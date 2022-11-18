@@ -24,6 +24,7 @@ type OwnProps = {
   noVerified?: boolean;
   noFake?: boolean;
   withEmojiStatus?: boolean;
+  emojiStatusSize?: number;
   isSavedMessages?: boolean;
   noLoopLimit?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
@@ -36,6 +37,7 @@ const FullNameTitle: FC<OwnProps> = ({
   noVerified,
   noFake,
   withEmojiStatus,
+  emojiStatusSize,
   isSavedMessages,
   noLoopLimit,
   onEmojiStatusClick,
@@ -63,6 +65,7 @@ const FullNameTitle: FC<OwnProps> = ({
       {withEmojiStatus && emojiStatus && (
         <CustomEmoji
           documentId={emojiStatus.documentId}
+          size={emojiStatusSize}
           loopLimit={!noLoopLimit ? EMOJI_STATUS_LOOP_LIMIT : undefined}
           observeIntersectionForLoading={observeIntersection}
           onClick={onEmojiStatusClick}

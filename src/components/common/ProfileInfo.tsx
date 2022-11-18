@@ -47,6 +47,8 @@ type StateProps =
   }
   & Pick<GlobalState, 'connectionState'>;
 
+const EMOJI_STATUS_SIZE = 24;
+
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
   canPlayVideo,
@@ -241,6 +243,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
           <FullNameTitle
             peer={(user || chat)!}
             withEmojiStatus
+            emojiStatusSize={EMOJI_STATUS_SIZE}
             isSavedMessages={isSavedMessages}
             onEmojiStatusClick={handleClickPremium}
             noLoopLimit

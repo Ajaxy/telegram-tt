@@ -30,11 +30,6 @@
   border-radius: 0 !important;
 
   user-select: none !important;
-
-  :global(canvas) {
-    width: 100% !important;
-    height: 100% !important;
-  }
 }
 
 .highlightCatch {

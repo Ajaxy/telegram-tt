@@ -26,6 +26,7 @@ type Frame =
 const MAX_WORKERS = 4;
 const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
+const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
 
@@ -209,8 +210,7 @@ class RLottie {
     } = containerInfo;
 
     if (!canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false') {
-      const { isLowPriority, quality = isLowPriority ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY } = this.params;
-      const sizeFactor = Math.max(DPR * quality, 1);
+      const sizeFactor = this.calcSizeFactor();
       ensureCanvasSize(canvas, sizeFactor);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       canvas.dataset.isJustCleaned = 'true';
@@ -239,10 +239,9 @@ class RLottie {
     onLoad?: NoneToVoidFunction,
     coords?: Params['coords'],
   ) {
-    const { isLowPriority, quality = isLowPriority ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY } = this.params;
+    const sizeFactor = this.calcSizeFactor();
+
     let imgSize: number;
-    // Reduced quality only looks acceptable on high DPR screens
-    const sizeFactor = Math.max(DPR * quality, 1);
 
     if (container instanceof HTMLDivElement) {
       if (!(container.parentNode instanceof HTMLElement)) {
@@ -311,6 +310,20 @@ class RLottie {
     if (this.isRendererInited) {
       this.doPlay();
     }
+  }
+
+  private calcSizeFactor() {
+    const {
+      isLowPriority,
+      size,
+      // Reduced quality only looks acceptable on big enough images
+      quality = isLowPriority && (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
+        ? LOW_PRIORITY_QUALITY
+        : HIGH_PRIORITY_QUALITY,
+    } = this.params;
+
+    // Reduced quality only looks acceptable on high DPR screens
+    return Math.max(DPR * quality, 1);
   }
 
   private destroy() {

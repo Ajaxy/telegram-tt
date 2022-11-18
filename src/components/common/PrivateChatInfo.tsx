@@ -31,6 +31,7 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withVideoAvatar?: boolean;
+  emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
 };
@@ -56,6 +57,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   withFullInfo,
   withUpdatingStatus,
   withVideoAvatar,
+  emojiStatusSize,
   noStatusOrTyping,
   noRtl,
   user,
@@ -141,7 +143,12 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         animationLevel={animationLevel}
       />
       <div className="info">
-        <FullNameTitle peer={user} withEmojiStatus isSavedMessages={isSavedMessages} />
+        <FullNameTitle
+          peer={user}
+          withEmojiStatus
+          emojiStatusSize={emojiStatusSize}
+          isSavedMessages={isSavedMessages}
+        />
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
     </div>
