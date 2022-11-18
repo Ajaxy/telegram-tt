@@ -1,20 +1,20 @@
-**Telegram Web Z was updated to version 1.55**
+**Telegram Web Z was updated to version 1.56**
 
 [👏](customEmoji:5471921242866981303) **Harder**
-• Sending custom emoji is now supported.
-• You can now view recent (cached) messages while offline.
-• Enjoy the beautifully redesigned payments screen with an option to add tips for certain invoices.
-• Media in chats can also be deleted via the Media Viewer.
+• Formatting is now preserved when pasting text from websites or Telegram messages.
+• The input field is automatically highlighted when you open a chat – so you can start typing right away.
+• Your account's profile pictures can now be deleted by clicking your profile picture in Settings.
+• Native system sharing is available when running the app as a PWA.
 
 [🤩](customEmoji:5373026167722876724) **Better**
-• Custom emoji sent without text are shown at a larger size.
+• A list of group members now appears when typing @ to help mention users even faster.
 
 [🚀](customEmoji:5445284980978621387) **Faster**
-• Optimized rendering for animated stickers and emoji.
+• Plenty of improvements and optimizations for stickers and custom emoji rendering – adding a noticeable performance increase.
 
 [💪](customEmoji:5471883477219549006) **Stronger**
-• Improved sync after editing drafts on another device.
-• Fixed duplicate notification sounds when waking up from sleep.
-• Various fixes for the Media Viewer.
-• Various fixes for username input.
+• Various fixes for copying text from messages.
+• Various fixes for custom emoji.
+• Fixed opening the symbol menu on certain touchscreen devices.
+• Fixed the quoted header disappearing when typing a reply.
 • Various layout improvements.

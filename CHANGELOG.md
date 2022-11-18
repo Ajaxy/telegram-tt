@@ -1,3 +1,24 @@
+## 1.56.0 (2022-11-18)
+
+### 👏 **Harder**
+* Formatting is now preserved when pasting text from websites or Telegram messages.
+* The input field is automatically highlighted when you open a chat – so you can start typing right away.
+* Your account's profile pictures can now be deleted by clicking your profile picture in Settings.
+* Native system sharing is available when running the app as a PWA.
+
+### 🤩 **Better**
+* A list of group members now appears when typing @ to help mention users even faster.
+
+### 🚀 **Faster**
+* Plenty of improvements and optimizations for stickers and custom emoji rendering – adding a noticeable performance increase.
+
+### 💪 **Stronger**
+* Various fixes for copying text from messages.
+* Various fixes for custom emoji.
+* Fixed opening the symbol menu on certain touchscreen devices.
+* Fixed the quoted header disappearing when typing a reply.
+* Various layout improvements.
+
 ## 1.55.0 (2022-10-29)
 
 ### 👏 **Harder**
