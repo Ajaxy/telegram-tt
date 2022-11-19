@@ -25,7 +25,7 @@ export async function respondForShare(e: FetchEvent) {
     }
   }
 
-  return Response.redirect('..');
+  return Response.redirect('.');
 }
 
 export function handleClientMessage(e: ExtendableMessageEvent) {
