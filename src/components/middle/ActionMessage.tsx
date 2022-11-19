@@ -156,7 +156,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   };
 
   if (isEmbedded) {
-    return <span className="embedded-action-message">{content}</span>;
+    return <span ref={ref} className="embedded-action-message">{content}</span>;
   }
 
   function renderGift() {
