@@ -1,5 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
+import React, {
+  memo, useCallback, useEffect, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
@@ -14,6 +16,7 @@ import {
 import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
+import { debounce } from '../../util/schedulers';
 import useLang from '../../hooks/useLang';
 
 import ListItem from '../ui/ListItem';
@@ -33,6 +36,8 @@ type StateProps =
     phoneCodeList: ApiCountryCode[];
   }
   & Pick<GlobalState, 'lastSyncTime'>;
+
+const runDebounced = debounce((cb) => cb(), 500, false);
 
 const ChatExtra: FC<OwnProps & StateProps> = ({
   lastSyncTime,
@@ -59,6 +64,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   const { id: chatId } = chat || {};
   const lang = useLang();
 
+  const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
   useEffect(() => {
     if (lastSyncTime && userId) {
       loadFullUser({ userId });
@@ -66,8 +72,16 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }, [loadFullUser, userId, lastSyncTime]);
 
   const handleNotificationChange = useCallback(() => {
-    updateChatMutedState({ chatId, isMuted: !isMuted });
-  }, [chatId, isMuted, updateChatMutedState]);
+    setAreNotificationsEnabled((current) => {
+      const newAreNotificationsEnabled = !current;
+
+      runDebounced(() => {
+        updateChatMutedState({ chatId, isMuted: !newAreNotificationsEnabled });
+      });
+
+      return newAreNotificationsEnabled;
+    });
+  }, [chatId, updateChatMutedState]);
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
     return undefined;
@@ -136,7 +150,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <Switcher
             id="group-notifications"
             label={userId ? 'Toggle User Notifications' : 'Toggle Chat Notifications'}
-            checked={!isMuted}
+            checked={areNotificationsEnabled}
             inactive
           />
         </ListItem>
