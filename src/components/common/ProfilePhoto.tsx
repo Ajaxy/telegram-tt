@@ -110,7 +110,7 @@ const ProfilePhoto: FC<OwnProps> = ({
               disablePictureInPicture
               loop
               playsInline
-              onPlay={markVideoReady}
+              onReady={markVideoReady}
             />
           ) : (
             <img

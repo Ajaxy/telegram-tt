@@ -4,10 +4,10 @@ import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../../..
 import { getMessageMediaThumbDataUri } from '../../../../global/helpers';
 import useCanvasBlur from '../../../../hooks/useCanvasBlur';
 
-export default function useBlurredMediaThumbRef(message: ApiMessage, fullMediaData?: string) {
+export default function useBlurredMediaThumbRef(message: ApiMessage, isDisabled?: boolean | string) {
   return useCanvasBlur(
     getMessageMediaThumbDataUri(message),
-    Boolean(fullMediaData),
+    Boolean(isDisabled),
     IS_SINGLE_COLUMN_LAYOUT && !IS_CANVAS_FILTER_SUPPORTED,
   );
 }

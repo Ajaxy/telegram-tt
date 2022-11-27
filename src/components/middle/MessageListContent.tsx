@@ -81,9 +81,9 @@ const MessageListContent: FC<OwnProps> = ({
   const { openHistoryCalendar } = getActions();
 
   const {
-    observeIntersectionForMedia,
     observeIntersectionForReading,
-    observeIntersectionForAnimatedStickers,
+    observeIntersectionForLoading,
+    observeIntersectionForPlaying,
   } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef);
 
   const {
@@ -144,8 +144,8 @@ const MessageListContent: FC<OwnProps> = ({
             key={message.id}
             message={message}
             observeIntersectionForReading={observeIntersectionForReading}
-            observeIntersectionForLoading={observeIntersectionForMedia}
-            observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isLastInList={isLastInList}
@@ -196,8 +196,8 @@ const MessageListContent: FC<OwnProps> = ({
             key={key}
             message={message}
             observeIntersectionForBottom={observeIntersectionForReading}
-            observeIntersectionForMedia={observeIntersectionForMedia}
-            observeIntersectionForAnimatedStickers={observeIntersectionForAnimatedStickers}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             album={album}
             noAvatars={noAvatars}
             withAvatar={position.isLastInGroup && withUsers && !isOwn && !(message.id === threadTopMessageId)}

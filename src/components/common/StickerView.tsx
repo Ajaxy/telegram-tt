@@ -170,7 +170,7 @@ const StickerView: FC<OwnProps> = ({
           muted
           loop={!loopLimit}
           disablePictureInPicture
-          onPlay={markPlayerReady}
+          onReady={markPlayerReady}
           onEnded={onVideoEnded}
         />
       ) : (

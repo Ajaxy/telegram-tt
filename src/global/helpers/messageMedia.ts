@@ -26,8 +26,8 @@ type Target =
   'micro'
   | 'pictogram'
   | 'inline'
-  | 'viewerPreview'
-  | 'viewerFull'
+  | 'preview'
+  | 'full'
   | 'download';
 
 export function getMessageContent(message: ApiMessage) {
@@ -191,9 +191,9 @@ export function getMessageMediaHash(
         return `${base}?size=m`;
       case 'inline':
         return !hasMessageLocalBlobUrl(message) ? getVideoOrAudioBaseHash(messageVideo, base) : undefined;
-      case 'viewerPreview':
-        return `${base}?size=m`;
-      case 'viewerFull':
+      case 'preview':
+        return `${base}?size=x`;
+      case 'full':
         return getVideoOrAudioBaseHash(messageVideo, base);
       case 'download':
         return `${base}?download`;
@@ -207,9 +207,9 @@ export function getMessageMediaHash(
         return `${base}?size=m`;
       case 'inline':
         return !hasMessageLocalBlobUrl(message) ? `${base}?size=x` : undefined;
-      case 'viewerPreview':
+      case 'preview':
         return `${base}?size=x`;
-      case 'viewerFull':
+      case 'full':
       case 'download':
         return `${base}?size=z`;
     }
@@ -220,13 +220,13 @@ export function getMessageMediaHash(
       case 'micro':
       case 'pictogram':
       case 'inline':
-      case 'viewerPreview':
+      case 'preview':
         if (!getDocumentHasPreview(document) || hasMessageLocalBlobUrl(message)) {
           return undefined;
         }
 
         return `${base}?size=m`;
-      case 'viewerFull':
+      case 'full':
       case 'download':
         return base;
     }
@@ -325,7 +325,7 @@ export function getMessageMediaFormat(
   }
 
   if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
-    target === 'viewerFull' || target === 'inline'
+    target === 'full' || target === 'inline'
   )) {
     return ApiMediaFormat.Progressive;
   }

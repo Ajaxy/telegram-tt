@@ -84,7 +84,7 @@ const Album: FC<OwnProps & StateProps> = ({
         <PhotoWithSelect
           id={`album-media-${getMessageHtmlId(message.id)}`}
           message={message}
-          observeIntersection={observeIntersection}
+          observeIntersectionForLoading={observeIntersection}
           canAutoLoad={canAutoLoad}
           shouldAffectAppendix={shouldAffectAppendix}
           uploadProgress={uploadProgress}
@@ -101,7 +101,7 @@ const Album: FC<OwnProps & StateProps> = ({
         <VideoWithSelect
           id={`album-media-${getMessageHtmlId(message.id)}`}
           message={message}
-          observeIntersection={observeIntersection}
+          observeIntersectionForLoading={observeIntersection}
           canAutoLoad={canAutoLoad}
           canAutoPlay={canAutoPlay}
           uploadProgress={uploadProgress}

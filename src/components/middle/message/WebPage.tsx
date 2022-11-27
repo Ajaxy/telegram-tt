@@ -121,7 +121,7 @@ const WebPage: FC<OwnProps> = ({
       {!inPreview && video && (
         <Video
           message={message}
-          observeIntersection={observeIntersection!}
+          observeIntersectionForLoading={observeIntersection!}
           noAvatars={noAvatars}
           canAutoLoad={canAutoLoad}
           canAutoPlay={canAutoPlay}

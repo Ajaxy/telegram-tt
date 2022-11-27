@@ -4,19 +4,16 @@
   height: 15rem;
   cursor: pointer;
 
-  .thumbnail-wrapper {
-    width: 15rem;
-    height: 15rem;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-
   .video-wrapper {
     position: absolute;
     left: 0;
     top: 0;
     border-radius: 50%;
     overflow: hidden;
+  }
+
+  canvas {
+    border-radius: 50%;
   }
 
   .progress {

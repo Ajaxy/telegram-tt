@@ -500,7 +500,7 @@
     &.interactive {
       cursor: pointer;
 
-      &.dark video {
+      &.dark video, &.dark canvas {
         background-color: #232323;
       }
     }
