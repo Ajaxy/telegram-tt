@@ -11,10 +11,10 @@ import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
-  getMessageMediaHash, getMessageMediaThumbDataUri,
+  getMessageMediaHash,
+  getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageWebPageVideo,
-  isForwardedMessage,
   isOwnMessage,
 } from '../../../global/helpers';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -41,10 +41,10 @@ export type OwnProps = {
   canAutoPlay?: boolean;
   uploadProgress?: number;
   dimensions?: IMediaDimensions;
+  asForwarded?: boolean;
   lastSyncTime?: number;
   isDownloading: boolean;
   isProtected?: boolean;
-  withAspectRatio?: boolean;
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
 };
@@ -60,11 +60,11 @@ const Video: FC<OwnProps> = ({
   uploadProgress,
   lastSyncTime,
   dimensions,
-  onClick,
-  onCancelUpload,
+  asForwarded,
   isDownloading,
   isProtected,
-  withAspectRatio,
+  onClick,
+  onCancelUpload,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -140,8 +140,10 @@ const Video: FC<OwnProps> = ({
   const duration = videoRef.current?.duration || video.duration || 0;
 
   const isOwn = isOwnMessage(message);
-  const isForwarded = isForwardedMessage(message);
-  const { width, height } = dimensions || calculateVideoDimensions(video, isOwn, isForwarded, noAvatars);
+  const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
+  const {
+    width, height,
+  } = dimensions || calculateVideoDimensions(video, isOwn, asForwarded, isWebPageVideo, noAvatars);
 
   const handleClick = useCallback(() => {
     if (isUploading) {
@@ -161,9 +163,8 @@ const Video: FC<OwnProps> = ({
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
 
-  const dimensionsStyle = dimensions ? ` left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
-  const aspectRatioStyle = withAspectRatio ? ` aspect-ratio: ${(width / height).toFixed(3)}/ 1;` : '';
-  const style = `width: ${width}px; height: ${height}px;${dimensionsStyle}${aspectRatioStyle}`;
+  const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
+  const style = `height: ${height}px;${dimensionsStyle}`;
 
   return (
     <div
@@ -179,8 +180,6 @@ const Video: FC<OwnProps> = ({
           src={fullMediaData}
           className="full-media"
           canPlay={isPlayAllowed && isIntersectingForPlaying}
-          width={width}
-          height={height}
           muted
           loop
           playsInline

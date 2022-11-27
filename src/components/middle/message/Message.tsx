@@ -585,12 +585,12 @@ const Message: FC<OwnProps & StateProps> = ({
   if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
     let width: number | undefined;
     if (photo) {
-      width = calculateMediaDimensions(message, noAvatars).width;
+      width = calculateMediaDimensions(message, asForwarded, noAvatars).width;
     } else if (video) {
       if (video.isRound) {
         width = ROUND_VIDEO_DIMENSIONS_PX;
       } else {
-        width = calculateMediaDimensions(message, noAvatars).width;
+        width = calculateMediaDimensions(message, asForwarded, noAvatars).width;
       }
     } else if (invoice?.extendedMedia && (
       invoice.extendedMedia.width && invoice.extendedMedia.height
@@ -600,7 +600,7 @@ const Message: FC<OwnProps & StateProps> = ({
         width: previewWidth,
         height: previewHeight,
         fromOwnMessage: isOwn,
-        isForwarded: isForwarding,
+        asForwarded,
         noAvatars,
       }).width;
     }
@@ -776,11 +776,12 @@ const Message: FC<OwnProps & StateProps> = ({
             canAutoLoad={canAutoLoadMedia}
             uploadProgress={uploadProgress}
             shouldAffectAppendix={hasCustomAppendix}
-            onClick={handleMediaClick}
-            onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             isProtected={isProtected}
+            asForwarded={asForwarded}
             theme={theme}
+            onClick={handleMediaClick}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {!isAlbum && video && video.isRound && (
@@ -802,10 +803,11 @@ const Message: FC<OwnProps & StateProps> = ({
             canAutoPlay={canAutoPlayMedia}
             uploadProgress={uploadProgress}
             lastSyncTime={lastSyncTime}
-            onClick={handleMediaClick}
-            onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
             isProtected={isProtected}
+            asForwarded={asForwarded}
+            onClick={handleMediaClick}
+            onCancelUpload={handleCancelUpload}
           />
         )}
         {(audio || voice) && (
@@ -901,12 +903,13 @@ const Message: FC<OwnProps & StateProps> = ({
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
+            asForwarded={asForwarded}
             lastSyncTime={lastSyncTime}
-            onMediaClick={handleMediaClick}
-            onCancelMediaTransfer={handleCancelUpload}
             isDownloading={isDownloading}
             isProtected={isProtected}
             theme={theme}
+            onMediaClick={handleMediaClick}
+            onCancelMediaTransfer={handleCancelUpload}
           />
         )}
         {invoice && !invoice.extendedMedia && (
