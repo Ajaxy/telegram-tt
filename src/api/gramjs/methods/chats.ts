@@ -385,7 +385,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       ...(chatPhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(chatPhoto) }),
       about,
       members,
-      adminMembers,
+      adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       canViewMembers: true,
       botCommands,
       ...(exportedInvite instanceof GramJs.ChatInviteExported && {
@@ -463,7 +463,7 @@ async function getFullChannelInfo(
     canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'kicked')
   ) || {};
   const { members: adminMembers, users: adminUsers, userStatusesById: adminStatusesById } = (
-    canViewParticipants && adminRights && await fetchMembers(id, accessHash, 'admin')
+    canViewParticipants && await fetchMembers(id, accessHash, 'admin')
   ) || {};
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
 
@@ -506,7 +506,7 @@ async function getFullChannelInfo(
       isPreHistoryHidden: hiddenPrehistory,
       members,
       kickedMembers,
-      adminMembers,
+      adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       groupCallId: call ? String(call.id) : undefined,
       linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'chat') : undefined,
       botCommands,

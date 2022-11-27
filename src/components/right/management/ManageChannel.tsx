@@ -108,7 +108,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     }
   }, [progress]);
 
-  const adminsCount = (chat?.fullInfo?.adminMembers?.length) || 0;
+  const adminsCount = Object.keys(chat.fullInfo?.adminMembersById || {}).length;
   const removedUsersCount = (chat?.fullInfo?.kickedMembers?.length) || 0;
 
   const handleClickEditType = useCallback(() => {

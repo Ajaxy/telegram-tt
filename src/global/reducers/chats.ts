@@ -2,7 +2,7 @@ import type { GlobalState } from '../types';
 import type { ApiChat, ApiChatMember, ApiPhoto } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
-import { areSortedArraysEqual, omit } from '../../util/iteratees';
+import { areSortedArraysEqual, buildCollectionByKey, omit } from '../../util/iteratees';
 import { selectChatListType } from '../selectors';
 
 export function replaceChatListIds(
@@ -242,6 +242,7 @@ export function addChatMembers(global: GlobalState, chat: ApiChat, membersToAdd:
     fullInfo: {
       ...chat.fullInfo,
       members: updatedMembers,
+      adminMembersById: buildCollectionByKey(updatedMembers, 'userId'),
     },
   });
 }

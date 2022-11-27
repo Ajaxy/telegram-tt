@@ -70,7 +70,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   });
 
   const selectedChatMember = useMemo(() => {
-    const selectedAdminMember = chat.fullInfo?.adminMembers?.find(({ userId }) => userId === selectedUserId);
+    const selectedAdminMember = selectedUserId ? chat.fullInfo?.adminMembersById?.[selectedUserId] : undefined;
 
     // If `selectedAdminMember` variable is filled with a value, then we have already saved the administrator,
     // so now we need to return to the list of administrators
@@ -91,7 +91,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
     }
 
     return selectedAdminMember;
-  }, [chat.fullInfo?.adminMembers, defaultRights, isNewAdmin, lang, selectedUserId]);
+  }, [chat.fullInfo?.adminMembersById, defaultRights, isNewAdmin, lang, selectedUserId]);
 
   useEffect(() => {
     if (chat?.fullInfo && selectedUserId && !selectedChatMember) {

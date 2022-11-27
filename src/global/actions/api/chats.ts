@@ -3,7 +3,7 @@ import {
 } from '../../index';
 
 import type {
-  ApiChat, ApiUser, ApiChatFolder, ApiError,
+  ApiChat, ApiUser, ApiChatFolder, ApiError, ApiChatMember,
 } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { NewChatMembersProgress, ChatCreationProgress, ManagementProgress } from '../../../types';
@@ -867,24 +867,31 @@ addActionHandler('updateChatAdmin', async (global, actions, payload) => {
     return;
   }
 
-  const { adminMembers } = chatAfterUpdate.fullInfo;
+  const { adminMembersById } = chatAfterUpdate.fullInfo;
   const isDismissed = !Object.keys(adminRights).length;
+  let newAdminMembersById: Record<string, ApiChatMember> | undefined;
+  if (adminMembersById) {
+    if (isDismissed) {
+      const { [userId]: remove, ...rest } = adminMembersById;
+      newAdminMembersById = rest;
+    } else {
+      newAdminMembersById = {
+        ...adminMembersById,
+        [userId]: {
+          ...adminMembersById[userId],
+          adminRights,
+          customTitle,
+        },
+      };
+    }
+  }
 
   global = getGlobal();
 
   setGlobal(updateChat(global, chatId, {
     fullInfo: {
       ...chatAfterUpdate.fullInfo,
-      ...(adminMembers && isDismissed && {
-        adminMembers: adminMembers.filter((m) => m.userId !== userId),
-      }),
-      ...(adminMembers && !isDismissed && {
-        adminMembers: adminMembers.map((m) => (
-          m.userId === userId
-            ? { ...m, adminRights, customTitle }
-            : m
-        )),
-      }),
+      ...(newAdminMembersById && { adminMembersById: newAdminMembersById }),
     },
   }));
 });

@@ -3,7 +3,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
-import { pick } from '../../../util/iteratees';
+import { buildCollectionByKey, pick } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import {
   updateChat,
@@ -326,7 +326,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           fullInfo: {
             ...targetChat.fullInfo,
             members,
-            adminMembers,
+            adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
           },
         });
       }

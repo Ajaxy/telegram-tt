@@ -274,10 +274,14 @@ export function buildChatMember(
 
   return {
     userId,
-    inviterId: 'inviterId' in member ? buildApiPeerId(member.inviterId as BigInt.BigInteger, 'user') : undefined,
+    inviterId: 'inviterId' in member && member.inviterId
+      ? buildApiPeerId(member.inviterId as BigInt.BigInteger, 'user')
+      : undefined,
     joinedDate: 'date' in member ? member.date : undefined,
-    kickedByUserId: 'kickedBy' in member ? buildApiPeerId(member.kickedBy, 'user') : undefined,
-    promotedByUserId: 'promotedBy' in member ? buildApiPeerId(member.promotedBy, 'user') : undefined,
+    kickedByUserId: 'kickedBy' in member && member.kickedBy ? buildApiPeerId(member.kickedBy, 'user') : undefined,
+    promotedByUserId: 'promotedBy' in member && member.promotedBy
+      ? buildApiPeerId(member.promotedBy, 'user')
+      : undefined,
     bannedRights: 'bannedRights' in member ? omitVirtualClassFields(member.bannedRights) : undefined,
     adminRights: 'adminRights' in member ? omitVirtualClassFields(member.adminRights) : undefined,
     customTitle: 'rank' in member ? member.rank : undefined,

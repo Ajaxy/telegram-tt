@@ -293,7 +293,7 @@ export interface ApiMessageForwardInfo {
   senderUserId?: string;
   fromMessageId?: number;
   hiddenUserName?: string;
-  adminTitle?: string;
+  postAuthorTitle?: string;
 }
 
 export type ApiMessageEntityDefault = {
@@ -408,7 +408,7 @@ export interface ApiMessage {
   isKeyboardSingleUse?: boolean;
   viaBotId?: string;
   threadInfo?: ApiThreadInfo;
-  adminTitle?: string;
+  postAuthorTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
   isFromScheduled?: boolean;
