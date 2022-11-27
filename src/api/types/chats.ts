@@ -86,7 +86,7 @@ export interface ApiChatFullInfo {
   onlineCount?: number;
   members?: ApiChatMember[];
   kickedMembers?: ApiChatMember[];
-  adminMembers?: ApiChatMember[];
+  adminMembersById?: Record<string, ApiChatMember>;
   canViewMembers?: boolean;
   isPreHistoryHidden?: boolean;
   inviteLink?: string;

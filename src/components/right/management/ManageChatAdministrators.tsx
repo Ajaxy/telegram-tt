@@ -49,11 +49,11 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   }, [onScreenSelect]);
 
   const adminMembers = useMemo(() => {
-    if (!chat.fullInfo || !chat.fullInfo.adminMembers) {
+    if (!chat.fullInfo?.adminMembersById) {
       return [];
     }
 
-    return chat.fullInfo.adminMembers.sort((a, b) => {
+    return Object.values(chat.fullInfo.adminMembersById).sort((a, b) => {
       if (a.isOwner) {
         return -1;
       } else if (b.isOwner) {

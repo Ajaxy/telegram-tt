@@ -17,6 +17,7 @@ import type {
   ApiChat,
   ApiThreadInfo,
   ApiAvailableReaction,
+  ApiChatMember,
 } from '../../../api/types';
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
@@ -74,7 +75,9 @@ import {
   areReactionsEmpty,
   getMessageHtmlId,
   isGeoLiveExpired,
-  getMessageSingleCustomEmoji, hasMessageText,
+  getMessageSingleCustomEmoji,
+  hasMessageText,
+  isChatGroup,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
@@ -183,6 +186,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
   isChannel?: boolean;
+  isGroup?: boolean;
   canReply?: boolean;
   lastSyncTime?: number;
   serverTimeOffset: number;
@@ -211,6 +215,7 @@ type StateProps = {
   isTranscriptionError?: boolean;
   isPremium: boolean;
   animationLevel: AnimationLevel;
+  senderAdminMember?: ApiChatMember;
 };
 
 type MetaPosition =
@@ -275,6 +280,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isChatWithSelf,
   isRepliesChat,
   isChannel,
+  isGroup,
   canReply,
   lastSyncTime,
   serverTimeOffset,
@@ -301,6 +307,7 @@ const Message: FC<OwnProps & StateProps> = ({
   hasUnreadReaction,
   memoFirstUnreadIdRef,
   animationLevel,
+  senderAdminMember,
 }) => {
   const {
     toggleMessageSelection,
@@ -615,7 +622,9 @@ const Message: FC<OwnProps & StateProps> = ({
     style = `width: ${calculatedWidth + extraPadding}px`;
   }
 
-  const signature = (isChannel && message.adminTitle) || (!asForwarded && forwardInfo?.adminTitle) || undefined;
+  const signature = (isChannel && message.postAuthorTitle)
+    || (!asForwarded && forwardInfo?.postAuthorTitle)
+    || undefined;
   const metaSafeAuthorWidth = useMemo(() => {
     return signature ? calculateAuthorWidth(signature) : undefined;
   }, [signature]);
@@ -984,12 +993,22 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {forwardInfo?.isLinkedChannelPost ? (
           <span className="admin-title" dir="auto">{lang('DiscussChannel')}</span>
-        ) : message.adminTitle && !isChannel ? (
-          <span className="admin-title" dir="auto">{message.adminTitle}</span>
+        ) : message.forwardInfo?.postAuthorTitle && isGroup && asForwarded ? (
+          <span className="admin-title" dir="auto">{message.forwardInfo?.postAuthorTitle}</span>
+        ) : message.postAuthorTitle && isGroup && !asForwarded ? (
+          <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
+        ) : senderAdminMember && !asForwarded ? (
+          <span className="admin-title" dir="auto">
+            {senderAdminMember.customTitle || lang(
+              senderAdminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin',
+            )}
+          </span>
         ) : undefined}
       </div>
     );
   }
+
+  const forwardAuthor = isGroup && asForwarded ? message.postAuthorTitle : undefined;
 
   return (
     <div
@@ -1040,7 +1059,10 @@ const Message: FC<OwnProps & StateProps> = ({
           dir="auto"
         >
           {asForwarded && !isInDocumentGroupNotFirst && (
-            <div className="message-title">{lang('ForwardedMessage')}</div>
+            <div className="message-title">
+              {lang('ForwardedMessage')}
+              {forwardAuthor && <span className="admin-title" dir="auto">{forwardAuthor}</span>}
+            </div>
           )}
           {renderContent()}
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && renderReactionsAndMeta()}
@@ -1124,13 +1146,18 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isRepliesChat = isChatWithRepliesBot(chatId);
     const isChannel = chat && isChatChannel(chat);
+    const isGroup = chat && isChatGroup(chat);
     const chatUsername = chat?.username;
 
+    const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
     const canShowSender = withSenderName || withAvatar || forceSenderName;
     const sender = selectSender(global, message);
     const originSender = selectForwardedSender(global, message);
     const botSender = viaBotId ? selectUser(global, viaBotId) : undefined;
+    const senderAdminMember = sender?.id && isGroup
+      ? chat.fullInfo?.adminMembersById?.[sender?.id]
+      : undefined;
 
     const threadTopMessageId = threadId ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
     const isThreadTop = message.id === threadTopMessageId;
@@ -1151,8 +1178,6 @@ export default memo(withGlobal<OwnProps>(
     const {
       direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
     } = (isFocused && focusedMessage) || {};
-
-    const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
 
     const { query: highlight } = selectCurrentTextSearch(global) || {};
 
@@ -1206,6 +1231,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf,
       isRepliesChat,
       isChannel,
+      isGroup,
       canReply,
       lastSyncTime,
       serverTimeOffset,
@@ -1239,6 +1265,7 @@ export default memo(withGlobal<OwnProps>(
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium: selectIsCurrentUserPremium(global),
       animationLevel: global.settings.byKey.animationLevel,
+      senderAdminMember,
     };
   },
 )(Message));

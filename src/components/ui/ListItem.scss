@@ -165,6 +165,11 @@
       overflow: hidden;
     }
 
+    .info-name-title {
+      display: flex;
+      align-items: center;
+    }
+
     .info-row,
     .title,
     .subtitle {
@@ -210,6 +215,17 @@
       align-items: center;
       flex-grow: 1;
       overflow: hidden;
+
+      .custom-title {
+        padding-inline-start: 1rem;
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin-inline-start: auto;
+        flex-shrink: 0;
+      }
 
       .status,
       .typing-status {

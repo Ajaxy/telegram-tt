@@ -236,7 +236,9 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     return totalCount;
   }, [chat]);
 
-  const adminsCount = (chat.fullInfo?.adminMembers?.length) || 0;
+  const adminsCount = useMemo(() => {
+    return Object.keys(chat.fullInfo?.adminMembersById || {}).length;
+  }, [chat.fullInfo?.adminMembersById]);
 
   const handleDeleteGroup = useCallback(() => {
     if (isBasicGroup) {

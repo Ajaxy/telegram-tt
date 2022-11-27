@@ -45,7 +45,7 @@ import {
   selectTheme,
 } from '../../global/selectors';
 import {
-  getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatSuperGroup, isUserId,
+  getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatGroup, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
@@ -108,6 +108,7 @@ type StateProps = {
   canSubscribe?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
+  shouldLoadFullChat?: boolean;
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
@@ -154,6 +155,7 @@ const MiddleColumn: FC<StateProps> = ({
   activeEmojiInteractions,
   shouldJoinToSend,
   shouldSendJoinRequest,
+  shouldLoadFullChat,
   lastSyncTime,
 }) => {
   const {
@@ -168,6 +170,7 @@ const MiddleColumn: FC<StateProps> = ({
     sendBotCommand,
     restartBot,
     showNotification,
+    loadFullChat,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -263,6 +266,12 @@ const MiddleColumn: FC<StateProps> = ({
       loadChatSettings({ chatId });
     }
   }, [chatId, isPrivate, areChatSettingsLoaded, lastSyncTime, loadChatSettings]);
+
+  useEffect(() => {
+    if (chatId && shouldLoadFullChat && isReady) {
+      loadFullChat({ chatId });
+    }
+  }, [shouldLoadFullChat, chatId, isReady, loadFullChat]);
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     if (IS_TOUCH_ENV) {
@@ -616,6 +625,7 @@ export default memo(withGlobal(
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && isBotNotStarted;
+    const shouldLoadFullChat = Boolean(chat && isChatGroup(chat) && !chat.fullInfo && lastSyncTime);
 
     return {
       ...state,
@@ -645,6 +655,7 @@ export default memo(withGlobal(
       canRestartBot,
       shouldJoinToSend,
       shouldSendJoinRequest,
+      shouldLoadFullChat,
     };
   },
 )(MiddleColumn));

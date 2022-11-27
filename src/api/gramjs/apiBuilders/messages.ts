@@ -210,7 +210,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
     ...(replies?.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
-    ...(postAuthor && { adminTitle: postAuthor }),
+    ...(postAuthor && { postAuthorTitle: postAuthor }),
     isProtected,
     isForwardingAllowed,
   };
@@ -399,7 +399,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
     fromMessageId: fwdFrom.savedFromMsgId || fwdFrom.channelPost,
     senderUserId: fromId,
     hiddenUserName: fwdFrom.fromName,
-    adminTitle: fwdFrom.postAuthor,
+    postAuthorTitle: fwdFrom.postAuthor,
   };
 }
 

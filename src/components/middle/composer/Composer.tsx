@@ -280,7 +280,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     addRecentEmoji,
     sendInlineBotResult,
     loadSendAs,
-    loadFullChat,
     resetOpenChatWithDraft,
     callAttachBot,
     openLimitReachedModal,
@@ -333,12 +332,6 @@ const Composer: FC<OwnProps & StateProps> = ({
       loadSendAs({ chatId });
     }
   }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsPeerIds]);
-
-  useEffect(() => {
-    if (chatId && chat && lastSyncTime && !chat.fullInfo && isReady && isChatSuperGroup(chat)) {
-      loadFullChat({ chatId });
-    }
-  }, [chat, chatId, isReady, lastSyncTime, loadFullChat]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
   useOnChange(([prevChatId, prevSendAsPeerIds]) => {

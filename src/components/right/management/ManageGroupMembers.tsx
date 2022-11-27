@@ -37,7 +37,7 @@ type OwnProps = {
 type StateProps = {
   userStatusesById: Record<string, ApiUserStatus>;
   members?: ApiChatMember[];
-  adminMembers?: ApiChatMember[];
+  adminMembersById?: Record<string, ApiChatMember>;
   isChannel?: boolean;
   localContactIds?: string[];
   searchQuery?: string;
@@ -52,7 +52,7 @@ type StateProps = {
 const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   noAdmins,
   members,
-  adminMembers,
+  adminMembersById,
   userStatusesById,
   isChannel,
   isActive,
@@ -78,8 +78,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const adminIds = useMemo(() => {
-    return noAdmins ? adminMembers?.map(({ userId }) => userId) || [] : [];
-  }, [adminMembers, noAdmins]);
+    return noAdmins && adminMembersById ? Object.keys(adminMembersById) : [];
+  }, [adminMembersById, noAdmins]);
 
   const memberIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
@@ -233,7 +233,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const { statusesById: userStatusesById } = global.users;
     const members = chat?.fullInfo?.members;
-    const adminMembers = chat?.fullInfo?.adminMembers;
+    const adminMembersById = chat?.fullInfo?.adminMembersById;
     const isChannel = chat && isChatChannel(chat);
     const { userIds: localContactIds } = global.contactList || {};
 
@@ -248,7 +248,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       members,
-      adminMembers,
+      adminMembersById,
       userStatusesById,
       isChannel,
       localContactIds,

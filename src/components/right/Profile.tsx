@@ -85,6 +85,7 @@ type StateProps = {
   canAddMembers?: boolean;
   canDeleteMembers?: boolean;
   members?: ApiChatMember[];
+  adminMembersById?: Record<string, ApiChatMember>;
   commonChatIds?: string[];
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
@@ -126,6 +127,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   canDeleteMembers,
   commonChatIds,
   members,
+  adminMembersById,
   usersById,
   userStatusesById,
   chatsById,
@@ -416,7 +418,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               onClick={() => handleMemberClick(id)}
               contextActions={getMemberContextAction(id)}
             >
-              <PrivateChatInfo userId={id} forceShowSelf />
+              <PrivateChatInfo userId={id} adminMember={adminMembersById?.[id]} forceShowSelf />
             </ListItem>
           ))
         ) : resultType === 'commonChats' ? (
@@ -524,6 +526,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
     const members = chat?.fullInfo?.members;
+    const adminMembersById = chat?.fullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
       && (chat.isForbidden || (chat.fullInfo && !chat.fullInfo.canViewMembers));
     const canAddMembers = hasMembersTab && chat
@@ -562,7 +565,7 @@ export default memo(withGlobal<OwnProps>(
       userStatusesById,
       chatsById,
       isChatProtected: chat?.isProtected,
-      ...(hasMembersTab && members && { members }),
+      ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };
   },

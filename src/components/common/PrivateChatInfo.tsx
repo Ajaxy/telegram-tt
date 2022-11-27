@@ -2,7 +2,9 @@ import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiUser, ApiTypingStatus, ApiUserStatus } from '../../api/types';
+import type {
+  ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember,
+} from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
@@ -34,6 +36,7 @@ type OwnProps = {
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
+  adminMember?: ApiChatMember;
 };
 
 type StateProps =
@@ -67,6 +70,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   animationLevel,
   lastSyncTime,
   serverTimeOffset,
+  adminMember,
 }) => {
   const {
     loadFullUser,
@@ -131,6 +135,10 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const customTitle = adminMember
+    ? adminMember.customTitle || lang(adminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin')
+    : undefined;
+
   return (
     <div className="ChatInfo" dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
       <Avatar
@@ -143,12 +151,15 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         animationLevel={animationLevel}
       />
       <div className="info">
-        <FullNameTitle
-          peer={user}
-          withEmojiStatus
-          emojiStatusSize={emojiStatusSize}
-          isSavedMessages={isSavedMessages}
-        />
+        <div className="info-name-title">
+          <FullNameTitle
+            peer={user}
+            withEmojiStatus
+            emojiStatusSize={emojiStatusSize}
+            isSavedMessages={isSavedMessages}
+          />
+          {customTitle && <span className="custom-title">{customTitle}</span>}
+        </div>
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
     </div>
