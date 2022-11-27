@@ -5,8 +5,6 @@
   height: var(--custom-emoji-size);
   position: relative;
 
-  border-radius: 0 !important;
-
   &.with-grid-fix .media, &.with-grid-fix .thumb {
     width: calc(100% + 1px) !important;
     height: calc(100% + 1px) !important;
@@ -27,9 +25,11 @@
   width: var(--custom-emoji-size) !important;
   height: var(--custom-emoji-size) !important;
 
-  border-radius: 0 !important;
-
   user-select: none !important;
+}
+
+.root, .media, .thumb {
+  border-radius: 0 !important;
 }
 
 .highlightCatch {
