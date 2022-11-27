@@ -405,6 +405,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         input
         && target !== input
         && target.tagName !== 'INPUT'
+        && target.tagName !== 'TEXTAREA'
         && !target.isContentEditable
       ) {
         focusEditableElement(input, true, true);
