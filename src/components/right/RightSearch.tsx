@@ -1,4 +1,6 @@
-import React, { useMemo, memo, useRef } from '../../lib/teact/teact';
+import React, {
+  useMemo, memo, useRef, useEffect,
+} from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -15,11 +17,12 @@ import {
 import {
   isChatChannel,
 } from '../../global/helpers';
+import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
+import { renderMessageSummary } from '../common/helpers/renderMessageText';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import { renderMessageSummary } from '../common/helpers/renderMessageText';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import ListItem from '../ui/ListItem';
@@ -70,6 +73,16 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     isActive,
     onBack: onClose,
   });
+
+  useEffect(() => {
+    if (!isActive) {
+      return undefined;
+    }
+
+    disableDirectTextInput();
+
+    return enableDirectTextInput;
+  }, [isActive]);
 
   const [viewportIds, getMore] = useInfiniteScroll(searchTextMessagesLocal, foundIds);
 

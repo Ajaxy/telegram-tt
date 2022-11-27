@@ -12,6 +12,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
 import { ManagementScreens } from '../../types';
 
+import { ANIMATION_LEVEL_MIN } from '../../config';
 import {
   ARE_CALLS_SUPPORTED, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,
 } from '../../util/environment';
@@ -57,10 +58,11 @@ interface StateProps {
   pendingJoinRequests?: number;
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
+  noAnimation?: boolean;
 }
 
 // Chrome breaks layout when focusing input during transition
-const SEARCH_FOCUS_DELAY_MS = 400;
+const SEARCH_FOCUS_DELAY_MS = 320;
 
 const HeaderActions: FC<OwnProps & StateProps> = ({
   chatId,
@@ -82,6 +84,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canExpandActions,
   shouldJoinToSend,
   shouldSendJoinRequest,
+  noAnimation,
 }) => {
   const {
     joinChannel,
@@ -140,15 +143,15 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       // iOS requires synchronous focus on user event.
       const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
       searchInput.focus();
+    } else if (noAnimation) {
+      // The second RAF is necessary because teact must update the state and render the async component
+      requestAnimationFrame(() => {
+        requestAnimationFrame(setFocusInSearchInput);
+      });
     } else {
-      setTimeout(() => {
-        const searchInput = document.querySelector<HTMLInputElement>('.RightHeader .SearchInput input');
-        if (searchInput) {
-          searchInput.focus();
-        }
-      }, SEARCH_FOCUS_DELAY_MS);
+      setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);
     }
-  }, [openLocalTextSearch]);
+  }, [noAnimation, openLocalTextSearch]);
 
   function handleRequestCall() {
     requestCall({ userId: chatId });
@@ -325,6 +328,7 @@ export default memo(withGlobal<OwnProps>(
     const pendingJoinRequests = chat.fullInfo?.requestsPending;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
+    const noAnimation = global.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN;
 
     return {
       noMenu: false,
@@ -343,6 +347,12 @@ export default memo(withGlobal<OwnProps>(
       pendingJoinRequests,
       shouldJoinToSend,
       shouldSendJoinRequest,
+      noAnimation,
     };
   },
 )(HeaderActions));
+
+function setFocusInSearchInput() {
+  const searchInput = document.querySelector<HTMLInputElement>('.RightHeader .SearchInput input');
+  searchInput?.focus();
+}
