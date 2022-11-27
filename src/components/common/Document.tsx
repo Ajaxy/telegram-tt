@@ -6,6 +6,10 @@ import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
 
+import {
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
+} from '../../config';
 import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
   getMediaTransferState,
@@ -100,7 +104,9 @@ const Document: FC<OwnProps> = ({
   const localBlobUrl = hasPreview ? document.previewBlobUrl : undefined;
   const previewData = useMedia(getMessageMediaHash(message, 'pictogram'), !isIntersecting);
 
-  const withMediaViewer = onMediaClick && Boolean(document.mediaType);
+  const withMediaViewer = onMediaClick && Boolean(document.mediaType) && (
+    SUPPORTED_VIDEO_CONTENT_TYPES.has(document.mimeType) || SUPPORTED_IMAGE_CONTENT_TYPES.has(document.mimeType)
+  );
 
   const handleClick = useCallback(() => {
     if (isUploading) {

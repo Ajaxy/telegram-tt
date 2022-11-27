@@ -1,7 +1,8 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef } from '../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../lib/teact/teact';
 
+import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import useShowTransition from '../../hooks/useShowTransition';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import buildClassName from '../../util/buildClassName';
@@ -10,6 +11,7 @@ import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
+import useCanvasBlur from '../../hooks/useCanvasBlur';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 import Link from '../ui/Link';
@@ -64,7 +66,11 @@ const File: FC<OwnProps> = ({
     elementRef = ref;
   }
 
-  const transitionClassNames = useMediaTransition(previewData);
+  const [withThumb] = useState(!previewData);
+  const noThumb = Boolean(previewData);
+  const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, IS_SINGLE_COLUMN_LAYOUT && !IS_CANVAS_FILTER_SUPPORTED);
+  const thumbClassNames = useMediaTransition(!noThumb);
+
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
@@ -94,19 +100,18 @@ const File: FC<OwnProps> = ({
         {thumbnailDataUri || previewData ? (
           <div className="file-preview media-inner">
             <img
-              src={thumbnailDataUri}
-              width={width}
-              height={height}
-              className="thumbnail"
-              alt=""
-            />
-            <img
               src={previewData}
-              className={buildClassName('full-media', transitionClassNames)}
+              className="full-media"
               width={width}
               height={height}
               alt=""
             />
+            {withThumb && (
+              <canvas
+                ref={thumbRef}
+                className={buildClassName('thumbnail', thumbClassNames)}
+              />
+            )}
           </div>
         ) : (
           <div className={`file-icon ${color}`}>
