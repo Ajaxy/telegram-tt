@@ -315,7 +315,7 @@ export function getMessageMediaFormat(
   const {
     video, audio, voice, document,
   } = message.content;
-  const fullVideo = video || getMessageWebPageVideo(message);
+  const isVideo = Boolean(video || getMessageWebPageVideo(message) || isMessageDocumentVideo(message));
   const size = (video || audio || document)?.size!;
   if (target === 'download') {
     if (IS_PROGRESSIVE_SUPPORTED && size > MAX_BUFFER_SIZE && !IS_OPFS_SUPPORTED) {
@@ -324,7 +324,7 @@ export function getMessageMediaFormat(
     return ApiMediaFormat.BlobUrl;
   }
 
-  if (fullVideo && IS_PROGRESSIVE_SUPPORTED && (
+  if (isVideo && IS_PROGRESSIVE_SUPPORTED && (
     target === 'full' || target === 'inline'
   )) {
     return ApiMediaFormat.Progressive;
