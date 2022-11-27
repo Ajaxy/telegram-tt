@@ -218,7 +218,7 @@ function renderUserContent(sender: ApiUser, noLinks?: boolean): string | TextPar
   const text = trimText(getUserFullName(sender), MAX_LENGTH);
 
   if (noLinks) {
-    return text;
+    return renderText(text!);
   }
 
   return <UserLink className="action-link" sender={sender}>{sender && renderText(text!)}</UserLink>;
@@ -228,7 +228,7 @@ function renderChatContent(lang: LangFn, chat: ApiChat, noLinks?: boolean): stri
   const text = trimText(getChatTitle(lang, chat), MAX_LENGTH);
 
   if (noLinks) {
-    return text;
+    return renderText(text!);
   }
 
   return <ChatLink className="action-link" chatId={chat.id}>{chat && renderText(text!)}</ChatLink>;
