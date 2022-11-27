@@ -445,7 +445,10 @@ class RLottie {
 
       // Paused from outside
       if (!this.isAnimating) {
-        return false;
+        const areAllLoaded = Array.from(this.containers.values()).every(({ isLoaded }) => isLoaded);
+        if (areAllLoaded) {
+          return false;
+        }
       }
 
       const frameIndex = Math.round(this.approxFrameIndex);
