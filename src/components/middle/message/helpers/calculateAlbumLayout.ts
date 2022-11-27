@@ -93,7 +93,7 @@ function calculateContainerSize(layout: IMediaLayout[]) {
 
 export function calculateAlbumLayout(
   isOwn: boolean,
-  isForwarded: boolean,
+  asForwarded: boolean,
   noAvatars: boolean,
   album: IAlbum,
 ): IAlbumLayout {
@@ -103,7 +103,7 @@ export function calculateAlbumLayout(
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;
   const forceCalc = ratios.some((ratio) => ratio > 2);
-  const maxWidth = getAvailableWidth(isOwn, isForwarded, false, noAvatars) - (isForwarded ? 2.5 : 0) * REM;
+  const maxWidth = getAvailableWidth(isOwn, asForwarded, false, noAvatars) - (asForwarded ? 2.5 : 0) * REM;
   const maxHeight = maxWidth;
 
   let layout;

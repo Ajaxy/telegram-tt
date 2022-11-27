@@ -26,6 +26,7 @@ type OwnProps = {
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
   inPreview?: boolean;
+  asForwarded?: boolean;
   lastSyncTime?: number;
   isDownloading?: boolean;
   isProtected?: boolean;
@@ -41,6 +42,7 @@ const WebPage: FC<OwnProps> = ({
   canAutoLoad,
   canAutoPlay,
   inPreview,
+  asForwarded,
   lastSyncTime,
   isDownloading = false,
   isProtected,
@@ -98,13 +100,13 @@ const WebPage: FC<OwnProps> = ({
           noAvatars={noAvatars}
           canAutoLoad={canAutoLoad}
           size={isSquarePhoto ? 'pictogram' : 'inline'}
+          asForwarded={asForwarded}
           nonInteractive={!isMediaInteractive}
-          onClick={isMediaInteractive ? handleMediaClick : undefined}
-          onCancelUpload={onCancelMediaTransfer}
           isDownloading={isDownloading}
           isProtected={isProtected}
-          withAspectRatio
           theme={theme}
+          onClick={isMediaInteractive ? handleMediaClick : undefined}
+          onCancelUpload={onCancelMediaTransfer}
         />
       )}
       {isArticle && (
@@ -126,11 +128,11 @@ const WebPage: FC<OwnProps> = ({
           canAutoLoad={canAutoLoad}
           canAutoPlay={canAutoPlay}
           lastSyncTime={lastSyncTime}
-          onClick={isMediaInteractive ? handleMediaClick : undefined}
-          onCancelUpload={onCancelMediaTransfer}
+          asForwarded={asForwarded}
           isDownloading={isDownloading}
           isProtected={isProtected}
-          withAspectRatio
+          onClick={isMediaInteractive ? handleMediaClick : undefined}
+          onCancelUpload={onCancelMediaTransfer}
         />
       )}
     </div>

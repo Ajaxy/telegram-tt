@@ -43,10 +43,10 @@ export type OwnProps = {
   size?: 'inline' | 'pictogram';
   shouldAffectAppendix?: boolean;
   dimensions?: IMediaDimensions & { isSmall?: boolean };
+  asForwarded?: boolean;
   nonInteractive?: boolean;
   isDownloading: boolean;
   isProtected?: boolean;
-  withAspectRatio?: boolean;
   theme: ISettings['theme'];
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;
@@ -63,11 +63,11 @@ const Photo: FC<OwnProps> = ({
   uploadProgress,
   size = 'inline',
   dimensions,
+  asForwarded,
   nonInteractive,
   shouldAffectAppendix,
   isDownloading,
   isProtected,
-  withAspectRatio,
   theme,
   onClick,
   onCancelUpload,
@@ -148,7 +148,7 @@ const Photo: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme] as const);
 
-  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, noAvatars);
+  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, asForwarded, noAvatars);
 
   const className = buildClassName(
     'media-inner',
@@ -157,10 +157,8 @@ const Photo: FC<OwnProps> = ({
     width === height && 'square-image',
   );
 
-  const aspectRatio = withAspectRatio ? `aspect-ratio: ${(width / height).toFixed(3)}/ 1` : '';
-  const style = dimensions
-    ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;${aspectRatio}`
-    : '';
+  const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
+  const style = size === 'inline' ? `height: ${height}px;${dimensionsStyle}` : undefined;
 
   return (
     <div
@@ -173,17 +171,11 @@ const Photo: FC<OwnProps> = ({
       <img
         src={fullMediaData}
         className="full-media"
-        width={width}
-        height={height}
         alt=""
         draggable={!isProtected}
       />
       {withThumb && (
-        <canvas
-          ref={thumbRef}
-          className={buildClassName('thumbnail', thumbClassNames)}
-          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-        />
+        <canvas ref={thumbRef} className={buildClassName('thumbnail', thumbClassNames)} />
       )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (

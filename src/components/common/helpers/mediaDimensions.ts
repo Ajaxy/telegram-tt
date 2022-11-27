@@ -60,11 +60,11 @@ function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean) {
 
 export function getAvailableWidth(
   fromOwnMessage: boolean,
-  isForwarded?: boolean,
-  isWebPagePhoto?: boolean,
+  asForwarded?: boolean,
+  isWebPageMedia?: boolean,
   noAvatars?: boolean,
 ) {
-  const extraPaddingRem = isForwarded || isWebPagePhoto ? 1.625 : 0;
+  const extraPaddingRem = asForwarded && isWebPageMedia ? 2.25 : (asForwarded || isWebPageMedia ? 1.625 : 0);
   const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars) - extraPaddingRem;
 
   return availableWidthRem * REM;
@@ -85,21 +85,21 @@ export function calculateDimensionsForMessageMedia({
   width,
   height,
   fromOwnMessage,
-  isForwarded,
-  isWebPagePhoto,
+  asForwarded,
+  isWebPageMedia,
   isGif,
   noAvatars,
 }: {
   width: number;
   height: number;
   fromOwnMessage: boolean;
-  isForwarded?: boolean;
-  isWebPagePhoto?: boolean;
+  asForwarded?: boolean;
+  isWebPageMedia?: boolean;
   isGif?: boolean;
   noAvatars?: boolean;
 }): ApiDimensions {
   const aspectRatio = height / width;
-  const availableWidth = getAvailableWidth(fromOwnMessage, isForwarded, isWebPagePhoto, noAvatars);
+  const availableWidth = getAvailableWidth(fromOwnMessage, asForwarded, isWebPageMedia, noAvatars);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
   const mediaWidth = isGif ? Math.max(GIF_MIN_WIDTH, width) : width;
   const mediaHeight = isGif ? height * (mediaWidth / width) : height;
@@ -123,8 +123,8 @@ export function getMediaViewerAvailableDimensions(withFooter: boolean, isVideo: 
 export function calculateInlineImageDimensions(
   photo: ApiPhoto,
   fromOwnMessage: boolean,
-  isForwarded?: boolean,
-  isWebPagePhoto?: boolean,
+  asForwarded?: boolean,
+  isWebPageMedia?: boolean,
   noAvatars?: boolean,
 ) {
   const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
@@ -133,8 +133,8 @@ export function calculateInlineImageDimensions(
     width,
     height,
     fromOwnMessage,
-    isForwarded,
-    isWebPagePhoto,
+    asForwarded,
+    isWebPageMedia,
     noAvatars,
   });
 }
@@ -142,7 +142,8 @@ export function calculateInlineImageDimensions(
 export function calculateVideoDimensions(
   video: ApiVideo,
   fromOwnMessage: boolean,
-  isForwarded?: boolean,
+  asForwarded?: boolean,
+  isWebPageMedia?: boolean,
   noAvatars?: boolean,
 ) {
   const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
@@ -151,7 +152,8 @@ export function calculateVideoDimensions(
     width,
     height,
     fromOwnMessage,
-    isForwarded,
+    asForwarded,
+    isWebPageMedia,
     isGif: video.isGif,
     noAvatars,
   });
