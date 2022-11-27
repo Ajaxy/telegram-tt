@@ -338,7 +338,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
 
   return {
     container,
-    mediaEl: mediaEls?.[mediaEls.length - 1],
+    mediaEl: mediaEls?.[0],
   };
 }
 

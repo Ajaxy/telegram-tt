@@ -88,7 +88,9 @@ const Photo: FC<OwnProps> = ({
   const fullMediaData = localBlobUrl || mediaData;
 
   const [withThumb] = useState(!fullMediaData);
-  const thumbRef = useBlurredMediaThumbRef(message, fullMediaData);
+  const noThumb = Boolean(fullMediaData);
+  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
+  const thumbClassNames = useMediaTransition(!noThumb);
 
   const {
     loadProgress: downloadProgress,
@@ -105,7 +107,6 @@ const Photo: FC<OwnProps> = ({
   );
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
 
-  const transitionClassNames = useMediaTransition(fullMediaData);
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
@@ -169,21 +170,21 @@ const Photo: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withThumb && (
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-        />
-      )}
       <img
         src={fullMediaData}
-        className={`full-media ${transitionClassNames}`}
+        className="full-media"
         width={width}
         height={height}
         alt=""
         draggable={!isProtected}
       />
+      {withThumb && (
+        <canvas
+          ref={thumbRef}
+          className={buildClassName('thumbnail', thumbClassNames)}
+          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
+        />
+      )}
       {isProtected && <span className="protector" />}
       {shouldRenderSpinner && !shouldRenderDownloadButton && (
         <div className={`media-loading ${spinnerClassNames}`}>

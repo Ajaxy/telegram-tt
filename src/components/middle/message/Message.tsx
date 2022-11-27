@@ -143,8 +143,8 @@ type OwnProps =
   {
     message: ApiMessage;
     observeIntersectionForBottom: ObserveFn;
-    observeIntersectionForMedia: ObserveFn;
-    observeIntersectionForAnimatedStickers: ObserveFn;
+    observeIntersectionForLoading: ObserveFn;
+    observeIntersectionForPlaying: ObserveFn;
     album?: IAlbum;
     noAvatars?: boolean;
     withAvatar?: boolean;
@@ -235,8 +235,8 @@ const Message: FC<OwnProps & StateProps> = ({
   message,
   chatUsername,
   observeIntersectionForBottom,
-  observeIntersectionForMedia,
-  observeIntersectionForAnimatedStickers,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   album,
   noAvatars,
   withAvatar,
@@ -634,7 +634,7 @@ const Message: FC<OwnProps & StateProps> = ({
         text={hiddenName}
         lastSyncTime={lastSyncTime}
         onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
-        observeIntersection={observeIntersectionForMedia}
+        observeIntersection={observeIntersectionForLoading}
         animationLevel={animationLevel}
         withVideo
       />
@@ -693,16 +693,16 @@ const Message: FC<OwnProps & StateProps> = ({
             noUserColors={isOwn}
             isProtected={isProtected}
             sender={replyMessageSender}
-            observeIntersectionForLoading={observeIntersectionForMedia}
-            observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             onClick={handleReplyClick}
           />
         )}
         {sticker && (
           <Sticker
             message={message}
-            observeIntersection={observeIntersectionForMedia}
-            observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+            observeIntersection={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             shouldLoop={shouldLoopStickers}
             lastSyncTime={lastSyncTime}
             shouldPlayEffect={(
@@ -719,7 +719,7 @@ const Message: FC<OwnProps & StateProps> = ({
             customEmojiId={animatedCustomEmoji}
             withEffects={isUserId(chatId)}
             isOwn={isOwn}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             lastSyncTime={lastSyncTime}
             forceLoadPreview={isLocal}
             messageId={messageId}
@@ -732,7 +732,7 @@ const Message: FC<OwnProps & StateProps> = ({
             emoji={animatedEmoji}
             withEffects={isUserId(chatId)}
             isOwn={isOwn}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             lastSyncTime={lastSyncTime}
             forceLoadPreview={isLocal}
             messageId={messageId}
@@ -744,7 +744,7 @@ const Message: FC<OwnProps & StateProps> = ({
           <Album
             album={album!}
             albumLayout={albumLayout!}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             isOwn={isOwn}
             isProtected={isProtected}
             hasCustomAppendix={hasCustomAppendix}
@@ -762,7 +762,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {!isAlbum && photo && (
           <Photo
             message={message}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             uploadProgress={uploadProgress}
@@ -777,7 +777,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {!isAlbum && video && video.isRound && (
           <RoundVideo
             message={message}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             lastSyncTime={lastSyncTime}
             isDownloading={isDownloading}
@@ -786,7 +786,8 @@ const Message: FC<OwnProps & StateProps> = ({
         {!isAlbum && video && !video.isRound && (
           <Video
             message={message}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersectionForLoading={observeIntersectionForLoading}
+            observeIntersectionForPlaying={observeIntersectionForPlaying}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
@@ -824,7 +825,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {document && (
           <Document
             message={message}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
             autoLoadFileMaxSizeMb={autoLoadFileMaxSizeMb}
             uploadProgress={uploadProgress}
@@ -876,8 +877,8 @@ const Message: FC<OwnProps & StateProps> = ({
               emojiSize={emojiSize}
               highlight={highlight}
               isProtected={isProtected}
-              observeIntersectionForLoading={observeIntersectionForMedia}
-              observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+              observeIntersectionForLoading={observeIntersectionForLoading}
+              observeIntersectionForPlaying={observeIntersectionForPlaying}
               withTranslucentThumbs={isCustomShape}
             />
             {metaPosition === 'in-text' && renderReactionsAndMeta()}
@@ -887,7 +888,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {webPage && (
           <WebPage
             message={message}
-            observeIntersection={observeIntersectionForMedia}
+            observeIntersection={observeIntersectionForLoading}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
@@ -960,8 +961,8 @@ const Message: FC<OwnProps & StateProps> = ({
               <CustomEmoji
                 documentId={senderEmojiStatus.documentId}
                 loopLimit={EMOJI_STATUS_LOOP_LIMIT}
-                observeIntersectionForLoading={observeIntersectionForMedia}
-                observeIntersectionForPlaying={observeIntersectionForAnimatedStickers}
+                observeIntersectionForLoading={observeIntersectionForLoading}
+                observeIntersectionForPlaying={observeIntersectionForPlaying}
               />
             )}
             {!asForwarded && !senderEmojiStatus && senderIsPremium && <PremiumIcon />}

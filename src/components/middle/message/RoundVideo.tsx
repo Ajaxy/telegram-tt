@@ -82,7 +82,7 @@ const RoundVideo: FC<OwnProps> = ({
   const isTransferring = (isLoadAllowed && !isBuffered) || isDownloading;
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
 
-  const transitionClassNames = useMediaTransition(mediaData);
+  const thumbClassNames = useMediaTransition(!mediaData);
   const {
     shouldRender: shouldSpinnerRender,
     transitionClassNames: spinnerClassNames,
@@ -180,30 +180,19 @@ const RoundVideo: FC<OwnProps> = ({
     setProgress(playerEl.currentTime / playerEl.duration);
   }, []);
 
-  const videoClassName = buildClassName('full-media', transitionClassNames);
-
   return (
     <div
       ref={ref}
       className="RoundVideo media-inner"
       onClick={handleClick}
     >
-      {withThumb && (
-        <div className="thumbnail-wrapper">
-          <canvas
-            ref={thumbRef}
-            className="thumbnail"
-            style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
-          />
-        </div>
-      )}
       {mediaData && (
         <div className="video-wrapper">
           <OptimizedVideo
             canPlay={shouldPlay}
             ref={playerRef}
             src={mediaData}
-            className={videoClassName}
+            className="full-media"
             width={ROUND_VIDEO_DIMENSIONS_PX}
             height={ROUND_VIDEO_DIMENSIONS_PX}
             autoPlay
@@ -217,6 +206,13 @@ const RoundVideo: FC<OwnProps> = ({
             onTimeUpdate={isActivated ? handleTimeUpdate : undefined}
           />
         </div>
+      )}
+      {withThumb && (
+        <canvas
+          ref={thumbRef}
+          className={buildClassName('thumbnail', thumbClassNames)}
+          style={`width: ${ROUND_VIDEO_DIMENSIONS_PX}px; height: ${ROUND_VIDEO_DIMENSIONS_PX}px`}
+        />
       )}
       <div className="progress" ref={playingProgressRef} />
       {shouldSpinnerRender && (

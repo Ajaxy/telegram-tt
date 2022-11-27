@@ -11,21 +11,22 @@ import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
-  getMessageMediaHash,
+  getMessageMediaHash, getMessageMediaThumbDataUri,
   getMessageVideo,
   getMessageWebPageVideo,
   isForwardedMessage,
   isOwnMessage,
 } from '../../../global/helpers';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import * as mediaLoader from '../../../util/mediaLoader';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
-import useBuffering from '../../../hooks/useBuffering';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
+import useFlag from '../../../hooks/useFlag';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -33,7 +34,8 @@ import OptimizedVideo from '../../ui/OptimizedVideo';
 export type OwnProps = {
   id?: string;
   message: ApiMessage;
-  observeIntersection: ObserveFn;
+  observeIntersectionForLoading: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
   noAvatars?: boolean;
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
@@ -50,7 +52,8 @@ export type OwnProps = {
 const Video: FC<OwnProps> = ({
   id,
   message,
-  observeIntersection,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
   noAvatars,
   canAutoLoad,
   canAutoPlay,
@@ -71,32 +74,41 @@ const Video: FC<OwnProps> = ({
   const video = (getMessageVideo(message) || getMessageWebPageVideo(message))!;
   const localBlobUrl = video.blobUrl;
 
-  const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const isIntersectingForLoading = useIsIntersecting(ref, observeIntersectionForLoading);
+  const isIntersectingForPlaying = (
+    useIsIntersecting(ref, observeIntersectionForPlaying)
+    && isIntersectingForLoading
+  );
+  const wasIntersectedRef = useRef(isIntersectingForLoading);
+  if (isIntersectingForPlaying && !wasIntersectedRef.current) {
+    wasIntersectedRef.current = true;
+  }
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
-  const shouldLoad = Boolean(isLoadAllowed && isIntersecting && lastSyncTime);
+  const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && lastSyncTime);
   const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay);
 
-  const previewBlobUrl = useMedia(
-    getMessageMediaHash(message, 'pictogram'),
-    !(isIntersecting && lastSyncTime),
-    getMessageMediaFormat(message, 'pictogram'),
-    lastSyncTime,
-  );
-  const previewClassNames = useMediaTransition(previewBlobUrl);
-
+  const fullMediaHash = getMessageMediaHash(message, 'inline');
+  const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
-    getMessageMediaHash(message, 'inline'),
-    !shouldLoad,
-    getMessageMediaFormat(message, 'inline'),
-    lastSyncTime,
+    fullMediaHash, !shouldLoad, getMessageMediaFormat(message, 'inline'), lastSyncTime,
   );
   const fullMediaData = localBlobUrl || mediaData;
-  const isInline = Boolean(isIntersecting && fullMediaData);
+  const [isPlayerReady, markPlayerReady] = useFlag();
 
-  // Thumbnail is always rendered, so we can only disable blur if we have a preview
-  const [withThumb] = useState(!previewBlobUrl);
-  const thumbRef = useBlurredMediaThumbRef(message, previewBlobUrl);
+  const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
+
+  const previewMediaHash = getMessageMediaHash(message, 'preview');
+  const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
+  const canLoadPreview = isIntersectingForLoading && lastSyncTime;
+  const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview, undefined, lastSyncTime);
+  const previewClassNames = useMediaTransition((hasThumb || previewBlobUrl) && !isPlayerReady);
+
+  const noThumb = !hasThumb || previewBlobUrl || isPlayerReady;
+  const thumbRef = useBlurredMediaThumbRef(message, noThumb);
+  const thumbClassNames = useMediaTransition(!noThumb);
+
+  const isInline = fullMediaData && wasIntersectedRef.current;
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'download'),
@@ -105,21 +117,20 @@ const Video: FC<OwnProps> = ({
     lastSyncTime,
   );
 
-  const { isBuffered, bufferingHandlers } = useBuffering(!canAutoLoad);
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(
     message,
     uploadProgress || (isDownloading ? downloadProgress : loadProgress),
-    (shouldLoad && !isBuffered) || isDownloading,
+    (shouldLoad && !isPlayerReady && !isFullMediaPreloaded) || isDownloading,
   );
+
   const wasLoadDisabled = usePrevious(isLoadAllowed) === false;
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
   const {
-    shouldRender: shouldRenderPlayButton,
     transitionClassNames: playButtonClassNames,
-  } = useShowTransition(isLoadAllowed && !isPlayAllowed && !shouldRenderSpinner);
+  } = useShowTransition(Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner));
 
   const [playProgress, setPlayProgress] = useState<number>(0);
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
@@ -149,10 +160,11 @@ const Video: FC<OwnProps> = ({
   }, [isUploading, isDownloading, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
-  const aspectRatio = withAspectRatio ? `aspect-ratio: ${(width / height).toFixed(3)}/ 1` : '';
-  const style = dimensions
-    ? `width: ${width}px; height: ${height}px; left: ${dimensions.x}px; top: ${dimensions.y}px;${aspectRatio}`
-    : '';
+
+  const dimensionsStyle = dimensions ? ` left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
+  const aspectRatioStyle = withAspectRatio ? ` aspect-ratio: ${(width / height).toFixed(3)}/ 1;` : '';
+  const style = `width: ${width}px; height: ${height}px;${dimensionsStyle}${aspectRatioStyle}`;
+
   return (
     <div
       ref={ref}
@@ -161,47 +173,42 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
-      {withThumb ? (
-        <canvas
-          ref={thumbRef}
-          className="thumbnail"
-          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-        />
-      ) : (
-        <img
-          src={previewBlobUrl}
-          className={buildClassName('thumbnail', previewClassNames)}
-          style={`width: ${width}px; height: ${height}px;${aspectRatio}`}
-          alt=""
-          draggable={!isProtected}
-        />
-      )}
       {isInline && (
         <OptimizedVideo
           ref={videoRef}
-          canPlay={isPlayAllowed}
           src={fullMediaData}
           className="full-media"
+          canPlay={isPlayAllowed && isIntersectingForPlaying}
           width={width}
           height={height}
           muted
           loop
           playsInline
-          // eslint-disable-next-line react/jsx-props-no-spreading
-          {...bufferingHandlers}
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
-          style={aspectRatio}
+          onReady={markPlayerReady}
+        />
+      )}
+      <img
+        src={previewBlobUrl}
+        className={buildClassName('thumbnail', previewClassNames)}
+        alt=""
+        draggable={!isProtected}
+      />
+      {hasThumb && !isPreviewPreloaded && (
+        <canvas
+          ref={thumbRef}
+          className={buildClassName('thumbnail', thumbClassNames)}
         />
       )}
       {isProtected && <span className="protector" />}
-      {shouldRenderPlayButton && <i className={buildClassName('icon-large-play', playButtonClassNames)} />}
+      <i className={buildClassName('icon-large-play', playButtonClassNames)} />
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner progress={transferProgress} onClick={handleClick} />
         </div>
       )}
-      {!isLoadAllowed && (
+      {!isLoadAllowed && !fullMediaData && (
         <i className="icon-download" />
       )}
       {isTransferring ? (

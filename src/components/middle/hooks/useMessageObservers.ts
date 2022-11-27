@@ -7,9 +7,9 @@ import { IS_ANDROID, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useBackgroundMode from '../../../hooks/useBackgroundMode';
 
-const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
-const INTERSECTION_MARGIN_FOR_MEDIA = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
 const INTERSECTION_THROTTLE_FOR_READING = 150;
+const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
+const INTERSECTION_MARGIN_FOR_LOADING = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
 
 export default function useMessageObservers(
   type: MessageListType,
@@ -17,14 +17,6 @@ export default function useMessageObservers(
   memoFirstUnreadIdRef: { current: number | undefined },
 ) {
   const { markMessageListRead, markMentionsRead, animateUnreadReaction } = getActions();
-
-  const {
-    observe: observeIntersectionForMedia,
-  } = useIntersectionObserver({
-    rootRef: containerRef,
-    throttleMs: INTERSECTION_THROTTLE_FOR_MEDIA,
-    margin: INTERSECTION_MARGIN_FOR_MEDIA,
-  });
 
   const {
     observe: observeIntersectionForReading, freeze: freezeForReading, unfreeze: unfreezeForReading,
@@ -78,14 +70,22 @@ export default function useMessageObservers(
 
   useBackgroundMode(freezeForReading, unfreezeForReading);
 
-  const { observe: observeIntersectionForAnimatedStickers } = useIntersectionObserver({
+  const {
+    observe: observeIntersectionForLoading,
+  } = useIntersectionObserver({
+    rootRef: containerRef,
+    throttleMs: INTERSECTION_THROTTLE_FOR_MEDIA,
+    margin: INTERSECTION_MARGIN_FOR_LOADING,
+  });
+
+  const { observe: observeIntersectionForPlaying } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE_FOR_MEDIA,
   });
 
   return {
-    observeIntersectionForMedia,
     observeIntersectionForReading,
-    observeIntersectionForAnimatedStickers,
+    observeIntersectionForLoading,
+    observeIntersectionForPlaying,
   };
 }

@@ -73,7 +73,7 @@ export const useMediaProps = ({
         return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
       }
     }
-    return message && getMessageMediaHash(message, isFull ? 'viewerFull' : 'viewerPreview');
+    return message && getMessageMediaHash(message, isFull ? 'full' : 'preview');
   }, [avatarOwner, message, avatarMedia, mediaId]);
 
   const pictogramBlobUrl = useMedia(
@@ -97,7 +97,7 @@ export const useMediaProps = ({
   } = useMediaWithLoadProgress(
     getMediaHash(true),
     undefined,
-    message && getMessageMediaFormat(message, 'viewerFull'),
+    message && getMessageMediaFormat(message, 'full'),
     undefined,
     delay,
   );
