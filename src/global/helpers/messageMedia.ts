@@ -116,12 +116,16 @@ export function getMessageWebPagePhoto(message: ApiMessage) {
   return getMessageWebPage(message)?.photo;
 }
 
-export function getMessageWebPageDocument(message: ApiMessage) {
-  return getMessageWebPage(message)?.document;
+export function getMessageDocumentPhoto(message: ApiMessage) {
+  return isMessageDocumentPhoto(message) ? getMessageDocument(message) : undefined;
 }
 
-export function getMessageWebPageVideo(message: ApiMessage): ApiVideo | undefined {
+export function getMessageWebPageVideo(message: ApiMessage) {
   return getMessageWebPage(message)?.video;
+}
+
+export function getMessageDocumentVideo(message: ApiMessage) {
+  return isMessageDocumentVideo(message) ? getMessageDocument(message) : undefined;
 }
 
 export function getMessageMediaThumbnail(message: ApiMessage) {
@@ -169,14 +173,11 @@ export function getMessageMediaHash(
   const {
     photo, video, sticker, audio, voice, document,
   } = message.content;
-  const webPagePhoto = getMessageWebPagePhoto(message);
-  const webPageVideo = getMessageWebPageVideo(message);
 
-  const messageVideo = video || webPageVideo;
-  const messagePhoto = photo || webPagePhoto;
+  const messagePhoto = photo || getMessageWebPagePhoto(message) || getMessageDocumentPhoto(message);
+  const messageVideo = video || getMessageWebPageVideo(message) || getMessageDocumentVideo(message);
 
   const content = messagePhoto || messageVideo || sticker || audio || voice || document;
-
   if (!content) {
     return undefined;
   }
@@ -297,7 +298,7 @@ export function getGamePreviewVideoHash(game: ApiGame) {
   return undefined;
 }
 
-function getVideoOrAudioBaseHash(media: ApiAudio | ApiVideo, base: string) {
+function getVideoOrAudioBaseHash(media: ApiAudio | ApiVideo | ApiDocument, base: string) {
   if (IS_PROGRESSIVE_SUPPORTED && IS_SAFARI) {
     return `${base}?fileSize=${media.size}&mimeType=${media.mimeType}`;
   }
