@@ -1,4 +1,6 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
 import { callApi } from '../../../api/gramjs';
 import { selectChat, selectUser } from '../../selectors';
@@ -217,6 +219,8 @@ addActionHandler('joinGroupCall', async (global, actions, payload) => {
   createAudioElement();
 
   await initializeSoundsForSafari();
+  void checkNavigatorUserMediaPermissions(true);
+
   const { groupCalls: { activeGroupCallId } } = global;
   let groupCall = id ? selectGroupCall(global, id) : selectChatGroupCall(global, chatId);
 
@@ -319,6 +323,7 @@ addActionHandler('requestCall', async (global, actions, payload) => {
   }
 
   await initializeSoundsForSafari();
+  void checkNavigatorUserMediaPermissions(isVideo);
 
   setGlobal({
     ...getGlobal(),
@@ -364,4 +369,45 @@ export function removeGroupCallAudioElement() {
   audioElement?.pause();
   audioContext = undefined;
   audioElement = undefined;
+}
+
+// This method is used instead of a navigator.permissions.query to determine permission to use a microphone,
+// because Firefox does not have support for 'microphone' and 'camera' permissions
+// https://github.com/mozilla/standards-positions/issues/19#issuecomment-370158947
+export function checkNavigatorUserMediaPermissions(isVideo?: boolean) {
+  if (isVideo) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        if (stream.getVideoTracks().length === 0) {
+          getActions().showNotification({
+            message: langProvider.getTranslation('Call.Camera.Error'),
+          });
+        } else {
+          checkMicrophonePermission();
+        }
+      })
+      .catch(() => {
+        getActions().showNotification({
+          message: langProvider.getTranslation('Call.Camera.Error'),
+        });
+      });
+  } else {
+    checkMicrophonePermission();
+  }
+}
+
+function checkMicrophonePermission() {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then((stream) => {
+      if (stream.getAudioTracks().length === 0) {
+        getActions().showNotification({
+          message: langProvider.getTranslation('RequestAcces.Error.HaveNotAccess.Call'),
+        });
+      }
+    })
+    .catch(() => {
+      getActions().showNotification({
+        message: langProvider.getTranslation('RequestAcces.Error.HaveNotAccess.Call'),
+      });
+    });
 }
