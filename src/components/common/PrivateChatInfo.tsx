@@ -139,6 +139,31 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     ? adminMember.customTitle || lang(adminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin')
     : undefined;
 
+  function renderNameTitle() {
+    if (customTitle) {
+      return (
+        <div className="info-name-title">
+          <FullNameTitle
+            peer={user!}
+            withEmojiStatus
+            emojiStatusSize={emojiStatusSize}
+            isSavedMessages={isSavedMessages}
+          />
+          {customTitle && <span className="custom-title">{customTitle}</span>}
+        </div>
+      );
+    }
+
+    return (
+      <FullNameTitle
+        peer={user!}
+        withEmojiStatus
+        emojiStatusSize={emojiStatusSize}
+        isSavedMessages={isSavedMessages}
+      />
+    );
+  }
+
   return (
     <div className="ChatInfo" dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
       <Avatar
@@ -151,15 +176,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         animationLevel={animationLevel}
       />
       <div className="info">
-        <div className="info-name-title">
-          <FullNameTitle
-            peer={user}
-            withEmojiStatus
-            emojiStatusSize={emojiStatusSize}
-            isSavedMessages={isSavedMessages}
-          />
-          {customTitle && <span className="custom-title">{customTitle}</span>}
-        </div>
+        {renderNameTitle()}
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
     </div>
