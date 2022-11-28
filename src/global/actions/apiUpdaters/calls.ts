@@ -6,7 +6,7 @@ import { updateChat } from '../../reducers';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { notifyAboutCall } from '../../../util/notifications';
 import { selectPhoneCallUser } from '../../selectors/calls';
-import { initializeSoundsForSafari } from '../ui/calls';
+import { checkNavigatorUserMediaPermissions, initializeSoundsForSafari } from '../ui/calls';
 import { onTickEnd } from '../../../util/schedulers';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
@@ -96,6 +96,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         });
 
         void initializeSoundsForSafari();
+        void checkNavigatorUserMediaPermissions(call.isVideo);
         return {
           ...global,
           phoneCall: call,
