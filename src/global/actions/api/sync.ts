@@ -129,6 +129,7 @@ async function loadAndReplaceMessages() {
         const { originChannelId } = threadInfo;
         const currentMessageListInfoOrigin = global.messages.byChatId[originChannelId];
         const resultOrigin = await loadTopMessages(global.chats.byId[originChannelId]);
+        global = getGlobal();
         if (resultOrigin) {
           const byIdOrigin = buildCollectionByKey(resultOrigin.messages, 'id');
           const listedIdsOrigin = Object.keys(byIdOrigin).map(Number);
