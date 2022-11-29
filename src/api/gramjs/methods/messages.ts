@@ -77,6 +77,7 @@ export function init(_onUpdate: OnApiUpdate) {
 export async function fetchMessages({
   chat,
   threadId,
+  offsetId,
   ...pagination
 }: {
   chat: ApiChat;
@@ -93,6 +94,10 @@ export async function fetchMessages({
       peer: buildInputPeer(chat.id, chat.accessHash),
       ...(threadId !== MAIN_THREAD_ID && {
         msgId: threadId,
+      }),
+      ...(offsetId && {
+        // Workaround for local message IDs overflowing some internal `Buffer` range check
+        offsetId: Math.min(offsetId, 2 ** (32 - 1) - 1),
       }),
       ...pagination,
     }), undefined, true);
@@ -1127,7 +1132,7 @@ export async function loadPollOptionResults({
 
 export async function fetchExtendedMedia({
   chat, ids,
-} : {
+}: {
   chat: ApiChat;
   ids: number[];
 }) {
