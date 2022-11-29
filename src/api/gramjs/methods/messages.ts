@@ -492,7 +492,7 @@ export async function editMessage({
   serverTimeOffset: number;
 }) {
   const isScheduled = message.date * 1000 > Date.now() + serverTimeOffset * 1000;
-  const emojiOnlyCount = text ? parseEmojiOnlyString(text) : undefined;
+  const emojiOnlyCount = text && !message.groupedId ? parseEmojiOnlyString(text) : undefined;
   const messageUpdate: Partial<ApiMessage> = {
     content: {
       ...message.content,

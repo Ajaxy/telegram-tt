@@ -177,7 +177,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
   const isProtected = mtpMessage.noforwards || isInvoiceMedia;
   const isForwardingAllowed = !mtpMessage.noforwards;
-  const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
+  const emojiOnlyCount = content.text && !groupedId && parseEmojiOnlyString(content.text.text);
 
   return {
     id: mtpMessage.id,
@@ -1218,7 +1218,7 @@ export function buildLocalMessage(
   const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
-  const emojiOnlyCount = text && parseEmojiOnlyString(text);
+  const emojiOnlyCount = text && !groupedId && parseEmojiOnlyString(text);
 
   return {
     id: localId,
@@ -1280,7 +1280,7 @@ export function buildLocalForwardedMessage(
     text: content.text.text,
     entities: content.text.entities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
   } : content.text;
-  const emojiOnlyCount = content.text && parseEmojiOnlyString(content.text.text);
+  const emojiOnlyCount = content.text && !groupedId && parseEmojiOnlyString(content.text.text);
 
   const updatedContent = {
     ...content,
