@@ -83,13 +83,10 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     isVideo,
     isPhoto,
     bestImageData,
+    bestData,
     dimensions,
     isGif,
     isVideoAvatar,
-    localBlobUrl,
-    fullMediaBlobUrl,
-    previewBlobUrl,
-    pictogramBlobUrl,
     videoSize,
     loadProgress,
   } = useMediaProps({
@@ -107,7 +104,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       return (
         <div key={chatId} className="MediaViewerContent">
           {renderPhoto(
-            fullMediaBlobUrl || previewBlobUrl,
+            bestData,
             calculateMediaViewerDimensions(dimensions, false),
             !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
             isProtected,
@@ -119,7 +116,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         <div key={chatId} className="MediaViewerContent">
           <VideoPlayer
             key={mediaId}
-            url={localBlobUrl || fullMediaBlobUrl}
+            url={bestData}
             isGif
             posterData={bestImageData}
             posterSize={calculateMediaViewerDimensions(dimensions!, false, true)}
@@ -151,7 +148,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       className={buildClassName('MediaViewerContent', hasFooter && 'has-footer')}
     >
       {isPhoto && renderPhoto(
-        localBlobUrl || fullMediaBlobUrl || previewBlobUrl || pictogramBlobUrl,
+        bestData,
         message && calculateMediaViewerDimensions(dimensions!, hasFooter),
         !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
         isProtected,
@@ -164,7 +161,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       ) : (
         <VideoPlayer
           key={mediaId}
-          url={localBlobUrl || fullMediaBlobUrl}
+          url={bestData}
           isGif={isGif}
           posterData={bestImageData}
           posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}

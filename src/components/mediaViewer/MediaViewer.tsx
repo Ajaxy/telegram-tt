@@ -114,15 +114,14 @@ const MediaViewer: FC<StateProps> = ({
     isVideo,
     isPhoto,
     bestImageData,
+    bestData,
     dimensions,
     isGif,
     isFromSharedMedia,
     avatarPhoto,
     fileName,
-    fullMediaBlobUrl,
-    previewBlobUrl,
   } = useMediaProps({
-    message, avatarOwner, mediaId, delay: isGhostAnimation && ANIMATION_DURATION,
+    message, avatarOwner, mediaId, origin, delay: isGhostAnimation && ANIMATION_DURATION,
   });
 
   const canReport = !!avatarPhoto && !isChatWithSelf;
@@ -244,7 +243,7 @@ const MediaViewer: FC<StateProps> = ({
       threadId,
       mediaId: id,
       avatarOwnerId: avatarOwner?.id,
-      origin,
+      origin: origin!,
     }, {
       forceOnHeavyAnimation: true,
     });
@@ -334,7 +333,7 @@ const MediaViewer: FC<StateProps> = ({
           {renderSenderInfo()}
         </Transition>
         <MediaViewerActions
-          mediaData={fullMediaBlobUrl || previewBlobUrl}
+          mediaData={bestData}
           isVideo={isVideo}
           message={message}
           canDeleteAvatar={canDeleteMedia && !!avatarPhoto}

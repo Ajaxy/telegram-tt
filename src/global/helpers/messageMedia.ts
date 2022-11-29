@@ -212,7 +212,7 @@ export function getMessageMediaHash(
         return `${base}?size=x`;
       case 'full':
       case 'download':
-        return `${base}?size=z`;
+        return document ? base : `${base}?size=z`;
     }
   }
 
