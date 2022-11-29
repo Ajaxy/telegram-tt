@@ -808,7 +808,7 @@ export interface ActionPayloads {
     mediaId?: number;
     avatarOwnerId?: string;
     profilePhotoIndex?: number;
-    origin?: MediaViewerOrigin;
+    origin: MediaViewerOrigin;
     volume?: number;
     playbackRate?: number;
     isMuted?: boolean;

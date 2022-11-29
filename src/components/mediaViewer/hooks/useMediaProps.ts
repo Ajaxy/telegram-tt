@@ -77,7 +77,10 @@ export const useMediaProps = ({
   }, [avatarOwner, message, avatarMedia, mediaId]);
 
   const pictogramBlobUrl = useMedia(
-    message && (isFromSharedMedia || isFromSearch) && getMessageMediaHash(message, 'pictogram'),
+    message
+    // Only use pictogram if it's already loaded
+    && (isFromSharedMedia || isFromSearch || isDocumentPhoto || isDocumentVideo)
+    && getMessageMediaHash(message, 'pictogram'),
     undefined,
     ApiMediaFormat.BlobUrl,
     undefined,
@@ -111,6 +114,9 @@ export const useMediaProps = ({
   if (isVideoAvatar && previewBlobUrl) {
     bestImageData = previewBlobUrl;
   }
+  const bestData = localBlobUrl || fullMediaBlobUrl || (
+    !isVideo ? previewBlobUrl || pictogramBlobUrl || bestImageData : undefined
+  );
 
   const fileName = message
     ? getMessageFileName(message)
@@ -144,14 +150,11 @@ export const useMediaProps = ({
     isDocumentVideo,
     fileName,
     bestImageData,
+    bestData,
     dimensions,
     isFromSharedMedia,
     avatarPhoto: avatarMedia,
     isVideoAvatar,
-    localBlobUrl,
-    fullMediaBlobUrl,
-    previewBlobUrl,
-    pictogramBlobUrl,
     loadProgress,
     videoSize,
   };
