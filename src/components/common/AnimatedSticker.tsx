@@ -97,12 +97,23 @@ const AnimatedSticker: FC<OwnProps> = ({
   const playSegmentRef = useRef<[number, number]>();
   playSegmentRef.current = playSegment;
 
+  const isUnmountedRef = useRef();
+  useEffect(() => {
+    return () => {
+      isUnmountedRef.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (animation || !tgsUrl || (sharedCanvas && !sharedCanvasCoords)) {
       return;
     }
 
     const exec = () => {
+      if (isUnmountedRef.current) {
+        return;
+      }
+
       const container = containerRef.current || sharedCanvas;
       if (!container) {
         return;
