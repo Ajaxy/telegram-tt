@@ -1285,6 +1285,7 @@ addActionHandler('setForwardChatId', async (global, actions, payload) => {
     if (!user.fullInfo) {
       const { accessHash } = user;
       user = await callApi('fetchFullUser', { id, accessHash });
+      global = getGlobal();
     }
 
     if (user?.fullInfo!.noVoiceMessages) {
