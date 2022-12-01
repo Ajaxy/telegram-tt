@@ -64,6 +64,7 @@ function MessageSummary({
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={withTranslucentThumbs}
+        truncateLength={truncateLength}
       />
     );
   }
