@@ -1,4 +1,5 @@
 import { getActions, getGlobal } from '../global';
+import { addCustomEmojiInputRenderCallback } from '../util/customEmojiManager';
 
 import { throttle } from '../util/schedulers';
 
@@ -24,10 +25,12 @@ const updateLastRendered = throttle(() => {
   RENDER_HISTORY.clear();
 }, THROTTLE, false);
 
-export function notifyCustomEmojiRender(emojiId: string) {
+function notifyCustomEmojiRender(emojiId: string) {
   RENDER_HISTORY.add(emojiId);
   updateLastRendered();
 }
+
+addCustomEmojiInputRenderCallback(notifyCustomEmojiRender);
 
 export default function useEnsureCustomEmoji(id: string) {
   const lastSyncTime = useLastSyncTime();

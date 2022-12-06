@@ -17,13 +17,15 @@ import {
 } from '../../../util/environment';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
+import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
+import { isSelectionInsideInput } from './helpers/selection';
+import renderText from '../../common/helpers/renderText';
+
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
-import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
-import { isSelectionInsideInput } from './helpers/selection';
-import renderText from '../../common/helpers/renderText';
+import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 
 import TextFormatter from './TextFormatter';
 
@@ -31,6 +33,8 @@ const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 350;
 const TRANSITION_DURATION_FACTOR = 50;
+
+const SCROLLER_CLASS = 'input-scroller';
 
 type OwnProps = {
   id: string;
@@ -58,6 +62,7 @@ type StateProps = {
 };
 
 const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
+const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 240;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
 const SELECTION_RECALCULATE_DELAY_MS = 260;
@@ -112,6 +117,14 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const selectionTimeoutRef = useRef<number>(null);
   // eslint-disable-next-line no-null/no-null
   const cloneRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const scrollerCloneRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const absoluteContainerRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
   const isContextMenuOpenRef = useRef(false);
@@ -120,10 +133,40 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [selectedRange, setSelectedRange] = useState<Range>();
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
 
+  useInputCustomEmojis(html, inputRef, sharedCanvasRef, sharedCanvasHqRef, absoluteContainerRef);
+
+  const updateInputHeight = useCallback((willSend = false) => {
+    const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
+    const clone = scrollerCloneRef.current!;
+    const currentHeight = Number(scroller.style.height.replace('px', ''));
+    const maxHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : MAX_INPUT_HEIGHT;
+    const newHeight = Math.min(clone.scrollHeight, maxHeight);
+    if (newHeight === currentHeight) {
+      return;
+    }
+
+    const transitionDuration = Math.round(
+      TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
+    );
+
+    const exec = () => {
+      scroller.style.height = `${newHeight}px`;
+      scroller.style.transitionDuration = `${transitionDuration}ms`;
+      scroller.classList.toggle('overflown', clone.scrollHeight > maxHeight);
+    };
+
+    if (willSend) {
+      // Sync with sending animation
+      requestAnimationFrame(exec);
+    } else {
+      exec();
+    }
+  }, [isAttachmentModalInput]);
+
   useEffect(() => {
     if (!isAttachmentModalInput) return;
     updateInputHeight(false);
-  }, [isAttachmentModalInput]);
+  }, [isAttachmentModalInput, updateInputHeight]);
 
   useLayoutEffectWithPrevDeps(([prevHtml]) => {
     if (html !== inputRef.current!.innerHTML) {
@@ -331,33 +374,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
   }
 
-  function updateInputHeight(willSend = false) {
-    const input = inputRef.current!;
-    const clone = cloneRef.current!;
-    const currentHeight = Number(input.style.height.replace('px', ''));
-    const newHeight = Math.min(clone.scrollHeight, MAX_INPUT_HEIGHT);
-    if (newHeight === currentHeight) {
-      return;
-    }
-
-    const transitionDuration = Math.round(
-      TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
-    );
-
-    const exec = () => {
-      input.style.height = `${newHeight}px`;
-      input.style.transitionDuration = `${transitionDuration}ms`;
-      input.classList.toggle('overflown', clone.scrollHeight > MAX_INPUT_HEIGHT);
-    };
-
-    if (willSend) {
-      // Sync with sending animation
-      requestAnimationFrame(exec);
-    } else {
-      exec();
-    }
-  }
-
   useEffect(() => {
     if (IS_TOUCH_ENV) {
       return;
@@ -450,37 +466,47 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   }, [shouldSuppressFocus]);
 
   const className = buildClassName(
-    'form-control custom-scroll',
+    'form-control',
     html.length > 0 && 'touched',
     shouldSuppressFocus && 'focus-disabled',
   );
 
   return (
     <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
-      <div
-        ref={inputRef}
-        id={editableInputId || EDITABLE_INPUT_ID}
-        className={className}
-        contentEditable
-        role="textbox"
-        dir="auto"
-        tabIndex={0}
-        onClick={focusInput}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        onMouseDown={handleMouseDown}
-        onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
-        onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
-        aria-label={placeholder}
-      />
+      <div className={buildClassName('custom-scroll', SCROLLER_CLASS)}>
+        <div className="input-scroller-content">
+          <div
+            ref={inputRef}
+            id={editableInputId || EDITABLE_INPUT_ID}
+            className={className}
+            contentEditable
+            role="textbox"
+            dir="auto"
+            tabIndex={0}
+            onClick={focusInput}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onMouseDown={handleMouseDown}
+            onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
+            onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
+            aria-label={placeholder}
+          />
+          {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
+          <canvas ref={sharedCanvasRef} className="shared-canvas" />
+          <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
+          <div ref={absoluteContainerRef} className="absolute-video-container" />
+        </div>
+      </div>
+      <div ref={scrollerCloneRef} className={buildClassName('custom-scroll', SCROLLER_CLASS, 'clone')}>
+        <div className="input-scroller-content">
+          <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
+        </div>
+      </div>
       {captionLimit && (
         <div className="max-length-indicator" dir="auto">
           {captionLimit}
         </div>
       )}
-
-      <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
-      {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
       <TextFormatter
         isOpen={isTextFormatterOpen}
         anchorPosition={textFormatterAnchorPosition}

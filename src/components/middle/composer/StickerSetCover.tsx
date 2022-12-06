@@ -10,6 +10,8 @@ import { selectIsAlwaysHighPriorityEmoji } from '../../../global/selectors';
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getFirstLetters } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
+import { getStickerPreviewHash } from '../../../global/helpers';
+
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
@@ -42,8 +44,13 @@ const StickerSetCover: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);
 
-  const mediaData = useMedia((hasThumbnail || isLottie) && `stickerSet${stickerSet.id}`, !isIntersecting);
-  const isReady = mediaData && (!isVideo || IS_WEBM_SUPPORTED);
+  const shouldFallbackToStatic = stickerSet.stickers && isVideo && !IS_WEBM_SUPPORTED;
+  const staticHash = shouldFallbackToStatic && getStickerPreviewHash(stickerSet.stickers![0].id);
+  const staticMediaData = useMedia(staticHash, !isIntersecting);
+
+  const mediaHash = ((hasThumbnail && !shouldFallbackToStatic) || isLottie) && `stickerSet${stickerSet.id}`;
+  const mediaData = useMedia(mediaHash, !isIntersecting);
+  const isReady = mediaData || staticMediaData;
   const transitionClassNames = useMediaTransition(isReady);
 
   const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
@@ -61,7 +68,7 @@ const StickerSetCover: FC<OwnProps> = ({
             sharedCanvas={sharedCanvasRef?.current || undefined}
             sharedCanvasCoords={bounds.coords}
           />
-        ) : isVideo ? (
+        ) : (isVideo && !shouldFallbackToStatic) ? (
           <OptimizedVideo
             className={buildClassName(styles.video, transitionClassNames)}
             src={mediaData}
@@ -71,7 +78,7 @@ const StickerSetCover: FC<OwnProps> = ({
           />
         ) : (
           <img
-            src={mediaData}
+            src={mediaData || staticMediaData}
             className={transitionClassNames}
             alt=""
           />

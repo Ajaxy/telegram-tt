@@ -249,10 +249,19 @@
 .message-input-wrapper {
   display: flex;
 
+  .input-scroller {
+    margin-right: 0.5rem;
+    padding-right: 2.5rem;
+  }
+
   > .Spinner {
     align-self: center;
     --spinner-size: 1.5rem;
     margin-right: -0.5rem;
+  }
+
+  .inline-bot-spinner {
+    margin-right: 3rem;
   }
 
   > .AttachMenu > .Button,
@@ -402,6 +411,45 @@
   }
 }
 
+.input-scroller {
+  min-height: 3.5rem;
+  max-height: 26rem;
+  overflow: hidden;
+
+  &.overflown {
+    overflow-y: auto;
+  }
+
+  @media (max-width: 600px) {
+    min-height: 2.875rem;
+    max-height: 16rem;
+  }
+
+  & > .input-scroller-content {
+    position: relative;
+  }
+
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: height 100ms ease;
+
+  body.animation-level-0 & {
+    transition: none !important;
+  }
+
+  .emoji {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0 1px -5px;
+    vertical-align: 0;
+    pointer-events: none;
+  }
+
+  .custom-emoji {
+    margin: 0;
+    vertical-align: text-top;
+  }
+}
+
 #message-input-text,
 #caption-input-text {
   position: relative;
@@ -410,16 +458,18 @@
     padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
       calc(0.9rem - var(--border-width));
     overflow: hidden;
+    height: auto;
     line-height: 1.375;
     font-family: var(--font-family);
     unicode-bidi: plaintext;
     text-align: initial;
     font-size: var(--composer-text-size, 1rem);
 
-    &.overflown {
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    caret-color: var(--color-text);
 
     &.touched,
     &:focus {
@@ -496,6 +546,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    right: 0;
     opacity: 0;
     pointer-events: none;
     z-index: -10;
@@ -509,30 +560,13 @@
 
   .form-control {
     margin-bottom: 0;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    caret-color: var(--color-text);
-    min-height: 3.5rem;
-    max-height: 26rem;
     line-height: 1.3125;
     padding: calc((3.5rem - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
     white-space: pre-wrap;
+    height: auto;
 
     @media (max-width: 600px) {
-      height: 2.875rem;
-      min-height: 2.875rem;
-      max-height: 16rem;
       padding: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
-      overflow: auto;
-    }
-
-    /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-    transition: height 100ms ease;
-
-    body.animation-level-0 & {
-      transition: none !important;
     }
   }
 
@@ -562,25 +596,22 @@
       margin-top: 0.75rem;
     }
   }
-
-  .emoji {
-    width: 1.25rem;
-    height: 1.25rem;
-    margin: 0 1px -5px;
-    vertical-align: 0;
-    pointer-events: none;
-  }
-
-  .custom-emoji {
-    vertical-align: text-top;
-  }
 }
 
 #caption-input-text {
-  .form-control {
-    height: 3.25rem;
+  border: 1px solid var(--color-borders-input);
+  border-radius: var(--border-radius-default);
+  margin-bottom: 0.5rem;
+
+  .input-scroller {
     min-height: 3.25rem;
     max-height: 15rem;
+
+    margin-right: 0.5rem;
+
+    &:has(.form-control:focus) {
+      border-color: var(--color-primary);
+    }
   }
 
   .placeholder-text {

@@ -35,8 +35,8 @@ const useEditing = (
     if (prevEditedMessage?.id === editedMessage.id) {
       return;
     }
-
-    const html = getTextWithEntitiesAsHtml(editingDraft?.text.length ? editingDraft : editedMessage.content.text);
+    const text = !prevEditedMessage && editingDraft?.text.length ? editingDraft : editedMessage.content.text;
+    const html = getTextWithEntitiesAsHtml(text);
     setHtml(html);
     // `fastRaf` would execute syncronously in this case
     requestAnimationFrame(() => {

@@ -13,7 +13,6 @@ import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
 import { selectIsAlwaysHighPriorityEmoji, selectIsDefaultEmojiStatusPack } from '../../global/selectors';
 
-import useEnsureCustomEmoji from '../../hooks/useEnsureCustomEmoji';
 import useCustomEmoji from './hooks/useCustomEmoji';
 
 import StickerView from './StickerView';
@@ -72,7 +71,6 @@ const CustomEmoji: FC<OwnProps> = ({
 
   // An alternative to `withGlobal` to avoid adding numerous global containers
   const customEmoji = useCustomEmoji(documentId);
-  useEnsureCustomEmoji(documentId);
 
   const loopCountRef = useRef(0);
   const [shouldLoop, setShouldLoop] = useState(true);

@@ -1,5 +1,6 @@
 .TextFormatter {
   transform: translate(-50%, -3.25rem);
+  z-index: 1;
 
   &,
   &-link-control {
