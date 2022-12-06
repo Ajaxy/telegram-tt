@@ -1,7 +1,5 @@
 .AttachMenu {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  align-self: flex-end;
 
   &--button {
     &:focus {
