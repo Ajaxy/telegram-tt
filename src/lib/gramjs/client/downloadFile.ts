@@ -5,6 +5,7 @@ import { sleep } from '../Helpers';
 import { getDownloadPartSize } from '../Utils';
 import errors from '../errors';
 import Deferred from '../../../util/Deferred';
+import { Foreman } from '../../../util/foreman';
 
 interface OnProgress {
     isCanceled?: boolean;
@@ -36,36 +37,6 @@ const DISCONNECT_SLEEP = 1000;
 const SENDER_TIMEOUT = 60 * 1000;
 // Telegram may have server issues so we try several times
 const SENDER_RETRIES = 5;
-
-class Foreman {
-    private deferreds: Deferred[] = [];
-
-    activeWorkers = 0;
-
-    constructor(private maxWorkers: number) {
-    }
-
-    requestWorker() {
-        if (this.activeWorkers === this.maxWorkers) {
-            const deferred = new Deferred();
-            this.deferreds.push(deferred);
-            return deferred.promise;
-        } else {
-            this.activeWorkers++;
-        }
-
-        return Promise.resolve();
-    }
-
-    releaseWorker() {
-        if (this.deferreds.length && (this.activeWorkers === this.maxWorkers)) {
-            const deferred = this.deferreds.shift()!;
-            deferred.resolve();
-        } else {
-            this.activeWorkers--;
-        }
-    }
-}
 
 class FileView {
     private type: 'memory' | 'opfs';
