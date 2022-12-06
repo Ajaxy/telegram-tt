@@ -286,6 +286,7 @@ export interface ApiWebPage {
 
 export interface ApiMessageForwardInfo {
   date: number;
+  isImported?: boolean;
   isChannelPost: boolean;
   channelPostId?: number;
   isLinkedChannelPost?: boolean;

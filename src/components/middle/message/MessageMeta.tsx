@@ -1,5 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
 import type { ActiveReaction } from '../../../global/types';
@@ -34,10 +35,18 @@ const MessageMeta: FC<OwnProps> = ({
   activeReaction, withReactionOffset, availableReactions,
   reactionMessage,
 }) => {
+  const { showNotification } = getActions();
   const lang = useLang();
   const [isActivated, markActivated] = useFlag();
 
   const reactions = withReactions && reactionMessage?.reactions?.results.filter((l) => l.count > 0);
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    showNotification({
+      message: lang('ImportedInfo'),
+    });
+  };
 
   const title = useMemo(() => {
     if (!isActivated) return undefined;
@@ -58,9 +67,15 @@ const MessageMeta: FC<OwnProps> = ({
     return text;
   }, [isActivated, lang, message]);
 
+  const fullClassName = buildClassName(
+    'MessageMeta',
+    withReactionOffset && 'reactions-offset',
+    message.forwardInfo?.isImported && 'is-imported',
+  );
+
   return (
     <span
-      className={buildClassName('MessageMeta', withReactionOffset && 'reactions-offset')}
+      className={fullClassName}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={onClick}
       data-ignore-on-paste
@@ -85,6 +100,14 @@ const MessageMeta: FC<OwnProps> = ({
         <span className="message-signature">{renderText(signature)}</span>
       )}
       <span className="message-time" title={title} onMouseEnter={markActivated}>
+        {message.forwardInfo?.isImported && (
+          <>
+            <span className="message-imported" onClick={handleClick}>
+              {formatDateTimeToString(message.forwardInfo.date * 1000, lang.code, true)}
+            </span>
+            <span className="message-imported" onClick={handleClick}>{lang('ImportedMessage')}</span>
+          </>
+        )}
         {message.isEdited && `${lang('EditedMessage')} `}
         {formatTime(lang, message.date * 1000)}
       </span>
