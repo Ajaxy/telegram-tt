@@ -7,7 +7,7 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
-import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
+import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import {
   getMessageLocation,
   buildStaticMapHash,
@@ -150,13 +150,13 @@ const Location: FC<OwnProps> = ({
   useLayoutEffectWithPrevDeps(([prevShouldRenderText]) => {
     if (shouldRenderText) {
       if (!prevShouldRenderText) {
-        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+        ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
       }
       return;
     }
 
     if (mapBlobUrl) {
-      const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
+      const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
       getCustomAppendixBg(mapBlobUrl, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.classList.add('has-appendix-thumb');

@@ -1,8 +1,13 @@
+import { MESSAGE_CONTENT_CLASS_NAME } from '../config';
+
 const ELEMENT_NODE = 1;
 
 export default function getMessageIdsForSelectedText() {
   const selection = window.getSelection();
-  let selectedFragments = selection && selection.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
+  let selectedFragments = selection?.rangeCount ? selection.getRangeAt(0).cloneContents() : undefined;
+
+  const shouldIncludeLastMessage = selection?.focusNode && selection.focusOffset > 0
+    && hasParentWithClassName(selection.focusNode, MESSAGE_CONTENT_CLASS_NAME);
   if (!selectedFragments || selectedFragments.childElementCount === 0) {
     return undefined;
   }
@@ -25,5 +30,17 @@ export default function getMessageIdsForSelectedText() {
   }
   selectedFragments = undefined;
 
+  if (!shouldIncludeLastMessage) {
+    messageIds.pop();
+  }
+
   return messageIds;
+}
+
+function hasParentWithClassName(element: Node, className: string): boolean {
+  if (element.nodeType === ELEMENT_NODE && (element as HTMLElement).classList.contains(className)) {
+    return true;
+  }
+
+  return element.parentNode ? hasParentWithClassName(element.parentNode, className) : false;
 }

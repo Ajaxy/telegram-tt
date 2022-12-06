@@ -8,7 +8,7 @@ import type { ISettings } from '../../../types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
+import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import {
   getMessagePhoto,
   getMessageWebPagePhoto,
@@ -132,12 +132,12 @@ const Photo: FC<OwnProps> = ({
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
       if (prevShouldAffectAppendix) {
-        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+        ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
       }
       return;
     }
 
-    const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
+    const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
     if (fullMediaData) {
       getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);

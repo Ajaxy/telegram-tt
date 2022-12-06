@@ -2,7 +2,7 @@ import type { ApiMessage, ApiDimensions } from '../../../api/types';
 
 import { MediaViewerOrigin } from '../../../types';
 
-import { ANIMATION_END_DELAY } from '../../../config';
+import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import {
   calculateDimensions,
   getMediaViewerAvailableDimensions,
@@ -330,7 +330,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
     case MediaViewerOrigin.Inline:
     default:
       containerSelector = `.Transition__slide--active > .MessageList #${getMessageHtmlId(message!.id)}`;
-      mediaSelector = '.message-content .full-media, .message-content .thumbnail';
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media, ${MESSAGE_CONTENT_SELECTOR} .thumbnail`;
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
