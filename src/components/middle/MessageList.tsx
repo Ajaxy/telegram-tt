@@ -505,8 +505,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isGroupChatJustCreated = isGroupChat && isCreator
     && messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'chatCreate';
 
-  const isBotInfoEmpty = botInfo && !botInfo.description;
-
   const className = buildClassName(
     'MessageList custom-scroll',
     noAvatars && 'no-avatars',
@@ -535,7 +533,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       ) : botInfo ? (
         <div className="empty">
           {isLoadingBotInfo && <span>{lang('Loading')}</span>}
-          {isBotInfoEmpty && <span>{lang('NoMessages')}</span>}
+          {!botInfo && !isLoadingBotInfo && <span>{lang('NoMessages')}</span>}
           {botInfo && (
             <div
               className="bot-info"
