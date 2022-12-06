@@ -12,7 +12,7 @@ import { createCallbackManager } from './callbacks';
 import { formatInteger } from './textFormat';
 
 interface LangFn {
-  (key: string, value?: any, format?: 'i'): any;
+  (key: string, value?: any, format?: 'i', pluralValue?: number): any;
 
   isRtl?: boolean;
   code?: LangCode;
@@ -94,10 +94,10 @@ export { addCallback, removeCallback };
 let currentLangCode: string | undefined;
 let currentTimeFormat: TimeFormat | undefined;
 
-export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') => {
+export const getTranslation: LangFn = (key: string, value?: any, format?: 'i', pluralValue?: number) => {
   if (value !== undefined) {
     const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
-    const cached = cache.get(`${key}_${cacheValue}_${format}`);
+    const cached = cache.get(`${key}_${cacheValue}_${format}${pluralValue ? `_${pluralValue}` : ''}`);
     if (cached) {
       return cached;
     }
@@ -116,7 +116,7 @@ export const getTranslation: LangFn = (key: string, value?: any, format?: 'i') =
     return key;
   }
 
-  return processTranslation(langString, key, value, format);
+  return processTranslation(langString, key, value, format, pluralValue);
 };
 
 export async function getTranslationForLangString(langCode: string, key: string) {
@@ -163,7 +163,7 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   const { languages, timeFormat } = getGlobal().settings.byKey;
   const langInfo = languages?.find((l) => l.langCode === langCode);
   getTranslation.isRtl = Boolean(langInfo?.rtl);
-  getTranslation.code = langCode;
+  getTranslation.code = langCode.replace('-raw', '') as LangCode;
   getTranslation.langName = langInfo?.nativeName;
   getTranslation.timeFormat = timeFormat;
 
@@ -241,8 +241,12 @@ function processTemplate(template: string, value: any) {
   }, initialValue || '');
 }
 
-function processTranslation(langString: ApiLangString | undefined, key: string, value?: any, format?: 'i') {
-  const preferredPluralOption = typeof value === 'number' ? getPluralOption(value) : 'value';
+function processTranslation(
+  langString: ApiLangString | undefined, key: string, value?: any, format?: 'i', pluralValue?: number,
+) {
+  const preferredPluralOption = typeof value === 'number' || pluralValue !== undefined
+    ? getPluralOption(pluralValue ?? value)
+    : 'value';
   const template = langString ? (
     langString[preferredPluralOption] || langString.otherValue || langString.value
   ) : undefined;
@@ -256,7 +260,7 @@ function processTranslation(langString: ApiLangString | undefined, key: string, 
     const formattedValue = format === 'i' ? formatInteger(value) : value;
     const result = processTemplate(template, formattedValue);
     const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
-    cache.set(`${key}_${cacheValue}_${format}`, result);
+    cache.set(`${key}_${cacheValue}_${format}${pluralValue ? `_${pluralValue}` : ''}`, result);
     return result;
   }
 
