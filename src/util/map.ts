@@ -1,4 +1,4 @@
-const PROVIDER = 'http://maps.google.com/maps';
+const PROVIDER = 'https://maps.google.com/maps';
 
 // eslint-disable-next-line max-len
 // https://github.com/TelegramMessenger/Telegram-iOS/blob/2a32c871882c4e1b1ccdecd34fccd301723b30d9/submodules/LocationResources/Sources/VenueIconResources.swift#L82

@@ -1,6 +1,7 @@
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
@@ -66,6 +67,7 @@ const Location: FC<OwnProps> = ({
   theme,
   serverTimeOffset,
 }) => {
+  const { openUrl } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -110,7 +112,7 @@ const Location: FC<OwnProps> = ({
 
   const handleClick = () => {
     const url = prepareMapUrl(point.lat, point.long, zoom);
-    window.open(url, '_blank', 'noopener')?.focus();
+    openUrl({ url });
   };
 
   const updateCountdown = useCallback((countdownEl: HTMLDivElement) => {
@@ -224,8 +226,7 @@ const Location: FC<OwnProps> = ({
         className="full-media map"
         src={mapBlobUrl}
         alt="Location on a map"
-        width={DEFAULT_MAP_CONFIG.width}
-        height={DEFAULT_MAP_CONFIG.height}
+        style={`width: ${DEFAULT_MAP_CONFIG.width}px; height: ${DEFAULT_MAP_CONFIG.height}px;`}
       />
     );
   }
