@@ -15,3 +15,5 @@ webpack.config.js
 jest.config.js
 src/lib/secret-sauce/
 playwright.config.ts
+
+dist/*

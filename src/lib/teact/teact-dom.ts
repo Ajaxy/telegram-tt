@@ -105,6 +105,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   }
 
   if (DEBUG && $new) {
+    // @ts-ignore TS 4.9 bug https://github.com/microsoft/TypeScript/issues/51501
     const newTarget = 'target' in $new && $new.target;
     if (newTarget && (!$current || ('target' in $current && newTarget !== $current.target))) {
       throw new Error('[Teact] Cached virtual element was moved within tree');

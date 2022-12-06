@@ -235,13 +235,13 @@ const MiddleColumn: FC<StateProps> = ({
 
   // Fix for mobile virtual keyboard
   useEffect(() => {
-    const { visualViewport } = window as any;
+    const { visualViewport } = window;
     if (!visualViewport) {
       return undefined;
     }
 
     const handleResize = () => {
-      if (window.visualViewport.height !== document.documentElement.clientHeight) {
+      if (visualViewport.height !== document.documentElement.clientHeight) {
         document.body.classList.add('keyboard-visible');
       } else {
         document.body.classList.remove('keyboard-visible');

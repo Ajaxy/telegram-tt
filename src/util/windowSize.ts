@@ -38,7 +38,7 @@ const handleResize = throttle(() => {
 
 window.addEventListener('orientationchange', handleResize);
 if (IS_IOS) {
-  window.visualViewport.addEventListener('resize', handleResize);
+  window.visualViewport!.addEventListener('resize', handleResize);
 } else {
   window.addEventListener('resize', handleResize);
 }
@@ -46,7 +46,7 @@ if (IS_IOS) {
 export function updateSizes(): IDimensions {
   let height: number;
   if (IS_IOS) {
-    height = window.visualViewport.height + window.visualViewport.pageTop;
+    height = window.visualViewport!.height + window.visualViewport!.pageTop;
   } else {
     height = window.innerHeight;
   }
