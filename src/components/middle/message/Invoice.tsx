@@ -4,7 +4,7 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
-import { CUSTOM_APPENDIX_ATTRIBUTE } from '../../../config';
+import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
@@ -53,13 +53,13 @@ const Invoice: FC<OwnProps> = ({
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
       if (prevShouldAffectAppendix) {
-        ref.current!.closest<HTMLDivElement>('.message-content')!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
+        ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
       }
       return;
     }
 
     if (photoUrl) {
-      const contentEl = ref.current!.closest<HTMLDivElement>('.message-content')!;
+      const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
       getCustomAppendixBg(photoUrl, false, isInSelectMode, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');

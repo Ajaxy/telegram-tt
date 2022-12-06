@@ -1,6 +1,6 @@
 import type { ApiMessage } from '../../../../api/types';
 
-import { EMOJI_SIZES } from '../../../../config';
+import { EMOJI_SIZES, MESSAGE_CONTENT_CLASS_NAME } from '../../../../config';
 import { getMessageContent } from '../../../../global/helpers';
 
 export function buildContentClassName(
@@ -35,7 +35,7 @@ export function buildContentClassName(
     text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice,
   } = getMessageContent(message);
 
-  const classNames = ['message-content'];
+  const classNames = [MESSAGE_CONTENT_CLASS_NAME];
   const isMedia = photo || video || location || invoice?.extendedMedia;
   const hasText = text || location?.type === 'venue' || isGeoLiveActive;
   const isMediaWithNoText = isMedia && !hasText;

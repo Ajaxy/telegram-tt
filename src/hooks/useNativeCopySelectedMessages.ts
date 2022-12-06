@@ -5,7 +5,7 @@ const useNativeCopySelectedMessages = (copyMessagesByIds: ({ messageIds }: { mes
   function handleCopy(e: KeyboardEvent) {
     const messageIds = getMessageIdsForSelectedText();
 
-    if (messageIds && messageIds.length > 0) {
+    if (messageIds && messageIds.length > 1) {
       e.preventDefault();
       copyMessagesByIds({ messageIds });
     }

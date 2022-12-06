@@ -102,6 +102,8 @@ export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 export const EDITABLE_INPUT_CSS_SELECTOR = `.messages-layout .Transition__slide--active #${EDITABLE_INPUT_ID}, .messages-layout .Transition > .to #${EDITABLE_INPUT_ID}`;
 
 export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
+export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';
+export const MESSAGE_CONTENT_SELECTOR = '.message-content';
 
 // Screen width where Pinned Message / Audio Player in the Middle Header can be safely displayed
 export const SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN = 1440; // px
