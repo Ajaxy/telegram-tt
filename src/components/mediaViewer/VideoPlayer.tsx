@@ -245,7 +245,7 @@ const VideoPlayer: FC<OwnProps> = ({
         <video
           ref={videoRef}
           autoPlay={IS_TOUCH_ENV}
-          controlsList={isProtected ? 'nodownload' : undefined}
+          controlsList="nodownload"
           playsInline
           loop={isGif || duration <= MAX_LOOP_DURATION}
           // This is to force autoplaying on mobiles
