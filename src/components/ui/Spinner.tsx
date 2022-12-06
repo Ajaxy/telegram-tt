@@ -8,12 +8,17 @@ import './Spinner.scss';
 const Spinner: FC<{
   color?: 'blue' | 'white' | 'black' | 'green' | 'gray' | 'yellow';
   backgroundColor?: 'light' | 'dark';
+  className?: string;
 }> = ({
   color = 'blue',
   backgroundColor,
+  className,
 }) => {
   return (
-    <div className={buildClassName('Spinner', color, backgroundColor && 'with-background', `bg-${backgroundColor}`)}>
+    <div className={buildClassName(
+      'Spinner', className, color, backgroundColor && 'with-background', `bg-${backgroundColor}`,
+    )}
+    >
       <div />
     </div>
   );

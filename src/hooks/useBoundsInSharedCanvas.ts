@@ -1,9 +1,10 @@
 import {
-  useCallback, useEffect, useLayoutEffect, useMemo, useState,
+  useCallback, useLayoutEffect, useMemo, useState,
 } from '../lib/teact/teact';
 
-import { throttle } from '../util/schedulers';
 import { round } from '../util/math';
+
+import { useResizeObserver } from './useResizeObserver';
 
 export default function useBoundsInSharedCanvas(
   containerRef: React.RefObject<HTMLDivElement>,
@@ -32,26 +33,7 @@ export default function useBoundsInSharedCanvas(
 
   useLayoutEffect(recalculate, [recalculate]);
 
-  useEffect(() => {
-    if (!('ResizeObserver' in window) || !sharedCanvasRef?.current) {
-      return undefined;
-    }
-
-    const observer = new ResizeObserver(throttle(([entry]) => {
-      // During animation
-      if (!(entry.target as HTMLCanvasElement).offsetParent) {
-        return;
-      }
-
-      recalculate();
-    }, 300, false));
-
-    observer.observe(sharedCanvasRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [recalculate, sharedCanvasRef]);
+  useResizeObserver(sharedCanvasRef, recalculate, true);
 
   const coords = useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);
 

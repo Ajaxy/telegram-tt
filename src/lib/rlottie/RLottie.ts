@@ -206,7 +206,7 @@ class RLottie {
   setSharedCanvasCoords(containerId: string, newCoords: Params['coords']) {
     const containerInfo = this.containers.get(containerId)!;
     const {
-      canvas, ctx, isPaused, coords,
+      canvas, ctx,
     } = containerInfo;
 
     if (!canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false') {
@@ -224,12 +224,10 @@ class RLottie {
       y: Math.round((newCoords?.y || 0) * canvas.height),
     };
 
-    if (isPaused || !this.isPlaying()) {
-      const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
+    const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
 
-      if (frame && frame !== WAITING) {
-        ctx.drawImage(frame, coords!.x, coords!.y);
-      }
+    if (frame && frame !== WAITING) {
+      ctx.drawImage(frame, containerInfo.coords.x, containerInfo.coords.y);
     }
   }
 

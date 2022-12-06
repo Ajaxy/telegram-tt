@@ -58,6 +58,7 @@ import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMess
 import useMedia from '../../hooks/useMedia';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import { useResizeObserver } from '../../hooks/useResizeObserver';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -297,26 +298,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [updateStickyDates, hasTools, type, setScrollOffset, chatId, threadId]);
 
   // Container resize observer (caused by Composer reply/webpage panels)
-  useEffect(() => {
-    if (!('ResizeObserver' in window) || process.env.APP_ENV === 'perf') {
-      return undefined;
-    }
-
-    const observer = new ResizeObserver(([entry]) => {
-      // During animation
-      if (!(entry.target as HTMLDivElement).offsetParent) {
-        return;
-      }
-
-      setContainerHeight(entry.contentRect.height);
-    });
-
-    observer.observe(containerRef.current!);
-
-    return () => {
-      observer.disconnect();
-    };
+  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+    setContainerHeight(entry.contentRect.height);
   }, []);
+  useResizeObserver(containerRef, handleResize);
 
   // Memorize height for scroll animation
   const { height: windowHeight } = useWindowSize();

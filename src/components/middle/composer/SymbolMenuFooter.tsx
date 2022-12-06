@@ -82,7 +82,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
       {renderTabButton(SymbolMenuTabs.Stickers)}
       {renderTabButton(SymbolMenuTabs.GIFs)}
 
-      {activeTab === SymbolMenuTabs.Emoji && (
+      {(activeTab === SymbolMenuTabs.Emoji || activeTab === SymbolMenuTabs.CustomEmoji) && (
         <Button
           className="symbol-delete-button"
           onClick={onRemoveSymbol}

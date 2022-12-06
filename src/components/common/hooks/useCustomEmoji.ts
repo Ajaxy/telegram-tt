@@ -1,26 +1,16 @@
 import { useCallback, useEffect, useState } from '../../../lib/teact/teact';
-import { addCallback } from '../../../lib/teact/teactn';
 import { getGlobal } from '../../../global';
 
-import type { GlobalState } from '../../../global/types';
 import type { ApiSticker } from '../../../api/types';
 
-const handlers = new Set<AnyToVoidFunction>();
+import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util/customEmojiManager';
 
-let prevGlobal: GlobalState | undefined;
-
-addCallback((global: GlobalState) => {
-  if (global.customEmojis.byId !== prevGlobal?.customEmojis.byId) {
-    for (const handler of handlers) {
-      handler();
-    }
-  }
-
-  prevGlobal = global;
-});
+import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
 
 export default function useCustomEmoji(documentId: string) {
   const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(getGlobal().customEmojis.byId[documentId]);
+
+  useEnsureCustomEmoji(documentId);
 
   const handleGlobalChange = useCallback(() => {
     setCustomEmoji(getGlobal().customEmojis.byId[documentId]);
@@ -31,10 +21,10 @@ export default function useCustomEmoji(documentId: string) {
   useEffect(() => {
     if (customEmoji) return undefined;
 
-    handlers.add(handleGlobalChange);
+    addCustomEmojiCallback(handleGlobalChange, documentId);
 
     return () => {
-      handlers.delete(handleGlobalChange);
+      removeCustomEmojiCallback(handleGlobalChange);
     };
   }, [customEmoji, documentId, handleGlobalChange]);
 
