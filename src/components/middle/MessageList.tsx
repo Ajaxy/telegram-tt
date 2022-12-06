@@ -275,7 +275,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     isScrollingRef.current = true;
 
-
     if (!memoFocusingIdRef.current) {
       updateStickyDates(container, hasTools);
     }

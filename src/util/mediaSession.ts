@@ -92,16 +92,6 @@ export function setPositionState(state?: MediaPositionState) {
   mediaSession?.setPositionState?.(state);
 }
 
-export function setMicrophoneActive(active: boolean) {
-  const { mediaSession } = window.navigator;
-  mediaSession?.setMicrophoneActive?.(active);
-}
-
-export function setCameraActive(active: boolean) {
-  const { mediaSession } = window.navigator;
-  mediaSession?.setCameraActive?.(active);
-}
-
 export function buildMediaMetadata({
   title, artist, album, artwork,
 }: MediaMetadataParameters) {

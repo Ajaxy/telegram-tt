@@ -2,8 +2,6 @@ const { Mutex } = require('async-mutex');
 
 const mutex = new Mutex();
 
-const WebSocketClient = require('websocket').w3cwebsocket;
-
 const closeError = new Error('WebSocket was closed');
 
 class PromisedWebSockets {
@@ -80,7 +78,7 @@ class PromisedWebSockets {
         });
         this.closed = false;
         this.website = this.getWebSocketLink(ip, port, testServers, isPremium);
-        this.client = new WebSocketClient(this.website, 'binary');
+        this.client = new WebSocket(this.website, 'binary');
         return new Promise((resolve, reject) => {
             this.client.onopen = () => {
                 this.receive();

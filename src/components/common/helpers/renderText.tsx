@@ -256,7 +256,7 @@ function replaceSimpleMarkdown(textParts: TextPart[], type: 'jsx' | 'html'): Tex
     }
 
     const parts = part.split(SIMPLE_MARKDOWN_REGEX);
-    const entities = part.match(SIMPLE_MARKDOWN_REGEX) || [];
+    const entities: string[] = part.match(SIMPLE_MARKDOWN_REGEX) || [];
     result.push(parts[0]);
 
     return entities.reduce((entityResult: TextPart[], entity, i) => {

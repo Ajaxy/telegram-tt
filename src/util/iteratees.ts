@@ -43,7 +43,7 @@ export function pickTruthy<T, K extends keyof T>(object: T, keys: K[]) {
   }, {} as Pick<T, K>);
 }
 
-export function omit<T, K extends keyof T>(object: T, keys: K[]) {
+export function omit<T extends object, K extends keyof T>(object: T, keys: K[]): Omit<T, K> {
   const stringKeys = new Set(keys.map(String));
   const savedKeys = Object.keys(object)
     .filter((key) => !stringKeys.has(key)) as Array<Exclude<keyof T, K>>;
@@ -118,7 +118,7 @@ export function split<T extends any>(array: T[], chunkSize: number) {
 }
 
 export function cloneDeep<T>(value: T): T {
-  if (typeof value !== 'object') {
+  if (!isObject(value)) {
     return value;
   }
 
@@ -130,6 +130,11 @@ export function cloneDeep<T>(value: T): T {
     acc[key as keyof T] = cloneDeep(value[key as keyof T]);
     return acc;
   }, {} as T);
+}
+
+function isObject(value: any): value is object {
+  // eslint-disable-next-line no-null/no-null
+  return typeof value === 'object' && value !== null;
 }
 
 export function findLast<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): T | undefined {

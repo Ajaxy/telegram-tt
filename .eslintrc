@@ -41,7 +41,10 @@
     "no-prototype-builtins": "off",
     "no-await-in-loop": "off",
     "no-nested-ternary": "off",
-    "function-paren-newline": ["error", "consistent"],
+    "function-paren-newline": [
+      "error",
+      "consistent"
+    ],
     "prefer-destructuring": "off",
     // Allow for...of. Edited from:
     // https://github.com/airbnb/javascript/blob/b4377fb03089dd7f08955242695860d47f9caab4/packages/eslint-config-airbnb-base/rules/style.js#L333
@@ -71,13 +74,17 @@
     "react/function-component-definition": "off",
     // Teact feature
     "react/style-prop-object": "off",
-    "react/jsx-no-bind": ["error", {
-      "ignoreRefs": true,
-      "allowArrowFunctions": false,
-      "allowFunctions": false,
-      "allowBind": false,
-      "ignoreDOMComponents": true
-    }],
+    "react/no-unknown-property": "off",
+    "react/jsx-no-bind": [
+      "error",
+      {
+        "ignoreRefs": true,
+        "allowArrowFunctions": false,
+        "allowFunctions": false,
+        "allowBind": false,
+        "ignoreDOMComponents": true
+      }
+    ],
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/no-static-element-interactions": "off",
     "jsx-a11y/label-has-associated-control": "off",
@@ -94,7 +101,10 @@
     "@typescript-eslint/camelcase": "off",
     "@typescript-eslint/member-delimiter-style": "error",
     "@typescript-eslint/default-param-last": "off",
-    "@typescript-eslint/return-await": ["error", "in-try-catch"],
+    "@typescript-eslint/return-await": [
+      "error",
+      "in-try-catch"
+    ],
     "@typescript-eslint/consistent-type-imports": [
       "error",
       {
@@ -106,7 +116,10 @@
   },
   "settings": {
     "import/resolver": "webpack",
-    "import/core-modules": ["fs", "path"]
+    "import/core-modules": [
+      "fs",
+      "path"
+    ]
   },
   "parserOptions": {
     "project": "./tsconfig.json"
