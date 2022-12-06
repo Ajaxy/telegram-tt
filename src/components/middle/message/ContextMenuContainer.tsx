@@ -13,6 +13,7 @@ import type { IAlbum, IAnchorPosition } from '../../../types';
 import {
   selectActiveDownloadIds,
   selectAllowedMessageActions,
+  selectCanScheduleUntilOnline,
   selectChat,
   selectCurrentMessageList, selectIsChatProtected, selectIsCurrentUserPremium,
   selectIsMessageProtected,
@@ -25,7 +26,6 @@ import {
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX } from '../../../config';
-import { getDayStartAt } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
 import { copyTextToClipboard } from '../../../util/clipboard';
@@ -33,12 +33,12 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useSchedule from '../../../hooks/useSchedule';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
 import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
-import CalendarModal from '../../common/CalendarModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 
 const START_SIZE = 2 * REM;
@@ -87,6 +87,7 @@ type StateProps = {
   activeDownloads: number[];
   canShowSeenBy?: boolean;
   enabledReactions?: string[];
+  canScheduleUntilOnline?: boolean;
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
@@ -130,6 +131,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canClosePoll,
   activeDownloads,
   canShowSeenBy,
+  canScheduleUntilOnline,
 }) => {
   const {
     setReplyingToId,
@@ -162,8 +164,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
-  const [isCalendarOpen, openCalendar, closeCalendar] = useFlag();
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
+
+  const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline, onClose, message.date);
 
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length);
@@ -244,11 +247,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     onClose();
   }, [onClose]);
 
-  const handleCloseCalendar = useCallback(() => {
-    closeCalendar();
-    onClose();
-  }, [closeCalendar, onClose]);
-
   const handleReply = useCallback(() => {
     setReplyingToId({ messageId: message.id });
     closeMenu();
@@ -317,10 +315,19 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [closeMenu, message.chatId, message.id, sendScheduledMessages]);
 
+  const handleRescheduleMessage = useCallback((scheduledAt: number) => {
+    rescheduleMessage({
+      chatId: message.chatId,
+      messageId: message.id,
+      scheduledAt,
+    });
+    onClose();
+  }, [message.chatId, message.id, onClose, rescheduleMessage]);
+
   const handleOpenCalendar = useCallback(() => {
     setIsMenuOpen(false);
-    openCalendar();
-  }, [openCalendar]);
+    requestCalendar(handleRescheduleMessage);
+  }, [handleRescheduleMessage, requestCalendar]);
 
   const handleOpenSeenByModal = useCallback(() => {
     closeMenu();
@@ -331,14 +338,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
     openReactorListModal({ chatId: message.chatId, messageId: message.id });
   }, [closeMenu, openReactorListModal, message.chatId, message.id]);
-
-  const handleRescheduleMessage = useCallback((date: Date) => {
-    rescheduleMessage({
-      chatId: message.chatId,
-      messageId: message.id,
-      scheduledAt: Math.round(date.getTime() / 1000),
-    });
-  }, [message.chatId, message.id, rescheduleMessage]);
 
   const handleCopyMessages = useCallback((messageIds: number[]) => {
     copyMessagesByIds({ messageIds });
@@ -476,17 +475,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         confirmLabel={lang('lng_polls_stop_sure')}
         confirmHandler={handlePollClose}
       />
-      {canReschedule && (
-        <CalendarModal
-          isOpen={isCalendarOpen}
-          withTimePicker
-          selectedAt={message.date * 1000}
-          maxAt={getDayStartAt(scheduledMaxDate)}
-          isFutureMode
-          onClose={handleCloseCalendar}
-          onSubmit={handleRescheduleMessage}
-        />
-      )}
+      {canReschedule && calendar}
     </div>
   );
 };
@@ -577,6 +566,7 @@ export default memo(withGlobal<OwnProps>(
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       customEmojiSetsInfo,
       customEmojiSets,
+      canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
     };
   },
 )(ContextMenuContainer));

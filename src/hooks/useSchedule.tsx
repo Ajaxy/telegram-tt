@@ -12,6 +12,7 @@ type OnScheduledCallback = (scheduledAt: number) => void;
 const useSchedule = (
   canScheduleUntilOnline?: boolean,
   onCancel?: () => void,
+  openAt?: number,
 ) => {
   const lang = useLang();
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
@@ -38,7 +39,7 @@ const useSchedule = (
     setOnScheduled(() => whenScheduled);
   }, []);
 
-  const scheduledDefaultDate = new Date();
+  const scheduledDefaultDate = openAt ? new Date(openAt * 1000) : new Date();
   scheduledDefaultDate.setSeconds(0);
   scheduledDefaultDate.setMilliseconds(0);
 
