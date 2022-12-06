@@ -57,7 +57,7 @@ import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildApiCallDiscardReason } from './calls';
-import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
+import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -177,7 +177,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
   const isProtected = mtpMessage.noforwards || isInvoiceMedia;
   const isForwardingAllowed = !mtpMessage.noforwards;
-  const emojiOnlyCount = content.text && !groupedId && parseEmojiOnlyString(content.text.text);
+  const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
 
   return {
     id: mtpMessage.id,
@@ -1219,9 +1219,8 @@ export function buildLocalMessage(
   const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
-  const emojiOnlyCount = text && !groupedId && parseEmojiOnlyString(text);
 
-  return {
+  const message = {
     id: localId,
     chatId: chat.id,
     content: {
@@ -1240,7 +1239,6 @@ export function buildLocalMessage(
     date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
-    ...(emojiOnlyCount && { emojiOnlyCount }),
     ...(replyingTo && { replyToMessageId: replyingTo }),
     ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
     ...(groupedId && {
@@ -1249,6 +1247,13 @@ export function buildLocalMessage(
     }),
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
+  };
+
+  const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
+
+  return {
+    ...message,
+    ...(emojiOnlyCount && { emojiOnlyCount }),
   };
 }
 
@@ -1281,7 +1286,7 @@ export function buildLocalForwardedMessage(
     text: content.text.text,
     entities: content.text.entities.filter((entity) => entity.type !== ApiMessageEntityTypes.CustomEmoji),
   } : content.text;
-  const emojiOnlyCount = content.text && !groupedId && parseEmojiOnlyString(content.text.text);
+  const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
 
   const updatedContent = {
     ...content,
