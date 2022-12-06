@@ -741,6 +741,14 @@ export interface ActionPayloads {
     chatId: string;
     force?: boolean;
   };
+  updateChatPhoto: {
+    chatId: string;
+    photo: ApiPhoto;
+  };
+  deleteChatPhoto: {
+    chatId: string;
+    photo: ApiPhoto;
+  };
   openChatWithDraft: {
     chatId?: string;
     text: string;
@@ -884,7 +892,9 @@ export interface ActionPayloads {
     profileId: string;
   };
   deleteProfilePhoto: {
-    profileId: string;
+    photo: ApiPhoto;
+  };
+  updateProfilePhoto: {
     photo: ApiPhoto;
   };
 

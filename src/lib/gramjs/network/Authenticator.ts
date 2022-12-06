@@ -8,7 +8,7 @@
 import { default as Api } from '../tl/api';
 import { SecurityError } from '../errors';
 // eslint-disable-next-line import/no-named-default
-import { default as MTProtoPlainSender } from './MTProtoPlainSender';
+import type { default as MTProtoPlainSender } from './MTProtoPlainSender';
 import { SERVER_KEYS } from '../crypto/RSA';
 
 const bigInt = require('big-integer');

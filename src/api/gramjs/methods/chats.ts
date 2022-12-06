@@ -12,7 +12,7 @@ import type {
   ApiChatBannedRights,
   ApiChatAdminRights,
   ApiGroupCall,
-  ApiUserStatus,
+  ApiUserStatus, ApiPhoto,
 } from '../../types';
 
 import {
@@ -41,7 +41,7 @@ import {
   isMessageWithMedia,
   buildChatBannedRights,
   buildChatAdminRights,
-  buildInputChatReactions,
+  buildInputChatReactions, buildInputPhoto,
 } from '../gramjsBuilders';
 import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -693,24 +693,33 @@ export async function createGroupChat({
 export async function editChatPhoto({
   chatId, accessHash, photo,
 }: {
-  chatId: string; accessHash?: string; photo: File;
+  chatId: string; accessHash?: string; photo?: File | ApiPhoto;
 }) {
-  const uploadedPhoto = await uploadFile(photo);
   const inputEntity = buildInputEntity(chatId, accessHash);
-
+  let inputPhoto: GramJs.TypeInputChatPhoto;
+  if (photo instanceof File) {
+    const uploadedPhoto = await uploadFile(photo);
+    inputPhoto = new GramJs.InputChatUploadedPhoto({
+      file: uploadedPhoto,
+    });
+  } else if (photo) {
+    const photoId = buildInputPhoto(photo);
+    if (!photoId) return false;
+    inputPhoto = new GramJs.InputChatPhoto({
+      id: photoId,
+    });
+  } else {
+    inputPhoto = new GramJs.InputChatPhotoEmpty();
+  }
   return invokeRequest(
     inputEntity instanceof GramJs.InputChannel
       ? new GramJs.channels.EditPhoto({
         channel: inputEntity as GramJs.InputChannel,
-        photo: new GramJs.InputChatUploadedPhoto({
-          file: uploadedPhoto,
-        }),
+        photo: inputPhoto,
       })
       : new GramJs.messages.EditChatPhoto({
         chatId: inputEntity as BigInt.BigInteger,
-        photo: new GramJs.InputChatUploadedPhoto({
-          file: uploadedPhoto,
-        }),
+        photo: inputPhoto,
       }),
     true,
   );

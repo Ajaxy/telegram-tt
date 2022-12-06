@@ -11,7 +11,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import { getActions, withGlobal } from '../../global';
 import {
-  getChatMediaMessageIds,
+  getChatMediaMessageIds, isChatAdmin,
 } from '../../global/helpers';
 import {
   selectChat,
@@ -59,7 +59,7 @@ type StateProps = {
   mediaId?: number;
   senderId?: string;
   isChatWithSelf?: boolean;
-  canDeleteMedia?: boolean;
+  canUpdateMedia?: boolean;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
   message?: ApiMessage;
@@ -78,7 +78,7 @@ const MediaViewer: FC<StateProps> = ({
   mediaId,
   senderId,
   isChatWithSelf,
-  canDeleteMedia,
+  canUpdateMedia,
   origin,
   avatarOwner,
   message,
@@ -336,11 +336,12 @@ const MediaViewer: FC<StateProps> = ({
           mediaData={bestData}
           isVideo={isVideo}
           message={message}
-          canDeleteAvatar={canDeleteMedia && !!avatarPhoto}
+          canUpdateMedia={canUpdateMedia}
           avatarPhoto={avatarPhoto}
-          avatarOwnerId={avatarOwner?.id}
+          avatarOwner={avatarOwner}
           fileName={fileName}
           canReport={canReport}
+          selectMedia={selectMedia}
           onBeforeDelete={handleBeforeDelete}
           onReport={openReportModal}
           onCloseMediaViewer={handleClose}
@@ -422,10 +423,13 @@ export default memo(withGlobal(
     if (avatarOwnerId) {
       const user = selectUser(global, avatarOwnerId);
       const chat = selectChat(global, avatarOwnerId);
-      let canDeleteMedia = false;
-      if (user) canDeleteMedia = avatarOwnerId === currentUserId;
-      // TODO Support deleting chat photos
-      // if (chat) canDeleteMedia = isChatAdmin(chat);
+      let canUpdateMedia = false;
+      if (user) {
+        canUpdateMedia = avatarOwnerId === currentUserId;
+      } else if (chat) {
+        canUpdateMedia = isChatAdmin(chat);
+      }
+
       isChatWithSelf = selectIsChatWithSelf(global, avatarOwnerId);
 
       return {
@@ -433,7 +437,7 @@ export default memo(withGlobal(
         senderId: avatarOwnerId,
         avatarOwner: user || chat,
         isChatWithSelf,
-        canDeleteMedia,
+        canUpdateMedia,
         animationLevel,
         origin,
         shouldSkipHistoryAnimations,

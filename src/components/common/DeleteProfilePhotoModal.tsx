@@ -7,6 +7,7 @@ import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import { isUserId } from '../../global/helpers';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -25,13 +26,21 @@ const DeleteProfilePhotoModal: FC<OwnProps> = ({
 }) => {
   const {
     deleteProfilePhoto,
+    deleteChatPhoto,
   } = getActions();
 
   const handleDeletePhoto = useCallback(() => {
     onConfirm?.();
-    deleteProfilePhoto({ photo, profileId });
+    if (isUserId(profileId)) {
+      deleteProfilePhoto({ photo });
+    } else {
+      deleteChatPhoto({
+        photo,
+        chatId: profileId,
+      });
+    }
     onClose();
-  }, [onConfirm, deleteProfilePhoto, photo, profileId, onClose]);
+  }, [onConfirm, profileId, onClose, deleteProfilePhoto, photo, deleteChatPhoto]);
 
   const lang = useLang();
 

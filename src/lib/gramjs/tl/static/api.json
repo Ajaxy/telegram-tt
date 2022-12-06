@@ -163,6 +163,7 @@
     "updates.getDifference",
     "updates.getChannelDifference",
     "photos.uploadProfilePhoto",
+    "photos.updateProfilePhoto",
     "photos.getUserPhotos",
     "photos.deletePhotos",
     "upload.saveFilePart",

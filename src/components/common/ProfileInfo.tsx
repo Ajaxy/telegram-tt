@@ -179,7 +179,9 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   }
 
   function renderPhoto(isActive?: boolean) {
-    const photo = !isSavedMessages && photos.length > 0 ? photos[currentPhotoIndex] : undefined;
+    const photo = !isSavedMessages && photos.length > 0
+      ? photos[currentPhotoIndex]
+      : undefined;
     return (
       <ProfilePhoto
         key={currentPhotoIndex}

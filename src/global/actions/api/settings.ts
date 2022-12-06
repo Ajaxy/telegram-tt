@@ -14,7 +14,7 @@ import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { subscribe, unsubscribe } from '../../../util/notifications';
 import { setTimeFormat } from '../../../util/langProvider';
-import { selectUser } from '../../selectors';
+import { selectUser, selectChat } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
   addNotifyExceptions,
@@ -39,7 +39,7 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
   });
 
   if (photo) {
-    const result = await callApi('updateProfilePhoto', photo);
+    const result = await callApi('uploadProfilePhoto', photo);
     if (result) {
       actions.loadProfilePhotos({ profileId: currentUserId });
     }
@@ -83,16 +83,52 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
   });
 });
 
-addActionHandler('deleteProfilePhoto', async (global, actions, payload) => {
-  const { photo, profileId } = payload;
-  const result = await callApi('deleteProfilePhoto', photo);
-  if (!result) return;
-  if (isUserId(profileId)) {
-    actions.loadFullUser({ userId: profileId });
-  } else {
-    actions.loadFullChat({ chatId: profileId });
+addActionHandler('updateProfilePhoto', async (global, actions, payload) => {
+  const { photo } = payload;
+  const { currentUserId } = global;
+  if (!currentUserId) return;
+  const currentUser = selectChat(global, currentUserId);
+  if (!currentUser) return;
+  setGlobal(updateUser(global, currentUserId, {
+    avatarHash: undefined,
+    fullInfo: {
+      ...currentUser.fullInfo,
+      profilePhoto: undefined,
+    },
+  }));
+  const newPhoto = await callApi('updateProfilePhoto', photo);
+  if (newPhoto) {
+    setGlobal(updateUser(getGlobal(), currentUserId, {
+      avatarHash: newPhoto.id,
+      fullInfo: {
+        ...currentUser.fullInfo,
+        profilePhoto: newPhoto,
+      },
+    }));
+    actions.loadFullUser({ userId: currentUserId });
+    actions.loadProfilePhotos({ profileId: currentUserId });
   }
-  actions.loadProfilePhotos({ profileId });
+});
+
+addActionHandler('deleteProfilePhoto', async (global, actions, payload) => {
+  const { photo } = payload;
+  const { currentUserId } = global;
+  if (!currentUserId) return;
+  const currentUser = selectChat(global, currentUserId);
+  if (!currentUser) return;
+  if (currentUser.avatarHash === photo.id) {
+    setGlobal(updateUser(global, currentUserId, {
+      avatarHash: undefined,
+      fullInfo: {
+        ...currentUser.fullInfo,
+        profilePhoto: undefined,
+      },
+    }));
+  }
+  const result = await callApi('deleteProfilePhotos', [photo]);
+  if (!result) return;
+  actions.loadFullUser({ userId: currentUserId });
+  actions.loadProfilePhotos({ profileId: currentUserId });
 });
 
 addActionHandler('checkUsername', async (global, actions, payload) => {

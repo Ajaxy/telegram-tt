@@ -251,11 +251,15 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
 
   global = getGlobal();
 
+  const userOrChat = user || chat;
+  const { photos } = result;
+  photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
+
   if (isPrivate) {
-    global = updateUser(global, profileId, { photos: result.photos });
+    global = updateUser(global, profileId, { photos });
   } else {
     global = addUsers(global, buildCollectionByKey(result.users!, 'id'));
-    global = updateChat(global, profileId, { photos: result.photos });
+    global = updateChat(global, profileId, { photos });
   }
 
   setGlobal(global);

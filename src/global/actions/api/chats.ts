@@ -923,6 +923,56 @@ addActionHandler('updateChat', async (global, actions, payload) => {
   setGlobal(updateManagementProgress(getGlobal(), ManagementProgress.Complete));
 });
 
+addActionHandler('updateChatPhoto', async (global, actions, payload) => {
+  const { photo, chatId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+  setGlobal(updateChat(global, chatId, {
+    avatarHash: undefined,
+    fullInfo: {
+      ...chat.fullInfo,
+      profilePhoto: undefined,
+    },
+  }));
+  // This method creates a new entry in photos array
+  await callApi('editChatPhoto', {
+    chatId,
+    accessHash: chat.accessHash,
+    photo,
+  });
+  // Explicitly delete the old photo reference
+  await callApi('deleteProfilePhotos', [photo]);
+  actions.loadFullChat({ chatId });
+  actions.loadProfilePhotos({ profileId: chatId });
+});
+
+addActionHandler('deleteChatPhoto', async (global, actions, payload) => {
+  const { photo, chatId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+  // Select next photo to set as avatar
+  const nextPhoto = chat.photos?.[1];
+  setGlobal(updateChat(global, chatId, {
+    avatarHash: undefined,
+    fullInfo: {
+      ...chat.fullInfo,
+      profilePhoto: undefined,
+    },
+  }));
+  // Set next photo as avatar
+  await callApi('editChatPhoto', {
+    chatId,
+    accessHash: chat.accessHash,
+    photo: nextPhoto,
+  });
+  // Delete references to the old photos
+  const photosToDelete = [photo, nextPhoto].filter(Boolean);
+  const result = await callApi('deleteProfilePhotos', photosToDelete);
+  if (!result) return;
+  actions.loadFullChat({ chatId });
+  actions.loadProfilePhotos({ profileId: chatId });
+});
+
 addActionHandler('toggleSignatures', (global, actions, payload) => {
   const { chatId, isEnabled } = payload!;
   const chat = selectChat(global, chatId);
