@@ -164,7 +164,6 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       const { chatId, id, message } = update;
 
       const currentMessage = selectChatMessage(global, chatId, id);
-
       const chat = selectChat(global, chatId);
 
       global = updateWithLocalMedia(global, chatId, id, message);
@@ -178,6 +177,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           message.threadInfo,
         );
       }
+
       if (currentMessage) {
         global = updateChatLastMessage(global, chatId, newMessage);
       }

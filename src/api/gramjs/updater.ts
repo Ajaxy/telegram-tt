@@ -4,7 +4,7 @@ import type {
   ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdateConnectionStateType, OnApiUpdate,
 } from '../types';
 
-import { pick } from '../../util/iteratees';
+import { omit, pick } from '../../util/iteratees';
 import {
   buildApiMessage,
   buildApiMessageFromShort,
@@ -298,7 +298,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       addMessageToLocalDb(update.message);
     }
 
-    const message = buildApiMessage(update.message)!;
+    // Workaround for a weird server behavior when own message is marked as incoming
+    const message = omit(buildApiMessage(update.message)!, ['isOutgoing']);
 
     onUpdate({
       '@type': 'updateMessage',
@@ -700,7 +701,9 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
 
       if (originRequest instanceof GramJs.messages.ToggleNoForwards) {
         shouldIgnoreNextChannelUpdate = true;
-        setTimeout(() => { shouldIgnoreNextChannelUpdate = false; }, IGNORE_NEXT_CHANNEL_UPDATE_TIMEOUT);
+        setTimeout(() => {
+          shouldIgnoreNextChannelUpdate = false;
+        }, IGNORE_NEXT_CHANNEL_UPDATE_TIMEOUT);
       }
 
       const chat = buildApiChatFromPreview(channel);
