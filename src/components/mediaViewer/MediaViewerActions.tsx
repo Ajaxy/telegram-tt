@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiMessage, ApiPhoto,
+  ApiMessage, ApiPhoto, ApiChat, ApiUser,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { MenuItemProps } from '../ui/MenuItem';
@@ -20,7 +20,7 @@ import {
   selectIsChatProtected,
 } from '../../global/selectors';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import { getMessageMediaFormat, getMessageMediaHash } from '../../global/helpers';
+import { getMessageMediaFormat, getMessageMediaHash, isUserId } from '../../global/helpers';
 
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
@@ -40,7 +40,9 @@ type StateProps = {
   isProtected?: boolean;
   isChatProtected?: boolean;
   canDelete?: boolean;
+  canUpdate?: boolean;
   messageListType?: MessageListType;
+  avatarOwnerId?: string;
 };
 
 type OwnProps = {
@@ -48,11 +50,13 @@ type OwnProps = {
   isVideo: boolean;
   zoomLevelChange: number;
   message?: ApiMessage;
-  canDeleteAvatar?: boolean;
+  canUpdateMedia?: boolean;
+  isSingleMedia?: boolean;
   avatarPhoto?: ApiPhoto;
-  avatarOwnerId?: string;
+  avatarOwner?: ApiChat | ApiUser;
   fileName?: string;
   canReport?: boolean;
+  selectMedia: (mediaId?: number) => void;
   onReport: NoneToVoidFunction;
   onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
@@ -73,7 +77,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   canReport,
   zoomLevelChange,
   canDelete,
+  canUpdate,
   messageListType,
+  selectMedia,
   onReport,
   onCloseMediaViewer,
   onBeforeDelete,
@@ -85,6 +91,8 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   const {
     downloadMessageMedia,
     cancelMessageMediaDownload,
+    updateProfilePhoto,
+    updateChatPhoto,
   } = getActions();
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
@@ -110,6 +118,16 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     const change = zoomLevelChange > 0 ? zoomLevelChange : 0;
     setZoomLevelChange(change + 1);
   }, [setZoomLevelChange, zoomLevelChange]);
+
+  const handleUpdate = useCallback(() => {
+    if (!avatarPhoto || !avatarOwnerId) return;
+    if (isUserId(avatarOwnerId)) {
+      updateProfilePhoto({ photo: avatarPhoto });
+    } else {
+      updateChatPhoto({ chatId: avatarOwnerId, photo: avatarPhoto });
+    }
+    selectMedia(0);
+  }, [avatarPhoto, avatarOwnerId, selectMedia, updateProfilePhoto, updateChatPhoto]);
 
   const lang = useLang();
 
@@ -217,6 +235,14 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
       });
     }
 
+    if (canUpdate) {
+      menuItems.push({
+        icon: 'copy-media',
+        onClick: handleUpdate,
+        children: lang('ProfilePhoto.SetMainPhoto'),
+      });
+    }
+
     if (canDelete) {
       menuItems.push({
         icon: 'delete',
@@ -298,6 +324,17 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           <i className="icon-flag" />
         </Button>
       )}
+      {canUpdate && (
+        <Button
+          round
+          size="smaller"
+          color="translucent-white"
+          ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
+          onClick={handleUpdate}
+        >
+          <i className="icon-copy-media" />
+        </Button>
+      )}
       {canDelete && (
         <Button
           round
@@ -324,7 +361,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, canDeleteAvatar }): StateProps => {
+  (global, {
+    message, canUpdateMedia, avatarPhoto, avatarOwner,
+  }): StateProps => {
     const currentMessageList = selectCurrentMessageList(global);
     const { threadId } = selectCurrentMessageList(global) || {};
     const isDownloading = message ? selectIsDownloading(global, message) : false;
@@ -332,7 +371,10 @@ export default memo(withGlobal<OwnProps>(
     const isChatProtected = message && selectIsChatProtected(global, message?.chatId);
     const { canDelete: canDeleteMessage } = (threadId
       && message && selectAllowedMessageActions(global, message, threadId)) || {};
+    const isCurrentAvatar = avatarPhoto && (avatarPhoto.id === avatarOwner?.avatarHash);
+    const canDeleteAvatar = canUpdateMedia && !!avatarPhoto;
     const canDelete = canDeleteMessage || canDeleteAvatar;
+    const canUpdate = canUpdateMedia && !!avatarPhoto && !isCurrentAvatar;
     const messageListType = currentMessageList?.type;
 
     return {
@@ -340,7 +382,9 @@ export default memo(withGlobal<OwnProps>(
       isProtected,
       isChatProtected,
       canDelete,
+      canUpdate,
       messageListType,
+      avatarOwnerId: avatarOwner?.id,
     };
   },
 )(MediaViewerActions));

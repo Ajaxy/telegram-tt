@@ -21,6 +21,7 @@ import {
   buildPrivacyRules,
 } from '../apiBuilders/misc';
 
+import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -32,7 +33,7 @@ import {
 import { getClient, invokeRequest, uploadFile } from './client';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
-import { addEntitiesWithPhotosToLocalDb } from '../helpers';
+import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb } from '../helpers';
 import localDb from '../localDb';
 
 const MAX_INT_32 = 2 ** 31 - 1;
@@ -67,26 +68,32 @@ export function updateUsername(username: string) {
   return invokeRequest(new GramJs.account.UpdateUsername({ username }), true);
 }
 
-export async function updateProfilePhoto(file: File) {
+export async function updateProfilePhoto(photo?: ApiPhoto) {
+  const photoId = photo ? buildInputPhoto(photo) : new GramJs.InputPhotoEmpty();
+  const result = await invokeRequest(new GramJs.photos.UpdateProfilePhoto({
+    id: photoId,
+  }));
+  if (result?.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(result.photo);
+    return buildApiPhoto(result.photo);
+  }
+  return undefined;
+}
+
+export async function uploadProfilePhoto(file: File) {
   const inputFile = await uploadFile(file);
   return invokeRequest(new GramJs.photos.UploadProfilePhoto({
     file: inputFile,
   }), true);
 }
 
-export async function uploadProfilePhoto(file: File) {
-  const inputFile = await uploadFile(file);
-  await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    file: inputFile,
-  }));
-}
-
-export async function deleteProfilePhoto(photo: ApiPhoto) {
-  const photoId = buildInputPhoto(photo);
-  if (!photoId) return false;
-  const isDeleted = await invokeRequest(new GramJs.photos.DeletePhotos({ id: [photoId] }), true);
+export async function deleteProfilePhotos(photos: ApiPhoto[]) {
+  const photoIds = photos.map(buildInputPhoto).filter(Boolean);
+  const isDeleted = await invokeRequest(new GramJs.photos.DeletePhotos({ id: photoIds }), true);
   if (isDeleted) {
-    delete localDb.photos[photo.id];
+    photos.forEach((photo) => {
+      delete localDb.photos[photo.id];
+    });
   }
   return isDeleted;
 }
