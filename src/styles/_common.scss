@@ -109,7 +109,7 @@
 }
 
 // Used by Avatar and ProfilePhoto components
-div {
+.Avatar, .ProfilePhoto {
   &.color-bg-1 {
     --color-user: var(--color-user-1);
   }
