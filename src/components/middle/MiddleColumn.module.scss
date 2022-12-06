@@ -55,7 +55,7 @@
 
   :global(html.theme-light body.animation-level-2) &:not(.customBgImage).withRightColumn::before {
     @media screen and (min-width: 1276px) {
-      transform: scaleX(0.67) !important;
+      transform: scaleX(0.69) !important;
     }
     @media screen and (min-width: 1921px) {
       transform: scaleX(0.8) !important;
