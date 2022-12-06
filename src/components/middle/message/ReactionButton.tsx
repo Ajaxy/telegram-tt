@@ -13,6 +13,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
 import ReactionAnimatedEmoji from './ReactionAnimatedEmoji';
+import AnimatedCounter from '../../common/AnimatedCounter';
 
 import './Reactions.scss';
 
@@ -70,7 +71,7 @@ const ReactionButton: FC<{
         <div className="avatars">
           {recentReactors.map((user) => <Avatar user={user} size="micro" />)}
         </div>
-      ) : formatIntegerCompact(reaction.count)}
+      ) : <AnimatedCounter text={formatIntegerCompact(reaction.count)} />}
     </Button>
   );
 };

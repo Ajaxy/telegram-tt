@@ -342,7 +342,7 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: {
   }));
 
   const collections = results
-    .filter<GramJs.LangPackDifference>(Boolean as any)
+    .filter(Boolean)
     .map((result) => {
       return buildCollectionByKey(result.strings.map<ApiLangString>(omitVirtualClassFields), 'key');
     });

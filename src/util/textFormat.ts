@@ -18,7 +18,7 @@ function formatFixedNumber(number: number) {
 
 export function formatIntegerCompact(views: number) {
   if (views < 1e3) {
-    return views;
+    return views.toString();
   }
 
   if (views < 1e6) {

@@ -7,6 +7,7 @@ import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
 
 import ShowTransition from '../../ui/ShowTransition';
+import AnimatedCounter from '../../common/AnimatedCounter';
 
 import './Badge.scss';
 
@@ -43,7 +44,7 @@ const Badge: FC<OwnProps> = ({ chat, isPinned, isMuted }) => {
 
     const unreadCountElement = (chat.hasUnreadMark || chat.unreadCount) ? (
       <div className={className}>
-        {!chat.hasUnreadMark && formatIntegerCompact(chat.unreadCount!)}
+        {!chat.hasUnreadMark && <AnimatedCounter text={formatIntegerCompact(chat.unreadCount!)} />}
       </div>
     ) : undefined;
 

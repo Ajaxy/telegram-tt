@@ -1,0 +1,56 @@
+$perspective: 10px;
+$translate: 10px;
+$rotate: 30deg;
+$animation-time: 0.15s;
+
+.root {
+  display: inline-flex;
+  white-space: pre;
+}
+
+.character-container {
+  position: relative;
+}
+
+@keyframes character-disappear {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+
+  to {
+    transform: perspective($perspective) translateY($translate) rotateX(-$rotate);
+    opacity: 0;
+  }
+}
+
+@keyframes character-appear {
+  from {
+    transform: perspective($perspective) translateY(-$translate) rotateX($rotate);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.character {
+  white-space: pre;
+  visibility: hidden;
+}
+
+.character-old {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: $animation-time ease-out character-disappear forwards;
+}
+
+.character-new {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: $animation-time ease-out character-appear forwards;
+}
