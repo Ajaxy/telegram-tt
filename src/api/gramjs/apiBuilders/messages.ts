@@ -392,6 +392,7 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
 
   return {
     date: fwdFrom.date,
+    isImported: fwdFrom.imported,
     isChannelPost: Boolean(fwdFrom.channelPost),
     channelPostId: fwdFrom.channelPost,
     isLinkedChannelPost: Boolean(fwdFrom.channelPost && savedFromPeerId && !isChatWithSelf),

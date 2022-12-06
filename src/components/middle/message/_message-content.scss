@@ -171,7 +171,7 @@
     bottom: -0.5rem !important;
     margin-top: -0.25rem;
 
-    &:not([dir="rtl"]) {
+    &:not([dir="rtl"]):not(.is-imported) {
       margin-top: -1.25rem;
     }
   }

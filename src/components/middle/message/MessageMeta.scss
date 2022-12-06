@@ -20,6 +20,7 @@
   }
 
   .message-time,
+  .message-imported,
   .message-signature,
   .message-views {
     font-size: 0.75rem;
@@ -40,6 +41,7 @@
     margin-inline-start: 0.1875rem;
   }
 
+  .message-imported,
   .message-signature {
     overflow: hidden;
     text-overflow: ellipsis;

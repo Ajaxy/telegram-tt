@@ -290,7 +290,7 @@ export function formatDateToString(
   return formatDayToStringWithCache(dayStartAt, locale, noYear, monthFormat, noDay);
 }
 
-export function formatDateTimeToString(datetime: Date | number, locale = 'en-US') {
+export function formatDateTimeToString(datetime: Date | number, locale = 'en-US', noSeconds?: boolean) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   return date.toLocaleString(
     locale,
@@ -300,7 +300,7 @@ export function formatDateTimeToString(datetime: Date | number, locale = 'en-US'
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      second: 'numeric',
+      second: noSeconds ? undefined : 'numeric',
     },
   );
 }
