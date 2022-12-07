@@ -15,7 +15,8 @@ import {
   selectAllowedMessageActions,
   selectCanScheduleUntilOnline,
   selectChat,
-  selectCurrentMessageList, selectIsChatProtected, selectIsCurrentUserPremium,
+  selectCurrentMessageList,
+  selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
   selectMessageCustomEmojiSets,
@@ -505,6 +506,7 @@ export default memo(withGlobal<OwnProps>(
       canRevote,
       canClosePoll,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
+
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
@@ -524,7 +526,6 @@ export default memo(withGlobal<OwnProps>(
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
     const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
-    const isChatProtected = selectIsChatProtected(global, message.chatId);
     const canCopyNumber = Boolean(message.content.contact);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
 
@@ -544,7 +545,7 @@ export default memo(withGlobal<OwnProps>(
       canDelete,
       canReport,
       canEdit: !isPinned && canEdit,
-      canForward: message.isForwardingAllowed && !isChatProtected && !isScheduled && canForward,
+      canForward: !isScheduled && canForward,
       canFaveSticker: !isScheduled && canFaveSticker,
       canUnfaveSticker: !isScheduled && canUnfaveSticker,
       canCopy: canCopyNumber || (!isProtected && canCopy),
