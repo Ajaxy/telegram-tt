@@ -140,6 +140,15 @@ function readCache(initialState: GlobalState): GlobalState {
 }
 
 export function migrateCache(cached: GlobalState, initialState: GlobalState) {
+  try {
+    unsafeMigrateCache(cached, initialState);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
+  }
+}
+
+function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   // Migrate from legacy setting names
   if ('shouldAutoDownloadMediaFromContacts' in cached.settings.byKey) {
     const {
