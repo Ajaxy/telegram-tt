@@ -950,23 +950,28 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload) => {
   const { photo, chatId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
-  // Select next photo to set as avatar
-  const nextPhoto = chat.photos?.[1];
-  setGlobal(updateChat(global, chatId, {
-    avatarHash: undefined,
-    fullInfo: {
-      ...chat.fullInfo,
-      profilePhoto: undefined,
-    },
-  }));
-  // Set next photo as avatar
-  await callApi('editChatPhoto', {
-    chatId,
-    accessHash: chat.accessHash,
-    photo: nextPhoto,
-  });
+  const photosToDelete = [photo];
+  if (chat.avatarHash === photo.id) {
+    // Select next photo to set as avatar
+    const nextPhoto = chat.photos?.[1];
+    if (nextPhoto) {
+      photosToDelete.push(nextPhoto);
+    }
+    setGlobal(updateChat(global, chatId, {
+      avatarHash: undefined,
+      fullInfo: {
+        ...chat.fullInfo,
+        profilePhoto: undefined,
+      },
+    }));
+    // Set next photo as avatar
+    await callApi('editChatPhoto', {
+      chatId,
+      accessHash: chat.accessHash,
+      photo: nextPhoto,
+    });
+  }
   // Delete references to the old photos
-  const photosToDelete = [photo, nextPhoto].filter(Boolean);
   const result = await callApi('deleteProfilePhotos', photosToDelete);
   if (!result) return;
   actions.loadFullChat({ chatId });
