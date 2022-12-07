@@ -73,7 +73,6 @@ const ReactionSelector: FC<OwnProps> = ({
                 isReady={isReady}
                 onSendReaction={onSendReaction}
                 reaction={reaction}
-                isCurrentUserPremium={isCurrentUserPremium}
               />
             );
           })}

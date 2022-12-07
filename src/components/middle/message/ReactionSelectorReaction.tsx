@@ -19,13 +19,12 @@ type OwnProps = {
   previewIndex: number;
   isReady?: boolean;
   onSendReaction: (reaction: string, x: number, y: number) => void;
-  isCurrentUserPremium?: boolean;
 };
 
 const cn = createClassNameBuilder('ReactionSelectorReaction');
 
 const ReactionSelectorReaction: FC<OwnProps> = ({
-  reaction, previewIndex, onSendReaction, isReady, isCurrentUserPremium,
+  reaction, previewIndex, onSendReaction, isReady,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,10 +53,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
     >
       {shouldRenderStatic && (
         <div
-          className={cn(
-            'static',
-            isCurrentUserPremium && 'premium',
-          )}
+          className={cn('static')}
           style={`background-position-x: ${previewIndex * -REACTION_SIZE}px;`}
         />
       )}
