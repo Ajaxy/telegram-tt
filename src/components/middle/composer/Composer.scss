@@ -448,6 +448,13 @@
     margin: 0;
     vertical-align: text-top;
   }
+
+  // Workaround to preserve correct input height
+  &.clone {
+    .custom-emoji {
+      vertical-align: bottom;
+    }
+  }
 }
 
 #message-input-text,
