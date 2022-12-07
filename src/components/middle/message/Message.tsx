@@ -607,7 +607,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     if (width) {
       calculatedWidth = Math.max(getMinMediaWidth(Boolean(text), withCommentButton), width);
-      if (calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
+      if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
