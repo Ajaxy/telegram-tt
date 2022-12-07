@@ -1261,7 +1261,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             onSuppressedFocus={closeSymbolMenu}
           />
           {isInlineBotLoading && Boolean(inlineBotId) && (
-            <Spinner color="gray" className="inline-bot-spinner" />
+            <Spinner color="gray" />
           )}
           {withScheduledButton && (
             <Button

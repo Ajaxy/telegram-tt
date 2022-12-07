@@ -7,7 +7,6 @@ import type { ApiSticker } from '../../../../api/types';
 
 import { getGlobal } from '../../../../global';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../../global/selectors';
-import generateIdFor from '../../../../util/generateIdFor';
 import {
   addCustomEmojiInputRenderCallback,
   getCustomEmojiMediaDataForInput,
@@ -16,14 +15,14 @@ import {
 import { round } from '../../../../util/math';
 import { fastRaf } from '../../../../util/schedulers';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
 import { useResizeObserver } from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 
-const ID_STORE = {};
-const SIZE = 20;
+const SIZE = 1.25 * REM;
 
-type Player = {
+type CustomEmojiPlayer = {
   play: () => void;
   pause: () => void;
   destroy: () => void;
@@ -37,7 +36,7 @@ export default function useInputCustomEmojis(
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
   absoluteContainerRef: React.RefObject<HTMLElement>,
 ) {
-  const mapRef = useRef<Map<string, Player>>(new Map());
+  const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
   const removeContainers = useCallback((ids: string[]) => {
     ids.forEach((id) => {
@@ -162,13 +161,13 @@ function createPlayer({
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
-}): Player {
+}): CustomEmojiPlayer {
   if (customEmoji.isLottie) {
     const lottie = RLottie.init(
       uniqueId,
       isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,
       undefined,
-      generateIdFor(ID_STORE, true),
+      customEmoji.id,
       mediaUrl,
       {
         size: SIZE,
