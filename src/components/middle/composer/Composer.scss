@@ -471,8 +471,7 @@
     box-shadow: none !important;
     caret-color: var(--color-text);
 
-    &.touched,
-    &:focus {
+    &.touched {
       & + .placeholder-text {
         display: none;
       }
@@ -615,7 +614,8 @@
   }
 
   .placeholder-text {
-    bottom: 0.8125rem;
+    top: auto;
+    bottom: 0.875rem;
     left: 0.9375rem;
   }
 }
