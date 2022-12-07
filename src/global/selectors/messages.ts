@@ -446,7 +446,10 @@ export function selectAllowedMessageActions(global: GlobalState, message: ApiMes
     || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
   );
 
-  const canForward = !isLocal && !isAction;
+  const isChatProtected = selectIsChatProtected(global, message.chatId);
+  const canForward = (
+    !isLocal && !isAction && !isChatProtected && (message.isForwardingAllowed || isServiceNotification)
+  );
 
   const hasSticker = Boolean(message.content.sticker);
   const hasFavoriteSticker = hasSticker && selectIsStickerFavorite(global, message.content.sticker!);
@@ -933,7 +936,9 @@ export function selectCanForwardMessages(global: GlobalState, chatId: string, me
 
   const messages = selectChatMessages(global, chatId);
 
-  return messageIds.every((messageId) => messages[messageId]?.isForwardingAllowed);
+  return messageIds
+    .map((id) => messages[id])
+    .every((message) => message.isForwardingAllowed || isServiceNotificationMessage(message));
 }
 
 export function selectSponsoredMessage(global: GlobalState, chatId: string) {
