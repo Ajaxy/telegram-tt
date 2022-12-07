@@ -1,20 +1,26 @@
-**Telegram Web Z was updated to version 1.56**
+**Telegram Web Z was updated to version 1.57**
 
 [👏](customEmoji:5471921242866981303) **Harder**
-• Formatting is now preserved when pasting text from websites or Telegram messages.
-• The input field is automatically highlighted when you open a chat – so you can start typing right away.
-• Your account's profile pictures can now be deleted by clicking your profile picture in Settings.
-• Native system sharing is available when running the app as a PWA.
+• Custom emoji now animate as you write a message.
+• Voice messages can now be played with more speed options like 0.5x, 0.75x and 1.5x.
+• You can now set a main photo for your profile, group or channel in the Media Viewer.
+• Messages will now display 'admin', 'owner' and 'imported' labels.
+• A notification will appear when camera or microphone access is needed.
 
 [🤩](customEmoji:5373026167722876724) **Better**
-• A list of group members now appears when typing @ to help mention users even faster.
+• Unread message counters animate as their number increases.
+• Custom Emoji have even better quality at larger sizes.
+• Clicking on live locations now requires a confirmation before opening Google Maps.
 
 [🚀](customEmoji:5445284980978621387) **Faster**
-• Plenty of improvements and optimizations for stickers and custom emoji rendering – adding a noticeable performance increase.
+• Uploading media and documents is drastically accelerated.
+• Video messages now load even more smoothly.
 
 [💪](customEmoji:5471883477219549006) **Stronger**
-• Various fixes for copying text from messages.
-• Various fixes for custom emoji.
-• Fixed opening the symbol menu on certain touchscreen devices.
-• Fixed the quoted header disappearing when typing a reply.
+• Fixed copying selected text in messages.
+• Fixed outgoing messages sometimes being displayed as incoming.
+• Fixed group descriptions being uneditable.
+• Fixed streaming video from files.
+• Fixed auto-closing calendar after rescheduling.
+• Fixed scrolling to the bottom of the chat after sending a new message.
 • Various layout improvements.
