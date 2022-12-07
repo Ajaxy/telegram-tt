@@ -1,3 +1,30 @@
+## 1.57.0 (2022-12-07)
+
+### 👏 **Harder**
+* Custom emoji now animate as you write a message.
+* Voice messages can now be played with more speed options like 0.5x, 0.75x and 1.5x.
+* You can now set a main photo for your profile, group or channel in the Media Viewer.
+* Messages will now display 'admin', 'owner' and 'imported' labels.
+* A notification will appear when camera or microphone access is needed.
+
+### 🤩 **Better**
+* Unread message counters animate as their number increases.
+* Custom Emoji have even better quality at larger sizes.
+* Clicking on live locations now requires a confirmation before opening Google Maps.
+
+### 🚀 **Faster**
+* Uploading media and documents is drastically accelerated.
+* Video messages now load even more smoothly.
+
+### 💪 **Stronger**
+* Fixed copying selected text in messages.
+* Fixed outgoing messages sometimes being displayed as incoming.
+* Fixed group descriptions being uneditable.
+* Fixed streaming video from files.
+* Fixed auto-closing calendar after rescheduling.
+* Fixed scrolling to the bottom of the chat after sending a new message.
+* Various layout improvements.
+
 ## 1.56.0 (2022-11-18)
 
 ### 👏 **Harder**
