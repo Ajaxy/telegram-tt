@@ -49,9 +49,19 @@
   .user-status,
   .group-status,
   .title,
+  .other-usernames,
   .subtitle {
     text-align: initial;
     unicode-bidi: plaintext;
+  }
+
+  .other-usernames {
+    display: block;
+  }
+
+  .username-link {
+    position: relative;
+    z-index: 2;
   }
 
   &.multiline {

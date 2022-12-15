@@ -175,7 +175,7 @@ export function selectIsChatPinned(global: GlobalState, chatId: string, folderId
 export function selectChatByUsername(global: GlobalState, username: string) {
   const usernameLowered = username.toLowerCase();
   return Object.values(global.chats.byId).find(
-    (chat) => chat.username && chat.username.toLowerCase() === usernameLowered,
+    (chat) => chat.usernames?.some((c) => c.username.toLowerCase() === usernameLowered),
   );
 }
 

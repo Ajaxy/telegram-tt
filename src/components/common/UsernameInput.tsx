@@ -25,7 +25,7 @@ type OwnProps = {
 const MIN_USERNAME_LENGTH = 5;
 const MAX_USERNAME_LENGTH = 32;
 const LINK_PREFIX_REGEX = /https:\/\/t\.me\/?/i;
-const USERNAME_REGEX = /^[^\d]([a-zA-Z0-9_]+)$/;
+const USERNAME_REGEX = /^\D([a-zA-Z0-9_]+)$/;
 
 const runDebouncedForCheckUsername = debounce((cb) => cb(), 250, false);
 

@@ -1,14 +1,12 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
-import {
-  isUserId,
-} from '../../../global/helpers';
+import { getMainUsername, isUserId } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -54,6 +52,20 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
     onBack: onReset,
   });
 
+  const blockedUsernamesById = useMemo(() => {
+    return blockedIds.reduce((acc, contactId) => {
+      const isPrivate = isUserId(contactId);
+      const user = isPrivate ? usersByIds[contactId] : undefined;
+      const mainUsername = user && !user.phoneNumber && getMainUsername(user);
+
+      if (mainUsername) {
+        acc[contactId] = mainUsername;
+      }
+
+      return acc;
+    }, {} as Record<string, string>);
+  }, [blockedIds, usersByIds]);
+
   function renderContact(contactId: string, i: number, viewportOffset: number) {
     const isPrivate = isUserId(contactId);
     const user = isPrivate ? usersByIds[contactId] : undefined;
@@ -64,6 +76,8 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
       'Chat chat-item-clickable blocked-list-item small-icon',
       isPrivate ? 'private' : 'group',
     );
+
+    const userMainUsername = blockedUsernamesById[contactId];
 
     return (
       <ListItem
@@ -86,9 +100,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
           {user?.phoneNumber && (
             <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(phoneCodeList, user.phoneNumber)}</div>
           )}
-          {user && !user.phoneNumber && user.username && (
-            <div className="contact-username" dir="auto">@{user.username}</div>
-          )}
+          {userMainUsername && (<div className="contact-username" dir="auto">@{userMainUsername}</div>)}
         </div>
       </ListItem>
     );

@@ -3,6 +3,7 @@ import { addCallback, removeCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from './index';
 
 import type { GlobalState } from './types';
+import type { ApiChat, ApiUser } from '../api/types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';
@@ -326,6 +327,30 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       notification.isDeleted = isHidden;
     }
   });
+
+  // TODO Remove in Mar 2023 (this was re-designed but can be hardcoded in cache)
+  if (cached.users.byId && Object.values(cached.users.byId).some((u) => 'username' in u)) {
+    cached.users.byId = Object.entries(cached.users.byId).reduce((acc, [id, user]) => {
+      if ('username' in user) {
+        delete user.username;
+      }
+      acc[id] = user;
+
+      return acc;
+    }, {} as Record<string, ApiUser>);
+  }
+
+  // TODO Remove in Mar 2023 (this was re-designed but can be hardcoded in cache)
+  if (cached.chats.byId && Object.values(cached.chats.byId).some((c) => 'username' in c)) {
+    cached.chats.byId = Object.entries(cached.chats.byId).reduce((acc, [id, user]) => {
+      if ('username' in user) {
+        delete user.username;
+      }
+      acc[id] = user;
+
+      return acc;
+    }, {} as Record<string, ApiChat>);
+  }
 }
 
 function updateCache() {

@@ -20,6 +20,7 @@ import {
 import { omitVirtualClassFields } from './helpers';
 import { getServerTime } from '../../../util/serverTime';
 import { buildApiReaction } from './messages';
+import { buildApiUsernames } from './common';
 
 type PeerEntityApiChatFields = Omit<ApiChat, (
   'id' | 'type' | 'title' |
@@ -42,15 +43,16 @@ function buildApiChatFieldsFromPeerEntity(
   const isFake = Boolean('fake' in peerEntity && peerEntity.fake);
   const isJoinToSend = Boolean('joinToSend' in peerEntity && peerEntity.joinToSend);
   const isJoinRequest = Boolean('joinRequest' in peerEntity && peerEntity.joinRequest);
+  const usernames = buildApiUsernames(peerEntity);
 
   return {
     isMin,
     hasPrivateLink,
     isSignaturesShown,
+    usernames,
     ...(accessHash && { accessHash }),
     hasVideoAvatar,
     ...(avatarHash && { avatarHash }),
-    ...('username' in peerEntity && { username: peerEntity.username }),
     ...('verified' in peerEntity && { isVerified: peerEntity.verified }),
     ...('callActive' in peerEntity && { isCallActive: peerEntity.callActive }),
     ...('callNotEmpty' in peerEntity && { isCallNotEmpty: peerEntity.callNotEmpty }),

@@ -30,7 +30,7 @@ export function selectIsPremiumPurchaseBlocked(global: GlobalState) {
 export function selectUserByUsername(global: GlobalState, username: string) {
   const usernameLowered = username.toLowerCase();
   return Object.values(global.users.byId).find(
-    (user) => user.username.toLowerCase() === usernameLowered,
+    (user) => user.usernames?.some((u) => u.username.toLowerCase() === usernameLowered),
   );
 }
 

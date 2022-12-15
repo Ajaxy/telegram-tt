@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -9,7 +9,7 @@ import { ManagementScreens, ManagementProgress } from '../../../types';
 import type { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { getChatAvatarHash, getHasAdminRight } from '../../../global/helpers';
+import { getChatAvatarHash, getHasAdminRight, isChatPublic } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import { selectChat } from '../../../global/selectors';
@@ -192,6 +192,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   }, [chat.isCreator, chat.id, closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, openChat]);
 
   const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
+  const isChannelPublic = useMemo(() => isChatPublic(chat), [chat]);
 
   if (chat.isRestricted || chat.isForbidden) {
     return undefined;
@@ -229,7 +230,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('ChannelType')}</span>
-              <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
+              <span className="subtitle">{isChannelPublic ? lang('TypePublic') : lang('TypePrivate')}</span>
             </ListItem>
           )}
           <ListItem

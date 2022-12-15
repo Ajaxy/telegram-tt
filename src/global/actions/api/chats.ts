@@ -57,7 +57,6 @@ const SERVICE_NOTIFICATIONS_USER_MOCK: ApiUser = {
   accessHash: '0',
   type: 'userTypeRegular',
   isMin: true,
-  username: '',
   phoneNumber: '',
 };
 
@@ -724,7 +723,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload) => {
   const chat = selectCurrentChat(global);
 
   if (!commentId) {
-    if (chat && chat.username === username && !startAttach && !startParam) {
+    if (!startAttach && !startParam && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({ chatId: chat.id, messageId });
       return;
     }
@@ -1683,7 +1682,7 @@ async function openChatByUsername(
     return;
   }
 
-  const isCurrentChat = currentChat?.username === username;
+  const isCurrentChat = currentChat?.usernames?.some((c) => c.username === username);
 
   if (!isCurrentChat) {
     // Open temporary empty chat to make the click response feel faster

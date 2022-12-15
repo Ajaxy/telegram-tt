@@ -44,7 +44,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v14';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v15';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 
@@ -206,6 +206,8 @@ export const RE_TG_LINK = /^tg:(\/\/)?/;
 export const RE_TME_LINK = /^(https?:\/\/)?([-a-zA-Z0-9@:%_+~#=]{1,32}\.)?t\.me/;
 export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//;
 export const TME_LINK_PREFIX = 'https://t.me/';
+export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
+export const PURCHASE_USERNAME = 'auction';
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);

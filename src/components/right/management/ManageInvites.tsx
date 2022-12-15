@@ -19,7 +19,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { getServerTime } from '../../../util/serverTime';
 import useFlag from '../../../hooks/useFlag';
-import { isChatChannel } from '../../../global/helpers';
+import { getMainUsername, isChatChannel } from '../../../global/helpers';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
@@ -99,12 +99,13 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     forceUpdate();
   }, hasDetailedCountdown ? 1000 : undefined);
 
+  const chatMainUsername = useMemo(() => chat && getMainUsername(chat), [chat]);
   const primaryInvite = exportedInvites?.find(({ isPermanent }) => isPermanent);
-  const primaryInviteLink = chat?.username ? `${TME_LINK_PREFIX}${chat.username}` : primaryInvite?.link;
+  const primaryInviteLink = chatMainUsername ? `${TME_LINK_PREFIX}${chatMainUsername}` : primaryInvite?.link;
   const temporalInvites = useMemo(() => {
-    const invites = chat?.username ? exportedInvites : exportedInvites?.filter(({ isPermanent }) => !isPermanent);
+    const invites = chat?.usernames ? exportedInvites : exportedInvites?.filter(({ isPermanent }) => !isPermanent);
     return invites?.sort(inviteComparator);
-  }, [chat?.username, exportedInvites]);
+  }, [chat?.usernames, exportedInvites]);
 
   const editInvite = (invite: ApiExportedInvite) => {
     setEditingExportedInvite({ chatId, invite });
@@ -307,7 +308,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         {primaryInviteLink && (
           <div className="section">
             <p className="text-muted">
-              {chat?.username ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
+              {chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
             </p>
             <div className="primary-link">
               <input
@@ -322,7 +323,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
                 positionX="right"
               >
                 <MenuItem icon="copy" onClick={handleCopyPrimaryClicked}>{lang('Copy')}</MenuItem>
-                {!chat?.username && (
+                {!chat?.usernames && (
                   <MenuItem icon="delete" onClick={handlePrimaryRevoke} destructive>{lang('RevokeButton')}</MenuItem>
                 )}
               </DropdownMenu>

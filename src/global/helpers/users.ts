@@ -248,7 +248,8 @@ export function filterUsersByName(
     }
 
     const name = id === currentUserId ? savedMessagesLang : getUserFullName(user);
-    return (name && searchWords(name)) || searchWords(user.username);
+
+    return (name && searchWords(name)) || Boolean(user.usernames?.find(({ username }) => searchWords(username)));
   });
 }
 
@@ -267,4 +268,8 @@ export function getUserColorKey(peer: ApiUser | ApiChat | undefined) {
   const index = peer ? getUserIdDividend(peer.id) % 7 : 0;
 
   return USER_COLOR_KEYS[index];
+}
+
+export function getMainUsername(userOrChat: ApiUser | ApiChat) {
+  return userOrChat.usernames?.find((u) => u.isActive)?.username;
 }

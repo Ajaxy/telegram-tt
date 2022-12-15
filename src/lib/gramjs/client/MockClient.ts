@@ -240,6 +240,7 @@ class TelegramClient {
 
             return new Api.messages.ChannelMessages({
                 messages: peer.TEST_messages,
+                topics: [],
                 pts: 0,
                 count: peer.TEST_messages.length,
                 chats: [],

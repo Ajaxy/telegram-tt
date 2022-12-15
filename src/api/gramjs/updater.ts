@@ -27,7 +27,11 @@ import {
   buildApiChatFolder,
   buildApiChatSettings,
 } from './apiBuilders/chats';
-import { buildApiUser, buildApiUserEmojiStatus, buildApiUserStatus } from './apiBuilders/users';
+import {
+  buildApiUser,
+  buildApiUserEmojiStatus,
+  buildApiUserStatus,
+} from './apiBuilders/users';
 import {
   buildMessageFromUpdate,
   isMessageWithMedia,
@@ -46,7 +50,7 @@ import {
   swapLocalInvoiceMedia,
 } from './helpers';
 import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
-import { buildApiPhoto } from './apiBuilders/common';
+import { buildApiPhoto, buildApiUsernames } from './apiBuilders/common';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
@@ -779,14 +783,20 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if (update instanceof GramJs.UpdateUserName) {
     const apiUserId = buildApiPeerId(update.userId, 'user');
     const updatedUser = localDb.users[apiUserId];
+
     const user = updatedUser?.mutualContact && !updatedUser.self
-      ? pick(update, ['username'])
-      : pick(update, ['firstName', 'lastName', 'username']);
+      ? pick(update, [])
+      : pick(update, ['firstName', 'lastName']);
+
+    const usernames = buildApiUsernames(update);
 
     onUpdate({
       '@type': 'updateUser',
       id: apiUserId,
-      user,
+      user: {
+        ...user,
+        usernames,
+      },
     });
   } else if (update instanceof GramJs.UpdateUserPhoto) {
     const { userId, photo } = update;

@@ -523,6 +523,7 @@ export type GlobalState = {
     progress: ProfileEditProgress;
     checkedUsername?: string;
     isUsernameAvailable?: boolean;
+    error?: string;
   };
 
   notifications: ApiNotification[];
@@ -1119,6 +1120,22 @@ export interface ActionPayloads {
     hash: string;
   };
   terminateAllWebAuthorizations: never;
+  toggleUsername: {
+    username: string;
+    isActive: boolean;
+  };
+  sortUsernames: {
+    usernames: string[];
+  };
+  toggleChatUsername: {
+    chatId: string;
+    username: string;
+    isActive: boolean;
+  };
+  sortChatUsernames: {
+    chatId: string;
+    usernames: string[];
+  };
 
   // Misc
   openPollModal: {

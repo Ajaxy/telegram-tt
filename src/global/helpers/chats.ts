@@ -94,9 +94,12 @@ export function getChatDescription(chat: ApiChat) {
 }
 
 export function getChatLink(chat: ApiChat) {
-  const { username } = chat;
-  if (username) {
-    return `${TME_LINK_PREFIX}${username}`;
+  const { usernames } = chat;
+  if (usernames) {
+    const activeUsername = usernames.find((u) => u.isActive);
+    if (activeUsername) {
+      return `${TME_LINK_PREFIX}${activeUsername.username}`;
+    }
   }
 
   const { inviteLink } = chat.fullInfo || {};
@@ -375,4 +378,8 @@ export function filterChatsByName(
 
     return searchWords(getChatTitle(lang, chat, undefined, id === currentUserId));
   });
+}
+
+export function isChatPublic(chat: ApiChat) {
+  return chat.usernames?.some(({ isActive }) => isActive);
 }

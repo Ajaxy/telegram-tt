@@ -25,9 +25,9 @@ type DraggableState = {
 
 type OwnProps = {
   children: React.ReactNode;
-  onDrag: (translation: TPoint, id: number) => void;
+  onDrag: (translation: TPoint, id: number | string) => void;
   onDragEnd: NoneToVoidFunction;
-  id: number;
+  id: number | string;
   style?: string;
   knobStyle?: string;
   isDisabled?: boolean;
@@ -143,12 +143,12 @@ const Draggable: FC<OwnProps> = ({
 
   const cssStyles = useMemo(() => {
     return buildStyle(
-      `transform: translate(${state.translation.x}px, ${state.translation.y}px)`,
+      state.isDragging && `transform: translate(${state.translation.x}px, ${state.translation.y}px)`,
       state.width ? `width: ${state.width}px` : undefined,
       state.height ? `height: ${state.height}px` : undefined,
       externalStyle,
     );
-  }, [externalStyle, state.height, state.translation.x, state.translation.y, state.width]);
+  }, [externalStyle, state.height, state.isDragging, state.translation.x, state.translation.y, state.width]);
 
   return (
     <div style={cssStyles} className={fullClassName} ref={ref}>

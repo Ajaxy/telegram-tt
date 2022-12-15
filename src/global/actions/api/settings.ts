@@ -4,6 +4,7 @@ import type { GlobalState } from '../../types';
 import type {
   ApiPrivacyKey, PrivacyVisibility, InputPrivacyRules, InputPrivacyContact,
 } from '../../../types';
+import type { ApiUsername } from '../../../api/types';
 import {
   ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
@@ -14,10 +15,10 @@ import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { subscribe, unsubscribe } from '../../../util/notifications';
 import { setTimeFormat } from '../../../util/langProvider';
-import { selectUser, selectChat } from '../../selectors';
+import { selectChat, selectUser } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
-  addNotifyExceptions,
+  addNotifyExceptions, updateChat,
 } from '../../reducers';
 import { isUserId } from '../../helpers';
 
@@ -70,8 +71,15 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
 
   if (username) {
     const result = await callApi('updateUsername', username);
-    if (result && currentUserId) {
-      setGlobal(updateUser(getGlobal(), currentUserId, { username }));
+    global = getGlobal();
+    const currentUser = currentUserId && selectUser(global, currentUserId);
+
+    if (result && currentUser) {
+      const shouldUsernameUpdate = currentUser.usernames?.find((u) => u.isEditable);
+      const usernames = shouldUsernameUpdate
+        ? currentUser.usernames?.map((u) => (u.isEditable ? { ...u, username } : u))
+        : [{ username, isEditable: true, isActive: true } as ApiUsername, ...currentUser.usernames || []];
+      setGlobal(updateUser(global, currentUserId, { usernames }));
     }
   }
 
@@ -145,10 +153,11 @@ addActionHandler('checkUsername', async (global, actions, payload) => {
       progress: global.profileEdit ? global.profileEdit.progress : ProfileEditProgress.Idle,
       checkedUsername: undefined,
       isUsernameAvailable: undefined,
+      error: undefined,
     },
   });
 
-  const isUsernameAvailable = await callApi('checkUsername', username);
+  const { result, error } = (await callApi('checkUsername', username))!;
 
   global = getGlobal();
   setGlobal({
@@ -156,7 +165,8 @@ addActionHandler('checkUsername', async (global, actions, payload) => {
     profileEdit: {
       ...global.profileEdit!,
       checkedUsername: username,
-      isUsernameAvailable,
+      isUsernameAvailable: result === true,
+      error,
     },
   });
 });
@@ -639,4 +649,105 @@ addActionHandler('updateGlobalPrivacySettings', async (global, actions, payload)
       ? !shouldArchiveAndMuteNewNonContact
       : result.shouldArchiveAndMuteNewNonContact,
   }));
+});
+
+addActionHandler('toggleUsername', async (global, actions, { username, isActive }) => {
+  const { currentUserId } = global;
+  if (!currentUserId) {
+    return;
+  }
+
+  const currentUser = selectUser(global, currentUserId);
+  if (!currentUser?.usernames) {
+    return;
+  }
+
+  const usernames = currentUser.usernames.map((item) => {
+    if (item.username !== username) {
+      return item;
+    }
+
+    return { ...item, isActive: isActive || undefined };
+  });
+
+  setGlobal(updateUser(global, currentUserId, { usernames }));
+
+  const result = await callApi('toggleUsername', { username, isActive });
+
+  if (!result) {
+    actions.loadFullUser({ userId: currentUserId });
+  }
+});
+
+addActionHandler('toggleChatUsername', async (global, actions, { chatId, username, isActive }) => {
+  const chat = selectChat(global, chatId);
+  if (!chat?.usernames) {
+    return;
+  }
+
+  const usernames = chat.usernames.map((item) => {
+    if (item.username !== username) {
+      return item;
+    }
+
+    return { ...item, isActive: isActive || undefined };
+  });
+
+  setGlobal(updateChat(global, chatId, { usernames }));
+
+  const result = await callApi('toggleUsername', {
+    chatId: chat.id,
+    accessHash: chat.accessHash,
+    username,
+    isActive,
+  });
+
+  if (!result) {
+    actions.loadFullChat({ chatId });
+  }
+});
+
+addActionHandler('sortUsernames', async (global, actions, { usernames }) => {
+  const { currentUserId } = global;
+  if (!currentUserId) {
+    return;
+  }
+
+  const result = await callApi('reorderUsernames', { usernames });
+
+  // After saving the order of usernames, server sends an update with the necessary data,
+  // so there is no need to update the state in this place
+  if (!result) {
+    actions.loadUser({ userId: currentUserId });
+  }
+});
+
+addActionHandler('sortChatUsernames', async (global, actions, { chatId, usernames }) => {
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const prevUsernames = [...chat.usernames!];
+  const sortedUsernames = chat.usernames!.reduce((res, currentUsername) => {
+    const idx = usernames.findIndex((username) => username === currentUsername.username);
+    res[idx] = currentUsername;
+
+    return res;
+  }, [] as ApiUsername[]);
+
+  global = updateChat(global, chatId, { usernames: sortedUsernames });
+  setGlobal(global);
+
+  const result = await callApi('reorderUsernames', {
+    chatId: chat.id,
+    accessHash: chat.accessHash,
+    usernames,
+  });
+
+  if (!result) {
+    global = getGlobal();
+    global = updateChat(global, chatId, { usernames: prevUsernames });
+    setGlobal(global);
+  }
 });

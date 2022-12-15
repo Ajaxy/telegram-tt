@@ -12,6 +12,7 @@ import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types'
 
 import type { LANG_PACKS } from '../../../config';
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
+import { ACCEPTABLE_USERNAME_ERRORS } from './management';
 import {
   buildApiCountryList,
   buildApiNotifyException,
@@ -55,13 +56,25 @@ export function updateProfile({
   }), true);
 }
 
-export function checkUsername(username: string) {
-  return invokeRequest(new GramJs.account.CheckUsername({ username }), undefined, true).catch((error) => {
-    if ((error as ApiError).message === 'USERNAME_INVALID') {
-      return false;
+export async function checkUsername(username: string) {
+  try {
+    const result = await invokeRequest(new GramJs.account.CheckUsername({
+      username,
+    }), undefined, true);
+
+    return { result, error: undefined };
+  } catch (error) {
+    const errorMessage = (error as ApiError).message;
+
+    if (ACCEPTABLE_USERNAME_ERRORS.has(errorMessage)) {
+      return {
+        result: false,
+        error: errorMessage,
+      };
     }
+
     throw error;
-  });
+  }
 }
 
 export function updateUsername(username: string) {
@@ -543,4 +556,43 @@ export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonCo
   return {
     shouldArchiveAndMuteNewNonContact: Boolean(result.archiveAndMuteNewNoncontactPeers),
   };
+}
+
+export function toggleUsername({
+  chatId, accessHash, username, isActive,
+}: {
+  username: string;
+  isActive: boolean;
+  chatId?: string;
+  accessHash?: string;
+}) {
+  if (chatId) {
+    return invokeRequest(new GramJs.channels.ToggleUsername({
+      channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+      username,
+      active: isActive,
+    }));
+  }
+
+  return invokeRequest(new GramJs.account.ToggleUsername({
+    username,
+    active: isActive,
+  }));
+}
+
+export function reorderUsernames({ chatId, accessHash, usernames }: {
+  usernames: string[];
+  chatId?: string;
+  accessHash?: string;
+}) {
+  if (chatId) {
+    return invokeRequest(new GramJs.channels.ReorderUsernames({
+      channel: buildInputEntity(chatId, accessHash) as GramJs.InputChannel,
+      order: usernames,
+    }));
+  }
+
+  return invokeRequest(new GramJs.account.ReorderUsernames({
+    order: usernames,
+  }));
 }

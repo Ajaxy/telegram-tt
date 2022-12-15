@@ -2,7 +2,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
 
 import type {
-  ApiPhoto, ApiPhotoSize, ApiThumbnail, ApiVideoSize,
+  ApiPhoto, ApiPhotoSize, ApiThumbnail, ApiVideoSize, ApiUsername,
 } from '../../types';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
@@ -99,4 +99,32 @@ export function buildApiPhotoSize(photoSize: GramJs.PhotoSize): ApiPhotoSize {
     height: h,
     type: type as ('m' | 'x' | 'y'),
   };
+}
+
+export function buildApiUsernames(mtpPeer: GramJs.User | GramJs.Channel | GramJs.UpdateUserName) {
+  if (!mtpPeer.usernames && !('username' in mtpPeer && mtpPeer.username)) {
+    return undefined;
+  }
+
+  const usernames: ApiUsername[] = [];
+
+  if ('username' in mtpPeer && mtpPeer.username) {
+    usernames.push({
+      username: mtpPeer.username,
+      isActive: true,
+      isEditable: true,
+    });
+  }
+
+  if (mtpPeer.usernames) {
+    mtpPeer.usernames.forEach(({ username, active, editable }) => {
+      usernames.push({
+        username,
+        ...(active && { isActive: true }),
+        ...(editable && { isEditable: true }),
+      });
+    });
+  }
+
+  return usernames;
 }

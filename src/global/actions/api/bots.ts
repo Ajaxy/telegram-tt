@@ -288,7 +288,7 @@ addActionHandler('switchBotInline', (global, actions, payload) => {
   }
 
   actions.openChatWithDraft({
-    text: `@${botSender.username} ${query}`,
+    text: `@${botSender.usernames![0].username} ${query}`,
     chatId: isSamePeer ? chat.id : undefined,
   });
   return undefined;
