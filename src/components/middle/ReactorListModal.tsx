@@ -158,22 +158,26 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             items={viewportIds}
             onLoadMore={getMore}
           >
-            {viewportIds?.map(
+            {viewportIds?.flatMap(
               (userId) => {
                 const user = usersById[userId];
-                const reaction = reactors?.reactions.find((l) => l.userId === userId)?.reaction;
-                return (
-                  <ListItem
-                    key={userId}
-                    className="chat-item-clickable reactors-list-item"
-                    // eslint-disable-next-line react/jsx-no-bind
-                    onClick={() => handleClick(userId)}
-                  >
-                    <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
-                    <FullNameTitle peer={user} withEmojiStatus />
-                    {reaction && <ReactionStaticEmoji className="reactors-list-emoji" reaction={reaction} />}
-                  </ListItem>
-                );
+                const userReactions = reactors?.reactions.filter((l) => l.userId === userId);
+                const items: React.ReactNode[] = [];
+                userReactions?.forEach((r) => {
+                  items.push(
+                    <ListItem
+                      key={`${userId}-${r.reaction}`}
+                      className="chat-item-clickable reactors-list-item"
+                      // eslint-disable-next-line react/jsx-no-bind
+                      onClick={() => handleClick(userId)}
+                    >
+                      <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
+                      <FullNameTitle peer={user} withEmojiStatus />
+                      {r.reaction && <ReactionStaticEmoji className="reactors-list-emoji" reaction={r.reaction} />}
+                    </ListItem>,
+                  );
+                });
+                return items;
               },
             )}
           </InfiniteScroll>
