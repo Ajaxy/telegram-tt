@@ -60,7 +60,7 @@ export {
   fetchNotificationExceptions, fetchNotificationSettings, updateContactSignUpNotification, updateNotificationSettings,
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
   updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
-  fetchGlobalPrivacySettings, updateGlobalPrivacySettings,
+  fetchGlobalPrivacySettings, updateGlobalPrivacySettings, toggleUsername, reorderUsernames,
 } from './settings';
 
 export {

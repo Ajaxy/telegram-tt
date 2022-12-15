@@ -1,21 +1,22 @@
 import type { ChangeEvent } from 'react';
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   useState, useCallback, memo, useEffect, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
+import type { ApiUsername } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress } from '../../../types';
 
-import { TME_LINK_PREFIX } from '../../../config';
+import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
 import { throttle } from '../../../util/schedulers';
 import { selectUser } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
-import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
+import useMedia from '../../../hooks/useMedia';
+import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import usePrevious from '../../../hooks/usePrevious';
 
@@ -25,6 +26,8 @@ import Spinner from '../../ui/Spinner';
 import InputText from '../../ui/InputText';
 import UsernameInput from '../../common/UsernameInput';
 import TextArea from '../../ui/TextArea';
+import ManageUsernames from '../../common/ManageUsernames';
+import SafeLink from '../../common/SafeLink';
 
 type OwnProps = {
   isActive: boolean;
@@ -36,11 +39,12 @@ type StateProps = {
   currentFirstName?: string;
   currentLastName?: string;
   currentBio?: string;
-  currentUsername?: string;
   progress?: ProfileEditProgress;
   checkedUsername?: string;
+  editUsernameError?: string;
   isUsernameAvailable?: boolean;
   maxBioLength: number;
+  usernames?: ApiUsername[];
 };
 
 const runThrottled = throttle((cb) => cb(), 60000, true);
@@ -53,11 +57,12 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   currentFirstName,
   currentLastName,
   currentBio,
-  currentUsername,
   progress,
   checkedUsername,
+  editUsernameError,
   isUsernameAvailable,
   maxBioLength,
+  usernames,
   onReset,
 }) => {
   const {
@@ -67,6 +72,8 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
+  const firstEditableUsername = useMemo(() => usernames?.find(({ isEditable }) => isEditable), [usernames]);
+  const currentUsername = firstEditableUsername?.username || '';
   const [isUsernameTouched, setIsUsernameTouched] = useState(false);
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -75,15 +82,16 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   const [firstName, setFirstName] = useState(currentFirstName || '');
   const [lastName, setLastName] = useState(currentLastName || '');
   const [bio, setBio] = useState(currentBio || '');
-  const [username, setUsername] = useState<string | false>(currentUsername || '');
+  const [editableUsername, setEditableUsername] = useState<string | false>(currentUsername);
 
   const currentAvatarBlobUrl = useMedia(currentAvatarHash, false, ApiMediaFormat.BlobUrl);
 
   const isLoading = progress === ProfileEditProgress.InProgress;
-  const isUsernameError = username === false;
+  const isUsernameError = editableUsername === false;
 
   const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
+  const shouldRenderUsernamesManage = usernames && usernames.length > 1;
 
   const isSaveButtonShown = useMemo(() => {
     if (isUsernameError) {
@@ -117,7 +125,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   }, [currentFirstName, currentLastName, currentBio]);
 
   useEffect(() => {
-    setUsername(currentUsername || '');
+    setEditableUsername(currentUsername || '');
   }, [currentUsername]);
 
   useEffect(() => {
@@ -148,7 +156,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleUsernameChange = useCallback((value: string | false) => {
-    setUsername(value);
+    setEditableUsername(value);
     setIsUsernameTouched(currentUsername !== value);
   }, [currentUsername]);
 
@@ -170,15 +178,30 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         bio: trimmedBio,
       }),
       ...(isUsernameTouched && {
-        username,
+        username: editableUsername,
       }),
     });
   }, [
     photo,
     firstName, lastName, bio, isProfileFieldsTouched,
-    username, isUsernameTouched,
+    editableUsername, isUsernameTouched,
     updateProfile,
   ]);
+
+  function renderPurchaseLink() {
+    const purchaseInfoLink = `${TME_LINK_PREFIX}${PURCHASE_USERNAME}`;
+
+    return (
+      <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
+        {(lang('lng_username_purchase_available') as string)
+          .replace('{link}', '%PURCHASE_LINK%')
+          .split('%')
+          .map((s) => {
+            return (s === 'PURCHASE_LINK' ? <SafeLink url={purchaseInfoLink} text={`@${PURCHASE_USERNAME}`} /> : s);
+          })}
+      </p>
+    );
+  }
 
   return (
     <div className="settings-fab-wrapper">
@@ -228,16 +251,24 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
             onChange={handleUsernameChange}
           />
 
+          {editUsernameError === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
           <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
             {renderText(lang('UsernameHelp'), ['br', 'simple_markdown'])}
           </p>
-          {username && (
+          {editableUsername && (
             <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('lng_username_link')}<br />
-              <span className="username-link">{TME_LINK_PREFIX}{username}</span>
+              <span className="username-link">{TME_LINK_PREFIX}{editableUsername}</span>
             </p>
           )}
         </div>
+
+        {shouldRenderUsernamesManage && (
+          <ManageUsernames
+            usernames={usernames}
+            onEditUsername={setEditableUsername}
+          />
+        )}
       </div>
 
       <FloatingActionButton
@@ -259,7 +290,9 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { currentUserId } = global;
-    const { progress, isUsernameAvailable, checkedUsername } = global.profileEdit || {};
+    const {
+      progress, isUsernameAvailable, checkedUsername, error: editUsernameError,
+    } = global.profileEdit || {};
     const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
 
     const maxBioLength = selectCurrentLimit(global, 'aboutLength');
@@ -269,6 +302,7 @@ export default memo(withGlobal<OwnProps>(
         progress,
         checkedUsername,
         isUsernameAvailable,
+        editUsernameError,
         maxBioLength,
       };
     }
@@ -276,7 +310,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       firstName: currentFirstName,
       lastName: currentLastName,
-      username: currentUsername,
+      usernames,
       fullInfo,
     } = currentUser;
     const { bio: currentBio } = fullInfo || {};
@@ -287,11 +321,12 @@ export default memo(withGlobal<OwnProps>(
       currentFirstName,
       currentLastName,
       currentBio,
-      currentUsername,
       progress,
       isUsernameAvailable,
       checkedUsername,
+      editUsernameError,
       maxBioLength,
+      usernames,
     };
   },
 )(SettingsEditProfile));

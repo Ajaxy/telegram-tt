@@ -9,7 +9,12 @@ import { ManagementScreens, ManagementProgress } from '../../../types';
 import type { ApiChat, ApiChatBannedRights, ApiExportedInvite } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { getChatAvatarHash, getHasAdminRight, isChatBasicGroup } from '../../../global/helpers';
+import {
+  getChatAvatarHash,
+  getHasAdminRight,
+  isChatBasicGroup,
+  isChatPublic,
+} from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -97,7 +102,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const [error, setError] = useState<string | undefined>();
   const imageHash = getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
-  const isPublicGroup = chat.username || hasLinkedChannel;
+  const isPublicGroup = useMemo(() => hasLinkedChannel || isChatPublic(chat), [chat, hasLinkedChannel]);
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const isPreHistoryHiddenCheckboxRef = useRef<HTMLDivElement>(null);
@@ -292,7 +297,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
               <span className="title">{lang('GroupType')}</span>
-              <span className="subtitle">{chat.username ? lang('TypePublic') : lang('TypePrivate')}</span>
+              <span className="subtitle">{isPublicGroup ? lang('TypePublic') : lang('TypePrivate')}</span>
             </ListItem>
           )}
           {hasLinkedChannel && (

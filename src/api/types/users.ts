@@ -13,7 +13,7 @@ export interface ApiUser {
   firstName?: string;
   lastName?: string;
   noStatus?: boolean;
-  username: string;
+  usernames?: ApiUsername[];
   phoneNumber: string;
   accessHash?: string;
   hasVideoAvatar?: boolean;
@@ -56,6 +56,12 @@ export interface ApiUserStatus {
   );
   wasOnline?: number;
   expires?: number;
+}
+
+export interface ApiUsername {
+  username: string;
+  isActive?: true;
+  isEditable?: true;
 }
 
 export type ApiChatType = typeof API_CHAT_TYPES[number];

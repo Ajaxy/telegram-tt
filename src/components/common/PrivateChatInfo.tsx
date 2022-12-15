@@ -1,4 +1,6 @@
-import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
+import React, {
+  useEffect, useCallback, memo, useMemo,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -10,7 +12,7 @@ import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
-import { getUserStatus, isUserOnline } from '../../global/helpers';
+import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
@@ -99,6 +101,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   }, [user, avatarSize, openMediaViewer]);
 
   const lang = useLang();
+  const mainUsername = useMemo(() => user && withUsername && getMainUsername(user), [user, withUsername]);
 
   if (!user) {
     return undefined;
@@ -129,7 +132,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
     return (
       <span className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
-        {withUsername && user.username && <span className="handle">{user.username}</span>}
+        {mainUsername && <span className="handle">{mainUsername}</span>}
         <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
       </span>
     );

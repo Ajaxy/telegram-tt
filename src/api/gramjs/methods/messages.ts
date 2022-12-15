@@ -1358,7 +1358,7 @@ export async function fetchSponsoredMessages({ chat }: { chat: ApiChat }) {
     channel: buildInputPeer(chat.id, chat.accessHash),
   }));
 
-  if (!result || !result.messages.length) {
+  if (!result || result instanceof GramJs.messages.SponsoredMessagesEmpty || !result.messages.length) {
     return undefined;
   }
 

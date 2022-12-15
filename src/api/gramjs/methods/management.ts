@@ -5,6 +5,8 @@ import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import type {
   ApiChat, ApiError, ApiUser, OnApiUpdate,
 } from '../../types';
+
+import { USERNAME_PURCHASE_ERROR } from '../../../config';
 import { addEntitiesWithPhotosToLocalDb } from '../helpers';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
 import { buildApiUser } from '../apiBuilders/users';
@@ -12,20 +14,32 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 
 let onUpdate: OnApiUpdate;
 
+export const ACCEPTABLE_USERNAME_ERRORS = new Set([USERNAME_PURCHASE_ERROR, 'USERNAME_INVALID']);
+
 export function init(_onUpdate: OnApiUpdate) {
   onUpdate = _onUpdate;
 }
 
-export function checkChatUsername({ username }: { username: string }) {
-  return invokeRequest(new GramJs.channels.CheckUsername({
-    channel: new GramJs.InputChannelEmpty(),
-    username,
-  }), undefined, true).catch((error) => {
-    if ((error as ApiError).message === 'USERNAME_INVALID') {
-      return false;
+export async function checkChatUsername({ username }: { username: string }) {
+  try {
+    const result = await invokeRequest(new GramJs.channels.CheckUsername({
+      channel: new GramJs.InputChannelEmpty(),
+      username,
+    }), undefined, true);
+
+    return { result, error: undefined };
+  } catch (error) {
+    const errorMessage = (error as ApiError).message;
+
+    if (ACCEPTABLE_USERNAME_ERRORS.has(errorMessage)) {
+      return {
+        result: false,
+        error: errorMessage,
+      };
     }
+
     throw error;
-  });
+  }
 }
 
 export async function setChatUsername(
@@ -36,11 +50,13 @@ export async function setChatUsername(
     username,
   }));
 
+  const usernames = chat.usernames!.map((u) => (u.isEditable ? { ...u, username } : u));
+
   if (result) {
     onUpdate({
       '@type': 'updateChat',
       id: chat.id,
-      chat: { username },
+      chat: { usernames },
     });
   }
 }

@@ -1,6 +1,8 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { useEffect, useCallback, memo } from '../../lib/teact/teact';
+import React, {
+  useEffect, useCallback, memo, useMemo,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiTypingStatus } from '../../api/types';
@@ -10,6 +12,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import {
   getChatTypeString,
+  getMainUsername,
   isChatSuperGroup,
 } from '../../global/helpers';
 import { selectChat, selectChatMessages, selectChatOnlineCount } from '../../global/selectors';
@@ -91,6 +94,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   }, [chat, avatarSize, openMediaViewer]);
 
   const lang = useLang();
+  const mainUsername = useMemo(() => chat && withUsername && getMainUsername(chat), [chat, withUsername]);
 
   if (!chat) {
     return undefined;
@@ -125,13 +129,12 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
       );
     }
 
-    const handle = withUsername ? chat.username : undefined;
     const groupStatus = getGroupStatus(lang, chat);
     const onlineStatus = onlineCount ? `, ${lang('OnlineCount', onlineCount, 'i')}` : undefined;
 
     return (
       <span className="status">
-        {handle && <span className="handle">{handle}</span>}
+        {mainUsername && <span className="handle">{mainUsername}</span>}
         <span className="group-status">{groupStatus}</span>
         {onlineStatus && <span className="online-status">{onlineStatus}</span>}
       </span>

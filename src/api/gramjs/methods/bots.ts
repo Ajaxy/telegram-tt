@@ -100,7 +100,7 @@ export async function fetchInlineBotResults({
   return {
     isGallery: Boolean(result.gallery),
     help: bot.botPlaceholder,
-    nextOffset: getInlineBotResultsNextOffset(bot.username, result.nextOffset),
+    nextOffset: getInlineBotResultsNextOffset(bot.usernames![0].username, result.nextOffset),
     switchPm: buildBotSwitchPm(result.switchPm),
     users: result.users.map(buildApiUser).filter(Boolean),
     results: processInlineBotResult(String(result.queryId), result.results),

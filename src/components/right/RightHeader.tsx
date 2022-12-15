@@ -391,7 +391,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       default:
         return (
           <>
-            <h3>Profile</h3>
+            <h3>{lang(isChannel ? 'Channel.TitleInfo' : (userId ? 'UserInfo.Title' : 'GroupInfo.Title'))}</h3>
             <section className="tools">
               {canAddContact && (
                 <Button

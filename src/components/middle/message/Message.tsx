@@ -18,6 +18,7 @@ import type {
   ApiThreadInfo,
   ApiAvailableReaction,
   ApiChatMember,
+  ApiUsername,
 } from '../../../api/types';
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
@@ -164,7 +165,7 @@ type OwnProps =
 type StateProps = {
   theme: ISettings['theme'];
   forceSenderName?: boolean;
-  chatUsername?: string;
+  chatUsernames?: ApiUsername[];
   sender?: ApiUser | ApiChat;
   canShowSender: boolean;
   originSender?: ApiUser | ApiChat;
@@ -238,7 +239,7 @@ const NO_MEDIA_CORNERS_THRESHOLD = 18;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
-  chatUsername,
+  chatUsernames,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -990,7 +991,7 @@ const Message: FC<OwnProps & StateProps> = ({
               className="interactive"
               onClick={handleViaBotClick}
             >
-              {renderText(`@${botSender.username}`)}
+              {renderText(`@${botSender.usernames![0].username}`)}
             </span>
           </>
         )}
@@ -1012,6 +1013,7 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   const forwardAuthor = isGroup && asForwarded ? message.postAuthorTitle : undefined;
+  const chatUsername = useMemo(() => chatUsernames?.find((c) => c.isActive), [chatUsernames]);
 
   return (
     <div
@@ -1123,7 +1125,7 @@ const Message: FC<OwnProps & StateProps> = ({
           anchor={contextMenuPosition}
           message={message}
           album={album}
-          chatUsername={chatUsername}
+          chatUsername={chatUsername?.username}
           messageListType={messageListType}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -1150,7 +1152,7 @@ export default memo(withGlobal<OwnProps>(
     const isRepliesChat = isChatWithRepliesBot(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
-    const chatUsername = chat?.username;
+    const chatUsernames = chat?.usernames;
 
     const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
@@ -1215,7 +1217,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       theme: selectTheme(global),
-      chatUsername,
+      chatUsernames,
       forceSenderName,
       sender,
       canShowSender,

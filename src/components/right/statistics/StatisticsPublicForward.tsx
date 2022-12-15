@@ -1,9 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
-import useLang from '../../../hooks/useLang';
-import { getActions } from '../../../global';
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessagePublicForward } from '../../../api/types';
+
+import { getActions } from '../../../global';
+
+import { getMainUsername } from '../../../global/helpers';
+import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 
@@ -17,9 +20,10 @@ const StatisticsPublicForward: FC<OwnProps> = ({ data }) => {
   const lang = useLang();
   const { openChatByUsername } = getActions();
 
+  const username = useMemo(() => getMainUsername(data.chat), [data.chat]);
   const handleClick = useCallback(() => {
-    openChatByUsername({ username: data.chat.username, messageId: data.messageId });
-  }, [data, openChatByUsername]);
+    openChatByUsername({ username, messageId: data.messageId });
+  }, [data.messageId, openChatByUsername, username]);
 
   return (
     <div className="StatisticsPublicForward" onClick={handleClick}>

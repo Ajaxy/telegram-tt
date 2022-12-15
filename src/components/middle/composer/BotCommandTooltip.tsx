@@ -45,7 +45,7 @@ const BotCommandTooltip: FC<OwnProps & StateProps> = ({
   const handleSendCommand = useCallback(({ botId, command }: ApiBotCommand) => {
     const bot = usersById[botId];
     sendBotCommand({
-      command: `/${command}${withUsername && bot ? `@${bot.username}` : ''}`,
+      command: `/${command}${withUsername && bot ? `@${bot.usernames![0].username}` : ''}`,
       botId,
     });
     onClick();

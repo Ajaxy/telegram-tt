@@ -26,16 +26,20 @@ addActionHandler('checkPublicLink', async (global, actions, payload) => {
   global = updateManagement(global, chatId, { isUsernameAvailable: undefined, checkedUsername: undefined });
   setGlobal(global);
 
-  const isUsernameAvailable = (await callApi('checkChatUsername', { username }))!;
+  const { result, error } = (await callApi('checkChatUsername', { username }))!;
 
   global = getGlobal();
   global = updateManagementProgress(
-    global, isUsernameAvailable ? ManagementProgress.Complete : ManagementProgress.Error,
+    global, result === true ? ManagementProgress.Complete : ManagementProgress.Error,
   );
-  global = updateManagement(global, chatId, { isUsernameAvailable, checkedUsername: username });
+  global = updateManagement(global, chatId, {
+    isUsernameAvailable: result === true,
+    checkedUsername: username,
+    error,
+  });
   setGlobal(global);
 
-  if (isUsernameAvailable === undefined) {
+  if (result === undefined) {
     actions.openLimitReachedModal({ limit: 'channelsPublic' });
   }
 });
@@ -66,7 +70,11 @@ addActionHandler('updatePublicLink', async (global, actions, payload) => {
 
   global = getGlobal();
   global = updateManagementProgress(global, result ? ManagementProgress.Complete : ManagementProgress.Error);
-  global = updateManagement(global, chatId, { isUsernameAvailable: undefined, checkedUsername: undefined });
+  global = updateManagement(global, chatId, {
+    isUsernameAvailable: undefined,
+    checkedUsername: undefined,
+    error: undefined,
+  });
   setGlobal(global);
 });
 

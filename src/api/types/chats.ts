@@ -1,7 +1,7 @@
 import type { ApiMessage, ApiPhoto, ApiStickerSet } from './messages';
 import type { ApiBotCommand } from './bots';
 import type { ApiChatInviteImporter } from './misc';
-import type { ApiFakeType } from './users';
+import type { ApiFakeType, ApiUsername } from './users';
 
 type ApiChatType = (
   'chatTypePrivate' | 'chatTypeSecret' |
@@ -29,7 +29,7 @@ export interface ApiChat {
   isMin?: boolean;
   hasVideoAvatar?: boolean;
   avatarHash?: string;
-  username?: string;
+  usernames?: ApiUsername[];
   membersCount?: number;
   joinDate?: number;
   isSupport?: boolean;

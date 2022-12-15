@@ -1,12 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import type { ApiChat, ApiCountryCode, ApiUser } from '../../api/types';
+import type {
+  ApiChat, ApiCountryCode, ApiUser, ApiUsername,
+} from '../../api/types';
 
+import { TME_LINK_PREFIX } from '../../config';
 import {
   selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../../global/selectors';
@@ -17,6 +20,7 @@ import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import { debounce } from '../../util/schedulers';
+import stopEvent from '../../util/stopEvent';
 import useLang from '../../hooks/useLang';
 
 import ListItem from '../ui/ListItem';
@@ -57,11 +61,11 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   const {
     id: userId,
     fullInfo,
-    username,
+    usernames,
     phoneNumber,
     isSelf,
   } = user || {};
-  const { id: chatId } = chat || {};
+  const { id: chatId, usernames: chatUsernames } = chat || {};
   const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
@@ -70,6 +74,17 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       loadFullUser({ userId });
     }
   }, [loadFullUser, userId, lastSyncTime]);
+  const activeUsernames = useMemo(() => {
+    const result = usernames?.filter((u) => u.isActive);
+
+    return result?.length ? result : undefined;
+  }, [usernames]);
+  const activeChatUsernames = useMemo(() => {
+    const result = chatUsernames?.filter((u) => u.isActive);
+
+    return result?.length ? result : undefined;
+  }, [chatUsernames]);
+  const link = useMemo(() => (chat ? getChatLink(chat) : undefined), [chat]);
 
   const handleNotificationChange = useCallback(() => {
     setAreNotificationsEnabled((current) => {
@@ -93,8 +108,54 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneCodeList, phoneNumber);
-  const link = getChatLink(chat);
   const description = (fullInfo?.bio) || getChatDescription(chat);
+
+  function renderUsernames(usernameList: ApiUsername[], isChat?: boolean) {
+    const [mainUsername, ...otherUsernames] = usernameList;
+    const usernameLinks = otherUsernames.length
+      ? (lang('UsernameAlso', '%USERNAMES%') as string)
+        .split('%')
+        .map((s) => {
+          return (s === 'USERNAMES' ? (
+            <>
+              {otherUsernames.map(({ username: nick }, idx) => (
+                <>
+                  {idx > 0 ? ', ' : ''}
+                  <a
+                    key={nick}
+                    href={`${TME_LINK_PREFIX}${nick}`}
+                    onClick={(e) => {
+                      stopEvent(e);
+                      copy(`@${nick}`, lang(isChat ? 'Link' : 'Username'));
+                    }}
+                    className="username-link"
+                  >
+                    {`@${nick}`}
+                  </a>
+                </>
+              ))}
+            </>
+          ) : s);
+        })
+      : undefined;
+
+    return (
+      <ListItem
+        icon="mention"
+        multiline
+        narrow
+        ripple
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => copy(`@${mainUsername.username}`, lang(isChat ? 'Link' : 'Username'))}
+      >
+        <span className="title" dir="auto">{renderText(mainUsername.username)}</span>
+        <span className="subtitle">
+          {usernameLinks && <span className="other-usernames">{usernameLinks}</span>}
+          {lang(isChat ? 'Link' : 'Username')}
+        </span>
+      </ListItem>
+    );
+  }
 
   return (
     <div className="ChatExtra">
@@ -105,19 +166,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang('Phone')}</span>
         </ListItem>
       )}
-      {username && (
-        <ListItem
-          icon="mention"
-          multiline
-          narrow
-          ripple
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => copy(`@${username}`, lang('Username'))}
-        >
-          <span className="title" dir="auto">{renderText(username)}</span>
-          <span className="subtitle">{lang('Username')}</span>
-        </ListItem>
-      )}
+      {activeUsernames && renderUsernames(activeUsernames)}
       {description && Boolean(description.length) && (
         <ListItem
           icon="info"
@@ -131,9 +180,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}
-      {(canInviteUsers || !username) && link && (
+      {activeChatUsernames && renderUsernames(activeChatUsernames, true)}
+      {!activeChatUsernames && canInviteUsers && link && (
         <ListItem
-          icon={chat.username ? 'mention' : 'link'}
+          icon="link"
           multiline
           narrow
           ripple

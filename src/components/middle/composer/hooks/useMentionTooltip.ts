@@ -6,7 +6,7 @@ import { getGlobal } from '../../../../global';
 import type { ApiChatMember, ApiUser } from '../../../../api/types';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import { filterUsersByName, getUserFirstOrLastName } from '../../../../global/helpers';
+import { filterUsersByName, getMainUsername, getUserFirstOrLastName } from '../../../../global/helpers';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
@@ -106,12 +106,13 @@ export default function useMentionTooltip(
   }, [markIsOpen, unmarkIsOpen, usersToMention]);
 
   const insertMention = useCallback((user: ApiUser, forceFocus = false) => {
-    if (!user.username && !getUserFirstOrLastName(user)) {
+    if (!user.usernames && !getUserFirstOrLastName(user)) {
       return;
     }
 
-    const insertedHtml = user.username
-      ? `@${user.username}`
+    const mainUsername = getMainUsername(user);
+    const insertedHtml = mainUsername
+      ? `@${mainUsername}`
       : `<a
           class="text-entity-link"
           data-entity-type="${ApiMessageEntityTypes.MentionName}"

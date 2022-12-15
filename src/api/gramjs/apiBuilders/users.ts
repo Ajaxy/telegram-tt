@@ -2,11 +2,13 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiEmojiStatus,
   ApiPremiumGiftOption,
-  ApiUser, ApiUserStatus, ApiUserType,
+  ApiUser,
+  ApiUserStatus,
+  ApiUserType,
 } from '../../types';
 import { buildApiPeerId } from './peers';
 import { buildApiBotInfo } from './bots';
-import { buildApiPhoto } from './common';
+import { buildApiPhoto, buildApiUsernames } from './common';
 
 export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUser {
   const {
@@ -50,6 +52,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     : undefined;
   const userType = buildApiUserType(mtpUser);
 
+  const usernames = buildApiUsernames(mtpUser);
+
   return {
     id: buildApiPeerId(id, 'user'),
     isMin: Boolean(mtpUser.min),
@@ -62,7 +66,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(firstName && { firstName }),
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
     ...(lastName && { lastName }),
-    username: mtpUser.username || '',
+    ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',
     noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
