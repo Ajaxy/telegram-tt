@@ -10,11 +10,13 @@ import {
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
-import { COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
+import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { subscribe, unsubscribe } from '../../../util/notifications';
 import { setTimeFormat } from '../../../util/langProvider';
+import requestActionTimeout from '../../../util/requestActionTimeout';
+import { getServerTime } from '../../../util/serverTime';
 import { selectChat, selectUser } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
@@ -621,9 +623,24 @@ addActionHandler('loadAppConfig', async () => {
   const appConfig = await callApi('fetchAppConfig');
   if (!appConfig) return;
 
+  requestActionTimeout('loadAppConfig', APP_CONFIG_REFETCH_INTERVAL);
+
   setGlobal({
     ...getGlobal(),
     appConfig,
+  });
+});
+
+addActionHandler('loadConfig', async (global) => {
+  const config = await callApi('fetchConfig');
+  if (!config) return;
+
+  const timeout = config.expiresAt - getServerTime(global.serverTimeOffset);
+  requestActionTimeout('loadConfig', timeout * 1000);
+
+  setGlobal({
+    ...getGlobal(),
+    config,
   });
 });
 

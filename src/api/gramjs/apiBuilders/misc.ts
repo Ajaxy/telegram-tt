@@ -1,6 +1,7 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiConfig,
   ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
 } from '../../types';
 import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
@@ -220,4 +221,15 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
     };
   }
   return undefined;
+}
+
+export function buildApiConfig(config: GramJs.Config): ApiConfig {
+  const defaultReaction = config.reactionsDefault
+    && 'emoticon' in config.reactionsDefault ? config.reactionsDefault.emoticon : undefined;
+  return {
+    expiresAt: config.expires,
+    gifSearchUsername: config.gifSearchUsername,
+    defaultReaction,
+    maxGroupSize: config.chatSizeMax,
+  };
 }

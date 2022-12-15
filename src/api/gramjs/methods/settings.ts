@@ -3,6 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiAppConfig,
+  ApiConfig,
   ApiError,
   ApiLangString,
   ApiLanguage,
@@ -14,6 +15,7 @@ import type { LANG_PACKS } from '../../../config';
 import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
 import { ACCEPTABLE_USERNAME_ERRORS } from './management';
 import {
+  buildApiConfig,
   buildApiCountryList,
   buildApiNotifyException,
   buildApiSession,
@@ -505,6 +507,13 @@ export async function fetchAppConfig(): Promise<ApiAppConfig | undefined> {
   if (!result) return undefined;
 
   return buildAppConfig(result);
+}
+
+export async function fetchConfig(): Promise<ApiConfig | undefined> {
+  const result = await invokeRequest(new GramJs.help.GetConfig());
+  if (!result) return undefined;
+
+  return buildApiConfig(result);
 }
 
 function updateLocalDb(

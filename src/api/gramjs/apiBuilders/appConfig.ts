@@ -22,7 +22,6 @@ interface GramJsAppConfig extends LimitsConfig {
   }>;
   emojies_send_dice: string[];
   groupcall_video_participants_max: number;
-  reactions_default: string;
   reactions_uniq_max: number;
   chat_read_mark_size_threshold: number;
   chat_read_mark_expire_period: number;
@@ -66,7 +65,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
   return {
-    defaultReaction: appConfig.reactions_default,
     emojiSounds: buildEmojiSounds(appConfig),
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,

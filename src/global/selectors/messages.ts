@@ -952,7 +952,7 @@ export function selectDefaultReaction(global: GlobalState, chatId: string) {
   if (chatId === SERVICE_NOTIFICATIONS_USER_ID) return undefined;
 
   const isPrivate = isUserId(chatId);
-  const defaultReaction = global.appConfig?.defaultReaction;
+  const defaultReaction = global.config?.defaultReaction;
   const { availableReactions } = global;
   if (!defaultReaction || !availableReactions?.some(
     (l) => l.reaction === defaultReaction && !l.isInactive,

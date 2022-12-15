@@ -1031,6 +1031,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       addEntitiesWithPhotosToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
+    onUpdate({ '@type': 'updateConfig' });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

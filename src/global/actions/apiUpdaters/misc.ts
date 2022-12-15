@@ -24,6 +24,10 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       });
       break;
 
+    case 'updateConfig':
+      actions.loadConfig();
+      break;
+
     case 'updateFavoriteStickers':
       actions.loadFavoriteStickers();
       break;

@@ -148,7 +148,7 @@ export default memo(withGlobal<OwnProps>(
       addedSetIds: global.stickers.added.setIds,
       customEmojiSetIds: global.customEmojis.added.setIds,
       stickerSetsById: global.stickers.setsById,
-      defaultReaction: global.appConfig?.defaultReaction,
+      defaultReaction: global.config?.defaultReaction,
     };
   },
 )(SettingsStickers));
