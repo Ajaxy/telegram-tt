@@ -128,7 +128,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
                       stopEvent(e);
                       copy(`@${nick}`, lang(isChat ? 'Link' : 'Username'));
                     }}
-                    className="username-link"
+                    className="text-entity-link username-link"
                   >
                     {`@${nick}`}
                   </a>
