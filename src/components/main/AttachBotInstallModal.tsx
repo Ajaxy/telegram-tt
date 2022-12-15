@@ -28,7 +28,7 @@ const AttachBotInstallModal: FC<OwnProps> = ({
       onClose={cancelAttachBotInstall}
       confirmHandler={confirmAttachBotInstall}
       title={name}
-      textParts={lang('WebApp.AddToAttachmentText', name)}
+      text={lang('WebApp.AddToAttachmentText', name)}
     />
   );
 };

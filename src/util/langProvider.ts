@@ -12,7 +12,7 @@ import { createCallbackManager } from './callbacks';
 import { formatInteger } from './textFormat';
 
 interface LangFn {
-  (key: string, value?: any, format?: 'i', pluralValue?: number): any;
+  (key: string, value?: any, format?: 'i', pluralValue?: number): string;
 
   isRtl?: boolean;
   code?: LangCode;
