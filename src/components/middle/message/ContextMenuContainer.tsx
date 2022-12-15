@@ -203,7 +203,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       // No need for expensive global updates on users, so we avoid them
       const usersById = getGlobal().users.byId;
 
-      return message.reactions?.recentReactions?.slice(0, 3).map(({ userId }) => usersById[userId]).filter(Boolean);
+      const uniqueReactors = new Set(message.reactions?.recentReactions?.map(({ userId }) => usersById[userId]));
+
+      return Array.from(uniqueReactors).filter(Boolean).slice(0, 3);
     }
 
     if (!message.seenByUserIds) {
