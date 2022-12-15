@@ -118,7 +118,8 @@
     "import/resolver": "webpack",
     "import/core-modules": [
       "fs",
-      "path"
+      "path",
+      "crypto"
     ]
   },
   "parserOptions": {
