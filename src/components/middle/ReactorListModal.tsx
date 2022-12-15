@@ -65,6 +65,10 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   const chatIdRef = useRef<string>();
 
   useEffect(() => {
+    if (isOpen && !isClosing) {
+      chatIdRef.current = undefined;
+    }
+
     if (isClosing && !isOpen) {
       stopClosing();
       setChosenTab(undefined);
@@ -96,14 +100,14 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
   const allReactions = useMemo(() => {
     return reactors?.reactions ? unique(reactors.reactions.map((l) => l.reaction)) : [];
-  }, [reactors?.reactions]);
+  }, [reactors]);
 
   const userIds = useMemo(() => {
     if (chosenTab) {
       return reactors?.reactions.filter((l) => l.reaction === chosenTab).map((l) => l.userId);
     }
     return unique(reactors?.reactions.map((l) => l.userId).concat(seenByUserIds || []) || []);
-  }, [chosenTab, reactors?.reactions, seenByUserIds]);
+  }, [chosenTab, reactors, seenByUserIds]);
 
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMore, userIds, reactors && reactors.nextOffset === undefined,
@@ -137,6 +141,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             const count = reactions?.results.find((l) => l.reaction === reaction)?.count;
             return (
               <Button
+                key={reaction}
                 className={buildClassName(chosenTab === reaction && 'chosen')}
                 size="tiny"
                 ripple
@@ -186,7 +191,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       <Button
         className="confirm-dialog-button"
         isText
-        onClick={closeReactorListModal}
+        onClick={handleClose}
       >
         {lang('Close')}
       </Button>

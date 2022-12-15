@@ -1,9 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useMemo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiAvailableReaction, ApiMessage, ApiSponsoredMessage, ApiStickerSet, ApiUser,
 } from '../../../api/types';
@@ -36,6 +36,7 @@ type OwnProps = {
   message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
   enabledReactions?: string[];
+  maxUniqueReactions?: number;
   canReschedule?: boolean;
   canReply?: boolean;
   canPin?: boolean;
@@ -103,6 +104,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   isPrivate,
   isCurrentUserPremium,
   enabledReactions,
+  maxUniqueReactions,
   anchor,
   canSendNow,
   canReschedule,
@@ -170,6 +172,11 @@ const MessageContextMenu: FC<OwnProps> = ({
   const messageId = !isSponsoredMessage ? message.id : '';
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
+
+  const currentReactions = useMemo(() => {
+    if (isSponsoredMessage) return undefined;
+    return message.reactions?.results.map((reaction) => reaction.reaction);
+  }, [isSponsoredMessage, message]);
 
   const handleAfterCopy = useCallback(() => {
     showNotification({
@@ -276,6 +283,8 @@ const MessageContextMenu: FC<OwnProps> = ({
       {canShowReactionList && (
         <ReactionSelector
           enabledReactions={enabledReactions}
+          currentReactions={currentReactions}
+          maxUniqueReactions={maxUniqueReactions}
           onSendReaction={onSendReaction!}
           isPrivate={isPrivate}
           availableReactions={availableReactions}

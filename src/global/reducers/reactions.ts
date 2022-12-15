@@ -36,11 +36,7 @@ export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
 }
 
 export function addMessageReaction(global: GlobalState, chatId: string, messageId: number, reaction: string) {
-  const { reactions } = selectChatMessage(global, chatId, messageId) || {};
-
-  if (!reactions) {
-    return global;
-  }
+  const reactions = selectChatMessage(global, chatId, messageId)?.reactions || { results: [] };
 
   // Update UI without waiting for server response
   let results = reactions.results.map((l) => (l.reaction === reaction

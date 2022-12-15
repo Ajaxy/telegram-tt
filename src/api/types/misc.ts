@@ -174,6 +174,7 @@ export interface ApiAppConfig {
   isPremiumPurchaseBlocked: boolean;
   premiumPromoOrder: string[];
   defaultEmojiStatusesStickerSetId: string;
+  maxUniqueReactions: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
 }
 

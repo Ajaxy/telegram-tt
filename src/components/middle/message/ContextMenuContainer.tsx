@@ -89,6 +89,7 @@ type StateProps = {
   canShowSeenBy?: boolean;
   enabledReactions?: string[];
   canScheduleUntilOnline?: boolean;
+  maxUniqueReactions?: number;
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
@@ -117,6 +118,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canRemoveReaction,
   canEdit,
   enabledReactions,
+  maxUniqueReactions,
   isPrivate,
   isCurrentUserPremium,
   canForward,
@@ -402,6 +404,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canBuyPremium={canBuyPremium}
         isOpen={isMenuOpen}
         enabledReactions={enabledReactions}
+        maxUniqueReactions={maxUniqueReactions}
         anchor={anchor}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
@@ -488,7 +491,7 @@ export default memo(withGlobal<OwnProps>(
     const { threadId } = selectCurrentMessageList(global) || {};
     const activeDownloads = selectActiveDownloadIds(global, message.chatId);
     const chat = selectChat(global, message.chatId);
-    const { seenByExpiresAt, seenByMaxChatMembers } = global.appConfig || {};
+    const { seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions } = global.appConfig || {};
     const {
       noOptions,
       canReply,
@@ -560,6 +563,7 @@ export default memo(withGlobal<OwnProps>(
       activeDownloads,
       canShowSeenBy,
       enabledReactions: chat?.isForbidden ? undefined : chat?.fullInfo?.enabledReactions,
+      maxUniqueReactions,
       isPrivate,
       isCurrentUserPremium,
       hasFullInfo: Boolean(chat?.fullInfo),
