@@ -80,10 +80,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     return result?.length ? result : undefined;
   }, [usernames]);
   const activeChatUsernames = useMemo(() => {
-    const result = chatUsernames?.filter((u) => u.isActive);
+    const result = !user ? chatUsernames?.filter((u) => u.isActive) : undefined;
 
     return result?.length ? result : undefined;
-  }, [chatUsernames]);
+  }, [chatUsernames, user]);
   const link = useMemo(() => (chat ? getChatLink(chat) : undefined), [chat]);
 
   const handleNotificationChange = useCallback(() => {
