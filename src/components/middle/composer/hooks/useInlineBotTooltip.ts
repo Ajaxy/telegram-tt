@@ -103,5 +103,11 @@ function parseBotQuery(html: string) {
 function getPlainText(html: string) {
   tempEl.innerHTML = html.replace(/<br>/g, '\n');
 
+  tempEl.querySelectorAll<HTMLElement>('[alt]').forEach((el) => {
+    if (!el.innerText) {
+      el.innerText = el.getAttribute('alt')!;
+    }
+  });
+
   return tempEl.innerText;
 }
