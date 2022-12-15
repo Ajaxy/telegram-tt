@@ -375,6 +375,10 @@ export type ApiUpdateError = {
   error: ApiError;
 };
 
+export type ApiUpdateConfig = {
+  '@type': 'updateConfig';
+};
+
 export type ApiUpdateResetContacts = {
   '@type': 'updateResetContactList';
 };
@@ -577,7 +581,7 @@ export type ApiUpdate = (
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
-  ApiUpdateMessageExtendedMedia
+  ApiUpdateMessageExtendedMedia | ApiUpdateConfig
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

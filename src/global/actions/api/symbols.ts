@@ -516,7 +516,7 @@ addActionHandler('setGifSearchQuery', (global, actions, payload) => {
 
   if (typeof query === 'string') {
     void searchThrottled(() => {
-      searchGifs(query);
+      searchGifs(query, global.config?.gifSearchUsername);
     });
   }
 });
@@ -526,7 +526,7 @@ addActionHandler('searchMoreGifs', (global) => {
 
   if (typeof query === 'string') {
     void searchThrottled(() => {
-      searchGifs(query, offset);
+      searchGifs(query, global.config?.gifSearchUsername, offset);
     });
   }
 });
@@ -646,8 +646,8 @@ async function searchStickers(query: string, hash?: string) {
   ));
 }
 
-async function searchGifs(query: string, offset?: string) {
-  const result = await callApi('searchGifs', { query, offset });
+async function searchGifs(query: string, botUsername?: string, offset?: string) {
+  const result = await callApi('searchGifs', { query, offset, username: botUsername });
   if (!result) {
     return;
   }

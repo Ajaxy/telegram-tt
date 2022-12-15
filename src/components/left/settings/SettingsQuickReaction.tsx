@@ -63,12 +63,12 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global) => {
-    const { availableReactions, appConfig } = global;
+    const { availableReactions, config } = global;
     const isPremium = selectIsCurrentUserPremium(global);
 
     return {
       availableReactions,
-      selectedReaction: appConfig?.defaultReaction,
+      selectedReaction: config?.defaultReaction,
       isPremium,
     };
   },

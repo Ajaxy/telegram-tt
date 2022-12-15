@@ -10,7 +10,7 @@ import {
 } from '../apiBuilders/symbols';
 import { buildInputStickerSet, buildInputDocument, buildInputStickerSetShortName } from '../gramjsBuilders';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
-import { RECENT_STICKERS_LIMIT } from '../../../config';
+import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STICKERS_LIMIT } from '../../../config';
 
 import localDb from '../localDb';
 
@@ -301,15 +301,14 @@ export async function uninstallStickerSet({ stickerSetId, accessHash }: { sticke
 
 let inputGifBot: GramJs.InputUser | undefined;
 
-export async function searchGifs({ query, offset = '' }: { query: string; offset?: string }) {
+export async function searchGifs({
+  query,
+  offset = '',
+  username = DEFAULT_GIF_SEARCH_BOT_USERNAME,
+}: { query: string; offset?: string; username?: string }) {
   if (!inputGifBot) {
-    const config = await invokeRequest(new GramJs.help.GetConfig());
-    if (!config) {
-      return undefined;
-    }
-
     const resolvedPeer = await invokeRequest(new GramJs.contacts.ResolveUsername({
-      username: config.gifSearchUsername,
+      username,
     }));
     if (!resolvedPeer || !(resolvedPeer.users[0] instanceof GramJs.User)) {
       return undefined;

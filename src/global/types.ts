@@ -46,6 +46,7 @@ import type {
   ApiChatType,
   ApiReceipt,
   ApiPaymentCredentials,
+  ApiConfig,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -138,6 +139,7 @@ export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
 )>;
 
 export type GlobalState = {
+  config?: ApiConfig;
   appConfig?: ApiAppConfig;
   canInstall?: boolean;
   hasWebAuthTokenFailed?: boolean;
@@ -1198,6 +1200,8 @@ export interface ActionPayloads {
   skipLockOnUnload: never;
 
   // Settings
+  loadConfig: never;
+  loadAppConfig: never;
   requestNextSettingsScreen: SettingsScreens;
   sortChatFolders: { folderIds: number[] };
   closeDeleteChatFolderModal: never;
@@ -1314,7 +1318,7 @@ export type NonTypedActionNames = (
   'updateWebNotificationSettings' | 'loadLanguages' | 'loadPrivacySettings' | 'setPrivacyVisibility' |
   'setPrivacySettings' | 'loadNotificationExceptions' | 'setThemeSettings' | 'updateIsOnline' |
   'loadContentSettings' | 'updateContentSettings' |
-  'loadCountryList' | 'ensureTimeFormat' | 'loadAppConfig' |
+  'loadCountryList' | 'ensureTimeFormat' |
   // stickers & GIFs
   'setStickerSearchQuery' | 'saveGif' | 'setGifSearchQuery' | 'searchMoreGifs' |
   'faveSticker' | 'unfaveSticker' | 'toggleStickerSet' |

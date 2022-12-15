@@ -1,7 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import * as mediaLoader from '../../../util/mediaLoader';
-import type { ApiAppConfig } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import {
   selectChat,
@@ -180,12 +179,19 @@ addActionHandler('setDefaultReaction', async (global, actions, payload) => {
     return;
   }
 
+  global = getGlobal();
+
+  if (!global.config) {
+    actions.loadConfig(); // Refetch new config, if it is somehow not loaded
+    return;
+  }
+
   setGlobal({
-    ...getGlobal(),
-    appConfig: {
-      ...global.appConfig,
+    ...global,
+    config: {
+      ...global.config,
       defaultReaction: reaction,
-    } as ApiAppConfig,
+    },
   });
 });
 

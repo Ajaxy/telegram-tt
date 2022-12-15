@@ -95,6 +95,8 @@ export const MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 15;
 
 export const DRAFT_DEBOUNCE = 10000; // 10s
 export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
+// 10000s from https://corefork.telegram.org/api/url-authorization#automatic-authorization
+export const APP_CONFIG_REFETCH_INTERVAL = 10000 * 1000;
 
 export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
@@ -218,6 +220,7 @@ export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
 export const RESTRICTED_EMOJI_SET_ID = '7173162320003080';
+export const DEFAULT_GIF_SEARCH_BOT_USERNAME = 'gif';
 export const ALL_FOLDER_ID = 0;
 export const ARCHIVED_FOLDER_ID = 1;
 export const DELETED_COMMENTS_CHANNEL_ID = '-777';

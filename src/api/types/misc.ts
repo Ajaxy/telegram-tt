@@ -162,7 +162,6 @@ export interface ApiCountryCode extends ApiCountry {
 }
 
 export interface ApiAppConfig {
-  defaultReaction: string;
   emojiSounds: Record<string, string>;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
@@ -176,6 +175,13 @@ export interface ApiAppConfig {
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
+}
+
+export interface ApiConfig {
+  expiresAt: number;
+  defaultReaction?: string;
+  gifSearchUsername?: string;
+  maxGroupSize: number;
 }
 
 export interface GramJsEmojiInteraction {

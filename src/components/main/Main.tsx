@@ -186,6 +186,7 @@ const Main: FC<StateProps> = ({
     closeStickerSetModal,
     closeCustomEmojiSets,
     checkVersionNotification,
+    loadConfig,
     loadAppConfig,
     loadAttachBots,
     loadContactList,
@@ -208,6 +209,7 @@ const Main: FC<StateProps> = ({
   useEffect(() => {
     if (lastSyncTime) {
       updateIsOnline(true);
+      loadConfig();
       loadAppConfig();
       loadAvailableReactions();
       loadAnimatedEmojis();
@@ -223,7 +225,7 @@ const Main: FC<StateProps> = ({
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion,
+    loadPremiumGifts, checkAppVersion, loadConfig,
   ]);
 
   // Language-based API calls
