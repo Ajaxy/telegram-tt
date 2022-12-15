@@ -98,11 +98,11 @@ export function formatCountdown(
   }
 }
 
-export function formatCountdownShort(lang: LangFn, msLeft: number) {
+export function formatCountdownShort(lang: LangFn, msLeft: number): string {
   if (msLeft < 60 * 1000) {
-    return Math.ceil(msLeft / 1000);
+    return Math.ceil(msLeft / 1000).toString();
   } else if (msLeft < 60 * 60 * 1000) {
-    return Math.ceil(msLeft / (60 * 1000));
+    return Math.ceil(msLeft / (60 * 1000)).toString();
   } else if (msLeft < MILLISECONDS_IN_DAY) {
     return lang('MessageTimer.ShortHours', Math.ceil(msLeft / (60 * 60 * 1000)));
   } else {

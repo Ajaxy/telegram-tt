@@ -172,7 +172,7 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
       )}
 
       <div>
-        {renderText(description, ['simple_markdown', 'br'])}
+        {renderText(description || '', ['simple_markdown', 'br'])}
       </div>
 
       <div className={styles.dialogButtons}>

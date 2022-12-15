@@ -27,7 +27,7 @@ const TypingStatus: FC<OwnProps & StateProps> = ({ typingStatus, typingUser }) =
   const content = lang(typingStatus.action)
     // Fix for translation "{user} is typing"
     .replace('{user}', '')
-    .replace('{emoji}', typingStatus.emoji).trim();
+    .replace('{emoji}', typingStatus.emoji || '').trim();
 
   return (
     <p className="typing-status" dir={lang.isRtl ? 'rtl' : 'auto'}>
