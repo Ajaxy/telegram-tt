@@ -73,6 +73,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     autologinDomains: appConfig.autologin_domains || [],
     autologinToken: appConfig.autologin_token || '',
     urlAuthDomains: appConfig.url_auth_domains || [],
+    maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
     premiumInvoiceSlug: appConfig.premium_invoice_slug,
     premiumPromoOrder: appConfig.premium_promo_order,

@@ -224,17 +224,8 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
     global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   }
 
-  const { nextOffset, count, reactions } = result;
-
   setGlobal(updateChatMessage(global, chatId, messageId, {
-    reactors: {
-      nextOffset,
-      count,
-      reactions: [
-        ...(message.reactors?.reactions || []),
-        ...reactions,
-      ],
-    },
+    reactors: result,
   }));
 });
 
