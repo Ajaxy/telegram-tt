@@ -92,7 +92,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
       <div className="media-list" dir={lang.isRtl ? 'rtl' : undefined}>
         {foundMessages.map((message) => (
           <Media
-            key={message.id}
+            key={`${message.chatId}-${message.id}`}
             idPrefix="search-media"
             message={message}
             isProtected={isChatProtected || message.isProtected}
