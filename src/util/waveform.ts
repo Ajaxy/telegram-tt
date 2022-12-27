@@ -1,6 +1,5 @@
 /* eslint-disable no-bitwise */
 
-// eslint-disable-next-line max-len
 // Ref: https://github.com/telegramdesktop/tdesktop/blob/0743e71ab6b928d2ee5bae1aed991849b1e2b291/Telegram/SourceFiles/data/data_document.cpp#L1018
 export function decodeWaveform(encoded5bit: Uint8Array) {
   const bitsCount = encoded5bit.length * 8;

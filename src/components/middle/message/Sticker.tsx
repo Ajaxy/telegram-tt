@@ -21,7 +21,6 @@ import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './Sticker.scss';
 
-// eslint-disable-next-line max-len
 // https://github.com/telegramdesktop/tdesktop/blob/master/Telegram/SourceFiles/history/view/media/history_view_sticker.cpp#L42
 const EFFECT_SIZE_MULTIPLIER = 1 + 0.245 * 2;
 

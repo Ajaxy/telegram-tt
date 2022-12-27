@@ -262,7 +262,6 @@ export function getUserIdDividend(userId: string) {
   return Math.abs(Number(userId));
 }
 
-// eslint-disable-next-line max-len
 // https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
 export function getUserColorKey(peer: ApiUser | ApiChat | undefined) {
   const index = peer ? getUserIdDividend(peer.id) % 7 : 0;

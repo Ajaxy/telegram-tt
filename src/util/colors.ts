@@ -191,7 +191,6 @@ export function getColorLuma(rgbColor: [number, number, number]) {
   return luma;
 }
 
-// eslint-disable-next-line max-len
 // Function was adapted from https://github.com/telegramdesktop/tdesktop/blob/35ff621b5b52f7e3553fb0f990ea13ade7101b8e/Telegram/SourceFiles/data/data_wall_paper.cpp#L518
 export function getPatternColor(rgbColor: [number, number, number]) {
   let [hue, saturation, value] = rgb2hsb(rgbColor);

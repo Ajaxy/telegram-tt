@@ -7,7 +7,6 @@ export default function calculateAuthorWidth(text: string) {
 
   if (!element) {
     element = document.createElement('span');
-    // eslint-disable-next-line max-len
     element.style.font = `400 12px ${fontFamily}`;
     element.style.whiteSpace = 'nowrap';
     element.style.position = 'absolute';

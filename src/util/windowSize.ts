@@ -72,7 +72,6 @@ function isLandscape() {
     return window.matchMedia('(orientation: landscape)').matches;
   }
 
-  // eslint-disable-next-line max-len
   // Source: https://web.archive.org/web/20160509220835/http://blog.abouthalf.com/development/orientation-media-query-challenges-in-android-browsers/
   // Feature is marked as deprecated now, but it is still supported
   // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/device-aspect-ratio#browser_compatibility
