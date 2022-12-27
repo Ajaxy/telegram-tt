@@ -16,7 +16,7 @@ export default function calculateAuthorWidth(text: string) {
     document.body.appendChild(element);
   }
 
-  element.innerHTML = text;
+  element.textContent = text;
 
   return element.offsetWidth;
 }

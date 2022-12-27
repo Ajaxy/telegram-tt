@@ -63,7 +63,7 @@ export default function parseMessageInput(
   };
 }
 
-function fixImageContent(fragment: HTMLDivElement) {
+export function fixImageContent(fragment: HTMLDivElement) {
   fragment.querySelectorAll('img').forEach((node) => {
     if (node.dataset.documentId) { // Custom Emoji
       node.textContent = (node as HTMLImageElement).alt || '';
