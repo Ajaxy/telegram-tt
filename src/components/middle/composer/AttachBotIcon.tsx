@@ -33,9 +33,9 @@ const AttachBotIcon: FC<OwnProps> = ({
 
     const mediaDataWithReplacedColors = mediaData.replace(COLOR_REPLACE_PATTERN, color);
     const doc = new DOMParser().parseFromString(mediaDataWithReplacedColors, 'image/svg+xml');
-    doc.querySelectorAll('path').forEach((l) => {
-      l.style.stroke = color;
-      l.style.strokeWidth = ADDITIONAL_STROKE_WIDTH;
+    doc.querySelectorAll('path').forEach((path) => {
+      path.style.stroke = color;
+      path.style.strokeWidth = ADDITIONAL_STROKE_WIDTH;
     });
 
     return `data:image/svg+xml;utf8,${doc.documentElement.outerHTML}`;

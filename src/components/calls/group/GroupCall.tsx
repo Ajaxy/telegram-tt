@@ -88,7 +88,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   const [isLeaving, setIsLeaving] = useState(false);
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
   const [isSidebarOpen, openSidebar, closeSidebar] = useFlag(true);
-  const hasVideoParticipants = participants && Object.values(participants).some((l) => l.video || l.presentation);
+  const hasVideoParticipants = Object.values(participants).some(({ video, presentation }) => video || presentation);
   const isLandscape = isFullscreen && !IS_SINGLE_COLUMN_LAYOUT && hasVideoParticipants;
 
   const [participantMenu, setParticipantMenu] = useState<{

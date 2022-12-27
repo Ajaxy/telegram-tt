@@ -53,14 +53,14 @@ export const initializeSoundsForSafari = () => {
     ringing: ringingAudio,
   };
 
-  initializationPromise = Promise.all(Object.values(sounds).map((l) => {
-    l.muted = true;
-    l.volume = 0.0001;
-    return l.play().then(() => {
-      l.pause();
-      l.volume = 1;
-      l.currentTime = 0;
-      l.muted = false;
+  initializationPromise = Promise.all(Object.values(sounds).map((sound) => {
+    sound.muted = true;
+    sound.volume = 0.0001;
+    return sound.play().then(() => {
+      sound.pause();
+      sound.volume = 1;
+      sound.currentTime = 0;
+      sound.muted = false;
     });
   })).then(() => {
     initializationPromise = undefined;

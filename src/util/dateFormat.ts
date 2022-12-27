@@ -159,7 +159,7 @@ export function formatTimeDuration(lang: LangFn, duration: number, showLast = 2)
   }
 
   // TODO In arabic we don't use "," as delimiter rather we use "and" each time
-  return out.map((l) => lang(l.type, l.duration, 'i')).join(', ');
+  return out.map((part) => lang(part.type, part.duration, 'i')).join(', ');
 }
 
 export function formatHumanDate(

@@ -159,7 +159,7 @@ async function downloadFile2(
     // Pick the least busy foreman
     // For some reason, fresh connections give out a higher speed for the first couple of seconds
     // I have no idea why, but this may speed up the download of small files
-    const activeCounts = foremans.map((l) => l.activeWorkers);
+    const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
     let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
     // Used for files with unknown size and for manual cancellations
     let hasEnded = false;

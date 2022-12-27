@@ -771,7 +771,7 @@ export async function fetchChatFolders() {
     return undefined;
   }
 
-  const defaultFolderPosition = result.findIndex((l) => l instanceof GramJs.DialogFilterDefault);
+  const defaultFolderPosition = result.findIndex((folder) => folder instanceof GramJs.DialogFilterDefault);
   const dialogFilters = result.filter((df): df is GramJs.DialogFilter => df instanceof GramJs.DialogFilter);
   const orderedIds = dialogFilters.map(({ id }) => id);
   if (defaultFolderPosition !== -1) {

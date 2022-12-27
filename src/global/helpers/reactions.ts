@@ -18,7 +18,7 @@ export function checkIfHasUnreadReactions(global: GlobalState, reactions: ApiRea
 }
 
 export function areReactionsEmpty(reactions: ApiReactions) {
-  return !reactions.results.some((l) => l.count > 0);
+  return !reactions.results.some(({ count }) => count > 0);
 }
 
 export function isSameReaction(first?: ApiReaction, second?: ApiReaction) {

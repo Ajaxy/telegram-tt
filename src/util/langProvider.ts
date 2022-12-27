@@ -161,7 +161,7 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
   document.documentElement.lang = langCode;
 
   const { languages, timeFormat } = getGlobal().settings.byKey;
-  const langInfo = languages?.find((l) => l.langCode === langCode);
+  const langInfo = languages?.find((lang) => lang.langCode === langCode);
   getTranslation.isRtl = Boolean(langInfo?.rtl);
   getTranslation.code = langCode.replace('-raw', '') as LangCode;
   getTranslation.langName = langInfo?.nativeName;

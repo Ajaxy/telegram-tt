@@ -358,7 +358,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleSetAttachments = useCallback(
     (newValue: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => {
       const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
-      if (newAttachments && newAttachments.some((l) => l.size > fileSizeLimit)) {
+      if (newAttachments.some(({ size }) => size > fileSizeLimit)) {
         openLimitReachedModal({
           limit: 'uploadMaxFileparts',
         });
