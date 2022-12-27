@@ -761,6 +761,7 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload) => {
 
   if (isChatBasicGroup(chat)) {
     chat = await migrateChat(chat);
+    global = getGlobal();
 
     if (!chat) {
       return;
