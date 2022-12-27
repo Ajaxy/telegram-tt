@@ -20,7 +20,10 @@
     ],
     "max-len": [
       "error",
-      120
+      {
+        "code": 120,
+        "ignoreComments": true
+      }
     ],
     "array-bracket-newline": [
       2,
