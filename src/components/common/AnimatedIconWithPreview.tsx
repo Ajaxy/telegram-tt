@@ -3,12 +3,13 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 import type { OwnProps as AnimatedIconProps } from './AnimatedIcon';
 
 import buildClassName from '../../util/buildClassName';
-
-import useMediaTransition from '../../hooks/useMediaTransition';
-import AnimatedIcon from './AnimatedIcon';
-import styles from './AnimatedIconWithPreview.module.scss';
-import useFlag from '../../hooks/useFlag';
 import buildStyle from '../../util/buildStyle';
+import useMediaTransition from '../../hooks/useMediaTransition';
+import useFlag from '../../hooks/useFlag';
+
+import AnimatedIcon from './AnimatedIcon';
+
+import styles from './AnimatedIconWithPreview.module.scss';
 
 type OwnProps =
   Partial<AnimatedIconProps>
@@ -18,11 +19,11 @@ const loadedPreviewUrls = new Set();
 
 function AnimatedIconWithPreview(props: OwnProps) {
   const {
-    previewUrl, thumbDataUri, noPreviewTransition, className, ...otherProps
+    previewUrl, thumbDataUri, className, ...otherProps
   } = props;
 
-  const [isPreviewLoaded, markPreviewLoaded] = useFlag(loadedPreviewUrls.has(previewUrl));
-  const previewClassNames = useMediaTransition(noPreviewTransition || isPreviewLoaded);
+  const [isPreviewLoaded, markPreviewLoaded] = useFlag(Boolean(thumbDataUri) || loadedPreviewUrls.has(previewUrl));
+  const transitionClassNames = useMediaTransition(isPreviewLoaded);
   const [isAnimationReady, markAnimationReady] = useFlag(false);
 
   const handlePreviewLoad = useCallback(() => {
@@ -34,18 +35,18 @@ function AnimatedIconWithPreview(props: OwnProps) {
 
   return (
     <div
-      className={buildClassName(className, styles.root)}
+      className={buildClassName(className, styles.root, transitionClassNames)}
       style={buildStyle(size !== undefined && `width: ${size}px; height: ${size}px;`)}
     >
-      {!isAnimationReady && thumbDataUri && (
+      {thumbDataUri && !isAnimationReady && (
         // eslint-disable-next-line jsx-a11y/alt-text
-        <img src={thumbDataUri} className={buildClassName(styles.preview)} />
+        <img src={thumbDataUri} className={styles.preview} />
       )}
-      {!isAnimationReady && previewUrl && (
+      {previewUrl && !isAnimationReady && (
         // eslint-disable-next-line jsx-a11y/alt-text
         <img
           src={previewUrl}
-          className={buildClassName(styles.preview, previewClassNames)}
+          className={styles.preview}
           onLoad={handlePreviewLoad}
         />
       )}

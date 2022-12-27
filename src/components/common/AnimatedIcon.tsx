@@ -16,8 +16,6 @@ export type OwnProps =
   Partial<AnimatedStickerProps>
   & { noTransition?: boolean; nonInteractive?: boolean };
 
-const loadedAnimationUrls = new Set();
-
 function AnimatedIcon(props: OwnProps) {
   const {
     size = DEFAULT_SIZE,
@@ -30,18 +28,13 @@ function AnimatedIcon(props: OwnProps) {
     onClick,
     ...otherProps
   } = props;
-  const { tgsUrl } = props;
-
-  const key = `${tgsUrl}_${size}`;
-  const [isAnimationLoaded, markAnimationLoaded] = useFlag(loadedAnimationUrls.has(key));
+  const [isAnimationLoaded, markAnimationLoaded] = useFlag(false);
   const transitionClassNames = useMediaTransition(noTransition || isAnimationLoaded);
 
   const handleLoad = useCallback(() => {
     markAnimationLoaded();
-    loadedAnimationUrls.add(key);
-
     onLoad?.();
-  }, [key, markAnimationLoaded, onLoad]);
+  }, [markAnimationLoaded, onLoad]);
 
   const [playKey, setPlayKey] = useState(String(Math.random()));
 
