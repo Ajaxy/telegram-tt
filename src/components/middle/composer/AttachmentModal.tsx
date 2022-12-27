@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -16,6 +16,7 @@ import { getFileExtension } from '../../common/helpers/documentInfo';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 import { hasPreview } from '../../../util/files';
+import { getHtmlTextLength } from './helpers/getHtmlTextLength';
 
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -63,6 +64,7 @@ export type OwnProps = {
 };
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
+const CAPTION_SYMBOLS_LEFT_THRESHOLD = 100;
 
 const AttachmentModal: FC<OwnProps> = ({
   chatId,
@@ -200,6 +202,11 @@ const AttachmentModal: FC<OwnProps> = ({
     }
   }
 
+  const leftChars = useMemo(() => {
+    const captionLeftBeforeLimit = captionLimit - getHtmlTextLength(caption);
+    return captionLeftBeforeLimit <= CAPTION_SYMBOLS_LEFT_THRESHOLD ? captionLeftBeforeLimit : undefined;
+  }, [caption, captionLimit]);
+
   if (!renderingAttachments) {
     return undefined;
   }
@@ -256,8 +263,6 @@ const AttachmentModal: FC<OwnProps> = ({
       </div>
     );
   }
-
-  const leftChars = (captionLimit - caption.length) <= 100 ? captionLimit - caption.length : undefined;
 
   return (
     <Modal

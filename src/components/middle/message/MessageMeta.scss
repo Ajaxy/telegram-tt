@@ -40,6 +40,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-right: 0.375rem;
+
+    .emoji-small {
+      width: 1rem !important;
+      height: 1rem !important;
+    }
   }
 
   .icon-channelviews {

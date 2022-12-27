@@ -502,7 +502,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
           <div ref={cloneRef} className={buildClassName(className, 'clone')} dir="auto" />
         </div>
       </div>
-      {captionLimit && (
+      {captionLimit !== undefined && (
         <div className="max-length-indicator" dir="auto">
           {captionLimit}
         </div>
