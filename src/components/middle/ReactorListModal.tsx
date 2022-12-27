@@ -4,17 +4,19 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiMessage } from '../../api/types';
+import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
 import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
-import useLang from '../../hooks/useLang';
 import { selectChatMessage } from '../../global/selectors';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import useFlag from '../../hooks/useFlag';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
+import { isSameReaction, getReactionUniqueKey } from '../../global/helpers';
+
+import useLang from '../../hooks/useLang';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import useFlag from '../../hooks/useFlag';
 
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Modal from '../ui/Modal';
@@ -37,6 +39,7 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUser
   chatId?: string;
   messageId?: number;
   animationLevel: AnimationLevel;
+  availableReactions?: ApiAvailableReaction[];
 };
 
 const ReactorListModal: FC<OwnProps & StateProps> = ({
@@ -47,6 +50,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   messageId,
   seenByUserIds,
   animationLevel,
+  availableReactions,
 }) => {
   const {
     loadReactors,
@@ -59,7 +63,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
-  const [chosenTab, setChosenTab] = useState<string | undefined>(undefined);
+  const [chosenTab, setChosenTab] = useState<ApiReaction | undefined>(undefined);
   const canShowFilters = reactors && reactions && reactors.count >= MIN_REACTIONS_COUNT_FOR_FILTERS
     && reactions.results.length > 1;
   const chatIdRef = useRef<string>();
@@ -99,14 +103,22 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   }, [chatId, loadReactors, messageId]);
 
   const allReactions = useMemo(() => {
-    return reactors?.reactions ? unique(reactors.reactions.map((l) => l.reaction)) : [];
+    const uniqueReactions: ApiReaction[] = [];
+    reactors?.reactions?.forEach(({ reaction }) => {
+      if (!uniqueReactions.some((r) => isSameReaction(r, reaction))) {
+        uniqueReactions.push(reaction);
+      }
+    });
+    return uniqueReactions;
   }, [reactors]);
 
   const userIds = useMemo(() => {
     if (chosenTab) {
-      return reactors?.reactions.filter((l) => l.reaction === chosenTab).map((l) => l.userId);
+      return reactors?.reactions
+        .filter(({ reaction }) => isSameReaction(reaction, chosenTab))
+        .map(({ userId }) => userId);
     }
-    return unique(reactors?.reactions.map((l) => l.userId).concat(seenByUserIds || []) || []);
+    return unique(reactors?.reactions.map(({ userId }) => userId).concat(seenByUserIds || []) || []);
   }, [chosenTab, reactors, seenByUserIds]);
 
   const [viewportIds, getMore] = useInfiniteScroll(
@@ -138,17 +150,22 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             {reactors?.count && formatIntegerCompact(reactors.count)}
           </Button>
           {allReactions.map((reaction) => {
-            const count = reactions?.results.find((l) => l.reaction === reaction)?.count;
+            const count = reactions?.results
+              .find((reactionsCount) => isSameReaction(reactionsCount.reaction, reaction))?.count;
             return (
               <Button
-                key={reaction}
-                className={buildClassName(chosenTab === reaction && 'chosen')}
+                key={getReactionUniqueKey(reaction)}
+                className={buildClassName(isSameReaction(chosenTab, reaction) && 'chosen')}
                 size="tiny"
                 ripple
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => setChosenTab(reaction)}
               >
-                <ReactionStaticEmoji reaction={reaction} className="reaction-filter-emoji" />
+                <ReactionStaticEmoji
+                  reaction={reaction}
+                  className="reaction-filter-emoji"
+                  availableReactions={availableReactions}
+                />
                 {count && formatIntegerCompact(count)}
               </Button>
             );
@@ -166,19 +183,26 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             {viewportIds?.flatMap(
               (userId) => {
                 const user = usersById[userId];
-                const userReactions = reactors?.reactions.filter((l) => l.userId === userId);
+                const userReactions = reactors?.reactions.filter((reactor) => reactor.userId === userId);
                 const items: React.ReactNode[] = [];
                 userReactions?.forEach((r) => {
+                  if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
                   items.push(
                     <ListItem
-                      key={`${userId}-${r.reaction}`}
+                      key={`${userId}-${getReactionUniqueKey(r.reaction)}`}
                       className="chat-item-clickable reactors-list-item"
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(userId)}
                     >
                       <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
                       <FullNameTitle peer={user} withEmojiStatus />
-                      {r.reaction && <ReactionStaticEmoji className="reactors-list-emoji" reaction={r.reaction} />}
+                      {r.reaction && (
+                        <ReactionStaticEmoji
+                          className="reactors-list-emoji"
+                          reaction={r.reaction}
+                          availableReactions={availableReactions}
+                        />
+                      )}
                     </ListItem>,
                   );
                 });

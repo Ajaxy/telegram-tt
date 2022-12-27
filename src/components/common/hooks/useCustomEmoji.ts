@@ -7,19 +7,22 @@ import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util
 
 import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
 
-export default function useCustomEmoji(documentId: string) {
-  const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(getGlobal().customEmojis.byId[documentId]);
+export default function useCustomEmoji(documentId?: string) {
+  const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(
+    documentId ? getGlobal().customEmojis.byId[documentId] : undefined,
+  );
 
   useEnsureCustomEmoji(documentId);
 
   const handleGlobalChange = useCallback(() => {
+    if (!documentId) return;
     setCustomEmoji(getGlobal().customEmojis.byId[documentId]);
   }, [documentId]);
 
   useEffect(handleGlobalChange, [documentId, handleGlobalChange]);
 
   useEffect(() => {
-    if (customEmoji) return undefined;
+    if (customEmoji || !documentId) return undefined;
 
     addCustomEmojiCallback(handleGlobalChange, documentId);
 

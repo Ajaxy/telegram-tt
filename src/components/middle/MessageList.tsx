@@ -242,7 +242,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!messageIds || !messagesById) {
       return;
     }
-    const ids = messageIds.filter((l) => messagesById[l]?.reactions);
+    const ids = messageIds.filter((id) => messagesById[id]?.reactions);
 
     if (!ids.length) return;
 
@@ -592,7 +592,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isViewportNewest={Boolean(isViewportNewest)}
           isUnread={Boolean(firstUnreadId)}
           withUsers={withUsers}
-          areReactionsInMeta={isPrivate}
           noAvatars={noAvatars}
           containerRef={containerRef}
           anchorIdRef={anchorIdRef}

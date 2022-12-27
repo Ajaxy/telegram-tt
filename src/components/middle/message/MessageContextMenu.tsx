@@ -1,11 +1,11 @@
 import React, {
-  memo, useMemo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type {
-  ApiAvailableReaction, ApiMessage, ApiSponsoredMessage, ApiStickerSet, ApiUser,
+  ApiAvailableReaction, ApiChatReactions, ApiMessage, ApiReaction, ApiSponsoredMessage, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
@@ -35,7 +35,7 @@ type OwnProps = {
   anchor: IAnchorPosition;
   message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
-  enabledReactions?: string[];
+  enabledReactions?: ApiChatReactions;
   maxUniqueReactions?: number;
   canReschedule?: boolean;
   canReply?: boolean;
@@ -45,7 +45,6 @@ type OwnProps = {
   canReport?: boolean;
   canShowReactionsCount?: boolean;
   canShowReactionList?: boolean;
-  canRemoveReaction?: boolean;
   canBuyPremium?: boolean;
   canEdit?: boolean;
   canForward?: boolean;
@@ -90,7 +89,7 @@ type OwnProps = {
   onShowReactors?: () => void;
   onAboutAds?: () => void;
   onSponsoredHide?: () => void;
-  onSendReaction?: (reaction: string | undefined, x: number, y: number) => void;
+  onToggleReaction?: (reaction: ApiReaction) => void;
 };
 
 const SCROLLBAR_WIDTH = 10;
@@ -128,7 +127,6 @@ const MessageContextMenu: FC<OwnProps> = ({
   isDownloading,
   canShowSeenBy,
   canShowReactionsCount,
-  canRemoveReaction,
   canShowReactionList,
   seenByRecentUsers,
   hasCustomEmoji,
@@ -155,7 +153,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onClosePoll,
   onShowSeenBy,
   onShowReactors,
-  onSendReaction,
+  onToggleReaction,
   onCopyMessages,
   onAboutAds,
   onSponsoredHide,
@@ -166,17 +164,12 @@ const MessageContextMenu: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const scrollableRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
-  const noReactions = !isPrivate && !enabledReactions?.length;
+  const noReactions = !isPrivate && !enabledReactions;
   const withReactions = canShowReactionList && !noReactions;
   const isSponsoredMessage = !('id' in message);
   const messageId = !isSponsoredMessage ? message.id : '';
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
-
-  const currentReactions = useMemo(() => {
-    if (isSponsoredMessage) return undefined;
-    return message.reactions?.results.map((reaction) => reaction.reaction);
-  }, [isSponsoredMessage, message]);
 
   const handleAfterCopy = useCallback(() => {
     showNotification({
@@ -239,10 +232,6 @@ const MessageContextMenu: FC<OwnProps> = ({
     };
   }, [withReactions]);
 
-  const handleRemoveReaction = useCallback(() => {
-    onSendReaction!(undefined, 0, 0);
-  }, [onSendReaction]);
-
   useEffect(() => {
     if (!isOpen) {
       unmarkIsReady();
@@ -280,12 +269,12 @@ const MessageContextMenu: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      {canShowReactionList && (
+      {withReactions && (
         <ReactionSelector
           enabledReactions={enabledReactions}
-          currentReactions={currentReactions}
+          currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           maxUniqueReactions={maxUniqueReactions}
-          onSendReaction={onSendReaction!}
+          onToggleReaction={onToggleReaction!}
           isPrivate={isPrivate}
           availableReactions={availableReactions}
           isReady={isReady}
@@ -299,7 +288,6 @@ const MessageContextMenu: FC<OwnProps> = ({
         style={menuStyle}
         ref={scrollableRef}
       >
-        {canRemoveReaction && <MenuItem icon="heart-outline" onClick={handleRemoveReaction}>Remove Reaction</MenuItem>}
         {canSendNow && <MenuItem icon="send-outline" onClick={onSend}>{lang('MessageScheduleSend')}</MenuItem>}
         {canReschedule && (
           <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>

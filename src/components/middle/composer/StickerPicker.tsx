@@ -160,7 +160,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
     if (isCurrentUserPremium) {
       const addedPremiumStickers = existingAddedSetIds
-        .map((l) => l.stickers?.filter((sticker) => sticker.hasEffect))
+        .map(({ stickers }) => stickers?.filter((sticker) => sticker.hasEffect))
         .flat()
         .filter(Boolean);
 

@@ -1,6 +1,6 @@
-import { updateChatMessage } from './messages';
 import type { GlobalState } from '../types';
-import { selectChatMessage } from '../selectors';
+import type { ApiChat, ApiMessage, ApiReaction } from '../../api/types';
+
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import {
   MIN_LEFT_COLUMN_WIDTH,
@@ -9,7 +9,8 @@ import {
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import windowSize from '../../util/windowSize';
 import { updateChat } from './chats';
-import type { ApiChat } from '../../api/types';
+import { isSameReaction, isReactionChosen } from '../helpers';
+import { updateChatMessage } from './messages';
 
 function getLeftColumnWidth(windowWidth: number) {
   if (windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN) {
@@ -35,44 +36,54 @@ export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
     : 0);
 }
 
-export function addMessageReaction(global: GlobalState, chatId: string, messageId: number, reaction: string) {
-  const reactions = selectChatMessage(global, chatId, messageId)?.reactions || { results: [] };
+export function addMessageReaction(
+  global: GlobalState, message: ApiMessage, userReactions: ApiReaction[],
+) {
+  const currentReactions = message.reactions || { results: [] };
 
   // Update UI without waiting for server response
-  let results = reactions.results.map((l) => (l.reaction === reaction
-    ? {
-      ...l,
-      count: l.isChosen ? l.count : l.count + 1,
-      isChosen: true,
-    } : (l.isChosen ? {
-      ...l,
-      isChosen: false,
-      count: l.count - 1,
-    } : l)))
-    .filter((l) => l.count > 0);
+  const results = currentReactions.results.map((current) => (
+    isReactionChosen(current) ? {
+      ...current,
+      chosenOrder: undefined,
+      count: current.count - 1,
+    } : current
+  )).filter(({ count }) => count > 0);
 
-  let { recentReactions } = reactions;
-
-  if (reaction && !results.some((l) => l.reaction === reaction)) {
-    const { currentUserId } = global;
-
-    results = [...results, {
-      reaction,
-      isChosen: true,
-      count: 1,
-    }];
-
-    if (reactions.canSeeList) {
-      recentReactions = [...(recentReactions || []), {
-        userId: currentUserId!,
+  userReactions.forEach((reaction, i) => {
+    const existingIndex = results.findIndex((r) => isSameReaction(r.reaction, reaction));
+    if (existingIndex > -1) {
+      results[existingIndex] = {
+        ...results[existingIndex],
+        chosenOrder: i,
+        count: results[existingIndex].count + 1,
+      };
+    } else {
+      results.push({
         reaction,
-      }];
+        chosenOrder: i,
+        count: 1,
+      });
     }
+  });
+
+  let { recentReactions = [] } = currentReactions;
+
+  if (recentReactions.length) {
+    recentReactions = recentReactions.filter(({ userId }) => userId !== global.currentUserId);
   }
 
-  return updateChatMessage(global, chatId, messageId, {
+  userReactions.forEach((reaction) => {
+    const { currentUserId } = global;
+    recentReactions.unshift({
+      userId: currentUserId!,
+      reaction,
+    });
+  });
+
+  return updateChatMessage(global, message.chatId, message.id, {
     reactions: {
-      ...reactions,
+      ...currentReactions,
       results,
       recentReactions,
     },

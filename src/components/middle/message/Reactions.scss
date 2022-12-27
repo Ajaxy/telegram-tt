@@ -23,12 +23,7 @@
     text-transform: none;
     color: var(--accent-color);
     overflow: visible;
-
-    .ReactionAnimatedEmoji, .icon-heart {
-      width: 1.125rem;
-      height: 1.125rem;
-      margin-right: 0.25rem;
-    }
+    line-height: 1.25rem;
 
     .avatars {
       display: flex;

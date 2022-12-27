@@ -72,6 +72,8 @@
   }
 
   .quick-reaction {
+    --custom-emoji-size: 2rem;
+
     cursor: pointer;
     position: absolute;
     right: -0.5rem;
@@ -79,7 +81,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scale(1);
+    transform: scale(0.75);
     opacity: 0;
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
     transition-delay: 0.2s;
@@ -90,16 +92,12 @@
 
     &:hover {
       transition-delay: unset;
-      transform: scale(1.4);
-    }
-
-    .ReactionStaticEmoji {
-      width: 1.125rem;
+      transform: scale(1);
     }
   }
 
   &.last-in-list .quick-reaction:hover {
-    transform: translateY(-0.1875rem) scale(1.4);
+    transform: translateY(-0.1875rem) scale(1);
   }
 
   &.own .quick-reaction {

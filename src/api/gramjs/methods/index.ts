@@ -42,7 +42,7 @@ export {
   faveSticker, fetchStickers, fetchSavedGifs, saveGif, searchStickers, installStickerSet, uninstallStickerSet,
   searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords, fetchAnimatedEmojiEffects,
   removeRecentSticker, clearRecentStickers, fetchCustomEmoji, fetchPremiumGifts, fetchCustomEmojiSets,
-  fetchFeaturedEmojiStickers,
+  fetchFeaturedEmojiStickers, fetchGenericEmojiEffects,
 } from './symbols';
 
 export {

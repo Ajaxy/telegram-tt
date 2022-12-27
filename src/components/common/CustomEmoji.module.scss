@@ -29,7 +29,7 @@
 }
 
 .root, .media, .thumb {
-  border-radius: 0 !important;
+  border-radius: var(--custom-emoji-border-radius) !important;
 }
 
 .highlightCatch {

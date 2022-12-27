@@ -4,8 +4,11 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiAvailableReaction, ApiChat } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiChat, ApiChatReactions, ApiReaction,
+} from '../../../api/types';
 
+import { isSameReaction } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -14,6 +17,7 @@ import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import Spinner from '../../ui/Spinner';
+import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   chatId: string;
@@ -24,7 +28,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   availableReactions?: ApiAvailableReaction[];
-  enabledReactions?: string[];
+  enabledReactions?: ApiChatReactions;
 };
 
 const ManageReactions: FC<OwnProps & StateProps> = ({
@@ -39,12 +43,23 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const [isTouched, setIsTouched] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [localEnabledReactions, setLocalEnabledReactions] = useState(enabledReactions || []);
+  const [localEnabledReactions, setLocalEnabledReactions] = useState<ApiChatReactions | undefined>(enabledReactions);
 
   useHistoryBack({
     isActive,
     onBack: onClose,
   });
+
+  const reactionsOptions = useMemo(() => [{
+    value: 'all',
+    label: lang('AllReactions'),
+  }, {
+    value: 'some',
+    label: lang('SomeReactions'),
+  }, {
+    value: 'none',
+    label: lang('NoReactions'),
+  }], [lang]);
 
   const handleSaveReactions = useCallback(() => {
     if (!chat) return;
@@ -59,24 +74,46 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     setIsLoading(false);
     setIsTouched(false);
-    setLocalEnabledReactions(enabledReactions || []);
+    setLocalEnabledReactions(enabledReactions);
   }, [enabledReactions]);
 
   const availableActiveReactions = useMemo<ApiAvailableReaction[] | undefined>(
-    () => availableReactions?.filter((l) => !l.isInactive),
+    () => availableReactions?.filter(({ isInactive }) => !isInactive),
     [availableReactions],
   );
+
+  const handleReactionsOptionChange = useCallback((value: string) => {
+    if (value === 'all') {
+      setLocalEnabledReactions({ type: 'all' });
+    } else if (value === 'some') {
+      setLocalEnabledReactions({
+        type: 'some',
+        allowed: enabledReactions?.type === 'some' ? enabledReactions.allowed : [],
+      });
+    } else {
+      setLocalEnabledReactions(undefined);
+    }
+    setIsTouched(true);
+  }, [enabledReactions]);
 
   const handleReactionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (!chat || !availableActiveReactions) return;
 
     const { name, checked } = e.currentTarget;
-    const newEnabledReactions = name === 'all' ? (checked ? availableActiveReactions.map((l) => l.reaction) : [])
-      : (!checked
-        ? localEnabledReactions.filter((l) => l !== name)
-        : [...localEnabledReactions, name]);
-
-    setLocalEnabledReactions(newEnabledReactions);
+    if (localEnabledReactions?.type === 'some') {
+      const reaction = { emoticon: name } as ApiReaction;
+      if (checked) {
+        setLocalEnabledReactions({
+          type: 'some',
+          allowed: [...localEnabledReactions.allowed, reaction],
+        });
+      } else {
+        setLocalEnabledReactions({
+          type: 'some',
+          allowed: localEnabledReactions.allowed.filter((local) => !isSameReaction(local, reaction)),
+        });
+      }
+    }
     setIsTouched(true);
   }, [availableActiveReactions, chat, localEnabledReactions]);
 
@@ -84,31 +121,43 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
     <div className="Management">
       <div className="custom-scroll">
         <div className="section">
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="all"
-              checked={!localEnabledReactions || localEnabledReactions.length > 0}
-              label={lang('EnableReactions')}
-              onChange={handleReactionChange}
-            />
-          </div>
-          {availableActiveReactions?.map(({ reaction, title }) => (
-            <div className="ListItem no-selection">
-              <Checkbox
-                name={reaction}
-                checked={!localEnabledReactions || localEnabledReactions?.includes(reaction)}
-                disabled={localEnabledReactions?.length === 0}
-                label={(
-                  <div className="Reaction">
-                    <ReactionStaticEmoji reaction={reaction} />
-                    {title}
-                  </div>
-                )}
-                onChange={handleReactionChange}
-              />
-            </div>
-          ))}
+          <h3 className="section-heading">
+            {lang('AvailableReactions')}
+          </h3>
+          <RadioGroup
+            selected={localEnabledReactions?.type || 'none'}
+            name="reactions"
+            options={reactionsOptions}
+            onChange={handleReactionsOptionChange}
+          />
+          <p className="section-info mt-4">
+            {localEnabledReactions?.type === 'all' && lang('EnableAllReactionsInfo')}
+            {localEnabledReactions?.type === 'some' && lang('EnableSomeReactionsInfo')}
+            {!localEnabledReactions && lang('DisableReactionsInfo')}
+          </p>
         </div>
+        {localEnabledReactions?.type === 'some' && (
+          <div className="section">
+            <h3 className="section-heading">
+              {lang('AvailableReactions')}
+            </h3>
+            {availableActiveReactions?.map(({ reaction, title }) => (
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name={reaction.emoticon}
+                  checked={localEnabledReactions?.allowed.some((r) => isSameReaction(reaction, r))}
+                  label={(
+                    <div className="Reaction">
+                      <ReactionStaticEmoji reaction={reaction} availableReactions={availableReactions} />
+                      {title}
+                    </div>
+                  )}
+                  onChange={handleReactionChange}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <FloatingActionButton

@@ -171,7 +171,7 @@ export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetC
 
 export function buildApiEmojiInteraction(json: GramJsEmojiInteraction): ApiEmojiInteraction {
   return {
-    timestamps: json.a.map((l) => l.t),
+    timestamps: json.a.map(({ t }) => t),
   };
 }
 

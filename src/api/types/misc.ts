@@ -1,4 +1,4 @@
-import type { ApiDocument, ApiPhoto } from './messages';
+import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
 import type { ApiLimitType } from '../../global/types';
 
@@ -174,12 +174,14 @@ export interface ApiAppConfig {
   premiumPromoOrder: string[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
+  maxUserReactionsDefault: number;
+  maxUserReactionsPremium: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
 }
 
 export interface ApiConfig {
   expiresAt: number;
-  defaultReaction?: string;
+  defaultReaction?: ApiReaction;
   gifSearchUsername?: string;
   maxGroupSize: number;
 }

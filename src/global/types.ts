@@ -47,6 +47,8 @@ import type {
   ApiReceipt,
   ApiPaymentCredentials,
   ApiConfig,
+  ApiReaction,
+  ApiChatReactions,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -99,7 +101,7 @@ export interface ActiveEmojiInteraction {
 
 export interface ActiveReaction {
   messageId?: number;
-  reaction?: string;
+  reaction?: ApiReaction;
 }
 
 export interface Thread {
@@ -341,6 +343,7 @@ export type GlobalState = {
 
   animatedEmojis?: ApiStickerSet;
   animatedEmojiEffects?: ApiStickerSet;
+  genericEmojiEffects?: ApiStickerSet;
   premiumGifts?: ApiStickerSet;
   emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
@@ -395,7 +398,7 @@ export type GlobalState = {
 
   availableReactions?: ApiAvailableReaction[];
   activeEmojiInteractions?: ActiveEmojiInteraction[];
-  activeReactions: Record<number, ActiveReaction>;
+  activeReactions: Record<number, ActiveReaction[]>;
 
   localTextSearch: {
     byChatThreadKey: Record<string, {
@@ -812,6 +815,38 @@ export interface ActionPayloads {
     ids: number[];
   };
 
+  // Reactions
+  loadAvailableReactions: never;
+
+  loadMessageReactions: {
+    chatId: string;
+    ids: number[];
+  };
+
+  toggleReaction: {
+    chatId: string;
+    messageId: number;
+    reaction: ApiReaction;
+  };
+
+  setDefaultReaction: {
+    reaction: ApiReaction;
+  };
+  sendDefaultReaction: {
+    chatId: string;
+    messageId: number;
+  };
+
+  setChatEnabledReactions: {
+    chatId: string;
+    enabledReactions?: ApiChatReactions;
+  };
+
+  stopActiveReaction: {
+    messageId: number;
+    reaction: ApiReaction;
+  };
+
   // Media Viewer & Audio Player
   openMediaViewer: {
     chatId?: string;
@@ -931,6 +966,7 @@ export interface ActionPayloads {
   };
   loadAnimatedEmojis: never;
   loadGreetingStickers: never;
+  loadGenericEmojiEffects: never;
 
   addRecentSticker: {
     sticker: ApiSticker;
@@ -1270,7 +1306,7 @@ export type NonTypedActionNames = (
   'joinChannel' | 'leaveChannel' | 'deleteChannel' | 'toggleChatPinned' | 'toggleChatArchived' | 'toggleChatUnread' |
   'loadChatFolders' | 'loadRecommendedChatFolders' | 'editChatFolder' | 'addChatFolder' | 'deleteChatFolder' |
   'updateChat' | 'toggleSignatures' | 'loadGroupsForDiscussion' | 'linkDiscussionGroup' | 'unlinkDiscussionGroup' |
-  'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' | 'setChatEnabledReactions' |
+  'loadMoreMembers' | 'setActiveChatFolder' | 'openNextChat' |
   'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' | 'editChatFolders' | 'toggleIsProtected' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
@@ -1278,12 +1314,11 @@ export type NonTypedActionNames = (
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
   'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
-  'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' | 'sendReaction' |
+  'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
   'reportMessages' | 'sendMessageAction' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
-  'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' | 'loadAvailableReactions' |
-  'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' | 'setDefaultReaction' |
-  'sendDefaultReaction' | 'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'loadMessageReactions' |
-  'stopActiveReaction' | 'copySelectedMessages' | 'copyMessagesByIds' |
+  'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' |
+  'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' |
+  'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'copySelectedMessages' | 'copyMessagesByIds' |
   'setEditingId' |
   // scheduled messages
   'loadScheduledHistory' | 'sendScheduledMessages' | 'rescheduleMessage' | 'deleteScheduledMessages' |

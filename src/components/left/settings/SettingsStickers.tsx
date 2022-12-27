@@ -6,10 +6,16 @@ import { getActions, withGlobal } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
 import type { ISettings } from '../../../types';
-import type { ApiSticker, ApiStickerSet } from '../../../api/types';
+import type {
+  ApiAvailableReaction,
+  ApiReaction,
+  ApiSticker,
+  ApiStickerSet,
+} from '../../../api/types';
 
 import renderText from '../../common/helpers/renderText';
 import { pick } from '../../../util/iteratees';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -19,6 +25,8 @@ import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import StickerSetCard from '../../common/StickerSetCard';
+
+const DEFAULT_REACTION_SIZE = 1.5 * REM;
 
 type OwnProps = {
   isActive?: boolean;
@@ -34,7 +42,8 @@ type StateProps =
     addedSetIds?: string[];
     customEmojiSetIds?: string[];
     stickerSetsById: Record<string, ApiStickerSet>;
-    defaultReaction?: string;
+    defaultReaction?: ApiReaction;
+    availableReactions?: ApiAvailableReaction[];
   };
 
 const SettingsStickers: FC<OwnProps & StateProps> = ({
@@ -45,6 +54,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
   defaultReaction,
   shouldSuggestStickers,
   shouldLoopStickers,
+  availableReactions,
   onReset,
   onScreenSelect,
 }) => {
@@ -109,7 +119,12 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => onScreenSelect(SettingsScreens.QuickReaction)}
           >
-            <ReactionStaticEmoji reaction={defaultReaction} />
+            <ReactionStaticEmoji
+              reaction={defaultReaction}
+              className="current-default-reaction"
+              size={DEFAULT_REACTION_SIZE}
+              availableReactions={availableReactions}
+            />
             <div className="title">{lang('DoubleTapSetting')}</div>
           </ListItem>
         )}

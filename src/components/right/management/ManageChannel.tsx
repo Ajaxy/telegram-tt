@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
-import type { ApiChat, ApiExportedInvite } from '../../../api/types';
+import type { ApiAvailableReaction, ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getChatAvatarHash, getHasAdminRight, isChatPublic } from '../../../global/helpers';
@@ -43,7 +43,7 @@ type StateProps = {
   canInvite?: boolean;
   exportedInvites?: ApiExportedInvite[];
   lastSyncTime?: number;
-  availableReactionsCount?: number;
+  availableReactions?: ApiAvailableReaction[];
 };
 
 const CHANNEL_TITLE_EMPTY = 'Channel title can\'t be empty';
@@ -58,10 +58,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   canInvite,
   exportedInvites,
   lastSyncTime,
-  availableReactionsCount,
+  isActive,
+  availableReactions,
   onScreenSelect,
   onClose,
-  isActive,
 }) => {
   const {
     updateChat,
@@ -191,7 +191,21 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     openChat({ id: undefined });
   }, [chat.isCreator, chat.id, closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, openChat]);
 
-  const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
+  const chatReactionsDescription = useMemo(() => {
+    if (!chat.fullInfo?.enabledReactions) {
+      return lang('ReactionsOff');
+    }
+
+    if (chat.fullInfo.enabledReactions.type === 'all') {
+      return lang('ReactionsAll');
+    }
+
+    const enabledLength = chat.fullInfo.enabledReactions.allowed.length;
+    const totalLength = availableReactions?.filter((reaction) => !reaction.isInactive).length || 0;
+
+    const text = totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
+    return text;
+  }, [availableReactions, chat, lang]);
   const isChannelPublic = useMemo(() => isChatPublic(chat), [chat]);
 
   if (chat.isRestricted || chat.isForbidden) {
@@ -275,7 +289,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('Reactions')}</span>
             <span className="subtitle" dir="auto">
-              {enabledReactionsCount}/{availableReactionsCount}
+              {chatReactionsDescription}
             </span>
           </ListItem>
           <div className="ListItem no-selection narrow">
@@ -358,7 +372,7 @@ export default memo(withGlobal<OwnProps>(
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
       lastSyncTime: global.lastSyncTime,
       exportedInvites: invites,
-      availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
+      availableReactions: global.availableReactions,
     };
   },
 )(ManageChannel));

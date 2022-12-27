@@ -351,6 +351,28 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       return acc;
     }, {} as Record<string, ApiChat>);
   }
+
+  // TODO Remove in Apr 2023 (this was re-designed but can be hardcoded in cache)
+  if (cached.messages.byChatId) {
+    const wasUpdated = Object.values(cached.messages.byChatId)
+      .some((messages) => Object.values(messages.byId).some(({ reactions }) => {
+        return reactions?.results[0]?.reaction && typeof reactions.results[0].reaction !== 'string';
+      }));
+    if (!wasUpdated) {
+      for (const messages of Object.values(cached.messages.byChatId)) {
+        for (const message of Object.values(messages.byId)) {
+          delete message.reactions;
+        }
+      }
+    }
+  }
+  if (typeof cached.config?.defaultReaction === 'string') {
+    cached.config.defaultReaction = { emoticon: cached.config.defaultReaction };
+  }
+  if (typeof cached.availableReactions?.[0].reaction === 'string') {
+    cached.availableReactions = cached.availableReactions
+      .map((r) => ({ ...r, reaction: { emoticon: r.reaction as unknown as string } }));
+  }
 }
 
 function updateCache() {

@@ -16,7 +16,9 @@ import { LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID } 
 import {
   selectChat, selectChatBot, selectIsChatWithBot, selectIsChatWithSelf,
 } from './chats';
-import { selectIsUserOrChatContact, selectUser, selectUserStatus } from './users';
+import {
+  selectIsCurrentUserPremium, selectIsUserOrChatContact, selectUser, selectUserStatus,
+} from './users';
 import {
   getSendingState,
   isChatChannel,
@@ -41,6 +43,7 @@ import {
   getMessageDocument,
   getMessageWebPagePhoto,
   getMessageOriginalId,
+  canSendReaction,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -953,10 +956,7 @@ export function selectDefaultReaction(global: GlobalState, chatId: string) {
 
   const isPrivate = isUserId(chatId);
   const defaultReaction = global.config?.defaultReaction;
-  const { availableReactions } = global;
-  if (!defaultReaction || !availableReactions?.some(
-    (l) => l.reaction === defaultReaction && !l.isInactive,
-  )) {
+  if (!defaultReaction) {
     return undefined;
   }
 
@@ -964,12 +964,18 @@ export function selectDefaultReaction(global: GlobalState, chatId: string) {
     return defaultReaction;
   }
 
-  const enabledReactions = selectChat(global, chatId)?.fullInfo?.enabledReactions;
-  if (!enabledReactions?.includes(defaultReaction)) {
+  const chatReactions = selectChat(global, chatId)?.fullInfo?.enabledReactions;
+  if (!chatReactions || !canSendReaction(defaultReaction, chatReactions)) {
     return undefined;
   }
 
   return defaultReaction;
+}
+
+export function selectMaxUserReactions(global: GlobalState): number {
+  const isPremium = selectIsCurrentUserPremium(global);
+  const { maxUserReactionsPremium = 3, maxUserReactionsDefault = 1 } = global.appConfig || {};
+  return isPremium ? maxUserReactionsPremium : maxUserReactionsDefault;
 }
 
 // Slow, not to be used in `withGlobal`

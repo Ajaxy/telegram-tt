@@ -1,0 +1,45 @@
+.root {
+  --custom-emoji-border-radius: 0.25rem;
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.25rem;
+
+  z-index: 2;
+
+  &.is-custom-emoji {
+    margin-right: 0.375rem;
+  }
+}
+
+.animated-icon, .effect {
+  position: fixed;
+  top: -0.375rem;
+  left: -0.375rem;
+  pointer-events: none;
+
+  &.effect {
+    top: -2.5rem;
+    left: -2.5rem;
+  }
+
+  &:not(:global(.open)) {
+    opacity: 1 !important;
+  }
+
+  &:global(.closing) {
+    opacity: 0 !important;
+  }
+}
+
+.animating {
+  // Fix for redundant scroll on iOS
+  transform: translateZ(0);
+  // Fix for redundant scroll in Firefox
+  contain: layout;
+}

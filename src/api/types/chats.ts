@@ -1,4 +1,6 @@
-import type { ApiMessage, ApiPhoto, ApiStickerSet } from './messages';
+import type {
+  ApiChatReactions, ApiMessage, ApiPhoto, ApiStickerSet,
+} from './messages';
 import type { ApiBotCommand } from './bots';
 import type { ApiChatInviteImporter } from './misc';
 import type { ApiFakeType, ApiUsername } from './users';
@@ -101,7 +103,7 @@ export interface ApiChatFullInfo {
   };
   linkedChatId?: string;
   botCommands?: ApiBotCommand[];
-  enabledReactions?: string[];
+  enabledReactions?: ApiChatReactions;
   sendAsId?: string;
   canViewStatistics?: boolean;
   recentRequesterIds?: string[];

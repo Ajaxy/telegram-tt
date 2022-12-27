@@ -19,6 +19,8 @@ import type {
   ApiAvailableReaction,
   ApiChatMember,
   ApiUsername,
+  ApiReaction,
+  ApiStickerSet,
 } from '../../../api/types';
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
@@ -83,7 +85,11 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import { calculateDimensionsForMessageMedia, ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
+import {
+  calculateDimensionsForMessageMedia,
+  REM,
+  ROUND_VIDEO_DIMENSIONS_PX,
+} from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
@@ -153,7 +159,6 @@ type OwnProps =
     noAvatars?: boolean;
     withAvatar?: boolean;
     withSenderName?: boolean;
-    areReactionsInMeta?: boolean;
     threadId: number;
     messageListType: MessageListType;
     noComments: boolean;
@@ -194,6 +199,7 @@ type StateProps = {
   highlight?: string;
   animatedEmoji?: string;
   animatedCustomEmoji?: string;
+  genericEffects?: ApiStickerSet;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
@@ -207,8 +213,8 @@ type StateProps = {
   threadInfo?: ApiThreadInfo;
   reactionMessage?: ApiMessage;
   availableReactions?: ApiAvailableReaction[];
-  defaultReaction?: string;
-  activeReaction?: ActiveReaction;
+  defaultReaction?: ApiReaction;
+  activeReactions?: ActiveReaction[];
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   hasUnreadReaction?: boolean;
   isTranscribing?: boolean;
@@ -226,7 +232,6 @@ type MetaPosition =
 type ReactionsPosition =
   'inside'
   | 'outside'
-  | 'in-meta'
   | 'none';
 
 const NBSP = '\u00A0';
@@ -236,6 +241,7 @@ const APPENDIX_OWN = { __html: '<svg width="9" height="20" xmlns="http://www.w3.
 const APPENDIX_NOT_OWN = { __html: '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>' };
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
+const QUICK_REACTION_SIZE = 2 * REM;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -247,7 +253,6 @@ const Message: FC<OwnProps & StateProps> = ({
   noAvatars,
   withAvatar,
   withSenderName,
-  areReactionsInMeta,
   noComments,
   appearanceOrder,
   isFirstInGroup,
@@ -288,6 +293,7 @@ const Message: FC<OwnProps & StateProps> = ({
   highlight,
   animatedEmoji,
   animatedCustomEmoji,
+  genericEffects,
   isInSelectMode,
   isSelected,
   isGroupSelected,
@@ -295,7 +301,7 @@ const Message: FC<OwnProps & StateProps> = ({
   reactionMessage,
   availableReactions,
   defaultReaction,
-  activeReaction,
+  activeReactions,
   activeEmojiInteractions,
   messageListType,
   isPinnedList,
@@ -502,7 +508,7 @@ const Message: FC<OwnProps & StateProps> = ({
     Boolean(message.inlineButtons) && 'has-inline-buttons',
     isSwiped && 'is-swiped',
     transitionClassNames,
-    (Boolean(activeReaction) || hasActiveStickerEffect) && 'has-active-reaction',
+    (Boolean(activeReactions) || hasActiveStickerEffect) && 'has-active-reaction',
   );
 
   const {
@@ -545,9 +551,7 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   let reactionsPosition!: ReactionsPosition;
-  if (areReactionsInMeta) {
-    reactionsPosition = 'in-meta';
-  } else if (hasReactions) {
+  if (hasReactions) {
     if (isCustomShape || ((photo || video) && !hasText)) {
       reactionsPosition = 'outside';
     } else if (asForwarded) {
@@ -655,13 +659,10 @@ const Message: FC<OwnProps & StateProps> = ({
     const meta = (
       <MessageMeta
         message={message}
-        reactionMessage={reactionMessage}
         outgoingStatus={outgoingStatus}
         signature={signature}
-        withReactions={reactionsPosition === 'in-meta'}
         withReactionOffset={reactionsPosition === 'inside'}
         availableReactions={availableReactions}
-        activeReaction={activeReaction}
         onClick={handleMetaClick}
       />
     );
@@ -672,10 +673,12 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <Reactions
-        activeReaction={activeReaction}
+        activeReactions={activeReactions}
         message={reactionMessage!}
         metaChildren={meta}
         availableReactions={availableReactions}
+        genericEffects={genericEffects}
+        observeIntersection={observeIntersectionForPlaying}
       />
     );
   }
@@ -1100,10 +1103,15 @@ const Message: FC<OwnProps & StateProps> = ({
           )}
           {withQuickReactionButton && (
             <div
-              className={buildClassName('quick-reaction', isQuickReactionVisible && !activeReaction && 'visible')}
+              className={buildClassName('quick-reaction', isQuickReactionVisible && !activeReactions && 'visible')}
               onClick={handleSendQuickReaction}
             >
-              <ReactionStaticEmoji reaction={defaultReaction!} />
+              <ReactionStaticEmoji
+                reaction={defaultReaction}
+                size={QUICK_REACTION_SIZE}
+                availableReactions={availableReactions}
+                observeIntersection={observeIntersectionForPlaying}
+              />
             </div>
           )}
         </div>
@@ -1114,8 +1122,10 @@ const Message: FC<OwnProps & StateProps> = ({
           <Reactions
             message={reactionMessage!}
             isOutside
-            activeReaction={activeReaction}
+            activeReactions={activeReactions}
             availableReactions={availableReactions}
+            genericEffects={genericEffects}
+            observeIntersection={observeIntersectionForPlaying}
           />
         )}
       </div>
@@ -1260,7 +1270,7 @@ export default memo(withGlobal<OwnProps>(
       threadInfo: actualThreadInfo,
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
-      activeReaction: reactionMessage && global.activeReactions[reactionMessage.id],
+      activeReactions: reactionMessage && global.activeReactions[reactionMessage.id],
       activeEmojiInteractions: global.activeEmojiInteractions,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
@@ -1271,6 +1281,7 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       animationLevel: global.settings.byKey.animationLevel,
       senderAdminMember,
+      genericEffects: global.genericEmojiEffects,
     };
   },
 )(Message));

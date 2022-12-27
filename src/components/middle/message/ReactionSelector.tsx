@@ -3,24 +3,28 @@ import React, {
 } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiAvailableReaction } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiChatReactions, ApiReaction, ApiReactionCount,
+} from '../../../api/types';
 
-import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useFlag from '../../../hooks/useFlag';
 import { getTouchY } from '../../../util/scrollLock';
 import { createClassNameBuilder } from '../../../util/buildClassName';
 import { IS_COMPACT_MENU } from '../../../util/environment';
+import { isSameReaction, canSendReaction, getReactionUniqueKey } from '../../../global/helpers';
+
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useFlag from '../../../hooks/useFlag';
 
 import ReactionSelectorReaction from './ReactionSelectorReaction';
 
 import './ReactionSelector.scss';
 
 type OwnProps = {
-  enabledReactions?: string[];
-  onSendReaction: (reaction: string, x: number, y: number) => void;
+  enabledReactions?: ApiChatReactions;
+  onToggleReaction: (reaction: ApiReaction) => void;
   isPrivate?: boolean;
   availableReactions?: ApiAvailableReaction[];
-  currentReactions?: string[];
+  currentReactions?: ApiReactionCount[];
   maxUniqueReactions?: number;
   isReady?: boolean;
   canBuyPremium?: boolean;
@@ -36,7 +40,7 @@ const ReactionSelector: FC<OwnProps> = ({
   maxUniqueReactions,
   isPrivate,
   isReady,
-  onSendReaction,
+  onToggleReaction,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const itemsScrollRef = useRef<HTMLDivElement>(null);
@@ -57,14 +61,25 @@ const ReactionSelector: FC<OwnProps> = ({
   };
 
   const reactionsToRender = useMemo(() => {
-    return availableReactions?.map((reaction) => {
-      if (reaction.isInactive) return undefined;
-      if (!isPrivate && (!enabledReactions || !enabledReactions.includes(reaction.reaction))) return undefined;
+    return availableReactions?.map((availableReaction) => {
+      if (availableReaction.isInactive) return undefined;
+      if (!isPrivate && (!enabledReactions || !canSendReaction(availableReaction.reaction, enabledReactions))) {
+        return undefined;
+      }
       if (maxUniqueReactions && currentReactions && currentReactions.length >= maxUniqueReactions
-        && !currentReactions.includes(reaction.reaction)) return undefined;
-      return reaction;
+        && !currentReactions.some(({ reaction }) => isSameReaction(reaction, availableReaction.reaction))) {
+        return undefined;
+      }
+      return availableReaction;
     }) || [];
   }, [availableReactions, currentReactions, enabledReactions, isPrivate, maxUniqueReactions]);
+
+  const userReactionIndexes = useMemo(() => {
+    const chosenReactions = currentReactions?.filter(({ chosenOrder }) => chosenOrder !== undefined) || [];
+    return new Set(chosenReactions.map(({ reaction }) => (
+      reactionsToRender.findIndex((r) => r && isSameReaction(r.reaction, reaction))
+    )));
+  }, [currentReactions, reactionsToRender]);
 
   if (!reactionsToRender.length) return undefined;
 
@@ -78,11 +93,12 @@ const ReactionSelector: FC<OwnProps> = ({
             if (!reaction) return undefined;
             return (
               <ReactionSelectorReaction
-                key={reaction.reaction}
+                key={getReactionUniqueKey(reaction.reaction)}
                 previewIndex={i}
                 isReady={isReady}
-                onSendReaction={onSendReaction}
+                onToggleReaction={onToggleReaction}
                 reaction={reaction}
+                chosen={userReactionIndexes.has(i)}
               />
             );
           })}
