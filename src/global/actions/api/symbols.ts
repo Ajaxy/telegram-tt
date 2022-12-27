@@ -14,6 +14,7 @@ import {
   updateStickersForEmoji,
   rebuildStickersForEmoji,
   updateCustomEmojiForEmoji,
+  updateCustomEmojiSets,
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
@@ -27,9 +28,32 @@ const ADDED_SETS_THROTTLE_CHUNK = 10;
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
-addActionHandler('loadStickerSets', (global, actions) => {
-  void loadStickerSets(global.stickers.added.hash);
-  void loadCustomEmojiSets(global.customEmojis.added.hash);
+addActionHandler('loadStickerSets', async (global, actions) => {
+  const [addedStickers, addedCustomEmojis] = await Promise.all([
+    callApi('fetchStickerSets', { hash: global.stickers.added.hash }),
+    callApi('fetchCustomEmojiSets', { hash: global.customEmojis.added.hash }),
+  ]);
+  if (!addedCustomEmojis || !addedStickers) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = updateStickerSets(
+    global,
+    'added',
+    addedStickers.hash,
+    addedStickers.sets,
+  );
+
+  global = updateCustomEmojiSets(
+    global,
+    addedCustomEmojis.hash,
+    addedCustomEmojis.sets,
+  );
+
+  setGlobal(global);
+
   actions.loadCustomEmojis({
     ids: global.recentCustomEmojis,
   });
@@ -346,34 +370,6 @@ addActionHandler('loadEmojiKeywords', async (global, actions, payload: { languag
     },
   });
 });
-
-async function loadCustomEmojiSets(hash?: string) {
-  const addedCustomEmojis = await callApi('fetchCustomEmojiSets', { hash });
-  if (!addedCustomEmojis) {
-    return;
-  }
-
-  setGlobal(updateStickerSets(
-    getGlobal(),
-    'added',
-    addedCustomEmojis.hash,
-    addedCustomEmojis.sets,
-  ));
-}
-
-async function loadStickerSets(hash?: string) {
-  const addedStickers = await callApi('fetchStickerSets', { hash });
-  if (!addedStickers) {
-    return;
-  }
-
-  setGlobal(updateStickerSets(
-    getGlobal(),
-    'added',
-    addedStickers.hash,
-    addedStickers.sets,
-  ));
-}
 
 async function loadRecentStickers(hash?: string) {
   const recentStickers = await callApi('fetchRecentStickers', { hash });

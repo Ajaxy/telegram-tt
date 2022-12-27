@@ -22,12 +22,7 @@ export function updateStickerSets(
     };
   });
 
-  const regularSetIds = sets.filter((set) => !set.isEmoji).map((set) => set.id);
-  const addedEmojiSetIds = category === 'added' ? sets.filter((set) => set.isEmoji).map((set) => set.id) : [];
-  const customEmojis = sets.filter((set) => set.isEmoji)
-    .map((set) => set.stickers)
-    .flat()
-    .filter(Boolean);
+  const regularSetIds = sets.map((set) => set.id);
 
   return {
     ...global,
@@ -52,6 +47,38 @@ export function updateStickerSets(
         ),
       },
     },
+  };
+}
+
+export function updateCustomEmojiSets(
+  global: GlobalState,
+  hash: string,
+  sets: ApiStickerSet[],
+): GlobalState {
+  const updatedSets = sets.map((stickerSet) => {
+    const existing = global.stickers.setsById[stickerSet.id];
+    if (!existing) {
+      return stickerSet;
+    }
+
+    return {
+      ...existing,
+      ...stickerSet,
+    };
+  });
+
+  const customEmojis = sets.map((set) => set.stickers).flat().filter(Boolean);
+  const addedSetIds = sets.map((set) => set.id);
+
+  return {
+    ...global,
+    stickers: {
+      ...global.stickers,
+      setsById: {
+        ...global.stickers.setsById,
+        ...buildCollectionByKey(updatedSets, 'id'),
+      },
+    },
     customEmojis: {
       ...global.customEmojis,
       added: {
@@ -59,7 +86,7 @@ export function updateStickerSets(
         hash,
         setIds: [
           ...(global.customEmojis.added.setIds || []),
-          ...addedEmojiSetIds,
+          ...addedSetIds,
         ],
       },
       byId: {
