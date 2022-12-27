@@ -19,7 +19,7 @@ type OwnProps = {
   isLoading?: boolean;
   isUsernameAvailable?: boolean;
   checkedUsername?: string;
-  onChange: (value: string | false) => void;
+  onChange: (value: string) => void;
 };
 
 const MIN_USERNAME_LENGTH = 5;
@@ -30,9 +30,11 @@ const USERNAME_REGEX = /^\D([a-zA-Z0-9_]+)$/;
 const runDebouncedForCheckUsername = debounce((cb) => cb(), 250, false);
 
 function isUsernameValid(username: string) {
-  return username.length >= MIN_USERNAME_LENGTH
+  return username.length === 0 || (
+    username.length >= MIN_USERNAME_LENGTH
     && username.length <= MAX_USERNAME_LENGTH
-    && USERNAME_REGEX.test(username);
+    && USERNAME_REGEX.test(username)
+  );
 }
 
 const UsernameInput: FC<OwnProps> = ({

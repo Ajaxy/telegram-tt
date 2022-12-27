@@ -71,7 +71,7 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
     }
   }
 
-  if (username) {
+  if (username !== undefined) {
     const result = await callApi('updateUsername', username);
     global = getGlobal();
     const currentUser = currentUserId && selectUser(global, currentUserId);
