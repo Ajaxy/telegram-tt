@@ -60,8 +60,8 @@ export interface ApiUserStatus {
 
 export interface ApiUsername {
   username: string;
-  isActive?: true;
-  isEditable?: true;
+  isActive?: boolean;
+  isEditable?: boolean;
 }
 
 export type ApiChatType = typeof API_CHAT_TYPES[number];

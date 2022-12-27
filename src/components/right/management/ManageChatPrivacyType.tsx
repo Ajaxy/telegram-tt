@@ -71,6 +71,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const isPublic = useMemo(() => isChatPublic(chat), [chat]);
   const privateLink = chat.fullInfo?.inviteLink;
 
+  const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [privacyType, setPrivacyType] = useState<PrivacyType>(isPublic ? 'public' : 'private');
   const [editableUsername, setEditableUsername] = useState();
   const [isRevokeConfirmDialogOpen, openRevokeConfirmDialog, closeRevokeConfirmDialog] = useFlag();
@@ -79,8 +80,10 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const previousIsUsernameAvailable = usePrevious(isUsernameAvailable);
   const renderingIsUsernameAvailable = isUsernameAvailable ?? previousIsUsernameAvailable;
 
-  const canUpdate = Boolean(
-    (privacyType === 'public' && editableUsername && renderingIsUsernameAvailable)
+  const canUpdate = isProfileFieldsTouched && Boolean(
+    (privacyType === 'public'
+      && (editableUsername || (currentUsername && editableUsername === ''))
+      && renderingIsUsernameAvailable)
     || (privacyType === 'private' && isPublic),
   );
 
@@ -90,10 +93,19 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
+    setIsProfileFieldsTouched(false);
+  }, [currentUsername]);
+
+  useEffect(() => {
     if (privacyType && !privateLink) {
       updatePrivateLink();
     }
   }, [privacyType, privateLink, updatePrivateLink]);
+
+  const handleUsernameChange = useCallback((value: string) => {
+    setEditableUsername(value);
+    setIsProfileFieldsTouched(true);
+  }, []);
 
   const handleOptionChange = useCallback((value: string, e: ChangeEvent<HTMLInputElement>) => {
     const myChats = Object.values(getGlobal().chats.byId)
@@ -109,6 +121,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
       return;
     }
     setPrivacyType(value as PrivacyType);
+    setIsProfileFieldsTouched(true);
   }, [maxPublicLinks, openLimitReachedModal]);
 
   const handleForwardingOptionChange = useCallback((value: string) => {
@@ -216,7 +229,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
               isLoading={isLoading}
               isUsernameAvailable={isUsernameAvailable}
               checkedUsername={checkedUsername}
-              onChange={setEditableUsername}
+              onChange={handleUsernameChange}
             />
             {error === USERNAME_PURCHASE_ERROR && renderPurchaseLink()}
             <p className="section-info" dir="auto">
@@ -228,7 +241,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
           <ManageUsernames
             chatId={chat.id}
             usernames={chat.usernames!}
-            onEditUsername={setEditableUsername}
+            onEditUsername={handleUsernameChange}
           />
         )}
         <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>

@@ -50,7 +50,9 @@ export async function setChatUsername(
     username,
   }));
 
-  const usernames = chat.usernames!.map((u) => (u.isEditable ? { ...u, username } : u));
+  const usernames = chat.usernames
+    ? chat.usernames.map((u) => (u.isEditable ? { ...u, username } : u))
+    : [{ username, isEditable: true, isActive: true }];
 
   if (result) {
     onUpdate({
@@ -59,6 +61,8 @@ export async function setChatUsername(
       chat: { usernames },
     });
   }
+
+  return result;
 }
 
 export async function updatePrivateLink({
