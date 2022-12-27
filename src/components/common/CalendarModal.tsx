@@ -3,6 +3,7 @@ import React, {
   memo, useState, useEffect, useMemo, useCallback,
 } from '../../lib/teact/teact';
 
+import { MAX_INT_32 } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { formatTime, formatDateToString, getDayStart } from '../../util/dateFormat';
 import type { LangFn } from '../../hooks/useLang';
@@ -15,7 +16,7 @@ import Button from '../ui/Button';
 
 import './CalendarModal.scss';
 
-const MAX_SAFE_DATE = 2147483647 * 1000; // API has int for dates
+const MAX_SAFE_DATE = MAX_INT_32 * 1000;
 const MIN_SAFE_DATE = 0;
 
 export type OwnProps = {

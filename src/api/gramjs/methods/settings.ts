@@ -10,9 +10,9 @@ import type {
   ApiNotifyException, ApiPhoto,
 } from '../../types';
 import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
-
 import type { LANG_PACKS } from '../../../config';
-import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK } from '../../../config';
+
+import { BLOCKED_LIST_LIMIT, DEFAULT_LANG_PACK, MAX_INT_32 } from '../../../config';
 import { ACCEPTABLE_USERNAME_ERRORS } from './management';
 import {
   buildApiConfig,
@@ -39,7 +39,6 @@ import { getServerTime } from '../../../util/serverTime';
 import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb } from '../helpers';
 import localDb from '../localDb';
 
-const MAX_INT_32 = 2 ** 31 - 1;
 const BETA_LANG_CODES = ['ar', 'fa', 'id', 'ko', 'uz', 'en'];
 
 export function updateProfile({
