@@ -109,7 +109,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
 
   const handleOptionChange = useCallback((value: string, e: ChangeEvent<HTMLInputElement>) => {
     const myChats = Object.values(getGlobal().chats.byId)
-      .filter((l) => l.isCreator && l.usernames?.some((c) => c.isActive));
+      .filter(({ isCreator, usernames }) => isCreator && usernames?.some((c) => c.isActive));
 
     if (myChats.length >= maxPublicLinks && value === 'public') {
       openLimitReachedModal({ limit: 'channelsPublic' });

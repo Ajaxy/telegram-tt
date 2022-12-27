@@ -171,7 +171,7 @@ export function buildApiPremiumPromo(promo: GramJs.help.PremiumPromo): ApiPremiu
 
   return {
     statusText,
-    statusEntities: statusEntities.map((l) => buildApiMessageEntity(l)),
+    statusEntities: statusEntities.map(buildApiMessageEntity),
     videoSections,
     videos: videos.map(buildApiDocument).filter(Boolean),
     options: periodOptions.map(buildApiPremiumSubscriptionOption),

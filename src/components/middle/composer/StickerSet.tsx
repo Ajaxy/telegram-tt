@@ -111,7 +111,7 @@ const StickerSet: FC<OwnProps> = ({
   }, [isCurrentUserPremium, isPremiumSet, openPremiumModal, stickerSet, toggleStickerSet]);
 
   const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
-    && stickerSet.stickers?.some((l) => !l.isFree);
+    && stickerSet.stickers?.some(({ isFree }) => !isFree);
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
   const itemsPerRow = isEmoji ? EMOJI_PER_ROW_ON_DESKTOP : STICKERS_PER_ROW_ON_DESKTOP;
   const margin = isEmoji ? EMOJI_MARGIN : STICKER_MARGIN;

@@ -104,7 +104,7 @@ export async function fetchExportedChatInvites({
   addEntitiesWithPhotosToLocalDb(exportedInvites.users);
   // TODO Verify Exported Invite logic
   return (exportedInvites.invites
-    .filter((l) => l instanceof GramJs.ChatInviteExported) as GramJs.ChatInviteExported[])
+    .filter((invite): invite is GramJs.ChatInviteExported => invite instanceof GramJs.ChatInviteExported))
     .map(buildApiExportedInvite);
 }
 

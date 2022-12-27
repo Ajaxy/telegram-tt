@@ -265,7 +265,8 @@ addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload) => {
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || !global.activeEmojiInteractions?.some((l) => l.id === id) || chatId === global.currentUserId) {
+  if (!chat || !global.activeEmojiInteractions?.some((interaction) => interaction.id === id)
+    || chatId === global.currentUserId) {
     return undefined;
   }
 

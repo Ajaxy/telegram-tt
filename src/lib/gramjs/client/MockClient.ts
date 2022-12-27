@@ -328,7 +328,7 @@ class TelegramClient {
 
         if (!id) return undefined;
 
-        return this.peers.findIndex((l) => l.peer.id.toString() === id.toString());
+        return this.peers.findIndex((localPeer) => localPeer.peer.id.toString() === id.toString());
     }
 
     private getPeer(peer: Api.TypeInputPeer) {
@@ -346,11 +346,11 @@ class TelegramClient {
     }
 
     private getChats() {
-        return this.peers.filter((l) => !(l.peer instanceof Api.User)).map((l) => l.peer);
+        return this.peers.filter(({ peer }) => !(peer instanceof Api.User)).map(({ peer }) => peer);
     }
 
     private getUsers() {
-        return this.peers.filter((l) => l.peer instanceof Api.User).map((l) => l.peer);
+        return this.peers.filter(({ peer }) => peer instanceof Api.User).map(({ peer }) => peer);
     }
 }
 

@@ -617,7 +617,7 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
   const hostParts = uri.hostname.split('.');
   if (hostParts.length > 3) return;
   const pathname = hostParts.length === 3 ? `${hostParts[0]}/${uri.pathname}` : uri.pathname;
-  const [part1, part2, part3] = pathname.split('/').filter(Boolean).map((l) => decodeURI(l));
+  const [part1, part2, part3] = pathname.split('/').filter(Boolean).map((part) => decodeURI(part));
   const params = Object.fromEntries(uri.searchParams);
 
   let hash: string | undefined;
