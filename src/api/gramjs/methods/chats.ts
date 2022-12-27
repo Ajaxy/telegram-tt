@@ -16,7 +16,7 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID, ALL_FOLDER_ID,
+  DEBUG, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID, ALL_FOLDER_ID, MAX_INT_32,
 } from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
@@ -57,7 +57,6 @@ type FullChatData = {
   membersCount?: number;
 };
 
-const MAX_INT_32 = 2 ** 31 - 1;
 let onUpdate: OnApiUpdate;
 
 export function init(_onUpdate: OnApiUpdate) {

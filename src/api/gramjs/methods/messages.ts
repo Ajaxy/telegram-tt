@@ -24,7 +24,7 @@ import {
 
 import {
   ALL_FOLDER_ID,
-  DEBUG, MENTION_UNREAD_SLICE,
+  DEBUG, MAX_INT_32, MENTION_UNREAD_SLICE,
   PINNED_MESSAGES_LIMIT, REACTION_UNREAD_SLICE,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -97,7 +97,7 @@ export async function fetchMessages({
       }),
       ...(offsetId && {
         // Workaround for local message IDs overflowing some internal `Buffer` range check
-        offsetId: Math.min(offsetId, 2 ** (32 - 1) - 1),
+        offsetId: Math.min(offsetId, MAX_INT_32),
       }),
       ...pagination,
     }), undefined, true);
@@ -763,27 +763,29 @@ export async function sendMessageAction({
 }
 
 export async function markMessageListRead({
-  chat, threadId, maxId, serverTimeOffset,
+  chat, threadId, maxId = -1, serverTimeOffset,
 }: {
   chat: ApiChat; threadId: number; maxId?: number; serverTimeOffset: number;
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
+  // Workaround for local message IDs overflowing some internal `Buffer` range check
+  const fixedMaxId = Math.min(maxId, MAX_INT_32);
   if (isChannel && threadId === MAIN_THREAD_ID) {
     await invokeRequest(new GramJs.channels.ReadHistory({
       channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-      maxId,
+      maxId: fixedMaxId,
     }));
   } else if (isChannel) {
     await invokeRequest(new GramJs.messages.ReadDiscussion({
       peer: buildInputPeer(chat.id, chat.accessHash),
       msgId: threadId,
-      readMaxId: maxId,
+      readMaxId: fixedMaxId,
     }));
   } else {
     await invokeRequest(new GramJs.messages.ReadHistory({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      maxId,
+      maxId: fixedMaxId,
     }));
   }
 
