@@ -6,7 +6,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import { ManagementScreens, ManagementProgress } from '../../../types';
-import type { ApiChat, ApiChatBannedRights, ApiExportedInvite } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiChat, ApiChatBannedRights, ApiExportedInvite,
+} from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import {
@@ -51,8 +53,8 @@ type StateProps = {
   canInvite?: boolean;
   exportedInvites?: ApiExportedInvite[];
   lastSyncTime?: number;
-  availableReactionsCount?: number;
   isChannelsPremiumLimitReached: boolean;
+  availableReactions?: ApiAvailableReaction[];
 };
 
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
@@ -71,13 +73,13 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   canChangeInfo,
   canBanUsers,
   canInvite,
-  onScreenSelect,
-  onClose,
   isActive,
   exportedInvites,
   lastSyncTime,
-  availableReactionsCount,
   isChannelsPremiumLimitReached,
+  availableReactions,
+  onScreenSelect,
+  onClose,
 }) => {
   const {
     togglePreHistoryHidden,
@@ -212,7 +214,21 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     checkbox.checked = !chat.fullInfo?.isPreHistoryHidden;
   }, [isChannelsPremiumLimitReached, chat.fullInfo?.isPreHistoryHidden]);
 
-  const enabledReactionsCount = chat.fullInfo?.enabledReactions?.length || 0;
+  const chatReactionsDescription = useMemo(() => {
+    if (!chat.fullInfo?.enabledReactions) {
+      return lang('ReactionsOff');
+    }
+
+    if (chat.fullInfo.enabledReactions.type === 'all') {
+      return lang('ReactionsAll');
+    }
+
+    const enabledLength = chat.fullInfo.enabledReactions.allowed.length;
+    const totalLength = availableReactions?.filter((reaction) => !reaction.isInactive).length || 0;
+
+    const text = totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
+    return text;
+  }, [availableReactions, chat, lang]);
 
   const enabledPermissionsCount = useMemo(() => {
     if (!chat.defaultBannedRights) {
@@ -330,7 +346,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('Reactions')}</span>
             <span className="subtitle" dir="auto">
-              {enabledReactionsCount}/{availableReactionsCount}
+              {chatReactionsDescription}
             </span>
           </ListItem>
           <ListItem
@@ -437,8 +453,8 @@ export default memo(withGlobal<OwnProps>(
       canInvite: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
       lastSyncTime: global.lastSyncTime,
-      availableReactionsCount: global.availableReactions?.filter((l) => !l.isInactive).length,
       isChannelsPremiumLimitReached: global.limitReachedModal?.limit === 'channels',
+      availableReactions: global.availableReactions,
     };
   },
 )(ManageGroup));

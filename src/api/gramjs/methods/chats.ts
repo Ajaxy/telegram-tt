@@ -12,7 +12,7 @@ import type {
   ApiChatBannedRights,
   ApiChatAdminRights,
   ApiGroupCall,
-  ApiUserStatus, ApiPhoto,
+  ApiUserStatus, ApiPhoto, ApiChatReactions,
 } from '../../types';
 
 import {
@@ -1266,7 +1266,7 @@ export async function importChatInvite({ hash }: { hash: string }) {
 export function setChatEnabledReactions({
   chat, enabledReactions,
 }: {
-  chat: ApiChat; enabledReactions: string[];
+  chat: ApiChat; enabledReactions?: ApiChatReactions;
 }) {
   return invokeRequest(new GramJs.messages.SetChatAvailableReactions({
     peer: buildInputPeer(chat.id, chat.accessHash),

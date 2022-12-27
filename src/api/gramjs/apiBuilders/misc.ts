@@ -6,7 +6,7 @@ import type {
 } from '../../types';
 import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
-import { buildApiDocument } from './messages';
+import { buildApiDocument, buildApiReaction } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -224,8 +224,7 @@ export function buildApiUrlAuthResult(result: GramJs.TypeUrlAuthResult): ApiUrlA
 }
 
 export function buildApiConfig(config: GramJs.Config): ApiConfig {
-  const defaultReaction = config.reactionsDefault
-    && 'emoticon' in config.reactionsDefault ? config.reactionsDefault.emoticon : undefined;
+  const defaultReaction = config.reactionsDefault && buildApiReaction(config.reactionsDefault);
   return {
     expiresAt: config.expires,
     gifSearchUsername: config.gifSearchUsername,

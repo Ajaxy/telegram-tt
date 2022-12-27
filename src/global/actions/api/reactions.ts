@@ -7,6 +7,7 @@ import {
   selectChatMessage, selectCurrentChat,
   selectDefaultReaction,
   selectLocalAnimatedEmojiEffectByName,
+  selectMaxUserReactions,
   selectMessageIdsByGroupId,
 } from '../../selectors';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
@@ -15,7 +16,7 @@ import {
 } from '../../reducers';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { ANIMATION_LEVEL_MAX } from '../../../config';
-import { isMessageLocal } from '../../helpers';
+import { isSameReaction, getUserReactions, isMessageLocal } from '../../helpers';
 
 const INTERACTION_RANDOM_OFFSET = 40;
 
@@ -85,29 +86,23 @@ addActionHandler('sendEmojiInteraction', (global, actions, payload) => {
 
 addActionHandler('sendDefaultReaction', (global, actions, payload) => {
   const {
-    chatId, messageId, x, y,
+    chatId, messageId,
   } = payload;
   const reaction = selectDefaultReaction(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
 
   if (!reaction || !message || isMessageLocal(message)) return;
 
-  actions.sendReaction({
+  actions.toggleReaction({
     chatId,
     messageId,
     reaction,
-    x,
-    y,
   });
 });
 
-addActionHandler('sendReaction', (global, actions, payload) => {
-  const {
-    chatId,
-  }: { chatId: string } = payload;
+addActionHandler('toggleReaction', (global, actions, payload) => {
+  const { chatId, reaction } = payload;
   let { messageId } = payload;
-
-  let { reaction } = payload;
 
   const chat = selectChat(global, chatId);
   let message = selectChatMessage(global, chatId, messageId);
@@ -125,30 +120,38 @@ addActionHandler('sendReaction', (global, actions, payload) => {
     : message;
   messageId = message?.id || messageId;
 
-  if (message.reactions?.results?.some((l) => l.reaction === reaction && l.isChosen)) {
-    reaction = undefined;
-  }
+  const userReactions = getUserReactions(message);
+  const hasReaction = userReactions.some((userReaction) => isSameReaction(userReaction, reaction));
 
-  void callApi('sendReaction', { chat, messageId, reaction });
+  const newUserReactions = hasReaction
+    ? userReactions.filter((userReaction) => !isSameReaction(userReaction, reaction)) : [...userReactions, reaction];
+
+  const limit = selectMaxUserReactions(global);
+
+  const reactions = newUserReactions.slice(-limit);
+
+  void callApi('sendReaction', { chat, messageId, reactions });
 
   const { animationLevel } = global.settings.byKey;
 
   if (animationLevel === ANIMATION_LEVEL_MAX) {
+    const newActiveReactions = hasReaction ? omit(global.activeReactions, [messageId]) : {
+      ...global.activeReactions,
+      [messageId]: [
+        ...(global.activeReactions[messageId] || []),
+        {
+          messageId,
+          reaction,
+        },
+      ],
+    };
     global = {
       ...global,
-      activeReactions: {
-        ...(reaction ? global.activeReactions : omit(global.activeReactions, [messageId])),
-        ...(reaction && {
-          [messageId]: {
-            reaction,
-            messageId,
-          },
-        }),
-      },
+      activeReactions: newActiveReactions,
     };
   }
 
-  return addMessageReaction(global, chatId, messageId, reaction);
+  return addMessageReaction(global, message, reactions);
 });
 
 addActionHandler('openChat', (global) => {
@@ -161,13 +164,21 @@ addActionHandler('openChat', (global) => {
 addActionHandler('stopActiveReaction', (global, actions, payload) => {
   const { messageId, reaction } = payload;
 
-  if (global.activeReactions[messageId]?.reaction !== reaction) {
+  if (!global.activeReactions[messageId]?.some((active) => isSameReaction(active.reaction, reaction))) {
     return global;
   }
 
+  const newMessageActiveReactions = global.activeReactions[messageId]
+    .filter((active) => !isSameReaction(active.reaction, reaction));
+
+  const newActiveReactions = newMessageActiveReactions.length ? {
+    ...global.activeReactions,
+    [messageId]: newMessageActiveReactions,
+  } : omit(global.activeReactions, [messageId]);
+
   return {
     ...global,
-    activeReactions: omit(global.activeReactions, [messageId]),
+    activeReactions: newActiveReactions,
   };
 });
 
@@ -200,7 +211,7 @@ addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
 
   return {
     ...global,
-    activeEmojiInteractions: global.activeEmojiInteractions?.filter((l) => l.id !== id),
+    activeEmojiInteractions: global.activeEmojiInteractions?.filter((active) => active.id !== id),
   };
 });
 
@@ -349,16 +360,16 @@ addActionHandler('animateUnreadReaction', (global, actions, payload) => {
 
         if (!message) return undefined;
 
-        const unread = message.reactions?.recentReactions?.find((l) => l.isUnread);
+        const unread = message.reactions?.recentReactions?.filter(({ isUnread }) => isUnread);
 
         if (!unread) return undefined;
 
-        const reaction = unread?.reaction;
+        const reactions = unread.map((recent) => recent.reaction);
 
-        return [messageId, {
+        return [messageId, reactions.map((r) => ({
           messageId,
-          reaction,
-        }];
+          reaction: r,
+        }))];
       }).filter(Boolean)),
     },
   };

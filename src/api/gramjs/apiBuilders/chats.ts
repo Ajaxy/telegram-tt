@@ -12,6 +12,7 @@ import type {
   ApiChatInviteImporter,
   ApiChatSettings,
   ApiSendAsPeerId,
+  ApiChatReactions,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -462,14 +463,18 @@ export function buildApiChatSettings({
   };
 }
 
-export function buildApiChatReactions(availableReactions?: GramJs.TypeChatReactions): string[] | undefined {
-  if (availableReactions instanceof GramJs.ChatReactionsAll) {
-    // TODO Hack before custom reactions are implemented
-    // eslint-disable-next-line max-len
-    return ['👍', '👎', '❤', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '😱', '🤬', '😢', '🎉', '🤩', '🤮', '💩', '🙏', '👌', '🕊', '🤡', '🥱', '🥴', '😍', '🐳', '❤‍🔥', '🌚', '🌭', '💯', '🤣', '⚡', '🍌', '🏆', '💔', '🤨', '😐', '🍓', '🍾', '💋', '🖕', '😈', '😴', '😭', '🤓', '👻', '👨‍💻', '👀', '🎃', '🙈', '😇', '😨', '🤝', '✍️', '🤗', '🫡'];
+export function buildApiChatReactions(chatReactions?: GramJs.TypeChatReactions): ApiChatReactions | undefined {
+  if (chatReactions instanceof GramJs.ChatReactionsAll) {
+    return {
+      type: 'all',
+      areCustomAllowed: chatReactions.allowCustom,
+    };
   }
-  if (availableReactions instanceof GramJs.ChatReactionsSome) {
-    return availableReactions.reactions.map(buildApiReaction).filter(Boolean);
+  if (chatReactions instanceof GramJs.ChatReactionsSome) {
+    return {
+      type: 'some',
+      allowed: chatReactions.reactions.map(buildApiReaction).filter(Boolean),
+    };
   }
 
   return undefined;

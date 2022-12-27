@@ -1,0 +1,35 @@
+.root {
+  position: absolute;
+  z-index: 10;
+}
+
+.particle {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  offset-path: var(--offset-path);
+  offset-rotate: 0deg;
+  animation: 1.5s particle ease-out;
+}
+
+@keyframes particle {
+  0% {
+    offset-distance: 0%;
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+    transform: scale(1);
+  }
+}

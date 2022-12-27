@@ -32,8 +32,9 @@ function notifyCustomEmojiRender(emojiId: string) {
 
 addCustomEmojiInputRenderCallback(notifyCustomEmojiRender);
 
-export default function useEnsureCustomEmoji(id: string) {
+export default function useEnsureCustomEmoji(id?: string) {
   const lastSyncTime = useLastSyncTime();
+  if (!id) return;
   notifyCustomEmojiRender(id);
 
   if (getGlobal().customEmojis.byId[id]) {

@@ -110,9 +110,9 @@ if (IS_OPFS_SUPPORTED) {
   })();
 }
 
-export const IS_BACKDROP_BLUR_SUPPORTED = !IS_TEST && (
-  CSS.supports('backdrop-filter: blur()') || CSS.supports('-webkit-backdrop-filter: blur()')
-);
+export const IS_OFFSET_PATH_SUPPORTED = CSS.supports('offset-rotate: 0deg');
+export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()')
+  || CSS.supports('-webkit-backdrop-filter: blur()');
 export const IS_COMPACT_MENU = !IS_TOUCH_ENV;
 export const IS_SCROLL_PATCH_NEEDED = !IS_MAC_OS && !IS_IOS && !IS_ANDROID;
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;

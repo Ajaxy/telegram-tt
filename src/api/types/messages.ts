@@ -436,15 +436,15 @@ export interface ApiReactions {
 
 export interface ApiUserReaction {
   userId: string;
-  reaction: string;
+  reaction: ApiReaction;
   isBig?: boolean;
   isUnread?: boolean;
 }
 
 export interface ApiReactionCount {
-  isChosen?: boolean;
+  chosenOrder?: number;
   count: number;
-  reaction: string;
+  reaction: ApiReaction;
 }
 
 export interface ApiAvailableReaction {
@@ -454,11 +454,33 @@ export interface ApiAvailableReaction {
   staticIcon?: ApiDocument;
   centerIcon?: ApiDocument;
   aroundAnimation?: ApiDocument;
-  reaction: string;
+  reaction: ApiReactionEmoji;
   title: string;
   isInactive?: boolean;
   isPremium?: boolean;
 }
+
+type ApiChatReactionsAll = {
+  type: 'all';
+  areCustomAllowed?: true;
+};
+
+type ApiChatReactionsSome = {
+  type: 'some';
+  allowed: ApiReaction[];
+};
+
+export type ApiChatReactions = ApiChatReactionsAll | ApiChatReactionsSome;
+
+export type ApiReactionEmoji = {
+  emoticon: string;
+};
+
+export type ApiReactionCustomEmoji = {
+  documentId: string;
+};
+
+export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
 
 export interface ApiThreadInfo {
   threadId: number;

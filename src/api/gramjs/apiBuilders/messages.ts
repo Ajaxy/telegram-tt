@@ -34,6 +34,8 @@ import type {
   ApiWebDocument,
   ApiMessageEntityDefault,
   ApiMessageExtendedMediaPreview,
+  ApiReaction,
+  ApiReactionEmoji,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -223,20 +225,30 @@ export function buildMessageReactions(reactions: GramJs.MessageReactions): ApiRe
 
   return {
     canSeeList,
-    results: results.map(buildReactionCount).filter(Boolean),
+    results: results.map(buildReactionCount).filter(Boolean).sort(reactionCountComparator),
     recentReactions: recentReactions?.map(buildMessagePeerReaction).filter(Boolean),
   };
+}
+
+function reactionCountComparator(a: ApiReactionCount, b: ApiReactionCount) {
+  const diff = b.count - a.count;
+  if (diff) return diff;
+  if (a.chosenOrder !== undefined && b.chosenOrder !== undefined) {
+    return a.chosenOrder - b.chosenOrder;
+  }
+  if (a.chosenOrder !== undefined) return 1;
+  if (b.chosenOrder !== undefined) return -1;
+  return 0;
 }
 
 function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount | undefined {
   const { chosenOrder, count, reaction } = reactionCount;
 
-  // TODO: Add custom reactions support
   const apiReaction = buildApiReaction(reaction);
   if (!apiReaction) return undefined;
 
   return {
-    isChosen: chosenOrder !== undefined, // TODO: Add custom reactions support
+    chosenOrder,
     count,
     reaction: apiReaction,
   };
@@ -247,7 +259,6 @@ export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReactio
     peerId, reaction, big, unread,
   } = userReaction;
 
-  // TODO: Add custom reactions support
   const apiReaction = buildApiReaction(reaction);
   if (!apiReaction) return undefined;
 
@@ -259,11 +270,19 @@ export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReactio
   };
 }
 
-export function buildApiReaction(reaction: GramJs.TypeReaction): string | undefined {
+export function buildApiReaction(reaction: GramJs.TypeReaction): ApiReaction | undefined {
   if (reaction instanceof GramJs.ReactionEmoji) {
-    return reaction.emoticon;
+    return {
+      emoticon: reaction.emoticon,
+    };
   }
-  // TODO: Add custom reactions support
+
+  if (reaction instanceof GramJs.ReactionCustomEmoji) {
+    return {
+      documentId: reaction.documentId.toString(),
+    };
+  }
+
   return undefined;
 }
 
@@ -281,7 +300,7 @@ export function buildApiAvailableReaction(availableReaction: GramJs.AvailableRea
     staticIcon: buildApiDocument(staticIcon),
     aroundAnimation: aroundAnimation ? buildApiDocument(aroundAnimation) : undefined,
     centerIcon: centerIcon ? buildApiDocument(centerIcon) : undefined,
-    reaction,
+    reaction: { emoticon: reaction } as ApiReactionEmoji,
     title,
     isInactive: inactive,
     isPremium: premium,

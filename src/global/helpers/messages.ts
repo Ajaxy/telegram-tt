@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiReactions, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiUser,
 } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
@@ -235,10 +235,6 @@ export function getMessageContentFilename(message: ApiMessage) {
   }
 
   return baseFilename;
-}
-
-export function areReactionsEmpty(reactions: ApiReactions) {
-  return !reactions.results.some((l) => l.count > 0);
 }
 
 export function isGeoLiveExpired(message: ApiMessage, timestamp = Date.now() / 1000) {

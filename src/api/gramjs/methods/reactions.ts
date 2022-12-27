@@ -1,4 +1,4 @@
-import type { ApiChat } from '../../types';
+import type { ApiChat, ApiReaction } from '../../types';
 import { invokeRequest } from './client';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
@@ -74,12 +74,12 @@ export async function getAvailableReactions() {
 }
 
 export function sendReaction({
-  chat, messageId, reaction,
+  chat, messageId, reactions,
 }: {
-  chat: ApiChat; messageId: number; reaction?: string;
+  chat: ApiChat; messageId: number; reactions?: ApiReaction[];
 }) {
   return invokeRequest(new GramJs.messages.SendReaction({
-    ...(reaction && { reaction: [buildInputReaction(reaction)] }),
+    reaction: reactions?.map((r) => buildInputReaction(r)),
     peer: buildInputPeer(chat.id, chat.accessHash),
     msgId: messageId,
   }), true);
@@ -99,7 +99,7 @@ export function fetchMessageReactions({
 export async function fetchMessageReactionsList({
   chat, messageId, reaction, offset,
 }: {
-  chat: ApiChat; messageId: number; reaction?: string; offset?: string;
+  chat: ApiChat; messageId: number; reaction?: ApiReaction; offset?: string;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetMessageReactionsList({
     peer: buildInputPeer(chat.id, chat.accessHash),
@@ -128,7 +128,7 @@ export async function fetchMessageReactionsList({
 export function setDefaultReaction({
   reaction,
 }: {
-  reaction: string;
+  reaction: ApiReaction;
 }) {
   return invokeRequest(new GramJs.messages.SetDefaultReaction({
     reaction: buildInputReaction(reaction),

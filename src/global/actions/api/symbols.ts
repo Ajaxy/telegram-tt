@@ -167,9 +167,21 @@ addActionHandler('loadGreetingStickers', async (global) => {
   });
 });
 
-addActionHandler('loadFeaturedStickers', (global) => {
+addActionHandler('loadFeaturedStickers', async (global) => {
   const { hash } = global.stickers.featured || {};
-  void loadFeaturedStickers(hash);
+  const featuredStickers = await callApi('fetchFeaturedStickers', { hash });
+  if (!featuredStickers) {
+    return;
+  }
+
+  global = getGlobal();
+
+  setGlobal(updateStickerSets(
+    global,
+    'featured',
+    featuredStickers.hash,
+    featuredStickers.sets,
+  ));
 });
 
 addActionHandler('loadPremiumGifts', async () => {
@@ -193,9 +205,39 @@ addActionHandler('loadStickers', (global, actions, payload) => {
   void loadStickers(stickerSetInfo);
 });
 
-addActionHandler('loadAnimatedEmojis', () => {
-  void loadAnimatedEmojis();
-  void loadAnimatedEmojiEffects();
+addActionHandler('loadAnimatedEmojis', async (global) => {
+  const [emojis, effects] = await Promise.all([
+    callApi('fetchAnimatedEmojis'),
+    callApi('fetchAnimatedEmojiEffects'),
+  ]);
+  if (!emojis || !effects) {
+    return;
+  }
+
+  global = getGlobal();
+
+  global = replaceAnimatedEmojis(global, { ...emojis.set, stickers: emojis.stickers });
+  global = {
+    ...global,
+    animatedEmojiEffects: { ...effects.set, stickers: effects.stickers },
+  };
+
+  setGlobal(global);
+});
+
+addActionHandler('loadGenericEmojiEffects', async (global) => {
+  const stickerSet = await callApi('fetchGenericEmojiEffects');
+  if (!stickerSet) {
+    return;
+  }
+  global = getGlobal();
+
+  const { set, stickers } = stickerSet;
+
+  setGlobal({
+    ...global,
+    genericEmojiEffects: { ...set, stickers },
+  });
 });
 
 addActionHandler('loadSavedGifs', (global) => {
@@ -405,20 +447,6 @@ async function loadFavoriteStickers(hash?: string) {
   });
 }
 
-async function loadFeaturedStickers(hash?: string) {
-  const featuredStickers = await callApi('fetchFeaturedStickers', { hash });
-  if (!featuredStickers) {
-    return;
-  }
-
-  setGlobal(updateStickerSets(
-    getGlobal(),
-    'featured',
-    featuredStickers.hash,
-    featuredStickers.sets,
-  ));
-}
-
 async function loadStickers(stickerSetInfo: ApiStickerSetInfo) {
   const stickerSet = await callApi(
     'fetchStickers',
@@ -451,31 +479,6 @@ async function loadStickers(stickerSetInfo: ApiStickerSetInfo) {
   }
 
   setGlobal(global);
-}
-
-async function loadAnimatedEmojis() {
-  const stickerSet = await callApi('fetchAnimatedEmojis');
-  if (!stickerSet) {
-    return;
-  }
-
-  const { set, stickers } = stickerSet;
-
-  setGlobal(replaceAnimatedEmojis(getGlobal(), { ...set, stickers }));
-}
-
-async function loadAnimatedEmojiEffects() {
-  const stickerSet = await callApi('fetchAnimatedEmojiEffects');
-  if (!stickerSet) {
-    return;
-  }
-
-  const { set, stickers } = stickerSet;
-
-  setGlobal({
-    ...getGlobal(),
-    animatedEmojiEffects: { ...set, stickers },
-  });
 }
 
 function unfaveSticker(sticker: ApiSticker) {

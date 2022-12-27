@@ -6,7 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
 import type {
-  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet,
+  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet, ApiChatReactions, ApiReaction,
 } from '../../../api/types';
 import type { IAlbum, IAnchorPosition } from '../../../types';
 
@@ -28,7 +28,6 @@ import {
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { REM } from '../../common/helpers/mediaDimensions';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -41,8 +40,6 @@ import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
 import MessageContextMenu from './MessageContextMenu';
 import ConfirmDialog from '../../ui/ConfirmDialog';
-
-const START_SIZE = 2 * REM;
 
 export type OwnProps = {
   isOpen: boolean;
@@ -67,7 +64,6 @@ type StateProps = {
   canShowReactionsCount?: boolean;
   canBuyPremium?: boolean;
   canShowReactionList?: boolean;
-  canRemoveReaction?: boolean;
   canUnpin?: boolean;
   canDelete?: boolean;
   canReport?: boolean;
@@ -87,7 +83,7 @@ type StateProps = {
   canClosePoll?: boolean;
   activeDownloads: number[];
   canShowSeenBy?: boolean;
-  enabledReactions?: string[];
+  enabledReactions?: ApiChatReactions;
   canScheduleUntilOnline?: boolean;
   maxUniqueReactions?: number;
 };
@@ -115,7 +111,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canReport,
   canShowReactionsCount,
   canShowReactionList,
-  canRemoveReaction,
   canEdit,
   enabledReactions,
   maxUniqueReactions,
@@ -150,7 +145,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     cancelMessageMediaDownload,
     loadSeenBy,
     openSeenByModal,
-    sendReaction,
     openReactorListModal,
     loadFullChat,
     loadReactors,
@@ -159,6 +153,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     loadStickers,
     cancelPollVote,
     closePoll,
+    toggleReaction,
   } = getActions();
 
   const lang = useLang();
@@ -376,12 +371,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [closeMenu, message, saveGif]);
 
-  const handleSendReaction = useCallback((reaction: string | undefined, x: number, y: number) => {
-    sendReaction({
-      chatId: message.chatId, messageId: message.id, reaction, x, y, startSize: START_SIZE,
+  const handleToggleReaction = useCallback((reaction: ApiReaction) => {
+    toggleReaction({
+      chatId: message.chatId, messageId: message.id, reaction,
     });
     closeMenu();
-  }, [closeMenu, message.chatId, message.id, sendReaction]);
+  }, [closeMenu, message, toggleReaction]);
 
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
@@ -408,7 +403,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         anchor={anchor}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
-        canRemoveReaction={canRemoveReaction}
         canSendNow={canSendNow}
         canReschedule={canReschedule}
         canReply={canReply}
@@ -453,7 +447,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCancelVote={handleCancelVote}
         onClosePoll={openClosePollDialog}
         onShowSeenBy={handleOpenSeenByModal}
-        onSendReaction={handleSendReaction}
+        onToggleReaction={handleToggleReaction}
         onShowReactors={handleOpenReactorListModal}
       />
       <DeleteMessageModal
@@ -529,7 +523,6 @@ export default memo(withGlobal<OwnProps>(
     const isAction = isActionMessage(message);
     const canShowReactionsCount = !isLocal && !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
-    const canRemoveReaction = isPrivate && message.reactions?.results?.some((l) => l.isChosen);
     const isProtected = selectIsMessageProtected(global, message);
     const canCopyNumber = Boolean(message.content.contact);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
@@ -569,7 +562,6 @@ export default memo(withGlobal<OwnProps>(
       hasFullInfo: Boolean(chat?.fullInfo),
       canShowReactionsCount,
       canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
-      canRemoveReaction,
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       customEmojiSetsInfo,
       customEmojiSets,

@@ -191,6 +191,7 @@ const Main: FC<StateProps> = ({
     loadAttachBots,
     loadContactList,
     loadCustomEmojis,
+    loadGenericEmojiEffects,
     closePaymentModal,
     clearReceipt,
     checkAppVersion,
@@ -213,6 +214,7 @@ const Main: FC<StateProps> = ({
       loadAppConfig();
       loadAvailableReactions();
       loadAnimatedEmojis();
+      loadGenericEmojiEffects();
       loadNotificationSettings();
       loadNotificationExceptions();
       loadTopInlineBots();
@@ -225,7 +227,7 @@ const Main: FC<StateProps> = ({
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion, loadConfig,
+    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects,
   ]);
 
   // Language-based API calls

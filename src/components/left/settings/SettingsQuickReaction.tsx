@@ -1,10 +1,8 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiAvailableReaction } from '../../../api/types';
-
-import { selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -18,14 +16,12 @@ type OwnProps = {
 
 type StateProps = {
   availableReactions?: ApiAvailableReaction[];
-  isPremium?: boolean;
   selectedReaction?: string;
 };
 
 const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
   isActive,
   availableReactions,
-  isPremium,
   selectedReaction,
   onReset,
 }) => {
@@ -36,17 +32,23 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
     onBack: onReset,
   });
 
-  const options = availableReactions?.filter((l) => (
-    !(l.isInactive || (!isPremium && l.isPremium))
-  )).map((l) => {
-    return {
-      label: <><ReactionStaticEmoji reaction={l.reaction} />{l.title}</>,
-      value: l.reaction,
-    };
-  }) || [];
+  const options = useMemo(() => (
+    (availableReactions || []).filter((availableReaction) => !availableReaction.isInactive)
+      .map((availableReaction) => ({
+        label: (
+          <>
+            <ReactionStaticEmoji reaction={availableReaction.reaction} availableReactions={availableReactions} />
+            {availableReaction.title}
+          </>
+        ),
+        value: availableReaction.reaction.emoticon,
+      }))
+  ), [availableReactions]);
 
   const handleChange = useCallback((reaction: string) => {
-    setDefaultReaction({ reaction });
+    setDefaultReaction({
+      reaction: { emoticon: reaction },
+    });
   }, [setDefaultReaction]);
 
   return (
@@ -64,12 +66,10 @@ const SettingsQuickReaction: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global) => {
     const { availableReactions, config } = global;
-    const isPremium = selectIsCurrentUserPremium(global);
 
     return {
       availableReactions,
       selectedReaction: config?.defaultReaction,
-      isPremium,
     };
   },
 )(SettingsQuickReaction));

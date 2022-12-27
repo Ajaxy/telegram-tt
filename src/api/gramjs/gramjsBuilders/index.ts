@@ -20,6 +20,8 @@ import type {
   ApiThemeParameters,
   ApiPoll,
   ApiRequestInputInvoice,
+  ApiChatReactions,
+  ApiReaction,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -547,15 +549,34 @@ export function buildInputInvoice(invoice: ApiRequestInputInvoice) {
   }
 }
 
-export function buildInputReaction(reaction?: string) {
-  if (!reaction) return new GramJs.ReactionEmpty();
-  return new GramJs.ReactionEmoji({
-    emoticon: reaction,
-  });
+export function buildInputReaction(reaction?: ApiReaction) {
+  if (reaction && 'emoticon' in reaction) {
+    return new GramJs.ReactionEmoji({
+      emoticon: reaction.emoticon,
+    });
+  }
+
+  if (reaction && 'documentId' in reaction) {
+    return new GramJs.ReactionCustomEmoji({
+      documentId: BigInt(reaction.documentId),
+    });
+  }
+
+  return new GramJs.ReactionEmpty();
 }
 
-export function buildInputChatReactions(chatReactions: string[]) {
-  return new GramJs.ChatReactionsSome({
-    reactions: chatReactions.map(buildInputReaction),
-  });
+export function buildInputChatReactions(chatReactions?: ApiChatReactions) {
+  if (chatReactions?.type === 'all') {
+    return new GramJs.ChatReactionsAll({
+      allowCustom: chatReactions.areCustomAllowed,
+    });
+  }
+
+  if (chatReactions?.type === 'some') {
+    return new GramJs.ChatReactionsSome({
+      reactions: chatReactions.allowed.map(buildInputReaction),
+    });
+  }
+
+  return new GramJs.ChatReactionsNone();
 }

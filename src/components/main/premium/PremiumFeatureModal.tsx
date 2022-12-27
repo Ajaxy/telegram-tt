@@ -17,7 +17,6 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import Button from '../../ui/Button';
 import PremiumLimitPreview from './common/PremiumLimitPreview';
 import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
-import PremiumFeaturePreviewReactions from './previews/PremiumFeaturePreviewReactions';
 import SliderDots from '../../common/SliderDots';
 import PremiumFeaturePreviewStickers from './previews/PremiumFeaturePreviewStickers';
 
@@ -25,7 +24,7 @@ import styles from './PremiumFeatureModal.module.scss';
 
 export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   double_limits: 'PremiumPreviewLimits',
-  unique_reactions: 'PremiumPreviewReactions',
+  infinite_reactions: 'PremiumPreviewReactions2',
   premium_stickers: 'PremiumPreviewStickers',
   animated_emoji: 'PremiumPreviewEmoji',
   no_ads: 'PremiumPreviewNoAds',
@@ -39,7 +38,7 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   double_limits: 'PremiumPreviewLimitsDescription',
-  unique_reactions: 'PremiumPreviewReactionsDescription',
+  infinite_reactions: 'PremiumPreviewReactions2Description',
   premium_stickers: 'PremiumPreviewStickersDescription',
   no_ads: 'PremiumPreviewNoAdsDescription',
   animated_emoji: 'PremiumPreviewEmojiDescription',
@@ -57,7 +56,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'faster_download',
   'voice_to_text',
   'no_ads',
-  'unique_reactions',
+  'infinite_reactions',
   'premium_stickers',
   'animated_emoji',
   'advanced_chat_management',
@@ -238,21 +237,6 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                       />
                     );
                   })}
-                </div>
-              </div>
-            );
-          }
-          if (section === 'unique_reactions') {
-            return (
-              <div className={styles.slide}>
-                <div className={styles.frame}>
-                  <PremiumFeaturePreviewReactions isActive={currentSlideIndex === index} />
-                </div>
-                <h1 className={styles.title}>
-                  {lang(PREMIUM_FEATURE_TITLES.unique_reactions)}
-                </h1>
-                <div className={styles.description}>
-                  {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.unique_reactions), ['br'])}
                 </div>
               </div>
             );

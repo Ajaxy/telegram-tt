@@ -25,6 +25,8 @@ interface GramJsAppConfig extends LimitsConfig {
   reactions_uniq_max: number;
   chat_read_mark_size_threshold: number;
   chat_read_mark_expire_period: number;
+  reactions_user_max_default: number;
+  reactions_user_max_premium: number;
   autologin_domains: string[];
   autologin_token: string;
   url_auth_domains: string[];
@@ -77,6 +79,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     premiumPromoOrder: appConfig.premium_promo_order,
     isPremiumPurchaseBlocked: appConfig.premium_purchase_blocked,
     defaultEmojiStatusesStickerSetId: appConfig.default_emoji_statuses_stickerset_id,
+    maxUserReactionsDefault: appConfig.reactions_user_max_default,
+    maxUserReactionsPremium: appConfig.reactions_user_max_premium,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),
       stickersFaved: getLimit(appConfig, 'stickers_faved_limit', 'stickersFaved'),

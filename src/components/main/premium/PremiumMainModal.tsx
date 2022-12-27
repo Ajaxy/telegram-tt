@@ -48,7 +48,7 @@ const LIMIT_ACCOUNTS = 4;
 
 const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   double_limits: PremiumLimits,
-  unique_reactions: PremiumReactions,
+  infinite_reactions: PremiumReactions,
   premium_stickers: PremiumStickers,
   animated_emoji: PremiumEmoji,
   no_ads: PremiumAds,
