@@ -45,7 +45,9 @@ type OwnProps = {
   className: string;
   loadAndPlay: boolean;
   canSendStickers: boolean;
-  onStickerSelect: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onStickerSelect: (
+    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldUpdateStickerSetsOrder?: boolean,
+  ) => void;
 };
 
 type StateProps = {
@@ -233,7 +235,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
-    onStickerSelect(sticker, isSilent, shouldSchedule);
+    onStickerSelect(sticker, isSilent, shouldSchedule, true);
     addRecentSticker({ sticker });
   }, [addRecentSticker, onStickerSelect]);
 

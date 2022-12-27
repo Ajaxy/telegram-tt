@@ -227,8 +227,14 @@ addActionHandler('reorderStickerSets', (global, action, payload) => {
     ...global,
     stickers: {
       ...global.stickers,
-      [isCustomEmoji ? 'customEmoji' : 'added']: {
-        setIds: order,
+      added: {
+        setIds: (!isCustomEmoji ? order : global.stickers.added.setIds),
+      },
+    },
+    customEmojis: {
+      ...global.customEmojis,
+      added: {
+        setIds: (isCustomEmoji ? order : global.customEmojis.added.setIds),
       },
     },
   };

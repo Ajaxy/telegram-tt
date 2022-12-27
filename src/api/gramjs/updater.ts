@@ -915,14 +915,24 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({ '@type': 'updateFavoriteStickers' });
   } else if (update instanceof GramJs.UpdateRecentStickers) {
     onUpdate({ '@type': 'updateRecentStickers' });
+  } else if (update instanceof GramJs.UpdateMoveStickerSetToTop) {
+    if (!update.masks) {
+      onUpdate({
+        '@type': 'updateMoveStickerSetToTop',
+        isCustomEmoji: update.emojis,
+        id: update.stickerset.toString(),
+      });
+    }
   } else if (update instanceof GramJs.UpdateStickerSets) {
     onUpdate({ '@type': 'updateStickerSets' });
   } else if (update instanceof GramJs.UpdateStickerSetsOrder) {
-    onUpdate({
-      '@type': 'updateStickerSetsOrder',
-      order: update.order.map((n) => n.toString()),
-      isCustomEmoji: update.emojis,
-    });
+    if (!update.masks) {
+      onUpdate({
+        '@type': 'updateStickerSetsOrder',
+        order: update.order.map((n) => n.toString()),
+        isCustomEmoji: update.emojis,
+      });
+    }
   } else if (update instanceof GramJs.UpdateNewStickerSet) {
     if (update.stickerset instanceof GramJs.messages.StickerSet) {
       const stickerSet = buildStickerSet(update.stickerset.set);

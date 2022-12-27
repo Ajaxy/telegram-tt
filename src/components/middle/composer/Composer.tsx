@@ -712,6 +712,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         attachments: currentAttachments,
         scheduledAt,
         isSilent,
+        shouldUpdateStickerSetsOrder: true,
       });
     }
 
@@ -820,7 +821,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [insertCustomEmojiAndUpdateCursor, isChatWithSelf, isCurrentUserPremium, showCustomEmojiPremiumNotification]);
 
   const handleStickerSelect = useCallback((
-    sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean, shouldPreserveInput = false,
+    sticker: ApiSticker,
+    isSilent?: boolean,
+    isScheduleRequested?: boolean,
+    shouldPreserveInput = false,
+    shouldUpdateStickerSetsOrder?: boolean,
   ) => {
     sticker = {
       ...sticker,
@@ -837,7 +842,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         });
       });
     } else {
-      sendMessage({ sticker, isSilent });
+      sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder });
       requestAnimationFrame(() => {
         resetComposer(shouldPreserveInput);
       });
