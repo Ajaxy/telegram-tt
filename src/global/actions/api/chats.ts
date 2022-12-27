@@ -769,6 +769,13 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload) => {
     actions.openChat({ id: chat.id });
   }
 
+  setGlobal(updateChat(global, chat.id, {
+    fullInfo: {
+      ...chat.fullInfo,
+      isPreHistoryHidden: isEnabled,
+    },
+  }));
+
   void callApi('togglePreHistoryHidden', { chat, isEnabled });
 });
 
@@ -1043,6 +1050,13 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload) => {
   }
 
   if (fullInfo!.isPreHistoryHidden) {
+    setGlobal(updateChat(global, chat.id, {
+      fullInfo: {
+        ...chat.fullInfo,
+        isPreHistoryHidden: false,
+      },
+    }));
+
     await callApi('togglePreHistoryHidden', { chat, isEnabled: false });
   }
 
