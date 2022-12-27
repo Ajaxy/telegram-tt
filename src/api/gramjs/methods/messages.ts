@@ -217,6 +217,7 @@ export function sendMessage(
     noWebPage,
     sendAs,
     serverTimeOffset,
+    shouldUpdateStickerSetsOrder,
   }: {
     chat: ApiChat;
     text?: string;
@@ -234,6 +235,7 @@ export function sendMessage(
     noWebPage?: boolean;
     sendAs?: ApiUser | ApiChat;
     serverTimeOffset?: number;
+    shouldUpdateStickerSetsOrder?: boolean;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -329,6 +331,7 @@ export function sendMessage(
       ...(media && { media }),
       ...(noWebPage && { noWebpage: noWebPage }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+      ...(shouldUpdateStickerSetsOrder && { updateStickersetsOrder: shouldUpdateStickerSetsOrder }),
     }), true);
   })();
 

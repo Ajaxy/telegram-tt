@@ -36,6 +36,14 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       actions.loadRecentStickers();
       break;
 
+    case 'updateMoveStickerSetToTop': {
+      const oldOrder = update.isCustomEmoji ? global.customEmojis.added.setIds : global.stickers.added.setIds;
+      if (!oldOrder) return global;
+      const newOrder = [update.id, ...oldOrder.filter((id) => id !== update.id)];
+      actions.reorderStickerSets({ order: newOrder, isCustomEmoji: update.isCustomEmoji });
+      break;
+    }
+
     case 'updateStickerSets':
       actions.loadStickerSets();
       break;

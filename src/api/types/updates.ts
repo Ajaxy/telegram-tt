@@ -391,6 +391,12 @@ export type ApiUpdateRecentStickers = {
   '@type': 'updateRecentStickers';
 };
 
+export type ApiUpdateMoveStickerSetToTop = {
+  '@type': 'updateMoveStickerSetToTop';
+  isCustomEmoji?: boolean;
+  id: string;
+};
+
 export type ApiUpdateStickerSets = {
   '@type': 'updateStickerSets';
 };
@@ -570,7 +576,7 @@ export type ApiUpdate = (
   ApiUpdateAvatar | ApiUpdateMessageImage | ApiUpdateDraftMessage |
   ApiUpdateError | ApiUpdateResetContacts | ApiUpdateStartEmojiInteraction |
   ApiUpdateFavoriteStickers | ApiUpdateStickerSet | ApiUpdateStickerSets | ApiUpdateStickerSetsOrder |
-  ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage |
+  ApiUpdateRecentStickers | ApiUpdateSavedGifs | ApiUpdateNewScheduledMessage | ApiUpdateMoveStickerSetToTop |
   ApiUpdateScheduledMessageSendSucceeded | ApiUpdateScheduledMessage |
   ApiUpdateDeleteScheduledMessages | ApiUpdateResetMessages |
   ApiUpdateTwoFaError | ApiUpdateTwoFaStateWaitCode | ApiUpdateWebViewResultSent |

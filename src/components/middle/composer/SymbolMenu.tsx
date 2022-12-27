@@ -41,7 +41,11 @@ export type OwnProps = {
   onEmojiSelect: (emoji: string) => void;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
   onStickerSelect: (
-    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldPreserveInput?: boolean
+    sticker: ApiSticker,
+    isSilent?: boolean,
+    shouldSchedule?: boolean,
+    shouldPreserveInput?: boolean,
+    shouldUpdateStickerSetsOrder?: boolean
   ) => void;
   onGifSelect: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: () => void;
@@ -171,8 +175,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     onSearchOpen(type);
   }, [onClose, onSearchOpen]);
 
-  const handleStickerSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
-    onStickerSelect(sticker, isSilent, shouldSchedule, true);
+  const handleStickerSelect = useCallback((
+    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldUpdateStickerSetsOrder?: boolean,
+  ) => {
+    onStickerSelect(sticker, isSilent, shouldSchedule, true, shouldUpdateStickerSetsOrder);
   }, [onStickerSelect]);
 
   const lang = useLang();

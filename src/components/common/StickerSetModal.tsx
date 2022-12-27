@@ -79,8 +79,9 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   const prevStickerSet = usePrevious(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
+  const isAdded = renderingStickerSet?.installedDate;
   const isEmoji = renderingStickerSet?.isEmoji;
-  const isButtonLocked = !renderingStickerSet?.installedDate && isSetPremium && !isCurrentUserPremium;
+  const isButtonLocked = !isAdded && isSetPremium && !isCurrentUserPremium;
 
   const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);
 
@@ -104,14 +105,16 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
     if (shouldSchedule || isScheduleRequested) {
       requestCalendar((scheduledAt) => {
-        sendMessage({ sticker, isSilent, scheduledAt });
+        sendMessage({
+          sticker, isSilent, scheduledAt,
+        });
         onClose();
       });
     } else {
-      sendMessage({ sticker, isSilent });
+      sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder: isAdded });
       onClose();
     }
-  }, [onClose, requestCalendar, sendMessage, shouldSchedule]);
+  }, [onClose, requestCalendar, sendMessage, shouldSchedule, isAdded]);
 
   const handleButtonClick = useCallback(() => {
     if (renderingStickerSet) {
@@ -133,7 +136,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     const suffix = isEmoji ? 'Emoji' : 'Sticker';
 
     return lang(
-      renderingStickerSet.installedDate ? `StickerPack.Remove${suffix}Count` : `StickerPack.Add${suffix}Count`,
+      isAdded ? `StickerPack.Remove${suffix}Count` : `StickerPack.Add${suffix}Count`,
       renderingStickerSet.count,
       'i',
     );
@@ -171,7 +174,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
             <Button
               size="smaller"
               fluid
-              color={renderingStickerSet.installedDate ? 'danger' : 'primary'}
+              color={isAdded ? 'danger' : 'primary'}
               isShiny={isButtonLocked}
               withPremiumGradient={isButtonLocked}
               onClick={handleButtonClick}
