@@ -264,5 +264,5 @@ function processPlaceholder(text: string, placeholder: string, replaceValue?: Te
   }
   content.push(text.substring(placeholderPosition + placeholder.length));
 
-  return content;
+  return content.flat();
 }
