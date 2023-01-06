@@ -11,6 +11,7 @@ import type {
   ApiExportedInvite,
   ApiChatInviteImporter,
   ApiChatSettings,
+  ApiTopic,
   ApiSendAsPeerId,
   ApiChatReactions,
 } from '../../types';
@@ -45,6 +46,7 @@ function buildApiChatFieldsFromPeerEntity(
   const isJoinToSend = Boolean('joinToSend' in peerEntity && peerEntity.joinToSend);
   const isJoinRequest = Boolean('joinRequest' in peerEntity && peerEntity.joinRequest);
   const usernames = buildApiUsernames(peerEntity);
+  const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
 
   return {
     isMin,
@@ -70,6 +72,7 @@ function buildApiChatFieldsFromPeerEntity(
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
     isJoinToSend,
     isJoinRequest,
+    isForum,
   };
 }
 
@@ -257,7 +260,7 @@ export function getApiChatTitleFromMtpPeer(peer: GramJs.TypePeer, peerEntity: Gr
 function getUserName(user: GramJs.User) {
   return user.firstName
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ''}`
-    : (user.lastName || undefined);
+    : (user.lastName || '');
 }
 
 export function buildAvatarHash(photo: GramJs.TypeUserProfilePhoto | GramJs.TypeChatPhoto) {
@@ -484,5 +487,52 @@ export function buildApiSendAsPeerId(sendAs: GramJs.SendAsPeer): ApiSendAsPeerId
   return {
     id: getApiChatIdFromMtpPeer(sendAs.peer),
     isPremium: sendAs.premiumRequired,
+  };
+}
+
+export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | undefined {
+  if (forumTopic instanceof GramJs.ForumTopicDeleted) {
+    return undefined;
+  }
+
+  const {
+    id,
+    my,
+    closed,
+    pinned,
+    hidden,
+    short,
+    date,
+    title,
+    iconColor,
+    iconEmojiId,
+    topMessage,
+    unreadCount,
+    unreadMentionsCount,
+    unreadReactionsCount,
+    fromId,
+    notifySettings: {
+      silent, muteUntil,
+    },
+  } = forumTopic;
+
+  return {
+    id,
+    isClosed: closed,
+    isPinned: pinned,
+    isHidden: hidden,
+    isOwner: my,
+    isMin: short,
+    date,
+    title,
+    iconColor,
+    iconEmojiId: iconEmojiId?.toString(),
+    lastMessageId: topMessage,
+    unreadCount,
+    unreadMentionsCount,
+    unreadReactionsCount,
+    fromId: getApiChatIdFromMtpPeer(fromId),
+    // TODO[forums] `muteUntil` should not really be parsed here
+    isMuted: silent || (muteUntil !== undefined ? muteUntil > 0 : undefined),
   };
 }

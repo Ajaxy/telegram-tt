@@ -1,9 +1,14 @@
 import type { GlobalState } from '../types';
-import type { ApiChat, ApiChatMember, ApiPhoto } from '../../api/types';
+import type {
+  ApiChat, ApiChatMember, ApiTopic, ApiPhoto,
+} from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
-import { areSortedArraysEqual, buildCollectionByKey, omit } from '../../util/iteratees';
-import { selectChatListType } from '../selectors';
+import {
+  areSortedArraysEqual, buildCollectionByKey, omit,
+} from '../../util/iteratees';
+import { selectChat, selectChatListType } from '../selectors';
+import { updateThread, updateThreadInfo } from './messages';
 
 export function replaceChatListIds(
   global: GlobalState,
@@ -245,4 +250,83 @@ export function addChatMembers(global: GlobalState, chat: ApiChat, membersToAdd:
       adminMembersById: buildCollectionByKey(updatedMembers, 'userId'),
     },
   });
+}
+
+export function updateTopics(
+  global: GlobalState, chatId: string, topicsCount: number, topics: ApiTopic[],
+): GlobalState {
+  const chat = selectChat(global, chatId);
+
+  const newTopics = buildCollectionByKey(topics, 'id');
+
+  global = updateChat(global, chatId, {
+    topics: {
+      ...chat?.topics,
+      ...newTopics,
+    },
+    topicsCount,
+  });
+
+  topics.forEach((topic) => {
+    global = updateThread(global, chatId, topic.id, {
+      firstMessageId: topic.id,
+    });
+
+    global = updateThreadInfo(global, chatId, topic.id, {
+      lastMessageId: topic.lastMessageId,
+      threadId: topic.id,
+      chatId,
+    });
+  });
+
+  return global;
+}
+
+export function updateTopic(
+  global: GlobalState, chatId: string, topicId: number, update: Partial<ApiTopic>,
+): GlobalState {
+  const chat = selectChat(global, chatId);
+
+  if (!chat) return global;
+
+  const topic = chat?.topics?.[topicId];
+
+  const updatedTopic = {
+    ...topic,
+    ...update,
+  } as ApiTopic;
+
+  if (!updatedTopic.id) return global;
+
+  global = updateChat(global, chatId, {
+    topics: {
+      ...(chat.topics || {}),
+      [topicId]: updatedTopic,
+    },
+  });
+
+  global = updateThread(global, chatId, updatedTopic.id, {
+    firstMessageId: updatedTopic.id,
+  });
+
+  global = updateThreadInfo(global, chatId, updatedTopic.id, {
+    lastMessageId: updatedTopic.lastMessageId,
+    threadId: updatedTopic.id,
+    chatId,
+  });
+
+  return global;
+}
+
+export function deleteTopic(
+  global: GlobalState, chatId: string, topicId: number,
+) {
+  const chat = selectChat(global, chatId);
+  const topics = chat?.topics || [];
+
+  global = updateChat(global, chatId, {
+    topics: omit(topics, [topicId]),
+  });
+
+  return global;
 }

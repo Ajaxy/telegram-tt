@@ -22,10 +22,12 @@ import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
 import ActionMessage from './ActionMessage';
 import { getActions } from '../../global';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 interface OwnProps {
   isCurrentUserPremium?: boolean;
   chatId: string;
+  threadId: number;
   messageIds: number[];
   messageGroups: MessageDateGroup[];
   isViewportNewest: boolean;
@@ -36,7 +38,6 @@ interface OwnProps {
   anchorIdRef: { current: string | undefined };
   memoUnreadDividerBeforeIdRef: { current: number | undefined };
   memoFirstUnreadIdRef: { current: number | undefined };
-  threadId: number;
   type: MessageListType;
   isReady: boolean;
   isScrollingRef: { current: boolean | undefined };
@@ -54,6 +55,7 @@ const UNREAD_DIVIDER_CLASS = 'unread-divider';
 const MessageListContent: FC<OwnProps> = ({
   isCurrentUserPremium,
   chatId,
+  threadId,
   messageIds,
   messageGroups,
   isViewportNewest,
@@ -64,7 +66,6 @@ const MessageListContent: FC<OwnProps> = ({
   anchorIdRef,
   memoUnreadDividerBeforeIdRef,
   memoFirstUnreadIdRef,
-  threadId,
   type,
   isReady,
   isScrollingRef,
@@ -141,6 +142,7 @@ const MessageListContent: FC<OwnProps> = ({
           <ActionMessage
             key={message.id}
             message={message}
+            isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID)}
             observeIntersectionForReading={observeIntersectionForReading}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}

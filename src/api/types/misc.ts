@@ -12,6 +12,7 @@ export interface ApiInitialArgs {
   maxBufferSize?: number;
   webAuthToken?: string;
   dcId?: number;
+  mockScenario?: string;
 }
 
 export interface ApiOnProgress {
@@ -174,6 +175,7 @@ export interface ApiAppConfig {
   premiumPromoOrder: string[];
   defaultEmojiStatusesStickerSetId: string;
   maxUniqueReactions: number;
+  topicsPinnedLimit: number;
   maxUserReactionsDefault: number;
   maxUserReactionsPremium: number;
   limits: Record<ApiLimitType, readonly [number, number]>;

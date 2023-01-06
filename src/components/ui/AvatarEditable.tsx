@@ -13,6 +13,7 @@ import './AvatarEditable.scss';
 interface OwnProps {
   title?: string;
   disabled?: boolean;
+  isForForum?: boolean;
   currentAvatarBlobUrl?: string;
   onChange: (file: File) => void;
 }
@@ -20,6 +21,7 @@ interface OwnProps {
 const AvatarEditable: FC<OwnProps> = ({
   title = 'Change your profile picture',
   disabled,
+  isForForum,
   currentAvatarBlobUrl,
   onChange,
 }) => {
@@ -58,6 +60,7 @@ const AvatarEditable: FC<OwnProps> = ({
   const labelClassName = buildClassName(
     croppedBlobUrl && 'filled',
     disabled && 'disabled',
+    isForForum && 'rounded-square',
   );
 
   return (

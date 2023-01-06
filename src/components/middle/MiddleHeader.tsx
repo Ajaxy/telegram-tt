@@ -39,6 +39,7 @@ import {
   selectPinnedIds,
   selectScheduledIds,
   selectThreadInfo,
+  selectThreadParam,
   selectThreadTopMessageId,
 } from '../../global/selectors';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
@@ -141,12 +142,13 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const chatTitleLength = chat && getChatTitle(lang, chat).length;
   const topMessageTitle = topMessageSender ? getSenderTitle(lang, topMessageSender) : undefined;
   const { settings } = chat || {};
+  const isForum = chat?.isForum;
 
   useEffect(() => {
-    if (threadId === MAIN_THREAD_ID && lastSyncTime && isReady) {
-      loadPinnedMessages({ chatId });
+    if (lastSyncTime && isReady && (threadId === MAIN_THREAD_ID || isForum)) {
+      loadPinnedMessages({ chatId, threadId });
     }
-  }, [chatId, loadPinnedMessages, lastSyncTime, threadId, isReady]);
+  }, [chatId, loadPinnedMessages, lastSyncTime, threadId, isReady, isForum]);
 
   // Reset pinned index when switching chats and pinning/unpinning
   useEffect(() => {
@@ -165,8 +167,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const shouldAnimateTools = useRef<boolean>(true);
 
   const handleHeaderClick = useCallback(() => {
-    openChatWithInfo({ id: chatId });
-  }, [openChatWithInfo, chatId]);
+    openChatWithInfo({ id: chatId, threadId });
+  }, [openChatWithInfo, chatId, threadId]);
 
   const handleUnpinMessage = useCallback((messageId: number) => {
     pinMessage({ chatId, messageId, isUnpin: true });
@@ -182,8 +184,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   }, [pinnedMessage, focusMessage, threadId, pinnedMessagesCount, pinnedMessageIndex]);
 
   const handleAllPinnedClick = useCallback(() => {
-    openChat({ id: chatId, threadId: MAIN_THREAD_ID, type: 'pinned' });
-  }, [openChat, chatId]);
+    openChat({ id: chatId, threadId, type: 'pinned' });
+  }, [openChat, chatId, threadId]);
 
   const setBackButtonActive = useCallback(() => {
     setTimeout(() => {
@@ -207,7 +209,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (threadId === MAIN_THREAD_ID && messageListType === 'thread' && currentTransitionKey === 0) {
+    if (messageListType === 'thread' && currentTransitionKey === 0) {
       if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
         openChat({ id: undefined }, { forceOnHeavyAnimation: true });
@@ -223,7 +225,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openPreviousChat();
     setBackButtonActive();
   }, [
-    threadId, messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
+    messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
     openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive,
   ]);
 
@@ -304,35 +306,29 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing, true);
 
   function renderInfo() {
+    if (messageListType === 'thread') {
+      if (threadId === MAIN_THREAD_ID || chat?.isForum) {
+        return renderChatInfo();
+      }
+    }
+
     return (
-      messageListType === 'thread' && threadId === MAIN_THREAD_ID ? (
-        renderMainThreadInfo()
-      ) : messageListType === 'thread' ? (
-        <>
-          {renderBackButton()}
-          <h3>
-            {lang('CommentsCount', messagesCount, 'i')}
-          </h3>
-        </>
-      ) : messageListType === 'pinned' ? (
-        <>
-          {renderBackButton()}
-          <h3>
-            {lang('PinnedMessagesCount', messagesCount, 'i')}
-          </h3>
-        </>
-      ) : messageListType === 'scheduled' ? (
-        <>
-          {renderBackButton()}
-          <h3>
-            {isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')}
-          </h3>
-        </>
-      ) : undefined
+      <>
+        {renderBackButton()}
+        <h3>
+          {messagesCount !== undefined ? (
+            messageListType === 'thread' ? (lang('CommentsCount', messagesCount, 'i'))
+              : messageListType === 'pinned' ? (lang('PinnedMessagesCount', messagesCount, 'i'))
+                : messageListType === 'scheduled' ? (
+                  isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')
+                ) : undefined
+          ) : lang('Loading')}
+        </h3>
+      </>
     );
   }
 
-  function renderMainThreadInfo() {
+  function renderChatInfo() {
     return (
       <>
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, true)}
@@ -355,11 +351,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
             <GroupChatInfo
               key={chatId}
               chatId={chatId}
+              threadId={threadId}
               typingStatus={typingStatus}
               status={connectionStatusText}
               withDots={Boolean(connectionStatusText)}
-              withMediaViewer
-              withFullInfo
+              withMediaViewer={threadId === MAIN_THREAD_ID}
+              withFullInfo={threadId === MAIN_THREAD_ID}
               withUpdatingStatus
               withVideoAvatar={isReady}
               noRtl
@@ -456,7 +453,6 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, threadId, messageListType }): StateProps => {
     const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
     const chat = selectChat(global, chatId);
-    const { typingStatus } = chat || {};
 
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
     const audioMessage = audioChatId && audioMessageId
@@ -465,10 +461,10 @@ export default memo(withGlobal<OwnProps>(
 
     let messagesCount: number | undefined;
     if (messageListType === 'pinned') {
-      const pinnedIds = selectPinnedIds(global, chatId);
+      const pinnedIds = selectPinnedIds(global, chatId, threadId);
       messagesCount = pinnedIds?.length;
     } else if (messageListType === 'scheduled') {
-      const scheduledIds = selectScheduledIds(global, chatId);
+      const scheduledIds = selectScheduledIds(global, chatId, threadId);
       messagesCount = scheduledIds?.length;
     } else if (messageListType === 'thread' && threadId !== MAIN_THREAD_ID) {
       const threadInfo = selectThreadInfo(global, chatId, threadId);
@@ -480,9 +476,10 @@ export default memo(withGlobal<OwnProps>(
     const canRestartBot = Boolean(isChatWithBot && selectIsUserBlocked(global, chatId));
     const canStartBot = isChatWithBot && !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));
     const canSubscribe = Boolean(
-      isMainThread && chat && (isChatChannel(chat) || isChatSuperGroup(chat)) && chat.isNotJoined,
+      chat && (isMainThread || chat.isForum) && (isChatChannel(chat) || isChatSuperGroup(chat)) && chat.isNotJoined,
     );
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
+    const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
 
     const state: StateProps = {
       typingStatus,
@@ -508,7 +505,7 @@ export default memo(withGlobal<OwnProps>(
 
     Object.assign(state, { messagesById });
 
-    if (threadId !== MAIN_THREAD_ID) {
+    if (threadId !== MAIN_THREAD_ID && !chat?.isForum) {
       const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
       const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
       const topMessageSender = message ? selectForwardedSender(global, message) : undefined;
@@ -521,7 +518,7 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const pinnedMessageIds = selectPinnedIds(global, chatId);
+    const pinnedMessageIds = selectPinnedIds(global, chatId, threadId);
     if (pinnedMessageIds?.length) {
       const firstPinnedMessage = messagesById[pinnedMessageIds[0]];
       const {

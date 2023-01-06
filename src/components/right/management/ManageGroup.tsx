@@ -1,11 +1,11 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState, useRef,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ManagementScreens, ManagementProgress } from '../../../types';
+import { ManagementProgress, ManagementScreens } from '../../../types';
 import type {
   ApiAvailableReaction, ApiChat, ApiChatBannedRights, ApiExportedInvite,
 } from '../../../api/types';
@@ -62,7 +62,7 @@ const GROUP_MAX_DESCRIPTION = 255;
 
 // Some checkboxes control multiple rights, and some rights are not controlled from Permissions screen,
 // so we need to define the amount manually
-const TOTAL_PERMISSIONS_COUNT = 8;
+const TOTAL_PERMISSIONS_COUNT = 9;
 
 const ManageGroup: FC<OwnProps & StateProps> = ({
   chatId,
@@ -98,7 +98,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const currentAbout = chat.fullInfo ? (chat.fullInfo.about || '') : '';
 
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
-  const [title, setTitle] = useState(currentTitle || '');
+  const [title, setTitle] = useState(currentTitle);
   const [about, setAbout] = useState(currentAbout);
   const [photo, setPhoto] = useState<File | undefined>();
   const [error, setError] = useState<string | undefined>();
@@ -226,8 +226,9 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     const enabledLength = chat.fullInfo.enabledReactions.allowed.length;
     const totalLength = availableReactions?.filter((reaction) => !reaction.isInactive).length || 0;
 
-    const text = totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
-    return text;
+    return totalLength
+      ? `${enabledLength} / ${totalLength}`
+      : `${enabledLength}`;
   }, [availableReactions, chat, lang]);
 
   const enabledPermissionsCount = useMemo(() => {
@@ -243,6 +244,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
       'changeInfo',
       'inviteUsers',
       'pinMessages',
+      'manageTopics',
     ].filter(
       (key) => !chat.defaultBannedRights![key as keyof ApiChatBannedRights],
     ).length;
@@ -288,6 +290,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
       <div className="custom-scroll">
         <div className="section">
           <AvatarEditable
+            isForForum={chat.isForum}
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handleSetPhoto}
             disabled={!canChangeInfo}
@@ -337,7 +340,6 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}
             </span>
           </ListItem>
-
           <ListItem
             icon="heart-outline"
             multiline

@@ -49,6 +49,7 @@ import type {
   ApiConfig,
   ApiReaction,
   ApiChatReactions,
+  ApiTypingStatus,
 } from '../api/types';
 import type {
   FocusDirection,
@@ -121,6 +122,7 @@ export interface Thread {
   threadInfo?: ApiThreadInfo;
   firstMessageId?: number;
   replyStack?: number[];
+  typingStatus?: ApiTypingStatus;
 }
 
 export interface ServiceNotification {
@@ -239,6 +241,8 @@ export type GlobalState = {
   isCallPanelVisible?: boolean;
   phoneCall?: ApiPhoneCall;
   ratingPhoneCall?: ApiPhoneCall;
+
+  forumPanelChatId?: string;
 
   scheduledMessages: {
     byChatId: Record<string, {
@@ -370,10 +374,12 @@ export type GlobalState = {
     recentlyFoundChatIds?: string[];
     currentContent?: GlobalSearchContent;
     chatId?: string;
+    foundTopicIds?: number[];
     fetchingStatus?: {
       chats?: boolean;
       messages?: boolean;
     };
+    isClosing?: boolean;
     localResults?: {
       chatIds?: string[];
       userIds?: string[];
@@ -413,7 +419,7 @@ export type GlobalState = {
   };
 
   localMediaSearch: {
-    byChatId: Record<string, {
+    byChatThreadKey: Record<string, {
       currentType?: SharedMediaType;
       resultsByType?: Partial<Record<SharedMediaType, {
         totalCount?: number;
@@ -468,6 +474,7 @@ export type GlobalState = {
     fromChatId?: string;
     messageIds?: number[];
     toChatId?: string;
+    toThreadId?: number;
     withMyScore?: boolean;
     noAuthors?: boolean;
     noCaptions?: boolean;
@@ -621,6 +628,8 @@ export type GlobalState = {
     buttonText: string;
     queryId?: string;
     slug?: string;
+    replyToMessageId?: number;
+    threadId?: number;
   };
 
   trustedBotIds: string[];
@@ -714,6 +723,8 @@ export interface ActionPayloads {
   openLimitReachedModal: { limit: ApiLimitTypeWithModal };
   closeLimitReachedModal: never;
   checkAppVersion: never;
+  toggleChatInfo: boolean;
+  setGlobalSearchClosing: boolean;
 
   // Accounts
   reportPeer: {
@@ -742,6 +753,7 @@ export interface ActionPayloads {
     threadId?: number;
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
+    noForumTopicPanel?: boolean;
   };
   loadFullChat: {
     chatId: string;
@@ -757,6 +769,7 @@ export interface ActionPayloads {
   };
   openChatWithDraft: {
     chatId?: string;
+    threadId?: number;
     text: string;
     files?: File[];
   };
@@ -768,6 +781,16 @@ export interface ActionPayloads {
   toggleJoinRequest: {
     chatId: string;
     isEnabled: boolean;
+  };
+
+  openForumPanel: {
+    chatId: string;
+  };
+  closeForumPanel: never;
+
+  requestThreadInfoUpdate: {
+    chatId: string;
+    threadId: number;
   };
 
   // Messages
@@ -813,6 +836,10 @@ export interface ActionPayloads {
   loadExtendedMedia: {
     chatId: string;
     ids: number[];
+  };
+  focusNextReply: never;
+  focusLastMessage: {
+    noForumTopicPanel?: boolean;
   };
 
   // Reactions
@@ -944,8 +971,9 @@ export interface ActionPayloads {
     withMyScore?: boolean;
   };
   openForwardMenuForSelectedMessages: never;
-  setForwardChatId: {
-    id: string;
+  setForwardChatOrTopic: {
+    chatId: string;
+    topicId?: number;
   };
   forwardMessages: {
     isSilent?: boolean;
@@ -1072,6 +1100,7 @@ export interface ActionPayloads {
     queryId: string;
     isSilent?: boolean;
     replyToMessageId?: number;
+    threadId?: number;
   };
   requestSimpleWebView: {
     url: string;
@@ -1121,6 +1150,7 @@ export interface ActionPayloads {
 
   callAttachBot: {
     chatId: string;
+    threadId?: number;
     botId: string;
     isFromBotMenu?: boolean;
     url?: string;
@@ -1284,6 +1314,51 @@ export interface ActionPayloads {
   validatePaymentPassword: {
     password: string;
   };
+
+  // Forums
+  toggleForum: {
+    chatId: string;
+    isEnabled: boolean;
+  };
+  loadTopics: {
+    chatId: string;
+    force?: boolean;
+  };
+  loadTopicById: {
+    chatId: string;
+    topicId: number;
+  };
+
+  deleteTopic: {
+    chatId: string;
+    topicId: number;
+  };
+
+  editTopic: {
+    chatId: string;
+    topicId: number;
+    title?: string;
+    iconEmojiId?: string;
+    isClosed?: boolean;
+    isHidden?: boolean;
+  };
+
+  toggleTopicPinned: {
+    chatId: string;
+    topicId: number;
+    isPinned: boolean;
+  };
+
+  markTopicRead: {
+    chatId: string;
+    topicId: number;
+  };
+
+  updateTopicMutedState: {
+    chatId: string;
+    topicId: number;
+    isMuted: boolean;
+  };
 }
 
 export type NonTypedActionNames = (
@@ -1291,7 +1366,7 @@ export type NonTypedActionNames = (
   'init' | 'reset' | 'disconnect' | 'initApi' | 'sync' | 'saveSession' |
   'showDialog' | 'dismissDialog' |
   // ui
-  'toggleChatInfo' | 'setIsUiReady' | 'toggleLeftColumn' |
+  'setIsUiReady' | 'toggleLeftColumn' |
   'toggleSafeLinkModal' | 'openHistoryCalendar' | 'closeHistoryCalendar' | 'disableContextMenuHint' |
   'setNewChatMembersDialogState' | 'disableHistoryAnimations' | 'setLeftColumnWidth' | 'resetLeftColumnWidth' |
   'openSeenByModal' | 'closeSeenByModal' | 'closeReactorListModal' | 'openReactorListModal' |
@@ -1310,12 +1385,12 @@ export type NonTypedActionNames = (
   'addChatMembers' | 'deleteChatMember' | 'openPreviousChat' | 'editChatFolders' | 'toggleIsProtected' |
   // messages
   'loadViewportMessages' | 'selectMessage' | 'sendMessage' | 'cancelSendingMessage' | 'pinMessage' | 'deleteMessages' |
-  'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' | 'focusLastMessage' |
+  'markMessageListRead' | 'markMessagesRead' | 'loadMessage' | 'focusMessage' |
   'editMessage' | 'deleteHistory' | 'enterMessageSelectMode' | 'toggleMessageSelection' | 'exitMessageSelectMode' |
-  'openTelegramLink' | 'openChatByUsername' | 'requestThreadInfoUpdate' | 'setScrollOffset' | 'unpinAllMessages' |
+  'openTelegramLink' | 'openChatByUsername' | 'setScrollOffset' | 'unpinAllMessages' |
   'setReplyingToId' | 'editLastMessage' | 'saveDraft' | 'clearDraft' | 'loadPinnedMessages' |
   'toggleMessageWebPage' | 'replyToNextMessage' | 'deleteChatUser' | 'deleteChat' |
-  'reportMessages' | 'sendMessageAction' | 'focusNextReply' | 'openChatByInvite' | 'loadSeenBy' |
+  'reportMessages' | 'sendMessageAction' | 'openChatByInvite' | 'loadSeenBy' |
   'loadSponsoredMessages' | 'viewSponsoredMessage' | 'loadSendAs' | 'saveDefaultSendAs' |
   'stopActiveEmojiInteraction' | 'interactWithAnimatedEmoji' | 'loadReactors' |
   'sendEmojiInteraction' | 'sendWatchingEmojiInteraction' | 'copySelectedMessages' | 'copyMessagesByIds' |

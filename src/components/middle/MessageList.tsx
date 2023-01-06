@@ -24,7 +24,7 @@ import {
   selectScrollOffset,
   selectThreadTopMessageId,
   selectFirstMessageId,
-  selectScheduledMessages,
+  selectChatScheduledMessages,
   selectCurrentMessageIds,
   selectIsCurrentUserPremium,
 } from '../../global/selectors';
@@ -226,7 +226,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const viewportIds = threadTopMessageId && (!messageIds[0] || threadFirstMessageId === messageIds[0])
+    const viewportIds = threadTopMessageId && threadFirstMessageId !== threadTopMessageId
+      && (!messageIds[0] || threadFirstMessageId === messageIds[0])
       ? [threadTopMessageId, ...messageIds]
       : messageIds;
 
@@ -625,12 +626,12 @@ export default memo(withGlobal<OwnProps>(
 
     const messageIds = selectCurrentMessageIds(global, chatId, threadId, type);
     const messagesById = type === 'scheduled'
-      ? selectScheduledMessages(global, chatId)
+      ? selectChatScheduledMessages(global, chatId)
       : selectChatMessages(global, chatId);
     const threadTopMessageId = selectThreadTopMessageId(global, chatId, threadId);
 
     if (
-      threadId !== MAIN_THREAD_ID
+      threadId !== MAIN_THREAD_ID && !chat?.isForum
       && !(messagesById && threadTopMessageId && messagesById[threadTopMessageId])
     ) {
       return {};

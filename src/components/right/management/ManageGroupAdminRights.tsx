@@ -37,6 +37,7 @@ type StateProps = {
   currentUserId?: string;
   isChannel: boolean;
   isFormFullyDisabled: boolean;
+  isForum?: boolean;
   defaultRights?: ApiChatAdminRights;
 };
 
@@ -51,6 +52,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   usersById,
   currentUserId,
   isChannel,
+  isForum,
   isFormFullyDisabled,
   onClose,
   isActive,
@@ -301,6 +303,18 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
+          {isForum && (
+            <div className="ListItem no-selection">
+              <Checkbox
+                name="manageTopics"
+                checked={Boolean(permissions.manageTopics)}
+                label={lang('ManageTopicsPermission')}
+                blocking
+                disabled={getControlIsDisabled('manageTopics')}
+                onChange={handlePermissionChange}
+              />
+            </div>
+          )}
           {!isChannel && (
             <div className="ListItem no-selection">
               <Checkbox
@@ -373,12 +387,14 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId } = global;
     const isChannel = isChatChannel(chat);
     const isFormFullyDisabled = !(chat.isCreator || isPromotedByCurrentUser);
+    const isForum = chat.isForum;
 
     return {
       chat,
       usersById,
       currentUserId,
       isChannel,
+      isForum,
       isFormFullyDisabled,
       defaultRights: chat.adminRights,
     };

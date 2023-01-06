@@ -422,9 +422,18 @@ function buildChatSummary(
 ): ChatSummary {
   const {
     id, type, lastMessage, isRestricted, isNotJoined, migratedTo, folderId,
-    unreadCount, unreadMentionsCount, hasUnreadMark,
-    joinDate, draftDate,
+    unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount, hasUnreadMark,
+    joinDate, draftDate, isForum, topics,
   } = chat;
+
+  const { unreadCount, unreadMentionsCount } = isForum
+    ? Object.values(topics || {}).reduce((acc, topic) => {
+      acc.unreadCount += topic.unreadCount;
+      acc.unreadMentionsCount += topic.unreadMentionsCount;
+
+      return acc;
+    }, { unreadCount: 0, unreadMentionsCount: 0 })
+    : { unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount };
 
   const userInfo = type === 'chatTypePrivate' && user;
   const shouldHideServiceChat = chat.id === SERVICE_NOTIFICATIONS_USER_ID && (

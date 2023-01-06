@@ -26,7 +26,7 @@ export type OwnProps = {
   searchPlaceholder: string;
   filter?: ApiChatType[];
   loadMore?: NoneToVoidFunction;
-  onSelectRecipient: (peerId: string) => void;
+  onSelectRecipient: (peerId: string, threadId?: number) => void;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
@@ -94,6 +94,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
     <ChatOrUserPicker
       isOpen={isOpen}
       chatOrUserIds={renderingIds}
+      chatsById={chatsById}
       searchPlaceholder={searchPlaceholder}
       search={search}
       onSearchChange={setSearch}

@@ -49,6 +49,8 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
   const lang = useLang();
 
+  const { isForum } = chat || {};
+
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -224,6 +226,18 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
+          {isForum && (
+            <div className="ListItem no-selection">
+              <Checkbox
+                name="manageTopics"
+                checked={!permissions.manageTopics}
+                label={lang('CreateTopicsPermission')}
+                blocking
+                disabled={getControlIsDisabled('manageTopics')}
+                onChange={handlePermissionChange}
+              />
+            </div>
+          )}
         </div>
 
         {!isFormFullyDisabled && (

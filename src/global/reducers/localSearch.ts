@@ -96,14 +96,17 @@ export function updateLocalTextSearchResults(
 function replaceLocalMediaSearch(
   global: GlobalState,
   chatId: string,
+  threadId: number,
   searchParams: MediaSearchParams,
 ): GlobalState {
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
   return {
     ...global,
     localMediaSearch: {
-      byChatId: {
-        ...global.localMediaSearch.byChatId,
-        [chatId]: searchParams,
+      byChatThreadKey: {
+        ...global.localMediaSearch.byChatThreadKey,
+        [chatThreadKey]: searchParams,
       },
     },
   };
@@ -112,10 +115,13 @@ function replaceLocalMediaSearch(
 export function updateLocalMediaSearchType(
   global: GlobalState,
   chatId: string,
+  threadId: number,
   currentType: SharedMediaType | undefined,
 ): GlobalState {
-  return replaceLocalMediaSearch(global, chatId, {
-    ...global.localMediaSearch.byChatId[chatId],
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return replaceLocalMediaSearch(global, chatId, threadId, {
+    ...global.localMediaSearch.byChatThreadKey[chatThreadKey],
     currentType,
   });
 }
@@ -123,15 +129,18 @@ export function updateLocalMediaSearchType(
 export function replaceLocalMediaSearchResults(
   global: GlobalState,
   chatId: string,
+  threadId: number,
   type: ApiMessageSearchType,
   foundIds?: number[],
   totalCount?: number,
   nextOffsetId?: number,
 ): GlobalState {
-  return replaceLocalMediaSearch(global, chatId, {
-    ...global.localMediaSearch.byChatId[chatId],
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return replaceLocalMediaSearch(global, chatId, threadId, {
+    ...global.localMediaSearch.byChatThreadKey[chatThreadKey],
     resultsByType: {
-      ...(global.localMediaSearch.byChatId[chatId] || {}).resultsByType,
+      ...(global.localMediaSearch.byChatThreadKey[chatThreadKey] || {}).resultsByType,
       [type]: {
         foundIds,
         totalCount,
@@ -144,17 +153,28 @@ export function replaceLocalMediaSearchResults(
 export function updateLocalMediaSearchResults(
   global: GlobalState,
   chatId: string,
+  threadId: number,
   type: SharedMediaType,
   newFoundIds: number[],
   totalCount?: number,
   nextOffsetId?: number,
 ): GlobalState {
-  const { resultsByType } = global.localMediaSearch.byChatId[chatId] || {};
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  const { resultsByType } = global.localMediaSearch.byChatThreadKey[chatThreadKey] || {};
   const prevFoundIds = resultsByType?.[type] ? resultsByType[type]!.foundIds : [];
   const foundIds = orderFoundIds(unique(Array.prototype.concat(prevFoundIds, newFoundIds)));
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
-  return replaceLocalMediaSearchResults(global, chatId, type, foundOrPrevFoundIds, totalCount, nextOffsetId);
+  return replaceLocalMediaSearchResults(
+    global,
+    chatId,
+    threadId,
+    type,
+    foundOrPrevFoundIds,
+    totalCount,
+    nextOffsetId,
+  );
 }
 
 function orderFoundIds(listedIds: number[]) {

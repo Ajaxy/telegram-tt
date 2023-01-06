@@ -25,8 +25,9 @@ import {
 } from '../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
-import { pick, unique } from '../util/iteratees';
+import { pick, pickTruthy, unique } from '../util/iteratees';
 import {
+  selectChat,
   selectCurrentChat,
   selectCurrentMessageList,
   selectVisibleUsers,
@@ -298,6 +299,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.recentCustomEmojis = [];
   }
 
+  if (!cached?.localMediaSearch?.byChatThreadKey) {
+    cached.localMediaSearch = initialState.localMediaSearch;
+  }
+
   if (cached.settings.byKey.shouldSuggestCustomEmoji === undefined) {
     cached.settings.byKey.shouldSuggestCustomEmoji = true;
   }
@@ -525,6 +530,7 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
   const chatIdsToSave = [
     ...currentChatId ? [currentChatId] : [],
     ...currentUserId ? [currentUserId] : [],
+    ...global.forumPanelChatId ? [global.forumPanelChatId] : [],
     ...getOrderedIds(ALL_FOLDER_ID)?.slice(0, GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT) || [],
   ];
 
@@ -534,16 +540,21 @@ function reduceMessages(global: GlobalState): GlobalState['messages'] {
       return;
     }
 
-    const mainThread = current.threadsById[MAIN_THREAD_ID];
-    if (!mainThread || !mainThread.viewportIds) {
+    const chat = selectChat(global, chatId);
+
+    const threadIdsToSave = currentChatId === chatId && threadId ? [MAIN_THREAD_ID, threadId] : [MAIN_THREAD_ID];
+    const threadsToSave = pickTruthy(current.threadsById, threadIdsToSave);
+    if (!Object.keys(threadsToSave).length) {
       return;
     }
 
+    const viewportIdsToSave = unique(Object.values(threadsToSave).flatMap((thread) => thread.viewportIds || []));
+    const lastMessagesToSave = chat?.topics
+      ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId) : [];
+
     byChatId[chatId] = {
-      byId: pick(current.byId, mainThread.viewportIds),
-      threadsById: {
-        [MAIN_THREAD_ID]: mainThread,
-      },
+      byId: pick(current.byId, viewportIdsToSave.concat(lastMessagesToSave)),
+      threadsById: threadsToSave,
     };
   });
 

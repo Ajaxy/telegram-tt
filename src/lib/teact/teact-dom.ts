@@ -709,6 +709,8 @@ function DEBUG_checkKeyUniqueness(children: VirtualElementChildren) {
     }, []);
 
     if (keys.length !== unique(keys).length) {
+      // eslint-disable-next-line no-console
+      console.warn('[Teact] Duplicated keys:', keys.filter((e, i, a) => a.indexOf(e) !== i));
       throw new Error('[Teact] Children keys are not unique');
     }
   }

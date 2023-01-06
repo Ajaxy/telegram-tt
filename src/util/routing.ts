@@ -1,31 +1,46 @@
 import type { MessageListType } from '../global/types';
 import { MAIN_THREAD_ID } from '../api/types';
 import { LOCATION_HASH } from '../hooks/useHistoryBack';
+import { IS_MOCKED_CLIENT } from '../config';
 
 let parsedInitialLocationHash: Record<string, string> | undefined;
 let messageHash: string | undefined;
 let isAlreadyParsed = false;
 
-export const createMessageHash = (chatId: string, type: string, threadId: number): string => (
-  chatId.toString()
-  + (type !== 'thread' ? `_${type}`
-    : (threadId !== -1 ? `_${threadId}` : ''))
-);
+export const createLocationHash = (chatId: string, type: string, threadId: number): string => {
+  const displayType = type === 'thread' ? undefined : type;
+  const parts = threadId === MAIN_THREAD_ID ? [chatId, displayType] : [chatId, threadId, displayType];
+
+  return parts.filter(Boolean).join('_');
+};
 
 export function parseLocationHash() {
   parseInitialLocationHash();
 
   if (!messageHash) return undefined;
 
-  const [chatId, typeOrThreadId] = messageHash.split('_');
+  const parts = messageHash.split('_');
+  let chatId: string | undefined;
+  let type: string | undefined;
+  let threadId: string | undefined;
+  if (parts.length === 1) {
+    chatId = parts[0];
+  } else if (parts.length === 2) {
+    const isType = ['thread', 'pinned', 'scheduled'].includes(parts[1]);
+    chatId = parts[0];
+    type = isType ? parts[1] : 'thread';
+    threadId = !isType ? parts[1] : undefined;
+  } else if (parts.length >= 3) {
+    [chatId, threadId, type] = parts;
+  }
   if (!chatId?.match(/^-?\d+$/)) return undefined;
 
-  const isType = ['thread', 'pinned', 'scheduled'].includes(typeOrThreadId);
+  const isType = ['thread', 'pinned', 'scheduled'].includes(type!);
 
   return {
     chatId,
-    type: Boolean(typeOrThreadId) && isType ? (typeOrThreadId as MessageListType) : 'thread',
-    threadId: Boolean(typeOrThreadId) && !isType ? Number(typeOrThreadId) : MAIN_THREAD_ID,
+    type: type && isType ? (type as MessageListType) : 'thread',
+    threadId: Number(threadId) || MAIN_THREAD_ID,
   };
 }
 
@@ -39,9 +54,13 @@ export function parseInitialLocationHash() {
   let parsedHash = LOCATION_HASH ? LOCATION_HASH.replace(/^#/, '') : undefined;
   if (parsedHash?.includes('?')) {
     [messageHash, parsedHash] = parsedHash.split('?');
-    window.location.hash = messageHash;
+    if (!IS_MOCKED_CLIENT) {
+      window.location.hash = messageHash;
+    }
   } else if (parsedHash?.includes('=')) {
-    window.location.hash = '';
+    if (!IS_MOCKED_CLIENT) {
+      window.location.hash = '';
+    }
   }
 
   parsedInitialLocationHash = parsedHash?.includes('=') ? parsedHash?.split('&').reduce((acc, cur) => {

@@ -32,6 +32,7 @@ import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import { getPromptInstall } from '../../../util/installPrompt';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -45,8 +46,10 @@ import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import './LeftMainHeader.scss';
 
 type OwnProps = {
+  shouldHideSearch?: boolean;
   content: LeftColumnContent;
   contactsFilter: string;
+  isClosingSearch?: boolean;
   shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onSelectSettings: () => void;
@@ -77,9 +80,11 @@ const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
+  shouldHideSearch,
   content,
   contactsFilter,
   onSearchQuery,
+  isClosingSearch,
   onSelectSettings,
   onSelectContacts,
   onSelectArchived,
@@ -250,12 +255,26 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
 
+  // Disable dropdown menu RTL animation for resize
+  const {
+    shouldDisableDropdownMenuTransitionRef,
+    handleDropdownMenuTransitionEnd,
+  } = useLeftHeaderButtonRtlForumTransition(shouldHideSearch);
+
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header">
+        {lang.isRtl && <div className="DropdownMenuFiller" />}
         <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${versionString}`}
+          className={buildClassName(
+            lang.isRtl && 'rtl',
+            shouldHideSearch && lang.isRtl && 'right-aligned',
+            shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+          )}
+          positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+          onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           <MenuItem
             icon="saved-messages"
@@ -269,7 +288,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           >
             <span className="menu-item-name">{lang('ArchivedChats')}</span>
             {archivedUnreadChatsCount > 0 && (
-              <div className="archived-badge">{archivedUnreadChatsCount}</div>
+              <div className="right-badge">{archivedUnreadChatsCount}</div>
             )}
           </MenuItem>
           <MenuItem
@@ -357,8 +376,11 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         <SearchInput
           inputId="telegram-search-input"
           parentContainerClassName="LeftSearch"
-          className={globalSearchChatId || searchDate ? 'with-picker-item' : ''}
-          value={contactsFilter || searchQuery}
+          className={buildClassName(
+            (globalSearchChatId || searchDate) ? 'with-picker-item' : undefined,
+            shouldHideSearch && 'SearchInput--hidden',
+          )}
+          value={isClosingSearch ? undefined : (contactsFilter || searchQuery)}
           focused={isSearchFocused}
           isLoading={isLoading || connectionStatusPosition === 'minimized'}
           spinnerColor={connectionStatusPosition === 'minimized' ? 'yellow' : undefined}

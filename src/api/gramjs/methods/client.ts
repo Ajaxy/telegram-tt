@@ -52,6 +52,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   const {
     userAgent, platform, sessionData, isTest, isMovSupported, isWebmSupported, maxBufferSize, webAuthToken, dcId,
+    mockScenario,
   } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
@@ -104,6 +105,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
         shouldThrowIfUnauthorized: Boolean(sessionData),
         webAuthToken,
         webAuthTokenFailed: onWebAuthTokenFailed,
+        mockScenario,
       });
     } catch (err: any) {
       // eslint-disable-next-line no-console

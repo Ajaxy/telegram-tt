@@ -6,6 +6,10 @@ $animation-time: 0.15s;
 .root {
   display: inline-flex;
   white-space: pre;
+
+  &[dir="rtl"] {
+    flex-direction: row-reverse;
+  }
 }
 
 .character-container {

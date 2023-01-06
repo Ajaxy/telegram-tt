@@ -74,6 +74,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   const fullClassName = buildClassName(
     'PickerSelectedItem',
     className,
+    chat?.isForum && 'forum-avatar',
     isMinimized && 'minimized',
     canClose && 'closeable',
   );

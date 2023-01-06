@@ -50,6 +50,8 @@ function getLangKeyForBannedRightKey(key: string) {
       return 'UserRestrictionsInviteUsers';
     case 'pinMessages':
       return 'UserRestrictionsPinMessages';
+    case 'manageTopics':
+      return 'GroupPermission.NoManageTopics';
     default:
       return undefined;
   }
@@ -69,6 +71,8 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   const [havePermissionChanged, setHavePermissionChanged] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const lang = useLang();
+
+  const { isForum } = chat || {};
 
   useHistoryBack({
     isActive,
@@ -245,6 +249,17 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
+          {isForum && (
+            <div className="ListItem no-selection">
+              <Checkbox
+                name="manageTopics"
+                checked={!permissions.manageTopics}
+                label={lang('CreateTopicsPermission')}
+                blocking
+                onChange={handlePermissionChange}
+              />
+            </div>
+          )}
         </div>
 
         <div className="section">

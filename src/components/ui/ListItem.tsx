@@ -44,11 +44,13 @@ interface OwnProps {
   destructive?: boolean;
   multiline?: boolean;
   isStatic?: boolean;
+  clickArg?: any;
   contextActions?: MenuItemContextAction[];
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>, arg?: any) => void;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
+  shouldUsePortalForMenu?: boolean;
 }
 
 const ListItem: FC<OwnProps> = ({
@@ -74,8 +76,10 @@ const ListItem: FC<OwnProps> = ({
   contextActions,
   onMouseDown,
   onClick,
+  clickArg,
   onSecondaryIconClick,
   onDragEnter,
+  shouldUsePortalForMenu,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -102,6 +106,11 @@ const ListItem: FC<OwnProps> = ({
     [],
   );
 
+  const getLayout = useCallback(
+    () => ({ shouldUsePortalPositioning: shouldUsePortalForMenu }),
+    [shouldUsePortalForMenu],
+  );
+
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
   } = useContextMenuPosition(
@@ -109,19 +118,20 @@ const ListItem: FC<OwnProps> = ({
     getTriggerElement,
     getRootElement,
     getMenuElement,
+    getLayout,
   );
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if ((disabled && !allowDisabledClick) || !onClick) {
       return;
     }
-    onClick(e);
+    onClick(e, clickArg);
 
     if (IS_TOUCH_ENV && !ripple) {
       markIsTouched();
       fastRaf(unmarkIsTouched);
     }
-  }, [allowDisabledClick, disabled, markIsTouched, onClick, ripple, unmarkIsTouched]);
+  }, [allowDisabledClick, clickArg, disabled, markIsTouched, onClick, ripple, unmarkIsTouched]);
 
   const handleSecondaryIconClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     if ((disabled && !allowDisabledClick) || e.button !== 0 || (!onSecondaryIconClick && !contextActions)) return;
@@ -220,6 +230,7 @@ const ListItem: FC<OwnProps> = ({
           autoClose
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
+          shouldUsePortalForMenu={shouldUsePortalForMenu}
         >
           {contextActions.map((action) => (
             <MenuItem

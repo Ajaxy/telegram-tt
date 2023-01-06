@@ -23,6 +23,7 @@ import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
   selectChatMessage,
   selectCurrentMessageList,
+  selectTopicFromMessage,
   selectNotifyExceptions,
   selectNotifySettings,
   selectUser,
@@ -292,6 +293,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   const privateChatUserId = getPrivateChatUserId(chat);
   const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
 
+  const topic = selectTopicFromMessage(global, message);
+
   let body: string;
   if (
     !isScreenLocked
@@ -308,9 +311,11 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
         actionTargetUsers,
         actionTargetMessage,
         actionTargetChatId,
+        topic,
         { asPlainText: true },
       ) as string;
     } else {
+      // TODO[forums] Support ApiChat
       const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
       const summary = getMessageSummaryText(getTranslation, message, false, 60, false);
 

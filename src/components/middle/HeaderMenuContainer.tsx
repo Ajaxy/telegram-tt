@@ -6,17 +6,25 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiBotCommand, ApiChat } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { REPLIES_USER_ID } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
-  selectChat, selectNotifySettings, selectNotifyExceptions, selectUser, selectChatBot, selectIsPremiumPurchaseBlocked,
+  selectChat,
+  selectNotifySettings,
+  selectNotifyExceptions,
+  selectUser,
+  selectChatBot,
+  selectIsPremiumPurchaseBlocked,
+  selectCurrentMessageList,
 } from '../../global/selectors';
 import {
   isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact, isChatChannel, isChatGroup,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
 
 import Portal from '../ui/Portal';
@@ -56,13 +64,17 @@ export type OwnProps = {
   canCall?: boolean;
   canMute?: boolean;
   canViewStatistics?: boolean;
+  withForumActions?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
   canCreateVoiceChat?: boolean;
+  pendingJoinRequests?: number;
   onSubscribeChannel: () => void;
   onSearchClick: () => void;
+  onAsMessagesClick: () => void;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
+  onJoinRequestsClick?: () => void;
 };
 
 type StateProps = {
@@ -70,20 +82,28 @@ type StateProps = {
   botCommands?: ApiBotCommand[];
   isPrivate?: boolean;
   isMuted?: boolean;
+  isTopic?: boolean;
   canAddContact?: boolean;
   canReportChat?: boolean;
   canDeleteChat?: boolean;
   canGiftPremium?: boolean;
   hasLinkedChat?: boolean;
+  isChatInfoShown?: boolean;
 };
+
+const CLOSE_MENU_ANIMATION_DURATION = 200;
 
 const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   chatId,
+  threadId,
   isOpen,
   withExtraActions,
   anchor,
   isChannel,
   botCommands,
+  withForumActions,
+  isTopic,
+  isChatInfoShown,
   canStartBot,
   canRestartBot,
   canSubscribe,
@@ -91,6 +111,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canCall,
   canMute,
   canViewStatistics,
+  pendingJoinRequests,
   canLeave,
   canEnterVoiceChat,
   canCreateVoiceChat,
@@ -102,8 +123,10 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canGiftPremium,
   hasLinkedChat,
   canAddContact,
+  onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
+  onAsMessagesClick,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -119,13 +142,18 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     requestCall,
     toggleStatistics,
     openGiftPremiumModal,
+    openChatWithInfo,
   } = getActions();
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const { x, y } = anchor;
 
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
+  const isViewGroupInfoShown = usePrevDuringAnimation(
+    (!isChatInfoShown && (withForumActions || isTopic)) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
+  );
 
   const handleReport = useCallback(() => {
     setIsMenuOpen(false);
@@ -146,6 +174,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     setIsMenuOpen(false);
     onClose();
   }, [onClose]);
+
+  const handleViewGroupInfo = useCallback(() => {
+    openChatWithInfo({ id: chatId, threadId });
+    closeMenu();
+  }, [chatId, closeMenu, openChatWithInfo, threadId]);
 
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
@@ -224,6 +257,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [closeMenu, enterMessageSelectMode]);
 
+  const handleOpenAsMessages = useCallback(() => {
+    onAsMessagesClick();
+    closeMenu();
+  }, [closeMenu, onAsMessagesClick]);
+
   useEffect(() => {
     disableScrolling();
 
@@ -263,6 +301,31 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
+          {isViewGroupInfoShown && (
+            <MenuItem
+              icon="info"
+              onClick={handleViewGroupInfo}
+            >
+              {isTopic ? lang('lng_context_view_topic') : lang('lng_context_view_group')}
+            </MenuItem>
+          )}
+          {withForumActions && Boolean(pendingJoinRequests) && (
+            <MenuItem
+              icon="user"
+              onClick={onJoinRequestsClick}
+            >
+              {isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
+              <div className="right-badge">{pendingJoinRequests}</div>
+            </MenuItem>
+          )}
+          {withForumActions && !isTopic && (
+            <MenuItem
+              icon="message"
+              onClick={handleOpenAsMessages}
+            >
+              {lang('lng_forum_view_as_messages')}
+            </MenuItem>
+          )}
           {withExtraActions && canStartBot && (
             <MenuItem
               icon="bots"
@@ -343,12 +406,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang(isChannel ? 'ViewDiscussion' : 'lng_profile_view_channel')}
             </MenuItem>
           )}
-          <MenuItem
-            icon="select"
-            onClick={handleSelectMessages}
-          >
-            {lang('ReportSelectMessages')}
-          </MenuItem>
+          {!withForumActions && (
+            <MenuItem
+              icon="select"
+              onClick={handleSelectMessages}
+            >
+              {lang('ReportSelectMessages')}
+            </MenuItem>
+          )}
           {canViewStatistics && (
             <MenuItem
               icon="stats"
@@ -407,7 +472,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId, threadId }): StateProps => {
     const chat = selectChat(global, chatId);
     if (!chat || chat.isRestricted) {
       return {};
@@ -415,7 +480,9 @@ export default memo(withGlobal<OwnProps>(
     const isPrivate = isUserId(chat.id);
     const user = isPrivate ? selectUser(global, chatId) : undefined;
     const canAddContact = user && getCanAddContact(user);
-    const canReportChat = isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf);
+    const isMainThread = threadId === MAIN_THREAD_ID;
+    const canReportChat = isMainThread && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
+    const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
     const canGiftPremium = Boolean(
@@ -428,12 +495,14 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       isPrivate,
+      isTopic: chat?.isForum && !isMainThread,
       canAddContact,
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
       canGiftPremium,
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       botCommands: chatBot?.fullInfo?.botInfo?.commands,
+      isChatInfoShown: global.isChatInfoShown && currentChatId === chatId && currentThreadId === threadId,
     };
   },
 )(HeaderMenuContainer));

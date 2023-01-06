@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../lib/teact/teactn';
 
-import { createMessageHash } from '../../util/routing';
+import { createLocationHash } from '../../util/routing';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import type { MessageList as GlobalMessageList } from '../../global/types';
 
@@ -22,7 +22,7 @@ const MessageListHistoryHandler: FC<StateProps> = ({ messageLists }) => {
   const MessageHistoryRecord: FC<GlobalMessageList> = ({ chatId, type, threadId }) => {
     useHistoryBack({
       isActive: true,
-      hash: createMessageHash(chatId, type, threadId),
+      hash: createLocationHash(chatId, type, threadId),
       onBack: closeChat,
     });
   };

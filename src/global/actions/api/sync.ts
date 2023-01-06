@@ -28,6 +28,7 @@ import {
   selectThreadInfo,
   selectEditingId,
   selectEditingDraft,
+  selectChatMessages,
 } from '../../selectors';
 import { init as initFolderManager } from '../../../util/folderManager';
 
@@ -84,32 +85,44 @@ async function loadAndReplaceMessages() {
   let areMessagesLoaded = false;
 
   let global = getGlobal();
-
+  const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
+  const activeThreadId = currentThreadId || MAIN_THREAD_ID;
+  const threadInfo = currentThreadId && currentChatId
+    ? selectThreadInfo(global, currentChatId, currentThreadId) : undefined;
+  // TODO Fix comments chat id, or refetch chat thread here
+  const activeCurrentChatId = threadInfo?.originChannelId || currentChatId;
   // Memoize drafts
   const draftChatIds = Object.keys(global.messages.byChatId);
   const draftsByChatId = draftChatIds.reduce<Record<string, Partial<Thread>>>((acc, chatId) => {
     acc[chatId] = {};
-    acc[chatId].draft = selectDraft(global, chatId, MAIN_THREAD_ID);
-    acc[chatId].editingId = selectEditingId(global, chatId, MAIN_THREAD_ID);
-    acc[chatId].editingDraft = selectEditingDraft(global, chatId, MAIN_THREAD_ID);
+    acc[chatId].draft = selectDraft(global, chatId, activeThreadId);
+    acc[chatId].editingId = selectEditingId(global, chatId, activeThreadId);
+    acc[chatId].editingDraft = selectEditingDraft(global, chatId, activeThreadId);
 
     return acc;
   }, {});
 
-  const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
-  const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
-  if (currentChatId && currentChat) {
-    const result = await loadTopMessages(currentChat);
+  const currentChat = activeCurrentChatId ? global.chats.byId[activeCurrentChatId] : undefined;
+  if (activeCurrentChatId && currentChat) {
+    if (currentChat.isForum) {
+      getActions().loadTopics({ chatId: activeCurrentChatId, force: true });
+    }
+    const result = await loadTopMessages(currentChat, activeThreadId, threadInfo?.lastReadInboxMessageId);
     global = getGlobal();
     const { chatId: newCurrentChatId } = selectCurrentMessageList(global) || {};
-    const threadInfo = currentThreadId && selectThreadInfo(global, currentChatId, currentThreadId);
 
     if (result && newCurrentChatId === currentChatId) {
-      const currentMessageListInfo = global.messages.byChatId[currentChatId];
+      const currentChatMessages = selectChatMessages(global, activeCurrentChatId);
       const localMessages = currentChatId === SERVICE_NOTIFICATIONS_USER_ID
         ? global.serviceNotifications.filter(({ isDeleted }) => !isDeleted).map(({ message }) => message)
         : [];
-      const allMessages = ([] as ApiMessage[]).concat(result.messages, localMessages);
+      const topicLastMessages = currentChat.isForum && currentChat.topics
+        ? Object.values(currentChat.topics)
+          .map(({ lastMessageId }) => currentChatMessages[lastMessageId])
+          .filter(Boolean)
+        : [];
+
+      const allMessages = ([] as ApiMessage[]).concat(result.messages, localMessages, topicLastMessages);
       const byId = buildCollectionByKey(allMessages, 'id');
       const listedIds = Object.keys(byId).map(Number);
 
@@ -121,55 +134,12 @@ async function loadAndReplaceMessages() {
         },
       };
 
-      global = addChatMessagesById(global, currentChatId, byId);
-      global = updateListedIds(global, currentChatId, MAIN_THREAD_ID, listedIds);
-      global = safeReplaceViewportIds(global, currentChatId, MAIN_THREAD_ID, listedIds);
-
-      if (currentThreadId && threadInfo && threadInfo.originChannelId) {
-        const { originChannelId } = threadInfo;
-        const currentMessageListInfoOrigin = global.messages.byChatId[originChannelId];
-        const resultOrigin = await loadTopMessages(global.chats.byId[originChannelId]);
-        global = getGlobal();
-        if (resultOrigin) {
-          const byIdOrigin = buildCollectionByKey(resultOrigin.messages, 'id');
-          const listedIdsOrigin = Object.keys(byIdOrigin).map(Number);
-
-          global = {
-            ...global,
-            messages: {
-              ...global.messages,
-              byChatId: {
-                ...global.messages.byChatId,
-                [threadInfo.originChannelId]: {
-                  byId: byIdOrigin,
-                  threadsById: {
-                    [MAIN_THREAD_ID]: {
-                      ...(currentMessageListInfoOrigin?.threadsById[MAIN_THREAD_ID]),
-                      listedIds: listedIdsOrigin,
-                      viewportIds: listedIdsOrigin,
-                      outlyingIds: undefined,
-                    },
-                  },
-                },
-                [currentChatId]: {
-                  ...global.messages.byChatId[currentChatId],
-                  threadsById: {
-                    ...global.messages.byChatId[currentChatId].threadsById,
-                    [currentThreadId]: {
-                      ...(currentMessageListInfo?.threadsById[currentThreadId]),
-                      outlyingIds: undefined,
-                    },
-                  },
-                },
-              },
-            },
-          };
-        }
-      }
-
+      global = addChatMessagesById(global, activeCurrentChatId, byId);
+      global = updateListedIds(global, activeCurrentChatId, activeThreadId, listedIds);
+      global = safeReplaceViewportIds(global, activeCurrentChatId, activeThreadId, listedIds);
       global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
       global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = updateThreadInfos(global, currentChatId, result.threadInfos);
+      global = updateThreadInfos(global, activeCurrentChatId, result.threadInfos);
 
       areMessagesLoaded = true;
     }
@@ -187,7 +157,7 @@ async function loadAndReplaceMessages() {
 
   // Restore drafts
   Object.keys(draftsByChatId).forEach((chatId) => {
-    global = updateThread(global, chatId, MAIN_THREAD_ID, draftsByChatId[chatId]);
+    global = updateThread(global, chatId, activeThreadId, draftsByChatId[chatId]);
   });
 
   setGlobal(global);
@@ -198,11 +168,11 @@ async function loadAndReplaceMessages() {
   }
 }
 
-function loadTopMessages(chat: ApiChat) {
+function loadTopMessages(chat: ApiChat, threadId: number, lastReadInboxId?: number) {
   return callApi('fetchMessages', {
     chat,
-    threadId: MAIN_THREAD_ID,
-    offsetId: chat.lastReadInboxMessageId,
+    threadId,
+    offsetId: lastReadInboxId || chat.lastReadInboxMessageId,
     addOffset: -(Math.round(MESSAGE_LIST_SLICE / 2) + 1),
     limit: MESSAGE_LIST_SLICE,
   });

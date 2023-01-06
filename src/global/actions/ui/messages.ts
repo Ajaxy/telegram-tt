@@ -35,7 +35,7 @@ import {
   selectReplyingToId,
   selectReplyStack,
   selectSender,
-  selectScheduledMessages,
+  selectChatScheduledMessages,
 } from '../../selectors';
 import { findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -287,7 +287,8 @@ addActionHandler('closePollResults', (global) => {
   };
 });
 
-addActionHandler('focusLastMessage', (global, actions) => {
+addActionHandler('focusLastMessage', (global, actions, payload) => {
+  const { noForumTopicPanel } = payload || {};
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return;
@@ -311,7 +312,7 @@ addActionHandler('focusLastMessage', (global, actions) => {
   }
 
   actions.focusMessage({
-    chatId, threadId, messageId: lastMessageId, noHighlight: true,
+    chatId, threadId, messageId: lastMessageId, noHighlight: true, noForumTopicPanel,
   });
 });
 
@@ -326,7 +327,7 @@ addActionHandler('focusNextReply', (global, actions) => {
   const replyStack = selectReplyStack(global, chatId, threadId);
 
   if (!replyStack || replyStack.length === 0) {
-    actions.focusLastMessage();
+    actions.focusLastMessage({ noForumTopicPanel: true });
   } else {
     const messageId = replyStack.pop();
 
@@ -338,6 +339,7 @@ addActionHandler('focusNextReply', (global, actions) => {
       chatId,
       threadId,
       messageId,
+      noForumTopicPanel: true,
     });
   }
 
@@ -347,7 +349,7 @@ addActionHandler('focusNextReply', (global, actions) => {
 addActionHandler('focusMessage', (global, actions, payload) => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
-    replyMessageId, isResizingContainer, shouldReplaceHistory,
+    replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel,
   } = payload!;
 
   let { messageId } = payload!;
@@ -392,7 +394,12 @@ addActionHandler('focusMessage', (global, actions, payload) => {
   const viewportIds = selectViewportIds(global, chatId, threadId);
   if (viewportIds && viewportIds.includes(messageId)) {
     setGlobal(global);
-    actions.openChat({ id: chatId, threadId, shouldReplaceHistory });
+    actions.openChat({
+      id: chatId,
+      threadId,
+      shouldReplaceHistory,
+      noForumTopicPanel,
+    });
     return undefined;
   }
 
@@ -409,7 +416,12 @@ addActionHandler('focusMessage', (global, actions, payload) => {
 
   setGlobal(global);
 
-  actions.openChat({ id: chatId, threadId, shouldReplaceHistory });
+  actions.openChat({
+    id: chatId,
+    threadId,
+    shouldReplaceHistory,
+    noForumTopicPanel,
+  });
   actions.loadViewportMessages();
   return undefined;
 });
@@ -741,7 +753,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   const lang = langProvider.getTranslation;
 
   const chatMessages = messageListType === 'scheduled'
-    ? selectScheduledMessages(global, chatId)
+    ? selectChatScheduledMessages(global, chatId)
     : selectChatMessages(global, chatId);
   if (!chatMessages || !threadId) return;
   const messages = messageIds

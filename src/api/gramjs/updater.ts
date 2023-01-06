@@ -39,7 +39,7 @@ import {
 } from './gramjsBuilders';
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
-import { DEBUG } from '../../config';
+import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
 import {
   addMessageToLocalDb,
   addEntitiesWithPhotosToLocalDb,
@@ -49,7 +49,12 @@ import {
   log,
   swapLocalInvoiceMedia,
 } from './helpers';
-import { buildApiNotifyException, buildPrivacyKey, buildPrivacyRules } from './apiBuilders/misc';
+import {
+  buildApiNotifyException,
+  buildApiNotifyExceptionTopic,
+  buildPrivacyKey,
+  buildPrivacyRules,
+} from './apiBuilders/misc';
 import { buildApiPhoto, buildApiUsernames } from './apiBuilders/common';
 import {
   buildApiGroupCall,
@@ -149,6 +154,13 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     let message: ApiMessage | undefined;
     let shouldForceReply: boolean | undefined;
 
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
     if (update instanceof GramJs.UpdateShortChatMessage) {
       message = buildApiMessageFromShortChat(update);
     } else if (update instanceof GramJs.UpdateShortMessage) {
@@ -172,13 +184,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       shouldForceReply = 'replyMarkup' in update.message
         && update.message?.replyMarkup instanceof GramJs.ReplyKeyboardForceReply
         && (!update.message.replyMarkup.selective || message.isMentioned);
-    }
-
-    // eslint-disable-next-line no-underscore-dangle
-    const entities = update._entities;
-    if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
-      dispatchUserAndChatUpdates(entities);
     }
 
     if (update instanceof GramJs.UpdateNewScheduledMessage) {
@@ -282,6 +287,23 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
             },
           });
         }
+      } else if (action instanceof GramJs.MessageActionTopicEdit) {
+        const { replyTo } = update.message;
+        const {
+          replyToMsgId, replyToTopId, forumTopic: isTopicReply,
+        } = replyTo || {};
+        const topicId = !isTopicReply ? GENERAL_TOPIC_ID : replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
+
+        onUpdate({
+          '@type': 'updateTopic',
+          chatId: getApiChatIdFromMtpPeer(update.message.peerId!),
+          topicId,
+        });
+      } else if (action instanceof GramJs.MessageActionTopicCreate) {
+        onUpdate({
+          '@type': 'updateTopics',
+          chatId: getApiChatIdFromMtpPeer(update.message.peerId!),
+        });
       }
     }
   } else if (
@@ -656,6 +678,16 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       ...buildApiNotifyException(update.notifySettings, update.peer.peer, serverTimeOffset),
     });
   } else if (
+    update instanceof GramJs.UpdateNotifySettings
+    && update.peer instanceof GramJs.NotifyForumTopic
+  ) {
+    onUpdate({
+      '@type': 'updateTopicNotifyExceptions',
+      ...buildApiNotifyExceptionTopic(
+        update.notifySettings, update.peer.peer, update.peer.topMsgId, serverTimeOffset,
+      ),
+    });
+  } else if (
     update instanceof GramJs.UpdateUserTyping
     || update instanceof GramJs.UpdateChatUserTyping
   ) {
@@ -684,6 +716,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateChatTypingStatus',
       id,
+      threadId: update.topMsgId,
       typingStatus: buildChatTypingStatus(update, serverTimeOffset),
     });
   } else if (update instanceof GramJs.UpdateChannel) {
@@ -907,6 +940,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'draftMessage',
       chatId: getApiChatIdFromMtpPeer(update.peer),
+      threadId: update.topMsgId,
       ...buildMessageDraft(update.draft),
     });
   } else if (update instanceof GramJs.UpdateContactsReset) {
@@ -1042,6 +1076,19 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       dispatchUserAndChatUpdates(entities);
     }
     onUpdate({ '@type': 'updateConfig' });
+  } else if (update instanceof GramJs.UpdateChannelPinnedTopic) {
+    onUpdate({
+      '@type': 'updatePinnedTopic',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      topicId: update.topicId,
+      isPinned: Boolean(update.pinned),
+    });
+  } else if (update instanceof GramJs.UpdateChannelPinnedTopics) {
+    onUpdate({
+      '@type': 'updatePinnedTopicsOrder',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      order: update.order || [],
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

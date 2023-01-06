@@ -7,11 +7,13 @@ import { getActions, withGlobal } from '../../global';
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
 } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
   selectAreActiveChatsLoaded,
+  selectChat,
   selectCurrentMessageList,
   selectRightColumnContentKey,
 } from '../../global/selectors';
@@ -38,6 +40,7 @@ type StateProps = {
   contentKey?: RightColumnContent;
   chatId?: string;
   threadId?: number;
+  isInsideTopic?: boolean;
   isChatSelected: boolean;
   shouldSkipHistoryAnimations?: boolean;
   nextManagementScreen?: ManagementScreens;
@@ -58,6 +61,7 @@ const RightColumn: FC<StateProps> = ({
   contentKey,
   chatId,
   threadId,
+  isInsideTopic,
   isChatSelected,
   shouldSkipHistoryAnimations,
   nextManagementScreen,
@@ -254,6 +258,7 @@ const RightColumn: FC<StateProps> = ({
           <Profile
             key={chatId!}
             chatId={chatId!}
+            topicId={isInsideTopic ? threadId : undefined}
             profileState={profileState}
             onProfileStateChange={setProfileState}
           />
@@ -299,6 +304,7 @@ const RightColumn: FC<StateProps> = ({
       <div id="RightColumn">
         <RightHeader
           chatId={chatId}
+          threadId={threadId}
           isColumnOpen={isOpen}
           isProfile={isProfile}
           isSearch={isSearch}
@@ -336,11 +342,14 @@ export default memo(withGlobal(
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
     const nextManagementScreen = chatId ? global.management.byChatId[chatId]?.nextScreen : undefined;
+    const isForum = chatId ? selectChat(global, chatId)?.isForum : undefined;
+    const isInsideTopic = isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
 
     return {
       contentKey: selectRightColumnContentKey(global),
       chatId,
       threadId,
+      isInsideTopic,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       nextManagementScreen,

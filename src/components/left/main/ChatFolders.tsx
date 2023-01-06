@@ -26,6 +26,7 @@ import ChatList from './ChatList';
 type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
   foldersDispatch: FolderEditDispatch;
+  shouldHideFolderTabs?: boolean;
 };
 
 type StateProps = {
@@ -51,6 +52,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   shouldSkipHistoryAnimations,
   maxFolders,
+  shouldHideFolderTabs,
 }) => {
   const {
     loadChatFolders,
@@ -221,7 +223,12 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const shouldRenderFolders = folderTabs && folderTabs.length > 1;
 
   return (
-    <div className="ChatFolders">
+    <div
+      className={buildClassName(
+        'ChatFolders',
+        shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
+      )}
+    >
       {shouldRenderFolders ? (
         <TabList tabs={folderTabs} activeTab={activeChatFolder} onSwitchTab={handleSwitchTab} areFolders />
       ) : shouldRenderPlaceholder ? (

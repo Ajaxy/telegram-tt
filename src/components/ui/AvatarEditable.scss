@@ -18,6 +18,7 @@
     position: relative;
     overflow: hidden;
     outline: none !important;
+    transition: border-radius 200ms;
 
     input {
       display: none;
@@ -81,6 +82,10 @@
       &::after {
         display: none;
       }
+    }
+
+    &.rounded-square {
+      border-radius: var(--border-radius-forum-avatar);
     }
   }
 }

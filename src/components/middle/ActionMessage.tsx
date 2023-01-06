@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiUser, ApiMessage, ApiChat, ApiSticker,
+  ApiUser, ApiMessage, ApiChat, ApiSticker, ApiTopic,
 } from '../../api/types';
 import type { FocusDirection } from '../../types';
 
@@ -14,6 +14,7 @@ import {
   selectChatMessage,
   selectIsMessageFocused,
   selectChat,
+  selectTopicFromMessage,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -39,6 +40,7 @@ type OwnProps = {
   isEmbedded?: boolean;
   appearanceOrder?: number;
   isLastInList?: boolean;
+  isInsideTopic?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
 };
 
@@ -50,6 +52,7 @@ type StateProps = {
   targetMessage?: ApiMessage;
   targetChatId?: string;
   isFocused: boolean;
+  topic?: ApiTopic;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   premiumGiftSticker?: ApiSticker;
@@ -59,9 +62,6 @@ const APPEARANCE_DELAY = 10;
 
 const ActionMessage: FC<OwnProps & StateProps> = ({
   message,
-  observeIntersectionForReading,
-  observeIntersectionForLoading,
-  observeIntersectionForPlaying,
   isEmbedded,
   appearanceOrder = 0,
   isLastInList,
@@ -75,7 +75,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   focusDirection,
   noFocusHighlight,
   premiumGiftSticker,
+  isInsideTopic,
+  topic,
   memoFirstUnreadIdRef,
+  observeIntersectionForReading,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
 }) => {
   const { openPremiumModal, requestConfetti } = getActions();
 
@@ -130,6 +135,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     targetUsers,
     targetMessage,
     targetChatId,
+    topic,
     { isEmbedded },
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
@@ -154,6 +160,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       monthsAmount: message.content.action?.months || 0,
     });
   };
+
+  // TODO: Refactoring for action rendering
+  const shouldSkipRender = isInsideTopic && message.content.action?.text === 'TopicWasCreatedAction';
+  if (shouldSkipRender) {
+    return <span ref={ref} />;
+  }
 
   if (isEmbedded) {
     return <span ref={ref} className="embedded-action-message">{content}</span>;
@@ -229,6 +241,7 @@ export default memo(withGlobal<OwnProps>(
     const senderUser = !isChat && userId ? selectUser(global, userId) : undefined;
     const senderChat = isChat ? chat : undefined;
     const premiumGiftSticker = global.premiumGifts?.stickers?.[0];
+    const topic = selectTopicFromMessage(global, message);
 
     return {
       usersById,
@@ -239,6 +252,7 @@ export default memo(withGlobal<OwnProps>(
       targetMessage,
       isFocused,
       premiumGiftSticker,
+      topic,
       ...(isFocused && { focusDirection, noFocusHighlight }),
     };
   },

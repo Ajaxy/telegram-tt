@@ -8,7 +8,7 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { selectCurrentChat } from '../../global/selectors';
+import { selectCurrentChat, selectIsForumPanelOpen } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -33,6 +33,9 @@ type StateProps = {
   nextSettingsScreen?: SettingsScreens;
   isChatOpen: boolean;
   isUpdateAvailable?: boolean;
+  isForumPanelOpen?: boolean;
+  forumPanelChatId?: string;
+  isClosingSearch?: boolean;
 };
 
 enum ContentType {
@@ -60,9 +63,13 @@ const LeftColumn: FC<StateProps> = ({
   nextSettingsScreen,
   isChatOpen,
   isUpdateAvailable,
+  isForumPanelOpen,
+  forumPanelChatId,
+  isClosingSearch,
 }) => {
   const {
     setGlobalSearchQuery,
+    setGlobalSearchClosing,
     setGlobalSearchChatId,
     resetChatCreation,
     setGlobalSearchDate,
@@ -106,11 +113,13 @@ const LeftColumn: FC<StateProps> = ({
     function fullReset() {
       setContent(LeftColumnContent.ChatList);
       setContactsFilter('');
-      setGlobalSearchQuery({ query: '' });
-      setGlobalSearchDate({ date: undefined });
-      setGlobalSearchChatId({ id: undefined });
+      setGlobalSearchClosing(true);
       resetChatCreation();
       setTimeout(() => {
+        setGlobalSearchQuery({ query: '' });
+        setGlobalSearchDate({ date: undefined });
+        setGlobalSearchChatId({ id: undefined });
+        setGlobalSearchClosing(false);
         setLastResetTime(Date.now());
       }, RESET_TRANSITION_DELAY_MS);
     }
@@ -299,8 +308,8 @@ const LeftColumn: FC<StateProps> = ({
 
     fullReset();
   }, [
-    content, isFirstChatFolderActive, settingsScreen, setGlobalSearchQuery, setGlobalSearchDate, setGlobalSearchChatId,
-    resetChatCreation, hasPasscode,
+    content, isFirstChatFolderActive, setGlobalSearchClosing, resetChatCreation, setGlobalSearchQuery,
+    setGlobalSearchDate, setGlobalSearchChatId, settingsScreen, hasPasscode,
   ]);
 
   const handleSearchQuery = useCallback((query: string) => {
@@ -315,6 +324,12 @@ const LeftColumn: FC<StateProps> = ({
       setGlobalSearchQuery({ query });
     }
   }, [content, searchQuery, setGlobalSearchQuery]);
+
+  const handleTopicSearch = useCallback(() => {
+    setContent(LeftColumnContent.GlobalSearch);
+    setGlobalSearchQuery({ query: '' });
+    setGlobalSearchChatId({ id: forumPanelChatId });
+  }, [forumPanelChatId, setGlobalSearchChatId, setGlobalSearchQuery]);
 
   useEffect(
     () => (content !== LeftColumnContent.ChatList || (isFirstChatFolderActive && !isChatOpen)
@@ -367,7 +382,7 @@ const LeftColumn: FC<StateProps> = ({
 
   const {
     initResize, resetResize, handleMouseUp,
-  } = useResize(resizeRef, setLeftColumnWidth, resetLeftColumnWidth, leftColumnWidth);
+  } = useResize(resizeRef, setLeftColumnWidth, resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
 
   const handleSettingsScreenSelect = useCallback((screen: SettingsScreens) => {
     setContent(LeftColumnContent.Settings);
@@ -393,7 +408,8 @@ const LeftColumn: FC<StateProps> = ({
                 <ArchivedChats
                   isActive={isActive}
                   onReset={handleReset}
-                  onContentChange={setContent}
+                  onTopicSearch={handleTopicSearch}
+                  isForumPanelOpen={isForumPanelOpen}
                 />
               );
             case ContentType.Settings:
@@ -433,6 +449,7 @@ const LeftColumn: FC<StateProps> = ({
               return (
                 <LeftMain
                   content={content}
+                  isClosingSearch={isClosingSearch}
                   searchQuery={searchQuery}
                   searchDate={searchDate}
                   contactsFilter={contactsFilter}
@@ -443,6 +460,8 @@ const LeftColumn: FC<StateProps> = ({
                   onReset={handleReset}
                   shouldSkipTransition={shouldSkipHistoryAnimations}
                   isUpdateAvailable={isUpdateAvailable}
+                  isForumPanelOpen={isForumPanelOpen}
+                  onTopicSearch={handleTopicSearch}
                 />
               );
           }
@@ -480,7 +499,10 @@ export default memo(withGlobal(
       isUpdateAvailable,
     } = global;
 
-    const isChatOpen = Boolean(selectCurrentChat(global)?.id);
+    const currentChat = selectCurrentChat(global);
+    const isChatOpen = Boolean(currentChat?.id);
+    const isForumPanelOpen = selectIsForumPanelOpen(global);
+    const forumPanelChatId = global.forumPanelChatId;
 
     return {
       searchQuery: query,
@@ -493,6 +515,9 @@ export default memo(withGlobal(
       nextSettingsScreen,
       isChatOpen,
       isUpdateAvailable,
+      isForumPanelOpen,
+      forumPanelChatId,
+      isClosingSearch: global.globalSearch.isClosing,
     };
   },
 )(LeftColumn));

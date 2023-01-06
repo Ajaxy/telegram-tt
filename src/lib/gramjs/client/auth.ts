@@ -16,6 +16,7 @@ export interface UserAuthParams {
     initialMethod?: 'phoneNumber' | 'qrCode';
     shouldThrowIfUnauthorized?: boolean;
     webAuthToken?: string;
+    mockScenario?: string;
 }
 
 export interface BotAuthParams {

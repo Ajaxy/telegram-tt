@@ -49,9 +49,19 @@
   }
 
   &.mention,
-  &.unread:not(.muted) {
+  &.unread:not(.muted),
+  &.unopened:not(.muted) {
     background: var(--color-green);
     color: var(--color-white);
+  }
+
+  &.unopened {
+    width: 0.5rem;
+    height: 0.5rem;
+    min-width: auto;
+    min-height: auto;
+    padding: 0;
+    align-self: center;
   }
 
   &.pinned {

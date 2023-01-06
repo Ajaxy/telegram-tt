@@ -20,6 +20,7 @@ import './GroupCallTopPane.scss';
 type OwnProps = {
   chatId: string;
   hasPinnedOffset: boolean;
+  className?: string;
 };
 
 type StateProps = {
@@ -33,6 +34,7 @@ type StateProps = {
 const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   chatId,
   isActive,
+  className,
   groupCall,
   hasPinnedOffset,
   usersById,
@@ -97,6 +99,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
         'GroupCallTopPane',
         hasPinnedOffset && 'has-pinned-offset',
         !isActive && 'is-hidden',
+        className,
       )}
       onClick={handleJoinGroupCall}
     >

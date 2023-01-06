@@ -1,7 +1,9 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
-import type { ApiUser, ApiMessage, ApiChat } from '../../api/types';
+import type {
+  ApiUser, ApiMessage, ApiChat,
+} from '../../api/types';
 
 import {
   getMessageMediaHash,

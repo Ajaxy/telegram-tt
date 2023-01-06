@@ -4,8 +4,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { ManagementScreens, ProfileState } from '../../types';
 import type { ApiExportedInvite } from '../../api/types';
+import { ManagementScreens, ProfileState } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
@@ -20,7 +21,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import {
-  getCanAddContact, isChatAdmin, isChatChannel, isUserId,
+  getCanAddContact, isChatAdmin, isChatChannel, isUserBot, isUserId,
 } from '../../global/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -36,6 +37,7 @@ import './RightHeader.scss';
 
 type OwnProps = {
   chatId?: string;
+  threadId?: number;
   isColumnOpen?: boolean;
   isProfile?: boolean;
   isSearch?: boolean;
@@ -64,6 +66,8 @@ type StateProps = {
   isEditingInvite?: boolean;
   currentInviteInfo?: ApiExportedInvite;
   shouldSkipHistoryAnimations?: boolean;
+  isBot?: boolean;
+  isInsideTopic?: boolean;
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -130,6 +134,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   canViewStatistics,
   currentInviteInfo,
   shouldSkipHistoryAnimations,
+  isBot,
+  isInsideTopic,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -253,6 +259,22 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
+
+  function getHeaderTitle() {
+    if (isInsideTopic) {
+      return lang('AccDescrTopic');
+    }
+
+    if (isChannel) {
+      return lang('Channel.TitleInfo');
+    }
+
+    if (userId) {
+      return lang(isBot ? 'lng_info_bot_title' : 'lng_info_user_title');
+    }
+
+    return lang('GroupInfo.Title');
+  }
 
   function renderHeaderContent() {
     if (renderingContentKey === -1) {
@@ -391,7 +413,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       default:
         return (
           <>
-            <h3>{lang(isChannel ? 'Channel.TitleInfo' : (userId ? 'UserInfo.Title' : 'GroupInfo.Title'))}</h3>
+            <h3>{getHeaderTitle()}
+            </h3>
             <section className="tools">
               {canAddContact && (
                 <Button
@@ -404,7 +427,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   <i className="icon-add-user" />
                 </Button>
               )}
-              {canManage && (
+              {canManage && !isInsideTopic && (
                 <Button
                   round
                   color="translucent"
@@ -470,13 +493,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isProfile, isManagement }): StateProps => {
+  (global, {
+    chatId, isProfile, isManagement, threadId,
+  }): StateProps => {
     const { query: messageSearchQuery } = selectCurrentTextSearch(global) || {};
     const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
     const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
     const chat = chatId ? selectChat(global, chatId) : undefined;
-    const isChannel = chat && isChatChannel(chat);
     const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
+    const isChannel = chat && isChatChannel(chat);
+    const isInsideTopic = chat?.isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
+    const isBot = user && isUserBot(user);
 
     const canAddContact = user && getCanAddContact(user);
     const canManage = Boolean(
@@ -489,7 +516,7 @@ export default memo(withGlobal<OwnProps>(
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
     const isEditingInvite = Boolean(chatId && global.management.byChatId[chatId]?.editingInvite);
-    const canViewStatistics = chat?.fullInfo?.canViewStatistics;
+    const canViewStatistics = !isInsideTopic && chat?.fullInfo?.canViewStatistics;
     const currentInviteInfo = chatId ? global.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
 
     return {
@@ -497,6 +524,8 @@ export default memo(withGlobal<OwnProps>(
       canAddContact,
       canViewStatistics,
       isChannel,
+      isBot,
+      isInsideTopic,
       userId: user?.id,
       messageSearchQuery,
       stickerSearchQuery,

@@ -35,11 +35,12 @@ export const processDeepLink = (url: string) => {
   switch (method) {
     case 'resolve': {
       const {
-        domain, phone, post, comment, voicechat, livestream, start, startattach, attach,
+        domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
       } = params;
 
       const startAttach = params.hasOwnProperty('startattach') && !startattach ? true : startattach;
       const choose = parseChooseParameter(params.choose);
+      const threadId = Number(thread) || Number(topic);
 
       if (domain !== 'telegrampassport') {
         if (startAttach && choose) {
@@ -63,6 +64,7 @@ export const processDeepLink = (url: string) => {
             startParam: start,
             startAttach,
             attach,
+            threadId,
           });
         }
       }

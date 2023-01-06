@@ -5,4 +5,27 @@
   .chat-list {
     height: calc(100% - var(--header-height));
   }
+
+  .DropdownMenuFiller {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .Button.rtl {
+    transition: var(--slide-transition) transform;
+    position: absolute;
+    z-index: 2;
+
+    &.right-aligned {
+      transform: translateX(calc(clamp(
+      var(--left-column-min-width),
+      var(--left-column-width),
+      var(--left-column-max-width)
+      ) - 4.375rem));
+    }
+
+    &.disable-transition {
+      transition: none;
+    }
+  }
 }

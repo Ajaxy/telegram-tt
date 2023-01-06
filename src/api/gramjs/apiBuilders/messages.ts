@@ -152,7 +152,10 @@ type UniversalMessage = (
   )>
 );
 
-export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalMessage): ApiMessage {
+export function buildApiMessageWithChatId(
+  chatId: string,
+  mtpMessage: UniversalMessage,
+): ApiMessage {
   const fromId = mtpMessage.fromId ? getApiChatIdFromMtpPeer(mtpMessage.fromId) : undefined;
   const peerId = mtpMessage.peerId ? getApiChatIdFromMtpPeer(mtpMessage.peerId) : undefined;
   const isChatWithSelf = !fromId && chatId === currentUserId;
@@ -167,7 +170,9 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
 
-  const { replyToMsgId, replyToTopId, replyToPeerId } = mtpMessage.replyTo || {};
+  const {
+    replyToMsgId, replyToTopId, forumTopic, replyToPeerId,
+  } = mtpMessage.replyTo || {};
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse,
@@ -195,6 +200,7 @@ export function buildApiMessageWithChatId(chatId: string, mtpMessage: UniversalM
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     ...(emojiOnlyCount && { emojiOnlyCount }),
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
+    ...(forumTopic && { isTopicReply: true }),
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
@@ -1017,6 +1023,23 @@ function buildAction(
     currency = action.currency;
     amount = action.amount.toJSNumber();
     months = action.months;
+  } else if (action instanceof GramJs.MessageActionTopicCreate) {
+    text = 'TopicWasCreatedAction';
+    type = 'topicCreate';
+    translationValues.push(action.title);
+  } else if (action instanceof GramJs.MessageActionTopicEdit) {
+    if (action.closed !== undefined) {
+      text = action.closed ? 'TopicWasClosedAction' : 'TopicWasReopenedAction';
+      translationValues.push('%action_origin%', '%action_topic%');
+    } else if (action.hidden !== undefined) {
+      text = action.hidden ? 'TopicHidden2' : 'TopicWasUnhiddenAction';
+    } else if (action.title) {
+      text = 'TopicRenamedTo';
+      translationValues.push('%action_origin%', action.title);
+    } else {
+      // TODO[forums] Support icon changed action
+      text = 'ChatList.UnsupportedMessage';
+    }
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -1238,6 +1261,7 @@ export function buildLocalMessage(
   const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
+  const isForum = chat.isForum;
 
   const message = {
     id: localId,
@@ -1260,13 +1284,14 @@ export function buildLocalMessage(
     senderId: sendAs?.id || currentUserId,
     ...(replyingTo && { replyToMessageId: replyingTo }),
     ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
+    ...((replyingTo || replyingToTopId) && isForum && { isTopicReply: true }),
     ...(groupedId && {
       groupedId,
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
     }),
     ...(scheduledAt && { isScheduled: true }),
     isForwardingAllowed: true,
-  };
+  } satisfies ApiMessage;
 
   const emojiOnlyCount = getEmojiOnlyCountForMessage(message.content, message.groupedId);
 
@@ -1276,15 +1301,25 @@ export function buildLocalMessage(
   };
 }
 
-export function buildLocalForwardedMessage(
-  toChat: ApiChat,
-  message: ApiMessage,
-  serverTimeOffset: number,
-  scheduledAt?: number,
-  noAuthors?: boolean,
-  noCaptions?: boolean,
-  isCurrentUserPremium?: boolean,
-): ApiMessage {
+export function buildLocalForwardedMessage({
+  toChat,
+  toThreadId,
+  message,
+  serverTimeOffset,
+  scheduledAt,
+  noAuthors,
+  noCaptions,
+  isCurrentUserPremium,
+}: {
+  toChat: ApiChat;
+  toThreadId?: number;
+  message: ApiMessage;
+  serverTimeOffset: number;
+  scheduledAt?: number;
+  noAuthors?: boolean;
+  noCaptions?: boolean;
+  isCurrentUserPremium?: boolean;
+}): ApiMessage {
   const localId = getNextLocalMessageId();
   const {
     content,
@@ -1322,6 +1357,8 @@ export function buildLocalForwardedMessage(
     sendingState: 'messageSendingStatePending',
     groupedId,
     isInAlbum,
+    isForwardingAllowed: true,
+    replyToTopMessageId: toThreadId,
     ...(emojiOnlyCount && { emojiOnlyCount }),
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {
@@ -1335,7 +1372,6 @@ export function buildLocalForwardedMessage(
     }),
     ...(message.chatId === currentUserId && !noAuthors && { forwardInfo: message.forwardInfo }),
     ...(scheduledAt && { isScheduled: true }),
-    isForwardingAllowed: true,
   };
 }
 

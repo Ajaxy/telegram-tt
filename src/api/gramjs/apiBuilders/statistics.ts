@@ -82,6 +82,7 @@ export function buildMessagePublicForwards(
       chat: {
         id: peerId,
         type: 'chatTypeChannel',
+        title: (channel as GramJs.Channel).title,
         username: (channel as GramJs.Channel).username,
         avatarHash: buildAvatarHash((channel as GramJs.Channel).photo),
       },

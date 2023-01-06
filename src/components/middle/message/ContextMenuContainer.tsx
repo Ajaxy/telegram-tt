@@ -24,9 +24,9 @@ import {
 } from '../../../global/selectors';
 import {
   isActionMessage, isChatChannel,
-  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo,
+  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo, getChatMessageLink,
 } from '../../../global/helpers';
-import { SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX } from '../../../config';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
@@ -86,6 +86,7 @@ type StateProps = {
   enabledReactions?: ApiChatReactions;
   canScheduleUntilOnline?: boolean;
   maxUniqueReactions?: number;
+  threadId?: number;
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
@@ -130,6 +131,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   activeDownloads,
   canShowSeenBy,
   canScheduleUntilOnline,
+  threadId,
 }) => {
   const {
     setReplyingToId,
@@ -345,9 +347,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   }, [closeMenu, copyMessagesByIds]);
 
   const handleCopyLink = useCallback(() => {
-    copyTextToClipboard(`${TME_LINK_PREFIX}${chatUsername || `c/${message.chatId.replace('-', '')}`}/${message.id}`);
+    copyTextToClipboard(getChatMessageLink(message.chatId, chatUsername, threadId, message.id));
     closeMenu();
-  }, [chatUsername, closeMenu, message]);
+  }, [chatUsername, closeMenu, message, threadId]);
 
   const handleCopyNumber = useCallback(() => {
     copyTextToClipboard(message.content.contact!.phoneNumber);
@@ -566,6 +568,7 @@ export default memo(withGlobal<OwnProps>(
       customEmojiSetsInfo,
       customEmojiSets,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
+      threadId,
     };
   },
 )(ContextMenuContainer));

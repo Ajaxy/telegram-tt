@@ -38,7 +38,11 @@
     overflow: hidden;
 
     &:first-child {
-      margin-left: 0.125rem;
+      margin-left: 0.5rem;
+
+      @media (max-width: 600px) {
+        margin-left: 0.125rem;
+      }
     }
 
     &:last-child {

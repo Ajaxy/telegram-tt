@@ -44,3 +44,9 @@ export function selectTheme(global: GlobalState) {
 
   return shouldUseSystemTheme ? getSystemTheme() : theme;
 }
+
+export function selectIsForumPanelOpen(global: GlobalState) {
+  return Boolean(global.forumPanelChatId) && (
+    global.globalSearch.query === undefined || global.globalSearch.isClosing
+  );
+}
