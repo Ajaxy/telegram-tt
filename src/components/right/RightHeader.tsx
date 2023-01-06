@@ -21,7 +21,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import {
-  getCanAddContact, isChatAdmin, isChatChannel, isUserBot, isUserId,
+  getCanAddContact, getCanManageTopic, isChatAdmin, isChatChannel, isUserBot, isUserId,
 } from '../../global/helpers';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
@@ -47,6 +47,8 @@ type OwnProps = {
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
+  isCreatingTopic?: boolean;
+  isEditingTopic?: boolean;
   isAddingChatMembers?: boolean;
   profileState?: ProfileState;
   managementScreen?: ManagementScreens;
@@ -68,6 +70,7 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   isBot?: boolean;
   isInsideTopic?: boolean;
+  canEditTopic?: boolean;
 };
 
 const COLUMN_ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -105,10 +108,13 @@ enum HeaderContent {
   ManageReactions,
   ManageInviteInfo,
   ManageJoinRequests,
+  CreateTopic,
+  EditTopic,
 }
 
 const RightHeader: FC<OwnProps & StateProps> = ({
   chatId,
+  threadId,
   isColumnOpen,
   isProfile,
   isSearch,
@@ -118,6 +124,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isStickerSearch,
   isGifSearch,
   isPollResults,
+  isCreatingTopic,
+  isEditingTopic,
   isAddingChatMembers,
   profileState,
   managementScreen,
@@ -136,6 +144,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   isBot,
   isInsideTopic,
+  canEditTopic,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -148,6 +157,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     toggleStatistics,
     setEditingExportedInvite,
     deleteExportedChatInvite,
+    openEditTopicPanel,
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -182,6 +192,11 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const handleAddContact = useCallback(() => {
     openAddContactDialog({ userId });
   }, [openAddContactDialog, userId]);
+
+  const toggleEditTopic = useCallback(() => {
+    if (!chatId || !threadId) return;
+    openEditTopicPanel({ chatId, topicId: threadId });
+  }, [chatId, openEditTopicPanel, threadId]);
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
 
@@ -256,6 +271,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.Statistics
   ) : isMessageStatistics ? (
     HeaderContent.MessageStatistics
+  ) : isCreatingTopic ? (
+    HeaderContent.CreateTopic
+  ) : isEditingTopic ? (
+    HeaderContent.EditTopic
   ) : undefined; // When column is closed
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true) ?? -1;
@@ -410,6 +429,10 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang('GroupMembers')}</h3>;
       case HeaderContent.ManageReactions:
         return <h3>{lang('Reactions')}</h3>;
+      case HeaderContent.CreateTopic:
+        return <h3>{lang('NewTopic')}</h3>;
+      case HeaderContent.EditTopic:
+        return <h3>{lang('EditTopic')}</h3>;
       default:
         return (
           <>
@@ -434,6 +457,17 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   size="smaller"
                   ariaLabel={lang('Edit')}
                   onClick={toggleManagement}
+                >
+                  <i className="icon-edit" />
+                </Button>
+              )}
+              {canEditTopic && (
+                <Button
+                  round
+                  color="translucent"
+                  size="smaller"
+                  ariaLabel={lang('EditTopic')}
+                  onClick={toggleEditTopic}
                 >
                   <i className="icon-edit" />
                 </Button>
@@ -503,6 +537,8 @@ export default memo(withGlobal<OwnProps>(
     const user = isProfile && chatId && isUserId(chatId) ? selectUser(global, chatId) : undefined;
     const isChannel = chat && isChatChannel(chat);
     const isInsideTopic = chat?.isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
+    const topic = isInsideTopic ? chat.topics?.[threadId!] : undefined;
+    const canEditTopic = isInsideTopic && topic && getCanManageTopic(chat, topic);
     const isBot = user && isUserBot(user);
 
     const canAddContact = user && getCanAddContact(user);
@@ -526,6 +562,7 @@ export default memo(withGlobal<OwnProps>(
       isChannel,
       isBot,
       isInsideTopic,
+      canEditTopic,
       userId: user?.id,
       messageSearchQuery,
       stickerSearchQuery,

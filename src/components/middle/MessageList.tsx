@@ -4,7 +4,9 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiBotInfo, ApiMessage, ApiRestrictionReason } from '../../api/types';
+import type {
+  ApiBotInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
+} from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { AnimationLevel } from '../../types';
@@ -107,6 +109,7 @@ type StateProps = {
   threadFirstMessageId?: number;
   hasLinkedChat?: boolean;
   lastSyncTime?: number;
+  topic?: ApiTopic;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
@@ -155,6 +158,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   withBottomShift,
   withDefaultBg,
+  topic,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -505,6 +509,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const isGroupChatJustCreated = isGroupChat && isCreator
     && messageIds?.length === 1 && messagesById?.[messageIds[0]]?.content.action?.type === 'chatCreate';
+  const isEmptyTopic = messageIds?.length === 1
+    && messagesById?.[messageIds[0]]?.content.action?.type === 'topicCreate';
 
   const className = buildClassName(
     'MessageList custom-scroll',
@@ -577,9 +583,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
         </div>
       ) : shouldRenderGreeting ? (
         <ContactGreeting userId={chatId} />
-      ) : messageIds && (!messageGroups || isGroupChatJustCreated) ? (
+      ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
         <NoMessages
           chatId={chatId}
+          topic={topic}
           type={type}
           isChatWithSelf={isChatWithSelf}
           isGroupChatJustCreated={isGroupChatJustCreated}
@@ -656,6 +663,8 @@ export default memo(withGlobal<OwnProps>(
       }
     }
 
+    const topic = chat.topics?.[threadId];
+
     return {
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isChatLoaded: true,
@@ -681,6 +690,7 @@ export default memo(withGlobal<OwnProps>(
         ? Boolean(chat.fullInfo.linkedChatId)
         : undefined,
       lastSyncTime: global.lastSyncTime,
+      topic,
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },

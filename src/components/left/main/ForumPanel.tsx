@@ -8,6 +8,7 @@ import type { ApiChat } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
+  GENERAL_TOPIC_ID,
   TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
 } from '../../../config';
 import { selectChat, selectCurrentMessageList } from '../../../global/selectors';
@@ -32,7 +33,7 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import HeaderActions from '../../middle/HeaderActions';
 import GroupCallTopPane from '../../calls/group/GroupCallTopPane';
-import EmptyTopic from './EmptyTopic';
+import EmptyForum from './EmptyForum';
 
 import styles from './ForumPanel.module.scss';
 
@@ -224,14 +225,16 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         sensitiveArea={TOPIC_LIST_SENSITIVE_AREA}
         beforeChildren={<div ref={scrollTopHandlerRef} className={styles.scrollTopHandler} />}
       >
-        {viewportIds?.length ? (
+        {viewportIds?.length && (
           renderTopics()
-        ) : !isLoading ? (
-          <EmptyTopic />
-        ) : (
+        )}
+        {isLoading && !viewportIds?.length && (
           <Loading key="loading" />
         )}
       </InfiniteScroll>
+      {!isLoading && viewportIds?.length === 1 && viewportIds[0] === GENERAL_TOPIC_ID && (
+        <EmptyForum chatId={chat.id} />
+      )}
     </div>
   );
 };

@@ -2,7 +2,9 @@ import type { GlobalState } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import { selectCurrentMessageList, selectIsPollResultsOpen } from './messages';
+import {
+  selectCurrentMessageList, selectIsCreateTopicPanelOpen, selectIsEditTopicPanelOpen, selectIsPollResultsOpen,
+} from './messages';
 import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
 import { selectIsStatisticsShown, selectIsMessageStatisticsShown } from './statistics';
@@ -14,7 +16,11 @@ export function selectIsMediaViewerOpen(global: GlobalState) {
 }
 
 export function selectRightColumnContentKey(global: GlobalState) {
-  return selectIsPollResultsOpen(global) ? (
+  return selectIsEditTopicPanelOpen(global) ? (
+    RightColumnContent.EditTopic
+  ) : selectIsCreateTopicPanelOpen(global) ? (
+    RightColumnContent.CreateTopic
+  ) : selectIsPollResultsOpen(global) ? (
     RightColumnContent.PollResults
   ) : !IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global) ? (
     RightColumnContent.Search

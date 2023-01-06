@@ -33,6 +33,8 @@ import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
 import AddChatMembers from './AddChatMembers';
+import CreateTopic from './CreateTopic';
+import EditTopic from './EditTopic';
 
 import './RightColumn.scss';
 
@@ -80,6 +82,8 @@ const RightColumn: FC<StateProps> = ({
     toggleMessageStatistics,
     setOpenedInviteInfo,
     requestNextManagementScreen,
+    closeCreateTopicPanel,
+    closeEditTopicPanel,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -99,6 +103,8 @@ const RightColumn: FC<StateProps> = ({
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
   const isAddingChatMembers = contentKey === RightColumnContent.AddingMembers;
+  const isCreatingTopic = contentKey === RightColumnContent.CreateTopic;
+  const isEditingTopic = contentKey === RightColumnContent.EditTopic;
   const isOverlaying = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN;
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isOpen);
@@ -181,11 +187,18 @@ const RightColumn: FC<StateProps> = ({
       case RightColumnContent.PollResults:
         closePollResults();
         break;
+      case RightColumnContent.CreateTopic:
+        closeCreateTopicPanel();
+        break;
+      case RightColumnContent.EditTopic:
+        closeEditTopicPanel();
+        break;
     }
   }, [
     contentKey, isScrolledDown, toggleChatInfo, closePollResults, setNewChatMembersDialogState,
     managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
     setEditingExportedInvite, chatId, setOpenedInviteInfo, toggleStatistics, toggleMessageStatistics,
+    closeCreateTopicPanel, closeEditTopicPanel,
   ]);
 
   const handleSelectChatMember = useCallback((memberId, isPromoted) => {
@@ -232,11 +245,12 @@ const RightColumn: FC<StateProps> = ({
     isActive: isChatSelected && (
       contentKey === RightColumnContent.ChatInfo
       || contentKey === RightColumnContent.Management
-      || contentKey === RightColumnContent.AddingMembers),
+      || contentKey === RightColumnContent.AddingMembers
+      || contentKey === RightColumnContent.CreateTopic
+      || contentKey === RightColumnContent.EditTopic),
     onBack: () => close(false),
   });
 
-  // eslint-disable-next-line consistent-return
   function renderContent(isActive: boolean) {
     if (renderingContentKey === -1) {
       return undefined;
@@ -290,7 +304,13 @@ const RightColumn: FC<StateProps> = ({
         return <GifSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.PollResults:
         return <PollResults onClose={close} isActive={isOpen && isActive} />;
+      case RightColumnContent.CreateTopic:
+        return <CreateTopic onClose={close} isActive={isOpen && isActive} />;
+      case RightColumnContent.EditTopic:
+        return <EditTopic onClose={close} isActive={isOpen && isActive} />;
     }
+
+    return undefined; // Unreachable
   }
 
   return (
@@ -314,6 +334,8 @@ const RightColumn: FC<StateProps> = ({
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isPollResults={isPollResults}
+          isCreatingTopic={isCreatingTopic}
+          isEditingTopic={isEditingTopic}
           isAddingChatMembers={isAddingChatMembers}
           profileState={profileState}
           managementScreen={managementScreen}

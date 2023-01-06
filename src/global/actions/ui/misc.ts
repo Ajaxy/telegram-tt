@@ -440,6 +440,43 @@ addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) =>
   };
 });
 
+addActionHandler('openCreateTopicPanel', (global, actions, payload) => {
+  const { chatId } = payload;
+
+  return {
+    ...global,
+    createTopicPanel: {
+      chatId,
+    },
+  };
+});
+
+addActionHandler('closeCreateTopicPanel', (global) => {
+  return {
+    ...global,
+    createTopicPanel: undefined,
+  };
+});
+
+addActionHandler('openEditTopicPanel', (global, actions, payload) => {
+  const { chatId, topicId } = payload;
+
+  return {
+    ...global,
+    editTopicPanel: {
+      chatId,
+      topicId,
+    },
+  };
+});
+
+addActionHandler('closeEditTopicPanel', (global) => {
+  return {
+    ...global,
+    editTopicPanel: undefined,
+  };
+});
+
 addActionHandler('checkAppVersion', () => {
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 

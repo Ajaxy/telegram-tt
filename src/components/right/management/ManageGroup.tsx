@@ -16,6 +16,7 @@ import {
   getHasAdminRight,
   isChatBasicGroup,
   isChatPublic,
+  isChatSuperGroup,
 } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
@@ -33,6 +34,7 @@ import Spinner from '../../ui/Spinner';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import TextArea from '../../ui/TextArea';
+import Switcher from '../../ui/Switcher';
 
 import './Management.scss';
 
@@ -51,6 +53,7 @@ type StateProps = {
   canChangeInfo?: boolean;
   canBanUsers?: boolean;
   canInvite?: boolean;
+  canEditForum?: boolean;
   exportedInvites?: ApiExportedInvite[];
   lastSyncTime?: number;
   isChannelsPremiumLimitReached: boolean;
@@ -73,6 +76,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   canChangeInfo,
   canBanUsers,
   canInvite,
+  canEditForum,
   isActive,
   exportedInvites,
   lastSyncTime,
@@ -91,6 +95,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     openChat,
     loadExportedChatInvites,
     loadChatJoinRequests,
+    toggleForum,
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
@@ -202,6 +207,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 
     togglePreHistoryHidden({ chatId: chat.id, isEnabled: !isPreHistoryHidden });
   }, [chat, togglePreHistoryHidden]);
+
+  const handleForumToggle = useCallback(() => {
+    toggleForum({ chatId, isEnabled: !chat.isForum });
+  }, [chat.isForum, chatId, toggleForum]);
 
   useEffect(() => {
     if (!isChannelsPremiumLimitReached) {
@@ -384,6 +393,20 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
               </span>
             </ListItem>
           )}
+          {canEditForum && (
+            <>
+              <ListItem icon="forums" ripple onClick={handleForumToggle}>
+                <span>{lang('ChannelTopics')}</span>
+                <Switcher
+                  id="group-notifications"
+                  label={lang('ChannelTopics')}
+                  checked={chat.isForum}
+                  inactive
+                />
+              </ListItem>
+              <div className="section-info section-info_push">{lang('ForumToggleDescription')}</div>
+            </>
+          )}
         </div>
         <div className="section">
           <ListItem icon="group" multiline onClick={handleClickMembers}>
@@ -444,6 +467,7 @@ export default memo(withGlobal<OwnProps>(
     const hasLinkedChannel = Boolean(chat.fullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
     const { invites } = global.management.byChatId[chatId] || {};
+    const canEditForum = !hasLinkedChannel && isChatSuperGroup(chat) && getHasAdminRight(chat, 'changeInfo');
 
     return {
       chat,
@@ -457,6 +481,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime: global.lastSyncTime,
       isChannelsPremiumLimitReached: global.limitReachedModal?.limit === 'channels',
       availableReactions: global.availableReactions,
+      canEditForum,
     };
   },
 )(ManageGroup));

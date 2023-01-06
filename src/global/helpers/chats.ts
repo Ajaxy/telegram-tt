@@ -12,7 +12,9 @@ import {
 import type { NotifyException, NotifySettings } from '../../types';
 import type { LangFn } from '../../hooks/useLang';
 
-import { ARCHIVED_FOLDER_ID, REPLIES_USER_ID, TME_LINK_PREFIX } from '../../config';
+import {
+  ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+} from '../../config';
 import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
@@ -153,6 +155,11 @@ export function isChatAdmin(chat: ApiChat) {
 
 export function getHasAdminRight(chat: ApiChat, key: keyof ApiChatAdminRights) {
   return chat.adminRights ? chat.adminRights[key] : false;
+}
+
+export function getCanManageTopic(chat: ApiChat, topic: ApiTopic) {
+  if (topic.id === GENERAL_TOPIC_ID) return chat.isCreator;
+  return chat.isCreator || getHasAdminRight(chat, 'manageTopics') || topic.isOwner;
 }
 
 export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights) {

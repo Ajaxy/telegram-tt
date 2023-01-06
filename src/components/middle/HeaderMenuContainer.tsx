@@ -21,7 +21,14 @@ import {
   selectCurrentMessageList,
 } from '../../global/selectors';
 import {
-  isUserId, getCanDeleteChat, selectIsChatMuted, getCanAddContact, isChatChannel, isChatGroup,
+  isUserId,
+  getCanDeleteChat,
+  selectIsChatMuted,
+  getCanAddContact,
+  isChatChannel,
+  isChatGroup,
+  getHasAdminRight,
+  getCanManageTopic,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -30,6 +37,7 @@ import useLang from '../../hooks/useLang';
 import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import MenuSeparator from '../ui/MenuSeparator';
 import DeleteChatModal from '../common/DeleteChatModal';
 import ReportModal from '../common/ReportModal';
 
@@ -87,6 +95,8 @@ type StateProps = {
   canReportChat?: boolean;
   canDeleteChat?: boolean;
   canGiftPremium?: boolean;
+  canCreateTopic?: boolean;
+  canEditTopic?: boolean;
   hasLinkedChat?: boolean;
   isChatInfoShown?: boolean;
 };
@@ -123,6 +133,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canGiftPremium,
   hasLinkedChat,
   canAddContact,
+  canCreateTopic,
+  canEditTopic,
   onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
@@ -143,6 +155,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     toggleStatistics,
     openGiftPremiumModal,
     openChatWithInfo,
+    openCreateTopicPanel,
+    openEditTopicPanel,
   } = getActions();
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -197,6 +211,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     updateChatMutedState({ chatId, isMuted: !isMuted });
     closeMenu();
   }, [chatId, closeMenu, isMuted, updateChatMutedState]);
+
+  const handleCreateTopicClick = useCallback(() => {
+    openCreateTopicPanel({ chatId });
+    closeMenu();
+  }, [openCreateTopicPanel, chatId, closeMenu]);
+
+  const handleEditTopicClick = useCallback(() => {
+    openEditTopicPanel({ chatId, topicId: threadId });
+    closeMenu();
+  }, [openEditTopicPanel, chatId, threadId, closeMenu]);
 
   const handleEnterVoiceChatClick = useCallback(() => {
     if (canCreateVoiceChat) {
@@ -301,12 +325,31 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
+          {withForumActions && canCreateTopic && (
+            <>
+              <MenuItem
+                icon="comments"
+                onClick={handleCreateTopicClick}
+              >
+                {lang('lng_forum_create_topic')}
+              </MenuItem>
+              <MenuSeparator />
+            </>
+          )}
           {isViewGroupInfoShown && (
             <MenuItem
               icon="info"
               onClick={handleViewGroupInfo}
             >
               {isTopic ? lang('lng_context_view_topic') : lang('lng_context_view_group')}
+            </MenuItem>
+          )}
+          {canEditTopic && (
+            <MenuItem
+              icon="edit"
+              onClick={handleEditTopicClick}
+            >
+              {lang('lng_forum_topic_edit')}
             </MenuItem>
           )}
           {withForumActions && Boolean(pendingJoinRequests) && (
@@ -440,15 +483,18 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             </MenuItem>
           )}
           {canLeave && (
-            <MenuItem
-              destructive
-              icon="delete"
-              onClick={handleDelete}
-            >
-              {lang(isPrivate
-                ? 'DeleteChatUser'
-                : (canDeleteChat ? 'GroupInfo.DeleteAndExit' : (isChannel ? 'LeaveChannel' : 'Group.LeaveGroup')))}
-            </MenuItem>
+            <>
+              <MenuSeparator />
+              <MenuItem
+                destructive
+                icon="delete"
+                onClick={handleDelete}
+              >
+                {lang(isPrivate
+                  ? 'DeleteChatUser'
+                  : (canDeleteChat ? 'GroupInfo.DeleteAndExit' : (isChannel ? 'LeaveChannel' : 'Group.LeaveGroup')))}
+              </MenuItem>
+            </>
           )}
         </Menu>
         {chat && (
@@ -491,6 +537,10 @@ export default memo(withGlobal<OwnProps>(
       && !selectIsPremiumPurchaseBlocked(global),
     );
 
+    const topic = chat?.topics?.[threadId];
+    const canCreateTopic = chat.isForum && (chat.isCreator || getHasAdminRight(chat, 'manageTopics'));
+    const canEditTopic = topic && getCanManageTopic(chat, topic);
+
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -503,6 +553,8 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       botCommands: chatBot?.fullInfo?.botInfo?.commands,
       isChatInfoShown: global.isChatInfoShown && currentChatId === chatId && currentThreadId === threadId,
+      canCreateTopic,
+      canEditTopic,
     };
   },
 )(HeaderMenuContainer));

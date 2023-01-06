@@ -20,7 +20,7 @@ export {
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
   getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest, fetchTopics, deleteTopic, togglePinnedTopic,
-  editTopic, toggleForum, fetchTopicById,
+  editTopic, toggleForum, fetchTopicById, createTopic,
 } from './chats';
 
 export {
