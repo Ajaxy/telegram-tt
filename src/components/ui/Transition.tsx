@@ -237,12 +237,14 @@ const Transition: FC<TransitionProps> = ({
       const container = containerRef.current!;
       const activeElement = container.querySelector<HTMLDivElement>(`.${classNames.active}`)
         || container.querySelector<HTMLDivElement>('.from');
-
-      if (activeElement) {
-        activeElement.style.height = 'auto';
-        container.style.height = `${activeElement.clientHeight}px`;
-        container.style.flexBasis = `${activeElement.clientHeight}px`;
+      const clientHeight = activeElement?.clientHeight;
+      if (!clientHeight) {
+        return;
       }
+
+      activeElement.style.height = 'auto';
+      container.style.height = `${clientHeight}px`;
+      container.style.flexBasis = `${clientHeight}px`;
     }
   }, [shouldRestoreHeight, children]);
 
