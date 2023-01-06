@@ -851,7 +851,7 @@ async function loadViewportMessages(
   }
 
   const {
-    messages, users, chats, threadInfos,
+    messages, users, chats, repliesThreadInfos,
   } = result;
 
   let global = getGlobal();
@@ -870,7 +870,7 @@ async function loadViewportMessages(
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
-  global = updateThreadInfos(global, chatId, threadInfos);
+  global = updateThreadInfos(global, chatId, repliesThreadInfos);
 
   let listedIds = selectListedIds(global, chatId, threadId);
   const outlyingIds = selectOutlyingIds(global, chatId, threadId);

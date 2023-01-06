@@ -126,13 +126,13 @@ export async function fetchMessages({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const threadInfos = messages.map(({ threadInfo }) => threadInfo).filter(Boolean);
+  const repliesThreadInfos = messages.map(({ repliesThreadInfo }) => repliesThreadInfo).filter(Boolean);
 
   return {
     messages,
     users,
     chats,
-    threadInfos,
+    repliesThreadInfos,
   };
 }
 

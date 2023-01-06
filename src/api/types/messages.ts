@@ -409,7 +409,7 @@ export interface ApiMessage {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
   viaBotId?: string;
-  threadInfo?: ApiThreadInfo;
+  repliesThreadInfo?: ApiThreadInfo;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;

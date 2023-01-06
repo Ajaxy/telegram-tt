@@ -139,7 +139,7 @@ async function loadAndReplaceMessages() {
       global = safeReplaceViewportIds(global, activeCurrentChatId, activeThreadId, listedIds);
       global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
       global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = updateThreadInfos(global, activeCurrentChatId, result.threadInfos);
+      global = updateThreadInfos(global, activeCurrentChatId, result.repliesThreadInfos);
 
       areMessagesLoaded = true;
     }

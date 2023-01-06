@@ -216,7 +216,7 @@ type StateProps = {
   canAutoPlayMedia?: boolean;
   shouldLoopStickers?: boolean;
   autoLoadFileMaxSizeMb: number;
-  threadInfo?: ApiThreadInfo;
+  repliesThreadInfo?: ApiThreadInfo;
   reactionMessage?: ApiMessage;
   availableReactions?: ApiAvailableReaction[];
   defaultReaction?: ApiReaction;
@@ -318,7 +318,7 @@ const Message: FC<OwnProps & StateProps> = ({
   canAutoPlayMedia,
   shouldLoopStickers,
   autoLoadFileMaxSizeMb,
-  threadInfo,
+  repliesThreadInfo,
   hasUnreadReaction,
   memoFirstUnreadIdRef,
   animationLevel,
@@ -379,7 +379,7 @@ const Message: FC<OwnProps & StateProps> = ({
   const isOwn = isOwnMessage(message);
   const isScheduled = messageListType === 'scheduled' || message.isScheduled;
   const hasReply = isReplyMessage(message) && !shouldHideReply;
-  const hasThread = Boolean(threadInfo) && messageListType === 'thread';
+  const hasThread = Boolean(repliesThreadInfo) && messageListType === 'thread';
   const isCustomShape = getMessageCustomShape(message);
   const hasAnimatedEmoji = isCustomShape && (animatedEmoji || animatedCustomEmoji);
   const hasReactions = reactionMessage?.reactions && !areReactionsEmpty(reactionMessage.reactions);
@@ -531,7 +531,8 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const { phoneCall } = action || {};
 
-  const withCommentButton = threadInfo && !isInDocumentGroupNotLast && messageListType === 'thread' && !noComments;
+  const withCommentButton = repliesThreadInfo && !isInDocumentGroupNotLast && messageListType === 'thread'
+    && !noComments;
   const withQuickReactionButton = !IS_TOUCH_ENV && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast;
 
@@ -542,7 +543,7 @@ const Message: FC<OwnProps & StateProps> = ({
     asForwarded,
     hasThread,
     forceSenderName,
-    hasComments: threadInfo && threadInfo?.messagesCount > 0,
+    hasComments: repliesThreadInfo && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
     hasReactions,
     isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message, getServerTime(serverTimeOffset)),
@@ -1122,7 +1123,7 @@ const Message: FC<OwnProps & StateProps> = ({
               <i className="icon-arrow-right" />
             </Button>
           ) : undefined}
-          {withCommentButton && <CommentButton threadInfo={threadInfo!} disabled={noComments} />}
+          {withCommentButton && <CommentButton threadInfo={repliesThreadInfo!} disabled={noComments} />}
           {withAppendix && (
             <div className="svg-appendix" dangerouslySetInnerHTML={isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN} />
           )}
@@ -1179,7 +1180,8 @@ export default memo(withGlobal<OwnProps>(
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, threadInfo, forwardInfo, transcriptionId,
+      id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, repliesThreadInfo, forwardInfo,
+      transcriptionId,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1237,8 +1239,8 @@ export default memo(withGlobal<OwnProps>(
 
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
     const isDownloading = selectIsDownloading(global, message);
-    const actualThreadInfo = threadInfo
-      ? selectThreadInfo(global, threadInfo.chatId, threadInfo.threadId) || threadInfo
+    const actualRepliesThreadInfo = repliesThreadInfo
+      ? selectThreadInfo(global, repliesThreadInfo.chatId, repliesThreadInfo.threadId) || repliesThreadInfo
       : undefined;
 
     const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
@@ -1296,7 +1298,7 @@ export default memo(withGlobal<OwnProps>(
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
-      threadInfo: actualThreadInfo,
+      repliesThreadInfo: actualRepliesThreadInfo,
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
       activeReactions: reactionMessage && global.activeReactions[reactionMessage.id],

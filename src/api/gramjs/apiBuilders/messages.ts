@@ -217,7 +217,7 @@ export function buildApiMessageWithChatId(
     ...(keyboardButtons && { keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
-    ...(replies?.comments && { threadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
+    ...(replies?.comments && { repliesThreadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { postAuthorTitle: postAuthor }),
     isProtected,
     isForwardingAllowed,
