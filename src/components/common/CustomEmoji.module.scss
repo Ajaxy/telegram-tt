@@ -4,6 +4,7 @@
   width: var(--custom-emoji-size);
   height: var(--custom-emoji-size);
   position: relative;
+  flex: 0 0 var(--custom-emoji-size);
 
   &.with-grid-fix .media, &.with-grid-fix .thumb {
     width: calc(100% + 1px) !important;
@@ -12,6 +13,10 @@
 
   &:global(.custom-color) {
     --emoji-status-color: var(--color-primary);
+  }
+
+  canvas {
+    display: block;
   }
 }
 

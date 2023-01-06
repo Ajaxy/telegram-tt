@@ -12,14 +12,15 @@ export {
 
 export {
   fetchChats, fetchFullChat, searchChats, requestChatUpdate, fetchChatSettings,
-  saveDraft, clearDraft, fetchChat, updateChatMutedState,
+  saveDraft, clearDraft, fetchChat, updateChatMutedState, updateTopicMutedState,
   createChannel, joinChannel, deleteChatUser, deleteChat, leaveChannel, deleteChannel, createGroupChat, editChatPhoto,
   toggleChatPinned, toggleChatArchived, toggleDialogUnread, setChatEnabledReactions,
   fetchChatFolders, editChatFolder, deleteChatFolder, sortChatFolders, fetchRecommendedChatFolders,
   getChatByUsername, togglePreHistoryHidden, updateChatDefaultBannedRights, updateChatMemberBannedRights,
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
-  getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest,
+  getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest, fetchTopics, deleteTopic, togglePinnedTopic,
+  editTopic, toggleForum, fetchTopicById,
 } from './chats';
 
 export {

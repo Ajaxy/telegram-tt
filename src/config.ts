@@ -59,22 +59,28 @@ export const MESSAGE_LIST_SLICE = isBigScreen ? 60 : 40;
 export const MESSAGE_LIST_VIEWPORT_LIMIT = MESSAGE_LIST_SLICE * 2;
 
 export const CHAT_HEIGHT_PX = 72;
+export const CHAT_HEIGHT_FORUM_PX = 96;
+export const TOPIC_HEIGHT_PX = 65;
 export const CHAT_LIST_SLICE = isBigScreen ? 30 : 25;
 export const CHAT_LIST_LOAD_SLICE = 100;
 export const SHARED_MEDIA_SLICE = 42;
 export const MESSAGE_SEARCH_SLICE = 42;
 export const GLOBAL_SEARCH_SLICE = 20;
+export const GLOBAL_TOPIC_SEARCH_SLICE = 5;
 export const MEMBERS_SLICE = 30;
 export const MEMBERS_LOAD_SLICE = 200;
 export const PINNED_MESSAGES_LIMIT = 50;
 export const BLOCKED_LIST_LIMIT = 100;
 export const PROFILE_PHOTOS_LIMIT = 40;
 export const PROFILE_SENSITIVE_AREA = 500;
+export const TOPIC_LIST_SENSITIVE_AREA = 600;
 export const COMMON_CHATS_LIMIT = 100;
 export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
 export const REACTION_LIST_LIMIT = 100;
 export const REACTION_UNREAD_SLICE = 100;
 export const MENTION_UNREAD_SLICE = 100;
+export const TOPICS_SLICE = 20;
+export const TOPICS_SLICE_SECOND_LOAD = 500;
 
 export const TOP_CHAT_MESSAGES_PRELOAD_LIMIT = 20;
 
@@ -232,6 +238,7 @@ export const DEFAULT_LANG_CODE = 'en';
 export const DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
+export const GENERAL_TOPIC_ID = 1;
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

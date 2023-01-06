@@ -145,7 +145,7 @@
 }
 
 .Message:not(.own) {
-  .custom-shape .reply-message + .MessageMeta {
+  .custom-shape .with-subheader + .MessageMeta {
     right: auto;
     left: 13.25rem;
     bottom: 0.25rem;

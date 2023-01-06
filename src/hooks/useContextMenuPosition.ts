@@ -6,6 +6,7 @@ interface Layout {
   extraTopPadding?: number;
   marginSides?: number;
   extraMarginTop?: number;
+  shouldUsePortalPositioning?: boolean;
 }
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
@@ -47,6 +48,7 @@ export default function useContextMenuPosition(
       extraTopPadding = 0,
       marginSides = 0,
       extraMarginTop = 0,
+      shouldUsePortalPositioning = false,
     } = getLayout?.() || {};
 
     const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
@@ -63,7 +65,7 @@ export default function useContextMenuPosition(
     if (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left) {
       x += 3;
       horizontalPosition = 'left';
-    } else if (x - menuRect.width > 0) {
+    } else if (x - menuRect.width - rootRect.left > 0) {
       horizontalPosition = 'right';
       x -= 3;
     } else {
@@ -97,18 +99,25 @@ export default function useContextMenuPosition(
     setPositionY(verticalPosition);
 
     const triggerRect = triggerEl.getBoundingClientRect();
-    const left = horizontalPosition === 'left'
-      ? Math.min(x - triggerRect.left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX)
-      : (x - triggerRect.left);
-    const top = y - triggerRect.top;
+
+    const addedYForPortalPositioning = (shouldUsePortalPositioning ? triggerRect.top : 0);
+    const addedXForPortalPositioning = (shouldUsePortalPositioning ? triggerRect.left : 0);
+
+    const left = (horizontalPosition === 'left'
+      ? Math.max(MENU_POSITION_VISUAL_COMFORT_SPACE_PX, Math.min(
+        x - triggerRect.left,
+        rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX,
+      ))
+      : (x - triggerRect.left)) + addedXForPortalPositioning;
+    const top = y - triggerRect.top + addedYForPortalPositioning;
 
     const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
 
     setWithScroll(menuMaxHeight < menuRect.height);
     setMenuStyle(`max-height: ${menuMaxHeight}px;`);
     setStyle(`left: ${left}px; top: ${top}px`);
-    const offsetX = (anchorX - triggerRect.left) - left;
-    const offsetY = (anchorY - triggerRect.top) - top - (marginTop || 0);
+    const offsetX = (anchorX + addedXForPortalPositioning - triggerRect.left) - left;
+    const offsetY = (anchorY + addedYForPortalPositioning - triggerRect.top) - top - (marginTop || 0);
     setTransformOriginX(horizontalPosition === 'left' ? offsetX : menuRect.width + offsetX);
     setTransformOriginY(verticalPosition === 'bottom' ? menuRect.height + offsetY : offsetY);
   }, [

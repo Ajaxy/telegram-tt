@@ -15,6 +15,7 @@ type OwnProps = {
   onOpen?: NoneToVoidFunction;
   onClose?: NoneToVoidFunction;
   onHide?: NoneToVoidFunction;
+  onTransitionEnd?: NoneToVoidFunction;
   children: React.ReactNode;
 };
 
@@ -28,6 +29,7 @@ const DropdownMenu: FC<OwnProps> = ({
   forceOpen,
   onOpen,
   onClose,
+  onTransitionEnd,
   onHide,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -70,6 +72,7 @@ const DropdownMenu: FC<OwnProps> = ({
       ref={dropdownRef}
       className={`DropdownMenu ${className || ''}`}
       onKeyDown={handleKeyDown}
+      onTransitionEnd={onTransitionEnd}
     >
       {trigger({ onTrigger: toggleIsOpen, isOpen })}
 

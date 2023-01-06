@@ -83,6 +83,7 @@ const Avatar: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const isDeleted = user && isDeletedUser(user);
   const isReplies = user && isChatWithRepliesBot(user.id);
+  const isForum = chat?.isForum;
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
@@ -184,6 +185,7 @@ const Avatar: FC<OwnProps> = ({
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
+    isForum && 'forum',
     isOnline && 'online',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',

@@ -34,7 +34,8 @@
     user-select: text;
   }
 
-  .text-content, .transcription {
+  .text-content,
+  .transcription {
     margin: 0;
     word-break: break-word;
     white-space: pre-wrap;
@@ -164,7 +165,6 @@
     margin-right: 0.4375rem;
     margin-left: -0.5rem;
   }
-
 
   &.document:not(.text) > .MessageMeta {
     top: auto !important;
@@ -298,6 +298,18 @@
         color: var(--accent-color);
       }
     }
+  }
+
+  .message-subheader {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    padding: 0.125rem 0;
+  }
+
+  .message-topic {
+    align-self: flex-start;
   }
 
   &.has-shadow {
@@ -500,13 +512,14 @@
     &.interactive {
       cursor: pointer;
 
-      &.dark video, &.dark canvas {
+      &.dark video,
+      &.dark canvas {
         background-color: #232323;
       }
     }
   }
 
-  &.round.is-reply {
+  &.round.has-subheader {
     width: auto !important;
   }
 
@@ -514,8 +527,8 @@
   &.force-sender-name .Album,
   &.text .media-inner,
   &.is-via-bot .media-inner,
-  &.is-reply .media-inner,
-  &.is-reply .Album {
+  &.has-subheader .media-inner,
+  &.has-subheader .Album {
     margin-left: -0.5rem;
     margin-right: -0.5rem;
 
@@ -528,9 +541,9 @@
     margin-top: -0.3125rem;
   }
 
-  &.is-reply .media-inner,
+  &.has-subheader .media-inner,
   &.force-sender-name .Album,
-  &.is-reply .Album,
+  &.has-subheader .Album,
   .message-title ~ .media-inner {
     margin-top: 0.375rem;
     margin-bottom: -0.375rem;
@@ -544,7 +557,7 @@
     margin-bottom: 0;
   }
 
-  // Moved below .is-reply to overwrite its styles
+  // Moved below `.has-subheader` to overwrite its styles
   &.text .media-inner,
   &.text .Album {
     margin-bottom: 0.375rem;
@@ -644,11 +657,11 @@
     }
   }
 
-  &.is-reply {
+  &.has-subheader {
     max-width: 100%;
   }
 
-  .reply-message {
+  .with-subheader {
     display: flex;
     align-items: flex-start;
     flex-direction: row-reverse;
@@ -659,7 +672,6 @@
     }
 
     .EmbeddedMessage {
-      margin-left: 0.5rem;
       border-radius: var(--border-radius-messages);
 
       @media (max-width: 600px) {
@@ -671,6 +683,11 @@
         z-index: 1;
         max-width: calc(90vw - 12rem);
       }
+    }
+
+    .message-subheader {
+      gap: 0.5rem;
+      margin-left: 0.5rem;
     }
   }
 
@@ -706,11 +723,10 @@
   }
 
   &.emoji-only {
-    --emoji-only-size: 2.25rem;
-    font-size: var(--emoji-only-size);
-    min-width: 6rem;
-
     --custom-emoji-size: var(--emoji-only-size);
+    --emoji-only-size: 2.25rem;
+
+    min-width: 6rem;
 
     .AnimatedEmoji {
       width: var(--emoji-only-size);
@@ -726,6 +742,12 @@
       margin-bottom: 1.25rem;
       word-break: normal;
       line-height: var(--emoji-only-size);
+      font-size: var(--emoji-only-size);
+
+      .emoji {
+        width: var(--emoji-only-size);
+        height: var(--emoji-only-size);
+      }
 
       .MessageMeta {
         text-shadow: none;
@@ -757,7 +779,7 @@
     --hover-color: var(--color-reply-own-hover);
     --active-color: var(--color-reply-own-active);
 
-    .reply-message {
+    .with-subheader {
       flex-direction: row;
 
       .EmbeddedMessage {

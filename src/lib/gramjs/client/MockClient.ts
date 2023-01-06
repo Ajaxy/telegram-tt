@@ -1,288 +1,245 @@
 import BigInt from 'big-integer';
+import type { MockTypes } from './mockUtils/MockTypes';
+import type { DownloadFileParams } from './downloadFile';
+
 import { UpdateConnectionState } from '../network';
 import Api from '../tl/api';
+import createMockedUser from './mockUtils/createMockedUser';
+import createMockedDialog from './mockUtils/createMockedDialog';
+import createMockedChannel from './mockUtils/createMockedChannel';
+import createMockedChat from './mockUtils/createMockedChat';
+import createMockedMessage from './mockUtils/createMockedMessage';
+import getIdFromInputPeer from './mockUtils/getIdFromInputPeer';
+import createMockedAvailableReaction from './mockUtils/createMockedAvailableReaction';
+import MockSender from './MockSender';
+import { downloadFile } from './downloadFile';
+import getDocumentIdFromLocation from './mockUtils/getDocumentIdFromLocation';
+import createMockedDialogFilter from './mockUtils/createMockedDialogFilter';
+import createMockedTypePeer from './mockUtils/createMockedTypePeer';
+import createMockedForumTopic from './mockUtils/createMockedForumTopic';
+import { GENERAL_TOPIC_ID } from '../../../config';
+import createMockedJSON from './mockUtils/createMockedJSON';
 
-type Peer = {
-    peer: Api.Chat | Api.Channel | Api.User;
-    inputPeer: Api.TypePeer;
-    TEST_messages: Api.Message[];
-    TEST_sendMessage: (data: CreateMessageParams) => Api.Message | undefined;
-};
-
-type CreateMessageParams = {
-    fromId?: any;
-    repliesChannelId?: any;
-    replyingTo?: Api.MessageReplyHeader;
-};
+const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
 
 class TelegramClient {
-    addEventHandler(callback: any, event: any) {
-        callback(event.build(new UpdateConnectionState(UpdateConnectionState.connected)));
-    }
+    private invokeMiddleware?: <A, R>(mockClient: TelegramClient, request: Api.Request<A, R>)
+    => Promise<R | undefined | 'pass'>;
 
-    private lastId = 0;
+    private mockData: MockTypes = {
+        users: [],
+        chats: [],
+        channels: [],
+        dialogFilters: [],
+        dialogs: {
+            active: [],
+            archived: [],
+        },
+        messages: {},
+        availableReactions: [],
+        documents: [],
+        topPeers: [],
+    };
 
-    private peers: Peer[] = [];
-
-    private dialogs: Api.Dialog[] = [];
-
-    start() {
-    }
+    private _log: {};
 
     constructor() {
-        const user = this.createUser({
-            firstName: 'Test',
-            lastName: 'Account',
-        });
-        user.TEST_sendMessage({});
-
-        const chat = this.createChat();
-        chat.TEST_sendMessage({});
-
-        const channel = this.createChannel({
-            title: 'Test Channel',
-            username: 'testchannel',
-        });
-
-        const discussion = this.createChannel({
-            title: 'Test Discussion',
-            username: 'testdiscuss',
-            isMegagroup: true,
-        });
-
-        const message = channel.TEST_sendMessage({
-            repliesChannelId: discussion.peer.id,
-        });
-
-        const { id } = discussion.TEST_sendMessage({})!;
-
-        discussion.TEST_sendMessage({
-            fromId: new Api.PeerUser({
-                userId: user.peer.id,
-            }),
-            replyingTo: new Api.MessageReplyHeader({
-                replyToMsgId: id,
-                replyToPeerId: new Api.PeerChannel({
-                    channelId: channel.peer.id,
-                }),
-                replyToTopId: message!.id,
-            }),
-        });
-    }
-
-    createDialog(peer: Api.TypePeer) {
-        return new Api.Dialog({
-            peer,
-            topMessage: 0,
-            readInboxMaxId: 0,
-            readOutboxMaxId: 0,
-            unreadCount: 0,
-            unreadMentionsCount: 0,
-            unreadReactionsCount: 0,
-            notifySettings: new Api.PeerNotifySettings({}),
-        });
-    }
-
-    createMessage(peer: Api.TypePeer) {
-        return ({
-            fromId,
-            repliesChannelId,
-            replyingTo,
-        }: CreateMessageParams) => {
-            const pi = this.getPeerIndex(peer);
-            const p = this.getPeer(peer);
-            if (!p || pi === undefined) return undefined;
-
-            const message = new Api.Message({
-                id: p.TEST_messages.length + 1,
-                fromId,
-                peerId: peer,
-                date: Number(new Date()) / 1000 + pi * 60,
-                message: 'lol @channel',
-                entities: [new Api.MessageEntityMention({
-                    offset: 4,
-                    length: 8,
-                })],
-                replyTo: replyingTo,
-                replies: new Api.MessageReplies({
-                    comments: true,
-                    replies: 0,
-                    repliesPts: 0,
-                    channelId: repliesChannelId ? BigInt(repliesChannelId) : undefined,
-                }),
-            });
-            this.peers[pi].TEST_messages.push(message);
-            return message;
+        this._log = {
+            info: () => {},
         };
     }
 
-    createChat() {
-        const chat = new Api.Chat({
-            id: BigInt(this.lastId++),
-            title: 'Some chat',
-            photo: new Api.ChatPhotoEmpty(),
-            participantsCount: 1,
-            date: 1000,
-            version: 1,
+    private callbacks: {
+        callback: any;
+        eventBuilder: any;
+    }[] = [];
+
+    addEventHandler(callback: any, eventBuilder: any) {
+        this.callbacks.push({
+            callback,
+            eventBuilder,
         });
-
-        const peerChat = new Api.PeerChat({
-            chatId: chat.id,
-        });
-
-        this.dialogs.push(this.createDialog(peerChat));
-
-        const testChat: Peer = {
-            peer: chat, inputPeer: peerChat, TEST_messages: [], TEST_sendMessage: this.createMessage(peerChat),
-        };
-
-        this.peers.push(testChat);
-
-        return testChat;
     }
 
-    createChannel({ title, username, isMegagroup }: {
-        title: string;
-        username: string;
-        isMegagroup?: boolean;
-    }) {
-        const channel = new Api.Channel({
-            username,
-            id: BigInt(this.lastId++),
-            megagroup: isMegagroup ? true : undefined,
-            title,
-            photo: new Api.ChatPhotoEmpty(),
-            participantsCount: 1,
-            date: 1000,
-            creator: true,
-        });
+    async loadScenario(scenario = 'default'): Promise<void> {
+        try {
+            const invokeMiddleware = await import(`./__invokeMiddlewares__/${scenario}`);
 
-        const peerChannel = new Api.PeerChannel({
-            channelId: channel.id,
-        });
+            this.invokeMiddleware = invokeMiddleware.default;
+        } catch (e) {
+            // Ignore and use the default logic
+        }
+        return import(`./__mocks__/${scenario}.json`).then(async (mockData) => {
+            this.mockData = mockData as MockTypes;
+            await Promise.all(this.mockData.documents.map(async (l, i) => {
+                const response = await import(`./__data__/${l.url}`).then((module) => fetch(module.default));
+                const bytes = await response.arrayBuffer();
+                this.mockData.documents[i].size = BigInt(bytes.byteLength);
+                this.mockData.documents[i].bytes = Buffer.from(new Uint8Array(bytes));
+            }));
 
-        this.dialogs.push(this.createDialog(peerChannel));
-
-        const testChat: Peer = {
-            peer: channel, inputPeer: peerChannel, TEST_messages: [], TEST_sendMessage: this.createMessage(peerChannel),
-        };
-
-        this.peers.push(testChat);
-
-        return testChat;
+            this.callbacks.forEach(({ eventBuilder, callback }) => (callback(
+                eventBuilder.build(new UpdateConnectionState(UpdateConnectionState.connected)),
+            )));
+        }).catch(() => this.loadScenario());
     }
 
-    createUser({
-        firstName,
-        lastName,
+    fireUpdate(update: Api.TypeUpdate) {
+        this.callbacks.forEach(({ eventBuilder, callback }) => (callback(eventBuilder.build(update))));
+    }
+
+    getUser(id: string) {
+        return createMockedUser(id, this.mockData);
+    }
+
+    getDialogs(type: 'active' | 'archived' = 'active') {
+        return this.mockData.dialogs[type].map((dialog) => createMockedDialog(dialog, this.mockData));
+    }
+
+    start({
+        mockScenario,
     }: {
-        firstName: string;
-        lastName: string;
-    }): Peer {
-        const user = new Api.User({
-            // self: true,
-            verified: true,
-            id: BigInt(this.lastId++),
-            // accessHash?: long;
-            firstName,
-            lastName,
-            username: 'man',
-            // phone?: string;
-            // photo?: Api.TypeUserProfilePhoto;
-            // status?: Api.TypeUserStatus;
-            // botInfoVersion?: int;
-            // restrictionReason?: Api.//TypeRestrictionReason[];
-            // botInlinePlaceholder?: string;
-            // langCode?: string;
-        });
-
-        const peerUser = new Api.PeerUser({
-            userId: user.id,
-        });
-
-        this.dialogs.push(this.createDialog(peerUser));
-
-        const testChat: Peer = {
-            peer: user, inputPeer: peerUser, TEST_messages: [], TEST_sendMessage: this.createMessage(peerUser),
-        };
-
-        this.peers.push(testChat);
-
-        return testChat;
+        mockScenario: string;
+    }) {
+        return this.loadScenario(mockScenario);
     }
 
-    invoke(request: any) {
-    // await new Promise(resolve => setTimeout(resolve, 1000))
+    async invoke<A, R>(request: Api.Request<A, R>) {
+        if (this.invokeMiddleware) {
+            const a = await this.invokeMiddleware(this, request);
+            if (a !== 'pass') {
+                return a;
+            }
+        }
+
+        if (this.mockData.appConfig && request instanceof Api.help.GetAppConfig) {
+            return createMockedJSON(this.mockData.appConfig);
+        }
+
         if (request instanceof Api.messages.GetDiscussionMessage) {
+            const peerId = getIdFromInputPeer(request.peer);
+            if (!peerId) return undefined;
+
             return new Api.messages.DiscussionMessage({
-                messages: [
-                    this.peers[3].TEST_messages[0],
-                ],
-                maxId: 2,
-                unreadCount: 1,
+                messages: this.getMessagesFrom(peerId).filter((l) => l.id === request.msgId),
+                unreadCount: 0,
                 chats: [],
                 users: [],
             });
         }
-        if (request instanceof Api.messages.GetHistory) {
-            const peer = this.getPeer(request.peer);
-            if (!peer) return undefined;
 
-            return new Api.messages.Messages({
-                messages: peer.TEST_messages,
-                chats: [],
-                users: [],
-            });
-        }
         if (request instanceof Api.messages.GetReplies) {
-            const peer = this.peers[3];
-            if (!peer) return undefined;
+            const peerId = getIdFromInputPeer(request.peer);
+            if (!peerId) return undefined;
 
-            return new Api.messages.ChannelMessages({
-                messages: peer.TEST_messages,
-                topics: [],
-                pts: 0,
-                count: peer.TEST_messages.length,
+            const messages = this.mockData.messages[peerId].filter((message) => message.replyToTopId === request.msgId);
+            return new Api.messages.Messages({
+                messages: messages.map((message) => createMockedMessage(peerId, message.id, this.mockData)),
                 chats: [],
                 users: [],
             });
         }
-        if (request instanceof Api.messages.GetDialogFilters) {
-            return [new Api.DialogFilter({
-                contacts: true,
-                nonContacts: true,
-                groups: true,
-                broadcasts: true,
-                bots: true,
-                // excludeMuted?: true;
-                // excludeRead?: true;
-                // excludeArchived?: true;
-                id: 1,
-                title: 'Dialog Filter',
-                // emoticon?: string;
-                pinnedPeers: [],
-                includePeers: [],
-                excludePeers: [],
-            })];
-        }
+
         if (request instanceof Api.contacts.GetTopPeers) {
             return new Api.contacts.TopPeers({
                 categories: [new Api.TopPeerCategoryPeers({
                     category: new Api.TopPeerCategoryCorrespondents(),
-                    count: 1,
-                    peers: [
-                        new Api.TopPeer({
-                            peer: this.peers[0].inputPeer,
+                    count: this.mockData.topPeers.length,
+                    peers: this.mockData.topPeers.map((id) => {
+                        return new Api.TopPeer({
+                            peer: createMockedTypePeer(id, this.mockData),
                             rating: 100,
-                        }),
-                    ],
+                        });
+                    }),
                 })],
                 chats: [],
-                users: [
-                    this.getUsers()[0],
-                ],
+                users: this.getUsers(),
             });
         }
+
+        if (request instanceof Api.channels.GetForumTopics) {
+            const channelId = getIdFromInputPeer(request.channel);
+            if (!channelId) return undefined;
+
+            const topics = this.getChannel(channelId)?.forumTopics;
+
+            if (!topics) return undefined;
+
+            const hasGeneralTopic = topics.some((l) => l.id === GENERAL_TOPIC_ID);
+            const offsetTopicId = request.offsetTopic;
+            const limit = request.limit;
+            return new Api.messages.ForumTopics({
+                topics: topics
+                    .sort((a, b) => b.id - a.id)
+                    .map((topic) => {
+                        return createMockedForumTopic(channelId, topic.id, this.mockData);
+                    }).filter((topic) => {
+                        if (offsetTopicId) {
+                            return topic.id < offsetTopicId;
+                        }
+                        return true;
+                    }).filter((_, i) => i < limit),
+                users: [],
+                chats: [],
+                messages: [],
+                pts: 0,
+                count: topics.length - (hasGeneralTopic ? 1 : 0),
+            });
+        }
+
+        if (request instanceof Api.users.GetFullUser) {
+            return new Api.users.UserFull({
+                fullUser: new Api.UserFull({
+                    about: 'lol',
+                    settings: new Api.PeerSettings({}),
+                    notifySettings: new Api.PeerNotifySettings({}),
+                    id: BigInt(1),
+                    commonChatsCount: 0,
+                }),
+                chats: [],
+                users: [],
+            });
+        }
+
+        if (request instanceof Api.messages.GetAvailableReactions) {
+            return new Api.messages.AvailableReactions({
+                reactions: this.mockData.availableReactions.map((reaction) => {
+                    return createMockedAvailableReaction(reaction, this.mockData);
+                }),
+                hash: 1,
+            });
+        }
+
+        if (request instanceof Api.messages.GetHistory) {
+            const peerId = getIdFromInputPeer(request.peer);
+            if (!peerId) return undefined;
+
+            return new Api.messages.Messages({
+                messages: this.getMessagesFrom(peerId),
+                chats: [],
+                users: [],
+            });
+        }
+
+        if (request instanceof Api.upload.GetFile) {
+            const fileId = getDocumentIdFromLocation(request.location);
+            if (fileId === undefined) return undefined;
+
+            return new Api.upload.File({
+                type: new Api.storage.FileUnknown(),
+                mtime: 0,
+                bytes: Buffer.from(new Uint8Array(this.mockData.documents.find((i) => i.id === fileId)!.bytes)),
+            });
+        }
+
+        if (request instanceof Api.messages.GetDialogFilters) {
+            return [
+                new Api.DialogFilterDefault(),
+                ...this.mockData.dialogFilters
+                    .map((dialogFilter) => createMockedDialogFilter(dialogFilter.id, this.mockData)),
+            ];
+        }
+
         if (request instanceof Api.messages.GetPinnedDialogs) {
             return new Api.messages.PeerDialogs({
                 dialogs: [],
@@ -298,6 +255,7 @@ class TelegramClient {
                 }),
             });
         }
+
         if (request instanceof Api.messages.GetDialogs) {
             if (request.folderId || !(request.offsetPeer instanceof Api.InputPeerEmpty)) {
                 return new Api.messages.Dialogs({
@@ -309,48 +267,171 @@ class TelegramClient {
             }
 
             return new Api.messages.Dialogs({
-                dialogs: this.dialogs,
+                dialogs: this.getDialogs(),
                 messages: this.getAllMessages(),
-                chats: this.getChats(),
+                chats: this.getChatsAndChannels(),
                 users: this.getUsers(),
             });
         }
         return undefined;
-    // console.log(request.className, request);
     }
 
-    private getPeerIndex(peer: Api.TypeInputPeer) {
-        const id = 'channelId' in peer ? peer.channelId : (
-            'userId' in peer ? peer.userId : (
-                'chatId' in peer ? peer.chatId : undefined
-            )
+    public getSender() {
+        return new MockSender(this);
+    }
+
+    downloadFile(inputLocation: any, args: DownloadFileParams) {
+        return downloadFile(this as any, inputLocation, args);
+    }
+
+    _downloadPhoto(photo: Api.MessageMediaPhoto | Api.Photo | undefined, args: any) {
+        if (photo instanceof Api.MessageMediaPhoto) {
+            photo = photo.photo;
+        }
+        if (!(photo instanceof Api.Photo)) {
+            return undefined;
+        }
+        const isVideoSize = args.sizeType === 'u' || args.sizeType === 'v';
+        const size = this._pickFileSize(isVideoSize
+            ? [...(photo.videoSizes as any), ...photo.sizes]
+            : photo.sizes, args.sizeType);
+        if (!size || (size instanceof Api.PhotoSizeEmpty)) {
+            return undefined;
+        }
+
+        if (size instanceof Api.PhotoCachedSize || size instanceof Api.PhotoStrippedSize) {
+            // TODO[mock] Implement
+            // return this._downloadCachedPhotoSize(size);
+            return undefined;
+        }
+        return this.downloadFile(
+            new Api.InputPhotoFileLocation({
+                id: photo.id,
+                accessHash: photo.accessHash,
+                fileReference: photo.fileReference,
+                thumbSize: size.type,
+            }),
+            {
+                dcId: photo.dcId,
+                fileSize: size.size || Math.max(...(size.sizes || [])),
+                progressCallback: args.progressCallback,
+            },
         );
-
-        if (!id) return undefined;
-
-        return this.peers.findIndex((localPeer) => localPeer.peer.id.toString() === id.toString());
     }
 
-    private getPeer(peer: Api.TypeInputPeer) {
-        const index = this.getPeerIndex(peer);
-        if (index === undefined) return undefined;
+    downloadMedia(messageOrMedia: any, args: any) {
+        let media;
+        if (messageOrMedia instanceof Api.Message) {
+            media = messageOrMedia.media;
+        } else {
+            media = messageOrMedia;
+        }
+        if (typeof media === 'string') {
+            throw new Error('not implemented');
+        }
 
-        return this.peers[index];
+        if (media instanceof Api.MessageMediaWebPage) {
+            if (media.webpage instanceof Api.WebPage) {
+                media = media.webpage.document || media.webpage.photo;
+            }
+        }
+        if (media instanceof Api.MessageMediaPhoto || media instanceof Api.Photo) {
+            return this._downloadPhoto(media, args);
+        } else if (media instanceof Api.MessageMediaDocument || media instanceof Api.Document) {
+            return this._downloadDocument(media, args);
+        } else if (media instanceof Api.MessageMediaContact) {
+            return undefined;
+        } else if (media instanceof Api.WebDocument || media instanceof Api.WebDocumentNoProxy) {
+            return undefined;
+        }
+        return undefined;
+    }
+
+    _downloadDocument(doc: any, args: any) {
+        if (doc instanceof Api.MessageMediaDocument) {
+            doc = doc.document;
+        }
+        if (!(doc instanceof Api.Document)) {
+            return undefined;
+        }
+
+        let size;
+        if (args.sizeType) {
+            size = doc.thumbs ? this._pickFileSize([...(doc.videoThumbs || []),
+                ...doc.thumbs], args.sizeType) : undefined;
+            if (!size && doc.mimeType.startsWith('video/')) {
+                return undefined;
+            }
+
+            if (size && (size instanceof Api.PhotoCachedSize
+                || size instanceof Api.PhotoStrippedSize)) {
+                // TODO[mock] Implement
+                // return this._downloadCachedPhotoSize(size);
+                return undefined;
+            }
+        }
+
+        return this.downloadFile(
+            new Api.InputDocumentFileLocation({
+                id: doc.id,
+                accessHash: doc.accessHash,
+                fileReference: doc.fileReference,
+                thumbSize: size ? size.type : '',
+            }),
+            {
+                fileSize: size ? size.size : doc.size.toJSNumber(),
+                progressCallback: args.progressCallback,
+                start: args.start,
+                end: args.end,
+                dcId: doc.dcId,
+                workers: args.workers,
+            },
+        );
+    }
+
+    _pickFileSize(sizes: any, sizeType: any) {
+        if (!sizeType || !sizes || !sizes.length) {
+            return undefined;
+        }
+        const indexOfSize = sizeTypes.indexOf(sizeType);
+        let size;
+        for (let i = indexOfSize; i < sizeTypes.length; i++) {
+            size = sizes.find((s: any) => s.type === sizeTypes[i]);
+            if (size) {
+                return size;
+            }
+        }
+        return undefined;
+    }
+
+    private getMessagesFrom(chatId: string) {
+        return this.mockData.messages[chatId].map((message) => createMockedMessage(chatId, message.id, this.mockData));
     }
 
     private getAllMessages() {
-        return this.peers.reduce((acc: Api.Message[], el) => {
-            acc.push(...el.TEST_messages);
-            return acc;
-        }, []);
+        return Object.entries(this.mockData.messages).flatMap(([chatId, messages]) => {
+            return messages.map((message) => createMockedMessage(chatId, message.id, this.mockData));
+        });
+    }
+
+    private getChatsAndChannels() {
+        return [...this.getChannels(), ...this.getChats()];
     }
 
     private getChats() {
-        return this.peers.filter(({ peer }) => !(peer instanceof Api.User)).map(({ peer }) => peer);
+        return this.mockData.chats.map((chat) => createMockedChat(chat.id, this.mockData));
+    }
+
+    private getChannel(chatId: string) {
+        return this.mockData.channels.find((channel) => channel.id === chatId);
+    }
+
+    private getChannels() {
+        return this.mockData.channels.map((channel) => createMockedChannel(channel.id, this.mockData));
     }
 
     private getUsers() {
-        return this.peers.filter(({ peer }) => peer instanceof Api.User).map(({ peer }) => peer);
+        return this.mockData.users.map((user) => createMockedUser(user.id, this.mockData));
     }
 }
 

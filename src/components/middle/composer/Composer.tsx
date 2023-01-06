@@ -21,9 +21,6 @@ import type {
   ApiBotMenuButton,
   ApiAttachMenuPeerType,
 } from '../../../api/types';
-import {
-  MAIN_THREAD_ID,
-} from '../../../api/types';
 import type { InlineBotSettings, ISettings } from '../../../types';
 
 import {
@@ -322,7 +319,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (chatId && lastSyncTime && threadId === MAIN_THREAD_ID && isReady) {
+    if (chatId && lastSyncTime && isReady) {
       loadScheduledHistory({ chatId });
     }
   }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
@@ -567,7 +564,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       stopRecordingVoiceRef.current!();
       resetComposer();
     };
-  }, [chatId, resetComposer, stopRecordingVoiceRef]);
+  }, [chatId, threadId, resetComposer, stopRecordingVoiceRef]);
 
   const showCustomEmojiPremiumNotification = useCallback(() => {
     const notificationNumber = customEmojiNotificationNumber.current;
@@ -741,11 +738,14 @@ const Composer: FC<OwnProps & StateProps> = ({
   ]);
 
   const handleClickBotMenu = useCallback(() => {
-    if (botMenuButton?.type !== 'webApp') return;
+    if (botMenuButton?.type !== 'webApp') {
+      return;
+    }
+
     callAttachBot({
-      botId: chatId, chatId, isFromBotMenu: true, url: botMenuButton.url,
+      botId: chatId, chatId, isFromBotMenu: true, url: botMenuButton.url, threadId,
     });
-  }, [botMenuButton, callAttachBot, chatId]);
+  }, [botMenuButton, callAttachBot, chatId, threadId]);
 
   const handleActivateBotCommandMenu = useCallback(() => {
     closeSymbolMenu();
@@ -1298,6 +1298,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           )}
           <AttachMenu
             chatId={chatId}
+            threadId={threadId}
             isButtonVisible={!activeVoiceRecording && !editingMessage}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
@@ -1414,7 +1415,7 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
-    const scheduledIds = selectScheduledIds(global, chatId);
+    const scheduledIds = selectScheduledIds(global, chatId, threadId);
     const { language, shouldSuggestStickers, shouldSuggestCustomEmoji } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
@@ -1453,8 +1454,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       isSelectModeActive: selectIsInSelectMode(global),
       withScheduledButton: (
-        threadId === MAIN_THREAD_ID
-        && messageListType === 'thread'
+        messageListType === 'thread'
         && Boolean(scheduledIds?.length)
       ),
       shouldSchedule: messageListType === 'scheduled',

@@ -6,7 +6,7 @@ import { getMessageContent } from '../../../../global/helpers';
 export function buildContentClassName(
   message: ApiMessage,
   {
-    hasReply,
+    hasSubheader,
     isCustomShape,
     isLastInGroup,
     asForwarded,
@@ -18,7 +18,7 @@ export function buildContentClassName(
     isGeoLiveActive,
     withVoiceTranscription,
   }: {
-    hasReply?: boolean;
+    hasSubheader?: boolean;
     isCustomShape?: boolean | number;
     isLastInGroup?: boolean;
     asForwarded?: boolean;
@@ -95,8 +95,8 @@ export function buildContentClassName(
     classNames.push('is-forwarded');
   }
 
-  if (hasReply) {
-    classNames.push('is-reply');
+  if (hasSubheader) {
+    classNames.push('has-subheader');
   }
 
   if (hasThread) {
@@ -122,7 +122,7 @@ export function buildContentClassName(
       classNames.push('has-background');
     }
 
-    if (hasReply || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName) {
+    if (hasSubheader || asForwarded || isViaBot || !isMediaWithNoText || forceSenderName) {
       classNames.push('has-solid-background');
     }
 

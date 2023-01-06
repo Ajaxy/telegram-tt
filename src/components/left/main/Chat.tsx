@@ -1,52 +1,58 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useLayoutEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
-import type { LangFn } from '../../../hooks/useLang';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiFormattedText, ApiUserStatus,
+  ApiChat,
+  ApiUser,
+  ApiMessage,
+  ApiMessageOutgoingStatus,
+  ApiFormattedText,
+  ApiUserStatus,
+  ApiTopic,
+  ApiTypingStatus,
 } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
-import { MAIN_THREAD_ID } from '../../../api/types';
+import type { ChatAnimationTypes } from './hooks';
 
 import { ANIMATION_END_DELAY } from '../../../config';
+import { MAIN_THREAD_ID } from '../../../api/types';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   isUserId,
-  isActionMessage,
   getPrivateChatUserId,
   getMessageAction,
-  getMessageSenderName,
-  isChatChannel,
-  getMessageMediaHash,
-  getMessageMediaThumbDataUri,
-  getMessageVideo,
-  getMessageSticker,
   selectIsChatMuted,
-  getMessageRoundVideo,
 } from '../../../global/helpers';
 import {
-  selectChat, selectUser, selectChatMessage, selectOutgoingStatus, selectDraft, selectCurrentMessageList,
-  selectNotifySettings, selectNotifyExceptions, selectUserStatus, selectIsDefaultEmojiStatusPack,
+  selectChat,
+  selectUser,
+  selectChatMessage,
+  selectOutgoingStatus,
+  selectDraft,
+  selectCurrentMessageList,
+  selectNotifySettings,
+  selectNotifyExceptions,
+  selectUserStatus,
+  selectIsDefaultEmojiStatusPack,
+  selectTopicFromMessage,
+  selectThreadParam,
+  selectIsForumPanelOpen,
 } from '../../../global/selectors';
-import { renderActionMessageText } from '../../common/helpers/renderActionMessageText';
-import renderText from '../../common/helpers/renderText';
-import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
-import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
+import { fastRaf } from '../../../util/schedulers';
+import buildStyle from '../../../util/buildStyle';
 
-import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
-import useMedia from '../../../hooks/useMedia';
-import { ChatAnimationTypes } from './hooks';
-import useLang from '../../../hooks/useLang';
+import useChatListEntry from './hooks/useChatListEntry';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import usePrevious from '../../../hooks/usePrevious';
 
 import Avatar from '../../common/Avatar';
-import TypingStatus from '../../common/TypingStatus';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import DeleteChatModal from '../../common/DeleteChatModal';
 import ListItem from '../../ui/ListItem';
@@ -55,17 +61,19 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
-import MessageSummary from '../../common/MessageSummary';
 
 import './Chat.scss';
 
+const TRANSFORM_TO_TOPIC_LIST_ANIMATION_DELAY = 300;
+
 type OwnProps = {
-  style?: string;
   chatId: string;
   folderId?: number;
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
+  offsetTopInSmallerMode: number;
+  offsetTop: number;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
 };
@@ -79,20 +87,21 @@ type StateProps = {
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
-  lastMessageSender?: ApiUser;
+  lastMessageSender?: ApiUser | ApiChat;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiFormattedText;
   animationLevel?: AnimationLevel;
   isSelected?: boolean;
+  isForumPanelActive?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
   lastSyncTime?: number;
+  lastMessageTopic?: ApiTopic;
+  typingStatus?: ApiTypingStatus;
+  forumPanelChatId?: string;
 };
 
-const ANIMATION_DURATION = 200;
-
 const Chat: FC<OwnProps & StateProps> = ({
-  style,
   chatId,
   folderId,
   orderDiff,
@@ -109,21 +118,27 @@ const Chat: FC<OwnProps & StateProps> = ({
   lastMessageOutgoingStatus,
   actionTargetMessage,
   actionTargetChatId,
+  offsetTopInSmallerMode,
+  offsetTop,
   draft,
   animationLevel,
   isSelected,
+  isForumPanelActive,
   canScrollDown,
   canChangeFolder,
   lastSyncTime,
+  lastMessageTopic,
+  typingStatus,
+  forumPanelChatId,
   onDragEnter,
 }) => {
   const {
     openChat,
+    openForumPanel,
+    closeForumPanel,
     focusLastMessage,
+    loadTopics,
   } = getActions();
-
-  // eslint-disable-next-line no-null/no-null
-  const ref = useRef<HTMLDivElement>(null);
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
@@ -132,74 +147,40 @@ const Chat: FC<OwnProps & StateProps> = ({
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
   const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
-  const { lastMessage, typingStatus } = chat || {};
-  const isAction = lastMessage && isActionMessage(lastMessage);
+  const { lastMessage, isForum } = chat || {};
 
-  useEnsureMessage(chatId, isAction ? lastMessage.replyToMessageId : undefined, actionTargetMessage);
+  const { renderSubtitle, ref } = useChatListEntry({
+    chat,
+    chatId,
+    lastMessage,
+    typingStatus,
+    draft,
+    actionTargetMessage,
+    actionTargetUserIds,
+    actionTargetChatId,
+    lastMessageTopic,
+    lastMessageSender,
+    observeIntersection,
 
-  const mediaThumbnail = lastMessage && !getMessageSticker(lastMessage)
-    ? getMessageMediaThumbDataUri(lastMessage)
-    : undefined;
-  const mediaBlobUrl = useMedia(lastMessage ? getMessageMediaHash(lastMessage, 'micro') : undefined);
-  const isRoundVideo = Boolean(lastMessage && getMessageRoundVideo(lastMessage));
-
-  const actionTargetUsers = useMemo(() => {
-    if (!actionTargetUserIds) {
-      return undefined;
-    }
-
-    // No need for expensive global updates on users, so we avoid them
-    const usersById = getGlobal().users.byId;
-    return actionTargetUserIds.map((userId) => usersById[userId]).filter(Boolean);
-  }, [actionTargetUserIds]);
-
-  // Sets animation excess values when `orderDiff` changes and then resets excess values to animate.
-  useLayoutEffect(() => {
-    const element = ref.current;
-
-    if (animationLevel === 0 || !element) {
-      return;
-    }
-
-    // TODO Refactor animation: create `useListAnimation` that owns `orderDiff` and `animationType`
-    if (animationType === ChatAnimationTypes.Opacity) {
-      element.style.opacity = '0';
-
-      fastRaf(() => {
-        element.classList.add('animate-opacity');
-        element.style.opacity = '1';
-      });
-    } else if (animationType === ChatAnimationTypes.Move) {
-      element.style.transform = `translate3d(0, ${-orderDiff * 100}%, 0)`;
-
-      fastRaf(() => {
-        element.classList.add('animate-transform');
-        element.style.transform = '';
-      });
-    } else {
-      return;
-    }
-
-    setTimeout(() => {
-      fastRaf(() => {
-        element.classList.remove('animate-opacity', 'animate-transform');
-        element.style.opacity = '';
-        element.style.transform = '';
-      });
-    }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [animationLevel, orderDiff, animationType]);
+    animationType,
+    animationLevel,
+    orderDiff,
+  });
 
   const handleClick = useCallback(() => {
+    if (chat?.isForum) {
+      openForumPanel({ chatId });
+      return;
+    }
+
+    if (forumPanelChatId) closeForumPanel();
     openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
   }, [
-    isSelected,
-    canScrollDown,
-    openChat,
-    chatId,
+    chat?.isForum, forumPanelChatId, closeForumPanel, openChat, chatId, isSelected, canScrollDown, openForumPanel,
     focusLastMessage,
   ]);
 
@@ -235,79 +216,66 @@ const Chat: FC<OwnProps & StateProps> = ({
     canChangeFolder,
   });
 
-  const lang = useLang();
+  const isIntersecting = useIsIntersecting(ref, observeIntersection);
+
+  // Load the forum topics to display unread count badge
+  useEffect(() => {
+    if (isIntersecting && lastSyncTime && isForum && chat && chat.topics === undefined) {
+      loadTopics({ chatId });
+    }
+  }, [chat, chatId, isForum, isIntersecting, lastSyncTime, loadTopics]);
+
+  const isOnForumPanel = chatId === forumPanelChatId;
+  const prevIsForumPanelActive = usePrevious(isForumPanelActive);
+  const isAnimatingRef = useRef(false);
+
+  if (prevIsForumPanelActive !== isForumPanelActive) {
+    isAnimatingRef.current = true;
+  }
+
+  // Animate changing to smaller chat size when navigating to/from forum topic list
+  useEffect(() => {
+    const current = ref.current;
+
+    if (current && isAnimatingRef.current && isForumPanelActive !== prevIsForumPanelActive) {
+      current.classList.add('animate-transform');
+      current.style.transform = '';
+      setTimeout(() => {
+        // Wait one more frame for better animation performance
+        fastRaf(() => {
+          isAnimatingRef.current = false;
+          current.classList.remove('animate-transform');
+        });
+      }, TRANSFORM_TO_TOPIC_LIST_ANIMATION_DELAY + ANIMATION_END_DELAY);
+    }
+  }, [ref, isForumPanelActive, prevIsForumPanelActive]);
 
   if (!chat) {
     return undefined;
   }
 
-  function renderLastMessageOrTyping() {
-    if (typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
-      return <TypingStatus typingStatus={typingStatus} />;
-    }
-
-    if (draft?.text.length) {
-      return (
-        <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          <span className="draft">{lang('Draft')}</span>
-          {renderTextWithEntities(draft.text, draft.entities, undefined, undefined, undefined, undefined, true)}
-        </p>
-      );
-    }
-
-    if (!lastMessage) {
-      return undefined;
-    }
-
-    if (isAction) {
-      const isChat = chat && (isChatChannel(chat) || lastMessage.senderId === lastMessage.chatId);
-
-      return (
-        <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
-          {renderActionMessageText(
-            lang,
-            lastMessage,
-            !isChat ? lastMessageSender : undefined,
-            isChat ? chat : undefined,
-            actionTargetUsers,
-            actionTargetMessage,
-            actionTargetChatId,
-            { isEmbedded: true },
-          )}
-        </p>
-      );
-    }
-
-    const senderName = getMessageSenderName(lang, chatId, lastMessageSender);
-
-    return (
-      <p className="last-message shared-canvas-container" dir={lang.isRtl ? 'auto' : 'ltr'}>
-        {senderName && (
-          <>
-            <span className="sender-name">{renderText(senderName)}</span>
-            <span className="colon">:</span>
-          </>
-        )}
-        {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
-      </p>
-    );
-  }
-
   const className = buildClassName(
     'Chat chat-item-clickable',
     isUserId(chatId) ? 'private' : 'group',
+    isForum && 'forum',
     isSelected && 'selected',
+    isForumPanelActive && 'smaller',
+    isOnForumPanel && 'active-forum',
   );
+
+  const chatTop = isForumPanelActive ? (offsetTop - offsetTopInSmallerMode) : offsetTop;
+  const offsetAnimate = isForumPanelActive ? offsetTopInSmallerMode : -offsetTopInSmallerMode;
 
   return (
     <ListItem
       ref={ref}
       className={className}
-      style={style}
-      ripple={!IS_SINGLE_COLUMN_LAYOUT}
+      style={buildStyle(`top: ${chatTop}px`, isAnimatingRef.current && `transform: translateY(${offsetAnimate}px)`)}
+      ripple={!isForum && !IS_SINGLE_COLUMN_LAYOUT}
       contextActions={contextActions}
       onClick={handleClick}
       onDragEnter={handleDragEnter}
+      shouldUsePortalForMenu={isForumPanelActive}
     >
       <div className="status">
         <Avatar
@@ -320,6 +288,13 @@ const Chat: FC<OwnProps & StateProps> = ({
           withVideo
           observeIntersection={observeIntersection}
         />
+        <div className={buildClassName(
+          'status-badge-wrapper',
+          isForumPanelActive && 'status-badge-wrapper-visible',
+        )}
+        >
+          <Badge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant />
+        </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
         )}
@@ -343,7 +318,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           )}
         </div>
         <div className="subtitle">
-          {renderLastMessageOrTyping()}
+          {renderSubtitle()}
           <Badge chat={chat} isPinned={isPinned} isMuted={isMuted} />
         </div>
       </div>
@@ -376,31 +351,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   );
 };
 
-function renderSummary(
-  lang: LangFn, message: ApiMessage, observeIntersection?: ObserveFn, blobUrl?: string, isRoundVideo?: boolean,
-) {
-  const messageSummary = (
-    <MessageSummary
-      lang={lang}
-      message={message}
-      noEmoji={Boolean(blobUrl)}
-      observeIntersectionForLoading={observeIntersection}
-    />
-  );
-
-  if (!blobUrl) {
-    return messageSummary;
-  }
-
-  return (
-    <span className="media-preview">
-      <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
-      {getMessageVideo(message) && <i className="icon-play" />}
-      {messageSummary}
-    </span>
-  );
-}
-
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
@@ -409,7 +359,8 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const { senderId, replyToMessageId, isOutgoing } = chat.lastMessage || {};
-    const lastMessageSender = senderId ? selectUser(global, senderId) : undefined;
+    const lastMessageSender = senderId
+      ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
     const lastMessageAction = chat.lastMessage ? getMessageAction(chat.lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)
@@ -421,12 +372,16 @@ export default memo(withGlobal<OwnProps>(
       threadId: currentThreadId,
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
+    const isForumPanelActive = selectIsForumPanelOpen(global);
     const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
     const statusEmoji = user?.emojiStatus && global.customEmojis.byId[user.emojiStatus.documentId];
     const isEmojiStatusColored = statusEmoji && selectIsDefaultEmojiStatusPack(global, statusEmoji.stickerSetInfo);
+    const lastMessageTopic = chat.lastMessage && selectTopicFromMessage(global, chat.lastMessage);
+
+    const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
 
     return {
       chat,
@@ -437,6 +392,7 @@ export default memo(withGlobal<OwnProps>(
       actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       animationLevel: global.settings.byKey.animationLevel,
+      isForumPanelActive,
       isSelected,
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
@@ -447,6 +403,9 @@ export default memo(withGlobal<OwnProps>(
       user,
       userStatus,
       isEmojiStatusColored,
+      lastMessageTopic,
+      typingStatus,
+      forumPanelChatId: global.forumPanelChatId,
     };
   },
 )(Chat));

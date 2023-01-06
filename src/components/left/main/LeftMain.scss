@@ -17,6 +17,14 @@
     flex-direction: column;
     overflow: hidden;
 
+    transition: 0.25s ease-out transform;
+
+    &--tabs-hidden {
+      transform: translateY(-3.125rem);
+
+      height: calc(100% + 3.125rem);
+    }
+
     .tabs-placeholder {
       height: 2.625rem;
       /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */

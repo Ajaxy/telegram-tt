@@ -49,6 +49,7 @@ export type OwnProps = {
   onMouseEnter?: NoneToVoidFunction;
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
+  onTransitionEnd?: NoneToVoidFunction;
 };
 
 // Longest animation duration;
@@ -76,6 +77,7 @@ const Button: FC<OwnProps> = ({
   isLoading,
   isShiny,
   withPremiumGradient,
+  onTransitionEnd,
   ariaLabel,
   ariaControls,
   hasPopup,
@@ -154,6 +156,7 @@ const Button: FC<OwnProps> = ({
         aria-label={ariaLabel}
         aria-controls={ariaControls}
         style={style}
+        onTransitionEnd={onTransitionEnd}
       >
         {children}
         {!disabled && ripple && (
@@ -174,6 +177,7 @@ const Button: FC<OwnProps> = ({
       onMouseDown={handleMouseDown}
       onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}
       onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
+      onTransitionEnd={onTransitionEnd}
       onFocus={onFocus && !disabled ? onFocus : undefined}
       aria-label={ariaLabel}
       aria-controls={ariaControls}

@@ -1,12 +1,15 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import { callApi } from '../../../api/gramjs';
-import type { ApiChat, ApiGlobalMessageSearchType } from '../../../api/types';
+import type {
+  ApiChat, ApiTopic, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
+} from '../../../api/types';
 
 import {
   addChats,
   addMessages,
   addUsers,
+  updateTopics,
   updateGlobalSearch,
   updateGlobalSearchFetchingStatus,
   updateGlobalSearchResults,
@@ -14,7 +17,7 @@ import {
 import { throttle } from '../../../util/schedulers';
 import { selectChat, selectCurrentGlobalSearchQuery } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { GLOBAL_SEARCH_SLICE } from '../../../config';
+import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
 import { timestampPlusDay } from '../../../util/dateFormat';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
@@ -107,10 +110,18 @@ async function searchChats(query: string) {
 async function searchMessagesGlobal(
   query = '', type: ApiGlobalMessageSearchType, offsetRate?: number, chat?: ApiChat, maxDate?: number, minDate?: number,
 ) {
-  let result;
+  let result: {
+    messages: ApiMessage[];
+    users: ApiUser[];
+    chats: ApiChat[];
+    topics?: ApiTopic[];
+    totalTopicsCount?: number;
+    totalCount: number;
+    nextRate: number | undefined;
+  } | undefined;
 
   if (chat) {
-    const localResult = await callApi('searchMessagesLocal', {
+    const localResultRequest = callApi('searchMessagesLocal', {
       chat,
       query,
       type,
@@ -119,13 +130,24 @@ async function searchMessagesGlobal(
       minDate,
       maxDate,
     });
+    const topicsRequest = chat.isForum ? callApi('fetchTopics', {
+      chat,
+      query,
+      limit: GLOBAL_TOPIC_SEARCH_SLICE,
+    }) : undefined;
+
+    const [localResult, topics] = await Promise.all([localResultRequest, topicsRequest]);
 
     if (localResult) {
       const {
         messages, users, totalCount, nextOffsetId,
       } = localResult;
 
+      const { topics: localTopics, count } = topics || {};
+
       result = {
+        topics: localTopics,
+        totalTopicsCount: count,
         messages,
         users,
         chats: [],
@@ -174,6 +196,15 @@ async function searchMessagesGlobal(
     type,
     nextRate,
   );
+
+  if (result.topics) {
+    global = updateTopics(global, chat!.id, result.totalTopicsCount!, result.topics);
+  }
+
+  const sortedTopics = result.topics?.map(({ id }) => id).sort((a, b) => b - a);
+  global = updateGlobalSearch(global, {
+    foundTopicIds: sortedTopics,
+  });
 
   setGlobal(global);
 }

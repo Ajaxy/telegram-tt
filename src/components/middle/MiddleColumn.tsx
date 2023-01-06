@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChatBannedRights } from '../../api/types';
+import type { ApiChat, ApiChatBannedRights } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type {
   MessageListType,
@@ -42,10 +42,17 @@ import {
   selectIsRightColumnShown,
   selectIsUserBlocked,
   selectPinnedIds,
+  selectReplyingToId,
   selectTheme,
 } from '../../global/selectors';
 import {
-  getCanPostInChat, getMessageSendingRestrictionReason, isChatChannel, isChatGroup, isChatSuperGroup, isUserId,
+  getCanPostInChat,
+  getMessageSendingRestrictionReason,
+  getForumComposerPlaceholder,
+  isChatChannel,
+  isChatGroup,
+  isChatSuperGroup,
+  isUserId,
 } from '../../global/helpers';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
@@ -80,6 +87,8 @@ type StateProps = {
   chatId?: string;
   threadId?: number;
   messageListType?: MessageListType;
+  chat?: ApiChat;
+  replyingToId?: number;
   isPrivate?: boolean;
   isPinnedMessageList?: boolean;
   isScheduledMessageList?: boolean;
@@ -125,6 +134,8 @@ const MiddleColumn: FC<StateProps> = ({
   chatId,
   threadId,
   messageListType,
+  chat,
+  replyingToId,
   isPrivate,
   isPinnedMessageList,
   canPost,
@@ -302,10 +313,10 @@ const MiddleColumn: FC<StateProps> = ({
   }, []);
 
   const handleUnpinAllMessages = useCallback(() => {
-    unpinAllMessages({ chatId });
+    unpinAllMessages({ chatId, threadId });
     closeUnpinModal();
     openPreviousChat();
-  }, [unpinAllMessages, chatId, closeUnpinModal, openPreviousChat]);
+  }, [unpinAllMessages, chatId, threadId, closeUnpinModal, openPreviousChat]);
 
   const handleTabletFocus = useCallback(() => {
     openChat({ id: chatId });
@@ -352,6 +363,9 @@ const MiddleColumn: FC<StateProps> = ({
   const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
     lang, currentUserBannedRights, defaultBannedRights,
   );
+  const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(replyingToId));
+
+  const composerRestrictionMessage = messageSendingRestrictionReason || forumComposerPlaceholder;
 
   // CSS Variables calculation doesn't work properly with transforms, so we calculate transform values in JS
   const {
@@ -381,10 +395,11 @@ const MiddleColumn: FC<StateProps> = ({
 
   const isMessagingDisabled = Boolean(
     !isPinnedMessageList && !renderingCanPost && !renderingCanRestartBot && !renderingCanStartBot
-    && !renderingCanSubscribe && messageSendingRestrictionReason,
+    && !renderingCanSubscribe && composerRestrictionMessage,
   );
   const withMessageListBottomShift = Boolean(
-    renderingCanRestartBot || renderingCanSubscribe || renderingCanStartBot || isPinnedMessageList,
+    renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
+    || isPinnedMessageList,
   );
   const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
 
@@ -469,7 +484,7 @@ const MiddleColumn: FC<StateProps> = ({
                   <div className={messagingDisabledClassName}>
                     <div className="messaging-disabled-inner">
                       <span>
-                        {messageSendingRestrictionReason}
+                        {composerRestrictionMessage}
                       </span>
                     </div>
                   </div>
@@ -609,7 +624,7 @@ export default memo(withGlobal(
     const isPrivate = isUserId(chatId);
     const chat = selectChat(global, chatId);
     const bot = selectChatBot(global, chatId);
-    const pinnedIds = selectPinnedIds(global, chatId);
+    const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
 
     const canPost = chat && getCanPostInChat(chat, threadId);
@@ -626,24 +641,30 @@ export default memo(withGlobal(
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && isBotNotStarted;
     const shouldLoadFullChat = Boolean(chat && isChatGroup(chat) && !chat.fullInfo && lastSyncTime);
+    const replyingToId = selectReplyingToId(global, chatId, threadId);
+    const shouldBlockBeforeReply = chat?.isForum ? (threadId === MAIN_THREAD_ID && !replyingToId) : false;
 
     return {
       ...state,
       chatId,
       threadId,
       messageListType,
+      chat,
+      replyingToId,
       isPrivate,
       areChatSettingsLoaded: Boolean(chat?.settings),
       canPost: !isPinnedMessageList
         && (!chat || canPost)
+        && !(isScheduledMessageList && chat?.isForum && threadId === MAIN_THREAD_ID)
         && !isBotNotStarted
-        && !(shouldJoinToSend && chat?.isNotJoined),
+        && !(shouldJoinToSend && chat?.isNotJoined)
+        && !shouldBlockBeforeReply,
       isPinnedMessageList,
       isScheduledMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
       hasPinnedOrAudioPlayer: (
-        threadId !== MAIN_THREAD_ID
+        (threadId !== MAIN_THREAD_ID && !chat?.isForum)
         || Boolean(!isPinnedMessageList && pinnedIds?.length)
         || Boolean(audioChatId && audioMessageId)
       ),

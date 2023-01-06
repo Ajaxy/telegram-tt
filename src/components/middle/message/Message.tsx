@@ -19,6 +19,7 @@ import type {
   ApiAvailableReaction,
   ApiChatMember,
   ApiUsername,
+  ApiTopic,
   ApiReaction,
   ApiStickerSet,
 } from '../../../api/types';
@@ -28,6 +29,9 @@ import type {
 import {
   AudioOrigin,
 } from '../../../types';
+import {
+  MAIN_THREAD_ID,
+} from '../../../api/types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
@@ -61,6 +65,7 @@ import {
   selectLocalAnimatedEmoji,
   selectIsCurrentUserPremium,
   selectIsChatProtected,
+  selectTopicFromMessage,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -138,6 +143,7 @@ import CustomEmoji from '../../common/CustomEmoji';
 import PremiumIcon from '../../common/PremiumIcon';
 import FakeIcon from '../../common/FakeIcon';
 import MessageText from '../../common/MessageText';
+import TopicChip from '../../common/TopicChip';
 
 import './Message.scss';
 
@@ -223,6 +229,8 @@ type StateProps = {
   isPremium: boolean;
   animationLevel: AnimationLevel;
   senderAdminMember?: ApiChatMember;
+  messageTopic?: ApiTopic;
+  hasTopicChip?: boolean;
 };
 
 type MetaPosition =
@@ -315,6 +323,8 @@ const Message: FC<OwnProps & StateProps> = ({
   memoFirstUnreadIdRef,
   animationLevel,
   senderAdminMember,
+  messageTopic,
+  hasTopicChip,
 }) => {
   const {
     toggleMessageSelection,
@@ -396,6 +406,8 @@ const Message: FC<OwnProps & StateProps> = ({
       && forwardInfo.fromMessageId
     ));
 
+  const hasSubheader = hasTopicChip || hasReply;
+
   const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
       messageId,
@@ -457,6 +469,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleFocus,
     handleFocusForwarded,
     handleDocumentGroupSelectAll,
+    handleTopicChipClick,
   } = useInnerHandlers(
     lang,
     selectMessage,
@@ -471,6 +484,7 @@ const Message: FC<OwnProps & StateProps> = ({
     avatarPeer,
     senderPeer,
     botSender,
+    messageTopic,
   );
 
   useEffect(() => {
@@ -522,7 +536,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast;
 
   const contentClassName = buildContentClassName(message, {
-    hasReply,
+    hasSubheader,
     isCustomShape,
     isLastInGroup,
     asForwarded,
@@ -687,7 +701,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const className = buildClassName(
       'content-inner',
       asForwarded && 'forwarded-message',
-      hasReply && 'reply-message',
+      hasSubheader && 'with-subheader',
       noMediaCorners && 'no-media-corners',
     );
     const hasCustomAppendix = isLastInGroup && !hasText && !asForwarded && !hasThread;
@@ -700,16 +714,27 @@ const Message: FC<OwnProps & StateProps> = ({
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
         {renderSenderName()}
-        {hasReply && (
-          <EmbeddedMessage
-            message={replyMessage}
-            noUserColors={isOwn}
-            isProtected={isProtected}
-            sender={replyMessageSender}
-            observeIntersectionForLoading={observeIntersectionForLoading}
-            observeIntersectionForPlaying={observeIntersectionForPlaying}
-            onClick={handleReplyClick}
-          />
+        {hasSubheader && (
+          <div className="message-subheader">
+            {hasTopicChip && (
+              <TopicChip
+                topic={messageTopic}
+                onClick={handleTopicChipClick}
+                className="message-topic"
+              />
+            )}
+            {hasReply && (
+              <EmbeddedMessage
+                message={replyMessage}
+                noUserColors={isOwn || isChannel}
+                isProtected={isProtected}
+                sender={replyMessageSender}
+                observeIntersectionForLoading={observeIntersectionForLoading}
+                observeIntersectionForPlaying={observeIntersectionForPlaying}
+                onClick={handleReplyClick}
+              />
+            )}
+          </div>
         )}
         {sticker && (
           <Sticker
@@ -943,7 +968,7 @@ const Message: FC<OwnProps & StateProps> = ({
   function renderSenderName() {
     const media = photo || video || location;
     const shouldRender = !(isCustomShape && !viaBotId) && (
-      (withSenderName && !media) || asForwarded || viaBotId || forceSenderName
+      (withSenderName && (!media || hasTopicChip)) || asForwarded || viaBotId || forceSenderName
     ) && !isInDocumentGroupNotFirst && !(hasReply && isCustomShape);
 
     if (!shouldRender) {
@@ -1151,7 +1176,7 @@ export default memo(withGlobal<OwnProps>(
       focusedMessage, forwardMessages, lastSyncTime, serverTimeOffset,
     } = global;
     const {
-      message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup,
+      message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
       id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, threadInfo, forwardInfo, transcriptionId,
@@ -1182,6 +1207,7 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, isRepliesChat && replyToChatId ? replyToChatId : chatId, replyToMessageId)
       : undefined;
     const replyMessageSender = replyMessage && selectReplySender(global, replyMessage, Boolean(forwardInfo));
+    const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
 
     const uploadProgress = selectUploadProgress(global, message);
     const isFocused = messageListType === 'thread' && (
@@ -1225,6 +1251,9 @@ export default memo(withGlobal<OwnProps>(
 
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
 
+    const messageTopic = threadId === MAIN_THREAD_ID ? selectTopicFromMessage(global, message) : undefined;
+    const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && isFirstInGroup;
+
     return {
       theme: selectTheme(global),
       chatUsernames,
@@ -1233,7 +1262,7 @@ export default memo(withGlobal<OwnProps>(
       canShowSender,
       originSender,
       botSender,
-      shouldHideReply,
+      shouldHideReply: shouldHideReply || isReplyToTopicStart,
       isThreadTop,
       replyMessage,
       replyMessageSender,
@@ -1281,7 +1310,9 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       animationLevel: global.settings.byKey.animationLevel,
       senderAdminMember,
+      messageTopic,
       genericEffects: global.genericEmojiEffects,
+      hasTopicChip,
     };
   },
 )(Message));

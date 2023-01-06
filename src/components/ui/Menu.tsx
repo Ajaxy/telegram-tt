@@ -14,6 +14,8 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 import { IS_BACKDROP_BLUR_SUPPORTED, IS_COMPACT_MENU } from '../../util/environment';
 
+import Portal from './Portal';
+
 import './Menu.scss';
 
 type OwnProps = {
@@ -39,6 +41,7 @@ type OwnProps = {
   onClose: () => void;
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  shouldUsePortalForMenu?: boolean;
   children: React.ReactNode;
 };
 
@@ -67,6 +70,7 @@ const Menu: FC<OwnProps> = ({
   onMouseEnter,
   onMouseLeave,
   shouldSkipTransition,
+  shouldUsePortalForMenu,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let menuRef = useRef<HTMLDivElement>(null);
@@ -121,7 +125,7 @@ const Menu: FC<OwnProps> = ({
   const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
   const transformOriginXStyle = transformOriginX !== undefined ? `${transformOriginX}px` : undefined;
 
-  return (
+  const menu = (
     <div
       id={id}
       className={buildClassName(
@@ -156,6 +160,12 @@ const Menu: FC<OwnProps> = ({
       </div>
     </div>
   );
+
+  if (shouldUsePortalForMenu) {
+    return <Portal>{menu}</Portal>;
+  }
+
+  return menu;
 };
 
 export default Menu;

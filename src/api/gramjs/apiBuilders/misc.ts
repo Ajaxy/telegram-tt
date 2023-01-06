@@ -139,6 +139,24 @@ export function buildApiNotifyException(
   };
 }
 
+export function buildApiNotifyExceptionTopic(
+  notifySettings: GramJs.TypePeerNotifySettings, peer: GramJs.TypePeer, topicId: number, serverTimeOffset: number,
+) {
+  const {
+    silent, muteUntil, showPreviews, otherSound,
+  } = notifySettings;
+
+  const hasSound = Boolean(otherSound && !(otherSound instanceof GramJs.NotificationSoundNone));
+
+  return {
+    chatId: getApiChatIdFromMtpPeer(peer),
+    topicId,
+    isMuted: silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil),
+    ...(!hasSound && { isSilent: true }),
+    ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
+  };
+}
+
 function buildApiCountry(country: GramJs.help.Country, code: GramJs.help.CountryCode) {
   const {
     hidden, iso2, defaultName, name,

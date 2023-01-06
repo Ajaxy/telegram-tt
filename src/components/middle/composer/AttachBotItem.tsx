@@ -19,6 +19,7 @@ type OwnProps = {
   bot: ApiAttachBot;
   theme: ISettings['theme'];
   chatId: string;
+  threadId?: number;
   onMenuOpened: VoidFunction;
   onMenuClosed: VoidFunction;
 };
@@ -27,6 +28,7 @@ const AttachBotItem: FC<OwnProps> = ({
   bot,
   theme,
   chatId,
+  threadId,
   onMenuOpened,
   onMenuClosed,
 }) => {
@@ -74,6 +76,7 @@ const AttachBotItem: FC<OwnProps> = ({
       onClick={() => callAttachBot({
         botId: bot.id,
         chatId,
+        threadId,
       })}
       onContextMenu={handleContextMenu}
     >

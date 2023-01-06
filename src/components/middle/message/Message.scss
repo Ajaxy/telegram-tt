@@ -571,7 +571,7 @@
       }
     }
 
-    &.is-reply .EmbeddedMessage {
+    &.has-subheader .EmbeddedMessage {
       & + .Album,
       & + .Audio,
       & + .File {
@@ -579,8 +579,8 @@
       }
     }
 
-    &:not(.custom-shape).is-reply .media-inner,
-    &:not(.custom-shape).is-reply .Album,
+    &:not(.custom-shape).has-subheader .media-inner,
+    &:not(.custom-shape).has-subheader .Album,
     &:not(.custom-shape).force-sender-name .Album,
     &:not(.is-forwarded) .message-title ~ .media-inner {
       --border-top-left-radius: 0;

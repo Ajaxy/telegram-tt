@@ -7,10 +7,11 @@ import type {
 } from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 
+import { MAIN_THREAD_ID } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import {
   selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList,
-  selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser,
+  selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId,
 } from '../../selectors';
 import { addChats, addUsers, removeBlockedContact } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -306,6 +307,12 @@ addActionHandler('sendInlineBotResult', (global, actions, payload) => {
   const { chatId, threadId } = currentMessageList;
 
   const chat = selectChat(global, chatId)!;
+  const replyingTo = selectReplyingToId(global, chatId, threadId);
+  let replyingToTopId: number | undefined;
+
+  if (replyingTo && threadId !== MAIN_THREAD_ID) {
+    replyingToTopId = selectThreadTopMessageId(global, chatId, threadId)!;
+  }
 
   actions.setReplyingToId({ messageId: undefined });
   actions.clearWebPagePreview({ chatId, threadId, value: false });
@@ -314,7 +321,8 @@ addActionHandler('sendInlineBotResult', (global, actions, payload) => {
     chat,
     resultId: id,
     queryId,
-    replyingTo: selectReplyingToId(global, chatId, threadId),
+    replyingTo,
+    replyingToTopId,
     sendAs: selectSendAs(global, chatId),
     isSilent,
     scheduleDate: scheduledAt,
@@ -438,6 +446,7 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
     theme,
     isSilent,
     replyToMessageId: reply || undefined,
+    threadId,
     isFromBotMenu,
     startParam,
     sendAs,
@@ -455,6 +464,8 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
       url: webViewUrl,
       botId,
       queryId,
+      replyToMessageId: reply || undefined,
+      threadId,
       buttonText,
     },
   });
@@ -462,7 +473,7 @@ addActionHandler('requestWebView', async (global, actions, payload) => {
 
 addActionHandler('prolongWebView', async (global, actions, payload) => {
   const {
-    botId, peerId, isSilent, replyToMessageId, queryId,
+    botId, peerId, isSilent, replyToMessageId, queryId, threadId,
   } = payload;
 
   const bot = selectUser(global, botId);
@@ -477,6 +488,7 @@ addActionHandler('prolongWebView', async (global, actions, payload) => {
     peer,
     isSilent,
     replyToMessageId,
+    threadId,
     queryId,
     sendAs,
   });
@@ -579,7 +591,7 @@ async function loadAttachBots(hash?: string) {
 
 addActionHandler('callAttachBot', (global, actions, payload) => {
   const {
-    chatId, botId, isFromBotMenu, url, startParam,
+    chatId, botId, isFromBotMenu, url, startParam, threadId,
   } = payload;
   const { attachMenu: { bots } } = global;
   if (!isFromBotMenu && !bots[botId]) {
@@ -589,13 +601,15 @@ addActionHandler('callAttachBot', (global, actions, payload) => {
         botId,
         onConfirm: {
           action: 'callAttachBot',
-          payload: { chatId, botId, startParam },
+          payload: {
+            chatId, botId, startParam, threadId,
+          },
         },
       },
     };
   }
   const theme = extractCurrentThemeParams();
-  actions.openChat({ id: chatId });
+  actions.openChat({ id: chatId, threadId });
   actions.requestWebView({
     url,
     peerId: chatId,

@@ -24,7 +24,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   isManyMessages,
 }) => {
   const {
-    setForwardChatId,
+    setForwardChatOrTopic,
     exitForwardMode,
     forwardToSavedMessages,
     showNotification,
@@ -39,7 +39,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
     }
   }, [isOpen, markIsShown]);
 
-  const handleSelectRecipient = useCallback((recipientId: string) => {
+  const handleSelectRecipient = useCallback((recipientId: string, threadId?: number) => {
     if (recipientId === currentUserId) {
       forwardToSavedMessages();
       showNotification({
@@ -48,9 +48,9 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
           : 'Conversation.ForwardTooltip.SavedMessages.One'),
       });
     } else {
-      setForwardChatId({ id: recipientId });
+      setForwardChatOrTopic({ chatId: recipientId, topicId: threadId });
     }
-  }, [currentUserId, forwardToSavedMessages, isManyMessages, lang, setForwardChatId, showNotification]);
+  }, [currentUserId, forwardToSavedMessages, isManyMessages, lang, setForwardChatOrTopic, showNotification]);
 
   const handleClose = useCallback(() => {
     exitForwardMode();

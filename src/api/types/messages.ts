@@ -259,7 +259,7 @@ export interface ApiAction {
   text: string;
   targetUserIds?: string[];
   targetChatId?: string;
-  type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'other';
+  type: 'historyClear' | 'contactSignUp' | 'chatCreate' | 'topicCreate' | 'other';
   photo?: ApiPhoto;
   amount?: number;
   currency?: string;
@@ -390,6 +390,7 @@ export interface ApiMessage {
   replyToChatId?: string;
   replyToMessageId?: number;
   replyToTopMessageId?: number;
+  isTopicReply?: true;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
   forwardInfo?: ApiMessageForwardInfo;
   isDeleting?: boolean;

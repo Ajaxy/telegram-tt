@@ -1,7 +1,7 @@
 import React, {
-  memo, useMemo, useEffect, useRef, useCallback,
+  memo, useEffect, useRef, useCallback, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { SettingsScreens } from '../../../types';
@@ -9,21 +9,20 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 
 import {
   ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID,
+  ARCHIVED_FOLDER_ID, CHAT_HEIGHT_FORUM_PX,
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
 import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
-import { mapValues } from '../../../util/iteratees';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
+import { selectChat } from '../../../global/selectors';
 
-import usePrevious from '../../../hooks/usePrevious';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
-import { useChatAnimationType } from './hooks';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
+import useChatOrderDiff from './hooks/useChatOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -60,28 +59,7 @@ const ChatList: FC<OwnProps> = ({
 
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
 
-  const orderById = useMemo(() => {
-    if (!orderedIds) {
-      return undefined;
-    }
-
-    return orderedIds.reduce((acc, id, i) => {
-      acc[id] = i;
-      return acc;
-    }, {} as Record<string, number>);
-  }, [orderedIds]);
-
-  const prevOrderById = usePrevious(orderById);
-
-  const orderDiffById = useMemo(() => {
-    if (!orderById || !prevOrderById) {
-      return {};
-    }
-
-    return mapValues(orderById, (order, id) => {
-      return prevOrderById[id] !== undefined ? order - prevOrderById[id] : -Infinity;
-    });
-  }, [orderById, prevOrderById]);
+  const { orderDiffById, getAnimationType } = useChatOrderDiff(orderedIds);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
 
@@ -122,8 +100,6 @@ const ChatList: FC<OwnProps> = ({
     };
   }, [isActive, openChat, openNextChat, orderedIds]);
 
-  const getAnimationType = useChatAnimationType(orderDiffById);
-
   const { observe } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE,
@@ -145,12 +121,31 @@ const ChatList: FC<OwnProps> = ({
     shouldIgnoreDragRef.current = true;
   }, []);
 
+  const viewportOffsetPx = useMemo(() => {
+    if (!viewportIds?.length) return 0;
+    const global = getGlobal();
+    const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
+    return orderedIds!.reduce((acc, id, i) => {
+      if (i >= viewportOffset) {
+        return acc;
+      }
+      return acc + (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
+    }, 0);
+  }, [orderedIds, viewportIds]);
+
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
+    const global = getGlobal();
+
     const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
+
+    let currentChatListHeight = viewportOffsetPx;
 
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
+      const chatTop = currentChatListHeight;
+      const chatTopSmaller = (viewportOffset + i) * CHAT_HEIGHT_PX;
+      currentChatListHeight += (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
 
       return (
         <Chat
@@ -161,7 +156,8 @@ const ChatList: FC<OwnProps> = ({
           folderId={folderId}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
-          style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+          offsetTop={chatTop}
+          offsetTopInSmallerMode={chatTop - chatTopSmaller}
           observeIntersection={observe}
           onDragEnter={handleDragEnter}
         />

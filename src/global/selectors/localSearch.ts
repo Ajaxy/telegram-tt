@@ -18,10 +18,12 @@ export function selectCurrentTextSearch(global: GlobalState) {
 }
 
 export function selectCurrentMediaSearch(global: GlobalState) {
-  const { chatId } = selectCurrentMessageList(global) || {};
-  if (!chatId) {
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
     return undefined;
   }
 
-  return global.localMediaSearch.byChatId[chatId];
+  const chatThreadKey = buildChatThreadKey(chatId, threadId);
+
+  return global.localMediaSearch.byChatThreadKey[chatThreadKey];
 }

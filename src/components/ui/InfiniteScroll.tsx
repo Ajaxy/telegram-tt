@@ -24,6 +24,7 @@ type OwnProps = {
   noScrollRestoreOnTop?: boolean;
   noFastList?: boolean;
   cacheBuster?: any;
+  beforeChildren?: React.ReactNode;
   children: React.ReactNode;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
@@ -51,6 +52,7 @@ const InfiniteScroll: FC<OwnProps> = ({
   noFastList,
   // Used to re-query `listItemElements` if rendering is delayed by transition
   cacheBuster,
+  beforeChildren,
   children,
   onLoadMore,
   onScroll,
@@ -230,6 +232,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
     >
+      {beforeChildren}
       {withAbsolutePositioning && items?.length ? (
         <div
           teactFastList={!noFastList}

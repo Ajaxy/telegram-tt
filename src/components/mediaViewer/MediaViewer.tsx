@@ -22,7 +22,7 @@ import {
   selectListedIds,
   selectOutlyingIds,
   selectScheduledMessage,
-  selectScheduledMessages,
+  selectChatScheduledMessages,
   selectUser,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
@@ -463,7 +463,7 @@ export default memo(withGlobal(
     let chatMessages: Record<number, ApiMessage> | undefined;
 
     if (origin && [MediaViewerOrigin.ScheduledAlbum, MediaViewerOrigin.ScheduledInline].includes(origin)) {
-      chatMessages = selectScheduledMessages(global, chatId);
+      chatMessages = selectChatScheduledMessages(global, chatId);
     } else {
       chatMessages = selectChatMessages(global, chatId);
     }

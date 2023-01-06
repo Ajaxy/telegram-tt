@@ -120,7 +120,7 @@ export const INITIAL_STATE: GlobalState = {
   },
 
   localMediaSearch: {
-    byChatId: {},
+    byChatThreadKey: {},
   },
 
   management: {

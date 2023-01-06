@@ -1,7 +1,7 @@
 import React from '../../../lib/teact/teact';
 
 import type {
-  ApiChat, ApiMessage, ApiUser, ApiGroupCall,
+  ApiChat, ApiMessage, ApiUser, ApiGroupCall, ApiTopic,
 } from '../../../api/types';
 import type { TextPart } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -38,6 +38,7 @@ export function renderActionMessageText(
   targetUsers?: ApiUser[],
   targetMessage?: ApiMessage,
   targetChatId?: string,
+  topic?: ApiTopic,
   options: RenderOptions = {},
   observeIntersectionForLoading?: ObserveFn,
   observeIntersectionForPlaying?: ObserveFn,
@@ -54,6 +55,7 @@ export function renderActionMessageText(
   const translationKey = text === 'Chat.Service.Group.UpdatedPinnedMessage1' && !targetMessage
     ? 'Message.PinnedGenericMessage'
     : text;
+
   let unprocessed = lang(translationKey, translationValues?.length ? translationValues : undefined);
   if (translationKey.includes('ScoredInGame')) { // Translation hack for games
     unprocessed = unprocessed.replace('un1', '%action_origin%').replace('un2', '%message%');
@@ -91,6 +93,16 @@ export function renderActionMessageText(
 
   unprocessed = processed.pop() as string;
   content.push(...processed);
+
+  if (unprocessed.includes('%action_topic%')) {
+    processed = processPlaceholder(
+      unprocessed,
+      '%action_topic%',
+      topic ? topic.title : 'a topic',
+    );
+    unprocessed = processed.pop() as string;
+    content.push(...processed);
+  }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
     processed = processPlaceholder(

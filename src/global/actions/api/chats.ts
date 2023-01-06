@@ -17,20 +17,37 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
   TMP_CHAT_ID,
   ALL_FOLDER_ID,
-  DEBUG,
+  DEBUG, TOPICS_SLICE, TOPICS_SLICE_SECOND_LOAD,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
-  addChats, addUsers, addUserStatuses, replaceThreadParam,
-  updateChatListIds, updateChats, updateChat, updateChatListSecondaryInfo,
-  updateManagementProgress, leaveChat, replaceUsers, replaceUserStatuses,
-  replaceChats, replaceChatListIds, addChatMembers, updateUser,
+  addChats,
+  addUsers,
+  addUserStatuses,
+  replaceThreadParam,
+  updateChatListIds,
+  updateChats,
+  updateChat,
+  updateChatListSecondaryInfo,
+  updateManagementProgress,
+  leaveChat,
+  replaceUsers,
+  replaceUserStatuses,
+  replaceChats,
+  replaceChatListIds,
+  addChatMembers,
+  updateUser,
+  addMessages,
+  updateTopics,
+  deleteTopic,
+  updateTopic,
+  updateThreadInfo,
 } from '../../reducers';
 import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
-  selectChatFolder, selectSupportChat, selectChatByUsername, selectThreadTopMessageId,
+  selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
-  selectVisibleUsers, selectUserByPhoneNumber, selectDraft,
+  selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -83,7 +100,7 @@ addActionHandler('preloadTopChatMessages', async (global, actions) => {
 });
 
 addActionHandler('openChat', (global, actions, payload) => {
-  const { id, threadId = MAIN_THREAD_ID } = payload;
+  const { id, threadId = MAIN_THREAD_ID, noForumTopicPanel } = payload;
   if (!id) {
     return;
   }
@@ -101,6 +118,10 @@ addActionHandler('openChat', (global, actions, payload) => {
       chatId: chat.lastMessage.threadInfo.chatId,
       threadId: chat.lastMessage.threadInfo.threadId,
     });
+  }
+
+  if (chat?.isForum && !noForumTopicPanel) {
+    actions.openForumPanel({ chatId: id });
   }
 
   if (!chat) {
@@ -262,6 +283,20 @@ addActionHandler('updateChatMutedState', (global, actions, payload) => {
 
   setGlobal(updateChat(global, chatId, { isMuted }));
   void callApi('updateChatMutedState', { chat, isMuted, serverTimeOffset });
+});
+
+addActionHandler('updateTopicMutedState', (global, actions, payload) => {
+  const { serverTimeOffset } = global;
+  const { chatId, isMuted, topicId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  setGlobal(updateTopic(global, chatId, topicId, { isMuted }));
+  void callApi('updateTopicMutedState', {
+    chat, topicId, isMuted, serverTimeOffset,
+  });
 });
 
 addActionHandler('createChannel', (global, actions, payload) => {
@@ -555,6 +590,31 @@ addActionHandler('toggleChatUnread', (global, actions, payload) => {
   }
 });
 
+addActionHandler('markTopicRead', (global, actions, payload) => {
+  const { chatId, topicId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const lastTopicMessageId = chat.topics?.[topicId]?.lastMessageId;
+  if (!lastTopicMessageId) return;
+
+  void callApi('markMessageListRead', {
+    chat,
+    threadId: topicId,
+    maxId: lastTopicMessageId,
+    serverTimeOffset: global.serverTimeOffset,
+  });
+
+  global = getGlobal();
+  global = updateTopic(global, chatId, topicId, {
+    unreadCount: 0,
+  });
+  global = updateThreadInfo(global, chatId, topicId, {
+    lastReadInboxMessageId: lastTopicMessageId,
+  });
+  setGlobal(global);
+});
+
 addActionHandler('openChatByInvite', async (global, actions, payload) => {
   const { hash } = payload!;
 
@@ -697,6 +757,7 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
     openChatByUsernameAction({
       username: part1,
       messageId: messageId || Number(chatOrChannelPostId),
+      threadId: messageId ? Number(chatOrChannelPostId) : undefined,
       commentId,
       startParam: params.start,
       startAttach,
@@ -717,17 +778,17 @@ addActionHandler('acceptInviteConfirmation', async (global, actions, payload) =>
 
 addActionHandler('openChatByUsername', async (global, actions, payload) => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach,
+    username, messageId, commentId, startParam, startAttach, attach, threadId,
   } = payload!;
 
   const chat = selectCurrentChat(global);
 
   if (!commentId) {
     if (!startAttach && !startParam && chat?.usernames?.some((c) => c.username === username)) {
-      actions.focusMessage({ chatId: chat.id, messageId });
+      actions.focusMessage({ chatId: chat.id, threadId, messageId });
       return;
     }
-    await openChatByUsername(actions, username, messageId, startParam, startAttach, attach);
+    await openChatByUsername(actions, username, threadId, messageId, startParam, startAttach, attach);
     return;
   }
 
@@ -1003,7 +1064,7 @@ addActionHandler('loadGroupsForDiscussion', async (global) => {
   }
 
   const addedById = groups.reduce((result, group) => {
-    if (group) {
+    if (group && !group.isForum) {
       result[group.id] = group;
     }
 
@@ -1051,6 +1112,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload) => {
   }
 
   if (fullInfo!.isPreHistoryHidden) {
+    global = getGlobal();
     setGlobal(updateChat(global, chat.id, {
       fullInfo: {
         ...chat.fullInfo,
@@ -1217,6 +1279,21 @@ addActionHandler('toggleJoinRequest', async (global, actions, payload) => {
   await callApi('toggleJoinRequest', chat, isEnabled);
 });
 
+addActionHandler('openForumPanel', (global, actions, payload) => {
+  const { chatId } = payload;
+  return {
+    ...global,
+    forumPanelChatId: chatId,
+  };
+});
+
+addActionHandler('closeForumPanel', (global) => {
+  return {
+    ...global,
+    forumPanelChatId: undefined,
+  };
+});
+
 addActionHandler('processAttachBotParameters', async (global, actions, payload) => {
   const { username, filter, startParam } = payload;
   const bot = await getAttachBotOrNotify(global, username);
@@ -1247,6 +1324,130 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload) 
     filter,
     startParam,
   });
+});
+
+addActionHandler('loadTopics', async (global, actions, payload) => {
+  const { chatId, force } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  if (!force && chat.topics && Object.values(chat.topics).length === chat.topicsCount) {
+    return;
+  }
+
+  const offsetTopic = !force && chat.topics ? Object.values(chat.topics).reduce((acc, el) => {
+    if (!acc || el.lastMessageId < acc.lastMessageId) {
+      return el;
+    }
+    return acc;
+  }) : undefined;
+
+  const { id: offsetTopicId, date: offsetDate, lastMessageId: offsetId } = offsetTopic || {};
+  const result = await callApi('fetchTopics', {
+    chat, offsetTopicId, offsetId, offsetDate, limit: offsetTopicId ? TOPICS_SLICE : TOPICS_SLICE_SECOND_LOAD,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addMessages(global, result.messages);
+  global = updateTopics(global, chatId, result.count, result.topics);
+  Object.entries(result.draftsById || {}).forEach(([threadId, draft]) => {
+    global = replaceThreadParam(global, chatId, Number(threadId), 'draft', draft?.formattedText);
+    global = replaceThreadParam(global, chatId, Number(threadId), 'replyingToId', draft?.replyingToId);
+  });
+  Object.entries(result.readInboxMessageIdByTopicId || {}).forEach(([topicId, messageId]) => {
+    global = updateThreadInfo(global, chatId, Number(topicId), { lastReadInboxMessageId: messageId });
+  });
+
+  setGlobal(global);
+});
+
+addActionHandler('loadTopicById', async (global, actions, payload) => {
+  const { chatId, topicId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchTopicById', { chat, topicId });
+
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addMessages(global, result.messages);
+  global = updateTopic(global, chatId, topicId, result.topic);
+
+  setGlobal(global);
+});
+
+addActionHandler('toggleForum', async (global, actions, payload) => {
+  const { chatId, isEnabled } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const prevIsForum = chat.isForum;
+  global = updateChat(global, chatId, { isForum: isEnabled });
+  setGlobal(global);
+
+  const result = await callApi('toggleForum', { chat, isEnabled });
+
+  if (!result) {
+    global = getGlobal();
+    global = updateChat(global, chatId, { isForum: prevIsForum });
+    setGlobal(global);
+  }
+});
+
+addActionHandler('deleteTopic', async (global, actions, payload) => {
+  const { chatId, topicId } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('deleteTopic', { chat, topicId });
+
+  if (!result) return;
+
+  global = getGlobal();
+  global = deleteTopic(global, chatId, topicId);
+  setGlobal(global);
+});
+
+addActionHandler('editTopic', async (global, actions, payload) => {
+  const { chatId, topicId, ...rest } = payload;
+  const chat = selectChat(global, chatId);
+  const topic = chat?.topics?.[topicId];
+  if (!chat || !topic) return;
+
+  const result = await callApi('editTopic', { chat, topicId, ...rest });
+  if (!result) return;
+
+  global = getGlobal();
+  global = updateTopic(global, chatId, topicId, rest);
+  setGlobal(global);
+});
+
+addActionHandler('toggleTopicPinned', (global, actions, payload) => {
+  const { chatId, topicId, isPinned } = payload;
+
+  const { topicsPinnedLimit } = global.appConfig || {};
+  const chat = selectChat(global, chatId);
+  if (!chat || !chat.topics || !topicsPinnedLimit) return;
+
+  if (isPinned && Object.values(chat.topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
+    actions.showNotification({
+      message: langProvider.getTranslation('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
+    });
+    return;
+  }
+
+  void callApi('togglePinnedTopic', { chat, topicId, isPinned });
 });
 
 async function loadChats(
@@ -1674,6 +1875,7 @@ async function getAttachBotOrNotify(global: GlobalState, username: string) {
 async function openChatByUsername(
   actions: GlobalActions,
   username: string,
+  threadId?: number,
   channelPostId?: number,
   startParam?: string,
   startAttach?: string | boolean,
@@ -1715,9 +1917,9 @@ async function openChatByUsername(
   }
 
   if (channelPostId) {
-    actions.focusMessage({ chatId: chat.id, messageId: channelPostId });
+    actions.focusMessage({ chatId: chat.id, threadId, messageId: channelPostId });
   } else if (!isCurrentChat) {
-    actions.openChat({ id: chat.id });
+    actions.openChat({ id: chat.id, threadId });
   }
 
   if (startParam) {

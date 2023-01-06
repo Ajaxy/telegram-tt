@@ -39,6 +39,8 @@ interface OwnProps {
   threadId: number;
   messageListType: MessageListType;
   canExpandActions: boolean;
+  withForumActions?: boolean;
+  onTopicSearch?: NoneToVoidFunction;
 }
 
 interface StateProps {
@@ -81,10 +83,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canCreateVoiceChat,
   pendingJoinRequests,
   isRightColumnShown,
+  withForumActions,
   canExpandActions,
   shouldJoinToSend,
   shouldSendJoinRequest,
   noAnimation,
+  onTopicSearch,
 }) => {
   const {
     joinChannel,
@@ -94,6 +98,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     requestCall,
     requestNextManagementScreen,
     showNotification,
+    openChat,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -137,6 +142,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   }, [requestNextManagementScreen]);
 
   const handleSearchClick = useCallback(() => {
+    if (withForumActions) {
+      onTopicSearch?.();
+      return;
+    }
+
     openLocalTextSearch();
 
     if (IS_SINGLE_COLUMN_LAYOUT) {
@@ -151,7 +161,11 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     } else {
       setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);
     }
-  }, [noAnimation, openLocalTextSearch]);
+  }, [noAnimation, onTopicSearch, openLocalTextSearch, withForumActions]);
+
+  const handleAsMessagesClick = useCallback(() => {
+    openChat({ id: chatId, threadId: MAIN_THREAD_ID });
+  }, [chatId, openChat]);
 
   function handleRequestCall() {
     requestCall({ userId: chatId });
@@ -240,7 +254,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
         </>
       )}
-      {Boolean(pendingJoinRequests) && (
+      {!withForumActions && Boolean(pendingJoinRequests) && (
         <Button
           round
           className="badge-button"
@@ -285,8 +299,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           canLeave={canLeave}
           canEnterVoiceChat={canEnterVoiceChat}
           canCreateVoiceChat={canCreateVoiceChat}
+          pendingJoinRequests={pendingJoinRequests}
+          onJoinRequestsClick={handleJoinRequestsClick}
+          withForumActions={withForumActions}
           onSubscribeChannel={handleSubscribeClick}
           onSearchClick={handleSearchClick}
+          onAsMessagesClick={handleAsMessagesClick}
           onClose={handleHeaderMenuClose}
           onCloseAnimationEnd={handleHeaderMenuHide}
         />
@@ -315,17 +333,17 @@ export default memo(withGlobal<OwnProps>(
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));
     const canSubscribe = Boolean(
-      isMainThread && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
+      (isMainThread || chat.isForum) && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
     );
     const canSearch = isMainThread || isDiscussionThread;
     const canCall = ARE_CALLS_SUPPORTED && isUserId(chat.id) && !isChatWithSelf && !bot;
     const canMute = isMainThread && !isChatWithSelf && !canSubscribe;
     const canLeave = isMainThread && !canSubscribe;
-    const canEnterVoiceChat = ARE_CALLS_SUPPORTED && chat.isCallActive;
-    const canCreateVoiceChat = ARE_CALLS_SUPPORTED && !chat.isCallActive
+    const canEnterVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && chat.isCallActive;
+    const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
-    const canViewStatistics = chat.fullInfo?.canViewStatistics;
-    const pendingJoinRequests = chat.fullInfo?.requestsPending;
+    const canViewStatistics = isMainThread && chat.fullInfo?.canViewStatistics;
+    const pendingJoinRequests = isMainThread ? chat.fullInfo?.requestsPending : undefined;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const noAnimation = global.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN;

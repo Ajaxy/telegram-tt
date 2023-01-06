@@ -8,7 +8,7 @@ import type { ActiveEmojiInteraction, GlobalActions, GlobalState } from '../../t
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { unique } from '../../../util/iteratees';
+import { pickTruthy, unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { notifyAboutMessage } from '../../../util/notifications';
 import {
@@ -22,6 +22,7 @@ import {
   updateScheduledMessage,
   deleteChatScheduledMessages,
   updateThreadUnreadFromForwardedMessage,
+  updateTopic,
 } from '../../reducers';
 import {
   selectChatMessage,
@@ -35,7 +36,7 @@ import {
   selectThreadByMessage,
   selectPinnedIds,
   selectScheduledMessage,
-  selectScheduledMessages,
+  selectChatScheduledMessages,
   selectIsMessageInCurrentMessageList,
   selectScheduledIds,
   selectCurrentMessageList,
@@ -46,6 +47,8 @@ import {
   selectIsServiceChatReady,
   selectLocalAnimatedEmojiEffect,
   selectLocalAnimatedEmoji,
+  selectThreadIdFromMessage,
+  selectTopicFromMessage,
 } from '../../selectors';
 import {
   getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions,
@@ -74,6 +77,13 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       }
 
       const newMessage = selectChatMessage(global, chatId, id)!;
+      const chat = selectChat(global, chatId);
+      if (chat?.isForum
+        && newMessage.isTopicReply
+        && !selectTopicFromMessage(global, newMessage)
+        && newMessage.replyToMessageId) {
+        actions.loadTopicById({ chatId, topicId: newMessage.replyToMessageId });
+      }
 
       const isLocal = isMessageLocal(message as ApiMessage);
       if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)) {
@@ -91,7 +101,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           }
         }
 
-        const { threadInfo } = selectThreadByMessage(global, chatId, message as ApiMessage) || {};
+        const { threadInfo } = selectThreadByMessage(global, message as ApiMessage) || {};
         if (threadInfo) {
           actions.requestThreadInfoUpdate({ chatId, threadId: threadInfo.threadId });
         }
@@ -152,8 +162,14 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       global = updateWithLocalMedia(global, chatId, id, message, true);
 
-      const scheduledIds = selectScheduledIds(global, chatId) || [];
+      const scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID) || [];
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', unique([...scheduledIds, id]));
+
+      const threadId = selectThreadIdFromMessage(global, message);
+      if (threadId !== MAIN_THREAD_ID) {
+        const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
+        global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', unique([...threadScheduledIds, id]));
+      }
 
       setGlobal(global);
 
@@ -214,8 +230,14 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       }
 
       global = updateWithLocalMedia(global, chatId, id, message, true);
-      const ids = Object.keys(selectScheduledMessages(global, chatId) || {}).map(Number).sort((a, b) => b - a);
+      const ids = Object.keys(selectChatScheduledMessages(global, chatId) || {}).map(Number).sort((a, b) => b - a);
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', ids);
+
+      const threadId = selectThreadIdFromMessage(global, currentMessage);
+      if (threadId !== MAIN_THREAD_ID) {
+        const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
+        global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', threadScheduledIds.sort((a, b) => b - a));
+      }
       setGlobal(global);
 
       break;
@@ -244,7 +266,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       const newMessage = selectChatMessage(global, chatId, message.id)!;
       global = updateChatLastMessage(global, chatId, newMessage);
 
-      const thread = selectThreadByMessage(global, chatId, message);
+      const thread = selectThreadByMessage(global, message);
       // For some reason Telegram requires to manually mark outgoing thread messages read
       if (thread?.threadInfo) {
         actions.markMessageListRead({ maxId: message.id });
@@ -263,8 +285,14 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
     case 'updateScheduledMessageSendSucceeded': {
       const { chatId, localId, message } = update;
-      const scheduledIds = selectScheduledIds(global, chatId) || [];
+      const scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID) || [];
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', [...scheduledIds, message.id]);
+
+      const threadId = selectThreadIdFromMessage(global, message);
+      if (threadId !== MAIN_THREAD_ID) {
+        const threadScheduledIds = selectScheduledIds(global, chatId, threadId) || [];
+        global = replaceThreadParam(global, chatId, threadId, 'scheduledIds', [...threadScheduledIds, message.id]);
+      }
 
       const currentMessage = selectScheduledMessage(global, chatId, localId);
 
@@ -282,12 +310,26 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     case 'updatePinnedIds': {
       const { chatId, isPinned, messageIds } = update;
 
-      const currentPinnedIds = selectPinnedIds(global, chatId) || [];
-      const newPinnedIds = isPinned
-        ? [...currentPinnedIds, ...messageIds].sort((a, b) => b - a)
-        : currentPinnedIds.filter((id) => !messageIds.includes(id));
+      const messages = pickTruthy(selectChatMessages(global, chatId), messageIds);
+      const updatePerThread: Record<number, number[]> = {
+        [MAIN_THREAD_ID]: messageIds,
+      };
+      Object.values(messages).forEach((message) => {
+        const threadId = selectThreadIdFromMessage(global, message);
+        if (threadId === MAIN_THREAD_ID) return;
+        const currentUpdatedInThread = updatePerThread[threadId] || [];
+        currentUpdatedInThread.push(message.id);
+        updatePerThread[threadId] = currentUpdatedInThread;
+      });
 
-      setGlobal(replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', newPinnedIds));
+      Object.entries(updatePerThread).forEach(([threadId, ids]) => {
+        const pinnedIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID) || [];
+        const newPinnedIds = isPinned
+          ? unique(pinnedIds.concat(ids)).sort((a, b) => b - a)
+          : pinnedIds.filter((id) => !ids.includes(id));
+        global = replaceThreadParam(global, chatId, Number(threadId), 'pinnedIds', newPinnedIds);
+      });
+      setGlobal(global);
 
       break;
     }
@@ -298,16 +340,16 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       } = update;
 
       const currentThreadInfo = selectThreadInfo(global, chatId, threadId);
-      const newTheadInfo = {
+      const newThreadInfo = {
         ...currentThreadInfo,
         ...threadInfo,
       };
 
-      if (!newTheadInfo.threadId) {
+      if (!newThreadInfo.threadId) {
         return;
       }
 
-      global = updateThreadInfo(global, chatId, threadId, newTheadInfo as ApiThreadInfo);
+      global = updateThreadInfo(global, chatId, threadId, newThreadInfo as ApiThreadInfo);
 
       if (firstMessageId) {
         global = replaceThreadParam(global, chatId, threadId, 'firstMessageId', firstMessageId);
@@ -645,7 +687,7 @@ function updateWithLocalMedia(
 function updateThreadUnread(global: GlobalState, actions: GlobalActions, message: ApiMessage, isDeleting?: boolean) {
   const { chatId } = message;
 
-  const { threadInfo } = selectThreadByMessage(global, chatId, message) || {};
+  const { threadInfo } = selectThreadByMessage(global, message) || {};
 
   if (!threadInfo && message.replyToMessageId) {
     const originMessage = selectChatMessage(global, chatId, message.replyToMessageId);
@@ -669,7 +711,7 @@ function updateThreadUnread(global: GlobalState, actions: GlobalActions, message
 function updateListedAndViewportIds(global: GlobalState, actions: GlobalActions, message: ApiMessage) {
   const { id, chatId } = message;
 
-  const { threadInfo, firstMessageId } = selectThreadByMessage(global, chatId, message) || {};
+  const { threadInfo, firstMessageId } = selectThreadByMessage(global, message) || {};
 
   const chat = selectChat(global, chatId);
   const isUnreadChatNotLoaded = chat?.unreadCount && !selectListedIds(global, chatId, MAIN_THREAD_ID);
@@ -723,7 +765,8 @@ function updateChatLastMessage(
   force = false,
 ) {
   const { chats } = global;
-  const currentLastMessage = chats.byId[chatId]?.lastMessage;
+  const chat = chats.byId[chatId];
+  const currentLastMessage = chat?.lastMessage;
 
   if (currentLastMessage && !force) {
     const isSameOrNewer = (
@@ -735,7 +778,15 @@ function updateChatLastMessage(
     }
   }
 
-  return updateChat(global, chatId, { lastMessage: message });
+  global = updateChat(global, chatId, { lastMessage: message });
+  const topic = chat.isForum ? selectTopicFromMessage(global, message) : undefined;
+  if (topic) {
+    global = updateTopic(global, chatId, topic.id, {
+      lastMessageId: message.id,
+    });
+  }
+
+  return global;
 }
 
 function findLastMessage(global: GlobalState, chatId: string) {
@@ -784,9 +835,9 @@ function deleteMessages(chatId: string | undefined, ids: number[], actions: Glob
 
       global = updateThreadUnread(global, actions, message, true);
 
-      const { threadInfo } = selectThreadByMessage(global, chatId, message) || {};
-      if (threadInfo) {
-        threadIdsToUpdate.push(threadInfo.threadId);
+      const threadId = selectThreadIdFromMessage(global, message);
+      if (threadId) {
+        threadIdsToUpdate.push(threadId);
       }
     });
 
@@ -851,7 +902,7 @@ function deleteScheduledMessages(
 
   setTimeout(() => {
     global = deleteChatScheduledMessages(getGlobal(), chatId, ids);
-    const scheduledMessages = selectScheduledMessages(global, chatId);
+    const scheduledMessages = selectChatScheduledMessages(global, chatId);
     global = replaceThreadParam(
       global, chatId, MAIN_THREAD_ID, 'scheduledIds', Object.keys(scheduledMessages || {}).map(Number),
     );

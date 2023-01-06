@@ -13,7 +13,7 @@ import useLang from '../../../hooks/useLang';
 import Button from '../../ui/Button';
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
 
-import './EmptyFolder.scss';
+import styles from './EmptyFolder.module.scss';
 
 type OwnProps = {
   folderId?: number;
@@ -27,7 +27,7 @@ type StateProps = {
   animatedEmoji?: ApiSticker;
 };
 
-const ICON_SIZE = 128;
+const ICON_SIZE = 96;
 
 const EmptyFolder: FC<OwnProps & StateProps> = ({
   chatFolder, animatedEmoji, foldersDispatch, onScreenSelect,
@@ -40,12 +40,12 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
   }, [chatFolder, foldersDispatch, onScreenSelect]);
 
   return (
-    <div className="EmptyFolder">
-      <div className="sticker">
+    <div className={styles.root}>
+      <div className={styles.sticker}>
         {animatedEmoji && <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} />}
       </div>
-      <h3 className="title" dir="auto">{lang('FilterNoChatsToDisplay')}</h3>
-      <p className="description" dir="auto">
+      <h3 className={styles.title} dir="auto">{lang('FilterNoChatsToDisplay')}</h3>
+      <p className={styles.description} dir="auto">
         {lang(chatFolder ? 'ChatList.EmptyChatListFilterText' : 'Chat.EmptyChat')}
       </p>
       {chatFolder && foldersDispatch && onScreenSelect && (
@@ -58,7 +58,9 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
           isRtl={lang.isRtl}
         >
           <i className="icon-settings" />
-          {lang('ChatList.EmptyChatListEditFilter')}
+          <div className={styles.buttonText}>
+            {lang('ChatList.EmptyChatListEditFilter')}
+          </div>
         </Button>
       )}
     </div>

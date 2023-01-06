@@ -24,6 +24,7 @@ import './AttachMenu.scss';
 
 export type OwnProps = {
   chatId: string;
+  threadId?: number;
   isButtonVisible: boolean;
   canAttachMedia: boolean;
   canAttachPolls: boolean;
@@ -37,6 +38,7 @@ export type OwnProps = {
 
 const AttachMenu: FC<OwnProps> = ({
   chatId,
+  threadId,
   isButtonVisible,
   canAttachMedia,
   canAttachPolls,
@@ -149,6 +151,7 @@ const AttachMenu: FC<OwnProps> = ({
           <AttachBotItem
             bot={bot}
             chatId={chatId}
+            threadId={threadId}
             theme={theme}
             onMenuOpened={markAttachmentBotMenuOpen}
             onMenuClosed={unmarkAttachmentBotMenuOpen}

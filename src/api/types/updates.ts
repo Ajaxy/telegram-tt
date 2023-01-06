@@ -121,6 +121,7 @@ export type ApiUpdateChatInbox = {
 export type ApiUpdateChatTypingStatus = {
   '@type': 'updateChatTypingStatus';
   id: string;
+  threadId?: number;
   typingStatus: ApiTypingStatus | undefined;
 };
 
@@ -184,7 +185,7 @@ export type ApiUpdateNewScheduledMessage = {
   '@type': 'newScheduledMessage';
   chatId: string;
   id: number;
-  message: Partial<ApiMessage>;
+  message: ApiMessage;
 };
 
 export type ApiUpdateNewMessage = {
@@ -309,6 +310,7 @@ export type ApiUpdateResetMessages = {
 export type ApiUpdateDraftMessage = {
   '@type': 'draftMessage';
   chatId: string;
+  threadId?: number;
   formattedText?: ApiFormattedText;
   date?: number;
   replyingToId?: number;
@@ -431,6 +433,11 @@ export type ApiUpdateNotifySettings = {
 
 export type ApiUpdateNotifyExceptions = {
   '@type': 'updateNotifyExceptions';
+} & ApiNotifyException;
+
+export type ApiUpdateTopicNotifyExceptions = {
+  '@type': 'updateTopicNotifyExceptions';
+  topicId: number;
 } & ApiNotifyException;
 
 export type ApiUpdateTwoFaStateWaitCode = {
@@ -563,6 +570,30 @@ export type ApiUpdateTranscribedAudio = {
   isPending?: boolean;
 };
 
+export type ApiUpdatePinnedTopic = {
+  '@type': 'updatePinnedTopic';
+  topicId: number;
+  chatId: string;
+  isPinned: boolean;
+};
+
+export type ApiUpdatePinnedTopicsOrder = {
+  '@type': 'updatePinnedTopicsOrder';
+  chatId: string;
+  order: number[];
+};
+
+export type ApiUpdateTopic = {
+  '@type': 'updateTopic';
+  chatId: string;
+  topicId: number;
+};
+
+export type ApiUpdateTopics = {
+  '@type': 'updateTopics';
+  chatId: string;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -587,7 +618,8 @@ export type ApiUpdate = (
   ApiUpdatePendingJoinRequests | ApiUpdatePaymentVerificationNeeded | ApiUpdatePaymentStateCompleted |
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
-  ApiUpdateMessageExtendedMedia | ApiUpdateConfig
+  ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
+  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

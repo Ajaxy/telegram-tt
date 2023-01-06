@@ -35,9 +35,11 @@ import {
   selectTheme,
   selectActiveDownloadIds,
   selectUser,
+  selectListedIds,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
+import { pickTruthy } from '../../util/iteratees';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useProfileState from './hooks/useProfileState';
@@ -45,6 +47,7 @@ import useTransitionFixes from './hooks/useTransitionFixes';
 import useAsyncRendering from './hooks/useAsyncRendering';
 import useLang from '../../hooks/useLang';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -67,6 +70,7 @@ import './Profile.scss';
 
 type OwnProps = {
   chatId: string;
+  topicId?: number;
   profileState: ProfileState;
   onProfileStateChange: (state: ProfileState) => void;
 };
@@ -76,7 +80,8 @@ type StateProps = {
   isChannel?: boolean;
   currentUserId?: string;
   resolvedUserId?: string;
-  chatMessages?: Record<number, ApiMessage>;
+  messagesById?: Record<number, ApiMessage>;
+  messageIds?: number[];
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
   hasCommonChatsTab?: boolean;
@@ -103,7 +108,6 @@ const TABS = [
   { type: 'documents', title: 'SharedFilesTab2' },
   { type: 'links', title: 'SharedLinksTab2' },
   { type: 'audio', title: 'SharedMusicTab2' },
-  { type: 'voice', title: 'SharedVoiceTab2' },
 ];
 
 const HIDDEN_RENDER_DELAY = 1000;
@@ -111,14 +115,16 @@ const INTERSECTION_THROTTLE = 500;
 
 const Profile: FC<OwnProps & StateProps> = ({
   chatId,
+  topicId,
   profileState,
   onProfileStateChange,
   theme,
   isChannel,
   resolvedUserId,
   currentUserId,
-  chatMessages,
+  messagesById,
   foundIds,
+  messageIds,
   mediaSearchType,
   hasCommonChatsTab,
   hasMembersTab,
@@ -164,14 +170,20 @@ const Profile: FC<OwnProps & StateProps> = ({
       type: 'members', title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
     ...TABS,
-    ...(hasCommonChatsTab ? [{
-      type: 'commonChats', title: 'SharedGroupsTab2',
-    }] : []),
-  ]), [hasCommonChatsTab, hasMembersTab, isChannel]);
-  const tabType = tabs[activeTab].type as ProfileTabType;
+    // TODO The filter for voice messages currently does not work
+    // in forum topics. Return it when it's fixed on the server side.
+    ...(!topicId ? [{ type: 'voice', title: 'SharedVoiceTab2' }] : []),
+    ...(hasCommonChatsTab ? [{ type: 'commonChats', title: 'SharedGroupsTab2' }] : []),
+  ]), [hasCommonChatsTab, hasMembersTab, isChannel, topicId]);
+
+  const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
+  const tabType = tabs[renderingActiveTab].type as ProfileTabType;
+
+  const chatMessages = useMemo(() => {
+    return messageIds && messagesById ? pickTruthy(messagesById, messageIds) : {};
+  }, [messagesById, messageIds]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
-    isRightColumnShown,
     loadMoreMembers,
     loadCommonChats,
     searchMediaMessagesLocal,
@@ -184,13 +196,14 @@ const Profile: FC<OwnProps & StateProps> = ({
     chatsById,
     chatMessages,
     foundIds,
-    chatId,
     lastSyncTime,
     serverTimeOffset,
+    topicId,
   );
+  const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
-  const { handleScroll } = useProfileState(containerRef, tabType, profileState, onProfileStateChange);
+  const { handleScroll } = useProfileState(containerRef, tabType, profileState, onProfileStateChange, isFirstTab);
 
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
 
@@ -210,10 +223,10 @@ const Profile: FC<OwnProps & StateProps> = ({
     setNewChatMembersDialogState(NewChatMembersProgress.InProgress);
   }, [setNewChatMembersDialogState]);
 
-  // Update search type when switching tabs
+  // Update search type when switching tabs or forum topics
   useEffect(() => {
     setLocalMediaSearchType({ mediaType: tabType });
-  }, [setLocalMediaSearchType, tabType]);
+  }, [setLocalMediaSearchType, tabType, topicId]);
 
   const profileId = resolvedUserId || chatId;
 
@@ -248,6 +261,16 @@ const Profile: FC<OwnProps & StateProps> = ({
     setDeletingUserId(undefined);
   }, []);
 
+  useEffectWithPrevDeps(([prevHasMemberTabs]) => {
+    if (activeTab === 0 || prevHasMemberTabs === hasMembersTab) {
+      return;
+    }
+
+    const newActiveTab = activeTab + (hasMembersTab ? 1 : -1);
+
+    setActiveTab(Math.min(newActiveTab, tabs.length - 1));
+  }, [hasMembersTab, activeTab, tabs]);
+
   useEffect(() => {
     if (!transitionRef.current || !IS_TOUCH_ENV) {
       return undefined;
@@ -257,20 +280,19 @@ const Profile: FC<OwnProps & StateProps> = ({
       selectorToPreventScroll: '.Profile',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
-          setActiveTab(Math.min(activeTab + 1, tabs.length - 1));
+          setActiveTab(Math.min(renderingActiveTab + 1, tabs.length - 1));
           return true;
         } else if (direction === SwipeDirection.Right) {
-          setActiveTab(Math.max(0, activeTab - 1));
+          setActiveTab(Math.max(0, renderingActiveTab - 1));
           return true;
         }
 
         return false;
       }),
     });
-  }, [activeTab, tabs.length]);
+  }, [renderingActiveTab, tabs.length]);
 
   let renderingDelay;
-  const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
   // @optimization Used to unparallelize rendering of message list and profile media
   if (isFirstTab) {
     renderingDelay = !isRightColumnShown ? HIDDEN_RENDER_DELAY : 0;
@@ -278,7 +300,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   } else if (!viewportIds) {
     renderingDelay = SLIDE_TRANSITION_DURATION;
   }
-  const canRenderContent = useAsyncRendering([chatId, resultType], renderingDelay);
+  const canRenderContent = useAsyncRendering([chatId, topicId, resultType, renderingActiveTab], renderingDelay);
 
   function getMemberContextAction(memberId: string) {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
@@ -470,7 +492,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           >
             {renderContent()}
           </Transition>
-          <TabList big activeTab={activeTab} tabs={tabs} onSwitchTab={setActiveTab} />
+          <TabList big activeTab={renderingActiveTab} tabs={tabs} onSwitchTab={setActiveTab} />
         </div>
       )}
 
@@ -513,18 +535,19 @@ function buildInfiniteScrollItemSelector(resultType: string) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId, topicId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const chatMessages = selectChatMessages(global, chatId);
+    const messagesById = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
+    const messageIds = selectListedIds(global, chatId, topicId || MAIN_THREAD_ID);
 
     const { byId: usersById, statusesById: userStatusesById } = global.users;
     const { byId: chatsById } = global.chats;
 
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
-    const hasMembersTab = isGroup || (isChannel && isChatAdmin(chat!));
+    const hasMembersTab = !topicId && (isGroup || (isChannel && isChatAdmin(chat!)));
     const members = chat?.fullInfo?.members;
     const adminMembersById = chat?.fullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
@@ -547,8 +570,9 @@ export default memo(withGlobal<OwnProps>(
       theme: selectTheme(global),
       isChannel,
       resolvedUserId,
-      chatMessages,
+      messagesById,
       foundIds,
+      messageIds,
       mediaSearchType,
       hasCommonChatsTab,
       hasMembersTab,

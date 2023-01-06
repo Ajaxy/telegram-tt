@@ -16,6 +16,7 @@ const config: PlaywrightTestConfig = {
     video: 'retain-on-failure',
     trace: 'on-first-retry',
   },
+  reporter: [['html', { outputFolder: 'playwright-report' }]],
   projects: [
     {
       name: 'chromium',

@@ -17,6 +17,12 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
   });
 });
 
+addActionHandler('setGlobalSearchClosing', (global, actions, payload) => {
+  return updateGlobalSearch(global, {
+    isClosing: payload,
+  });
+});
+
 addActionHandler('addRecentlyFoundChatId', (global, actions, payload) => {
   const { id } = payload!;
   const { recentlyFoundChatIds } = global.globalSearch;

@@ -54,12 +54,18 @@
         right: 0.625rem;
       }
     }
+
+    &.topic-search-heading {
+      margin-left: -1.0625rem !important;
+      padding-left: 2.125rem;
+    }
   }
 
   .LeftSearch .search-section .section-heading,
   .RecentContacts .search-section .section-heading {
-    margin-left: -1rem !important;
-    width: calc(100% + 2rem);
+    margin-left: -0.5rem !important;
+    padding-left: 1.5rem;
+    width: calc(100% + 0.625rem);
     box-shadow: 0 -1px 0 0 var(--color-borders);
 
     &::before {
@@ -135,6 +141,28 @@
         }
       }
     }
+
+    .topic-item {
+      display: flex;
+      align-items: center;
+      font-size: 1rem;
+      line-height: 1.6875rem;
+      font-weight: 500;
+      overflow: hidden;
+
+      .topic-icon {
+        --custom-emoji-size: 2rem;
+        margin-inline-end: 0.25rem !important;
+        width: 2rem;
+        height: 2rem;
+        font-size: 2rem !important;
+      }
+
+      .fullName {
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
   }
 
   .ListItem.search-result-message {
@@ -150,12 +178,12 @@
 
   @media (max-width: 600px) {
     .ListItem {
-      margin: 0 -0.625rem;
+      margin: 0 -0.125rem 0 -0.5rem;
     }
   }
 
   .search-section {
-    padding: 0 1rem 0.5rem;
+    padding: 0 0.125rem 0.5rem 0.5rem;
 
     .section-heading {
       color: var(--color-text-secondary);

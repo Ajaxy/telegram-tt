@@ -263,5 +263,12 @@
     "messages.getUnreadReactions",
     "messages.readMentions",
     "messages.getUnreadMentions",
-    "help.getPremiumPromo"
+    "help.getPremiumPromo",
+    "channels.toggleForum",
+    "channels.createForumTopic",
+    "channels.getForumTopics",
+    "channels.getForumTopicsByID",
+    "channels.editForumTopic",
+    "channels.updatePinnedForumTopic",
+    "channels.deleteTopicHistory"
 ]

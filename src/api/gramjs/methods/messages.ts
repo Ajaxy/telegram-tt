@@ -93,7 +93,7 @@ export async function fetchMessages({
     result = await invokeRequest(new RequestClass({
       peer: buildInputPeer(chat.id, chat.accessHash),
       ...(threadId !== MAIN_THREAD_ID && {
-        msgId: threadId,
+        msgId: Number(threadId),
       }),
       ...(offsetId && {
         // Workaround for local message IDs overflowing some internal `Buffer` range check
@@ -255,6 +255,7 @@ export function sendMessage(
     sendAs,
     serverTimeOffset,
   );
+
   onUpdate({
     '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
     id: localMessage.id,
@@ -280,7 +281,15 @@ export function sendMessage(
 
   if (groupedId) {
     return sendGroupedMedia({
-      chat, text, entities, replyingTo, attachment: attachment!, groupedId, isSilent, scheduledAt,
+      chat,
+      text,
+      entities,
+      replyingTo,
+      replyingToTopId,
+      attachment: attachment!,
+      groupedId,
+      isSilent,
+      scheduledAt,
     }, randomId, localMessage, onProgress);
   }
 
@@ -328,6 +337,7 @@ export function sendMessage(
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(replyingTo && { replyToMsgId: replyingTo }),
+      ...(replyingToTopId && { topMsgId: replyingToTopId }),
       ...(media && { media }),
       ...(noWebPage && { noWebpage: noWebPage }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
@@ -349,6 +359,7 @@ function sendGroupedMedia(
     text,
     entities,
     replyingTo,
+    replyingToTopId,
     attachment,
     groupedId,
     isSilent,
@@ -359,6 +370,7 @@ function sendGroupedMedia(
     text?: string;
     entities?: ApiMessageEntity[];
     replyingTo?: number;
+    replyingToTopId?: number;
     attachment: ApiAttachment;
     groupedId: string;
     isSilent?: boolean;
@@ -434,6 +446,7 @@ function sendGroupedMedia(
       peer: buildInputPeer(chat.id, chat.accessHash),
       multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
       replyToMsgId: replyingTo,
+      ...(replyingToTopId && { topMsgId: replyingToTopId }),
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
@@ -628,9 +641,10 @@ export async function pinMessage({
   }), true);
 }
 
-export async function unpinAllMessages({ chat }: { chat: ApiChat }) {
+export async function unpinAllMessages({ chat, threadId }: { chat: ApiChat; threadId?: number }) {
   await invokeRequest(new GramJs.messages.UnpinAllMessages({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    ...(threadId && { topMsgId: threadId }),
   }), true);
 }
 
@@ -834,14 +848,18 @@ export async function requestThreadInfoUpdate({
 }: {
   chat: ApiChat; threadId: number;
 }) {
+  if (threadId === MAIN_THREAD_ID) {
+    return undefined;
+  }
+
   const [topMessageResult, repliesResult] = await Promise.all([
     invokeRequest(new GramJs.messages.GetDiscussionMessage({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      msgId: threadId,
+      msgId: Number(threadId),
     })),
     invokeRequest(new GramJs.messages.GetReplies({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      msgId: threadId,
+      msgId: Number(threadId),
       offsetId: 1,
       addOffset: -1,
       limit: 1,
@@ -881,6 +899,14 @@ export async function requestThreadInfoUpdate({
       noTopChatsRequest: true,
     });
   });
+
+  if (chat.isForum) {
+    onUpdate({
+      '@type': 'updateTopic',
+      chatId: chat.id,
+      topicId: threadId,
+    });
+  }
 
   return {
     discussionChatId,
@@ -928,9 +954,9 @@ export async function searchMessagesLocal({
 
   const result = await invokeRequest(new GramJs.messages.Search({
     peer: buildInputPeer(chat.id, chat.accessHash),
+    topMsgId: topMessageId,
     filter,
     q: query || '',
-    topMsgId: topMessageId,
     minDate,
     maxDate,
     ...pagination,
@@ -1154,6 +1180,7 @@ export async function fetchExtendedMedia({
 export async function forwardMessages({
   fromChat,
   toChat,
+  toThreadId,
   messages,
   serverTimeOffset,
   isSilent,
@@ -1166,6 +1193,7 @@ export async function forwardMessages({
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
+  toThreadId?: number;
   messages: ApiMessage[];
   serverTimeOffset: number;
   isSilent?: boolean;
@@ -1180,9 +1208,16 @@ export async function forwardMessages({
   const randomIds = messages.map(generateRandomBigInt);
 
   messages.forEach((message, index) => {
-    const localMessage = buildLocalForwardedMessage(
-      toChat, message, serverTimeOffset, scheduledAt, noAuthors, noCaptions, isCurrentUserPremium,
-    );
+    const localMessage = buildLocalForwardedMessage({
+      toChat,
+      toThreadId,
+      message,
+      serverTimeOffset,
+      scheduledAt,
+      noAuthors,
+      noCaptions,
+      isCurrentUserPremium,
+    });
     localDb.localMessages[String(randomIds[index])] = localMessage;
 
     onUpdate({
@@ -1202,6 +1237,7 @@ export async function forwardMessages({
     silent: isSilent || undefined,
     dropAuthor: noAuthors || undefined,
     dropMediaCaptions: noCaptions || undefined,
+    ...(toThreadId && { topMsgId: toThreadId }),
     ...(scheduledAt && { scheduleDate: scheduledAt }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }), true);
@@ -1281,13 +1317,14 @@ function updateLocalDb(result: (
   });
 }
 
-export async function fetchPinnedMessages({ chat }: { chat: ApiChat }) {
+export async function fetchPinnedMessages({ chat, threadId }: { chat: ApiChat; threadId: number }) {
   const result = await invokeRequest(new GramJs.messages.Search(
     {
       peer: buildInputPeer(chat.id, chat.accessHash),
       filter: new GramJs.InputMessagesFilterPinned(),
       q: '',
       limit: PINNED_MESSAGES_LIMIT,
+      topMsgId: threadId,
     },
   ));
 

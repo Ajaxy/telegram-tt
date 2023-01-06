@@ -69,7 +69,7 @@
     transition: opacity 0.15s ease;
 
     .Avatar__icon, i {
-      font-size: 2rem;
+      font-size: 1rem;
     }
   }
 
@@ -118,6 +118,16 @@
     color: white;
     opacity: 0;
     transition: opacity 0.15s ease;
+  }
+
+
+  &.forum-avatar {
+    border-start-start-radius: 0.625rem;
+    border-end-start-radius: 0.625rem;
+
+    .item-remove {
+      border-radius: 0.625rem;
+    }
   }
 
   &[dir="rtl"] {

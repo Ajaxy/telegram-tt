@@ -15,6 +15,7 @@
   "--color-background-own-selected": ["#d0ffac", "#6549d4"],
   "--color-chat-hover": ["#F4F4F5", "#2C2C2C"],
   "--color-chat-active": ["#3390EC", "#766AC8"],
+  "--color-chat-active-greyed": ["#60a7f0", "#9288d3"],
   "--color-item-active": ["#ededed", "#292929"],
   "--color-text": ["#000000", "#FFFFFF"],
   "--color-text-secondary": ["#707579", "#AAAAAA"],
@@ -49,5 +50,12 @@
   "--color-message-reaction-own": ["#cef0ba", "#675CAF"],
   "--color-message-reaction-hover-own": ["#b5e0a4", "#5B529B"],
   "--color-voice-transcribe-button": ["#e8f3ff", "#2a2a3c"],
-  "--color-voice-transcribe-button-own": ["#cceebf", "#8373d3"]
+  "--color-voice-transcribe-button-own": ["#cceebf", "#8373d3"],
+  "--color-topic-blue": ["#2F7772", "#6ff9f0"],
+  "--color-topic-yellow": ["#7F693B", "#ffd67e"],
+  "--color-topic-violet": ["#8B5A96", "#cb86db"],
+  "--color-topic-green": ["#44774A", "#8eee98"],
+  "--color-topic-rose": ["#9B576B", "#ff93b2"],
+  "--color-topic-red": ["#EB6858", "#fb6f5f"],
+  "--color-topic-grey": ["#6C6C6C", "#999999"]
 }

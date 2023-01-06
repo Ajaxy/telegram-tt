@@ -28,9 +28,14 @@
 }
 
 #LeftColumn {
-  min-width: 12rem;
   width: 33vw;
-  max-width: 26.5rem;
+
+  --left-column-min-width: 16rem;
+  --left-column-max-width: 26.5rem;
+
+  min-width: var(--left-column-min-width);
+  max-width: var(--left-column-max-width);
+
   height: 100%;
   position: relative;
   background-color: var(--color-background);
@@ -45,12 +50,12 @@
   }
 
   @media (min-width: 926px) {
-    max-width: 40vw;
+    --left-column-max-width: 40vw;
   }
 
   @media (min-width: 1276px) {
     width: 25vw;
-    max-width: 33vw;
+    --left-column-max-width: 33vw;
   }
 
   @media (max-width: 925px) {
@@ -115,6 +120,7 @@
 
   @media (max-width: 600px) {
     max-width: none;
+    --left-column-max-width: calc(100vw - env(safe-area-inset-left));
     transform: translate3d(-20vw, 0, 0);
     left: env(safe-area-inset-left) !important;
     width: calc(100vw - env(safe-area-inset-left)) !important;

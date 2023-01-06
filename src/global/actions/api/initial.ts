@@ -50,6 +50,7 @@ addActionHandler('initApi', async (global, actions) => {
     maxBufferSize: MAX_BUFFER_SIZE,
     webAuthToken: initialLocationHash?.tgWebAuthToken,
     dcId: initialLocationHash?.tgWebAuthDcId ? Number(initialLocationHash?.tgWebAuthDcId) : undefined,
+    mockScenario: initialLocationHash?.mockScenario,
   });
 });
 

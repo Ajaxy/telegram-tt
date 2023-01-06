@@ -1,0 +1,96 @@
+.root {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 4.75rem;
+  z-index: var(--z-forum-panel);
+  height: 100%;
+  background-color: var(--color-background);
+  border-left: 1px solid var(--color-borders);
+  display: flex;
+  flex-direction: column;
+
+  &.rtl {
+    left: 0;
+    right: 4.75rem;
+    transform: translateX(-100%);
+    border-left: none;
+    border-right: 1px solid var(--color-borders);
+  }
+
+  transition: transform var(--slide-transition);
+  transform: translate3d(100%, 0, 0);
+
+  :global(.chat-list) {
+    position: relative;
+    overflow-x: hidden;
+    padding-top: 0 !important;
+  }
+
+  :global(.HeaderActions) {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}
+
+.group-call {
+  position: static !important;
+}
+
+.border-bottom {
+  width: 100%;
+  height: 0;
+  transition: 0.1s ease-out border-color;
+  border-bottom: 0.0625rem solid transparent;
+}
+
+.scrolled .border-bottom {
+  border-color: var(--color-borders);
+}
+
+.scroll-top-handler {
+  position: absolute;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  height: 1px;
+}
+
+.info {
+  margin-left: 0.4375rem;
+  min-width: 0;
+  width: 100%;
+  cursor: pointer;
+
+  :global(.info) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-grow: 1;
+    overflow: hidden;
+  }
+
+  :global(.fullName) {
+    line-height: 1.375rem;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    unicode-bidi: plaintext;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+  }
+
+  :global(.status) {
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+    margin: 0;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+}

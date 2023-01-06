@@ -129,7 +129,7 @@ export default function useOuterHandlers(
   }
 
   function handleContainerDoubleClick() {
-    if (IS_TOUCH_ENV) return;
+    if (IS_TOUCH_ENV || !canReply) return;
 
     setReplyingToId({ messageId });
   }
@@ -161,7 +161,7 @@ export default function useOuterHandlers(
         return false;
       }),
       onRelease: () => {
-        if (!startedAt) {
+        if (!startedAt || !canReply) {
           return;
         }
 

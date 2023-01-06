@@ -11,6 +11,7 @@ import { IS_TOUCH_ENV } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
+import useForumPanelRender from '../../../hooks/useForumPanelRender';
 
 import Transition from '../../ui/Transition';
 import LeftMainHeader from './LeftMainHeader';
@@ -19,6 +20,7 @@ import LeftSearch from '../search/LeftSearch.async';
 import ContactList from './ContactList.async';
 import NewChatButton from '../NewChatButton';
 import Button from '../../ui/Button';
+import ForumPanel from './ForumPanel';
 
 import './LeftMain.scss';
 
@@ -30,9 +32,12 @@ type OwnProps = {
   shouldSkipTransition?: boolean;
   foldersDispatch: FolderEditDispatch;
   isUpdateAvailable?: boolean;
+  isForumPanelOpen?: boolean;
+  isClosingSearch?: boolean;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onScreenSelect: (screen: SettingsScreens) => void;
+  onTopicSearch: NoneToVoidFunction;
   onReset: () => void;
 };
 
@@ -45,16 +50,22 @@ const LeftMain: FC<OwnProps> = ({
   content,
   searchQuery,
   searchDate,
+  isClosingSearch,
   contactsFilter,
   shouldSkipTransition,
   foldersDispatch,
   isUpdateAvailable,
+  isForumPanelOpen,
   onSearchQuery,
   onContentChange,
   onScreenSelect,
   onReset,
+  onTopicSearch,
 }) => {
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
+
+  const { shouldRenderForumPanel, handleForumPanelAnimationEnd } = useForumPanelRender(isForumPanelOpen);
+  const isForumPanelVisible = isForumPanelOpen && content === LeftColumnContent.ChatList;
 
   const {
     shouldRender: shouldRenderUpdateButton,
@@ -137,6 +148,7 @@ const LeftMain: FC<OwnProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
       <LeftMainHeader
+        shouldHideSearch={isForumPanelVisible}
         content={content}
         contactsFilter={contactsFilter}
         onSearchQuery={onSearchQuery}
@@ -145,6 +157,7 @@ const LeftMain: FC<OwnProps> = ({
         onSelectArchived={handleSelectArchived}
         onReset={onReset}
         shouldSkipTransition={shouldSkipTransition}
+        isClosingSearch={isClosingSearch}
       />
       <Transition
         name={shouldSkipTransition ? 'none' : 'zoom-fade'}
@@ -156,7 +169,13 @@ const LeftMain: FC<OwnProps> = ({
         {(isActive) => {
           switch (content) {
             case LeftColumnContent.ChatList:
-              return <ChatFolders onScreenSelect={onScreenSelect} foldersDispatch={foldersDispatch} />;
+              return (
+                <ChatFolders
+                  shouldHideFolderTabs={isForumPanelVisible}
+                  onScreenSelect={onScreenSelect}
+                  foldersDispatch={foldersDispatch}
+                />
+              );
             case LeftColumnContent.GlobalSearch:
               return (
                 <LeftSearch
@@ -182,6 +201,14 @@ const LeftMain: FC<OwnProps> = ({
         >
           {lang('lng_update_telegram')}
         </Button>
+      )}
+      {shouldRenderForumPanel && (
+        <ForumPanel
+          isOpen={isForumPanelOpen}
+          isHidden={!isForumPanelVisible}
+          onTopicSearch={onTopicSearch}
+          onCloseAnimationEnd={handleForumPanelAnimationEnd}
+        />
       )}
       <NewChatButton
         isShown={isNewChatButtonShown}

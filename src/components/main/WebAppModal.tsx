@@ -108,7 +108,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const {
-    url, buttonText, queryId,
+    url, buttonText, queryId, replyToMessageId, threadId,
   } = webApp || {};
   const isOpen = Boolean(url);
   const isSimple = !queryId;
@@ -204,6 +204,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       botId: bot!.id,
       queryId: queryId!,
       peerId: chat!.id,
+      replyToMessageId,
+      threadId,
     });
   }, queryId ? PROLONG_INTERVAL : undefined, true);
 

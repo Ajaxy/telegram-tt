@@ -8,6 +8,7 @@ import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
 import { getMessageMediaHash, getMessageSingleInlineButton } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/environment';
+import renderText from '../common/helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
@@ -104,7 +105,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
         {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
         <div className="message-text">
           <div className="title" dir="auto">
-            {customTitle || `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
+            {customTitle ? renderText(customTitle) : `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
           </div>
           <p dir="auto">
             <MessageSummary lang={lang} message={message} noEmoji={Boolean(mediaThumbnail)} />

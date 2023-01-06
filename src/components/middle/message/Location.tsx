@@ -250,10 +250,10 @@ const Location: FC<OwnProps> = ({
 
     if (type === 'venue') {
       const color = getVenueColor(location.venueType);
-      const icon = getVenueIconUrl(location.venueType);
+      const iconSrc = getVenueIconUrl(location.venueType);
       return (
         <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN} style={`--pin-color: ${color}`}>
-          <img src={icon} className="venue-icon" alt="" />
+          <img src={iconSrc} className="venue-icon" alt="" />
         </div>
       );
     }

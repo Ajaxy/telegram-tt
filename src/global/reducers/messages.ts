@@ -17,11 +17,12 @@ import {
   selectPinnedIds,
   selectThreadInfo,
   selectMessageIdsByGroupId,
-  selectScheduledMessages,
+  selectChatScheduledMessages,
   selectScheduledIds,
   selectCurrentMessageIds,
   selectChatMessage,
   selectCurrentMessageList,
+  selectChat,
 } from '../selectors';
 import {
   areSortedArraysEqual, omit, pickTruthy, unique,
@@ -75,6 +76,13 @@ export function updateThread(
   global: GlobalState, chatId: string, threadId: number, threadUpdate: Partial<Thread>,
 ): GlobalState {
   const current = global.messages.byChatId[chatId];
+
+  if (threadUpdate.listedIds?.length) {
+    const lastListedId = threadUpdate.listedIds[threadUpdate.listedIds.length - 1];
+    if (lastListedId) {
+      global = updateTopicLastMessageId(global, chatId, threadId, lastListedId);
+    }
+  }
 
   return updateMessageStore(global, chatId, {
     threadsById: {
@@ -170,7 +178,7 @@ export function updateChatMessage(
 export function updateScheduledMessage(
   global: GlobalState, chatId: string, messageId: number, messageUpdate: Partial<ApiMessage>,
 ): GlobalState {
-  const byId = selectScheduledMessages(global, chatId) || {};
+  const byId = selectChatScheduledMessages(global, chatId) || {};
   const message = byId[messageId];
   const updatedMessage = {
     ...message,
@@ -208,25 +216,30 @@ export function deleteChatMessages(
     let listedIds = selectListedIds(global, chatId, threadId);
     let outlyingIds = selectOutlyingIds(global, chatId, threadId);
     let viewportIds = selectViewportIds(global, chatId, threadId);
-    let pinnedIds = selectPinnedIds(global, chatId);
+    let pinnedIds = selectPinnedIds(global, chatId, threadId);
+    let mainPinnedIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID);
     let newMessageCount = threadInfo?.messagesCount;
 
     messageIds.forEach((messageId) => {
-      if (listedIds && listedIds.includes(messageId)) {
+      if (listedIds?.includes(messageId)) {
         listedIds = listedIds.filter((id) => id !== messageId);
         if (newMessageCount !== undefined) newMessageCount -= 1;
       }
 
-      if (outlyingIds && outlyingIds.includes(messageId)) {
+      if (outlyingIds?.includes(messageId)) {
         outlyingIds = outlyingIds.filter((id) => id !== messageId);
       }
 
-      if (viewportIds && viewportIds.includes(messageId)) {
+      if (viewportIds?.includes(messageId)) {
         viewportIds = viewportIds.filter((id) => id !== messageId);
       }
 
-      if (pinnedIds && pinnedIds.includes(messageId)) {
+      if (pinnedIds?.includes(messageId)) {
         pinnedIds = pinnedIds.filter((id) => id !== messageId);
+      }
+
+      if (mainPinnedIds?.includes(messageId)) {
+        mainPinnedIds = mainPinnedIds.filter((id) => id !== messageId);
       }
     });
 
@@ -234,6 +247,7 @@ export function deleteChatMessages(
     global = replaceThreadParam(global, chatId, threadId, 'outlyingIds', outlyingIds);
     global = replaceThreadParam(global, chatId, threadId, 'viewportIds', viewportIds);
     global = replaceThreadParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
+    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', mainPinnedIds);
 
     if (threadInfo && newMessageCount !== undefined) {
       global = replaceThreadParam(global, chatId, threadId, 'threadInfo', {
@@ -272,13 +286,13 @@ export function deleteChatScheduledMessages(
   chatId: string,
   messageIds: number[],
 ): GlobalState {
-  const byId = selectScheduledMessages(global, chatId);
+  const byId = selectChatScheduledMessages(global, chatId);
   if (!byId) {
     return global;
   }
   const newById = omit(byId, messageIds);
 
-  let scheduledIds = selectScheduledIds(global, chatId);
+  let scheduledIds = selectScheduledIds(global, chatId, MAIN_THREAD_ID);
   if (scheduledIds) {
     messageIds.forEach((messageId) => {
       if (scheduledIds!.includes(messageId)) {
@@ -286,6 +300,13 @@ export function deleteChatScheduledMessages(
       }
     });
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'scheduledIds', scheduledIds);
+
+    Object.entries(global.messages.byChatId[chatId].threadsById).forEach(([threadId, thread]) => {
+      if (thread.scheduledIds) {
+        const newScheduledIds = thread.scheduledIds.filter((id) => !messageIds.includes(id));
+        global = replaceThreadParam(global, chatId, Number(threadId), 'scheduledIds', newScheduledIds);
+      }
+    });
   }
 
   global = replaceScheduledMessages(global, chatId, newById);
@@ -565,4 +586,30 @@ export function updateThreadUnreadFromForwardedMessage(
     }
   }
   return global;
+}
+
+export function updateTopicLastMessageId(
+  global: GlobalState, chatId: string, threadId: number, lastMessageId: number,
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat?.topics?.[threadId]) return global;
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      byId: {
+        ...global.chats.byId,
+        [chatId]: {
+          ...chat,
+          topics: {
+            ...chat.topics,
+            [threadId]: {
+              ...chat.topics[threadId],
+              lastMessageId,
+            },
+          },
+        },
+      },
+    },
+  };
 }

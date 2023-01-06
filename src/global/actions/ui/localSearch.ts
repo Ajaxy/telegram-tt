@@ -41,13 +41,13 @@ addActionHandler('setLocalTextSearchQuery', (global, actions, payload) => {
 });
 
 addActionHandler('setLocalMediaSearchType', (global, actions, payload) => {
-  const { chatId } = selectCurrentMessageList(global) || {};
-  if (!chatId) {
+  const { chatId, threadId } = selectCurrentMessageList(global) || {};
+  if (!chatId || !threadId) {
     return undefined;
   }
 
   const { mediaType } = payload!;
-  return updateLocalMediaSearchType(global, chatId, mediaType);
+  return updateLocalMediaSearchType(global, chatId, threadId, mediaType);
 });
 
 export function closeLocalTextSearch(global: GlobalState): GlobalState {

@@ -51,6 +51,10 @@ const Tab: FC<OwnProps> = ({
     const tabEl = tabRef.current!;
     const prevTabEl = tabEl.parentElement!.children[previousActiveTab];
     if (!prevTabEl) {
+      // The number of tabs in the parent component has decreased. It is necessary to add the active tab class name.
+      if (isActive && !tabEl.classList.contains(classNames.active)) {
+        tabEl.classList.add(classNames.active);
+      }
       return;
     }
 

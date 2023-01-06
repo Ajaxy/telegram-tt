@@ -74,7 +74,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     loadChatJoinRequests,
   } = getActions();
 
-  const currentTitle = chat ? (chat.title || '') : '';
+  const currentTitle = chat?.title || '';
   const currentAbout = chat?.fullInfo ? (chat.fullInfo.about || '') : '';
   const hasLinkedChat = chat?.fullInfo?.linkedChatId;
 

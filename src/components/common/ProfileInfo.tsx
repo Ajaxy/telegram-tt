@@ -4,19 +4,23 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiUser, ApiChat, ApiUserStatus } from '../../api/types';
+import type {
+  ApiUser, ApiChat, ApiUserStatus, ApiTopic,
+} from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
+import { GENERAL_TOPIC_ID } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import { selectChat, selectUser, selectUserStatus } from '../../global/selectors';
 import {
-  getUserStatus, isChatChannel, isUserOnline,
-} from '../../global/helpers';
+  selectChat, selectCurrentMessageList, selectThreadInfo, selectUser, selectUserStatus,
+} from '../../global/selectors';
+import { getUserStatus, isChatChannel, isUserOnline } from '../../global/helpers';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
 
 import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
@@ -25,8 +29,10 @@ import usePrevious from '../../hooks/usePrevious';
 import FullNameTitle from './FullNameTitle';
 import ProfilePhoto from './ProfilePhoto';
 import Transition from '../ui/Transition';
+import TopicIcon from './TopicIcon';
 
 import './ProfileInfo.scss';
+import styles from './ProfileInfo.module.scss';
 
 type OwnProps = {
   userId: string;
@@ -44,10 +50,13 @@ type StateProps =
     serverTimeOffset: number;
     mediaId?: number;
     avatarOwnerId?: string;
+    topic?: ApiTopic;
+    messagesCount?: number;
   }
   & Pick<GlobalState, 'connectionState'>;
 
 const EMOJI_STATUS_SIZE = 24;
+const EMOJI_TOPIC_SIZE = 120;
 
 const ProfileInfo: FC<OwnProps & StateProps> = ({
   forceShowSelf,
@@ -61,6 +70,8 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   mediaId,
   avatarOwnerId,
+  topic,
+  messagesCount,
 }) => {
   const {
     loadFullUser,
@@ -139,7 +150,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   // Swipe gestures
   useEffect(() => {
-    const element = document.querySelector<HTMLDivElement>('.photo-wrapper');
+    const element = document.querySelector<HTMLDivElement>(`.${styles.photoWrapper}`);
     if (!element) {
       return undefined;
     }
@@ -164,15 +175,35 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  function renderTopic() {
+    return (
+      <div className={styles.topicContainer}>
+        <TopicIcon
+          topic={topic!}
+          size={EMOJI_TOPIC_SIZE}
+          className={styles.topicIcon}
+          letterClassName={styles.topicIconTitle}
+          noLoopLimit
+        />
+        <h3 className={styles.topicTitle} dir={lang.isRtl ? 'rtl' : undefined}>{renderText(topic!.title)}</h3>
+        <p className={styles.topicMessagesCounter}>
+          {messagesCount && messagesCount > 1
+            ? lang('Chat.Title.Topic', messagesCount + (topic!.id === GENERAL_TOPIC_ID ? 1 : -1), 'i')
+            : lang('lng_forum_no_messages')}
+        </p>
+      </div>
+    );
+  }
+
   function renderPhotoTabs() {
     if (isSavedMessages || !photos || photos.length <= 1) {
       return undefined;
     }
 
     return (
-      <div className="photo-dashes">
+      <div className={styles.photoDashes}>
         {photos.map((_, i) => (
-          <span className={`photo-dash ${i === currentPhotoIndex ? 'current' : ''}`} />
+          <span className={buildClassName(styles.photoDash, i === currentPhotoIndex && styles.photoDash_current)} />
         ))}
       </div>
     );
@@ -198,14 +229,14 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   function renderStatus() {
     if (user) {
       return (
-        <div className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
+        <div className={buildClassName(styles.status, 'status', isUserOnline(user, userStatus) && 'online')}>
           <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
         </div>
       );
     }
 
     return (
-      <span className="status" dir="auto">{
+      <span className={buildClassName(styles.status, 'status')} dir="auto">{
         isChatChannel(chat!)
           ? lang('Subscribers', chat!.membersCount ?? 0, 'i')
           : lang('Members', chat!.membersCount ?? 0, 'i')
@@ -214,18 +245,26 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     );
   }
 
+  if (topic) {
+    return renderTopic();
+  }
+
   return (
-    <div className={buildClassName('ProfileInfo', forceShowSelf && 'self')} dir={lang.isRtl ? 'rtl' : undefined}>
-      <div className="photo-wrapper">
+    <div
+      className={buildClassName('ProfileInfo', forceShowSelf && styles.self)}
+      dir={lang.isRtl ? 'rtl' : undefined}
+    >
+      <div className={styles.photoWrapper}>
         {renderPhotoTabs()}
-        <Transition activeKey={currentPhotoIndex} name={slideAnimation} className="profile-slide-container">
+        <Transition activeKey={currentPhotoIndex} name={slideAnimation}>
           {renderPhoto}
         </Transition>
 
         {!isFirst && (
           <button
             type="button"
-            className="navigation prev"
+            dir={lang.isRtl ? 'rtl' : undefined}
+            className={buildClassName(styles.navigation, styles.navigation_prev)}
             aria-label={lang('AccDescrPrevious')}
             onClick={selectPreviousMedia}
           />
@@ -233,14 +272,15 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         {!isLast && (
           <button
             type="button"
-            className="navigation next"
+            dir={lang.isRtl ? 'rtl' : undefined}
+            className={buildClassName(styles.navigation, styles.navigation_next)}
             aria-label={lang('Next')}
             onClick={selectNextMedia}
           />
         )}
       </div>
 
-      <div className="info" dir={lang.isRtl ? 'rtl' : 'auto'}>
+      <div className={styles.info} dir={lang.isRtl ? 'rtl' : 'auto'}>
         {(user || chat) && (
           <FullNameTitle
             peer={(user || chat)!}
@@ -266,6 +306,10 @@ export default memo(withGlobal<OwnProps>(
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { animationLevel } = global.settings.byKey;
     const { mediaId, avatarOwnerId } = global.mediaViewer;
+    const isForum = chat?.isForum;
+    const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
+    const threadInfo = currentTopicId ? selectThreadInfo(global, userId, currentTopicId) : undefined;
+    const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
 
     return {
       connectionState,
@@ -277,6 +321,10 @@ export default memo(withGlobal<OwnProps>(
       serverTimeOffset,
       mediaId,
       avatarOwnerId,
+      ...(topic && {
+        topic,
+        messagesCount: threadInfo?.messagesCount,
+      }),
     };
   },
 )(ProfileInfo));

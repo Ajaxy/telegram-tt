@@ -1,0 +1,158 @@
+$radius: 0.5rem;
+
+.root {
+  --first-column-background-color: var(--color-item-active);
+
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  margin-inline-end: 0.25rem;
+
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 3;
+
+  transition: 0.25s ease-out background-color;
+
+  pointer-events: none;
+
+  &:hover {
+    --first-column-background-color: var(--color-borders);
+  }
+}
+
+.title-row {
+  display: flex;
+  max-width: 100%;
+}
+
+.loading {
+  color: var(--color-text-secondary);
+}
+
+.other-column, .main-column {
+  display: flex;
+  align-items: center;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.unread {
+  font-weight: 500;
+  color: var(--color-text);
+
+  &.main-column, &.last-message {
+    padding: 0 0.25rem;
+  }
+
+  &.main-column, &.last-message, .after-wrapper {
+    transition: background-color 0.15s ease-in-out;
+    background: var(--first-column-background-color);
+  }
+}
+
+.other-column {
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+  display: inline;
+}
+
+.main-column {
+  border-start-start-radius: $radius;
+  border-start-end-radius: $radius;
+
+  max-width: 100%;
+
+  position: relative;
+
+  pointer-events: initial;
+
+  border-end-end-radius: $radius;
+
+  .after-wrapper {
+    width: $radius;
+    height: $radius;
+    bottom: 0;
+    position: absolute;
+    inset-inline-end: -$radius;
+  }
+
+  .after {
+    border-end-start-radius: $radius;
+    background: var(--background-color);
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.title {
+  margin-left: 0.25rem;
+  font-size: 0.9375rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.other-column-title {
+  font-size: 0.9375rem;
+  margin-left: 0.25rem;
+}
+
+.other-columns {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ellipsis {
+  margin-left: auto;
+}
+
+.last-message {
+  border-end-start-radius: $radius;
+  border-end-end-radius: $radius;
+
+  max-width: 100%;
+
+  pointer-events: initial;
+
+  position: relative;
+
+  .after-wrapper {
+    width: $radius;
+    height: $radius;
+    top: 0;
+    position: absolute;
+    inset-inline-end: -$radius;
+  }
+
+  .after {
+    border-start-start-radius: $radius;
+    background: var(--background-color);
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.reverse-corner {
+  .main-column {
+    border-end-end-radius: 0;
+  }
+
+  .last-message {
+    border-start-end-radius: $radius;
+  }
+}
+
+.overwritten-width {
+  .last-message, .main-column {
+    min-width: var(--overwritten-width);
+  }
+
+  .last-message {
+    border-start-end-radius: 0;
+  }
+
+  .main-column {
+    border-end-end-radius: 0;
+  }
+}

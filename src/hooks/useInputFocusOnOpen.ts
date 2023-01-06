@@ -16,14 +16,14 @@ export default function useInputFocusOnOpen(
       if (!IS_SINGLE_COLUMN_LAYOUT) {
         setTimeout(() => {
           requestAnimationFrame(() => {
-            if (inputRef.current) {
+            if (inputRef.current?.isConnected) {
               inputRef.current.focus();
             }
           });
         }, FOCUS_DELAY_MS);
       }
     } else {
-      if (inputRef.current) {
+      if (inputRef.current?.isConnected) {
         inputRef.current.blur();
       }
 
