@@ -1,3 +1,21 @@
+## 1.58.0 (2023-01-06)
+
+### 👏 Harder
+* Topics in groups are now supported.
+* Collectible usernames now appear on profiles, and can be managed in Settings.
+* Custom reactions are properly displayed.
+* Premium users can react multiple times with different emoji.
+
+### 🤩 Better
+* Animations can be disabled from the main menu.
+
+### 💪 Stronger
+* Fixed missing Quick Reaction buttons.
+* Fixed issues with the ‘Chat History for New Members’ setting.
+* Fixed issues when changing display name.
+* Fixed issues with emoji in display names on Windows.
+* Fixed inline bot query parsing on Windows.
+
 ## 1.57.0 (2022-12-07)
 
 ### 👏 **Harder**
