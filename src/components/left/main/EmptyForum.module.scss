@@ -1,37 +1,14 @@
 .root {
-  width: 100%;
-  height: 80%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 
-  @media (max-height: 480px) {
-    height: 100%;
-  }
-
-  .sticker {
-    height: 6rem;
-    margin-bottom: 1.875rem;
-  }
-
-  .title {
-    font-size: 1.25rem;
-    margin-bottom: 0.125rem;
-    word-break: break-word;
-    text-align: center;
-    max-width: 100%;
-  }
-
-  .description {
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-
-    body.is-ios &,
-    body.is-macos & {
-      color: var(--color-text-secondary-apple);
-    }
-  }
+  padding: 1rem;
 
   :global(.Button.pill) {
     max-width: 100%;
@@ -55,6 +32,26 @@
   }
 }
 
-.centered {
+.sticker {
+  height: 7rem;
+  margin-bottom: 1.875rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  margin-bottom: 0.125rem;
+  word-break: break-word;
   text-align: center;
+  max-width: 100%;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+
+  body.is-ios &,
+  body.is-macos & {
+    color: var(--color-text-secondary-apple);
+  }
 }

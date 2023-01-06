@@ -10,6 +10,13 @@
     margin: 0 auto 1rem;
   }
 
+  .topic-icon {
+    --custom-emoji-size: 3rem;
+    width: 3rem;
+    height: 3rem;
+    font-size: 2rem;
+  }
+
   .wrapper {
     display: inline-flex;
     flex-direction: column;
@@ -38,6 +45,11 @@
     padding: 0;
     list-style: none;
     unicode-bidi: plaintext;
+  }
+
+  .topic-description {
+    text-align: center;
+    padding: 0 1rem;
   }
 
   .list-checkmarks {

@@ -51,7 +51,9 @@ import {
   isMessageWithMedia,
   buildChatBannedRights,
   buildChatAdminRights,
-  buildInputChatReactions, buildInputPhoto,
+  buildInputChatReactions,
+  buildInputPhoto,
+  generateRandomBigInt,
 } from '../gramjsBuilders';
 import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -1331,6 +1333,36 @@ export function toggleForum({
     channel: buildInputPeer(id, accessHash),
     enabled: isEnabled,
   }), true);
+}
+
+export async function createTopic({
+  chat, title, iconColor, iconEmojiId, sendAs,
+}: {
+  chat: ApiChat;
+  title: string;
+  iconColor?: number;
+  iconEmojiId?: string;
+  sendAs?: ApiUser | ApiChat;
+}) {
+  const { id, accessHash } = chat;
+
+  const updates = await invokeRequest(new GramJs.channels.CreateForumTopic({
+    channel: buildInputPeer(id, accessHash),
+    title,
+    iconColor,
+    iconEmojiId: iconEmojiId ? BigInt(iconEmojiId) : undefined,
+    sendAs: sendAs ? buildInputPeer(sendAs.id, sendAs.accessHash) : undefined,
+    randomId: generateRandomBigInt(),
+  }));
+
+  if (!(updates instanceof GramJs.Updates) || !updates.updates.length) {
+    return undefined;
+  }
+
+  // Finding topic id in updates
+  return updates.updates?.find((update): update is GramJs.UpdateMessageID => (
+    update instanceof GramJs.UpdateMessageID
+  ))?.id;
 }
 
 export async function fetchTopics({

@@ -1032,7 +1032,7 @@ function buildAction(
       text = action.closed ? 'TopicWasClosedAction' : 'TopicWasReopenedAction';
       translationValues.push('%action_origin%', '%action_topic%');
     } else if (action.hidden !== undefined) {
-      text = action.hidden ? 'TopicHidden2' : 'TopicWasUnhiddenAction';
+      text = action.hidden ? 'TopicHidden2' : 'TopicShown';
     } else if (action.title) {
       text = 'TopicRenamedTo';
       translationValues.push('%action_origin%', action.title);

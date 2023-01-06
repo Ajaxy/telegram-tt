@@ -707,6 +707,17 @@ export type GlobalState = {
   };
 
   deleteFolderDialogModal?: number;
+
+  createTopicPanel?: {
+    chatId: string;
+    isLoading?: boolean;
+  };
+
+  editTopicPanel?: {
+    chatId: string;
+    topicId: number;
+    isLoading?: boolean;
+  };
 };
 
 export type CallSound = (
@@ -1320,6 +1331,11 @@ export interface ActionPayloads {
     chatId: string;
     isEnabled: boolean;
   };
+  createTopic: {
+    chatId: string;
+    title: string;
+    iconColor?: number;
+  };
   loadTopics: {
     chatId: string;
     force?: boolean;
@@ -1359,6 +1375,17 @@ export interface ActionPayloads {
     topicId: number;
     isMuted: boolean;
   };
+
+  openCreateTopicPanel: {
+    chatId: string;
+  };
+  closeCreateTopicPanel: never;
+
+  openEditTopicPanel: {
+    chatId: string;
+    topicId: number;
+  };
+  closeEditTopicPanel: never;
 }
 
 export type NonTypedActionNames = (

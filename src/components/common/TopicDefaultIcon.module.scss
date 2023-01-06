@@ -19,12 +19,12 @@
   z-index: 1;
   color: #ffffff;
   font-weight: 500;
-  font-size: 0.75rem;
+  font-size: 0.75em;
   position: relative;
   bottom: 0.0625rem;
 
   :global(.emoji) {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 1em;
+    height: 1em;
   }
 }

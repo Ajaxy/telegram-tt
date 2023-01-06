@@ -253,6 +253,8 @@ export enum RightColumnContent {
   GifSearch,
   PollResults,
   AddingMembers,
+  CreateTopic,
+  EditTopic,
 }
 
 export enum MediaViewerOrigin {

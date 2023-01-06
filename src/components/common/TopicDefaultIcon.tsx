@@ -16,6 +16,7 @@ type OwnProps = {
   topicId: number;
   iconColor?: number;
   title: string;
+  onClick?: NoneToVoidFunction;
 };
 
 const TopicDefaultIcon: FC<OwnProps> = ({
@@ -24,15 +25,18 @@ const TopicDefaultIcon: FC<OwnProps> = ({
   topicId,
   iconColor,
   title,
+  onClick,
 }) => {
   const iconSrc = getTopicDefaultIcon(iconColor);
 
   if (topicId === GENERAL_TOPIC_ID) {
-    return <i className={buildClassName(styles.root, className, 'icon-hashtag', 'general-forum-icon')} />;
+    return (
+      <i className={buildClassName(styles.root, className, 'icon-hashtag', 'general-forum-icon')} onClick={onClick} />
+    );
   }
   return (
-    <div className={buildClassName(styles.root, className)}>
-      <img className={styles.icon} src={iconSrc} alt="" />
+    <div className={buildClassName(styles.root, className)} onClick={onClick}>
+      <img className={styles.icon} src={iconSrc} alt="" draggable={false} />
       <div className={buildClassName(styles.title, letterClassName, 'topic-icon-letter')}>
         {renderText(getFirstLetters(title, 1))}
       </div>

@@ -8,12 +8,13 @@ import CustomEmoji from './CustomEmoji';
 import TopicDefaultIcon from './TopicDefaultIcon';
 
 type OwnProps = {
-  topic: ApiTopic;
+  topic: Pick<ApiTopic, 'iconEmojiId' | 'iconColor' | 'title' | 'id'>;
   className?: string;
   letterClassName?: string;
   size?: number;
   noLoopLimit?: true;
   observeIntersection?: ObserveFn;
+  onClick?: NoneToVoidFunction;
 };
 
 const LOOP_LIMIT = 2;
@@ -25,6 +26,7 @@ const TopicIcon: FC<OwnProps> = ({
   size,
   noLoopLimit,
   observeIntersection,
+  onClick,
 }) => {
   if (topic.iconEmojiId) {
     return (
@@ -34,6 +36,7 @@ const TopicIcon: FC<OwnProps> = ({
         size={size}
         observeIntersectionForPlaying={observeIntersection}
         loopLimit={!noLoopLimit ? LOOP_LIMIT : undefined}
+        onClick={onClick}
       />
     );
   }
@@ -45,6 +48,7 @@ const TopicIcon: FC<OwnProps> = ({
       topicId={topic.id}
       className={className}
       letterClassName={letterClassName}
+      onClick={onClick}
     />
   );
 };

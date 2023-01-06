@@ -409,7 +409,13 @@ export function selectCanDeleteTopic(global: GlobalState, chatId: string, topicI
 
 export function selectThreadIdFromMessage(global: GlobalState, message: ApiMessage): number {
   const chat = selectChat(global, message.chatId);
-  const { replyToMessageId, replyToTopMessageId, isTopicReply } = message;
+  const {
+    replyToMessageId, replyToTopMessageId, isTopicReply, content,
+  } = message;
+  if ('action' in content && content.action?.type === 'topicCreate') {
+    return message.id;
+  }
+
   // TODO ignore only basic group if reply threads are added
   if (!chat?.isForum) return MAIN_THREAD_ID;
   if (!isTopicReply) return GENERAL_TOPIC_ID;
@@ -727,6 +733,16 @@ export function selectFirstUnreadId(global: GlobalState, chatId: string, threadI
 export function selectIsPollResultsOpen(global: GlobalState) {
   const { pollResults } = global;
   return Boolean(pollResults.messageId);
+}
+
+export function selectIsCreateTopicPanelOpen(global: GlobalState) {
+  const { createTopicPanel } = global;
+  return Boolean(createTopicPanel);
+}
+
+export function selectIsEditTopicPanelOpen(global: GlobalState) {
+  const { editTopicPanel } = global;
+  return Boolean(editTopicPanel);
 }
 
 export function selectIsForwardModalOpen(global: GlobalState) {

@@ -1,0 +1,35 @@
+.root {
+  position: relative;
+  height: 100%;
+  background-color: var(--color-background-secondary);
+}
+
+.top {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 1rem 1.5rem;
+
+  background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+  margin-bottom: 0.625rem;
+}
+
+.icon {
+  --custom-emoji-size: 5rem;
+  width: 5rem;
+  height: 5rem;
+  font-size: 3rem;
+  align-self: center;
+  margin: 1.5rem 0;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.heading {
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}

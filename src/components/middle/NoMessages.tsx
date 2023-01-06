@@ -1,22 +1,33 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
+import type { FC } from '../../lib/teact/teact';
 import type { MessageListType } from '../../global/types';
-
+import type { ApiTopic } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
+
+import { REM } from '../common/helpers/mediaDimensions';
+import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 
+import TopicIcon from '../common/TopicIcon';
+
 import './NoMessages.scss';
+
+const ICON_SIZE = 3 * REM;
 
 type OwnProps = {
   chatId: string;
   isChatWithSelf?: boolean;
   type: MessageListType;
   isGroupChatJustCreated?: boolean;
+  topic?: ApiTopic;
 };
 
 const NoMessages: FC<OwnProps> = ({
-  isChatWithSelf, type, isGroupChatJustCreated,
+  isChatWithSelf,
+  type,
+  isGroupChatJustCreated,
+  topic,
 }) => {
   const lang = useLang();
 
@@ -32,10 +43,26 @@ const NoMessages: FC<OwnProps> = ({
     return renderGroup(lang);
   }
 
+  if (topic) {
+    return renderTopic(lang, topic);
+  }
+
   return (
     <div className="empty"><span>{lang('NoMessages')}</span></div>
   );
 };
+
+function renderTopic(lang: LangFn, topic: ApiTopic) {
+  return (
+    <div className="NoMessages">
+      <div className="wrapper">
+        <TopicIcon topic={topic} size={ICON_SIZE} className="icon topic-icon" />
+        <h3 className="title">{lang('Chat.EmptyTopicPlaceholder.Title')}</h3>
+        <p className="description topic-description">{renderText(lang('Chat.EmptyTopicPlaceholder.Text'), ['br'])}</p>
+      </div>
+    </div>
+  );
+}
 
 function renderScheduled(lang: LangFn) {
   return (

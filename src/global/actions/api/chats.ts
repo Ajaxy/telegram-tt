@@ -1405,6 +1405,25 @@ addActionHandler('toggleForum', async (global, actions, payload) => {
   }
 });
 
+addActionHandler('createTopic', async (global, actions, payload) => {
+  const { chatId, title, iconColor } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  setGlobal({
+    ...global,
+    createTopicPanel: {
+      chatId,
+      isLoading: true,
+    },
+  });
+
+  const topicId = await callApi('createTopic', { chat, title, iconColor });
+  if (topicId) {
+    actions.openChat({ id: chatId, threadId: topicId, shouldReplaceHistory: true });
+  }
+});
+
 addActionHandler('deleteTopic', async (global, actions, payload) => {
   const { chatId, topicId } = payload;
   const chat = selectChat(global, chatId);
