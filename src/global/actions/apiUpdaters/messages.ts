@@ -67,12 +67,12 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
 
-      if (message.threadInfo) {
+      if (message.repliesThreadInfo) {
         global = updateThreadInfo(
           global,
-          message.threadInfo.chatId,
-          message.threadInfo.threadId,
-          message.threadInfo,
+          message.repliesThreadInfo.chatId,
+          message.repliesThreadInfo.threadId,
+          message.repliesThreadInfo,
         );
       }
 
@@ -185,12 +185,12 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       global = updateWithLocalMedia(global, chatId, id, message);
 
       const newMessage = selectChatMessage(global, chatId, id)!;
-      if (message.threadInfo) {
+      if (message.repliesThreadInfo) {
         global = updateThreadInfo(
           global,
-          message.threadInfo.chatId,
-          message.threadInfo.threadId,
-          message.threadInfo,
+          message.repliesThreadInfo.chatId,
+          message.repliesThreadInfo.threadId,
+          message.repliesThreadInfo,
         );
       }
 
@@ -213,7 +213,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         && chat.lastMessage?.id === message.id
         && selectIsChatWithBot(global, chat)
         && selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)
-        && selectIsViewportNewest(global, chatId, message.threadInfo?.threadId || MAIN_THREAD_ID)
+        && selectIsViewportNewest(global, chatId, message.repliesThreadInfo?.threadId || MAIN_THREAD_ID)
       ) {
         actions.focusLastMessage();
       }

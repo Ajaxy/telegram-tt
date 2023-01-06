@@ -271,7 +271,7 @@ export function deleteChatMessages(
         global = updateCurrentMessageList(global, chatId);
       }
       if (originalPost) {
-        global = updateChatMessage(global, fromChatId!, fromMessageId!, { threadInfo: undefined });
+        global = updateChatMessage(global, fromChatId!, fromMessageId!, { repliesThreadInfo: undefined });
       }
     });
   }
