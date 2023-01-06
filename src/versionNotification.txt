@@ -1,26 +1,18 @@
-**Telegram Web Z was updated to version 1.57**
+**Telegram Web Z was updated to version 1.58**
 
 [👏](customEmoji:5471921242866981303) **Harder**
-• Custom emoji now animate as you write a message.
-• Voice messages can now be played with more speed options like 0.5x, 0.75x and 1.5x.
-• You can now set a main photo for your profile, group or channel in the Media Viewer.
-• Messages will now display 'admin', 'owner' and 'imported' labels.
-• A notification will appear when camera or microphone access is needed.
+• Topics in groups are now supported.
+• Collectible usernames now appear on profiles, and can be managed in Settings.
+• Custom reactions are properly displayed.
+• Premium users can react multiple times with different emoji.
 
 [🤩](customEmoji:5373026167722876724) **Better**
-• Unread message counters animate as their number increases.
-• Custom Emoji have even better quality at larger sizes.
-• Clicking on live locations now requires a confirmation before opening Google Maps.
-
-[🚀](customEmoji:5445284980978621387) **Faster**
-• Uploading media and documents is drastically accelerated.
-• Video messages now load even more smoothly.
+• Animations can be disabled from the main menu.
 
 [💪](customEmoji:5471883477219549006) **Stronger**
-• Fixed copying selected text in messages.
-• Fixed outgoing messages sometimes being displayed as incoming.
-• Fixed group descriptions being uneditable.
-• Fixed streaming video from files.
-• Fixed auto-closing calendar after rescheduling.
-• Fixed scrolling to the bottom of the chat after sending a new message.
+• Fixed missing Quick Reaction buttons.
+• Fixed issues with the ‘Chat History for New Members’ setting.
+• Fixed issues when changing display name.
+• Fixed issues with emoji in display names on Windows.
+• Fixed inline bot query parsing on Windows.
 • Various layout improvements.
