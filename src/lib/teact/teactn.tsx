@@ -54,7 +54,6 @@ const containers = new Map<string, {
   ownProps: Props;
   mappedProps?: Props;
   forceUpdate: Function;
-  areMappedPropsChanged: boolean;
   isDetached: boolean;
   detachReason: any;
   detachWhenChanged: DetachWhenChanged;
@@ -188,7 +187,6 @@ function updateContainers() {
       }
 
       container.mappedProps = newMappedProps;
-      container.areMappedPropsChanged = true;
       container.DEBUG_updates++;
 
       forceUpdate();
@@ -248,7 +246,6 @@ export function withGlobal<OwnProps extends AnyLiteral>(
         container = {
           mapStateToProps,
           ownProps: props,
-          areMappedPropsChanged: false,
           forceUpdate,
           isDetached: false,
           detachReason: undefined,
@@ -269,17 +266,15 @@ export function withGlobal<OwnProps extends AnyLiteral>(
         containers.set(id, container);
       }
 
-      if (container.areMappedPropsChanged) {
-        container.areMappedPropsChanged = false;
-      }
-
       if (!container.mappedProps || !arePropsShallowEqual(container.ownProps, props)) {
         container.ownProps = props;
 
-        try {
-          container.mappedProps = mapStateToProps(currentGlobal, props, container.detachWhenChanged);
-        } catch (err: any) {
-          handleError(err);
+        if (!container.isDetached) {
+          try {
+            container.mappedProps = mapStateToProps(currentGlobal, props, container.detachWhenChanged);
+          } catch (err: any) {
+            handleError(err);
+          }
         }
       }
 
