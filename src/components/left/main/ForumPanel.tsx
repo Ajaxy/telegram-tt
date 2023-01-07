@@ -13,7 +13,6 @@ import {
 } from '../../../config';
 import { selectChat, selectCurrentMessageList } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { fastRaf } from '../../../util/schedulers';
 import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
@@ -135,16 +134,13 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         dispatchHeavyAnimationStop();
       });
 
-      // For performance reasons, we delay animation of the topic list panel to the next animation frame
-      fastRaf(() => {
-        if (isVisible) {
-          shouldRenderRef.current = true;
-          ref.current!.style.transform = 'none';
-        } else {
-          shouldRenderRef.current = false;
-          ref.current!.style.transform = '';
-        }
-      });
+      if (isVisible) {
+        shouldRenderRef.current = true;
+        ref.current!.style.transform = 'none';
+      } else {
+        shouldRenderRef.current = false;
+        ref.current!.style.transform = '';
+      }
     }
   }, [isVisible, prevIsVisible]);
 
@@ -212,7 +208,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
       {chat && <GroupCallTopPane chatId={chat.id} hasPinnedOffset={false} className={styles.groupCall} />}
 
-      <div className={styles.borderBottom} />
+      <div className={styles.notch} />
 
       <InfiniteScroll
         className="chat-list custom-scroll"

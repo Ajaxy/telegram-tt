@@ -18,10 +18,11 @@ type OwnProps = {
   isPinned?: boolean;
   isMuted?: boolean;
   shouldShowOnlyMostImportant?: boolean;
+  forceHidden?: boolean;
 };
 
 const Badge: FC<OwnProps> = ({
-  topic, chat, isPinned, isMuted, shouldShowOnlyMostImportant, wasTopicOpened,
+  topic, chat, isPinned, isMuted, shouldShowOnlyMostImportant, wasTopicOpened, forceHidden,
 }) => {
   const {
     unreadMentionsCount = 0, unreadReactionsCount = 0,
@@ -50,7 +51,7 @@ const Badge: FC<OwnProps> = ({
 
   const hasUnreadMark = topic ? false : chat.hasUnreadMark;
 
-  const isShown = Boolean(
+  const isShown = !forceHidden && Boolean(
     unreadCount || unreadMentionsCount || hasUnreadMark || isPinned || unreadReactionsCount
     || isTopicUnopened,
   );

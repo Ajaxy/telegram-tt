@@ -102,9 +102,7 @@
   }
 
   .SearchInput {
-    transition-duration: 0.25s;
-    transition-timing-function: ease-out;
-    transition-property: opacity;
+    transition: opacity 250ms ease; // Same as Forum Panel
 
     &--hidden {
       opacity: 0;

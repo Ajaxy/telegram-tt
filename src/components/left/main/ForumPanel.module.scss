@@ -18,7 +18,7 @@
     border-right: 1px solid var(--color-borders);
   }
 
-  transition: transform var(--slide-transition);
+  transition: transform 250ms ease; // Same as `.Chat > .info`
   transform: translate3d(100%, 0, 0);
 
   :global(.chat-list) {
@@ -39,15 +39,17 @@
   position: static !important;
 }
 
-.border-bottom {
+.notch {
   width: 100%;
   height: 0;
-  transition: 0.1s ease-out border-color;
-  border-bottom: 0.0625rem solid transparent;
+  border-bottom: 0.0625rem solid var(--color-borders);
+
+  transition: 0.1s ease opacity;
+  opacity: 0;
 }
 
-.scrolled .border-bottom {
-  border-color: var(--color-borders);
+.scrolled .notch {
+  opacity: 1;
 }
 
 .scroll-top-handler {

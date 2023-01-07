@@ -17,7 +17,7 @@
     flex-direction: column;
     overflow: hidden;
 
-    transition: 0.25s ease-out transform;
+    transition: transform 250ms ease; // Same as Forum Panel
 
     &--tabs-hidden {
       transform: translateY(-3.125rem);
