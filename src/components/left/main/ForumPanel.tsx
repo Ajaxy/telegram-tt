@@ -11,11 +11,13 @@ import {
   GENERAL_TOPIC_ID,
   TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
 } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { selectChat, selectCurrentMessageList, selectIsForumPanelOpen } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
+import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -144,6 +146,24 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
     }
   }, [isVisible, prevIsVisible]);
 
+  useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      return undefined;
+    }
+
+    return captureEvents(ref.current!, {
+      selectorToPreventScroll: '.chat-list',
+      onSwipe: ((e, direction) => {
+        if (direction === SwipeDirection.Right) {
+          closeForumPanel();
+          return true;
+        }
+
+        return false;
+      }),
+    });
+  }, [closeForumPanel]);
+
   function renderTopics() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
 
@@ -165,12 +185,12 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
   return (
     <div
+      ref={ref}
       className={buildClassName(
         styles.root,
         isScrolled && styles.scrolled,
         lang.isRtl && styles.rtl,
       )}
-      ref={ref}
       onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
     >
       <div className="left-header">
