@@ -54,6 +54,10 @@ addActionHandler('openChat', (global, actions, payload) => {
     };
   }
 
+  if (id !== global.forumPanelChatId) {
+    actions.closeForumPanel();
+  }
+
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory);
 });
 

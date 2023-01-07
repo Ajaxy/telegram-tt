@@ -44,13 +44,14 @@ interface OwnProps {
   destructive?: boolean;
   multiline?: boolean;
   isStatic?: boolean;
-  clickArg?: any;
   contextActions?: MenuItemContextAction[];
+  offsetCollapseDelta?: number;
+  withPortalForMenu?: boolean;
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLDivElement>, arg?: any) => void;
+  clickArg?: any;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
-  shouldUsePortalForMenu?: boolean;
 }
 
 const ListItem: FC<OwnProps> = ({
@@ -74,12 +75,13 @@ const ListItem: FC<OwnProps> = ({
   multiline,
   isStatic,
   contextActions,
+  withPortalForMenu,
+  offsetCollapseDelta,
   onMouseDown,
   onClick,
   clickArg,
   onSecondaryIconClick,
   onDragEnter,
-  shouldUsePortalForMenu,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -107,8 +109,8 @@ const ListItem: FC<OwnProps> = ({
   );
 
   const getLayout = useCallback(
-    () => ({ shouldUsePortalPositioning: shouldUsePortalForMenu }),
-    [shouldUsePortalForMenu],
+    () => ({ withPortal: withPortalForMenu }),
+    [withPortalForMenu],
   );
 
   const {
@@ -183,6 +185,7 @@ const ListItem: FC<OwnProps> = ({
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : undefined}
       style={style}
+      data-offset-collapse-delta={offsetCollapseDelta}
       onMouseDown={onMouseDown}
       onDragEnter={onDragEnter}
     >
@@ -230,7 +233,7 @@ const ListItem: FC<OwnProps> = ({
           autoClose
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
-          shouldUsePortalForMenu={shouldUsePortalForMenu}
+          withPortal={withPortalForMenu}
         >
           {contextActions.map((action) => (
             <MenuItem

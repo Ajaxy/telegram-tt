@@ -68,7 +68,7 @@ const ArchivedChats: FC<OwnProps> = ({
         </Button>
         {shouldRenderTitle && <h3 className={titleClassNames}>{lang('ArchivedChats')}</h3>}
       </div>
-      <ChatList folderType="archived" isActive={isActive} />
+      <ChatList folderType="archived" isActive={isActive} isForumPanelOpen={isForumPanelOpen} />
       {shouldRenderForumPanel && (
         <ForumPanel
           isOpen={isForumPanelOpen}

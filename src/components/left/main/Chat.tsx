@@ -1,7 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
@@ -18,7 +16,6 @@ import type {
 import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
-import { ANIMATION_END_DELAY } from '../../../config';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
@@ -40,31 +37,26 @@ import {
   selectIsDefaultEmojiStatusPack,
   selectTopicFromMessage,
   selectThreadParam,
-  selectIsForumPanelOpen,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { fastRaf } from '../../../util/schedulers';
-import buildStyle from '../../../util/buildStyle';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import usePrevious from '../../../hooks/usePrevious';
 
+import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import DeleteChatModal from '../../common/DeleteChatModal';
-import ListItem from '../../ui/ListItem';
-import Badge from './Badge';
-import ChatFolderModal from '../ChatFolderModal.async';
-import ChatCallStatus from './ChatCallStatus';
 import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import ChatFolderModal from '../ChatFolderModal.async';
+import ChatCallStatus from './ChatCallStatus';
+import Badge from './Badge';
+import AvatarBadge from './AvatarBadge';
 
 import './Chat.scss';
-
-const TRANSFORM_TO_TOPIC_LIST_ANIMATION_DELAY = 300;
 
 type OwnProps = {
   chatId: string;
@@ -72,8 +64,8 @@ type OwnProps = {
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
-  offsetTopInSmallerMode: number;
   offsetTop: number;
+  offsetCollapseDelta: number;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
 };
@@ -92,13 +84,12 @@ type StateProps = {
   draft?: ApiFormattedText;
   animationLevel?: AnimationLevel;
   isSelected?: boolean;
-  isForumPanelActive?: boolean;
+  isSelectedForum?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
   lastSyncTime?: number;
   lastMessageTopic?: ApiTopic;
   typingStatus?: ApiTypingStatus;
-  forumPanelChatId?: string;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -118,24 +109,22 @@ const Chat: FC<OwnProps & StateProps> = ({
   lastMessageOutgoingStatus,
   actionTargetMessage,
   actionTargetChatId,
-  offsetTopInSmallerMode,
   offsetTop,
+  offsetCollapseDelta,
   draft,
   animationLevel,
   isSelected,
-  isForumPanelActive,
+  isSelectedForum,
   canScrollDown,
   canChangeFolder,
   lastSyncTime,
   lastMessageTopic,
   typingStatus,
-  forumPanelChatId,
   onDragEnter,
 }) => {
   const {
     openChat,
     openForumPanel,
-    closeForumPanel,
     focusLastMessage,
     loadTopics,
   } = getActions();
@@ -161,27 +150,24 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessageTopic,
     lastMessageSender,
     observeIntersection,
-
     animationType,
     animationLevel,
     orderDiff,
   });
 
   const handleClick = useCallback(() => {
-    if (chat?.isForum) {
+    if (isForum) {
       openForumPanel({ chatId });
       return;
     }
 
-    if (forumPanelChatId) closeForumPanel();
     openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
   }, [
-    chat?.isForum, forumPanelChatId, closeForumPanel, openChat, chatId, isSelected, canScrollDown, openForumPanel,
-    focusLastMessage,
+    isForum, openChat, chatId, isSelected, canScrollDown, openForumPanel, focusLastMessage,
   ]);
 
   const handleDragEnter = useCallback((e) => {
@@ -225,31 +211,6 @@ const Chat: FC<OwnProps & StateProps> = ({
     }
   }, [chat, chatId, isForum, isIntersecting, lastSyncTime, loadTopics]);
 
-  const isOnForumPanel = chatId === forumPanelChatId;
-  const prevIsForumPanelActive = usePrevious(isForumPanelActive);
-  const isAnimatingRef = useRef(false);
-
-  if (prevIsForumPanelActive !== isForumPanelActive) {
-    isAnimatingRef.current = true;
-  }
-
-  // Animate changing to smaller chat size when navigating to/from forum topic list
-  useLayoutEffect(() => {
-    const current = ref.current;
-
-    if (current && isAnimatingRef.current && isForumPanelActive !== prevIsForumPanelActive) {
-      current.classList.add('animate-transform');
-      current.style.transform = '';
-      setTimeout(() => {
-        // Wait one more frame for better animation performance
-        fastRaf(() => {
-          isAnimatingRef.current = false;
-          current.classList.remove('animate-transform');
-        });
-      }, TRANSFORM_TO_TOPIC_LIST_ANIMATION_DELAY + ANIMATION_END_DELAY);
-    }
-  }, [ref, isForumPanelActive, prevIsForumPanelActive]);
-
   if (!chat) {
     return undefined;
   }
@@ -259,23 +220,20 @@ const Chat: FC<OwnProps & StateProps> = ({
     isUserId(chatId) ? 'private' : 'group',
     isForum && 'forum',
     isSelected && 'selected',
-    isForumPanelActive && 'smaller',
-    isOnForumPanel && 'active-forum',
+    isSelectedForum && 'selected-forum',
   );
-
-  const chatTop = isForumPanelActive ? (offsetTop - offsetTopInSmallerMode) : offsetTop;
-  const offsetAnimate = isForumPanelActive ? offsetTopInSmallerMode : -offsetTopInSmallerMode;
 
   return (
     <ListItem
       ref={ref}
       className={className}
-      style={buildStyle(`top: ${chatTop}px`, isAnimatingRef.current && `transform: translateY(${offsetAnimate}px)`)}
+      style={`top: ${offsetTop}px`}
       ripple={!isForum && !IS_SINGLE_COLUMN_LAYOUT}
       contextActions={contextActions}
       onClick={handleClick}
       onDragEnter={handleDragEnter}
-      shouldUsePortalForMenu={isForumPanelActive}
+      offsetCollapseDelta={offsetCollapseDelta}
+      withPortalForMenu
     >
       <div className="status">
         <Avatar
@@ -288,9 +246,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           withVideo
           observeIntersection={observeIntersection}
         />
-        <div className="status-badge-wrapper">
-          <Badge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={!isForumPanelActive} />
-        </div>
+        <AvatarBadge chatId={chatId} />
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
         )}
@@ -368,8 +324,8 @@ export default memo(withGlobal<OwnProps>(
       threadId: currentThreadId,
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
-    const isForumPanelActive = selectIsForumPanelOpen(global);
     const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
+    const isSelectedForum = chatId === global.forumPanelChatId;
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
@@ -388,8 +344,8 @@ export default memo(withGlobal<OwnProps>(
       actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       animationLevel: global.settings.byKey.animationLevel,
-      isForumPanelActive,
       isSelected,
+      isSelectedForum,
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
       lastSyncTime: global.lastSyncTime,
@@ -401,7 +357,6 @@ export default memo(withGlobal<OwnProps>(
       isEmojiStatusColored,
       lastMessageTopic,
       typingStatus,
-      forumPanelChatId: global.forumPanelChatId,
     };
   },
 )(Chat));

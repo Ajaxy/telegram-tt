@@ -16,6 +16,7 @@ import {
 import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import { selectChat } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
@@ -28,11 +29,13 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 import EmptyFolder from './EmptyFolder';
+import useCollapseWithForumPanel from './hooks/useCollapseWithForumPanel';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
   isActive: boolean;
+  isForumPanelOpen?: boolean;
   lastSyncTime?: number;
   foldersDispatch?: FolderEditDispatch;
   onScreenSelect?: (screen: SettingsScreens) => void;
@@ -45,6 +48,7 @@ const ChatList: FC<OwnProps> = ({
   folderType,
   folderId,
   isActive,
+  isForumPanelOpen,
   foldersDispatch,
   onScreenSelect,
 }) => {
@@ -105,6 +109,8 @@ const ChatList: FC<OwnProps> = ({
     throttleMs: INTERSECTION_THROTTLE,
   });
 
+  useCollapseWithForumPanel(containerRef, isForumPanelOpen);
+
   const handleDragEnter = useDebouncedCallback((chatId: string) => {
     if (shouldIgnoreDragRef.current) {
       shouldIgnoreDragRef.current = false;
@@ -143,8 +149,9 @@ const ChatList: FC<OwnProps> = ({
 
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
-      const chatTop = currentChatListHeight;
-      const chatTopSmaller = (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const expendedOffsetTop = currentChatListHeight;
+      const collapsedOffsetTop = (viewportOffset + i) * CHAT_HEIGHT_PX;
+
       currentChatListHeight += (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
 
       return (
@@ -156,8 +163,8 @@ const ChatList: FC<OwnProps> = ({
           folderId={folderId}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
-          offsetTop={chatTop}
-          offsetTopInSmallerMode={chatTop - chatTopSmaller}
+          offsetTop={isForumPanelOpen ? collapsedOffsetTop : expendedOffsetTop}
+          offsetCollapseDelta={expendedOffsetTop - collapsedOffsetTop}
           observeIntersection={observe}
           onDragEnter={handleDragEnter}
         />
@@ -167,7 +174,7 @@ const ChatList: FC<OwnProps> = ({
 
   return (
     <InfiniteScroll
-      className="chat-list custom-scroll"
+      className={buildClassName('chat-list custom-scroll', isForumPanelOpen && 'forum-panel-open')}
       ref={containerRef}
       items={viewportIds}
       preloadBackwards={CHAT_LIST_SLICE}

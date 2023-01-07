@@ -15,12 +15,17 @@
 
   &.animate-opacity {
     will-change: opacity;
-    transition: opacity 250ms ease;
+    transition: opacity 0.2s ease-out;
   }
 
   &.animate-transform {
     will-change: transform;
-    transition: transform 250ms ease;
+    transition: transform 0.2s ease-out;
+  }
+
+  &.animate-collapse {
+    will-change: transform;
+    transition: transform var(--layer-transition);
   }
 
   &:hover,
@@ -29,12 +34,22 @@
       border-color: var(--color-chat-hover);
     }
 
-    .status-badge-wrapper {
+    .avatar-badge-wrapper {
       --outline-color: var(--color-chat-hover);
     }
 
     .ChatCallStatus {
       border-color: var(--color-chat-hover);
+    }
+  }
+
+  // Super specific selector to override the same in `ListItem`
+  @media (min-width: 600px) {
+    &:not(.has-ripple):not(.is-static),
+    body.animation-level-0 & {
+      .ListItem-button:active {
+        --background-color: var(--color-chat-hover) !important;
+      }
     }
   }
 
@@ -55,17 +70,17 @@
       }
     }
 
-    &.active-forum {
-      .status-badge-wrapper {
+    &.selected-forum {
+      .avatar-badge-wrapper {
         --outline-color: var(--color-chat-hover);
       }
     }
   }
 
   @media (min-width: 600px) {
-    &.active-forum.forum,
-    &.active-forum.forum:hover {
-      .status-badge-wrapper {
+    &.selected-forum.forum,
+    &.selected-forum.forum:hover {
+      .avatar-badge-wrapper {
         --outline-color: var(--color-chat-hover);
       }
     }
@@ -111,7 +126,6 @@
       }
 
       .Badge:not(.pinned) {
-        background: var(--color-white);
         color: var(--color-chat-active);
       }
 
@@ -120,35 +134,18 @@
         background: #FFFFFF33;
       }
 
-      .status-badge-wrapper-visible .Badge:not(.pinned).muted {
-        background: var(--color-chat-active-greyed);
+      .avatar-badge-wrapper .Badge:not(.pinned) {
         --outline-color: transparent;
       }
 
-      .status-badge-wrapper-visible .Badge:not(.pinned):not(.muted) {
-        --outline-color: transparent;
+      .avatar-badge-wrapper .Badge:not(.pinned).muted {
+        background: var(--color-gray);
       }
     }
   }
 
-  &.smaller .ListItem-button {
-    height: 4.5rem;
-  }
-
-  &.active-forum::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -0.5rem;
-    width: 0.375rem;
-    height: 75%;
-    transform: translateY(-50%);
-
-    background: var(--color-primary);
-    z-index: 1;
-
-    border-start-end-radius: var(--border-radius-default);
-    border-end-end-radius: var(--border-radius-default);
+  &.selected-forum {
+    --background-color: var(--color-chat-hover) !important;
   }
 
   @media (max-width: 600px) {
@@ -169,7 +166,7 @@
     background: var(--background-color);
   }
 
-  .status-badge-wrapper {
+  .avatar-badge-wrapper {
     position: absolute;
     bottom: 0;
     right: 0.5rem;
@@ -182,12 +179,12 @@
     }
 
     .Badge-transition {
-      transition: opacity 250ms ease, transform 250ms ease; // Same as Forum Panel
+      transition: opacity var(--layer-transition), transform var(--layer-transition);
     }
   }
 
   .info {
-    transition: opacity 250ms ease, transform 250ms ease; // Same as Forum Panel
+    transition: opacity 300ms ease, transform var(--layer-transition);
 
     .subtitle {
       margin-top: -0.125rem;
@@ -316,19 +313,5 @@
         unicode-bidi: plaintext;
       }
     }
-
-    &.active-forum::before {
-      left: auto;
-      right: 0.0625rem;
-    }
-  }
-
-  &.smaller .info {
-    transform: translateX(-25%);
-    opacity: 0;
-  }
-
-  &[dir="rtl"].smaller .info {
-    transform: translateX(25%);
   }
 }
