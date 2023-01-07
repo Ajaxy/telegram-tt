@@ -40,7 +40,7 @@ export const processDeepLink = (url: string) => {
 
       const startAttach = params.hasOwnProperty('startattach') && !startattach ? true : startattach;
       const choose = parseChooseParameter(params.choose);
-      const threadId = Number(thread) || Number(topic);
+      const threadId = Number(thread) || Number(topic) || undefined;
 
       if (domain !== 'telegrampassport') {
         if (startAttach && choose) {
@@ -59,8 +59,8 @@ export const processDeepLink = (url: string) => {
         } else {
           openChatByUsername({
             username: domain,
-            messageId: Number(post),
-            commentId: Number(comment),
+            messageId: post ? Number(post) : undefined,
+            commentId: comment ? Number(comment) : undefined,
             startParam: start,
             startAttach,
             attach,
