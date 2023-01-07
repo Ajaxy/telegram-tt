@@ -9,7 +9,7 @@ import type {
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import type { Thread } from '../../../../global/types';
 
-import { ANIMATION_END_DELAY } from '../../../../config';
+import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import {
   getMessageMediaHash,
@@ -173,7 +173,7 @@ export default function useChatListEntry({
         element.style.opacity = '1';
       });
     } else if (animationType === ChatAnimationTypes.Move) {
-      element.style.transform = `translate3d(0, ${-orderDiff * 100}%, 0)`;
+      element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX}px, 0)`;
 
       fastRaf(() => {
         element.classList.add('animate-transform');
