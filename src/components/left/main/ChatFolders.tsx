@@ -132,11 +132,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   }, [activeChatFolder, folderTabs, setActiveChatFolder]);
 
   useEffect(() => {
-    if (!transitionRef.current || !IS_TOUCH_ENV || !folderTabs || !folderTabs.length) {
+    if (!IS_TOUCH_ENV || !folderTabs?.length || isForumPanelOpen) {
       return undefined;
     }
 
-    return captureEvents(transitionRef.current, {
+    return captureEvents(transitionRef.current!, {
       selectorToPreventScroll: '.chat-list',
       onSwipe: ((e, direction) => {
         if (direction === SwipeDirection.Left) {
@@ -150,7 +150,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         return false;
       }),
     });
-  }, [activeChatFolder, folderTabs, setActiveChatFolder]);
+  }, [activeChatFolder, folderTabs, isForumPanelOpen, setActiveChatFolder]);
 
   const isNotInFirstFolderRef = useRef();
   isNotInFirstFolderRef.current = !isInFirstFolder;
