@@ -11,7 +11,7 @@ import {
   GENERAL_TOPIC_ID,
   TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
 } from '../../../config';
-import { selectChat, selectCurrentMessageList } from '../../../global/selectors';
+import { selectChat, selectCurrentMessageList, selectIsForumPanelOpen } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -237,9 +237,9 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, ownProps, detachWhenChanged): StateProps => {
-    const chatId = global.forumPanelChatId;
-    detachWhenChanged(chatId);
+    detachWhenChanged(selectIsForumPanelOpen(global));
 
+    const chatId = global.forumPanelChatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const {
       chatId: currentChatId,
