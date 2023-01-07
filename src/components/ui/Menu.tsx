@@ -41,7 +41,7 @@ type OwnProps = {
   onClose: () => void;
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  shouldUsePortalForMenu?: boolean;
+  withPortal?: boolean;
   children: React.ReactNode;
 };
 
@@ -70,7 +70,7 @@ const Menu: FC<OwnProps> = ({
   onMouseEnter,
   onMouseLeave,
   shouldSkipTransition,
-  shouldUsePortalForMenu,
+  withPortal,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let menuRef = useRef<HTMLDivElement>(null);
@@ -161,7 +161,7 @@ const Menu: FC<OwnProps> = ({
     </div>
   );
 
-  if (shouldUsePortalForMenu) {
+  if (withPortal) {
     return <Portal>{menu}</Portal>;
   }
 

@@ -10,6 +10,10 @@
   display: flex;
   flex-direction: column;
 
+  @media (max-width: 600px) {
+    left: 4.3125rem;
+  }
+
   &.rtl {
     left: 0;
     right: 4.75rem;
@@ -18,7 +22,7 @@
     border-right: 1px solid var(--color-borders);
   }
 
-  transition: transform 250ms ease; // Same as `.Chat > .info`
+  transition: transform var(--layer-transition);
   transform: translate3d(100%, 0, 0);
 
   :global(.chat-list) {

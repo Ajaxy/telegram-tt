@@ -88,6 +88,21 @@
     @include overflow-y-overlay();
   }
 
+  &.forum-panel-open {
+    .info {
+      transform: translateX(-25%);
+      opacity: 0;
+    }
+
+    .Chat[dir="rtl"] .info {
+      transform: translateX(25%);
+    }
+
+    .ListItem-button {
+      height: 4.5rem;
+    }
+  }
+
   .scroll-container {
     position: relative;
   }

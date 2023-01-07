@@ -22,6 +22,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import Transition from '../../ui/Transition';
 import TabList from '../../ui/TabList';
 import ChatList from './ChatList';
+import { selectIsForumPanelOpen } from '../../../global/selectors';
 
 type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
@@ -34,6 +35,7 @@ type StateProps = {
   orderedFolderIds?: number[];
   activeChatFolder: number;
   currentUserId?: string;
+  isForumPanelOpen?: boolean;
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
@@ -49,6 +51,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   orderedFolderIds,
   activeChatFolder,
   currentUserId,
+  isForumPanelOpen,
   lastSyncTime,
   shouldSkipHistoryAnimations,
   maxFolders,
@@ -195,27 +198,17 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   function renderCurrentTab(isActive: boolean) {
     const activeFolder = Object.values(chatFoldersById)
       .find(({ id }) => id === folderTabs![activeChatFolder].id);
-
-    if (!activeFolder || isInAllChatsFolder) {
-      return (
-        <ChatList
-          folderType="all"
-          isActive={isActive}
-          lastSyncTime={lastSyncTime}
-          foldersDispatch={foldersDispatch}
-          onScreenSelect={onScreenSelect}
-        />
-      );
-    }
+    const isFolder = activeFolder && !isInAllChatsFolder;
 
     return (
       <ChatList
-        folderType="folder"
-        folderId={activeFolder.id}
+        folderType={isFolder ? 'folder' : 'all'}
+        folderId={isFolder ? activeFolder.id : undefined}
         isActive={isActive}
+        isForumPanelOpen={isForumPanelOpen}
         lastSyncTime={lastSyncTime}
-        onScreenSelect={onScreenSelect}
         foldersDispatch={foldersDispatch}
+        onScreenSelect={onScreenSelect}
       />
     );
   }
@@ -259,16 +252,15 @@ export default memo(withGlobal<OwnProps>(
       shouldSkipHistoryAnimations,
     } = global;
 
-    const maxFolders = selectCurrentLimit(global, 'dialogFilters');
-
     return {
       chatFoldersById,
       orderedFolderIds,
       activeChatFolder,
       currentUserId,
+      isForumPanelOpen: selectIsForumPanelOpen(global),
       lastSyncTime,
       shouldSkipHistoryAnimations,
-      maxFolders,
+      maxFolders: selectCurrentLimit(global, 'dialogFilters'),
     };
   },
 )(ChatFolders));

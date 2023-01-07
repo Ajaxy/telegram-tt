@@ -102,7 +102,7 @@
   }
 
   .SearchInput {
-    transition: opacity 250ms ease; // Same as Forum Panel
+    transition: opacity var(--layer-transition);
 
     &--hidden {
       opacity: 0;

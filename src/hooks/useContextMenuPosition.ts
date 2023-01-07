@@ -6,7 +6,7 @@ interface Layout {
   extraTopPadding?: number;
   marginSides?: number;
   extraMarginTop?: number;
-  shouldUsePortalPositioning?: boolean;
+  withPortal?: boolean;
 }
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
@@ -48,7 +48,7 @@ export default function useContextMenuPosition(
       extraTopPadding = 0,
       marginSides = 0,
       extraMarginTop = 0,
-      shouldUsePortalPositioning = false,
+      withPortal = false,
     } = getLayout?.() || {};
 
     const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
@@ -100,8 +100,8 @@ export default function useContextMenuPosition(
 
     const triggerRect = triggerEl.getBoundingClientRect();
 
-    const addedYForPortalPositioning = (shouldUsePortalPositioning ? triggerRect.top : 0);
-    const addedXForPortalPositioning = (shouldUsePortalPositioning ? triggerRect.left : 0);
+    const addedYForPortalPositioning = (withPortal ? triggerRect.top : 0);
+    const addedXForPortalPositioning = (withPortal ? triggerRect.left : 0);
 
     const left = (horizontalPosition === 'left'
       ? Math.max(MENU_POSITION_VISUAL_COMFORT_SPACE_PX, Math.min(

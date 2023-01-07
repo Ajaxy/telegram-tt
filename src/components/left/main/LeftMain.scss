@@ -35,7 +35,7 @@
       z-index: 1;
 
       opacity: 1;
-      transition: opacity 250ms ease; // Same as Forum Panel
+      transition: opacity var(--layer-transition);
     }
 
     &--tabs-hidden .TabList {
