@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -234,7 +234,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   }
 
   // Animate changing to smaller chat size when navigating to/from forum topic list
-  useEffect(() => {
+  useLayoutEffect(() => {
     const current = ref.current;
 
     if (current && isAnimatingRef.current && isForumPanelActive !== prevIsForumPanelActive) {
@@ -288,12 +288,8 @@ const Chat: FC<OwnProps & StateProps> = ({
           withVideo
           observeIntersection={observeIntersection}
         />
-        <div className={buildClassName(
-          'status-badge-wrapper',
-          isForumPanelActive && 'status-badge-wrapper-visible',
-        )}
-        >
-          <Badge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant />
+        <div className="status-badge-wrapper">
+          <Badge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={!isForumPanelActive} />
         </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />

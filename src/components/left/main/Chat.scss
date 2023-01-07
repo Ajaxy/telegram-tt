@@ -15,12 +15,12 @@
 
   &.animate-opacity {
     will-change: opacity;
-    transition: opacity 0.2s ease-out;
+    transition: opacity 250ms ease;
   }
 
   &.animate-transform {
     will-change: transform;
-    transition: transform 0.2s ease-out;
+    transition: transform 250ms ease;
   }
 
   &:hover,
@@ -175,28 +175,19 @@
     right: 0.5rem;
     z-index: 2;
 
-    transition-duration: 0.25s;
-    transition-timing-function: cubic-bezier(0.16,1.25,0.64,1);
-    transition-property: opacity, transform;
-    opacity: 0;
-    transform: scale(0);
-
     --outline-color: var(--color-background);
 
     .Badge {
       box-shadow: 0 0 0 2px var(--outline-color);
     }
-  }
 
-  .status-badge-wrapper-visible {
-    opacity: 1;
-    transform: scale(1);
+    .Badge-transition {
+      transition: opacity 250ms ease, transform 250ms ease; // Same as Forum Panel
+    }
   }
 
   .info {
-    transition-duration: 0.25s;
-    transition-property: ease-in-out;
-    transition-property: opacity, transform;
+    transition: opacity 250ms ease, transform 250ms ease; // Same as Forum Panel
 
     .subtitle {
       margin-top: -0.125rem;
