@@ -243,7 +243,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         sensitiveArea={TOPIC_LIST_SENSITIVE_AREA}
         beforeChildren={<div ref={scrollTopHandlerRef} className={styles.scrollTopHandler} />}
       >
-        {viewportIds?.length && (
+        {Boolean(viewportIds?.length) && (
           renderTopics()
         )}
         {isLoading && !viewportIds?.length && (

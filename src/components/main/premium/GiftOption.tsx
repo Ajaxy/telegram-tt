@@ -51,7 +51,7 @@ const GiftOption: FC<OwnProps> = ({
         <div className={styles.month}>{lang('Months', months)}</div>
         <div className={styles.perMonth}>
           {lang('PricePerMonth', formatCurrency(perMonth, currency, lang.code))}
-          {discount && (
+          {Boolean(discount) && (
             <span className={styles.discount} title={lang('GiftDiscount')}> &minus;{discount}% </span>
           )}
         </div>

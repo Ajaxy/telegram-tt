@@ -147,7 +147,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             onClick={() => setChosenTab(undefined)}
           >
             <i className="icon-heart" />
-            {reactors?.count && formatIntegerCompact(reactors.count)}
+            {Boolean(reactors?.count) && formatIntegerCompact(reactors.count)}
           </Button>
           {allReactions.map((reaction) => {
             const count = reactions?.results
@@ -166,7 +166,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                   className="reaction-filter-emoji"
                   availableReactions={availableReactions}
                 />
-                {count && formatIntegerCompact(count)}
+                {Boolean(count) && formatIntegerCompact(count)}
               </Button>
             );
           })}

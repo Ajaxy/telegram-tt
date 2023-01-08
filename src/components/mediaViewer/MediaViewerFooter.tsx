@@ -60,7 +60,7 @@ const MediaViewerFooter: FC<OwnProps> = ({
 
   return (
     <div className={classNames} onClick={stopEvent}>
-      {text && (
+      {Boolean(text) && (
         <div className="media-viewer-footer-content" onClick={!IS_SINGLE_COLUMN_LAYOUT ? onClick : undefined}>
           <p className={`media-text custom-scroll ${isMultiline ? 'multiline' : ''}`} dir="auto">{text}</p>
         </div>

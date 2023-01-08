@@ -6,6 +6,7 @@
     "airbnb-typescript"
   ],
   "plugins": [
+    "jsx-expressions",
     "no-async-without-await",
     "teactn",
     "no-null"
@@ -86,6 +87,12 @@
         "allowFunctions": false,
         "allowBind": false,
         "ignoreDOMComponents": true
+      }
+    ],
+    "jsx-expressions/strict-logical-expressions": [
+      "error",
+      {
+        "allowString": true
       }
     ],
     "jsx-a11y/click-events-have-key-events": "off",

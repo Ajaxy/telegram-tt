@@ -1280,7 +1280,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               <i className="icon-schedule" />
             </Button>
           )}
-          {botKeyboardMessageId && !activeVoiceRecording && !editingMessage && (
+          {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
             <ResponsiveHoverButton
               className={isBotKeyboardOpen ? 'activated' : ''}
               round
@@ -1291,7 +1291,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               <i className="icon-bot-command" />
             </ResponsiveHoverButton>
           )}
-          {activeVoiceRecording && currentRecordTime && (
+          {activeVoiceRecording && Boolean(currentRecordTime) && (
             <span className="recording-state">
               {formatVoiceRecordDuration(currentRecordTime - startRecordTimeRef.current!)}
             </span>
@@ -1309,7 +1309,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             peerType={attachMenuPeerType}
             theme={theme}
           />
-          {botKeyboardMessageId && (
+          {Boolean(botKeyboardMessageId) && (
             <BotKeyboardMenu
               messageId={botKeyboardMessageId}
               isOpen={isBotKeyboardOpen}
