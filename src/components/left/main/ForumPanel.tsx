@@ -154,7 +154,9 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
     return captureEvents(ref.current!, {
       selectorToPreventScroll: '.chat-list',
       onSwipe: ((e, direction) => {
-        if (direction === SwipeDirection.Right) {
+        const closeDirection = lang.isRtl ? SwipeDirection.Left : SwipeDirection.Right;
+
+        if (direction === closeDirection) {
           closeForumPanel();
           return true;
         }
@@ -162,7 +164,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         return false;
       }),
     });
-  }, [closeForumPanel]);
+  }, [closeForumPanel, lang.isRtl]);
 
   function renderTopics() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
