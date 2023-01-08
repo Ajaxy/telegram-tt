@@ -779,7 +779,7 @@ function updateChatLastMessage(
   }
 
   global = updateChat(global, chatId, { lastMessage: message });
-  const topic = chat.isForum ? selectTopicFromMessage(global, message) : undefined;
+  const topic = chat?.isForum ? selectTopicFromMessage(global, message) : undefined;
   if (topic) {
     global = updateTopic(global, chatId, topic.id, {
       lastMessageId: message.id,
