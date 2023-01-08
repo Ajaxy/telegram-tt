@@ -502,7 +502,7 @@ function processEntityAsHtml(
     case ApiMessageEntityTypes.Code:
       return `<code class="text-entity-code">${renderedContent}</code>`;
     case ApiMessageEntityTypes.Pre:
-      return `\`\`\`${entity.language || ''}<br/>${renderedContent}<br/>\`\`\`<br/>`;
+      return `\`\`\`${renderText(entity.language || '', ['escape_html'])}<br/>${renderedContent}<br/>\`\`\`<br/>`;
     case ApiMessageEntityTypes.Strike:
       return `<del>${renderedContent}</del>`;
     case ApiMessageEntityTypes.MentionName:
