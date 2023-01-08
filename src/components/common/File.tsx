@@ -146,7 +146,7 @@ const File: FC<OwnProps> = ({
             {isTransferring && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
           </span>
           {sender && <span className="file-sender">{renderText(sender)}</span>}
-          {!sender && timestamp && (
+          {!sender && Boolean(timestamp) && (
             <>
               <span className="bullet" />
               <Link onClick={onDateClick}>{formatMediaDateTime(lang, timestamp * 1000, true)}</Link>
@@ -154,7 +154,7 @@ const File: FC<OwnProps> = ({
           )}
         </div>
       </div>
-      {sender && timestamp && (
+      {sender && Boolean(timestamp) && (
         <Link onClick={onDateClick}>{formatPastTimeShort(lang, timestamp * 1000)}</Link>
       )}
     </div>

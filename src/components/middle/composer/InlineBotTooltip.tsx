@@ -202,7 +202,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
       sensitiveArea={160}
     >
       {switchPm && renderSwitchPm()}
-      {renderedInlineBotResults?.length && renderContent()}
+      {Boolean(renderedInlineBotResults?.length) && renderContent()}
     </InfiniteScroll>
   );
 };

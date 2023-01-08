@@ -312,7 +312,7 @@ const Audio: FC<OwnProps> = ({
           <p className="title" dir="auto" title={renderFirstLine()}>{renderText(renderFirstLine())}</p>
 
           <div className="message-date">
-            {date && (
+            {Boolean(date) && (
               <Link
                 className="date"
                 onClick={handleDateClick}
@@ -469,7 +469,7 @@ function renderAudio(
               <span className="performer" dir="auto" title={performer}>{renderText(performer)}</span>
             </>
           )}
-          {date && (
+          {Boolean(date) && (
             <>
               <span className="bullet">&bull;</span>
               <Link className="date" onClick={handleDateClick}>

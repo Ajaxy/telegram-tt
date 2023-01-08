@@ -146,7 +146,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
                 onClick={handleCopyClicked}
               />
               <Button className="copy-link" onClick={handleCopyClicked}>{lang('CopyLink')}</Button>
-              {expireDate && (
+              {Boolean(expireDate) && (
                 <p className="text-muted">
                   {isExpired
                     ? lang('ExpiredLink')
