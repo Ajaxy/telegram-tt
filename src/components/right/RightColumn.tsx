@@ -33,8 +33,8 @@ import StickerSearch from './StickerSearch.async';
 import GifSearch from './GifSearch.async';
 import PollResults from './PollResults.async';
 import AddChatMembers from './AddChatMembers';
-import CreateTopic from './CreateTopic';
-import EditTopic from './EditTopic';
+import CreateTopic from './CreateTopic.async';
+import EditTopic from './EditTopic.async';
 
 import './RightColumn.scss';
 

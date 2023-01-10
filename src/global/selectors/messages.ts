@@ -173,6 +173,15 @@ export function selectReplyStack(global: GlobalState, chatId: string, threadId: 
   return selectThreadParam(global, chatId, threadId, 'replyStack');
 }
 
+export function selectThreadMessagesCount(global: GlobalState, chatId: string, threadId: number) {
+  const chat = selectChat(global, chatId);
+  const threadInfo = selectThreadInfo(global, chatId, threadId);
+  if (!chat || !threadInfo || threadInfo.messagesCount === undefined) return undefined;
+  // In forum topics first message is ignored, but not in General
+  if (chat.isForum && threadId !== GENERAL_TOPIC_ID) return threadInfo.messagesCount - 1;
+  return threadInfo.messagesCount;
+}
+
 export function selectThreadOriginChat(global: GlobalState, chatId: string, threadId: number) {
   if (threadId === MAIN_THREAD_ID) {
     return selectChat(global, chatId);

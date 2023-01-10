@@ -124,7 +124,6 @@ const Chat: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openChat,
-    openForumPanel,
     focusLastMessage,
     loadTopics,
   } = getActions();
@@ -156,19 +155,12 @@ const Chat: FC<OwnProps & StateProps> = ({
   });
 
   const handleClick = useCallback(() => {
-    if (isForum) {
-      openForumPanel({ chatId });
-      return;
-    }
-
     openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
-  }, [
-    isForum, openChat, chatId, isSelected, canScrollDown, openForumPanel, focusLastMessage,
-  ]);
+  }, [openChat, chatId, isSelected, canScrollDown, focusLastMessage]);
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();

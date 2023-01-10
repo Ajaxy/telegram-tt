@@ -4,10 +4,11 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiChat } from '../../api/types';
+import type { ApiChat, ApiSticker } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
-import { selectChat } from '../../global/selectors';
+import { DEFAULT_TOPIC_ICON_STICKER_ID } from '../../config';
+import { selectChat, selectIsCurrentUserPremium } from '../../global/selectors';
 import { getTopicColors } from '../../util/forumColors';
 import cycleRestrict from '../../util/cycleRestrict';
 import buildClassName from '../../util/buildClassName';
@@ -20,12 +21,14 @@ import TopicIcon from '../common/TopicIcon';
 import InputText from '../ui/InputText';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import Spinner from '../ui/Spinner';
+import CustomEmojiPicker from '../middle/composer/CustomEmojiPicker';
+import Transition from '../ui/Transition';
 
 import styles from './ManageTopic.module.scss';
 
 const ICON_SIZE = 5 * REM;
 
-type OwnProps = {
+export type OwnProps = {
   isActive: boolean;
   onClose: NoneToVoidFunction;
 };
@@ -33,17 +36,20 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   createTopicPanel?: GlobalState['createTopicPanel'];
+  isCurrentUserPremium?: boolean;
 };
 
 const CreateTopic: FC<OwnProps & StateProps> = ({
   isActive,
   chat,
   createTopicPanel,
+  isCurrentUserPremium,
   onClose,
 }) => {
-  const { createTopic, closeCreateTopicPanel } = getActions();
+  const { createTopic, openPremiumModal } = getActions();
   const [title, setTitle] = useState('');
   const [iconColorIndex, setIconColorIndex] = useState(0);
+  const [iconEmojiId, setIconEmojiId] = useState<string | undefined>(undefined);
   const lang = useLang();
 
   const isTouched = Boolean(title);
@@ -67,17 +73,32 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
       chatId: chat!.id,
       title,
       iconColor: getTopicColors()[iconColorIndex],
+      iconEmojiId,
     });
-    closeCreateTopicPanel();
-  }, [chat, closeCreateTopicPanel, createTopic, iconColorIndex, title]);
+  }, [chat, createTopic, iconColorIndex, iconEmojiId, title]);
+
+  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+    if (!emoji.isFree && !isCurrentUserPremium) {
+      openPremiumModal({ initialSection: 'animated_emoji' });
+      return;
+    }
+
+    if (emoji.id === DEFAULT_TOPIC_ICON_STICKER_ID) {
+      setIconEmojiId(undefined);
+      return;
+    }
+
+    setIconEmojiId(emoji.id);
+  }, [isCurrentUserPremium, openPremiumModal]);
 
   const dummyTopic = useMemo(() => {
     return {
       id: 0,
       title,
       iconColor: getTopicColors()[iconColorIndex],
+      iconEmojiId,
     };
-  }, [iconColorIndex, title]);
+  }, [iconColorIndex, iconEmojiId, title]);
 
   if (!chat?.isForum) {
     return undefined;
@@ -85,21 +106,38 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={styles.root}>
-      <div className="custom-scroll">
-        <div className={buildClassName(styles.top, 'section')}>
+      <div className={buildClassName(styles.content, 'custom-scroll')}>
+        <div className={buildClassName(styles.section, styles.top)}>
           <span className={styles.heading}>{lang('CreateTopicTitle')}</span>
-          <TopicIcon
-            topic={dummyTopic}
-            className={buildClassName(styles.icon, styles.clickable)}
-            onClick={handleIconClick}
-            size={ICON_SIZE}
-          />
+          <Transition
+            name="zoom-fade"
+            activeKey={Number(dummyTopic.iconEmojiId) || 0}
+            shouldCleanup
+            direction={1}
+            className={styles.iconWrapper}
+          >
+            <TopicIcon
+              topic={dummyTopic}
+              className={buildClassName(styles.icon, styles.clickable)}
+              onClick={handleIconClick}
+              size={ICON_SIZE}
+              noLoopLimit
+            />
+          </Transition>
           <InputText
             value={title}
             onChange={handleTitleChange}
             label={lang('lng_forum_topic_title')}
             disabled={isLoading}
             teactExperimentControlled
+          />
+        </div>
+        <div className={buildClassName(styles.section, styles.bottom)}>
+          <CustomEmojiPicker
+            loadAndPlay={isActive}
+            onCustomEmojiSelect={handleCustomEmojiSelect}
+            className={styles.iconPicker}
+            withDefaultTopicIcons
           />
         </div>
       </div>
@@ -125,6 +163,7 @@ export default memo(withGlobal(
     return {
       chat: createTopicPanel?.chatId ? selectChat(global, createTopicPanel.chatId) : undefined,
       createTopicPanel,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(CreateTopic));

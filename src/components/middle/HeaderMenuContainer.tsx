@@ -27,8 +27,8 @@ import {
   getCanAddContact,
   isChatChannel,
   isChatGroup,
-  getHasAdminRight,
   getCanManageTopic,
+  isUserRightBanned,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -91,6 +91,7 @@ type StateProps = {
   isPrivate?: boolean;
   isMuted?: boolean;
   isTopic?: boolean;
+  isForum?: boolean;
   canAddContact?: boolean;
   canReportChat?: boolean;
   canDeleteChat?: boolean;
@@ -113,6 +114,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   botCommands,
   withForumActions,
   isTopic,
+  isForum,
   isChatInfoShown,
   canStartBot,
   canRestartBot,
@@ -157,6 +159,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openChatWithInfo,
     openCreateTopicPanel,
     openEditTopicPanel,
+    openChat,
   } = getActions();
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -166,7 +169,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const isViewGroupInfoShown = usePrevDuringAnimation(
-    (!isChatInfoShown && (withForumActions || isTopic)) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
+    (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );
 
   const handleReport = useCallback(() => {
@@ -221,6 +224,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openEditTopicPanel({ chatId, topicId: threadId });
     closeMenu();
   }, [openEditTopicPanel, chatId, threadId, closeMenu]);
+
+  const handleViewAsTopicsClick = useCallback(() => {
+    openChat({ id: undefined });
+    closeMenu();
+  }, [closeMenu, openChat]);
 
   const handleEnterVoiceChatClick = useCallback(() => {
     if (canCreateVoiceChat) {
@@ -350,6 +358,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               onClick={handleEditTopicClick}
             >
               {lang('lng_forum_topic_edit')}
+            </MenuItem>
+          )}
+          {IS_SINGLE_COLUMN_LAYOUT && !withForumActions && isForum && !isTopic && (
+            <MenuItem
+              icon="forums"
+              onClick={handleViewAsTopicsClick}
+            >
+              {lang('Chat.ContextViewAsTopics')}
             </MenuItem>
           )}
           {withForumActions && Boolean(pendingJoinRequests) && (
@@ -538,7 +554,7 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const topic = chat?.topics?.[threadId];
-    const canCreateTopic = chat.isForum && (chat.isCreator || getHasAdminRight(chat, 'manageTopics'));
+    const canCreateTopic = chat.isForum && !isUserRightBanned(chat, 'manageTopics');
     const canEditTopic = topic && getCanManageTopic(chat, topic);
 
     return {
@@ -546,6 +562,7 @@ export default memo(withGlobal<OwnProps>(
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
       isPrivate,
       isTopic: chat?.isForum && !isMainThread,
+      isForum: chat?.isForum,
       canAddContact,
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),

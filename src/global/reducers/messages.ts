@@ -250,8 +250,7 @@ export function deleteChatMessages(
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', mainPinnedIds);
 
     if (threadInfo && newMessageCount !== undefined) {
-      global = replaceThreadParam(global, chatId, threadId, 'threadInfo', {
-        ...threadInfo,
+      global = updateThreadInfo(global, chatId, threadId, {
         messagesCount: newMessageCount,
       });
     }
@@ -581,7 +580,7 @@ export function updateThreadUnreadFromForwardedMessage(
       global = replaceThreadParam(global, chatId, channelPostId, 'threadInfo', {
         ...threadInfoOld,
         lastMessageId,
-        messagesCount: threadInfoOld.messagesCount + (isDeleting ? -1 : 1),
+        messagesCount: (threadInfoOld.messagesCount || 0) + (isDeleting ? -1 : 1),
       });
     }
   }

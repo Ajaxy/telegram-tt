@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo, useCallback, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
@@ -10,20 +10,23 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 
 import {
+  DEFAULT_TOPIC_ICON_STICKER_ID,
   EMOJI_SIZE_PICKER, FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, STICKER_SIZE_PICKER,
 } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
-import windowSize from '../../../util/windowSize';
 import buildClassName from '../../../util/buildClassName';
 import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useMediaTransition from '../../../hooks/useMediaTransition';
+import { useResizeObserver } from '../../../hooks/useResizeObserver';
 
 import StickerButton from '../../common/StickerButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Button from '../../ui/Button';
+
+import grey from '../../../assets/icons/forumTopic/grey.svg';
 
 type OwnProps = {
   stickerSet: StickerSetOrRecent;
@@ -34,6 +37,8 @@ type OwnProps = {
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
   isCustomEmojiPicker?: boolean;
+  shouldHideRecentHeader?: boolean;
+  withDefaultTopicIcon?: boolean;
   observeIntersection: ObserveFn;
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
@@ -41,11 +46,11 @@ type OwnProps = {
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
 };
 
-const STICKERS_PER_ROW_ON_DESKTOP = 5;
-const EMOJI_PER_ROW_ON_DESKTOP = 8;
 const STICKER_MARGIN = IS_SINGLE_COLUMN_LAYOUT ? 8 : 16;
 const EMOJI_MARGIN = IS_SINGLE_COLUMN_LAYOUT ? 8 : 10;
-const MOBILE_CONTAINER_PADDING = 8;
+const CONTAINER_PADDING = 8;
+
+const ITEMS_PER_ROW_FALLBACK = 8;
 
 const StickerSet: FC<OwnProps> = ({
   stickerSet,
@@ -56,6 +61,8 @@ const StickerSet: FC<OwnProps> = ({
   isSavedMessages,
   isCurrentUserPremium,
   isCustomEmojiPicker,
+  shouldHideRecentHeader,
+  withDefaultTopicIcon,
   observeIntersection,
   onStickerSelect,
   onStickerUnfave,
@@ -75,10 +82,12 @@ const StickerSet: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line no-null/no-null
-  const sharedCanvas2Ref = useRef<HTMLCanvasElement>(null);
+  const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
 
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const lang = useLang();
+
+  const [itemsPerRow, setItemsPerRow] = useState(ITEMS_PER_ROW_FALLBACK);
 
   useOnIntersect(ref, observeIntersection);
 
@@ -110,21 +119,48 @@ const StickerSet: FC<OwnProps> = ({
     }
   }, [isCurrentUserPremium, isPremiumSet, openPremiumModal, stickerSet, toggleStickerSet]);
 
-  const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
-    && stickerSet.stickers?.some(({ isFree }) => !isFree);
+  const handleDefaultTopicIconClick = useCallback(() => {
+    onStickerSelect?.({
+      id: DEFAULT_TOPIC_ICON_STICKER_ID,
+      isLottie: false,
+      isVideo: false,
+      stickerSetInfo: {
+        shortName: 'dummy',
+      },
+    } satisfies ApiSticker);
+  }, [onStickerSelect]);
+
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
-  const itemsPerRow = isEmoji ? EMOJI_PER_ROW_ON_DESKTOP : STICKERS_PER_ROW_ON_DESKTOP;
   const margin = isEmoji ? EMOJI_MARGIN : STICKER_MARGIN;
 
-  const stickersPerRow = IS_SINGLE_COLUMN_LAYOUT
-    ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (itemSize + margin))
-    : itemsPerRow;
+  const calculateItemsPerRow = useCallback((width: number) => {
+    if (!width) return ITEMS_PER_ROW_FALLBACK;
+
+    return Math.floor((width - CONTAINER_PADDING) / (itemSize + margin));
+  }, [itemSize, margin]);
+
+  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+    setItemsPerRow(calculateItemsPerRow(entry.contentRect.width));
+  }, [calculateItemsPerRow]);
+  useResizeObserver(ref, handleResize);
+
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    setItemsPerRow(calculateItemsPerRow(ref.current.clientWidth));
+  }, [calculateItemsPerRow]);
+
+  const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
+    && stickerSet.stickers?.some(({ isFree }) => !isFree);
 
   const canCut = !stickerSet.installedDate && stickerSet.id !== RECENT_SYMBOL_SET_ID;
   const [isCut, , expand] = useFlag(canCut);
-  const itemsBeforeCutout = stickersPerRow * 3 - 1;
-  const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, stickerSet.count) / stickersPerRow) * (itemSize + margin);
-  const height = isCut ? heightWhenCut : Math.ceil(stickerSet.count / stickersPerRow) * (itemSize + margin);
+  const itemsBeforeCutout = itemsPerRow * 3 - 1;
+  const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
+
+  const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, totalItemsCount) / itemsPerRow) * (itemSize + margin);
+  const height = isCut ? heightWhenCut : Math.ceil(totalItemsCount / itemsPerRow) * (itemSize + margin);
+
+  const shouldHideHeader = isRecent && shouldHideRecentHeader;
 
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
@@ -139,27 +175,29 @@ const StickerSet: FC<OwnProps> = ({
         buildClassName('symbol-set', isLocked && 'symbol-set-locked')
       }
     >
-      <div className="symbol-set-header">
-        <p className="symbol-set-name">
-          {isLocked && <i className="symbol-set-locked-icon icon-lock-badge" />}
-          {stickerSet.title}
-        </p>
-        {isRecent && (
-          <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
-        )}
-        {!isRecent && isEmoji && !stickerSet.installedDate && (
-          <Button
-            className="symbol-set-add-button"
-            withPremiumGradient={isPremiumSet && !isCurrentUserPremium}
-            onClick={handleAddClick}
-            pill
-            size="tiny"
-            fluid
-          >
-            {isPremiumSet && isLocked ? lang('Unlock') : lang('Add')}
-          </Button>
-        )}
-      </div>
+      {!shouldHideHeader && (
+        <div className="symbol-set-header">
+          <p className="symbol-set-name">
+            {isLocked && <i className="symbol-set-locked-icon icon-lock-badge" />}
+            {stickerSet.title}
+          </p>
+          {isRecent && (
+            <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
+          )}
+          {!isRecent && isEmoji && !stickerSet.installedDate && (
+            <Button
+              className="symbol-set-add-button"
+              withPremiumGradient={isPremiumSet && !isCurrentUserPremium}
+              onClick={handleAddClick}
+              pill
+              size="tiny"
+              fluid
+            >
+              {isPremiumSet && isLocked ? lang('Unlock') : lang('Add')}
+            </Button>
+          )}
+        </div>
+      )}
       <div
         className={buildClassName('symbol-set-container shared-canvas-container', transitionClassNames)}
         style={`height: ${height}px;`}
@@ -169,14 +207,24 @@ const StickerSet: FC<OwnProps> = ({
           className="shared-canvas"
           style={canCut ? `height: ${heightWhenCut}px;` : undefined}
         />
-        {(isRecent || isFavorite || canCut) && <canvas ref={sharedCanvas2Ref} className="shared-canvas" />}
+        {(isRecent || isFavorite || canCut) && <canvas ref={sharedCanvasHqRef} className="shared-canvas" />}
+        {withDefaultTopicIcon && (
+          <Button
+            className="StickerButton custom-emoji"
+            color="translucent"
+            onClick={handleDefaultTopicIconClick}
+            key="default-topic-icon"
+          >
+            <img src={grey} alt="Reset" />
+          </Button>
+        )}
         {shouldRender && stickerSet.stickers && stickerSet.stickers
           .slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
           .map((sticker, i) => {
             const isHqEmoji = (isRecent || isFavorite)
               && selectIsAlwaysHighPriorityEmoji(getGlobal(), sticker.stickerSetInfo);
             const canvasRef = (canCut && i >= itemsBeforeCutout) || isHqEmoji
-              ? sharedCanvas2Ref
+              ? sharedCanvasHqRef
               : sharedCanvasRef;
 
             return (
@@ -198,9 +246,15 @@ const StickerSet: FC<OwnProps> = ({
               />
             );
           })}
-        {isCut && stickerSet.count > itemsBeforeCutout && (
-          <Button className="StickerButton custom-emoji set-expand" round color="translucent" onClick={expand}>
-            +{stickerSet.count - itemsBeforeCutout}
+        {isCut && totalItemsCount > itemsBeforeCutout && (
+          <Button
+            className="StickerButton custom-emoji set-expand"
+            round
+            color="translucent"
+            onClick={expand}
+            key="more"
+          >
+            +{totalItemsCount - itemsBeforeCutout}
           </Button>
         )}
       </div>

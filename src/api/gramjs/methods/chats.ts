@@ -1516,7 +1516,7 @@ export function editTopic({
     channel: buildInputPeer(id, accessHash),
     topicId,
     title,
-    iconEmojiId: iconEmojiId ? BigInt(iconEmojiId) : undefined,
+    iconEmojiId: BigInt(iconEmojiId || '0'),
     closed: isClosed,
     hidden: isHidden,
   }), true);

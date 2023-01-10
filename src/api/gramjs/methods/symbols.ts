@@ -248,6 +248,21 @@ export async function fetchPremiumGifts() {
   };
 }
 
+export async function fetchDefaultTopicIcons() {
+  const result = await invokeRequest(new GramJs.messages.GetStickerSet({
+    stickerset: new GramJs.InputStickerSetEmojiDefaultTopicIcons(),
+  }));
+
+  if (!(result instanceof GramJs.messages.StickerSet)) {
+    return undefined;
+  }
+
+  return {
+    set: buildStickerSet(result.set),
+    stickers: processStickerResult(result.documents),
+  };
+}
+
 export async function searchStickers({ query, hash = '0' }: { query: string; hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.SearchStickerSets({
     q: query,
