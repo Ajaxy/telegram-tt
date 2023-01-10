@@ -1,11 +1,14 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiError, ApiNotification } from '../../../api/types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
 import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
-import { selectChatMessage, selectCurrentMessageList, selectIsTrustedBot } from '../../selectors';
+import {
+  selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectIsTrustedBot,
+} from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { unique } from '../../../util/iteratees';
 
@@ -443,6 +446,10 @@ addActionHandler('updateLastRenderedCustomEmojis', (global, actions, payload) =>
 addActionHandler('openCreateTopicPanel', (global, actions, payload) => {
   const { chatId } = payload;
 
+  // Topic panel can be opened only if there is a selected chat
+  const currentChat = selectCurrentChat(global);
+  if (!currentChat) actions.openChat({ id: chatId, threadId: MAIN_THREAD_ID });
+
   return {
     ...global,
     createTopicPanel: {
@@ -460,6 +467,10 @@ addActionHandler('closeCreateTopicPanel', (global) => {
 
 addActionHandler('openEditTopicPanel', (global, actions, payload) => {
   const { chatId, topicId } = payload;
+
+  // Topic panel can be opened only if there is a selected chat
+  const currentChat = selectCurrentChat(global);
+  if (!currentChat) actions.openChat({ id: chatId });
 
   return {
     ...global,

@@ -20,7 +20,7 @@ import {
   isChatSuperGroup,
 } from '../../global/helpers';
 import {
-  selectChat, selectChatMessages, selectChatOnlineCount, selectThreadInfo,
+  selectChat, selectChatMessages, selectChatOnlineCount, selectThreadInfo, selectThreadMessagesCount,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -61,6 +61,7 @@ type StateProps =
     onlineCount?: number;
     areMessagesLoaded: boolean;
     animationLevel: AnimationLevel;
+    messagesCount?: number;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
 
@@ -85,6 +86,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   animationLevel,
   lastSyncTime,
   topic,
+  messagesCount,
   onClick,
 }) => {
   const {
@@ -148,7 +150,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     if (isTopic) {
       return (
         <span className="status" dir="auto">
-          {threadInfo?.messagesCount ? lang('messages', threadInfo.messagesCount, 'i') : renderText(chat.title)}
+          {messagesCount ? lang('messages', messagesCount, 'i') : renderText(chat.title)}
         </span>
       );
     }
@@ -227,6 +229,7 @@ export default memo(withGlobal<OwnProps>(
     const onlineCount = chat ? selectChatOnlineCount(global, chat) : undefined;
     const areMessagesLoaded = Boolean(selectChatMessages(global, chatId));
     const topic = threadId ? chat?.topics?.[threadId] : undefined;
+    const messagesCount = topic && selectThreadMessagesCount(global, chatId, threadId!);
 
     return {
       lastSyncTime,
@@ -236,6 +239,7 @@ export default memo(withGlobal<OwnProps>(
       topic,
       areMessagesLoaded,
       animationLevel: global.settings.byKey.animationLevel,
+      messagesCount,
     };
   },
 )(GroupChatInfo));

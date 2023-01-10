@@ -11,11 +11,10 @@ import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { GENERAL_TOPIC_ID } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
-  selectChat, selectCurrentMessageList, selectThreadInfo, selectUser, selectUserStatus,
+  selectChat, selectCurrentMessageList, selectThreadMessagesCount, selectUser, selectUserStatus,
 } from '../../global/selectors';
 import { getUserStatus, isChatChannel, isUserOnline } from '../../global/helpers';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -187,9 +186,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         />
         <h3 className={styles.topicTitle} dir={lang.isRtl ? 'rtl' : undefined}>{renderText(topic!.title)}</h3>
         <p className={styles.topicMessagesCounter}>
-          {messagesCount && messagesCount > 1
-            ? lang('Chat.Title.Topic', messagesCount + (topic!.id === GENERAL_TOPIC_ID ? 1 : -1), 'i')
-            : lang('lng_forum_no_messages')}
+          {messagesCount ? lang('Chat.Title.Topic', messagesCount, 'i') : lang('lng_forum_no_messages')}
         </p>
       </div>
     );
@@ -308,7 +305,6 @@ export default memo(withGlobal<OwnProps>(
     const { mediaId, avatarOwnerId } = global.mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
-    const threadInfo = currentTopicId ? selectThreadInfo(global, userId, currentTopicId) : undefined;
     const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
 
     return {
@@ -323,7 +319,7 @@ export default memo(withGlobal<OwnProps>(
       avatarOwnerId,
       ...(topic && {
         topic,
-        messagesCount: threadInfo?.messagesCount,
+        messagesCount: selectThreadMessagesCount(global, userId, currentTopicId!),
       }),
     };
   },

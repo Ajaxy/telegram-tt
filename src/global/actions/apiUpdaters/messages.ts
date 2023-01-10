@@ -23,6 +23,7 @@ import {
   deleteChatScheduledMessages,
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
+  deleteTopic,
 } from '../../reducers';
 import {
   selectChatMessage,
@@ -376,7 +377,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     case 'deleteMessages': {
       const { ids, chatId } = update;
 
-      deleteMessages(chatId, ids, actions, global);
+      deleteMessages(global, chatId, ids, actions);
       break;
     }
 
@@ -402,7 +403,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       if (chatMessages) {
         const ids = Object.keys(chatMessages.byId).map(Number);
-        deleteMessages(chatId, ids, actions, getGlobal());
+        deleteMessages(global, chatId, ids, actions);
       } else {
         actions.requestChatUpdate({ chatId });
       }
@@ -734,7 +735,7 @@ function updateListedAndViewportIds(global: GlobalState, actions: GlobalActions,
     global = replaceThreadParam(global, chatId, threadInfo.threadId, 'threadInfo', {
       ...threadInfo,
       lastMessageId: message.id,
-      messagesCount: threadInfo.messagesCount + 1,
+      messagesCount: (threadInfo.messagesCount || 0) + 1,
     });
   }
 
@@ -808,10 +809,13 @@ function findLastMessage(global: GlobalState, chatId: string) {
   return undefined;
 }
 
-function deleteMessages(chatId: string | undefined, ids: number[], actions: GlobalActions, global: GlobalState) {
+function deleteMessages(global: GlobalState, chatId: string | undefined, ids: number[], actions: GlobalActions) {
   // Channel update
 
   if (chatId) {
+    const chat = selectChat(global, chatId);
+    if (!chat) return;
+
     ids.forEach((id) => {
       global = updateChatMessage(global, chatId, id, {
         isDeleting: true,
@@ -820,6 +824,10 @@ function deleteMessages(chatId: string | undefined, ids: number[], actions: Glob
       const newLastMessage = findLastMessage(global, chatId);
       if (newLastMessage) {
         global = updateChatLastMessage(global, chatId, newLastMessage, true);
+      }
+
+      if (chat.topics?.[id]) {
+        global = deleteTopic(global, chatId, id);
       }
     });
 

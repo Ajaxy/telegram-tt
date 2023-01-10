@@ -2,26 +2,48 @@
   position: relative;
   height: 100%;
   background-color: var(--color-background-secondary);
+  --topic-icon-size: 5rem;
 }
 
-.top {
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.section {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  padding: 1rem 1.5rem;
 
   background-color: var(--color-background);
   box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
   margin-bottom: 0.625rem;
 }
 
-.icon {
-  --custom-emoji-size: 5rem;
-  width: 5rem;
-  height: 5rem;
-  font-size: 3rem;
-  align-self: center;
+.top {
+  padding: 1rem 1.5rem;
+}
+
+.bottom {
+  flex-grow: 1;
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+.iconWrapper {
   margin: 1.5rem 0;
+  align-self: center;
+
+  width: var(--topic-icon-size);
+  height: var(--topic-icon-size);
+  --custom-emoji-size: var(--topic-icon-size);
+  font-size: calc(var(--topic-icon-size) - 2rem);
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
 }
 
 .clickable {
@@ -32,4 +54,8 @@
   font-weight: 500;
   font-size: 0.9375rem;
   color: var(--color-text-secondary);
+}
+
+.icon-picker {
+  min-height: 10rem;
 }

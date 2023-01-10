@@ -180,6 +180,7 @@ const Main: FC<StateProps> = ({
     loadAvailableReactions,
     loadStickerSets,
     loadPremiumGifts,
+    loadDefaultTopicIcons,
     loadAddedStickers,
     loadFavoriteStickers,
     ensureTimeFormat,
@@ -222,12 +223,13 @@ const Main: FC<StateProps> = ({
       loadAttachBots();
       loadContactList();
       loadPremiumGifts();
+      loadDefaultTopicIcons();
       checkAppVersion();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects,
+    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons,
   ]);
 
   // Language-based API calls

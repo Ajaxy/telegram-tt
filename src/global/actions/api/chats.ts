@@ -1373,13 +1373,16 @@ addActionHandler('loadTopics', async (global, actions, payload) => {
 });
 
 addActionHandler('loadTopicById', async (global, actions, payload) => {
-  const { chatId, topicId } = payload;
+  const { chatId, topicId, shouldCloseChatOnError } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
   const result = await callApi('fetchTopicById', { chat, topicId });
 
   if (!result) {
+    if (shouldCloseChatOnError) {
+      actions.openChat({ id: undefined });
+    }
     return;
   }
 
@@ -1413,7 +1416,9 @@ addActionHandler('toggleForum', async (global, actions, payload) => {
 });
 
 addActionHandler('createTopic', async (global, actions, payload) => {
-  const { chatId, title, iconColor } = payload;
+  const {
+    chatId, title, iconColor, iconEmojiId,
+  } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
@@ -1425,10 +1430,13 @@ addActionHandler('createTopic', async (global, actions, payload) => {
     },
   });
 
-  const topicId = await callApi('createTopic', { chat, title, iconColor });
+  const topicId = await callApi('createTopic', {
+    chat, title, iconColor, iconEmojiId,
+  });
   if (topicId) {
     actions.openChat({ id: chatId, threadId: topicId, shouldReplaceHistory: true });
   }
+  actions.closeCreateTopicPanel();
 });
 
 addActionHandler('deleteTopic', async (global, actions, payload) => {
@@ -1451,12 +1459,23 @@ addActionHandler('editTopic', async (global, actions, payload) => {
   const topic = chat?.topics?.[topicId];
   if (!chat || !topic) return;
 
+  setGlobal({
+    ...global,
+    editTopicPanel: {
+      chatId,
+      topicId,
+      isLoading: true,
+    },
+  });
+
   const result = await callApi('editTopic', { chat, topicId, ...rest });
   if (!result) return;
 
   global = getGlobal();
   global = updateTopic(global, chatId, topicId, rest);
   setGlobal(global);
+
+  actions.closeEditTopicPanel();
 });
 
 addActionHandler('toggleTopicPinned', (global, actions, payload) => {

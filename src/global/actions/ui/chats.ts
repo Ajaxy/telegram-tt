@@ -5,13 +5,13 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   exitMessageSelectMode, replaceThreadParam, updateCurrentMessageList,
 } from '../../reducers';
-import { selectCurrentMessageList } from '../../selectors';
+import { selectChat, selectCurrentMessageList } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
 
 addActionHandler('openChat', (global, actions, payload) => {
   const {
     id,
-    threadId = MAIN_THREAD_ID,
+    threadId,
     type = 'thread',
     shouldReplaceHistory = false,
   } = payload;
@@ -35,7 +35,7 @@ addActionHandler('openChat', (global, actions, payload) => {
       || currentMessageList.type !== type
     )) {
     if (id) {
-      global = replaceThreadParam(global, id, threadId, 'replyStack', []);
+      global = replaceThreadParam(global, id, threadId || MAIN_THREAD_ID, 'replyStack', []);
     }
 
     global = exitMessageSelectMode(global);
@@ -54,8 +54,14 @@ addActionHandler('openChat', (global, actions, payload) => {
     };
   }
 
-  if (id !== global.forumPanelChatId) {
+  if (id && id !== global.forumPanelChatId) {
     actions.closeForumPanel();
+  }
+
+  if (id && !threadId) {
+    const chat = selectChat(global, id);
+    // Prevent chat opening on forum click
+    if (chat?.isForum) return global;
   }
 
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory);

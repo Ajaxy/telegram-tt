@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../../global';
 
-import type { ApiStickerSet, ApiSticker, ApiChat } from '../../../api/types';
+import type { ApiStickerSet, ApiSticker } from '../../../api/types';
 import type { StickerSetOrRecent } from '../../../types';
 
 import {
@@ -41,17 +41,18 @@ import StickerSetCover from './StickerSetCover';
 import './StickerPicker.scss';
 
 type OwnProps = {
-  chatId: string;
-  className: string;
+  chatId?: string;
+  className?: string;
   loadAndPlay: boolean;
+  withDefaultTopicIcons?: boolean;
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
 };
 
 type StateProps = {
-  chat?: ApiChat;
   stickerSetsById: Record<string, ApiStickerSet>;
   addedCustomEmojiIds?: string[];
   recentCustomEmoji: ApiSticker[];
+  defaultTopicIconsId?: string;
   featuredCustomEmojiIds?: string[];
   canAnimate?: boolean;
   isSavedMessages?: boolean;
@@ -74,6 +75,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
+  withDefaultTopicIcons,
+  defaultTopicIconsId,
   onCustomEmojiSelect,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -124,7 +127,16 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
     const defaultSets = [];
 
-    if (recentCustomEmoji.length) {
+    if (withDefaultTopicIcons) {
+      const defaultTopicIconsPack = stickerSetsById[defaultTopicIconsId!];
+      if (defaultTopicIconsPack.stickers?.length) {
+        defaultSets.push({
+          ...defaultTopicIconsPack,
+          id: RECENT_SYMBOL_SET_ID,
+          title: lang('RecentStickers'),
+        });
+      }
+    } else if (recentCustomEmoji.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
         title: lang('RecentStickers'),
@@ -144,7 +156,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       ...existingAddedSetIds,
       ...featuredSetIds,
     ];
-  }, [addedCustomEmojiIds, featuredCustomEmojiIds, lang, recentCustomEmoji, stickerSetsById]);
+  }, [
+    addedCustomEmojiIds, defaultTopicIconsId, featuredCustomEmojiIds, lang, recentCustomEmoji, stickerSetsById,
+    withDefaultTopicIcons,
+  ]);
 
   const noPopulatedSets = useMemo(() => (
     areAddedLoaded
@@ -280,6 +295,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersection}
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
             isSavedMessages={isSavedMessages}
+            shouldHideRecentHeader={withDefaultTopicIcons}
+            withDefaultTopicIcon={withDefaultTopicIcons}
             isCustomEmojiPicker
             isCurrentUserPremium={isCurrentUserPremium}
             onStickerSelect={handleEmojiSelect}
@@ -296,7 +313,7 @@ export default memo(withGlobal<OwnProps>(
       setsById,
     } = global.stickers;
 
-    const isSavedMessages = selectIsChatWithSelf(global, chatId);
+    const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
 
     const recentCustomEmoji = Object.values(pickTruthy(global.customEmojis.byId, global.recentCustomEmojis));
 
@@ -308,6 +325,7 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       recentCustomEmoji,
       featuredCustomEmojiIds: global.customEmojis.featuredIds,
+      defaultTopicIconsId: global.defaultTopicIconsId,
     };
   },
 )(CustomEmojiPicker));

@@ -198,6 +198,24 @@ addActionHandler('loadPremiumGifts', async () => {
   });
 });
 
+addActionHandler('loadDefaultTopicIcons', async (global) => {
+  const stickerSet = await callApi('fetchDefaultTopicIcons');
+  if (!stickerSet) {
+    return;
+  }
+  global = getGlobal();
+
+  const { set, stickers } = stickerSet;
+
+  const fullSet = { ...set, stickers };
+
+  global = updateStickerSet(global, fullSet.id, fullSet);
+  setGlobal({
+    ...global,
+    defaultTopicIconsId: fullSet.id,
+  });
+});
+
 addActionHandler('loadStickers', (global, actions, payload) => {
   const { stickerSetInfo } = payload;
   const cachedSet = selectStickerSet(global, stickerSetInfo);

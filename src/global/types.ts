@@ -349,6 +349,7 @@ export type GlobalState = {
   animatedEmojiEffects?: ApiStickerSet;
   genericEmojiEffects?: ApiStickerSet;
   premiumGifts?: ApiStickerSet;
+  defaultTopicIconsId?: string;
   emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
   gifs: {
@@ -1305,6 +1306,7 @@ export interface ActionPayloads {
   };
 
   loadPremiumGifts: never;
+  loadDefaultTopicIcons: never;
   loadPremiumStickers: {
     hash?: string;
   };
@@ -1335,6 +1337,7 @@ export interface ActionPayloads {
     chatId: string;
     title: string;
     iconColor?: number;
+    iconEmojiId?: string;
   };
   loadTopics: {
     chatId: string;
@@ -1343,6 +1346,7 @@ export interface ActionPayloads {
   loadTopicById: {
     chatId: string;
     topicId: number;
+    shouldCloseChatOnError?: boolean;
   };
 
   deleteTopic: {

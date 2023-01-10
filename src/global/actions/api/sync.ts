@@ -104,9 +104,6 @@ async function loadAndReplaceMessages() {
 
   const currentChat = activeCurrentChatId ? global.chats.byId[activeCurrentChatId] : undefined;
   if (activeCurrentChatId && currentChat) {
-    if (currentChat.isForum) {
-      getActions().loadTopics({ chatId: activeCurrentChatId, force: true });
-    }
     const result = await loadTopMessages(currentChat, activeThreadId, threadInfo?.lastReadInboxMessageId);
     global = getGlobal();
     const { chatId: newCurrentChatId } = selectCurrentMessageList(global) || {};
@@ -161,6 +158,15 @@ async function loadAndReplaceMessages() {
   });
 
   setGlobal(global);
+
+  if (currentChat?.isForum) {
+    getActions().loadTopics({ chatId: activeCurrentChatId!, force: true });
+    if (currentThreadId && currentThreadId !== MAIN_THREAD_ID) {
+      getActions().loadTopicById({
+        chatId: activeCurrentChatId!, topicId: currentThreadId, shouldCloseChatOnError: true,
+      });
+    }
+  }
 
   const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
   if (audioChatId && audioMessageId && !selectChatMessage(global, audioChatId, audioMessageId)) {
