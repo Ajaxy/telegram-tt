@@ -277,7 +277,7 @@ class RLottie {
         canvas, ctx, onLoad,
       });
     } else {
-      if (!container.offsetParent) {
+      if (!container.isConnected) {
         throw new Error('[RLottie] Shared canvas is not mounted');
       }
 

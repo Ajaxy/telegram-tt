@@ -45,6 +45,7 @@ let RLottie: RLottieClass;
 // Time for the main interface to completely load
 const LOTTIE_LOAD_DELAY = 3000;
 const ID_STORE = {};
+const ANIMATION_END_TIMEOUT = 500;
 
 async function ensureLottie() {
   if (!lottiePromise) {
@@ -116,6 +117,12 @@ const AnimatedSticker: FC<OwnProps> = ({
 
       const container = containerRef.current || sharedCanvas;
       if (!container) {
+        return;
+      }
+
+      // Wait until element is properly mounted
+      if (sharedCanvas && !sharedCanvas.offsetParent) {
+        setTimeout(exec, ANIMATION_END_TIMEOUT);
         return;
       }
 
