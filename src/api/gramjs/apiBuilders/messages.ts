@@ -1359,6 +1359,8 @@ export function buildLocalForwardedMessage({
     isInAlbum,
     isForwardingAllowed: true,
     replyToTopMessageId: toThreadId,
+    ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
+
     ...(emojiOnlyCount && { emojiOnlyCount }),
     // Forward info doesn't get added when users forwards his own messages, also when forwarding audio
     ...(message.chatId !== currentUserId && !isAudio && !noAuthors && {

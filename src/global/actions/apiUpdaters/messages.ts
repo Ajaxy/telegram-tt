@@ -769,6 +769,13 @@ function updateChatLastMessage(
   const chat = chats.byId[chatId];
   const currentLastMessage = chat?.lastMessage;
 
+  const topic = chat?.isForum ? selectTopicFromMessage(global, message) : undefined;
+  if (topic) {
+    global = updateTopic(global, chatId, topic.id, {
+      lastMessageId: message.id,
+    });
+  }
+
   if (currentLastMessage && !force) {
     const isSameOrNewer = (
       currentLastMessage.id === message.id || currentLastMessage.id === message.previousLocalId
@@ -780,12 +787,6 @@ function updateChatLastMessage(
   }
 
   global = updateChat(global, chatId, { lastMessage: message });
-  const topic = chat?.isForum ? selectTopicFromMessage(global, message) : undefined;
-  if (topic) {
-    global = updateTopic(global, chatId, topic.id, {
-      lastMessageId: message.id,
-    });
-  }
 
   return global;
 }

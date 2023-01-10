@@ -5,7 +5,7 @@ import type {
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import {
-  areSortedArraysEqual, buildCollectionByKey, omit,
+  areSortedArraysEqual, buildCollectionByKey, omit, unique,
 } from '../../util/iteratees';
 import { selectChat, selectChatListType } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
@@ -249,6 +249,17 @@ export function addChatMembers(global: GlobalState, chat: ApiChat, membersToAdd:
       members: updatedMembers,
       adminMembersById: buildCollectionByKey(updatedMembers, 'userId'),
     },
+  });
+}
+
+export function updateListedTopicIds(
+  global: GlobalState, chatId: string, topicIds: number[],
+): GlobalState {
+  return updateChat(global, chatId, {
+    listedTopicIds: unique([
+      ...(global.chats.byId[chatId]?.listedTopicIds || []),
+      ...topicIds,
+    ]),
   });
 }
 
