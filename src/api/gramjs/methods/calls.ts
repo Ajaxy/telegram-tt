@@ -276,7 +276,7 @@ export async function requestCall({
   }));
 
   if (!result) {
-    return false;
+    return undefined;
   }
 
   const call = buildPhoneCall(result.phoneCall);
@@ -286,7 +286,11 @@ export async function requestCall({
     call,
   });
 
-  return true;
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+  };
 }
 
 export function setCallRating({
@@ -323,7 +327,7 @@ export async function acceptCall({
   }));
 
   if (!result) {
-    return;
+    return undefined;
   }
 
   call = buildPhoneCall(result.phoneCall);
@@ -332,6 +336,12 @@ export async function acceptCall({
     '@type': 'updatePhoneCall',
     call,
   });
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+  };
 }
 
 export async function confirmCall({
@@ -347,7 +357,7 @@ export async function confirmCall({
   }));
 
   if (!result) {
-    return;
+    return undefined;
   }
 
   call = buildPhoneCall(result.phoneCall);
@@ -356,6 +366,12 @@ export async function confirmCall({
     '@type': 'updatePhoneCall',
     call,
   });
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+  };
 }
 
 export function sendSignalingData({

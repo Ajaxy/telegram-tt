@@ -2,9 +2,9 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { GlobalState } from '../../types';
 import type {
-  ApiPrivacyKey, PrivacyVisibility, InputPrivacyRules, InputPrivacyContact,
+  ApiPrivacyKey, PrivacyVisibility, InputPrivacyRules, InputPrivacyContact, ApiPrivacySettings,
 } from '../../../types';
-import type { ApiUsername } from '../../../api/types';
+import type { ApiUser, ApiUsername } from '../../../api/types';
 import {
   ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
@@ -44,6 +44,8 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
   if (photo) {
     const result = await callApi('uploadProfilePhoto', photo);
     if (result) {
+      global = getGlobal();
+      setGlobal(addUsers(global, buildCollectionByKey(result.users, 'id')));
       actions.loadProfilePhotos({ profileId: currentUserId });
     }
   }
@@ -106,18 +108,23 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload) => {
       profilePhoto: undefined,
     },
   }));
-  const newPhoto = await callApi('updateProfilePhoto', photo);
-  if (newPhoto) {
-    setGlobal(updateUser(getGlobal(), currentUserId, {
-      avatarHash: newPhoto.id,
-      fullInfo: {
-        ...currentUser.fullInfo,
-        profilePhoto: newPhoto,
-      },
-    }));
-    actions.loadFullUser({ userId: currentUserId });
-    actions.loadProfilePhotos({ profileId: currentUserId });
-  }
+  const result = await callApi('updateProfilePhoto', photo);
+  if (!result) return;
+
+  const { photo: newPhoto, users } = result;
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+
+  setGlobal(updateUser(global, currentUserId, {
+    avatarHash: newPhoto.id,
+    fullInfo: {
+      ...currentUser.fullInfo,
+      profilePhoto: newPhoto,
+    },
+  }));
+
+  actions.loadFullUser({ userId: currentUserId });
+  actions.loadProfilePhotos({ profileId: currentUserId });
 });
 
 addActionHandler('deleteProfilePhoto', async (global, actions, payload) => {
@@ -375,16 +382,7 @@ addActionHandler('loadLanguages', async () => {
 });
 
 addActionHandler('loadPrivacySettings', async (global) => {
-  const [
-    phoneNumberSettings,
-    lastSeenSettings,
-    profilePhotoSettings,
-    forwardsSettings,
-    chatInviteSettings,
-    phoneCallSettings,
-    phoneP2PSettings,
-    voiceMessagesSettings,
-  ] = await Promise.all([
+  const result = await Promise.all([
     callApi('fetchPrivacySettings', 'phoneNumber'),
     callApi('fetchPrivacySettings', 'lastSeen'),
     callApi('fetchPrivacySettings', 'profilePhoto'),
@@ -395,34 +393,42 @@ addActionHandler('loadPrivacySettings', async (global) => {
     callApi('fetchPrivacySettings', 'voiceMessages'),
   ]);
 
-  if (
-    !phoneNumberSettings
-    || !lastSeenSettings
-    || !profilePhotoSettings
-    || !forwardsSettings
-    || !chatInviteSettings
-    || !phoneCallSettings
-    || !phoneP2PSettings
-    || !voiceMessagesSettings
-  ) {
+  if (result.some((e) => e === undefined)) {
     return;
   }
 
+  const [
+    phoneNumberSettings,
+    lastSeenSettings,
+    profilePhotoSettings,
+    forwardsSettings,
+    chatInviteSettings,
+    phoneCallSettings,
+    phoneP2PSettings,
+    voiceMessagesSettings,
+  ] = result as {
+    users: ApiUser[];
+    rules: ApiPrivacySettings;
+  }[];
+
+  const allUsers = result.flatMap((e) => e!.users);
+
   global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(allUsers, 'id'));
   setGlobal({
     ...global,
     settings: {
       ...global.settings,
       privacy: {
         ...global.settings.privacy,
-        phoneNumber: phoneNumberSettings,
-        lastSeen: lastSeenSettings,
-        profilePhoto: profilePhotoSettings,
-        forwards: forwardsSettings,
-        chatInvite: chatInviteSettings,
-        phoneCall: phoneCallSettings,
-        phoneP2P: phoneP2PSettings,
-        voiceMessages: voiceMessagesSettings,
+        phoneNumber: phoneNumberSettings.rules,
+        lastSeen: lastSeenSettings.rules,
+        profilePhoto: profilePhotoSettings.rules,
+        forwards: forwardsSettings.rules,
+        chatInvite: chatInviteSettings.rules,
+        phoneCall: phoneCallSettings.rules,
+        phoneP2P: phoneP2PSettings.rules,
+        voiceMessages: voiceMessagesSettings.rules,
       },
     },
   });
@@ -451,14 +457,14 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload) => {
   }
 
   global = getGlobal();
-
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal({
     ...global,
     settings: {
       ...global.settings,
       privacy: {
         ...global.settings.privacy,
-        [privacyKey]: result,
+        [privacyKey]: result.rules,
       },
     },
   });
@@ -486,14 +492,14 @@ addActionHandler('setPrivacySettings', async (global, actions, payload) => {
   }
 
   global = getGlobal();
-
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal({
     ...global,
     settings: {
       ...global.settings,
       privacy: {
         ...global.settings.privacy,
-        [privacyKey]: result,
+        [privacyKey]: result.rules,
       },
     },
   });

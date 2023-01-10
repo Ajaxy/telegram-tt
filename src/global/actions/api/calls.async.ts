@@ -20,6 +20,8 @@ import {
 } from '../../reducers/calls';
 import { getGroupCallAudioContext, getGroupCallAudioElement, removeGroupCallAudioElement } from '../ui/calls';
 import { loadFullChat } from './chats';
+import { addUsers } from '../../reducers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('leaveGroupCall', async (global, actions, payload) => {
   const {
@@ -233,7 +235,11 @@ addActionHandler('connectToActivePhoneCall', async (global, actions) => {
 
   if (!result) {
     actions.hangUp();
+    return;
   }
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
 });
 
 addActionHandler('acceptCall', async (global) => {
@@ -247,7 +253,13 @@ addActionHandler('acceptCall', async (global) => {
   await callApi('createPhoneCallState', [false]);
 
   const gB = await callApi('acceptPhoneCall', [dhConfig])!;
-  callApi('acceptCall', { call: phoneCall, gB });
+  const result = await callApi('acceptCall', { call: phoneCall, gB });
+  if (!result) {
+    return;
+  }
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
 });
 
 addActionHandler('sendSignalingData', (global, actions, payload) => {

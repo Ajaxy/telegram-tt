@@ -2,6 +2,8 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectChat } from '../../selectors';
 import { callApi } from '../../../api/gramjs';
 import { getTranslation } from '../../../util/langProvider';
+import { addUsers } from '../../reducers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('reportPeer', async (global, actions, payload) => {
   const {
@@ -171,17 +173,21 @@ addActionHandler('changeSessionTtl', async (global, actions, payload) => {
   });
 });
 
-addActionHandler('loadWebAuthorizations', async () => {
+addActionHandler('loadWebAuthorizations', async (global) => {
   const result = await callApi('fetchWebAuthorizations');
   if (!result) {
     return;
   }
+  const { users, webAuthorizations } = result;
+  global = getGlobal();
+
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
   setGlobal({
-    ...getGlobal(),
+    ...global,
     activeWebSessions: {
-      byHash: result,
-      orderedHashes: Object.keys(result),
+      byHash: webAuthorizations,
+      orderedHashes: Object.keys(webAuthorizations),
     },
   });
 });

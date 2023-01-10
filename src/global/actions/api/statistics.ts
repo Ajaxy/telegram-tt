@@ -1,9 +1,11 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import type { ApiChannelStatistics } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
-import { updateStatistics, updateMessageStatistics, updateStatisticsGraph } from '../../reducers';
+import {
+  updateStatistics, updateMessageStatistics, updateStatisticsGraph, addUsers,
+} from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('loadStatistics', async (global, actions, payload) => {
   const { chatId, isGroup } = payload;
@@ -18,15 +20,17 @@ addActionHandler('loadStatistics', async (global, actions, payload) => {
   }
 
   global = getGlobal();
+  const { stats, users } = result;
 
-  if ((result as ApiChannelStatistics).recentTopMessages?.length) {
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+
+  if ('recentTopMessages' in stats && stats.recentTopMessages.length) {
     const messages = selectChatMessages(global, chatId);
 
-    (result as ApiChannelStatistics).recentTopMessages = (result as ApiChannelStatistics).recentTopMessages
-      .map((message) => ({ ...message, ...messages[message.msgId] }));
+    stats.recentTopMessages = stats.recentTopMessages.map((message) => ({ ...message, ...messages[message.msgId] }));
   }
 
-  setGlobal(updateStatistics(global, chatId, result));
+  setGlobal(updateStatistics(global, chatId, stats));
 });
 
 addActionHandler('loadMessageStatistics', async (global, actions, payload) => {

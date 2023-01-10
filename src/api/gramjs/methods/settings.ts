@@ -87,18 +87,36 @@ export async function updateProfilePhoto(photo?: ApiPhoto) {
   const result = await invokeRequest(new GramJs.photos.UpdateProfilePhoto({
     id: photoId,
   }));
-  if (result?.photo instanceof GramJs.Photo) {
+  if (!result) return undefined;
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+  if (result.photo instanceof GramJs.Photo) {
     addPhotoToLocalDb(result.photo);
-    return buildApiPhoto(result.photo);
+    return {
+      users: result.users.map(buildApiUser).filter(Boolean),
+      photo: buildApiPhoto(result.photo),
+    };
   }
   return undefined;
 }
 
 export async function uploadProfilePhoto(file: File) {
   const inputFile = await uploadFile(file);
-  return invokeRequest(new GramJs.photos.UploadProfilePhoto({
+  const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
     file: inputFile,
-  }), true);
+  }));
+
+  if (!result) return undefined;
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+  if (result.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(result.photo);
+    return {
+      users: result.users.map(buildApiUser).filter(Boolean),
+      photo: buildApiPhoto(result.photo),
+    };
+  }
+  return undefined;
 }
 
 export async function deleteProfilePhotos(photos: ApiPhoto[]) {
@@ -217,8 +235,12 @@ export async function fetchWebAuthorizations() {
   if (!result) {
     return undefined;
   }
+  addEntitiesWithPhotosToLocalDb(result.users);
 
-  return buildCollectionByKey(result.authorizations.map(buildApiWebSession), 'hash');
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+    webAuthorizations: buildCollectionByKey(result.authorizations.map(buildApiWebSession), 'hash'),
+  };
 }
 
 export function terminateWebAuthorization(hash: string) {
@@ -401,7 +423,10 @@ export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {
 
   updateLocalDb(result);
 
-  return buildPrivacyRules(result.rules);
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+    rules: buildPrivacyRules(result.rules),
+  };
 }
 
 export function registerDevice(token: string) {
@@ -476,7 +501,10 @@ export async function setPrivacySettings(
 
   updateLocalDb(result);
 
-  return buildPrivacyRules(result.rules);
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+    rules: buildPrivacyRules(result.rules),
+  };
 }
 
 export async function updateIsOnline(isOnline: boolean) {

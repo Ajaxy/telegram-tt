@@ -27,10 +27,11 @@ import {
   clearLegacySessions,
 } from '../../../util/sessions';
 import { forceWebsync } from '../../../util/websync';
-import { clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
+import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { serializeGlobal } from '../../cache';
 import { parseInitialLocationHash } from '../../../util/routing';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('initApi', async (global, actions) => {
   if (!IS_TEST) {
@@ -90,10 +91,15 @@ addActionHandler('setAuthPassword', (global, actions, payload) => {
   };
 });
 
-addActionHandler('uploadProfilePhoto', (global, actions, payload) => {
+addActionHandler('uploadProfilePhoto', async (global, actions, payload) => {
   const { file } = payload!;
 
-  void callApi('uploadProfilePhoto', file);
+  const result = await callApi('uploadProfilePhoto', file);
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
 });
 
 addActionHandler('signUp', (global, actions, payload) => {

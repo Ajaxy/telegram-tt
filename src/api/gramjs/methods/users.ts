@@ -252,6 +252,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
       photos: result.photos
         .filter((photo): photo is GramJs.Photo => photo instanceof GramJs.Photo)
         .map(buildApiPhoto),
+      users: result.users.map(buildApiUser).filter(Boolean),
     };
   }
 
@@ -288,5 +289,9 @@ function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice
 
   if ('photos' in result) {
     result.photos.forEach(addPhotoToLocalDb);
+  }
+
+  if ('users' in result) {
+    addEntitiesWithPhotosToLocalDb(result.users);
   }
 }

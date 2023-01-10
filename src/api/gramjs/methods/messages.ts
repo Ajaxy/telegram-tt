@@ -908,8 +908,14 @@ export async function requestThreadInfoUpdate({
     });
   }
 
+  addEntitiesWithPhotosToLocalDb(topMessageResult.users);
+  addEntitiesWithPhotosToLocalDb(topMessageResult.chats);
+
+  const users = topMessageResult.users.map(buildApiUser).filter(Boolean);
+
   return {
     discussionChatId,
+    users,
   };
 }
 

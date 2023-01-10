@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser } from '../../selectors/calls';
 import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
-import { omit } from '../../../util/iteratees';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import type { ApiCallProtocol } from '../../../lib/secret-sauce';
 import {
   handleUpdateGroupCallConnection,
@@ -13,6 +13,7 @@ import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { callApi } from '../../../api/gramjs';
 import * as langProvider from '../../../util/langProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
+import { addUsers } from '../../reducers';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   const { activeGroupCallId } = global.groupCalls;
@@ -133,9 +134,14 @@ addActionHandler('apiUpdate', (global, actions, update) => {
             phoneCall: newCall,
           });
 
-          callApi('confirmCall', {
+          const result = await callApi('confirmCall', {
             call, gA, keyFingerprint,
           });
+          if (result) {
+            global = getGlobal();
+            global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+            setGlobal(global);
+          }
         })();
       } else if (state === 'active' && connections && phoneCall?.state !== 'active') {
         if (!isOutgoing) {

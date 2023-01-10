@@ -126,6 +126,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
   return {
     form: buildApiPaymentForm(result),
     invoice: buildApiInvoiceFromForm(result),
+    users: result.users.map(buildApiUser).filter(Boolean),
   };
 }
 
@@ -139,7 +140,12 @@ export async function getReceipt(chat: ApiChat, msgId: number) {
     return undefined;
   }
 
-  return buildApiReceipt(result);
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  return {
+    receipt: buildApiReceipt(result),
+    users: result.users.map(buildApiUser).filter(Boolean),
+  };
 }
 
 export async function fetchPremiumPromo() {

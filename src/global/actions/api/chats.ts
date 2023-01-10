@@ -170,6 +170,9 @@ addActionHandler('focusMessageInComments', async (global, actions, payload) => {
   if (!result) {
     return;
   }
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
 
   actions.focusMessage({ chatId, threadId, messageId });
 });
@@ -1255,10 +1258,14 @@ addActionHandler('loadChatSettings', async (global, actions, payload) => {
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  const settings = await callApi('fetchChatSettings', chat);
-  if (!settings) return;
+  const result = await callApi('fetchChatSettings', chat);
+  if (!result) return;
+  const { settings, users } = result;
+  global = getGlobal();
 
-  setGlobal(updateChat(getGlobal(), chat.id, { settings }));
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
+
+  setGlobal(updateChat(global, chat.id, { settings }));
 });
 
 addActionHandler('toggleJoinToSend', async (global, actions, payload) => {
@@ -1981,7 +1988,7 @@ async function openCommentsByUsername(
 
   if (!chat) return;
 
-  const global = getGlobal();
+  let global = getGlobal();
 
   const threadInfo = selectThreadInfo(global, chat.id, messageId);
   let discussionChatId: string | undefined;
@@ -1989,6 +1996,9 @@ async function openCommentsByUsername(
   if (!threadInfo) {
     const result = await callApi('requestThreadInfoUpdate', { chat, threadId: messageId });
     if (!result) return;
+    global = getGlobal();
+    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+    setGlobal(global);
 
     discussionChatId = result.discussionChatId;
   } else {
