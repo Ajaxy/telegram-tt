@@ -41,7 +41,7 @@ import {
   updateTopics,
   deleteTopic,
   updateTopic,
-  updateThreadInfo,
+  updateThreadInfo, updateListedTopicIds,
 } from '../../reducers';
 import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
@@ -1338,18 +1338,22 @@ addActionHandler('loadTopics', async (global, actions, payload) => {
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  if (!force && chat.topics && Object.values(chat.topics).length === chat.topicsCount) {
+  if (!force && chat.listedTopicIds && chat.listedTopicIds.length === chat.topicsCount) {
     return;
   }
 
-  const offsetTopic = !force && chat.topics ? Object.values(chat.topics).reduce((acc, el) => {
-    if (!acc || el.lastMessageId < acc.lastMessageId) {
+  const offsetTopic = !force && chat.listedTopicIds ? chat.listedTopicIds.reduce((acc, el) => {
+    const topic = chat.topics?.[el];
+    const accTopic = chat.topics?.[acc];
+    if (!topic) return acc;
+    if (!accTopic || topic.lastMessageId < accTopic.lastMessageId) {
       return el;
     }
     return acc;
   }) : undefined;
 
-  const { id: offsetTopicId, date: offsetDate, lastMessageId: offsetId } = offsetTopic || {};
+  const { id: offsetTopicId, date: offsetDate, lastMessageId: offsetId } = (offsetTopic
+    && chat.topics?.[offsetTopic]) || {};
   const result = await callApi('fetchTopics', {
     chat, offsetTopicId, offsetId, offsetDate, limit: offsetTopicId ? TOPICS_SLICE : TOPICS_SLICE_SECOND_LOAD,
   });
@@ -1361,6 +1365,7 @@ addActionHandler('loadTopics', async (global, actions, payload) => {
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   global = addMessages(global, result.messages);
   global = updateTopics(global, chatId, result.count, result.topics);
+  global = updateListedTopicIds(global, chatId, result.topics.map((topic) => topic.id));
   Object.entries(result.draftsById || {}).forEach(([threadId, draft]) => {
     global = replaceThreadParam(global, chatId, Number(threadId), 'draft', draft?.formattedText);
     global = replaceThreadParam(global, chatId, Number(threadId), 'replyingToId', draft?.replyingToId);

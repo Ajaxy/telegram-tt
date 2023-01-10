@@ -198,7 +198,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
-    if (isIntersecting && lastSyncTime && isForum && chat && chat.topics === undefined) {
+    if (isIntersecting && lastSyncTime && isForum && chat && chat.listedTopicIds === undefined) {
       loadTopics({ chatId });
     }
   }, [chat, chatId, isForum, isIntersecting, lastSyncTime, loadTopics]);

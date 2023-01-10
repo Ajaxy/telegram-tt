@@ -41,6 +41,7 @@ export interface ApiChat {
   fakeType?: ApiFakeType;
   isForum?: boolean;
   topics?: Record<number, ApiTopic>;
+  listedTopicIds?: number[];
   topicsCount?: number;
   orderedPinnedTopicIds?: number[];
 
