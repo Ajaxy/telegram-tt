@@ -296,7 +296,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
             isSavedMessages={isSavedMessages}
             shouldHideRecentHeader={withDefaultTopicIcons}
-            withDefaultTopicIcon={withDefaultTopicIcons}
+            withDefaultTopicIcon={stickerSet.id === RECENT_SYMBOL_SET_ID}
             isCustomEmojiPicker
             isCurrentUserPremium={isCurrentUserPremium}
             onStickerSelect={handleEmojiSelect}
