@@ -144,14 +144,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           <span className="settings-item__current-value">{blockedCount || ''}</span>
         </ListItem>
         <ListItem
-          icon="web"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
-        >
-          {lang('PrivacySettings.WebSessions')}
-          <span className="settings-item__current-value">{webAuthCount || ''}</span>
-        </ListItem>
-        <ListItem
           icon="key"
           narrow
           // eslint-disable-next-line react/jsx-no-bind
@@ -181,6 +173,16 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             </span>
           </div>
         </ListItem>
+        {webAuthCount > 0 && (
+          <ListItem
+            icon="web"
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => onScreenSelect(SettingsScreens.ActiveWebsites)}
+          >
+            {lang('PrivacySettings.WebSessions')}
+            <span className="settings-item__current-value">{webAuthCount}</span>
+          </ListItem>
+        )}
       </div>
 
       <div className="settings-item">
