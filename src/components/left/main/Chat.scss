@@ -125,8 +125,9 @@
         color: var(--color-white) !important;
       }
 
-      .Badge:not(.pinned) {
+      .Badge:not(.pinned):not(.muted) {
         color: var(--color-chat-active);
+        background: var(--color-white);
       }
 
       .Badge:not(.pinned).muted {
