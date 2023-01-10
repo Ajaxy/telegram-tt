@@ -579,7 +579,8 @@ async function loadAttachBots(hash?: string) {
     return;
   }
 
-  const global = getGlobal();
+  let global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal({
     ...global,
     attachMenu: {

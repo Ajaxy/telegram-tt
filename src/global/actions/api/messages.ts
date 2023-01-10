@@ -751,14 +751,18 @@ addActionHandler('rescheduleMessage', (global, actions, payload) => {
   });
 });
 
-addActionHandler('requestThreadInfoUpdate', (global, actions, payload) => {
+addActionHandler('requestThreadInfoUpdate', async (global, actions, payload) => {
   const { chatId, threadId } = payload;
   const chat = selectThreadOriginChat(global, chatId, threadId);
   if (!chat) {
     return;
   }
 
-  void callApi('requestThreadInfoUpdate', { chat, threadId });
+  const result = await callApi('requestThreadInfoUpdate', { chat, threadId });
+  if (!result) return;
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
 });
 
 addActionHandler('transcribeAudio', async (global, actions, payload) => {

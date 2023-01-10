@@ -76,7 +76,6 @@ export async function updatePrivateLink({
     expireDate,
   }));
 
-  // TODO Verify Exported Invite logic
   if (!(result instanceof GramJs.ChatInviteExported)) return undefined;
 
   onUpdate({
@@ -102,10 +101,15 @@ export async function fetchExportedChatInvites({
 
   if (!exportedInvites) return undefined;
   addEntitiesWithPhotosToLocalDb(exportedInvites.users);
-  // TODO Verify Exported Invite logic
-  return (exportedInvites.invites
+
+  const invites = (exportedInvites.invites
     .filter((invite): invite is GramJs.ChatInviteExported => invite instanceof GramJs.ChatInviteExported))
     .map(buildApiExportedInvite);
+
+  return {
+    invites,
+    users: exportedInvites.users.map(buildApiUser).filter(Boolean),
+  };
 }
 
 export async function editExportedChatInvite({
@@ -119,7 +123,6 @@ export async function editExportedChatInvite({
   isRequestNeeded?: boolean;
   title?: string;
 }) {
-  // TODO Verify Exported Invite logic
   const invite = await invokeRequest(new GramJs.messages.EditExportedChatInvite({
     link,
     peer: buildInputPeer(peer.id, peer.accessHash),
@@ -138,6 +141,7 @@ export async function editExportedChatInvite({
     return {
       oldInvite: replaceInvite,
       newInvite: replaceInvite,
+      users: invite.users.map(buildApiUser).filter(Boolean),
     };
   }
 
@@ -149,6 +153,7 @@ export async function editExportedChatInvite({
     return {
       oldInvite,
       newInvite,
+      users: invite.users.map(buildApiUser).filter(Boolean),
     };
   }
   return undefined;
@@ -171,7 +176,6 @@ export async function exportChatInvite({
     title,
   }));
 
-  // TODO Verify Exported Invite logic
   if (!(invite instanceof GramJs.ChatInviteExported)) return undefined;
   return buildApiExportedInvite(invite);
 }

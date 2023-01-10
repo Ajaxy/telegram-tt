@@ -273,6 +273,7 @@ export async function loadAttachBots({
     return {
       hash: result.hash.toString(),
       bots: buildCollectionByKey(result.bots.map(buildApiAttachBot), 'id'),
+      users: result.users.map(buildApiUser).filter(Boolean),
     };
   }
   return undefined;

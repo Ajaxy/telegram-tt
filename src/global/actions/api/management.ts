@@ -9,6 +9,7 @@ import {
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import { migrateChat } from './chats';
 import { isChatBasicGroup } from '../../helpers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 
 addActionHandler('checkPublicLink', async (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
@@ -116,10 +117,13 @@ addActionHandler('loadExportedChatInvites', async (global, actions, payload) => 
   if (!result) {
     return;
   }
+  global = getGlobal();
+  const { invites, users } = result;
 
-  const update = isRevoked ? { revokedInvites: result } : { invites: result };
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
-  setGlobal(updateManagement(getGlobal(), chatId, update));
+  const update = isRevoked ? { revokedInvites: invites } : { invites };
+  setGlobal(updateManagement(global, chatId, update));
 });
 
 addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
@@ -142,7 +146,7 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
     return;
   }
 
-  const { oldInvite, newInvite } = result;
+  const { oldInvite, newInvite, users } = result;
 
   global = getGlobal();
   const invites = (global.management.byChatId[chatId].invites || [])
@@ -154,6 +158,8 @@ addActionHandler('editExportedChatInvite', async (global, actions, payload) => {
   } else {
     invites.push(newInvite);
   }
+
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
 
   setGlobal(updateManagement(global, chatId, {
     invites,

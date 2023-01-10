@@ -215,7 +215,12 @@ export async function fetchChatSettings(chat: ApiChat) {
     return undefined;
   }
 
-  return buildApiChatSettings(result.settings);
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  return {
+    users: result.users.map(buildApiUser).filter(Boolean),
+    settings: buildApiChatSettings(result.settings),
+  };
 }
 
 export async function searchChats({ query }: { query: string }) {
@@ -393,6 +398,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
   const members = buildChatMembers(participants);
   const adminMembers = members ? members.filter(({ isAdmin, isOwner }) => isAdmin || isOwner) : undefined;
   const botCommands = botInfo ? buildApiChatBotCommands(botInfo) : undefined;
+  const inviteLink = exportedInvite instanceof GramJs.ChatInviteExported ? exportedInvite.link : undefined;
   const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
 
   return {
@@ -403,10 +409,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       canViewMembers: true,
       botCommands,
-      ...(exportedInvite instanceof GramJs.ChatInviteExported && {
-        // TODO Verify Exported Invite logic
-        inviteLink: exportedInvite.link,
-      }),
+      inviteLink,
       groupCallId: call?.id.toString(),
       enabledReactions: buildApiChatReactions(availableReactions),
       requestsPending,

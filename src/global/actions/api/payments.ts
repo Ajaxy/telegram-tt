@@ -92,10 +92,11 @@ async function getPaymentForm(inputInvoice: ApiRequestInputInvoice): Promise<Api
     return undefined;
   }
 
-  const { form, invoice } = result;
+  const { form, invoice, users } = result;
 
   let global = setPaymentForm(getGlobal(), form);
   global = setPaymentStep(global, PaymentStep.Checkout);
+  global = addUsers(global, buildCollectionByKey(users, 'id'));
   setGlobal(global);
 
   return invoice;
@@ -119,7 +120,8 @@ async function getReceipt(chat: ApiChat, messageId: number, receiptMessageId: nu
 
   let global = getGlobal();
   const message = selectChatMessage(global, chat.id, messageId);
-  global = setReceipt(global, result, message);
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = setReceipt(global, result.receipt, message);
   setGlobal(global);
 }
 
