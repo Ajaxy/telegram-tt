@@ -6,6 +6,8 @@ import { round } from '../util/math';
 
 import { useResizeObserver } from './useResizeObserver';
 
+const ANIMATION_END_TIMEOUT = 500;
+
 export default function useBoundsInSharedCanvas(
   containerRef: React.RefObject<HTMLDivElement>,
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
@@ -18,6 +20,12 @@ export default function useBoundsInSharedCanvas(
     const container = containerRef.current;
     const canvas = sharedCanvasRef?.current;
     if (!container || !canvas) {
+      return;
+    }
+
+    // Wait until elements are properly mounted
+    if (!container.offsetParent || !canvas.offsetParent) {
+      setTimeout(recalculate, ANIMATION_END_TIMEOUT);
       return;
     }
 
