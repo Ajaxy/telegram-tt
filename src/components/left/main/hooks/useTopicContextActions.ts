@@ -3,7 +3,7 @@ import { getActions } from '../../../../global';
 import type { ApiChat, ApiTopic } from '../../../../api/types';
 
 import { compact } from '../../../../util/iteratees';
-import { getHasAdminRight } from '../../../../global/helpers';
+import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
 
 import useLang from '../../../../hooks/useLang';
 import { useMemo } from '../../../../lib/teact/teact';
@@ -19,7 +19,7 @@ export default function useTopicContextActions(
 
   return useMemo(() => {
     const {
-      isPinned, isMuted, isClosed, isOwner, id: topicId,
+      isPinned, isMuted, isClosed, id: topicId,
     } = topic;
 
     const chatId = chat.id;
@@ -31,7 +31,7 @@ export default function useTopicContextActions(
       updateTopicMutedState,
     } = getActions();
 
-    const canToggleClosed = isOwner || chat.isCreator || getHasAdminRight(chat, 'manageTopics');
+    const canToggleClosed = getCanManageTopic(chat, topic);
     const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
 
     const actionUnreadMark = topic.unreadCount || !wasOpened

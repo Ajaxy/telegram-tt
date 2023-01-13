@@ -879,6 +879,7 @@ function buildAction(
   let photo: ApiPhoto | undefined;
   let score: number | undefined;
   let months: number | undefined;
+  let topicEmojiIconId: string | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -1036,8 +1037,11 @@ function buildAction(
     } else if (action.title) {
       text = 'TopicRenamedTo';
       translationValues.push('%action_origin%', action.title);
+    } else if (action.iconEmojiId) {
+      text = 'TopicWasIconChangedToAction';
+      translationValues.push('%action_origin%', '%action_topic_icon%');
+      topicEmojiIconId = action.iconEmojiId.toString();
     } else {
-      // TODO[forums] Support icon changed action
       text = 'ChatList.UnsupportedMessage';
     }
   } else {
@@ -1062,6 +1066,7 @@ function buildAction(
     phoneCall,
     score,
     months,
+    topicEmojiIconId,
   };
 }
 

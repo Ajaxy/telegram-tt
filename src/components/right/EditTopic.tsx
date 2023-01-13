@@ -26,6 +26,7 @@ import Transition from '../ui/Transition';
 import styles from './ManageTopic.module.scss';
 
 const ICON_SIZE = 5 * REM;
+const RESET_ICON_ID = '0';
 
 export type OwnProps = {
   isActive: boolean;
@@ -92,7 +93,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
     }
 
     if (emoji.id === DEFAULT_TOPIC_ICON_STICKER_ID) {
-      setIconEmojiId(undefined);
+      setIconEmojiId(RESET_ICON_ID);
       return;
     }
 
