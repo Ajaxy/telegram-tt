@@ -1427,13 +1427,15 @@ addActionHandler('createTopic', async (global, actions, payload) => {
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
-  setGlobal({
-    ...global,
-    createTopicPanel: {
-      chatId,
-      isLoading: true,
-    },
-  });
+  if (global.createTopicPanel) {
+    setGlobal({
+      ...global,
+      createTopicPanel: {
+        chatId,
+        isLoading: true,
+      },
+    });
+  }
 
   const topicId = await callApi('createTopic', {
     chat, title, iconColor, iconEmojiId,
@@ -1464,14 +1466,16 @@ addActionHandler('editTopic', async (global, actions, payload) => {
   const topic = chat?.topics?.[topicId];
   if (!chat || !topic) return;
 
-  setGlobal({
-    ...global,
-    editTopicPanel: {
-      chatId,
-      topicId,
-      isLoading: true,
-    },
-  });
+  if (global.editTopicPanel) {
+    setGlobal({
+      ...global,
+      editTopicPanel: {
+        chatId,
+        topicId,
+        isLoading: true,
+      },
+    });
+  }
 
   const result = await callApi('editTopic', { chat, topicId, ...rest });
   if (!result) return;

@@ -268,6 +268,7 @@ export interface ApiAction {
   phoneCall?: PhoneCallAction;
   score?: number;
   months?: number;
+  topicEmojiIconId?: string;
 }
 
 export interface ApiWebPage {

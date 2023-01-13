@@ -26,6 +26,7 @@ import {
   ALL_FOLDER_ID,
   MAX_INT_32,
   TOPICS_SLICE,
+  GENERAL_TOPIC_ID,
 } from '../../../config';
 import { invokeRequest, uploadFile } from './client';
 import {
@@ -1516,7 +1517,7 @@ export function editTopic({
     channel: buildInputPeer(id, accessHash),
     topicId,
     title,
-    iconEmojiId: BigInt(iconEmojiId || '0'),
+    iconEmojiId: topicId !== GENERAL_TOPIC_ID && iconEmojiId ? BigInt(iconEmojiId) : undefined,
     closed: isClosed,
     hidden: isHidden,
   }), true);
