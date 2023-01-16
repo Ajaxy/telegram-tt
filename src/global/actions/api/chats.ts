@@ -17,7 +17,10 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
   TMP_CHAT_ID,
   ALL_FOLDER_ID,
-  DEBUG, TOPICS_SLICE, TOPICS_SLICE_SECOND_LOAD,
+  DEBUG,
+  TOPICS_SLICE,
+  TOPICS_SLICE_SECOND_LOAD,
+  TME_WEB_DOMAINS,
 } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import {
@@ -672,12 +675,13 @@ addActionHandler('openTelegramLink', (global, actions, payload) => {
   }
 
   const uri = new URL(url.startsWith('http') ? url : `https://${url}`);
-  if (uri.hostname === 't.me' && uri.pathname === '/') {
+  if (TME_WEB_DOMAINS.has(uri.hostname) && uri.pathname === '/') {
     window.open(uri.toString(), '_blank', 'noopener');
     return;
   }
 
-  const hostParts = uri.hostname.split('.');
+  const hostname = TME_WEB_DOMAINS.has(uri.hostname) ? 't.me' : uri.hostname;
+  const hostParts = hostname.split('.');
   if (hostParts.length > 3) return;
   const pathname = hostParts.length === 3 ? `${hostParts[0]}/${uri.pathname}` : uri.pathname;
   const [part1, part2, part3] = pathname.split('/').filter(Boolean).map((part) => decodeURI(part));
