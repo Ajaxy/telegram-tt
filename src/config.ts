@@ -218,6 +218,7 @@ export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//;
 export const TME_LINK_PREFIX = 'https://t.me/';
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
 export const PURCHASE_USERNAME = 'auction';
+export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'k.t.me', 'z.t.me']);
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
