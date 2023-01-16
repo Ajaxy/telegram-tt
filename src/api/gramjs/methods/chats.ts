@@ -119,10 +119,12 @@ export async function fetchChats({
       .filter(Boolean),
     'chatId',
   );
-  const peersByKey: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {
-    ...(resultPinned && preparePeers(resultPinned)),
-    ...preparePeers(result),
-  };
+
+  const peersByKey = preparePeers(result);
+  if (resultPinned) {
+    Object.assign(peersByKey, preparePeers(resultPinned, peersByKey));
+  }
+
   const chats: ApiChat[] = [];
   const draftsById: Record<string, ApiFormattedText> = {};
   const replyingToById: Record<string, number> = {};
@@ -155,6 +157,7 @@ export async function fetchChats({
     }
 
     chat.isListed = true;
+
     chats.push(chat);
 
     if (withPinned && dialog.pinned) {
@@ -1260,15 +1263,28 @@ export function toggleJoinRequest(chat: ApiChat, isEnabled: boolean) {
 
 function preparePeers(
   result: GramJs.messages.Dialogs | GramJs.messages.DialogsSlice | GramJs.messages.PeerDialogs,
+  currentStore?: Record<string, GramJs.TypeChat | GramJs.TypeUser>,
 ) {
   const store: Record<string, GramJs.TypeChat | GramJs.TypeUser> = {};
 
   result.chats?.forEach((chat) => {
-    store[`chat${chat.id}`] = chat;
+    const key = `chat${chat.id}`;
+
+    if (currentStore?.[key] && 'min' in chat && chat.min) {
+      return;
+    }
+
+    store[key] = chat;
   });
 
   result.users?.forEach((user) => {
-    store[`user${user.id}`] = user;
+    const key = `user${user.id}`;
+
+    if (currentStore?.[key] && 'min' in user && user.min) {
+      return;
+    }
+
+    store[key] = user;
   });
 
   return store;
