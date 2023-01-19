@@ -92,6 +92,7 @@ const VideoPlayer: FC<OwnProps> = ({
   const [
     isPictureInPictureSupported,
     enterPictureInPicture,
+    isInPictureInPicture,
   ] = usePictureInPicture(videoRef, handleEnterFullscreen, handleLeaveFullscreen);
 
   const handleVideoMove = useCallback(() => {
@@ -207,7 +208,7 @@ const VideoPlayer: FC<OwnProps> = ({
   useEffect(() => {
     if (!isMediaViewerOpen) return undefined;
     const togglePayingStateBySpace = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if ((e.key === 'Enter' || e.key === ' ') && !isInPictureInPicture) {
         e.preventDefault();
         togglePlayState(e);
       }
@@ -218,7 +219,7 @@ const VideoPlayer: FC<OwnProps> = ({
     return () => {
       document.removeEventListener('keydown', togglePayingStateBySpace, false);
     };
-  }, [togglePlayState, isMediaViewerOpen]);
+  }, [togglePlayState, isMediaViewerOpen, isInPictureInPicture]);
 
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;

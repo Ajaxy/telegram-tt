@@ -7,7 +7,7 @@ type RefType = {
   current: HTMLVideoElement | null;
 };
 
-type ReturnType = [boolean, () => void] | [false];
+type ReturnType = [boolean, () => void, boolean] | [false];
 type CallbackType = () => void;
 
 export default function usePictureInPicture(
@@ -16,6 +16,7 @@ export default function usePictureInPicture(
   onLeave: CallbackType,
 ): ReturnType {
   const [isSupported, setIsSupported] = useState(false);
+  const [isInPictureInPicture, setIsInPictureInPicture] = useState(false);
 
   useLayoutEffect(() => {
     // PIP is not supported in PWA on iOS, despite being detected
@@ -28,8 +29,8 @@ export default function usePictureInPicture(
     // @ts-ignore
     video.autoPictureInPicture = true;
     setIsSupported(true);
-    video.addEventListener('enterpictureinpicture', onEnter);
-    video.addEventListener('leavepictureinpicture', onLeave);
+    video.addEventListener('enterpictureinpicture', () => { onEnter(); setIsInPictureInPicture(true); });
+    video.addEventListener('leavepictureinpicture', () => { onLeave(); setIsInPictureInPicture(false); });
     return () => {
       video.removeEventListener('enterpictureinpicture', onEnter);
       video.removeEventListener('leavepictureinpicture', onLeave);
@@ -68,7 +69,7 @@ export default function usePictureInPicture(
     return [false];
   }
 
-  return [isSupported, enterPictureInPicture];
+  return [isSupported, enterPictureInPicture, isInPictureInPicture];
 }
 
 function getSetPresentationMode(video: HTMLVideoElement) {
