@@ -20,12 +20,6 @@ export default function usePictureInPicture(
 
   useLayoutEffect(() => {
     // PIP is not supported in PWA on iOS, despite being detected
-    const onEnterInternal = () => {
-      onEnter(); setIsInPictureInPicture(true);
-    };
-    const onLeaveInternal = () => {
-      onLeave(); setIsInPictureInPicture(false);
-    };
     if ((IS_IOS && IS_PWA) || !elRef.current) return undefined;
     const video = elRef.current;
     const setMode = getSetPresentationMode(video);
@@ -35,6 +29,12 @@ export default function usePictureInPicture(
     // @ts-ignore
     video.autoPictureInPicture = true;
     setIsSupported(true);
+    const onEnterInternal = () => {
+      onEnter(); setIsInPictureInPicture(true);
+    };
+    const onLeaveInternal = () => {
+      onLeave(); setIsInPictureInPicture(false);
+    };
     video.addEventListener('enterpictureinpicture', onEnterInternal);
     video.addEventListener('leavepictureinpicture', onLeaveInternal);
     return () => {
