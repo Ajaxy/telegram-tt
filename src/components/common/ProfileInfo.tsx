@@ -258,8 +258,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
         </Transition>
 
         {!isFirst && (
-          <button
-            type="button"
+          <div
             dir={lang.isRtl ? 'rtl' : undefined}
             className={buildClassName(styles.navigation, styles.navigation_prev)}
             aria-label={lang('AccDescrPrevious')}
@@ -267,8 +266,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
           />
         )}
         {!isLast && (
-          <button
-            type="button"
+          <div
             dir={lang.isRtl ? 'rtl' : undefined}
             className={buildClassName(styles.navigation, styles.navigation_next)}
             aria-label={lang('Next')}
