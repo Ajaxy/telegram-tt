@@ -9,6 +9,7 @@ const useShowTransition = (
   noOpenTransition = false,
   className: string | false = 'fast',
   noCloseTransition = false,
+  closeDuration = CLOSE_DURATION,
 ) => {
   const [isClosed, setIsClosed] = useState(!isOpen);
   const closeTimeoutRef = useRef<number>();
@@ -40,7 +41,7 @@ const useShowTransition = (
       if (noCloseTransition) {
         exec();
       } else {
-        closeTimeoutRef.current = window.setTimeout(exec, CLOSE_DURATION);
+        closeTimeoutRef.current = window.setTimeout(exec, closeDuration);
       }
     }
   }

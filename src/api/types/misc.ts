@@ -46,7 +46,8 @@ export interface ApiAttachment {
   };
   previewBlobUrl?: string;
 
-  shouldSendAsFile?: boolean;
+  shouldSendAsFile?: true;
+  shouldSendAsSpoiler?: true;
 
   uniqueId?: string;
 }

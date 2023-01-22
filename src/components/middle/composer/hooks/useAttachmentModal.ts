@@ -24,14 +24,14 @@ export default function useAttachmentModal({
     setAttachments(MEMO_EMPTY_ARRAY);
   }, [setAttachments]);
 
-  const handleDeleteAttachment = useCallback((index: number) => {
-    const newAttachments = attachments.filter((_, i) => i !== index);
-    setAttachments(newAttachments?.length ? newAttachments : MEMO_EMPTY_ARRAY);
-  }, [attachments, setAttachments]);
-
   const handleSetAttachments = useCallback(
     (newValue: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => {
       const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
+      if (!newAttachments.length) {
+        setAttachments(MEMO_EMPTY_ARRAY);
+        return;
+      }
+
       if (newAttachments.some(({ size }) => size > fileSizeLimit)) {
         openLimitReachedModal({
           limit: 'uploadMaxFileparts',
@@ -42,10 +42,12 @@ export default function useAttachmentModal({
     }, [attachments, fileSizeLimit, openLimitReachedModal, setAttachments],
   );
 
-  const handleAppendFiles = useCallback(async (files: File[]) => {
+  const handleAppendFiles = useCallback(async (files: File[], isSpoiler?: boolean) => {
     handleSetAttachments([
       ...attachments,
-      ...await Promise.all(files.map((file) => buildAttachment(file.name, file))),
+      ...await Promise.all(files.map((file) => (
+        buildAttachment(file.name, file, { shouldSendAsSpoiler: isSpoiler || undefined })
+      ))),
     ]);
   }, [attachments, handleSetAttachments]);
 
@@ -60,7 +62,6 @@ export default function useAttachmentModal({
     handleFileSelect,
     onCaptionUpdate: setHtml,
     handleClearAttachments,
-    handleDeleteAttachment,
     handleSetAttachments,
   };
 }

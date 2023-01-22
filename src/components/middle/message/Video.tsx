@@ -30,6 +30,7 @@ import useFlag from '../../../hooks/useFlag';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
+import MediaSpoiler from '../../common/MediaSpoiler';
 
 export type OwnProps = {
   id?: string;
@@ -74,6 +75,8 @@ const Video: FC<OwnProps> = ({
   const video = (getMessageVideo(message) || getMessageWebPageVideo(message))!;
   const localBlobUrl = video.blobUrl;
 
+  const [isSpoilerShown, , hideSpoiler] = useFlag(video.isSpoiler);
+
   const isIntersectingForLoading = useIsIntersecting(ref, observeIntersectionForLoading);
   const isIntersectingForPlaying = (
     useIsIntersecting(ref, observeIntersectionForPlaying)
@@ -86,7 +89,7 @@ const Video: FC<OwnProps> = ({
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && lastSyncTime);
-  const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay);
+  const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay && !isSpoilerShown);
 
   const fullMediaHash = getMessageMediaHash(message, 'inline');
   const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));
@@ -96,7 +99,8 @@ const Video: FC<OwnProps> = ({
   const fullMediaData = localBlobUrl || mediaData;
   const [isPlayerReady, markPlayerReady] = useFlag();
 
-  const hasThumb = Boolean(getMessageMediaThumbDataUri(message));
+  const thumbDataUri = getMessageMediaThumbDataUri(message);
+  const hasThumb = Boolean(thumbDataUri);
 
   const previewMediaHash = getMessageMediaHash(message, 'preview');
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
@@ -147,19 +151,34 @@ const Video: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (isUploading) {
-      if (onCancelUpload) {
-        onCancelUpload(message);
-      }
-    } else if (isDownloading) {
-      getActions().cancelMessageMediaDownload({ message });
-    } else if (!fullMediaData) {
-      setIsLoadAllowed((isAllowed) => !isAllowed);
-    } else if (fullMediaData && !isPlayAllowed) {
-      setIsPlayAllowed(true);
-    } else if (onClick) {
-      onClick(message.id);
+      onCancelUpload?.(message);
+      return;
     }
-  }, [isUploading, isDownloading, fullMediaData, isPlayAllowed, onClick, onCancelUpload, message]);
+
+    if (isDownloading) {
+      getActions().cancelMessageMediaDownload({ message });
+      return;
+    }
+
+    if (!fullMediaData) {
+      setIsLoadAllowed((isAllowed) => !isAllowed);
+      return;
+    }
+
+    if (fullMediaData && !isPlayAllowed) {
+      setIsPlayAllowed(true);
+    }
+
+    if (isSpoilerShown) {
+      hideSpoiler();
+      return;
+    }
+
+    onClick?.(message.id);
+  }, [
+    isUploading, isDownloading, fullMediaData, isPlayAllowed, isSpoilerShown, onClick, message, onCancelUpload,
+    hideSpoiler,
+  ]);
 
   const className = buildClassName('media-inner dark', !isUploading && 'interactive');
 
@@ -202,6 +221,14 @@ const Video: FC<OwnProps> = ({
       )}
       {isProtected && <span className="protector" />}
       <i className={buildClassName('icon-large-play', playButtonClassNames)} />
+      <MediaSpoiler
+        isVisible={isSpoilerShown}
+        withAnimation
+        thumbDataUri={thumbDataUri}
+        width={width}
+        height={height}
+        className="media-spoiler"
+      />
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames)}>
           <ProgressSpinner progress={transferProgress} onClick={handleClick} />

@@ -251,7 +251,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
     return {
       photos: result.photos
         .filter((photo): photo is GramJs.Photo => photo instanceof GramJs.Photo)
-        .map(buildApiPhoto),
+        .map((photo) => buildApiPhoto(photo)),
       users: result.users.map(buildApiUser).filter(Boolean),
     };
   }

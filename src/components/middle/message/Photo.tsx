@@ -16,6 +16,7 @@ import {
   getMediaTransferState,
   isOwnMessage,
   getMessageMediaFormat,
+  getMessageMediaThumbDataUri,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
@@ -28,8 +29,10 @@ import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import usePrevious from '../../../hooks/usePrevious';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
+import useFlag from '../../../hooks/useFlag';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
+import MediaSpoiler from '../../common/MediaSpoiler';
 
 export type OwnProps = {
   id?: string;
@@ -91,6 +94,9 @@ const Photo: FC<OwnProps> = ({
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(message, noThumb);
   const thumbClassNames = useMediaTransition(!noThumb);
+  const thumbDataUri = getMessageMediaThumbDataUri(message);
+
+  const [isSpoilerShown, , hideSpoiler] = useFlag(photo.isSpoiler);
 
   const {
     loadProgress: downloadProgress,
@@ -118,15 +124,22 @@ const Photo: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (isUploading) {
-      if (onCancelUpload) {
-        onCancelUpload(message);
-      }
-    } else if (!fullMediaData) {
-      setIsLoadAllowed((isAllowed) => !isAllowed);
-    } else if (onClick) {
-      onClick(message.id);
+      onCancelUpload?.(message);
+      return;
     }
-  }, [fullMediaData, isUploading, message, onCancelUpload, onClick]);
+
+    if (!fullMediaData) {
+      setIsLoadAllowed((isAllowed) => !isAllowed);
+      return;
+    }
+
+    if (isSpoilerShown) {
+      hideSpoiler();
+      return;
+    }
+
+    onClick?.(message.id);
+  }, [fullMediaData, hideSpoiler, isSpoilerShown, isUploading, message, onCancelUpload, onClick]);
 
   const isOwn = isOwnMessage(message);
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
@@ -184,6 +197,14 @@ const Photo: FC<OwnProps> = ({
         </div>
       )}
       {shouldRenderDownloadButton && <i className={buildClassName('icon-download', downloadButtonClassNames)} />}
+      <MediaSpoiler
+        isVisible={isSpoilerShown}
+        withAnimation
+        thumbDataUri={thumbDataUri}
+        width={width}
+        height={height}
+        className="media-spoiler"
+      />
       {isTransferring && (
         <span className="message-transfer-progress">{Math.round(transferProgress * 100)}%</span>
       )}

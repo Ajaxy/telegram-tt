@@ -11,6 +11,7 @@ import {
   getSenderTitle,
   getMessageRoundVideo,
   getUserColorKey,
+  getMessageIsSpoiler,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
@@ -24,6 +25,7 @@ import useLang from '../../hooks/useLang';
 
 import ActionMessage from '../middle/ActionMessage';
 import MessageSummary from './MessageSummary';
+import MediaSpoiler from './MediaSpoiler';
 
 import './EmbeddedMessage.scss';
 
@@ -63,6 +65,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaBlobUrl = useMedia(message && getMessageMediaHash(message, 'pictogram'), !isIntersecting);
   const mediaThumbnail = useThumbnail(message);
   const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
+  const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
 
   const lang = useLang();
 
@@ -78,7 +81,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       )}
       onClick={message ? onClick : undefined}
     >
-      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected)}
+      {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       <div className="message-text">
         <p dir="auto">
           {!message ? (
@@ -112,21 +115,27 @@ function renderPictogram(
   blobUrl?: string,
   isRoundVideo?: boolean,
   isProtected?: boolean,
+  isSpoiler?: boolean,
 ) {
   const { width, height } = getPictogramDimensions();
 
+  const srcUrl = blobUrl || thumbDataUri;
+
   return (
-    <>
-      <img
-        src={blobUrl || thumbDataUri}
-        width={width}
-        height={height}
-        alt=""
-        className={buildClassName('pictogram', isRoundVideo && 'round')}
-        draggable={!isProtected}
-      />
+    <div className={buildClassName('embedded-thumb', isRoundVideo && 'round')}>
+      {!isSpoiler && (
+        <img
+          src={srcUrl}
+          width={width}
+          height={height}
+          alt=""
+          className="pictogram"
+          draggable={false}
+        />
+      )}
+      <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(isSpoiler)} width={width} height={height} />
       {isProtected && <span className="protector" />}
-    </>
+    </div>
   );
 }
 

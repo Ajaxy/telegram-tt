@@ -1,0 +1,105 @@
+.root {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-text-secondary); // Fallback before canvas is prepared
+
+  --click-shift-x: 0px;
+  --click-shift-y: 0px;
+}
+
+.mask-animation:global(.closing) {
+  mask-image: url("../../assets/spoilers/mask.svg"), linear-gradient(#ffffff, #ffffff);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  mask-position: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)), center center;
+  mask-repeat: no-repeat;
+  animation: 500ms ease-in circle-cut forwards;
+
+  .dots {
+    transform: scale(1.2);
+  }
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dots {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  --background-url: url("../../assets/spoilers/turbulence_1x.png");
+  --background-size: 256px;
+  background: rgba(0, 0, 0, 0.25) var(--background-url);
+  background-size: var(--background-size) var(--background-size);
+
+  transition: transform 500ms ease-in;
+  transform-origin: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y));
+
+  @media (-webkit-min-device-pixel-ratio: 2) {
+    --background-url: url("../../assets/spoilers/turbulence_2x.png");
+  }
+
+  @media (-webkit-min-device-pixel-ratio: 3) {
+    --background-url: url("../../assets/spoilers/turbulence_3x.png");
+  }
+
+  --x-direction: var(--background-size);
+  --y-direction: 0;
+  animation: 20s linear infinite dots;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--background-url);
+    background-size: var(--background-size) var(--background-size);
+
+    --x-direction: 0;
+    --y-direction: var(--background-size);
+    animation: 20s linear -7s infinite dots;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: var(--background-url);
+    background-size: var(--background-size) var(--background-size);
+
+    --x-direction: calc(-1 * var(--background-size));
+    --y-direction: calc(-1 * var(--background-size));
+    animation: 20s linear -14s infinite dots;
+  }
+}
+
+@keyframes dots {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: var(--x-direction) var(--y-direction);
+  }
+}
+
+@keyframes circle-cut {
+  0% {
+    mask-size: 0%, 100%;
+  }
+
+  100% {
+    mask-size: 350%, 100%;
+  }
+}

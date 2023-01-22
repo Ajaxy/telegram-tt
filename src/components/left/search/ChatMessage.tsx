@@ -15,6 +15,7 @@ import {
   getMessageVideo,
   getMessageRoundVideo,
   getMessageSticker,
+  getMessageIsSpoiler,
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -120,9 +121,17 @@ function renderSummary(
     return renderMessageSummary(lang, message, undefined, searchQuery);
   }
 
+  const isSpoiler = getMessageIsSpoiler(message);
+
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
+      <img
+        src={blobUrl}
+        alt=""
+        className={
+          buildClassName('media-preview--image', isRoundVideo && 'round', isSpoiler && 'media-preview-spoiler')
+        }
+      />
       {getMessageVideo(message) && <i className="icon-play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
     </span>

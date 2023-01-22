@@ -32,6 +32,8 @@ import useFlag from '../../../hooks/useFlag';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { useStateRef } from '../../../hooks/useStateRef';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useScrolledState from '../../../hooks/useScrolledState';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -57,9 +59,9 @@ export type OwnProps = {
   shouldSuggestCompression?: boolean;
   onCaptionUpdate: (html: string) => void;
   onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
-  onFileAppend: (files: File[]) => void;
-  onDelete: (attachmentIndex: number) => void;
-  onClear: () => void;
+  onFileAppend: (files: File[], isSpoiler?: boolean) => void;
+  onAttachmentsUpdate: (attachments: ApiAttachment[]) => void;
+  onClear: NoneToVoidFunction;
   onSendSilent: (sendCompressed: boolean, sendGrouped: boolean) => void;
   onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean) => void;
 };
@@ -99,10 +101,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   customEmojiForEmoji,
   attachmentSettings,
   shouldSuggestCompression,
+  onAttachmentsUpdate,
   onCaptionUpdate,
   onSend,
   onFileAppend,
-  onDelete,
   onClear,
   onSendSilent,
   onSendScheduled,
@@ -121,6 +123,14 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   );
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
 
+  const {
+    handleScroll: handleAttachmentsScroll,
+    isAtBeginning: areAttachmentsNotScrolled,
+    isAtEnd: areAttachmentsScrolledToBottom,
+  } = useScrolledState();
+
+  const { handleScroll: handleCaptionScroll, isAtBeginning: isCaptionNotScrolled } = useScrolledState();
+
   const isOpen = Boolean(attachments.length);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
 
@@ -129,6 +139,13 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (onlyMedia) return [true, true];
     const oneMedia = Boolean(renderingAttachments?.some((a) => a.quick || a.audio));
     return [oneMedia, false];
+  }, [renderingAttachments]);
+
+  const [hasSpoiler, isEverySpoiler] = useMemo(() => {
+    const areAllSpoilers = Boolean(renderingAttachments?.every((a) => a.shouldSendAsSpoiler));
+    if (areAllSpoilers) return [true, true];
+    const hasOneSpoiler = Boolean(renderingAttachments?.some((a) => a.shouldSendAsSpoiler));
+    return [hasOneSpoiler, false];
   }, [renderingAttachments]);
 
   const {
@@ -240,9 +257,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
     const files = await getFilesFromDataTransferItems(dataTransfer.items);
     if (files?.length) {
-      onFileAppend(files);
+      onFileAppend(files, isEverySpoiler);
     }
-  }, [onFileAppend, unmarkHovered]);
+  }, [isEverySpoiler, onFileAppend, unmarkHovered]);
 
   function handleDragOver(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
@@ -258,13 +275,38 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
-      onFileAppend(validatedFiles);
+      onFileAppend(validatedFiles, isEverySpoiler);
     }
-  }, [onFileAppend]);
+  }, [isEverySpoiler, onFileAppend]);
 
   const handleDocumentSelect = useCallback(() => {
     openSystemFilesDialog('*', (e) => handleFileSelect(e));
   }, [handleFileSelect]);
+
+  const handleDelete = useCallback((index: number) => {
+    onAttachmentsUpdate(attachments.filter((a, i) => i !== index));
+  }, [attachments, onAttachmentsUpdate]);
+
+  const handleEnableSpoilers = useCallback(() => {
+    onAttachmentsUpdate(attachments.map((a) => ({ ...a, shouldSendAsSpoiler: true })));
+  }, [attachments, onAttachmentsUpdate]);
+
+  const handleDisableSpoilers = useCallback(() => {
+    onAttachmentsUpdate(attachments.map((a) => ({ ...a, shouldSendAsSpoiler: undefined })));
+  }, [attachments, onAttachmentsUpdate]);
+
+  const handleToggleSpoiler = useCallback((index: number) => {
+    onAttachmentsUpdate(attachments.map((attachment, i) => {
+      if (i === index) {
+        return {
+          ...attachment,
+          shouldSendAsSpoiler: !attachment.shouldSendAsSpoiler || undefined,
+        };
+      }
+
+      return attachment;
+    }));
+  }, [attachments, onAttachmentsUpdate]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -332,17 +374,32 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         >
           <MenuItem icon="add" onClick={handleDocumentSelect}>{lang('Add')}</MenuItem>
           {hasMedia && (
-            shouldSendCompressed ? (
-              // eslint-disable-next-line react/jsx-no-bind
-              <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
-                {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
-              </MenuItem>
-            ) : (
-              // eslint-disable-next-line react/jsx-no-bind
-              <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
-                {isMultiple ? 'Send All as Media' : 'Send as Media'}
-              </MenuItem>
-            )
+            <>
+              {
+                shouldSendCompressed ? (
+                  // eslint-disable-next-line react/jsx-no-bind
+                  <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
+                    {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
+                  </MenuItem>
+                ) : (
+                  // eslint-disable-next-line react/jsx-no-bind
+                  <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
+                    {isMultiple ? 'Send All as Media' : 'Send as Media'}
+                  </MenuItem>
+                )
+              }
+              {shouldSendCompressed && (
+                hasSpoiler ? (
+                  <MenuItem icon="spoiler-disable" onClick={handleDisableSpoilers}>
+                    {lang('Attachment.DisableSpoiler')}
+                  </MenuItem>
+                ) : (
+                  <MenuItem icon="spoiler" onClick={handleEnableSpoilers}>
+                    {lang('Attachment.EnableSpoiler')}
+                  </MenuItem>
+                )
+              )}
+            </>
           )}
           {isMultiple && (
             shouldSendGrouped ? (
@@ -370,7 +427,11 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       onClose={onClear}
       header={renderHeader()}
-      className={`AttachmentModal ${isHovered ? 'hovered' : ''}`}
+      className={buildClassName(
+        'AttachmentModal',
+        isHovered && 'hovered',
+        !areAttachmentsNotScrolled && 'modal-header-border',
+      )}
       noBackdropClose
     >
       <div
@@ -383,7 +444,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         data-attach-description={lang('Preview.Dragging.AddItems', 10)}
         data-dropzone
       >
-        <div className={buildClassName('attachments-wrapper', 'custom-scroll')}>
+        <div
+          className="attachments-wrapper custom-scroll"
+          onScroll={handleAttachmentsScroll}
+        >
           {renderingAttachments.map((attachment, i) => (
             <AttachmentModalItem
               attachment={attachment}
@@ -393,11 +457,17 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               isSingle={renderingAttachments.length === 1}
               index={i}
               key={attachment.uniqueId || i}
-              onDelete={onDelete}
+              onDelete={handleDelete}
+              onToggleSpoiler={handleToggleSpoiler}
             />
           ))}
         </div>
-        <div className="attachment-caption-wrapper">
+        <div
+          className={buildClassName(
+            'attachment-caption-wrapper',
+            (!areAttachmentsScrolledToBottom || !isCaptionNotScrolled) && 'caption-top-border',
+          )}
+        >
           <MentionTooltip
             isOpen={isMentionTooltipOpen}
             onClose={closeMentionTooltip}
@@ -431,6 +501,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               placeholder={lang('AddCaption')}
               onUpdate={onCaptionUpdate}
               onSend={handleSendClick}
+              onScroll={handleCaptionScroll}
               canAutoFocus={Boolean(isReady && attachments.length)}
               captionLimit={leftChars}
             />

@@ -28,6 +28,7 @@ export interface ApiPhoto {
   sizes: ApiPhotoSize[];
   videoSizes?: ApiVideoSize[];
   blobUrl?: string;
+  isSpoiler?: boolean;
 }
 
 export interface ApiSticker {
@@ -88,8 +89,10 @@ export interface ApiVideo {
   supportsStreaming?: boolean;
   isRound?: boolean;
   isGif?: boolean;
+  isSpoiler?: boolean;
   thumbnail?: ApiThumbnail;
   blobUrl?: string;
+  previewBlobUrl?: string;
   size: number;
 }
 

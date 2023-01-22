@@ -462,6 +462,7 @@ async function fetchInputMedia(
     peer,
     media: uploadedMedia,
   }));
+  const isSpoiler = uploadedMedia.spoiler;
 
   if ((
     messageMedia instanceof GramJs.MessageMediaPhoto
@@ -472,6 +473,7 @@ async function fetchInputMedia(
 
     return new GramJs.InputMediaPhoto({
       id: new GramJs.InputPhoto({ id, accessHash, fileReference }),
+      spoiler: isSpoiler,
     });
   }
 
@@ -484,6 +486,7 @@ async function fetchInputMedia(
 
     return new GramJs.InputMediaDocument({
       id: new GramJs.InputDocument({ id, accessHash, fileReference }),
+      spoiler: isSpoiler,
     });
   }
 
@@ -562,7 +565,7 @@ export async function rescheduleMessage({
 
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
-    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile,
+    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile, shouldSendAsSpoiler,
   } = attachment;
 
   const patchedOnProgress: ApiOnProgress = (progress) => {
@@ -583,7 +586,10 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
   if (!shouldSendAsFile) {
     if (quick) {
       if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
-        return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
+        return new GramJs.InputMediaUploadedPhoto({
+          file: inputFile,
+          spoiler: shouldSendAsSpoiler,
+        });
       }
 
       if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
@@ -624,7 +630,8 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     mimeType,
     attributes,
     thumb,
-    forceFile: shouldSendAsFile || undefined,
+    forceFile: shouldSendAsFile,
+    spoiler: shouldSendAsSpoiler,
   });
 }
 
