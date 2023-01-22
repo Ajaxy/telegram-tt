@@ -89,8 +89,8 @@
     &.selected:not(.forum):hover {
       --background-color: var(--color-chat-active) !important;
 
-      .custom-emoji.custom-color {
-        --emoji-status-color: var(--color-white);
+      .custom-emoji {
+        --color-text: var(--color-white);
       }
 
       .VerifiedIcon, .PremiumIcon {
@@ -165,6 +165,10 @@
     flex-shrink: 0;
     z-index: 1;
     background: var(--background-color);
+  }
+
+  .custom-emoji {
+    --color-text: var(--color-primary);
   }
 
   .avatar-badge-wrapper {

@@ -1316,11 +1316,11 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload) 
     setGlobal({
       ...global,
       requestedAttachBotInstall: {
-        botId: bot.id,
+        bot,
         onConfirm: {
           action: 'requestAttachBotInChat',
           payload: {
-            botId: bot.id,
+            bot,
             filter,
             startParam,
           },
@@ -1331,7 +1331,7 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload) 
   }
 
   getActions().requestAttachBotInChat({
-    botId: bot.id,
+    bot,
     filter,
     startParam,
   });
@@ -1420,6 +1420,37 @@ addActionHandler('toggleForum', async (global, actions, payload) => {
   if (!result) {
     global = getGlobal();
     global = updateChat(global, chatId, { isForum: prevIsForum });
+    setGlobal(global);
+  }
+});
+
+addActionHandler('toggleParticipantsHidden', async (global, actions, payload) => {
+  const { chatId, isEnabled } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return;
+  }
+
+  const prevIsEnabled = chat.fullInfo?.areParticipantsHidden;
+
+  global = updateChat(global, chatId, {
+    fullInfo: {
+      ...chat.fullInfo,
+      areParticipantsHidden: isEnabled,
+    },
+  });
+  setGlobal(global);
+
+  const result = await callApi('toggleParticipantsHidden', { chat, isEnabled });
+
+  if (!result && prevIsEnabled !== undefined) {
+    global = getGlobal();
+    global = updateChat(global, chatId, {
+      fullInfo: {
+        ...chat.fullInfo,
+        areParticipantsHidden: prevIsEnabled,
+      },
+    });
     setGlobal(global);
   }
 });
@@ -1922,12 +1953,22 @@ async function getAttachBotOrNotify(global: GlobalState, username: string) {
   if (!user) return undefined;
 
   const isBot = isUserBot(user);
-  if (!isBot || !user.isAttachBot) {
+  if (!isBot) return undefined;
+  const result = await callApi('loadAttachBot', {
+    bot: user,
+  });
+
+  global = getGlobal();
+  if (!result) {
     getActions().showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
 
     return undefined;
   }
-  return user;
+
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
+
+  return result.bot;
 }
 
 async function openChatByUsername(
@@ -1949,7 +1990,7 @@ async function openChatByUsername(
     if (!currentChat || !bot) return;
 
     actions.callAttachBot({
-      botId: bot.id,
+      bot,
       chatId: currentChat.id,
       ...(typeof startAttach === 'string' && { startParam: startAttach }),
     });
@@ -1991,18 +2032,15 @@ async function openChatByUsername(
 
 async function openAttachMenuFromLink(
   actions: GlobalActions,
-  chatId: string, attach: string, startAttach?: string | boolean,
+  chatId: string,
+  attach: string,
+  startAttach?: string | boolean,
 ) {
-  const botChat = await fetchChatByUsername(attach);
-  if (!botChat) return;
-  const botUser = selectUser(getGlobal(), botChat.id);
-  if (!botUser || !botUser.isAttachBot) {
-    actions.showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
-    return;
-  }
+  const bot = await getAttachBotOrNotify(getGlobal(), attach);
+  if (!bot) return;
 
   actions.callAttachBot({
-    botId: botUser.id,
+    bot,
     chatId,
     ...(typeof startAttach === 'string' && { startParam: startAttach }),
   });

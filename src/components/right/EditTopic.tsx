@@ -87,7 +87,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
   }, [chat, editTopic, iconEmojiId, title, topic]);
 
   const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
-    if (!emoji.isFree && !isCurrentUserPremium) {
+    if (!emoji.isFree && !isCurrentUserPremium && emoji.id !== DEFAULT_TOPIC_ICON_STICKER_ID) {
       openPremiumModal({ initialSection: 'animated_emoji' });
       return;
     }

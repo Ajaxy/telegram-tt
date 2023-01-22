@@ -244,8 +244,8 @@
       & > .color-#{$i} {
         color: var(--color-user-#{$i});
 
-        .custom-emoji.custom-color {
-          --emoji-status-color: var(--color-user-#{$i});
+        .custom-emoji {
+          --color-text: var(--color-user-#{$i});
         }
 
         .PremiumIcon {
@@ -273,10 +273,6 @@
 
     .custom-emoji {
       margin-left: 0.25rem;
-
-      &.custom-color {
-        opacity: 0.5;
-      }
     }
 
     .PremiumIcon {

@@ -342,6 +342,11 @@ export type ApiUpdateUser = {
   user: Partial<ApiUser>;
 };
 
+export type ApiUpdateRequestUserUpdate = {
+  '@type': 'updateRequestUserUpdate';
+  id: string;
+};
+
 export type ApiUpdateUserStatus = {
   '@type': 'updateUserStatus';
   userId: string;
@@ -595,7 +600,7 @@ export type ApiUpdateTopics = {
 };
 
 export type ApiUpdate = (
-  ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed |
+  ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |

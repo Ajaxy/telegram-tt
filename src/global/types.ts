@@ -643,14 +643,14 @@ export type GlobalState = {
     };
   };
   requestedAttachBotInstall?: {
-    botId: string;
+    bot: ApiAttachBot;
     onConfirm?: {
       action: keyof GlobalActions;
       payload: any; // TODO Add TS support
     };
   };
   requestedAttachBotInChat?: {
-    botId: string;
+    bot: ApiAttachBot;
     filter: ApiChatType[];
     startParam?: string;
   };
@@ -803,6 +803,11 @@ export interface ActionPayloads {
   requestThreadInfoUpdate: {
     chatId: string;
     threadId: number;
+  };
+
+  toggleParticipantsHidden: {
+    chatId: string;
+    isEnabled: boolean;
   };
 
   // Messages
@@ -1131,7 +1136,9 @@ export interface ActionPayloads {
   };
 
   cancelAttachBotInstall: never;
-  confirmAttachBotInstall: never;
+  confirmAttachBotInstall: {
+    isWriteAllowed: boolean;
+  };
 
   processAttachBotParameters: {
     username: string;
@@ -1139,7 +1146,7 @@ export interface ActionPayloads {
     startParam?: string;
   };
   requestAttachBotInChat: {
-    botId: string;
+    bot: ApiAttachBot;
     filter: ApiChatType[];
     startParam?: string;
   };
@@ -1157,13 +1164,14 @@ export interface ActionPayloads {
 
   toggleAttachBot: {
     botId: string;
+    isWriteAllowed?: boolean;
     isEnabled: boolean;
   };
 
   callAttachBot: {
     chatId: string;
     threadId?: number;
-    botId: string;
+    bot: ApiAttachBot;
     isFromBotMenu?: boolean;
     url?: string;
     startParam?: string;

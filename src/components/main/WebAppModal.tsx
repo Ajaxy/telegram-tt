@@ -92,6 +92,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     openChat,
     openInvoice,
     setWebAppPaymentSlug,
+    showNotification,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
@@ -188,9 +189,15 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       if (!eventData.message.trim().length || !eventData.buttons?.length || eventData.buttons.length > 3) return;
       setPopupParams(eventData);
     }
+
+    if (eventType === 'web_app_open_scan_qr_popup') {
+      showNotification({
+        message: 'Scan QR code is not supported in this client yet',
+      });
+    }
   }, [
     bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug,
-    isPaymentModalOpen,
+    isPaymentModalOpen, showNotification,
   ]);
 
   const {

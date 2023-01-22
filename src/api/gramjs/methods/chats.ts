@@ -470,6 +470,7 @@ async function getFullChannelInfo(
     participantsCount,
     stickerset,
     chatPhoto,
+    participantsHidden,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -538,6 +539,7 @@ async function getFullChannelInfo(
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
       statisticsDcId: statsDc,
       stickerSet: stickerset ? buildStickerSet(stickerset) : undefined,
+      areParticipantsHidden: participantsHidden,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
     userStatusesById: statusesById,
@@ -1341,6 +1343,17 @@ export function toggleIsProtected({
   return invokeRequest(new GramJs.messages.ToggleNoForwards({
     peer: buildInputPeer(id, accessHash),
     enabled: isProtected,
+  }), true);
+}
+
+export function toggleParticipantsHidden({
+  chat, isEnabled,
+}: { chat: ApiChat; isEnabled: boolean }) {
+  const { id, accessHash } = chat;
+
+  return invokeRequest(new GramJs.channels.ToggleParticipantsHidden({
+    channel: buildInputPeer(id, accessHash),
+    enabled: isEnabled,
   }), true);
 }
 

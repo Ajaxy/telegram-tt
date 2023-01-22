@@ -43,6 +43,7 @@ export interface ApiSticker {
   isPreloadedGlobally?: boolean;
   hasEffect?: boolean;
   isFree?: boolean;
+  shouldUseTextColor?: boolean;
 }
 
 export interface ApiStickerSet {

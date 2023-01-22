@@ -34,7 +34,6 @@ import {
   selectNotifySettings,
   selectNotifyExceptions,
   selectUserStatus,
-  selectIsDefaultEmojiStatusPack,
   selectTopicFromMessage,
   selectThreadParam,
 } from '../../../global/selectors';
@@ -327,11 +326,11 @@ export default memo(withGlobal<OwnProps>(
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
-    const statusEmoji = user?.emojiStatus && global.customEmojis.byId[user.emojiStatus.documentId];
-    const isEmojiStatusColored = statusEmoji && selectIsDefaultEmojiStatusPack(global, statusEmoji.stickerSetInfo);
     const lastMessageTopic = chat.lastMessage && selectTopicFromMessage(global, chat.lastMessage);
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
+
+    const statusEmoji = user?.emojiStatus && global.customEmojis.byId[user.emojiStatus.documentId];
 
     return {
       chat,
@@ -352,9 +351,9 @@ export default memo(withGlobal<OwnProps>(
       }),
       user,
       userStatus,
-      isEmojiStatusColored,
       lastMessageTopic,
       typingStatus,
+      isEmojiStatusColored: statusEmoji?.shouldUseTextColor,
     };
   },
 )(Chat));

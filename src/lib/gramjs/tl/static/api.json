@@ -270,5 +270,6 @@
     "channels.getForumTopicsByID",
     "channels.editForumTopic",
     "channels.updatePinnedForumTopic",
-    "channels.deleteTopicHistory"
+    "channels.deleteTopicHistory",
+    "channels.toggleParticipantsHidden"
 ]

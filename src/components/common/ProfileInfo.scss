@@ -45,9 +45,6 @@
     cursor: pointer;
 
     --custom-emoji-size: 1.5rem;
-
-    .custom-color {
-      --emoji-status-color: var(--color-white);
-    }
+    --color-text: var(--color-white);
   }
 }

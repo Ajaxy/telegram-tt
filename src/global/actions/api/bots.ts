@@ -559,17 +559,17 @@ addActionHandler('loadAttachBots', async (global, actions, payload) => {
 });
 
 addActionHandler('toggleAttachBot', async (global, actions, payload) => {
-  const { botId, isEnabled } = payload;
+  const { botId, isWriteAllowed, isEnabled } = payload;
 
   const bot = selectUser(global, botId);
 
   if (!bot) return;
 
-  await toggleAttachBot(bot, isEnabled);
+  await toggleAttachBot(bot, isEnabled, isWriteAllowed);
 });
 
-async function toggleAttachBot(bot: ApiUser, isEnabled: boolean) {
-  await callApi('toggleAttachBot', { bot, isEnabled });
+async function toggleAttachBot(bot: ApiUser, isEnabled: boolean, isWriteAllowed?: boolean) {
+  await callApi('toggleAttachBot', { bot, isWriteAllowed, isEnabled });
   await loadAttachBots();
 }
 
@@ -592,19 +592,16 @@ async function loadAttachBots(hash?: string) {
 
 addActionHandler('callAttachBot', (global, actions, payload) => {
   const {
-    chatId, botId, isFromBotMenu, url, startParam, threadId,
+    chatId, bot, isFromBotMenu, url, startParam, threadId,
   } = payload;
-  const { attachMenu: { bots } } = global;
-  if (!isFromBotMenu && !bots[botId]) {
+  if (!isFromBotMenu && !global.attachMenu.bots[bot.id]) {
     return {
       ...global,
       requestedAttachBotInstall: {
-        botId,
+        bot,
         onConfirm: {
           action: 'callAttachBot',
-          payload: {
-            chatId, botId, startParam, threadId,
-          },
+          payload,
         },
       },
     };
@@ -614,7 +611,7 @@ addActionHandler('callAttachBot', (global, actions, payload) => {
   actions.requestWebView({
     url,
     peerId: chatId,
-    botId,
+    botId: bot.id,
     theme,
     buttonText: '',
     isFromBotMenu,
@@ -624,23 +621,24 @@ addActionHandler('callAttachBot', (global, actions, payload) => {
   return undefined;
 });
 
-addActionHandler('confirmAttachBotInstall', async (global) => {
+addActionHandler('confirmAttachBotInstall', async (global, actions, payload) => {
   const { requestedAttachBotInstall } = global;
+  const { isWriteAllowed } = payload;
 
-  const { botId, onConfirm } = requestedAttachBotInstall!;
+  const { bot, onConfirm } = requestedAttachBotInstall!;
 
   setGlobal({
     ...global,
     requestedAttachBotInstall: undefined,
   });
 
-  const bot = selectUser(global, botId);
-  if (!bot) return;
+  const botUser = selectUser(global, bot.id);
+  if (!botUser) return;
 
-  await toggleAttachBot(bot, true);
+  await toggleAttachBot(botUser, true, isWriteAllowed);
   if (onConfirm) {
-    const { action, payload } = onConfirm;
-    getActions()[action](payload);
+    const { action, payload: confirmPayload } = onConfirm;
+    actions[action](confirmPayload);
   }
 });
 
@@ -652,20 +650,17 @@ addActionHandler('cancelAttachBotInstall', (global) => {
 });
 
 addActionHandler('requestAttachBotInChat', (global, actions, payload) => {
-  const { botId, filter, startParam } = payload;
+  const { bot, filter, startParam } = payload;
   const currentChatId = selectCurrentMessageList(global)?.chatId;
 
-  const { attachMenu: { bots } } = global;
-  const bot = bots[botId];
-  if (!bot) return;
   const supportedFilters = bot.peerTypes.filter((type): type is ApiChatType => (
     type !== 'self' && filter.includes(type)
   ));
 
   if (!supportedFilters.length) {
     actions.callAttachBot({
-      chatId: currentChatId || botId,
-      botId,
+      chatId: currentChatId || bot.id,
+      bot,
       startParam,
     });
     return;
@@ -674,7 +669,7 @@ addActionHandler('requestAttachBotInChat', (global, actions, payload) => {
   setGlobal({
     ...global,
     requestedAttachBotInChat: {
-      botId,
+      bot,
       filter: supportedFilters,
       startParam,
     },

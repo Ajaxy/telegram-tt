@@ -66,6 +66,7 @@ export function buildApiAttachBot(bot: GramJs.AttachMenuBot): ApiAttachBot {
   return {
     id: bot.botId.toString(),
     hasSettings: bot.hasSettings,
+    shouldRequestWriteAccess: bot.requestWriteAccess,
     shortName: bot.shortName,
     peerTypes: bot.peerTypes.map(buildApiAttachMenuPeerType),
     icons: bot.icons.map(buildApiAttachMenuIcon).filter(Boolean),

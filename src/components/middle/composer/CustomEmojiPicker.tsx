@@ -125,7 +125,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
-    const defaultSets = [];
+    const defaultSets: StickerSetOrRecent[] = [];
 
     if (withDefaultTopicIcons) {
       const defaultTopicIconsPack = stickerSetsById[defaultTopicIconsId!];
@@ -139,6 +139,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     } else if (recentCustomEmoji.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
+        accessHash: '0',
         title: lang('RecentStickers'),
         stickers: recentCustomEmoji,
         count: recentCustomEmoji.length,
@@ -296,7 +297,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
             isSavedMessages={isSavedMessages}
             shouldHideRecentHeader={withDefaultTopicIcons}
-            withDefaultTopicIcon={stickerSet.id === RECENT_SYMBOL_SET_ID}
+            withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
             isCustomEmojiPicker
             isCurrentUserPremium={isCurrentUserPremium}
             onStickerSelect={handleEmojiSelect}

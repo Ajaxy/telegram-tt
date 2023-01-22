@@ -6,6 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { AnimationLevel, LangCode } from '../../types';
 import type {
+  ApiAttachBot,
   ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 import type { ApiLimitTypeWithModal, GlobalState } from '../../global/types';
@@ -109,7 +110,7 @@ type StateProps = {
   isPremiumModalOpen?: boolean;
   botTrustRequest?: GlobalState['botTrustRequest'];
   botTrustRequestBot?: ApiUser;
-  attachBotToInstall?: ApiUser;
+  attachBotToInstall?: ApiAttachBot;
   requestedAttachBotInChat?: GlobalState['requestedAttachBotInChat'];
   requestedDraft?: GlobalState['requestedDraft'];
   currentUser?: ApiUser;
@@ -567,7 +568,7 @@ export default memo(withGlobal(
       isRatePhoneCallModalOpen: Boolean(global.ratingPhoneCall),
       botTrustRequest,
       botTrustRequestBot: botTrustRequest && selectUser(global, botTrustRequest.botId),
-      attachBotToInstall: requestedAttachBotInstall && selectUser(global, requestedAttachBotInstall.botId),
+      attachBotToInstall: requestedAttachBotInstall?.bot,
       requestedAttachBotInChat,
       webApp,
       currentUser,

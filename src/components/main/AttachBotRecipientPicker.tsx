@@ -27,12 +27,12 @@ const AttachBotRecipientPicker: FC<OwnProps> = ({
     }
   }, [isOpen, markIsShown]);
 
-  const { botId, filter, startParam } = requestedAttachBotInChat || {};
+  const { bot, filter, startParam } = requestedAttachBotInChat || {};
 
   const handlePeerRecipient = useCallback((recipientId: string) => {
-    callAttachBot({ botId: botId!, chatId: recipientId, startParam });
+    callAttachBot({ bot: bot!, chatId: recipientId, startParam });
     cancelAttachBotInChat();
-  }, [botId, callAttachBot, cancelAttachBotInChat, startParam]);
+  }, [bot, callAttachBot, cancelAttachBotInChat, startParam]);
 
   if (!isOpen && !isShown) {
     return undefined;

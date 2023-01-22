@@ -806,6 +806,11 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       userId: buildApiPeerId(update.userId, 'user'),
       status: buildApiUserStatus(update.status),
     });
+  } else if (update instanceof GramJs.UpdateUser) {
+    onUpdate({
+      '@type': 'updateRequestUserUpdate',
+      id: buildApiPeerId(update.userId, 'user'),
+    });
   } else if (update instanceof GramJs.UpdateUserEmojiStatus) {
     const emojiStatus = buildApiUserEmojiStatus(update.emojiStatus);
     onUpdate({
@@ -830,20 +835,6 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         ...user,
         usernames,
       },
-    });
-  } else if (update instanceof GramJs.UpdateUserPhoto) {
-    const { userId, photo } = update;
-    const apiUserId = buildApiPeerId(userId, 'user');
-    const avatarHash = buildAvatarHash(photo);
-
-    if (localDb.users[apiUserId]) {
-      localDb.users[apiUserId].photo = photo;
-    }
-
-    onUpdate({
-      '@type': 'updateUser',
-      id: apiUserId,
-      user: { avatarHash },
     });
   } else if (update instanceof GramJs.UpdateUserPhone) {
     const { userId, phone } = update;

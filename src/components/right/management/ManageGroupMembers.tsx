@@ -10,7 +10,7 @@ import { ManagementScreens } from '../../../types';
 import { unique } from '../../../util/iteratees';
 import { selectChat } from '../../../global/selectors';
 import {
-  sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight,
+  sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight, isChatBasicGroup,
 } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -24,6 +24,7 @@ import InputText from '../../ui/InputText';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import DeleteMemberModal from '../DeleteMemberModal';
+import Switcher from '../../ui/Switcher';
 
 type OwnProps = {
   chatId: string;
@@ -47,9 +48,12 @@ type StateProps = {
   serverTimeOffset: number;
   currentUserId?: string;
   canDeleteMembers?: boolean;
+  isBasicGroup?: boolean;
+  areParticipantsHidden?: boolean;
 };
 
 const ManageGroupMembers: FC<OwnProps & StateProps> = ({
+  chatId,
   noAdmins,
   members,
   adminMembersById,
@@ -64,11 +68,15 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   serverTimeOffset,
   currentUserId,
   canDeleteMembers,
+  isBasicGroup,
+  areParticipantsHidden,
   onClose,
   onScreenSelect,
   onChatMemberSelect,
 }) => {
-  const { openChat, setUserSearchQuery, closeManagement } = getActions();
+  const {
+    openChat, setUserSearchQuery, closeManagement, toggleParticipantsHidden,
+  } = getActions();
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -152,6 +160,10 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     setDeletingUserId(undefined);
   }, []);
 
+  const handleToggleParticipantsHidden = useCallback(() => {
+    toggleParticipantsHidden({ chatId, isEnabled: !areParticipantsHidden });
+  }, [areParticipantsHidden, chatId, toggleParticipantsHidden]);
+
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -184,6 +196,17 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     <div className="Management">
       {noAdmins && renderSearchField()}
       <div className="custom-scroll">
+        {!isBasicGroup && (
+          <div className="section">
+            <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
+              <span>{lang('ChannelHideMembers')}</span>
+              <Switcher label={lang('ChannelHideMembers')} checked={areParticipantsHidden} />
+            </ListItem>
+            <p className="section-info">
+              {lang(areParticipantsHidden ? 'GroupMembers.MembersHiddenOn' : 'GroupMembers.MembersHiddenOff')}
+            </p>
+          </div>
+        )}
         <div className="section">
           {viewportIds?.length ? (
             <InfiniteScroll
@@ -247,6 +270,8 @@ export default memo(withGlobal<OwnProps>(
     const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
 
     return {
+      isBasicGroup: Boolean(chat && isChatBasicGroup(chat)),
+      areParticipantsHidden: Boolean(chat && chat.fullInfo?.areParticipantsHidden),
       members,
       adminMembersById,
       userStatusesById,

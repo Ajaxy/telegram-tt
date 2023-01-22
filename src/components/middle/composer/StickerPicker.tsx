@@ -145,6 +145,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     if (favoriteStickers.length) {
       defaultSets.push({
         id: FAVORITE_SYMBOL_SET_ID,
+        accessHash: '0',
         title: lang('FavoriteStickers'),
         stickers: favoriteStickers,
         count: favoriteStickers.length,
@@ -154,6 +155,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     if (recentStickers.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
+        accessHash: '0',
         title: lang('RecentStickers'),
         stickers: recentStickers,
         count: recentStickers.length,
@@ -171,6 +173,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       if (totalPremiumStickers.length) {
         defaultSets.push({
           id: PREMIUM_STICKER_SET_ID,
+          accessHash: '0',
           title: lang('PremiumStickers'),
           stickers: totalPremiumStickers,
           count: totalPremiumStickers.length,
@@ -183,6 +186,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       if (fullSet) {
         defaultSets.push({
           id: CHAT_STICKER_SET_ID,
+          accessHash: fullSet.accessHash,
           title: lang('GroupStickers'),
           stickers: fullSet.stickers,
           count: fullSet.stickers!.length,

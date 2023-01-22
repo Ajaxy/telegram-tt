@@ -35,6 +35,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   premium_invoice_slug: string;
   premium_promo_order: string[];
   default_emoji_statuses_stickerset_id: string;
+  hidden_members_group_size_min: number;
   // Forums
   topics_pinned_limit: number;
 }
@@ -84,6 +85,7 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
     topicsPinnedLimit: appConfig.topics_pinned_limit,
     maxUserReactionsDefault: appConfig.reactions_user_max_default,
     maxUserReactionsPremium: appConfig.reactions_user_max_premium,
+    hiddenMembersMinCount: appConfig.hidden_members_group_size_min,
     limits: {
       uploadMaxFileparts: getLimit(appConfig, 'upload_max_fileparts', 'uploadMaxFileparts'),
       stickersFaved: getLimit(appConfig, 'stickers_faved_limit', 'stickersFaved'),

@@ -20,7 +20,7 @@ export {
   updateChatTitle, updateChatAbout, toggleSignatures, updateChatAdmin, fetchGroupsForDiscussion, setDiscussionGroup,
   migrateChat, openChatByInvite, fetchMembers, importChatInvite, addChatMembers, deleteChatMember, toggleIsProtected,
   getChatByPhoneNumber, toggleJoinToSend, toggleJoinRequest, fetchTopics, deleteTopic, togglePinnedTopic,
-  editTopic, toggleForum, fetchTopicById, createTopic,
+  editTopic, toggleForum, fetchTopicById, createTopic, toggleParticipantsHidden,
 } from './chats';
 
 export {
@@ -71,7 +71,7 @@ export {
 export {
   answerCallbackButton, fetchTopInlineBots, fetchInlineBot, fetchInlineBotResults, sendInlineBotResult, startBot,
   requestWebView, requestSimpleWebView, sendWebViewData, prolongWebView, loadAttachBots, toggleAttachBot,
-  requestBotUrlAuth, requestLinkUrlAuth, acceptBotUrlAuth, acceptLinkUrlAuth,
+  requestBotUrlAuth, requestLinkUrlAuth, acceptBotUrlAuth, acceptLinkUrlAuth, loadAttachBot,
 } from './bots';
 
 export {
