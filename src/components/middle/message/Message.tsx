@@ -692,6 +692,7 @@ const Message: FC<OwnProps & StateProps> = ({
         availableReactions={availableReactions}
         genericEffects={genericEffects}
         observeIntersection={observeIntersectionForPlaying}
+        noRecentReactors={isChannel}
       />
     );
   }
@@ -1149,6 +1150,7 @@ const Message: FC<OwnProps & StateProps> = ({
             availableReactions={availableReactions}
             genericEffects={genericEffects}
             observeIntersection={observeIntersectionForPlaying}
+            noRecentReactors={isChannel}
           />
         )}
       </div>
