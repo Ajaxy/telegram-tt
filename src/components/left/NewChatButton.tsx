@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useState, useEffect, memo, useCallback,
+  useState, useEffect, memo, useCallback, useMemo,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -49,6 +49,14 @@ const NewChatButton: FC<OwnProps> = ({
     setIsMenuOpen(false);
   }, []);
 
+  const menuItems = useMemo(() => (
+    <>
+      <MenuItem icon="channel" onClick={onNewChannel}>{lang('NewChannel')}</MenuItem>
+      <MenuItem icon="group" onClick={onNewGroup}>{lang('NewGroup')}</MenuItem>
+      <MenuItem icon="user" onClick={onNewPrivateChat}>{lang('NewMessageTitle')}</MenuItem>
+    </>
+  ), [lang, onNewChannel, onNewGroup, onNewPrivateChat]);
+
   return (
     <div className={fabClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       <Button
@@ -69,9 +77,7 @@ const NewChatButton: FC<OwnProps> = ({
         autoClose
         onClose={handleClose}
       >
-        <MenuItem icon="channel" onClick={onNewChannel}>{lang('NewChannel')}</MenuItem>
-        <MenuItem icon="group" onClick={onNewGroup}>{lang('NewGroup')}</MenuItem>
-        <MenuItem icon="user" onClick={onNewPrivateChat}>{lang('NewMessageTitle')}</MenuItem>
+        {menuItems}
       </Menu>
     </div>
   );

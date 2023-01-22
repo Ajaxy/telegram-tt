@@ -266,6 +266,111 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     handleDropdownMenuTransitionEnd,
   } = useLeftHeaderButtonRtlForumTransition(shouldHideSearch);
 
+  const menuItems = useMemo(() => (
+    <>
+      <MenuItem
+        icon="saved-messages"
+        onClick={handleSelectSaved}
+      >
+        {lang('SavedMessages')}
+      </MenuItem>
+      <MenuItem
+        icon="archive"
+        onClick={onSelectArchived}
+      >
+        <span className="menu-item-name">{lang('ArchivedChats')}</span>
+        {archivedUnreadChatsCount > 0 && (
+          <div className="right-badge">{archivedUnreadChatsCount}</div>
+        )}
+      </MenuItem>
+      <MenuItem
+        icon="user"
+        onClick={onSelectContacts}
+      >
+        {lang('Contacts')}
+      </MenuItem>
+      <MenuItem
+        icon="settings"
+        onClick={onSelectSettings}
+      >
+        {lang('Settings')}
+      </MenuItem>
+      <MenuItem
+        icon="darkmode"
+        onClick={handleDarkModeToggle}
+      >
+        <span className="menu-item-name">{lang('lng_menu_night_mode')}</span>
+        <Switcher
+          id="darkmode"
+          label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
+          checked={theme === 'dark'}
+          noAnimation
+        />
+      </MenuItem>
+      <MenuItem
+        icon="animations"
+        onClick={handleAnimationLevelChange}
+      >
+        <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
+        <Switcher
+          id="animations"
+          label="Toggle Animations"
+          checked={animationLevel > 0}
+        />
+      </MenuItem>
+      <MenuItem
+        icon="help"
+        onClick={handleOpenTipsChat}
+      >
+        {lang('TelegramFeatures')}
+      </MenuItem>
+      <MenuItem
+        icon="bug"
+        onClick={handleBugReportClick}
+      >
+        Report Bug
+      </MenuItem>
+      {IS_BETA && (
+        <MenuItem
+          icon="permissions"
+          onClick={handleChangelogClick}
+        >
+          Beta Changelog
+        </MenuItem>
+      )}
+      {withOtherVersions && (
+        <>
+          <MenuItem
+            icon="char-K"
+            href={WEBK_VERSION_URL}
+            onClick={handleSwitchToWebK}
+          >
+            Switch to K Version
+          </MenuItem>
+          <MenuItem
+            icon="char-W"
+            href={LEGACY_VERSION_URL}
+            onClick={handleSwitchToLegacy}
+          >
+            Switch to Old Version
+          </MenuItem>
+        </>
+      )}
+      {canInstall && (
+        <MenuItem
+          icon="install"
+          onClick={getPromptInstall()}
+        >
+          Install App
+        </MenuItem>
+      )}
+    </>
+  ), [
+    animationLevel, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick,
+    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToLegacy,
+    handleSwitchToWebK, lang, onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
+  ]);
+
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header">
@@ -281,102 +386,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
           onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
-          <MenuItem
-            icon="saved-messages"
-            onClick={handleSelectSaved}
-          >
-            {lang('SavedMessages')}
-          </MenuItem>
-          <MenuItem
-            icon="archive"
-            onClick={onSelectArchived}
-          >
-            <span className="menu-item-name">{lang('ArchivedChats')}</span>
-            {archivedUnreadChatsCount > 0 && (
-              <div className="right-badge">{archivedUnreadChatsCount}</div>
-            )}
-          </MenuItem>
-          <MenuItem
-            icon="user"
-            onClick={onSelectContacts}
-          >
-            {lang('Contacts')}
-          </MenuItem>
-          <MenuItem
-            icon="settings"
-            onClick={onSelectSettings}
-          >
-            {lang('Settings')}
-          </MenuItem>
-          <MenuItem
-            icon="darkmode"
-            onClick={handleDarkModeToggle}
-          >
-            <span className="menu-item-name">{lang('lng_menu_night_mode')}</span>
-            <Switcher
-              id="darkmode"
-              label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
-              checked={theme === 'dark'}
-              noAnimation
-            />
-          </MenuItem>
-          <MenuItem
-            icon="animations"
-            onClick={handleAnimationLevelChange}
-          >
-            <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
-            <Switcher
-              id="animations"
-              label="Toggle Animations"
-              checked={animationLevel > 0}
-            />
-          </MenuItem>
-          <MenuItem
-            icon="help"
-            onClick={handleOpenTipsChat}
-          >
-            {lang('TelegramFeatures')}
-          </MenuItem>
-          <MenuItem
-            icon="bug"
-            onClick={handleBugReportClick}
-          >
-            Report Bug
-          </MenuItem>
-          {IS_BETA && (
-            <MenuItem
-              icon="permissions"
-              onClick={handleChangelogClick}
-            >
-              Beta Changelog
-            </MenuItem>
-          )}
-          {withOtherVersions && (
-            <>
-              <MenuItem
-                icon="char-K"
-                href={WEBK_VERSION_URL}
-                onClick={handleSwitchToWebK}
-              >
-                Switch to K Version
-              </MenuItem>
-              <MenuItem
-                icon="char-W"
-                href={LEGACY_VERSION_URL}
-                onClick={handleSwitchToLegacy}
-              >
-                Switch to Old Version
-              </MenuItem>
-            </>
-          )}
-          {canInstall && (
-            <MenuItem
-              icon="install"
-              onClick={getPromptInstall()}
-            >
-              Install App
-            </MenuItem>
-          )}
+          {menuItems}
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
