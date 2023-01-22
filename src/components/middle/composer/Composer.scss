@@ -456,6 +456,7 @@
 #message-input-text,
 #caption-input-text {
   position: relative;
+  flex-grow: 1;
 
   .form-control {
     padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
@@ -558,8 +559,6 @@
 }
 
 #message-input-text {
-  flex-grow: 1;
-
   .form-control {
     margin-bottom: 0;
     line-height: 1.3125;
@@ -601,19 +600,19 @@
 }
 
 #caption-input-text {
-  border: 1px solid var(--color-borders-input);
-  border-radius: var(--border-radius-default);
-  margin-bottom: 0.5rem;
-
   .input-scroller {
-    min-height: 3.25rem;
+    min-height: 3rem;
     max-height: 15rem;
 
-    margin-right: 0.5rem;
+    margin-right: -5.5625rem;
 
     &:has(.form-control:focus) {
       border-color: var(--color-primary);
     }
+  }
+
+  .input-scroller-content {
+    margin-right: 5rem;
   }
 
   .placeholder-text {

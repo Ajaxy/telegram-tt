@@ -10,6 +10,7 @@ import type { ApiWallpaper } from '../../../api/types';
 
 import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config';
 import { throttle } from '../../../util/schedulers';
+import { validateFiles } from '../../../util/files';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
 import { selectTheme } from '../../../global/selectors';
@@ -68,8 +69,9 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   const handleFileSelect = useCallback((e: Event) => {
     const { files } = e.target as HTMLInputElement;
 
-    if (files && files.length > 0) {
-      uploadWallpaper(files[0]);
+    const validatedFiles = validateFiles(files);
+    if (validatedFiles?.length) {
+      uploadWallpaper(validatedFiles[0]);
     }
   }, [uploadWallpaper]);
 

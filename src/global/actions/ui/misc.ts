@@ -390,6 +390,20 @@ addActionHandler('requestConfetti', (global, actions, payload) => {
   };
 });
 
+addActionHandler('updateAttachmentSettings', (global, actions, payload) => {
+  const {
+    shouldCompress, shouldSendGrouped,
+  } = payload;
+
+  return {
+    ...global,
+    attachmentSettings: {
+      shouldCompress: shouldCompress ?? global.attachmentSettings.shouldCompress,
+      shouldSendGrouped: shouldSendGrouped ?? global.attachmentSettings.shouldSendGrouped,
+    },
+  };
+});
+
 addActionHandler('openLimitReachedModal', (global, actions, payload) => {
   const { limit } = payload;
 

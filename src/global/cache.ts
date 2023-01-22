@@ -427,6 +427,7 @@ export function serializeGlobal(global: GlobalState) {
       'shouldShowContextMenuHint',
       'leftColumnWidth',
       'serviceNotifications',
+      'attachmentSettings',
     ]),
     audioPlayer: {
       volume: global.audioPlayer.volume,

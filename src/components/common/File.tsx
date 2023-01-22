@@ -140,7 +140,7 @@ const File: FC<OwnProps> = ({
         )}
       </div>
       <div className="file-info">
-        <div className="file-title" dir="auto">{renderText(name)}</div>
+        <div className="file-title" dir="auto" title={name}>{renderText(name)}</div>
         <div className="file-subtitle" dir="auto">
           <span>
             {isTransferring && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}

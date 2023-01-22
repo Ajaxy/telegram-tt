@@ -51,6 +51,11 @@ export const INITIAL_STATE: GlobalState = {
     byId: {},
   },
 
+  attachmentSettings: {
+    shouldCompress: true,
+    shouldSendGrouped: true,
+  },
+
   scheduledMessages: {
     byChatId: {},
   },

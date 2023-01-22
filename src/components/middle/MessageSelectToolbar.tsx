@@ -188,7 +188,7 @@ export default memo(withGlobal<OwnProps>(
     const canDownload = selectCanDownloadSelectedMessages(global);
     const { messageIds: selectedMessageIds } = global.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
-    const canForward = chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
+    const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
     const isForwardModalOpen = global.forwardMessages.isModalShown;
     const isAnyModalOpen = Boolean(isForwardModalOpen || global.requestedDraft
       || global.requestedAttachBotInChat || global.requestedAttachBotInstall);

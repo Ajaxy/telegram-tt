@@ -10,6 +10,7 @@ import type { ISettings } from '../../../types';
 import { CONTENT_TYPES_WITH_PREVIEW } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import { validateFiles } from '../../../util/files';
 
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
@@ -31,7 +32,7 @@ export type OwnProps = {
   isScheduled?: boolean;
   attachBots: GlobalState['attachMenu']['bots'];
   peerType?: ApiAttachMenuPeerType;
-  onFileSelect: (files: File[], isQuick: boolean) => void;
+  onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
   onPollCreate: () => void;
   theme: ISettings['theme'];
 };
@@ -67,11 +68,12 @@ const AttachMenu: FC<OwnProps> = ({
     }
   }, [isAttachMenuOpen, openAttachMenu, closeAttachMenu]);
 
-  const handleFileSelect = useCallback((e: Event, isQuick: boolean) => {
+  const handleFileSelect = useCallback((e: Event, shouldSuggestCompression?: boolean) => {
     const { files } = e.target as HTMLInputElement;
+    const validatedFiles = validateFiles(files);
 
-    if (files && files.length > 0) {
-      onFileSelect(Array.from(files), isQuick);
+    if (validatedFiles?.length) {
+      onFileSelect(validatedFiles, shouldSuggestCompression);
     }
   }, [onFileSelect]);
 

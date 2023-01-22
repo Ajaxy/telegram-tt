@@ -64,7 +64,7 @@ import {
 import { formatMediaDuration, formatVoiceRecordDuration } from '../../../util/dateFormat';
 import focusEditableElement from '../../../util/focusEditableElement';
 import parseMessageInput from '../../../util/parseMessageInput';
-import buildAttachment from './helpers/buildAttachment';
+import buildAttachment, { prepareAttachmentsToSend } from './helpers/buildAttachment';
 import renderText from '../../common/helpers/renderText';
 import { insertHtmlInSelection } from '../../../util/selection';
 import deleteLastCharacterOutsideSelection from '../../../util/deleteLastCharacterOutsideSelection';
@@ -73,7 +73,6 @@ import windowSize from '../../../util/windowSize';
 import { isSelectionInsideInput } from './helpers/selection';
 import applyIosAutoCapitalizationFix from './helpers/applyIosAutoCapitalizationFix';
 import { getServerTime } from '../../../util/serverTime';
-import { hasPreview } from '../../../util/files';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { buildCustomEmojiHtml } from './helpers/customEmoji';
 import { processMessageInputForCustomEmoji } from '../../../util/customEmojiManager';
@@ -98,6 +97,7 @@ import useInlineBotTooltip from './hooks/useInlineBotTooltip';
 import useBotCommandTooltip from './hooks/useBotCommandTooltip';
 import useSchedule from '../../../hooks/useSchedule';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
+import useAttachmentModal from './hooks/useAttachmentModal';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -279,7 +279,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     loadSendAs,
     resetOpenChatWithDraft,
     callAttachBot,
-    openLimitReachedModal,
     openPremiumModal,
     addRecentCustomEmoji,
     showNotification,
@@ -344,6 +343,21 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
 
+  const {
+    shouldSuggestCompression,
+    handleAppendFiles,
+    handleFileSelect,
+    onCaptionUpdate,
+    handleClearAttachments,
+    handleDeleteAttachment,
+    handleSetAttachments,
+  } = useAttachmentModal({
+    attachments,
+    setHtml,
+    setAttachments,
+    fileSizeLimit,
+  });
+
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
   const [isBotCommandMenuOpen, openBotCommandMenu, closeBotCommandMenu] = useFlag();
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
@@ -351,19 +365,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
   const [isHoverDisabled, disableHover, enableHover] = useFlag();
-
-  const handleSetAttachments = useCallback(
-    (newValue: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => {
-      const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
-      if (newAttachments.some(({ size }) => size > fileSizeLimit)) {
-        openLimitReachedModal({
-          limit: 'uploadMaxFileparts',
-        });
-      } else {
-        setAttachments(newAttachments);
-      }
-    }, [attachments, fileSizeLimit, openLimitReachedModal],
-  );
 
   const {
     startRecordingVoice,
@@ -612,20 +613,100 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [editingMessage, handleEditCancel]);
 
-  const handleFileSelect = useCallback(async (files: File[], isQuick: boolean) => {
-    handleSetAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))));
-  }, [handleSetAttachments]);
+  const validateTextLength = useCallback((text: string, isAttachmentModal?: boolean) => {
+    const maxLength = isAttachmentModal ? captionLimit : MESSAGE_MAX_LENGTH;
+    if (text?.length > maxLength) {
+      const extraLength = text.length - maxLength;
+      showDialog({
+        data: {
+          message: 'MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
+          textParams: {
+            '{EXTRA_CHARS_COUNT}': extraLength,
+            '{PLURAL_S}': extraLength > 1 ? 's' : '',
+          },
+          hasErrorKey: true,
+        },
+      });
 
-  const handleAppendFiles = useCallback(async (files: File[], isQuick: boolean) => {
-    handleSetAttachments([
-      ...attachments,
-      ...await Promise.all(files.map((file) => buildAttachment(file.name, file, isQuick))),
-    ]);
-  }, [attachments, handleSetAttachments]);
+      return false;
+    }
+    return true;
+  }, [captionLimit, showDialog]);
 
-  const handleClearAttachment = useCallback(() => {
-    setAttachments(MEMO_EMPTY_ARRAY);
-  }, []);
+  const checkSlowMode = useCallback(() => {
+    if (slowMode && !isAdmin) {
+      // No need to subscribe on updates in `mapStateToProps`
+      const { serverTimeOffset } = getGlobal();
+
+      const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+
+      const nowSeconds = getServerTime(serverTimeOffset);
+      const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
+        && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
+      const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
+
+      if (
+        (secondsSinceLastMessage && secondsSinceLastMessage < slowMode.seconds)
+        || nextSendDateNotReached
+      ) {
+        const secondsRemaining = nextSendDateNotReached
+          ? slowMode.nextSendDate! - nowSeconds
+          : slowMode.seconds - secondsSinceLastMessage!;
+        showDialog({
+          data: {
+            message: lang('SlowModeHint', formatMediaDuration(secondsRemaining)),
+            isSlowMode: true,
+            hasErrorKey: false,
+          },
+        });
+
+        messageInput?.blur();
+
+        return false;
+      }
+    }
+    return true;
+  }, [isAdmin, lang, showDialog, slowMode]);
+
+  const handleSendAttachments = useCallback((
+    sendCompressed: boolean, sendGrouped: boolean, isSilent?: boolean, scheduledAt?: number,
+  ) => {
+    if (connectionState !== 'connectionStateReady') {
+      return;
+    }
+
+    const { text, entities } = parseMessageInput(htmlRef.current!);
+    if (!text && !attachments.length) {
+      return;
+    }
+    if (!validateTextLength(text, true)) return;
+    if (!checkSlowMode()) return;
+
+    sendMessage({
+      text,
+      entities,
+      scheduledAt,
+      isSilent,
+      shouldUpdateStickerSetsOrder: true,
+      attachments: prepareAttachmentsToSend(attachments, sendCompressed),
+      shouldGroupMessages: sendGrouped,
+    });
+
+    // No need to subscribe on updates in `mapStateToProps`
+    const { serverTimeOffset } = getGlobal();
+
+    lastMessageSendTimeSeconds.current = getServerTime(serverTimeOffset);
+
+    clearDraft({ chatId, localOnly: true });
+
+    // Wait until message animation starts
+    requestAnimationFrame(() => {
+      resetComposer();
+    });
+  }, [
+    attachments, chatId, checkSlowMode, clearDraft, htmlRef, resetComposer, sendMessage, validateTextLength,
+    connectionState,
+  ]);
 
   const handleSend = useCallback(async (isSilent = false, scheduledAt?: number) => {
     if (connectionState !== 'connectionStateReady') {
@@ -641,7 +722,6 @@ const Composer: FC<OwnProps & StateProps> = ({
         currentAttachments = [await buildAttachment(
           VOICE_RECORDING_FILENAME,
           blob,
-          false,
           { voice: { duration, waveform } },
         )];
       }
@@ -649,64 +729,28 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     const { text, entities } = parseMessageInput(htmlRef.current!);
 
-    if (!currentAttachments.length && !text && !isForwarding) {
+    if (currentAttachments.length) {
+      handleSendAttachments(false, false);
+      return;
+    }
+
+    if (!text && !isForwarding) {
       return;
     }
 
     // No need to subscribe on updates in `mapStateToProps`
     const { serverTimeOffset } = getGlobal();
 
-    const maxLength = currentAttachments.length ? captionLimit : MESSAGE_MAX_LENGTH;
-    if (text?.length > maxLength) {
-      const extraLength = text.length - maxLength;
-      showDialog({
-        data: {
-          message: 'MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
-          textParams: {
-            '{EXTRA_CHARS_COUNT}': extraLength,
-            '{PLURAL_S}': extraLength > 1 ? 's' : '',
-          },
-          hasErrorKey: true,
-        },
-      });
-
-      return;
-    }
+    if (!validateTextLength(text)) return;
 
     const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
-    if (currentAttachments.length || text) {
-      if (slowMode && !isAdmin) {
-        const nowSeconds = getServerTime(serverTimeOffset);
-        const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
-          && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
-        const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
-
-        if (
-          (secondsSinceLastMessage && secondsSinceLastMessage < slowMode.seconds)
-          || nextSendDateNotReached
-        ) {
-          const secondsRemaining = nextSendDateNotReached
-            ? slowMode.nextSendDate! - nowSeconds
-            : slowMode.seconds - secondsSinceLastMessage!;
-          showDialog({
-            data: {
-              message: lang('SlowModeHint', formatMediaDuration(secondsRemaining)),
-              isSlowMode: true,
-              hasErrorKey: false,
-            },
-          });
-
-          messageInput?.blur();
-
-          return;
-        }
-      }
+    if (text) {
+      if (!checkSlowMode()) return;
 
       sendMessage({
         text,
         entities,
-        attachments: currentAttachments,
         scheduledAt,
         isSilent,
         shouldUpdateStickerSetsOrder: true,
@@ -733,8 +777,8 @@ const Composer: FC<OwnProps & StateProps> = ({
       resetComposer();
     });
   }, [
-    connectionState, attachments, activeVoiceRecording, isForwarding, clearDraft, chatId, captionLimit,
-    resetComposer, stopRecordingVoice, showDialog, slowMode, isAdmin, sendMessage, forwardMessages, lang, htmlRef,
+    connectionState, attachments, activeVoiceRecording, htmlRef, isForwarding, validateTextLength, clearDraft,
+    chatId, stopRecordingVoice, handleSendAttachments, checkSlowMode, sendMessage, forwardMessages, resetComposer,
   ]);
 
   const handleClickBotMenu = useCallback(() => {
@@ -778,13 +822,16 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (!args || Object.keys(restArgs).length === 0) {
       void handleSend(Boolean(isSilent), scheduledAt);
+    } else if (args.sendCompressed !== undefined || args.sendGrouped !== undefined) {
+      const { sendCompressed = false, sendGrouped = false } = args;
+      void handleSendAttachments(sendCompressed, sendGrouped, isSilent, scheduledAt);
     } else {
       sendMessage({
         ...args,
         scheduledAt,
       });
     }
-  }, [handleSend, sendInlineBotResult, sendMessage]);
+  }, [handleSendAttachments, handleSend, sendInlineBotResult, sendMessage]);
 
   useEffect(() => {
     if (contentToBeScheduled) {
@@ -807,8 +854,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (requestedDraftFiles?.length) {
-      const isQuick = requestedDraftFiles.every((file) => hasPreview(file));
-      handleFileSelect(requestedDraftFiles, isQuick);
+      handleFileSelect(requestedDraftFiles);
       resetOpenChatWithDraft();
     }
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
@@ -931,15 +977,18 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [closePollModal, handleMessageSchedule, requestCalendar, sendMessage, shouldSchedule]);
 
-  const handleSendSilent = useCallback(() => {
+  const sendSilent = useCallback((additionalArgs?: ScheduledMessageArgs) => {
     if (shouldSchedule) {
       requestCalendar((scheduledAt) => {
-        handleMessageSchedule({ isSilent: true }, scheduledAt);
+        handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt);
       });
+    } else if (additionalArgs && ('sendCompressed' in additionalArgs || 'sendGrouped' in additionalArgs)) {
+      const { sendCompressed = false, sendGrouped = false } = additionalArgs;
+      void handleSendAttachments(sendCompressed, sendGrouped, true);
     } else {
       void handleSend(true);
     }
-  }, [handleMessageSchedule, handleSend, requestCalendar, shouldSchedule]);
+  }, [handleMessageSchedule, handleSend, handleSendAttachments, requestCalendar, shouldSchedule]);
 
   const handleSearchOpen = useCallback((type: 'stickers' | 'gifs') => {
     if (type === 'stickers') {
@@ -1087,12 +1136,28 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   }, [handleMessageSchedule, requestCalendar]);
 
+  const handleSendSilent = useCallback(() => {
+    sendSilent();
+  }, [sendSilent]);
+
+  const handleSendScheduledAttachments = useCallback((sendCompressed: boolean, sendGrouped: boolean) => {
+    requestCalendar((scheduledAt) => {
+      handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt);
+    });
+  }, [handleMessageSchedule, requestCalendar]);
+
+  const handleSendSilentAttachments = useCallback((sendCompressed: boolean, sendGrouped: boolean) => {
+    sendSilent({ sendCompressed, sendGrouped });
+  }, [sendSilent]);
+
   const onSend = mainButtonState === MainButtonState.Edit
     ? handleEditComplete
     : mainButtonState === MainButtonState.Schedule ? handleSendScheduled
       : handleSend;
 
   const isBotMenuButtonCommands = botMenuButton && botMenuButton?.type === 'commands';
+  const shouldDisplayBotCommands = isChatWithBot && isBotMenuButtonCommands && botCommands !== false
+    && !activeVoiceRecording && !editingMessage;
 
   return (
     <div className={className}>
@@ -1109,24 +1174,16 @@ const Composer: FC<OwnProps & StateProps> = ({
         threadId={threadId}
         canShowCustomSendMenu={canShowCustomSendMenu}
         attachments={attachments}
-        captionLimit={captionLimit}
         caption={attachments.length ? html : ''}
-        groupChatMembers={groupChatMembers}
-        currentUserId={currentUserId}
-        recentEmojis={recentEmojis}
         isReady={isReady}
-        isChatWithSelf={isChatWithSelf}
-        onCaptionUpdate={setHtml}
-        baseEmojiKeywords={baseEmojiKeywords}
-        emojiKeywords={emojiKeywords}
-        shouldSchedule={shouldSchedule}
-        onSendSilent={handleSendSilent}
-        onSend={handleSend}
-        onSendScheduled={handleSendScheduled}
+        shouldSuggestCompression={shouldSuggestCompression}
+        onCaptionUpdate={onCaptionUpdate}
+        onSendSilent={handleSendSilentAttachments}
+        onSend={handleSendAttachments}
+        onSendScheduled={handleSendScheduledAttachments}
         onFileAppend={handleAppendFiles}
-        onClear={handleClearAttachment}
-        shouldSuggestCustomEmoji={shouldSuggestCustomEmoji}
-        customEmojiForEmoji={customEmojiForEmoji}
+        onClear={handleClearAttachments}
+        onDelete={handleDeleteAttachment}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1196,8 +1253,7 @@ const Composer: FC<OwnProps & StateProps> = ({
                 isDisabled={Boolean(activeVoiceRecording)}
               />
             )}
-          {(isChatWithBot && isBotMenuButtonCommands
-            && botCommands !== false && !activeVoiceRecording && !editingMessage) && (
+          {shouldDisplayBotCommands && (
             <ResponsiveHoverButton
               className={buildClassName('bot-commands', isBotCommandMenuOpen && 'activated')}
               round
