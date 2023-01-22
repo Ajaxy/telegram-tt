@@ -27,7 +27,6 @@ const ReactionButton: FC<{
   withRecentReactors?: boolean;
   genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
-  hideAvatars?: boolean;
 }> = ({
   reaction,
   message,
@@ -36,7 +35,6 @@ const ReactionButton: FC<{
   withRecentReactors,
   genericEffects,
   observeIntersection,
-  hideAvatars,
 }) => {
   const { toggleReaction } = getActions();
   const { recentReactions } = message.reactions!;
@@ -76,7 +74,7 @@ const ReactionButton: FC<{
         genericEffects={genericEffects}
         observeIntersection={observeIntersection}
       />
-      {recentReactors?.length && !hideAvatars ? (
+      {recentReactors?.length ? (
         <div className="avatars">
           {recentReactors.map((user) => <Avatar user={user} size="micro" />)}
         </div>

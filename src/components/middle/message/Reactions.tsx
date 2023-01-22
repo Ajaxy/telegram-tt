@@ -20,7 +20,7 @@ type OwnProps = {
   metaChildren?: React.ReactNode;
   genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
-  hideAvatars?: boolean;
+  noRecentReactors?: boolean;
 };
 
 const MAX_RECENT_AVATARS = 3;
@@ -33,7 +33,7 @@ const Reactions: FC<OwnProps> = ({
   metaChildren,
   genericEffects,
   observeIntersection,
-  hideAvatars,
+  noRecentReactors,
 }) => {
   const totalCount = useMemo(() => (
     message.reactions!.results.reduce((acc, reaction) => acc + reaction.count, 0)
@@ -48,10 +48,9 @@ const Reactions: FC<OwnProps> = ({
           message={message}
           activeReactions={activeReactions}
           availableReactions={availableReactions}
-          withRecentReactors={totalCount <= MAX_RECENT_AVATARS}
+          withRecentReactors={totalCount <= MAX_RECENT_AVATARS && !noRecentReactors}
           genericEffects={genericEffects}
           observeIntersection={observeIntersection}
-          hideAvatars={hideAvatars}
         />
       ))}
       {metaChildren}
