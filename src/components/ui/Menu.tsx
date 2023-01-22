@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { useEffect, useRef } from '../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
 import useShowTransition from '../../hooks/useShowTransition';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
@@ -168,4 +168,4 @@ const Menu: FC<OwnProps> = ({
   return menu;
 };
 
-export default Menu;
+export default memo(Menu);
