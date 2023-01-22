@@ -786,12 +786,10 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const attachBot = attachBots[chatId];
-
     callAttachBot({
-      bot: attachBot, chatId, isFromBotMenu: true, url: botMenuButton.url, threadId,
+      chatId, url: botMenuButton.url, threadId,
     });
-  }, [attachBots, botMenuButton, callAttachBot, chatId, threadId]);
+  }, [botMenuButton, callAttachBot, chatId, threadId]);
 
   const handleActivateBotCommandMenu = useCallback(() => {
     closeSymbolMenu();
