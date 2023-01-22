@@ -1393,61 +1393,65 @@ function buildUploadingMedia(
     previewBlobUrl,
     mimeType,
     size,
+    audio,
+    shouldSendAsFile,
   } = attachment;
 
-  if (attachment.quick) {
-    if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
-      const { width, height } = attachment.quick;
+  if (!shouldSendAsFile) {
+    if (attachment.quick) {
+      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+        const { width, height } = attachment.quick;
+        return {
+          photo: {
+            id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
+            sizes: [],
+            thumbnail: { width, height, dataUri: '' }, // Used only for dimensions
+            blobUrl,
+          },
+        };
+      }
+      if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
+        const { width, height, duration } = attachment.quick;
+        return {
+          video: {
+            id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
+            mimeType,
+            duration: duration || 0,
+            fileName,
+            width,
+            height,
+            blobUrl,
+            ...(previewBlobUrl && { thumbnail: { width, height, dataUri: previewBlobUrl } }),
+            size,
+          },
+        };
+      }
+    }
+    if (attachment.voice) {
+      const { duration, waveform } = attachment.voice;
+      const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
       return {
-        photo: {
+        voice: {
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-          sizes: [],
-          thumbnail: { width, height, dataUri: '' }, // Used only for dimensions
-          blobUrl,
+          duration,
+          waveform: inputWaveform,
         },
       };
     }
-    if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
-      const { width, height, duration } = attachment.quick;
+    if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
+      const { duration, performer, title } = audio || {};
       return {
-        video: {
+        audio: {
           id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
           mimeType,
-          duration: duration || 0,
           fileName,
-          width,
-          height,
-          blobUrl,
-          ...(previewBlobUrl && { thumbnail: { width, height, dataUri: previewBlobUrl } }),
           size,
+          duration: duration || 0,
+          title,
+          performer,
         },
       };
     }
-  }
-  if (attachment.voice) {
-    const { duration, waveform } = attachment.voice;
-    const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
-    return {
-      voice: {
-        id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-        duration,
-        waveform: inputWaveform,
-      },
-    };
-  }
-  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) {
-    const { duration, performer, title } = attachment.audio || {};
-    return {
-      audio: {
-        id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
-        mimeType,
-        fileName,
-        size,
-        duration: duration || 0,
-        title,
-        performer,
-      },
-    };
   }
   return {
     document: {

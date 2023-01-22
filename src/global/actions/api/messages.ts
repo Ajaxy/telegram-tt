@@ -25,6 +25,9 @@ import {
   RE_TG_LINK,
   RE_TME_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
+  SUPPORTED_AUDIO_CONTENT_TYPES,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { IS_IOS } from '../../../util/environment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
@@ -235,7 +238,7 @@ addActionHandler('sendMessage', (global, actions, payload) => {
   actions.clearWebPagePreview({ chatId, threadId, value: false });
 
   const isSingle = !payload.attachments || payload.attachments.length <= 1;
-  const isGrouped = !isSingle && payload.attachments && payload.attachments.length > 1;
+  const isGrouped = !isSingle && payload.shouldGroupMessages;
 
   if (isSingle) {
     const { attachments, ...restParams } = params;
@@ -247,27 +250,33 @@ addActionHandler('sendMessage', (global, actions, payload) => {
     const {
       text, entities, attachments, ...commonParams
     } = params;
-    const groupedAttachments = split(attachments as ApiAttachment[], MAX_MEDIA_FILES_FOR_ALBUM);
-    for (let i = 0; i < groupedAttachments.length; i++) {
-      const [firstAttachment, ...restAttachments] = groupedAttachments[i];
-      const groupedId = `${Date.now()}${i}`;
+    const byType = splitAttachmentsByType(attachments);
 
-      sendMessage({
-        ...commonParams,
-        text: i === 0 ? text : undefined,
-        entities: i === 0 ? entities : undefined,
-        attachment: firstAttachment,
-        groupedId: restAttachments.length > 0 ? groupedId : undefined,
-      });
+    byType.forEach((group, groupIndex) => {
+      const groupedAttachments = split(group as ApiAttachment[], MAX_MEDIA_FILES_FOR_ALBUM);
+      for (let i = 0; i < groupedAttachments.length; i++) {
+        const [firstAttachment, ...restAttachments] = groupedAttachments[i];
+        const groupedId = `${Date.now()}${groupIndex}${i}`;
 
-      restAttachments.forEach((attachment: ApiAttachment) => {
+        const isFirst = i === 0 && groupIndex === 0;
+
         sendMessage({
           ...commonParams,
-          attachment,
-          groupedId,
+          text: isFirst ? text : undefined,
+          entities: isFirst ? entities : undefined,
+          attachment: firstAttachment,
+          groupedId: restAttachments.length > 0 ? groupedId : undefined,
         });
-      });
-    }
+
+        restAttachments.forEach((attachment: ApiAttachment) => {
+          sendMessage({
+            ...commonParams,
+            attachment,
+            groupedId,
+          });
+        });
+      }
+    });
   } else {
     const {
       text, entities, attachments, replyingTo, ...commonParams
@@ -1381,4 +1390,34 @@ function countSortedIds(ids: number[], from: number, to: number) {
   }
 
   return count;
+}
+
+function splitAttachmentsByType(attachments: ApiAttachment[]) {
+  return attachments.reduce((acc, attachment, index, arr) => {
+    if (index === 0) {
+      acc.push([attachment]);
+      return acc;
+    }
+
+    const type = getAttachmentType(attachment);
+    const previousType = getAttachmentType(arr[index - 1]);
+    if (type === previousType) {
+      acc[acc.length - 1].push(attachment);
+    } else {
+      acc.push([attachment]);
+    }
+
+    return acc;
+  }, [] as ApiAttachment[][]);
+}
+
+function getAttachmentType(attachment: ApiAttachment) {
+  const {
+    shouldSendAsFile, mimeType,
+  } = attachment;
+  if (shouldSendAsFile) return 'file';
+  if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType) || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return 'media';
+  if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) return 'audio';
+  if (attachment.voice) return 'voice';
+  return 'file';
 }

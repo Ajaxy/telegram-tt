@@ -10,7 +10,6 @@ import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferIt
 import parseMessageInput, { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
 import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
 
-const CLIPBOARD_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/gif'];
 const MAX_MESSAGE_LENGTH = 4096;
 
 const STYLE_TAG_REGEX = /<style>(.*?)<\/style>/gs;
@@ -90,20 +89,20 @@ const useClipboardPaste = (
       }
 
       const { items } = e.clipboardData;
-      let files: File[] = [];
+      let files: File[] | undefined = [];
 
       e.preventDefault();
       if (items.length > 0) {
         files = await getFilesFromDataTransferItems(items);
       }
 
-      if (files.length === 0 && !pastedText) {
+      if (!files?.length && !pastedText) {
         return;
       }
 
-      if (files.length > 0 && !editedMessage) {
+      if (files?.length && !editedMessage) {
         const newAttachments = await Promise.all(files.map((file) => {
-          return buildAttachment(file.name, file, files.length === 1 && CLIPBOARD_ACCEPTED_TYPES.includes(file.type));
+          return buildAttachment(file.name, file);
         }));
         setAttachments((attachments) => attachments.concat(newAttachments));
       }

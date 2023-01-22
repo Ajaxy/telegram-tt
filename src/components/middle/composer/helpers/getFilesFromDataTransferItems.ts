@@ -1,3 +1,5 @@
+import { validateFiles } from '../../../../util/files';
+
 export default async function getFilesFromDataTransferItems(dataTransferItems: DataTransferItemList) {
   const files: File[] = [];
 
@@ -45,14 +47,5 @@ export default async function getFilesFromDataTransferItems(dataTransferItems: D
 
   await Promise.all(entriesPromises);
 
-  return files.map(fixMovMime);
-}
-
-// .mov MIME type not reported sometimes https://developer.mozilla.org/en-US/docs/Web/API/File/type#sect1
-function fixMovMime(file: File) {
-  const ext = file.name.split('.').pop()!;
-  if (!file.type && ext.toLowerCase() === 'mov') {
-    return new File([file], file.name, { type: 'video/quicktime' });
-  }
-  return file;
+  return validateFiles(files);
 }

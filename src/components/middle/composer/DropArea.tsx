@@ -19,7 +19,7 @@ export type OwnProps = {
   isOpen: boolean;
   withQuick?: boolean;
   onHide: NoneToVoidFunction;
-  onFileSelect: (files: File[], isQuick: boolean) => void;
+  onFileSelect: (files: File[], suggestCompression?: boolean) => void;
 };
 
 export enum DropAreaState {
@@ -48,14 +48,14 @@ const DropArea: FC<OwnProps> = ({
       files = files.concat(Array.from(dt.files));
     } else if (dt.items && dt.items.length > 0) {
       const folderFiles = await getFilesFromDataTransferItems(dt.items);
-      if (folderFiles.length) {
+      if (folderFiles?.length) {
         files = files.concat(folderFiles);
       }
     }
 
     onHide();
-    onFileSelect(files, false);
-  }, [onFileSelect, onHide]);
+    onFileSelect(files, withQuick ? false : undefined);
+  }, [onFileSelect, onHide, withQuick]);
 
   const handleQuickFilesDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
@@ -89,6 +89,8 @@ const DropArea: FC<OwnProps> = ({
     return undefined;
   }
 
+  const shouldRenderQuick = withQuick || prevWithQuick;
+
   const className = buildClassName(
     'DropArea',
     transitionClassNames,
@@ -103,8 +105,8 @@ const DropArea: FC<OwnProps> = ({
         onDrop={onHide}
         onClick={onHide}
       >
-        <DropTarget onFileSelect={handleFilesDrop} />
-        {(withQuick || prevWithQuick) && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
+        <DropTarget onFileSelect={handleFilesDrop} isGeneric={!shouldRenderQuick} />
+        {shouldRenderQuick && <DropTarget onFileSelect={handleQuickFilesDrop} isQuick />}
       </div>
     </Portal>
   );

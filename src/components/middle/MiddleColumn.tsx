@@ -28,7 +28,6 @@ import {
 import {
   IS_SINGLE_COLUMN_LAYOUT,
   IS_TABLET_COLUMN_LAYOUT,
-  IS_TOUCH_ENV,
   MASK_IMAGE_DISABLED,
 } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
@@ -285,10 +284,6 @@ const MiddleColumn: FC<StateProps> = ({
   }, [shouldLoadFullChat, chatId, isReady, loadFullChat]);
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    if (IS_TOUCH_ENV) {
-      return;
-    }
-
     const { items } = e.dataTransfer || {};
     const shouldDrawQuick = items && items.length > 0 && Array.from(items)
       // Filter unnecessary element for drag and drop images in Firefox (https://github.com/Ajaxy/telegram-tt/issues/49)

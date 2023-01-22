@@ -5,65 +5,49 @@
     max-width: 26.25rem;
     @media (max-width: 600px) {
       max-height: 100%;
-      padding-bottom: 1.5rem;
     }
+  }
+
+  .modal-header-condensed {
+    padding: 0.3125rem 0.5rem !important;
+    border-bottom: 1px solid var(--color-borders);
   }
 
   .modal-content {
-    padding: 0.5rem 1.25rem 1.875rem;
+    padding: 0;
     max-height: calc(100vh - 3.25rem);
-    @media (max-width: 600px) {
-      padding-bottom: 0.25rem;
-    }
+
+    overflow-x: auto;
   }
 
-  .media-wrapper {
+  .attachments-wrapper {
     max-height: 26rem;
     overflow: auto;
+    flex-shrink: 0;
+
     display: flex;
     flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+    margin: 0 0.25rem;
+    padding: 0.5rem 0.25rem;
 
-    video,
-    img {
-      flex: 1;
-      width: calc(50% - 0.15rem);
-      height: 12rem;
-      margin-bottom: 0.3125rem;
-      border-radius: var(--border-radius-default);
-      object-fit: cover;
-
-      &:only-child {
-        height: auto;
-        max-height: 25rem;
-        margin-bottom: 0;
-      }
-
-      &:nth-child(even) {
-        margin-left: 0.3125rem;
-      }
-    }
-  }
-
-  .document-wrapper {
-    max-height: 25rem;
-    overflow: auto;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    margin: 0.75rem 0 1.75rem;
-
-    .File:not(:last-child) {
-      margin-bottom: 1.5rem;
-    }
-
-    .file-icon {
-      cursor: default !important;
+    @media (max-width: 600px) {
+      max-height: 80vh;
     }
   }
 
   .attachment-caption-wrapper {
     position: relative;
+    margin: 0 0.5rem;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.5rem;
+      top: 0;
+      right: -0.5rem;
+      border-top: 1px solid var(--color-borders);
+    }
 
     .form-control {
       background: var(--color-background);
@@ -73,6 +57,15 @@
       right: 0 !important;
       z-index: 0;
     }
+  }
+
+  .attachment-caption {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .attachment-checkbox {
+    margin-left: -1rem;
   }
 
   .drop-target {
@@ -119,9 +112,8 @@
     }
 
     .attachment-caption-wrapper,
-    .document-wrapper,
-    .media-wrapper,
-    .form-control {
+    .attachments-wrapper,
+    .input-scroller {
       pointer-events: none;
     }
 
@@ -136,13 +128,24 @@
   }
 
   .CustomSendMenu {
-    bottom: auto;
+    bottom: 2.25rem;
 
     .is-pointer-env & > .backdrop {
       width: 100%;
-      top: -2.25rem;
+      top: -2rem;
       bottom: auto;
-      height: 2.75rem;
+      height: 3.5rem;
     }
+  }
+
+  .AttachmentModal--send-wrapper {
+    align-self: flex-end;
+    margin-right: 0.25rem;
+  }
+
+  .AttachmentModal--send {
+    height: 2.5rem;
+    padding: 0 1rem;
+    margin-bottom: 0.25rem;
   }
 }

@@ -45,6 +45,10 @@ export interface ApiAttachment {
     performer?: string;
   };
   previewBlobUrl?: string;
+
+  shouldSendAsFile?: boolean;
+
+  uniqueId?: string;
 }
 
 export interface ApiWallpaper {

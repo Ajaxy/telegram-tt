@@ -17,7 +17,7 @@ const MAX_QUICK_IMG_SIZE = 1280; // px
 const FILE_EXT_REGEX = /\.[^/.]+$/;
 
 export default async function buildAttachment(
-  filename: string, blob: Blob, isQuick: boolean, options?: Partial<ApiAttachment>,
+  filename: string, blob: Blob, options?: Partial<ApiAttachment>,
 ): Promise<ApiAttachment> {
   const blobUrl = URL.createObjectURL(blob);
   const { type: mimeType, size } = blob;
@@ -26,28 +26,25 @@ export default async function buildAttachment(
   let previewBlobUrl;
 
   if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
-    if (isQuick) {
-      const img = await preloadImage(blobUrl);
-      const { width, height } = img;
-      const shouldShrink = width > MAX_QUICK_IMG_SIZE || height > MAX_QUICK_IMG_SIZE;
+    const img = await preloadImage(blobUrl);
+    const { width, height } = img;
+    const shouldShrink = Math.max(width, height) > MAX_QUICK_IMG_SIZE;
 
-      if (shouldShrink || mimeType !== 'image/jpeg') {
-        const resizedUrl = await scaleImage(
-          blobUrl, shouldShrink ? MAX_QUICK_IMG_SIZE / Math.max(width, height) : 1, 'image/jpeg',
-        );
-        URL.revokeObjectURL(blobUrl);
-        const newBlob = await fetchBlob(resizedUrl);
-        return buildAttachment(filename, newBlob, true, options);
-      }
-
-      if (mimeType === 'image/jpeg') {
-        filename = filename.replace(FILE_EXT_REGEX, '.jpg');
-      }
-
-      quick = { width, height };
-    } else {
-      previewBlobUrl = blobUrl;
+    if (shouldShrink || mimeType !== 'image/jpeg') {
+      const resizedUrl = await scaleImage(
+        blobUrl, shouldShrink ? MAX_QUICK_IMG_SIZE / Math.max(width, height) : 1, 'image/jpeg',
+      );
+      URL.revokeObjectURL(blobUrl);
+      const newBlob = await fetchBlob(resizedUrl);
+      return buildAttachment(filename, newBlob, options);
     }
+
+    if (mimeType === 'image/jpeg') {
+      filename = filename.replace(FILE_EXT_REGEX, '.jpg');
+    }
+
+    quick = { width, height };
+    previewBlobUrl = blobUrl;
   } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
     const { videoWidth: width, videoHeight: height, duration } = await preloadVideo(blobUrl);
     quick = { width, height, duration };
@@ -73,6 +70,13 @@ export default async function buildAttachment(
     quick,
     audio,
     previewBlobUrl,
+    uniqueId: `${Date.now()}-${Math.random()}`,
     ...options,
   };
+}
+
+export function prepareAttachmentsToSend(attachments: ApiAttachment[], shouldSendCompressed?: boolean) {
+  return !shouldSendCompressed
+    ? attachments.map((attachment) => ({ ...attachment, shouldSendAsFile: true }))
+    : attachments;
 }

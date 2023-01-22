@@ -566,7 +566,7 @@ export async function rescheduleMessage({
 
 async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, onProgress: ApiOnProgress) {
   const {
-    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl,
+    filename, blobUrl, mimeType, quick, voice, audio, previewBlobUrl, shouldSendAsFile,
   } = attachment;
 
   const patchedOnProgress: ApiOnProgress = (progress) => {
@@ -584,41 +584,43 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
   const thumb = thumbFile ? await uploadFile(thumbFile) : undefined;
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
-  if (quick) {
-    if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
-      return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
-    }
+  if (!shouldSendAsFile) {
+    if (quick) {
+      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+        return new GramJs.InputMediaUploadedPhoto({ file: inputFile });
+      }
 
-    if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
-      const { width, height, duration } = quick;
-      if (duration !== undefined) {
-        attributes.push(new GramJs.DocumentAttributeVideo({
-          duration,
-          w: width,
-          h: height,
-          supportsStreaming: true,
-        }));
+      if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
+        const { width, height, duration } = quick;
+        if (duration !== undefined) {
+          attributes.push(new GramJs.DocumentAttributeVideo({
+            duration,
+            w: width,
+            h: height,
+            supportsStreaming: true,
+          }));
+        }
       }
     }
-  }
 
-  if (audio) {
-    const { duration, title, performer } = audio;
-    attributes.push(new GramJs.DocumentAttributeAudio({
-      duration,
-      title,
-      performer,
-    }));
-  }
+    if (audio) {
+      const { duration, title, performer } = audio;
+      attributes.push(new GramJs.DocumentAttributeAudio({
+        duration,
+        title,
+        performer,
+      }));
+    }
 
-  if (voice) {
-    const { duration, waveform } = voice;
-    const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
-    attributes.push(new GramJs.DocumentAttributeAudio({
-      voice: true,
-      duration,
-      waveform: Buffer.from(inputWaveform),
-    }));
+    if (voice) {
+      const { duration, waveform } = voice;
+      const { data: inputWaveform } = interpolateArray(waveform, INPUT_WAVEFORM_LENGTH);
+      attributes.push(new GramJs.DocumentAttributeAudio({
+        voice: true,
+        duration,
+        waveform: Buffer.from(inputWaveform),
+      }));
+    }
   }
 
   return new GramJs.InputMediaUploadedDocument({
@@ -626,6 +628,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     mimeType,
     attributes,
     thumb,
+    forceFile: shouldSendAsFile || undefined,
   });
 }
 

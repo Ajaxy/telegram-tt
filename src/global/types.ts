@@ -229,6 +229,8 @@ export type GlobalState = {
       sticker?: ApiSticker;
       poll?: ApiNewPoll;
       isSilent?: boolean;
+      sendGrouped?: boolean;
+      sendCompressed?: boolean;
     };
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
   };
@@ -248,6 +250,11 @@ export type GlobalState = {
     byChatId: Record<string, {
       byId: Record<number, ApiMessage>;
     }>;
+  };
+
+  attachmentSettings: {
+    shouldCompress: boolean;
+    shouldSendGrouped: boolean;
   };
 
   chatFolders: {
@@ -1236,6 +1243,11 @@ export interface ActionPayloads {
     width: number;
     height: number;
   } | undefined;
+
+  updateAttachmentSettings: {
+    shouldCompress?: boolean;
+    shouldSendGrouped?: boolean;
+  };
 
   openUrl: {
     url: string;
