@@ -403,7 +403,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       if (chatMessages) {
         const ids = Object.keys(chatMessages.byId).map(Number);
-        deleteMessages(global, chatId, ids, actions);
+        deleteMessages(getGlobal(), chatId, ids, actions);
       } else {
         actions.requestChatUpdate({ chatId });
       }
