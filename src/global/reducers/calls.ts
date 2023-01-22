@@ -17,7 +17,7 @@ export function updateGroupCall(
     ...global.groupCalls.byId[groupCallId]?.participants,
     ...groupCallUpdate.participants,
   });
-  const filtered = unfiltered.filter(({ isLeft }) => isLeft);
+  const filtered = unfiltered.filter(({ isLeft }) => !isLeft);
   const participants = filtered.reduce((acc: Record<string, GroupCallParticipant>, el) => {
     acc[el.id] = el;
     return acc;
