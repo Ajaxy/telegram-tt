@@ -1,23 +1,28 @@
 import { useEffect } from '../lib/teact/teact';
 
-export default function useOnSelectionChange(container: HTMLElement | null, callback: (range: Range) => void) {
+export default function useOnSelectionChange(
+  inputSelector: string, callback: (range: Range) => void,
+) {
   useEffect(() => {
-    if (!container) return undefined;
-
-    const onSelectionChange = () => {
+    function onSelectionChange() {
       const selection = window.getSelection();
       if (!selection) return;
+
+      const inputEl = document.querySelector(inputSelector);
+      if (!inputEl) {
+        return;
+      }
 
       for (let i = 0; i < selection.rangeCount; i++) {
         const range = selection.getRangeAt(i);
         const ancestor = range.commonAncestorContainer;
-        if (container.contains(ancestor)) {
+        if (inputEl.contains(ancestor)) {
           callback(range);
         }
       }
-    };
+    }
 
     document.addEventListener('selectionchange', onSelectionChange);
     return () => document.removeEventListener('selectionchange', onSelectionChange);
-  }, [callback, container]);
+  }, [callback, inputSelector]);
 }

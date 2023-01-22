@@ -36,7 +36,7 @@ export default function useCustomEmojiTooltip(
     }
   }, [updateCacheBuster]);
 
-  useOnSelectionChange(document.querySelector<HTMLDivElement>(inputSelector), handleSelectionChange);
+  useOnSelectionChange(inputSelector, handleSelectionChange);
 
   useEffect(() => {
     if (!html) {

@@ -86,6 +86,10 @@ export default function useInlineBotTooltip(
 }
 
 function parseBotQuery(html: string) {
+  if (!html.startsWith('@')) {
+    return MEMO_NO_RESULT;
+  }
+
   const text = getPlainText(html);
   const result = text.match(INLINE_BOT_QUERY_REGEXP);
   if (!result) {
