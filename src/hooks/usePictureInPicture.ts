@@ -34,7 +34,8 @@ export default function usePictureInPicture(
       setIsInPictureInPicture(true);
     };
     const onLeaveInternal = () => {
-      onLeave(); setIsInPictureInPicture(false);
+      onLeave();
+      setIsInPictureInPicture(false);
     };
     video.addEventListener('enterpictureinpicture', onEnterInternal);
     video.addEventListener('leavepictureinpicture', onLeaveInternal);
