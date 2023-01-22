@@ -42,6 +42,11 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       return updateUser(global, update.id, update.user);
     }
 
+    case 'updateRequestUserUpdate': {
+      actions.loadFullUser({ userId: update.id });
+      break;
+    }
+
     case 'updateUserEmojiStatus': {
       return updateUser(global, update.userId, { emojiStatus: update.emojiStatus });
     }

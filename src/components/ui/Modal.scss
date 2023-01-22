@@ -175,17 +175,21 @@
 
   .dialog-buttons {
     display: flex;
-    align-items: flex-end;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
 
     .confirm-dialog-button + .confirm-dialog-button {
       margin-left: 1rem;
     }
   }
 
+  .dialog-checkbox {
+    margin: 1rem 0;
+  }
+
   .confirm-dialog-button {
     width: auto;
     height: auto;
-    margin-left: auto;
     text-align: right;
     font-weight: 500;
     white-space: pre-wrap;

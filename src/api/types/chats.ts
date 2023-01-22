@@ -114,6 +114,7 @@ export interface ApiChatFullInfo {
   statisticsDcId?: number;
   stickerSet?: ApiStickerSet;
   profilePhoto?: ApiPhoto;
+  areParticipantsHidden?: boolean;
 }
 
 export interface ApiChatMember {

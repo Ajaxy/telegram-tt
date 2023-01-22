@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useLayoutEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
@@ -7,7 +7,6 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 import type { StickerSetOrRecent } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 
 import {
   DEFAULT_TOPIC_ICON_STICKER_ID,
@@ -21,6 +20,7 @@ import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import { useResizeObserver } from '../../../hooks/useResizeObserver';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 
 import StickerButton from '../../common/StickerButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -74,6 +74,7 @@ const StickerSet: FC<OwnProps> = ({
     clearRecentCustomEmoji,
     openPremiumModal,
     toggleStickerSet,
+    loadStickers,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -89,7 +90,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const [itemsPerRow, setItemsPerRow] = useState(ITEMS_PER_ROW_FALLBACK);
 
-  useOnIntersect(ref, observeIntersection);
+  const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const transitionClassNames = useMediaTransition(shouldRender);
 
@@ -148,6 +149,17 @@ const StickerSet: FC<OwnProps> = ({
     if (!ref.current) return;
     setItemsPerRow(calculateItemsPerRow(ref.current.clientWidth));
   }, [calculateItemsPerRow]);
+
+  useEffect(() => {
+    if (isIntersecting && !stickerSet.stickers?.length && stickerSet.accessHash) {
+      loadStickers({
+        stickerSetInfo: {
+          id: stickerSet.id,
+          accessHash: stickerSet.accessHash,
+        },
+      });
+    }
+  }, [isIntersecting, loadStickers, stickerSet]);
 
   const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
     && stickerSet.stickers?.some(({ isFree }) => !isFree);

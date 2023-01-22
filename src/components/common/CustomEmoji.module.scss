@@ -11,10 +11,6 @@
     height: calc(100% + 1px) !important;
   }
 
-  &:global(.custom-color) {
-    --emoji-status-color: var(--color-primary);
-  }
-
   canvas {
     display: block;
   }

@@ -74,7 +74,7 @@ const AttachBotItem: FC<OwnProps> = ({
       icon={!icon ? 'bots' : undefined}
       // eslint-disable-next-line react/jsx-no-bind
       onClick={() => callAttachBot({
-        botId: bot.id,
+        bot,
         chatId,
         threadId,
       })}

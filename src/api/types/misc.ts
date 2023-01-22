@@ -178,6 +178,7 @@ export interface ApiAppConfig {
   topicsPinnedLimit: number;
   maxUserReactionsDefault: number;
   maxUserReactionsPremium: number;
+  hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
 }
 

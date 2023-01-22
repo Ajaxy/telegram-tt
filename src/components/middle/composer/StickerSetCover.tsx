@@ -1,7 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useRef } from '../../../lib/teact/teact';
-import { getGlobal } from '../../../global';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
+import { getActions, getGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiStickerSet } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
@@ -37,6 +37,7 @@ const StickerSetCover: FC<OwnProps> = ({
   observeIntersection,
   sharedCanvasRef,
 }) => {
+  const { loadStickers } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +55,17 @@ const StickerSetCover: FC<OwnProps> = ({
   const transitionClassNames = useMediaTransition(isReady);
 
   const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
+
+  useEffect(() => {
+    if (isIntersecting && !stickerSet.stickers?.length) {
+      loadStickers({
+        stickerSetInfo: {
+          id: stickerSet.id,
+          accessHash: stickerSet.accessHash,
+        },
+      });
+    }
+  }, [isIntersecting, loadStickers, stickerSet]);
 
   return (
     <div ref={containerRef} className="sticker-set-cover">

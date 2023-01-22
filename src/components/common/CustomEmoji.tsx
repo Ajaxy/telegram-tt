@@ -11,7 +11,7 @@ import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
-import { selectIsAlwaysHighPriorityEmoji, selectIsDefaultEmojiStatusPack } from '../../global/selectors';
+import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
 import useCustomEmoji from './hooks/useCustomEmoji';
 
@@ -76,14 +76,14 @@ const CustomEmoji: FC<OwnProps> = ({
   const [shouldLoop, setShouldLoop] = useState(true);
 
   const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
-  const hasCustomColor = customEmoji && selectIsDefaultEmojiStatusPack(getGlobal(), customEmoji.stickerSetInfo);
+  const hasCustomColor = customEmoji?.shouldUseTextColor;
 
   useEffect(() => {
     if (!hasCustomColor) {
       setCustomColor(undefined);
       return;
     }
-    const hexColor = getPropertyHexColor(getComputedStyle(containerRef.current!), '--emoji-status-color');
+    const hexColor = getPropertyHexColor(getComputedStyle(containerRef.current!), '--color-text');
     if (!hexColor) {
       setCustomColor(undefined);
       return;
@@ -127,7 +127,6 @@ const CustomEmoji: FC<OwnProps> = ({
         className,
         'custom-emoji',
         'emoji',
-        hasCustomColor && 'custom-color',
         withGridFix && styles.withGridFix,
       )}
       onClick={onClick}

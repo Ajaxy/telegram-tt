@@ -70,6 +70,7 @@ export type ApiAttachMenuPeerType = 'self' | ApiChatType;
 export interface ApiAttachBot {
   id: string;
   hasSettings?: boolean;
+  shouldRequestWriteAccess?: boolean;
   shortName: string;
   peerTypes: ApiAttachMenuPeerType[];
   icons: ApiAttachBotIcon[];

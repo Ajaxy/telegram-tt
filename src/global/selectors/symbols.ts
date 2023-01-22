@@ -139,11 +139,8 @@ export function selectLocalAnimatedEmojiEffectByName(name: string) {
   return name === 'Cumshot' ? '🍆' : undefined;
 }
 
-export function selectIsDefaultEmojiStatusPack(global: GlobalState, stickerSet: ApiStickerSetInfo | ApiStickerSet) {
-  return 'id' in stickerSet && stickerSet.id === global.appConfig?.defaultEmojiStatusesStickerSetId;
-}
-
 export function selectIsAlwaysHighPriorityEmoji(global: GlobalState, stickerSet: ApiStickerSetInfo | ApiStickerSet) {
-  return selectIsDefaultEmojiStatusPack(global, stickerSet)
-    || ('id' in stickerSet && stickerSet.id === RESTRICTED_EMOJI_SET_ID);
+  if (!('id' in stickerSet)) return false;
+  return stickerSet.id === global.appConfig?.defaultEmojiStatusesStickerSetId
+    || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
 }

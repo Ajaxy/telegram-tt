@@ -318,6 +318,10 @@
         }
       }
     }
+
+    .custom-emoji {
+      --color-text: var(--color-primary);
+    }
   }
 
   .Avatar, .topic-header-icon {

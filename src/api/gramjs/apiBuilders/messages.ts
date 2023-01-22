@@ -1044,6 +1044,8 @@ function buildAction(
     } else {
       text = 'ChatList.UnsupportedMessage';
     }
+  } else if (action instanceof GramJs.MessageActionAttachMenuBotAllowed) {
+    text = 'ActionAttachMenuBotAllowed';
   } else {
     text = 'ChatList.UnsupportedMessage';
   }

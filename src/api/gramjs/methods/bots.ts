@@ -279,15 +279,37 @@ export async function loadAttachBots({
   return undefined;
 }
 
+export async function loadAttachBot({
+  bot,
+}: {
+  bot: ApiUser;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetAttachMenuBot({
+    bot: buildInputPeer(bot.id, bot.accessHash),
+  }));
+
+  if (result instanceof GramJs.AttachMenuBotsBot) {
+    addEntitiesWithPhotosToLocalDb(result.users);
+    return {
+      bot: buildApiAttachBot(result.bot),
+      users: result.users.map(buildApiUser).filter(Boolean),
+    };
+  }
+  return undefined;
+}
+
 export function toggleAttachBot({
   bot,
+  isWriteAllowed,
   isEnabled,
 }: {
   bot: ApiUser;
+  isWriteAllowed?: boolean;
   isEnabled: boolean;
 }) {
   return invokeRequest(new GramJs.messages.ToggleBotInAttachMenu({
     bot: buildInputPeer(bot.id, bot.accessHash),
+    writeAllowed: isWriteAllowed || undefined,
     enabled: isEnabled,
   }));
 }

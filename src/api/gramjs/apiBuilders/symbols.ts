@@ -35,6 +35,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
   const isLottie = mimeType === LOTTIE_STICKER_MIME_TYPE;
   const isVideo = mimeType === VIDEO_STICKER_MIME_TYPE;
   const isCustomEmoji = Boolean(customEmojiAttribute);
+  const shouldUseTextColor = isCustomEmoji && customEmojiAttribute.textColor;
 
   const imageSizeAttribute = document.attributes
     .find((attr: any): attr is GramJs.DocumentAttributeImageSize => (
@@ -94,6 +95,7 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
     thumbnail,
     hasEffect,
     isFree,
+    shouldUseTextColor,
   };
 }
 
@@ -148,6 +150,10 @@ function buildApiStickerSetInfo(inputSet?: GramJs.TypeInputStickerSet): ApiStick
 
 export function buildStickerSetCovered(coveredStickerSet: GramJs.TypeStickerSetCovered): ApiStickerSet {
   const stickerSet = buildStickerSet(coveredStickerSet.set);
+
+  if (coveredStickerSet instanceof GramJs.StickerSetNoCovered) {
+    return stickerSet;
+  }
 
   const stickerSetCovers = (coveredStickerSet instanceof GramJs.StickerSetCovered) ? [coveredStickerSet.cover]
     : (coveredStickerSet instanceof GramJs.StickerSetMultiCovered) ? coveredStickerSet.covers
