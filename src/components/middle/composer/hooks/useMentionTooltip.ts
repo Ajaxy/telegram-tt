@@ -75,7 +75,7 @@ export default function useMentionTooltip(
     }
   }, [updateCacheBuster]);
 
-  useOnSelectionChange(document.querySelector<HTMLDivElement>(inputSelector), handleSelectionChange);
+  useOnSelectionChange(inputSelector, handleSelectionChange);
 
   useEffect(() => {
     setHtmlBeforeSelection(getHtmlBeforeSelection(document.querySelector<HTMLDivElement>(inputSelector)!));
