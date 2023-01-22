@@ -235,6 +235,7 @@ export default memo(withGlobal<OwnProps>(
       reactors: message?.reactors,
       seenByUserIds: message?.seenByUserIds,
       animationLevel: global.settings.byKey.animationLevel,
+      availableReactions: global.availableReactions,
     };
   },
 )(ReactorListModal));
