@@ -164,7 +164,8 @@ const StickerSet: FC<OwnProps> = ({
   const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
     && stickerSet.stickers?.some(({ isFree }) => !isFree);
 
-  const canCut = !stickerSet.installedDate && stickerSet.id !== RECENT_SYMBOL_SET_ID;
+  const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
+  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID;
   const [isCut, , expand] = useFlag(canCut);
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
   const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
@@ -196,7 +197,7 @@ const StickerSet: FC<OwnProps> = ({
           {isRecent && (
             <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
           )}
-          {!isRecent && isEmoji && !stickerSet.installedDate && (
+          {!isRecent && isEmoji && !isInstalled && (
             <Button
               className="symbol-set-add-button"
               withPremiumGradient={isPremiumSet && !isCurrentUserPremium}

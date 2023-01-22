@@ -368,9 +368,10 @@ addActionHandler('toggleStickerSet', (global, actions, payload) => {
     return;
   }
 
-  const { accessHash, installedDate } = stickerSet;
+  const { accessHash, installedDate, isArchived } = stickerSet;
+  const isInstalled = !isArchived && Boolean(installedDate);
 
-  void callApi(!installedDate ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
+  void callApi(!isInstalled ? 'installStickerSet' : 'uninstallStickerSet', { stickerSetId, accessHash });
 });
 
 addActionHandler('loadEmojiKeywords', async (global, actions, payload: { language: LangCode }) => {

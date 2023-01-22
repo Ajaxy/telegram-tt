@@ -79,7 +79,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   const prevStickerSet = usePrevious(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
-  const isAdded = renderingStickerSet?.installedDate;
+  const isAdded = !renderingStickerSet?.isArchived && renderingStickerSet?.installedDate;
   const isEmoji = renderingStickerSet?.isEmoji;
   const isButtonLocked = !isAdded && isSetPremium && !isCurrentUserPremium;
 

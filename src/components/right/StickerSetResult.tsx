@@ -40,7 +40,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const lang = useLang();
-  const isAdded = set && Boolean(set.installedDate);
+  const isAdded = set && !set.isArchived && Boolean(set.installedDate);
   const areStickersLoaded = Boolean(set?.stickers);
 
   const displayedStickers = useMemo(() => {
