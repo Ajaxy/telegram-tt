@@ -4,6 +4,7 @@ import type { ApiUser, ApiUserStatus } from '../../api/types';
 import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { updateChat } from './chats';
+import { areDeepEqual } from '../../util/areDeepEqual';
 
 export function replaceUsers(global: GlobalState, newById: Record<string, ApiUser>): GlobalState {
   return {
@@ -109,11 +110,20 @@ export function addUsers(global: GlobalState, newById: Record<string, ApiUser>):
 function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial<ApiUser>) {
   const { byId } = global.users;
   const user = byId[userId];
+  const omitProps: (keyof ApiUser)[] = [];
+
   const shouldOmitMinInfo = userUpdate.isMin && user && !user.isMin;
+  if (shouldOmitMinInfo) {
+    omitProps.push('isMin', 'accessHash');
+  }
+
+  if (areDeepEqual(user?.usernames, userUpdate.usernames)) {
+    omitProps.push('usernames');
+  }
 
   const updatedUser = {
     ...user,
-    ...(shouldOmitMinInfo ? omit(userUpdate, ['isMin', 'accessHash']) : userUpdate),
+    ...omit(userUpdate, omitProps),
   };
 
   if (!updatedUser.id || !updatedUser.type) {
