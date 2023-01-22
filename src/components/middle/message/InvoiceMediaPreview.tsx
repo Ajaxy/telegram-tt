@@ -10,8 +10,9 @@ import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 
 import useLang from '../../../hooks/useLang';
-import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useInterval from '../../../hooks/useInterval';
+
+import MediaSpoiler from '../../common/MediaSpoiler';
 
 import styles from './InvoiceMediaPreview.module.scss';
 
@@ -21,7 +22,6 @@ type OwnProps = {
 };
 
 const POLLING_INTERVAL = 30000;
-const BLUR_RADIUS = 25;
 
 const InvoiceMediaPreview: FC<OwnProps> = ({
   message,
@@ -49,8 +49,6 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
     width, height, thumbnail, duration,
   } = extendedMedia!;
 
-  const canvasRef = useCanvasBlur(thumbnail?.dataUri, false, undefined, BLUR_RADIUS, width, height);
-
   const handleClick = useCallback(() => {
     openInvoice({
       chatId,
@@ -64,8 +62,13 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
       className={buildClassName(styles.root, 'media-inner')}
       onClick={handleClick}
     >
-      <canvas ref={canvasRef} className={styles.canvas} width={width} height={height} />
-      <div className={styles.dots} />
+      <MediaSpoiler
+        thumbDataUri={thumbnail?.dataUri}
+        width={width}
+        height={height}
+        isVisible
+        className={styles.spoiler}
+      />
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
         <i className={buildClassName('icon-lock', styles.lock)} />

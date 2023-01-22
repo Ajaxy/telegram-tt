@@ -566,18 +566,25 @@
       height: 1rem;
     }
 
-    & > img {
+    .pinned-thumb {
+      position: relative;
       width: 2.25rem;
       height: 2.25rem;
-      object-fit: cover;
-      border-radius: 0.25rem;
+
       margin-inline-start: 0.375rem;
       margin-top: 0.125rem;
       flex-shrink: 0;
 
+      border-radius: 0.25rem;
+      overflow: hidden;
+
       & + .message-text {
         max-width: 12rem;
       }
+    }
+
+    .pinned-thumb-image {
+      object-fit: cover;
     }
   }
 

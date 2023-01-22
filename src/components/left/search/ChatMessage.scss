@@ -53,13 +53,18 @@
         }
       }
 
+      .media-preview-spoiler {
+        filter: blur(1px);
+      }
+
       .media-preview--image {
         width: 1.25rem;
         height: 1.25rem;
         object-fit: cover;
         border-radius: 0.125rem;
         vertical-align: -0.25rem;
-        margin-right: 0.25rem;
+        margin-inline-start: 0.125rem;
+        margin-inline-end: 0.25rem;
       }
 
       .icon-play {

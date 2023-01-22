@@ -62,7 +62,7 @@ export function buildApiThumbnailFromPath(
   };
 }
 
-export function buildApiPhoto(photo: GramJs.Photo): ApiPhoto {
+export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhoto {
   const sizes = photo.sizes
     .filter((s: any): s is GramJs.PhotoSize => {
       return s instanceof GramJs.PhotoSize || s instanceof GramJs.PhotoSizeProgressive;
@@ -73,6 +73,7 @@ export function buildApiPhoto(photo: GramJs.Photo): ApiPhoto {
     id: String(photo.id),
     thumbnail: buildApiThumbnailFromStripped(photo.sizes),
     sizes,
+    isSpoiler,
     ...(photo.videoSizes && { videoSizes: photo.videoSizes.map(buildApiVideoSize), isVideo: true }),
   };
 }

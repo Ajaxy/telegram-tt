@@ -6,62 +6,6 @@
   cursor: pointer;
 }
 
-.dots {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  --background-url: url('../../../assets/turbulence_1x.png');
-  --background-size: 256px;
-  background: rgba(0, 0, 0, 0.25) var(--background-url);
-  background-size: var(--background-size) var(--background-size);
-  z-index: 1;
-
-  @media (-webkit-min-device-pixel-ratio: 2) {
-    --background-url: url('../../../assets/turbulence_2x.png');
-  }
-
-  @media (-webkit-min-device-pixel-ratio: 3) {
-    --background-url: url('../../../assets/turbulence_3x.png');
-  }
-
-  --x-direction: var(--background-size);
-  --y-direction: 0;
-  animation: 20s linear infinite dots;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: var(--background-url);
-    background-size: var(--background-size) var(--background-size);
-
-    --x-direction: 0;
-    --y-direction: var(--background-size);
-    animation: 20s linear -7s infinite dots;
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: var(--background-url);
-    background-size: var(--background-size) var(--background-size);
-
-    --x-direction: calc(-1 * var(--background-size));
-    --y-direction: calc(-1 * var(--background-size));
-    animation: 20s linear -14s infinite dots;
-  }
-}
-
 .duration {
   z-index: 2;
   position: absolute;
@@ -97,16 +41,6 @@
   line-height: 1rem;
 }
 
-.canvas {
-  display: block;
-  max-width: 100%;
-}
-
-@keyframes dots {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: var(--x-direction) var(--y-direction);
-  }
+.spoiler {
+  position: static;
 }

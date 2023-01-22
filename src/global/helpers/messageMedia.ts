@@ -134,7 +134,8 @@ export function getMessageMediaThumbnail(message: ApiMessage) {
     || getMessageDocument(message)
     || getMessageSticker(message)
     || getMessageWebPagePhoto(message)
-    || getMessageWebPageVideo(message);
+    || getMessageWebPageVideo(message)
+    || getMessageInvoice(message)?.extendedMedia;
 
   if (!media) {
     return undefined;
@@ -145,6 +146,14 @@ export function getMessageMediaThumbnail(message: ApiMessage) {
 
 export function getMessageMediaThumbDataUri(message: ApiMessage) {
   return getMessageMediaThumbnail(message)?.dataUri;
+}
+
+export function getMessageIsSpoiler(message: ApiMessage) {
+  const media = getMessagePhoto(message)
+    || getMessageVideo(message);
+
+  const invoiceMedia = getMessageInvoice(message)?.extendedMedia;
+  return Boolean(invoiceMedia || media?.isSpoiler);
 }
 
 export function getDocumentMediaHash(document: ApiDocument) {

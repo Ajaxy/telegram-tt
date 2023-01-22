@@ -349,7 +349,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     handleFileSelect,
     onCaptionUpdate,
     handleClearAttachments,
-    handleDeleteAttachment,
     handleSetAttachments,
   } = useAttachmentModal({
     attachments,
@@ -1196,7 +1195,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         onSendScheduled={handleSendScheduledAttachments}
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachments}
-        onDelete={handleDeleteAttachment}
+        onAttachmentsUpdate={handleSetAttachments}
       />
       <PollModal
         isOpen={pollModal.isOpen}

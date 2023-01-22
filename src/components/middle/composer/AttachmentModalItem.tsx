@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment } from '../../../api/types';
@@ -7,8 +7,10 @@ import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '..
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import File from '../../common/File';
+import MediaSpoiler from '../../common/MediaSpoiler';
 
 import styles from './AttachmentModalItem.module.scss';
 
@@ -20,7 +22,10 @@ type OwnProps = {
   isSingle?: boolean;
   index: number;
   onDelete?: (index: number) => void;
+  onToggleSpoiler?: (index: number) => void;
 };
+
+const BLUR_CANVAS_SIZE = 15 * REM;
 
 const AttachmentModalItem: FC<OwnProps> = ({
   attachment,
@@ -30,8 +35,13 @@ const AttachmentModalItem: FC<OwnProps> = ({
   shouldDisplayGrouped,
   index,
   onDelete,
+  onToggleSpoiler,
 }) => {
   const displayType = getDisplayType(attachment, shouldDisplayCompressed);
+
+  const handleSpoilerClick = useCallback(() => {
+    onToggleSpoiler?.(index);
+  }, [index, onToggleSpoiler]);
 
   const content = useMemo(() => {
     switch (displayType) {
@@ -83,7 +93,8 @@ const AttachmentModalItem: FC<OwnProps> = ({
   }, [attachment, displayType, index, onDelete]);
 
   const shouldSkipGrouping = displayType === 'file' || !shouldDisplayGrouped;
-  const shouldRenderOverlay = displayType !== 'file' && onDelete;
+  const shouldDisplaySpoiler = Boolean(displayType !== 'file' && attachment.shouldSendAsSpoiler);
+  const shouldRenderOverlay = displayType !== 'file';
 
   const rootClassName = buildClassName(
     className, styles.root, isSingle && styles.single, shouldSkipGrouping && styles.noGrouping,
@@ -91,14 +102,27 @@ const AttachmentModalItem: FC<OwnProps> = ({
 
   return (
     <div className={rootClassName}>
+      {content}
+      <MediaSpoiler
+        isVisible={shouldDisplaySpoiler}
+        thumbDataUri={attachment.previewBlobUrl || attachment.blobUrl}
+        width={BLUR_CANVAS_SIZE}
+        height={BLUR_CANVAS_SIZE}
+      />
       {shouldRenderOverlay && (
         <div className={styles.overlay}>
+          <i
+            className={buildClassName(
+              attachment.shouldSendAsSpoiler ? 'icon-spoiler-disable' : 'icon-spoiler',
+              styles.actionItem,
+            )}
+            onClick={handleSpoilerClick}
+          />
           {onDelete && (
             <i className={buildClassName('icon-delete', styles.actionItem)} onClick={() => onDelete(index)} />
           )}
         </div>
       )}
-      {content}
     </div>
   );
 };

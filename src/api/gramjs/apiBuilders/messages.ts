@@ -447,10 +447,10 @@ function buildPhoto(media: GramJs.TypeMessageMedia): ApiPhoto | undefined {
     return undefined;
   }
 
-  return buildApiPhoto(media.photo);
+  return buildApiPhoto(media.photo, media.spoiler);
 }
 
-export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | undefined {
+export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: boolean): ApiVideo | undefined {
   if (document instanceof GramJs.DocumentEmpty) {
     return undefined;
   }
@@ -499,6 +499,7 @@ export function buildVideoFromDocument(document: GramJs.Document): ApiVideo | un
     isGif: Boolean(gifAttr),
     thumbnail: buildApiThumbnailFromStripped(thumbs),
     size: size.toJSNumber(),
+    isSpoiler,
   };
 }
 
@@ -511,7 +512,7 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
     return undefined;
   }
 
-  return buildVideoFromDocument(media.document);
+  return buildVideoFromDocument(media.document, media.spoiler);
 }
 
 function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
@@ -1393,6 +1394,7 @@ function buildUploadingMedia(
     size,
     audio,
     shouldSendAsFile,
+    shouldSendAsSpoiler,
   } = attachment;
 
   if (!shouldSendAsFile) {
@@ -1403,8 +1405,9 @@ function buildUploadingMedia(
           photo: {
             id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
             sizes: [],
-            thumbnail: { width, height, dataUri: '' }, // Used only for dimensions
+            thumbnail: { width, height, dataUri: blobUrl },
             blobUrl,
+            isSpoiler: shouldSendAsSpoiler,
           },
         };
       }
@@ -1421,6 +1424,7 @@ function buildUploadingMedia(
             blobUrl,
             ...(previewBlobUrl && { thumbnail: { width, height, dataUri: previewBlobUrl } }),
             size,
+            isSpoiler: shouldSendAsSpoiler,
           },
         };
       }

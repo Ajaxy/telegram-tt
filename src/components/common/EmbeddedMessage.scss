@@ -36,7 +36,7 @@
       bottom: 0.625rem;
     }
 
-    .pictogram {
+    .embedded-thumb {
       margin-inline-start: 0.5rem;
     }
 
@@ -120,17 +120,25 @@
     opacity: 0.75;
   }
 
-  .pictogram {
+  .embedded-thumb {
+    position: relative;
     width: 2rem;
     height: 2rem;
-    object-fit: cover;
     border-radius: 0.25rem;
     margin-left: 0.25rem;
     flex-shrink: 0;
 
+    overflow: hidden;
+
     &.round {
       border-radius: 1rem;
     }
+  }
+
+  .pictogram {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   &.inside-input {
@@ -144,7 +152,7 @@
       bottom: 0.3125rem;
     }
 
-    .pictogram {
+    .embedded-thumb {
       margin-left: 0.125rem;
     }
 

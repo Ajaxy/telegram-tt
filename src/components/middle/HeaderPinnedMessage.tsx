@@ -5,7 +5,10 @@ import { getActions } from '../../global';
 import type { ApiMessage } from '../../api/types';
 
 import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
-import { getMessageMediaHash, getMessageSingleInlineButton } from '../../global/helpers';
+import {
+  getMessageIsSpoiler,
+  getMessageMediaHash, getMessageSingleInlineButton,
+} from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import renderText from '../common/helpers/renderText';
@@ -20,6 +23,7 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
 import PinnedMessageNavigation from './PinnedMessageNavigation';
 import MessageSummary from '../common/MessageSummary';
+import MediaSpoiler from '../common/MediaSpoiler';
 
 type OwnProps = {
   message: ApiMessage;
@@ -39,6 +43,8 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   const lang = useLang();
   const mediaThumbnail = useThumbnail(message);
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'pictogram'));
+
+  const isSpoiler = getMessageIsSpoiler(message);
 
   const [isUnpinDialogOpen, openUnpinDialog, closeUnpinDialog] = useFlag();
 
@@ -102,7 +108,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           count={count}
           index={index}
         />
-        {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl)}
+        {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isSpoiler)}
         <div className="message-text">
           <div className="title" dir="auto">
             {customTitle ? renderText(customTitle) : `${lang('PinnedMessage')} ${index > 0 ? `#${count - index}` : ''}`}
@@ -129,11 +135,15 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
   );
 };
 
-function renderPictogram(thumbDataUri: string, blobUrl?: string) {
+function renderPictogram(thumbDataUri: string, blobUrl?: string, isSpoiler?: boolean) {
   const { width, height } = getPictogramDimensions();
+  const srcUrl = blobUrl || thumbDataUri;
 
   return (
-    <img src={blobUrl || thumbDataUri} width={width} height={height} alt="" />
+    <div className="pinned-thumb">
+      {!isSpoiler && <img className="pinned-thumb-image" src={srcUrl} width={width} height={height} alt="" />}
+      <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(isSpoiler)} width={width} height={height} />
+    </div>
   );
 }
 

@@ -12,6 +12,7 @@ import type { Thread } from '../../../../global/types';
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
 import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import {
+  getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageMediaThumbDataUri, getMessageRoundVideo,
   getMessageSenderName, getMessageSticker, getMessageVideo, isActionMessage, isChatChannel,
@@ -214,9 +215,17 @@ function renderSummary(
     return messageSummary;
   }
 
+  const isSpoiler = getMessageIsSpoiler(message);
+
   return (
     <span className="media-preview">
-      <img src={blobUrl} alt="" className={buildClassName('media-preview--image', isRoundVideo && 'round')} />
+      <img
+        src={blobUrl}
+        alt=""
+        className={
+          buildClassName('media-preview--image', isRoundVideo && 'round', isSpoiler && 'media-preview-spoiler')
+        }
+      />
       {getMessageVideo(message) && <i className="icon-play" />}
       {messageSummary}
     </span>

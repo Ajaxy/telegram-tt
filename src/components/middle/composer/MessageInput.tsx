@@ -52,6 +52,7 @@ type OwnProps = {
   onUpdate: (html: string) => void;
   onSuppressedFocus?: () => void;
   onSend: () => void;
+  onScroll?: (event: React.UIEvent<HTMLElement>) => void;
   captionLimit?: number;
 };
 
@@ -105,6 +106,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onUpdate,
   onSuppressedFocus,
   onSend,
+  onScroll,
 }) => {
   const {
     editLastMessage,
@@ -473,7 +475,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   return (
     <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
-      <div className={buildClassName('custom-scroll', SCROLLER_CLASS)}>
+      <div className={buildClassName('custom-scroll', SCROLLER_CLASS)} onScroll={onScroll}>
         <div className="input-scroller-content">
           <div
             ref={inputRef}
