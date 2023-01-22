@@ -29,6 +29,7 @@ import {
   isChatGroup,
   getCanManageTopic,
   isUserRightBanned,
+  getHasAdminRight,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -554,7 +555,9 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const topic = chat?.topics?.[threadId];
-    const canCreateTopic = chat.isForum && !isUserRightBanned(chat, 'manageTopics');
+    const canCreateTopic = chat.isForum && (
+      chat.isCreator || !isUserRightBanned(chat, 'manageTopics') || getHasAdminRight(chat, 'manageTopics')
+    );
     const canEditTopic = topic && getCanManageTopic(chat, topic);
 
     return {
