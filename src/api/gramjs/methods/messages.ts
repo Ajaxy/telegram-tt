@@ -64,6 +64,7 @@ import {
 import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import { getServerTimeOffset } from '../../../util/serverTime';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -216,7 +217,6 @@ export function sendMessage(
     groupedId,
     noWebPage,
     sendAs,
-    serverTimeOffset,
     shouldUpdateStickerSetsOrder,
   }: {
     chat: ApiChat;
@@ -234,7 +234,6 @@ export function sendMessage(
     groupedId?: string;
     noWebPage?: boolean;
     sendAs?: ApiUser | ApiChat;
-    serverTimeOffset?: number;
     shouldUpdateStickerSetsOrder?: boolean;
   },
   onProgress?: ApiOnProgress,
@@ -253,7 +252,6 @@ export function sendMessage(
     groupedId,
     scheduledAt,
     sendAs,
-    serverTimeOffset,
   );
 
   onUpdate({
@@ -498,16 +496,14 @@ export async function editMessage({
   text,
   entities,
   noWebPage,
-  serverTimeOffset,
 }: {
   chat: ApiChat;
   message: ApiMessage;
   text: string;
   entities?: ApiMessageEntity[];
   noWebPage?: boolean;
-  serverTimeOffset: number;
 }) {
-  const isScheduled = message.date * 1000 > Date.now() + serverTimeOffset * 1000;
+  const isScheduled = message.date * 1000 > Date.now() + getServerTimeOffset() * 1000;
   let messageUpdate: Partial<ApiMessage> = {
     content: {
       ...message.content,
@@ -780,9 +776,9 @@ export async function sendMessageAction({
 }
 
 export async function markMessageListRead({
-  chat, threadId, maxId = -1, serverTimeOffset,
+  chat, threadId, maxId = -1,
 }: {
-  chat: ApiChat; threadId: number; maxId?: number; serverTimeOffset: number;
+  chat: ApiChat; threadId: number; maxId?: number;
 }) {
   const isChannel = getEntityTypeById(chat.id) === 'channel';
 
@@ -807,7 +803,7 @@ export async function markMessageListRead({
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    void requestChatUpdate({ chat, serverTimeOffset, noLastMessage: true });
+    void requestChatUpdate({ chat, noLastMessage: true });
   } else {
     void requestThreadInfoUpdate({ chat, threadId });
   }
@@ -1191,7 +1187,6 @@ export async function forwardMessages({
   toChat,
   toThreadId,
   messages,
-  serverTimeOffset,
   isSilent,
   scheduledAt,
   sendAs,
@@ -1204,7 +1199,6 @@ export async function forwardMessages({
   toChat: ApiChat;
   toThreadId?: number;
   messages: ApiMessage[];
-  serverTimeOffset: number;
   isSilent?: boolean;
   scheduledAt?: number;
   sendAs?: ApiUser | ApiChat;
@@ -1221,7 +1215,6 @@ export async function forwardMessages({
       toChat,
       toThreadId,
       message,
-      serverTimeOffset,
       scheduledAt,
       noAuthors,
       noCaptions,

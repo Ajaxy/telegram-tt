@@ -41,7 +41,6 @@ type StateProps = {
   isChannel?: boolean;
   exportedInvites?: ApiExportedInvite[];
   revokedExportedInvites?: ApiExportedInvite[];
-  serverTimeOffset: number;
 };
 
 const BULLET = '\u2022';
@@ -61,7 +60,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   revokedExportedInvites,
   isActive,
   isChannel,
-  serverTimeOffset,
   onClose,
   onScreenSelect,
 }) => {
@@ -91,9 +89,9 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     if (!exportedInvites) return undefined;
     return exportedInvites
       .some(({ expireDate }) => (
-        expireDate && (expireDate - getServerTime(serverTimeOffset) < MILLISECONDS_IN_DAY / 1000)
+        expireDate && (expireDate - getServerTime() < MILLISECONDS_IN_DAY / 1000)
       ));
-  }, [exportedInvites, serverTimeOffset]);
+  }, [exportedInvites]);
   const forceUpdate = useForceUpdate();
   useInterval(() => {
     forceUpdate();
@@ -211,7 +209,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     if (usageLimit !== undefined && usage === usageLimit) {
       text += ` ${BULLET} ${lang('LinkLimitReached')}`;
     } else if (expireDate) {
-      const diff = (expireDate - getServerTime(serverTimeOffset)) * 1000;
+      const diff = (expireDate - getServerTime()) * 1000;
       text += ` ${BULLET} `;
       if (diff > 0) {
         text += lang('InviteLink.ExpiresIn', formatCountdown(lang, diff));
@@ -236,7 +234,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
       return 'link-status-icon-green';
     }
     if (expireDate) {
-      const diff = (expireDate - getServerTime(serverTimeOffset)) * 1000;
+      const diff = (expireDate - getServerTime()) * 1000;
       if (diff <= 0) {
         return 'link-status-icon-red';
       }
@@ -425,7 +423,6 @@ export default memo(withGlobal<OwnProps>(
       exportedInvites: invites,
       revokedExportedInvites: revokedInvites,
       chat,
-      serverTimeOffset: global.serverTimeOffset,
       isChannel,
     };
   },

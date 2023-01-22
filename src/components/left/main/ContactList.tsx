@@ -26,7 +26,6 @@ type StateProps = {
   usersById: Record<string, ApiUser>;
   userStatusesById: Record<string, ApiUserStatus>;
   contactIds?: string[];
-  serverTimeOffset: number;
 };
 
 const ContactList: FC<OwnProps & StateProps> = ({
@@ -35,7 +34,6 @@ const ContactList: FC<OwnProps & StateProps> = ({
   usersById,
   userStatusesById,
   contactIds,
-  serverTimeOffset,
   onReset,
 }) => {
   const {
@@ -61,8 +59,8 @@ const ContactList: FC<OwnProps & StateProps> = ({
 
     const filteredIds = filterUsersByName(contactIds, usersById, filter);
 
-    return sortUserIds(filteredIds, usersById, userStatusesById, undefined, serverTimeOffset);
-  }, [contactIds, filter, usersById, userStatusesById, serverTimeOffset]);
+    return sortUserIds(filteredIds, usersById, userStatusesById);
+  }, [contactIds, filter, usersById, userStatusesById]);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, listIds, Boolean(filter));
 
@@ -108,7 +106,6 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       userStatusesById,
       contactIds,
-      serverTimeOffset: global.serverTimeOffset,
     };
   },
 )(ContactList));

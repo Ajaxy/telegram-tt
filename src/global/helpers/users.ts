@@ -4,7 +4,7 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import type { LangFn } from '../../hooks/useLang';
-import { getServerTime } from '../../util/serverTime';
+import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { formatPhoneNumber } from '../../util/phoneNumber';
 
@@ -67,7 +67,7 @@ export function getUserFullName(user?: ApiUser) {
 }
 
 export function getUserStatus(
-  lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined, serverTimeOffset: number,
+  lang: LangFn, user: ApiUser, userStatus: ApiUserStatus | undefined,
 ) {
   if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
     return lang('ServiceNotifications').toLowerCase();
@@ -99,6 +99,7 @@ export function getUserStatus(
 
       if (!wasOnline) return lang('LastSeen.Offline');
 
+      const serverTimeOffset = getServerTimeOffset();
       const now = new Date(new Date().getTime() + serverTimeOffset * 1000);
       const wasOnlineDate = new Date(wasOnline * 1000);
 
@@ -191,10 +192,9 @@ export function sortUserIds(
   usersById: Record<string, ApiUser>,
   userStatusesById: Record<string, ApiUserStatus>,
   priorityIds?: string[],
-  serverTimeOffset = 0,
 ) {
   return orderBy(userIds, (id) => {
-    const now = getServerTime(serverTimeOffset);
+    const now = getServerTime();
 
     if (priorityIds && priorityIds.includes(id)) {
       // Assuming that online status expiration date can't be as far as two days from now,

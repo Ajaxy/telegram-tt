@@ -159,7 +159,6 @@ export type GlobalState = {
   isSyncing?: boolean;
   isUpdateAvailable?: boolean;
   lastSyncTime?: number;
-  serverTimeOffset: number;
   leftColumnWidth?: number;
 
   // TODO Move to `auth`.

@@ -19,6 +19,7 @@ import { selectNotifySettings } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
 import { clearWebTokenAuth } from '../../../util/routing';
+import { setServerTimeOffset } from '../../../util/serverTime';
 
 addActionHandler('apiUpdate', (global, actions, update) => {
   switch (update['@type']) {
@@ -205,16 +206,7 @@ function onUpdateSession(update: ApiUpdateSession) {
 }
 
 function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {
-  const global = getGlobal();
-
-  if (global.serverTimeOffset === update.serverTimeOffset) {
-    return;
-  }
-
-  setGlobal({
-    ...global,
-    serverTimeOffset: update.serverTimeOffset,
-  });
+  setServerTimeOffset(update.serverTimeOffset);
 }
 
 function onUpdateCurrentUser(update: ApiUpdateCurrentUser) {

@@ -18,6 +18,7 @@ import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntit
 import { formatMediaDuration } from '../../../util/dateFormat';
 import type { LangFn } from '../../../hooks/useLang';
 import useLang from '../../../hooks/useLang';
+import { getServerTimeOffset } from '../../../util/serverTime';
 
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';
@@ -37,7 +38,6 @@ type OwnProps = {
 type StateProps = {
   recentVoterIds?: number[];
   usersById: Record<string, ApiUser>;
-  serverTimeOffset: number;
 };
 
 const SOLUTION_CONTAINER_ID = '#middle-column-portals';
@@ -50,7 +50,6 @@ const Poll: FC<OwnProps & StateProps> = ({
   recentVoterIds,
   usersById,
   onSendVote,
-  serverTimeOffset,
 }) => {
   const { loadMessage, openPollResults, requestConfetti } = getActions();
 
@@ -62,7 +61,7 @@ const Poll: FC<OwnProps & StateProps> = ({
   const [wasSubmitted, setWasSubmitted] = useState<boolean>(false);
   const [closePeriod, setClosePeriod] = useState<number>(
     !summary.closed && summary.closeDate && summary.closeDate > 0
-      ? Math.min(summary.closeDate - Math.floor(Date.now() / 1000) + serverTimeOffset, summary.closePeriod!)
+      ? Math.min(summary.closeDate - Math.floor(Date.now() / 1000) + getServerTimeOffset(), summary.closePeriod!)
       : 0,
   );
   // eslint-disable-next-line no-null/no-null
@@ -362,7 +361,7 @@ function stopPropagation(e: React.MouseEvent<HTMLDivElement>) {
 export default memo(withGlobal<OwnProps>(
   (global, { poll }) => {
     const { recentVoterIds } = poll.results;
-    const { serverTimeOffset, users: { byId: usersById } } = global;
+    const { users: { byId: usersById } } = global;
     if (!recentVoterIds || recentVoterIds.length === 0) {
       return {};
     }
@@ -370,7 +369,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       recentVoterIds,
       usersById,
-      serverTimeOffset,
     };
   },
 )(Poll));

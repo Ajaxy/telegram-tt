@@ -66,7 +66,7 @@ addActionHandler('loadUser', async (global, actions, payload) => {
 addActionHandler('loadTopUsers', (global) => {
   const { topPeers: { lastRequestedAt } } = global;
 
-  if (!lastRequestedAt || getServerTime(global.serverTimeOffset) - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
+  if (!lastRequestedAt || getServerTime() - lastRequestedAt > TOP_PEERS_REQUEST_COOLDOWN) {
     void loadTopUsers();
   }
 });
@@ -138,7 +138,7 @@ async function loadTopUsers() {
     topPeers: {
       ...global.topPeers,
       userIds: ids,
-      lastRequestedAt: getServerTime(global.serverTimeOffset),
+      lastRequestedAt: getServerTime(),
     },
   };
   setGlobal(global);

@@ -175,11 +175,6 @@ function handleGramJsUpdate(update: any) {
     isConnected = update.state === connection.UpdateConnectionState.connected;
   } else if (update instanceof GramJs.UpdatesTooLong) {
     void handleTerminatedSession();
-  } else if (update instanceof connection.UpdateServerTimeOffset) {
-    onUpdate({
-      '@type': 'updateServerTimeOffset',
-      serverTimeOffset: update.timeOffset,
-    });
   } else if (update instanceof GramJs.UpdateConfig) {
     // eslint-disable-next-line no-underscore-dangle
     const currentUser = (update as GramJs.UpdateConfig & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] })

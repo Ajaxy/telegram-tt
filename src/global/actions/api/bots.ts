@@ -200,7 +200,7 @@ addActionHandler('restartBot', async (global, actions, payload) => {
 
 addActionHandler('loadTopInlineBots', async (global) => {
   const { lastRequestedAt } = global.topInlineBots;
-  if (lastRequestedAt && getServerTime(global.serverTimeOffset) - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
+  if (lastRequestedAt && getServerTime() - lastRequestedAt < TOP_PEERS_REQUEST_COOLDOWN) {
     return;
   }
 
@@ -218,7 +218,7 @@ addActionHandler('loadTopInlineBots', async (global) => {
     topInlineBots: {
       ...global.topInlineBots,
       userIds: ids,
-      lastRequestedAt: getServerTime(global.serverTimeOffset),
+      lastRequestedAt: getServerTime(),
     },
   };
   setGlobal(global);

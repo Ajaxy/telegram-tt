@@ -81,14 +81,12 @@ export async function fetchChats({
   offsetDate,
   archived,
   withPinned,
-  serverTimeOffset,
   lastLocalServiceMessage,
 }: {
   limit: number;
   offsetDate?: number;
   archived?: boolean;
   withPinned?: boolean;
-  serverTimeOffset: number;
   lastLocalServiceMessage?: ApiMessage;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetDialogs({
@@ -144,7 +142,7 @@ export async function fetchChats({
     }
 
     const peerEntity = peersByKey[getPeerKey(dialog.peer)];
-    const chat = buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset);
+    const chat = buildApiChatFromDialog(dialog, peerEntity);
 
     if (
       chat.id === SERVICE_NOTIFICATIONS_USER_ID
@@ -294,11 +292,10 @@ export async function fetchChat({
 
 export async function requestChatUpdate({
   chat,
-  serverTimeOffset,
   lastLocalMessage,
   noLastMessage,
 }: {
-  chat: ApiChat; serverTimeOffset: number; lastLocalMessage?: ApiMessage; noLastMessage?: boolean;
+  chat: ApiChat; lastLocalMessage?: ApiMessage; noLastMessage?: boolean;
 }) {
   const { id, accessHash } = chat;
 
@@ -334,7 +331,7 @@ export async function requestChatUpdate({
     '@type': 'updateChat',
     id,
     chat: {
-      ...buildApiChatFromDialog(dialog, peerEntity, serverTimeOffset),
+      ...buildApiChatFromDialog(dialog, peerEntity),
       ...(!noLastMessage && { lastMessage }),
     },
   });
@@ -558,9 +555,9 @@ async function getFullChannelInfo(
 }
 
 export async function updateChatMutedState({
-  chat, isMuted, serverTimeOffset,
+  chat, isMuted,
 }: {
-  chat: ApiChat; isMuted: boolean; serverTimeOffset: number;
+  chat: ApiChat; isMuted: boolean;
 }) {
   await invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyPeer({
@@ -577,7 +574,6 @@ export async function updateChatMutedState({
 
   void requestChatUpdate({
     chat,
-    serverTimeOffset,
     noLastMessage: true,
   });
 }
@@ -585,8 +581,7 @@ export async function updateChatMutedState({
 export async function updateTopicMutedState({
   chat, topicId, isMuted,
 }: {
-  chat: ApiChat; topicId: number; isMuted: boolean; serverTimeOffset: number;
-
+  chat: ApiChat; topicId: number; isMuted: boolean;
 }) {
   await invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyForumTopic({

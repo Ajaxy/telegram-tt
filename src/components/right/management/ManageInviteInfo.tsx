@@ -29,7 +29,6 @@ type StateProps = {
   requesters?: ApiChatInviteImporter[];
   admin?: ApiUser;
   isChannel?: boolean;
-  serverTimeOffset: number;
 };
 
 const ManageInviteInfo: FC<OwnProps & StateProps> = ({
@@ -39,7 +38,6 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   requesters,
   isChannel,
   isActive,
-  serverTimeOffset,
   onClose,
 }) => {
   const {
@@ -53,8 +51,8 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   const {
     usage = 0, usageLimit, link, adminId,
   } = invite || {};
-  const expireDate = invite?.expireDate && (invite.expireDate - getServerTime(serverTimeOffset)) * 1000 + Date.now();
-  const isExpired = ((invite?.expireDate || 0) - getServerTime(serverTimeOffset)) < 0;
+  const expireDate = invite?.expireDate && (invite.expireDate - getServerTime()) * 1000 + Date.now();
+  const isExpired = ((invite?.expireDate || 0) - getServerTime()) < 0;
 
   useEffect(() => {
     if (link) {
@@ -191,7 +189,6 @@ export default memo(withGlobal<OwnProps>(
       importers,
       requesters,
       isChannel,
-      serverTimeOffset: global.serverTimeOffset,
     };
   },
 )(ManageInviteInfo));

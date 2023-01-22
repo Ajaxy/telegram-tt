@@ -24,7 +24,6 @@ export default function useProfileViewportIds(
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
   lastSyncTime?: number,
-  serverTimeOffset = 0,
   topicId?: number,
 ) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
@@ -38,10 +37,8 @@ export default function useProfileViewportIds(
       groupChatMembers.map(({ userId }) => userId),
       usersById,
       userStatusesById,
-      undefined,
-      serverTimeOffset,
     );
-  }, [groupChatMembers, serverTimeOffset, usersById, userStatusesById]);
+  }, [groupChatMembers, usersById, userStatusesById]);
 
   const chatIds = useMemo(() => {
     if (!commonChatIds || !chatsById) {

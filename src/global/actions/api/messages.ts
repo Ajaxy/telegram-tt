@@ -303,7 +303,6 @@ addActionHandler('sendMessage', (global, actions, payload) => {
 });
 
 addActionHandler('editMessage', (global, actions, payload) => {
-  const { serverTimeOffset } = global;
   const { text, entities } = payload!;
 
   const currentMessageList = selectCurrentMessageList(global);
@@ -319,7 +318,7 @@ addActionHandler('editMessage', (global, actions, payload) => {
   }
 
   void callApi('editMessage', {
-    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId), serverTimeOffset,
+    chat, message, text, entities, noWebPage: selectNoWebPage(global, chatId, threadId),
   });
 
   actions.setEditingId({ messageId: undefined });
@@ -515,7 +514,6 @@ addActionHandler('sendMessageAction', async (global, actions, payload) => {
 });
 
 addActionHandler('markMessageListRead', (global, actions, payload) => {
-  const { serverTimeOffset } = global;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return undefined;
@@ -531,7 +529,7 @@ addActionHandler('markMessageListRead', (global, actions, payload) => {
 
   runDebouncedForMarkRead(() => {
     void callApi('markMessageListRead', {
-      serverTimeOffset, chat, threadId, maxId,
+      chat, threadId, maxId,
     });
   });
 
@@ -679,7 +677,6 @@ addActionHandler('forwardMessages', (global, action, payload) => {
       toChat,
       toThreadId,
       messages: realMessages,
-      serverTimeOffset: getGlobal().serverTimeOffset,
       isSilent,
       scheduledAt,
       sendAs,
@@ -992,7 +989,6 @@ async function sendMessage(params: {
   sticker?: ApiSticker;
   gif?: ApiVideo;
   poll?: ApiNewPoll;
-  serverTimeOffset?: number;
   isSilent?: boolean;
   scheduledAt?: number;
   sendAs?: ApiChat | ApiUser;
@@ -1024,7 +1020,6 @@ async function sendMessage(params: {
   }
 
   const global = getGlobal();
-  params.serverTimeOffset = global.serverTimeOffset;
   const currentMessageList = selectCurrentMessageList(global);
   if (!currentMessageList) {
     return;

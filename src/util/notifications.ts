@@ -179,12 +179,8 @@ let areSettingsLoaded = false;
 async function loadNotificationSettings() {
   if (areSettingsLoaded) return selectNotifySettings(getGlobal());
   const [resultSettings, resultExceptions] = await Promise.all([
-    callApi('fetchNotificationSettings', {
-      serverTimeOffset: getGlobal().serverTimeOffset,
-    }),
-    callApi('fetchNotificationExceptions', {
-      serverTimeOffset: getGlobal().serverTimeOffset,
-    }),
+    callApi('fetchNotificationSettings'),
+    callApi('fetchNotificationExceptions'),
   ]);
   if (!resultSettings) return selectNotifySettings(getGlobal());
 
