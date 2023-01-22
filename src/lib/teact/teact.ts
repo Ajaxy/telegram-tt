@@ -6,13 +6,12 @@ import {
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
+import { incrementOverlayCounter } from '../../util/debugOverlay';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export type FC_withDebug = FC & {
-  DEBUG_contentComponentName?: string;
-};
+export type FC_withDebug = FC & { DEBUG_contentComponentName?: string };
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -339,6 +338,11 @@ export function renderComponent(componentInstance: ComponentInstance) {
       }
       DEBUG_components[componentName].renderTimes.push(duration);
       DEBUG_components[componentName].renderCount++;
+
+      if (DEBUG_MORE) {
+        incrementOverlayCounter(`${componentName} renders`);
+        incrementOverlayCounter(`${componentName} duration`, duration);
+      }
     }
   } catch (err: any) {
     handleError(err);
