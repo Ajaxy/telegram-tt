@@ -1178,8 +1178,7 @@ export interface ActionPayloads {
   callAttachBot: {
     chatId: string;
     threadId?: number;
-    bot: ApiAttachBot;
-    isFromBotMenu?: boolean;
+    bot?: ApiAttachBot;
     url?: string;
     startParam?: string;
   };

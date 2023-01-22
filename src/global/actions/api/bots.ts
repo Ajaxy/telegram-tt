@@ -592,8 +592,9 @@ async function loadAttachBots(hash?: string) {
 
 addActionHandler('callAttachBot', (global, actions, payload) => {
   const {
-    chatId, bot, isFromBotMenu, url, startParam, threadId,
+    chatId, bot, url, startParam, threadId,
   } = payload;
+  const isFromBotMenu = !bot;
   if (!isFromBotMenu && !global.attachMenu.bots[bot.id]) {
     return {
       ...global,
@@ -611,7 +612,7 @@ addActionHandler('callAttachBot', (global, actions, payload) => {
   actions.requestWebView({
     url,
     peerId: chatId,
-    botId: bot.id,
+    botId: isFromBotMenu ? chatId : bot.id,
     theme,
     buttonText: '',
     isFromBotMenu,
