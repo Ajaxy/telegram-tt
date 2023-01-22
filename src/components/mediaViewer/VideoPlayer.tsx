@@ -254,7 +254,7 @@ const VideoPlayer: FC<OwnProps> = ({
           style={videoStyle}
           onPlay={() => setIsPlaying(true)}
           onEnded={handleEnded}
-          onClick={!IS_SINGLE_COLUMN_LAYOUT ? handleClick : undefined}
+          onClick={!IS_SINGLE_COLUMN_LAYOUT && !isFullscreen ? handleClick : undefined}
           onDoubleClick={!IS_TOUCH_ENV ? handleFullscreenChange : undefined}
           // eslint-disable-next-line react/jsx-props-no-spreading
           {...bufferingHandlers}
