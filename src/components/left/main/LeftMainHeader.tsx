@@ -115,6 +115,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lockScreen,
     requestNextSettingsScreen,
     skipLockOnUnload,
+    openUrl,
   } = getActions();
 
   const lang = useLang();
@@ -237,6 +238,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     openChatByUsername({ username: lang('Settings.TipsUsername') });
   }, [lang, openChatByUsername]);
 
+  const handleBugReportClick = useCallback(() => {
+    openUrl({ url: FEEDBACK_URL });
+  }, [openUrl]);
+
   const handleLockScreen = useCallback(() => {
     lockScreen();
   }, [lockScreen]);
@@ -334,7 +339,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           </MenuItem>
           <MenuItem
             icon="bug"
-            href={FEEDBACK_URL}
+            onClick={handleBugReportClick}
           >
             Report Bug
           </MenuItem>
