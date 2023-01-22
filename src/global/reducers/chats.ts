@@ -9,6 +9,7 @@ import {
 } from '../../util/iteratees';
 import { selectChat, selectChatListType } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
+import { areDeepEqual } from '../../util/areDeepEqual';
 
 export function replaceChatListIds(
   global: GlobalState,
@@ -125,15 +126,24 @@ function getUpdatedChat(
 ) {
   const { byId } = global.chats;
   const chat = byId[chatId];
-  const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
+  const omitProps: (keyof ApiChat)[] = [];
 
-  chatUpdate = noOmitUnreadReactionCount
-    ? chatUpdate : omit(chatUpdate, ['unreadReactionsCount']);
+  const shouldOmitMinInfo = chatUpdate.isMin && chat && !chat.isMin;
+  if (shouldOmitMinInfo) {
+    omitProps.push('isMin', 'accessHash');
+  }
+
+  if (!noOmitUnreadReactionCount) {
+    omitProps.push('unreadReactionsCount');
+  }
+
+  if (areDeepEqual(chat?.usernames, chatUpdate.usernames)) {
+    omitProps.push('usernames');
+  }
+
   const updatedChat: ApiChat = {
     ...chat,
-    ...(shouldOmitMinInfo
-      ? omit(chatUpdate, ['isMin', 'accessHash'])
-      : chatUpdate),
+    ...omit(chatUpdate, omitProps),
     ...(photo && { photos: [photo, ...(chat.photos || [])] }),
   };
 
