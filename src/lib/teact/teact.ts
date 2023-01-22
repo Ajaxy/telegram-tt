@@ -473,39 +473,41 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
       value: initial,
       nextValue: initial,
       setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
-        if (byCursor[cursor].nextValue !== newValue) {
-          byCursor[cursor].nextValue = typeof newValue === 'function'
-            ? (newValue as (current: T) => T)(byCursor[cursor].value)
-            : newValue;
+        if (typeof newValue === 'function') {
+          newValue = (newValue as (current: T) => T)(byCursor[cursor].value);
+        }
 
-          if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
-            componentInstance.prepareForFrame = throttleWithPrimaryRaf(
-              () => prepareComponentForFrame(componentInstance),
+        if (byCursor[cursor].nextValue === newValue) {
+          return;
+        }
+
+        byCursor[cursor].nextValue = newValue;
+
+        if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
+          componentInstance.prepareForFrame = throttleWithPrimaryRaf(
+            () => prepareComponentForFrame(componentInstance),
+          );
+          componentInstance.forceUpdate = throttleWithRaf(
+            () => forceUpdateComponent(componentInstance),
+          );
+        }
+
+        componentInstance.prepareForFrame();
+        componentInstance.forceUpdate();
+
+        if (DEBUG_MORE) {
+          if (componentInstance.name !== 'TeactNContainer') {
+            // eslint-disable-next-line no-console
+            console.log(
+              '[Teact.useState]',
+              componentInstance.name,
+              // `componentInstance.Component` may be set to `null` by GC helper
+              componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
+                ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
+                : '',
+              `State update at cursor #${cursor}${debugKey ? ` (${debugKey})` : ''}, next value: `,
+              byCursor[cursor].nextValue,
             );
-            componentInstance.forceUpdate = throttleWithRaf(
-              () => forceUpdateComponent(componentInstance),
-            );
-          }
-
-          componentInstance.prepareForFrame();
-          componentInstance.forceUpdate();
-
-          if (DEBUG_MORE) {
-            if (componentInstance.name !== 'TeactNContainer') {
-              // eslint-disable-next-line no-console
-              console.log(
-                '[Teact.useState]',
-                componentInstance.name,
-                // `componentInstance.Component` may be set to `null` by GC helper
-                componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
-                  ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
-                  : '',
-                debugKey
-                  ? `State update for ${debugKey}, next value: `
-                  : `State update at cursor #${cursor}, next value: `,
-                byCursor[cursor].nextValue,
-              );
-            }
           }
         }
       })(renderingInstance),
