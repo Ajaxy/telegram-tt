@@ -98,7 +98,6 @@ type StateProps = {
   isRightColumnShown: boolean;
   isRestricted?: boolean;
   lastSyncTime?: number;
-  serverTimeOffset: number;
   activeDownloadIds: number[];
   isChatProtected?: boolean;
 };
@@ -141,7 +140,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   isRestricted,
   lastSyncTime,
   activeDownloadIds,
-  serverTimeOffset,
   isChatProtected,
 }) => {
   const {
@@ -197,7 +195,6 @@ const Profile: FC<OwnProps & StateProps> = ({
     chatMessages,
     foundIds,
     lastSyncTime,
-    serverTimeOffset,
     topicId,
   );
   const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
@@ -583,7 +580,6 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global),
       isRestricted: chat?.isRestricted,
       lastSyncTime: global.lastSyncTime,
-      serverTimeOffset: global.serverTimeOffset,
       activeDownloadIds,
       usersById,
       userStatusesById,

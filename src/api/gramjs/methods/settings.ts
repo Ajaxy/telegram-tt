@@ -251,9 +251,7 @@ export function terminateAllWebAuthorizations() {
   return invokeRequest(new GramJs.account.ResetWebAuthorizations());
 }
 
-export async function fetchNotificationExceptions({
-  serverTimeOffset,
-}: { serverTimeOffset: number }) {
+export async function fetchNotificationExceptions() {
   const result = await invokeRequest(new GramJs.account.GetNotifyExceptions({
     compareSound: true,
   }), undefined, undefined, true);
@@ -269,15 +267,13 @@ export async function fetchNotificationExceptions({
       return acc;
     }
 
-    acc.push(buildApiNotifyException(update.notifySettings, update.peer.peer, serverTimeOffset));
+    acc.push(buildApiNotifyException(update.notifySettings, update.peer.peer));
 
     return acc;
   }, [] as ApiNotifyException[]);
 }
 
-export async function fetchNotificationSettings({
-  serverTimeOffset,
-}: { serverTimeOffset: number }) {
+export async function fetchNotificationSettings() {
   const [
     isMutedContactSignUpNotification,
     privateContactNotificationsSettings,
@@ -314,17 +310,17 @@ export async function fetchNotificationSettings({
     hasContactJoinedNotifications: !isMutedContactSignUpNotification,
     hasPrivateChatsNotifications: !(
       privateSilent
-      || (typeof privateMuteUntil === 'number' && getServerTime(serverTimeOffset) < privateMuteUntil)
+      || (typeof privateMuteUntil === 'number' && getServerTime() < privateMuteUntil)
     ),
     hasPrivateChatsMessagePreview: privateShowPreviews,
     hasGroupNotifications: !(
       groupSilent || (typeof groupMuteUntil === 'number'
-        && getServerTime(serverTimeOffset) < groupMuteUntil)
+        && getServerTime() < groupMuteUntil)
     ),
     hasGroupMessagePreview: groupShowPreviews,
     hasBroadcastNotifications: !(
       broadcastSilent || (typeof broadcastMuteUntil === 'number'
-        && getServerTime(serverTimeOffset) < broadcastMuteUntil)
+        && getServerTime() < broadcastMuteUntil)
     ),
     hasBroadcastMessagePreview: broadcastShowPreviews,
   };

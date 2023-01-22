@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState, MessageListType } from '../../../global/types';
 import type {
@@ -635,12 +635,9 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const checkSlowMode = useCallback(() => {
     if (slowMode && !isAdmin) {
-      // No need to subscribe on updates in `mapStateToProps`
-      const { serverTimeOffset } = getGlobal();
-
       const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
-      const nowSeconds = getServerTime(serverTimeOffset);
+      const nowSeconds = getServerTime();
       const secondsSinceLastMessage = lastMessageSendTimeSeconds.current
         && Math.floor(nowSeconds - lastMessageSendTimeSeconds.current);
       const nextSendDateNotReached = slowMode.nextSendDate && slowMode.nextSendDate > nowSeconds;
@@ -692,10 +689,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       shouldGroupMessages: sendGrouped,
     });
 
-    // No need to subscribe on updates in `mapStateToProps`
-    const { serverTimeOffset } = getGlobal();
-
-    lastMessageSendTimeSeconds.current = getServerTime(serverTimeOffset);
+    lastMessageSendTimeSeconds.current = getServerTime();
 
     clearDraft({ chatId, localOnly: true });
 
@@ -738,9 +732,6 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    // No need to subscribe on updates in `mapStateToProps`
-    const { serverTimeOffset } = getGlobal();
-
     if (!validateTextLength(text)) return;
 
     const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
@@ -764,7 +755,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       });
     }
 
-    lastMessageSendTimeSeconds.current = getServerTime(serverTimeOffset);
+    lastMessageSendTimeSeconds.current = getServerTime();
 
     clearDraft({ chatId, localOnly: true });
 

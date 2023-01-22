@@ -201,7 +201,6 @@ type StateProps = {
   isGroup?: boolean;
   canReply?: boolean;
   lastSyncTime?: number;
-  serverTimeOffset: number;
   highlight?: string;
   animatedEmoji?: string;
   animatedCustomEmoji?: string;
@@ -297,7 +296,6 @@ const Message: FC<OwnProps & StateProps> = ({
   isGroup,
   canReply,
   lastSyncTime,
-  serverTimeOffset,
   highlight,
   animatedEmoji,
   animatedCustomEmoji,
@@ -546,7 +544,7 @@ const Message: FC<OwnProps & StateProps> = ({
     hasComments: repliesThreadInfo && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
     hasReactions,
-    isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message, getServerTime(serverTimeOffset)),
+    isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message, getServerTime()),
     withVoiceTranscription,
   });
 
@@ -959,7 +957,6 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             theme={theme}
             peer={sender}
-            serverTimeOffset={serverTimeOffset}
           />
         )}
       </div>
@@ -1174,7 +1171,7 @@ const Message: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {
     const {
-      focusedMessage, forwardMessages, lastSyncTime, serverTimeOffset,
+      focusedMessage, forwardMessages, lastSyncTime,
     } = global;
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
@@ -1280,7 +1277,6 @@ export default memo(withGlobal<OwnProps>(
       isGroup,
       canReply,
       lastSyncTime,
-      serverTimeOffset,
       highlight,
       animatedEmoji,
       animatedCustomEmoji,

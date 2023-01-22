@@ -37,14 +37,12 @@ type OwnProps = {
 
 type StateProps = {
   editingInvite?: ApiExportedInvite;
-  serverTimeOffset: number;
 };
 
 const ManageInvite: FC<OwnProps & StateProps> = ({
   chatId,
   editingInvite,
   isActive,
-  serverTimeOffset,
   onClose,
   onScreenSelect,
 }) => {
@@ -71,7 +69,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
       setTitle('');
       setSelectedExpireOption('unlimited');
       setSelectedUsageOption('0');
-      setCustomExpireDate(getServerTime(serverTimeOffset) * 1000 + DEFAULT_CUSTOM_EXPIRE_DATE);
+      setCustomExpireDate(getServerTime() * 1000 + DEFAULT_CUSTOM_EXPIRE_DATE);
       setCustomUsageLimit(10);
       setIsRequestNeeded(false);
     } else {
@@ -84,7 +82,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         setCustomUsageLimit(usageLimit);
       }
       if (expireDate) {
-        const minSafeDate = getServerTime(serverTimeOffset) + DEFAULT_CUSTOM_EXPIRE_DATE;
+        const minSafeDate = getServerTime() + DEFAULT_CUSTOM_EXPIRE_DATE;
         setSelectedExpireOption('custom');
         setCustomExpireDate(Math.max(expireDate, minSafeDate) * 1000);
       }
@@ -92,7 +90,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
         setIsRequestNeeded(true);
       }
     }
-  }, [editingInvite, serverTimeOffset]);
+  }, [editingInvite]);
 
   const handleIsRequestChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsRequestNeeded(e.target.checked);
@@ -117,12 +115,12 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
     let expireDate;
     switch (selectedExpireOption) {
       case 'custom':
-        expireDate = getServerTime(serverTimeOffset) + (customExpireDate - Date.now()) / 1000;
+        expireDate = getServerTime() + (customExpireDate - Date.now()) / 1000;
         break;
       case 'hour':
       case 'day':
       case 'week':
-        expireDate = getServerTime(serverTimeOffset) + DEFAULT_EXPIRE_DATE[selectedExpireOption] / 1000;
+        expireDate = getServerTime() + DEFAULT_EXPIRE_DATE[selectedExpireOption] / 1000;
         break;
       case 'unlimited':
         expireDate = 0;
@@ -153,7 +151,6 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
   }, [
     chatId, customExpireDate, customUsageLimit, editExportedChatInvite, editingInvite,
     exportChatInvite, isRequestNeeded, selectedExpireOption, selectedUsageOption, title, onScreenSelect,
-    serverTimeOffset,
   ]);
 
   return (
@@ -272,7 +269,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       editingInvite,
-      serverTimeOffset: global.serverTimeOffset,
     };
   },
 )(ManageInvite));

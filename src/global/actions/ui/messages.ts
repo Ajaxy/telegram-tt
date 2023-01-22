@@ -645,7 +645,7 @@ addActionHandler('checkVersionNotification', (global, actions) => {
 
   const message: Omit<ApiMessage, 'id'> = {
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
-    date: getServerTime(global.serverTimeOffset),
+    date: getServerTime(),
     content: {
       text: parseMessageInput(versionNotification, true),
     },

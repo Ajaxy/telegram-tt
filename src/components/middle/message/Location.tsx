@@ -55,7 +55,6 @@ type OwnProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   theme: ISettings['theme'];
-  serverTimeOffset: number;
 };
 
 const Location: FC<OwnProps> = ({
@@ -65,7 +64,6 @@ const Location: FC<OwnProps> = ({
   isInSelectMode,
   isSelected,
   theme,
-  serverTimeOffset,
 }) => {
   const { openUrl } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -78,7 +76,7 @@ const Location: FC<OwnProps> = ({
   const location = getMessageLocation(message)!;
   const { type, geo } = location;
 
-  const serverTime = getServerTime(serverTimeOffset);
+  const serverTime = getServerTime();
   const isExpired = isGeoLiveExpired(message, serverTime);
   const secondsBeforeEnd = (type === 'geoLive' && !isExpired) ? message.date + location.period - serverTime
     : undefined;
@@ -122,7 +120,7 @@ const Location: FC<OwnProps> = ({
     const svgEl = countdownEl.lastElementChild;
     const timerEl = countdownEl.firstElementChild as SVGElement;
 
-    const timeLeft = message.date + location.period - getServerTime(serverTimeOffset);
+    const timeLeft = message.date + location.period - getServerTime();
     const strokeDashOffset = (1 - timeLeft / location.period) * circumference;
     const text = formatCountdownShort(lang, timeLeft * 1000);
 
@@ -139,7 +137,7 @@ const Location: FC<OwnProps> = ({
       timerEl.textContent = text;
       svgEl.firstElementChild!.setAttribute('stroke-dashoffset', `-${strokeDashOffset}`);
     }
-  }, [type, message.date, location, serverTimeOffset, lang]);
+  }, [type, message.date, location, lang]);
 
   useLayoutEffect(() => {
     if (countdownRef.current) {

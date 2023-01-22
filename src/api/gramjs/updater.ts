@@ -4,7 +4,9 @@ import type {
   ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdateConnectionStateType, OnApiUpdate,
 } from '../types';
 
+import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
 import { omit, pick } from '../../util/iteratees';
+import { getServerTimeOffset, setServerTimeOffset } from '../../util/serverTime';
 import {
   buildApiMessage,
   buildApiMessageFromShort,
@@ -39,7 +41,6 @@ import {
 } from './gramjsBuilders';
 import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
-import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
 import {
   addMessageToLocalDb,
   addEntitiesWithPhotosToLocalDb,
@@ -79,7 +80,6 @@ export function init(_onUpdate: OnApiUpdate) {
 }
 
 const sentMessageIds = new Set();
-let serverTimeOffset = 0;
 // Workaround for a situation when an incorrect update comes with an undefined property `adminRights`
 let shouldIgnoreNextChannelUpdate = false;
 const IGNORE_NEXT_CHANNEL_UPDATE_TIMEOUT = 2000;
@@ -121,7 +121,12 @@ function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat
 
 export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   if (update instanceof connection.UpdateServerTimeOffset) {
-    serverTimeOffset = update.timeOffset;
+    setServerTimeOffset(update.timeOffset);
+
+    onUpdate({
+      '@type': 'updateServerTimeOffset',
+      serverTimeOffset: update.timeOffset,
+    });
   } else if (update instanceof connection.UpdateConnectionState) {
     let connectionState: ApiUpdateConnectionStateType;
 
@@ -423,7 +428,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         },
       });
     } else {
-      const currentDate = Date.now() / 1000 + serverTimeOffset;
+      const currentDate = Date.now() / 1000 + getServerTimeOffset();
       const message = buildApiMessageFromNotification(update, currentDate);
 
       if (isMessageWithMedia(update)) {
@@ -478,7 +483,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     sentMessageIds.add(update.id);
 
     // Edge case for "Send When Online"
-    const isAlreadySent = 'date' in update && update.date * 1000 < Date.now() + serverTimeOffset * 1000;
+    const isAlreadySent = 'date' in update && update.date * 1000 < Date.now() + getServerTimeOffset() * 1000;
 
     onUpdate({
       '@type': localMessage.isScheduled && !isAlreadySent
@@ -675,7 +680,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   ) {
     onUpdate({
       '@type': 'updateNotifyExceptions',
-      ...buildApiNotifyException(update.notifySettings, update.peer.peer, serverTimeOffset),
+      ...buildApiNotifyException(update.notifySettings, update.peer.peer),
     });
   } else if (
     update instanceof GramJs.UpdateNotifySettings
@@ -684,7 +689,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
     onUpdate({
       '@type': 'updateTopicNotifyExceptions',
       ...buildApiNotifyExceptionTopic(
-        update.notifySettings, update.peer.peer, update.peer.topMsgId, serverTimeOffset,
+        update.notifySettings, update.peer.peer, update.peer.topMsgId,
       ),
     });
   } else if (
@@ -707,7 +712,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       onUpdate({
         '@type': 'updateChatTypingStatus',
         id,
-        typingStatus: buildChatTypingStatus(update, serverTimeOffset),
+        typingStatus: buildChatTypingStatus(update),
       });
     }
   } else if (update instanceof GramJs.UpdateChannelUserTyping) {
@@ -717,7 +722,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateChatTypingStatus',
       id,
       threadId: update.topMsgId,
-      typingStatus: buildChatTypingStatus(update, serverTimeOffset),
+      typingStatus: buildChatTypingStatus(update),
     });
   } else if (update instanceof GramJs.UpdateChannel) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -907,7 +912,7 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
       '@type': 'updateNotifySettings',
       peerType,
       isSilent: Boolean(silent
-        || (typeof muteUntil === 'number' && Date.now() + serverTimeOffset * 1000 < muteUntil * 1000)),
+        || (typeof muteUntil === 'number' && Date.now() + getServerTimeOffset() * 1000 < muteUntil * 1000)),
       shouldShowPreviews: Boolean(showPreviews),
     });
   } else if (update instanceof GramJs.UpdatePeerBlocked) {

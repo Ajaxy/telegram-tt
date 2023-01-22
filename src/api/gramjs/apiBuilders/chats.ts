@@ -20,7 +20,7 @@ import {
   buildApiPeerId, getApiChatIdFromMtpPeer, isPeerChat, isPeerUser,
 } from './peers';
 import { omitVirtualClassFields } from './helpers';
-import { getServerTime } from '../../../util/serverTime';
+import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { buildApiReaction } from './messages';
 import { buildApiUsernames } from './common';
 
@@ -79,14 +79,13 @@ function buildApiChatFieldsFromPeerEntity(
 export function buildApiChatFromDialog(
   dialog: GramJs.Dialog,
   peerEntity: GramJs.TypeUser | GramJs.TypeChat,
-  serverTimeOffset: number,
 ): ApiChat {
   const {
     peer, folderId, unreadMark, unreadCount, unreadMentionsCount, unreadReactionsCount,
     notifySettings: { silent, muteUntil },
     readOutboxMaxId, readInboxMaxId, draft,
   } = dialog;
-  const isMuted = silent || (typeof muteUntil === 'number' && getServerTime(serverTimeOffset) < muteUntil);
+  const isMuted = silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil);
 
   return {
     id: getApiChatIdFromMtpPeer(peer),
@@ -316,7 +315,6 @@ export function buildChatMembers(
 
 export function buildChatTypingStatus(
   update: GramJs.UpdateUserTyping | GramJs.UpdateChatUserTyping | GramJs.UpdateChannelUserTyping,
-  serverTimeOffset: number,
 ) {
   let action: string = '';
   let emoticon: string | undefined;
@@ -361,7 +359,7 @@ export function buildChatTypingStatus(
     action,
     ...(emoticon && { emoji: emoticon }),
     ...(!(update instanceof GramJs.UpdateUserTyping) && { userId: getApiChatIdFromMtpPeer(update.fromId) }),
-    timestamp: Date.now() + serverTimeOffset * 1000,
+    timestamp: Date.now() + getServerTimeOffset() * 1000,
   };
 }
 

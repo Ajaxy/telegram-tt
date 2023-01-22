@@ -60,6 +60,7 @@ import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../h
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildApiCallDiscardReason } from './calls';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import { getServerTimeOffset } from '../../../util/serverTime';
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -1263,7 +1264,6 @@ export function buildLocalMessage(
   groupedId?: string,
   scheduledAt?: number,
   sendAs?: ApiChat | ApiUser,
-  serverTimeOffset = 0,
 ): ApiMessage {
   const localId = getNextLocalMessageId();
   const media = attachment && buildUploadingMedia(attachment);
@@ -1286,7 +1286,7 @@ export function buildLocalMessage(
       ...(poll && buildNewPoll(poll, localId)),
       ...(contact && { contact }),
     },
-    date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
+    date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
     ...(replyingTo && { replyToMessageId: replyingTo }),
@@ -1312,7 +1312,6 @@ export function buildLocalForwardedMessage({
   toChat,
   toThreadId,
   message,
-  serverTimeOffset,
   scheduledAt,
   noAuthors,
   noCaptions,
@@ -1321,7 +1320,6 @@ export function buildLocalForwardedMessage({
   toChat: ApiChat;
   toThreadId?: number;
   message: ApiMessage;
-  serverTimeOffset: number;
   scheduledAt?: number;
   noAuthors?: boolean;
   noCaptions?: boolean;
@@ -1358,7 +1356,7 @@ export function buildLocalForwardedMessage({
     id: localId,
     chatId: toChat.id,
     content: updatedContent,
-    date: scheduledAt || Math.round(Date.now() / 1000) + serverTimeOffset,
+    date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !asIncomingInChatWithSelf && toChat.type !== 'chatTypeChannel',
     senderId: currentUserId,
     sendingState: 'messageSendingStatePending',

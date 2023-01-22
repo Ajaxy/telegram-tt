@@ -263,7 +263,6 @@ addActionHandler('loadTopChats', () => {
 });
 
 addActionHandler('requestChatUpdate', (global, actions, payload) => {
-  const { serverTimeOffset } = global;
   const { chatId } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -272,7 +271,6 @@ addActionHandler('requestChatUpdate', (global, actions, payload) => {
 
   void callApi('requestChatUpdate', {
     chat,
-    serverTimeOffset,
     ...(chatId === SERVICE_NOTIFICATIONS_USER_ID && {
       lastLocalMessage: selectLastServiceNotification(global)?.message,
     }),
@@ -280,7 +278,6 @@ addActionHandler('requestChatUpdate', (global, actions, payload) => {
 });
 
 addActionHandler('updateChatMutedState', (global, actions, payload) => {
-  const { serverTimeOffset } = global;
   const { chatId, isMuted } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -288,11 +285,10 @@ addActionHandler('updateChatMutedState', (global, actions, payload) => {
   }
 
   setGlobal(updateChat(global, chatId, { isMuted }));
-  void callApi('updateChatMutedState', { chat, isMuted, serverTimeOffset });
+  void callApi('updateChatMutedState', { chat, isMuted });
 });
 
 addActionHandler('updateTopicMutedState', (global, actions, payload) => {
-  const { serverTimeOffset } = global;
   const { chatId, isMuted, topicId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
@@ -301,7 +297,7 @@ addActionHandler('updateTopicMutedState', (global, actions, payload) => {
 
   setGlobal(updateTopic(global, chatId, topicId, { isMuted }));
   void callApi('updateTopicMutedState', {
-    chat, topicId, isMuted, serverTimeOffset,
+    chat, topicId, isMuted,
   });
 });
 
@@ -582,11 +578,10 @@ addActionHandler('deleteChatFolder', (global, actions, payload) => {
 
 addActionHandler('toggleChatUnread', (global, actions, payload) => {
   const { id } = payload!;
-  const { serverTimeOffset } = global;
   const chat = selectChat(global, id);
   if (chat) {
     if (chat.unreadCount) {
-      void callApi('markMessageListRead', { serverTimeOffset, chat, threadId: MAIN_THREAD_ID });
+      void callApi('markMessageListRead', { chat, threadId: MAIN_THREAD_ID });
     } else {
       void callApi('toggleDialogUnread', {
         chat,
@@ -608,7 +603,6 @@ addActionHandler('markTopicRead', (global, actions, payload) => {
     chat,
     threadId: topicId,
     maxId: lastTopicMessageId,
-    serverTimeOffset: global.serverTimeOffset,
   });
 
   global = getGlobal();
@@ -1553,7 +1547,6 @@ async function loadChats(
     offsetDate,
     archived: listType === 'archived',
     withPinned: shouldReplace,
-    serverTimeOffset: global.serverTimeOffset,
     lastLocalServiceMessage,
   });
 

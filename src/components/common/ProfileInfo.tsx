@@ -46,7 +46,6 @@ type StateProps =
     chat?: ApiChat;
     isSavedMessages?: boolean;
     animationLevel: AnimationLevel;
-    serverTimeOffset: number;
     mediaId?: number;
     avatarOwnerId?: string;
     topic?: ApiTopic;
@@ -66,7 +65,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   connectionState,
   animationLevel,
-  serverTimeOffset,
   mediaId,
   avatarOwnerId,
   topic,
@@ -227,7 +225,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     if (user) {
       return (
         <div className={buildClassName(styles.status, 'status', isUserOnline(user, userStatus) && 'online')}>
-          <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
+          <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus)}</span>
         </div>
       );
     }
@@ -296,7 +294,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
-    const { connectionState, serverTimeOffset } = global;
+    const { connectionState } = global;
     const user = selectUser(global, userId);
     const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
@@ -314,7 +312,6 @@ export default memo(withGlobal<OwnProps>(
       chat,
       isSavedMessages,
       animationLevel,
-      serverTimeOffset,
       mediaId,
       avatarOwnerId,
       ...(topic && {

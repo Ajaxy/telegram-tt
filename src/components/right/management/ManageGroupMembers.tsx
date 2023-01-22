@@ -45,7 +45,6 @@ type StateProps = {
   isSearching?: boolean;
   localUserIds?: string[];
   globalUserIds?: string[];
-  serverTimeOffset: number;
   currentUserId?: string;
   canDeleteMembers?: boolean;
   isBasicGroup?: boolean;
@@ -65,7 +64,6 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   localUserIds,
   isSearching,
   searchQuery,
-  serverTimeOffset,
   currentUserId,
   canDeleteMembers,
   isBasicGroup,
@@ -100,12 +98,10 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
       members.map(({ userId }) => userId),
       usersById,
       userStatusesById,
-      undefined,
-      serverTimeOffset,
     );
 
     return noAdmins ? userIds.filter((userId) => !adminIds.includes(userId)) : userIds;
-  }, [members, userStatusesById, serverTimeOffset, noAdmins, adminIds]);
+  }, [members, userStatusesById, noAdmins, adminIds]);
 
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
@@ -282,7 +278,6 @@ export default memo(withGlobal<OwnProps>(
       globalUserIds,
       localUserIds,
       canDeleteMembers,
-      serverTimeOffset: global.serverTimeOffset,
       currentUserId: global.currentUserId,
     };
   },

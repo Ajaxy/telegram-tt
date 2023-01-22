@@ -35,7 +35,6 @@ type StateProps = {
   user?: ApiUser;
   userStatus?: ApiUserStatus;
   phoneCodeList: ApiCountryCode[];
-  serverTimeOffset?: number;
 };
 
 const NewContactModal: FC<OwnProps & StateProps> = ({
@@ -45,7 +44,6 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   user,
   userStatus,
   phoneCodeList,
-  serverTimeOffset,
 }) => {
   const { updateContact, importContact, closeNewContactDialog } = getActions();
 
@@ -130,7 +128,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
                 : lang('MobileHidden')}
             </p>
             <span className="NewContactModal__user-status" dir="auto">
-              {getUserStatus(lang, renderingUser!, userStatus, serverTimeOffset!)}
+              {getUserStatus(lang, renderingUser!, userStatus)}
             </span>
           </div>
         </div>
@@ -232,7 +230,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       user: userId ? selectUser(global, userId) : undefined,
       userStatus: userId ? selectUserStatus(global, userId) : undefined,
-      serverTimeOffset: global.serverTimeOffset,
       phoneCodeList: global.countryList.phoneCodes,
     };
   },

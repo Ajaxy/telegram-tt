@@ -48,7 +48,6 @@ type StateProps =
     isSavedMessages?: boolean;
     animationLevel: AnimationLevel;
     areMessagesLoaded: boolean;
-    serverTimeOffset: number;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
 
@@ -71,7 +70,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   areMessagesLoaded,
   animationLevel,
   lastSyncTime,
-  serverTimeOffset,
   adminMember,
 }) => {
   const {
@@ -133,7 +131,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     return (
       <span className={buildClassName('status', isUserOnline(user, userStatus) && 'online')}>
         {mainUsername && <span className="handle">{mainUsername}</span>}
-        <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus, serverTimeOffset)}</span>
+        <span className="user-status" dir="auto">{getUserStatus(lang, user, userStatus)}</span>
       </span>
     );
   }
@@ -188,7 +186,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
-    const { lastSyncTime, serverTimeOffset } = global;
+    const { lastSyncTime } = global;
     const user = selectUser(global, userId);
     const userStatus = selectUserStatus(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
@@ -200,7 +198,6 @@ export default memo(withGlobal<OwnProps>(
       userStatus,
       isSavedMessages,
       areMessagesLoaded,
-      serverTimeOffset,
       animationLevel: global.settings.byKey.animationLevel,
     };
   },

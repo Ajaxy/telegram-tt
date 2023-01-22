@@ -316,10 +316,8 @@ addActionHandler('unblockContact', async (global, actions, payload) => {
   setGlobal(removeBlockedContact(getGlobal(), contactId));
 });
 
-addActionHandler('loadNotificationExceptions', async (global) => {
-  const { serverTimeOffset } = global;
-
-  const result = await callApi('fetchNotificationExceptions', { serverTimeOffset });
+addActionHandler('loadNotificationExceptions', async () => {
+  const result = await callApi('fetchNotificationExceptions');
   if (!result) {
     return;
   }
@@ -327,11 +325,8 @@ addActionHandler('loadNotificationExceptions', async (global) => {
   setGlobal(addNotifyExceptions(getGlobal(), result));
 });
 
-addActionHandler('loadNotificationSettings', async (global) => {
-  const { serverTimeOffset } = global;
-  const result = await callApi('fetchNotificationSettings', {
-    serverTimeOffset,
-  });
+addActionHandler('loadNotificationSettings', async () => {
+  const result = await callApi('fetchNotificationSettings');
   if (!result) {
     return;
   }
@@ -637,11 +632,11 @@ addActionHandler('loadAppConfig', async () => {
   });
 });
 
-addActionHandler('loadConfig', async (global) => {
+addActionHandler('loadConfig', async () => {
   const config = await callApi('fetchConfig');
   if (!config) return;
 
-  const timeout = config.expiresAt - getServerTime(global.serverTimeOffset);
+  const timeout = config.expiresAt - getServerTime();
   requestActionTimeout('loadConfig', timeout * 1000);
 
   setGlobal({
