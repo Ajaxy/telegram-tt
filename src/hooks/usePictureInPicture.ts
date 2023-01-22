@@ -30,7 +30,8 @@ export default function usePictureInPicture(
     video.autoPictureInPicture = true;
     setIsSupported(true);
     const onEnterInternal = () => {
-      onEnter(); setIsInPictureInPicture(true);
+      onEnter();
+      setIsInPictureInPicture(true);
     };
     const onLeaveInternal = () => {
       onLeave(); setIsInPictureInPicture(false);
