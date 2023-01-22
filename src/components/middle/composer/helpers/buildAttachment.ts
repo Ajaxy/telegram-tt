@@ -77,6 +77,6 @@ export default async function buildAttachment(
 
 export function prepareAttachmentsToSend(attachments: ApiAttachment[], shouldSendCompressed?: boolean) {
   return !shouldSendCompressed
-    ? attachments.map((attachment) => ({ ...attachment, shouldSendAsFile: true }))
+    ? attachments.map((attachment) => ({ ...attachment, shouldSendAsFile: !attachment.voice ? true : undefined }))
     : attachments;
 }

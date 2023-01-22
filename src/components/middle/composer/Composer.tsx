@@ -665,15 +665,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     return true;
   }, [isAdmin, lang, showDialog, slowMode]);
 
-  const handleSendAttachments = useCallback((
-    sendCompressed: boolean, sendGrouped: boolean, isSilent?: boolean, scheduledAt?: number,
-  ) => {
+  const sendAttachments = useCallback(({
+    attachments: attachmentsToSend,
+    sendCompressed,
+    sendGrouped,
+    isSilent,
+    scheduledAt,
+  } : {
+    attachments: ApiAttachment[];
+    sendCompressed?: boolean;
+    sendGrouped?: boolean;
+    isSilent?: boolean;
+    scheduledAt?: number;
+  }) => {
     if (connectionState !== 'connectionStateReady') {
       return;
     }
 
     const { text, entities } = parseMessageInput(htmlRef.current!);
-    if (!text && !attachments.length) {
+    if (!text && !attachmentsToSend.length) {
       return;
     }
     if (!validateTextLength(text, true)) return;
@@ -685,7 +695,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       scheduledAt,
       isSilent,
       shouldUpdateStickerSetsOrder: true,
-      attachments: prepareAttachmentsToSend(attachments, sendCompressed),
+      attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
       shouldGroupMessages: sendGrouped,
     });
 
@@ -697,10 +707,22 @@ const Composer: FC<OwnProps & StateProps> = ({
     requestAnimationFrame(() => {
       resetComposer();
     });
-  }, [
-    attachments, chatId, checkSlowMode, clearDraft, htmlRef, resetComposer, sendMessage, validateTextLength,
-    connectionState,
-  ]);
+  }, [chatId, checkSlowMode, clearDraft, htmlRef, resetComposer, sendMessage, validateTextLength, connectionState]);
+
+  const handleSendAttachments = useCallback((
+    sendCompressed: boolean,
+    sendGrouped: boolean,
+    isSilent?: boolean,
+    scheduledAt?: number,
+  ) => {
+    sendAttachments({
+      attachments,
+      sendCompressed,
+      sendGrouped,
+      isSilent,
+      scheduledAt,
+    });
+  }, [attachments, sendAttachments]);
 
   const handleSend = useCallback(async (isSilent = false, scheduledAt?: number) => {
     if (connectionState !== 'connectionStateReady') {
@@ -724,7 +746,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     const { text, entities } = parseMessageInput(htmlRef.current!);
 
     if (currentAttachments.length) {
-      handleSendAttachments(false, false);
+      sendAttachments({
+        attachments: currentAttachments,
+      });
       return;
     }
 
@@ -769,7 +793,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   }, [
     connectionState, attachments, activeVoiceRecording, htmlRef, isForwarding, validateTextLength, clearDraft,
-    chatId, stopRecordingVoice, handleSendAttachments, checkSlowMode, sendMessage, forwardMessages, resetComposer,
+    chatId, stopRecordingVoice, sendAttachments, checkSlowMode, sendMessage, forwardMessages, resetComposer,
   ]);
 
   const handleClickBotMenu = useCallback(() => {
