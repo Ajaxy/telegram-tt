@@ -28,6 +28,7 @@ type OwnProps = {
 };
 
 const NO_CORNER_THRESHOLD = Number(REM);
+const MAX_TOPICS = 3;
 
 const ChatForumLastMessage: FC<OwnProps> = ({
   chat,
@@ -46,7 +47,11 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   const lastMessage = renderLastMessage();
 
   const [lastActiveTopic, ...otherTopics] = useMemo(() => {
-    return chat.topics ? getOrderedTopics(Object.values(chat.topics), undefined, true) : [];
+    if (!chat.topics) {
+      return [];
+    }
+
+    return getOrderedTopics(Object.values(chat.topics), undefined, true).slice(0, MAX_TOPICS);
   }, [chat.topics]);
 
   const [isReversedCorner, setIsReversedCorner] = useState(false);
