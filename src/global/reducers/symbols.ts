@@ -104,7 +104,7 @@ export function updateStickerSet(
   const isCustomEmoji = update.isEmoji || currentStickerSet.isEmoji;
   const addedSets = (isCustomEmoji ? global.customEmojis.added.setIds : global.stickers.added.setIds) || [];
   let setIds: string[] = addedSets;
-  if (update.installedDate && addedSets && !addedSets.includes(stickerSetId)) {
+  if (update.installedDate && !update.isArchived && addedSets && !addedSets.includes(stickerSetId)) {
     setIds = [stickerSetId, ...setIds];
   }
 

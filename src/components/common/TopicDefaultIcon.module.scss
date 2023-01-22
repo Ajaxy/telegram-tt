@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  vertical-align: middle;
 
   position: relative;
   width: 1.25rem;
@@ -20,8 +21,10 @@
   color: #ffffff;
   font-weight: 500;
   font-size: 0.75em;
-  position: relative;
-  bottom: 0.0625rem;
+  line-height: 1;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 
   :global(.emoji) {
     width: 1em;

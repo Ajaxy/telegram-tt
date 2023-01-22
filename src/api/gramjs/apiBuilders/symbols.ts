@@ -116,7 +116,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
   } = set;
 
   return {
-    archived,
+    isArchived: archived,
     isLottie: animated,
     isVideos: videos,
     isEmoji: emojis,

@@ -47,7 +47,7 @@ export interface ApiSticker {
 }
 
 export interface ApiStickerSet {
-  archived?: true;
+  isArchived?: true;
   isLottie?: true;
   isVideos?: true;
   isEmoji?: true;

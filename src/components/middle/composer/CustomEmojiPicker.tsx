@@ -20,7 +20,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import buildClassName from '../../../util/buildClassName';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
-import { pickTruthy } from '../../../util/iteratees';
+import { pickTruthy, unique } from '../../../util/iteratees';
 import {
   selectIsAlwaysHighPriorityEmoji,
   selectIsChatWithSelf,
@@ -147,15 +147,13 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       });
     }
 
-    const existingAddedSetIds = Object.values(pickTruthy(stickerSetsById, addedCustomEmojiIds));
+    const setIdsToDisplay = unique(addedCustomEmojiIds.concat(featuredCustomEmojiIds || []));
 
-    const filteredFeaturedIds = featuredCustomEmojiIds?.filter((id) => !addedCustomEmojiIds.includes(id)) || [];
-    const featuredSetIds = Object.values(pickTruthy(stickerSetsById, filteredFeaturedIds));
+    const setsToDisplay = Object.values(pickTruthy(stickerSetsById, setIdsToDisplay));
 
     return [
       ...defaultSets,
-      ...existingAddedSetIds,
-      ...featuredSetIds,
+      ...setsToDisplay,
     ];
   }, [
     addedCustomEmojiIds, defaultTopicIconsId, featuredCustomEmojiIds, lang, recentCustomEmoji, stickerSetsById,
