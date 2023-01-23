@@ -459,7 +459,7 @@
   flex-grow: 1;
 
   .form-control {
-    padding: calc((3.25rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
+    padding: calc((3.5rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
       calc(0.9rem - var(--border-width));
     overflow: hidden;
     height: auto;
@@ -601,8 +601,8 @@
 
 #caption-input-text {
   .input-scroller {
-    min-height: 3rem;
-    max-height: 15rem;
+    min-height: 3.5rem;
+    max-height: 10rem;
 
     margin-right: -5.625rem;
 

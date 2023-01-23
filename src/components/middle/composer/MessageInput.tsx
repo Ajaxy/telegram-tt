@@ -63,7 +63,7 @@ type StateProps = {
 };
 
 const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
-const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 240;
+const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
 const SELECTION_RECALCULATE_DELAY_MS = 260;

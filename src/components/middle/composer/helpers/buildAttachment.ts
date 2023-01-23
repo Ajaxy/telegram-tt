@@ -9,7 +9,6 @@ import {
   preloadImage,
   preloadVideo,
   createPosterForVideo,
-  fetchBlob,
 } from '../../../../util/files';
 import { scaleImage } from '../../../../util/imageResize';
 
@@ -30,13 +29,14 @@ export default async function buildAttachment(
     const { width, height } = img;
     const shouldShrink = Math.max(width, height) > MAX_QUICK_IMG_SIZE;
 
-    if (shouldShrink || mimeType !== 'image/jpeg') {
+    if (!options?.compressedBlobUrl && (shouldShrink || mimeType !== 'image/jpeg')) {
       const resizedUrl = await scaleImage(
         blobUrl, shouldShrink ? MAX_QUICK_IMG_SIZE / Math.max(width, height) : 1, 'image/jpeg',
       );
       URL.revokeObjectURL(blobUrl);
-      const newBlob = await fetchBlob(resizedUrl);
-      return buildAttachment(filename, newBlob, options);
+      return buildAttachment(filename, blob, {
+        compressedBlobUrl: resizedUrl,
+      });
     }
 
     if (mimeType === 'image/jpeg') {
@@ -76,11 +76,21 @@ export default async function buildAttachment(
 }
 
 export function prepareAttachmentsToSend(attachments: ApiAttachment[], shouldSendCompressed?: boolean) {
-  return !shouldSendCompressed
-    ? attachments.map((attachment) => ({
-      ...attachment,
-      shouldSendAsFile: !attachment.voice ? true : undefined,
+  return attachments.map((attach) => {
+    if (shouldSendCompressed) {
+      if (attach.compressedBlobUrl) {
+        return {
+          ...attach,
+          blobUrl: attach.compressedBlobUrl,
+        };
+      }
+      return attach;
+    }
+
+    return {
+      ...attach,
+      shouldSendAsFile: !attach.voice ? true : undefined,
       shouldSendAsSpoiler: undefined,
-    }))
-    : attachments;
+    };
+  });
 }
