@@ -19,6 +19,7 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
+import useAppLayout from '../../../../hooks/useAppLayout';
 
 const SIZE = 1.25 * REM;
 
@@ -26,7 +27,7 @@ type CustomEmojiPlayer = {
   play: () => void;
   pause: () => void;
   destroy: () => void;
-  updatePosition: (x: number, y: number) => void;
+  updatePosition: (x: number, y: number, isMobile?: boolean) => void;
 };
 
 export default function useInputCustomEmojis(
@@ -37,6 +38,8 @@ export default function useInputCustomEmojis(
   absoluteContainerRef: React.RefObject<HTMLElement>,
 ) {
   const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
+
+  const { isMobile } = useAppLayout();
 
   const removeContainers = useCallback((ids: string[]) => {
     ids.forEach((id) => {
@@ -74,7 +77,7 @@ export default function useInputCustomEmojis(
 
       if (mapRef.current.has(id)) {
         const player = mapRef.current.get(id)!;
-        player.updatePosition(x, y);
+        player.updatePosition(x, y, isMobile);
         return;
       }
 
@@ -93,6 +96,7 @@ export default function useInputCustomEmojis(
         mediaUrl,
         isHq,
         position: { x, y },
+        isMobile,
       });
       animation.play();
 
@@ -100,7 +104,7 @@ export default function useInputCustomEmojis(
     });
 
     removeContainers(Array.from(removedContainers));
-  }, [absoluteContainerRef, inputRef, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
+  }, [absoluteContainerRef, inputRef, isMobile, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -152,6 +156,7 @@ function createPlayer({
   mediaUrl,
   position,
   isHq,
+  isMobile,
 } : {
   customEmoji: ApiSticker;
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -161,6 +166,7 @@ function createPlayer({
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
+  isMobile?: boolean;
 }): CustomEmojiPlayer {
   if (customEmoji.isLottie) {
     const lottie = RLottie.init(
@@ -173,13 +179,16 @@ function createPlayer({
         size: SIZE,
         coords: position,
         isLowPriority: !isHq,
+        isMobile,
       },
     );
     return {
       play: () => lottie.play(),
       pause: () => lottie.pause(),
       destroy: () => lottie.removeContainer(uniqueId),
-      updatePosition: (x: number, y: number) => lottie.setSharedCanvasCoords(uniqueId, { x, y }),
+      updatePosition: (x: number, y: number, isMobileNew?: boolean) => {
+        return lottie.setSharedCanvasCoords(uniqueId, { x, y }, isMobileNew);
+      },
     };
   }
 

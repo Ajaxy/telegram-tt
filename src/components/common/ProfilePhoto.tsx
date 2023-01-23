@@ -3,7 +3,7 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/environment';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -21,6 +21,7 @@ import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Spinner from '../ui/Spinner';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -50,6 +51,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
@@ -73,7 +75,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const transitionClassNames = useMediaTransition(isFullMediaReady);
   const isBlurredThumb = canHaveMedia && !isFullMediaReady && !avatarBlobUrl && currentPhoto?.thumbnail?.dataUri;
   const blurredThumbCanvasRef = useCanvasBlur(
-    currentPhoto?.thumbnail?.dataUri, !isBlurredThumb, IS_SINGLE_COLUMN_LAYOUT && !IS_CANVAS_FILTER_SUPPORTED,
+    currentPhoto?.thumbnail?.dataUri, !isBlurredThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED,
   );
   const hasMedia = currentPhoto || avatarBlobUrl || isBlurredThumb;
 

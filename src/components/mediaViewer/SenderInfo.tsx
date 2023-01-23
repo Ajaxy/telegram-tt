@@ -5,7 +5,6 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 import type { AnimationLevel } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getSenderTitle, isUserId } from '../../global/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -16,6 +15,7 @@ import {
   selectUser,
 } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Avatar from '../common/Avatar';
 
@@ -49,10 +49,12 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     toggleChatInfo,
   } = getActions();
 
+  const { isMobile } = useAppLayout();
+
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();
 
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       setTimeout(() => {
         toggleChatInfo(false, { forceSyncOnIOs: true });
         focusMessage({ chatId, messageId });
@@ -60,7 +62,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     } else {
       focusMessage({ chatId, messageId });
     }
-  }, [chatId, focusMessage, toggleChatInfo, messageId, closeMediaViewer]);
+  }, [chatId, isMobile, focusMessage, toggleChatInfo, messageId, closeMediaViewer]);
 
   const lang = useLang();
 

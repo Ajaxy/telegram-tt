@@ -7,7 +7,6 @@ import type { GlobalState } from '../../global/types';
 import '../../global/actions/initial';
 import { pick } from '../../util/iteratees';
 import { PLATFORM_ENV } from '../../util/environment';
-import windowSize from '../../util/windowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
@@ -55,15 +54,6 @@ const Auth: FC<OwnProps & StateProps> = ({
       || (isMobile && authState === 'authorizationStateWaitQrCode'),
     onBack: handleChangeAuthorizationMethod,
   });
-
-  // Prevent refresh when rotating device
-  useEffect(() => {
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, []);
 
   // For animation purposes
   const renderingAuthState = useCurrentOrPrev(

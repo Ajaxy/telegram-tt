@@ -19,12 +19,12 @@ import {
   selectCurrentMessageList,
   selectIsChatProtected,
 } from '../../global/selectors';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { getMessageMediaFormat, getMessageMediaHash, isUserId } from '../../global/helpers';
 
 import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useFlag from '../../hooks/useFlag';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -87,6 +87,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   setZoomLevelChange,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
+  const { isMobile } = useAppLayout();
 
   const {
     downloadMessageMedia,
@@ -201,7 +202,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     );
   }
 
-  if (IS_SINGLE_COLUMN_LAYOUT) {
+  if (isMobile) {
     const menuItems: MenuItemProps[] = [];
     if (!message?.isForwardingAllowed && !isChatProtected) {
       menuItems.push({

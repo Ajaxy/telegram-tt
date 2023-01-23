@@ -4,6 +4,7 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
@@ -17,7 +18,6 @@ import {
   getMessageWebPageVideo,
   isOwnMessage,
 } from '../../../global/helpers';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
@@ -27,6 +27,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import useFlag from '../../../hooks/useFlag';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -87,6 +88,7 @@ const Video: FC<OwnProps> = ({
     wasIntersectedRef.current = true;
   }
 
+  const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && lastSyncTime);
   const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay && !isSpoilerShown);
@@ -147,7 +149,7 @@ const Video: FC<OwnProps> = ({
   const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
   const {
     width, height,
-  } = dimensions || calculateVideoDimensions(video, isOwn, asForwarded, isWebPageVideo, noAvatars);
+  } = dimensions || calculateVideoDimensions(video, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
 
   const handleClick = useCallback(() => {
     if (isUploading) {

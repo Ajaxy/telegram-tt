@@ -6,8 +6,8 @@ import type {
   ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
 } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
+import type { LangFn } from '../../../hooks/useLang';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   getPrivateChatUserId,
   getMessageMediaHash,
@@ -23,9 +23,9 @@ import { formatPastTimeShort } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
 import useMedia from '../../../hooks/useMedia';
-import type { LangFn } from '../../../hooks/useLang';
 import useLang from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Avatar from '../../common/Avatar';
 import ListItem from '../../ui/ListItem';
@@ -59,6 +59,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
 }) => {
   const { focusMessage } = getActions();
 
+  const { isMobile } = useAppLayout();
   const mediaThumbnail = !getMessageSticker(message) ? getMessageMediaThumbDataUri(message) : undefined;
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
@@ -78,7 +79,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   return (
     <ListItem
       className="ChatMessage chat-item-clickable"
-      ripple={!IS_SINGLE_COLUMN_LAYOUT}
+      ripple={!isMobile}
       onClick={handleClick}
       buttonRef={buttonRef}
     >

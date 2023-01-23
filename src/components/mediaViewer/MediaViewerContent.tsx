@@ -8,7 +8,7 @@ import type {
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/environment';
 import {
   selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';
@@ -17,6 +17,7 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import stopEvent from '../../util/stopEvent';
 import buildClassName from '../../util/buildClassName';
 import { useMediaProps } from './hooks/useMediaProps';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Spinner from '../ui/Spinner';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -94,6 +95,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   });
 
   const isOpen = Boolean(avatarOwner || mediaId);
+  const { isMobile } = useAppLayout();
 
   const toggleControls = useCallback((isVisible) => {
     setControlsVisible?.(isVisible);
@@ -106,7 +108,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           {renderPhoto(
             bestData,
             calculateMediaViewerDimensions(dimensions, false),
-            !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+            !isMobile && !isProtected,
             isProtected,
           )}
         </div>
@@ -150,13 +152,13 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
       {isPhoto && renderPhoto(
         bestData,
         message && calculateMediaViewerDimensions(dimensions!, hasFooter),
-        !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+        !isMobile && !isProtected,
         isProtected,
       )}
       {isVideo && (!isActive ? renderVideoPreview(
         bestImageData,
         message && calculateMediaViewerDimensions(dimensions!, hasFooter, true),
-        !IS_SINGLE_COLUMN_LAYOUT && !isProtected,
+        !isMobile && !isProtected,
         isProtected,
       ) : (
         <VideoPlayer

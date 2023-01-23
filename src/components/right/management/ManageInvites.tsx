@@ -1,25 +1,25 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
 import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
-import useInterval from '../../../hooks/useInterval';
-import useForceUpdate from '../../../hooks/useForceUpdate';
+import { getMainUsername, isChatChannel } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { getServerTime } from '../../../util/serverTime';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useInterval from '../../../hooks/useInterval';
+import useForceUpdate from '../../../hooks/useForceUpdate';
 import useFlag from '../../../hooks/useFlag';
-import { getMainUsername, isChatChannel } from '../../../global/helpers';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
@@ -79,6 +79,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const [revokingInvite, setRevokingInvite] = useState<ApiExportedInvite | undefined>();
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [deletingInvite, setDeletingInvite] = useState<ApiExportedInvite | undefined>();
+  const { isMobile } = useAppLayout();
 
   useHistoryBack({
     isActive,
@@ -280,7 +281,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
@@ -290,7 +291,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         <i className="icon-more" />
       </Button>
     );
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="Management ManageInvites">

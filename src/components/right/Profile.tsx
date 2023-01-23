@@ -72,6 +72,7 @@ type OwnProps = {
   chatId: string;
   topicId?: number;
   profileState: ProfileState;
+  isMobile?: boolean;
   onProfileStateChange: (state: ProfileState) => void;
 };
 
@@ -532,7 +533,7 @@ function buildInfiniteScrollItemSelector(resultType: string) {
 }
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, topicId }): StateProps => {
+  (global, { chatId, topicId, isMobile }): StateProps => {
     const chat = selectChat(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
@@ -577,7 +578,7 @@ export default memo(withGlobal<OwnProps>(
       canAddMembers,
       canDeleteMembers,
       currentUserId: global.currentUserId,
-      isRightColumnShown: selectIsRightColumnShown(global),
+      isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isRestricted: chat?.isRestricted,
       lastSyncTime: global.lastSyncTime,
       activeDownloadIds,

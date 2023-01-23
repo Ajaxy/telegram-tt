@@ -26,12 +26,9 @@ import type {
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
 } from '../../../types';
-import {
-  AudioOrigin,
-} from '../../../types';
-import {
-  MAIN_THREAD_ID,
-} from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { AudioOrigin } from '../../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
@@ -88,8 +85,6 @@ import {
   isChatGroup,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import useEnsureMessage from '../../../hooks/useEnsureMessage';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import {
   calculateDimensionsForMessageMedia,
   REM,
@@ -100,9 +95,13 @@ import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimen
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { isAnimatingScroll } from '../../../util/fastSmoothScroll';
 
+import { getServerTime } from '../../../util/serverTime';
+import { isElementInViewport } from '../../../util/isElementInViewport';
+import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
+import useEnsureMessage from '../../../hooks/useEnsureMessage';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -110,10 +109,8 @@ import useFlag from '../../../hooks/useFlag';
 import useFocusMessage from './hooks/useFocusMessage';
 import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
-import { getServerTime } from '../../../util/serverTime';
-import { isElementInViewport } from '../../../util/isElementInViewport';
-import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import useResizeObserver from '../../../hooks/useResizeObserver';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -349,6 +346,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
   const [hasActiveStickerEffect, startStickerEffect, stopStickerEffect] = useFlag();
+  const { isMobile } = useAppLayout();
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
@@ -626,19 +624,21 @@ const Message: FC<OwnProps & StateProps> = ({
   let calculatedWidth;
   let noMediaCorners = false;
   const albumLayout = useMemo(() => {
-    return isAlbum ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!) : undefined;
-  }, [isAlbum, isOwn, asForwarded, noAvatars, album]);
+    return isAlbum
+      ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!, isMobile)
+      : undefined;
+  }, [isAlbum, isOwn, asForwarded, noAvatars, album, isMobile]);
 
   const extraPadding = asForwarded ? 28 : 0;
   if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
     let width: number | undefined;
     if (photo) {
-      width = calculateMediaDimensions(message, asForwarded, noAvatars).width;
+      width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
     } else if (video) {
       if (video.isRound) {
         width = ROUND_VIDEO_DIMENSIONS_PX;
       } else {
-        width = calculateMediaDimensions(message, asForwarded, noAvatars).width;
+        width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
       }
     } else if (invoice?.extendedMedia && (
       invoice.extendedMedia.width && invoice.extendedMedia.height
@@ -650,6 +650,7 @@ const Message: FC<OwnProps & StateProps> = ({
         fromOwnMessage: isOwn,
         asForwarded,
         noAvatars,
+        isMobile,
       }).width;
     }
 

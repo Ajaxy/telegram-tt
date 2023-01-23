@@ -3,7 +3,7 @@ import type {
 } from '../../../api/types';
 
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import windowSize from '../../../util/windowSize';
 import { getPhotoInlineDimensions, getVideoDimensions } from '../../../global/helpers';
 
@@ -25,9 +25,9 @@ let cachedMaxWidthOwn: number | undefined;
 let cachedMaxWidth: number | undefined;
 let cachedMaxWidthNoAvatar: number | undefined;
 
-function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean) {
+function getMaxMessageWidthRem(fromOwnMessage: boolean, noAvatars?: boolean, isMobile?: boolean) {
   const regularMaxWidth = fromOwnMessage ? MESSAGE_OWN_MAX_WIDTH_REM : MESSAGE_MAX_WIDTH_REM;
-  if (!IS_SINGLE_COLUMN_LAYOUT) {
+  if (!isMobile) {
     return regularMaxWidth;
   }
 
@@ -63,9 +63,10 @@ export function getAvailableWidth(
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
+  isMobile?: boolean,
 ) {
   const extraPaddingRem = asForwarded && isWebPageMedia ? 2.25 : (asForwarded || isWebPageMedia ? 1.625 : 0);
-  const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars) - extraPaddingRem;
+  const availableWidthRem = getMaxMessageWidthRem(fromOwnMessage, noAvatars, isMobile) - extraPaddingRem;
 
   return availableWidthRem * REM;
 }
@@ -89,6 +90,7 @@ export function calculateDimensionsForMessageMedia({
   isWebPageMedia,
   isGif,
   noAvatars,
+  isMobile,
 }: {
   width: number;
   height: number;
@@ -97,9 +99,10 @@ export function calculateDimensionsForMessageMedia({
   isWebPageMedia?: boolean;
   isGif?: boolean;
   noAvatars?: boolean;
+  isMobile?: boolean;
 }): ApiDimensions {
   const aspectRatio = height / width;
-  const availableWidth = getAvailableWidth(fromOwnMessage, asForwarded, isWebPageMedia, noAvatars);
+  const availableWidth = getAvailableWidth(fromOwnMessage, asForwarded, isWebPageMedia, noAvatars, isMobile);
   const availableHeight = getAvailableHeight(isGif, aspectRatio);
   const mediaWidth = isGif ? Math.max(GIF_MIN_WIDTH, width) : width;
   const mediaHeight = isGif ? height * (mediaWidth / width) : height;
@@ -126,6 +129,7 @@ export function calculateInlineImageDimensions(
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
+  isMobile?: boolean,
 ) {
   const { width, height } = getPhotoInlineDimensions(photo) || DEFAULT_MEDIA_DIMENSIONS;
 
@@ -136,6 +140,7 @@ export function calculateInlineImageDimensions(
     asForwarded,
     isWebPageMedia,
     noAvatars,
+    isMobile,
   });
 }
 
@@ -145,6 +150,7 @@ export function calculateVideoDimensions(
   asForwarded?: boolean,
   isWebPageMedia?: boolean,
   noAvatars?: boolean,
+  isMobile?: boolean,
 ) {
   const { width, height } = getVideoDimensions(video) || DEFAULT_MEDIA_DIMENSIONS;
 
@@ -156,6 +162,7 @@ export function calculateVideoDimensions(
     isWebPageMedia,
     isGif: video.isGif,
     noAvatars,
+    isMobile,
   });
 }
 
@@ -180,7 +187,7 @@ export function getDocumentThumbnailDimensions(smaller?: boolean): ApiDimensions
   };
 }
 
-export function getStickerDimensions(sticker: ApiSticker): ApiDimensions {
+export function getStickerDimensions(sticker: ApiSticker, isMobile?: boolean): ApiDimensions {
   const { width } = sticker;
   let { height } = sticker;
 
@@ -191,7 +198,7 @@ export function getStickerDimensions(sticker: ApiSticker): ApiDimensions {
 
   const aspectRatio = (height && width) && height / width;
   const baseWidth = REM * (
-    IS_SINGLE_COLUMN_LAYOUT
+    isMobile
       ? STICKER_SIZE_INLINE_MOBILE_FACTOR
       : STICKER_SIZE_INLINE_DESKTOP_FACTOR
   );

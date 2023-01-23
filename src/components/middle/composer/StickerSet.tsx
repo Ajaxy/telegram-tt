@@ -12,7 +12,6 @@ import {
   DEFAULT_TOPIC_ICON_STICKER_ID,
   EMOJI_SIZE_PICKER, FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, STICKER_SIZE_PICKER,
 } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../../global/selectors';
 
@@ -21,6 +20,7 @@ import useFlag from '../../../hooks/useFlag';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import StickerButton from '../../common/StickerButton';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -45,10 +45,6 @@ type OwnProps = {
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
 };
-
-const STICKER_MARGIN = IS_SINGLE_COLUMN_LAYOUT ? 8 : 16;
-const EMOJI_MARGIN = IS_SINGLE_COLUMN_LAYOUT ? 8 : 10;
-const CONTAINER_PADDING = IS_SINGLE_COLUMN_LAYOUT ? 8 : 0;
 
 const ITEMS_PER_ROW_FALLBACK = 8;
 
@@ -85,8 +81,9 @@ const StickerSet: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
 
-  const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const lang = useLang();
+  const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
+  const { isMobile } = useAppLayout();
 
   const [itemsPerRow, setItemsPerRow] = useState(ITEMS_PER_ROW_FALLBACK);
 
@@ -94,6 +91,9 @@ const StickerSet: FC<OwnProps> = ({
 
   const transitionClassNames = useMediaTransition(shouldRender);
 
+  const stickerMarginPx = isMobile ? 8 : 16;
+  const emojiMarginPx = isMobile ? 8 : 10;
+  const containerPaddingPx = isMobile ? 8 : 0;
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
@@ -132,13 +132,13 @@ const StickerSet: FC<OwnProps> = ({
   }, [onStickerSelect]);
 
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
-  const margin = isEmoji ? EMOJI_MARGIN : STICKER_MARGIN;
+  const margin = isEmoji ? emojiMarginPx : stickerMarginPx;
 
   const calculateItemsPerRow = useCallback((width: number) => {
     if (!width) return ITEMS_PER_ROW_FALLBACK;
 
-    return Math.floor((width - CONTAINER_PADDING) / (itemSize + margin));
-  }, [itemSize, margin]);
+    return Math.floor((width - containerPaddingPx) / (itemSize + margin));
+  }, [containerPaddingPx, itemSize, margin]);
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
     setItemsPerRow(calculateItemsPerRow(entry.contentRect.width));

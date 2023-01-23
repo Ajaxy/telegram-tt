@@ -6,11 +6,11 @@ import {
   MIN_LEFT_COLUMN_WIDTH,
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import windowSize from '../../util/windowSize';
 import { updateChat } from './chats';
 import { isSameReaction, isReactionChosen } from '../helpers';
 import { updateChatMessage } from './messages';
+import { getIsMobile } from '../../hooks/useAppLayout';
 
 function getLeftColumnWidth(windowWidth: number) {
   if (windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN) {
@@ -31,7 +31,7 @@ function getLeftColumnWidth(windowWidth: number) {
 }
 
 export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
-  return x - ((global.isLeftColumnShown && !IS_SINGLE_COLUMN_LAYOUT)
+  return x - ((global.isLeftColumnShown && !getIsMobile())
     ? global.leftColumnWidth || getLeftColumnWidth(windowSize.get().width)
     : 0);
 }

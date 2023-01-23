@@ -55,7 +55,7 @@ const ReactionSelector: FC<OwnProps> = ({
     if (!itemsScrollRef) return;
     const deltaY = 'deltaY' in e ? e.deltaY : getTouchY(e);
 
-    if (deltaY) {
+    if (deltaY && e.cancelable) {
       e.preventDefault();
     }
   };

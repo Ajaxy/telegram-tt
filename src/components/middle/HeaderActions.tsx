@@ -13,9 +13,7 @@ import type { IAnchorPosition } from '../../types';
 import { ManagementScreens } from '../../types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
-import {
-  ARE_CALLS_SUPPORTED, IS_PWA, IS_SINGLE_COLUMN_LAYOUT,
-} from '../../util/environment';
+import { ARE_CALLS_SUPPORTED, IS_PWA } from '../../util/environment';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
@@ -40,6 +38,7 @@ interface OwnProps {
   messageListType: MessageListType;
   canExpandActions: boolean;
   withForumActions?: boolean;
+  isMobile?: boolean;
   onTopicSearch?: NoneToVoidFunction;
 }
 
@@ -70,6 +69,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   noMenu,
+  isMobile,
   isChannel,
   canStartBot,
   canRestartBot,
@@ -149,7 +149,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
     openLocalTextSearch();
 
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       // iOS requires synchronous focus on user event.
       const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
       searchInput.focus();
@@ -161,7 +161,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     } else {
       setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);
     }
-  }, [noAnimation, onTopicSearch, openLocalTextSearch, withForumActions]);
+  }, [isMobile, noAnimation, onTopicSearch, openLocalTextSearch, withForumActions]);
 
   const handleAsMessagesClick = useCallback(() => {
     openChat({ id: chatId, threadId: MAIN_THREAD_ID });
@@ -186,7 +186,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="HeaderActions">
-      {!IS_SINGLE_COLUMN_LAYOUT && (
+      {!isMobile && (
         <>
           {canExpandActions && !shouldSendJoinRequest && (canSubscribe || shouldJoinToSend) && (
             <Button
@@ -272,7 +272,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         ref={menuButtonRef}
         className={isMenuOpen ? 'active' : ''}
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         size="smaller"
         color="translucent"
         disabled={noMenu}
@@ -287,7 +287,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           threadId={threadId}
           isOpen={isMenuOpen}
           anchor={menuPosition}
-          withExtraActions={IS_SINGLE_COLUMN_LAYOUT || !canExpandActions}
+          withExtraActions={isMobile || !canExpandActions}
           isChannel={isChannel}
           canStartBot={canStartBot}
           canRestartBot={canRestartBot}
@@ -314,7 +314,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId, messageListType }): StateProps => {
+  (global, {
+    chatId, threadId, messageListType, isMobile,
+  }): StateProps => {
     const chat = selectChat(global, chatId);
     const isChannel = Boolean(chat && isChatChannel(chat));
 
@@ -328,7 +330,7 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
     const isDiscussionThread = messageListType === 'thread' && threadId !== MAIN_THREAD_ID;
-    const isRightColumnShown = selectIsRightColumnShown(global);
+    const isRightColumnShown = selectIsRightColumnShown(global, isMobile);
 
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));

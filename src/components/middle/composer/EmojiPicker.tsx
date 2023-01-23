@@ -1,22 +1,20 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   useState, useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { GlobalState } from '../../../global/types';
-
-import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import type {
   EmojiModule,
   EmojiRawData,
   EmojiData,
 } from '../../../util/emoji';
-import {
-  uncompressEmoji,
-} from '../../../util/emoji';
+
+import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
+import { IS_TOUCH_ENV } from '../../../util/environment';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { uncompressEmoji } from '../../../util/emoji';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';
 import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
@@ -25,6 +23,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -79,6 +78,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
   const [categories, setCategories] = useState<EmojiCategoryData[]>();
   const [emojis, setEmojis] = useState<AllEmojis>();
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
+  const { isMobile } = useAppLayout();
 
   const { observe: observeIntersection } = useIntersectionObserver({
     rootRef: containerRef,
@@ -105,7 +105,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
   });
 
-  useHorizontalScroll(headerRef.current, !IS_SINGLE_COLUMN_LAYOUT);
+  useHorizontalScroll(headerRef.current, !isMobile);
 
   // Scroll header when active set updates
   useEffect(() => {

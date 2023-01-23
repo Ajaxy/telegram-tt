@@ -6,12 +6,13 @@ import { withGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../../util/environment';
 import { selectAnimatedEmoji } from '../../../../global/selectors';
 import renderText from '../../../common/helpers/renderText';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useAppLayout from '../../../../hooks/useAppLayout';
 
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
@@ -35,7 +36,6 @@ type StateProps = {
   animatedEmoji: ApiSticker;
 };
 
-const FOCUS_DELAY_TIMEOUT_MS = IS_SINGLE_COLUMN_LAYOUT ? 550 : 400;
 const ICON_SIZE = 160;
 
 const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
@@ -52,7 +52,9 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
+  const { isMobile } = useAppLayout();
 
+  const focusDelayTimeoutMs = isMobile ? 550 : 400;
   const [value, setValue] = useState<string>('');
   const [isConfirmShown, markIsConfirmShown, unmarkIsConfirmShown] = useFlag(false);
 
@@ -60,9 +62,9 @@ const SettingsTwoFaSkippableForm: FC<OwnProps & StateProps> = ({
     if (!IS_TOUCH_ENV) {
       setTimeout(() => {
         inputRef.current!.focus();
-      }, FOCUS_DELAY_TIMEOUT_MS);
+      }, focusDelayTimeoutMs);
     }
-  }, []);
+  }, [focusDelayTimeoutMs]);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (error && clearError) {

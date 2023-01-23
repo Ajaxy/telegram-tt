@@ -21,6 +21,7 @@ import AppInactive from './components/main/AppInactive';
 import Transition from './components/ui/Transition';
 import UiLoader from './components/common/UiLoader';
 import { parseInitialLocationHash } from './util/routing';
+import useAppLayout from './hooks/useAppLayout';
 // import Test from './components/test/TestNoRedundancy';
 
 type StateProps = {
@@ -46,7 +47,8 @@ const App: FC<StateProps> = ({
   const { disconnect } = getActions();
 
   const [isInactive, markInactive] = useFlag(false);
-  const isMobile = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
+  const { isMobile } = useAppLayout();
+  const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
 
   useEffect(() => {
     updateSizes();
@@ -129,7 +131,7 @@ const App: FC<StateProps> = ({
   } else if (hasPasscode) {
     activeKey = AppScreens.lock;
   } else {
-    page = isMobile ? 'authPhoneNumber' : 'authQrCode';
+    page = isMobileOs ? 'authPhoneNumber' : 'authQrCode';
     activeKey = AppScreens.auth;
   }
 
@@ -150,7 +152,7 @@ const App: FC<StateProps> = ({
       case AppScreens.auth:
         return <Auth isActive={isActive} />;
       case AppScreens.main:
-        return <Main />;
+        return <Main isMobile={isMobile} />;
       case AppScreens.lock:
         return <LockScreen isLocked={isScreenLocked} />;
       case AppScreens.inactive:
@@ -159,7 +161,7 @@ const App: FC<StateProps> = ({
   }
 
   return (
-    <UiLoader key="Loader" page={page}>
+    <UiLoader key="Loader" page={page} isMobile={isMobile}>
       <Transition
         name="fade"
         activeKey={activeKey}

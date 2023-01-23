@@ -9,8 +9,6 @@ import type { GlobalState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 import type { PopupOptions, WebAppInboundEvent } from './hooks/useWebAppFrame';
 
-import windowSize from '../../util/windowSize';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { TME_LINK_PREFIX } from '../../config';
 import { selectCurrentChat, selectTheme, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -22,6 +20,7 @@ import useOnChange from '../../hooks/useOnChange';
 import useWebAppFrame from './hooks/useWebAppFrame';
 import usePrevious from '../../hooks/usePrevious';
 import useFlag from '../../hooks/useFlag';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -101,6 +100,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const [confirmClose, setConfirmClose] = useState(false);
   const [isCloseModalOpen, openCloseModal, closeCloseModal] = useFlag(false);
   const [popupParams, setPopupParams] = useState<PopupOptions | undefined>();
+  const { isMobile } = useAppLayout();
   const prevPopupParams = usePrevious(popupParams);
   const renderingPopupParams = popupParams || prevPopupParams;
 
@@ -268,16 +268,6 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }, ANIMATION_WAIT);
   }, [theme, sendTheme]);
 
-  // Prevent refresh when rotating device
-  useEffect(() => {
-    if (!isOpen) return undefined;
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, [isOpen]);
-
   useOnChange(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
     if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
@@ -330,7 +320,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     return ({ onTrigger, isOpen: isMenuOpen }) => (
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         size="smaller"
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
@@ -340,7 +330,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         <i className="icon-more" />
       </Button>
     );
-  }, []);
+  }, [isMobile]);
 
   const backButtonClassName = buildClassName(
     'animated-close-icon',

@@ -14,7 +14,6 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 import { getHtmlTextLength } from './helpers/getHtmlTextLength';
@@ -117,6 +116,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const hideTimeoutRef = useRef<number>();
   const prevAttachments = usePrevious(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
+  const { isMobile } = useAppLayout();
 
   const [shouldSendCompressed, setShouldSendCompressed] = useState(
     shouldSuggestCompression ?? attachmentSettings.shouldCompress,
@@ -312,7 +312,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     return ({ onTrigger, isOpen: isMenuOpen }) => (
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         size="smaller"
         color="translucent"
         className={isMenuOpen ? 'active' : ''}
@@ -322,7 +322,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         <i className="icon-more" />
       </Button>
     );
-  }, []);
+  }, [isMobile]);
 
   const leftChars = useMemo(() => {
     const captionLeftBeforeLimit = captionLimit - getHtmlTextLength(caption);

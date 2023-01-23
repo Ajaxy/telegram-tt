@@ -30,7 +30,7 @@ import {
   SEND_MESSAGE_ACTION_INTERVAL,
   EDITABLE_INPUT_CSS_SELECTOR, MAX_UPLOAD_FILEPART_SIZE,
 } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT, IS_IOS } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import {
   selectChat,
@@ -132,6 +132,7 @@ type OwnProps = {
   messageListType: MessageListType;
   dropAreaState: string;
   isReady: boolean;
+  isMobile?: boolean;
   onDropHide: NoneToVoidFunction;
 };
 
@@ -213,6 +214,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   shouldSchedule,
   canScheduleUntilOnline,
   isReady,
+  isMobile,
   onDropHide,
   editingMessage,
   chatId,
@@ -548,13 +550,16 @@ const Composer: FC<OwnProps & StateProps> = ({
     closeMentionTooltip();
     closeEmojiTooltip();
 
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       // @optimization
       setTimeout(() => closeSymbolMenu(), SENDING_ANIMATION_DURATION);
     } else {
       closeSymbolMenu();
     }
-  }, [closeStickerTooltip, closeCustomEmojiTooltip, closeMentionTooltip, closeEmojiTooltip, closeSymbolMenu, setHtml]);
+  }, [
+    closeStickerTooltip, closeCustomEmojiTooltip, closeMentionTooltip, closeEmojiTooltip,
+    closeSymbolMenu, setHtml, isMobile,
+  ]);
 
   // Handle chat change (ref is used to avoid redundant effect calls)
   const stopRecordingVoiceRef = useRef<typeof stopRecordingVoice>();
@@ -1015,7 +1020,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleSymbolMenuOpen = useCallback(() => {
     const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
-    if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
+    if (!isMobile || messageInput !== document.activeElement) {
       openSymbolMenu();
       return;
     }
@@ -1025,12 +1030,12 @@ const Composer: FC<OwnProps & StateProps> = ({
       closeBotCommandMenu();
       openSymbolMenu();
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
-  }, [openSymbolMenu, closeBotCommandMenu]);
+  }, [openSymbolMenu, closeBotCommandMenu, isMobile]);
 
   const handleSendAsMenuOpen = useCallback(() => {
     const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
-    if (!IS_SINGLE_COLUMN_LAYOUT || messageInput !== document.activeElement) {
+    if (!isMobile || messageInput !== document.activeElement) {
       closeBotCommandMenu();
       closeSymbolMenu();
       openSendAsMenu();
@@ -1043,17 +1048,17 @@ const Composer: FC<OwnProps & StateProps> = ({
       closeSymbolMenu();
       openSendAsMenu();
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
-  }, [closeBotCommandMenu, closeSymbolMenu, openSendAsMenu]);
+  }, [closeBotCommandMenu, closeSymbolMenu, openSendAsMenu, isMobile]);
 
   const handleAllScheduledClick = useCallback(() => {
     openChat({ id: chatId, threadId, type: 'scheduled' });
   }, [openChat, chatId, threadId]);
 
   useEffect(() => {
-    if (isRightColumnShown && IS_SINGLE_COLUMN_LAYOUT) {
+    if (isRightColumnShown && isMobile) {
       closeSymbolMenu();
     }
-  }, [isRightColumnShown, closeSymbolMenu]);
+  }, [isRightColumnShown, closeSymbolMenu, isMobile]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -1292,7 +1297,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               />
             </Button>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT ? (
+          {isMobile ? (
             <Button
               className={symbolMenuButtonClassName}
               round
@@ -1329,7 +1334,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && !attachments.length}
             noFocusInterception={attachments.length > 0}
-            shouldSuppressFocus={IS_SINGLE_COLUMN_LAYOUT && isSymbolMenuOpen}
+            shouldSuppressFocus={isMobile && isSymbolMenuOpen}
             shouldSuppressTextFormatter={isEmojiTooltipOpen || isMentionTooltipOpen || isInlineBotTooltipOpen}
             onUpdate={setHtml}
             onSend={onSend}
@@ -1479,7 +1484,9 @@ const Composer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId, messageListType }): StateProps => {
+  (global, {
+    chatId, threadId, messageListType, isMobile,
+  }): StateProps => {
     const chat = selectChat(global, chatId);
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
@@ -1521,7 +1528,7 @@ export default memo(withGlobal<OwnProps>(
       isForCurrentMessageList,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, chatId),
       isChannel: chat ? isChatChannel(chat) : undefined,
-      isRightColumnShown: selectIsRightColumnShown(global),
+      isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isSelectModeActive: selectIsInSelectMode(global),
       withScheduledButton: (
         messageListType === 'thread'

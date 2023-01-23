@@ -8,13 +8,13 @@ import { getActions, withGlobal } from '../../../global';
 import type { IAnchorPosition, ISettings } from '../../../types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
+import {
+  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
+} from '../../../util/environment';
 import { selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
-import {
-  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV,
-} from '../../../util/environment';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
 import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
@@ -26,6 +26,7 @@ import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import TextFormatter from './TextFormatter';
 
@@ -62,7 +63,6 @@ type StateProps = {
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
 };
 
-const MAX_INPUT_HEIGHT = IS_SINGLE_COLUMN_LAYOUT ? 256 : 416;
 const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
@@ -134,14 +134,16 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [textFormatterAnchorPosition, setTextFormatterAnchorPosition] = useState<IAnchorPosition>();
   const [selectedRange, setSelectedRange] = useState<Range>();
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
+  const { isMobile } = useAppLayout();
 
   useInputCustomEmojis(html, inputRef, sharedCanvasRef, sharedCanvasHqRef, absoluteContainerRef);
 
+  const maxInputHeight = isMobile ? 256 : 416;
   const updateInputHeight = useCallback((willSend = false) => {
     const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
     const clone = scrollerCloneRef.current!;
     const currentHeight = Number(scroller.style.height.replace('px', ''));
-    const maxHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : MAX_INPUT_HEIGHT;
+    const maxHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : maxInputHeight;
     const newHeight = Math.min(clone.scrollHeight, maxHeight);
     if (newHeight === currentHeight) {
       return;
@@ -163,7 +165,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     } else {
       exec();
     }
-  }, [isAttachmentModalInput]);
+  }, [isAttachmentModalInput, maxInputHeight]);
 
   useEffect(() => {
     if (!isAttachmentModalInput) return;
@@ -391,7 +393,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       !chatId
       || editableInputId !== EDITABLE_INPUT_ID
       || noFocusInterception
-      || (IS_TOUCH_ENV && IS_SINGLE_COLUMN_LAYOUT)
+      || (IS_TOUCH_ENV && isMobile)
       || isSelectModeActive
     ) {
       return undefined;
@@ -438,7 +440,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     return () => {
       document.removeEventListener('keydown', handleDocumentKeyDown, true);
     };
-  }, [chatId, editableInputId, isSelectModeActive, noFocusInterception]);
+  }, [chatId, editableInputId, isMobile, isSelectModeActive, noFocusInterception]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {

@@ -6,9 +6,9 @@ import { getActions } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import useLang from '../../../hooks/useLang';
 import useMultiClick from '../../../hooks/useMultiClick';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -35,6 +35,7 @@ const SettingsHeader: FC<OwnProps> = ({
     openDeleteChatFolderModal,
   } = getActions();
 
+  const { isMobile } = useAppLayout();
   const [isSignOutDialogOpen, setIsSignOutDialogOpen] = useState(false);
 
   const handleMultiClick = useMultiClick(5, () => {
@@ -64,7 +65,7 @@ const SettingsHeader: FC<OwnProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
@@ -74,7 +75,7 @@ const SettingsHeader: FC<OwnProps> = ({
         <i className="icon-more" />
       </Button>
     );
-  }, []);
+  }, [isMobile]);
 
   const lang = useLang();
 
@@ -240,7 +241,7 @@ const SettingsHeader: FC<OwnProps> = ({
 
             <Button
               round
-              ripple={!IS_SINGLE_COLUMN_LAYOUT}
+              ripple={!isMobile}
               size="smaller"
               color="translucent"
               // eslint-disable-next-line react/jsx-no-bind

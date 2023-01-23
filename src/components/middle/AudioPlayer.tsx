@@ -1,6 +1,4 @@
-import React, {
-  useCallback, useEffect, useMemo, useRef,
-} from '../../lib/teact/teact';
+import React, { useCallback, useMemo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -9,7 +7,7 @@ import type {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../config';
 
 import * as mediaLoader from '../../util/mediaLoader';
@@ -20,10 +18,10 @@ import { selectChat, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { makeTrackId } from '../../util/audioPlayer';
 import { clearMediaSession } from '../../util/mediaSession';
-import windowSize from '../../util/windowSize';
-import useLang from '../../hooks/useLang';
 import renderText from '../common/helpers/renderText';
 
+import useLang from '../../hooks/useLang';
+import useAppLayout from '../../hooks/useAppLayout';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
 import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -80,6 +78,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const lang = useLang();
+  const { isMobile } = useAppLayout();
   const { audio, voice, video } = getMessageContent(message);
   const isVoice = Boolean(voice || video);
   const shouldRenderPlaybackButton = isVoice || (audio?.duration || 0) > PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION;
@@ -112,20 +111,6 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     isMessageLocal(message),
     true,
   );
-
-  // Prevent refresh by accidentally rotating device when listening to a voice message
-  const isVoicePlaying = isVoice && isPlaying;
-  useEffect(() => {
-    if (!isVoicePlaying) {
-      return undefined;
-    }
-
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, [isVoicePlaying]);
 
   const {
     isContextMenuOpen,
@@ -178,7 +163,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         color="translucent"
         size="smaller"
         ariaLabel="Playback Rate"
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         onClick={handlePlaybackClick}
         onMouseDown={handleBeforeContextMenu}
         onContextMenu={handleContextMenu}
@@ -188,7 +173,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         </span>
       </Button>
     );
-  }, [handleBeforeContextMenu, handleContextMenu, handlePlaybackClick, playbackRate]);
+  }, [handleBeforeContextMenu, handleContextMenu, handlePlaybackClick, isMobile, playbackRate]);
 
   const volumeIcon = useMemo(() => {
     if (volume === 0 || isMuted) return 'icon-muted';
@@ -210,7 +195,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
 
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         color="translucent"
         size="smaller"
         className="player-button"
@@ -222,7 +207,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
       </Button>
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         color="translucent"
         size="smaller"
         className={buildClassName('toggle-play', 'player-button', isPlaying ? 'pause' : 'play')}
@@ -234,7 +219,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
       </Button>
       <Button
         round
-        ripple={!IS_SINGLE_COLUMN_LAYOUT}
+        ripple={!isMobile}
         color="translucent"
         size="smaller"
         className="player-button"

@@ -7,7 +7,6 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { unique } from '../../../util/iteratees';
 import {
   sortChatIds,
@@ -15,9 +14,10 @@ import {
 } from '../../../global/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
-import useLang from '../../../hooks/useLang';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+import useLang from '../../../hooks/useLang';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import LeftSearchResultChat from './LeftSearchResultChat';
@@ -72,6 +72,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
+  const { isMobile } = useAppLayout();
   const [shouldShowMoreLocal, setShouldShowMoreLocal] = useState<boolean>(false);
   const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
 
@@ -94,11 +95,11 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         addRecentlyFoundChatId({ id });
       }
 
-      if (!IS_SINGLE_COLUMN_LAYOUT) {
+      if (!isMobile) {
         onReset();
       }
     },
-    [currentUserId, openChat, addRecentlyFoundChatId, onReset],
+    [openChat, currentUserId, isMobile, addRecentlyFoundChatId, onReset],
   );
 
   const handlePickerItemClick = useCallback((id: string) => {

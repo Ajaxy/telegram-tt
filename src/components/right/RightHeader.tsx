@@ -9,7 +9,6 @@ import { ManagementScreens, ProfileState } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { debounce } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import {
@@ -23,10 +22,11 @@ import {
 import {
   getCanAddContact, getCanManageTopic, isChatAdmin, isChatChannel, isUserBot, isUserId,
 } from '../../global/helpers';
+import { getDayStartAt } from '../../util/dateFormat';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
-import { getDayStartAt } from '../../util/dateFormat';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
@@ -161,6 +161,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
+  const { isMobile } = useAppLayout();
 
   const handleEditInviteClick = useCallback(() => {
     setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
@@ -490,7 +491,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   }
 
   const isBackButton = (
-    IS_SINGLE_COLUMN_LAYOUT
+    isMobile
     || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
     || contentKey === HeaderContent.AddingMembers

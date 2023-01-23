@@ -19,7 +19,7 @@ import {
   IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
-import { IS_PWA, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_PWA } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
@@ -33,6 +33,7 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import { getPromptInstall } from '../../../util/installPrompt';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
@@ -119,6 +120,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
+  const { isMobile } = useAppLayout();
   const hasMenu = content === LeftColumnContent.ChatList;
   const clearedDateSearchParam = { date: undefined };
   const clearedChatSearchParam = { id: undefined };
@@ -168,7 +170,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     return ({ onTrigger, isOpen }) => (
       <Button
         round
-        ripple={hasMenu && !IS_SINGLE_COLUMN_LAYOUT}
+        ripple={hasMenu && !isMobile}
         size="smaller"
         color="translucent"
         className={isOpen ? 'active' : ''}
@@ -184,7 +186,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         />
       </Button>
     );
-  }, [hasMenu, lang, onReset, shouldSkipTransition]);
+  }, [hasMenu, isMobile, lang, onReset, shouldSkipTransition]);
 
   const handleSearchFocus = useCallback(() => {
     if (!searchQuery) {
@@ -431,7 +433,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         {hasPasscode && (
           <Button
             round
-            ripple={!IS_SINGLE_COLUMN_LAYOUT}
+            ripple={!isMobile}
             size="smaller"
             color="translucent"
             ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}

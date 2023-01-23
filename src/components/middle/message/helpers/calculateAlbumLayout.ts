@@ -46,10 +46,10 @@ export type IAlbumLayout = {
   containerStyle: ApiDimensions;
 };
 
-function getRatios(messages: ApiMessage[]) {
+function getRatios(messages: ApiMessage[], isMobile?: boolean) {
   return messages.map(
     (message) => {
-      const dimensions = calculateMediaDimensions(message) as ApiDimensions;
+      const dimensions = calculateMediaDimensions(message, undefined, undefined, isMobile) as ApiDimensions;
 
       return dimensions.width / dimensions.height;
     },
@@ -96,14 +96,15 @@ export function calculateAlbumLayout(
   asForwarded: boolean,
   noAvatars: boolean,
   album: IAlbum,
+  isMobile?: boolean,
 ): IAlbumLayout {
   const spacing = 2;
-  const ratios = getRatios(album.messages);
+  const ratios = getRatios(album.messages, isMobile);
   const proportions = getProportions(ratios);
   const averageRatio = getAverageRatio(ratios);
   const albumCount = ratios.length;
   const forceCalc = ratios.some((ratio) => ratio > 2);
-  const maxWidth = getAvailableWidth(isOwn, asForwarded, false, noAvatars) - (asForwarded ? 2.5 : 0) * REM;
+  const maxWidth = getAvailableWidth(isOwn, asForwarded, false, noAvatars, isMobile) - (asForwarded ? 2.5 : 0) * REM;
   const maxHeight = maxWidth;
 
   let layout;

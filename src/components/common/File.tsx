@@ -2,16 +2,17 @@ import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../lib/teact/teact';
 
-import { IS_CANVAS_FILTER_SUPPORTED, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
-import useShowTransition from '../../hooks/useShowTransition';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatPastTimeShort } from '../../util/dateFormat';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';
 import { getDocumentThumbnailDimensions } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
+import useShowTransition from '../../hooks/useShowTransition';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import ProgressSpinner from '../ui/ProgressSpinner';
 import Link from '../ui/Link';
@@ -66,9 +67,10 @@ const File: FC<OwnProps> = ({
     elementRef = ref;
   }
 
+  const { isMobile } = useAppLayout();
   const [withThumb] = useState(!previewData);
   const noThumb = Boolean(previewData);
-  const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, IS_SINGLE_COLUMN_LAYOUT && !IS_CANVAS_FILTER_SUPPORTED);
+  const thumbRef = useCanvasBlur(thumbnailDataUri, noThumb, isMobile && !IS_CANVAS_FILTER_SUPPORTED);
   const thumbClassNames = useMediaTransition(!noThumb);
 
   const {

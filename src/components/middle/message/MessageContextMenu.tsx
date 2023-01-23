@@ -13,12 +13,12 @@ import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
 import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -170,6 +170,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const messageId = !isSponsoredMessage ? message.id : '';
 
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
+  const { isMobile } = useAppLayout();
 
   const handleAfterCopy = useCallback(() => {
     showNotification({
@@ -217,11 +218,11 @@ const MessageContextMenu: FC<OwnProps> = ({
   );
 
   const getLayout = useCallback(() => {
-    const extraHeightAudioPlayer = (IS_SINGLE_COLUMN_LAYOUT
+    const extraHeightAudioPlayer = (isMobile
       && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
     const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessage-wrapper');
-    const extraHeightPinned = (((IS_SINGLE_COLUMN_LAYOUT && !extraHeightAudioPlayer)
-      || (!IS_SINGLE_COLUMN_LAYOUT && pinnedElement?.classList.contains('full-width')))
+    const extraHeightPinned = (((isMobile && !extraHeightAudioPlayer)
+      || (!isMobile && pinnedElement?.classList.contains('full-width')))
       && pinnedElement?.offsetHeight) || 0;
 
     return {
@@ -230,7 +231,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
     };
-  }, [withReactions]);
+  }, [isMobile, withReactions]);
 
   useEffect(() => {
     if (!isOpen) {

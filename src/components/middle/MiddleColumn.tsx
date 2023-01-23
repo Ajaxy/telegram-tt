@@ -25,11 +25,7 @@ import {
   ANIMATION_LEVEL_MIN,
   SUPPORTED_IMAGE_CONTENT_TYPES,
 } from '../../config';
-import {
-  IS_SINGLE_COLUMN_LAYOUT,
-  IS_TABLET_COLUMN_LAYOUT,
-  MASK_IMAGE_DISABLED,
-} from '../../util/environment';
+import { MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
@@ -53,6 +49,7 @@ import {
   isChatSuperGroup,
   isUserId,
 } from '../../global/helpers';
+import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import useCustomBackground from '../../hooks/useCustomBackground';
@@ -63,7 +60,7 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useOnChange from '../../hooks/useOnChange';
-import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -81,6 +78,10 @@ import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
 
 import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
+
+interface OwnProps {
+  isMobile?: boolean;
+}
 
 type StateProps = {
   chatId?: string;
@@ -103,7 +104,7 @@ type StateProps = {
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
-  isMobileSearchActive?: boolean;
+  hasCurrentTextSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
   isReactorListModalOpen: boolean;
@@ -123,16 +124,15 @@ type StateProps = {
   lastSyncTime?: number;
 };
 
-const CLOSE_ANIMATION_DURATION = IS_SINGLE_COLUMN_LAYOUT ? 450 + ANIMATION_END_DELAY : undefined;
-
 function isImage(item: DataTransferItem) {
   return item.kind === 'file' && item.type && SUPPORTED_IMAGE_CONTENT_TYPES.has(item.type);
 }
 
-const MiddleColumn: FC<StateProps> = ({
+const MiddleColumn: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   messageListType,
+  isMobile,
   chat,
   replyingToId,
   isPrivate,
@@ -149,7 +149,7 @@ const MiddleColumn: FC<StateProps> = ({
   isLeftColumnShown,
   isRightColumnShown,
   isBackgroundBlurred,
-  isMobileSearchActive,
+  hasCurrentTextSearch,
   isSelectModeActive,
   isSeenByModalOpen,
   isReactorListModalOpen,
@@ -184,6 +184,7 @@ const MiddleColumn: FC<StateProps> = ({
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
+  const { isTablet } = useAppLayout();
 
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
@@ -191,6 +192,8 @@ const MiddleColumn: FC<StateProps> = ({
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
+  const isMobileSearchActive = isMobile && hasCurrentTextSearch;
+  const closeAnimationDuration = isMobile ? 450 + ANIMATION_END_DELAY : undefined;
   const hasTools = hasPinnedOrAudioPlayer && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
     || (
@@ -202,19 +205,19 @@ const MiddleColumn: FC<StateProps> = ({
     )
   );
 
-  const renderingChatId = usePrevDuringAnimation(chatId, CLOSE_ANIMATION_DURATION);
-  const renderingThreadId = usePrevDuringAnimation(threadId, CLOSE_ANIMATION_DURATION);
-  const renderingMessageListType = usePrevDuringAnimation(messageListType, CLOSE_ANIMATION_DURATION);
-  const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, CLOSE_ANIMATION_DURATION);
-  const renderingCanStartBot = usePrevDuringAnimation(canStartBot, CLOSE_ANIMATION_DURATION);
-  const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, CLOSE_ANIMATION_DURATION);
-  const renderingCanPost = usePrevDuringAnimation(canPost, CLOSE_ANIMATION_DURATION)
+  const renderingChatId = usePrevDuringAnimation(chatId, closeAnimationDuration);
+  const renderingThreadId = usePrevDuringAnimation(threadId, closeAnimationDuration);
+  const renderingMessageListType = usePrevDuringAnimation(messageListType, closeAnimationDuration);
+  const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, closeAnimationDuration);
+  const renderingCanStartBot = usePrevDuringAnimation(canStartBot, closeAnimationDuration);
+  const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, closeAnimationDuration);
+  const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
     && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe;
-  const renderingHasTools = usePrevDuringAnimation(hasTools, CLOSE_ANIMATION_DURATION);
-  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, CLOSE_ANIMATION_DURATION);
-  const renderingIsChannel = usePrevDuringAnimation(isChannel, CLOSE_ANIMATION_DURATION);
-  const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, CLOSE_ANIMATION_DURATION);
-  const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, CLOSE_ANIMATION_DURATION);
+  const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
+  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration);
+  const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
+  const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, closeAnimationDuration);
+  const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, closeAnimationDuration);
 
   const prevTransitionKey = usePrevious(currentTransitionKey);
 
@@ -227,6 +230,7 @@ const MiddleColumn: FC<StateProps> = ({
     currentTransitionKey,
     prevTransitionKey,
     chatId,
+    isMobile,
   );
 
   useEffect(() => {
@@ -414,7 +418,7 @@ const MiddleColumn: FC<StateProps> = ({
         --theme-background-color:
           ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)};
       `}
-      onClick={(IS_TABLET_COLUMN_LAYOUT && isLeftColumnShown) ? handleTabletFocus : undefined}
+      onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
       <div
         className={bgClassName}
@@ -429,6 +433,7 @@ const MiddleColumn: FC<StateProps> = ({
               threadId={renderingThreadId}
               messageListType={renderingMessageListType}
               isReady={isReady}
+              isMobile={isMobile}
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
@@ -459,6 +464,7 @@ const MiddleColumn: FC<StateProps> = ({
                     dropAreaState={dropAreaState}
                     onDropHide={handleHideDropArea}
                     isReady={isReady}
+                    isMobile={isMobile}
                   />
                 )}
                 {isPinnedMessageList && (
@@ -484,7 +490,7 @@ const MiddleColumn: FC<StateProps> = ({
                     </div>
                   </div>
                 )}
-                {IS_SINGLE_COLUMN_LAYOUT
+                {isMobile
                   && (renderingCanSubscribe || (renderingShouldJoinToSend && !renderingShouldSendJoinRequest)) && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
@@ -498,7 +504,7 @@ const MiddleColumn: FC<StateProps> = ({
                     </Button>
                   </div>
                 )}
-                {IS_SINGLE_COLUMN_LAYOUT && renderingShouldSendJoinRequest && (
+                {isMobile && renderingShouldSendJoinRequest && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
                       size="tiny"
@@ -511,7 +517,7 @@ const MiddleColumn: FC<StateProps> = ({
                     </Button>
                   </div>
                 )}
-                {IS_SINGLE_COLUMN_LAYOUT && renderingCanStartBot && (
+                {isMobile && renderingCanStartBot && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
                       size="tiny"
@@ -524,7 +530,7 @@ const MiddleColumn: FC<StateProps> = ({
                     </Button>
                   </div>
                 )}
-                {IS_SINGLE_COLUMN_LAYOUT && renderingCanRestartBot && (
+                {isMobile && renderingCanRestartBot && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
                       size="tiny"
@@ -553,7 +559,7 @@ const MiddleColumn: FC<StateProps> = ({
               withExtraShift={withExtraShift}
             />
           </div>
-          {IS_SINGLE_COLUMN_LAYOUT && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
+          {isMobile && <MobileSearch isActive={Boolean(isMobileSearchActive)} />}
         </>
       )}
       {chatId && (
@@ -579,8 +585,8 @@ const MiddleColumn: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global): StateProps => {
+export default memo(withGlobal<OwnProps>(
+  (global, { isMobile }): StateProps => {
     const theme = selectTheme(global);
     const {
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
@@ -598,9 +604,9 @@ export default memo(withGlobal(
       backgroundColor,
       patternColor,
       isLeftColumnShown,
-      isRightColumnShown: selectIsRightColumnShown(global),
+      isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isBackgroundBlurred,
-      isMobileSearchActive: Boolean(IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global)),
+      hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
       isSeenByModalOpen: Boolean(global.seenByModal),
       isReactorListModalOpen: Boolean(global.reactorModal),
@@ -681,8 +687,9 @@ function useIsReady(
   currentTransitionKey?: number,
   prevTransitionKey?: number,
   chatId?: string,
+  isMobile?: boolean,
 ) {
-  const [isReady, setIsReady] = useState(!IS_SINGLE_COLUMN_LAYOUT);
+  const [isReady, setIsReady] = useState(!isMobile);
   const forceUpdate = useForceUpdate();
 
   const willSwitchMessageList = prevTransitionKey !== undefined && prevTransitionKey !== currentTransitionKey;

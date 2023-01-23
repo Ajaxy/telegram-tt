@@ -4,12 +4,12 @@ import { getActions, withGlobal } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { REM } from '../../common/helpers/mediaDimensions';
 import { selectAnimatedEmoji, selectChat } from '../../../global/selectors';
 import { getHasAdminRight } from '../../../global/helpers';
-import { REM } from '../../common/helpers/mediaDimensions';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Button from '../../ui/Button';
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
@@ -31,7 +31,9 @@ const EmptyForum: FC<OwnProps & StateProps> = ({
   chatId, animatedEmoji, canManageTopics,
 }) => {
   const { openCreateTopicPanel } = getActions();
+
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   const handleCreateTopic = useCallback(() => {
     openCreateTopicPanel({ chatId });
@@ -48,7 +50,7 @@ const EmptyForum: FC<OwnProps & StateProps> = ({
       </p>
       {canManageTopics && (
         <Button
-          ripple={!IS_SINGLE_COLUMN_LAYOUT}
+          ripple={!isMobile}
           fluid
           onClick={handleCreateTopic}
           size="smaller"

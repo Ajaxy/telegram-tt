@@ -12,7 +12,6 @@ import {
   IS_ANDROID,
   IS_IOS,
   IS_REQUEST_FULLSCREEN_SUPPORTED,
-  IS_SINGLE_COLUMN_LAYOUT,
 } from '../../../util/environment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
@@ -26,6 +25,7 @@ import {
 } from '../../../lib/secret-sauce';
 import useInterval from '../../../hooks/useInterval';
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Modal from '../../ui/Modal';
 import Avatar from '../../common/Avatar';
@@ -58,6 +58,7 @@ const PhoneCall: FC<StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
+  const { isMobile } = useAppLayout();
 
   const toggleFullscreen = useCallback(() => {
     if (isFullscreen) {
@@ -230,7 +231,7 @@ const PhoneCall: FC<StateProps> = ({
       onClose={handleClose}
       className={buildClassName(
         styles.root,
-        IS_SINGLE_COLUMN_LAYOUT && styles.singleColumn,
+        isMobile && styles.singleColumn,
       )}
       dialogRef={containerRef}
     >

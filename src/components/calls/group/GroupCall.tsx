@@ -17,7 +17,6 @@ import {
   IS_ANDROID,
   IS_IOS,
   IS_REQUEST_FULLSCREEN_SUPPORTED,
-  IS_SINGLE_COLUMN_LAYOUT,
 } from '../../../util/environment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
@@ -28,6 +27,7 @@ import {
 } from '../../../global/selectors/calls';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
@@ -84,12 +84,13 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isMobile, isLandscape } = useAppLayout();
 
   const [isLeaving, setIsLeaving] = useState(false);
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
   const [isSidebarOpen, openSidebar, closeSidebar] = useFlag(true);
   const hasVideoParticipants = Object.values(participants).some(({ video, presentation }) => video || presentation);
-  const isLandscape = isFullscreen && !IS_SINGLE_COLUMN_LAYOUT && hasVideoParticipants;
+  const isLandscapeLayout = isFullscreen && (!isMobile || isLandscape) && hasVideoParticipants;
 
   const [participantMenu, setParticipantMenu] = useState<{
     participant: TypeGroupCallParticipant;
@@ -254,8 +255,8 @@ const GroupCall: FC<OwnProps & StateProps> = ({
       onClose={toggleGroupCallPanel}
       className={buildClassName(
         'GroupCall',
-        IS_SINGLE_COLUMN_LAYOUT && 'single-column',
-        isLandscape && 'landscape',
+        (isMobile && !isLandscape) && 'single-column',
+        isLandscapeLayout && 'landscape',
         !isSidebarOpen && 'no-sidebar',
       )}
       dialogRef={containerRef}
@@ -274,7 +275,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             <i className={isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'} />
           </Button>
         )}
-        {isLandscape && (
+        {isLandscapeLayout && (
           <Button
             round
             size="smaller"
@@ -321,7 +322,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
       <div className="scrollable custom-scroll">
         <GroupCallParticipantStreams onDoubleClick={handleStreamsDoubleClick} />
 
-        {(!isLandscape || isSidebarOpen)
+        {(!isLandscapeLayout || isSidebarOpen)
         && <GroupCallParticipantList openParticipantMenu={handleOpenParticipantMenu} />}
       </div>
 
