@@ -76,12 +76,12 @@
 
     cursor: pointer;
     position: absolute;
-    right: -0.75rem;
-    bottom: -0.375rem;
+    right: -0.875rem;
+    bottom: -0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transform: scale(0.75);
+    transform: scale(0.7);
     opacity: 0;
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
     transition-delay: 0.2s;
