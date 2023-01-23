@@ -101,6 +101,8 @@ import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { isAnimatingScroll } from '../../../util/fastSmoothScroll';
+
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -111,6 +113,7 @@ import useInnerHandlers from './hooks/useInnerHandlers';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -249,6 +252,7 @@ const APPENDIX_NOT_OWN = { __html: '<svg width="9" height="20" xmlns="http://www
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
+const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -338,6 +342,8 @@ const Message: FC<OwnProps & StateProps> = ({
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const messageHeightRef = useRef(0);
 
   const lang = useLang();
 
@@ -584,6 +590,30 @@ const Message: FC<OwnProps & StateProps> = ({
     message.id,
   );
   useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer);
+
+  const shouldFocusOnResize = isLastInGroup;
+
+  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+    const lastHeight = messageHeightRef.current;
+
+    const newHeight = entry.target.clientHeight;
+    messageHeightRef.current = newHeight;
+    if (isAnimatingScroll() || !lastHeight || newHeight <= lastHeight) return;
+
+    const container = entry.target.closest<HTMLDivElement>('.MessageList');
+    if (!container) return;
+
+    const resizeDiff = newHeight - lastHeight;
+    const { offsetHeight, scrollHeight, scrollTop } = container;
+    const currentScrollBottom = Math.round(scrollHeight - scrollTop - offsetHeight);
+    const previousScrollBottom = currentScrollBottom - resizeDiff;
+
+    if (previousScrollBottom <= BOTTOM_FOCUS_SCROLL_THRESHOLD) {
+      focusLastMessage();
+    }
+  }, [focusLastMessage]);
+
+  useResizeObserver(shouldFocusOnResize ? ref : undefined, handleResize, true);
 
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;

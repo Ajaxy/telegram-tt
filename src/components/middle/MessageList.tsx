@@ -60,7 +60,7 @@ import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMess
 import useMedia from '../../hooks/useMedia';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import { useResizeObserver } from '../../hooks/useResizeObserver';
+import useResizeObserver from '../../hooks/useResizeObserver';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';

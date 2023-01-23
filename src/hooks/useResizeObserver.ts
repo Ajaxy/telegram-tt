@@ -3,7 +3,7 @@ import { throttle } from '../util/schedulers';
 
 const THROTTLE = 300;
 
-export function useResizeObserver(
+export default function useResizeObserver(
   ref: React.RefObject<HTMLElement> | undefined,
   onResize: (entry: ResizeObserverEntry) => void,
   withThrottle = false,
