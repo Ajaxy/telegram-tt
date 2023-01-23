@@ -46,7 +46,7 @@ import AttachmentModalItem from './AttachmentModalItem';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
 
-import './AttachmentModal.scss';
+import styles from './AttachmentModal.module.scss';
 
 export type OwnProps = {
   chatId: string;
@@ -233,12 +233,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     const { relatedTarget: toTarget, target: fromTarget } = e;
 
     // Esc button pressed during drag event
-    if ((fromTarget as HTMLDivElement).matches('.drop-target') && !toTarget) {
+    if ((fromTarget as HTMLDivElement).matches(styles.dropTarget) && !toTarget) {
       hideTimeoutRef.current = window.setTimeout(unmarkHovered, DROP_LEAVE_TIMEOUT_MS);
     }
 
     // Prevent DragLeave event from firing when the pointer moves inside the AttachmentModal drop target
-    if (fromTarget && (fromTarget as HTMLElement).closest('.AttachmentModal.hovered')) {
+    if (fromTarget && (fromTarget as HTMLElement).closest(styles.hovered)) {
       return;
     }
 
@@ -422,20 +422,22 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const isBottomDividerShown = !areAttachmentsScrolledToBottom || !isCaptionNotScrolled;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClear}
       header={renderHeader()}
       className={buildClassName(
-        'AttachmentModal',
-        isHovered && 'hovered',
-        !areAttachmentsNotScrolled && 'modal-header-border',
+        styles.root,
+        isHovered && styles.hovered,
+        !areAttachmentsNotScrolled && styles.headerBorder,
       )}
       noBackdropClose
     >
       <div
-        className="drop-target"
+        className={styles.dropTarget}
         onDragEnter={markHovered}
         onDrop={handleFilesDrop}
         onDragOver={handleDragOver}
@@ -445,13 +447,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         data-dropzone
       >
         <div
-          className="attachments-wrapper custom-scroll"
+          className={buildClassName(
+            styles.attachments,
+            'custom-scroll',
+            isBottomDividerShown && styles.attachmentsBottomPadding,
+          )}
           onScroll={handleAttachmentsScroll}
         >
           {renderingAttachments.map((attachment, i) => (
             <AttachmentModalItem
               attachment={attachment}
-              className="attachment-modal-item"
               shouldDisplayCompressed={shouldSendCompressed}
               shouldDisplayGrouped={shouldSendGrouped}
               isSingle={renderingAttachments.length === 1}
@@ -464,8 +469,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         </div>
         <div
           className={buildClassName(
-            'attachment-caption-wrapper',
-            (!areAttachmentsScrolledToBottom || !isCaptionNotScrolled) && 'caption-top-border',
+            styles.captionWrapper,
+            isBottomDividerShown && styles.captionTopBorder,
           )}
         >
           <MentionTooltip
@@ -490,7 +495,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
             onCustomEmojiSelect={insertCustomEmoji}
             addRecentCustomEmoji={addRecentCustomEmoji}
           />
-          <div className="attachment-caption">
+          <div className={styles.caption}>
             <MessageInput
               id="caption-input-text"
               chatId={chatId}
@@ -505,10 +510,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               canAutoFocus={Boolean(isReady && attachments.length)}
               captionLimit={leftChars}
             />
-            <div className="AttachmentModal--send-wrapper">
+            <div className={styles.sendWrapper}>
               <Button
                 ref={mainButtonRef}
-                className="AttachmentModal--send"
+                className={styles.send}
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >

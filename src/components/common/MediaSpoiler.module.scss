@@ -14,7 +14,11 @@
   mask-composite: exclude;
   mask-position: calc(50% + var(--click-shift-x)) calc(50% + var(--click-shift-y)), center center;
   mask-repeat: no-repeat;
-  animation: 500ms ease-in circle-cut forwards;
+  mask-size: 0%;
+
+  :global(body.animation-level-2) & {
+    animation: 500ms ease-in circle-cut forwards;
+  }
 
   .dots {
     transform: scale(1.2);
@@ -52,7 +56,6 @@
 
   --x-direction: var(--background-size);
   --y-direction: 0;
-  animation: 20s linear infinite dots;
 
   &::before {
     content: "";
@@ -66,7 +69,8 @@
 
     --x-direction: 0;
     --y-direction: var(--background-size);
-    animation: 20s linear -7s infinite dots;
+    animation: 2s linear -0.8s infinite opacity-breath;
+    background-position: calc(var(--x-direction) / 2) calc(var(--y-direction) / 2);
   }
 
   &::after {
@@ -81,6 +85,19 @@
 
     --x-direction: calc(-1 * var(--background-size));
     --y-direction: calc(-1 * var(--background-size));
+    animation: 2s linear -1.5s infinite opacity-breath;
+    background-position: calc(var(--x-direction) / 2) calc(var(--y-direction) / 2);
+  }
+}
+
+:global(body.animation-level-2) .dots {
+  animation: 20s linear infinite dots;
+
+  &::before {
+    animation: 20s linear -7s infinite dots;
+  }
+
+  &::after {
     animation: 20s linear -14s infinite dots;
   }
 }
@@ -101,5 +118,19 @@
 
   100% {
     mask-size: 350%, 100%;
+  }
+}
+
+@keyframes opacity-breath {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.1;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
