@@ -17,7 +17,7 @@ import { fastRaf } from '../../../../util/schedulers';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
-import { useResizeObserver } from '../../../../hooks/useResizeObserver';
+import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 
 const SIZE = 1.25 * REM;

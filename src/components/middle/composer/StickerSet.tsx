@@ -19,7 +19,7 @@ import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../../gl
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useMediaTransition from '../../../hooks/useMediaTransition';
-import { useResizeObserver } from '../../../hooks/useResizeObserver';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 
 import StickerButton from '../../common/StickerButton';

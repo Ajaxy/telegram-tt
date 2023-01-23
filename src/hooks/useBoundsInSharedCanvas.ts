@@ -4,7 +4,7 @@ import {
 
 import { round } from '../util/math';
 
-import { useResizeObserver } from './useResizeObserver';
+import useResizeObserver from './useResizeObserver';
 
 const ANIMATION_END_TIMEOUT = 500;
 

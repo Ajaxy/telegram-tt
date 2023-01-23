@@ -44,7 +44,6 @@ import {
   selectViewportIds,
   selectFirstUnreadId,
   selectChat,
-  selectIsChatWithBot,
   selectIsServiceChatReady,
   selectLocalAnimatedEmojiEffect,
   selectLocalAnimatedEmoji,
@@ -204,20 +203,6 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       }
 
       setGlobal(global);
-
-      // Scroll down if bot message height is changed with an updated inline keyboard.
-      // A drawback: this will scroll down even if the previous scroll was not at bottom.
-      if (
-        currentMessage
-        && chat
-        && !message.isOutgoing
-        && chat.lastMessage?.id === message.id
-        && selectIsChatWithBot(global, chat)
-        && selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage)
-        && selectIsViewportNewest(global, chatId, message.repliesThreadInfo?.threadId || MAIN_THREAD_ID)
-      ) {
-        actions.focusLastMessage();
-      }
 
       break;
     }
