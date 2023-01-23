@@ -18,6 +18,7 @@ import {
 import { IS_ANDROID } from '../../util/environment';
 import {
   selectChatMessage,
+  selectCurrentMessageList,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
@@ -27,8 +28,8 @@ import {
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
-import windowSize from '../../util/windowSize';
 import { getAllNotificationsCount } from '../../util/folderManager';
+import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import { fastRaf } from '../../util/schedulers';
 
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
@@ -40,7 +41,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
-import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -78,10 +79,15 @@ import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 
 import './Main.scss';
 
+export interface OwnProps {
+  isMobile?: boolean;
+}
+
 type StateProps = {
   chat?: ApiChat;
   lastSyncTime?: number;
   isLeftColumnOpen: boolean;
+  isMiddleColumnOpen: boolean;
   isRightColumnOpen: boolean;
   isMediaViewerOpen: boolean;
   isForwardModalOpen: boolean;
@@ -129,9 +135,11 @@ let notificationInterval: number | undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
 
-const Main: FC<StateProps> = ({
+const Main: FC<OwnProps & StateProps> = ({
   lastSyncTime,
+  isMobile,
   isLeftColumnOpen,
+  isMiddleColumnOpen,
   isRightColumnOpen,
   isMediaViewerOpen,
   isForwardModalOpen,
@@ -198,6 +206,7 @@ const Main: FC<StateProps> = ({
     clearReceipt,
     checkAppVersion,
     openChat,
+    toggleLeftColumn,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -205,6 +214,15 @@ const Main: FC<StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  // If you open the chat in the mobile version, switch to the desktop version, close the chat and
+  // switch back to the mobile version, you get a blank screen
+  const { isDesktop } = useAppLayout();
+  useEffect(() => {
+    if (!isMiddleColumnOpen && !isLeftColumnOpen && !isDesktop) {
+      toggleLeftColumn();
+    }
+  }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, toggleLeftColumn]);
 
   useInterval(checkAppVersion, APP_OUTDATED_TIMEOUT_MS, true);
 
@@ -302,19 +320,6 @@ const Main: FC<StateProps> = ({
       });
     }
   }, [lastSyncTime] as const);
-
-  // Prevent refresh by accidentally rotating device when listening to a voice chat
-  useEffect(() => {
-    if (!activeGroupCallId && !isPhoneCallActive) {
-      return undefined;
-    }
-
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, [activeGroupCallId, isPhoneCallActive]);
 
   const leftColumnTransition = useShowTransition(
     isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
@@ -442,8 +447,8 @@ const Main: FC<StateProps> = ({
   return (
     <div id="Main" className={className}>
       <LeftColumn />
-      <MiddleColumn />
-      <RightColumn />
+      <MiddleColumn isMobile={isMobile} />
+      <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
       <DraftRecipientPicker requestedDraft={requestedDraft} />
@@ -510,8 +515,8 @@ function updatePageTitle(nextTitle: string) {
   }
 }
 
-export default memo(withGlobal(
-  (global): StateProps => {
+export default memo(withGlobal<OwnProps>(
+  (global, { isMobile }): StateProps => {
     const {
       settings: {
         byKey: {
@@ -538,11 +543,13 @@ export default memo(withGlobal(
     const gameMessage = openedGame && selectChatMessage(global, openedGame.chatId, openedGame.messageId);
     const gameTitle = gameMessage?.content.game?.title;
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
+    const { chatId } = selectCurrentMessageList(global) || {};
 
     return {
       lastSyncTime,
       isLeftColumnOpen: global.isLeftColumnShown,
-      isRightColumnOpen: selectIsRightColumnShown(global),
+      isMiddleColumnOpen: Boolean(chatId),
+      isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       hasNotifications: Boolean(global.notifications.length),

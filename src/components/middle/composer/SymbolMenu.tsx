@@ -7,7 +7,7 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import { selectIsCurrentUserPremium } from '../../../global/selectors';
@@ -15,6 +15,7 @@ import { selectIsCurrentUserPremium } from '../../../global/selectors';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
@@ -86,8 +87,9 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
   const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
+  const { isMobile } = useAppLayout();
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_SINGLE_COLUMN_LAYOUT);
+  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
 
   if (!isActivated && isOpen) {
@@ -107,7 +109,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [isCurrentUserPremium, lastSyncTime, loadFeaturedEmojiStickers, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
-    if (!IS_SINGLE_COLUMN_LAYOUT) {
+    if (!isMobile) {
       return undefined;
     }
 
@@ -126,7 +128,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         });
       }
     };
-  }, [isOpen]);
+  }, [isMobile, isOpen]);
 
   const recentEmojisRef = useRef(recentEmojis);
   recentEmojisRef.current = recentEmojis;
@@ -239,7 +241,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           </Transition>
         )}
       </div>
-      {IS_SINGLE_COLUMN_LAYOUT && (
+      {isMobile && (
         <Button
           round
           faded
@@ -261,7 +263,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     </>
   );
 
-  if (IS_SINGLE_COLUMN_LAYOUT) {
+  if (isMobile) {
     if (!shouldRender) {
       return undefined;
     }

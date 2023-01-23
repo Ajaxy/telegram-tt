@@ -30,6 +30,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -83,6 +84,7 @@ const Photo: FC<OwnProps> = ({
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
+  const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = isLoadAllowed && isIntersecting;
   const {
@@ -161,7 +163,7 @@ const Photo: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme] as const);
 
-  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, asForwarded, noAvatars);
+  const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, asForwarded, noAvatars, isMobile);
 
   const className = buildClassName(
     'media-inner',

@@ -1,9 +1,4 @@
-import {
-  DPR,
-  IS_SINGLE_COLUMN_LAYOUT,
-  IS_SAFARI,
-  IS_ANDROID,
-} from '../../util/environment';
+import { DPR, IS_SAFARI, IS_ANDROID } from '../../util/environment';
 import WorkerConnector from '../../util/WorkerConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
@@ -14,6 +9,7 @@ interface Params {
   size?: number;
   quality?: number;
   isLowPriority?: boolean;
+  isMobile?: boolean;
   coords?: { x: number; y: number };
 }
 
@@ -24,7 +20,8 @@ type Frame =
   | ImageBitmap;
 
 const MAX_WORKERS = 4;
-const HIGH_PRIORITY_QUALITY = IS_SINGLE_COLUMN_LAYOUT ? 0.75 : 1;
+const HIGH_PRIORITY_QUALITY_MOBILE = 0.75;
+const HIGH_PRIORITY_QUALITY_DESKTOP = 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
@@ -99,7 +96,7 @@ class RLottie {
       instance = new RLottie(...args);
       instancesById.set(id, instance);
     } else {
-      instance.addContainer(container, canvas, onLoad, params?.coords);
+      instance.addContainer(container, canvas, onLoad, params?.coords, params?.isMobile);
     }
 
     return instance;
@@ -116,7 +113,7 @@ class RLottie {
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
   ) {
-    this.addContainer(containerId, container, onLoad, params.coords);
+    this.addContainer(containerId, container, onLoad, params.coords, params.isMobile);
     this.initConfig();
     this.initRenderer();
   }
@@ -203,13 +200,18 @@ class RLottie {
     this.params.noLoop = noLoop;
   }
 
-  setSharedCanvasCoords(containerId: string, newCoords: Params['coords']) {
+  setIsMobile(isMobile?: Params['isMobile']) {
+    this.params.isMobile = isMobile;
+  }
+
+  setSharedCanvasCoords(containerId: string, newCoords: Params['coords'], isMobile?: Params['isMobile']) {
     const containerInfo = this.containers.get(containerId)!;
     const {
       canvas, ctx,
     } = containerInfo;
 
     if (!canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false') {
+      this.setIsMobile(isMobile);
       const sizeFactor = this.calcSizeFactor();
       ensureCanvasSize(canvas, sizeFactor);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -236,7 +238,9 @@ class RLottie {
     container: HTMLDivElement | HTMLCanvasElement,
     onLoad?: NoneToVoidFunction,
     coords?: Params['coords'],
+    isMobile?: Params['isMobile'],
   ) {
+    this.setIsMobile(isMobile);
     const sizeFactor = this.calcSizeFactor();
 
     let imgSize: number;
@@ -314,10 +318,11 @@ class RLottie {
     const {
       isLowPriority,
       size,
+      isMobile,
       // Reduced quality only looks acceptable on big enough images
       quality = isLowPriority && (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
         ? LOW_PRIORITY_QUALITY
-        : HIGH_PRIORITY_QUALITY,
+        : (isMobile ? HIGH_PRIORITY_QUALITY_MOBILE : HIGH_PRIORITY_QUALITY_DESKTOP),
     } = this.params;
 
     // Reduced quality only looks acceptable on high DPR screens

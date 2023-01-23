@@ -38,6 +38,7 @@ export type UiLoaderPage =
 type OwnProps = {
   page?: UiLoaderPage;
   children: React.ReactNode;
+  isMobile?: boolean;
 };
 
 type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
@@ -173,13 +174,13 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 };
 
 export default withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { isMobile }): StateProps => {
     const theme = selectTheme(global);
 
     return {
       shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
       uiReadyState: global.uiReadyState,
-      isRightColumnShown: selectIsRightColumnShown(global),
+      isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       leftColumnWidth: global.leftColumnWidth,
       theme,
     };

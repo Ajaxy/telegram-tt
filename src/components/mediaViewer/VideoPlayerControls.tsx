@@ -2,15 +2,17 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, useRef, useCallback, useMemo,
 } from '../../lib/teact/teact';
-import buildClassName from '../../util/buildClassName';
 
-import useFlag from '../../hooks/useFlag';
-import { IS_IOS, IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import type { BufferedRange } from '../../hooks/useBuffering';
+
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
+import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
-import useLang from '../../hooks/useLang';
-import type { BufferedRange } from '../../hooks/useBuffering';
 import { captureEvents } from '../../util/captureEvents';
+import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Button from '../ui/Button';
 import RangeSlider from '../ui/RangeSlider';
@@ -88,6 +90,8 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const seekerRef = useRef<HTMLDivElement>(null);
   const isSeekingRef = useRef<boolean>(false);
   const isSeeking = isSeekingRef.current;
+
+  const { isMobile } = useAppLayout();
 
   useEffect(() => {
     if (!IS_TOUCH_ENV) return undefined;
@@ -170,7 +174,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
         <Button
           ariaLabel={lang('AccActionPlay')}
           size="tiny"
-          ripple={!IS_SINGLE_COLUMN_LAYOUT}
+          ripple={!isMobile}
           color="translucent-white"
           className="play"
           round

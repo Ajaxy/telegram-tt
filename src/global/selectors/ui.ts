@@ -1,7 +1,7 @@
 import type { GlobalState } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
-import { getSystemTheme, IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { getSystemTheme } from '../../util/environment';
 import {
   selectCurrentMessageList, selectIsCreateTopicPanelOpen, selectIsEditTopicPanelOpen, selectIsPollResultsOpen,
 } from './messages';
@@ -15,14 +15,14 @@ export function selectIsMediaViewerOpen(global: GlobalState) {
   return Boolean(mediaViewer.mediaId || mediaViewer.avatarOwnerId);
 }
 
-export function selectRightColumnContentKey(global: GlobalState) {
+export function selectRightColumnContentKey(global: GlobalState, isMobile?: boolean) {
   return selectIsEditTopicPanelOpen(global) ? (
     RightColumnContent.EditTopic
   ) : selectIsCreateTopicPanelOpen(global) ? (
     RightColumnContent.CreateTopic
   ) : selectIsPollResultsOpen(global) ? (
     RightColumnContent.PollResults
-  ) : !IS_SINGLE_COLUMN_LAYOUT && selectCurrentTextSearch(global) ? (
+  ) : !isMobile && selectCurrentTextSearch(global) ? (
     RightColumnContent.Search
   ) : selectCurrentManagement(global) ? (
     RightColumnContent.Management
@@ -41,8 +41,8 @@ export function selectRightColumnContentKey(global: GlobalState) {
   ) : undefined;
 }
 
-export function selectIsRightColumnShown(global: GlobalState) {
-  return selectRightColumnContentKey(global) !== undefined;
+export function selectIsRightColumnShown(global: GlobalState, isMobile?: boolean) {
+  return selectRightColumnContentKey(global, isMobile) !== undefined;
 }
 
 export function selectTheme(global: GlobalState) {

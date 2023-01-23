@@ -38,6 +38,10 @@ import EditTopic from './EditTopic.async';
 
 import './RightColumn.scss';
 
+interface OwnProps {
+  isMobile?: boolean;
+}
+
 type StateProps = {
   contentKey?: RightColumnContent;
   chatId?: string;
@@ -59,10 +63,11 @@ function blurSearchInput() {
   }
 }
 
-const RightColumn: FC<StateProps> = ({
+const RightColumn: FC<OwnProps & StateProps> = ({
   contentKey,
   chatId,
   threadId,
+  isMobile,
   isInsideTopic,
   isChatSelected,
   shouldSkipHistoryAnimations,
@@ -274,6 +279,7 @@ const RightColumn: FC<StateProps> = ({
             chatId={chatId!}
             topicId={isInsideTopic ? threadId : undefined}
             profileState={profileState}
+            isMobile={isMobile}
             onProfileStateChange={setProfileState}
           />
         );
@@ -359,8 +365,8 @@ const RightColumn: FC<StateProps> = ({
   );
 };
 
-export default memo(withGlobal(
-  (global): StateProps => {
+export default memo(withGlobal<OwnProps>(
+  (global, { isMobile }): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
     const nextManagementScreen = chatId ? global.management.byChatId[chatId]?.nextScreen : undefined;
@@ -368,7 +374,7 @@ export default memo(withGlobal(
     const isInsideTopic = isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
 
     return {
-      contentKey: selectRightColumnContentKey(global),
+      contentKey: selectRightColumnContentKey(global, isMobile),
       chatId,
       threadId,
       isInsideTopic,

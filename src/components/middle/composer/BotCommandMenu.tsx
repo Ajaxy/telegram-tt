@@ -1,16 +1,17 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiBotCommand } from '../../../api/types';
 
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/environment';
 import useMouseInside from '../../../hooks/useMouseInside';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Menu from '../../ui/Menu';
 import BotCommand from './BotCommand';
 
 import './BotCommandMenu.scss';
-import { getActions } from '../../../global';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -22,8 +23,9 @@ const BotCommandMenu: FC<OwnProps> = ({
   isOpen, botCommands, onClose,
 }) => {
   const { sendBotCommand } = getActions();
+  const { isMobile } = useAppLayout();
 
-  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, IS_SINGLE_COLUMN_LAYOUT);
+  const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
 
   const handleClick = useCallback((botCommand: ApiBotCommand) => {
     sendBotCommand({

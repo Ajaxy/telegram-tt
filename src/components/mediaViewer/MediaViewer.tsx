@@ -27,10 +27,9 @@ import {
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/environment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
-import windowSize from '../../util/windowSize';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 import { renderMessageText } from '../common/helpers/renderMessageText';
@@ -42,6 +41,7 @@ import { exitPictureInPictureIfNeeded } from '../../hooks/usePictureInPicture';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import { useMediaProps } from './hooks/useMediaProps';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import ReportModal from '../common/ReportModal';
 import Button from '../ui/Button';
@@ -97,6 +97,7 @@ const MediaViewer: FC<StateProps> = ({
   } = getActions();
 
   const isOpen = Boolean(avatarOwner || mediaId);
+  const { isMobile } = useAppLayout();
 
   /* Animation */
   const animationKey = useRef<number>();
@@ -163,14 +164,14 @@ const MediaViewer: FC<StateProps> = ({
   }, [isVisible]);
 
   useEffect(() => {
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       document.body.classList.toggle('is-media-viewer-open', isOpen);
     }
     // Disable user selection if media viewer is open, to prevent accidental text selection
     if (IS_TOUCH_ENV) {
       document.body.classList.toggle('no-selection', isOpen);
     }
-  }, [isOpen]);
+  }, [isMobile, isOpen]);
 
   const forceUpdate = useForceUpdate();
   useEffect(() => {
@@ -220,7 +221,7 @@ const MediaViewer: FC<StateProps> = ({
   const handleFooterClick = useCallback(() => {
     handleClose();
 
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       setTimeout(() => {
         toggleChatInfo(false, { forceSyncOnIOs: true });
         focusMessage({ chatId, threadId, mediaId });
@@ -228,7 +229,7 @@ const MediaViewer: FC<StateProps> = ({
     } else {
       focusMessage({ chatId, threadId, mediaId });
     }
-  }, [handleClose, chatId, threadId, focusMessage, toggleChatInfo, mediaId]);
+  }, [handleClose, isMobile, chatId, threadId, focusMessage, toggleChatInfo, mediaId]);
 
   const handleForward = useCallback(() => {
     openForwardMenu({
@@ -258,18 +259,6 @@ const MediaViewer: FC<StateProps> = ({
       stopCurrentAudio();
     }
   }, [isGif, isVideo]);
-
-  // Prevent refresh when rotating device to watch a video
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined;
-    }
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, [isOpen]);
 
   const getMediaId = useCallback((fromId?: number, direction?: number): number | undefined => {
     if (fromId === undefined) return undefined;
@@ -317,7 +306,7 @@ const MediaViewer: FC<StateProps> = ({
       noCloseTransition={shouldSkipHistoryAnimations}
     >
       <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
-        {IS_SINGLE_COLUMN_LAYOUT && (
+        {isMobile && (
           <Button
             className="media-viewer-close"
             round

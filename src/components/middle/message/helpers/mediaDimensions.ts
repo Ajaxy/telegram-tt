@@ -22,7 +22,9 @@ export function getMinMediaWidth(hasText?: boolean, hasCommentButton?: boolean) 
     : (hasCommentButton ? MIN_MEDIA_WIDTH_WITH_COMMENTS : MIN_MEDIA_WIDTH);
 }
 
-export function calculateMediaDimensions(message: ApiMessage, asForwarded?: boolean, noAvatars?: boolean) {
+export function calculateMediaDimensions(
+  message: ApiMessage, asForwarded?: boolean, noAvatars?: boolean, isMobile?: boolean,
+) {
   const isOwn = isOwnMessage(message);
   const photo = getMessagePhoto(message) || getMessageWebPagePhoto(message);
   const video = getMessageVideo(message);
@@ -30,8 +32,8 @@ export function calculateMediaDimensions(message: ApiMessage, asForwarded?: bool
   const isWebPagePhoto = Boolean(getMessageWebPagePhoto(message));
   const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
   const { width, height } = photo
-    ? calculateInlineImageDimensions(photo, isOwn, asForwarded, isWebPagePhoto, noAvatars)
-    : calculateVideoDimensions(video!, isOwn, asForwarded, isWebPageVideo, noAvatars);
+    ? calculateInlineImageDimensions(photo, isOwn, asForwarded, isWebPagePhoto, noAvatars, isMobile)
+    : calculateVideoDimensions(video!, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
 
   const hasText = Boolean(getMessageText(message));
   const minMediaWidth = getMinMediaWidth(hasText);

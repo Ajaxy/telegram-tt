@@ -8,11 +8,12 @@ import React, {
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import generateIdFor from '../../util/generateIdFor';
 
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useOnChange from '../../hooks/useOnChange';
-import generateIdFor from '../../util/generateIdFor';
+import useAppLayout from '../../hooks/useAppLayout';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -88,6 +89,7 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const containerId = useMemo(() => generateIdFor(ID_STORE, true), []);
 
+  const { isMobile } = useAppLayout();
   const [animation, setAnimation] = useState<RLottieInstance>();
   const wasPlaying = useRef(false);
   const isFrozen = useRef(false);
@@ -138,6 +140,7 @@ const AnimatedSticker: FC<OwnProps> = ({
           quality,
           isLowPriority,
           coords: sharedCanvasCoords,
+          isMobile,
         },
         color,
         onEnded,
@@ -164,7 +167,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [
     animation, animationId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop,
-    containerId, sharedCanvas, sharedCanvasCoords,
+    containerId, sharedCanvas, sharedCanvasCoords, isMobile,
   ]);
 
   useEffect(() => {
@@ -232,11 +235,14 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [noLoop, animation]);
 
-  useOnChange(([prevSharedCanvasCoords]) => {
-    if (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords) {
-      animation?.setSharedCanvasCoords(containerId, sharedCanvasCoords);
+  useOnChange(([prevSharedCanvasCoords, prevIsMobile]) => {
+    if (
+      (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords)
+      || (prevIsMobile !== undefined && isMobile !== prevIsMobile)
+    ) {
+      animation?.setSharedCanvasCoords(containerId, sharedCanvasCoords, isMobile);
     }
-  }, [sharedCanvasCoords, containerId, animation]);
+  }, [sharedCanvasCoords, isMobile, containerId, animation]);
 
   useEffect(() => {
     if (!animation) {

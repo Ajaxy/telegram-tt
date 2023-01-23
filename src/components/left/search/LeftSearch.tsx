@@ -14,7 +14,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ChatResults from './ChatResults';
-import UserChatResults from './ChatMessageResults';
+import ChatMessageResults from './ChatMessageResults';
 import MediaResults from './MediaResults';
 import LinkResults from './LinkResults';
 import FileResults from './FileResults';
@@ -99,7 +99,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
             case GlobalSearchContent.ChatList:
               if (chatId) {
                 return (
-                  <UserChatResults
+                  <ChatMessageResults
                     searchQuery={searchQuery}
                     dateSearchQuery={dateSearchQuery}
                     onReset={onReset}

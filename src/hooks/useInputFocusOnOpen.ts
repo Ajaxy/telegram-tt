@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
+import useAppLayout from './useAppLayout';
 
 // Focus slows down animation, also it breaks transition layout in Chrome
 const FOCUS_DELAY_MS = 500;
@@ -11,9 +11,11 @@ export default function useInputFocusOnOpen(
   isOpen?: boolean,
   onClose?: NoneToVoidFunction,
 ) {
+  const { isMobile } = useAppLayout();
+
   useEffect(() => {
     if (isOpen) {
-      if (!IS_SINGLE_COLUMN_LAYOUT) {
+      if (!isMobile) {
         setTimeout(() => {
           requestAnimationFrame(() => {
             if (inputRef.current?.isConnected) {
@@ -31,5 +33,5 @@ export default function useInputFocusOnOpen(
         setTimeout(onClose, MODAL_HIDE_DELAY_MS);
       }
     }
-  }, [inputRef, isOpen, onClose]);
+  }, [inputRef, isMobile, isOpen, onClose]);
 }

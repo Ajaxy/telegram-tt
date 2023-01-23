@@ -8,7 +8,6 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { withGlobal } from '../../global';
 import { selectChat } from '../../global/selectors';
 import { getCanPostInChat } from '../../global/helpers';
-import windowSize from '../../util/windowSize';
 
 import useLang from '../../hooks/useLang';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
@@ -67,17 +66,6 @@ const GameModal: FC<OwnProps & StateProps> = ({ openedGame, gameTitle, canPost }
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [handleMessage]);
-
-  // Prevent refresh when rotating device
-  useEffect(() => {
-    if (!isOpen) return undefined;
-
-    windowSize.disableRefresh();
-
-    return () => {
-      windowSize.enableRefresh();
-    };
-  }, [isOpen]);
 
   return (
     <Modal

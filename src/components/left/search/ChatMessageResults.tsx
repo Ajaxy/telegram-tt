@@ -8,8 +8,8 @@ import { LoadMoreDirection } from '../../../types';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import NothingFound from '../../common/NothingFound';
@@ -54,6 +54,8 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   const { searchMessagesGlobal, openChat } = getActions();
 
   const lang = useLang();
+  const { isMobile } = useAppLayout();
+
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
@@ -70,11 +72,11 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
     (id: number) => {
       openChat({ id: searchChatId, threadId: id, shouldReplaceHistory: true });
 
-      if (!IS_SINGLE_COLUMN_LAYOUT) {
+      if (!isMobile) {
         onReset();
       }
     },
-    [openChat, searchChatId, onReset],
+    [openChat, searchChatId, isMobile, onReset],
   );
 
   const foundMessages = useMemo(() => {

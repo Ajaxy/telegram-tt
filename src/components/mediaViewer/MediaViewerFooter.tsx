@@ -3,10 +3,10 @@ import React, { useEffect, useState } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
+import { REM } from '../common/helpers/mediaDimensions';
 import { throttle } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
-import { REM } from '../common/helpers/mediaDimensions';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import './MediaViewerFooter.scss';
 
@@ -24,6 +24,8 @@ const MediaViewerFooter: FC<OwnProps> = ({
   text = '', isHidden, isForVideo, onClick, isProtected,
 }) => {
   const [isMultiline, setIsMultiline] = useState(false);
+  const { isMobile } = useAppLayout();
+
   useEffect(() => {
     const footerContent = document.querySelector('.MediaViewerFooter .media-text') as HTMLDivElement | null;
 
@@ -61,7 +63,7 @@ const MediaViewerFooter: FC<OwnProps> = ({
   return (
     <div className={classNames} onClick={stopEvent}>
       {Boolean(text) && (
-        <div className="media-viewer-footer-content" onClick={!IS_SINGLE_COLUMN_LAYOUT ? onClick : undefined}>
+        <div className="media-viewer-footer-content" onClick={!isMobile ? onClick : undefined}>
           <p className={`media-text custom-scroll ${isMultiline ? 'multiline' : ''}`} dir="auto">{text}</p>
         </div>
       )}

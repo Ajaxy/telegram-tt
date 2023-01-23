@@ -17,7 +17,6 @@ import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import {
   isUserId,
   getPrivateChatUserId,
@@ -43,6 +42,7 @@ import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
@@ -128,6 +128,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     openForumPanel,
   } = getActions();
 
+  const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
@@ -225,7 +226,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       ref={ref}
       className={className}
       style={`top: ${offsetTop}px`}
-      ripple={!isForum && !IS_SINGLE_COLUMN_LAYOUT}
+      ripple={!isForum && !isMobile}
       contextActions={contextActions}
       onClick={handleClick}
       onDragEnter={handleDragEnter}
@@ -245,7 +246,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         />
         <AvatarBadge chatId={chatId} />
         {chat.isCallActive && chat.isCallNotEmpty && (
-          <ChatCallStatus isSelected={isSelected} isActive={animationLevel !== 0} />
+          <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={animationLevel !== 0} />
         )}
       </div>
       <div className="info">
@@ -255,7 +256,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             withEmojiStatus
             isSavedMessages={chatId === user?.id && user?.isSelf}
             observeIntersection={observeIntersection}
-            key={!IS_SINGLE_COLUMN_LAYOUT && isEmojiStatusColored ? `${isSelected}` : undefined}
+            key={!isMobile && isEmojiStatusColored ? `${isSelected}` : undefined}
           />
           {isMuted && <i className="icon-muted" />}
           <div className="separator" />

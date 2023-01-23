@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef } from '../../../lib/teact/teact'
 
 import type { ApiMessage } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash } from '../../../global/helpers';
@@ -10,11 +11,11 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/environment';
 import { getActions } from '../../../global';
 
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import StickerView from '../../common/StickerView';
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -42,6 +43,7 @@ const Sticker: FC<OwnProps> = ({
   const { showNotification, openStickerSet } = getActions();
 
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -101,7 +103,7 @@ const Sticker: FC<OwnProps> = ({
   }, [hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect]);
 
   const isMemojiSticker = 'isMissing' in stickerSetInfo;
-  const { width, height } = getStickerDimensions(sticker);
+  const { width, height } = getStickerDimensions(sticker, isMobile);
   const className = buildClassName(
     'Sticker media-inner',
     isMemojiSticker && 'inactive',

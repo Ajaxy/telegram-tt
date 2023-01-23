@@ -6,9 +6,9 @@ import type { ApiChatFolder, ApiSticker } from '../../../api/types';
 import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
 import { selectAnimatedEmoji, selectChatFolder } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import Button from '../../ui/Button';
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
@@ -33,6 +33,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
   chatFolder, animatedEmoji, foldersDispatch, onScreenSelect,
 }) => {
   const lang = useLang();
+  const { isMobile } = useAppLayout();
 
   const handleEditFolder = useCallback(() => {
     foldersDispatch!({ type: 'editFolder', payload: chatFolder });
@@ -50,7 +51,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
       </p>
       {chatFolder && foldersDispatch && onScreenSelect && (
         <Button
-          ripple={!IS_SINGLE_COLUMN_LAYOUT}
+          ripple={!isMobile}
           fluid
           pill
           onClick={handleEditFolder}

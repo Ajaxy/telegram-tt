@@ -3,6 +3,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import type { ApiMessage } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
+import type { GlobalState } from '../../types';
 
 import {
   ANIMATION_END_DELAY,
@@ -45,8 +46,8 @@ import parseMessageInput from '../../../util/parseMessageInput';
 import { getMessageSummaryText, getSenderTitle } from '../../helpers';
 import * as langProvider from '../../../util/langProvider';
 import { copyHtmlToClipboard } from '../../../util/clipboard';
-import type { GlobalState } from '../../types';
 import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
+import { getIsMobile } from '../../../hooks/useAppLayout';
 
 const FOCUS_DURATION = 1500;
 const FOCUS_NO_HIGHLIGHT_DURATION = FAST_SMOOTH_MAX_DURATION + ANIMATION_END_DELAY;
@@ -251,7 +252,7 @@ addActionHandler('closeAudioPlayer', (global) => {
 addActionHandler('openPollResults', (global, actions, payload) => {
   const { chatId, messageId } = payload!;
 
-  const shouldOpenInstantly = selectIsRightColumnShown(global);
+  const shouldOpenInstantly = selectIsRightColumnShown(global, getIsMobile());
 
   if (!shouldOpenInstantly) {
     window.setTimeout(() => {

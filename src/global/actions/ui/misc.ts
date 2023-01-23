@@ -4,13 +4,13 @@ import type { ApiError, ApiNotification } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT } from '../../../config';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../../util/environment';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
   selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectIsTrustedBot,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { unique } from '../../../util/iteratees';
+import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
 export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
@@ -104,7 +104,7 @@ addActionHandler('closeManagement', (global) => {
 });
 
 addActionHandler('openChat', (global) => {
-  if (!IS_SINGLE_COLUMN_LAYOUT && !IS_TABLET_COLUMN_LAYOUT) {
+  if (!getIsMobile() && !getIsTablet()) {
     return undefined;
   }
 

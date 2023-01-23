@@ -23,7 +23,6 @@ import {
   DEFAULT_PATTERN_COLOR,
   DEFAULT_LIMITS,
 } from '../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../util/environment';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 import { pick, pickTruthy, unique } from '../util/iteratees';
 import {
@@ -39,6 +38,7 @@ import { isUserId } from './helpers';
 import { getOrderedIds } from '../util/folderManager';
 import { clearGlobalForLockScreen } from './reducers';
 import { encryptSession } from '../util/passcode';
+import { getIsMobile } from '../hooks/useAppLayout';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -130,7 +130,7 @@ function readCache(initialState: GlobalState): GlobalState {
     ...cached,
   };
 
-  const parsedMessageList = !IS_SINGLE_COLUMN_LAYOUT ? parseLocationHash() : undefined;
+  const parsedMessageList = !getIsMobile() ? parseLocationHash() : undefined;
 
   return {
     ...newState,

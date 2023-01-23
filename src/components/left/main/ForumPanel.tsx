@@ -26,6 +26,7 @@ import useLang from '../../../hooks/useLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import GroupChatInfo from '../../common/GroupChatInfo';
 import Button from '../../ui/Button';
@@ -73,6 +74,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const scrollTopHandlerRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useAppLayout();
 
   useEffect(() => {
     if (lastSyncTime && chat && !chat.topics) {
@@ -223,6 +225,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
               messageListType="thread"
               canExpandActions={false}
               withForumActions
+              isMobile={isMobile}
               onTopicSearch={onTopicSearch}
             />
           )}

@@ -9,7 +9,6 @@ import type { IAnchorPosition } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { REPLIES_USER_ID } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT } from '../../util/environment';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
   selectChat,
@@ -34,6 +33,7 @@ import {
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Portal from '../ui/Portal';
 import Menu from '../ui/Menu';
@@ -163,6 +163,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openChat,
   } = getActions();
 
+  const { isMobile } = useAppLayout();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -361,7 +362,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('lng_forum_topic_edit')}
             </MenuItem>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT && !withForumActions && isForum && !isTopic && (
+          {isMobile && !withForumActions && isForum && !isTopic && (
             <MenuItem
               icon="forums"
               onClick={handleViewAsTopicsClick}
@@ -418,7 +419,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('AddContact')}
             </MenuItem>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT && canCall && (
+          {isMobile && canCall && (
             <MenuItem
               icon="phone"
               onClick={handleCall}
@@ -434,7 +435,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('VideoCall')}
             </MenuItem>
           )}
-          {IS_SINGLE_COLUMN_LAYOUT && canSearch && (
+          {isMobile && canSearch && (
             <MenuItem
               icon="search"
               onClick={handleSearch}

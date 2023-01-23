@@ -10,6 +10,7 @@ import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
 import trimText from '../../../util/trimText';
 import buildClassName from '../../../util/buildClassName';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import SafeLink from '../../common/SafeLink';
 import Photo from './Photo';
@@ -51,6 +52,7 @@ const WebPage: FC<OwnProps> = ({
   onCancelMediaTransfer,
 }) => {
   const webPage = getMessageWebPage(message);
+  const { isMobile } = useAppLayout();
 
   const handleMediaClick = useCallback(() => {
     onMediaClick!();
@@ -73,7 +75,7 @@ const WebPage: FC<OwnProps> = ({
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = false;
   if (isArticle && webPage?.photo && !webPage.video) {
-    const { width, height } = calculateMediaDimensions(message);
+    const { width, height } = calculateMediaDimensions(message, undefined, undefined, isMobile);
     isSquarePhoto = width === height;
   }
   const isMediaInteractive = (photo || video) && onMediaClick && !isSquarePhoto;

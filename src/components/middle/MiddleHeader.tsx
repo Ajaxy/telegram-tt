@@ -20,7 +20,6 @@ import {
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
 } from '../../config';
-import { IS_SINGLE_COLUMN_LAYOUT, IS_TABLET_COLUMN_LAYOUT } from '../../util/environment';
 import {
   getChatTitle, getMessageKey, getSenderTitle, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
@@ -50,6 +49,7 @@ import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
 import usePrevious from '../../hooks/usePrevious';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -73,6 +73,7 @@ type OwnProps = {
   threadId: number;
   messageListType: MessageListType;
   isReady?: boolean;
+  isMobile?: boolean;
 };
 
 type StateProps = {
@@ -101,6 +102,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   threadId,
   messageListType,
   isReady,
+  isMobile,
   pinnedMessageIds,
   messagesById,
   canUnpin,
@@ -133,6 +135,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const isBackButtonActive = useRef(true);
+  const { isTablet } = useAppLayout();
 
   const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
   const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[pinnedMessageIndex] : pinnedMessageIds;
@@ -160,7 +163,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const { width: windowWidth } = useWindowSize();
 
   const isLeftColumnHideable = windowWidth <= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN;
-  const shouldShowCloseButton = IS_TABLET_COLUMN_LAYOUT && isLeftColumnShown;
+  const shouldShowCloseButton = isTablet && isLeftColumnShown;
 
   // eslint-disable-next-line no-null/no-null
   const componentRef = useRef<HTMLDivElement>(null);
@@ -198,7 +201,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
     // Workaround for missing UI when quickly clicking the Back button
     isBackButtonActive.current = false;
-    if (IS_SINGLE_COLUMN_LAYOUT) {
+    if (isMobile) {
       const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
       messageInput?.blur();
     }
@@ -210,7 +213,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }
 
     if (messageListType === 'thread' && currentTransitionKey === 0) {
-      if (IS_SINGLE_COLUMN_LAYOUT || shouldShowCloseButton) {
+      if (isMobile || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
         openChat({ id: undefined }, { forceOnHeavyAnimation: true });
       } else {
@@ -226,7 +229,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     setBackButtonActive();
   }, [
     messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
-    openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive,
+    openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive, isMobile,
   ]);
 
   const canToolsCollideWithChatInfo = (
@@ -386,7 +389,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const isAudioPlayerRendered = Boolean(shouldRenderAudioPlayer && renderingAudioMessage);
   const isPinnedMessagesFullWidth = isAudioPlayerRendered
-    || (!IS_SINGLE_COLUMN_LAYOUT && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES);
+    || (!isMobile && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES);
 
   return (
     <div className="MiddleHeader" ref={componentRef}>
@@ -442,6 +445,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           chatId={chatId}
           threadId={threadId}
           messageListType={messageListType}
+          isMobile={isMobile}
           canExpandActions={!isAudioPlayerRendered}
         />
       </div>
@@ -450,7 +454,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, threadId, messageListType }): StateProps => {
+  (global, {
+    chatId, threadId, messageListType, isMobile,
+  }): StateProps => {
     const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
     const chat = selectChat(global, chatId);
 
@@ -484,7 +490,7 @@ export default memo(withGlobal<OwnProps>(
     const state: StateProps = {
       typingStatus,
       isLeftColumnShown,
-      isRightColumnShown: selectIsRightColumnShown(global),
+      isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isSelectModeActive: selectIsInSelectMode(global),
       audioMessage,
       chat,

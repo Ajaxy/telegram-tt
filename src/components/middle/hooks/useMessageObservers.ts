@@ -3,13 +3,13 @@ import { getActions } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
 
-import { IS_ANDROID, IS_SINGLE_COLUMN_LAYOUT } from '../../../util/environment';
+import { IS_ANDROID } from '../../../util/environment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useBackgroundMode from '../../../hooks/useBackgroundMode';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 const INTERSECTION_THROTTLE_FOR_READING = 150;
 const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;
-const INTERSECTION_MARGIN_FOR_LOADING = IS_SINGLE_COLUMN_LAYOUT ? 300 : 500;
 
 export default function useMessageObservers(
   type: MessageListType,
@@ -17,6 +17,9 @@ export default function useMessageObservers(
   memoFirstUnreadIdRef: { current: number | undefined },
 ) {
   const { markMessageListRead, markMentionsRead, animateUnreadReaction } = getActions();
+
+  const { isMobile } = useAppLayout();
+  const INTERSECTION_MARGIN_FOR_LOADING = isMobile ? 300 : 500;
 
   const {
     observe: observeIntersectionForReading, freeze: freezeForReading, unfreeze: unfreezeForReading,
