@@ -113,7 +113,7 @@ const ReportModal: FC<OwnProps> = ({
       onClose={onClose}
       onEnter={isOpen ? handleReport : undefined}
       onCloseAnimationEnd={onCloseAnimationEnd}
-      className="report"
+      className="narrow"
       title={title}
     >
       <RadioGroup
@@ -127,10 +127,12 @@ const ReportModal: FC<OwnProps> = ({
         value={description}
         onChange={handleDescriptionChange}
       />
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
-        {lang('lng_report_button')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      <div className="dialog-buttons">
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
+          {lang('lng_report_button')}
+        </Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };

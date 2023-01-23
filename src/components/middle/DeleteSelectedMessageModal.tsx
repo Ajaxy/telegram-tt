@@ -92,17 +92,19 @@ const DeleteSelectedMessageModal: FC<OwnProps & StateProps> = ({
       {willDeleteForAll && (
         <p>This will delete them for everyone in this chat.</p>
       )}
-      {canDeleteForAll && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          {contactName
-            ? renderText(lang('ChatList.DeleteForEveryone', contactName))
-            : lang('Conversation.DeleteMessagesForEveryone')}
+      <div className={canDeleteForAll ? 'dialog-buttons-column' : 'dialog-buttons'}>
+        {canDeleteForAll && (
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
+            {contactName
+              ? renderText(lang('ChatList.DeleteForEveryone', contactName))
+              : lang('Conversation.DeleteMessagesForEveryone')}
+          </Button>
+        )}
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
+          {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
         </Button>
-      )}
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
-        {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };

@@ -46,7 +46,6 @@ const AttachBotInstallModal: FC<OwnProps> = ({
     <ConfirmDialog
       isOpen={Boolean(bot)}
       onClose={cancelAttachBotInstall}
-      isButtonsInOneRow
       title={renderingBot?.shortName}
       confirmHandler={handleConfirm}
     >

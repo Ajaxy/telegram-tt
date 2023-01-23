@@ -390,12 +390,14 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             onCheck={setShouldEndGroupCall}
           />
         )}
-        <Button isText className="confirm-dialog-button" onClick={handleLeaveGroupCall}>
-          {lang(isEndGroupCallModal ? 'VoipGroupEnd' : 'VoipGroupLeave')}
-        </Button>
-        <Button isText className="confirm-dialog-button" onClick={handleCloseConfirmLeaveModal}>
-          {lang('Cancel')}
-        </Button>
+        <div className="dialog-buttons">
+          <Button isText className="confirm-dialog-button" onClick={handleLeaveGroupCall}>
+            {lang(isEndGroupCallModal ? 'VoipGroupEnd' : 'VoipGroupLeave')}
+          </Button>
+          <Button isText className="confirm-dialog-button" onClick={handleCloseConfirmLeaveModal}>
+            {lang('Cancel')}
+          </Button>
+        </div>
       </Modal>
     </Modal>
   );

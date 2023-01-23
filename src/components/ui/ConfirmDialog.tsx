@@ -20,7 +20,7 @@ type OwnProps = {
   confirmLabel?: string;
   confirmHandler: () => void;
   confirmIsDestructive?: boolean;
-  isButtonsInOneRow?: boolean;
+  areButtonsInColumn?: boolean;
   children?: React.ReactNode;
 };
 
@@ -35,7 +35,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   confirmLabel = 'Confirm',
   confirmHandler,
   confirmIsDestructive,
-  isButtonsInOneRow,
+  areButtonsInColumn,
   children,
 }) => {
   const lang = useLang();
@@ -62,7 +62,11 @@ const ConfirmDialog: FC<OwnProps> = ({
         <p>{textPart}</p>
       ))}
       {textParts || children}
-      <div className={isButtonsInOneRow ? 'dialog-buttons mt-2' : ''} ref={containerRef} onKeyDown={handleKeyDown}>
+      <div
+        className={areButtonsInColumn ? 'dialog-buttons-column' : 'dialog-buttons mt-2'}
+        ref={containerRef}
+        onKeyDown={handleKeyDown}
+      >
         <Button
           className="confirm-dialog-button"
           isText

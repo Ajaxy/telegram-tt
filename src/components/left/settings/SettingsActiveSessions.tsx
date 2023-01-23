@@ -247,6 +247,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           confirmLabel={lang('TerminateAllSessions')}
           confirmHandler={handleTerminateAllSessions}
           confirmIsDestructive
+          areButtonsInColumn
         />
       )}
       <SettingsActiveSession isOpen={isModalOpen} hash={openedSessionHash} onClose={handleCloseSessionModal} />
