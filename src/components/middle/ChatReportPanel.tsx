@@ -151,7 +151,6 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
         text={user
           ? lang('UserInfo.BlockConfirmationTitle', getUserFullName(user))
           : lang('Chat.Confirm.ReportSpam.Channel')}
-        isButtonsInOneRow
         confirmIsDestructive
         confirmLabel={lang('Block')}
         confirmHandler={user ? handleConfirmBlock : handleChatReportSpam}

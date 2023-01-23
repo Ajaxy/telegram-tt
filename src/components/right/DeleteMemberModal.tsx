@@ -9,8 +9,7 @@ import { getUserFirstOrLastName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -44,19 +43,15 @@ const DeleteMemberModal: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <Modal
+    <ConfirmDialog
       isOpen={isOpen}
       onClose={onClose}
-      onEnter={handleDeleteChatMember}
-      className="delete"
       title={lang('GroupRemoved.Remove')}
-    >
-      <p>{renderText(lang('PeerInfo.Confirm.RemovePeer', contactName))}</p>
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChatMember}>
-        {lang('lng_box_remove')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
-    </Modal>
+      textParts={renderText(lang('PeerInfo.Confirm.RemovePeer', contactName))}
+      confirmLabel={lang('lng_box_remove')}
+      confirmHandler={handleDeleteChatMember}
+      confirmIsDestructive
+    />
   );
 };
 

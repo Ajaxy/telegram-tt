@@ -242,7 +242,6 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
           textParts={renderLinkGroupConfirmText()}
           confirmLabel={lang('DiscussionLinkGroup')}
           confirmHandler={handleLinkGroupSessions}
-          isButtonsInOneRow
         />
       </div>
     );

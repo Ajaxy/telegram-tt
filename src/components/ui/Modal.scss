@@ -28,12 +28,6 @@
     }
   }
 
-  &.report {
-    .modal-dialog {
-      max-width: 15rem;
-    }
-  }
-
   .modal-container {
     position: fixed;
     top: 0;
@@ -177,10 +171,17 @@
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-start;
+    flex-wrap: wrap;
 
     .confirm-dialog-button + .confirm-dialog-button {
       margin-left: 1rem;
     }
+  }
+
+  .dialog-buttons-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
   }
 
   .dialog-checkbox {

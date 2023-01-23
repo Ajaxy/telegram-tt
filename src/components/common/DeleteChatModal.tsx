@@ -192,30 +192,32 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {renderContent()}
-      {isBot && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
-          {lang('DeleteAndStop')}
+      <div className="dialog-buttons-column">
+        {isBot && (
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
+            {lang('DeleteAndStop')}
+          </Button>
+        )}
+        {canDeleteForAll && (
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteForAll}>
+            {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
+          </Button>
+        )}
+        {!isPrivateChat && chat.isCreator && (
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
+            {lang('DeleteForAll')}
+          </Button>
+        )}
+        <Button
+          color="danger"
+          className="confirm-dialog-button"
+          isText
+          onClick={isPrivateChat ? handleDeleteChat : handleLeaveChat}
+        >
+          {lang(renderActionText())}
         </Button>
-      )}
-      {canDeleteForAll && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteForAll}>
-          {contactName ? renderText(lang('ChatList.DeleteForEveryone', contactName)) : lang('DeleteForAll')}
-        </Button>
-      )}
-      {!isPrivateChat && chat.isCreator && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteChat}>
-          {lang('DeleteForAll')}
-        </Button>
-      )}
-      <Button
-        color="danger"
-        className="confirm-dialog-button"
-        isText
-        onClick={isPrivateChat ? handleDeleteChat : handleLeaveChat}
-      >
-        {lang(renderActionText())}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };

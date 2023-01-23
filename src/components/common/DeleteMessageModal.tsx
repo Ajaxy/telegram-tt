@@ -99,16 +99,18 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       {willDeleteForAll && (
         <p>{lang('lng_delete_for_everyone_hint', 1, 'i')}</p>
       )}
-      {canDeleteForAll && (
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-          {contactName && renderText(lang('Conversation.DeleteMessagesFor', contactName))}
-          {!contactName && lang('Conversation.DeleteMessagesForEveryone')}
+      <div className={canDeleteForAll ? 'dialog-buttons-column' : 'dialog-buttons'}>
+        {canDeleteForAll && (
+          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
+            {contactName && renderText(lang('Conversation.DeleteMessagesFor', contactName))}
+            {!contactName && lang('Conversation.DeleteMessagesForEveryone')}
+          </Button>
+        )}
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
+          {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
         </Button>
-      )}
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
-        {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };
