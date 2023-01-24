@@ -470,7 +470,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     insertEmoji,
     insertCustomEmoji: insertCustomEmojiFromEmojiTooltip,
   } = useEmojiTooltip(
-    Boolean(shouldSuggestStickers && canSendStickers && !attachments.length),
+    Boolean(shouldSuggestStickers && !attachments.length),
     htmlRef,
     recentEmojis,
     undefined,
