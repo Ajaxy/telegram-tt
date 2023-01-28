@@ -575,16 +575,16 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
     trustedBotIds: Array.from(newTrustedBotIds),
   };
 
-  global = updateTabState(global, {
-    botTrustRequest: undefined,
-  }, tabId);
-
   const tabState = selectTabState(global, tabId);
   if (tabState.botTrustRequest?.onConfirm) {
     const { action, payload: callbackPayload } = tabState.botTrustRequest.onConfirm;
     // @ts-ignore
     actions[action](callbackPayload);
   }
+
+  global = updateTabState(global, {
+    botTrustRequest: undefined,
+  }, tabId);
 
   setGlobal(global);
 });
