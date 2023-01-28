@@ -184,6 +184,7 @@ type StateProps =
     captionLimit: number;
     isCurrentUserPremium?: boolean;
     canSendVoiceByPrivacy?: boolean;
+    attachmentSettings: GlobalState['attachmentSettings'];
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -263,6 +264,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   botMenuButton,
   attachBots,
   attachMenuPeerType,
+  attachmentSettings,
   theme,
 }) => {
   const {
@@ -671,8 +673,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const sendAttachments = useCallback(({
     attachments: attachmentsToSend,
-    sendCompressed,
-    sendGrouped,
+    sendCompressed = attachmentSettings.shouldCompress,
+    sendGrouped = attachmentSettings.shouldSendGrouped,
     isSilent,
     scheduledAt,
   } : {
@@ -711,7 +713,10 @@ const Composer: FC<OwnProps & StateProps> = ({
     requestAnimationFrame(() => {
       resetComposer();
     });
-  }, [chatId, checkSlowMode, clearDraft, htmlRef, resetComposer, sendMessage, validateTextLength, connectionState]);
+  }, [
+    attachmentSettings, connectionState, htmlRef, validateTextLength, checkSlowMode, sendMessage, clearDraft, chatId,
+    resetComposer,
+  ]);
 
   const handleSendAttachments = useCallback((
     sendCompressed: boolean,
@@ -1569,6 +1574,7 @@ export default memo(withGlobal<OwnProps>(
       captionLimit: selectCurrentLimit(global, 'captionLength'),
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       canSendVoiceByPrivacy,
+      attachmentSettings: global.attachmentSettings,
     };
   },
 )(Composer));
