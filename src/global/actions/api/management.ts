@@ -445,7 +445,7 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
 
   if (file && !isSuggest) {
     actions.showNotification({
-      message: langProvider.getTranslation('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
+      message: langProvider.translate('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
     });
   }
 });
