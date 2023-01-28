@@ -77,15 +77,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (phoneCall) {
         if (call.state === 'discarded') {
           actions.playGroupCallSound({ sound: 'end' });
-          global = {
+          actions.hangUp({ tabId: getCurrentTabId() });
+
+          return {
             ...global,
             ...(call.needRating && { ratingPhoneCall: call }),
-            phoneCall: undefined,
           };
-
-          return updateTabState(global, {
-            isCallPanelVisible: undefined,
-          }, getCurrentTabId());
         }
 
         return undefined;
