@@ -33,15 +33,12 @@
   border-radius: var(--custom-emoji-border-radius) !important;
 }
 
-.highlightCatch {
+.highlight-catch {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   user-select: auto !important;
-}
-
-.altEmoji {
-  opacity: 0;
+  z-index: 1;
 }

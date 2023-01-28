@@ -132,11 +132,12 @@ const StickerView: FC<OwnProps> = ({
         className={buildClassName(
           styles.thumb,
           noTransition && styles.noTransition,
-          isThumbOpaque && styles.thumb_opaque,
+          isThumbOpaque && styles.thumbOpaque,
           thumbClassName,
           thumbClassNames,
         )}
         alt=""
+        draggable={false}
       />
       {isLottie ? (
         <AnimatedSticker
@@ -178,6 +179,7 @@ const StickerView: FC<OwnProps> = ({
           className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
           src={fullMediaData}
           alt={emoji}
+          draggable={false}
         />
       )}
     </>
