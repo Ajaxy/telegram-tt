@@ -1,6 +1,7 @@
 import type { ApiMessageEntity, ApiFormattedText } from '../api/types';
 import { ApiMessageEntityTypes } from '../api/types';
 import { RE_LINK_TEMPLATE } from '../config';
+import { IS_EMOJI_SUPPORTED } from './environment';
 
 export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
   B: ApiMessageEntityTypes.Bold,
@@ -101,9 +102,13 @@ function parseMarkdown(html: string) {
   );
 
   // Custom Emoji markdown tag
+  if (!IS_EMOJI_SUPPORTED) {
+    // Prepare alt text for custom emoji
+    parsedHtml = parsedHtml.replace(/\[<img[^>]+alt="([^"]+)"[^>]*>]/gm, '[$1]');
+  }
   parsedHtml = parsedHtml.replace(
-    /(^|\s)(?!<(?:code|pre)[^<]*|<\/)\[([^\]\n]+)\]\(customEmoji:(\d+)\)(?![^<]*<\/(?:code|pre)>)(\s|$)/g,
-    '$1<img alt="$2" data-document-id="$3">$4',
+    /(?!<(?:code|pre)[^<]*|<\/)\[([^\]\n]+)\]\(customEmoji:(\d+)\)(?![^<]*<\/(?:code|pre)>)/g,
+    '<img alt="$1" data-document-id="$2">',
   );
 
   // Other simple markdown
