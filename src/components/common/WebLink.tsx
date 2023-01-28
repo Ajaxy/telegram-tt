@@ -84,6 +84,8 @@ const WebLink: FC<OwnProps> = ({
     (!photo && !video) && 'without-media',
   );
 
+  const safeLinkContent = url.replace('mailto:', '') || displayUrl;
+
   return (
     <div
       className={className}
@@ -105,11 +107,9 @@ const WebLink: FC<OwnProps> = ({
         <SafeLink
           url={url}
           className="site-name"
-          text=""
+          text={safeLinkContent}
           isRtl={lang.isRtl}
-        >
-          {url.replace('mailto:', '') || displayUrl}
-        </SafeLink>
+        />
         {senderTitle && <div className="sender-name">{renderText(senderTitle)}</div>}
       </div>
       {senderTitle && (

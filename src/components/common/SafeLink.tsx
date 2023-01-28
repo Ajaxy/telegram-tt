@@ -29,10 +29,11 @@ const SafeLink: FC<OwnProps> = ({
   const { openUrl } = getActions();
 
   const content = children || text;
-  const isSafe = url === content;
+  const isSafe = url === text;
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     if (!url) return true;
+
     e.preventDefault();
     openUrl({ url, shouldSkipModal: isSafe });
 
