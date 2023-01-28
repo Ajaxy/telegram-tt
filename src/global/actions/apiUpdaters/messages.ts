@@ -212,7 +212,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       if (message.reactions && chat) {
-        global = updateReactions(global, chatId, id, message.reactions, chat, message.isOutgoing, currentMessage);
+        global = updateReactions(global, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage);
       }
 
       setGlobal(global);
