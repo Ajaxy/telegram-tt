@@ -637,7 +637,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
 
 export async function pinMessage({
   chat, messageId, isUnpin, isOneSide, isSilent,
-}: { chat: ApiChat; messageId: number; isUnpin: boolean; isOneSide: boolean; isSilent: boolean }) {
+}: { chat: ApiChat; messageId: number; isUnpin: boolean; isOneSide?: boolean; isSilent?: boolean }) {
   await invokeRequest(new GramJs.messages.UpdatePinnedMessage({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: messageId,

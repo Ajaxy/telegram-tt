@@ -17,7 +17,7 @@ import {
   selectUser,
   selectChatBot,
   selectIsPremiumPurchaseBlocked,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectTabState,
 } from '../../global/selectors';
 import {
   isUserId,
@@ -150,11 +150,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     enterMessageSelectMode,
     sendBotCommand,
     restartBot,
-    joinGroupCall,
+    requestMasterAndJoinGroupCall,
     createGroupCall,
     openLinkedChat,
     openAddContactDialog,
-    requestCall,
+    requestMasterAndRequestCall,
     toggleStatistics,
     openGiftPremiumModal,
     openChatWithInfo,
@@ -239,12 +239,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
         chatId,
       });
     } else {
-      joinGroupCall({
+      requestMasterAndJoinGroupCall({
         chatId,
       });
     }
     closeMenu();
-  }, [closeMenu, canCreateVoiceChat, chatId, joinGroupCall, createGroupCall]);
+  }, [closeMenu, canCreateVoiceChat, chatId, requestMasterAndJoinGroupCall, createGroupCall]);
 
   const handleLinkedChatClick = useCallback(() => {
     openLinkedChat({ id: chatId });
@@ -267,14 +267,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   }, [closeMenu, onSubscribeChannel]);
 
   const handleVideoCall = useCallback(() => {
-    requestCall({ userId: chatId, isVideo: true });
+    requestMasterAndRequestCall({ userId: chatId, isVideo: true });
     closeMenu();
-  }, [chatId, closeMenu, requestCall]);
+  }, [chatId, closeMenu, requestMasterAndRequestCall]);
 
   const handleCall = useCallback(() => {
-    requestCall({ userId: chatId });
+    requestMasterAndRequestCall({ userId: chatId });
     closeMenu();
-  }, [chatId, closeMenu, requestCall]);
+  }, [chatId, closeMenu, requestMasterAndRequestCall]);
 
   const handleSearch = useCallback(() => {
     onSearchClick();
@@ -573,7 +573,8 @@ export default memo(withGlobal<OwnProps>(
       canGiftPremium,
       hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       botCommands: chatBot?.fullInfo?.botInfo?.commands,
-      isChatInfoShown: global.isChatInfoShown && currentChatId === chatId && currentThreadId === threadId,
+      isChatInfoShown: selectTabState(global).isChatInfoShown
+        && currentChatId === chatId && currentThreadId === threadId,
       canCreateTopic,
       canEditTopic,
     };

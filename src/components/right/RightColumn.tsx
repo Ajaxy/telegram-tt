@@ -14,7 +14,7 @@ import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
   selectAreActiveChatsLoaded,
   selectChat,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectTabState,
   selectRightColumnContentKey,
 } from '../../global/selectors';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
@@ -119,14 +119,14 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const close = useCallback((shouldScrollUp = true) => {
     switch (contentKey) {
       case RightColumnContent.AddingMembers:
-        setNewChatMembersDialogState(NewChatMembersProgress.Closed);
+        setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed });
         break;
       case RightColumnContent.ChatInfo:
         if (isScrolledDown && shouldScrollUp) {
           setProfileState(ProfileState.Profile);
           break;
         }
-        toggleChatInfo(undefined, { forceSyncOnIOs: true });
+        toggleChatInfo({ force: false }, { forceSyncOnIOs: true });
         break;
       case RightColumnContent.Management: {
         switch (managementScreen) {
@@ -162,8 +162,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           case ManagementScreens.EditInvite:
           case ManagementScreens.InviteInfo:
             setManagementScreen(ManagementScreens.Invites);
-            setOpenedInviteInfo({ invite: undefined });
-            setEditingExportedInvite({ chatId, invite: undefined });
+            setOpenedInviteInfo({ chatId: chatId!, invite: undefined });
+            setEditingExportedInvite({ chatId: chatId!, invite: undefined });
             break;
         }
 
@@ -212,7 +212,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleAppendingChatMembers = useCallback((memberIds: string[]) => {
-    addChatMembers({ chatId, memberIds });
+    addChatMembers({ chatId: chatId!, memberIds });
   }, [addChatMembers, chatId]);
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
@@ -369,7 +369,8 @@ export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
-    const nextManagementScreen = chatId ? global.management.byChatId[chatId]?.nextScreen : undefined;
+    const { management, shouldSkipHistoryAnimations } = selectTabState(global);
+    const nextManagementScreen = chatId ? management.byChatId[chatId]?.nextScreen : undefined;
     const isForum = chatId ? selectChat(global, chatId)?.isForum : undefined;
     const isInsideTopic = isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
 
@@ -379,7 +380,7 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       isInsideTopic,
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
-      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      shouldSkipHistoryAnimations,
       nextManagementScreen,
     };
   },

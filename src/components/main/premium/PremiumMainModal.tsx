@@ -15,7 +15,7 @@ import PremiumFeatureModal, {
 import { TME_LINK_PREFIX } from '../../../config';
 import { formatCurrency } from '../../../util/formatCurrency';
 import buildClassName from '../../../util/buildClassName';
-import { selectIsCurrentUserPremium, selectUser } from '../../../global/selectors';
+import { selectTabState, selectIsCurrentUserPremium, selectUser } from '../../../global/selectors';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
@@ -309,16 +309,19 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
+  const {
+    premiumModal,
+  } = selectTabState(global);
   return {
     currentUserId: global.currentUserId,
-    promo: global.premiumModal?.promo,
-    isClosing: global.premiumModal?.isClosing,
-    isSuccess: global.premiumModal?.isSuccess,
-    isGift: global.premiumModal?.isGift,
-    monthsAmount: global.premiumModal?.monthsAmount,
-    fromUser: global.premiumModal?.fromUserId ? selectUser(global, global.premiumModal.fromUserId) : undefined,
-    toUser: global.premiumModal?.toUserId ? selectUser(global, global.premiumModal.toUserId) : undefined,
-    initialSection: global.premiumModal?.initialSection,
+    promo: premiumModal?.promo,
+    isClosing: premiumModal?.isClosing,
+    isSuccess: premiumModal?.isSuccess,
+    isGift: premiumModal?.isGift,
+    monthsAmount: premiumModal?.monthsAmount,
+    fromUser: premiumModal?.fromUserId ? selectUser(global, premiumModal.fromUserId) : undefined,
+    toUser: premiumModal?.toUserId ? selectUser(global, premiumModal.toUserId) : undefined,
+    initialSection: premiumModal?.initialSection,
     isPremium: selectIsCurrentUserPremium(global),
     limitChannels: selectPremiumLimit(global, 'channels'),
     limitFolders: selectPremiumLimit(global, 'dialogFilters'),

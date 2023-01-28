@@ -1,5 +1,7 @@
 import { DEBUG_ALERT_MSG } from '../config';
 import { throttle } from './schedulers';
+import { getAllMultitabTokens } from './establishMultitabRole';
+import { IS_MULTITAB_SUPPORTED } from './environment';
 
 window.addEventListener('error', handleErrorEvent);
 window.addEventListener('unhandledrejection', handleErrorEvent);
@@ -18,7 +20,13 @@ function handleErrorEvent(e: ErrorEvent | PromiseRejectionEvent) {
   handleError(e instanceof ErrorEvent ? (e.error || e.message) : e.reason);
 }
 
-const throttledAlert = throttle(window.alert, 1000);
+const throttledAlert = throttle((message: string) => {
+  if (IS_MULTITAB_SUPPORTED && getAllMultitabTokens().length > 1) {
+    return;
+  }
+  // eslint-disable-next-line no-alert
+  window.alert(message);
+}, 1000);
 
 export function handleError(err: Error) {
   // eslint-disable-next-line no-console

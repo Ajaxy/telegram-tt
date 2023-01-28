@@ -6,13 +6,13 @@ import { omit } from '../../util/iteratees';
 import { updateChat } from './chats';
 import { selectChat } from '../selectors';
 
-export function updateGroupCall(
-  global: GlobalState,
+export function updateGroupCall<T extends GlobalState>(
+  global: T,
   groupCallId: string,
   groupCallUpdate: Partial<ApiGroupCall>,
   addToParticipantCount?: number,
   resetParticipantCount?: number,
-): GlobalState {
+): T {
   const unfiltered = Object.values({
     ...global.groupCalls.byId[groupCallId]?.participants,
     ...groupCallUpdate.participants,
@@ -45,10 +45,10 @@ export function updateGroupCall(
   };
 }
 
-export function removeGroupCall(
-  global: GlobalState,
+export function removeGroupCall<T extends GlobalState>(
+  global: T,
   groupCallId: string,
-): GlobalState {
+): T {
   const groupCall = selectGroupCall(global, groupCallId);
   if (groupCall && groupCall.chatId) {
     const chat = selectChat(global, groupCall.chatId);
@@ -73,11 +73,11 @@ export function removeGroupCall(
   };
 }
 
-export function updateActiveGroupCall(
-  global: GlobalState,
+export function updateActiveGroupCall<T extends GlobalState>(
+  global: T,
   groupCallUpdate: Partial<ApiGroupCall>,
   resetParticipantCount?: number,
-): GlobalState {
+): T {
   if (!global.groupCalls.activeGroupCallId) {
     return global;
   }
@@ -89,13 +89,13 @@ export function updateActiveGroupCall(
     resetParticipantCount);
 }
 
-export function updateGroupCallParticipant(
-  global: GlobalState,
+export function updateGroupCallParticipant<T extends GlobalState>(
+  global: T,
   groupCallId: string,
   userId: string,
   participantUpdate: Partial<GroupCallParticipant>,
   noUpdateCount = false,
-) {
+): T {
   const groupCall = selectGroupCall(global, groupCallId);
   if (!groupCall) {
     return global;

@@ -91,7 +91,6 @@ const useEditing = (
     }
 
     editMessage({
-      messageId: editedMessage.id,
       text,
       entities,
     });

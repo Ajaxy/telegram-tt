@@ -6,6 +6,14 @@ const SALT = 'harder better faster stronger';
 
 let currentPasscodeHash: ArrayBuffer | undefined;
 
+export function getPasscodeHash() {
+  return currentPasscodeHash;
+}
+
+export function setPasscodeHash(passcodeHash: ArrayBuffer) {
+  currentPasscodeHash = passcodeHash;
+}
+
 export async function setupPasscode(passcode: string) {
   currentPasscodeHash = await sha256(passcode);
 }
@@ -29,6 +37,28 @@ export async function encryptSession(sessionJson?: string, globalJson?: string) 
       await store('globalEncrypted', globalEncrypted);
     })(),
   ]);
+}
+
+export async function decryptSessionByCurrentHash() {
+  if (!currentPasscodeHash) {
+    throw new Error('[api/passcode] Missing current passcode');
+  }
+
+  const [sessionEncrypted, globalEncrypted] = await Promise.all([
+    load('sessionEncrypted'),
+    load('globalEncrypted'),
+  ]);
+
+  if (!sessionEncrypted || !globalEncrypted) {
+    throw new Error('[api/passcode] Missing required stored fields');
+  }
+
+  const [sessionJson, globalJson] = await Promise.all([
+    aesDecrypt(sessionEncrypted, currentPasscodeHash),
+    aesDecrypt(globalEncrypted, currentPasscodeHash),
+  ]);
+
+  return { sessionJson, globalJson };
 }
 
 export async function decryptSession(passcode: string) {

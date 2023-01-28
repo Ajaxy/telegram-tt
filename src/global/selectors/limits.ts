@@ -2,7 +2,7 @@ import type { ApiLimitType, GlobalState } from '../types';
 import { selectIsCurrentUserPremium } from './users';
 import { DEFAULT_LIMITS } from '../../config';
 
-export function selectCurrentLimit(global: GlobalState, limit: ApiLimitType) {
+export function selectCurrentLimit<T extends GlobalState>(global: T, limit: ApiLimitType) {
   const { appConfig } = global;
   if (!appConfig) {
     return DEFAULT_LIMITS[limit][0];
@@ -16,7 +16,7 @@ export function selectCurrentLimit(global: GlobalState, limit: ApiLimitType) {
   return value;
 }
 
-export function selectPremiumLimit(global: GlobalState, limit: ApiLimitType) {
+export function selectPremiumLimit<T extends GlobalState>(global: T, limit: ApiLimitType) {
   const { appConfig } = global;
   if (!appConfig) return DEFAULT_LIMITS[limit][1];
 

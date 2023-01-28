@@ -47,7 +47,7 @@ const ReportModal: FC<OwnProps> = ({
   const handleReport = useCallback(() => {
     switch (subject) {
       case 'messages':
-        reportMessages({ messageIds, reason: selectedReason, description });
+        reportMessages({ messageIds: messageIds!, reason: selectedReason, description });
         exitMessageSelectMode();
         break;
       case 'peer':

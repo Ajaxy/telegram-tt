@@ -58,7 +58,7 @@ const SettingsHeader: FC<OwnProps> = ({
 
   const handleSignOutMessage = useCallback(() => {
     closeSignOutConfirmation();
-    signOut();
+    signOut({ forceInitApi: true });
   }, [closeSignOutConfirmation, signOut]);
 
   const SettingsMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {

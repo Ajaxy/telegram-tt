@@ -1,9 +1,9 @@
 import type { GlobalState } from '../types';
 
-export function updateTwoFaSettings(
-  global: GlobalState,
+export function updateTwoFaSettings<T extends GlobalState>(
+  global: T,
   update: GlobalState['twoFaSettings'],
-): GlobalState {
+): T {
   return {
     ...global,
     twoFaSettings: {

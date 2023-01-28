@@ -1,5 +1,5 @@
 import React, {
-  useMemo, memo, useRef, useEffect,
+  useMemo, memo, useRef, useEffect, useCallback,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -84,7 +84,11 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     return enableDirectTextInput;
   }, [isActive]);
 
-  const [viewportIds, getMore] = useInfiniteScroll(searchTextMessagesLocal, foundIds);
+  const handleSearchTextMessagesLocal = useCallback(() => {
+    searchTextMessagesLocal();
+  }, [searchTextMessagesLocal]);
+
+  const [viewportIds, getMore] = useInfiniteScroll(handleSearchTextMessagesLocal, foundIds);
 
   const viewportResults = useMemo(() => {
     if (!query || !viewportIds?.length || !messagesById) {

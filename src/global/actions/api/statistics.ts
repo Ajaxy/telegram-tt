@@ -6,9 +6,10 @@ import {
 } from '../../reducers';
 import { selectChatMessages, selectChat } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
-addActionHandler('loadStatistics', async (global, actions, payload) => {
-  const { chatId, isGroup } = payload;
+addActionHandler('loadStatistics', async (global, actions, payload): Promise<void> => {
+  const { chatId, isGroup, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
     return;
@@ -30,11 +31,12 @@ addActionHandler('loadStatistics', async (global, actions, payload) => {
     stats.recentTopMessages = stats.recentTopMessages.map((message) => ({ ...message, ...messages[message.msgId] }));
   }
 
-  setGlobal(updateStatistics(global, chatId, stats));
+  global = updateStatistics(global, chatId, stats, tabId);
+  setGlobal(global);
 });
 
-addActionHandler('loadMessageStatistics', async (global, actions, payload) => {
-  const { chatId, messageId } = payload;
+addActionHandler('loadMessageStatistics', async (global, actions, payload): Promise<void> => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
     return;
@@ -58,12 +60,13 @@ addActionHandler('loadMessageStatistics', async (global, actions, payload) => {
 
   global = getGlobal();
 
-  setGlobal(updateMessageStatistics(global, result));
+  global = updateMessageStatistics(global, result, tabId);
+  setGlobal(global);
 });
 
-addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload) => {
+addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, token, name, isPercentage,
+    chatId, token, name, isPercentage, tabId = getCurrentTabId(),
   } = payload;
   const chat = selectChat(global, chatId);
   if (!chat?.fullInfo) {
@@ -77,5 +80,7 @@ addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload) =>
     return;
   }
 
-  setGlobal(updateStatisticsGraph(getGlobal(), chatId, name, result));
+  global = getGlobal();
+  global = updateStatisticsGraph(global, chatId, name, result, tabId);
+  setGlobal(global);
 });

@@ -218,12 +218,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   }, [releaseTransitionFix, resetCacheBuster]);
 
   const handleNewMemberDialogOpen = useCallback(() => {
-    setNewChatMembersDialogState(NewChatMembersProgress.InProgress);
+    setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.InProgress });
   }, [setNewChatMembersDialogState]);
 
   // Update search type when switching tabs or forum topics
   useEffect(() => {
-    setLocalMediaSearchType({ mediaType: tabType });
+    setLocalMediaSearchType({ mediaType: tabType as SharedMediaType });
   }, [setLocalMediaSearchType, tabType, topicId]);
 
   const profileId = resolvedUserId || chatId;

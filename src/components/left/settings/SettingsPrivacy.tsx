@@ -108,6 +108,10 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     }
   }, [isCurrentUserPremium, lang, onScreenSelect, showNotification]);
 
+  const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
+    updateContentSettings(isChecked);
+  }, [updateContentSettings]);
+
   function getVisibilityValue(setting?: ApiPrivacySettings) {
     const { visibility } = setting || {};
     const blockCount = setting ? setting.blockChatIds.length + setting.blockUserIds.length : 0;
@@ -318,7 +322,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             subLabel={lang('lng_settings_sensitive_about')}
             checked={Boolean(isSensitiveEnabled)}
             disabled={!canChangeSensitive}
-            onCheck={updateContentSettings}
+            onCheck={handleUpdateContentSettings}
           />
         </div>
       )}

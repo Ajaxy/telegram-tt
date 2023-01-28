@@ -14,6 +14,7 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
 } from '../../../util/environment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
 import useLang from '../../../hooks/useLang';
@@ -52,7 +53,7 @@ const PhoneCall: FC<StateProps> = ({
 }) => {
   const lang = useLang();
   const {
-    hangUp, acceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,
+    hangUp, requestMasterAndAcceptCall, playGroupCallSound, toggleGroupCallPanel, connectToActivePhoneCall,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -347,7 +348,7 @@ const PhoneCall: FC<StateProps> = ({
         )}
         {isIncomingRequested && (
           <PhoneCallButton
-            onClick={acceptCall}
+            onClick={requestMasterAndAcceptCall}
             icon="phone-discard"
             isDisabled={isDiscarded}
             label={lang('lng_call_accept')}
@@ -370,12 +371,13 @@ const PhoneCall: FC<StateProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const { phoneCall, currentUserId } = global;
+    const { isCallPanelVisible, isMasterTab } = selectTabState(global);
 
     return {
-      isCallPanelVisible: Boolean(global.isCallPanelVisible),
+      isCallPanelVisible: Boolean(isCallPanelVisible),
       user: selectPhoneCallUser(global),
       isOutgoing: phoneCall?.adminId === currentUserId,
-      phoneCall,
+      phoneCall: isMasterTab ? phoneCall : undefined,
       animationLevel: global.settings.byKey.animationLevel,
     };
   },

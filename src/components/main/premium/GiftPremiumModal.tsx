@@ -10,7 +10,7 @@ import type { AnimationLevel } from '../../../types';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import { getUserFirstOrLastName } from '../../../global/helpers';
-import { selectUser } from '../../../global/selectors';
+import { selectTabState, selectUser } from '../../../global/selectors';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
@@ -160,7 +160,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
-  const { forUserId, monthlyCurrency, monthlyAmount } = global.giftPremiumModal || {};
+  const { forUserId, monthlyCurrency, monthlyAmount } = selectTabState(global).giftPremiumModal || {};
   const user = forUserId ? selectUser(global, forUserId) : undefined;
   const gifts = user ? user.fullInfo?.premiumGifts : undefined;
 

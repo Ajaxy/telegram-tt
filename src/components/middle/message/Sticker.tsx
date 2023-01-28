@@ -89,7 +89,12 @@ const Sticker: FC<OwnProps> = ({
       if (isPlayingEffect) {
         showNotification({
           message: lang('PremiumStickerTooltip'),
-          action: openModal,
+          action: {
+            action: 'openStickerSet',
+            payload: {
+              stickerSetInfo: sticker.stickerSetInfo,
+            },
+          },
           actionText: lang('ViewAction'),
         });
         return;
@@ -100,7 +105,10 @@ const Sticker: FC<OwnProps> = ({
       }
     }
     openModal();
-  }, [hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect]);
+  }, [
+    hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect,
+    sticker.stickerSetInfo,
+  ]);
 
   const isMemojiSticker = 'isMissing' in stickerSetInfo;
   const { width, height } = getStickerDimensions(sticker, isMobile);

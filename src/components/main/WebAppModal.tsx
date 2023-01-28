@@ -5,12 +5,14 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiAttachBot, ApiChat, ApiUser } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 import type { PopupOptions, WebAppInboundEvent } from './hooks/useWebAppFrame';
 
 import { TME_LINK_PREFIX } from '../../config';
-import { selectCurrentChat, selectTheme, selectUser } from '../../global/selectors';
+import {
+  selectCurrentChat, selectTabState, selectTheme, selectUser,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { extractCurrentThemeParams, validateHexColor } from '../../util/themeStyle';
 
@@ -41,7 +43,7 @@ type WebAppButton = {
 };
 
 export type OwnProps = {
-  webApp?: GlobalState['webApp'];
+  webApp?: TabState['webApp'];
 };
 
 type StateProps = {
@@ -50,7 +52,7 @@ type StateProps = {
   attachBot?: ApiAttachBot;
   theme?: ThemeKey;
   isPaymentModalOpen?: boolean;
-  paymentStatus?: GlobalState['payment']['status'];
+  paymentStatus?: TabState['payment']['status'];
 };
 
 const NBSP = '\u00A0';
@@ -504,7 +506,7 @@ export default memo(withGlobal<OwnProps>(
     const bot = botId ? selectUser(global, botId) : undefined;
     const chat = selectCurrentChat(global);
     const theme = selectTheme(global);
-    const { isPaymentModalOpen, status } = global.payment;
+    const { isPaymentModalOpen, status } = selectTabState(global).payment;
 
     return {
       attachBot,

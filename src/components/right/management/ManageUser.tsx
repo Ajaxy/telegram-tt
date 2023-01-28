@@ -10,7 +10,7 @@ import { ManagementProgress } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
-  selectChat, selectNotifyExceptions, selectNotifySettings, selectUser,
+  selectChat, selectTabState, selectNotifyExceptions, selectNotifySettings, selectUser,
 } from '../../../global/selectors';
 import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
@@ -277,7 +277,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId)!;
-    const { progress } = global.management;
+    const { progress } = selectTabState(global).management;
     const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     return {

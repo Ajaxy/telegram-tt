@@ -49,14 +49,14 @@ export default function useInlineBotTooltip(
 
   useEffect(() => {
     if (isAllowed && usernameLowered && chatId) {
-      queryInlineBot({ chatId, username: usernameLowered, query });
+      queryInlineBot({ chatId, username: usernameLowered, query: query! });
     }
   }, [query, isAllowed, queryInlineBot, chatId, usernameLowered]);
 
   const loadMore = useCallback(() => {
     if (isAllowed && usernameLowered && chatId) {
       queryInlineBot({
-        chatId, username: usernameLowered, query, offset,
+        chatId, username: usernameLowered, query: query!, offset,
       });
     }
   }, [isAllowed, usernameLowered, chatId, queryInlineBot, query, offset]);
@@ -70,7 +70,7 @@ export default function useInlineBotTooltip(
   }, [botId, isAllowed, markIsOpen, results, switchPm, unmarkIsOpen]);
 
   if (prevUsername !== username) {
-    resetInlineBot({ username: prevUsername });
+    resetInlineBot({ username: prevUsername! });
   }
 
   return {

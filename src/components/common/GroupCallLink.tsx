@@ -17,13 +17,13 @@ type OwnProps = {
 const GroupCallLink: FC<OwnProps> = ({
   className, groupCall, children,
 }) => {
-  const { joinGroupCall } = getActions();
+  const { requestMasterAndJoinGroupCall } = getActions();
 
   const handleClick = useCallback(() => {
     if (groupCall) {
-      joinGroupCall({ id: groupCall.id, accessHash: groupCall.accessHash });
+      requestMasterAndJoinGroupCall({ id: groupCall.id, accessHash: groupCall.accessHash });
     }
-  }, [groupCall, joinGroupCall]);
+  }, [groupCall, requestMasterAndJoinGroupCall]);
 
   if (!groupCall) {
     return children;

@@ -3,6 +3,7 @@ import { getActions } from '../global';
 
 import type { ApiChat, ApiUser } from '../api/types';
 
+import { IS_MULTITAB_SUPPORTED } from '../util/environment';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel, isChatGroup,
@@ -46,7 +47,16 @@ const useChatContextActions = ({
       updateChatMutedState,
       toggleChatArchived,
       toggleChatUnread,
+      openChatInNewTab,
     } = getActions();
+
+    const actionOpenInNewTab = IS_MULTITAB_SUPPORTED && {
+      title: 'Open in new tab',
+      icon: 'open-in-new-tab',
+      handler: () => {
+        openChatInNewTab({ chatId: chat.id });
+      },
+    };
 
     const actionAddToFolder = canChangeFolder ? {
       title: lang('ChatList.Filter.AddToFolder'),
@@ -58,12 +68,12 @@ const useChatContextActions = ({
       ? {
         title: lang('UnpinFromTop'),
         icon: 'unpin',
-        handler: () => toggleChatPinned({ id: chat.id, folderId }),
+        handler: () => toggleChatPinned({ id: chat.id, folderId: folderId! }),
       }
-      : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId }) };
+      : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId: folderId! }) };
 
     if (isInSearch) {
-      return compact([actionPin, actionAddToFolder]);
+      return compact([actionOpenInNewTab, actionPin, actionAddToFolder]);
     }
 
     const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
@@ -105,6 +115,7 @@ const useChatContextActions = ({
     const isInFolder = folderId !== undefined;
 
     return compact([
+      actionOpenInNewTab,
       actionAddToFolder,
       actionUnreadMark,
       actionPin,

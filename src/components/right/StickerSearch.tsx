@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import { throttle } from '../../util/schedulers';
-import { selectCurrentStickerSearch } from '../../global/selectors';
+import { selectCurrentStickerSearch, selectTabState } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -114,7 +114,7 @@ export default memo(withGlobal(
       query,
       featuredIds: featured.setIds,
       resultIds,
-      isModalOpen: Boolean(global.openedStickerSetShortName),
+      isModalOpen: Boolean(selectTabState(global).openedStickerSetShortName),
     };
   },
 )(StickerSearch));

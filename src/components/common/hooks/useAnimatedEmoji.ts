@@ -52,11 +52,11 @@ export default function useAnimatedEmoji(
     if (!container) return;
 
     sendEmojiInteraction({
-      chatId,
-      messageId,
+      chatId: chatId!,
+      messageId: messageId!,
       localEffect,
-      emoji,
-      interactions: interactions.current,
+      emoji: emoji!,
+      interactions: interactions.current!,
     });
     startedInteractions.current = undefined;
     interactions.current = undefined;
@@ -91,7 +91,7 @@ export default function useAnimatedEmoji(
 
     interactWithAnimatedEmoji({
       localEffect,
-      emoji,
+      emoji: emoji!,
       x,
       y,
       startSize: size,
@@ -131,8 +131,8 @@ export default function useAnimatedEmoji(
 
       sendWatchingEmojiInteraction({
         id,
-        chatId,
-        emoticon: localEffect ? selectLocalAnimatedEmojiEffectByName(localEffect) : emoji,
+        chatId: chatId!,
+        emoticon: localEffect ? selectLocalAnimatedEmojiEffectByName(localEffect)! : emoji!,
         startSize: size,
         x,
         y,

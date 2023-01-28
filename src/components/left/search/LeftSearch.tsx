@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import { GlobalSearchContent } from '../../../types';
 
+import { selectTabState } from '../../../global/selectors';
 import { parseDateString } from '../../../util/dateFormat';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
@@ -148,7 +149,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { currentContent, chatId } = global.globalSearch;
+    const { currentContent, chatId } = selectTabState(global).globalSearch;
 
     return { currentContent, chatId };
   },

@@ -88,6 +88,10 @@ const GifSearch: FC<OwnProps & StateProps> = ({
     }
   }, [canSendGifs, requestCalendar, sendMessage, setGifSearchQuery]);
 
+  const handleSearchMoreGifs = useCallback(() => {
+    searchMoreGifs();
+  }, [searchMoreGifs]);
+
   const lang = useLang();
 
   useHistoryBack({
@@ -134,7 +138,7 @@ const GifSearch: FC<OwnProps & StateProps> = ({
         itemSelector=".GifButton"
         preloadBackwards={PRELOAD_BACKWARDS}
         noFastList
-        onLoadMore={searchMoreGifs}
+        onLoadMore={handleSearchMoreGifs}
       >
         {renderContent()}
       </InfiniteScroll>

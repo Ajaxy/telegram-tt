@@ -14,6 +14,7 @@ import { MediaViewerOrigin } from '../../types';
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
+  selectTabState,
   selectChat, selectCurrentMessageList, selectThreadMessagesCount, selectUser, selectUserStatus,
 } from '../../global/selectors';
 import { getUserStatus, isChatChannel, isUserOnline } from '../../global/helpers';
@@ -336,7 +337,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const { animationLevel } = global.settings.byKey;
-    const { mediaId, avatarOwnerId } = global.mediaViewer;
+    const { mediaId, avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
     const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;

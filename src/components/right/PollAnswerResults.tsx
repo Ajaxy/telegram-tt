@@ -10,6 +10,7 @@ import type {
   ApiPollAnswer,
   ApiPollResult,
 } from '../../api/types';
+import { selectTabState } from '../../global/selectors';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 
@@ -134,7 +135,7 @@ function getPercentage(value: number, total: number) {
 
 export default memo(withGlobal<OwnProps>(
   (global, { answer }: OwnProps): StateProps => {
-    const { voters, offsets } = global.pollResults;
+    const { voters, offsets } = selectTabState(global).pollResults;
 
     return {
       voters: voters?.[answer.option],

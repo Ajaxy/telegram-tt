@@ -5,7 +5,7 @@ import { getActions, getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiUser } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 
 import { ensureProtocol } from '../../util/ensureProtocol';
 import renderText from '../common/helpers/renderText';
@@ -20,7 +20,7 @@ import Checkbox from '../ui/Checkbox';
 import styles from './UrlAuthModal.module.scss';
 
 export type OwnProps = {
-  urlAuth?: GlobalState['urlAuth'];
+  urlAuth?: TabState['urlAuth'];
   currentUser?: ApiUser;
 };
 

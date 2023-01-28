@@ -281,12 +281,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleFaveSticker = useCallback(() => {
     closeMenu();
-    faveSticker({ sticker: message.content.sticker });
+    faveSticker({ sticker: message.content.sticker! });
   }, [closeMenu, message.content.sticker, faveSticker]);
 
   const handleUnfaveSticker = useCallback(() => {
     closeMenu();
-    unfaveSticker({ sticker: message.content.sticker });
+    unfaveSticker({ sticker: message.content.sticker! });
   }, [closeMenu, message.content.sticker, unfaveSticker]);
 
   const handleCancelVote = useCallback(() => {
@@ -369,7 +369,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleSaveGif = useCallback(() => {
     const video = getMessageVideo(message);
-    saveGif({ gif: video });
+    saveGif({ gif: video! });
     closeMenu();
   }, [closeMenu, message, saveGif]);
 

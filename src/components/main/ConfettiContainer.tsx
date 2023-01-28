@@ -1,11 +1,12 @@
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type { FC } from '../../lib/teact/teact';
 
 import { pick } from '../../util/iteratees';
 import buildStyle from '../../util/buildStyle';
+import { selectTabState } from '../../global/selectors';
 
 import useWindowSize from '../../hooks/useWindowSize';
 import useOnChange from '../../hooks/useOnChange';
@@ -15,7 +16,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import styles from './ConfettiContainer.module.scss';
 
 type StateProps = {
-  confetti?: GlobalState['confetti'];
+  confetti?: TabState['confetti'];
 };
 
 interface Confetti {
@@ -203,5 +204,5 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['confetti']),
+  (global): StateProps => pick(selectTabState(global), ['confetti']),
 )(ConfettiContainer));

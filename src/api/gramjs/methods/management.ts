@@ -91,7 +91,7 @@ export async function updatePrivateLink({
 
 export async function fetchExportedChatInvites({
   peer, admin, limit = 0, isRevoked,
-}: { peer: ApiChat; admin: ApiUser; limit: number; isRevoked?: boolean }) {
+}: { peer: ApiChat; admin: ApiUser; limit?: number; isRevoked?: boolean }) {
   const exportedInvites = await invokeRequest(new GramJs.messages.GetExportedChatInvites({
     peer: buildInputPeer(peer.id, peer.accessHash),
     adminId: buildInputEntity(admin.id, admin.accessHash) as GramJs.InputUser,
@@ -209,7 +209,7 @@ export async function deleteRevokedExportedChatInvites({
 export async function fetchChatInviteImporters({
   peer, link, offsetDate = 0, offsetUser, limit = 0, isRequested,
 }: {
-  peer: ApiChat; link?: string; offsetDate: number; offsetUser?: ApiUser; limit: number; isRequested?: boolean;
+  peer: ApiChat; link?: string; offsetDate?: number; offsetUser?: ApiUser; limit?: number; isRequested?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetChatInviteImporters({
     peer: buildInputPeer(peer.id, peer.accessHash),

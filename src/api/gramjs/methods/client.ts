@@ -145,12 +145,12 @@ export function setIsPremium({ isPremium }: { isPremium: boolean }) {
   client.setIsPremium(isPremium);
 }
 
-export async function destroy(noLogOut = false) {
+export async function destroy(noLogOut = false, noClearLocalDb = false) {
   if (!noLogOut) {
     await invokeRequest(new GramJs.auth.LogOut());
   }
 
-  clearLocalDb();
+  if (!noClearLocalDb) clearLocalDb();
 
   await client.destroy();
 }

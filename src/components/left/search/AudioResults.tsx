@@ -30,7 +30,6 @@ const AudioResults: FC<OwnProps & StateProps> = ({
   theme,
   isVoice,
   searchQuery,
-  searchChatId,
   isLoading,
   chatsById,
   usersById,
@@ -52,12 +51,10 @@ const AudioResults: FC<OwnProps & StateProps> = ({
       runThrottled(() => {
         searchMessagesGlobal({
           type: currentType,
-          query: searchQuery,
-          chatId: searchChatId,
         });
       });
     }
-  }, [currentType, lastSyncTime, searchMessagesGlobal, searchQuery, searchChatId]);
+  }, [currentType, lastSyncTime, searchMessagesGlobal]);
 
   const foundMessages = useMemo(() => {
     if (!foundIds || !globalMessagesByChatId) {

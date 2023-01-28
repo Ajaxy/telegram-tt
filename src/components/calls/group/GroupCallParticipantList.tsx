@@ -1,6 +1,6 @@
 import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import useLang from '../../../hooks/useLang';
@@ -36,15 +36,23 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
     return Object.keys(participants || {});
   }, [participants]);
 
+  const handleLoadMoreGroupCallParticipants = useCallback(() => {
+    loadMoreGroupCallParticipants();
+  }, [loadMoreGroupCallParticipants]);
+
   const [viewportIds, getMore] = useInfiniteScroll(
-    loadMoreGroupCallParticipants,
+    handleLoadMoreGroupCallParticipants,
     participantsIds,
     participantsIds.length >= participantsCount,
   );
 
+  function handleCreateGroupCallInviteLink() {
+    createGroupCallInviteLink();
+  }
+
   return (
     <div className="participants">
-      <div className="invite-btn" onClick={createGroupCallInviteLink}>
+      <div className="invite-btn" onClick={handleCreateGroupCallInviteLink}>
         <div className="icon">
           <i className="icon-add-user" />
         </div>

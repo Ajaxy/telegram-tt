@@ -14,7 +14,7 @@ import buildClassName from '../../util/buildClassName';
 import {
   selectChat,
   selectCurrentGifSearch,
-  selectCurrentStickerSearch,
+  selectCurrentStickerSearch, selectTabState,
   selectCurrentTextSearch,
   selectIsChatWithSelf,
   selectUser,
@@ -198,6 +198,14 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     if (!chatId || !threadId) return;
     openEditTopicPanel({ chatId, topicId: threadId });
   }, [chatId, openEditTopicPanel, threadId]);
+
+  const handleToggleManagement = useCallback(() => {
+    toggleManagement();
+  }, [toggleManagement]);
+
+  const handleToggleStatistics = useCallback(() => {
+    toggleStatistics();
+  }, [toggleStatistics]);
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
 
@@ -457,7 +465,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   color="translucent"
                   size="smaller"
                   ariaLabel={lang('Edit')}
-                  onClick={toggleManagement}
+                  onClick={handleToggleManagement}
                 >
                   <i className="icon-edit" />
                 </Button>
@@ -479,7 +487,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   color="translucent"
                   size="smaller"
                   ariaLabel={lang('Statistics')}
-                  onClick={toggleStatistics}
+                  onClick={handleToggleStatistics}
                 >
                   <i className="icon-stats" />
                 </Button>
@@ -531,6 +539,7 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, isProfile, isManagement, threadId,
   }): StateProps => {
+    const tabState = selectTabState(global);
     const { query: messageSearchQuery } = selectCurrentTextSearch(global) || {};
     const { query: stickerSearchQuery } = selectCurrentStickerSearch(global) || {};
     const { query: gifSearchQuery } = selectCurrentGifSearch(global) || {};
@@ -552,9 +561,10 @@ export default memo(withGlobal<OwnProps>(
       // chat.isCreator is for Basic Groups
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
-    const isEditingInvite = Boolean(chatId && global.management.byChatId[chatId]?.editingInvite);
+    const isEditingInvite = Boolean(chatId && tabState.management.byChatId[chatId]?.editingInvite);
     const canViewStatistics = !isInsideTopic && chat?.fullInfo?.canViewStatistics;
-    const currentInviteInfo = chatId ? global.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
+    const currentInviteInfo = chatId
+      ? tabState.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
 
     return {
       canManage,
@@ -570,7 +580,7 @@ export default memo(withGlobal<OwnProps>(
       gifSearchQuery,
       isEditingInvite,
       currentInviteInfo,
-      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
     };
   },
 )(RightHeader));

@@ -10,7 +10,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/environment';
 import {
-  selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectUser,
+  selectChat, selectChatMessage, selectTabState, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';
 import { calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
@@ -216,7 +216,7 @@ export default memo(withGlobal<OwnProps>(
       isMuted,
       playbackRate,
       isHidden,
-    } = global.mediaViewer;
+    } = selectTabState(global).mediaViewer;
 
     if (origin === MediaViewerOrigin.SearchResult) {
       if (!(chatId && mediaId)) {

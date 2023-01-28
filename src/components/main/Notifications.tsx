@@ -4,6 +4,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiNotification } from '../../api/types';
 
+import { selectTabState } from '../../global/selectors';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
 
@@ -40,5 +41,5 @@ const Notifications: FC<StateProps> = ({ notifications }) => {
 };
 
 export default memo(withGlobal(
-  (global): StateProps => pick(global, ['notifications']),
+  (global): StateProps => pick(selectTabState(global), ['notifications']),
 )(Notifications));

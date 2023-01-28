@@ -106,7 +106,9 @@ export function init() {
   addCallback(updateFolderManagerThrottled);
   addActionHandler('reset', reset);
 
-  updateFolderManager(getGlobal());
+  const global = getGlobal();
+  updateFolders(global, true, true, true);
+  updateFolderManager(global);
 }
 
 export function getOrderedIds(folderId: number) {

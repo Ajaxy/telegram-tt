@@ -1,12 +1,15 @@
 import { addActionHandler } from '../../index';
 
 import { updateGlobalSearch, updateGlobalSearchContent } from '../../reducers';
+import { selectTabState } from '../../selectors';
+import type { ActionReturnType } from '../../types';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 const MAX_RECENTLY_FOUND_IDS = 10;
 
-addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
-  const { query } = payload!;
-  const { chatId } = global.globalSearch;
+addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionReturnType => {
+  const { query, tabId = getCurrentTabId() } = payload!;
+  const { chatId } = selectTabState(global, tabId).globalSearch;
 
   return updateGlobalSearch(global, {
     globalResults: {},
@@ -14,21 +17,25 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload) => {
     resultsByType: undefined,
     ...(query ? { fetchingStatus: { chats: !chatId, messages: true } } : { fetchingStatus: undefined }),
     query,
-  });
+  }, tabId);
 });
 
-addActionHandler('setGlobalSearchClosing', (global, actions, payload) => {
+addActionHandler('setGlobalSearchClosing', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), isClosing } = payload || {};
   return updateGlobalSearch(global, {
-    isClosing: payload,
-  });
+    isClosing,
+  }, tabId);
 });
 
-addActionHandler('addRecentlyFoundChatId', (global, actions, payload) => {
+addActionHandler('addRecentlyFoundChatId', (global, actions, payload): ActionReturnType => {
   const { id } = payload!;
-  const { recentlyFoundChatIds } = global.globalSearch;
+  const { recentlyFoundChatIds } = global;
 
   if (!recentlyFoundChatIds) {
-    return updateGlobalSearch(global, { recentlyFoundChatIds: [id] });
+    return {
+      ...global,
+      recentlyFoundChatIds: [id],
+    };
   }
 
   const newRecentIds = recentlyFoundChatIds.filter((chatId) => chatId !== id);
@@ -37,21 +44,27 @@ addActionHandler('addRecentlyFoundChatId', (global, actions, payload) => {
     newRecentIds.pop();
   }
 
-  return updateGlobalSearch(global, { recentlyFoundChatIds: newRecentIds });
+  return {
+    ...global,
+    recentlyFoundChatIds: newRecentIds,
+  };
 });
 
-addActionHandler('clearRecentlyFoundChats', (global) => {
-  return updateGlobalSearch(global, { recentlyFoundChatIds: undefined });
+addActionHandler('clearRecentlyFoundChats', (global): ActionReturnType => {
+  return {
+    ...global,
+    recentlyFoundChatIds: undefined,
+  };
 });
 
-addActionHandler('setGlobalSearchContent', (global, actions, payload) => {
-  const { content } = payload!;
+addActionHandler('setGlobalSearchContent', (global, actions, payload): ActionReturnType => {
+  const { content, tabId = getCurrentTabId() } = payload;
 
-  return updateGlobalSearchContent(global, content);
+  return updateGlobalSearchContent(global, content, tabId);
 });
 
-addActionHandler('setGlobalSearchChatId', (global, actions, payload) => {
-  const { id } = payload!;
+addActionHandler('setGlobalSearchChatId', (global, actions, payload): ActionReturnType => {
+  const { id, tabId = getCurrentTabId() } = payload;
 
-  return updateGlobalSearch(global, { chatId: id, query: undefined, resultsByType: undefined });
+  return updateGlobalSearch(global, { chatId: id, query: undefined, resultsByType: undefined }, tabId);
 });

@@ -15,6 +15,7 @@ import {
   selectIsMessageFocused,
   selectChat,
   selectTopicFromMessage,
+  selectTabState,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -242,7 +243,10 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
 
     const isFocused = selectIsMessageFocused(global, message);
-    const { direction: focusDirection, noHighlight: noFocusHighlight } = (isFocused && global.focusedMessage) || {};
+    const {
+      direction: focusDirection,
+      noHighlight: noFocusHighlight,
+    } = (isFocused && selectTabState(global).focusedMessage) || {};
 
     const chat = selectChat(global, message.chatId);
     const isChat = chat && (isChatChannel(chat) || userId === message.chatId);

@@ -25,6 +25,7 @@ import {
   selectGroupCallParticipant,
   selectIsAdminInActiveGroupCall,
 } from '../../../global/selectors/calls';
+import { selectTabState } from '../../../global/selectors';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -249,6 +250,10 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     }
   }, [isLeaving, leaveGroupCall, shouldEndGroupCall]);
 
+  const handleToggleGroupCallPresentation = useCallback(() => {
+    toggleGroupCallPresentation();
+  }, [toggleGroupCallPresentation]);
+
   return (
     <Modal
       isOpen={!isCallPanelVisible && !isLeaving}
@@ -293,7 +298,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             {IS_SCREENSHARE_SUPPORTED && !shouldRaiseHand && (
               <MenuItem
                 icon="share-screen-outlined"
-                onClick={toggleGroupCallPresentation}
+                onClick={handleToggleGroupCallPresentation}
               >
                 {lang(hasPresentation ? 'VoipChatStopScreenCapture' : 'VoipChatStartScreenCapture')}
               </MenuItem>
@@ -416,7 +421,7 @@ export default memo(withGlobal<OwnProps>(
       isSpeakerEnabled: !isSpeakerDisabled,
       participantsCount,
       meParticipant: selectGroupCallParticipant(global, groupCallId, global.currentUserId!),
-      isCallPanelVisible: Boolean(global.isCallPanelVisible),
+      isCallPanelVisible: Boolean(selectTabState(global).isCallPanelVisible),
       isAdmin: selectIsAdminInActiveGroupCall(global),
       participants,
     };

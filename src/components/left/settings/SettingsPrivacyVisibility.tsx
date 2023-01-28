@@ -171,7 +171,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
 
   const handleVisibilityChange = useCallback((value) => {
     setPrivacyVisibility({
-      privacyKey,
+      privacyKey: privacyKey!,
       visibility: value,
     });
   }, [privacyKey, setPrivacyVisibility]);

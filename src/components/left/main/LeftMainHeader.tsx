@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { AnimationLevel, ISettings } from '../../../types';
 import { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { ApiChat } from '../../../api/types';
-import type { GlobalState } from '../../../global/types';
+import type { TabState, GlobalState } from '../../../global/types';
 
 import {
   ANIMATION_LEVEL_MAX,
@@ -25,7 +25,7 @@ import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
-import { selectCurrentMessageList, selectTheme } from '../../../global/selectors';
+import { selectCurrentMessageList, selectTabState, selectTheme } from '../../../global/selectors';
 import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
@@ -74,7 +74,7 @@ type StateProps =
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'canInstall'>;
+  & Pick<GlobalState, 'connectionState' | 'isSyncing'> & Pick<TabState, 'canInstall'>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
@@ -153,7 +153,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     if (hasPasscode) {
       lockScreen();
     } else {
-      requestNextSettingsScreen(SettingsScreens.PasscodeDisabled);
+      requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
     }
   }, [hasPasscode, lockScreen, requestNextSettingsScreen]);
 
@@ -461,9 +461,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const tabState = selectTabState(global);
     const {
       query: searchQuery, fetchingStatus, chatId, date,
-    } = global.globalSearch;
+    } = tabState.globalSearch;
     const { currentUserId, connectionState, isSyncing } = global;
     const { byId: chatsById } = global.chats;
     const { isConnectionStatusMinimized, animationLevel } = global.settings.byKey;
@@ -483,7 +484,7 @@ export default memo(withGlobal<OwnProps>(
       isConnectionStatusMinimized,
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
-      canInstall: Boolean(global.canInstall),
+      canInstall: Boolean(tabState.canInstall),
     };
   },
 )(LeftMainHeader));

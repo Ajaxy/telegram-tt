@@ -1,29 +1,52 @@
-import type { GlobalState } from '../types';
+import type { GlobalState, TabArgs } from '../types';
+import { selectTabState } from './tabs';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
 
-export function selectPaymentInputInvoice(global: GlobalState) {
-  return global.payment.inputInvoice;
+export function selectPaymentInputInvoice<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.inputInvoice;
 }
 
-export function selectPaymentFormId(global: GlobalState) {
-  return global.payment.formId;
+export function selectPaymentFormId<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.formId;
 }
 
-export function selectPaymentRequestId(global: GlobalState) {
-  return global.payment.requestId;
+export function selectPaymentRequestId<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.requestId;
 }
 
-export function selectProviderPublishableKey(global: GlobalState) {
-  return global.payment.nativeParams?.publishableKey;
+export function selectProviderPublishableKey<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.nativeParams?.publishableKey;
 }
 
-export function selectProviderPublicToken(global: GlobalState) {
-  return global.payment.nativeParams?.publicToken;
+export function selectProviderPublicToken<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.nativeParams?.publicToken;
 }
 
-export function selectStripeCredentials(global: GlobalState) {
-  return global.payment.stripeCredentials;
+export function selectStripeCredentials<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.stripeCredentials;
 }
 
-export function selectSmartGlocalCredentials(global: GlobalState) {
-  return global.payment.smartGlocalCredentials;
+export function selectSmartGlocalCredentials<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectTabState(global, tabId).payment.smartGlocalCredentials;
 }

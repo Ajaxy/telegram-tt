@@ -31,6 +31,7 @@ import {
   selectChat,
   selectChatBot,
   selectCurrentMessageList,
+  selectTabState,
   selectCurrentTextSearch,
   selectIsChatBotNotStarted,
   selectIsInSelectMode,
@@ -271,13 +272,13 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (isPrivate) {
-      loadUser({ userId: chatId });
+      loadUser({ userId: chatId! });
     }
   }, [chatId, isPrivate, loadUser]);
 
   useEffect(() => {
     if (!areChatSettingsLoaded && lastSyncTime) {
-      loadChatSettings({ chatId });
+      loadChatSettings({ chatId: chatId! });
     }
   }, [chatId, isPrivate, areChatSettingsLoaded, lastSyncTime, loadChatSettings]);
 
@@ -312,7 +313,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   }, []);
 
   const handleUnpinAllMessages = useCallback(() => {
-    unpinAllMessages({ chatId, threadId });
+    unpinAllMessages({ chatId: chatId!, threadId: threadId! });
     closeUnpinModal();
     openPreviousChat();
   }, [unpinAllMessages, chatId, threadId, closeUnpinModal, openPreviousChat]);
@@ -322,7 +323,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   }, [openChat, chatId]);
 
   const handleSubscribeClick = useCallback(() => {
-    joinChannel({ chatId });
+    joinChannel({ chatId: chatId! });
     if (renderingShouldSendJoinRequest) {
       showNotification({
         message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
@@ -592,11 +593,12 @@ export default memo(withGlobal<OwnProps>(
       isBlurred: isBackgroundBlurred, background: customBackground, backgroundColor, patternColor,
     } = global.settings.themes[theme] || {};
 
-    const { messageLists } = global.messages;
-    const currentMessageList = selectCurrentMessageList(global);
     const {
-      isLeftColumnShown, chats: { listIds }, activeEmojiInteractions, lastSyncTime,
-    } = global;
+      messageLists, isLeftColumnShown, activeEmojiInteractions,
+      seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
+    } = selectTabState(global);
+    const currentMessageList = selectCurrentMessageList(global);
+    const { chats: { listIds }, lastSyncTime } = global;
 
     const state: StateProps = {
       theme,
@@ -608,9 +610,9 @@ export default memo(withGlobal<OwnProps>(
       isBackgroundBlurred,
       hasCurrentTextSearch: Boolean(selectCurrentTextSearch(global)),
       isSelectModeActive: selectIsInSelectMode(global),
-      isSeenByModalOpen: Boolean(global.seenByModal),
-      isReactorListModalOpen: Boolean(global.reactorModal),
-      isGiftPremiumModalOpen: global.giftPremiumModal?.isOpen,
+      isSeenByModalOpen: Boolean(seenByModal),
+      isReactorListModalOpen: Boolean(reactorModal),
+      isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,
@@ -626,7 +628,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const bot = selectChatBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
-    const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
+    const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
 
     const canPost = chat && getCanPostInChat(chat, threadId);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
@@ -670,7 +672,7 @@ export default memo(withGlobal<OwnProps>(
         || Boolean(audioChatId && audioMessageId)
       ),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
-      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
+      shouldSkipHistoryAnimations,
       isChannel,
       canSubscribe,
       canStartBot,

@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { GlobalState, MessageListType } from '../../../global/types';
+import type { TabState, MessageListType, GlobalState } from '../../../global/types';
 import type {
   ApiAttachment,
   ApiBotInlineResult,
@@ -53,6 +53,7 @@ import {
   selectIsCurrentUserPremium,
   selectChatType,
   selectRequestedDraftFiles,
+  selectTabState,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -148,7 +149,7 @@ type StateProps =
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
     isForwarding?: boolean;
-    pollModal: GlobalState['pollModal'];
+    pollModal: TabState['pollModal'];
     botKeyboardMessageId?: number;
     botKeyboardPlaceholder?: string;
     withScheduledButton?: boolean;
@@ -160,7 +161,7 @@ type StateProps =
     currentUserId?: string;
     recentEmojis: string[];
     lastSyncTime?: number;
-    contentToBeScheduled?: GlobalState['messages']['contentToBeScheduled'];
+    contentToBeScheduled?: TabState['contentToBeScheduled'];
     shouldSuggestStickers?: boolean;
     shouldSuggestCustomEmoji?: boolean;
     baseEmojiKeywords?: Record<string, string[]>;
@@ -195,7 +196,7 @@ enum MainButtonState {
   Schedule = 'schedule',
 }
 
-type ScheduledMessageArgs = GlobalState['messages']['contentToBeScheduled'] | {
+type ScheduledMessageArgs = TabState['contentToBeScheduled'] | {
   id: string; queryId: string; isSilent?: boolean;
 };
 
@@ -283,7 +284,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     loadSendAs,
     resetOpenChatWithDraft,
     callAttachBot,
-    openPremiumModal,
     addRecentCustomEmoji,
     showNotification,
   } = getActions();
@@ -578,18 +578,24 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!notificationNumber) {
       showNotification({
         message: lang('UnlockPremiumEmojiHint'),
-        action: () => openPremiumModal({ initialSection: 'animated_emoji' }),
+        action: {
+          action: 'openPremiumModal',
+          payload: { initialSection: 'animated_emoji' },
+        },
         actionText: lang('PremiumMore'),
       });
     } else {
       showNotification({
         message: lang('UnlockPremiumEmojiHint2'),
-        action: () => openChat({ id: currentUserId, shouldReplaceHistory: true }),
+        action: {
+          action: 'openChat',
+          payload: { id: currentUserId, shouldReplaceHistory: true },
+        },
         actionText: lang('Open'),
       });
     }
     customEmojiNotificationNumber.current = Number(!notificationNumber);
-  }, [currentUserId, lang, openChat, openPremiumModal, showNotification]);
+  }, [currentUserId, lang, showNotification]);
 
   const [handleEditComplete, handleEditCancel] = useEditing(
     htmlRef,
@@ -627,7 +633,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         data: {
           message: 'MESSAGE_TOO_LONG_PLEASE_REMOVE_CHARACTERS',
           textParams: {
-            '{EXTRA_CHARS_COUNT}': extraLength,
+            '{EXTRA_CHARS_COUNT}': extraLength.toString(),
             '{PLURAL_S}': extraLength > 1 ? 's' : '',
           },
           hasErrorKey: true,
@@ -1523,6 +1529,8 @@ export default memo(withGlobal<OwnProps>(
       ? selectEditingScheduledDraft(global, chatId)
       : selectEditingDraft(global, chatId, threadId);
 
+    const tabState = selectTabState(global);
+
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       connectionState: global.connectionState,
@@ -1542,22 +1550,22 @@ export default memo(withGlobal<OwnProps>(
       shouldSchedule: messageListType === 'scheduled',
       botKeyboardMessageId,
       botKeyboardPlaceholder: keyboardMessage?.keyboardPlaceholder,
-      isForwarding: chatId === global.forwardMessages.toChatId,
-      pollModal: global.pollModal,
+      isForwarding: chatId === tabState.forwardMessages.toChatId,
+      pollModal: tabState.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
       groupChatMembers: chat?.fullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
       lastSyncTime: global.lastSyncTime,
-      contentToBeScheduled: global.messages.contentToBeScheduled,
+      contentToBeScheduled: tabState.contentToBeScheduled,
       shouldSuggestStickers,
       shouldSuggestCustomEmoji,
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,
-      inlineBots: global.inlineBots.byUsername,
-      isInlineBotLoading: global.inlineBots.isLoading,
+      inlineBots: tabState.inlineBots.byUsername,
+      isInlineBotLoading: tabState.inlineBots.isLoading,
       chatBotCommands: chat?.fullInfo && chat.fullInfo.botCommands,
       botCommands: chatBot?.fullInfo ? (chatBot.fullInfo.botInfo?.commands || false) : undefined,
       botMenuButton: chatBot?.fullInfo?.botInfo?.menuButton,

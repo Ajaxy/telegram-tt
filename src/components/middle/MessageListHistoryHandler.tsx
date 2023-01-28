@@ -1,10 +1,12 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../lib/teact/teactn';
+import { getActions, withGlobal } from '../../global';
+
+import type { FC } from '../../lib/teact/teact';
+import type { MessageList as GlobalMessageList } from '../../global/types';
 
 import { createLocationHash } from '../../util/routing';
+import { selectTabState } from '../../global/selectors';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import type { MessageList as GlobalMessageList } from '../../global/types';
 
 type StateProps = {
   messageLists?: GlobalMessageList[];
@@ -44,7 +46,7 @@ const MessageListHistoryHandler: FC<StateProps> = ({ messageLists }) => {
 export default memo(withGlobal(
   (global): StateProps => {
     return {
-      messageLists: global.messages.messageLists,
+      messageLists: selectTabState(global).messageLists,
     };
   },
 )(MessageListHistoryHandler));

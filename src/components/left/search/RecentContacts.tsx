@@ -68,6 +68,10 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
     }, SEARCH_CLOSE_TIMEOUT_MS);
   }, [openChat, addRecentlyFoundChatId, onReset]);
 
+  const handleClearRecentlyFoundChats = useCallback(() => {
+    clearRecentlyFoundChats();
+  }, [clearRecentlyFoundChats]);
+
   const lang = useLang();
 
   return (
@@ -94,7 +98,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
               size="smaller"
               color="translucent"
               ariaLabel="Clear recent chats"
-              onClick={clearRecentlyFoundChats}
+              onClick={handleClearRecentlyFoundChats}
               isRtl={lang.isRtl}
             >
               <i className="icon-close" />
@@ -116,7 +120,7 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
-    const { recentlyFoundChatIds } = global.globalSearch;
+    const { recentlyFoundChatIds } = global;
     const { animationLevel } = global.settings.byKey;
 
     return {

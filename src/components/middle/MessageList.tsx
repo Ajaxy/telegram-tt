@@ -28,7 +28,7 @@ import {
   selectFirstMessageId,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
-  selectIsCurrentUserPremium,
+  selectIsCurrentUserPremium, selectLastScrollOffset,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -169,7 +169,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   // We update local cached `scrollOffsetRef` when opening chat.
   // Then we update global version every second on scrolling.
-  const scrollOffsetRef = useRef<number>((type === 'thread' && selectScrollOffset(getGlobal(), chatId, threadId)) || 0);
+  const scrollOffsetRef = useRef<number>((type === 'thread'
+    && selectScrollOffset(getGlobal(), chatId, threadId))
+    || selectLastScrollOffset(getGlobal(), chatId, threadId)
+    || 0);
+
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
   const listItemElementsRef = useRef<HTMLDivElement[]>();

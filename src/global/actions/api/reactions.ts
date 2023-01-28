@@ -4,7 +4,7 @@ import * as mediaLoader from '../../../util/mediaLoader';
 import { ApiMediaFormat } from '../../../api/types';
 import {
   selectChat,
-  selectChatMessage, selectCurrentChat,
+  selectChatMessage, selectCurrentChat, selectTabState,
   selectDefaultReaction,
   selectLocalAnimatedEmojiEffectByName,
   selectMaxUserReactions,
@@ -17,12 +17,15 @@ import {
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import { isSameReaction, getUserReactions, isMessageLocal } from '../../helpers';
+import type { ActionReturnType } from '../../types';
+import { updateTabState } from '../../reducers/tabs';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 const INTERACTION_RANDOM_OFFSET = 40;
 
 let interactionLocalId = 0;
 
-addActionHandler('loadAvailableReactions', async () => {
+addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
   const result = await callApi('getAvailableReactions');
   if (!result) {
     return;
@@ -38,15 +41,17 @@ addActionHandler('loadAvailableReactions', async () => {
     }
   });
 
-  setGlobal({
-    ...getGlobal(),
+  global = getGlobal();
+  global = {
+    ...global,
     availableReactions: result,
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('interactWithAnimatedEmoji', (global, actions, payload) => {
+addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {
   const {
-    emoji, x, y, localEffect, startSize, isReversed,
+    emoji, x, y, localEffect, startSize, isReversed, tabId = getCurrentTabId(),
   } = payload!;
 
   const activeEmojiInteraction = {
@@ -59,13 +64,12 @@ addActionHandler('interactWithAnimatedEmoji', (global, actions, payload) => {
     isReversed,
   };
 
-  return {
-    ...global,
-    activeEmojiInteractions: [...(global.activeEmojiInteractions || []), activeEmojiInteraction],
-  };
+  return updateTabState(global, {
+    activeEmojiInteractions: [...(selectTabState(global, tabId).activeEmojiInteractions || []), activeEmojiInteraction],
+  }, tabId);
 });
 
-addActionHandler('sendEmojiInteraction', (global, actions, payload) => {
+addActionHandler('sendEmojiInteraction', (global, actions, payload): ActionReturnType => {
   const {
     messageId, chatId, emoji, interactions, localEffect,
   } = payload!;
@@ -79,14 +83,14 @@ addActionHandler('sendEmojiInteraction', (global, actions, payload) => {
   void callApi('sendEmojiInteraction', {
     chat,
     messageId,
-    emoticon: emoji || selectLocalAnimatedEmojiEffectByName(localEffect),
+    emoticon: emoji || selectLocalAnimatedEmojiEffectByName(localEffect!)!,
     timestamps: interactions,
   });
 });
 
-addActionHandler('sendDefaultReaction', (global, actions, payload) => {
+addActionHandler('sendDefaultReaction', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, messageId,
+    chatId, messageId, tabId = getCurrentTabId(),
   } = payload;
   const reaction = selectDefaultReaction(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
@@ -97,11 +101,12 @@ addActionHandler('sendDefaultReaction', (global, actions, payload) => {
     chatId,
     messageId,
     reaction,
+    tabId,
   });
 });
 
-addActionHandler('toggleReaction', (global, actions, payload) => {
-  const { chatId, reaction } = payload;
+addActionHandler('toggleReaction', (global, actions, payload): ActionReturnType => {
+  const { chatId, reaction, tabId = getCurrentTabId() } = payload;
   let { messageId } = payload;
 
   const chat = selectChat(global, chatId);
@@ -134,55 +139,56 @@ addActionHandler('toggleReaction', (global, actions, payload) => {
 
   const { animationLevel } = global.settings.byKey;
 
+  const tabState = selectTabState(global, tabId);
   if (animationLevel === ANIMATION_LEVEL_MAX) {
-    const newActiveReactions = hasReaction ? omit(global.activeReactions, [messageId]) : {
-      ...global.activeReactions,
+    const newActiveReactions = hasReaction ? omit(tabState.activeReactions, [messageId]) : {
+      ...tabState.activeReactions,
       [messageId]: [
-        ...(global.activeReactions[messageId] || []),
+        ...(tabState.activeReactions[messageId] || []),
         {
           messageId,
           reaction,
         },
       ],
     };
-    global = {
-      ...global,
+    global = updateTabState(global, {
       activeReactions: newActiveReactions,
-    };
+    }, tabId);
   }
 
   return addMessageReaction(global, message, reactions);
 });
 
-addActionHandler('openChat', (global) => {
-  return {
-    ...global,
+addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
     activeReactions: {},
-  };
+  }, tabId);
 });
 
-addActionHandler('stopActiveReaction', (global, actions, payload) => {
-  const { messageId, reaction } = payload;
+addActionHandler('stopActiveReaction', (global, actions, payload): ActionReturnType => {
+  const { messageId, reaction, tabId = getCurrentTabId() } = payload;
 
-  if (!global.activeReactions[messageId]?.some((active) => isSameReaction(active.reaction, reaction))) {
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.activeReactions[messageId]?.some((active) => isSameReaction(active.reaction, reaction))) {
     return global;
   }
 
-  const newMessageActiveReactions = global.activeReactions[messageId]
+  const newMessageActiveReactions = tabState.activeReactions[messageId]
     .filter((active) => !isSameReaction(active.reaction, reaction));
 
   const newActiveReactions = newMessageActiveReactions.length ? {
-    ...global.activeReactions,
+    ...tabState.activeReactions,
     [messageId]: newMessageActiveReactions,
-  } : omit(global.activeReactions, [messageId]);
+  } : omit(tabState.activeReactions, [messageId]);
 
-  return {
-    ...global,
+  return updateTabState(global, {
     activeReactions: newActiveReactions,
-  };
+  }, tabId);
 });
 
-addActionHandler('setDefaultReaction', async (global, actions, payload) => {
+addActionHandler('setDefaultReaction', async (global, actions, payload): Promise<void> => {
   const { reaction } = payload;
 
   const result = await callApi('setDefaultReaction', { reaction });
@@ -197,25 +203,26 @@ addActionHandler('setDefaultReaction', async (global, actions, payload) => {
     return;
   }
 
-  setGlobal({
+  global = {
     ...global,
     config: {
       ...global.config,
       defaultReaction: reaction,
     },
-  });
-});
-
-addActionHandler('stopActiveEmojiInteraction', (global, actions, payload) => {
-  const { id } = payload;
-
-  return {
-    ...global,
-    activeEmojiInteractions: global.activeEmojiInteractions?.filter((active) => active.id !== id),
   };
+  setGlobal(global);
 });
 
-addActionHandler('loadReactors', async (global, actions, payload) => {
+addActionHandler('stopActiveEmojiInteraction', (global, actions, payload): ActionReturnType => {
+  const { id, tabId = getCurrentTabId() } = payload;
+
+  return updateTabState(global, {
+    activeEmojiInteractions: selectTabState(global, tabId)
+      .activeEmojiInteractions?.filter((active) => active.id !== id),
+  }, tabId);
+});
+
+addActionHandler('loadReactors', async (global, actions, payload): Promise<void> => {
   const { chatId, messageId, reaction } = payload;
   const chat = selectChat(global, chatId);
   const message = selectChatMessage(global, chatId, messageId);
@@ -241,12 +248,13 @@ addActionHandler('loadReactors', async (global, actions, payload) => {
     global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   }
 
-  setGlobal(updateChatMessage(global, chatId, messageId, {
+  global = updateChatMessage(global, chatId, messageId, {
     reactors: result,
-  }));
+  });
+  setGlobal(global);
 });
 
-addActionHandler('loadMessageReactions', (global, actions, payload) => {
+addActionHandler('loadMessageReactions', (global, actions, payload): ActionReturnType => {
   const { ids, chatId } = payload;
 
   const chat = selectChat(global, chatId);
@@ -258,23 +266,23 @@ addActionHandler('loadMessageReactions', (global, actions, payload) => {
   callApi('fetchMessageReactions', { ids, chat });
 });
 
-addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload) => {
+addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, emoticon, x, y, startSize, isReversed, id,
+    chatId, emoticon, x, y, startSize, isReversed, id, tabId = getCurrentTabId(),
   } = payload;
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || !global.activeEmojiInteractions?.some((interaction) => interaction.id === id)
+  const tabState = selectTabState(global, tabId);
+  if (!chat || !tabState.activeEmojiInteractions?.some((interaction) => interaction.id === id)
     || chatId === global.currentUserId) {
     return undefined;
   }
 
   callApi('sendWatchingEmojiInteraction', { chat, emoticon });
 
-  return {
-    ...global,
-    activeEmojiInteractions: global.activeEmojiInteractions.map((activeEmojiInteraction) => {
+  return updateTabState(global, {
+    activeEmojiInteractions: tabState.activeEmojiInteractions.map((activeEmojiInteraction) => {
       if (activeEmojiInteraction.id === id) {
         return {
           ...activeEmojiInteraction,
@@ -286,10 +294,10 @@ addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload) => {
       }
       return activeEmojiInteraction;
     }),
-  };
+  }, tabId);
 });
 
-addActionHandler('fetchUnreadReactions', async (global, actions, payload) => {
+addActionHandler('fetchUnreadReactions', async (global, actions, payload): Promise<void> => {
   const { chatId, offsetId } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
@@ -323,12 +331,12 @@ addActionHandler('fetchUnreadReactions', async (global, actions, payload) => {
   setGlobal(global);
 });
 
-addActionHandler('animateUnreadReaction', (global, actions, payload) => {
-  const { messageIds } = payload;
+addActionHandler('animateUnreadReaction', (global, actions, payload): ActionReturnType => {
+  const { messageIds, tabId = getCurrentTabId() } = payload;
 
   const { animationLevel } = global.settings.byKey;
 
-  const chat = selectCurrentChat(global);
+  const chat = selectCurrentChat(global, tabId);
   if (!chat) return undefined;
 
   if (chat.unreadReactionsCount) {
@@ -346,16 +354,15 @@ addActionHandler('animateUnreadReaction', (global, actions, payload) => {
     }
   }
 
-  actions.markMessagesRead({ messageIds });
+  actions.markMessagesRead({ messageIds, tabId });
 
   if (animationLevel !== ANIMATION_LEVEL_MAX) return undefined;
 
   global = getGlobal();
 
-  return {
-    ...global,
+  return updateTabState(global, {
     activeReactions: {
-      ...global.activeReactions,
+      ...selectTabState(global, tabId).activeReactions,
       ...Object.fromEntries(messageIds.map((messageId) => {
         const message = selectChatMessage(global, chat.id, messageId);
 
@@ -373,19 +380,21 @@ addActionHandler('animateUnreadReaction', (global, actions, payload) => {
         }))];
       }).filter(Boolean)),
     },
-  };
+  }, tabId);
 });
 
-addActionHandler('focusNextReaction', (global, actions) => {
-  const chat = selectCurrentChat(global);
+addActionHandler('focusNextReaction', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const chat = selectCurrentChat(global, tabId);
 
   if (!chat?.unreadReactions) return;
 
-  actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0] });
+  actions.focusMessage({ chatId: chat.id, messageId: chat.unreadReactions[0], tabId });
 });
 
-addActionHandler('readAllReactions', (global) => {
-  const chat = selectCurrentChat(global);
+addActionHandler('readAllReactions', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const chat = selectCurrentChat(global, tabId);
   if (!chat) return undefined;
 
   callApi('readAllReactions', { chat });

@@ -1,7 +1,12 @@
 import type { ReactElement } from 'react';
 import { DEBUG, DEBUG_MORE } from '../../config';
 import {
-  fastRaf, fastRafPrimary, onTickEnd, onTickEndPrimary, throttleWithPrimaryRaf, throttleWithRaf,
+  fastRafWithFallback,
+  fastRafPrimaryWithFallback,
+  onTickEnd,
+  onTickEndPrimary,
+  throttleWithPrimaryRafFallback,
+  throttleWithRafFallback,
 } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
@@ -451,8 +456,8 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
     hook.value = hook.nextValue;
   });
 
-  componentInstance.prepareForFrame = throttleWithPrimaryRaf(() => prepareComponentForFrame(componentInstance));
-  componentInstance.forceUpdate = throttleWithRaf(() => forceUpdateComponent(componentInstance));
+  componentInstance.prepareForFrame = throttleWithPrimaryRafFallback(() => prepareComponentForFrame(componentInstance));
+  componentInstance.forceUpdate = throttleWithRafFallback(() => forceUpdateComponent(componentInstance));
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
@@ -488,10 +493,10 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
         byCursor[cursor].nextValue = newValue;
 
         if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
-          componentInstance.prepareForFrame = throttleWithPrimaryRaf(
+          componentInstance.prepareForFrame = throttleWithPrimaryRafFallback(
             () => prepareComponentForFrame(componentInstance),
           );
-          componentInstance.forceUpdate = throttleWithRaf(
+          componentInstance.forceUpdate = throttleWithRafFallback(
             () => forceUpdateComponent(componentInstance),
           );
         }
@@ -639,7 +644,7 @@ function useLayoutEffectBase(
 }
 
 export function useEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {
-  return useLayoutEffectBase(fastRaf, fastRafPrimary, effect, dependencies, debugKey);
+  return useLayoutEffectBase(fastRafWithFallback, fastRafPrimaryWithFallback, effect, dependencies, debugKey);
 }
 
 export function useLayoutEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {

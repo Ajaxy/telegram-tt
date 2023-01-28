@@ -48,7 +48,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
     void setLanguage(langCode as LangCode, () => {
       unmarkIsLoading();
 
-      setSettingOption({ language: langCode });
+      setSettingOption({ language: langCode as LangCode });
 
       loadAttachBots(); // Should be refetched every language change
     });

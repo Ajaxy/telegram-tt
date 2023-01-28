@@ -5,10 +5,10 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiChat, ApiSticker } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 
 import { DEFAULT_TOPIC_ICON_STICKER_ID } from '../../config';
-import { selectChat, selectIsCurrentUserPremium } from '../../global/selectors';
+import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
 import { getTopicColors } from '../../util/forumColors';
 import cycleRestrict from '../../util/cycleRestrict';
 import buildClassName from '../../util/buildClassName';
@@ -35,7 +35,7 @@ export type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
-  createTopicPanel?: GlobalState['createTopicPanel'];
+  createTopicPanel?: TabState['createTopicPanel'];
   isCurrentUserPremium?: boolean;
 };
 
@@ -159,7 +159,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { createTopicPanel } = global;
+    const { createTopicPanel } = selectTabState(global);
     return {
       chat: createTopicPanel?.chatId ? selectChat(global, createTopicPanel.chatId) : undefined,
       createTopicPanel,

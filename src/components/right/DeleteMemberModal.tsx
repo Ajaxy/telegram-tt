@@ -34,7 +34,7 @@ const DeleteMemberModal: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const handleDeleteChatMember = useCallback(() => {
-    deleteChatMember({ chatId: chat!.id, userId });
+    deleteChatMember({ chatId: chat!.id, userId: userId! });
     onClose();
   }, [chat, deleteChatMember, onClose, userId]);
 

@@ -56,7 +56,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     setThemeSettings,
   } = getActions();
 
-  const themeRef = useRef<string>();
+  const themeRef = useRef<ThemeKey>();
   themeRef.current = theme;
   // Due to the parent Transition, this component never gets unmounted,
   // that's why we use throttled API call on every update.
@@ -94,20 +94,20 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
   }, [setThemeSettings, theme]);
 
   const handleWallPaperSelect = useCallback((slug: string) => {
-    setThemeSettings({ theme: themeRef.current, background: slug });
+    setThemeSettings({ theme: themeRef.current!, background: slug });
     const currentWallpaper = loadedWallpapers && loadedWallpapers.find((wallpaper) => wallpaper.slug === slug);
     if (currentWallpaper?.document.thumbnail) {
       getAverageColor(currentWallpaper.document.thumbnail.dataUri)
         .then((color) => {
           const patternColor = getPatternColor(color);
           const rgbColor = `#${rgb2hex(color)}`;
-          setThemeSettings({ theme: themeRef.current, backgroundColor: rgbColor, patternColor });
+          setThemeSettings({ theme: themeRef.current!, backgroundColor: rgbColor, patternColor });
         });
     }
   }, [loadedWallpapers, setThemeSettings]);
 
   const handleWallPaperBlurChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeSettings({ theme: themeRef.current, isBlurred: e.target.checked });
+    setThemeSettings({ theme: themeRef.current!, isBlurred: e.target.checked });
   }, [setThemeSettings]);
 
   const lang = useLang();

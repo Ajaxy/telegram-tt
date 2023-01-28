@@ -5,10 +5,10 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiChat, ApiSticker, ApiTopic } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 
 import { DEFAULT_TOPIC_ICON_STICKER_ID, GENERAL_TOPIC_ID } from '../../config';
-import { selectChat, selectIsCurrentUserPremium } from '../../global/selectors';
+import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
@@ -36,7 +36,7 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   topic?: ApiTopic;
-  editTopicPanel?: GlobalState['editTopicPanel'];
+  editTopicPanel?: TabState['editTopicPanel'];
   isCurrentUserPremium?: boolean;
 };
 
@@ -173,7 +173,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
-    const { editTopicPanel } = global;
+    const { editTopicPanel } = selectTabState(global);
     const chat = editTopicPanel?.chatId ? selectChat(global, editTopicPanel.chatId) : undefined;
     const topic = editTopicPanel?.topicId ? chat?.topics?.[editTopicPanel?.topicId] : undefined;
     return {

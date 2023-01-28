@@ -9,7 +9,7 @@ import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSaf
 import type { MessageKey } from '../global/helpers';
 import { getMessageKey, parseMessageKey } from '../global/helpers';
 import { fastRaf } from './schedulers';
-import { selectCurrentMessageList } from '../global/selectors';
+import { selectCurrentMessageList, selectTabState } from '../global/selectors';
 
 type Handler = (eventName: string, e: Event) => void;
 export type TrackId = `${MessageKey}-${number}`;
@@ -91,7 +91,7 @@ function playNext(trackId: TrackId, isReverseOrder?: boolean) {
     if (currentTrack.onTrackChange) currentTrack.onTrackChange();
   }
 
-  const origin = getGlobal().audioPlayer.origin || AudioOrigin.Inline;
+  const origin = selectTabState(getGlobal()).audioPlayer.origin || AudioOrigin.Inline;
 
   const nextTrackId = findNextInQueue(trackId, origin, isReverseOrder);
   if (!nextTrackId) {
@@ -227,11 +227,11 @@ export function register(
     },
 
     isLast() {
-      return !findNextInQueue(trackId, getGlobal().audioPlayer.origin);
+      return !findNextInQueue(trackId, selectTabState(getGlobal()).audioPlayer.origin);
     },
 
     isFirst() {
-      return !findNextInQueue(trackId, getGlobal().audioPlayer.origin, true);
+      return !findNextInQueue(trackId, selectTabState(getGlobal()).audioPlayer.origin, true);
     },
 
     requestPreviousTrack() {
@@ -294,7 +294,7 @@ function removeFromQueue(track: Track, trackId: TrackId) {
 }
 
 function cleanUpQueue(type: Track['type'], trackId: TrackId) {
-  if (getGlobal().globalSearch.currentContent === GlobalSearchContent.Music) return;
+  if (selectTabState(getGlobal()).globalSearch.currentContent === GlobalSearchContent.Music) return;
   const { chatId } = parseMessageKey(splitTrackId(trackId).messageKey);
   const openedChatId = selectCurrentMessageList(getGlobal())?.chatId;
   const queueFilter = (id: string) => (

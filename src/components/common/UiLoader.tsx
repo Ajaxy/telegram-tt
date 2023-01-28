@@ -2,12 +2,16 @@ import React, { useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type { ThemeKey } from '../../types';
 import type { FC } from '../../lib/teact/teact';
 
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
-import { selectIsRightColumnShown, selectTheme } from '../../global/selectors';
+import {
+  selectIsRightColumnShown,
+  selectTheme,
+  selectTabState,
+} from '../../global/selectors';
 import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -41,7 +45,7 @@ type OwnProps = {
   isMobile?: boolean;
 };
 
-type StateProps = Pick<GlobalState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
+type StateProps = Pick<TabState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
   isRightColumnShown?: boolean;
   leftColumnWidth?: number;
   theme: ThemeKey;
@@ -74,7 +78,7 @@ function preloadAvatars() {
 
 const preloadTasks = {
   main: () => Promise.all([
-    loadModule(Bundles.Main, 'Main')
+    loadModule(Bundles.Main)
       .then(preloadFonts),
     preloadAvatars(),
     preloadImage(reactionThumbsPath),
@@ -176,12 +180,13 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 export default withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const theme = selectTheme(global);
+    const tabState = selectTabState(global);
 
     return {
-      shouldSkipHistoryAnimations: global.shouldSkipHistoryAnimations,
-      uiReadyState: global.uiReadyState,
+      shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
+      uiReadyState: tabState.uiReadyState,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
-      leftColumnWidth: global.leftColumnWidth,
+      leftColumnWidth: tabState.leftColumnWidth,
       theme,
     };
   },

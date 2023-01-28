@@ -1,4 +1,4 @@
-import type { GlobalState } from '../types';
+import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
 import { getSystemTheme } from '../../util/environment';
@@ -9,50 +9,68 @@ import { selectCurrentTextSearch } from './localSearch';
 import { selectCurrentStickerSearch, selectCurrentGifSearch } from './symbols';
 import { selectIsStatisticsShown, selectIsMessageStatisticsShown } from './statistics';
 import { selectCurrentManagement } from './management';
+import { selectTabState } from './tabs';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
 
-export function selectIsMediaViewerOpen(global: GlobalState) {
-  const { mediaViewer } = global;
+export function selectIsMediaViewerOpen<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { mediaViewer } = selectTabState(global, tabId);
   return Boolean(mediaViewer.mediaId || mediaViewer.avatarOwnerId);
 }
 
-export function selectRightColumnContentKey(global: GlobalState, isMobile?: boolean) {
-  return selectIsEditTopicPanelOpen(global) ? (
+export function selectRightColumnContentKey<T extends GlobalState>(
+  global: T,
+  isMobile?: boolean,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectIsEditTopicPanelOpen(global, tabId) ? (
     RightColumnContent.EditTopic
-  ) : selectIsCreateTopicPanelOpen(global) ? (
+  ) : selectIsCreateTopicPanelOpen(global, tabId) ? (
     RightColumnContent.CreateTopic
-  ) : selectIsPollResultsOpen(global) ? (
+  ) : selectIsPollResultsOpen(global, tabId) ? (
     RightColumnContent.PollResults
-  ) : !isMobile && selectCurrentTextSearch(global) ? (
+  ) : !isMobile && selectCurrentTextSearch(global, tabId) ? (
     RightColumnContent.Search
-  ) : selectCurrentManagement(global) ? (
+  ) : selectCurrentManagement(global, tabId) ? (
     RightColumnContent.Management
-  ) : selectIsMessageStatisticsShown(global) ? (
+  ) : selectIsMessageStatisticsShown(global, tabId) ? (
     RightColumnContent.MessageStatistics
-  ) : selectIsStatisticsShown(global) ? (
+  ) : selectIsStatisticsShown(global, tabId) ? (
     RightColumnContent.Statistics
-  ) : selectCurrentStickerSearch(global).query !== undefined ? (
+  ) : selectCurrentStickerSearch(global, tabId).query !== undefined ? (
     RightColumnContent.StickerSearch
-  ) : selectCurrentGifSearch(global).query !== undefined ? (
+  ) : selectCurrentGifSearch(global, tabId).query !== undefined ? (
     RightColumnContent.GifSearch
-  ) : global.newChatMembersProgress !== NewChatMembersProgress.Closed ? (
+  ) : selectTabState(global, tabId).newChatMembersProgress !== NewChatMembersProgress.Closed ? (
     RightColumnContent.AddingMembers
-  ) : global.isChatInfoShown && selectCurrentMessageList(global) ? (
+  ) : selectTabState(global, tabId).isChatInfoShown && selectCurrentMessageList(global, tabId) ? (
     RightColumnContent.ChatInfo
   ) : undefined;
 }
 
-export function selectIsRightColumnShown(global: GlobalState, isMobile?: boolean) {
-  return selectRightColumnContentKey(global, isMobile) !== undefined;
+export function selectIsRightColumnShown<T extends GlobalState>(
+  global: T,
+  isMobile?: boolean,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return selectRightColumnContentKey(global, isMobile, tabId) !== undefined;
 }
 
-export function selectTheme(global: GlobalState) {
+export function selectTheme<T extends GlobalState>(global: T) {
   const { theme, shouldUseSystemTheme } = global.settings.byKey;
 
   return shouldUseSystemTheme ? getSystemTheme() : theme;
 }
 
-export function selectIsForumPanelOpen(global: GlobalState) {
-  return Boolean(global.forumPanelChatId) && (
-    global.globalSearch.query === undefined || global.globalSearch.isClosing
+export function selectIsForumPanelOpen<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const tabState = selectTabState(global, tabId);
+
+  return Boolean(tabState.forumPanelChatId) && (
+    tabState.globalSearch.query === undefined || tabState.globalSearch.isClosing
   );
 }

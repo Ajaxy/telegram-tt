@@ -1,6 +1,6 @@
 import type { TelegramClient } from '../../../lib/gramjs';
 import { Api as GramJs } from '../../../lib/gramjs';
-import type { ApiOnProgress, ApiParsedMedia, ApiPreparedMedia } from '../../types';
+import type { ApiOnProgress, ApiParsedMedia } from '../../types';
 import {
   ApiMediaFormat,
 } from '../../types';
@@ -52,11 +52,11 @@ export default async function downloadMedia(
     void cacheApi.save(cacheName, url, parsed);
   }
 
-  const prepared = mediaFormat === ApiMediaFormat.Progressive ? '' : prepareMedia(parsed as string | Blob);
+  const dataBlob = mediaFormat === ApiMediaFormat.Progressive ? '' : parsed as string | Blob;
   const arrayBuffer = mediaFormat === ApiMediaFormat.Progressive ? parsed as ArrayBuffer : undefined;
 
   return {
-    prepared,
+    dataBlob,
     arrayBuffer,
     mimeType,
     fullSize,
@@ -260,14 +260,6 @@ async function parseMedia(
   }
 
   return undefined;
-}
-
-function prepareMedia(mediaData: Exclude<ApiParsedMedia, ArrayBuffer>): ApiPreparedMedia {
-  if (mediaData instanceof Blob) {
-    return URL.createObjectURL(mediaData);
-  }
-
-  return mediaData;
 }
 
 function getMimeType(data: Uint8Array, fallbackMimeType = 'image/jpeg') {

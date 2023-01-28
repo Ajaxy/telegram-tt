@@ -34,7 +34,7 @@ import {
   selectNotifyExceptions,
   selectUserStatus,
   selectTopicFromMessage,
-  selectThreadParam,
+  selectThreadParam, selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
@@ -323,7 +323,7 @@ export default memo(withGlobal<OwnProps>(
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
     const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
-    const isSelectedForum = chatId === global.forumPanelChatId;
+    const isSelectedForum = chatId === selectTabState(global).forumPanelChatId;
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;

@@ -11,7 +11,7 @@ import { ProfileEditProgress } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
 import { throttle } from '../../../util/schedulers';
-import { selectUser } from '../../../global/selectors';
+import { selectTabState, selectUser } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
@@ -165,6 +165,8 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
     const trimmedLastName = lastName.trim();
     const trimmedBio = bio.trim();
 
+    if (!editableUsername) return;
+
     if (!trimmedFirstName.length) {
       setError(ERROR_FIRST_NAME_MISSING);
       return;
@@ -292,7 +294,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId } = global;
     const {
       progress, isUsernameAvailable, checkedUsername, error: editUsernameError,
-    } = global.profileEdit || {};
+    } = selectTabState(global).profileEdit || {};
     const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
 
     const maxBioLength = selectCurrentLimit(global, 'aboutLength');

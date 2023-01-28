@@ -28,6 +28,7 @@ import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
+  selectTabState,
   selectForwardedSender,
   selectIsChatBotNotStarted,
   selectIsChatWithBot,
@@ -174,8 +175,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   }, [openChatWithInfo, chatId, threadId]);
 
   const handleUnpinMessage = useCallback((messageId: number) => {
-    pinMessage({ chatId, messageId, isUnpin: true });
-  }, [pinMessage, chatId]);
+    pinMessage({ messageId, isUnpin: true });
+  }, [pinMessage]);
 
   const handlePinnedMessageClick = useCallback((): void => {
     if (pinnedMessage) {
@@ -457,10 +458,13 @@ export default memo(withGlobal<OwnProps>(
   (global, {
     chatId, threadId, messageListType, isMobile,
   }): StateProps => {
-    const { isLeftColumnShown, lastSyncTime, shouldSkipHistoryAnimations } = global;
+    const {
+      isLeftColumnShown, shouldSkipHistoryAnimations, audioPlayer, messageLists,
+    } = selectTabState(global);
+    const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
 
-    const { chatId: audioChatId, messageId: audioMessageId } = global.audioPlayer;
+    const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
@@ -498,7 +502,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       lastSyncTime,
       shouldSkipHistoryAnimations,
-      currentTransitionKey: Math.max(0, global.messages.messageLists.length - 1),
+      currentTransitionKey: Math.max(0, messageLists.length - 1),
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,

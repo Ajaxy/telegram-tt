@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
+import { selectTabState } from '../../../global/selectors';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import { formatFullDate, formatTime } from '../../../util/dateFormat';
@@ -111,7 +112,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 
   const handleSaveClick = useCallback(() => {
     setIsSubmitBlocked(true);
-    const usageLimit = selectedUsageOption === 'custom' ? customUsageLimit : selectedUsageOption;
+    const usageLimit = selectedUsageOption === 'custom' ? customUsageLimit : Number(selectedUsageOption);
     let expireDate;
     switch (selectedExpireOption) {
       case 'custom':
@@ -265,7 +266,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { editingInvite } = global.management.byChatId[chatId];
+    const { editingInvite } = selectTabState(global).management.byChatId[chatId];
 
     return {
       editingInvite,
