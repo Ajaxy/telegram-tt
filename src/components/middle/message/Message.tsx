@@ -96,11 +96,11 @@ import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimen
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
-import { isAnimatingScroll } from '../../../util/fastSmoothScroll';
-
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
+import { isAnimatingScroll } from '../../../util/fastSmoothScroll';
+
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -110,8 +110,8 @@ import useFlag from '../../../hooks/useFlag';
 import useFocusMessage from './hooks/useFocusMessage';
 import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
-import useResizeObserver from '../../../hooks/useResizeObserver';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useResizeObserver from '../../../hooks/useResizeObserver';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
