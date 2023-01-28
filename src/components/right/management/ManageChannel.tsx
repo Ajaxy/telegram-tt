@@ -240,6 +240,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
             maxLength={CHANNEL_MAX_DESCRIPTION}
             maxLengthIndicator={(CHANNEL_MAX_DESCRIPTION - about.length).toString()}
             disabled={!canChangeInfo}
+            noReplaceNewlines
           />
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>
