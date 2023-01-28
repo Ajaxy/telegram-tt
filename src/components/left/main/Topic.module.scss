@@ -20,6 +20,10 @@
     width: 1rem;
     height: 1rem;
   }
+
+  :global(body.is-ios) &::after {
+    left: 0.75rem !important;
+  }
 }
 
 .closed-icon {

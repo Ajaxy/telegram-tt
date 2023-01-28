@@ -41,7 +41,7 @@
     line-height: 1.5rem;
   }
 
-  body.is-ios & {
+  body.is-ios &:not(.unopened) {
     line-height: 1.375rem;
     min-width: 1.375rem;
     height: 1.375rem;
