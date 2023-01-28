@@ -3,7 +3,7 @@ import type Api from '../../tl/api';
 import type { ApiAvailableReaction } from '../../../../api/types';
 import type { GramJsAppConfig } from '../../../../api/gramjs/apiBuilders/appConfig';
 
-export type MockDialog = {
+export type MockDialog = Partial<Api.Dialog> & {
     id: string;
 };
 

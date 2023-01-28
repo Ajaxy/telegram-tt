@@ -26,7 +26,7 @@ class TelegramClient {
     private invokeMiddleware?: <A, R>(mockClient: TelegramClient, request: Api.Request<A, R>)
     => Promise<R | undefined | 'pass'>;
 
-    private mockData: MockTypes = {
+    public mockData: MockTypes = {
         users: [],
         chats: [],
         channels: [],
@@ -93,7 +93,7 @@ class TelegramClient {
     }
 
     getDialogs(type: 'active' | 'archived' = 'active') {
-        return this.mockData.dialogs[type].map((dialog) => createMockedDialog(dialog, this.mockData));
+        return this.mockData.dialogs[type].map((dialog) => createMockedDialog(dialog.id, this.mockData));
     }
 
     start({

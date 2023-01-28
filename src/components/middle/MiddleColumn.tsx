@@ -244,7 +244,6 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   useOnChange(() => {
     setDropAreaState(DropAreaState.None);
-    setIsFabShown(undefined);
     setIsNotchShown(undefined);
   }, [chatId]);
 
