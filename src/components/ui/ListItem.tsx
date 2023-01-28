@@ -104,8 +104,9 @@ const ListItem: FC<OwnProps> = ({
   );
 
   const getMenuElement = useCallback(
-    () => containerRef.current!.querySelector('.ListItem-context-menu .bubble'),
-    [],
+    () => (withPortalForMenu ? document.querySelector('#portals') : containerRef.current)!
+      .querySelector('.ListItem-context-menu .bubble'),
+    [withPortalForMenu],
   );
 
   const getLayout = useCallback(
