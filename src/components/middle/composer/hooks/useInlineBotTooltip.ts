@@ -23,7 +23,7 @@ export default function useInlineBotTooltip(
   html: string,
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {
-  const { queryInlineBot, resetInlineBot } = getActions();
+  const { queryInlineBot, resetInlineBot, resetAllInlineBots } = getActions();
 
   const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
   const {
@@ -46,6 +46,12 @@ export default function useInlineBotTooltip(
       unmarkIsOpen();
     }
   }, [prevQuery, query, unmarkIsOpen]);
+
+  useEffect(() => {
+    if (!isOpen && !username) {
+      resetAllInlineBots();
+    }
+  }, [isOpen, resetAllInlineBots, username]);
 
   useEffect(() => {
     if (isAllowed && usernameLowered && chatId) {

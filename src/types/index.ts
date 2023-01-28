@@ -391,4 +391,5 @@ export type InlineBotSettings = {
   results?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
   isGallery?: boolean;
   switchPm?: ApiBotInlineSwitchPm;
+  cacheTime: number;
 };
