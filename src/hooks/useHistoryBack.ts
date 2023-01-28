@@ -6,7 +6,7 @@ import { IS_IOS } from '../util/environment';
 import { getActions } from '../lib/teact/teactn';
 
 export const LOCATION_HASH = window.location.hash;
-const PATH_BASE = `${window.location.pathname}${window.location.search}`;
+const PATH_BASE = window.location.pathname;
 // Carefully selected by swiping and observing visual changes
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
 const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
@@ -119,7 +119,7 @@ function resetHistory() {
     onBack: () => window.history.back(),
   }];
 
-  window.history.replaceState({ index: 0, historyUniqueSessionId }, PATH_BASE);
+  window.history.replaceState({ index: 0, historyUniqueSessionId }, '', PATH_BASE);
 }
 
 resetHistory();
