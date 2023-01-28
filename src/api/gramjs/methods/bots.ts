@@ -104,6 +104,7 @@ export async function fetchInlineBotResults({
     switchPm: buildBotSwitchPm(result.switchPm),
     users: result.users.map(buildApiUser).filter(Boolean),
     results: processInlineBotResult(String(result.queryId), result.results),
+    cacheTime: result.cacheTime,
   };
 }
 

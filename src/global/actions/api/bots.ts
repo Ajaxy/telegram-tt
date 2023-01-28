@@ -267,6 +267,7 @@ addActionHandler('queryInlineBot', async (global, actions, payload): Promise<voi
       switchPm: undefined,
       canLoadMore: true,
       results: [],
+      cacheTime: 0,
     };
 
     global = replaceInlineBotSettings(global, username, inlineBotData, tabId);
@@ -350,13 +351,15 @@ addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('resetInlineBot', (global, actions, payload): ActionReturnType => {
-  const { username, tabId = getCurrentTabId() } = payload;
+  const { username, force, tabId = getCurrentTabId() } = payload;
 
   let inlineBotData = selectTabState(global, tabId).inlineBots.byUsername[username];
 
   if (!inlineBotData) {
     return;
   }
+
+  if (!force && Date.now() < inlineBotData.cacheTime) return;
 
   inlineBotData = {
     id: inlineBotData.id,
@@ -365,10 +368,20 @@ addActionHandler('resetInlineBot', (global, actions, payload): ActionReturnType 
     switchPm: undefined,
     canLoadMore: true,
     results: [],
+    cacheTime: 0,
   };
 
   global = replaceInlineBotSettings(global, username, inlineBotData, tabId);
   setGlobal(global);
+});
+
+addActionHandler('resetAllInlineBots', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const inlineBots = selectTabState(global, tabId).inlineBots.byUsername;
+
+  Object.keys(inlineBots).forEach((username) => {
+    actions.resetInlineBot({ username, tabId });
+  });
 });
 
 addActionHandler('startBot', async (global, actions, payload): Promise<void> => {
@@ -900,6 +913,7 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
   global = replaceInlineBotSettings(global, username, {
     ...newInlineBotData,
     help: result.help,
+    cacheTime: Date.now() + result.cacheTime * 1000,
     ...(newResults.length && { isGallery: result.isGallery }),
     ...(result.switchPm && { switchPm: result.switchPm }),
     canLoadMore: result.results.length > 0 && Boolean(result.nextOffset),

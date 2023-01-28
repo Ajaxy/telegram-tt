@@ -1893,7 +1893,9 @@ export interface ActionPayloads {
   } & WithTabId;
   resetInlineBot: {
     username: string;
+    force?: boolean;
   } & WithTabId;
+  resetAllInlineBots: WithTabId | undefined;
   startBot: {
     botId: string;
     param?: string;
