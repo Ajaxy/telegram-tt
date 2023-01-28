@@ -69,6 +69,8 @@ export default function useScrollHooks(
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= NOTCH_THRESHOLD;
 
+    if (scrollHeight === 0) return;
+
     onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
   }
