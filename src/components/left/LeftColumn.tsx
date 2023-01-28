@@ -332,10 +332,10 @@ const LeftColumn: FC<StateProps> = ({
   }, [forumPanelChatId, setGlobalSearchChatId, setGlobalSearchQuery]);
 
   useEffect(
-    () => (content !== LeftColumnContent.ChatList || (isFirstChatFolderActive && !isChatOpen)
+    () => (content !== LeftColumnContent.ChatList || (isFirstChatFolderActive && !isChatOpen && !isForumPanelOpen)
       ? captureEscKeyListener(() => handleReset())
       : undefined),
-    [isFirstChatFolderActive, content, handleReset, isChatOpen],
+    [isFirstChatFolderActive, content, handleReset, isChatOpen, isForumPanelOpen],
   );
 
   const handleHotkeySearch = useCallback((e: KeyboardEvent) => {
