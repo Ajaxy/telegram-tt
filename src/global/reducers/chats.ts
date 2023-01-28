@@ -255,11 +255,13 @@ export function addChatMembers<T extends GlobalState>(global: T, chat: ApiChat, 
     return global;
   }
 
+  const adminMembers = updatedMembers.filter(({ isAdmin, isOwner }) => isAdmin || isOwner);
+
   return updateChat(global, chat.id, {
     fullInfo: {
       ...chat.fullInfo,
       members: updatedMembers,
-      adminMembersById: buildCollectionByKey(updatedMembers, 'userId'),
+      adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
     },
   });
 }
