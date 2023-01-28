@@ -978,6 +978,13 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
   } else if (update instanceof GramJs.UpdateSavedGifs) {
     onUpdate({ '@type': 'updateSavedGifs' });
   } else if (update instanceof GramJs.UpdateGroupCall) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesWithPhotosToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
     onUpdate({
       '@type': 'updateGroupCall',
       call: buildApiGroupCall(update.call),
