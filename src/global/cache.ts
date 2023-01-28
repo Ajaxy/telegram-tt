@@ -331,6 +331,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.availableReactions = cached.availableReactions
       .map((r) => ({ ...r, reaction: { emoticon: r.reaction as unknown as string } }));
   }
+
+  if (!cached.attachmentSettings) {
+    cached.attachmentSettings = initialState.attachmentSettings;
+  }
 }
 
 function updateCache() {
