@@ -42,6 +42,7 @@ export interface ApiUserFullInfo {
   botInfo?: ApiBotInfo;
   profilePhoto?: ApiPhoto;
   fallbackPhoto?: ApiPhoto;
+  personalPhoto?: ApiPhoto;
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
 }

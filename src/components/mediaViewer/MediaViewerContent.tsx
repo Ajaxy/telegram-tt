@@ -18,6 +18,7 @@ import stopEvent from '../../util/stopEvent';
 import buildClassName from '../../util/buildClassName';
 import { useMediaProps } from './hooks/useMediaProps';
 import useAppLayout from '../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
 
 import Spinner from '../ui/Spinner';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -78,11 +79,14 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     isMoving,
   } = props;
 
+  const lang = useLang();
+
   const isGhostAnimation = animationLevel === 2;
 
   const {
     isVideo,
     isPhoto,
+    actionPhoto,
     bestImageData,
     bestData,
     dimensions,
@@ -101,7 +105,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     setControlsVisible?.(isVisible);
   }, [setControlsVisible]);
 
-  if (avatarOwner) {
+  if (avatarOwner || actionPhoto) {
     if (!isVideoAvatar) {
       return (
         <div key={chatId} className="MediaViewerContent">
@@ -142,7 +146,9 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   }
 
   if (!message) return undefined;
-  const textParts = renderMessageText(message);
+  const textParts = message.content.action?.type === 'suggestProfilePhoto'
+    ? lang('Conversation.SuggestedPhotoTitle')
+    : renderMessageText(message);
   const hasFooter = Boolean(textParts);
 
   return (

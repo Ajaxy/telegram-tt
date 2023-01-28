@@ -279,7 +279,7 @@
     }
   }
 
-  .ActionMessage.premium-gift {
+  .ActionMessage.centered-action {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -294,6 +294,24 @@
     margin-top: 0.5rem;
     cursor: pointer;
     outline: none;
+  }
+
+  .action-message-suggested-avatar {
+    max-width: 16rem;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1rem !important;
+    padding-bottom: 0.75rem !important;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    outline: none;
+
+    .Avatar {
+      width: 6.5rem;
+      height: 6.5rem;
+      margin: 1rem;
+    }
   }
 
   .action-message-button {

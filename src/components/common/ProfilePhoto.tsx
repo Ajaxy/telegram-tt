@@ -56,7 +56,10 @@ const ProfilePhoto: FC<OwnProps> = ({
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
   const userOrChat = user || chat;
-  const currentPhoto = photo || userOrChat?.fullInfo?.profilePhoto || user?.fullInfo?.fallbackPhoto;
+  const currentPhoto = photo
+    || user?.fullInfo?.personalPhoto
+    || userOrChat?.fullInfo?.profilePhoto
+    || user?.fullInfo?.fallbackPhoto;
   const canHaveMedia = userOrChat && !isSavedMessages && !isDeleted && !isRepliesChat;
   const { isVideo } = currentPhoto || {};
 

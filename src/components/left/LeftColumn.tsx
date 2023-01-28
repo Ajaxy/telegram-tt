@@ -373,7 +373,7 @@ const LeftColumn: FC<StateProps> = ({
   }, [clearTwoFaError, loadPasswordInfo, settingsScreen]);
 
   useOnChange(() => {
-    if (nextSettingsScreen) {
+    if (nextSettingsScreen !== undefined) {
       setContent(LeftColumnContent.Settings);
       setSettingsScreen(nextSettingsScreen);
       requestNextSettingsScreen(undefined);

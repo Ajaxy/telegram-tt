@@ -9,6 +9,11 @@
     overflow-x: hidden;
   }
 
+  .personal-photo {
+    margin-right: 2rem;
+    transform: scale(1.25);
+  }
+
   .section {
     padding: 1rem 1.5rem;
     background-color: var(--color-background);

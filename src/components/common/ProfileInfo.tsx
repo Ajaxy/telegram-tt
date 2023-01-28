@@ -258,6 +258,17 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     >
       <div className={styles.photoWrapper}>
         {renderPhotoTabs()}
+        {!forceShowSelf && user?.fullInfo?.personalPhoto && (
+          <div className={buildClassName(
+            styles.fallbackPhoto,
+            isFirst && styles.fallbackPhotoVisible,
+          )}
+          >
+            <div className={styles.fallbackPhotoContents}>
+              {lang(user.fullInfo.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+            </div>
+          </div>
+        )}
         {forceShowSelf && user?.fullInfo?.fallbackPhoto && (
           <div className={buildClassName(
             styles.fallbackPhoto,

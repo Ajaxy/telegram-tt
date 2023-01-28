@@ -1048,6 +1048,15 @@ function buildAction(
     }
   } else if (action instanceof GramJs.MessageActionAttachMenuBotAllowed) {
     text = 'ActionAttachMenuBotAllowed';
+  } else if (action instanceof GramJs.MessageActionSuggestProfilePhoto) {
+    const isVideo = action.photo instanceof GramJs.Photo && action.photo.videoSizes?.length;
+    text = senderId === currentUserId
+      ? (isVideo ? 'ActionSuggestVideoFromYouDescription' : 'ActionSuggestPhotoFromYouDescription')
+      : (isVideo ? 'ActionSuggestVideoToYouDescription' : 'ActionSuggestPhotoToYouDescription');
+    type = 'suggestProfilePhoto';
+    translationValues.push('%target_user%');
+
+    if (targetPeerId) targetUserIds.push(targetPeerId);
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
