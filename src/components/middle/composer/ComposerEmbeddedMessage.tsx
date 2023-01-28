@@ -54,6 +54,7 @@ type StateProps = {
 
 type OwnProps = {
   onClear?: () => void;
+  shouldForceShowEditing?: boolean;
 };
 
 const FORWARD_RENDERING_DELAY = 300;
@@ -68,6 +69,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   noAuthors,
   noCaptions,
   forwardsHaveCaptions,
+  shouldForceShowEditing,
   isCurrentUserPremium,
   onClear,
 }) => {
@@ -99,7 +101,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   } = useShowTransition(canAnimate && isShown, undefined, !shouldAnimate, undefined, !shouldAnimate);
 
   const clearEmbedded = useCallback(() => {
-    if (replyingToId) {
+    if (replyingToId && !shouldForceShowEditing) {
       setReplyingToId({ messageId: undefined });
     } else if (editingId) {
       setEditingId({ messageId: undefined });
@@ -107,7 +109,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
       exitForwardMode();
     }
     onClear?.();
-  }, [replyingToId, editingId, forwardedMessagesCount, onClear, setReplyingToId, setEditingId, exitForwardMode]);
+  }, [
+    replyingToId, shouldForceShowEditing, editingId, forwardedMessagesCount, onClear, setReplyingToId, setEditingId,
+    exitForwardMode,
+  ]);
 
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
@@ -146,7 +151,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
 
   const leftIcon = useMemo(() => {
-    if (replyingToId) {
+    if (replyingToId && !shouldForceShowEditing) {
       return 'icon-reply';
     }
     if (editingId) {
@@ -157,7 +162,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     }
 
     return undefined;
-  }, [editingId, isForwarding, replyingToId]);
+  }, [editingId, isForwarding, replyingToId, shouldForceShowEditing]);
 
   const customText = forwardedMessagesCount && forwardedMessagesCount > 1
     ? lang('ForwardedMessageCount', forwardedMessagesCount)
@@ -274,7 +279,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { shouldForceShowEditing }): StateProps => {
     const { chatId, threadId, type: messageListType } = selectCurrentMessageList(global) || {};
     if (!chatId || !threadId || !messageListType) {
       return {};
@@ -295,7 +300,7 @@ export default memo(withGlobal<OwnProps>(
     const forwardedMessages = forwardMessageIds?.map((id) => selectChatMessage(global, fromChatId!, id)!);
 
     let message: ApiMessage | undefined;
-    if (replyingToId) {
+    if (replyingToId && !shouldForceShowEditing) {
       message = selectChatMessage(global, chatId, replyingToId);
     } else if (editingId) {
       message = selectEditingMessage(global, chatId, threadId, messageListType);
@@ -304,7 +309,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     let sender: ApiChat | ApiUser | undefined;
-    if (replyingToId && message) {
+    if (replyingToId && message && !shouldForceShowEditing) {
       const { forwardInfo } = message;
       const isChatWithSelf = selectIsChatWithSelf(global, chatId);
       if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {

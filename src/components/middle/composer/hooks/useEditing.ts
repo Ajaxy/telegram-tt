@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
@@ -25,19 +25,30 @@ const useEditing = (
   type: MessageListType,
   draft?: ApiFormattedText,
   editingDraft?: ApiFormattedText,
-) => {
+  replyingToId?: number,
+): [VoidFunction, VoidFunction, boolean] => {
   const { editMessage, setEditingDraft } = getActions();
+  const [shouldForceShowEditing, setShouldForceShowEditing] = useState<boolean>();
 
-  useEffectWithPrevDeps(([prevEditedMessage]) => {
+  useEffectWithPrevDeps(([prevEditedMessage, prevReplyingToId]) => {
     if (!editedMessage) {
       return;
     }
-    if (prevEditedMessage?.id === editedMessage.id) {
+
+    if (replyingToId && prevReplyingToId !== replyingToId) {
+      setHtml('');
+      setShouldForceShowEditing(false);
       return;
     }
+
+    if (prevEditedMessage?.id === editedMessage.id && replyingToId === prevReplyingToId) {
+      return;
+    }
+
     const text = !prevEditedMessage && editingDraft?.text.length ? editingDraft : editedMessage.content.text;
     const html = getTextWithEntitiesAsHtml(text);
     setHtml(html);
+    setShouldForceShowEditing(true);
     // `fastRaf` would execute syncronously in this case
     requestAnimationFrame(() => {
       const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
@@ -45,7 +56,7 @@ const useEditing = (
         focusEditableElement(messageInput, true);
       }
     });
-  }, [editedMessage, setHtml] as const);
+  }, [editedMessage, replyingToId, setHtml] as const);
 
   useEffect(() => {
     if (!editedMessage) return undefined;
@@ -111,7 +122,7 @@ const useEditing = (
   useBackgroundMode(handleBlur);
   useBeforeUnload(handleBlur);
 
-  return [handleEditComplete, handleEditCancel];
+  return [handleEditComplete, handleEditCancel, shouldForceShowEditing];
 };
 
 export default useEditing;
