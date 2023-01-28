@@ -88,10 +88,12 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
         onChange={setSelectedFolderIds}
         round
       />
-      <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
-        {lang('FilterAddTo')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      <div className="dialog-buttons">
+        <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+          {lang('FilterAddTo')}
+        </Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };
