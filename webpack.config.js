@@ -136,11 +136,11 @@ module.exports = (_env, { mode = 'production' }) => {
     plugins: [
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
-        /highlight\.js\/lib\/languages/,
+        /highlight\.js[\\\/]lib[\\\/]languages/,
         /^((?!\.js\.js).)*$/
       ),
       ...(APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
-        /src\/lib\/gramjs\/client\/TelegramClient\.js/,
+        /src[\\\/]lib[\\\/]gramjs[\\\/]client[\\\/]TelegramClient\.js/,
         './MockClient.ts'
       )] : []),
       new HtmlWebpackPlugin({
