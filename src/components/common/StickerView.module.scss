@@ -10,14 +10,14 @@
   &:global(.closing) {
     transition-delay: 150ms;
   }
-
-  &_opaque {
-    background: var(--thumbs-background);
-    transition-delay: 0s;
-  }
 }
 
-.noTransition {
+.thumb-opaque {
+  background: var(--thumbs-background);
+  transition-delay: 0s;
+}
+
+.no-transition {
   transition: none !important;
 }
 
