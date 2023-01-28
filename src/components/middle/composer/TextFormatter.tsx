@@ -12,6 +12,7 @@ import { ensureProtocol } from '../../../util/ensureProtocol';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getKeyFromEvent from '../../../util/getKeyFromEvent';
 import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
+import stopEvent from '../../../util/stopEvent';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
@@ -415,6 +416,8 @@ const TextFormatter: FC<OwnProps> = ({
       className={className}
       style={style}
       onKeyDown={handleContainerKeyDown}
+      // Prevents focus loss when clicking on the toolbar
+      onMouseDown={stopEvent}
     >
       <div className="TextFormatter-buttons">
         <Button
