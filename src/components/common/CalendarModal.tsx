@@ -239,6 +239,7 @@ const CalendarModal: FC<OwnProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       className="CalendarModal"
+      onEnter={handleSubmit}
     >
       <div className="container">
         <div className="month-selector">
