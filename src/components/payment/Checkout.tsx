@@ -131,11 +131,9 @@ const Checkout: FC<OwnProps> = ({
         {langStringSplit[0]}
         <SafeLink
           url={url}
-          text=""
+          text={langStringSplit[1]}
           isRtl={isRtl}
-        >
-          {langStringSplit[1]}
-        </SafeLink>
+        />
         {langStringSplit.slice(2)}
       </>
     );
