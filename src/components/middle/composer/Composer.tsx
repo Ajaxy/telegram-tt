@@ -54,6 +54,7 @@ import {
   selectChatType,
   selectRequestedDraftFiles,
   selectTabState,
+  selectReplyingToId,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -145,6 +146,7 @@ type StateProps =
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
+    replyingToId?: number;
     isForCurrentMessageList: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
@@ -260,6 +262,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsChat,
   sendAsId,
   editingDraft,
+  replyingToId,
   requestedDraftText,
   requestedDraftFiles,
   botMenuButton,
@@ -394,12 +397,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendMessageAction({ type: 'typing' });
   }, [editingMessage, html, sendMessageAction]);
 
-  const mainButtonState = editingMessage ? MainButtonState.Edit
-    : (!IS_VOICE_RECORDING_SUPPORTED || activeVoiceRecording || (html && !attachments.length) || isForwarding)
-      ? (shouldSchedule ? MainButtonState.Schedule : MainButtonState.Send)
-      : MainButtonState.Record;
-  const canShowCustomSendMenu = !shouldSchedule;
-
   const {
     isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
   } = useMentionTooltip(
@@ -437,13 +434,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     botCommands,
     chatBotCommands,
   );
-
-  const {
-    isContextMenuOpen: isCustomSendMenuOpen,
-    handleContextMenu,
-    handleContextMenuClose,
-    handleContextMenuHide,
-  } = useContextMenuHandlers(mainButtonRef, !(mainButtonState === MainButtonState.Send && canShowCustomSendMenu));
 
   const {
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
@@ -597,7 +587,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     customEmojiNotificationNumber.current = Number(!notificationNumber);
   }, [currentUserId, lang, showNotification]);
 
-  const [handleEditComplete, handleEditCancel] = useEditing(
+  const [handleEditComplete, handleEditCancel, shouldForceShowEditing] = useEditing(
     htmlRef,
     setHtml,
     editingMessage,
@@ -608,7 +598,36 @@ const Composer: FC<OwnProps & StateProps> = ({
     messageListType,
     draft,
     editingDraft,
+    replyingToId,
   );
+
+  const mainButtonState = useMemo(() => {
+    if (editingMessage && shouldForceShowEditing) {
+      return MainButtonState.Edit;
+    }
+
+    if (IS_VOICE_RECORDING_SUPPORTED && !activeVoiceRecording && !(html && !attachments.length) && !isForwarding) {
+      return MainButtonState.Record;
+    }
+
+    if (shouldSchedule) {
+      return MainButtonState.Schedule;
+    }
+
+    return MainButtonState.Send;
+  }, [
+    activeVoiceRecording, attachments.length, editingMessage, html, isForwarding, shouldForceShowEditing,
+    shouldSchedule,
+  ]);
+  const canShowCustomSendMenu = !shouldSchedule;
+
+  const {
+    isContextMenuOpen: isCustomSendMenuOpen,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(mainButtonRef, !(mainButtonState === MainButtonState.Send && canShowCustomSendMenu));
+
   useDraft(draft, chatId, threadId, htmlRef, setHtml, editingMessage, lastSyncTime);
   useClipboardPaste(
     isForCurrentMessageList,
@@ -1264,7 +1283,10 @@ const Composer: FC<OwnProps & StateProps> = ({
       />
       <div id="message-compose">
         <div className="svg-appendix" ref={appendixRef} />
-        <ComposerEmbeddedMessage onClear={handleEmbeddedClear} />
+        <ComposerEmbeddedMessage
+          onClear={handleEmbeddedClear}
+          shouldForceShowEditing={Boolean(shouldForceShowEditing && editingMessage)}
+        />
         <WebPagePreview
           chatId={chatId}
           threadId={threadId}
@@ -1529,11 +1551,14 @@ export default memo(withGlobal<OwnProps>(
       ? selectEditingScheduledDraft(global, chatId)
       : selectEditingDraft(global, chatId, threadId);
 
+    const replyingToId = selectReplyingToId(global, chatId, threadId);
+
     const tabState = selectTabState(global);
 
     return {
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       connectionState: global.connectionState,
+      replyingToId,
       draft: selectDraft(global, chatId, threadId),
       chat,
       isChatWithBot,
