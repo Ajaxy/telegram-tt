@@ -321,6 +321,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             onChange={handleAboutChange}
             value={about}
             disabled={!canChangeInfo}
+            noReplaceNewlines
           />
           {chat.isCreator && (
             <ListItem icon="lock" multiline onClick={handleClickEditType}>

@@ -28,6 +28,7 @@ type OwnProps = {
   onKeyDown?: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => void;
   onPaste?: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+  noReplaceNewlines?: boolean;
 };
 
 const TextArea: FC<OwnProps> = ({
@@ -52,6 +53,7 @@ const TextArea: FC<OwnProps> = ({
   onKeyDown,
   onBlur,
   onPaste,
+  noReplaceNewlines,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -79,11 +81,16 @@ const TextArea: FC<OwnProps> = ({
   }, []);
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
-    e.currentTarget.value = e.currentTarget.value.replace(/\n/, '');
+    if (!noReplaceNewlines) {
+      const previousSelectionEnd = e.currentTarget.selectionEnd;
+      // TDesktop replaces newlines with spaces as well
+      e.currentTarget.value = e.currentTarget.value.replace(/\n/g, ' ');
+      e.currentTarget.selectionEnd = previousSelectionEnd;
+    }
     e.currentTarget.style.height = '0';
     e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
     onChange?.(e);
-  }, [onChange]);
+  }, [noReplaceNewlines, onChange]);
 
   return (
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
