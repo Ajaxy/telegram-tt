@@ -86,7 +86,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
 
   const handleSubmit = useCallback(() => {
     setPrivacySettings({
-      privacyKey: getPrivacyKey(screen),
+      privacyKey: getPrivacyKey(screen)!,
       isAllowList: Boolean(isAllowList),
       contactsIds: newSelectedContactIds,
     });

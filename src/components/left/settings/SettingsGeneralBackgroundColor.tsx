@@ -59,7 +59,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
 }) => {
   const { setThemeSettings } = getActions();
 
-  const themeRef = useRef<string>();
+  const themeRef = useRef<ThemeKey>();
   themeRef.current = theme;
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
     if (!isFirstRunRef.current) {
       const patternColor = getPatternColor(rgb);
       setThemeSettings({
-        theme: themeRef.current,
+        theme: themeRef.current!,
         background: undefined,
         backgroundColor: color,
         patternColor,

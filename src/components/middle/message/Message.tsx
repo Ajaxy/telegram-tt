@@ -63,6 +63,7 @@ import {
   selectIsCurrentUserPremium,
   selectIsChatProtected,
   selectTopicFromMessage,
+  selectTabState,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -1204,8 +1205,9 @@ const Message: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {
     const {
-      focusedMessage, forwardMessages, lastSyncTime,
-    } = global;
+      focusedMessage, forwardMessages, activeReactions, activeEmojiInteractions,
+    } = selectTabState(global);
+    const { lastSyncTime } = global;
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
@@ -1330,8 +1332,8 @@ export default memo(withGlobal<OwnProps>(
       repliesThreadInfo: actualRepliesThreadInfo,
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
-      activeReactions: reactionMessage && global.activeReactions[reactionMessage.id],
-      activeEmojiInteractions: global.activeEmojiInteractions,
+      activeReactions: reactionMessage && activeReactions[reactionMessage.id],
+      activeEmojiInteractions,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
       ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),

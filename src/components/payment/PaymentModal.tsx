@@ -4,13 +4,13 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 import type { ApiChat, ApiCountry, ApiPaymentCredentials } from '../../api/types';
 import type { Price, ShippingOption } from '../../types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import { PaymentStep } from '../../types';
-import { selectChat } from '../../global/selectors';
+import { selectChat, selectTabState } from '../../global/selectors';
 import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
 import { detectCardTypeText } from '../common/helpers/detectCardType';
@@ -67,7 +67,7 @@ type StateProps = {
   isExtendedMedia?: boolean;
 };
 
-type GlobalStateProps = Pick<GlobalState['payment'], (
+type GlobalStateProps = Pick<TabState['payment'], (
   'step' | 'shippingOptions' |
   'savedInfo' | 'canSaveCredentials' | 'nativeProvider' | 'passwordMissing' | 'invoice' | 'error'
 )>;
@@ -223,6 +223,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     setStep(PaymentStep.PaymentInfo);
   }, [setStep]);
 
+  const handleClearPaymentError = useCallback(() => {
+    clearPaymentError();
+  }, [clearPaymentError]);
+
   function renderError() {
     if (!error) {
       return undefined;
@@ -237,7 +241,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         <p>{error.description || 'Error'}</p>
         <Button
           isText
-          onClick={clearPaymentError}
+          onClick={handleClearPaymentError}
         >
           {lang('OK')}
         </Button>
@@ -595,7 +599,7 @@ export default memo(withGlobal<OwnProps>(
       savedCredentials,
       temporaryPassword,
       isExtendedMedia,
-    } = global.payment;
+    } = selectTabState(global).payment;
 
     const chat = inputInvoice && 'chatId' in inputInvoice ? selectChat(global, inputInvoice.chatId) : undefined;
     const isProviderError = Boolean(invoice && (!nativeProvider || !SUPPORTED_PROVIDERS.has(nativeProvider)));
@@ -721,7 +725,19 @@ function getRequestInfo(paymentState: FormState) {
   };
 }
 
-function getCredentials(paymentState: FormState) {
+export type ApiCredentials = {
+  data: {
+    cardNumber: string;
+    cardholder: string;
+    expiryMonth: string;
+    expiryYear: string;
+    cvv: string;
+    country: string;
+    zip: string;
+  };
+};
+
+function getCredentials(paymentState: FormState): ApiCredentials {
   const {
     cardNumber, cardholder, expiry, cvv, billingCountry, billingZip,
   } = paymentState;

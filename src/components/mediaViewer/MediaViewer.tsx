@@ -14,7 +14,7 @@ import {
   selectChatMessage,
   selectChatMessages,
   selectChatScheduledMessages,
-  selectCurrentMediaSearch,
+  selectCurrentMediaSearch, selectTabState,
   selectIsChatWithSelf,
   selectListedIds,
   selectOutlyingIds,
@@ -218,13 +218,15 @@ const MediaViewer: FC<StateProps> = ({
   const handleFooterClick = useCallback(() => {
     handleClose();
 
+    if (!chatId || !mediaId) return;
+
     if (isMobile) {
       setTimeout(() => {
-        toggleChatInfo(false, { forceSyncOnIOs: true });
-        focusMessage({ chatId, threadId, mediaId });
+        toggleChatInfo({ force: false }, { forceSyncOnIOs: true });
+        focusMessage({ chatId, threadId, messageId: mediaId });
       }, ANIMATION_DURATION);
     } else {
-      focusMessage({ chatId, threadId, mediaId });
+      focusMessage({ chatId, threadId, messageId: mediaId });
     }
   }, [handleClose, isMobile, chatId, threadId, focusMessage, toggleChatInfo, mediaId]);
 
@@ -370,6 +372,7 @@ const MediaViewer: FC<StateProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
+    const { mediaViewer, shouldSkipHistoryAnimations } = selectTabState(global);
     const {
       chatId,
       threadId,
@@ -377,12 +380,12 @@ export default memo(withGlobal(
       avatarOwnerId,
       origin,
       isHidden,
-    } = global.mediaViewer;
+    } = mediaViewer;
     const {
       animationLevel,
     } = global.settings.byKey;
 
-    const { shouldSkipHistoryAnimations, currentUserId } = global;
+    const { currentUserId } = global;
     let isChatWithSelf = !!chatId && selectIsChatWithSelf(global, chatId);
 
     if (origin === MediaViewerOrigin.SearchResult) {

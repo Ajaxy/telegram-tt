@@ -1,32 +1,28 @@
 import { addActionHandler } from '../../index';
+import { updateTabState } from '../../reducers/tabs';
+import type { ActionReturnType } from '../../types';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
-addActionHandler('setStickerSearchQuery', (global, actions, payload) => {
-  const { query } = payload!;
+addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionReturnType => {
+  const { query, tabId = getCurrentTabId() } = payload!;
 
-  return {
-    ...global,
-    stickers: {
-      ...global.stickers,
-      search: {
-        query,
-        resultIds: undefined,
-      },
+  return updateTabState(global, {
+    stickerSearch: {
+      query,
+      resultIds: undefined,
     },
-  };
+  }, tabId);
 });
 
-addActionHandler('setGifSearchQuery', (global, actions, payload) => {
-  const { query } = payload!;
+addActionHandler('setGifSearchQuery', (global, actions, payload): ActionReturnType => {
+  const { query, tabId = getCurrentTabId() } = payload!;
 
-  return {
-    ...global,
-    gifs: {
-      ...global.gifs,
-      search: {
-        query,
-        offsetId: undefined,
-        results: undefined,
-      },
+  return updateTabState(global, {
+    gifSearch: {
+      query,
+      offset: undefined,
+      // offsetId: undefined,
+      results: undefined,
     },
-  };
+  }, tabId);
 });

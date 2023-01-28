@@ -8,7 +8,7 @@ import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/ty
 import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
-import { selectChatMessage } from '../../global/selectors';
+import { selectChatMessage, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
@@ -97,8 +97,8 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
   const handleLoadMore = useCallback(() => {
     loadReactors({
-      chatId,
-      messageId,
+      chatId: chatId!,
+      messageId: messageId!,
     });
   }, [chatId, loadReactors, messageId]);
 
@@ -225,7 +225,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { chatId, messageId } = global.reactorModal || {};
+    const { chatId, messageId } = selectTabState(global).reactorModal || {};
     const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
 
     return {

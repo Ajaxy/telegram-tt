@@ -8,7 +8,7 @@ import type { ApiChatMember, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { unique } from '../../../util/iteratees';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
 import {
   sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight, isChatBasicGroup,
 } from '../../../global/helpers';
@@ -261,7 +261,7 @@ export default memo(withGlobal<OwnProps>(
       fetchingStatus,
       globalUserIds,
       localUserIds,
-    } = global.userSearch;
+    } = selectTabState(global).userSearch;
 
     const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
 

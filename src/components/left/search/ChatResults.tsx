@@ -7,6 +7,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 import {
   sortChatIds,
@@ -81,11 +82,10 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       runThrottled(() => {
         searchMessagesGlobal({
           type: 'text',
-          query: searchQuery,
         });
       });
     }
-  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
+  }, [lastSyncTime, searchMessagesGlobal]);
 
   const handleChatClick = useCallback(
     (id: string) => {
@@ -303,7 +303,7 @@ export default memo(withGlobal<OwnProps>(
     } = global;
     const {
       fetchingStatus, globalResults, localResults, resultsByType,
-    } = global.globalSearch;
+    } = selectTabState(global).globalSearch;
     const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
     const { chatIds: localChatIds, userIds: localUserIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;

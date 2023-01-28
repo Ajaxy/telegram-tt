@@ -4,6 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import { selectTabState } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
@@ -74,6 +75,6 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     currentUserId: global.currentUserId,
-    isManyMessages: (global.forwardMessages.messageIds?.length || 0) > 1,
+    isManyMessages: (selectTabState(global).forwardMessages.messageIds?.length || 0) > 1,
   };
 })(ForwardRecipientPicker));

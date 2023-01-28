@@ -8,7 +8,7 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { selectCurrentChat, selectIsForumPanelOpen } from '../../global/selectors';
+import { selectTabState, selectCurrentChat, selectIsForumPanelOpen } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -113,13 +113,13 @@ const LeftColumn: FC<StateProps> = ({
     function fullReset() {
       setContent(LeftColumnContent.ChatList);
       setContactsFilter('');
-      setGlobalSearchClosing(true);
+      setGlobalSearchClosing({ isClosing: true });
       resetChatCreation();
       setTimeout(() => {
         setGlobalSearchQuery({ query: '' });
         setGlobalSearchDate({ date: undefined });
         setGlobalSearchChatId({ id: undefined });
-        setGlobalSearchClosing(false);
+        setGlobalSearchClosing({ isClosing: false });
         setLastResetTime(Date.now());
       }, RESET_TRANSITION_DELAY_MS);
     }
@@ -376,13 +376,15 @@ const LeftColumn: FC<StateProps> = ({
     if (nextSettingsScreen !== undefined) {
       setContent(LeftColumnContent.Settings);
       setSettingsScreen(nextSettingsScreen);
-      requestNextSettingsScreen(undefined);
+      requestNextSettingsScreen({ screen: undefined });
     }
   }, [nextSettingsScreen, requestNextSettingsScreen]);
 
   const {
     initResize, resetResize, handleMouseUp,
-  } = useResize(resizeRef, setLeftColumnWidth, resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
+  } = useResize(resizeRef, (n) => setLeftColumnWidth({
+    leftColumnWidth: n,
+  }), resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
 
   const handleSettingsScreenSelect = useCallback((screen: SettingsScreens) => {
     setContent(LeftColumnContent.Settings);
@@ -479,22 +481,21 @@ const LeftColumn: FC<StateProps> = ({
 
 export default memo(withGlobal(
   (global): StateProps => {
+    const tabState = selectTabState(global);
     const {
       globalSearch: {
         query,
         date,
       },
-      chatFolders: {
-        activeChatFolder,
-      },
       shouldSkipHistoryAnimations,
       leftColumnWidth,
+      activeChatFolder,
+      nextSettingsScreen,
+    } = tabState;
+    const {
       currentUserId,
       passcode: {
         hasPasscode,
-      },
-      settings: {
-        nextScreen: nextSettingsScreen,
       },
       isUpdateAvailable,
     } = global;
@@ -502,7 +503,7 @@ export default memo(withGlobal(
     const currentChat = selectCurrentChat(global);
     const isChatOpen = Boolean(currentChat?.id);
     const isForumPanelOpen = selectIsForumPanelOpen(global);
-    const forumPanelChatId = global.forumPanelChatId;
+    const forumPanelChatId = tabState.forumPanelChatId;
 
     return {
       searchQuery: query,
@@ -517,7 +518,7 @@ export default memo(withGlobal(
       isUpdateAvailable,
       isForumPanelOpen,
       forumPanelChatId,
-      isClosingSearch: global.globalSearch.isClosing,
+      isClosingSearch: tabState.globalSearch.isClosing,
     };
   },
 )(LeftColumn));

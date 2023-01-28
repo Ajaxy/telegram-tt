@@ -56,9 +56,11 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   const handleFocusMessage = useCallback(() => {
     closeMediaViewer();
 
+    if (!chatId || !messageId) return;
+
     if (isMobile) {
       setTimeout(() => {
-        toggleChatInfo(false, { forceSyncOnIOs: true });
+        toggleChatInfo({ force: false }, { forceSyncOnIOs: true });
         focusMessage({ chatId, messageId });
       }, ANIMATION_DURATION);
     } else {

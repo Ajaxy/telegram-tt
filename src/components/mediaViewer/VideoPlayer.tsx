@@ -81,12 +81,12 @@ const VideoPlayer: FC<OwnProps> = ({
   const handleEnterFullscreen = useCallback(() => {
     // Yandex browser doesn't support PIP when video is hidden
     if (IS_YA_BROWSER) return;
-    setMediaViewerHidden(true);
+    setMediaViewerHidden({ isHidden: true });
   }, [setMediaViewerHidden]);
 
   const handleLeaveFullscreen = useCallback(() => {
     if (IS_YA_BROWSER) return;
-    setMediaViewerHidden(false);
+    setMediaViewerHidden({ isHidden: false });
   }, [setMediaViewerHidden]);
 
   const [

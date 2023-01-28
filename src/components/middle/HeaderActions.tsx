@@ -95,7 +95,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     sendBotCommand,
     openLocalTextSearch,
     restartBot,
-    requestCall,
+    requestMasterAndRequestCall,
     requestNextManagementScreen,
     showNotification,
     openChat,
@@ -168,7 +168,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   }, [chatId, openChat]);
 
   function handleRequestCall() {
-    requestCall({ userId: chatId });
+    requestMasterAndRequestCall({ userId: chatId });
   }
 
   const handleHotkeySearchClick = useCallback((e: KeyboardEvent) => {

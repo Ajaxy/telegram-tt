@@ -21,7 +21,7 @@ import {
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -463,10 +463,11 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId)!;
-    const { progress } = global.management;
+    const { management, limitReachedModal } = selectTabState(global);
+    const { progress } = management;
     const hasLinkedChannel = Boolean(chat.fullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
-    const { invites } = global.management.byChatId[chatId] || {};
+    const { invites } = management.byChatId[chatId] || {};
     const canEditForum = !hasLinkedChannel && isChatSuperGroup(chat) && getHasAdminRight(chat, 'changeInfo');
 
     return {
@@ -479,7 +480,7 @@ export default memo(withGlobal<OwnProps>(
       canInvite: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
       lastSyncTime: global.lastSyncTime,
-      isChannelsPremiumLimitReached: global.limitReachedModal?.limit === 'channels',
+      isChannelsPremiumLimitReached: limitReachedModal?.limit === 'channels',
       availableReactions: global.availableReactions,
       canEditForum,
     };

@@ -84,7 +84,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
 
   const handleUnlinkGroupSessions = useCallback(() => {
     closeConfirmUnlinkGroupDialog();
-    unlinkDiscussionGroup({ channelId: isChannel ? chatId : linkedChatId });
+    unlinkDiscussionGroup({ channelId: isChannel ? chatId : linkedChatId! });
     if (!isChannel) {
       onScreenSelect(ManagementScreens.Initial);
     }

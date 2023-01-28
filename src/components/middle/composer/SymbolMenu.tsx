@@ -10,7 +10,7 @@ import type { GlobalActions } from '../../../global/types';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
-import { selectIsCurrentUserPremium } from '../../../global/selectors';
+import { selectTabState, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMouseInside from '../../../hooks/useMouseInside';
@@ -304,7 +304,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
-      isLeftColumnShown: global.isLeftColumnShown,
+      isLeftColumnShown: selectTabState(global).isLeftColumnShown,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       lastSyncTime: global.lastSyncTime,
     };

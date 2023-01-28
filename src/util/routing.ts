@@ -44,6 +44,12 @@ export function parseLocationHash() {
   };
 }
 
+export const createMessageHashUrl = (chatId: string, type: string, threadId: number): string => {
+  const url = new URL(window.location.href);
+  url.hash = createLocationHash(chatId, type, threadId);
+  return url.href;
+};
+
 export function parseInitialLocationHash() {
   if (parsedInitialLocationHash) return parsedInitialLocationHash;
 

@@ -4,6 +4,8 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
+import type { ApiChatFolder } from '../../../../api/types';
+
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
 import { findIntersectionWithSet } from '../../../../util/iteratees';
@@ -142,9 +144,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     dispatch({ type: 'setIsLoading', payload: true });
     if (state.mode === 'edit') {
-      editChatFolder({ id: state.folderId, folderUpdate: state.folder });
+      editChatFolder({ id: state.folderId!, folderUpdate: state.folder });
     } else {
-      addChatFolder({ folder: state.folder });
+      addChatFolder({ folder: state.folder as ApiChatFolder });
     }
 
     setTimeout(() => {

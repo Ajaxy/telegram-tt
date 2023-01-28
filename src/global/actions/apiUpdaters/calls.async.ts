@@ -13,9 +13,12 @@ import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { callApi } from '../../../api/gramjs';
 import * as langProvider from '../../../util/langProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
+import type { ActionReturnType } from '../../types';
+import { updateTabState } from '../../reducers/tabs';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addUsers } from '../../reducers';
 
-addActionHandler('apiUpdate', (global, actions, update) => {
+addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   const { activeGroupCallId } = global.groupCalls;
 
   switch (update['@type']) {
@@ -33,7 +36,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (!activeGroupCallId) break;
 
       if (update.connectionState === 'disconnected') {
-        actions.leaveGroupCall({ isFromLibrary: true });
+        actions.leaveGroupCall({ isFromLibrary: true, tabId: getCurrentTabId() });
         break;
       }
 
@@ -51,8 +54,8 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     }
     case 'updateGroupCallConnection': {
       if (update.data.stream) {
-        actions.showNotification({ message: 'Big live streams are not yet supported' });
-        actions.leaveGroupCall();
+        actions.showNotification({ message: 'Big live streams are not yet supported', tabId: getCurrentTabId() });
+        actions.leaveGroupCall({ tabId: getCurrentTabId() });
         break;
       }
       void handleUpdateGroupCallConnection(update.data, update.presentation);
@@ -104,8 +107,11 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (state === 'active' || state === 'accepted') {
         if (!verifyPhoneCallProtocol(call.protocol)) {
           const user = selectPhoneCallUser(global);
-          actions.hangUp();
-          actions.showNotification({ message: langProvider.translate('VoipPeerIncompatible', user?.firstName) });
+          actions.hangUp({ tabId: getCurrentTabId() });
+          actions.showNotification({
+            message: langProvider.translate('VoipPeerIncompatible', user?.firstName),
+            tabId: getCurrentTabId(),
+          });
           return undefined;
         }
       }
@@ -114,11 +120,10 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         // Discarded from other device
         if (!phoneCall) return undefined;
 
-        return {
-          ...global,
+        return updateTabState(global, {
           ...(call.needRating && { ratingPhoneCall: call }),
           isCallPanelVisible: undefined,
-        };
+        }, getCurrentTabId());
       } else if (state === 'accepted' && accessHash && gB) {
         (async () => {
           const { gA, keyFingerprint, emojis } = await callApi('confirmPhoneCall', [gB, EMOJI_DATA, EMOJI_OFFSETS])!;
@@ -129,10 +134,11 @@ addActionHandler('apiUpdate', (global, actions, update) => {
             emojis,
           } as ApiPhoneCall;
 
-          setGlobal({
+          global = {
             ...global,
             phoneCall: newCall,
-          });
+          };
+          setGlobal(global);
 
           const result = await callApi('confirmCall', {
             call, gA, keyFingerprint,
@@ -155,10 +161,11 @@ addActionHandler('apiUpdate', (global, actions, update) => {
               emojis,
             } as ApiPhoneCall;
 
-            setGlobal({
+            global = {
               ...global,
               phoneCall: newCall,
-            });
+            };
+            setGlobal(global);
           })();
         }
         void joinPhoneCall(
@@ -174,7 +181,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (!global.phoneCall) return global;
 
       if (connectionState === 'closed' || connectionState === 'disconnected' || connectionState === 'failed') {
-        actions.hangUp();
+        actions.hangUp({ tabId: getCurrentTabId() });
         return undefined;
       }
 

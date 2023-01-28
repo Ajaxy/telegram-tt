@@ -30,7 +30,6 @@ const BotCommandMenu: FC<OwnProps> = ({
   const handleClick = useCallback((botCommand: ApiBotCommand) => {
     sendBotCommand({
       command: `/${botCommand.command}`,
-      botId: botCommand.botId,
     });
     onClose();
   }, [onClose, sendBotCommand]);

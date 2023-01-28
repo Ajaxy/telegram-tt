@@ -441,7 +441,7 @@ export async function notifyAboutMessage({
       notification.close();
       dispatch.focusMessage({
         chatId: chat.id,
-        messageId: message.id,
+        messageId: message.id!,
         shouldReplaceHistory: true,
       });
       if (window.focus) {

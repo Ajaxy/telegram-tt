@@ -1,6 +1,6 @@
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
-import type { ApiLimitType } from '../../global/types';
+import type { ApiLimitType, CallbackAction } from '../../global/types';
 
 export interface ApiInitialArgs {
   userAgent: string;
@@ -107,7 +107,7 @@ export type ApiNotification = {
   title?: string;
   message: string;
   actionText?: string;
-  action: VoidFunction;
+  action?: CallbackAction;
   className?: string;
 };
 

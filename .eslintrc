@@ -9,9 +9,15 @@
     "jsx-expressions",
     "no-async-without-await",
     "teactn",
-    "no-null"
+    "no-null",
+    "eslint-multitab-tt"
   ],
   "rules": {
+    "eslint-multitab-tt/no-immediate-global": "error",
+    "eslint-multitab-tt/must-update-global-after-await": "off",
+    "eslint-multitab-tt/set-global-only-variable": "error",
+    "eslint-multitab-tt/no-getactions-in-actions": "error",
+    "eslint-multitab-tt/must-specify-action-handler-return-type": "error",
     "indent": [
       "error",
       2,

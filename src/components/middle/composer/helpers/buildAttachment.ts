@@ -77,7 +77,9 @@ export default async function buildAttachment(
   };
 }
 
-export function prepareAttachmentsToSend(attachments: ApiAttachment[], shouldSendCompressed?: boolean) {
+export function prepareAttachmentsToSend(
+  attachments: ApiAttachment[], shouldSendCompressed?: boolean,
+): ApiAttachment[] {
   return attachments.map((attach) => {
     if (shouldSendCompressed) {
       if (attach.compressedBlobUrl) {

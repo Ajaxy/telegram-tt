@@ -47,6 +47,9 @@ export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
 export const LANG_CACHE_NAME = 'tt-lang-packs-v16';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
+export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
+export const ESTABLISH_BROADCAST_CHANNEL_NAME = 'tt-establish';
+export const MULTITAB_LOCALSTORAGE_KEY = 'tt-multitab';
 
 export const DOWNLOAD_WORKERS = 16;
 export const UPLOAD_WORKERS = 16;

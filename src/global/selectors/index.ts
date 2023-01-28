@@ -9,3 +9,4 @@ export * from './symbols';
 export * from './payments';
 export * from './settings';
 export * from './statistics';
+export * from './tabs';

@@ -11,7 +11,7 @@ import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
 import { getMainUsername, isChatChannel } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { getServerTime } from '../../../util/serverTime';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -416,7 +416,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { invites, revokedInvites } = global.management.byChatId[chatId];
+    const { invites, revokedInvites } = selectTabState(global).management.byChatId[chatId];
     const chat = selectChat(global, chatId);
     const isChannel = chat && isChatChannel(chat);
 

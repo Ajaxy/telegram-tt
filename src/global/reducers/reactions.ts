@@ -10,6 +10,7 @@ import windowSize from '../../util/windowSize';
 import { updateChat } from './chats';
 import { isSameReaction, isReactionChosen } from '../helpers';
 import { updateChatMessage } from './messages';
+import { selectTabState } from '../selectors';
 import { getIsMobile } from '../../hooks/useAppLayout';
 
 function getLeftColumnWidth(windowWidth: number) {
@@ -31,14 +32,15 @@ function getLeftColumnWidth(windowWidth: number) {
 }
 
 export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
-  return x - ((global.isLeftColumnShown && !getIsMobile())
-    ? global.leftColumnWidth || getLeftColumnWidth(windowSize.get().width)
+  const tabState = selectTabState(global);
+  return x - ((tabState.isLeftColumnShown && !getIsMobile())
+    ? tabState.leftColumnWidth || getLeftColumnWidth(windowSize.get().width)
     : 0);
 }
 
-export function addMessageReaction(
-  global: GlobalState, message: ApiMessage, userReactions: ApiReaction[],
-) {
+export function addMessageReaction<T extends GlobalState>(
+  global: T, message: ApiMessage, userReactions: ApiReaction[],
+): T {
   const currentReactions = message.reactions || { results: [] };
 
   // Update UI without waiting for server response
@@ -90,8 +92,8 @@ export function addMessageReaction(
   });
 }
 
-export function updateUnreadReactions(
-  global: GlobalState, chatId: string, update: Pick<ApiChat, 'unreadReactionsCount' | 'unreadReactions'>,
-) {
+export function updateUnreadReactions<T extends GlobalState>(
+  global: T, chatId: string, update: Pick<ApiChat, 'unreadReactionsCount' | 'unreadReactions'>,
+): T {
   return updateChat(global, chatId, update, undefined, true);
 }

@@ -1,16 +1,29 @@
-import { addActionHandler } from './index';
+import {
+  addActionHandler, getGlobal, setGlobal,
+} from './index';
 
-import { INITIAL_STATE } from './initialState';
+import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from './initialState';
 import { IS_MOCKED_CLIENT } from '../config';
 import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';
-import { updatePasscodeSettings } from './reducers';
+import { replaceTabThreadParam, updatePasscodeSettings } from './reducers';
 import { clearStoredSession } from '../util/sessions';
+import { parseLocationHash } from '../util/routing';
+import { MAIN_THREAD_ID } from '../api/types';
+import { selectTabState, selectThreadParam } from './selectors';
+import { Bundles, loadBundle } from '../util/moduleLoader';
+import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
+import { updateTabState } from './reducers/tabs';
+import type { ActionReturnType } from './types';
+import { getIsMobile } from '../hooks/useAppLayout';
 
 initCache();
 
-addActionHandler('init', () => {
-  const initial = cloneDeep(INITIAL_STATE);
+addActionHandler('initShared', (prevGlobal, actions, payload): ActionReturnType => {
+  const { force } = payload || {};
+  if (!force && 'byTabId' in prevGlobal) return prevGlobal;
+
+  const initial = cloneDeep(INITIAL_GLOBAL_STATE);
   let global = loadCache(initial) || initial;
   if (IS_MOCKED_CLIENT) global.authState = 'authorizationStateReady';
 
@@ -23,5 +36,88 @@ addActionHandler('init', () => {
     clearStoredSession();
   }
 
+  if (force) {
+    global.byTabId = prevGlobal.byTabId;
+  }
+
   return global;
+});
+
+addActionHandler('init', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId(), isMasterTab } = payload || {};
+
+  const initialTabState = cloneDeep(INITIAL_TAB_STATE);
+  initialTabState.id = tabId;
+  global = {
+    ...global,
+    byTabId: {
+      ...global.byTabId,
+      [tabId]: initialTabState,
+    },
+  };
+
+  if (isMasterTab) {
+    initialTabState.isMasterTab = isMasterTab;
+  }
+
+  Object.keys(global.messages.byChatId).forEach((chatId) => {
+    global = replaceTabThreadParam(
+      global,
+      chatId,
+      MAIN_THREAD_ID,
+      'viewportIds',
+      selectThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds'),
+      tabId,
+    );
+  });
+  const parsedMessageList = !getIsMobile() ? parseLocationHash() : undefined;
+
+  if (global.authState !== 'authorizationStateReady'
+    && !global.passcode.hasPasscode && !global.passcode.isScreenLocked) {
+    Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
+      if (otherTabId === tabId) return;
+      global = updateTabState(global, {
+        isInactive: true,
+      }, otherTabId);
+    });
+  }
+
+  return updateTabState(global, {
+    messageLists: parsedMessageList ? [parsedMessageList] : initialTabState.messageLists,
+  }, tabId);
+});
+
+addActionHandler('requestMasterAndCallAction', async (
+  global, actions, payload,
+): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload;
+
+  if (selectTabState(global, tabId).isMasterTab) {
+    const { action, payload: actionPayload } = payload;
+    // @ts-ignore
+    actions[action](actionPayload);
+    return;
+  }
+
+  if (global.phoneCall || global.groupCalls.activeGroupCallId) {
+    await loadBundle(Bundles.Calls);
+    actions.hangUp({ tabId });
+    actions.leaveGroupCall({ tabId });
+  } else {
+    reestablishMasterToSelf();
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    multitabNextAction: payload,
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('clearMultitabNextAction', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    multitabNextAction: undefined,
+  }, tabId);
 });

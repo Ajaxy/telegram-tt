@@ -19,6 +19,7 @@ import {
   selectEditingMessage,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectTabState,
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
@@ -220,7 +221,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
               icon={!noAuthors ? 'message-succeeded' : undefined}
               customIcon={noAuthors ? <i className="icon-placeholder" /> : undefined}
               // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => setForwardNoAuthors(false)}
+              onClick={() => setForwardNoAuthors({
+                noAuthors: false,
+              })}
             >
               {lang(forwardedMessagesCount > 1 ? 'ShowSenderNames' : 'ShowSendersName')}
             </MenuItem>
@@ -228,7 +231,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
               icon={noAuthors ? 'message-succeeded' : undefined}
               customIcon={!noAuthors ? <i className="icon-placeholder" /> : undefined}
               // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => setForwardNoAuthors(true)}
+              onClick={() => setForwardNoAuthors({
+                noAuthors: true,
+              })}
             >
               {lang(forwardedMessagesCount > 1 ? 'HideSenderNames' : 'HideSendersName')}
             </MenuItem>
@@ -239,7 +244,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                   icon={!noCaptions ? 'message-succeeded' : undefined}
                   customIcon={noCaptions ? <i className="icon-placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
-                  onClick={() => setForwardNoCaptions(false)}
+                  onClick={() => setForwardNoCaptions({
+                    noCaptions: false,
+                  })}
                 >
                   {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.ShowCaption' : 'ShowCaption')}
                 </MenuItem>
@@ -247,7 +254,9 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
                   icon={noCaptions ? 'message-succeeded' : undefined}
                   customIcon={!noCaptions ? <i className="icon-placeholder" /> : undefined}
                   // eslint-disable-next-line react/jsx-no-bind
-                  onClick={() => setForwardNoCaptions(true)}
+                  onClick={() => setForwardNoCaptions({
+                    noCaptions: true,
+                  })}
                 >
                   {lang(forwardedMessagesCount > 1 ? 'Conversation.ForwardOptions.HideCaption' : 'HideCaption')}
                 </MenuItem>
@@ -275,7 +284,7 @@ export default memo(withGlobal<OwnProps>(
       forwardMessages: {
         fromChatId, toChatId, messageIds: forwardMessageIds, noAuthors, noCaptions,
       },
-    } = global;
+    } = selectTabState(global);
 
     const replyingToId = selectReplyingToId(global, chatId, threadId);
     const editingId = messageListType === 'scheduled'

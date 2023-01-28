@@ -33,7 +33,6 @@ const runThrottled = throttle((cb) => cb(), 500, true);
 
 const MediaResults: FC<OwnProps & StateProps> = ({
   searchQuery,
-  searchChatId,
   isLoading,
   globalMessagesByChatId,
   foundIds,
@@ -60,12 +59,10 @@ const MediaResults: FC<OwnProps & StateProps> = ({
       runThrottled(() => {
         searchMessagesGlobal({
           type: CURRENT_TYPE,
-          query: searchQuery,
-          chatId: searchChatId,
         });
       });
     }
-  }, [lastSyncTime, searchMessagesGlobal, searchQuery, searchChatId]);
+  }, [lastSyncTime, searchMessagesGlobal]);
 
   const foundMessages = useMemo(() => {
     if (!foundIds || !globalMessagesByChatId) {

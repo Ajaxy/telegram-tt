@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import { ChatCreationProgress } from '../../../types';
 
+import { selectTabState } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -198,7 +199,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       progress: creationProgress,
       error: creationError,
-    } = global.chatCreation || {};
+    } = selectTabState(global).chatCreation || {};
 
     return {
       creationProgress,

@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import { callApi } from '../../../api/gramjs';
 import type { ApiMessageStatistics, ApiMessagePublicForward, StatisticsGraph } from '../../../api/types';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
 
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
@@ -175,8 +175,9 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const dcId = chat?.fullInfo?.statisticsDcId;
-    const statistics = global.statistics.currentMessage;
-    const messageId = global.statistics.currentMessageId;
+    const tabState = selectTabState(global);
+    const statistics = tabState.statistics.currentMessage;
+    const messageId = tabState.statistics.currentMessageId;
 
     return { statistics, dcId, messageId };
   },

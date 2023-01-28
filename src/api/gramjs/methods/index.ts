@@ -100,3 +100,7 @@ export {
   acceptPhoneCall, confirmPhoneCall, requestPhoneCall, decodePhoneCallData, createPhoneCallState,
   destroyPhoneCallState, encodePhoneCallData,
 } from './phoneCallState';
+
+export {
+  broadcastLocalDbUpdateFull,
+} from '../localDb';

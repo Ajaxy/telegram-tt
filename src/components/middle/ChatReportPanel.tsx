@@ -58,13 +58,13 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   const handleAddContact = useCallback(() => {
     openAddContactDialog({ userId: chatId });
     if (isAutoArchived) {
-      toggleChatArchived({ chatId });
+      toggleChatArchived({ id: chatId });
     }
   }, [openAddContactDialog, isAutoArchived, toggleChatArchived, chatId]);
 
   const handleConfirmBlock = useCallback(() => {
     closeBlockUserModal();
-    blockContact({ contactId: chatId, accessHash });
+    blockContact({ contactId: chatId, accessHash: accessHash! });
     if (canReportSpam && shouldReportSpam) {
       reportSpam({ chatId });
     }
@@ -84,7 +84,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     closeBlockUserModal();
     reportSpam({ chatId });
     if (isBasicGroup) {
-      deleteChatUser({ chatId, userId: currentUserId });
+      deleteChatUser({ chatId, userId: currentUserId! });
       deleteHistory({ chatId, shouldDeleteForAll: false });
     } else {
       leaveChannel({ chatId });

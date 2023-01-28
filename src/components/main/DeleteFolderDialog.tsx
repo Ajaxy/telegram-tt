@@ -18,7 +18,7 @@ const DeleteFolderDialog: FC<OwnProps> = ({
 
   const handleDeleteFolderMessage = useCallback(() => {
     closeDeleteChatFolderModal();
-    deleteChatFolder({ id: deleteFolderDialogId });
+    deleteChatFolder({ id: deleteFolderDialogId! });
   }, [closeDeleteChatFolderModal, deleteChatFolder, deleteFolderDialogId]);
 
   return (

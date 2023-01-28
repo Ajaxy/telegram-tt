@@ -10,7 +10,7 @@ import { copyTextToClipboard } from '../../../util/clipboard';
 import { getServerTime } from '../../../util/serverTime';
 import { formatFullDate, formatMediaDateTime, formatTime } from '../../../util/dateFormat';
 import { isChatChannel } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
@@ -179,7 +179,7 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const { inviteInfo } = global.management.byChatId[chatId];
+    const { inviteInfo } = selectTabState(global).management.byChatId[chatId];
     const { invite, importers, requesters } = inviteInfo || {};
     const chat = selectChat(global, chatId);
     const isChannel = chat && isChatChannel(chat);

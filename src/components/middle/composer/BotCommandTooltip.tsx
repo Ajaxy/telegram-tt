@@ -46,7 +46,6 @@ const BotCommandTooltip: FC<OwnProps & StateProps> = ({
     const bot = usersById[botId];
     sendBotCommand({
       command: `/${command}${withUsername && bot ? `@${bot.usernames![0].username}` : ''}`,
-      botId,
     });
     onClick();
   }, [onClick, sendBotCommand, usersById, withUsername]);

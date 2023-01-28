@@ -4,7 +4,7 @@ import type {
 } from '../../../../api/types';
 import type { ISettings } from '../../../../types';
 
-import { selectChat, selectTheme } from '../../../../global/selectors';
+import { selectChat, selectTabState, selectTheme } from '../../../../global/selectors';
 
 export type StateProps = {
   theme: ISettings['theme'];
@@ -21,11 +21,12 @@ export type StateProps = {
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
   return (global: GlobalState, props: any) => {
+    const tabState = selectTabState(global);
     const { byId: chatsById } = global.chats;
     const { byId: usersById } = global.users;
     const {
       fetchingStatus, resultsByType, chatId,
-    } = global.globalSearch;
+    } = tabState.globalSearch;
 
     // One component is used for two different types of results.
     // The differences between them are only in the isVoice property.
@@ -35,7 +36,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
     const { byChatId: globalMessagesByChatId } = global.messages;
     const foundIds = resultsByType?.[currentType]?.foundIds;
 
-    const activeDownloads = global.activeDownloads.byChatId;
+    const activeDownloads = tabState.activeDownloads.byChatId;
 
     return {
       theme: selectTheme(global),

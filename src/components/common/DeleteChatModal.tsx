@@ -80,7 +80,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
 
   const handleDeleteAndStop = useCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
-    blockContact({ contactId: chat.id, accessHash: chat.accessHash });
+    blockContact({ contactId: chat.id, accessHash: chat.accessHash! });
 
     onClose();
   }, [deleteHistory, chat.id, chat.accessHash, blockContact, onClose]);
@@ -89,7 +89,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     if (isPrivateChat) {
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if (isBasicGroup) {
-      deleteChatUser({ chatId: chat.id, userId: currentUserId });
+      deleteChatUser({ chatId: chat.id, userId: currentUserId! });
       deleteHistory({ chatId: chat.id, shouldDeleteForAll: false });
     } else if ((isChannel || isSuperGroup) && !chat.isCreator) {
       leaveChannel({ chatId: chat.id });

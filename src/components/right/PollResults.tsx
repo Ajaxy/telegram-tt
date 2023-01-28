@@ -3,7 +3,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { ApiMessage, ApiChat } from '../../api/types';
-import { selectChat, selectChatMessage } from '../../global/selectors';
+import { selectChat, selectChatMessage, selectTabState } from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
@@ -74,8 +74,8 @@ export default memo(withGlobal(
   (global): StateProps => {
     const {
       pollResults: { chatId, messageId },
-      lastSyncTime,
-    } = global;
+    } = selectTabState(global);
+    const { lastSyncTime } = global;
 
     if (!chatId || !messageId) {
       return {};

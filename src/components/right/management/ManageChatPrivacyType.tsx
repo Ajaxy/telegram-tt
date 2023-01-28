@@ -9,7 +9,7 @@ import type { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
-import { selectChat, selectManagement } from '../../../global/selectors';
+import { selectChat, selectTabState, selectManagement } from '../../../global/selectors';
 import { isChatChannel, isChatPublic } from '../../../global/helpers';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 
@@ -73,7 +73,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
 
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [privacyType, setPrivacyType] = useState<PrivacyType>(isPublic ? 'public' : 'private');
-  const [editableUsername, setEditableUsername] = useState();
+  const [editableUsername, setEditableUsername] = useState<string>();
   const [isRevokeConfirmDialogOpen, openRevokeConfirmDialog, closeRevokeConfirmDialog] = useFlag();
   const [isUsernameLostDialogOpen, openUsernameLostDialog, closeUsernameLostDialog] = useFlag();
 
@@ -292,7 +292,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       isChannel: isChatChannel(chat),
-      progress: global.management.progress,
+      progress: selectTabState(global).management.progress,
       error,
       isUsernameAvailable,
       checkedUsername,

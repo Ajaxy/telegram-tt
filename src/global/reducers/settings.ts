@@ -5,7 +5,7 @@ import type {
 import type { ApiNotifyException } from '../../api/types';
 import { updateUserBlockedState } from './users';
 
-export function replaceSettings(global: GlobalState, newSettings?: Partial<ISettings>): GlobalState {
+export function replaceSettings<T extends GlobalState>(global: T, newSettings?: Partial<ISettings>): T {
   return {
     ...global,
     settings: {
@@ -18,9 +18,9 @@ export function replaceSettings(global: GlobalState, newSettings?: Partial<ISett
   };
 }
 
-export function replaceThemeSettings(
-  global: GlobalState, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
-): GlobalState {
+export function replaceThemeSettings<T extends GlobalState>(
+  global: T, theme: ThemeKey, newSettings?: Partial<IThemeSettings>,
+): T {
   return {
     ...global,
     settings: {
@@ -36,9 +36,9 @@ export function replaceThemeSettings(
   };
 }
 
-export function addNotifyExceptions(
-  global: GlobalState, notifyExceptions: ApiNotifyException[],
-): GlobalState {
+export function addNotifyExceptions<T extends GlobalState>(
+  global: T, notifyExceptions: ApiNotifyException[],
+): T {
   notifyExceptions.forEach((notifyException) => {
     const { chatId, ...exceptionData } = notifyException;
     global = addNotifyException(global, chatId, exceptionData);
@@ -47,9 +47,9 @@ export function addNotifyExceptions(
   return global;
 }
 
-export function addNotifyException(
-  global: GlobalState, id: string, notifyException: NotifyException,
-): GlobalState {
+export function addNotifyException<T extends GlobalState>(
+  global: T, id: string, notifyException: NotifyException,
+): T {
   return {
     ...global,
     settings: {
@@ -63,9 +63,9 @@ export function addNotifyException(
 }
 
 // eslint-disable-next-line consistent-return
-export function updateNotifySettings(
-  global: GlobalState, peerType: 'contact' | 'group' | 'broadcast', isSilent?: boolean, shouldShowPreviews?: boolean,
-) {
+export function updateNotifySettings<T extends GlobalState>(
+  global: T, peerType: 'contact' | 'group' | 'broadcast', isSilent?: boolean, shouldShowPreviews?: boolean,
+): T {
   switch (peerType) {
     case 'contact':
       return replaceSettings(global, {
@@ -85,7 +85,7 @@ export function updateNotifySettings(
   }
 }
 
-export function addBlockedContact(global: GlobalState, contactId: string): GlobalState {
+export function addBlockedContact<T extends GlobalState>(global: T, contactId: string): T {
   global = updateUserBlockedState(global, contactId, true);
 
   return {
@@ -98,7 +98,7 @@ export function addBlockedContact(global: GlobalState, contactId: string): Globa
   };
 }
 
-export function removeBlockedContact(global: GlobalState, contactId: string): GlobalState {
+export function removeBlockedContact<T extends GlobalState>(global: T, contactId: string): T {
   global = updateUserBlockedState(global, contactId, false);
 
   return {

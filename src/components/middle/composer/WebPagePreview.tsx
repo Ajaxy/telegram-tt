@@ -7,7 +7,7 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
-import { selectNoWebPage, selectTheme } from '../../../global/selectors';
+import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
 import parseMessageInput from '../../../util/parseMessageInput';
 import useOnChange from '../../../hooks/useOnChange';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -131,7 +131,7 @@ export default memo(withGlobal<OwnProps>(
     const noWebPage = selectNoWebPage(global, chatId, threadId);
     return {
       theme: selectTheme(global),
-      webPagePreview: global.webPagePreview,
+      webPagePreview: selectTabState(global).webPagePreview,
       noWebPage,
     };
   },

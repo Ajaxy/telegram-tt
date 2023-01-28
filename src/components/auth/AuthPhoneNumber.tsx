@@ -203,6 +203,10 @@ const AuthPhoneNumber: FC<StateProps> = ({
     }
   }
 
+  const handleGoToAuthQrCode = useCallback(() => {
+    goToAuthQrCode();
+  }, [goToAuthQrCode]);
+
   const isAuthReady = authState === 'authorizationStateWaitPhoneNumber';
 
   return (
@@ -242,7 +246,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
             )
           )}
           {isAuthReady && (
-            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={goToAuthQrCode}>
+            <Button isText ripple isLoading={authIsLoadingQrCode} onClick={handleGoToAuthQrCode}>
               {lang('Login.QR.Login')}
             </Button>
           )}

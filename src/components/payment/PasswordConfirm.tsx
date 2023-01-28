@@ -5,6 +5,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { ApiPaymentCredentials } from '../../api/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 
+import { selectTabState } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 
 import PasswordMonkey from '../common/PasswordMonkey';
@@ -62,9 +63,10 @@ const PasswordConfirm: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
+  const { payment } = selectTabState(global);
   return {
-    error: global.payment.error?.message,
+    error: payment.error?.message,
     passwordHint: global.twoFaSettings.hint,
-    savedCredentials: global.payment.savedCredentials,
+    savedCredentials: payment.savedCredentials,
   };
 })(PasswordConfirm));

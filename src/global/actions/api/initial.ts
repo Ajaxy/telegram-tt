@@ -1,8 +1,8 @@
 import {
-  addActionHandler, getActions, getGlobal, setGlobal,
+  addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 
-import { initApi, callApi } from '../../../api/gramjs';
+import { initApi, callApi, callApiLocal } from '../../../api/gramjs';
 
 import {
   LANG_CACHE_NAME,
@@ -31,9 +31,11 @@ import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../.
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { serializeGlobal } from '../../cache';
 import { parseInitialLocationHash } from '../../../util/routing';
+import type { ActionReturnType } from '../../types';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
-addActionHandler('initApi', async (global, actions) => {
+addActionHandler('initApi', async (global, actions): Promise<void> => {
   if (!IS_TEST) {
     await importLegacySession();
     void clearLegacySessions();
@@ -55,7 +57,7 @@ addActionHandler('initApi', async (global, actions) => {
   });
 });
 
-addActionHandler('setAuthPhoneNumber', (global, actions, payload) => {
+addActionHandler('setAuthPhoneNumber', (global, actions, payload): ActionReturnType => {
   const { phoneNumber } = payload!;
 
   void callApi('provideAuthPhoneNumber', phoneNumber.replace(/[^\d]/g, ''));
@@ -67,7 +69,7 @@ addActionHandler('setAuthPhoneNumber', (global, actions, payload) => {
   };
 });
 
-addActionHandler('setAuthCode', (global, actions, payload) => {
+addActionHandler('setAuthCode', (global, actions, payload): ActionReturnType => {
   const { code } = payload!;
 
   void callApi('provideAuthCode', code);
@@ -79,7 +81,7 @@ addActionHandler('setAuthCode', (global, actions, payload) => {
   };
 });
 
-addActionHandler('setAuthPassword', (global, actions, payload) => {
+addActionHandler('setAuthPassword', (global, actions, payload): ActionReturnType => {
   const { password } = payload!;
 
   void callApi('provideAuthPassword', password);
@@ -91,7 +93,7 @@ addActionHandler('setAuthPassword', (global, actions, payload) => {
   };
 });
 
-addActionHandler('uploadProfilePhoto', async (global, actions, payload) => {
+addActionHandler('uploadProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
     file, isFallback, isVideo, videoTs,
   } = payload!;
@@ -106,7 +108,7 @@ addActionHandler('uploadProfilePhoto', async (global, actions, payload) => {
   actions.loadFullUser({ userId: global.currentUserId! });
 });
 
-addActionHandler('signUp', (global, actions, payload) => {
+addActionHandler('signUp', (global, actions, payload): ActionReturnType => {
   const { firstName, lastName } = payload!;
 
   void callApi('provideAuthRegistration', { firstName, lastName });
@@ -118,7 +120,7 @@ addActionHandler('signUp', (global, actions, payload) => {
   };
 });
 
-addActionHandler('returnToAuthPhoneNumber', (global) => {
+addActionHandler('returnToAuthPhoneNumber', (global): ActionReturnType => {
   void callApi('restartAuth');
 
   return {
@@ -127,7 +129,7 @@ addActionHandler('returnToAuthPhoneNumber', (global) => {
   };
 });
 
-addActionHandler('goToAuthQrCode', (global) => {
+addActionHandler('goToAuthQrCode', (global): ActionReturnType => {
   void callApi('restartAuthWithQr');
 
   return {
@@ -137,22 +139,22 @@ addActionHandler('goToAuthQrCode', (global) => {
   };
 });
 
-addActionHandler('saveSession', (global, actions, payload) => {
+addActionHandler('saveSession', (global, actions, payload): ActionReturnType => {
   if (global.passcode.isScreenLocked) {
     return;
   }
 
   const { sessionData } = payload;
   if (sessionData) {
-    storeSession(payload.sessionData, global.currentUserId);
+    storeSession(sessionData, global.currentUserId);
   } else {
     clearStoredSession();
   }
 });
 
-addActionHandler('signOut', async (_global, actions, payload) => {
-  if ('hangUp' in actions) actions.hangUp();
-  if ('leaveGroupCall' in actions) actions.leaveGroupCall();
+addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
+  if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
+  if ('leaveGroupCall' in actions) actions.leaveGroupCall({ tabId: getCurrentTabId() });
 
   try {
     await unsubscribe();
@@ -162,14 +164,14 @@ addActionHandler('signOut', async (_global, actions, payload) => {
     // Do nothing
   }
 
-  getActions().reset();
+  actions.reset();
 
   if (payload?.forceInitApi) {
-    getActions().initApi();
+    actions.initApi();
   }
 });
 
-addActionHandler('reset', () => {
+addActionHandler('reset', (global, actions): ActionReturnType => {
   clearStoredSession();
   clearEncryptedSession();
 
@@ -188,27 +190,36 @@ addActionHandler('reset', () => {
 
   updateAppBadge(0);
 
-  getActions().init();
+  actions.initShared({ force: true });
+  Object.values(global.byTabId).forEach(({ id: otherTabId, isMasterTab }) => {
+    actions.init({ tabId: otherTabId, isMasterTab });
+  });
 });
 
-addActionHandler('disconnect', () => {
-  void callApi('disconnect');
+addActionHandler('disconnect', (): ActionReturnType => {
+  void callApiLocal('disconnect');
 });
 
-addActionHandler('loadNearestCountry', async (global) => {
+addActionHandler('destroyConnection', (): ActionReturnType => {
+  void callApiLocal('destroy', true, true);
+});
+
+addActionHandler('loadNearestCountry', async (global): Promise<void> => {
   if (global.connectionState !== 'connectionStateReady') {
     return;
   }
 
   const authNearestCountry = await callApi('fetchNearestCountry');
 
-  setGlobal({
-    ...getGlobal(),
+  global = getGlobal();
+  global = {
+    ...global,
     authNearestCountry,
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('setDeviceToken', (global, actions, deviceToken) => {
+addActionHandler('setDeviceToken', (global, actions, deviceToken): ActionReturnType => {
   return {
     ...global,
     push: {
@@ -218,16 +229,16 @@ addActionHandler('setDeviceToken', (global, actions, deviceToken) => {
   };
 });
 
-addActionHandler('deleteDeviceToken', (global) => {
+addActionHandler('deleteDeviceToken', (global): ActionReturnType => {
   return {
     ...global,
     push: undefined,
   };
 });
 
-addActionHandler('lockScreen', async (global) => {
+addActionHandler('lockScreen', async (global): Promise<void> => {
   const sessionJson = JSON.stringify({ ...loadStoredSession(), userId: global.currentUserId });
-  const globalJson = serializeGlobal(global);
+  const globalJson = await serializeGlobal(global);
 
   await encryptSession(sessionJson, globalJson);
   forgetPasscode();
@@ -235,16 +246,19 @@ addActionHandler('lockScreen', async (global) => {
   updateAppBadge(0);
 
   global = getGlobal();
-  setGlobal(updatePasscodeSettings(
+  global = updatePasscodeSettings(
     global,
     {
       isScreenLocked: true,
       invalidAttemptsCount: 0,
     },
-  ));
+  );
+  setGlobal(global);
 
   setTimeout(() => {
-    setGlobal(clearGlobalForLockScreen(getGlobal()));
+    global = getGlobal();
+    global = clearGlobalForLockScreen(global);
+    setGlobal(global);
   }, LOCK_SCREEN_ANIMATION_DURATION_MS);
 
   try {

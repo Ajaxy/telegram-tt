@@ -8,13 +8,16 @@ import { notifyAboutCall } from '../../../util/notifications';
 import { selectPhoneCallUser } from '../../selectors/calls';
 import { checkNavigatorUserMediaPermissions, initializeSoundsForSafari } from '../ui/calls';
 import { onTickEnd } from '../../../util/schedulers';
+import type { ActionReturnType } from '../../types';
+import { updateTabState } from '../../reducers/tabs';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
-addActionHandler('apiUpdate', (global, actions, update) => {
+addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateGroupCall': {
       if (update.call.connectionState === 'discarded') {
         if (global.groupCalls.activeGroupCallId) {
-          actions.leaveGroupCall({ shouldRemove: true });
+          actions.leaveGroupCall({ shouldRemove: true, tabId: getCurrentTabId() });
           return undefined;
         } else {
           return removeGroupCall(global, update.call.id);
@@ -74,12 +77,15 @@ addActionHandler('apiUpdate', (global, actions, update) => {
       if (phoneCall) {
         if (call.state === 'discarded') {
           actions.playGroupCallSound({ sound: 'end' });
-          return {
+          global = {
             ...global,
             ...(call.needRating && { ratingPhoneCall: call }),
-            isCallPanelVisible: undefined,
             phoneCall: undefined,
           };
+
+          return updateTabState(global, {
+            isCallPanelVisible: undefined,
+          }, getCurrentTabId());
         }
 
         return undefined;
@@ -89,19 +95,23 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
       if (!isOutgoing && call.state === 'requested') {
         onTickEnd(() => {
+          global = getGlobal();
           notifyAboutCall({
             call,
-            user: selectPhoneCallUser(getGlobal())!,
+            user: selectPhoneCallUser(global)!,
           });
         });
 
         void initializeSoundsForSafari();
-        void checkNavigatorUserMediaPermissions(call.isVideo);
-        return {
+        void checkNavigatorUserMediaPermissions(global, actions, call.isVideo, getCurrentTabId());
+        global = {
           ...global,
           phoneCall: call,
-          isCallPanelVisible: false,
         };
+
+        return updateTabState(global, {
+          isCallPanelVisible: false,
+        }, getCurrentTabId());
       }
     }
   }

@@ -142,7 +142,7 @@ const SettingsTwoFa: FC<OwnProps & StateProps> = ({
     dispatch({ type: 'setEmail', payload: value });
     updateRecoveryEmail({
       ...state,
-      email: value,
+      email: value!,
       onSuccess: () => {
         onScreenSelect(SettingsScreens.TwoFaCongratulations);
       },

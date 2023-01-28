@@ -64,6 +64,22 @@ export function throttle<F extends AnyToVoidFunction>(
   };
 }
 
+export function fastRafWithFallback<F extends AnyToVoidFunction>(fn: F) {
+  return fastRaf(fn, false, true);
+}
+
+export function fastRafPrimaryWithFallback<F extends AnyToVoidFunction>(fn: F) {
+  return fastRaf(fn, true, true);
+}
+
+export function throttleWithRafFallback<F extends AnyToVoidFunction>(fn: F) {
+  return throttleWith(fastRafWithFallback, fn);
+}
+
+export function throttleWithPrimaryRafFallback<F extends AnyToVoidFunction>(fn: F) {
+  return throttleWith(fastRafPrimaryWithFallback, fn);
+}
+
 export function throttleWithRaf<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(fastRaf, fn);
 }
@@ -116,25 +132,65 @@ export function rafPromise() {
 
 let fastRafCallbacks: NoneToVoidFunction[] | undefined;
 let fastRafPrimaryCallbacks: NoneToVoidFunction[] | undefined;
+let timeoutCallbacks: NoneToVoidFunction[] | undefined;
+let timeoutPrimaryCallbacks: NoneToVoidFunction[] | undefined;
+let timeout: NodeJS.Timeout | undefined;
+
+const FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
 
 // May result in an immediate execution if called from another `requestAnimationFrame` callback
-export function fastRaf(callback: NoneToVoidFunction, isPrimary = false) {
+export function fastRaf(callback: NoneToVoidFunction, isPrimary = false, withTimeoutFallback = false) {
   if (!fastRafCallbacks) {
-    fastRafCallbacks = isPrimary ? [] : [callback];
-    fastRafPrimaryCallbacks = isPrimary ? [callback] : [];
+    fastRafCallbacks = !withTimeoutFallback && !isPrimary ? [callback] : [];
+    fastRafPrimaryCallbacks = !withTimeoutFallback && isPrimary ? [callback] : [];
+    timeoutCallbacks = withTimeoutFallback && !isPrimary ? [callback] : [];
+    timeoutPrimaryCallbacks = withTimeoutFallback && isPrimary ? [callback] : [];
 
     requestAnimationFrame(() => {
       const currentCallbacks = fastRafCallbacks!;
       const currentPrimaryCallbacks = fastRafPrimaryCallbacks!;
+      const currentTimeoutCallbacks = timeoutCallbacks!;
+      const currentTimeoutPrimaryCallbacks = timeoutPrimaryCallbacks!;
+
+      if (timeout) clearTimeout(timeout);
+      timeout = undefined;
+
       fastRafCallbacks = undefined;
       fastRafPrimaryCallbacks = undefined;
+      timeoutCallbacks = undefined;
+      timeoutPrimaryCallbacks = undefined;
+
       currentPrimaryCallbacks.forEach((cb) => cb());
+      currentTimeoutPrimaryCallbacks.forEach((cb) => cb());
       currentCallbacks.forEach((cb) => cb());
+      currentTimeoutCallbacks.forEach((cb) => cb());
     });
   } else if (isPrimary) {
-    fastRafPrimaryCallbacks!.push(callback);
+    if (withTimeoutFallback) {
+      timeoutPrimaryCallbacks!.push(callback);
+    } else {
+      fastRafPrimaryCallbacks!.push(callback);
+    }
+  } else if (withTimeoutFallback) {
+    timeoutCallbacks!.push(callback);
   } else {
     fastRafCallbacks.push(callback);
+  }
+
+  if (!timeout && withTimeoutFallback) {
+    timeout = setTimeout(() => {
+      const currentTimeoutCallbacks = timeoutCallbacks!;
+      const currentTimeoutPrimaryCallbacks = timeoutPrimaryCallbacks!;
+
+      if (timeout) clearTimeout(timeout);
+      timeout = undefined;
+
+      timeoutCallbacks = [];
+      timeoutPrimaryCallbacks = [];
+
+      currentTimeoutPrimaryCallbacks.forEach((cb) => cb());
+      currentTimeoutCallbacks.forEach((cb) => cb());
+    }, FAST_RAF_TIMEOUT_FALLBACK_MS);
   }
 }
 

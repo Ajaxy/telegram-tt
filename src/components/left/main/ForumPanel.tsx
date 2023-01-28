@@ -12,7 +12,9 @@ import {
   TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
-import { selectChat, selectCurrentMessageList, selectIsForumPanelOpen } from '../../../global/selectors';
+import {
+  selectChat, selectCurrentMessageList, selectIsForumPanelOpen, selectTabState,
+} from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -264,7 +266,7 @@ export default memo(withGlobal<OwnProps>(
   (global, ownProps, detachWhenChanged): StateProps => {
     detachWhenChanged(selectIsForumPanelOpen(global));
 
-    const chatId = global.forumPanelChatId;
+    const chatId = selectTabState(global).forumPanelChatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const {
       chatId: currentChatId,

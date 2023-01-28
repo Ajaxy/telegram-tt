@@ -29,5 +29,6 @@
     "class-methods-use-this": "off",
     "max-classes-per-file": "off",
     "camelcase": "off"
-  }
+  },
+  "ignorePatterns": ["client/mockUtils/*", "client/__invokeMiddlewares__/*"]
 }

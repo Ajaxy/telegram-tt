@@ -26,7 +26,7 @@ const MEMORY_CACHE: Partial<ImportedBundles> = {};
 
 const { addCallback, runCallbacks } = createCallbackManager();
 
-export async function loadModule<B extends Bundles, M extends BundleModules<B>>(bundleName: B, moduleName: M) {
+export async function loadBundle<B extends Bundles>(bundleName: B) {
   if (!LOAD_PROMISES[bundleName]) {
     switch (bundleName) {
       case Bundles.Auth:
@@ -57,7 +57,11 @@ export async function loadModule<B extends Bundles, M extends BundleModules<B>>(
     MEMORY_CACHE[bundleName] = bundle;
   }
 
-  return getModuleFromMemory(bundleName, moduleName);
+  return bundle;
+}
+
+export async function loadModule<B extends Bundles>(bundleName: B) {
+  await loadBundle(bundleName);
 }
 
 export function getModuleFromMemory<B extends Bundles, M extends BundleModules<B>>(bundleName: B, moduleName: M) {

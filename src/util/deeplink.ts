@@ -55,7 +55,7 @@ export const processDeepLink = (url: string) => {
             inviteHash: voicechat || livestream,
           });
         } else if (phone) {
-          openChatByPhoneNumber({ phone, startAttach, attach });
+          openChatByPhoneNumber({ phoneNumber: phone, startAttach, attach });
         } else {
           openChatByUsername({
             username: domain,
@@ -77,7 +77,7 @@ export const processDeepLink = (url: string) => {
 
       focusMessage({
         chatId: `-${channel}`,
-        id: post,
+        messageId: Number(post),
       });
       break;
     }

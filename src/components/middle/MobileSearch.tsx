@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat } from '../../api/types';
 
 import { debounce } from '../../util/schedulers';
-import { selectCurrentTextSearch, selectCurrentChat } from '../../global/selectors';
+import { selectCurrentTextSearch, selectCurrentChat, selectTabState } from '../../global/selectors';
 import { getDayStartAt } from '../../util/dateFormat';
 
 import Button from '../ui/Button';
@@ -135,6 +135,10 @@ const MobileSearchFooter: FC<StateProps> = ({
     }
   }, [chat, focusedIndex, focusMessage, foundIds]);
 
+  const handleCloseLocalTextSearch = useCallback(() => {
+    closeLocalTextSearch();
+  }, [closeLocalTextSearch]);
+
   return (
     <div id="MobileSearch" className={isActive ? 'active' : ''}>
       <div className="header">
@@ -142,7 +146,7 @@ const MobileSearchFooter: FC<StateProps> = ({
           size="smaller"
           round
           color="translucent"
-          onClick={closeLocalTextSearch}
+          onClick={handleCloseLocalTextSearch}
         >
           <i className="icon-arrow-left" />
         </Button>
@@ -213,7 +217,7 @@ export default memo(withGlobal<OwnProps>(
       query,
       totalCount,
       foundIds,
-      isHistoryCalendarOpen: Boolean(global.historyCalendarSelectedAt),
+      isHistoryCalendarOpen: Boolean(selectTabState(global).historyCalendarSelectedAt),
     };
   },
 )(MobileSearchFooter));

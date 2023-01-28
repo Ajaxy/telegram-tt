@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { GlobalState } from '../../global/types';
+import type { TabState } from '../../global/types';
 
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
@@ -12,7 +12,7 @@ import useFlag from '../../hooks/useFlag';
 import RecipientPicker from '../common/RecipientPicker';
 
 export type OwnProps = {
-  requestedDraft?: GlobalState['requestedDraft'];
+  requestedDraft?: TabState['requestedDraft'];
 };
 
 const DraftRecipientPicker: FC<OwnProps> = ({

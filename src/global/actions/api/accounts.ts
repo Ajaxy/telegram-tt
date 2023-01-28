@@ -4,12 +4,14 @@ import { callApi } from '../../../api/gramjs';
 import { translate } from '../../../util/langProvider';
 import { addUsers } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
-addActionHandler('reportPeer', async (global, actions, payload) => {
+addActionHandler('reportPeer', async (global, actions, payload): Promise<void> => {
   const {
     chatId,
     reason,
     description,
+    tabId = getCurrentTabId(),
   } = payload;
   if (!chatId) {
     return;
@@ -30,15 +32,17 @@ addActionHandler('reportPeer', async (global, actions, payload) => {
     message: result
       ? translate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
+    tabId,
   });
 });
 
-addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
+addActionHandler('reportProfilePhoto', async (global, actions, payload): Promise<void> => {
   const {
     chatId,
     reason,
     description,
     photo,
+    tabId = getCurrentTabId(),
   } = payload;
   if (!chatId) {
     return;
@@ -60,26 +64,29 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
     message: result
       ? translate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
+    tabId,
   });
 });
 
-addActionHandler('loadAuthorizations', async () => {
+addActionHandler('loadAuthorizations', async (global): Promise<void> => {
   const result = await callApi('fetchAuthorizations');
   if (!result) {
     return;
   }
 
-  setGlobal({
-    ...getGlobal(),
+  global = getGlobal();
+  global = {
+    ...global,
     activeSessions: {
       byHash: result.authorizations,
       orderedHashes: Object.keys(result.authorizations),
       ttlDays: result.ttlDays,
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('terminateAuthorization', async (global, actions, payload) => {
+addActionHandler('terminateAuthorization', async (global, actions, payload): Promise<void> => {
   const { hash } = payload!;
 
   const result = await callApi('terminateAuthorization', hash);
@@ -91,16 +98,17 @@ addActionHandler('terminateAuthorization', async (global, actions, payload) => {
 
   const { [hash]: removedSessions, ...newSessions } = global.activeSessions.byHash;
 
-  setGlobal({
+  global = {
     ...global,
     activeSessions: {
       byHash: newSessions,
       orderedHashes: global.activeSessions.orderedHashes.filter((el) => el !== hash),
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('terminateAllAuthorizations', async (global) => {
+addActionHandler('terminateAllAuthorizations', async (global): Promise<void> => {
   const result = await callApi('terminateAllAuthorizations');
   if (!result) {
     return;
@@ -114,7 +122,7 @@ addActionHandler('terminateAllAuthorizations', async (global) => {
   }
   const currentSession = global.activeSessions.byHash[currentSessionHash];
 
-  setGlobal({
+  global = {
     ...global,
     activeSessions: {
       byHash: {
@@ -122,10 +130,11 @@ addActionHandler('terminateAllAuthorizations', async (global) => {
       },
       orderedHashes: [currentSessionHash],
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('changeSessionSettings', async (global, actions, payload) => {
+addActionHandler('changeSessionSettings', async (global, actions, payload): Promise<void> => {
   const { hash, areCallsEnabled, areSecretChatsEnabled } = payload;
   const result = await callApi('changeSessionSettings', {
     hash,
@@ -138,7 +147,7 @@ addActionHandler('changeSessionSettings', async (global, actions, payload) => {
   }
 
   global = getGlobal();
-  setGlobal({
+  global = {
     ...global,
     activeSessions: {
       ...global.activeSessions,
@@ -151,10 +160,11 @@ addActionHandler('changeSessionSettings', async (global, actions, payload) => {
         },
       },
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('changeSessionTtl', async (global, actions, payload) => {
+addActionHandler('changeSessionTtl', async (global, actions, payload): Promise<void> => {
   const { days } = payload;
 
   const result = await callApi('changeSessionTtl', { days });
@@ -164,16 +174,17 @@ addActionHandler('changeSessionTtl', async (global, actions, payload) => {
   }
 
   global = getGlobal();
-  setGlobal({
+  global = {
     ...global,
     activeSessions: {
       ...global.activeSessions,
       ttlDays: days,
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('loadWebAuthorizations', async (global) => {
+addActionHandler('loadWebAuthorizations', async (global): Promise<void> => {
   const result = await callApi('fetchWebAuthorizations');
   if (!result) {
     return;
@@ -183,16 +194,17 @@ addActionHandler('loadWebAuthorizations', async (global) => {
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
 
-  setGlobal({
+  global = {
     ...global,
     activeWebSessions: {
       byHash: webAuthorizations,
       orderedHashes: Object.keys(webAuthorizations),
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('terminateWebAuthorization', async (global, actions, payload) => {
+addActionHandler('terminateWebAuthorization', async (global, actions, payload): Promise<void> => {
   const { hash } = payload!;
 
   const result = await callApi('terminateWebAuthorization', hash);
@@ -204,16 +216,17 @@ addActionHandler('terminateWebAuthorization', async (global, actions, payload) =
 
   const { [hash]: removedSessions, ...newSessions } = global.activeWebSessions.byHash;
 
-  setGlobal({
+  global = {
     ...global,
     activeWebSessions: {
       byHash: newSessions,
       orderedHashes: global.activeWebSessions.orderedHashes.filter((el) => el !== hash),
     },
-  });
+  };
+  setGlobal(global);
 });
 
-addActionHandler('terminateAllWebAuthorizations', async (global) => {
+addActionHandler('terminateAllWebAuthorizations', async (global): Promise<void> => {
   const result = await callApi('terminateAllWebAuthorizations');
   if (!result) {
     return;
@@ -221,11 +234,12 @@ addActionHandler('terminateAllWebAuthorizations', async (global) => {
 
   global = getGlobal();
 
-  setGlobal({
+  global = {
     ...global,
     activeWebSessions: {
       byHash: {},
       orderedHashes: [],
     },
-  });
+  };
+  setGlobal(global);
 });

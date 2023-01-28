@@ -115,22 +115,28 @@ export async function importLegacySession() {
       // eslint-disable-next-line no-console
       console.warn('Failed to load legacy session', err);
     }
-    // Do nothing.
   }
 }
 
 // Remove previously created IndexedDB and cache API sessions
 export async function clearLegacySessions() {
-  localStorage.removeItem(LEGACY_SESSION_KEY);
+  try {
+    localStorage.removeItem(LEGACY_SESSION_KEY);
 
-  const idbKeys = await idb.keys();
+    const idbKeys = await idb.keys();
 
-  await Promise.all<Promise<any>>([
-    cacheApi.clear('GramJs'),
-    ...idbKeys
-      .filter((k) => typeof k === 'string' && k.startsWith('GramJs:GramJs-session-'))
-      .map((k) => idb.del(k)),
-  ]);
+    await Promise.all<Promise<any>>([
+      cacheApi.clear('GramJs'),
+      ...idbKeys
+        .filter((k) => typeof k === 'string' && k.startsWith('GramJs:GramJs-session-'))
+        .map((k) => idb.del(k)),
+    ]);
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to clear legacy session', err);
+    }
+  }
 }
 
 export function importTestSession() {
@@ -143,7 +149,6 @@ export function importTestSession() {
       // eslint-disable-next-line no-console
       console.warn('Failed to load test session', err);
     }
-    // Do nothing.
   }
 }
 

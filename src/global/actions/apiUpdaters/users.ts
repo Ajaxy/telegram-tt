@@ -5,6 +5,7 @@ import type { ApiUserStatus } from '../../../api/types';
 import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
 import { selectIsCurrentUserPremium, selectUser } from '../../selectors';
+import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 
@@ -18,26 +19,30 @@ function scheduleStatusUpdate(userId: string, statusUpdate: ApiUserStatus) {
 }
 
 function flushStatusUpdates() {
-  const global = getGlobal();
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
+  let global = getGlobal() as RequiredGlobalState;
 
-  setGlobal(replaceUserStatuses(global, {
+  global = replaceUserStatuses(global, {
     ...global.users.statusesById,
     ...pendingStatusUpdates,
-  }));
+  });
+  setGlobal(global);
 
   pendingStatusUpdates = {};
 }
 
-addActionHandler('apiUpdate', (global, actions, update) => {
+addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'deleteContact': {
       return deleteContact(global, update.id);
     }
 
     case 'updateUser': {
-      if (update.id === global.currentUserId && update.user.isPremium && !selectIsCurrentUserPremium(global)) {
-        actions.openPremiumModal({ isSuccess: true });
-      }
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        if (update.id === global.currentUserId && update.user.isPremium && !selectIsCurrentUserPremium(global)) {
+          actions.openPremiumModal({ isSuccess: true, tabId });
+        }
+      });
 
       return updateUser(global, update.id, update.user);
     }

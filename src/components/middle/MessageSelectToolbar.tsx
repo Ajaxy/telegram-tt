@@ -9,7 +9,7 @@ import {
   selectCanDownloadSelectedMessages,
   selectCanForwardMessages,
   selectCanReportSelectedMessages,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectTabState,
   selectHasProtectedMessage,
   selectSelectedMessagesCount,
 } from '../../global/selectors';
@@ -72,16 +72,21 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
 
   useCopySelectedMessages(Boolean(isActive), copySelectedMessages);
+
+  const handleExitMessageSelectMode = useCallback(() => {
+    exitMessageSelectMode();
+  }, [exitMessageSelectMode]);
+
   useEffect(() => {
     return isActive && !isDeleteModalOpen && !isReportModalOpen && !isAnyModalOpen
       ? captureKeyboardListeners({
         onBackspace: canDeleteMessages ? openDeleteModal : undefined,
         onDelete: canDeleteMessages ? openDeleteModal : undefined,
-        onEsc: exitMessageSelectMode,
+        onEsc: handleExitMessageSelectMode,
       })
       : undefined;
   }, [
-    isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, exitMessageSelectMode, isAnyModalOpen,
+    isActive, isDeleteModalOpen, isReportModalOpen, openDeleteModal, handleExitMessageSelectMode, isAnyModalOpen,
     canDeleteMessages,
   ]);
 
@@ -134,7 +139,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         <Button
           color="translucent"
           round
-          onClick={exitMessageSelectMode}
+          onClick={handleExitMessageSelectMode}
           ariaLabel="Exit select mode"
         >
           <i className="icon-close" />
@@ -181,17 +186,18 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const tabState = selectTabState(global);
     const { type: messageListType, chatId } = selectCurrentMessageList(global) || {};
     const isSchedule = messageListType === 'scheduled';
     const { canDelete } = selectCanDeleteSelectedMessages(global);
     const canReport = Boolean(!isSchedule && selectCanReportSelectedMessages(global));
     const canDownload = selectCanDownloadSelectedMessages(global);
-    const { messageIds: selectedMessageIds } = global.selectedMessages || {};
+    const { messageIds: selectedMessageIds } = tabState.selectedMessages || {};
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
-    const isForwardModalOpen = global.forwardMessages.isModalShown;
-    const isAnyModalOpen = Boolean(isForwardModalOpen || global.requestedDraft
-      || global.requestedAttachBotInChat || global.requestedAttachBotInstall);
+    const isForwardModalOpen = tabState.forwardMessages.isModalShown;
+    const isAnyModalOpen = Boolean(isForwardModalOpen || tabState.requestedDraft
+      || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall);
 
     return {
       isSchedule,

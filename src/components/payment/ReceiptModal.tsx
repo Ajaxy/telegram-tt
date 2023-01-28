@@ -6,6 +6,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { Price } from '../../types';
 import type { ApiShippingAddress, ApiWebDocument } from '../../api/types';
 
+import { selectTabState } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
@@ -116,7 +117,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { receipt } = global.payment;
+    const { receipt } = selectTabState(global).payment;
     const {
       currency,
       prices,

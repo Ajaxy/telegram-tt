@@ -992,7 +992,7 @@ export function updateChatMemberBannedRights({
 
 export function updateChatAdmin({
   chat, user, adminRights, customTitle = '',
-}: { chat: ApiChat; user: ApiUser; adminRights: ApiChatAdminRights; customTitle: string }) {
+}: { chat: ApiChat; user: ApiUser; adminRights: ApiChatAdminRights; customTitle?: string }) {
   const channel = buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel;
   const userId = buildInputEntity(user.id, user.accessHash) as GramJs.InputUser;
 

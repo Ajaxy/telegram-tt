@@ -118,7 +118,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
             isMuted: !newAreNotificationsEnabled,
           });
         } else {
-          updateChatMutedState({ chatId, isMuted: !newAreNotificationsEnabled });
+          updateChatMutedState({ chatId: chatId!, isMuted: !newAreNotificationsEnabled });
         }
       });
 

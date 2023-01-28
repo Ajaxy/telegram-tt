@@ -22,7 +22,7 @@ function handleWorkerMessage(e: MessageEvent) {
   switch (action.type) {
     case 'focusMessage':
       if (dispatch.focusMessage) {
-        dispatch.focusMessage(payload);
+        dispatch.focusMessage(payload as any);
       }
       break;
     case 'playNotificationSound':

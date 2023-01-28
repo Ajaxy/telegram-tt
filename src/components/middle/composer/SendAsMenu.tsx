@@ -38,7 +38,7 @@ const SendAsMenu: FC<OwnProps> = ({
   isCurrentUserPremium,
   onClose,
 }) => {
-  const { saveDefaultSendAs, showNotification, openPremiumModal } = getActions();
+  const { saveDefaultSendAs, showNotification } = getActions();
 
   // No need for expensive global updates on users and chats, so we avoid them
   const usersById = getGlobal().users.byId;
@@ -58,7 +58,7 @@ const SendAsMenu: FC<OwnProps> = ({
 
   const handleUserSelect = useCallback((id: string) => {
     onClose();
-    saveDefaultSendAs({ chatId, sendAsId: id });
+    saveDefaultSendAs({ chatId: chatId!, sendAsId: id });
   }, [chatId, onClose, saveDefaultSendAs]);
 
   const selectedSendAsIndex = useKeyboardNavigation({
@@ -106,7 +106,10 @@ const SendAsMenu: FC<OwnProps> = ({
             showNotification({
               message: lang('SelectSendAsPeerPremiumHint'),
               actionText: lang('Open'),
-              action: () => openPremiumModal(),
+              action: {
+                action: 'openPremiumModal',
+                payload: {},
+              },
             });
           }
         };

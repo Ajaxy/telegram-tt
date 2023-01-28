@@ -7,6 +7,7 @@ import type {
 } from '../../api/types';
 import type { AnimationLevel } from '../../types';
 
+import { selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
@@ -20,7 +21,7 @@ import Avatar from '../common/Avatar';
 import './Dialogs.scss';
 
 type StateProps = {
-  dialogs: (ApiError | ApiInviteInfo)[];
+  dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
   animationLevel: AnimationLevel;
 };
 
@@ -198,7 +199,7 @@ function getErrorHeader(error: ApiError) {
 export default memo(withGlobal(
   (global): StateProps => {
     return {
-      dialogs: global.dialogs,
+      dialogs: selectTabState(global).dialogs,
       animationLevel: global.settings.byKey.animationLevel,
     };
   },

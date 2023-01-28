@@ -21,18 +21,17 @@ import {
   selectThreadParam,
 } from '../../selectors';
 import { updateUnreadReactions } from '../../reducers/reactions';
+import type { ActionReturnType } from '../../types';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
-// Enough to animate and mark as read in Message List
-const CURRENT_CHAT_UNREAD_DELAY = 1500;
 
-addActionHandler('apiUpdate', (global, actions, update) => {
+addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateChat': {
       const { isForum: prevIsForum } = selectChat(global, update.id) || {};
-      const { chatId: currentChatId } = selectCurrentMessageList(global) || {};
 
-      setGlobal(updateChat(global, update.id, update.chat, update.newProfilePhoto));
+      global = updateChat(global, update.id, update.chat, update.newProfilePhoto);
+      setGlobal(global);
 
       if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)) {
         // Chat can appear in dialogs list.
@@ -46,13 +45,16 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         });
       }
 
-      // The property `isForum` was changed in another client
-      if (currentChatId === update.id && 'isForum' in update.chat && prevIsForum !== update.chat.isForum) {
-        if (prevIsForum) {
-          actions.closeForumPanel();
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const { chatId: currentChatId } = selectCurrentMessageList(global, tabId) || {};
+        // The property `isForum` was changed in another client
+        if (currentChatId === update.id && 'isForum' in update.chat && prevIsForum !== update.chat.isForum) {
+          if (prevIsForum) {
+            actions.closeForumPanel({ tabId });
+          }
+          actions.openChat({ id: currentChatId, tabId });
         }
-        actions.openChat({ id: currentChatId });
-      }
+      });
 
       return undefined;
     }
@@ -85,13 +87,15 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
     case 'updateChatTypingStatus': {
       const { id, threadId = MAIN_THREAD_ID, typingStatus } = update;
-      setGlobal(replaceThreadParam(global, id, threadId, 'typingStatus', typingStatus));
+      global = replaceThreadParam(global, id, threadId, 'typingStatus', typingStatus);
+      setGlobal(global);
 
       setTimeout(() => {
         global = getGlobal();
         const currentTypingStatus = selectThreadParam(global, id, threadId, 'typingStatus');
         if (typingStatus && currentTypingStatus && typingStatus.timestamp === currentTypingStatus.timestamp) {
-          setGlobal(replaceThreadParam(global, id, threadId, 'typingStatus', undefined));
+          global = replaceThreadParam(global, id, threadId, 'typingStatus', undefined);
+          setGlobal(global);
         }
       }, TYPING_STATUS_CLEAR_DELAY);
 
@@ -100,7 +104,6 @@ addActionHandler('apiUpdate', (global, actions, update) => {
 
     case 'newMessage': {
       const { message } = update;
-      const { chatId: currentChatId, threadId, type: messageListType } = selectCurrentMessageList(global) || {};
 
       if (message.senderId === global.currentUserId && !message.isFromScheduled) {
         return undefined;
@@ -111,24 +114,12 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         return undefined;
       }
 
-      const isActiveChat = (
-        messageListType === 'thread'
-        && threadId === MAIN_THREAD_ID
-        && update.chatId === currentChatId
-      );
-
       const hasMention = Boolean(update.message.id && update.message.hasUnreadMention);
 
-      if (isActiveChat) {
-        setTimeout(() => {
-          actions.requestChatUpdate({ chatId: update.chatId });
-        }, CURRENT_CHAT_UNREAD_DELAY);
-      } else {
-        global = updateChat(global, update.chatId, {
-          unreadCount: (chat.unreadCount || 0) + 1,
-          ...(hasMention && { unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1 }),
-        });
-      }
+      global = updateChat(global, update.chatId, {
+        unreadCount: chat.unreadCount ? chat.unreadCount + 1 : 1,
+        ...(hasMention && { unreadMentionsCount: (chat.unreadMentionsCount || 0) + 1 }),
+      });
 
       if (hasMention) {
         global = updateChat(global, update.chatId, {
@@ -377,7 +368,9 @@ addActionHandler('apiUpdate', (global, actions, update) => {
     case 'showInvite': {
       const { data } = update;
 
-      actions.showDialog({ data });
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        actions.showDialog({ data, tabId });
+      });
 
       return undefined;
     }

@@ -14,7 +14,7 @@ import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
 } from '../../global/helpers';
-import { selectChat, selectSender } from '../../global/selectors';
+import { selectChat, selectTabState, selectSender } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { makeTrackId } from '../../util/audioPlayer';
 import { clearMediaSession } from '../../util/mediaSession';
@@ -320,7 +320,7 @@ export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const sender = selectSender(global, message);
     const chat = selectChat(global, message.chatId);
-    const { volume, playbackRate, isMuted } = global.audioPlayer;
+    const { volume, playbackRate, isMuted } = selectTabState(global).audioPlayer;
 
     return {
       sender,

@@ -89,7 +89,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     if (message.chatInviteHash) {
       openChatByInvite({ hash: message.chatInviteHash });
     } else if (message.channelPostId) {
-      focusMessage({ chatId: message.chatId, messageId: message.channelPostId });
+      focusMessage({ chatId: message.chatId!, messageId: message.channelPostId });
     } else {
       openChat({ id: message.chatId });
 

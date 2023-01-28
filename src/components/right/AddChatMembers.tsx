@@ -10,7 +10,7 @@ import type {
 import { NewChatMembersProgress } from '../../types';
 
 import { unique } from '../../util/iteratees';
-import { selectChat } from '../../global/selectors';
+import { selectChat, selectTabState } from '../../global/selectors';
 import {
   filterUsersByName, isChatChannel, isUserBot, sortChatIds,
 } from '../../global/helpers';
@@ -153,7 +153,8 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const { userIds: localContactIds } = global.contactList || {};
     const { byId: chatsById } = global.chats;
-    const { currentUserId, newChatMembersProgress } = global;
+    const { newChatMembersProgress } = selectTabState(global);
+    const { currentUserId } = global;
     const isChannel = chat && isChatChannel(chat);
 
     const {
@@ -161,7 +162,7 @@ export default memo(withGlobal<OwnProps>(
       fetchingStatus,
       globalUserIds,
       localUserIds,
-    } = global.userSearch;
+    } = selectTabState(global).userSearch;
 
     return {
       isChannel,

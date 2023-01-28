@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
+import { selectTabState } from '../../../global/selectors';
 import { filterUsersByName, getUserFullName } from '../../../global/helpers';
 import { unique } from '../../../util/iteratees';
 import useLang from '../../../hooks/useLang';
@@ -102,7 +103,7 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       blockedIds,
       contactIds: contactList?.userIds,
-      localContactIds: global.userSearch.localUserIds,
+      localContactIds: selectTabState(global).userSearch.localUserIds,
       currentUserId,
     };
   },

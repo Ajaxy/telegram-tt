@@ -370,8 +370,8 @@ export function updateNotificationSettings(peerType: 'contact' | 'group' | 'broa
   isSilent,
   shouldShowPreviews,
 }: {
-  isSilent: boolean;
-  shouldShowPreviews: boolean;
+  isSilent?: boolean;
+  shouldShowPreviews?: boolean;
 }) {
   let peer: GramJs.TypeInputNotifyPeer;
   if (peerType === 'contact') {

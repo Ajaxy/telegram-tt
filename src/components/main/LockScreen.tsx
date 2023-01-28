@@ -90,7 +90,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
 
   const handleSignOutMessage = useCallback(() => {
     closeSignOutConfirmation();
-    signOut();
+    signOut({ forceInitApi: true });
   }, [closeSignOutConfirmation, signOut]);
 
   if (!shouldRender) {

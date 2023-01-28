@@ -22,7 +22,7 @@ const StatisticsPublicForward: FC<OwnProps> = ({ data }) => {
 
   const username = useMemo(() => getMainUsername(data.chat), [data.chat]);
   const handleClick = useCallback(() => {
-    openChatByUsername({ username, messageId: data.messageId });
+    openChatByUsername({ username: username!, messageId: data.messageId });
   }, [data.messageId, openChatByUsername, username]);
 
   return (

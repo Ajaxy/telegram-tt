@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { selectTabState } from '../../../global/selectors';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
@@ -39,7 +40,6 @@ const runThrottled = throttle((cb) => cb(), 500, true);
 
 const ChatMessageResults: FC<OwnProps & StateProps> = ({
   searchQuery,
-  currentUserId,
   dateSearchQuery,
   foundIds,
   globalMessagesByChatId,
@@ -61,12 +61,10 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
       runThrottled(() => {
         searchMessagesGlobal({
           type: 'text',
-          query: searchQuery,
-          chatId: currentUserId,
         });
       });
     }
-  }, [currentUserId, lastSyncTime, searchMessagesGlobal, searchQuery]);
+  }, [lastSyncTime, searchMessagesGlobal]);
 
   const handleTopicClick = useCallback(
     (id: number) => {
@@ -171,7 +169,7 @@ export default memo(withGlobal<OwnProps>(
     const { currentUserId, messages: { byChatId: globalMessagesByChatId }, lastSyncTime } = global;
     const {
       fetchingStatus, resultsByType, foundTopicIds, chatId: searchChatId,
-    } = global.globalSearch;
+    } = selectTabState(global).globalSearch;
 
     const { foundIds } = (resultsByType?.text) || {};
 

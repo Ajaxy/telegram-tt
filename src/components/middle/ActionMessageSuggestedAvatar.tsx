@@ -27,7 +27,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   content,
 }) => {
   const {
-    openMediaViewer, uploadProfilePhoto, showNotification, requestNextSettingsScreen,
+    openMediaViewer, uploadProfilePhoto, showNotification,
   } = getActions();
 
   const { isOutgoing } = message;
@@ -42,10 +42,15 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
     showNotification({
       title: lang('ApplyAvatarHintTitle'),
       message: lang('ApplyAvatarHint'),
-      action: () => requestNextSettingsScreen(SettingsScreens.Main),
+      action: {
+        action: 'requestNextSettingsScreen',
+        payload: {
+          screen: SettingsScreens.Main,
+        },
+      },
       actionText: lang('Open'),
     });
-  }, [lang, requestNextSettingsScreen, showNotification]);
+  }, [lang, showNotification]);
 
   const handleSetSuggestedAvatar = useCallback((file: File) => {
     setCropModalBlob(undefined);
