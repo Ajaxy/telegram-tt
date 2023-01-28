@@ -529,9 +529,12 @@ class TelegramClient {
         let media;
         if (messageOrMedia instanceof constructors.Message) {
             media = messageOrMedia.media;
+        } else if (messageOrMedia instanceof constructors.MessageService) {
+            media = messageOrMedia.action.photo;
         } else {
             media = messageOrMedia;
         }
+
         if (typeof media === 'string') {
             throw new Error('not implemented');
         }

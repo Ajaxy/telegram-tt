@@ -18,7 +18,7 @@ import {
   getMessageDocument,
   getPhotoFullDimensions,
   getVideoDimensions,
-  getMessageFileSize,
+  getMessageFileSize, getMessageActionPhoto,
 } from '../../../global/helpers';
 import { useMemo } from '../../../lib/teact/teact';
 import useMedia from '../../../hooks/useMedia';
@@ -44,6 +44,7 @@ export const useMediaProps = ({
   delay,
 }: UseMediaProps) => {
   const photo = message ? getMessagePhoto(message) : undefined;
+  const actionPhoto = message ? getMessageActionPhoto(message) : undefined;
   const video = message ? getMessageVideo(message) : undefined;
   const webPagePhoto = message ? getMessageWebPagePhoto(message) : undefined;
   const webPageVideo = message ? getMessageWebPageVideo(message) : undefined;
@@ -51,9 +52,9 @@ export const useMediaProps = ({
   const isDocumentVideo = message ? isMessageDocumentVideo(message) : false;
   const videoSize = message ? getMessageFileSize(message) : undefined;
   const avatarMedia = avatarOwner?.photos?.[mediaId];
-  const isVideoAvatar = Boolean(avatarMedia?.isVideo);
+  const isVideoAvatar = Boolean(avatarMedia?.isVideo || actionPhoto?.isVideo);
   const isVideo = Boolean(video || webPageVideo || isDocumentVideo);
-  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto || isDocumentPhoto));
+  const isPhoto = Boolean(!isVideo && (photo || webPagePhoto || isDocumentPhoto || actionPhoto));
   const { isGif } = video || webPageVideo || {};
   const isFromSharedMedia = origin === MediaViewerOrigin.SharedMedia;
   const isFromSearch = origin === MediaViewerOrigin.SearchResult;
@@ -73,8 +74,11 @@ export const useMediaProps = ({
         return getChatAvatarHash(avatarOwner, isFull ? 'big' : 'normal');
       }
     }
+    if (actionPhoto && isVideoAvatar && isFull) {
+      return `videoAvatar${actionPhoto.id}?size=u`;
+    }
     return message && getMessageMediaHash(message, isFull ? 'full' : 'preview');
-  }, [avatarOwner, message, avatarMedia, mediaId]);
+  }, [avatarOwner, actionPhoto, isVideoAvatar, message, avatarMedia, mediaId]);
 
   const pictogramBlobUrl = useMedia(
     message
@@ -128,8 +132,8 @@ export const useMediaProps = ({
   if (message) {
     if (isDocumentPhoto || isDocumentVideo) {
       dimensions = getMessageDocument(message)!.mediaSize!;
-    } else if (photo || webPagePhoto) {
-      dimensions = getPhotoFullDimensions((photo || webPagePhoto)!)!;
+    } else if (photo || webPagePhoto || actionPhoto) {
+      dimensions = getPhotoFullDimensions((photo || webPagePhoto || actionPhoto)!)!;
     } else if (video || webPageVideo) {
       dimensions = getVideoDimensions((video || webPageVideo)!)!;
     }
@@ -142,6 +146,7 @@ export const useMediaProps = ({
     photo,
     video,
     webPagePhoto,
+    actionPhoto,
     webPageVideo,
     isVideo,
     isPhoto,

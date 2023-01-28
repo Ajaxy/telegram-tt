@@ -40,7 +40,12 @@ addActionHandler('loadFullUser', async (global, actions, payload) => {
   const newUser = await callApi('fetchFullUser', { id, accessHash });
   if (!newUser) return;
 
-  if (user.avatarHash !== newUser.avatarHash && user.photos?.length) {
+  const hasChangedAvatarHash = user.avatarHash !== newUser.avatarHash;
+  const hasChangedProfilePhoto = user.fullInfo?.profilePhoto?.id !== newUser.fullInfo?.profilePhoto?.id;
+  const hasChangedFallbackPhoto = user.fullInfo?.fallbackPhoto?.id !== newUser.fullInfo?.fallbackPhoto?.id;
+  const hasChangedPersonalPhoto = user.fullInfo?.personalPhoto?.id !== newUser.fullInfo?.personalPhoto?.id;
+  if ((hasChangedAvatarHash || hasChangedProfilePhoto || hasChangedFallbackPhoto || hasChangedPersonalPhoto)
+    && user.photos?.length) {
     actions.loadProfilePhotos({ profileId: userId });
   }
 });
@@ -266,7 +271,9 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
   const { photos, users } = result;
   photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
   const fallbackPhoto = user?.fullInfo?.fallbackPhoto;
+  const personalPhoto = user?.fullInfo?.personalPhoto;
   if (fallbackPhoto) photos.push(fallbackPhoto);
+  if (personalPhoto) photos.unshift(personalPhoto);
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
 

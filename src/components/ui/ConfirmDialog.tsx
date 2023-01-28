@@ -15,7 +15,7 @@ type OwnProps = {
   onCloseAnimationEnd?: () => void;
   title?: string;
   header?: TeactNode;
-  textParts?: TextPart[];
+  textParts?: TextPart;
   text?: string;
   confirmLabel?: string;
   confirmHandler: () => void;

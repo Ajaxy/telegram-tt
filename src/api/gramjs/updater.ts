@@ -181,7 +181,10 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         return;
       }
 
-      if (update.message instanceof GramJs.Message && isMessageWithMedia(update.message)) {
+      if ((update.message instanceof GramJs.Message && isMessageWithMedia(update.message))
+      || (update.message instanceof GramJs.MessageService
+          && update.message.action instanceof GramJs.MessageActionSuggestProfilePhoto)
+      ) {
         addMessageToLocalDb(update.message);
       }
 

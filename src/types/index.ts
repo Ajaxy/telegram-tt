@@ -268,6 +268,7 @@ export enum MediaViewerOrigin {
   Album,
   ScheduledAlbum,
   SearchResult,
+  SuggestedAvatar,
 }
 
 export enum AudioOrigin {

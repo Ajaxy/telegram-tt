@@ -160,7 +160,9 @@ async function download(
     let mimeType;
     let fullSize;
 
-    if (entity instanceof GramJs.Message) {
+    if (entity instanceof GramJs.MessageService && entity.action instanceof GramJs.MessageActionSuggestProfilePhoto) {
+      mimeType = 'image/jpeg';
+    } else if (entity instanceof GramJs.Message) {
       mimeType = getMessageMediaMimeType(entity, sizeType);
       if (entity.media instanceof GramJs.MessageMediaDocument && entity.media.document instanceof GramJs.Document) {
         fullSize = entity.media.document.size.toJSNumber();

@@ -1,4 +1,4 @@
-import type { ApiMessage, ApiDimensions } from '../../../api/types';
+import type { ApiDimensions, ApiMessage } from '../../../api/types';
 
 import { MediaViewerOrigin } from '../../../types';
 
@@ -326,6 +326,11 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
       mediaSelector = '.avatar-media';
       break;
 
+    case MediaViewerOrigin.SuggestedAvatar:
+      containerSelector = `.Transition__slide--active > .MessageList #${getMessageHtmlId(message!.id)}`;
+      mediaSelector = '.Avatar img';
+      break;
+
     case MediaViewerOrigin.ScheduledInline:
     case MediaViewerOrigin.Inline:
     default:
@@ -359,7 +364,11 @@ function applyShape(ghost: HTMLDivElement, origin: MediaViewerOrigin) {
       break;
 
     case MediaViewerOrigin.MiddleHeaderAvatar:
+    case MediaViewerOrigin.SuggestedAvatar:
       ghost.classList.add('circle');
+      if (origin === MediaViewerOrigin.SuggestedAvatar) {
+        ghost.classList.add('transition-circle');
+      }
       break;
   }
 }

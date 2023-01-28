@@ -92,9 +92,11 @@ addActionHandler('setAuthPassword', (global, actions, payload) => {
 });
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload) => {
-  const { file, isFallback } = payload!;
+  const {
+    file, isFallback, isVideo, videoTs,
+  } = payload!;
 
-  const result = await callApi('uploadProfilePhoto', file, isFallback);
+  const result = await callApi('uploadProfilePhoto', file, isFallback, isVideo, videoTs);
   if (!result) return;
 
   global = getGlobal();

@@ -7,7 +7,7 @@ import type {
   ApiError,
   ApiLangString,
   ApiLanguage,
-  ApiNotifyException, ApiPhoto,
+  ApiNotifyException, ApiPhoto, ApiUser,
 } from '../../types';
 import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 import type { LANG_PACKS } from '../../../config';
@@ -101,10 +101,10 @@ export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean)
   return undefined;
 }
 
-export async function uploadProfilePhoto(file: File, isFallback?: boolean) {
+export async function uploadProfilePhoto(file: File, isFallback?: boolean, isVideo = false, videoTs = 0) {
   const inputFile = await uploadFile(file);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
-    file: inputFile,
+    ...(isVideo ? { video: inputFile, videoStartTs: videoTs } : { file: inputFile }),
     ...(isFallback ? { fallback: true } : undefined),
   }));
 
@@ -119,6 +119,40 @@ export async function uploadProfilePhoto(file: File, isFallback?: boolean) {
     };
   }
   return undefined;
+}
+
+export async function uploadContactProfilePhoto({
+  file, isSuggest, user,
+}: {
+  file?: File;
+  isSuggest?: boolean;
+  user: ApiUser;
+}) {
+  const inputFile = file ? await uploadFile(file) : undefined;
+  const result = await invokeRequest(new GramJs.photos.UploadContactProfilePhoto({
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    file: inputFile,
+    ...(isSuggest ? { suggest: true } : { save: true }),
+  }));
+
+  if (!result) return undefined;
+
+  addEntitiesWithPhotosToLocalDb(result.users);
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+
+  if (result.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(result.photo);
+    return {
+      users,
+      photo: buildApiPhoto(result.photo),
+    };
+  }
+
+  return {
+    users,
+    photo: undefined,
+  };
 }
 
 export async function deleteProfilePhotos(photos: ApiPhoto[]) {

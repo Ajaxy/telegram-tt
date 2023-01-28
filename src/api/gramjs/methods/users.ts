@@ -46,9 +46,14 @@ export async function fetchFullUser({
   }
 
   updateLocalDb(fullInfo);
+  addUserToLocalDb(fullInfo.users[0], true);
 
   if (fullInfo.fullUser.profilePhoto instanceof GramJs.Photo) {
     localDb.photos[fullInfo.fullUser.profilePhoto.id.toString()] = fullInfo.fullUser.profilePhoto;
+  }
+
+  if (fullInfo.fullUser.personalPhoto instanceof GramJs.Photo) {
+    localDb.photos[fullInfo.fullUser.personalPhoto.id.toString()] = fullInfo.fullUser.personalPhoto;
   }
 
   if (fullInfo.fullUser.fallbackPhoto instanceof GramJs.Photo) {

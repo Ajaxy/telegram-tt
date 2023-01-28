@@ -52,6 +52,10 @@ export function getMessagePhoto(message: ApiMessage) {
   return message.content.photo;
 }
 
+export function getMessageActionPhoto(message: ApiMessage) {
+  return message.content.action?.type === 'suggestProfilePhoto' ? message.content.action.photo : undefined;
+}
+
 export function getMessageVideo(message: ApiMessage) {
   return message.content.video;
 }
@@ -180,13 +184,14 @@ export function getMessageMediaHash(
   target: Target,
 ) {
   const {
-    photo, video, sticker, audio, voice, document,
+    video, sticker, audio, voice, document,
   } = message.content;
 
-  const messagePhoto = photo || getMessageWebPagePhoto(message) || getMessageDocumentPhoto(message);
+  const messagePhoto = getMessagePhoto(message) || getMessageWebPagePhoto(message) || getMessageDocumentPhoto(message);
+  const actionPhoto = getMessageActionPhoto(message);
   const messageVideo = video || getMessageWebPageVideo(message) || getMessageDocumentVideo(message);
 
-  const content = messagePhoto || messageVideo || sticker || audio || voice || document;
+  const content = actionPhoto || messagePhoto || messageVideo || sticker || audio || voice || document;
   if (!content) {
     return undefined;
   }
@@ -210,18 +215,18 @@ export function getMessageMediaHash(
     }
   }
 
-  if (messagePhoto) {
+  if (messagePhoto || actionPhoto) {
     switch (target) {
       case 'micro':
       case 'pictogram':
-        return `${base}?size=m`;
+        return `${base}?size=${actionPhoto ? 'a' : 'm'}`;
       case 'inline':
-        return !hasMessageLocalBlobUrl(message) ? `${base}?size=x` : undefined;
+        return !hasMessageLocalBlobUrl(message) ? `${base}?size=${actionPhoto ? 'b' : 'x'}` : undefined;
       case 'preview':
-        return `${base}?size=x`;
+        return `${base}?size=${actionPhoto ? 'b' : 'x'}`;
       case 'full':
       case 'download':
-        return document ? base : `${base}?size=z`;
+        return document ? base : `${base}?size=${actionPhoto ? 'c' : 'z'}`;
     }
   }
 

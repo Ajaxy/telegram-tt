@@ -31,6 +31,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 
 import ContextMenuContainer from './message/ContextMenuContainer.async';
 import AnimatedIconFromSticker from '../common/AnimatedIconFromSticker';
+import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
 
 type OwnProps = {
   message: ApiMessage;
@@ -96,6 +97,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
   const isGift = Boolean(message.content.action?.text.startsWith('ActionGift'));
+  const isSuggestedAvatar = message.content.action?.type === 'suggestProfilePhoto' && message.content.action!.photo;
 
   useEffect(() => {
     if (noAppearanceAnimation) {
@@ -192,7 +194,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const className = buildClassName(
     'ActionMessage message-list-item',
     isFocused && !noFocusHighlight && 'focused',
-    isGift && 'premium-gift',
+    (isGift || isSuggestedAvatar) && 'centered-action',
     isContextMenuShown && 'has-menu-open',
     isLastInList && 'last-in-list',
     transitionClassNames,
@@ -207,8 +209,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      <span>{content}</span>
+      {!isSuggestedAvatar && <span>{content}</span>}
       {isGift && renderGift()}
+      {isSuggestedAvatar && (
+        <ActionMessageSuggestedAvatar
+          message={message}
+          content={content}
+        />
+      )}
       {contextMenuPosition && (
         <ContextMenuContainer
           isOpen={isContextMenuOpen}

@@ -8,8 +8,9 @@ import {
 } from '../../reducers';
 import { selectChat, selectCurrentMessageList, selectUser } from '../../selectors';
 import { migrateChat } from './chats';
-import { isChatBasicGroup } from '../../helpers';
+import { getUserFirstOrLastName, isChatBasicGroup } from '../../helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
 
 addActionHandler('checkPublicLink', async (global, actions, payload) => {
   const { chatId } = selectCurrentMessageList(global) || {};
@@ -398,4 +399,53 @@ addActionHandler('hideChatReportPanel', async (global, actions, payload) => {
   setGlobal(updateChat(getGlobal(), chatId, {
     settings: undefined,
   }));
+});
+
+addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): Promise<void> => {
+  const { userId, file, isSuggest } = payload;
+
+  const user = selectUser(global, userId);
+  if (!user) return;
+
+  global = updateManagementProgress(global, ManagementProgress.InProgress);
+  setGlobal(global);
+
+  const result = await callApi('uploadContactProfilePhoto', {
+    user,
+    file,
+    isSuggest,
+  });
+
+  if (!result) {
+    global = getGlobal();
+    global = updateManagementProgress(global, ManagementProgress.Error);
+    setGlobal(global);
+
+    return;
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  setGlobal(global);
+
+  const { id, accessHash } = user;
+  const newUser = await callApi('fetchFullUser', { id, accessHash });
+  if (!newUser) {
+    global = getGlobal();
+    global = updateManagementProgress(global, ManagementProgress.Error);
+    setGlobal(global);
+    return;
+  }
+
+  actions.loadProfilePhotos({ profileId: userId });
+
+  global = getGlobal();
+  global = updateManagementProgress(global, ManagementProgress.Complete);
+  setGlobal(global);
+
+  if (file && !isSuggest) {
+    actions.showNotification({
+      message: langProvider.getTranslation('UserInfo.SetCustomPhoto.SuccessPhotoText', getUserFirstOrLastName(user)),
+    });
+  }
 });

@@ -132,10 +132,13 @@ export function getChatAvatarHash(
   const { fullInfo } = owner;
 
   if (type === 'video') {
+    const userFullInfo = isUserId(owner.id) ? fullInfo as ApiUserFullInfo : undefined;
+    if (userFullInfo?.personalPhoto?.isVideo) {
+      return getVideoAvatarMediaHash(userFullInfo.personalPhoto);
+    }
     if (fullInfo?.profilePhoto?.isVideo) {
       return getVideoAvatarMediaHash(fullInfo.profilePhoto);
     }
-    const userFullInfo = isUserId(owner.id) ? fullInfo as ApiUserFullInfo : undefined;
     if (userFullInfo?.fallbackPhoto?.isVideo) {
       return getVideoAvatarMediaHash(userFullInfo.fallbackPhoto);
     }

@@ -3,26 +3,22 @@ import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type {
-  ApiChat, ApiMessage, ApiUser,
-} from '../../api/types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { getActions, withGlobal } from '../../global';
-import {
-  getChatMediaMessageIds, isChatAdmin, isUserId,
-} from '../../global/helpers';
+import { getChatMediaMessageIds, isChatAdmin, isUserId } from '../../global/helpers';
 import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
+  selectChatScheduledMessages,
   selectCurrentMediaSearch,
   selectIsChatWithSelf,
   selectListedIds,
   selectOutlyingIds,
   selectScheduledMessage,
-  selectChatScheduledMessages,
   selectUser,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
@@ -113,6 +109,7 @@ const MediaViewer: FC<StateProps> = ({
     webPagePhoto,
     webPageVideo,
     isVideo,
+    actionPhoto,
     isPhoto,
     bestImageData,
     bestData,
@@ -129,7 +126,7 @@ const MediaViewer: FC<StateProps> = ({
   const isVisible = !isHidden && isOpen;
 
   /* Navigation */
-  const singleMediaId = webPagePhoto || webPageVideo ? mediaId : undefined;
+  const singleMediaId = webPagePhoto || webPageVideo || actionPhoto ? mediaId : undefined;
 
   const mediaIds = useMemo(() => {
     if (singleMediaId) {
@@ -460,7 +457,9 @@ export default memo(withGlobal(
     }
     let collectionIds: number[] | undefined;
 
-    if (origin === MediaViewerOrigin.Inline || origin === MediaViewerOrigin.Album) {
+    if (origin === MediaViewerOrigin.Inline
+      || origin === MediaViewerOrigin.Album
+      || origin === MediaViewerOrigin.SuggestedAvatar) {
       collectionIds = selectOutlyingIds(global, chatId, threadId) || selectListedIds(global, chatId, threadId);
     } else if (origin === MediaViewerOrigin.SharedMedia) {
       const currentSearch = selectCurrentMediaSearch(global);

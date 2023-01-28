@@ -271,5 +271,6 @@
     "channels.editForumTopic",
     "channels.updatePinnedForumTopic",
     "channels.deleteTopicHistory",
-    "channels.toggleParticipantsHidden"
+    "channels.toggleParticipantsHidden",
+    "photos.uploadContactProfilePhoto"
 ]

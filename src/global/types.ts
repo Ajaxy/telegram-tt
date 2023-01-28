@@ -1409,6 +1409,12 @@ export interface ActionPayloads {
     topicId: number;
   };
   closeEditTopicPanel: never;
+
+  uploadContactProfilePhoto: {
+    userId: string;
+    file?: File;
+    isSuggest?: boolean;
+  };
 }
 
 export type NonTypedActionNames = (

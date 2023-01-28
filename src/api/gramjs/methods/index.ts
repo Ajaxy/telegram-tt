@@ -62,6 +62,7 @@ export {
   fetchLanguages, fetchLangPack, fetchPrivacySettings, setPrivacySettings, registerDevice, unregisterDevice,
   updateIsOnline, fetchContentSettings, updateContentSettings, fetchLangStrings, fetchCountryList, fetchAppConfig,
   fetchGlobalPrivacySettings, updateGlobalPrivacySettings, toggleUsername, reorderUsernames, fetchConfig,
+  uploadContactProfilePhoto,
 } from './settings';
 
 export {

@@ -221,6 +221,10 @@
   border-radius: 0;
   transition: transform 0.2s ease, opacity 0.2s ease;
 
+  &.transition-circle {
+    transition: transform 0.2s ease, opacity 0.2s ease, border-radius 0.2s ease;
+  }
+
   &.rounded-corners {
     border-radius: var(--border-radius-messages);
   }
