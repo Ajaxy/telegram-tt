@@ -248,19 +248,19 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
     const selectionRange = window.getSelection()!.getRangeAt(0);
     const selectionRect = selectionRange.getBoundingClientRect();
-    const inputRect = inputRef.current!.getBoundingClientRect();
+    const scrollerRect = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!.getBoundingClientRect();
 
-    let x = (selectionRect.left + selectionRect.width / 2) - inputRect.left;
+    let x = (selectionRect.left + selectionRect.width / 2) - scrollerRect.left;
 
     if (x < TEXT_FORMATTER_SAFE_AREA_PX) {
       x = TEXT_FORMATTER_SAFE_AREA_PX;
-    } else if (x > inputRect.width - TEXT_FORMATTER_SAFE_AREA_PX) {
-      x = inputRect.width - TEXT_FORMATTER_SAFE_AREA_PX;
+    } else if (x > scrollerRect.width - TEXT_FORMATTER_SAFE_AREA_PX) {
+      x = scrollerRect.width - TEXT_FORMATTER_SAFE_AREA_PX;
     }
 
     setTextFormatterAnchorPosition({
       x,
-      y: selectionRect.top - inputRect.top,
+      y: selectionRect.top - scrollerRect.top,
     });
 
     setSelectedRange(selectionRange);
