@@ -2020,12 +2020,11 @@ export async function fetchChatByUsername<T extends GlobalState>(
 
   global = getGlobal();
   global = updateChat(global, chat.id, chat);
-  setGlobal(global);
-
   if (user) {
     global = updateUser(global, user.id, user);
-    setGlobal(global);
   }
+
+  setGlobal(global);
 
   return chat;
 }
