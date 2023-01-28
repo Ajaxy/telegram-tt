@@ -25,7 +25,6 @@ import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import { makeTrackId } from '../../util/audioPlayer';
-import { getTranslation } from '../../util/langProvider';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import type { BufferedRange } from '../../hooks/useBuffering';
@@ -443,7 +442,7 @@ function renderAudio(
     title, performer, fileName,
   } = audio;
   const showSeekline = isPlaying || (playProgress > 0 && playProgress < 1);
-  const { isRtl } = getTranslation;
+  const { isRtl } = lang;
 
   return (
     <div className="content">

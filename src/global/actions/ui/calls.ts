@@ -196,7 +196,7 @@ addActionHandler('joinVoiceChatByLink', async (global, actions, payload) => {
   const chat = await fetchChatByUsername(username);
 
   if (!chat) {
-    actions.showNotification({ message: langProvider.getTranslation('NoUsernameFound') });
+    actions.showNotification({ message: langProvider.translate('NoUsernameFound') });
     return;
   }
 
@@ -383,7 +383,7 @@ export function checkNavigatorUserMediaPermissions(isVideo?: boolean) {
       .then((stream) => {
         if (stream.getVideoTracks().length === 0) {
           getActions().showNotification({
-            message: langProvider.getTranslation('Call.Camera.Error'),
+            message: langProvider.translate('Call.Camera.Error'),
           });
         } else {
           checkMicrophonePermission();
@@ -391,7 +391,7 @@ export function checkNavigatorUserMediaPermissions(isVideo?: boolean) {
       })
       .catch(() => {
         getActions().showNotification({
-          message: langProvider.getTranslation('Call.Camera.Error'),
+          message: langProvider.translate('Call.Camera.Error'),
         });
       });
   } else {
@@ -404,13 +404,13 @@ function checkMicrophonePermission() {
     .then((stream) => {
       if (stream.getAudioTracks().length === 0) {
         getActions().showNotification({
-          message: langProvider.getTranslation('RequestAcces.Error.HaveNotAccess.Call'),
+          message: langProvider.translate('RequestAcces.Error.HaveNotAccess.Call'),
         });
       }
     })
     .catch(() => {
       getActions().showNotification({
-        message: langProvider.getTranslation('RequestAcces.Error.HaveNotAccess.Call'),
+        message: langProvider.translate('RequestAcces.Error.HaveNotAccess.Call'),
       });
     });
 }

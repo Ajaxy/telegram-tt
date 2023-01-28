@@ -29,7 +29,7 @@ import {
   selectUser,
 } from '../global/selectors';
 import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './environment';
-import { getTranslation } from './langProvider';
+import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
 
@@ -300,7 +300,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
 
       body = renderActionMessageText(
-        getTranslation,
+        translate,
         message,
         !isChat ? messageSender : undefined,
         isChat ? chat : undefined,
@@ -312,8 +312,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       ) as string;
     } else {
       // TODO[forums] Support ApiChat
-      const senderName = getMessageSenderName(getTranslation, chat.id, messageSender);
-      const summary = getMessageSummaryText(getTranslation, message, false, 60, false);
+      const senderName = getMessageSenderName(translate, chat.id, messageSender);
+      const summary = getMessageSummaryText(translate, message, false, 60, false);
 
       body = senderName ? `${senderName}: ${summary}` : summary;
     }
@@ -321,7 +321,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     body = 'New message';
   }
 
-  let title = isScreenLocked ? APP_NAME : getChatTitle(getTranslation, chat, privateChatUser);
+  let title = isScreenLocked ? APP_NAME : getChatTitle(translate, chat, privateChatUser);
 
   if (message.isSilent) {
     title += ' 🔕';
@@ -364,7 +364,7 @@ export async function notifyAboutCall({
     options.vibrate = [200, 100, 200];
   }
 
-  const notification = new Notification(getTranslation('VoipIncoming'), options);
+  const notification = new Notification(translate('VoipIncoming'), options);
 
   notification.onclick = () => {
     notification.close();

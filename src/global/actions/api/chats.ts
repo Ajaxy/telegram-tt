@@ -636,7 +636,7 @@ addActionHandler('openChatByPhoneNumber', async (global, actions, payload) => {
   if (!chat) {
     actions.openPreviousChat();
     actions.showNotification({
-      message: langProvider.getTranslation('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
+      message: langProvider.translate('lng_username_by_phone_not_found').replace('{phone}', phoneNumber),
     });
     return;
   }
@@ -1525,7 +1525,7 @@ addActionHandler('toggleTopicPinned', (global, actions, payload) => {
 
   if (isPinned && Object.values(chat.topics).filter((topic) => topic.isPinned).length >= topicsPinnedLimit) {
     actions.showNotification({
-      message: langProvider.getTranslation('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
+      message: langProvider.translate('LimitReachedPinnedTopics', topicsPinnedLimit, 'i'),
     });
     return;
   }
@@ -1953,7 +1953,7 @@ async function getAttachBotOrNotify(global: GlobalState, username: string) {
 
   global = getGlobal();
   if (!result) {
-    getActions().showNotification({ message: langProvider.getTranslation('WebApp.AddToAttachmentUnavailableError') });
+    getActions().showNotification({ message: langProvider.translate('WebApp.AddToAttachmentUnavailableError') });
 
     return undefined;
   }

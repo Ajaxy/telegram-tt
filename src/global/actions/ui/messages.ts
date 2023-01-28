@@ -751,7 +751,7 @@ addActionHandler('copyMessagesByIds', (global, actions, payload: { messageIds?: 
 
 function copyTextForMessages(global: GlobalState, chatId: string, messageIds: number[]) {
   const { type: messageListType, threadId } = selectCurrentMessageList(global) || {};
-  const lang = langProvider.getTranslation;
+  const lang = langProvider.translate;
 
   const chatMessages = messageListType === 'scheduled'
     ? selectChatScheduledMessages(global, chatId)

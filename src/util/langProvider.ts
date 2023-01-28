@@ -11,7 +11,7 @@ import { callApi } from '../api/gramjs';
 import { createCallbackManager } from './callbacks';
 import { formatInteger } from './textFormat';
 
-interface LangFn {
+export interface LangFn {
   (key: string, value?: any, format?: 'i', pluralValue?: number): string;
 
   isRtl?: boolean;
@@ -94,30 +94,42 @@ export { addCallback, removeCallback };
 let currentLangCode: string | undefined;
 let currentTimeFormat: TimeFormat | undefined;
 
-export const getTranslation: LangFn = (key: string, value?: any, format?: 'i', pluralValue?: number) => {
-  if (value !== undefined) {
-    const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
-    const cached = cache.get(`${key}_${cacheValue}_${format}${pluralValue ? `_${pluralValue}` : ''}`);
-    if (cached) {
-      return cached;
-    }
-  }
-
-  if (!langPack && !fallbackLangPack) {
-    return key;
-  }
-
-  const langString = (langPack?.[key]) || (fallbackLangPack?.[key]);
-  if (!langString) {
-    if (!fallbackLangPack) {
-      void importFallbackLangPack();
+function createLangFn() {
+  return (key: string, value?: any, format?: 'i', pluralValue?: number) => {
+    if (value !== undefined) {
+      const cacheValue = Array.isArray(value) ? JSON.stringify(value) : value;
+      const cached = cache.get(`${key}_${cacheValue}_${format}${pluralValue ? `_${pluralValue}` : ''}`);
+      if (cached) {
+        return cached;
+      }
     }
 
-    return key;
-  }
+    if (!langPack && !fallbackLangPack) {
+      return key;
+    }
 
-  return processTranslation(langString, key, value, format, pluralValue);
-};
+    const langString = (langPack?.[key]) || (fallbackLangPack?.[key]);
+    if (!langString) {
+      if (!fallbackLangPack) {
+        void importFallbackLangPack();
+      }
+
+      return key;
+    }
+
+    return processTranslation(langString, key, value, format, pluralValue);
+  };
+}
+
+let translationFn: LangFn = createLangFn();
+
+export function translate(...args: Parameters<LangFn>) {
+  return translationFn(...args);
+}
+
+export function getTranslationFn(): LangFn {
+  return translationFn;
+}
 
 export async function getTranslationForLangString(langCode: string, key: string) {
   let translateString: ApiLangString | undefined = await cacheApi.fetch(
@@ -162,10 +174,11 @@ export async function setLanguage(langCode: LangCode, callback?: NoneToVoidFunct
 
   const { languages, timeFormat } = getGlobal().settings.byKey;
   const langInfo = languages?.find((lang) => lang.langCode === langCode);
-  getTranslation.isRtl = Boolean(langInfo?.rtl);
-  getTranslation.code = langCode.replace('-raw', '') as LangCode;
-  getTranslation.langName = langInfo?.nativeName;
-  getTranslation.timeFormat = timeFormat;
+  translationFn = createLangFn();
+  translationFn.isRtl = Boolean(langInfo?.rtl);
+  translationFn.code = langCode.replace('-raw', '') as LangCode;
+  translationFn.langName = langInfo?.nativeName;
+  translationFn.timeFormat = timeFormat;
 
   if (callback) {
     callback();
@@ -180,7 +193,7 @@ export function setTimeFormat(timeFormat: TimeFormat) {
   }
 
   currentTimeFormat = timeFormat;
-  getTranslation.timeFormat = timeFormat;
+  translationFn.timeFormat = timeFormat;
 
   runCallbacks();
 }

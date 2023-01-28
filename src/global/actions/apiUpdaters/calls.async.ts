@@ -105,7 +105,7 @@ addActionHandler('apiUpdate', (global, actions, update) => {
         if (!verifyPhoneCallProtocol(call.protocol)) {
           const user = selectPhoneCallUser(global);
           actions.hangUp();
-          actions.showNotification({ message: langProvider.getTranslation('VoipPeerIncompatible', user?.firstName) });
+          actions.showNotification({ message: langProvider.translate('VoipPeerIncompatible', user?.firstName) });
           return undefined;
         }
       }

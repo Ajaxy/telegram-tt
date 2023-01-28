@@ -2,7 +2,7 @@ import * as langProvider from '../util/langProvider';
 import useForceUpdate from './useForceUpdate';
 import useOnChange from './useOnChange';
 
-export type LangFn = typeof langProvider.getTranslation;
+export type LangFn = langProvider.LangFn;
 
 const useLang = (): LangFn => {
   const forceUpdate = useForceUpdate();
@@ -11,7 +11,7 @@ const useLang = (): LangFn => {
     return langProvider.addCallback(forceUpdate);
   }, [forceUpdate]);
 
-  return langProvider.getTranslation;
+  return langProvider.getTranslationFn();
 };
 
 export default useLang;
