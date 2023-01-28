@@ -5,7 +5,7 @@ import { selectChat } from '../../selectors';
 import { updateChat } from '../../reducers';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { notifyAboutCall } from '../../../util/notifications';
-import { selectPhoneCallUser } from '../../selectors/calls';
+import { selectGroupCall, selectPhoneCallUser } from '../../selectors/calls';
 import { checkNavigatorUserMediaPermissions, initializeSoundsForSafari } from '../ui/calls';
 import { onTickEnd } from '../../../util/schedulers';
 import type { ActionReturnType } from '../../types';
@@ -22,6 +22,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         } else {
           return removeGroupCall(global, update.call.id);
         }
+      }
+
+      const groupCall = selectGroupCall(global, update.call.id);
+      const chatId = groupCall?.chatId;
+      if (chatId) {
+        global = updateChat(global, chatId, {
+          isCallNotEmpty: (groupCall.participantsCount > 0 || Boolean(groupCall.participants?.length)),
+        });
       }
 
       return updateGroupCall(
@@ -60,6 +68,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (nextOffset) {
         global = updateGroupCall(global, groupCallId, {
           nextOffset,
+        });
+      }
+
+      const groupCall = selectGroupCall(global, groupCallId);
+      const chatId = groupCall?.chatId;
+      if (chatId) {
+        global = updateChat(global, chatId, {
+          isCallNotEmpty: (groupCall.participantsCount > 0 || Boolean(groupCall.participants?.length)),
         });
       }
       return global;
