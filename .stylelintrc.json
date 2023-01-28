@@ -9,6 +9,7 @@
     "stylelint-declaration-block-no-ignored-properties",
     "stylelint-high-performance-animation",
     "stylelint-group-selectors",
+    "stylelint-selector-tag-no-without-class",
     "./dev/wholePixel.js"
   ],
   "rules": {
@@ -39,6 +40,7 @@
       {
         "ignorePseudoClasses": ["global"]
       }
-    ]
+    ],
+    "plugin/selector-tag-no-without-class": ["/^(?!body|html)([^_-]*)$/", { "severity": "warning" }]
   }
 }
