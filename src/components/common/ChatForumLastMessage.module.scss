@@ -38,8 +38,11 @@ $radius: 0.5rem;
 }
 
 .unread {
-  font-weight: 500;
   color: var(--color-text);
+
+  .title, :global(.sender-name) {
+    font-weight: 500;
+  }
 
   &.main-column, &.last-message {
     padding: 0 0.25rem;
