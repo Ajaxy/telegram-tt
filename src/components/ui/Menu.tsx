@@ -40,6 +40,7 @@ type OwnProps = {
   onCloseAnimationEnd?: () => void;
   onClose: () => void;
   onMouseEnter?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   withPortal?: boolean;
   children: React.ReactNode;
@@ -71,6 +72,7 @@ const Menu: FC<OwnProps> = ({
   onMouseLeave,
   shouldSkipTransition,
   withPortal,
+  onMouseEnterBackdrop,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let menuRef = useRef<HTMLDivElement>(null);
@@ -143,7 +145,11 @@ const Menu: FC<OwnProps> = ({
     >
       {isOpen && (
         // This only prevents click events triggering on underlying elements
-        <div className="backdrop" onMouseDown={preventMessageInputBlurWithBubbling} />
+        <div
+          className="backdrop"
+          onMouseDown={preventMessageInputBlurWithBubbling}
+          onMouseEnter={onMouseEnterBackdrop}
+        />
       )}
       <div
         role="presentation"

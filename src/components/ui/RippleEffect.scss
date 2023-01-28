@@ -44,5 +44,6 @@
     border-radius: 50%;
     transform: scale(0);
     animation: ripple-animation 700ms;
+    pointer-events: none;
   }
 }

@@ -212,13 +212,14 @@ addActionHandler('setAudioPlayerVolume', (global, actions, payload): ActionRetur
 
 addActionHandler('setAudioPlayerPlaybackRate', (global, actions, payload): ActionReturnType => {
   const {
-    playbackRate, tabId = getCurrentTabId(),
+    playbackRate, isPlaybackRateActive, tabId = getCurrentTabId(),
   } = payload;
 
   return updateTabState(global, {
     audioPlayer: {
       ...selectTabState(global, tabId).audioPlayer,
       playbackRate,
+      isPlaybackRateActive,
     },
   }, tabId);
 });
@@ -256,6 +257,7 @@ addActionHandler('closeAudioPlayer', (global, actions, payload): ActionReturnTyp
     audioPlayer: {
       volume: tabState.audioPlayer.volume,
       playbackRate: tabState.audioPlayer.playbackRate,
+      isPlaybackRateActive: undefined,
       isMuted: tabState.audioPlayer.isMuted,
     },
   }, tabId);

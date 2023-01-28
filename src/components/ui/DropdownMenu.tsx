@@ -16,6 +16,7 @@ type OwnProps = {
   onClose?: NoneToVoidFunction;
   onHide?: NoneToVoidFunction;
   onTransitionEnd?: NoneToVoidFunction;
+  onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   children: React.ReactNode;
 };
 
@@ -30,6 +31,7 @@ const DropdownMenu: FC<OwnProps> = ({
   onOpen,
   onClose,
   onTransitionEnd,
+  onMouseEnterBackdrop,
   onHide,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -88,6 +90,7 @@ const DropdownMenu: FC<OwnProps> = ({
         onClose={handleClose}
         shouldSkipTransition={forceOpen}
         onCloseAnimationEnd={onHide}
+        onMouseEnterBackdrop={onMouseEnterBackdrop}
       >
         {children}
       </Menu>
