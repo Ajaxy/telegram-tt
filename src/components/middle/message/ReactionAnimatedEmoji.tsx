@@ -33,8 +33,8 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
 };
 
-const CENTER_ICON_SIZE = 1.875 * REM;
-const EFFECT_SIZE = 6.25 * REM;
+const CENTER_ICON_SIZE = 2.5 * REM;
+const EFFECT_SIZE = 6.5 * REM;
 
 const ReactionAnimatedEmoji: FC<OwnProps> = ({
   reaction,
