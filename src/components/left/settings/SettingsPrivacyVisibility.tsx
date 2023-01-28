@@ -6,12 +6,14 @@ import type { ApiChat, ApiUser } from '../../../api/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
+import { getPrivacyKey } from './helpers/privacy';
+import { selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
-import { getPrivacyKey } from './helpers/privacy';
+import SettingsPrivacyPublicProfilePhoto from './SettingsPrivacyPublicProfilePhoto';
 
 type OwnProps = {
   screen: SettingsScreens;
@@ -24,6 +26,7 @@ type StateProps =
   Partial<ApiPrivacySettings> & {
     chatsById?: Record<string, ApiChat>;
     usersById?: Record<string, ApiUser>;
+    currentUser: ApiUser;
   };
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
@@ -37,6 +40,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   blockUserIds,
   blockChatIds,
   chatsById,
+  currentUser,
 }) => {
   const { setPrivacyVisibility } = getActions();
 
@@ -44,7 +48,6 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
 
   const visibilityOptions = useMemo(() => {
     switch (screen) {
-      case SettingsScreens.PrivacyProfilePhoto:
       case SettingsScreens.PrivacyGroupChats:
         return [
           { value: 'everybody', label: lang('P2PEverybody') },
@@ -226,6 +229,10 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
           </ListItem>
         )}
       </div>
+
+      {screen === SettingsScreens.PrivacyProfilePhoto && exceptionLists.shouldShowAllowed && (
+        <SettingsPrivacyPublicProfilePhoto currentUser={currentUser} />
+      )}
     </div>
   );
 };
@@ -238,6 +245,8 @@ export default memo(withGlobal<OwnProps>(
       chats: { byId: chatsById },
       settings: { privacy },
     } = global;
+
+    const currentUser = selectUser(global, global.currentUserId!)!;
 
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
@@ -274,12 +283,15 @@ export default memo(withGlobal<OwnProps>(
     }
 
     if (!privacySettings) {
-      return {};
+      return {
+        currentUser,
+      };
     }
 
     return {
       ...privacySettings,
       chatsById,
+      currentUser,
     };
   },
 )(SettingsPrivacyVisibility));

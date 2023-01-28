@@ -52,6 +52,17 @@
     }
   }
 
+  &.size-mini {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+
+    .emoji {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
+
   &.size-small {
     width: 2.125rem;
     height: 2.125rem;

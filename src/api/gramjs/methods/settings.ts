@@ -82,10 +82,11 @@ export function updateUsername(username: string) {
   return invokeRequest(new GramJs.account.UpdateUsername({ username }), true);
 }
 
-export async function updateProfilePhoto(photo?: ApiPhoto) {
+export async function updateProfilePhoto(photo?: ApiPhoto, isFallback?: boolean) {
   const photoId = photo ? buildInputPhoto(photo) : new GramJs.InputPhotoEmpty();
   const result = await invokeRequest(new GramJs.photos.UpdateProfilePhoto({
     id: photoId,
+    ...(isFallback ? { fallback: true } : undefined),
   }));
   if (!result) return undefined;
 
@@ -100,10 +101,11 @@ export async function updateProfilePhoto(photo?: ApiPhoto) {
   return undefined;
 }
 
-export async function uploadProfilePhoto(file: File) {
+export async function uploadProfilePhoto(file: File, isFallback?: boolean) {
   const inputFile = await uploadFile(file);
   const result = await invokeRequest(new GramJs.photos.UploadProfilePhoto({
     file: inputFile,
+    ...(isFallback ? { fallback: true } : undefined),
   }));
 
   if (!result) return undefined;

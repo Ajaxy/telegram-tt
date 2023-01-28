@@ -96,7 +96,7 @@ addActionHandler('updateProfile', async (global, actions, payload) => {
 });
 
 addActionHandler('updateProfilePhoto', async (global, actions, payload) => {
-  const { photo } = payload;
+  const { photo, isFallback } = payload;
   const { currentUserId } = global;
   if (!currentUserId) return;
   const currentUser = selectChat(global, currentUserId);
@@ -108,7 +108,7 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload) => {
       profilePhoto: undefined,
     },
   }));
-  const result = await callApi('updateProfilePhoto', photo);
+  const result = await callApi('updateProfilePhoto', photo, isFallback);
   if (!result) return;
 
   const { photo: newPhoto, users } = result;

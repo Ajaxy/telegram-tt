@@ -29,7 +29,7 @@ import * as langProvider from '../../../util/langProvider';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
-addActionHandler('loadFullUser', (global, actions, payload) => {
+addActionHandler('loadFullUser', async (global, actions, payload) => {
   const { userId } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
@@ -37,7 +37,12 @@ addActionHandler('loadFullUser', (global, actions, payload) => {
   }
 
   const { id, accessHash } = user;
-  callApi('fetchFullUser', { id, accessHash });
+  const newUser = await callApi('fetchFullUser', { id, accessHash });
+  if (!newUser) return;
+
+  if (user.avatarHash !== newUser.avatarHash && user.photos?.length) {
+    actions.loadProfilePhotos({ profileId: userId });
+  }
 });
 
 addActionHandler('loadUser', async (global, actions, payload) => {
@@ -238,10 +243,16 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
   const { profileId } = payload!;
   const isPrivate = isUserId(profileId);
 
-  const user = isPrivate ? selectUser(global, profileId) : undefined;
+  let user = isPrivate ? selectUser(global, profileId) : undefined;
   const chat = !isPrivate ? selectChat(global, profileId) : undefined;
   if (!user && !chat) {
     return;
+  }
+
+  if (user && !user?.fullInfo) {
+    const { id, accessHash } = user;
+    user = await callApi('fetchFullUser', { id, accessHash });
+    if (!user) return;
   }
 
   const result = await callApi('fetchProfilePhotos', user, chat);
@@ -254,6 +265,8 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload) => {
   const userOrChat = user || chat;
   const { photos, users } = result;
   photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
+  const fallbackPhoto = user?.fullInfo?.fallbackPhoto;
+  if (fallbackPhoto) photos.push(fallbackPhoto);
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
 

@@ -35,7 +35,7 @@ const AvatarEditable: FC<OwnProps> = ({
   function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
     const target = event.target as HTMLInputElement;
 
-    if (!target || !target.files || !target.files[0]) {
+    if (!target?.files?.[0]) {
       return;
     }
 

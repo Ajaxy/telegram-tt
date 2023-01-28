@@ -984,6 +984,7 @@ export interface ActionPayloads {
   };
   updateProfilePhoto: {
     photo: ApiPhoto;
+    isFallback?: boolean;
   };
 
   // Forwards

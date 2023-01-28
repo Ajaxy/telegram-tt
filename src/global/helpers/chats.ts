@@ -3,7 +3,7 @@ import type {
   ApiUser,
   ApiChatBannedRights,
   ApiChatAdminRights,
-  ApiChatFolder, ApiTopic,
+  ApiChatFolder, ApiTopic, ApiUserFullInfo,
 } from '../../api/types';
 import {
   MAIN_THREAD_ID,
@@ -124,8 +124,9 @@ export function getChatAvatarHash(
   owner: ApiChat | ApiUser,
   size: 'normal' | 'big' = 'normal',
   type: 'photo' | 'video' = 'photo',
+  avatarHash = owner.avatarHash,
 ) {
-  if (!owner.avatarHash) {
+  if (!avatarHash) {
     return undefined;
   }
   const { fullInfo } = owner;
@@ -134,14 +135,18 @@ export function getChatAvatarHash(
     if (fullInfo?.profilePhoto?.isVideo) {
       return getVideoAvatarMediaHash(fullInfo.profilePhoto);
     }
+    const userFullInfo = isUserId(owner.id) ? fullInfo as ApiUserFullInfo : undefined;
+    if (userFullInfo?.fallbackPhoto?.isVideo) {
+      return getVideoAvatarMediaHash(userFullInfo.fallbackPhoto);
+    }
     return undefined;
   }
 
   switch (size) {
     case 'big':
-      return `profile${owner.id}?${owner.avatarHash}`;
+      return `profile${owner.id}?${avatarHash}`;
     default:
-      return `avatar${owner.id}?${owner.avatarHash}`;
+      return `avatar${owner.id}?${avatarHash}`;
   }
 }
 

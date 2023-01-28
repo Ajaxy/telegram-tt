@@ -41,6 +41,7 @@ export interface ApiUserFullInfo {
   pinnedMessageId?: number;
   botInfo?: ApiBotInfo;
   profilePhoto?: ApiPhoto;
+  fallbackPhoto?: ApiPhoto;
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
 }

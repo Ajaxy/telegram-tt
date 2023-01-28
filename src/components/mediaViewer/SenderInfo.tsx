@@ -25,6 +25,7 @@ type OwnProps = {
   chatId?: string;
   messageId?: number;
   isAvatar?: boolean;
+  isFallbackAvatar?: boolean;
 };
 
 type StateProps = {
@@ -39,6 +40,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   chatId,
   messageId,
   sender,
+  isFallbackAvatar,
   isAvatar,
   message,
   animationLevel,
@@ -85,7 +87,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
         </div>
         <div className="date" dir="auto">
           {isAvatar
-            ? lang('lng_mediaview_profile_photo')
+            ? lang(isFallbackAvatar ? 'lng_mediaview_profile_public_photo' : 'lng_mediaview_profile_photo')
             : formatMediaDateTime(lang, message!.date * 1000, true)}
         </div>
       </div>
