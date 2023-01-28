@@ -321,6 +321,7 @@ export type TabState = {
     origin?: AudioOrigin;
     volume: number;
     playbackRate: number;
+    isPlaybackRateActive?: boolean;
     isMuted: boolean;
   };
 
@@ -1708,6 +1709,7 @@ export interface ActionPayloads {
   } & WithTabId;
   setAudioPlayerPlaybackRate: {
     playbackRate: number;
+    isPlaybackRateActive?: boolean;
   } & WithTabId;
   setAudioPlayerMuted: {
     isMuted: boolean;

@@ -46,7 +46,7 @@ export type OwnProps = {
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: NoneToVoidFunction;
+  onMouseEnter?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onTransitionEnd?: NoneToVoidFunction;

@@ -46,6 +46,7 @@ type StateProps = {
   chat?: ApiChat;
   volume: number;
   playbackRate: number;
+  isPlaybackRateActive?: boolean;
   isMuted: boolean;
 };
 
@@ -56,6 +57,10 @@ const PLAYBACK_RATES: Record<number, number> = {
   1.5: 1.4,
   2: 1.8,
 };
+const PLAYBACK_RATE_VALUES = Object.keys(PLAYBACK_RATES).sort().map(Number);
+
+const REGULAR_PLAYBACK_RATE = 1;
+const DEFAULT_FAST_PLAYBACK_RATE = 2;
 
 const AudioPlayer: FC<OwnProps & StateProps> = ({
   message,
@@ -65,6 +70,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
   chat,
   volume,
   playbackRate,
+  isPlaybackRateActive,
   isMuted,
 }) => {
   const {
@@ -143,37 +149,62 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     setAudioPlayerMuted({ isMuted: !isMuted });
   }, [isMuted, setAudioPlayerMuted, toggleMuted]);
 
-  const updatePlaybackRate = useCallback((newRate: number) => {
+  const updatePlaybackRate = useCallback((newRate: number, isActive = true) => {
     const rate = PLAYBACK_RATES[newRate];
-    setAudioPlayerPlaybackRate({ playbackRate: rate });
-    setPlaybackRate(rate);
+    const shouldBeActive = newRate !== REGULAR_PLAYBACK_RATE && isActive;
+    setAudioPlayerPlaybackRate({ playbackRate: rate, isPlaybackRateActive: shouldBeActive });
+    setPlaybackRate(shouldBeActive ? rate : REGULAR_PLAYBACK_RATE);
   }, [setAudioPlayerPlaybackRate, setPlaybackRate]);
 
   const handlePlaybackClick = useCallback(() => {
-    if (isContextMenuOpen) return;
-    updatePlaybackRate(playbackRate === 1 ? 2 : 1);
-  }, [isContextMenuOpen, playbackRate, updatePlaybackRate]);
+    handleContextMenuClose();
+    const oldRate = Number(Object.entries(PLAYBACK_RATES).find(([, rate]) => rate === playbackRate)?.[0])
+      || REGULAR_PLAYBACK_RATE;
+    const newIsActive = !isPlaybackRateActive;
+
+    updatePlaybackRate(
+      newIsActive && oldRate === REGULAR_PLAYBACK_RATE ? DEFAULT_FAST_PLAYBACK_RATE : oldRate,
+      newIsActive,
+    );
+  }, [handleContextMenuClose, isPlaybackRateActive, playbackRate, updatePlaybackRate]);
 
   const PlaybackRateButton = useCallback(() => {
-    const displayRate = Object.entries(PLAYBACK_RATES).find(([, rate]) => rate === playbackRate)?.[0] || 1;
+    const displayRate = Object.entries(PLAYBACK_RATES).find(([, rate]) => rate === playbackRate)?.[0]
+      || REGULAR_PLAYBACK_RATE;
+    const text = `${playbackRate === REGULAR_PLAYBACK_RATE ? DEFAULT_FAST_PLAYBACK_RATE : displayRate}Х`;
     return (
-      <Button
-        round
-        className={buildClassName('playback-button', playbackRate !== 1 && 'applied')}
-        color="translucent"
-        size="smaller"
-        ariaLabel="Playback Rate"
-        ripple={!isMobile}
-        onClick={handlePlaybackClick}
-        onMouseDown={handleBeforeContextMenu}
-        onContextMenu={handleContextMenu}
-      >
-        <span className="playback-button-inner">
-          {playbackRate === 1 ? 2 : displayRate}Х
-        </span>
-      </Button>
+      <div className="playback-wrapper">
+        {isContextMenuOpen && <div className="playback-backdrop" onClick={handleContextMenuClose} />}
+
+        <Button
+          round
+          className={buildClassName(
+            'playback-button', isPlaybackRateActive && 'applied', isContextMenuOpen && 'on-top',
+          )}
+          color="translucent"
+          size="smaller"
+          ariaLabel="Playback Rate"
+          ripple={!isMobile}
+          onMouseEnter={handleContextMenu}
+          onClick={handlePlaybackClick}
+          onMouseDown={handleBeforeContextMenu}
+          onContextMenu={handleContextMenu}
+        >
+          <span className={buildClassName(
+            'playback-button-inner',
+            text.length === 4 && 'small',
+            text.length === 5 && 'tiny',
+          )}
+          >
+            {text}
+          </span>
+        </Button>
+      </div>
     );
-  }, [handleBeforeContextMenu, handleContextMenu, handlePlaybackClick, isMobile, playbackRate]);
+  }, [
+    handleBeforeContextMenu, handleContextMenu, handleContextMenuClose, handlePlaybackClick, isContextMenuOpen,
+    isMobile, isPlaybackRateActive, playbackRate,
+  ]);
 
   const volumeIcon = useMemo(() => {
     if (volume === 0 || isMuted) return 'icon-muted';
@@ -230,24 +261,28 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         <i className="icon-skip-next" />
       </Button>
 
-      <Button
-        round
-        className="player-button volume-button"
-        color="translucent"
-        size="smaller"
-        ariaLabel="Volume"
-        noPreventDefault
-      >
-        <i className={volumeIcon} onClick={handleVolumeClick} />
+      <div className="volume-button-wrapper">
+        <Button
+          round
+          className="player-button volume-button"
+          color="translucent"
+          size="smaller"
+          ariaLabel="Volume"
+          onClick={handleVolumeClick}
+          ripple={!isMobile}
+        >
+          <i className={volumeIcon} />
+        </Button>
+
         {!IS_IOS && (
-          <>
+          <div className="volume-slider-wrapper">
             <div className="volume-slider-spacer" />
             <div className="volume-slider">
               <RangeSlider bold value={isMuted ? 0 : volume * 100} onChange={handleVolumeChange} />
             </div>
-          </>
+          </div>
         )}
-      </Button>
+      </div>
 
       {shouldRenderPlaybackButton && (
         <DropdownMenu
@@ -258,12 +293,11 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
           trigger={PlaybackRateButton}
           onClose={handleContextMenuClose}
           onHide={handleContextMenuHide}
+          onMouseEnterBackdrop={handleContextMenuClose}
         >
-          {renderPlaybackRateMenuItem(0.5, playbackRate, updatePlaybackRate)}
-          {renderPlaybackRateMenuItem(0.75, playbackRate, updatePlaybackRate)}
-          {renderPlaybackRateMenuItem(1, playbackRate, updatePlaybackRate)}
-          {renderPlaybackRateMenuItem(1.5, playbackRate, updatePlaybackRate)}
-          {renderPlaybackRateMenuItem(2, playbackRate, updatePlaybackRate)}
+          {PLAYBACK_RATE_VALUES.map((rate) => {
+            return renderPlaybackRateMenuItem(rate, playbackRate, updatePlaybackRate, isPlaybackRateActive);
+          })}
         </DropdownMenu>
       )}
 
@@ -303,13 +337,19 @@ function renderVoice(subtitle: string, senderName?: string) {
   );
 }
 
-function renderPlaybackRateMenuItem(rate: number, currentRate: number, onClick: (rate: number) => void) {
+function renderPlaybackRateMenuItem(
+  rate: number, currentRate: number, onClick: (rate: number) => void,
+  isPlaybackRateActive?: boolean,
+) {
+  const isSelected = (currentRate === PLAYBACK_RATES[rate] && isPlaybackRateActive)
+    || (rate === REGULAR_PLAYBACK_RATE && !isPlaybackRateActive);
   return (
     <MenuItem
+      key={rate}
       // eslint-disable-next-line react/jsx-no-bind
       onClick={() => onClick(rate)}
-      icon={currentRate === PLAYBACK_RATES[rate] ? 'check' : undefined}
-      customIcon={currentRate !== PLAYBACK_RATES[rate] ? <i className="icon-placeholder" /> : undefined}
+      icon={isSelected ? 'check' : undefined}
+      customIcon={!isSelected ? <i className="icon-placeholder" /> : undefined}
     >
       {rate}X
     </MenuItem>
@@ -320,13 +360,16 @@ export default withGlobal<OwnProps>(
   (global, { message }): StateProps => {
     const sender = selectSender(global, message);
     const chat = selectChat(global, message.chatId);
-    const { volume, playbackRate, isMuted } = selectTabState(global).audioPlayer;
+    const {
+      volume, playbackRate, isMuted, isPlaybackRateActive,
+    } = selectTabState(global).audioPlayer;
 
     return {
       sender,
       chat,
       volume,
       playbackRate,
+      isPlaybackRateActive,
       isMuted,
     };
   },
