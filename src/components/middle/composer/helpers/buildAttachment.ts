@@ -1,5 +1,6 @@
 import type { ApiAttachment } from '../../../../api/types';
 import {
+  GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -28,8 +29,9 @@ export default async function buildAttachment(
     const img = await preloadImage(blobUrl);
     const { width, height } = img;
     const shouldShrink = Math.max(width, height) > MAX_QUICK_IMG_SIZE;
+    const isGif = mimeType === GIF_MIME_TYPE;
 
-    if (!options?.compressedBlobUrl && (shouldShrink || mimeType !== 'image/jpeg')) {
+    if (!options?.compressedBlobUrl && !isGif && (shouldShrink || mimeType !== 'image/jpeg')) {
       const resizedUrl = await scaleImage(
         blobUrl, shouldShrink ? MAX_QUICK_IMG_SIZE / Math.max(width, height) : 1, 'image/jpeg',
       );

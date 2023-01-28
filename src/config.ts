@@ -182,8 +182,10 @@ export const SLIDE_TRANSITION_DURATION = 450;
 export const VIDEO_MOV_TYPE = 'video/quicktime';
 export const VIDEO_WEBM_TYPE = 'video/webm';
 
+export const GIF_MIME_TYPE = 'image/gif';
+
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
-  'image/png', 'image/gif', 'image/jpeg',
+  'image/png', 'image/jpeg', GIF_MIME_TYPE,
 ]);
 
 export const SUPPORTED_VIDEO_CONTENT_TYPES = new Set([

@@ -24,7 +24,7 @@ import {
 
 import {
   ALL_FOLDER_ID,
-  DEBUG, MAX_INT_32, MENTION_UNREAD_SLICE,
+  DEBUG, GIF_MIME_TYPE, MAX_INT_32, MENTION_UNREAD_SLICE,
   PINNED_MESSAGES_LIMIT, REACTION_UNREAD_SLICE,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -585,7 +585,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (!shouldSendAsFile) {
     if (quick) {
-      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
+      if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType) && mimeType !== GIF_MIME_TYPE) {
         return new GramJs.InputMediaUploadedPhoto({
           file: inputFile,
           spoiler: shouldSendAsSpoiler,

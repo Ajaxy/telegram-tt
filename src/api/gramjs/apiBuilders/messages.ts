@@ -1408,6 +1408,7 @@ function buildUploadingMedia(
 
   if (!shouldSendAsFile) {
     if (attachment.quick) {
+      // TODO Handle GIF as video, but support playback in <video>
       if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType)) {
         const { width, height } = attachment.quick;
         return {
