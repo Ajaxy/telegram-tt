@@ -92,14 +92,16 @@ addActionHandler('setAuthPassword', (global, actions, payload) => {
 });
 
 addActionHandler('uploadProfilePhoto', async (global, actions, payload) => {
-  const { file } = payload!;
+  const { file, isFallback } = payload!;
 
-  const result = await callApi('uploadProfilePhoto', file);
+  const result = await callApi('uploadProfilePhoto', file, isFallback);
   if (!result) return;
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
   setGlobal(global);
+
+  actions.loadFullUser({ userId: global.currentUserId! });
 });
 
 addActionHandler('signUp', (global, actions, payload) => {

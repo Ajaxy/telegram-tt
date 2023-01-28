@@ -11,7 +11,7 @@ import { MediaViewerOrigin } from '../../types';
 
 import { getActions, withGlobal } from '../../global';
 import {
-  getChatMediaMessageIds, isChatAdmin,
+  getChatMediaMessageIds, isChatAdmin, isUserId,
 } from '../../global/helpers';
 import {
   selectChat,
@@ -288,6 +288,8 @@ const MediaViewer: FC<StateProps> = ({
         key={mediaId}
         chatId={avatarOwner.id}
         isAvatar
+        isFallbackAvatar={isUserId(avatarOwner.id)
+          && (avatarOwner as ApiUser).photos?.[mediaId!].id === (avatarOwner as ApiUser).fullInfo?.fallbackPhoto?.id}
       />
     ) : (
       <SenderInfo

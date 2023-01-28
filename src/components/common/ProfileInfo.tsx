@@ -29,6 +29,7 @@ import FullNameTitle from './FullNameTitle';
 import ProfilePhoto from './ProfilePhoto';
 import Transition from '../ui/Transition';
 import TopicIcon from './TopicIcon';
+import Avatar from './Avatar';
 
 import './ProfileInfo.scss';
 import styles from './ProfileInfo.module.scss';
@@ -145,6 +146,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     setCurrentPhotoIndex(currentPhotoIndex + 1);
   }, [currentPhotoIndex, isLast]);
 
+  function handleSelectFallbackPhoto() {
+    if (!isFirst) return;
+    setHasSlideAnimation(true);
+    setCurrentPhotoIndex(photos.length - 1);
+  }
+
   // Swipe gestures
   useEffect(() => {
     const element = document.querySelector<HTMLDivElement>(`.${styles.photoWrapper}`);
@@ -251,6 +258,24 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     >
       <div className={styles.photoWrapper}>
         {renderPhotoTabs()}
+        {forceShowSelf && user?.fullInfo?.fallbackPhoto && (
+          <div className={buildClassName(
+            styles.fallbackPhoto,
+            (isFirst || isLast) && styles.fallbackPhotoVisible,
+          )}
+          >
+            <div className={styles.fallbackPhotoContents} onClick={handleSelectFallbackPhoto}>
+              {!isLast && (
+                <Avatar
+                  photo={user.fullInfo.fallbackPhoto}
+                  className={styles.fallbackPhotoAvatar}
+                  size="mini"
+                />
+              )}
+              {lang(user.fullInfo.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+            </div>
+          </div>
+        )}
         <Transition activeKey={currentPhotoIndex} name={slideAnimation}>
           {renderPhoto}
         </Transition>

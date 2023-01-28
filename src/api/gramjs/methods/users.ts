@@ -45,8 +45,14 @@ export async function fetchFullUser({
     return undefined;
   }
 
+  updateLocalDb(fullInfo);
+
   if (fullInfo.fullUser.profilePhoto instanceof GramJs.Photo) {
     localDb.photos[fullInfo.fullUser.profilePhoto.id.toString()] = fullInfo.fullUser.profilePhoto;
+  }
+
+  if (fullInfo.fullUser.fallbackPhoto instanceof GramJs.Photo) {
+    localDb.photos[fullInfo.fullUser.fallbackPhoto.id.toString()] = fullInfo.fullUser.fallbackPhoto;
   }
 
   const botInfo = fullInfo.fullUser.botInfo;
@@ -58,11 +64,14 @@ export async function fetchFullUser({
   }
 
   const userWithFullInfo = buildApiUserFromFull(fullInfo);
+  const user = buildApiUser(fullInfo.users[0]);
 
   onUpdate({
     '@type': 'updateUser',
     id,
     user: {
+      ...user,
+      avatarHash: user?.avatarHash || undefined,
       fullInfo: userWithFullInfo.fullInfo,
     },
   });
