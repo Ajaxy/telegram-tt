@@ -11,7 +11,7 @@ const version = require('../package.json').version;
 const gitOptions = {
   repo: '.',
   branch: 'master',
-  number: 100,
+  number: 200,
   fields: ['hash', 'subject', 'committerDate'],
 };
 
@@ -69,7 +69,7 @@ async function preparePage() {
 
 function renderCommit(dom, commit) {
   const li = dom.window.document.createElement('li');
-  const subject = commit.subject.replaceAll(/`(.+)`/g, '<code>$1</code>');
+  const subject = commit.subject.replaceAll(/`(.+?)`/g, '<code>$1</code>');
   li.innerHTML = `<p><code>${commit.hash.substring(0, 7)}</code> <b>${subject}</b></p>`;
   return li;
 }
