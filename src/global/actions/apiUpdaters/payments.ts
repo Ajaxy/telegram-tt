@@ -18,8 +18,8 @@ addActionHandler('apiUpdate', (global, actions, update) => {
           const { amount, currency, title } = message.content.invoice;
 
           actions.showNotification({
-            message: langProvider.getTranslation('PaymentInfoHint', [
-              formatCurrency(amount, currency, langProvider.getTranslation.code),
+            message: langProvider.translate('PaymentInfoHint', [
+              formatCurrency(amount, currency, langProvider.getTranslationFn().code),
               title,
             ]),
           });

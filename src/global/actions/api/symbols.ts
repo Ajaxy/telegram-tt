@@ -18,7 +18,7 @@ import {
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
-import { getTranslation } from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
 import * as langProvider from '../../../util/langProvider';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -273,9 +273,9 @@ addActionHandler('saveGif', async (global, actions, payload) => {
 
   if (!shouldUnsave && length && length >= limit) {
     actions.showNotification({
-      title: langProvider.getTranslation('LimitReachedFavoriteGifs', limit.toString()),
-      message: isPremium ? langProvider.getTranslation('LimitReachedFavoriteGifsSubtitlePremium')
-        : langProvider.getTranslation('LimitReachedFavoriteGifsSubtitle',
+      title: langProvider.translate('LimitReachedFavoriteGifs', limit.toString()),
+      message: isPremium ? langProvider.translate('LimitReachedFavoriteGifsSubtitlePremium')
+        : langProvider.translate('LimitReachedFavoriteGifsSubtitle',
           premiumLimit.toString()),
       ...(!isPremium && { action: actions.openPremiumModal }),
       className: 'bold-link',
@@ -312,9 +312,9 @@ addActionHandler('faveSticker', (global, actions, payload) => {
 
   if (current >= limit) {
     actions.showNotification({
-      title: langProvider.getTranslation('LimitReachedFavoriteStickers', limit.toString()),
-      message: isPremium ? langProvider.getTranslation('LimitReachedFavoriteStickersSubtitlePremium')
-        : langProvider.getTranslation('LimitReachedFavoriteStickersSubtitle',
+      title: langProvider.translate('LimitReachedFavoriteStickers', limit.toString()),
+      message: isPremium ? langProvider.translate('LimitReachedFavoriteStickersSubtitlePremium')
+        : langProvider.translate('LimitReachedFavoriteStickersSubtitle',
           premiumLimit.toString()),
       ...(!isPremium && { action: actions.openPremiumModal }),
       className: 'bold-link',
@@ -476,7 +476,7 @@ async function loadStickers(stickerSetInfo: ApiStickerSetInfo) {
   if (!stickerSet) {
     onTickEnd(() => {
       getActions().showNotification({
-        message: getTranslation('StickerPack.ErrorNotFound'),
+        message: translate('StickerPack.ErrorNotFound'),
       });
     });
     if ('shortName' in stickerSetInfo && global.openedStickerSetShortName === stickerSetInfo.shortName) {
@@ -621,7 +621,7 @@ addActionHandler('openStickerSet', async (global, actions, payload) => {
   const set = selectStickerSet(global, stickerSetInfo);
   if (!set?.shortName) {
     actions.showNotification({
-      message: getTranslation('StickerPack.ErrorNotFound'),
+      message: translate('StickerPack.ErrorNotFound'),
     });
     return;
   }

@@ -10,7 +10,7 @@ import type { TextFilter } from './renderText';
 import buildClassName from '../../../util/buildClassName';
 import renderText from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
-import { getTranslation } from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
 
 import MentionLink from '../../middle/message/MentionLink';
@@ -550,6 +550,6 @@ function handleHashtagClick(e: React.MouseEvent<HTMLAnchorElement>) {
 function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   copyTextToClipboard(e.currentTarget.innerText);
   getActions().showNotification({
-    message: getTranslation('TextCopied'),
+    message: translate('TextCopied'),
   });
 }

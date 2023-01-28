@@ -1,7 +1,7 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { selectChat } from '../../selectors';
 import { callApi } from '../../../api/gramjs';
-import { getTranslation } from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import { addUsers } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 
@@ -28,7 +28,7 @@ addActionHandler('reportPeer', async (global, actions, payload) => {
 
   actions.showNotification({
     message: result
-      ? getTranslation('ReportPeer.AlertSuccess')
+      ? translate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
   });
 });
@@ -58,7 +58,7 @@ addActionHandler('reportProfilePhoto', async (global, actions, payload) => {
 
   actions.showNotification({
     message: result
-      ? getTranslation('ReportPeer.AlertSuccess')
+      ? translate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
   });
 });

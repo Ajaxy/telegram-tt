@@ -302,7 +302,7 @@ addActionHandler('importContact', async (global, actions, payload) => {
   const result = await callApi('importContact', { phone, firstName, lastName });
   if (!result) {
     actions.showNotification({
-      message: langProvider.getTranslation('Contacts.PhoneNumber.NotRegistred'),
+      message: langProvider.translate('Contacts.PhoneNumber.NotRegistred'),
     });
 
     return;

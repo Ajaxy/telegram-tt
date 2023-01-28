@@ -84,7 +84,7 @@ import {
 import {
   getMessageOriginalId, getUserFullName, isDeletedUser, isServiceNotificationMessage, isUserBot,
 } from '../../helpers';
-import { getTranslation } from '../../../util/langProvider';
+import { translate } from '../../../util/langProvider';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
@@ -494,7 +494,7 @@ addActionHandler('reportMessages', async (global, actions, payload) => {
 
   actions.showNotification({
     message: result
-      ? getTranslation('ReportPeer.AlertSuccess')
+      ? translate('ReportPeer.AlertSuccess')
       : 'An error occurred while submitting your report. Please, try again later.',
   });
 });
@@ -1336,7 +1336,7 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload) => {
     if (user?.fullInfo!.noVoiceMessages) {
       actions.showDialog({
         data: {
-          message: getTranslation('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
+          message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),
         },
       });
       return;
