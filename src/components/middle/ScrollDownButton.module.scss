@@ -10,6 +10,10 @@
 
   &:not(:first-child) {
     margin-top: 0.5rem;
+
+    @media (max-width: 600px) {
+      margin-top: 1rem;
+    }
   }
 
   @media (min-width: 1276px) {
