@@ -124,7 +124,8 @@ const Avatar: FC<OwnProps> = ({
   const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl, lastSyncTime);
   const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
-  const shouldPlayVideo = Boolean(isIntersecting && videoBlobUrl);
+  // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
+  const shouldPlayVideo = Boolean(isIntersecting && videoBlobUrl && shouldLoadVideo);
 
   const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
 
