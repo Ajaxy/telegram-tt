@@ -32,18 +32,19 @@ addActionHandler('toggleChatInfo', (global, actions, payload): ActionReturnType 
 });
 
 addActionHandler('setLeftColumnWidth', (global, actions, payload): ActionReturnType => {
-  const { leftColumnWidth, tabId = getCurrentTabId() } = payload;
+  const { leftColumnWidth } = payload;
 
-  return updateTabState(global, {
+  return {
+    ...global,
     leftColumnWidth,
-  }, tabId);
+  };
 });
 
-addActionHandler('resetLeftColumnWidth', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
+addActionHandler('resetLeftColumnWidth', (global): ActionReturnType => {
+  return {
+    ...global,
     leftColumnWidth: undefined,
-  }, tabId);
+  };
 });
 
 addActionHandler('toggleManagement', (global, actions, payload): ActionReturnType => {

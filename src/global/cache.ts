@@ -383,6 +383,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'push',
       'serviceNotifications',
       'attachmentSettings',
+      'leftColumnWidth',
     ]),
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),
@@ -510,12 +511,21 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
     }
 
     const viewportIdsToSave = unique(Object.values(threadsToSave).flatMap((thread) => thread.lastViewportIds || []));
-    const lastMessagesToSave = chat?.topics
+    const lastMessageIdsToSave = chat?.topics
       ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId) : [];
+    const byId = pick(current.byId, viewportIdsToSave.concat(lastMessageIdsToSave));
+    const threadsById = Object.keys(threadsToSave).reduce((acc, key) => {
+      const t = threadsToSave[Number(key)];
+      acc[Number(key)] = {
+        ...t,
+        listedIds: t.lastViewportIds,
+      };
+      return acc;
+    }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);
 
     byChatId[chatId] = {
-      byId: pick(current.byId, viewportIdsToSave.concat(lastMessagesToSave)),
-      threadsById: threadsToSave,
+      byId,
+      threadsById,
     };
   });
 

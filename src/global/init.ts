@@ -6,7 +6,7 @@ import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from './initialState';
 import { IS_MOCKED_CLIENT } from '../config';
 import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';
-import { replaceTabThreadParam, updatePasscodeSettings } from './reducers';
+import { replaceTabThreadParam, replaceThreadParam, updatePasscodeSettings } from './reducers';
 import { clearStoredSession } from '../util/sessions';
 import { parseLocationHash } from '../util/routing';
 import { MAIN_THREAD_ID } from '../api/types';
@@ -14,7 +14,7 @@ import { selectTabState, selectThreadParam } from './selectors';
 import { Bundles, loadBundle } from '../util/moduleLoader';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
 import { updateTabState } from './reducers/tabs';
-import type { ActionReturnType } from './types';
+import type { ActionReturnType, GlobalState } from './types';
 import { getIsMobile } from '../hooks/useAppLayout';
 
 initCache();
@@ -61,15 +61,49 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
   }
 
   Object.keys(global.messages.byChatId).forEach((chatId) => {
+    const lastViewportIds = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds');
+    // Check if migration from previous version is faulty
+    if (!lastViewportIds?.every((id) => global.messages.byChatId[chatId]?.byId[id])) {
+      global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds', undefined);
+      return;
+    }
     global = replaceTabThreadParam(
       global,
       chatId,
       MAIN_THREAD_ID,
       'viewportIds',
-      selectThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds'),
+      lastViewportIds,
       tabId,
     );
   });
+
+  // Temporary state fix
+  Object.keys(global.messages.byChatId).forEach((chatId) => {
+    const threadsById = global.messages.byChatId[chatId].threadsById;
+    const fixedThreadsById = Object.keys(threadsById).reduce((acc, key) => {
+      const t = threadsById[Number(key)];
+      acc[Number(key)] = {
+        ...t,
+        listedIds: t.lastViewportIds,
+      };
+      return acc;
+    }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);
+
+    global = {
+      ...global,
+      messages: {
+        ...global.messages,
+        byChatId: {
+          ...global.messages.byChatId,
+          [chatId]: {
+            ...global.messages.byChatId[chatId],
+            threadsById: fixedThreadsById,
+          },
+        },
+      },
+    };
+  });
+
   const parsedMessageList = !getIsMobile() ? parseLocationHash() : undefined;
 
   if (global.authState !== 'authorizationStateReady'
@@ -101,8 +135,8 @@ addActionHandler('requestMasterAndCallAction', async (
 
   if (global.phoneCall || global.groupCalls.activeGroupCallId) {
     await loadBundle(Bundles.Calls);
-    actions.hangUp({ tabId });
-    actions.leaveGroupCall({ tabId });
+    if ('hangUp' in actions) actions.hangUp({ tabId });
+    if ('leaveGroupCall' in actions) actions.leaveGroupCall({ tabId });
   } else {
     reestablishMasterToSelf();
   }

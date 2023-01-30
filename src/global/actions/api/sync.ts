@@ -35,6 +35,7 @@ import {
   selectTabState,
 } from '../../selectors';
 import { init as initFolderManager } from '../../../util/folderManager';
+import { updateTabState } from '../../reducers/tabs';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
 
@@ -96,6 +97,8 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
   global = getGlobal();
 
+  let wasReset = false;
+
   for (const { id: tabId } of Object.values(global.byTabId)) {
     global = getGlobal();
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
@@ -137,9 +140,32 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         const byId = buildCollectionByKey(allMessages, 'id');
         const listedIds = Object.keys(byId).map(Number);
 
+        if (!wasReset) {
+          global = {
+            ...global,
+            messages: {
+              ...global.messages,
+              byChatId: {},
+            },
+          };
+          // eslint-disable-next-line @typescript-eslint/no-loop-func
+          Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
+            global = updateTabState(global, {
+              tabThreads: {},
+            }, otherTabId);
+          });
+          wasReset = true;
+        }
+
         global = addChatMessagesById(global, activeCurrentChatId, byId);
         global = updateListedIds(global, activeCurrentChatId, activeThreadId, listedIds);
-        global = safeReplaceViewportIds(global, activeCurrentChatId, activeThreadId, listedIds, tabId);
+        // eslint-disable-next-line @typescript-eslint/no-loop-func
+        Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
+          const { chatId: otherChatId, threadId: otherThreadId } = selectCurrentMessageList(global, otherTabId) || {};
+          if (otherChatId === activeCurrentChatId && otherThreadId === activeThreadId) {
+            global = safeReplaceViewportIds(global, activeCurrentChatId, activeThreadId, listedIds, otherTabId);
+          }
+        });
         global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
         global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
         global = updateThreadInfos(global, activeCurrentChatId, result.repliesThreadInfos);
@@ -176,6 +202,14 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         byChatId: {},
       },
     };
+    // eslint-disable-next-line @typescript-eslint/no-loop-func
+    Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
+      global = updateTabState(global, {
+        tabThreads: {},
+      }, otherTabId);
+    });
+
+    setGlobal(global);
   }
 
   Object.values(global.byTabId).forEach(({ id: tabId }) => {

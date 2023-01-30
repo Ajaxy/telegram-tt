@@ -488,11 +488,11 @@ export default memo(withGlobal(
         date,
       },
       shouldSkipHistoryAnimations,
-      leftColumnWidth,
       activeChatFolder,
       nextSettingsScreen,
     } = tabState;
     const {
+      leftColumnWidth,
       currentUserId,
       passcode: {
         hasPasscode,

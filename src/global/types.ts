@@ -173,7 +173,6 @@ export type TabState = {
   uiReadyState: 0 | 1 | 2;
   shouldInit: boolean;
   shouldSkipHistoryAnimations?: boolean;
-  leftColumnWidth?: number;
 
   gifSearch: {
     query?: string;
@@ -534,6 +533,7 @@ export type GlobalState = {
   lastSyncTime?: number;
   serverTimeOffset: number;
   blurredTabTokens: number[];
+  leftColumnWidth?: number;
   initialUnreadNotifications?: number;
   notificationIndex?: number;
   allNotificationsCount?: number;
@@ -1315,8 +1315,8 @@ export interface ActionPayloads {
   disableHistoryAnimations: WithTabId | undefined;
   setLeftColumnWidth: {
     leftColumnWidth: number;
-  } & WithTabId;
-  resetLeftColumnWidth: WithTabId | undefined;
+  };
+  resetLeftColumnWidth: undefined;
 
   copySelectedMessages: WithTabId;
   copyMessagesByIds: {
@@ -1326,8 +1326,8 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
   } & WithTabId;
-  closeSeenByModal: WithTabId;
-  closeReactorListModal: WithTabId;
+  closeSeenByModal: WithTabId | undefined;
+  closeReactorListModal: WithTabId | undefined;
   openReactorListModal: {
     chatId: string;
     messageId: number;
