@@ -82,17 +82,19 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
       title={lang('PinMessageAlertTitle')}
     >
       <p>{renderMessage()}</p>
-      <Button className="confirm-dialog-button" isText onClick={handlePinMessage}>
-        {lang('DialogPin')}
-      </Button>
-      {canPinForAll && (
-        <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
-          {contactName
-            ? renderText(lang('Conversation.PinMessagesFor', contactName))
-            : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
+      <div className="dialog-buttons-column">
+        <Button className="confirm-dialog-button" isText onClick={handlePinMessage}>
+          {lang('DialogPin')}
         </Button>
-      )}
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        {canPinForAll && (
+          <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
+            {contactName
+              ? renderText(lang('Conversation.PinMessagesFor', contactName))
+              : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
+          </Button>
+        )}
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };
