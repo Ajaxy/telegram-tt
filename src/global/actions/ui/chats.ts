@@ -5,7 +5,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList,
 } from '../../reducers';
-import { selectCurrentMessageList, selectTabState } from '../../selectors';
+import { selectChat, selectCurrentMessageList, selectTabState } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
 import type { ActionReturnType } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
@@ -18,6 +18,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     threadId = MAIN_THREAD_ID,
     type = 'thread',
     shouldReplaceHistory = false,
+    noForumTopicPanel,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -25,7 +26,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 
   const tabState = selectTabState(global, tabId);
   if (tabState.premiumModal?.promo && tabState.premiumModal?.isOpen) {
-    return updateTabState(global, {
+    global = updateTabState(global, {
       premiumModal: {
         ...tabState.premiumModal,
         isOpen: false,
@@ -55,8 +56,14 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     }, tabId);
   }
 
-  if (id && id !== selectTabState(global, tabId).forumPanelChatId) {
-    actions.closeForumPanel({ tabId });
+  if (id) {
+    const chat = selectChat(global, id);
+
+    if (chat?.isForum && !noForumTopicPanel) {
+      actions.openForumPanel({ chatId: id!, tabId });
+    } else if (id !== selectTabState(global, tabId).forumPanelChatId) {
+      actions.closeForumPanel({ tabId });
+    }
   }
 
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory, tabId);

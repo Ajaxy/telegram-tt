@@ -180,7 +180,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const handlePinnedMessageClick = useCallback((): void => {
     if (pinnedMessage) {
-      focusMessage({ chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id });
+      focusMessage({
+        chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id, noForumTopicPanel: true,
+      });
 
       const newIndex = cycleRestrict(pinnedMessagesCount || 1, pinnedMessageIndex + 1);
       setPinnedMessageIndex(newIndex);

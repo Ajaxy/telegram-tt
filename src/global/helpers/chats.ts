@@ -274,7 +274,7 @@ export function getForumComposerPlaceholder(
   }
 
   if (threadId === MAIN_THREAD_ID) {
-    if (isReplying) return undefined;
+    if (isReplying || (chat.topics && !chat.topics[GENERAL_TOPIC_ID]?.isClosed)) return undefined;
     return lang('lng_forum_replies_only');
   }
 

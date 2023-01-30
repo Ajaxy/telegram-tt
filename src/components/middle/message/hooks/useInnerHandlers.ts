@@ -73,6 +73,7 @@ export default function useInnerHandlers(
       threadId,
       messageId: replyToMessageId!,
       replyMessageId: isChatWithRepliesBot && replyToChatId ? undefined : messageId,
+      noForumTopicPanel: true,
     });
   }, [focusMessage, isChatWithRepliesBot, replyToChatId, chatId, threadId, replyToMessageId, messageId]);
 

@@ -1458,9 +1458,7 @@ export interface ActionPayloads {
     noForumTopicPanel?: boolean;
   } & WithTabId;
 
-  focusLastMessage: ({
-    noForumTopicPanel?: boolean;
-  } & WithTabId) | undefined;
+  focusLastMessage: WithTabId | undefined;
   setReplyingToId: {
     messageId?: number;
   } & WithTabId;

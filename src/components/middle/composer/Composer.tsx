@@ -1081,7 +1081,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [closeBotCommandMenu, closeSymbolMenu, openSendAsMenu, isMobile]);
 
   const handleAllScheduledClick = useCallback(() => {
-    openChat({ id: chatId, threadId, type: 'scheduled' });
+    openChat({
+      id: chatId, threadId, type: 'scheduled', noForumTopicPanel: true,
+    });
   }, [openChat, chatId, threadId]);
 
   useEffect(() => {
