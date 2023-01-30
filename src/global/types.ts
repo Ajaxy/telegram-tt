@@ -534,6 +534,7 @@ export type GlobalState = {
   serverTimeOffset: number;
   blurredTabTokens: number[];
   leftColumnWidth?: number;
+  lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;
   notificationIndex?: number;
   allNotificationsCount?: number;
