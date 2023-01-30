@@ -244,7 +244,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
-    return groupMessages(orderBy(listedMessages, ['date', 'id']), memoUnreadDividerBeforeIdRef.current);
+    return listedMessages.length
+      ? groupMessages(orderBy(listedMessages, ['date', 'id']), memoUnreadDividerBeforeIdRef.current)
+      : undefined;
   }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId]);
 
   useInterval(() => {
