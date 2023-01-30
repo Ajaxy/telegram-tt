@@ -233,12 +233,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     const { relatedTarget: toTarget, target: fromTarget } = e;
 
     // Esc button pressed during drag event
-    if ((fromTarget as HTMLDivElement).matches(styles.dropTarget) && !toTarget) {
+    if ((fromTarget as HTMLDivElement).matches(`.${styles.dropTarget}`) && !toTarget) {
       hideTimeoutRef.current = window.setTimeout(unmarkHovered, DROP_LEAVE_TIMEOUT_MS);
     }
 
     // Prevent DragLeave event from firing when the pointer moves inside the AttachmentModal drop target
-    if (fromTarget && (fromTarget as HTMLElement).closest(styles.hovered)) {
+    if (fromTarget && (fromTarget as HTMLElement).closest(`.${styles.hovered}`)) {
       return;
     }
 
