@@ -558,6 +558,7 @@
   }
 
   .message-content {
+    &.has-replies:not(.custom-shape):not(.has-reactions) .WebPage.with-square-photo .media-inner,
     &.has-replies:not(.custom-shape):not(.has-reactions) .WebPage.with-video .media-inner {
       margin-bottom: 1.5rem !important;
     }
