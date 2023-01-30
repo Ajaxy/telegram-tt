@@ -31,7 +31,7 @@ import { AudioOrigin } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
-import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   selectChat,
   selectChatMessage,
@@ -1285,8 +1285,9 @@ export default memo(withGlobal<OwnProps>(
 
     const hasUnreadReaction = chat?.unreadReactions?.includes(message.id);
 
-    const messageTopic = threadId === MAIN_THREAD_ID ? selectTopicFromMessage(global, message) : undefined;
     const hasTopicChip = threadId === MAIN_THREAD_ID && chat?.isForum && isFirstInGroup;
+    const messageTopic = hasTopicChip ? (selectTopicFromMessage(global, message) || chat?.topics?.[GENERAL_TOPIC_ID])
+      : undefined;
 
     return {
       theme: selectTheme(global),

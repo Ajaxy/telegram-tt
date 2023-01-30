@@ -76,9 +76,12 @@ const useChatContextActions = ({
       return compact([actionOpenInNewTab, actionPin, actionAddToFolder]);
     }
 
-    const actionUnreadMark = chat.unreadCount || chat.hasUnreadMark
+    const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)
       ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
-      : { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) };
+      : undefined;
+    const actionMarkAsUnread = !(chat.unreadCount || chat.hasUnreadMark) && !chat.isForum
+      ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
+      : undefined;
 
     const actionMute = isMuted
       ? {
@@ -117,7 +120,8 @@ const useChatContextActions = ({
     return compact([
       actionOpenInNewTab,
       actionAddToFolder,
-      actionUnreadMark,
+      actionMaskAsRead,
+      actionMarkAsUnread,
       actionPin,
       !isSelf && actionMute,
       !isSelf && !isServiceNotifications && !isInFolder && actionArchive,

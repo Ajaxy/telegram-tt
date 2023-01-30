@@ -116,7 +116,7 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
 
 addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   const {
-    id, threadId = MAIN_THREAD_ID, noForumTopicPanel, tabId = getCurrentTabId(),
+    id, threadId = MAIN_THREAD_ID,
   } = payload;
   if (!id) {
     return;
@@ -135,10 +135,6 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
       chatId: chat.lastMessage.repliesThreadInfo.chatId,
       threadId: chat.lastMessage.repliesThreadInfo.threadId,
     });
-  }
-
-  if (chat?.isForum && !noForumTopicPanel) {
-    actions.openForumPanel({ chatId: id, tabId });
   }
 
   if (!chat) {

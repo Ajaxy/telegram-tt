@@ -303,7 +303,7 @@ addActionHandler('closePollResults', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnType => {
-  const { noForumTopicPanel, tabId = getCurrentTabId() } = payload || {};
+  const { tabId = getCurrentTabId() } = payload || {};
   const currentMessageList = selectCurrentMessageList(global, tabId);
   if (!currentMessageList) {
     return;
@@ -331,7 +331,7 @@ addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnTyp
     threadId,
     messageId: lastMessageId,
     noHighlight: true,
-    noForumTopicPanel,
+    noForumTopicPanel: true,
     tabId,
   });
 });
@@ -348,7 +348,7 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
   const replyStack = selectReplyStack(global, chatId, threadId, tabId);
 
   if (!replyStack || replyStack.length === 0) {
-    actions.focusLastMessage({ noForumTopicPanel: true, tabId });
+    actions.focusLastMessage({ tabId });
   } else {
     const messageId = replyStack.pop();
 

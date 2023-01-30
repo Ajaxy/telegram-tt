@@ -118,7 +118,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const handleMessageClick = useCallback((): void => {
     if (isForwarding) return;
-    focusMessage({ chatId: message!.chatId, messageId: message!.id });
+    focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
   }, [focusMessage, isForwarding, message]);
 
   const handleClearClick = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {

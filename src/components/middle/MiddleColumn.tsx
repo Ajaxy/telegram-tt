@@ -24,6 +24,7 @@ import {
   LIGHT_THEME_BG_COLOR,
   ANIMATION_LEVEL_MIN,
   SUPPORTED_IMAGE_CONTENT_TYPES,
+  GENERAL_TOPIC_ID,
 } from '../../config';
 import { MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
@@ -644,7 +645,9 @@ export default memo(withGlobal<OwnProps>(
     const canStartBot = !canRestartBot && isBotNotStarted;
     const shouldLoadFullChat = Boolean(chat && isChatGroup(chat) && !chat.fullInfo && lastSyncTime);
     const replyingToId = selectReplyingToId(global, chatId, threadId);
-    const shouldBlockBeforeReply = chat?.isForum ? (threadId === MAIN_THREAD_ID && !replyingToId) : false;
+    const shouldBlockSendInForum = chat?.isForum
+      ? threadId === MAIN_THREAD_ID && !replyingToId && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)
+      : false;
 
     return {
       ...state,
@@ -657,10 +660,9 @@ export default memo(withGlobal<OwnProps>(
       areChatSettingsLoaded: Boolean(chat?.settings),
       canPost: !isPinnedMessageList
         && (!chat || canPost)
-        && !(isScheduledMessageList && chat?.isForum && threadId === MAIN_THREAD_ID)
         && !isBotNotStarted
         && !(shouldJoinToSend && chat?.isNotJoined)
-        && !shouldBlockBeforeReply,
+        && !shouldBlockSendInForum,
       isPinnedMessageList,
       isScheduledMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
