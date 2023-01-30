@@ -186,7 +186,7 @@ export default withGlobal<OwnProps>(
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
       uiReadyState: tabState.uiReadyState,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
-      leftColumnWidth: tabState.leftColumnWidth,
+      leftColumnWidth: global.leftColumnWidth,
       theme,
     };
   },

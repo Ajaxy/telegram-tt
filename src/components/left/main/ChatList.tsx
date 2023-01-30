@@ -152,7 +152,7 @@ const ChatList: FC<OwnProps> = ({
       const expendedOffsetTop = currentChatListHeight;
       const collapsedOffsetTop = (viewportOffset + i) * CHAT_HEIGHT_PX;
 
-      currentChatListHeight += (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
+      currentChatListHeight += (selectChat(global, id)?.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
 
       return (
         <Chat

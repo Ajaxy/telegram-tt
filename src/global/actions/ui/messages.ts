@@ -749,7 +749,7 @@ addActionHandler('openReactorListModal', (global, actions, payload): ActionRetur
 });
 
 addActionHandler('closeReactorListModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+  const { tabId = getCurrentTabId() } = payload || {};
 
   return updateTabState(global, {
     reactorModal: undefined,
@@ -765,7 +765,7 @@ addActionHandler('openSeenByModal', (global, actions, payload): ActionReturnType
 });
 
 addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+  const { tabId = getCurrentTabId() } = payload || {};
 
   return updateTabState(global, {
     seenByModal: undefined,

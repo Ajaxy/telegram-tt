@@ -34,7 +34,7 @@ function getLeftColumnWidth(windowWidth: number) {
 export function subtractXForEmojiInteraction(global: GlobalState, x: number) {
   const tabState = selectTabState(global);
   return x - ((tabState.isLeftColumnShown && !getIsMobile())
-    ? tabState.leftColumnWidth || getLeftColumnWidth(windowSize.get().width)
+    ? global.leftColumnWidth || getLeftColumnWidth(windowSize.get().width)
     : 0);
 }
 
