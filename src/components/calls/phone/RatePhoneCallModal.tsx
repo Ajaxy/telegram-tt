@@ -29,7 +29,7 @@ const RatePhoneCallModal: FC<OwnProps> = ({
   const lang = useLang();
   const [rating, setRating] = useState<number | undefined>();
 
-  function handleSend() {
+  const handleSend = useCallback(() => {
     if (!rating) {
       closeCallRatingModal();
       return;
@@ -38,7 +38,7 @@ const RatePhoneCallModal: FC<OwnProps> = ({
       rating: rating + 1,
       comment: inputRef.current?.value || '',
     });
-  }
+  }, [closeCallRatingModal, rating, setCallRating]);
 
   function handleClickStar(index: number) {
     return () => setRating(rating === index ? undefined : index);
@@ -71,11 +71,12 @@ const RatePhoneCallModal: FC<OwnProps> = ({
         className={buildClassName(styles.comment, rating !== 4 && rating !== undefined && styles.visible)}
       />
 
-      {/* eslint-disable-next-line react/jsx-no-bind */}
-      <Button className="confirm-dialog-button" isText onClick={handleSend}>
-        {lang('Send')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={handleCancelClick}>{lang('Cancel')}</Button>
+      <div className="dialog-buttons mt-2">
+        <Button className="confirm-dialog-button" isText onClick={handleSend}>
+          {lang('Send')}
+        </Button>
+        <Button className="confirm-dialog-button" isText onClick={handleCancelClick}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };
