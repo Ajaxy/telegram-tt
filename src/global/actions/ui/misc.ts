@@ -26,9 +26,12 @@ const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
 
 addActionHandler('toggleChatInfo', (global, actions, payload): ActionReturnType => {
   const { force, tabId = getCurrentTabId() } = payload || {};
-  return updateTabState(global, {
-    isChatInfoShown: force !== undefined ? force : !selectTabState(global, tabId).isChatInfoShown,
-  }, tabId);
+  const isChatInfoShown = force !== undefined ? force : !selectTabState(global, tabId).isChatInfoShown;
+
+  global = updateTabState(global, { isChatInfoShown }, tabId);
+  global = { ...global, lastIsChatInfoShown: isChatInfoShown };
+
+  return global;
 });
 
 addActionHandler('setLeftColumnWidth', (global, actions, payload): ActionReturnType => {

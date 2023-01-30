@@ -48,6 +48,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
 
   const initialTabState = cloneDeep(INITIAL_TAB_STATE);
   initialTabState.id = tabId;
+  initialTabState.isChatInfoShown = Boolean(global.lastIsChatInfoShown);
   global = {
     ...global,
     byTabId: {

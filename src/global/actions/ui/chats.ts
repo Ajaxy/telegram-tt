@@ -87,6 +87,7 @@ addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnTyp
     ...selectTabState(global, tabId),
     isChatInfoShown: true,
   }, tabId);
+  global = { ...global, lastIsChatInfoShown: true };
   setGlobal(global);
 
   actions.openChat({ ...payload, tabId });

@@ -384,6 +384,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'serviceNotifications',
       'attachmentSettings',
       'leftColumnWidth',
+      'lastIsChatInfoShown',
     ]),
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),
