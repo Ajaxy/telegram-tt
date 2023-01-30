@@ -122,11 +122,12 @@ export default function useMentionTooltip(
         >${getUserFirstOrLastName(user)}</a>`;
 
     const containerEl = document.querySelector<HTMLDivElement>(inputSelector)!;
+    const fixedHtmlBeforeSelection = cleanWebkitNewLines(htmlBeforeSelection);
 
-    const atIndex = htmlBeforeSelection.lastIndexOf('@');
+    const atIndex = fixedHtmlBeforeSelection.lastIndexOf('@');
     if (atIndex !== -1) {
-      const newHtml = `${htmlBeforeSelection.substr(0, atIndex)}${insertedHtml}&nbsp;`;
-      const htmlAfterSelection = containerEl.innerHTML.substring(htmlBeforeSelection.length);
+      const newHtml = `${fixedHtmlBeforeSelection.substr(0, atIndex)}${insertedHtml}&nbsp;`;
+      const htmlAfterSelection = cleanWebkitNewLines(containerEl.innerHTML).substring(fixedHtmlBeforeSelection.length);
       onUpdateHtml(`${newHtml}${htmlAfterSelection}`);
 
       requestAnimationFrame(() => {
@@ -149,6 +150,12 @@ function getUsernameFilter(html: string) {
   const username = prepareForRegExp(html).match(RE_USERNAME_SEARCH);
 
   return username ? username[0].trim() : undefined;
+}
+
+// Webkit replaces the line break with the `<div><br /></div>` or `<div></div>` code.
+// It is necessary to clean the html to a single form before processing.
+function cleanWebkitNewLines(html: string) {
+  return html.replace(/<div>(<br>|<br\s?\/>)?<\/div>/gi, '<br>');
 }
 
 function canSuggestInlineBots(html: string) {
