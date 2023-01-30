@@ -1,3 +1,34 @@
+## 1.59.0 (2023-01-30)
+
+### 👏 **Harder**
+* Chats can be opened in multiple browser tabs or windows.
+* A spoiler effect is available for photos and videos.
+* You can replace profile photos of contacts or suggest new ones.
+* Your account can have a public profile photo, in addition to the main one.
+* Media can be sent from your clipboard without compression.
+* Topics are able to be created or edited in groups.
+* Syntax highlighting is now supported for Type (.tl) language.
+
+### 🤩 **Better**
+* Multiple media items can be sent as separate messages from the attachment menu.
+* The audio player now supports multiple playback speeds.
+* The topic panel can be quickly closed with a swipe.
+
+### 🚀 **Faster**
+* Animations in the topic panel are faster and lighter.
+
+### 💪 **Stronger**
+* Fixed some chats being hidden in the chat list.
+* Fixed the app reloading when resizing the window.
+* Fixed missing video in group video calls.
+* Fixed problems with deleting chat history.
+* Fixed missing text formats when composing a message.
+* Fixed jumping cursor when editing chat description.
+* Fixed app URL not updating after closing a chat.
+* Fixed yellow border when switching profile photos.
+* Fixed call indicator not hiding after a call ends.
+* Various layout improvements.
+
 ## 1.58.0 (2023-01-06)
 
 ### 👏 Harder
