@@ -14,7 +14,7 @@ type OwnProps = {
   text: string;
 };
 
-const ANIMATION_TIME = 150;
+const ANIMATION_TIME = 200;
 
 const AnimatedCounter: FC<OwnProps> = ({
   text,
@@ -54,7 +54,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   useTimeout(() => {
     isAnimatingRef.current = false;
     forceUpdate();
-  }, shouldAnimate && isAnimatingRef.current ? ANIMATION_TIME : undefined);
+  }, isAnimatingRef.current ? ANIMATION_TIME : undefined);
 
   return (
     <span className={styles.root} dir={lang.isRtl ? 'rtl' : undefined}>
