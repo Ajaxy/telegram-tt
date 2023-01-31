@@ -36,6 +36,7 @@ const FOCUS_DELAY_MS = 350;
 const TRANSITION_DURATION_FACTOR = 50;
 
 const SCROLLER_CLASS = 'input-scroller';
+const INPUT_WRAPPER_CLASS = 'message-input-wrapper';
 
 type OwnProps = {
   id: string;
@@ -277,7 +278,9 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (e.button !== 2) {
-      e.target.addEventListener('mouseup', processSelectionWithTimeout, { once: true });
+      const listenerEl = e.currentTarget.closest(`.${INPUT_WRAPPER_CLASS}`) || e.target;
+
+      listenerEl.addEventListener('mouseup', processSelectionWithTimeout, { once: true });
       return;
     }
 
