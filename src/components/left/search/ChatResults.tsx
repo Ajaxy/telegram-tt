@@ -54,7 +54,7 @@ type StateProps = {
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 4;
 const LESS_LIST_ITEMS_AMOUNT = 5;
 
-const runThrottled = throttle((cb) => cb(), 500, true);
+const runThrottled = throttle((cb) => cb(), 500, false);
 
 const ChatResults: FC<OwnProps & StateProps> = ({
   searchQuery, searchDate, dateSearchQuery, currentUserId,
