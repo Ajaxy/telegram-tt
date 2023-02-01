@@ -6,7 +6,7 @@ import { IS_IOS } from '../util/environment';
 import { getActions } from '../lib/teact/teactn';
 
 export const LOCATION_HASH = window.location.hash;
-const PATH_BASE = window.location.pathname;
+const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 // Carefully selected by swiping and observing visual changes
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
 const SAFARI_EDGE_BACK_GESTURE_LIMIT = 300;
