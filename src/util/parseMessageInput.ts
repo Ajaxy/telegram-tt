@@ -8,6 +8,7 @@ export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = 
   STRONG: ApiMessageEntityTypes.Bold,
   I: ApiMessageEntityTypes.Italic,
   EM: ApiMessageEntityTypes.Italic,
+  INS: ApiMessageEntityTypes.Underline,
   U: ApiMessageEntityTypes.Underline,
   S: ApiMessageEntityTypes.Strike,
   STRIKE: ApiMessageEntityTypes.Strike,
