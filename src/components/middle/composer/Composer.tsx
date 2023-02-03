@@ -1526,7 +1526,7 @@ export default memo(withGlobal<OwnProps>(
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
-    const messageWithActualBotKeyboard = isChatWithBot && selectNewestMessageWithBotKeyboardButtons(global, chatId);
+    const messageWithActualBotKeyboard = selectNewestMessageWithBotKeyboardButtons(global, chatId, threadId);
     const scheduledIds = selectScheduledIds(global, chatId, threadId);
     const { language, shouldSuggestStickers, shouldSuggestCustomEmoji } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];

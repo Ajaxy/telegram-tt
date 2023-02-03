@@ -175,11 +175,10 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
 
 addActionHandler('sendBotCommand', (global, actions, payload): ActionReturnType => {
   const { command, chatId, tabId = getCurrentTabId() } = payload;
-  const { currentUserId } = global;
   const chat = chatId ? selectChat(global, chatId) : selectCurrentChat(global, tabId);
   const currentMessageList = selectCurrentMessageList(global, tabId);
 
-  if (!currentUserId || !chat || !currentMessageList) {
+  if (!chat || !currentMessageList) {
     return;
   }
 
@@ -188,7 +187,7 @@ addActionHandler('sendBotCommand', (global, actions, payload): ActionReturnType 
   actions.clearWebPagePreview({ tabId });
 
   void sendBotCommand(
-    chat, currentUserId, command, selectReplyingToId(global, chat.id, threadId), selectSendAs(global, chat.id),
+    chat, threadId, command, selectReplyingToId(global, chat.id, threadId), selectSendAs(global, chat.id),
   );
 });
 
@@ -209,7 +208,7 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   global = getGlobal();
   global = removeBlockedContact(global, bot.id);
   setGlobal(global);
-  void sendBotCommand(chat, currentUserId, '/start', undefined, selectSendAs(global, chatId));
+  void sendBotCommand(chat, MAIN_THREAD_ID, '/start', undefined, selectSendAs(global, chatId));
 });
 
 addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
@@ -927,10 +926,11 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
 }
 
 async function sendBotCommand(
-  chat: ApiChat, currentUserId: string, command: string, replyingTo?: number, sendAs?: ApiChat | ApiUser,
+  chat: ApiChat, threadId = MAIN_THREAD_ID, command: string, replyingTo?: number, sendAs?: ApiChat | ApiUser,
 ) {
   await callApi('sendMessage', {
     chat,
+    replyingToTopId: threadId,
     text: command,
     replyingTo,
     sendAs,

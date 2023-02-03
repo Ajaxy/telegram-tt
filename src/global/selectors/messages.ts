@@ -15,7 +15,7 @@ import {
   GENERAL_TOPIC_ID, LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import {
-  selectChat, selectChatBot, selectIsChatWithBot, selectIsChatWithSelf,
+  selectChat, selectChatBot, selectIsChatWithSelf,
 } from './chats';
 import {
   selectIsCurrentUserPremium, selectIsUserOrChatContact, selectUser, selectUserStatus,
@@ -921,7 +921,7 @@ export function selectSelectedMessagesCount<T extends GlobalState>(
 }
 
 export function selectNewestMessageWithBotKeyboardButtons<T extends GlobalState>(
-  global: T, chatId: string,
+  global: T, chatId: string, threadId = MAIN_THREAD_ID,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): ApiMessage | undefined {
   const chat = selectChat(global, chatId);
@@ -929,29 +929,61 @@ export function selectNewestMessageWithBotKeyboardButtons<T extends GlobalState>
     return undefined;
   }
 
-  if (!selectIsChatWithBot(global, chat)) {
-    return undefined;
-  }
-
   const chatMessages = selectChatMessages(global, chatId);
-  const viewportIds = selectViewportIds(global, chatId, MAIN_THREAD_ID, tabId);
+  const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
   if (!chatMessages || !viewportIds) {
     return undefined;
   }
 
-  const messageId = findLast(viewportIds, (id) => {
-    return !chatMessages[id].isOutgoing && Boolean(chatMessages[id].keyboardButtons);
-  });
+  const messageId = findLast(viewportIds, (id) => selectShouldDisplayReplyKeyboard(global, chatMessages[id]));
 
-  const replyHideMessageId = findLast(viewportIds, (id) => {
-    return Boolean(chatMessages[id].shouldHideKeyboardButtons);
-  });
+  const replyHideMessageId = findLast(viewportIds, (id) => selectShouldHideReplyKeyboard(global, chatMessages[id]));
 
   if (messageId && replyHideMessageId && replyHideMessageId > messageId) {
     return undefined;
   }
 
   return messageId ? chatMessages[messageId] : undefined;
+}
+
+function selectShouldHideReplyKeyboard<T extends GlobalState>(global: T, message: ApiMessage) {
+  const {
+    shouldHideKeyboardButtons,
+    isHideKeyboardSelective,
+    replyToMessageId,
+    isMentioned,
+  } = message;
+  if (!shouldHideKeyboardButtons) return false;
+
+  if (isHideKeyboardSelective) {
+    if (isMentioned) return true;
+    if (!replyToMessageId) return false;
+
+    const replyMessage = selectChatMessage(global, message.chatId, replyToMessageId);
+    return Boolean(replyMessage?.senderId === global.currentUserId);
+  }
+  return true;
+}
+
+function selectShouldDisplayReplyKeyboard<T extends GlobalState>(global: T, message: ApiMessage) {
+  const {
+    keyboardButtons,
+    shouldHideKeyboardButtons,
+    isKeyboardSelective,
+    isMentioned,
+    replyToMessageId,
+  } = message;
+  if (!keyboardButtons || shouldHideKeyboardButtons) return false;
+
+  if (isKeyboardSelective) {
+    if (isMentioned) return true;
+    if (!replyToMessageId) return false;
+
+    const replyMessage = selectChatMessage(global, message.chatId, replyToMessageId);
+    return Boolean(replyMessage?.senderId === global.currentUserId);
+  }
+
+  return true;
 }
 
 export function selectCanAutoLoadMedia<T extends GlobalState>(global: T, message: ApiMessage) {

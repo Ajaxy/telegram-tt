@@ -176,13 +176,15 @@ export function buildApiMessageWithChatId(
   } = mtpMessage.replyTo || {};
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
-    inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse,
+    inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
   } = buildReplyButtons(mtpMessage, isInvoiceMedia) || {};
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
   const { replies, mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
+  const isHideKeyboardSelective = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide
+    && mtpMessage.replyMarkup.selective;
   const isProtected = mtpMessage.noforwards || isInvoiceMedia;
   const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
@@ -215,8 +217,10 @@ export function buildApiMessageWithChatId(
       isInAlbum,
     }),
     inlineButtons,
-    ...(keyboardButtons && { keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse }),
-    ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons }),
+    ...(keyboardButtons && {
+      keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
+    }),
+    ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons, isHideKeyboardSelective }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
     ...(replies?.comments && { repliesThreadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { postAuthorTitle: postAuthor }),
@@ -1242,6 +1246,7 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
     ...(replyMarkup instanceof GramJs.ReplyKeyboardMarkup && {
       keyboardPlaceholder: replyMarkup.placeholder,
       isKeyboardSingleUse: replyMarkup.singleUse,
+      isKeyboardSelective: replyMarkup.selective,
     }),
   };
 }

@@ -518,6 +518,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isEmptyTopic = messageIds?.length === 1
     && messagesById?.[messageIds[0]]?.content.action?.type === 'topicCreate';
 
+  const isBotInfoEmpty = botInfo && !botInfo.description && !botInfo.gif && !botInfo.photo;
+
   const className = buildClassName(
     'MessageList custom-scroll',
     noAvatars && 'no-avatars',
@@ -546,7 +548,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       ) : botInfo ? (
         <div className="empty">
           {isLoadingBotInfo && <span>{lang('Loading')}</span>}
-          {!botInfo && !isLoadingBotInfo && <span>{lang('NoMessages')}</span>}
+          {isBotInfoEmpty && !isLoadingBotInfo && <span>{lang('NoMessages')}</span>}
           {botInfo && (
             <div
               className="bot-info"
