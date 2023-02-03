@@ -51,9 +51,10 @@ type OwnProps = {
 type StateProps = {
   stickerSetsById: Record<string, ApiStickerSet>;
   addedCustomEmojiIds?: string[];
-  recentCustomEmoji: ApiSticker[];
+  customEmojisById: Record<string, ApiSticker>;
+  recentCustomEmojiIds: string[];
   defaultTopicIconsId?: string;
-  featuredCustomEmojiIds?: string[];
+  customEmojiFeaturedIds?: string[];
   canAnimate?: boolean;
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
@@ -69,9 +70,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   className,
   loadAndPlay,
   addedCustomEmojiIds,
-  recentCustomEmoji,
+  customEmojisById,
+  recentCustomEmojiIds,
   stickerSetsById,
-  featuredCustomEmojiIds,
+  customEmojiFeaturedIds,
   canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
@@ -120,6 +122,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
+  const recentCustomEmojis = useMemo(() => {
+    return Object.values(pickTruthy(customEmojisById, recentCustomEmojiIds));
+  }, [customEmojisById, recentCustomEmojiIds]);
+
   const allSets = useMemo(() => {
     if (!addedCustomEmojiIds) {
       return MEMO_EMPTY_ARRAY;
@@ -136,18 +142,18 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           title: lang('RecentStickers'),
         });
       }
-    } else if (recentCustomEmoji.length) {
+    } else if (recentCustomEmojis.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
         accessHash: '0',
         title: lang('RecentStickers'),
-        stickers: recentCustomEmoji,
-        count: recentCustomEmoji.length,
+        stickers: recentCustomEmojis,
+        count: recentCustomEmojis.length,
         isEmoji: true as true,
       });
     }
 
-    const setIdsToDisplay = unique(addedCustomEmojiIds.concat(featuredCustomEmojiIds || []));
+    const setIdsToDisplay = unique(addedCustomEmojiIds.concat(customEmojiFeaturedIds || []));
 
     const setsToDisplay = Object.values(pickTruthy(stickerSetsById, setIdsToDisplay));
 
@@ -156,7 +162,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       ...setsToDisplay,
     ];
   }, [
-    addedCustomEmojiIds, defaultTopicIconsId, featuredCustomEmojiIds, lang, recentCustomEmoji, stickerSetsById,
+    addedCustomEmojiIds, defaultTopicIconsId, customEmojiFeaturedIds, lang, recentCustomEmojis, stickerSetsById,
     withDefaultTopicIcons,
   ]);
 
@@ -309,21 +315,27 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const {
-      setsById,
-    } = global.stickers;
+      stickers: {
+        setsById: stickerSetsById,
+      },
+      customEmojis: {
+        byId: customEmojisById,
+        featuredIds: customEmojiFeaturedIds,
+      },
+      recentCustomEmojis: recentCustomEmojiIds,
+    } = global;
 
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
 
-    const recentCustomEmoji = Object.values(pickTruthy(global.customEmojis.byId, global.recentCustomEmojis));
-
     return {
-      stickerSetsById: setsById,
+      stickerSetsById,
       addedCustomEmojiIds: global.customEmojis.added.setIds,
       canAnimate: global.settings.byKey.shouldLoopStickers,
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
-      recentCustomEmoji,
-      featuredCustomEmojiIds: global.customEmojis.featuredIds,
+      customEmojisById,
+      recentCustomEmojiIds,
+      customEmojiFeaturedIds,
       defaultTopicIconsId: global.defaultTopicIconsId,
     };
   },
