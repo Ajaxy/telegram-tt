@@ -571,6 +571,8 @@ function useLayoutEffectBase(
         }
       }
     } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`);
       handleError(err);
     } finally {
       byCursor[cursor].cleanup = undefined;
@@ -584,24 +586,30 @@ function useLayoutEffectBase(
 
     execCleanup();
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    let DEBUG_startAt: number | undefined;
-    if (DEBUG) {
-      DEBUG_startAt = performance.now();
-    }
-
-    const result = effect();
-    if (typeof result === 'function') {
-      byCursor[cursor].cleanup = result;
-    }
-
-    if (DEBUG) {
-      const duration = performance.now() - DEBUG_startAt!;
-      const componentName = componentInstance.name;
-      if (duration > DEBUG_EFFECT_THRESHOLD) {
-        // eslint-disable-next-line no-console
-        console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
+    try {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      let DEBUG_startAt: number | undefined;
+      if (DEBUG) {
+        DEBUG_startAt = performance.now();
       }
+
+      const result = effect();
+      if (typeof result === 'function') {
+        byCursor[cursor].cleanup = result;
+      }
+
+      if (DEBUG) {
+        const duration = performance.now() - DEBUG_startAt!;
+        const componentName = componentInstance.name;
+        if (duration > DEBUG_EFFECT_THRESHOLD) {
+          // eslint-disable-next-line no-console
+          console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
+        }
+      }
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error(`[Teact] Error in effect at cursor #${cursor} in ${componentInstance.name}`);
+      handleError(err);
     }
   }
 
