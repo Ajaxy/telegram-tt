@@ -194,7 +194,11 @@ export function getSendingState(message: ApiMessage) {
 }
 
 export function isMessageLocal(message: ApiMessage) {
-  return message.id > LOCAL_MESSAGE_MIN_ID;
+  return isLocalMessageId(message.id);
+}
+
+export function isLocalMessageId(id: number) {
+  return id > LOCAL_MESSAGE_MIN_ID;
 }
 
 export function isHistoryClearMessage(message: ApiMessage) {

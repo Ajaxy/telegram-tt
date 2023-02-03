@@ -16,6 +16,7 @@ import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMulti
 import { updateTabState } from './reducers/tabs';
 import type { ActionReturnType, GlobalState } from './types';
 import { getIsMobile } from '../hooks/useAppLayout';
+import { isLocalMessageId } from './helpers';
 
 initCache();
 
@@ -64,7 +65,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
   Object.keys(global.messages.byChatId).forEach((chatId) => {
     const lastViewportIds = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds');
     // Check if migration from previous version is faulty
-    if (!lastViewportIds?.every((id) => global.messages.byChatId[chatId]?.byId[id])) {
+    if (!lastViewportIds?.every((id) => isLocalMessageId(id) || global.messages.byChatId[chatId]?.byId[id])) {
       global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds', undefined);
       return;
     }
