@@ -5,9 +5,10 @@ import type { ApiAttachment, ApiFormattedText, ApiMessage } from '../../../../ap
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
-import { EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';
+import { DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 import parseMessageInput, { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
+import cleanDocsHtml from '../../../../lib/cleanDocsHtml';
 import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
 
 const MAX_MESSAGE_LENGTH = 4096;
@@ -16,6 +17,14 @@ const STYLE_TAG_REGEX = /<style>(.*?)<\/style>/gs;
 
 function preparePastedHtml(html: string) {
   let fragment = document.createElement('div');
+  try {
+    html = cleanDocsHtml(html);
+  } catch (err) {
+    if (DEBUG) {
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
+  }
   fragment.innerHTML = html.replace(/\u00a0/g, ' ').replace(STYLE_TAG_REGEX, ''); // Strip &nbsp and styles
 
   const textContents = fragment.querySelectorAll<HTMLDivElement>('.text-content');
