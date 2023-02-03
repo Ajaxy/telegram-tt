@@ -169,10 +169,25 @@ const useWebAppFrame = (
   isOpen: boolean,
   isSimpleView: boolean,
   onEvent: (event: WebAppInboundEvent) => void,
+  onLoad?: () => void,
 ) => {
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
+
+  useEffect(() => {
+    if (!ref.current || !isOpen) return undefined;
+
+    const handleLoad = () => {
+      onLoad?.();
+    };
+
+    const frame = ref.current;
+    frame.addEventListener('load', handleLoad);
+    return () => {
+      frame.removeEventListener('load', handleLoad);
+    };
+  }, [onLoad, ref, isOpen]);
 
   const reloadFrame = useCallback((url: string) => {
     if (!ref.current) return;
@@ -228,6 +243,10 @@ const useWebAppFrame = (
     try {
       const data = JSON.parse(event.data) as WebAppInboundEvent;
       // Handle some app requests here to simplify hook usage
+      if (data.eventType === 'web_app_ready') {
+        onLoad?.();
+      }
+
       if (data.eventType === 'web_app_request_viewport') {
         sendViewport(windowSize.isResizing);
       }
@@ -263,7 +282,7 @@ const useWebAppFrame = (
     } catch (err) {
       // Ignore other messages
     }
-  }, [isSimpleView, onEvent, sendCustomStyle, sendEvent, sendTheme, sendViewport, windowSize.isResizing]);
+  }, [isSimpleView, onEvent, sendCustomStyle, sendEvent, sendTheme, sendViewport, onLoad, windowSize.isResizing]);
 
   useEffect(() => {
     const { width, height, isResizing } = windowSize;
