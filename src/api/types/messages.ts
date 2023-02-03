@@ -413,11 +413,13 @@ export interface ApiMessage {
   keyboardButtons?: ApiKeyboardButtons;
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
+  isKeyboardSelective?: boolean;
   viaBotId?: string;
   repliesThreadInfo?: ApiThreadInfo;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
+  isHideKeyboardSelective?: boolean;
   isFromScheduled?: boolean;
   isSilent?: boolean;
   seenByUserIds?: string[];
@@ -600,6 +602,7 @@ export type ApiKeyboardButtons = ApiKeyboardButton[][];
 export type ApiReplyKeyboard = {
   keyboardPlaceholder?: string;
   isKeyboardSingleUse?: boolean;
+  isKeyboardSelective?: boolean;
 } & {
   [K in 'inlineButtons' | 'keyboardButtons']?: ApiKeyboardButtons;
 };
