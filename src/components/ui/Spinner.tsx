@@ -16,7 +16,7 @@ const Spinner: FC<{
 }) => {
   return (
     <div className={buildClassName(
-      'Spinner', className, color, backgroundColor && 'with-background', `bg-${backgroundColor}`,
+      'Spinner', className, color, backgroundColor && 'with-background', backgroundColor && `bg-${backgroundColor}`,
     )}
     >
       <div />

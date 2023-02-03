@@ -31,7 +31,7 @@ import MenuItem from '../ui/MenuItem';
 import Spinner from '../ui/Spinner';
 import ConfirmDialog from '../ui/ConfirmDialog';
 
-import './WebAppModal.scss';
+import styles from './WebAppModal.module.scss';
 
 type WebAppButton = {
   isVisible: boolean;
@@ -101,6 +101,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const [headerColor, setHeaderColor] = useState(extractCurrentThemeParams().bg_color);
   const [confirmClose, setConfirmClose] = useState(false);
   const [isCloseModalOpen, openCloseModal, closeCloseModal] = useFlag(false);
+  const [isLoaded, markLoaded, markUnloaded] = useFlag(false);
   const [popupParams, setPopupParams] = useState<PopupOptions | undefined>();
   const { isMobile } = useAppLayout();
   const prevPopupParams = usePrevious(popupParams);
@@ -204,7 +205,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   const {
     reloadFrame, sendEvent, sendViewport, sendTheme,
-  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent);
+  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent, markLoaded);
 
   const shouldShowMainButton = mainButton?.isVisible && mainButton.text.trim().length > 0;
 
@@ -315,8 +316,9 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       setConfirmClose(false);
       closeCloseModal();
       setPopupParams(undefined);
+      markUnloaded();
     }
-  }, [closeCloseModal, isOpen]);
+  }, [closeCloseModal, isOpen, markUnloaded]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -335,8 +337,8 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }, [isMobile]);
 
   const backButtonClassName = buildClassName(
-    'animated-close-icon',
-    isBackButtonVisible && 'state-back',
+    styles.closeIcon,
+    isBackButtonVisible && styles.stateBack,
   );
 
   const header = useMemo(() => {
@@ -361,6 +363,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
           )}
           <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
+          {attachBot?.hasSettings && (
+            <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
+              {lang('Settings')}
+            </MenuItem>
+          )}
           {bot?.isAttachBot && (
             <MenuItem
               icon={attachBot ? 'stop' : 'install'}
@@ -368,11 +375,6 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
               destructive={Boolean(attachBot)}
             >
               {lang(attachBot ? 'WebApp.RemoveBot' : 'WebApp.AddToAttachmentAdd')}
-            </MenuItem>
-          )}
-          {attachBot?.hasSettings && (
-            <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
-              {lang('Settings')}
             </MenuItem>
           )}
         </DropdownMenu>
@@ -425,17 +427,18 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   return (
     <Modal
-      className="WebAppModal"
+      className={styles.root}
       isOpen={isOpen}
       onClose={handleClose}
       header={header}
       hasCloseButton
       style={`background-color: ${backgroundColor}`}
     >
+      <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />
       {isOpen && (
         <>
           <iframe
-            className={buildClassName('web-app-frame', shouldDecreaseWebFrameSize && 'with-button')}
+            className={buildClassName(styles.frame, shouldDecreaseWebFrameSize && styles.withButton)}
             src={url}
             title={`${bot?.firstName} Web App`}
             sandbox={SANDBOX_ATTRIBUTES}
@@ -445,16 +448,16 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           />
           <Button
             className={buildClassName(
-              'web-app-button',
-              shouldShowMainButton && 'visible',
-              shouldHideButton && 'hidden',
+              styles.mainButton,
+              shouldShowMainButton && styles.visible,
+              shouldHideButton && styles.hidden,
             )}
             style={`background-color: ${mainButtonCurrentColor}; color: ${mainButtonCurrentTextColor}`}
             disabled={!mainButtonCurrentIsActive}
             onClick={handleMainButtonClick}
           >
             {mainButtonCurrentText}
-            {mainButton?.isProgressVisible && <Spinner color="white" />}
+            {mainButton?.isProgressVisible && <Spinner className={styles.mainButtonSpinner} color="white" />}
           </Button>
         </>
       )}
@@ -475,16 +478,18 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           title={renderingPopupParams.title || NBSP}
           onClose={handlePopupModalClose}
           hasCloseButton
-          className={buildClassName('web-app-popup', !renderingPopupParams.title?.trim().length && 'without-title')}
+          className={
+            buildClassName(styles.webAppPopup, !renderingPopupParams.title?.trim().length && styles.withoutTitle)
+          }
         >
           {renderingPopupParams.message}
           <div className="dialog-buttons mt-2">
             {renderingPopupParams.buttons.map((button) => (
               <Button
-                key={button.id || button.text || button.type}
+                key={button.id || button.type}
+                className="confirm-dialog-button"
                 color={button.type === 'destructive' ? 'danger' : 'primary'}
                 isText
-                fluid
                 size="smaller"
                 // eslint-disable-next-line react/jsx-no-bind
                 onClick={() => handlePopupClose(button.id)}

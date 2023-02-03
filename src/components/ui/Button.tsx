@@ -185,7 +185,7 @@ const Button: FC<OwnProps> = ({
       title={ariaLabel}
       tabIndex={tabIndex}
       dir={isRtl ? 'rtl' : undefined}
-      style={buildStyle(backgroundImage && `background-image: url(${backgroundImage})`)}
+      style={buildStyle(style, backgroundImage && `background-image: url(${backgroundImage})`)}
     >
       {isLoading ? (
         <div>
