@@ -22,7 +22,10 @@ const {
 } = require('./auth');
 const { downloadFile } = require('./downloadFile');
 const { uploadFile } = require('./uploadFile');
-const { updateTwoFaSettings, getTmpPassword } = require('./2fa');
+const {
+    updateTwoFaSettings,
+    getTmpPassword,
+} = require('./2fa');
 
 const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
@@ -370,6 +373,24 @@ class TelegramClient {
         const sender = await this._exportedSenderPromises[dcId][index];
         delete this._exportedSenderPromises[dcId][index];
         await sender.disconnect();
+    }
+
+    async _cleanupExportedSenders(dcId) {
+        const promises = Object.values(this._exportedSenderPromises[dcId]);
+        if (!promises.length) {
+            return;
+        }
+
+        if (this.session.dcId !== dcId) {
+            this.session.setAuthKey(undefined, dcId);
+        }
+
+        this._exportedSenderPromises[dcId] = {};
+
+        await Promise.all(promises.map(async (promise) => {
+            const sender = await promise;
+            await sender.disconnect();
+        }));
     }
 
     async _connectSender(sender, dcId, isPremium = false) {
