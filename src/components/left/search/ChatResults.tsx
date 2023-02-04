@@ -16,6 +16,7 @@ import {
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+
 import useLang from '../../../hooks/useLang';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -85,7 +86,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  }, [lastSyncTime, searchMessagesGlobal]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
 
   const handleChatClick = useCallback(
     (id: string) => {

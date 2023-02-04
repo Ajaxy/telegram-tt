@@ -54,7 +54,8 @@ const AudioResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  }, [currentType, lastSyncTime, searchMessagesGlobal]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+  }, [currentType, lastSyncTime, searchMessagesGlobal, searchQuery]);
 
   const foundMessages = useMemo(() => {
     if (!foundIds || !globalMessagesByChatId) {

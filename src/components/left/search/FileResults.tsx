@@ -66,7 +66,8 @@ const FileResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  }, [lastSyncTime, searchMessagesGlobal]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
 
   const foundMessages = useMemo(() => {
     if (!foundIds || !globalMessagesByChatId) {
