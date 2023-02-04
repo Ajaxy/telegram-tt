@@ -84,6 +84,7 @@ import {
   getMessageSingleCustomEmoji,
   hasMessageText,
   isChatGroup,
+  getMessageLocation,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import {
@@ -1289,11 +1290,12 @@ export default memo(withGlobal<OwnProps>(
     const messageTopic = hasTopicChip ? (selectTopicFromMessage(global, message) || chat?.topics?.[GENERAL_TOPIC_ID])
       : undefined;
 
+    const isLocation = Boolean(getMessageLocation(message));
+
     return {
       theme: selectTheme(global),
       chatUsernames,
       forceSenderName,
-      sender,
       canShowSender,
       originSender,
       botSender,
@@ -1335,9 +1337,6 @@ export default memo(withGlobal<OwnProps>(
       defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
       activeReactions: reactionMessage && activeReactions[reactionMessage.id],
       activeEmojiInteractions,
-      ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
-      ...(typeof uploadProgress === 'number' && { uploadProgress }),
-      ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
       hasUnreadReaction,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
@@ -1347,6 +1346,10 @@ export default memo(withGlobal<OwnProps>(
       messageTopic,
       genericEffects: global.genericEmojiEffects,
       hasTopicChip,
+      ...((canShowSender || isLocation) && { sender }),
+      ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
+      ...(typeof uploadProgress === 'number' && { uploadProgress }),
+      ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
     };
   },
 )(Message));
