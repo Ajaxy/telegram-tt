@@ -101,10 +101,14 @@ export async function downloadFile(
         try {
             return await downloadFile2(client, inputLocation, fileParams);
         } catch (err: any) {
-            if (i === SENDER_RETRIES - 1 || !err.message.startsWith('SESSION_REVOKED')) {
+            if (
+                (err.message.startsWith('SESSION_REVOKED') || err.message.startsWith('CONNECTION_NOT_INITED'))
+                && i < SENDER_RETRIES - 1
+            ) {
+                await client._cleanupExportedSenders(dcId);
+            } else {
                 throw err;
             }
-            await client._cleanupExportedSender(dcId);
         }
     }
 
@@ -215,7 +219,7 @@ async function downloadFile2(
                             precise: isPrecise || undefined,
                         })),
                         sleep(SENDER_TIMEOUT).then(() => {
-                            // if we're on the main DC we just cancel the download and let the user retry later.
+                            // If we're on the main DC we just cancel the download and let the user retry later
                             if (dcId === client.session.dcId) {
                                 return Promise.reject(new Error('USER_CANCELED'));
                             } else {
