@@ -280,25 +280,27 @@ function handleUpdatesFromRequest<T extends GramJs.AnyRequest>(request: T, resul
   }
 }
 
-export function downloadMedia(
+export async function downloadMedia(
   args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean },
   onProgress?: ApiOnProgress,
 ) {
-  return downloadMediaWithClient(args, client, isConnected, onProgress).catch(async (err) => {
+  try {
+    return (await downloadMediaWithClient(args, client, isConnected, onProgress));
+  } catch (err: any) {
     if (err.message.startsWith('FILE_REFERENCE')) {
       const isFileReferenceRepaired = await repairFileReference({ url: args.url });
-      if (!isFileReferenceRepaired) {
-        if (DEBUG) {
-          // eslint-disable-next-line no-console
-          console.error('Failed to repair file reference', args.url);
-        }
-        return undefined;
+      if (isFileReferenceRepaired) {
+        return downloadMediaWithClient(args, client, isConnected, onProgress);
       }
 
-      return downloadMediaWithClient(args, client, isConnected, onProgress);
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to repair file reference', args.url);
+      }
     }
-    return undefined;
-  });
+
+    throw err;
+  }
 }
 
 export function uploadFile(file: File, onProgress?: ApiOnProgress) {
