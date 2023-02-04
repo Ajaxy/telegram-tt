@@ -868,7 +868,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     return;
   }
 
-  const uri = new URL(url.startsWith('http') ? url : `https://${url}`);
+  const uri = new URL(url.toLowerCase().startsWith('http') ? url : `https://${url}`);
   if (TME_WEB_DOMAINS.has(uri.hostname) && uri.pathname === '/') {
     window.open(uri.toString(), '_blank', 'noopener');
     return;
