@@ -540,6 +540,15 @@ export type GlobalState = {
   notificationIndex?: number;
   allNotificationsCount?: number;
 
+  audioPlayer: {
+    lastPlaybackRate: number;
+    isLastPlaybackRateActive?: boolean;
+  };
+
+  mediaViewer: {
+    lastPlaybackRate: number;
+  };
+
   recentlyFoundChatIds?: string[];
 
   twoFaSettings: {

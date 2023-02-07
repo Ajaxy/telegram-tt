@@ -270,6 +270,14 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.customEmojis.forEmoji = {};
   }
 
+  if (!cached.audioPlayer) {
+    cached.audioPlayer = initialState.audioPlayer;
+  }
+
+  if (!cached.mediaViewer) {
+    cached.mediaViewer = initialState.mediaViewer;
+  }
+
   // TODO Remove in Jan 2023 (this was re-designed but can be hardcoded in cache)
   const { light: lightTheme } = cached.settings.themes;
   if (lightTheme?.patternColor === 'rgba(90, 110, 70, 0.6)' || !lightTheme?.patternColor) {
@@ -386,6 +394,8 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'leftColumnWidth',
       'lastIsChatInfoShown',
     ]),
+    audioPlayer: global.audioPlayer,
+    mediaViewer: global.mediaViewer,
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),
     chats: reduceChats(global),
