@@ -37,6 +37,8 @@ export default function useInputCustomEmojis(
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>,
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
   absoluteContainerRef: React.RefObject<HTMLElement>,
+  prefixId?: string,
+  isActive?: boolean,
 ) {
   const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
@@ -59,7 +61,7 @@ export default function useInputCustomEmojis(
     const customEmojies = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
 
     customEmojies.forEach((element) => {
-      const id = element.dataset.uniqueId!;
+      const id = `${prefixId || ''}${element.dataset.uniqueId!}`;
       const documentId = element.dataset.documentId!;
       if (!id) {
         return;
@@ -105,7 +107,10 @@ export default function useInputCustomEmojis(
     });
 
     removeContainers(Array.from(removedContainers));
-  }, [absoluteContainerRef, inputRef, isMobile, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
+  }, [
+    absoluteContainerRef, inputRef, prefixId, isMobile, removeContainers, sharedCanvasHqRef,
+    sharedCanvasRef,
+  ]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -116,13 +121,13 @@ export default function useInputCustomEmojis(
   }, [synchronizeElements]);
 
   useEffect(() => {
-    if (!getHtml() || !inputRef.current || !sharedCanvasRef.current) {
+    if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive) {
       removeContainers(Array.from(mapRef.current.keys()));
       return;
     }
 
     synchronizeElements();
-  }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef]);
+  }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef, isActive]);
 
   useResizeObserver(sharedCanvasRef, synchronizeElements, true);
 

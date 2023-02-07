@@ -146,7 +146,15 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
   const { isMobile } = useAppLayout();
 
-  useInputCustomEmojis(getHtml, inputRef, sharedCanvasRef, sharedCanvasHqRef, absoluteContainerRef);
+  useInputCustomEmojis(
+    getHtml,
+    inputRef,
+    sharedCanvasRef,
+    sharedCanvasHqRef,
+    absoluteContainerRef,
+    isAttachmentModalInput ? 'attachment' : undefined,
+    isActive,
+  );
 
   const maxInputHeight = isMobile ? 256 : 416;
   const updateInputHeight = useCallback((willSend = false) => {
