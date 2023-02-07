@@ -135,7 +135,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
   const handleMemberClick = useCallback((id: string) => {
     if (noAdmins) {
-      onChatMemberSelect!(id, false);
+      onChatMemberSelect!(id, true);
       onScreenSelect!(ManagementScreens.ChatNewAdminRights);
     } else {
       closeManagement();

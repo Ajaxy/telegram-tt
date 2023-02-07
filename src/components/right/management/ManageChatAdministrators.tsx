@@ -48,6 +48,8 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     onScreenSelect(ManagementScreens.GroupRecentActions);
   }, [onScreenSelect]);
 
+  const canAddNewAdmins = Boolean(chat.isCreator || chat.adminRights?.addAdmins);
+
   const adminMembers = useMemo(() => {
     if (!chat.fullInfo?.adminMembersById) {
       return [];
@@ -126,7 +128,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
           ))}
 
           <FloatingActionButton
-            isShown
+            isShown={canAddNewAdmins}
             onClick={handleAddAdminClick}
             ariaLabel={lang('Channel.Management.AddModerator')}
           >

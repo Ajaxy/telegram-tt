@@ -158,6 +158,10 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
       return true;
     }
 
+    if (chat.isCreator) {
+      return false;
+    }
+
     return !chat.adminRights![key];
   }, [chat, isFormFullyDisabled]);
 
