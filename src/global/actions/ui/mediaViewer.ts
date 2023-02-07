@@ -22,7 +22,7 @@ addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType
       origin,
       isHidden: false,
       volume: volume ?? tabState.mediaViewer.volume,
-      playbackRate: playbackRate || tabState.mediaViewer.playbackRate,
+      playbackRate: playbackRate || tabState.mediaViewer.playbackRate || global.mediaViewer.lastPlaybackRate,
       isMuted: isMuted || tabState.mediaViewer.isMuted,
     },
     forwardMessages: {},
@@ -65,6 +65,14 @@ addActionHandler('setMediaViewerPlaybackRate', (global, actions, payload): Actio
     playbackRate,
     tabId = getCurrentTabId(),
   } = payload;
+
+  global = {
+    ...global,
+    mediaViewer: {
+      ...global.mediaViewer,
+      lastPlaybackRate: playbackRate,
+    },
+  };
 
   return updateTabState(global, {
     mediaViewer: {

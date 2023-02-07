@@ -17,6 +17,14 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   serverTimeOffset: 0,
   isUpdateAvailable: false,
 
+  audioPlayer: {
+    lastPlaybackRate: DEFAULT_PLAYBACK_RATE,
+  },
+
+  mediaViewer: {
+    lastPlaybackRate: DEFAULT_PLAYBACK_RATE,
+  },
+
   authRememberMe: true,
   countryList: {
     phoneCodes: [],
