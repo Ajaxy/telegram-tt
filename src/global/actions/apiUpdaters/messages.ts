@@ -361,6 +361,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         global = replaceThreadParam(global, chatId, threadId, 'firstMessageId', firstMessageId);
       }
 
+      const chat = selectChat(global, chatId);
+      if (chat?.isForum && threadInfo.lastReadInboxMessageId !== currentThreadInfo?.lastReadInboxMessageId) {
+        actions.loadTopicById({ chatId, topicId: threadId });
+      }
+
       setGlobal(global);
 
       break;

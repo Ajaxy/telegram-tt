@@ -594,6 +594,15 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         lastReadOutboxMessageId: update.maxId,
       },
     });
+  } else if (update instanceof GramJs.UpdateReadChannelDiscussionInbox) {
+    onUpdate({
+      '@type': 'updateThreadInfo',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      threadId: update.topMsgId,
+      threadInfo: {
+        lastReadInboxMessageId: update.readMaxId,
+      },
+    });
   } else if (
     update instanceof GramJs.UpdateDialogPinned
     && update.peer instanceof GramJs.DialogPeer
