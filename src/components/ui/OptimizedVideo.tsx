@@ -3,7 +3,7 @@ import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 
 type OwnProps =
   {
@@ -40,13 +40,13 @@ function OptimizedVideo({
   // This is only needed for browsers not allowing autoplay
   const { isBuffered, bufferingHandlers } = useBuffering(true, onTimeUpdate);
   const { onPlaying: handlePlayingForBuffering, ...otherBufferingHandlers } = bufferingHandlers;
-  useOnChange(([prevIsBuffered]) => {
+  useSyncEffect(([prevIsBuffered]) => {
     if (prevIsBuffered === undefined) {
       return;
     }
 
     handleReady();
-  }, [isBuffered]);
+  }, [isBuffered, handleReady]);
 
   const handlePlaying = useCallback((e) => {
     handlePlayingForAutoPause();

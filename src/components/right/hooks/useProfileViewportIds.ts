@@ -7,7 +7,7 @@ import type { ProfileTabType, SharedMediaType } from '../../../types';
 
 import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../global/helpers';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 
 export default function useProfileViewportIds(
@@ -150,11 +150,11 @@ function useInfiniteScrollForSharedMedia(
 ) {
   const messageIdsRef = useRef<number[]>();
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     messageIdsRef.current = undefined;
   }, [topicId]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (currentResultType === forSharedMediaType && chatMessages && foundIds) {
       messageIdsRef.current = getMessageContentIds(
         chatMessages,

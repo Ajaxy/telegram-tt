@@ -9,7 +9,7 @@ import { LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../../config';
 import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';
 import { debounce } from '../../../util/schedulers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 const FAB_THRESHOLD = 50;
 const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect
@@ -136,14 +136,16 @@ export default function useScrollHooks(
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
-  useOnChange(() => {
+  const toggleScrollToolsRef = useRef<typeof toggleScrollTools>();
+  toggleScrollToolsRef.current = toggleScrollTools;
+  useSyncEffect(() => {
     if (isReady) {
-      toggleScrollTools();
+      toggleScrollToolsRef.current!();
     }
   }, [isReady]);
 
   // Workaround for FAB and notch flickering with tall incoming message
-  useOnChange(() => {
+  useSyncEffect(() => {
     freezeForFab();
     freezeForNotch();
 
@@ -151,7 +153,7 @@ export default function useScrollHooks(
       unfreezeForNotch();
       unfreezeForFab();
     }, TOOLS_FREEZE_TIMEOUT);
-  }, [messageIds]);
+  }, [freezeForFab, freezeForNotch, messageIds, unfreezeForFab, unfreezeForNotch]);
 
   return { backwardsTriggerRef, forwardsTriggerRef, fabTriggerRef };
 }

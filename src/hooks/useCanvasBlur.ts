@@ -2,7 +2,7 @@ import { useEffect, useRef } from '../lib/teact/teact';
 
 import { IS_CANVAS_FILTER_SUPPORTED } from '../util/environment';
 import fastBlur from '../lib/fastBlur';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 
 const RADIUS = 2;
 const ITERATIONS = 2;
@@ -19,7 +19,7 @@ export default function useCanvasBlur(
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isStarted = useRef();
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (!isDisabled) {
       isStarted.current = false;
     }

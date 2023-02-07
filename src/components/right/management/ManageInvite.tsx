@@ -18,7 +18,7 @@ import InputText from '../../ui/InputText';
 import RadioGroup from '../../ui/RadioGroup';
 import Button from '../../ui/Button';
 import FloatingActionButton from '../../ui/FloatingActionButton';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import CalendarModal from '../../common/CalendarModal';
 
 const DEFAULT_USAGE_LIMITS = [1, 10, 100];
@@ -64,7 +64,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  useOnChange(([oldEditingInvite]) => {
+  useSyncEffect(([oldEditingInvite]) => {
     if (oldEditingInvite === editingInvite) return;
     if (!editingInvite) {
       setTitle('');

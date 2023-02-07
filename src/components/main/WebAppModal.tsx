@@ -18,7 +18,7 @@ import { extractCurrentThemeParams, validateHexColor } from '../../util/themeSty
 
 import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useWebAppFrame from './hooks/useWebAppFrame';
 import usePrevious from '../../hooks/usePrevious';
 import useFlag from '../../hooks/useFlag';
@@ -258,20 +258,20 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   }, [handlePopupClose]);
 
   // Notify view that height changed
-  useOnChange(() => {
+  useSyncEffect(() => {
     setTimeout(() => {
       sendViewport();
     }, ANIMATION_WAIT);
   }, [mainButton?.isVisible, sendViewport]);
 
   // Notify view that theme changed
-  useOnChange(() => {
+  useSyncEffect(() => {
     setTimeout(() => {
       sendTheme();
     }, ANIMATION_WAIT);
   }, [theme, sendTheme]);
 
-  useOnChange(([prevIsPaymentModalOpen]) => {
+  useSyncEffect(([prevIsPaymentModalOpen]) => {
     if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
     if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
       sendEvent({
@@ -285,7 +285,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         slug: undefined,
       });
     }
-  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp] as const);
+  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp]);
 
   const handleToggleClick = useCallback(() => {
     toggleAttachBot({

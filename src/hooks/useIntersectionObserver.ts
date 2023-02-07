@@ -4,6 +4,7 @@ import {
 } from '../lib/teact/teact';
 
 import { throttle, debounce } from '../util/schedulers';
+import useEffectOnce from './useEffectOnce';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
 
 type TargetCallback = (entry: IntersectionObserverEntry) => void;
@@ -155,11 +156,10 @@ export function useIntersectionObserver({
 export function useOnIntersect(
   targetRef: RefObject<HTMLDivElement>, observe?: ObserveFn, callback?: TargetCallback,
 ) {
-  useEffect(() => {
+  useEffectOnce(() => {
     return observe ? observe(targetRef.current!, callback) : undefined;
     // Arguments should never change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 }
 
 export function useIsIntersecting(

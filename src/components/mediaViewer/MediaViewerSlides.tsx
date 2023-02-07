@@ -120,7 +120,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     forceUpdate();
   }, [forceUpdate]);
 
-  const selectMediaDebounced = useDebouncedCallback(selectMedia, [], DEBOUNCE_MESSAGE, true);
+  const selectMediaDebounced = useDebouncedCallback(selectMedia, [selectMedia], DEBOUNCE_MESSAGE, true);
   const clearSwipeDirectionDebounced = useDebouncedCallback(() => {
     swipeDirectionRef.current = undefined;
   }, [], DEBOUNCE_SWIPE, true);

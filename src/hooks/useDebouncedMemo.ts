@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from '../lib/teact/teact';
 
 import useRunDebounced from './useRunDebounced';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 import useHeavyAnimationCheck, { isHeavyAnimating } from './useHeavyAnimationCheck';
 import useForceUpdate from './useForceUpdate';
 
@@ -12,7 +12,7 @@ export default function useDebouncedMemo<R extends any, D extends any[]>(
   const { isFrozen, updateWhenUnfrozen } = useHeavyAnimationFreeze();
   const runDebounced = useRunDebounced(ms, true);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (isFrozen) {
       updateWhenUnfrozen();
       return;
@@ -21,6 +21,7 @@ export default function useDebouncedMemo<R extends any, D extends any[]>(
     runDebounced(() => {
       setValue(resolverFn());
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...dependencies, isFrozen]);
 
   return value;

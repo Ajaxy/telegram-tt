@@ -1,4 +1,4 @@
-import React, { memo, useRef } from '../../lib/teact/teact';
+import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
@@ -9,7 +9,7 @@ import buildStyle from '../../util/buildStyle';
 import { selectTabState } from '../../global/selectors';
 
 import useWindowSize from '../../hooks/useWindowSize';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useAppLayout from '../../hooks/useAppLayout';
 
@@ -55,7 +55,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     lastConfettiTime, top, width, left, height,
   } = confetti || {};
 
-  function generateConfetti(w: number, h: number, amount = defaultConfettiAmount) {
+  const generateConfetti = useCallback((w: number, h: number, amount = defaultConfettiAmount) => {
     for (let i = 0; i < amount; i++) {
       const leftSide = i % 2;
       const pos = {
@@ -83,9 +83,9 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
         frameCount: 0,
       });
     }
-  }
+  }, [defaultConfettiAmount]);
 
-  const updateCanvas = () => {
+  const updateCanvas = useCallback(() => {
     if (!canvasRef.current || !isRafStartedRef.current) {
       return;
     }
@@ -166,9 +166,9 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     } else {
       isRafStartedRef.current = false;
     }
-  };
+  }, []);
 
-  useOnChange(([prevConfettiTime]) => {
+  useSyncEffect(([prevConfettiTime]) => {
     let hideTimeout: ReturnType<typeof setTimeout>;
     if (prevConfettiTime !== lastConfettiTime) {
       generateConfetti(width || windowSize.width, height || windowSize.height);
@@ -179,11 +179,10 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
       }
     }
     return () => {
-      if (hideTimeout) {
-        clearTimeout(hideTimeout);
-      }
+      clearTimeout(hideTimeout);
     };
-  }, [lastConfettiTime, updateCanvas]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- Old timeout should be cleared only if new confetti is generated
+  }, [lastConfettiTime, forceUpdate, updateCanvas]);
 
   if (!lastConfettiTime || Date.now() - lastConfettiTime > CONFETTI_FADEOUT_TIMEOUT) {
     return undefined;

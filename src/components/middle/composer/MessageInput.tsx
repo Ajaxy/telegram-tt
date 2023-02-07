@@ -185,7 +185,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     if (prevHtml !== undefined && prevHtml !== html) {
       updateInputHeight(!html.length);
     }
-  }, [html]);
+  }, [html, updateInputHeight]);
 
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;

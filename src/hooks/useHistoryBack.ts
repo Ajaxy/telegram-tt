@@ -1,9 +1,12 @@
-import useOnChange from './useOnChange';
-import { useEffect, useRef } from '../lib/teact/teact';
+import { useCallback, useRef } from '../lib/teact/teact';
+import { getActions } from '../lib/teact/teactn';
+
 import { IS_TEST } from '../config';
 import { fastRaf } from '../util/schedulers';
 import { IS_IOS } from '../util/environment';
-import { getActions } from '../lib/teact/teactn';
+
+import useSyncEffect from './useSyncEffect';
+import useEffectOnce from './useEffectOnce';
 
 export const LOCATION_HASH = window.location.hash;
 const PATH_BASE = `${window.location.pathname}${window.location.search}`;
@@ -241,7 +244,7 @@ export default function useHistoryBack({
 
   const isFirstRender = useRef(true);
 
-  const pushState = (forceReplace = false) => {
+  const pushState = useCallback((forceReplace = false) => {
     // Check if the old state should be replaced
     const shouldReplace = forceReplace || historyState[historyCursor].shouldBeReplaced;
     indexRef.current = shouldReplace ? historyCursor : ++historyCursor;
@@ -276,9 +279,9 @@ export default function useHistoryBack({
       },
       hash: hash ? `#${hash}` : undefined,
     });
-  };
+  }, [hash, onBack, shouldBeReplaced]);
 
-  const processBack = () => {
+  const processBack = useCallback(() => {
     // Only process back on open records
     if (indexRef.current && historyState[indexRef.current] && !wasReplaced.current) {
       historyState[indexRef.current].isClosed = true;
@@ -287,19 +290,19 @@ export default function useHistoryBack({
         historyCursor -= cleanupClosed();
       }
     }
-  };
+  }, [shouldBeReplaced]);
 
   // Process back navigation when element is unmounted
-  useEffect(() => {
+  useEffectOnce(() => {
     isFirstRender.current = false;
     return () => {
       if (!isActive || wasReplaced.current) return;
       processBack();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
-  useOnChange(() => {
+  useSyncEffect(([prevIsActive]) => {
+    if (prevIsActive === isActive) return;
     if (isFirstRender.current && !isActive) return;
 
     if (isActive) {
@@ -307,5 +310,5 @@ export default function useHistoryBack({
     } else {
       processBack();
     }
-  }, [isActive]);
+  }, [isActive, processBack, pushState]);
 }

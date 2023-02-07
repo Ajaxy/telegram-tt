@@ -9,7 +9,7 @@ import type { ISettings } from '../../../types';
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
 import parseMessageInput from '../../../util/parseMessageInput';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useDebouncedMemo from '../../../hooks/useDebouncedMemo';
@@ -78,10 +78,10 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, toggleMessageWebPage, clearWebPagePreview, link, loadWebPagePreview, threadId]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     clearWebPagePreview();
     toggleMessageWebPage({ chatId, threadId });
-  }, [chatId]);
+  }, [chatId, clearWebPagePreview, threadId, toggleMessageWebPage]);
 
   const isShown = Boolean(webPagePreview && messageText.length && !noWebPage && !disabled);
   const { shouldRender, transitionClassNames } = useShowTransition(isShown);

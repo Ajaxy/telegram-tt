@@ -88,7 +88,7 @@ import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import useInterval from '../../../hooks/useInterval';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import { useStateRef } from '../../../hooks/useStateRef';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
@@ -338,7 +338,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsPeerIds]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
-  useOnChange(([prevChatId, prevSendAsPeerIds]) => {
+  useSyncEffect(([prevChatId, prevSendAsPeerIds]) => {
     // We only animate send-as button if `sendAsPeerIds` was missing when opening the chat
     shouldAnimateSendAsButtonRef.current = Boolean(chatId === prevChatId && sendAsPeerIds && !prevSendAsPeerIds);
   }, [chatId, sendAsPeerIds]);
