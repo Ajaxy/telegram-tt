@@ -225,7 +225,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     const result = await client.invoke(request, dcId);
 
     if (DEBUG) {
-      log('INVOKE RESPONSE', request.className, result);
+      log('RESPONSE', request.className, result);
     }
 
     if (!shouldIgnoreUpdates) {

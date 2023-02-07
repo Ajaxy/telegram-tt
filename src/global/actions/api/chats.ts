@@ -1445,6 +1445,8 @@ addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<vo
   }
 
   const offset = (chat.fullInfo?.members?.length) || undefined;
+  if (offset !== undefined && chat.membersCount !== undefined && offset >= chat.membersCount) return;
+
   const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
   if (!result) {
     return;
