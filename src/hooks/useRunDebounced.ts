@@ -1,7 +1,8 @@
 import useDebouncedCallback from './useDebouncedCallback';
 
-export default function useRunDebounced(ms: number, noFirst?: boolean, noLast?: boolean) {
+export default function useRunDebounced(ms: number, noFirst?: boolean, noLast?: boolean, deps: any = []) {
   return useDebouncedCallback((cb: NoneToVoidFunction) => {
     cb();
-  }, [], ms, noFirst, noLast);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps, ms, noFirst, noLast);
 }

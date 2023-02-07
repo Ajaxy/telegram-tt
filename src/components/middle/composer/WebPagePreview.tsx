@@ -1,3 +1,4 @@
+import type { Signal } from '../../../util/signals';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
@@ -8,12 +9,14 @@ import type { ISettings } from '../../../types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import parseMessageInput from '../../../util/parseMessageInput';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useDebouncedMemo from '../../../hooks/useDebouncedMemo';
-import buildClassName from '../../../util/buildClassName';
+import useDerivedState from '../../../hooks/useDerivedState';
+import useDerivedSignal from '../../../hooks/useDerivedSignal';
+import { useDebouncedResolver } from '../../../hooks/useAsyncResolvers';
 
 import WebPage from '../message/WebPage';
 import Button from '../../ui/Button';
@@ -23,8 +26,8 @@ import './WebPagePreview.scss';
 type OwnProps = {
   chatId: string;
   threadId: number;
-  messageText: string;
-  disabled?: boolean;
+  getHtml: Signal<string>;
+  isDisabled?: boolean;
 };
 
 type StateProps = {
@@ -39,8 +42,8 @@ const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 const WebPagePreview: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
-  messageText,
-  disabled,
+  getHtml,
+  isDisabled,
   webPagePreview,
   noWebPage,
   theme,
@@ -51,39 +54,36 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     toggleMessageWebPage,
   } = getActions();
 
-  const link = useDebouncedMemo(() => {
-    const { text, entities } = parseMessageInput(messageText);
-
+  const detectLinkDebounced = useDebouncedResolver(() => {
+    const { text, entities } = parseMessageInput(getHtml());
     const linkEntity = entities?.find((entity): entity is ApiMessageEntityTextUrl => (
       entity.type === ApiMessageEntityTypes.TextUrl
     ));
-    if (linkEntity) {
-      return linkEntity.url;
-    }
 
-    const textMatch = text.match(RE_LINK);
-    if (textMatch) {
-      return textMatch[0];
-    }
+    return linkEntity?.url || text.match(RE_LINK)?.[0];
+  }, [getHtml], DEBOUNCE_MS, true);
 
-    return undefined;
-  }, DEBOUNCE_MS, [messageText]);
+  const getLink = useDerivedSignal(detectLinkDebounced, [detectLinkDebounced, getHtml], true);
 
   useEffect(() => {
+    const link = getLink();
+
     if (link) {
       loadWebPagePreview({ text: link });
     } else {
       clearWebPagePreview();
       toggleMessageWebPage({ chatId, threadId });
     }
-  }, [chatId, toggleMessageWebPage, clearWebPagePreview, link, loadWebPagePreview, threadId]);
+  }, [getLink, chatId, threadId, clearWebPagePreview, loadWebPagePreview, toggleMessageWebPage]);
 
   useSyncEffect(() => {
     clearWebPagePreview();
     toggleMessageWebPage({ chatId, threadId });
   }, [chatId, clearWebPagePreview, threadId, toggleMessageWebPage]);
 
-  const isShown = Boolean(webPagePreview && messageText.length && !noWebPage && !disabled);
+  const isShown = useDerivedState(() => {
+    return Boolean(webPagePreview && getHtml() && !noWebPage && !isDisabled);
+  }, [isDisabled, getHtml, noWebPage, webPagePreview]);
   const { shouldRender, transitionClassNames } = useShowTransition(isShown);
 
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);

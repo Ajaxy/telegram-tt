@@ -3,6 +3,7 @@ import { getActions } from '../../../../global';
 
 import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
 import type { MessageListType } from '../../../../global/types';
+import type { Signal } from '../../../../util/signals';
 
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import { EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
@@ -15,7 +16,7 @@ import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 
 const useEditing = (
-  htmlRef: { current: string },
+  getHtml: Signal<string>,
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
   resetComposer: (shouldPreserveInput?: boolean) => void,
@@ -47,6 +48,7 @@ const useEditing = (
 
     const text = !prevEditedMessage && editingDraft?.text.length ? editingDraft : editedMessage.content.text;
     const html = getTextWithEntitiesAsHtml(text);
+
     setHtml(html);
     setShouldForceShowEditing(true);
     // `fastRaf` would execute syncronously in this case
@@ -62,14 +64,14 @@ const useEditing = (
   useEffect(() => {
     if (!editedMessage) return undefined;
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      const edited = parseMessageInput(htmlRef.current!);
+      const edited = parseMessageInput(getHtml());
       const update = edited.text.length ? edited : undefined;
+
       setEditingDraft({
         chatId, threadId, type, text: update,
       });
     };
-  }, [chatId, editedMessage, htmlRef, setEditingDraft, threadId, type]);
+  }, [chatId, editedMessage, getHtml, setEditingDraft, threadId, type]);
 
   const restoreNewDraftAfterEditing = useCallback(() => {
     if (!draft) return;
@@ -91,7 +93,7 @@ const useEditing = (
   }, [resetComposer, restoreNewDraftAfterEditing]);
 
   const handleEditComplete = useCallback(() => {
-    const { text, entities } = parseMessageInput(htmlRef.current!);
+    const { text, entities } = parseMessageInput(getHtml());
 
     if (!editedMessage) {
       return;
@@ -109,16 +111,17 @@ const useEditing = (
 
     resetComposer();
     restoreNewDraftAfterEditing();
-  }, [editMessage, editedMessage, htmlRef, openDeleteModal, resetComposer, restoreNewDraftAfterEditing]);
+  }, [editMessage, editedMessage, getHtml, openDeleteModal, resetComposer, restoreNewDraftAfterEditing]);
 
   const handleBlur = useCallback(() => {
     if (!editedMessage) return;
-    const edited = parseMessageInput(htmlRef.current!);
+    const edited = parseMessageInput(getHtml());
     const update = edited.text.length ? edited : undefined;
+
     setEditingDraft({
       chatId, threadId, type, text: update,
     });
-  }, [chatId, editedMessage, htmlRef, setEditingDraft, threadId, type]);
+  }, [chatId, editedMessage, getHtml, setEditingDraft, threadId, type]);
 
   useBackgroundMode(handleBlur);
   useBeforeUnload(handleBlur);

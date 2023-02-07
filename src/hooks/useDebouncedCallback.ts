@@ -6,8 +6,8 @@ export default function useDebouncedCallback<T extends AnyToVoidFunction>(
   fn: T,
   deps: any[],
   ms: number,
-  noFirst?: boolean,
-  noLast?: boolean,
+  noFirst = false,
+  noLast = false,
 ) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fnMemo = useCallback(fn, deps);

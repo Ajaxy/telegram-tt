@@ -25,8 +25,9 @@ import styles from './CustomEmojiTooltip.module.scss';
 export type OwnProps = {
   chatId: string;
   isOpen: boolean;
-  onCustomEmojiSelect: (customEmoji: ApiSticker) => void;
   addRecentCustomEmoji: GlobalActions['addRecentCustomEmoji'];
+  onCustomEmojiSelect: (customEmoji: ApiSticker) => void;
+  onClose: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -39,11 +40,12 @@ const INTERSECTION_THROTTLE = 200;
 
 const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
   isOpen,
+  addRecentCustomEmoji,
+  onCustomEmojiSelect,
+  onClose,
   customEmoji,
   isSavedMessages,
   isCurrentUserPremium,
-  onCustomEmojiSelect,
-  addRecentCustomEmoji,
 }) => {
   const { clearCustomEmojiForEmoji } = getActions();
 
@@ -59,9 +61,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE });
 
-  useEffect(() => (
-    isOpen ? captureEscKeyListener(clearCustomEmojiForEmoji) : undefined
-  ), [isOpen, clearCustomEmojiForEmoji]);
+  useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
   const handleCustomEmojiSelect = useCallback((ce: ApiSticker) => {
     if (!isOpen) return;
@@ -111,6 +111,7 @@ export default memo(withGlobal<OwnProps>(
     const { stickers: customEmoji } = global.customEmojis.forEmoji;
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
     const isCurrentUserPremium = selectIsCurrentUserPremium(global);
+
     return { customEmoji, isSavedMessages, isCurrentUserPremium };
   },
 )(CustomEmojiTooltip));

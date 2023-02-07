@@ -1,4 +1,4 @@
-const fragmentEl = document.createElement('div');
+const extractorEl = document.createElement('div');
 
 export function insertHtmlInSelection(html: string) {
   const selection = window.getSelection();
@@ -42,20 +42,9 @@ export function getHtmlBeforeSelection(container?: HTMLElement, useCommonAncesto
 
   range.collapse(true);
   range.setStart(container, 0);
-  replaceChildren(fragmentEl, range.cloneContents());
 
-  return fragmentEl.innerHTML;
-}
+  extractorEl.innerHTML = '';
+  extractorEl.appendChild(range.cloneContents());
 
-function replaceChildren(el: HTMLElement, nodes?: DocumentFragment) {
-  if (el.replaceChildren === undefined) {
-    while (el.lastChild) {
-      el.removeChild(el.lastChild);
-    }
-    if (nodes !== undefined) {
-      el.append(nodes);
-    }
-  } else {
-    el.replaceChildren(nodes || '');
-  }
+  return extractorEl.innerHTML;
 }

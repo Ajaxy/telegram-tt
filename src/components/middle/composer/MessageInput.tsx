@@ -1,11 +1,12 @@
-import type { ChangeEvent } from 'react';
+import type { RefObject, ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, useRef, memo, useState, useCallback,
+  useEffect, useRef, memo, useState, useCallback, useLayoutEffect,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { IAnchorPosition, ISettings } from '../../../types';
+import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import {
@@ -21,12 +22,12 @@ import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import renderText from '../../common/helpers/renderText';
 
-import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useDerivedState from '../../../hooks/useDerivedState';
 
 import TextFormatter from './TextFormatter';
 
@@ -39,12 +40,14 @@ const SCROLLER_CLASS = 'input-scroller';
 const INPUT_WRAPPER_CLASS = 'message-input-wrapper';
 
 type OwnProps = {
+  ref?: RefObject<HTMLDivElement>;
   id: string;
   chatId: string;
   threadId: number;
   isAttachmentModalInput?: boolean;
   editableInputId?: string;
-  html: string;
+  isActive: boolean;
+  getHtml: Signal<string>;
   placeholder: string;
   forcedPlaceholder?: string;
   noFocusInterception?: boolean;
@@ -89,12 +92,14 @@ function clearSelection() {
 }
 
 const MessageInput: FC<OwnProps & StateProps> = ({
+  ref,
   id,
   chatId,
   captionLimit,
   isAttachmentModalInput,
   editableInputId,
-  html,
+  isActive,
+  getHtml,
   placeholder,
   forcedPlaceholder,
   canAutoFocus,
@@ -115,7 +120,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
-  const inputRef = useRef<HTMLDivElement>(null);
+  let inputRef = useRef<HTMLDivElement>(null);
+  if (ref) {
+    inputRef = ref;
+  }
+
   // eslint-disable-next-line no-null/no-null
   const selectionTimeoutRef = useRef<number>(null);
   // eslint-disable-next-line no-null/no-null
@@ -137,7 +146,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
   const { isMobile } = useAppLayout();
 
-  useInputCustomEmojis(html, inputRef, sharedCanvasRef, sharedCanvasHqRef, absoluteContainerRef);
+  useInputCustomEmojis(getHtml, inputRef, sharedCanvasRef, sharedCanvasHqRef, absoluteContainerRef);
 
   const maxInputHeight = isMobile ? 256 : 416;
   const updateInputHeight = useCallback((willSend = false) => {
@@ -173,7 +182,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     updateInputHeight(false);
   }, [isAttachmentModalInput, updateInputHeight]);
 
-  useLayoutEffectWithPrevDeps(([prevHtml]) => {
+  const htmlRef = useRef(getHtml());
+  useLayoutEffect(() => {
+    const html = isActive ? getHtml() : '';
+
     if (html !== inputRef.current!.innerHTML) {
       inputRef.current!.innerHTML = html;
     }
@@ -182,10 +194,12 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       cloneRef.current!.innerHTML = html;
     }
 
-    if (prevHtml !== undefined && prevHtml !== html) {
-      updateInputHeight(!html.length);
+    if (html !== htmlRef.current) {
+      htmlRef.current = html;
+
+      updateInputHeight(!html);
     }
-  }, [html, updateInputHeight]);
+  }, [getHtml, isActive, updateInputHeight]);
 
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;
@@ -311,7 +325,9 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     // https://levelup.gitconnected.com/javascript-events-handlers-keyboard-and-load-events-1b3e46a6b0c3#1960
     const { isComposing } = e;
 
-    if (!isComposing && !html.length && (e.metaKey || e.ctrlKey)) {
+    const html = getHtml();
+
+    if (!isComposing && !html && (e.metaKey || e.ctrlKey)) {
       const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
       if (targetIndexDelta) {
         e.preventDefault();
@@ -334,7 +350,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         closeTextFormatter();
         onSend();
       }
-    } else if (!isComposing && e.key === 'ArrowUp' && !html.length && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    } else if (!isComposing && e.key === 'ArrowUp' && !html && !e.metaKey && !e.ctrlKey && !e.altKey) {
       e.preventDefault();
       editLastMessage();
     } else {
@@ -472,9 +488,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     };
   }, [shouldSuppressFocus]);
 
+  const isTouched = useDerivedState(() => Boolean(isActive && getHtml()), [isActive, getHtml]);
+
   const className = buildClassName(
     'form-control',
-    html.length > 0 && 'touched',
+    isTouched && 'touched',
     shouldSuppressFocus && 'focus-disabled',
   );
 

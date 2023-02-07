@@ -6,6 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment, ApiChatMember, ApiSticker } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
+import type { Signal } from '../../../util/signals';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
@@ -29,10 +30,11 @@ import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import { useStateRef } from '../../../hooks/useStateRef';
 import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useScrolledState from '../../../hooks/useScrolledState';
+import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
+import useDerivedState from '../../../hooks/useDerivedState';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -51,11 +53,12 @@ export type OwnProps = {
   chatId: string;
   threadId: number;
   attachments: ApiAttachment[];
-  caption: string;
+  getHtml: Signal<string>;
   canShowCustomSendMenu?: boolean;
   isReady?: boolean;
   shouldSchedule?: boolean;
   shouldSuggestCompression?: boolean;
+  isForCurrentMessageList?: boolean;
   onCaptionUpdate: (html: string) => void;
   onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
@@ -79,13 +82,13 @@ type StateProps = {
 };
 
 const DROP_LEAVE_TIMEOUT_MS = 150;
-const CAPTION_SYMBOLS_LEFT_THRESHOLD = 100;
+const MAX_LEFT_CHARS_TO_SHOW = 100;
 
 const AttachmentModal: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   attachments,
-  caption,
+  getHtml,
   canShowCustomSendMenu,
   captionLimit,
   isReady,
@@ -100,6 +103,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   customEmojiForEmoji,
   attachmentSettings,
   shouldSuggestCompression,
+  isForCurrentMessageList,
   onAttachmentsUpdate,
   onCaptionUpdate,
   onSend,
@@ -109,10 +113,14 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onSendScheduled,
 }) => {
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
+
   const lang = useLang();
-  const captionRef = useStateRef(caption);
+
   // eslint-disable-next-line no-null/no-null
-  const mainButtonRef = useStateRef<HTMLButtonElement | null>(null);
+  const mainButtonRef = useRef<HTMLButtonElement | null>(null);
+  // eslint-disable-next-line no-null/no-null
+  const inputRef = useRef<HTMLDivElement>(null);
+
   const hideTimeoutRef = useRef<number>();
   const prevAttachments = usePrevious(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
@@ -132,6 +140,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const { handleScroll: handleCaptionScroll, isAtBeginning: isCaptionNotScrolled } = useScrolledState();
 
   const isOpen = Boolean(attachments.length);
+  const renderingIsOpen = Boolean(renderingAttachments?.length);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
 
   const [hasMedia, hasOnlyMedia] = useMemo(() => {
@@ -148,42 +157,51 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     return [hasOneSpoiler, false];
   }, [renderingAttachments]);
 
-  const {
-    isMentionTooltipOpen, closeMentionTooltip, insertMention, mentionFilteredUsers,
-  } = useMentionTooltip(
-    isOpen,
-    `#${EDITABLE_INPUT_MODAL_ID}`,
-    onCaptionUpdate,
-    groupChatMembers,
-    undefined,
-    currentUserId,
-  );
-
-  const { isCustomEmojiTooltipOpen, insertCustomEmoji } = useCustomEmojiTooltip(
-    Boolean(shouldSuggestCustomEmoji) && isOpen,
-    `#${EDITABLE_INPUT_MODAL_ID}`,
-    caption,
-    onCaptionUpdate,
-    customEmojiForEmoji,
-    !isReady,
-  );
+  const getSelectionRange = useGetSelectionRange(`#${EDITABLE_INPUT_MODAL_ID}`);
 
   const {
     isEmojiTooltipOpen,
     filteredEmojis,
     filteredCustomEmojis,
     insertEmoji,
-    insertCustomEmoji: insertCustomEmojiFromEmojiTooltip,
     closeEmojiTooltip,
   } = useEmojiTooltip(
-    isOpen,
-    captionRef,
-    recentEmojis,
-    EDITABLE_INPUT_MODAL_ID,
+    Boolean(isReady && isForCurrentMessageList && renderingIsOpen),
+    getHtml,
     onCaptionUpdate,
+    EDITABLE_INPUT_MODAL_ID,
+    recentEmojis,
     baseEmojiKeywords,
     emojiKeywords,
-    !isReady,
+  );
+
+  const {
+    isCustomEmojiTooltipOpen,
+    insertCustomEmoji,
+    closeCustomEmojiTooltip,
+  } = useCustomEmojiTooltip(
+    Boolean(isReady && isForCurrentMessageList && renderingIsOpen && shouldSuggestCustomEmoji),
+    getHtml,
+    onCaptionUpdate,
+    getSelectionRange,
+    inputRef,
+    customEmojiForEmoji,
+  );
+
+  const {
+    isMentionTooltipOpen,
+    closeMentionTooltip,
+    insertMention,
+    mentionFilteredUsers,
+  } = useMentionTooltip(
+    Boolean(isReady && isForCurrentMessageList && renderingIsOpen),
+    getHtml,
+    onCaptionUpdate,
+    getSelectionRange,
+    inputRef,
+    groupChatMembers,
+    undefined,
+    currentUserId,
   );
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
@@ -324,10 +342,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     );
   }, [isMobile]);
 
-  const leftChars = useMemo(() => {
-    const captionLeftBeforeLimit = captionLimit - getHtmlTextLength(caption);
-    return captionLeftBeforeLimit <= CAPTION_SYMBOLS_LEFT_THRESHOLD ? captionLeftBeforeLimit : undefined;
-  }, [caption, captionLimit]);
+  const leftChars = useDerivedState(() => {
+    if (!renderingIsOpen) return undefined;
+
+    const leftCharsBeforeLimit = captionLimit - getHtmlTextLength(getHtml());
+    return leftCharsBeforeLimit <= MAX_LEFT_CHARS_TO_SHOW ? leftCharsBeforeLimit : undefined;
+  }, [captionLimit, getHtml, renderingIsOpen]);
 
   const isQuickGallery = shouldSendCompressed && hasOnlyMedia;
 
@@ -475,39 +495,42 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         >
           <MentionTooltip
             isOpen={isMentionTooltipOpen}
-            onClose={closeMentionTooltip}
-            onInsertUserName={insertMention}
             filteredUsers={mentionFilteredUsers}
+            onInsertUserName={insertMention}
+            onClose={closeMentionTooltip}
           />
           <EmojiTooltip
             isOpen={isEmojiTooltipOpen}
             emojis={filteredEmojis}
             customEmojis={filteredCustomEmojis}
-            onClose={closeEmojiTooltip}
-            onEmojiSelect={insertEmoji}
-            onCustomEmojiSelect={insertCustomEmojiFromEmojiTooltip}
             addRecentEmoji={addRecentEmoji}
             addRecentCustomEmoji={addRecentCustomEmoji}
+            onEmojiSelect={insertEmoji}
+            onCustomEmojiSelect={insertEmoji}
+            onClose={closeEmojiTooltip}
           />
           <CustomEmojiTooltip
             chatId={chatId}
             isOpen={isCustomEmojiTooltipOpen}
-            onCustomEmojiSelect={insertCustomEmoji}
             addRecentCustomEmoji={addRecentCustomEmoji}
+            onCustomEmojiSelect={insertCustomEmoji}
+            onClose={closeCustomEmojiTooltip}
           />
           <div className={styles.caption}>
             <MessageInput
+              ref={inputRef}
               id="caption-input-text"
               chatId={chatId}
               threadId={threadId}
               isAttachmentModalInput
-              html={caption}
+              isActive={isOpen}
+              getHtml={getHtml}
               editableInputId={EDITABLE_INPUT_MODAL_ID}
               placeholder={lang('AddCaption')}
               onUpdate={onCaptionUpdate}
               onSend={handleSendClick}
               onScroll={handleCaptionScroll}
-              canAutoFocus={Boolean(isReady && attachments.length)}
+              canAutoFocus={Boolean(isReady && isForCurrentMessageList && attachments.length)}
               captionLimit={leftChars}
             />
             <div className={styles.sendWrapper}>

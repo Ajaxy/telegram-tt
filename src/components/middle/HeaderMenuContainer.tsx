@@ -234,7 +234,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleEnterVoiceChatClick = useCallback(() => {
     if (canCreateVoiceChat) {
-      // TODO show popup to schedule
+      // TODO Show popup to schedule
       createGroupCall({
         chatId,
       });
