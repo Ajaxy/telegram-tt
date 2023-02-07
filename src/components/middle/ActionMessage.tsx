@@ -210,7 +210,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      {!isSuggestedAvatar && <span>{content}</span>}
+      {!isSuggestedAvatar && <span className="action-message-content">{content}</span>}
       {isGift && renderGift()}
       {isSuggestedAvatar && (
         <ActionMessageSuggestedAvatar
