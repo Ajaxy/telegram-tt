@@ -5,9 +5,11 @@ import {
 } from '../../index';
 
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import type { ApiStickerSetInfo } from '../../../api/types';
+import type {
+  ApiError, ApiSticker, ApiStickerSet, ApiStickerSetInfo,
+} from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
-import { onTickEnd, pause, throttle } from '../../../util/schedulers';
+import { pause, throttle } from '../../../util/schedulers';
 import {
   updateStickerSets,
   updateStickerSet,
@@ -537,27 +539,33 @@ async function loadStickers<T extends GlobalState>(
   stickerSetInfo: ApiStickerSetInfo,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const stickerSet = await callApi(
-    'fetchStickers',
-    { stickerSetInfo },
-  );
-  global = getGlobal();
-
-  if (!stickerSet) {
-    onTickEnd(() => {
+  let stickerSet: { set: ApiStickerSet; stickers: ApiSticker[]; packs: Record<string, ApiSticker[]> } | undefined;
+  try {
+    stickerSet = await callApi(
+      'fetchStickers',
+      { stickerSetInfo },
+    );
+  } catch (error) {
+    if ((error as ApiError).message === 'STICKERSET_INVALID') {
       actions.showNotification({
         message: translate('StickerPack.ErrorNotFound'),
         tabId,
       });
-    });
 
-    if ('shortName' in stickerSetInfo
-      && selectTabState(global, tabId).openedStickerSetShortName === stickerSetInfo.shortName) {
-      global = updateTabState(global, {
-        openedStickerSetShortName: undefined,
-      }, tabId);
-      setGlobal(global);
+      if ('shortName' in stickerSetInfo
+        && selectTabState(global, tabId).openedStickerSetShortName === stickerSetInfo.shortName) {
+        global = updateTabState(global, {
+          openedStickerSetShortName: undefined,
+        }, tabId);
+        setGlobal(global);
+      }
+      return;
     }
+  }
+  global = getGlobal();
+
+  if (!stickerSet) {
+    // TODO handle this case when sticker cache is implemented
     return;
   }
 
@@ -729,10 +737,6 @@ addActionHandler('openStickerSet', async (global, actions, payload): Promise<voi
   global = getGlobal();
   const set = selectStickerSet(global, stickerSetInfo);
   if (!set?.shortName) {
-    actions.showNotification({
-      message: translate('StickerPack.ErrorNotFound'),
-      tabId,
-    });
     return;
   }
 
