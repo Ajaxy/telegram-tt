@@ -201,7 +201,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
-  const { handleScroll } = useProfileState(containerRef, tabType, profileState, onProfileStateChange, isFirstTab);
+  const { handleScroll } = useProfileState(containerRef, resultType, profileState, onProfileStateChange);
 
   const { applyTransitionFix, releaseTransitionFix } = useTransitionFixes(containerRef);
 
