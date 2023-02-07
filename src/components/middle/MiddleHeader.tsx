@@ -92,6 +92,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
   hasButtonInHeader?: boolean;
+  hasReachedFocusedMessage?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
@@ -121,6 +122,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
+  hasReachedFocusedMessage,
   isSyncing,
 }) => {
   const {
@@ -129,6 +131,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     focusMessage,
     openChat,
     openPreviousChat,
+    setReachedFocusedMessage,
     loadPinnedMessages,
     toggleLeftColumn,
     exitMessageSelectMode,
@@ -136,6 +139,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const isBackButtonActive = useRef(true);
+  const [isWaitingForPinnedMessageFocus, setWaitingForPinnedMessageFocus] = useState(false);
   const { isTablet } = useAppLayout();
 
   const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
@@ -157,7 +161,21 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   // Reset pinned index when switching chats and pinning/unpinning
   useEffect(() => {
     setPinnedMessageIndex(0);
+    setWaitingForPinnedMessageFocus(false);
   }, [pinnedMessageIds]);
+
+  useEffect(() => {
+    if (hasReachedFocusedMessage && isWaitingForPinnedMessageFocus) {
+      setReachedFocusedMessage({ hasReached: false });
+      setWaitingForPinnedMessageFocus(false);
+
+      const newIndex = cycleRestrict(pinnedMessagesCount || 1, pinnedMessageIndex + 1);
+      setPinnedMessageIndex(newIndex);
+    }
+  }, [
+    hasReachedFocusedMessage, isWaitingForPinnedMessageFocus, pinnedMessageIndex, pinnedMessagesCount,
+    setReachedFocusedMessage,
+  ]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
@@ -184,10 +202,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id, noForumTopicPanel: true,
       });
 
-      const newIndex = cycleRestrict(pinnedMessagesCount || 1, pinnedMessageIndex + 1);
-      setPinnedMessageIndex(newIndex);
+      setWaitingForPinnedMessageFocus(true);
     }
-  }, [pinnedMessage, focusMessage, threadId, pinnedMessagesCount, pinnedMessageIndex]);
+  }, [pinnedMessage, focusMessage, threadId]);
 
   const handleAllPinnedClick = useCallback(() => {
     openChat({ id: chatId, threadId, type: 'pinned' });
@@ -492,6 +509,7 @@ export default memo(withGlobal<OwnProps>(
     );
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
+    const focusedMessage = selectTabState(global).focusedMessage;
 
     const state: StateProps = {
       typingStatus,
@@ -508,6 +526,7 @@ export default memo(withGlobal<OwnProps>(
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
+      hasReachedFocusedMessage: !focusedMessage || focusedMessage.hasReachedMessage,
     };
 
     const messagesById = selectChatMessages(global, chatId);

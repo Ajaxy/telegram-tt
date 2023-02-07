@@ -22,7 +22,7 @@ import {
   replaceThreadParam,
   replaceTabThreadParam,
   updateFocusDirection,
-  updateFocusedMessage,
+  updateFocusedMessage, updateFocusedMessageReached,
 } from '../../reducers';
 import {
   selectCurrentChat,
@@ -366,6 +366,12 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
   }
 
   return undefined;
+});
+
+addActionHandler('setReachedFocusedMessage', (global, actions, payload): ActionReturnType => {
+  const { hasReached = false, tabId = getCurrentTabId() } = payload;
+
+  return updateFocusedMessageReached(global, hasReached, tabId);
 });
 
 addActionHandler('focusMessage', (global, actions, payload): ActionReturnType => {
