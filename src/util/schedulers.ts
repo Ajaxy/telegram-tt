@@ -92,6 +92,10 @@ export function throttleWithTickEnd<F extends AnyToVoidFunction>(fn: F) {
   return throttleWith(onTickEnd, fn);
 }
 
+export function throttleWithPrimaryTickEnd<F extends AnyToVoidFunction>(fn: F) {
+  return throttleWith(onTickEndPrimary, fn);
+}
+
 export function throttleWith<F extends AnyToVoidFunction>(schedulerFn: Scheduler, fn: F) {
   let waiting = false;
   let args: Parameters<F>;

@@ -1,11 +1,10 @@
 import type { ReactElement } from 'react';
 import { DEBUG, DEBUG_MORE } from '../../config';
 import {
-  fastRafWithFallback,
-  fastRafPrimaryWithFallback,
-  onTickEnd,
-  onTickEndPrimary,
   throttleWithRafFallback,
+  throttleWithPrimaryRafFallback,
+  throttleWithTickEnd,
+  throttleWithPrimaryTickEnd,
 } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
@@ -15,7 +14,9 @@ import { incrementOverlayCounter } from '../../util/debugOverlay';
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export type FC_withDebug = FC & { DEBUG_contentComponentName?: string };
+export type FC_withDebug =
+  FC
+  & { DEBUG_contentComponentName?: string };
 
 export enum VirtualElementTypesEnum {
   Empty,
@@ -79,9 +80,8 @@ interface ComponentInstance {
     effects: {
       cursor: number;
       byCursor: {
-        effect: () => void;
         dependencies?: readonly any[];
-        cleanup?: Function;
+        cleanup?: NoneToVoidFunction;
       }[];
     };
     memos: {
@@ -455,8 +455,7 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 // We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
   componentInstance.hooks.effects.byCursor.forEach((hook) => {
-    hook.cleanup = undefined;
-    hook.effect = undefined as any;
+    hook.cleanup = undefined as any;
     hook.dependencies = undefined;
   });
 
@@ -554,10 +553,10 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
   ];
 }
 
-function useLayoutEffectBase(
-  schedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
-  primarySchedulerFn: typeof onTickEnd | typeof requestAnimationFrame,
-  effect: () => Function | void,
+function useEffectBase(
+  schedulerFn: (cb: NoneToVoidFunction) => void,
+  primarySchedulerFn: (cb: NoneToVoidFunction) => void,
+  effect: () => NoneToVoidFunction | void,
   dependencies?: readonly any[],
   debugKey?: string,
 ) {
@@ -636,7 +635,12 @@ function useLayoutEffectBase(
     }
   }
 
-  if (byCursor[cursor] !== undefined && dependencies && byCursor[cursor].dependencies) {
+  function schedule() {
+    primarySchedulerFn(execCleanup);
+    schedulerFn(exec);
+  }
+
+  if (dependencies && byCursor[cursor]?.dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
       if (debugKey) {
         const causedBy = dependencies.reduce((res, newValue, i) => {
@@ -652,8 +656,7 @@ function useLayoutEffectBase(
         console.log(`[Teact] Effect "${debugKey}" caused by dependencies.`, causedBy.join(', '));
       }
 
-      primarySchedulerFn(execCleanup);
-      schedulerFn(exec);
+      schedule();
     }
   } else {
     if (debugKey) {
@@ -661,25 +664,37 @@ function useLayoutEffectBase(
       console.log(`[Teact] Effect "${debugKey}" caused by missing dependencies.`);
     }
 
-    primarySchedulerFn(execCleanup);
-    schedulerFn(exec);
+    schedule();
   }
 
   byCursor[cursor] = {
-    effect,
+    ...byCursor[cursor],
     dependencies,
-    cleanup: byCursor[cursor]?.cleanup,
   };
 
   renderingInstance.hooks.effects.cursor++;
 }
 
-export function useEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {
-  return useLayoutEffectBase(fastRafWithFallback, fastRafPrimaryWithFallback, effect, dependencies, debugKey);
+export function useEffect(
+  effect: () => NoneToVoidFunction | void,
+  dependencies?: readonly any[],
+  debugKey?: string,
+) {
+  const schedulerFn = useMemo(() => throttleWithRafFallback((cb: NoneToVoidFunction) => cb()), []);
+  const primarySchedulerFn = useMemo(() => throttleWithPrimaryRafFallback((cb: NoneToVoidFunction) => cb()), []);
+
+  return useEffectBase(schedulerFn, primarySchedulerFn, effect, dependencies, debugKey);
 }
 
-export function useLayoutEffect(effect: () => Function | void, dependencies?: readonly any[], debugKey?: string) {
-  return useLayoutEffectBase(onTickEnd, onTickEndPrimary, effect, dependencies, debugKey);
+export function useLayoutEffect(
+  effect: () => NoneToVoidFunction | void,
+  dependencies?: readonly any[],
+  debugKey?: string,
+) {
+  const schedulerFn = useMemo(() => throttleWithTickEnd((cb: NoneToVoidFunction) => cb()), []);
+  const primarySchedulerFn = useMemo(() => throttleWithPrimaryTickEnd((cb: NoneToVoidFunction) => cb()), []);
+
+  return useEffectBase(schedulerFn, primarySchedulerFn, effect, dependencies, debugKey);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {
