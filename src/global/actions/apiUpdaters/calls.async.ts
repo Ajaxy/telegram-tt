@@ -36,7 +36,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (!activeGroupCallId) break;
 
       if (update.connectionState === 'disconnected') {
-        actions.leaveGroupCall({ isFromLibrary: true, tabId: getCurrentTabId() });
+        if ('leaveGroupCall' in actions) actions.leaveGroupCall({ isFromLibrary: true, tabId: getCurrentTabId() });
         break;
       }
 
@@ -55,7 +55,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateGroupCallConnection': {
       if (update.data.stream) {
         actions.showNotification({ message: 'Big live streams are not yet supported', tabId: getCurrentTabId() });
-        actions.leaveGroupCall({ tabId: getCurrentTabId() });
+        if ('leaveGroupCall' in actions) actions.leaveGroupCall({ tabId: getCurrentTabId() });
         break;
       }
       void handleUpdateGroupCallConnection(update.data, update.presentation);
@@ -107,7 +107,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (state === 'active' || state === 'accepted') {
         if (!verifyPhoneCallProtocol(call.protocol)) {
           const user = selectPhoneCallUser(global);
-          actions.hangUp({ tabId: getCurrentTabId() });
+          if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
           actions.showNotification({
             message: langProvider.translate('VoipPeerIncompatible', user?.firstName),
             tabId: getCurrentTabId(),
@@ -181,7 +181,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (!global.phoneCall) return global;
 
       if (connectionState === 'closed' || connectionState === 'disconnected' || connectionState === 'failed') {
-        actions.hangUp({ tabId: getCurrentTabId() });
+        if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
         return undefined;
       }
 
