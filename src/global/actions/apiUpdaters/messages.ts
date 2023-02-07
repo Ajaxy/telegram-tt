@@ -267,14 +267,16 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const thread = selectThreadByMessage(global, message);
       // For some reason Telegram requires to manually mark outgoing thread messages read
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
+        if (currentChatId !== chatId
+          || (thread?.threadInfo?.threadId || MAIN_THREAD_ID) !== currentThreadId) {
+          return;
+        }
+
+        actions.markMessageListRead({ maxId: message.id, tabId });
+      });
       if (thread?.threadInfo) {
-        Object.values(global.byTabId).forEach(({ id: tabId }) => {
-          const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
-          if (currentChatId !== chatId || thread.threadInfo?.threadId !== currentThreadId) return;
-
-          actions.markMessageListRead({ maxId: message.id, tabId });
-        });
-
         global = replaceThreadParam(global, chatId, thread.threadInfo.threadId, 'threadInfo', {
           ...thread.threadInfo,
           lastMessageId: message.id,
