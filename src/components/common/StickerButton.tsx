@@ -37,6 +37,7 @@ type OwnProps<T> = {
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   observeIntersection: ObserveFn;
+  noShowPremium?: boolean;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
   clickArg: T;
   onFaveClick?: (sticker: ApiSticker) => void;
@@ -55,6 +56,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   canViewSet,
   observeIntersection,
   isCurrentUserPremium,
+  noShowPremium,
   sharedCanvasRef,
   onClick,
   clickArg,
@@ -254,14 +256,14 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         sharedCanvasRef={sharedCanvasRef}
         customColor={customColor}
       />
-      {isLocked && (
+      {!noShowPremium && isLocked && (
         <div
           className="sticker-locked"
         >
           <i className="icon-lock-badge" />
         </div>
       )}
-      {isPremium && !isLocked && (
+      {!noShowPremium && isPremium && !isLocked && (
         <div className="sticker-premium">
           <i className="icon-premium" />
         </div>

@@ -1290,19 +1290,6 @@ const Composer: FC<OwnProps & StateProps> = ({
         onInsertUserName={insertMention}
         onClose={closeMentionTooltip}
       />
-      <InlineBotTooltip
-        isOpen={isInlineBotTooltipOpen}
-        botId={inlineBotId}
-        isGallery={isInlineBotTooltipGallery}
-        inlineBotResults={inlineBotResults}
-        switchPm={inlineBotSwitchPm}
-        loadMore={loadMoreForInlineBot}
-        isSavedMessages={isChatWithSelf}
-        canSendGifs={canSendGifs}
-        isCurrentUserPremium={isCurrentUserPremium}
-        onSelectResult={handleInlineBotSelect}
-        onClose={closeInlineBotTooltip}
-      />
       <BotCommandTooltip
         isOpen={isBotCommandTooltipOpen}
         withUsername={Boolean(chatBotCommands)}
@@ -1312,6 +1299,20 @@ const Composer: FC<OwnProps & StateProps> = ({
       />
       <div id="message-compose">
         <div className="svg-appendix" ref={appendixRef} />
+
+        <InlineBotTooltip
+          isOpen={isInlineBotTooltipOpen}
+          botId={inlineBotId}
+          isGallery={isInlineBotTooltipGallery}
+          inlineBotResults={inlineBotResults}
+          switchPm={inlineBotSwitchPm}
+          loadMore={loadMoreForInlineBot}
+          isSavedMessages={isChatWithSelf}
+          canSendGifs={canSendGifs}
+          isCurrentUserPremium={isCurrentUserPremium}
+          onSelectResult={handleInlineBotSelect}
+          onClose={closeInlineBotTooltip}
+        />
         <ComposerEmbeddedMessage
           onClear={handleEmbeddedClear}
           shouldForceShowEditing={Boolean(shouldForceShowEditing && editingMessage)}

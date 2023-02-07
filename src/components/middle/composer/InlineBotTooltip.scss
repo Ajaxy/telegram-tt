@@ -6,12 +6,13 @@
 
   &.gallery {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(8, 1fr);
+    grid-auto-flow: dense;
     grid-gap: 1px;
     padding: 0;
 
     @media (max-width: 600px) {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
 
     .switch-pm {
@@ -22,16 +23,12 @@
       }
     }
 
-    .GifButton {
-      grid-column-end: initial;
-    }
-
     .StickerButton {
       width: initial;
       height: 0;
       margin: 0;
       padding-bottom: 100%;
-      border-radius: 0;
+      border-radius: var(--border-radius-default);
 
       .AnimatedSticker,
       img,
@@ -50,5 +47,11 @@
         }
       }
     }
+  }
+
+  &:not(.gallery) .GifButton {
+    width: 4rem;
+    height: 4rem;
+    margin: 0.5rem;
   }
 }
