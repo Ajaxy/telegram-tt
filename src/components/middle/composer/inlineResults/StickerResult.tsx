@@ -40,6 +40,7 @@ const StickerResult: FC<OwnProps> = ({
       clickArg={inlineResult}
       isSavedMessages={isSavedMessages}
       canViewSet
+      noShowPremium
       isCurrentUserPremium={isCurrentUserPremium}
     />
   );
