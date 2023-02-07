@@ -53,7 +53,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
   const prevStickers = usePrevious(customEmoji, true);
   const displayedStickers = customEmoji || prevStickers;
 
-  useHorizontalScroll(containerRef.current);
+  useHorizontalScroll(containerRef);
 
   const {
     observe: observeIntersection,

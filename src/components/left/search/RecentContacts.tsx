@@ -58,7 +58,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
     });
   }, [loadTopUsers]);
 
-  useHorizontalScroll(topUsersRef.current, !topUserIds);
+  useHorizontalScroll(topUsersRef, !topUserIds);
 
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });

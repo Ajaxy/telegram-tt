@@ -81,7 +81,7 @@ const EmojiTooltip: FC<OwnProps> = ({
     emojis.length ? [...customEmojis, ...emojis] : undefined, CLOSE_DURATION,
   ) || [];
 
-  useHorizontalScroll(containerRef.current);
+  useHorizontalScroll(containerRef);
 
   const handleSelectEmoji = useCallback((emoji: Emoji) => {
     onEmojiSelect(emoji.native);

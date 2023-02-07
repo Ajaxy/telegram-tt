@@ -171,7 +171,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     && allSets.filter((set) => set.stickers?.length).length === 0
   ), [allSets, areAddedLoaded]);
 
-  useHorizontalScroll(headerRef.current);
+  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+  const shouldRenderContents = areAddedLoaded && canRenderContents && !noPopulatedSets;
+
+  useHorizontalScroll(headerRef, !shouldRenderContents);
 
   // Scroll container and header when active set changes
   useEffect(() => {
@@ -198,8 +201,6 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   const handleEmojiSelect = useCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
   }, [onCustomEmojiSelect]);
-
-  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   function renderCover(stickerSet: StickerSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
@@ -263,7 +264,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', 'CustomEmojiPicker', className);
 
-  if (!areAddedLoaded || !canRenderContents || noPopulatedSets) {
+  if (!shouldRenderContents) {
     return (
       <div className={fullClassName}>
         {noPopulatedSets ? (
