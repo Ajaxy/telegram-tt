@@ -35,7 +35,7 @@ import { fastRaf } from '../../util/schedulers';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -272,7 +272,7 @@ const Main: FC<OwnProps & StateProps> = ({
         ignoreCache: true,
       });
     }
-  }, [lastSyncTime, isMasterTab] as const);
+  }, [lastSyncTime, isMasterTab, loadCustomEmojis]);
 
   // Sticker sets
   useEffect(() => {
@@ -324,7 +324,7 @@ const Main: FC<OwnProps & StateProps> = ({
         type: parsedLocationHash.type,
       });
     }
-  }, [lastSyncTime] as const);
+  }, [lastSyncTime, openChat]);
 
   const leftColumnTransition = useShowTransition(
     isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
@@ -333,8 +333,8 @@ const Main: FC<OwnProps & StateProps> = ({
   const forceUpdate = useForceUpdate();
 
   // Handle opening middle column
-  useOnChange(([prevIsLeftColumnOpen]) => {
-    if (prevIsLeftColumnOpen === undefined || animationLevel === 0) {
+  useSyncEffect(([prevIsLeftColumnOpen]) => {
+    if (prevIsLeftColumnOpen === undefined || isLeftColumnOpen === prevIsLeftColumnOpen || animationLevel === 0) {
       return;
     }
 
@@ -353,7 +353,7 @@ const Main: FC<OwnProps & StateProps> = ({
       willAnimateLeftColumnRef.current = false;
       forceUpdate();
     });
-  }, [isLeftColumnOpen]);
+  }, [animationLevel, forceUpdate, isLeftColumnOpen]);
 
   const rightColumnTransition = useShowTransition(
     isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
@@ -362,8 +362,8 @@ const Main: FC<OwnProps & StateProps> = ({
   const [isNarrowMessageList, setIsNarrowMessageList] = useState(isRightColumnOpen);
 
   // Handle opening right column
-  useOnChange(([prevIsRightColumnOpen]) => {
-    if (prevIsRightColumnOpen === undefined) {
+  useSyncEffect(([prevIsRightColumnOpen]) => {
+    if (prevIsRightColumnOpen === undefined || isRightColumnOpen === prevIsRightColumnOpen) {
       return;
     }
 
@@ -382,7 +382,7 @@ const Main: FC<OwnProps & StateProps> = ({
       forceUpdate();
       setIsNarrowMessageList(isRightColumnOpen);
     });
-  }, [isRightColumnOpen]);
+  }, [animationLevel, forceUpdate, isRightColumnOpen]);
 
   const className = buildClassName(
     leftColumnTransition.hasShownClass && 'left-column-shown',

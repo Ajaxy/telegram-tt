@@ -1,4 +1,4 @@
-import React, { useEffect } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
@@ -13,14 +13,16 @@ import {
   selectTabState,
 } from '../../global/selectors';
 import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
-import useFlag from '../../hooks/useFlag';
-import useShowTransition from '../../hooks/useShowTransition';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
 import buildClassName from '../../util/buildClassName';
+
+import useFlag from '../../hooks/useFlag';
+import useShowTransition from '../../hooks/useShowTransition';
+import useEffectOnce from '../../hooks/useEffectOnce';
 
 import styles from './UiLoader.module.scss';
 
@@ -114,7 +116,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
     shouldRender: shouldRenderMask, transitionClassNames,
   } = useShowTransition(!isReady, undefined, true);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     let timeout: number | undefined;
 
     const safePreload = async () => {
@@ -145,8 +147,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
 
       setIsUiReady({ uiReadyState: 0 });
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   return (
     <div

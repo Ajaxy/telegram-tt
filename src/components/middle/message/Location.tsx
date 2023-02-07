@@ -161,7 +161,7 @@ const Location: FC<OwnProps> = ({
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });
     }
-  }, [shouldRenderText, isOwn, isInSelectMode, isSelected, theme, mapBlobUrl] as const);
+  }, [shouldRenderText, isOwn, isInSelectMode, isSelected, theme, mapBlobUrl]);
 
   useEffect(() => {
     // Prevent map refetching for slight location changes

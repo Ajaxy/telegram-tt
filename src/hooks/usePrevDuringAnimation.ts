@@ -2,7 +2,7 @@ import { useRef } from '../lib/teact/teact';
 
 import usePrevious from './usePrevious';
 import useForceUpdate from './useForceUpdate';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 
 export default function usePrevDuringAnimation(current: any, duration?: number) {
   const prev = usePrevious(current, true);
@@ -18,7 +18,7 @@ export default function usePrevDuringAnimation(current: any, duration?: number) 
     timeoutRef.current = undefined;
   }
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     // When `current` becomes empty
     if (duration && !isCurrentPresent && isPrevPresent && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
@@ -26,7 +26,7 @@ export default function usePrevDuringAnimation(current: any, duration?: number) 
         forceUpdate();
       }, duration);
     }
-  }, [current]);
+  }, [duration, forceUpdate, isCurrentPresent, isPrevPresent]);
 
   return !timeoutRef.current || !duration || isCurrentPresent ? current : prev;
 }

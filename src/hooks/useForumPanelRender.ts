@@ -1,13 +1,13 @@
 import { useCallback, useRef } from '../lib/teact/teact';
 
 import useForceUpdate from './useForceUpdate';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 
 export default function useForumPanelRender(isForumPanelOpen = false) {
   const shouldRenderForumPanelRef = useRef(isForumPanelOpen);
   const forceUpdate = useForceUpdate();
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (isForumPanelOpen) {
       shouldRenderForumPanelRef.current = true;
     }

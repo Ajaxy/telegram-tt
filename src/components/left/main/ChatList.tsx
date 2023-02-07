@@ -117,7 +117,7 @@ const ChatList: FC<OwnProps> = ({
       return;
     }
     openChat({ id: chatId, shouldReplaceHistory: true });
-  }, [], DRAG_ENTER_DEBOUNCE, true);
+  }, [openChat], DRAG_ENTER_DEBOUNCE, true);
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

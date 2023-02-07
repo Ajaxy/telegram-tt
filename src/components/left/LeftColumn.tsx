@@ -12,7 +12,7 @@ import { selectTabState, selectCurrentChat, selectIsForumPanelOpen } from '../..
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 
 import Transition from '../ui/Transition';
 import LeftMain from './main/LeftMain';
@@ -372,7 +372,7 @@ const LeftColumn: FC<StateProps> = ({
     }
   }, [clearTwoFaError, loadPasswordInfo, settingsScreen]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (nextSettingsScreen !== undefined) {
       setContent(LeftColumnContent.Settings);
       setSettingsScreen(nextSettingsScreen);

@@ -14,7 +14,7 @@ import {
 import { selectTabState } from '../global/selectors';
 
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 
 type Handler = (e: Event) => void;
 
@@ -47,7 +47,7 @@ const useAudioPlayer = (
     if (onTrackChange) onTrackChange();
   }, [onTrackChange]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     controllerRef.current = register(trackId, trackType, (eventName, e) => {
       switch (eventName) {
         case 'onPlay': {
@@ -105,6 +105,8 @@ const useAudioPlayer = (
 
     if (!isPlaying && !proxy.paused) {
       setIsPlaying(true);
+      // `isPlayingSync` is only needed to help `setIsPlaying` because it is asynchronous
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       isPlayingSync = true;
     }
 

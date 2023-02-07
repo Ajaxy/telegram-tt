@@ -65,7 +65,7 @@ const Invoice: FC<OwnProps> = ({
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });
     }
-  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme] as const);
+  }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
 
   return (
     <div

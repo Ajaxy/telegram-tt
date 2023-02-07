@@ -1,7 +1,7 @@
 import { useRef } from '../lib/teact/teact';
 
 import fastBlur from '../lib/fastBlur';
-import useOnChange from './useOnChange';
+import useSyncEffect from './useSyncEffect';
 import useBlur from './useBlur';
 import { imgToCanvas } from '../util/files';
 
@@ -13,7 +13,8 @@ export default function useBlurSync(dataUri: string | false | undefined) {
 
   let isChanged = false;
 
-  useOnChange(() => {
+  useSyncEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     isChanged = true;
 
     blurredRef.current = undefined;

@@ -40,7 +40,12 @@
     "no-console": "error",
     "semi": "error",
     "no-implicit-coercion": "error",
-    "react-hooks/exhaustive-deps": "error",
+    "react-hooks/exhaustive-deps": [
+      "error",
+      {
+        "additionalHooks": "(useSyncEffect|useAsync|useDebouncedCallback|useThrottledCallback|useEffectWithPrevDeps|useLayoutEffectWithPrevDeps)$"
+      }
+    ],
     "arrow-body-style": "off",
     "no-else-return": "off",
     "no-plusplus": "off",

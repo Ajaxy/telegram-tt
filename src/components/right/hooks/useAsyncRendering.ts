@@ -1,6 +1,6 @@
 import { useEffect, useRef } from '../../../lib/teact/teact';
 
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 
 export default function useAsyncRendering<T extends any[]>(dependencies: T, delay?: number) {
@@ -9,7 +9,7 @@ export default function useAsyncRendering<T extends any[]>(dependencies: T, dela
   const timeoutRef = useRef<number>();
   const forceUpdate = useForceUpdate();
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (isDisabled) {
       return;
     }
@@ -20,6 +20,7 @@ export default function useAsyncRendering<T extends any[]>(dependencies: T, dela
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, dependencies);
 
   useEffect(() => {

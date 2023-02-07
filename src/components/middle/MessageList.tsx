@@ -50,7 +50,7 @@ import resetScroll, { patchChromiumScroll } from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useStickyDates from './hooks/useStickyDates';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLang from '../../hooks/useLang';
@@ -196,7 +196,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const areMessagesLoaded = Boolean(messageIds);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     // We only need it first time when message list appears
     if (areMessagesLoaded) {
       onTickEnd(() => {
@@ -206,24 +206,24 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [areMessagesLoaded]);
 
   // Updated every time (to be used from intersection callback closure)
-  useOnChange(() => {
+  useSyncEffect(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
 
-  useOnChange(() => {
+  useEffect(() => {
     if (!isCurrentUserPremium && isChannelChat && isReady && lastSyncTime) {
       loadSponsoredMessages({ chatId });
     }
-  }, [isCurrentUserPremium, chatId, isReady, isChannelChat, lastSyncTime]);
+  }, [isCurrentUserPremium, chatId, isReady, isChannelChat, lastSyncTime, loadSponsoredMessages]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (areMessagesLoaded) {
       memoUnreadDividerBeforeIdRef.current = memoFirstUnreadIdRef.current;
     }
   }, [areMessagesLoaded]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     memoFocusingIdRef.current = focusingId;
   }, [focusingId]);
 
@@ -344,7 +344,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [isChatLoaded, messageIds, loadMoreAround, focusingId, isRestricted]);
 
   // Remember scroll position before repositioning it
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (!messageIds || !listItemElementsRef.current) {
       return;
     }
@@ -488,7 +488,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
       // eslint-disable-next-line no-console
       console.timeEnd('scrollTop');
     }
-    // This should match deps for `useOnChange` above
+    // This should match deps for `useSyncEffect` above
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `as const` not yet supported by linter
   }, [messageIds, isViewportNewest, containerHeight, hasTools] as const);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {

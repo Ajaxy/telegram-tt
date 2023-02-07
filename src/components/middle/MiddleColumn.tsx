@@ -61,7 +61,7 @@ import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
 
 import Transition from '../ui/Transition';
@@ -243,7 +243,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [chatId, openChat]);
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
     setIsNotchShown(undefined);
   }, [chatId]);
@@ -704,7 +704,7 @@ function useIsReady(
     }
   }
 
-  useOnChange(() => {
+  useSyncEffect(() => {
     if (!withAnimations) {
       setIsReady(true);
     }

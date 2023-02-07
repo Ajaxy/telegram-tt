@@ -12,7 +12,7 @@ import generateIdFor from '../../util/generateIdFor';
 
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
-import useOnChange from '../../hooks/useOnChange';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
 
 export type OwnProps = {
@@ -229,13 +229,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     fastRaf(unfreezeAnimation);
   }, [unfreezeAnimation]);
 
-  useOnChange(([prevNoLoop]) => {
+  useSyncEffect(([prevNoLoop]) => {
     if (prevNoLoop !== undefined && noLoop !== prevNoLoop) {
       animation?.setNoLoop(noLoop);
     }
   }, [noLoop, animation]);
 
-  useOnChange(([prevSharedCanvasCoords, prevIsMobile]) => {
+  useSyncEffect(([prevSharedCanvasCoords, prevIsMobile]) => {
     if (
       (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords)
       || (prevIsMobile !== undefined && isMobile !== prevIsMobile)

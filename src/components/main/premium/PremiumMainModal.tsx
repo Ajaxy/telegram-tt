@@ -22,7 +22,7 @@ import renderText from '../../common/helpers/renderText';
 import { getUserFullName } from '../../../global/helpers';
 
 import useLang from '../../../hooks/useLang';
-import useOnChange from '../../../hooks/useOnChange';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
@@ -170,11 +170,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
   }, [isSuccess, showConfetti]);
 
-  useOnChange(([prevIsPremium]) => {
+  useSyncEffect(([prevIsPremium]) => {
     if (prevIsPremium === isPremium) return;
 
     showConfetti();
-  }, [isPremium]);
+  }, [isPremium, showConfetti]);
 
   if (!promo) return undefined;
 

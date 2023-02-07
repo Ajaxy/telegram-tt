@@ -161,7 +161,7 @@ const Photo: FC<OwnProps> = ({
     } else {
       contentEl.classList.add('has-appendix-thumb');
     }
-  }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme] as const);
+  }, [shouldAffectAppendix, fullMediaData, isOwn, isInSelectMode, isSelected, theme]);
 
   const { width, height, isSmall } = dimensions || calculateMediaDimensions(message, asForwarded, noAvatars, isMobile);
 
