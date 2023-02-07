@@ -214,6 +214,7 @@ export type TabState = {
     direction?: FocusDirection;
     noHighlight?: boolean;
     isResizingContainer?: boolean;
+    hasReachedMessage?: boolean;
   };
 
   selectedMessages?: {
@@ -1444,6 +1445,9 @@ export interface ActionPayloads {
   loadTopChats: undefined;
   showDialog: {
     data: TabState['dialogs'][number];
+  } & WithTabId;
+  setReachedFocusedMessage: {
+    hasReached?: boolean;
   } & WithTabId;
   focusMessage: {
     chatId: string;

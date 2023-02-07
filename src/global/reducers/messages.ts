@@ -512,6 +512,22 @@ export function updateFocusedMessage<T extends GlobalState>(
   }, tabId);
 }
 
+export function updateFocusedMessageReached<T extends GlobalState>(
+  global: T, hasReachedMessage: boolean,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const focusedMessage = selectTabState(global, tabId).focusedMessage;
+
+  if (!focusedMessage) return global;
+
+  return updateTabState(global, {
+    focusedMessage: {
+      ...focusedMessage,
+      hasReachedMessage,
+    },
+  }, tabId);
+}
+
 export function updateSponsoredMessage<T extends GlobalState>(
   global: T, chatId: string, message: ApiSponsoredMessage,
 ): T {
