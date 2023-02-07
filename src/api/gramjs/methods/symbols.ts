@@ -163,7 +163,7 @@ export async function fetchStickers(
     stickerset: 'id' in stickerSetInfo
       ? buildInputStickerSet(stickerSetInfo.id, stickerSetInfo.accessHash)
       : buildInputStickerSetShortName(stickerSetInfo.shortName),
-  }));
+  }), undefined, true);
 
   if (!(result instanceof GramJs.messages.StickerSet)) {
     return undefined;
