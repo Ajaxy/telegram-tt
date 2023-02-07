@@ -17,7 +17,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateGroupCall': {
       if (update.call.connectionState === 'discarded') {
         if (global.groupCalls.activeGroupCallId) {
-          actions.leaveGroupCall({ shouldRemove: true, tabId: getCurrentTabId() });
+          if ('leaveGroupCall' in actions) actions.leaveGroupCall({ shouldRemove: true, tabId: getCurrentTabId() });
           return undefined;
         } else {
           return removeGroupCall(global, update.call.id);
@@ -93,7 +93,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (phoneCall) {
         if (call.state === 'discarded') {
           actions.playGroupCallSound({ sound: 'end' });
-          actions.hangUp({ tabId: getCurrentTabId() });
+          if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
 
           return {
             ...global,

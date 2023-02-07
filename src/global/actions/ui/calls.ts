@@ -271,10 +271,12 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
   }
 
   if (activeGroupCallId) {
-    actions.leaveGroupCall({
-      rejoin: payload,
-      tabId,
-    });
+    if ('leaveGroupCall' in actions) {
+      actions.leaveGroupCall({
+        rejoin: payload,
+        tabId,
+      });
+    }
     return;
   }
 

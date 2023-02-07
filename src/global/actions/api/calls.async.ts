@@ -253,7 +253,7 @@ addActionHandler('connectToActivePhoneCall', async (global, actions): Promise<vo
   const result = await callApi('requestCall', { user, gAHash, isVideo: phoneCall.isVideo });
 
   if (!result) {
-    actions.hangUp({ tabId: getCurrentTabId() });
+    if ('hangUp' in actions) actions.hangUp({ tabId: getCurrentTabId() });
     return;
   }
   global = getGlobal();
