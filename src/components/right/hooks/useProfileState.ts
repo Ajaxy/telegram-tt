@@ -18,14 +18,9 @@ export default function useProfileState(
   tabType: string,
   profileState: ProfileState,
   onProfileStateChange: (state: ProfileState) => void,
-  isFirstTab?: boolean,
 ) {
   // Scroll to tabs if needed
-  useEffectWithPrevDeps(([prevTabType, prevIsFirstTab]) => {
-    if (isFirstTab === prevIsFirstTab) {
-      return;
-    }
-
+  useEffectWithPrevDeps(([prevTabType]) => {
     if (prevTabType && prevTabType !== tabType) {
       const container = containerRef.current!;
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
@@ -38,7 +33,7 @@ export default function useProfileState(
         }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
       }
     }
-  }, [tabType, isFirstTab, onProfileStateChange, containerRef]);
+  }, [tabType, onProfileStateChange, containerRef]);
 
   // Scroll to top
   useEffectWithPrevDeps(([prevProfileState]) => {
