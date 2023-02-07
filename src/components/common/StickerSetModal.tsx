@@ -1,25 +1,27 @@
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 
-import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL } from '../../config';
+import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
   selectCurrentMessageList,
   selectIsChatWithSelf, selectIsCurrentUserPremium,
-  selectIsSetPremium,
   selectShouldSchedule,
   selectStickerSet,
 } from '../../global/selectors';
+import renderText from './helpers/renderText';
+import { copyTextToClipboard } from '../../util/clipboard';
+import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
+
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import renderText from './helpers/renderText';
-import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
+import useAppLayout from '../../hooks/useAppLayout';
 import useSchedule from '../../hooks/useSchedule';
 import usePrevious from '../../hooks/usePrevious';
 
@@ -27,6 +29,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Loading from '../ui/Loading';
 import StickerButton from './StickerButton';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
 
 import './StickerSetModal.scss';
 
@@ -43,7 +47,6 @@ type StateProps = {
   canScheduleUntilOnline?: boolean;
   shouldSchedule?: boolean;
   isSavedMessages?: boolean;
-  isSetPremium?: boolean;
   isCurrentUserPremium?: boolean;
 };
 
@@ -58,7 +61,6 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   canScheduleUntilOnline,
   shouldSchedule,
   isSavedMessages,
-  isSetPremium,
   isCurrentUserPremium,
   onClose,
 }) => {
@@ -66,7 +68,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     loadStickers,
     toggleStickerSet,
     sendMessage,
-    openPremiumModal,
+    showNotification,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -76,12 +78,13 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
+  const { isMobile } = useAppLayout();
+
   const prevStickerSet = usePrevious(stickerSet);
   const renderingStickerSet = stickerSet || prevStickerSet;
 
   const isAdded = Boolean(!renderingStickerSet?.isArchived && renderingStickerSet?.installedDate);
   const isEmoji = renderingStickerSet?.isEmoji;
-  const isButtonLocked = !isAdded && isSetPremium && !isCurrentUserPremium;
 
   const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);
 
@@ -118,20 +121,24 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   const handleButtonClick = useCallback(() => {
     if (renderingStickerSet) {
-      if (isButtonLocked) {
-        openPremiumModal({ initialSection: 'animated_emoji' });
-        return;
-      }
       toggleStickerSet({ stickerSetId: renderingStickerSet.id });
       onClose();
     }
-  }, [isButtonLocked, onClose, openPremiumModal, renderingStickerSet, toggleStickerSet]);
+  }, [onClose, renderingStickerSet, toggleStickerSet]);
+
+  const handleCopyLink = useCallback(() => {
+    if (!renderingStickerSet) return;
+    const { shortName } = renderingStickerSet;
+    const suffix = isEmoji ? 'addemoji' : 'addstickers';
+    const url = `${TME_LINK_PREFIX}${suffix}/${shortName}`;
+    copyTextToClipboard(url);
+    showNotification({
+      message: lang('LinkCopied'),
+    });
+  }, [isEmoji, lang, renderingStickerSet, showNotification]);
 
   const renderButtonText = () => {
     if (!renderingStickerSet) return lang('Loading');
-    if (isButtonLocked) {
-      return lang('EmojiInput.UnlockPack', renderingStickerSet.title);
-    }
 
     const suffix = isEmoji ? 'Emoji' : 'Sticker';
 
@@ -142,14 +149,48 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     );
   };
 
+  const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen: isMenuOpen }) => (
+      <Button
+        round
+        ripple={!isMobile}
+        size="smaller"
+        color="translucent"
+        className={isMenuOpen ? 'active' : ''}
+        onClick={onTrigger}
+        ariaLabel="More actions"
+      >
+        <i className="icon-more" />
+      </Button>
+    );
+  }, [isMobile]);
+
+  function renderHeader() {
+    return (
+      <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
+        <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
+          <i className="icon-close" />
+        </Button>
+        <div className="modal-title">
+          {renderingStickerSet ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
+        </div>
+        <DropdownMenu
+          className="stickers-more-menu"
+          trigger={MoreMenuButton}
+          positionX="right"
+        >
+          <MenuItem icon="copy" onClick={handleCopyLink}>{lang('StickersCopy')}</MenuItem>
+        </DropdownMenu>
+      </div>
+    );
+  }
+
   return (
     <Modal
       className="StickerSetModal"
       isOpen={isOpen}
       onClose={onClose}
-      hasCloseButton
-      title={renderingStickerSet
-        ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
+      header={renderHeader()}
     >
       {renderingStickerSet?.stickers ? (
         <>
@@ -175,8 +216,6 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
               size="smaller"
               fluid
               color={isAdded ? 'danger' : 'primary'}
-              isShiny={isButtonLocked}
-              withPremiumGradient={isButtonLocked}
               onClick={handleButtonClick}
             >
               {renderButtonText()}
@@ -206,7 +245,6 @@ export default memo(withGlobal<OwnProps>(
       : stickerSetShortName ? { shortName: stickerSetShortName } : undefined;
 
     const stickerSet = stickerSetInfo ? selectStickerSet(global, stickerSetInfo) : undefined;
-    const isSetPremium = stickerSet && selectIsSetPremium(stickerSet);
 
     return {
       canScheduleUntilOnline: Boolean(chatId) && selectCanScheduleUntilOnline(global, chatId),
@@ -215,7 +253,6 @@ export default memo(withGlobal<OwnProps>(
       shouldSchedule: selectShouldSchedule(global),
       stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
-      isSetPremium,
     };
   },
 )(StickerSetModal));

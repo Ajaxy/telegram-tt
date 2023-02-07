@@ -341,7 +341,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     isBackButtonVisible && styles.stateBack,
   );
 
-  const header = useMemo(() => {
+  function renderHeader() {
     return (
       <div className="modal-header" style={`background-color: ${headerColor}`}>
         <Button
@@ -380,10 +380,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         </DropdownMenu>
       </div>
     );
-  }, [
-    lang, handleBackClick, bot, MoreMenuButton, chat, openBotChat, handleRefreshClick, attachBot,
-    handleToggleClick, handleSettingsButtonClick, isBackButtonVisible, headerColor, backButtonClassName,
-  ]);
+  }
 
   const prevMainButtonColor = usePrevious(mainButton?.color, true);
   const prevMainButtonTextColor = usePrevious(mainButton?.textColor, true);
@@ -430,8 +427,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       className={styles.root}
       isOpen={isOpen}
       onClose={handleClose}
-      header={header}
-      hasCloseButton
+      header={renderHeader()}
       style={`background-color: ${backgroundColor}`}
     >
       <Spinner className={buildClassName(styles.loadingSpinner, isLoaded && styles.hide)} />

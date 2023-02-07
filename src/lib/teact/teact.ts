@@ -337,16 +337,16 @@ function scheduleUpdate(componentInstance: ComponentInstance) {
 export function renderComponent(componentInstance: ComponentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
 
-  renderingInstance = componentInstance;
-  componentInstance.hooks.state.cursor = 0;
-  componentInstance.hooks.effects.cursor = 0;
-  componentInstance.hooks.memos.cursor = 0;
-  componentInstance.hooks.refs.cursor = 0;
-
   const { Component, props } = componentInstance;
   let newRenderedValue;
 
   try {
+    renderingInstance = componentInstance;
+    componentInstance.hooks.state.cursor = 0;
+    componentInstance.hooks.effects.cursor = 0;
+    componentInstance.hooks.memos.cursor = 0;
+    componentInstance.hooks.refs.cursor = 0;
+
     // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
@@ -388,6 +388,8 @@ export function renderComponent(componentInstance: ComponentInstance) {
       }
     }
   } catch (err: any) {
+    // eslint-disable-next-line no-console
+    console.error(`[Teact] Error while rendering component ${componentInstance.name}`);
     handleError(err);
 
     newRenderedValue = componentInstance.renderedValue;
