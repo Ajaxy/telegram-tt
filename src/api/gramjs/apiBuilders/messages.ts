@@ -43,6 +43,7 @@ import {
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
+  LOCAL_MESSAGE_MIN_ID,
   SERVICE_NOTIFICATIONS_USER_ID,
   SPONSORED_MESSAGE_CACHE_MS,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -65,8 +66,8 @@ import { getServerTimeOffset } from '../../../util/serverTime';
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
 
-let localMessageCounter = 0;
-const getNextLocalMessageId = () => parseFloat(`${Date.now()}.${localMessageCounter++}`);
+let localMessageCounter = LOCAL_MESSAGE_MIN_ID;
+const getNextLocalMessageId = () => ++localMessageCounter;
 
 let currentUserId!: string;
 
