@@ -40,7 +40,7 @@ const TabList: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const previousActiveTab = usePrevious(activeTab);
 
-  useHorizontalScroll(containerRef.current, undefined, true);
+  useHorizontalScroll(containerRef, undefined, true);
 
   // Scroll container to place active tab in the center
   useEffect(() => {

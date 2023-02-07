@@ -70,8 +70,6 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const chatSelectionRef = useRef<HTMLDivElement>(null);
 
-  useHorizontalScroll(chatSelectionRef.current, undefined, true);
-
   const lang = useLang();
 
   const { isMobile } = useAppLayout();
@@ -131,6 +129,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),
     ];
   }, [searchQuery, currentUserId, localContactIds, lang, localChatIds, localUserIds, chatsById]);
+
+  useHorizontalScroll(chatSelectionRef, !localResults.length, true);
 
   const globalResults = useMemo(() => {
     if (!searchQuery || searchQuery.length < MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH || !globalChatIds || !globalUserIds) {

@@ -214,7 +214,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     sendMessageAction({ type: 'chooseSticker' });
   }, [canSendStickers, loadAndPlay, loadRecentStickers, sendMessageAction]);
 
-  useHorizontalScroll(headerRef.current);
+  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+  const shouldRenderContents = areAddedLoaded && canRenderContents && !noPopulatedSets && canSendStickers;
+
+  useHorizontalScroll(headerRef, !shouldRenderContents);
 
   // Scroll container and header when active set changes
   useEffect(() => {
@@ -259,8 +262,6 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   const handleRemoveRecentSticker = useCallback((sticker: ApiSticker) => {
     removeRecentSticker({ sticker });
   }, [removeRecentSticker]);
-
-  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   function renderCover(stickerSet: StickerSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
@@ -329,7 +330,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   const fullClassName = buildClassName('StickerPicker', className);
 
-  if (!areAddedLoaded || !canRenderContents || noPopulatedSets || !canSendStickers) {
+  if (!shouldRenderContents) {
     return (
       <div className={fullClassName}>
         {!canSendStickers ? (

@@ -45,7 +45,7 @@ const ReactionSelector: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const itemsScrollRef = useRef<HTMLDivElement>(null);
   const [isHorizontalScrollEnabled, enableHorizontalScroll] = useFlag(false);
-  useHorizontalScroll(itemsScrollRef.current, !isHorizontalScrollEnabled);
+  useHorizontalScroll(itemsScrollRef, !isHorizontalScrollEnabled);
 
   useLayoutEffect(() => {
     enableHorizontalScroll();

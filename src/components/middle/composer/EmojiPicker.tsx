@@ -105,7 +105,10 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
   });
 
-  useHorizontalScroll(headerRef.current, !isMobile);
+  const canRenderContents = useAsyncRendering([], MENU_TRANSITION_DURATION);
+  const shouldRenderContent = emojis && canRenderContents;
+
+  useHorizontalScroll(headerRef, !(isMobile && shouldRenderContent));
 
   // Scroll header when active set updates
   useEffect(() => {
@@ -169,8 +172,6 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     onEmojiSelect(emoji, name);
   }, [onEmojiSelect]);
 
-  const canRenderContents = useAsyncRendering([], MENU_TRANSITION_DURATION);
-
   function renderCategoryButton(category: EmojiCategoryData, index: number) {
     const icon = ICONS_BY_CATEGORY[category.id];
 
@@ -191,7 +192,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
 
   const containerClassName = buildClassName('EmojiPicker', className);
 
-  if (!emojis || !canRenderContents) {
+  if (!shouldRenderContent) {
     return (
       <div className={containerClassName}>
         <Loading />
