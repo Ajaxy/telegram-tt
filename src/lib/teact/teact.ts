@@ -5,7 +5,6 @@ import {
   fastRafPrimaryWithFallback,
   onTickEnd,
   onTickEndPrimary,
-  throttleWithPrimaryRafFallback,
   throttleWithRafFallback,
 } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
@@ -61,6 +60,7 @@ export interface VirtualElementFragment {
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
 
 interface ComponentInstance {
+  id: number;
   $element: VirtualElementComponent;
   Component: FC;
   name: string;
@@ -130,6 +130,7 @@ const DEBUG_RENDER_THRESHOLD = 7;
 const DEBUG_EFFECT_THRESHOLD = 7;
 const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer', 'Button', 'ListItem', 'MenuItem']);
 
+let lastComponentId = 0;
 let renderingInstance: ComponentInstance;
 
 export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
@@ -190,6 +191,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
   }
 
   const componentInstance: ComponentInstance = {
+    id: ++lastComponentId,
     $element: {} as VirtualElementComponent,
     Component,
     name: Component.name,
@@ -292,14 +294,46 @@ function buildEmptyElement(): VirtualElementEmpty {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DEBUG_components: AnyLiteral = {};
+const DEBUG_components: AnyLiteral = { TOTAL: { componentName: 'TOTAL', renderCount: 0 } };
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console
   console.warn('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
 });
 
+let instancesPendingUpdate = new Set<ComponentInstance>();
+let idsToExcludeFromUpdate = new Set<number>();
+
+const runUpdatePassOnRaf = throttleWithRafFallback(() => {
+  idsToExcludeFromUpdate = new Set();
+
+  const instancesToUpdate = Array
+    .from(instancesPendingUpdate)
+    .sort((a, b) => a.id - b.id);
+
+  instancesPendingUpdate = new Set();
+
+  instancesToUpdate.forEach((instance) => {
+    prepareComponentForFrame(instance);
+  });
+
+  instancesToUpdate.forEach((instance) => {
+    if (idsToExcludeFromUpdate!.has(instance.id)) {
+      return;
+    }
+
+    forceUpdateComponent(instance);
+  });
+});
+
+function scheduleUpdate(componentInstance: ComponentInstance) {
+  instancesPendingUpdate.add(componentInstance);
+  runUpdatePassOnRaf();
+}
+
 export function renderComponent(componentInstance: ComponentInstance) {
+  idsToExcludeFromUpdate.add(componentInstance.id);
+
   renderingInstance = componentInstance;
   componentInstance.hooks.state.cursor = 0;
   componentInstance.hooks.effects.cursor = 0;
@@ -343,6 +377,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
       }
       DEBUG_components[componentName].renderTimes.push(duration);
       DEBUG_components[componentName].renderCount++;
+      DEBUG_components.TOTAL.renderCount++;
 
       if (DEBUG_MORE) {
         incrementOverlayCounter(`${componentName} renders`);
@@ -398,6 +433,8 @@ export function unmountComponent(componentInstance: ComponentInstance) {
     return;
   }
 
+  idsToExcludeFromUpdate.add(componentInstance.id);
+
   componentInstance.hooks.effects.byCursor.forEach((effect) => {
     if (effect.cleanup) {
       try {
@@ -443,7 +480,6 @@ function helpGc(componentInstance: ComponentInstance) {
   componentInstance.renderedValue = undefined;
   componentInstance.Component = undefined as any;
   componentInstance.props = undefined as any;
-  componentInstance.forceUpdate = undefined;
   componentInstance.onUpdate = undefined;
 }
 
@@ -455,9 +491,6 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
   componentInstance.hooks.state.byCursor.forEach((hook) => {
     hook.value = hook.nextValue;
   });
-
-  componentInstance.prepareForFrame = throttleWithPrimaryRafFallback(() => prepareComponentForFrame(componentInstance));
-  componentInstance.forceUpdate = throttleWithRafFallback(() => forceUpdateComponent(componentInstance));
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
@@ -492,17 +525,7 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
 
         byCursor[cursor].nextValue = newValue;
 
-        if (!componentInstance.prepareForFrame || !componentInstance.forceUpdate) {
-          componentInstance.prepareForFrame = throttleWithPrimaryRafFallback(
-            () => prepareComponentForFrame(componentInstance),
-          );
-          componentInstance.forceUpdate = throttleWithRafFallback(
-            () => forceUpdateComponent(componentInstance),
-          );
-        }
-
-        componentInstance.prepareForFrame();
-        componentInstance.forceUpdate();
+        scheduleUpdate(componentInstance);
 
         if (DEBUG_MORE) {
           if (componentInstance.name !== 'TeactNContainer') {
