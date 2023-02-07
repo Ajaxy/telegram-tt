@@ -3,6 +3,8 @@
     .modal-header {
       border-bottom: 1px solid var(--color-dividers);
       padding: 0.5rem;
+
+      transition: 0.25s ease-in-out background-color;
     }
 
     .modal-dialog {
@@ -21,6 +23,8 @@
       padding: 0;
       border-bottom-right-radius: var(--border-radius-default);
       border-bottom-left-radius: var(--border-radius-default);
+
+      transition: 0.25s ease-in-out background-color;
     }
 
     @media (max-width: 600px) {
@@ -84,7 +88,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
 
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.25s ease-in-out;
 }
 
 .hide {
@@ -106,8 +110,12 @@
   position: absolute;
   bottom: 0;
   border-radius: 0;
+
+  z-index: 1;
   transform: translateY(100%);
-  transition: 0.25s ease-in-out transform;
+  transition-property: background-color, color, transform;
+  transition-duration: 0.25s;
+  transition-timing-function: ease-in-out;
 
   &.visible {
     transform: translateY(0);
