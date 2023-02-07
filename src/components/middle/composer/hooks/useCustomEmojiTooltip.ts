@@ -1,90 +1,100 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../global';
+import type { RefObject } from 'react';
+import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import twemojiRegex from '../../../../lib/twemojiRegex';
 
 import type { ApiSticker } from '../../../../api/types';
+import type { Signal } from '../../../../util/signals';
 
+import { getActions } from '../../../../global';
 import { EMOJI_IMG_REGEX } from '../../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
 import { getHtmlBeforeSelection } from '../../../../util/selection';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import twemojiRegex from '../../../../lib/twemojiRegex';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
 
-import useOnSelectionChange from '../../../../hooks/useOnSelectionChange';
-import useCacheBuster from '../../../../hooks/useCacheBuster';
+import useDerivedState from '../../../../hooks/useDerivedState';
+import useFlag from '../../../../hooks/useFlag';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
 
+const THROTTLE = 300;
 const RE_ENDS_ON_EMOJI = new RegExp(`(${twemojiRegex.source})$`, 'g');
-const ENDS_ON_EMOJI_IMG_REGEX = new RegExp(`${EMOJI_IMG_REGEX.source}$`, 'g');
+const RE_ENDS_ON_EMOJI_IMG = new RegExp(`${EMOJI_IMG_REGEX.source}$`, 'g');
 
 export default function useCustomEmojiTooltip(
-  isAllowed: boolean,
-  inputSelector: string,
-  html: string,
-  onUpdateHtml: (html: string) => void,
-  stickers?: ApiSticker[],
-  isDisabled = false,
+  isEnabled: boolean,
+  getHtml: Signal<string>,
+  setHtml: (html: string) => void,
+  getSelectionRange: Signal<Range | undefined>,
+  inputRef: RefObject<HTMLDivElement>,
+  customEmojis?: ApiSticker[],
 ) {
   const { loadCustomEmojiForEmoji, clearCustomEmojiForEmoji } = getActions();
 
-  const [htmlBeforeSelection, setHtmlBeforeSelection] = useState('');
+  const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
 
-  const [cacheBuster, updateCacheBuster] = useCacheBuster();
+  const extractLastEmojiThrottled = useThrottledResolver(() => {
+    const html = getHtml();
+    if (!isEnabled || !html || !getSelectionRange()?.collapsed) return undefined;
 
-  const handleSelectionChange = useCallback((range: Range) => {
-    if (range.collapsed) {
-      updateCacheBuster(); // Update tooltip on cursor move
-    }
-  }, [updateCacheBuster]);
+    const hasEmoji = html.match(IS_EMOJI_SUPPORTED ? twemojiRegex : EMOJI_IMG_REGEX);
+    if (!hasEmoji) return undefined;
 
-  useOnSelectionChange(inputSelector, handleSelectionChange);
+    const htmlBeforeSelection = getHtmlBeforeSelection(inputRef.current!);
 
-  useEffect(() => {
-    if (!html) {
-      setHtmlBeforeSelection('');
-      return;
-    }
-    setHtmlBeforeSelection(getHtmlBeforeSelection(document.querySelector<HTMLDivElement>(inputSelector)!));
-  }, [html, inputSelector, cacheBuster]);
+    return htmlBeforeSelection.match(IS_EMOJI_SUPPORTED ? RE_ENDS_ON_EMOJI : RE_ENDS_ON_EMOJI_IMG)?.[0];
+  }, [getHtml, getSelectionRange, inputRef, isEnabled], THROTTLE);
 
-  const lastEmojiText = htmlBeforeSelection.match(IS_EMOJI_SUPPORTED ? RE_ENDS_ON_EMOJI : ENDS_ON_EMOJI_IMG_REGEX)?.[0];
-  const hasStickers = Boolean(stickers?.length && lastEmojiText);
+  const getLastEmoji = useDerivedSignal(
+    extractLastEmojiThrottled, [extractLastEmojiThrottled, getHtml, getSelectionRange], true,
+  );
+
+  const isActive = useDerivedState(() => Boolean(getLastEmoji()), [getLastEmoji]);
+  const hasCustomEmojis = Boolean(customEmojis?.length);
 
   useEffect(() => {
-    if (isDisabled) return;
+    if (!isEnabled) return;
 
-    if (isAllowed && lastEmojiText) {
-      loadCustomEmojiForEmoji({
-        emoji: IS_EMOJI_SUPPORTED ? lastEmojiText : lastEmojiText.match(/.+alt="(.+)"/)?.[1]!,
-      });
-    } else if (hasStickers || !lastEmojiText) {
+    const lastEmoji = getLastEmoji();
+    if (lastEmoji) {
+      if (!hasCustomEmojis) {
+        loadCustomEmojiForEmoji({
+          emoji: IS_EMOJI_SUPPORTED ? lastEmoji : lastEmoji.match(/.+alt="(.+)"/)?.[1]!,
+        });
+      }
+    } else {
       clearCustomEmojiForEmoji();
     }
-    // We omit `hasStickers` here to prevent re-fetching after manually closing tooltip (via <Esc>).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastEmojiText, clearCustomEmojiForEmoji, loadCustomEmojiForEmoji, isAllowed, isDisabled]);
+  }, [isEnabled, getLastEmoji, hasCustomEmojis, clearCustomEmojiForEmoji, loadCustomEmojiForEmoji]);
 
   const insertCustomEmoji = useCallback((emoji: ApiSticker) => {
-    if (!lastEmojiText) return;
-    const containerEl = document.querySelector<HTMLDivElement>(inputSelector)!;
-    const regexText = IS_EMOJI_SUPPORTED ? lastEmojiText
+    const lastEmoji = getLastEmoji();
+    if (!isEnabled || !lastEmoji) return;
+
+    const inputEl = inputRef.current!;
+    const htmlBeforeSelection = getHtmlBeforeSelection(inputEl);
+    const regexText = IS_EMOJI_SUPPORTED
+      ? lastEmoji
       // Escape regexp special chars
-      : lastEmojiText.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+      : lastEmoji.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
     const regex = new RegExp(`(${regexText})\\1*$`, '');
     const matched = htmlBeforeSelection.match(regex)![0];
-    const count = matched.length / lastEmojiText.length;
-
+    const count = matched.length / lastEmoji.length;
     const newHtml = htmlBeforeSelection.replace(regex, buildCustomEmojiHtml(emoji).repeat(count));
-    const htmlAfterSelection = containerEl.innerHTML.substring(htmlBeforeSelection.length);
-    onUpdateHtml(`${newHtml}${htmlAfterSelection}`);
+    const htmlAfterSelection = inputEl.innerHTML.substring(htmlBeforeSelection.length);
+
+    setHtml(`${newHtml}${htmlAfterSelection}`);
 
     requestAnimationFrame(() => {
-      focusEditableElement(containerEl, true, true);
+      focusEditableElement(inputEl, true, true);
     });
-  }, [htmlBeforeSelection, inputSelector, lastEmojiText, onUpdateHtml]);
+  }, [getLastEmoji, isEnabled, inputRef, setHtml]);
+
+  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 
   return {
-    isCustomEmojiTooltipOpen: hasStickers,
-    closeCustomEmojiTooltip: clearCustomEmojiForEmoji,
+    isCustomEmojiTooltipOpen: Boolean(isActive && hasCustomEmojis && !isManuallyClosed),
+    closeCustomEmojiTooltip: markManuallyClosed,
     insertCustomEmoji,
   };
 }

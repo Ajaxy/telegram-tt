@@ -4,6 +4,7 @@ import {
 import RLottie from '../../../../lib/rlottie/RLottie';
 
 import type { ApiSticker } from '../../../../api/types';
+import type { Signal } from '../../../../util/signals';
 
 import { getGlobal } from '../../../../global';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../../global/selectors';
@@ -31,7 +32,7 @@ type CustomEmojiPlayer = {
 };
 
 export default function useInputCustomEmojis(
-  html: string,
+  getHtml: Signal<string>,
   inputRef: React.RefObject<HTMLDivElement>,
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>,
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
@@ -115,13 +116,13 @@ export default function useInputCustomEmojis(
   }, [synchronizeElements]);
 
   useEffect(() => {
-    if (!html || !inputRef.current || !sharedCanvasRef.current) {
+    if (!getHtml() || !inputRef.current || !sharedCanvasRef.current) {
       removeContainers(Array.from(mapRef.current.keys()));
       return;
     }
 
     synchronizeElements();
-  }, [html, inputRef, removeContainers, sharedCanvasRef, synchronizeElements]);
+  }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef]);
 
   useResizeObserver(sharedCanvasRef, synchronizeElements, true);
 
@@ -157,7 +158,7 @@ function createPlayer({
   position,
   isHq,
   isMobile,
-} : {
+}: {
   customEmoji: ApiSticker;
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>;

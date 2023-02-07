@@ -10,6 +10,7 @@ import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
 import { incrementOverlayCounter } from '../../util/debugOverlay';
+import { isSignal } from '../../util/signals';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
@@ -81,7 +82,9 @@ interface ComponentInstance {
       cursor: number;
       byCursor: {
         dependencies?: readonly any[];
+        schedule: NoneToVoidFunction;
         cleanup?: NoneToVoidFunction;
+        releaseSignals?: NoneToVoidFunction;
       }[];
     };
     memos: {
@@ -436,15 +439,15 @@ export function unmountComponent(componentInstance: ComponentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
 
   componentInstance.hooks.effects.byCursor.forEach((effect) => {
-    if (effect.cleanup) {
-      try {
-        effect.cleanup();
-      } catch (err: any) {
-        handleError(err);
-      } finally {
-        effect.cleanup = undefined;
-      }
+    try {
+      effect.cleanup?.();
+    } catch (err: any) {
+      handleError(err);
+    } finally {
+      effect.cleanup = undefined;
     }
+
+    effect.releaseSignals?.();
   });
 
   componentInstance.isMounted = false;
@@ -455,7 +458,9 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 // We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
   componentInstance.hooks.effects.byCursor.forEach((hook) => {
+    hook.schedule = undefined as any;
     hook.cleanup = undefined as any;
+    hook.releaseSignals = undefined as any;
     hook.dependencies = undefined;
   });
 
@@ -667,10 +672,31 @@ function useEffectBase(
     schedule();
   }
 
+  const isFirstRun = !byCursor[cursor];
+
   byCursor[cursor] = {
     ...byCursor[cursor],
     dependencies,
+    schedule,
   };
+
+  function setupSignals() {
+    const cleanups = dependencies?.filter(isSignal).map((signal) => signal.subscribe(() => {
+      byCursor[cursor].schedule();
+    }));
+
+    if (!cleanups?.length) {
+      return undefined;
+    }
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }
+
+  if (isFirstRun) {
+    byCursor[cursor].releaseSignals = setupSignals();
+  }
 
   renderingInstance.hooks.effects.cursor++;
 }

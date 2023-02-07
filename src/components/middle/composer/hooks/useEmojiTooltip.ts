@@ -1,10 +1,10 @@
-import {
-  useCallback, useEffect, useState,
-} from '../../../../lib/teact/teact';
+import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
+import { uncompressEmoji } from '../../../../util/emoji';
+import type { Signal } from '../../../../util/signals';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
 import {
@@ -12,7 +12,6 @@ import {
 } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
-import { uncompressEmoji } from '../../../../util/emoji';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import memoized from '../../../../util/memoized';
 import renderText from '../../../common/helpers/renderText';
@@ -20,7 +19,8 @@ import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
 
 import useFlag from '../../../../hooks/useFlag';
-import useDebouncedCallback from '../../../../hooks/useDebouncedCallback';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
 
 interface Library {
   keywords: string[];
@@ -37,7 +37,7 @@ let RE_EMOJI_SEARCH: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
 
-const DEBOUNCE = 300;
+const THROTTLE = 300;
 
 const prepareRecentEmojisMemo = memoized(prepareRecentEmojis);
 const prepareLibraryMemo = memoized(prepareLibrary);
@@ -51,68 +51,93 @@ try {
 }
 
 export default function useEmojiTooltip(
-  isAllowed: boolean,
-  htmlRef: { current: string },
-  recentEmojiIds: string[],
+  isEnabled: boolean,
+  getHtml: Signal<string>,
+  setHtml: (html: string) => void,
   inputId = EDITABLE_INPUT_ID,
-  onUpdateHtml: (html: string) => void,
+  recentEmojiIds: string[],
   baseEmojiKeywords?: Record<string, string[]>,
   emojiKeywords?: Record<string, string[]>,
-  isDisabled = false,
 ) {
-  const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
+  const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
+
   const [byId, setById] = useState<Record<string, Emoji> | undefined>();
-  const [shouldForceInsertEmoji, setShouldForceInsertEmoji] = useState(false);
-  const [filteredEmojis, setFilteredEmojisInner] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
+  const [filteredEmojis, setFilteredEmojis] = useState<Emoji[]>(MEMO_EMPTY_ARRAY);
   const [filteredCustomEmojis, setFilteredCustomEmojis] = useState<ApiSticker[]>(MEMO_EMPTY_ARRAY);
 
-  const setFilteredEmojis = useDebouncedCallback((emojis: Emoji[]) => {
-    setFilteredEmojisInner(emojis);
-  }, [], DEBOUNCE);
-
-  // Initialize data on first render.
+  // Initialize data on first render
   useEffect(() => {
-    if (isDisabled) return;
-    const exec = () => {
+    if (!isEnabled) return;
+
+    function exec() {
       setById(emojiData.emojis);
-    };
+    }
 
     if (emojiData) {
       exec();
     } else {
-      ensureEmojiData()
-        .then(exec);
+      ensureEmojiData().then(exec);
     }
-  }, [isDisabled]);
+  }, [isEnabled]);
 
-  const html = htmlRef.current;
-  useEffect(() => {
-    if (isDisabled) return;
+  const detectEmojiCodeThrottled = useThrottledResolver(() => {
+    const html = getHtml();
+    return isEnabled && html.includes(':') ? prepareForRegExp(html).match(RE_EMOJI_SEARCH)?.[0].trim() : undefined;
+  }, [getHtml, isEnabled], THROTTLE);
+
+  const getEmojiCode = useDerivedSignal(
+    detectEmojiCodeThrottled, [detectEmojiCodeThrottled, getHtml], true,
+  );
+
+  const updateFiltered = useCallback((emojis: Emoji[]) => {
+    setFilteredEmojis(emojis);
+
+    if (emojis === MEMO_EMPTY_ARRAY) {
+      setFilteredCustomEmojis(MEMO_EMPTY_ARRAY);
+      return;
+    }
+
+    const nativeEmojis = emojis.map((emoji) => emoji.native);
     const customEmojis = uniqueByField(
-      selectCustomEmojiForEmojis(getGlobal(), filteredEmojis.map((emoji) => emoji.native)),
+      selectCustomEmojiForEmojis(getGlobal(), nativeEmojis),
       'id',
     );
     setFilteredCustomEmojis(customEmojis);
-  }, [filteredEmojis, isDisabled]);
+  }, []);
+
+  const insertEmoji = useCallback((emoji: string | ApiSticker, isForce = false) => {
+    const html = getHtml();
+    if (!html) return;
+
+    const atIndex = html.lastIndexOf(':', isForce ? html.lastIndexOf(':') - 1 : undefined);
+
+    if (atIndex !== -1) {
+      const emojiHtml = typeof emoji === 'string' ? renderText(emoji, ['emoji_html']) : buildCustomEmojiHtml(emoji);
+      setHtml(`${html.substring(0, atIndex)}${emojiHtml}`);
+
+      const messageInput = inputId === EDITABLE_INPUT_ID
+        ? document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!
+        : document.getElementById(inputId) as HTMLDivElement;
+
+      requestAnimationFrame(() => {
+        focusEditableElement(messageInput, true, true);
+      });
+    }
+
+    updateFiltered(MEMO_EMPTY_ARRAY);
+  }, [getHtml, setHtml, inputId, updateFiltered]);
 
   useEffect(() => {
-    if (!isAllowed || !html || !byId || isDisabled) {
-      unmarkIsOpen();
+    const emojiCode = getEmojiCode();
+    if (!emojiCode || !byId) {
+      updateFiltered(MEMO_EMPTY_ARRAY);
       return;
     }
 
-    const code = html.includes(':') && getEmojiCode(html);
-    if (!code) {
-      setFilteredEmojis(MEMO_EMPTY_ARRAY);
-      unmarkIsOpen();
-      return;
-    }
+    const newShouldAutoInsert = emojiCode.length > 2 && emojiCode.endsWith(':');
 
-    const forceSend = code.length > 2 && code.endsWith(':');
-    const filter = code.substr(1, forceSend ? code.length - 2 : undefined);
+    const filter = emojiCode.substring(1, newShouldAutoInsert ? 1 + emojiCode.length - 2 : undefined);
     let matched: Emoji[] = MEMO_EMPTY_ARRAY;
-
-    setShouldForceInsertEmoji(forceSend);
 
     if (!filter) {
       matched = prepareRecentEmojisMemo(byId, recentEmojiIds, EMOJIS_LIMIT);
@@ -121,77 +146,28 @@ export default function useEmojiTooltip(
       matched = searchInLibraryMemo(library, filter, EMOJIS_LIMIT);
     }
 
-    if (matched.length) {
-      if (!forceSend) {
-        markIsOpen();
-      }
-      setFilteredEmojis(matched);
+    if (!matched.length) {
+      return;
+    }
+
+    if (newShouldAutoInsert) {
+      insertEmoji(matched[0].native, true);
     } else {
-      unmarkIsOpen();
+      updateFiltered(matched);
     }
   }, [
-    byId, html, isAllowed, markIsOpen, recentEmojiIds, unmarkIsOpen, setShouldForceInsertEmoji,
-    isDisabled, baseEmojiKeywords, emojiKeywords, setFilteredEmojis,
+    baseEmojiKeywords, byId, getEmojiCode, emojiKeywords, insertEmoji, recentEmojiIds, updateFiltered,
   ]);
 
-  const insertEmoji = useCallback((textEmoji: string, isForce?: boolean) => {
-    const currentHtml = htmlRef.current;
-    const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
-    if (atIndex !== -1) {
-      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${renderText(textEmoji, ['emoji_html'])}`);
-      let messageInput: HTMLDivElement;
-      if (inputId === EDITABLE_INPUT_ID) {
-        messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
-      } else {
-        messageInput = document.getElementById(inputId) as HTMLDivElement;
-      }
-      requestAnimationFrame(() => {
-        focusEditableElement(messageInput, true, true);
-      });
-    }
-
-    unmarkIsOpen();
-  }, [htmlRef, inputId, onUpdateHtml, unmarkIsOpen]);
-
-  const insertCustomEmoji = useCallback((emoji: ApiSticker, isForce?: boolean) => {
-    const currentHtml = htmlRef.current;
-    const atIndex = currentHtml.lastIndexOf(':', isForce ? currentHtml.lastIndexOf(':') - 1 : undefined);
-    if (atIndex !== -1) {
-      onUpdateHtml(`${currentHtml.substr(0, atIndex)}${buildCustomEmojiHtml(emoji)}`);
-      let messageInput: HTMLDivElement;
-      if (inputId === EDITABLE_INPUT_ID) {
-        messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
-      } else {
-        messageInput = document.getElementById(inputId) as HTMLDivElement;
-      }
-      requestAnimationFrame(() => {
-        focusEditableElement(messageInput, true, true);
-      });
-    }
-
-    unmarkIsOpen();
-  }, [htmlRef, inputId, onUpdateHtml, unmarkIsOpen]);
-
-  useEffect(() => {
-    if (isOpen && shouldForceInsertEmoji && filteredEmojis.length) {
-      insertEmoji(filteredEmojis[0].native, true);
-    }
-  }, [filteredEmojis, insertEmoji, isOpen, shouldForceInsertEmoji]);
+  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 
   return {
-    isEmojiTooltipOpen: isOpen,
-    closeEmojiTooltip: unmarkIsOpen,
+    isEmojiTooltipOpen: Boolean(filteredEmojis.length || filteredCustomEmojis.length) && !isManuallyClosed,
+    closeEmojiTooltip: markManuallyClosed,
     filteredEmojis,
     filteredCustomEmojis,
     insertEmoji,
-    insertCustomEmoji,
   };
-}
-
-function getEmojiCode(html: string) {
-  const emojis = prepareForRegExp(html).match(RE_EMOJI_SEARCH);
-
-  return emojis ? emojis[0].trim() : undefined;
 }
 
 async function ensureEmojiData() {

@@ -164,7 +164,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     });
   };
 
-  // TODO: Refactoring for action rendering
+  // TODO Refactoring for action rendering
   const shouldSkipRender = isInsideTopic && message.content.action?.text === 'TopicWasCreatedAction';
   if (shouldSkipRender) {
     return <span ref={ref} />;

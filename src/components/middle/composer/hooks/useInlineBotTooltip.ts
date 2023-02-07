@@ -1,11 +1,17 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
-import { getActions } from '../../../../global';
-import type { InlineBotSettings } from '../../../../types';
-import useFlag from '../../../../hooks/useFlag';
-import usePrevious from '../../../../hooks/usePrevious';
-import useDebouncedMemo from '../../../../hooks/useDebouncedMemo';
 
-const DEBOUNCE_MS = 300;
+import type { InlineBotSettings } from '../../../../types';
+import type { Signal } from '../../../../util/signals';
+
+import { getActions } from '../../../../global';
+import memoized from '../../../../util/memoized';
+
+import useFlag from '../../../../hooks/useFlag';
+import useDerivedState from '../../../../hooks/useDerivedState';
+import useSyncEffect from '../../../../hooks/useSyncEffect';
+import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+
+const THROTTLE = 300;
 const INLINE_BOT_QUERY_REGEXP = /^@([a-z0-9_]{1,32})[\u00A0\u0020]+(.*)/i;
 const HAS_NEW_LINE = /^@([a-z0-9_]{1,32})[\u00A0\u0020]+\n{2,}/i;
 const MEMO_NO_RESULT = {
@@ -18,20 +24,40 @@ const MEMO_NO_RESULT = {
 const tempEl = document.createElement('div');
 
 export default function useInlineBotTooltip(
-  isAllowed: boolean,
+  isEnabled: boolean,
   chatId: string,
-  html: string,
+  getHtml: Signal<string>,
   inlineBots?: Record<string, false | InlineBotSettings>,
 ) {
   const { queryInlineBot, resetInlineBot, resetAllInlineBots } = getActions();
 
-  const [isOpen, markIsOpen, unmarkIsOpen] = useFlag();
+  const [isManuallyClosed, markManuallyClosed, unmarkManuallyClosed] = useFlag(false);
+
+  const extractBotQueryThrottled = useThrottledResolver(() => {
+    const html = getHtml();
+    return isEnabled && html.startsWith('@') ? parseBotQuery(html) : MEMO_NO_RESULT;
+  }, [getHtml, isEnabled], THROTTLE);
   const {
     username, query, canShowHelp, usernameLowered,
-  } = useDebouncedMemo(() => parseBotQuery(html), DEBOUNCE_MS, [html]) || {};
-  const prevQuery = usePrevious(query);
-  const prevUsername = usePrevious(username);
-  const inlineBotData = usernameLowered ? inlineBots?.[usernameLowered] : undefined;
+  } = useDerivedState(extractBotQueryThrottled, [extractBotQueryThrottled, getHtml], true);
+
+  useSyncEffect(([prevUsername]) => {
+    if (prevUsername) {
+      resetInlineBot({ username: prevUsername });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username, resetInlineBot] as const);
+
+  useEffect(() => {
+    if (!usernameLowered) return;
+
+    queryInlineBot({
+      chatId, username: usernameLowered, query,
+    });
+  }, [chatId, query, queryInlineBot, usernameLowered]);
+
+  useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
+
   const {
     id: botId,
     switchPm,
@@ -39,13 +65,9 @@ export default function useInlineBotTooltip(
     results,
     isGallery,
     help,
-  } = inlineBotData || {};
+  } = (usernameLowered && inlineBots?.[usernameLowered]) || {};
 
-  useEffect(() => {
-    if (prevQuery !== query) {
-      unmarkIsOpen();
-    }
-  }, [prevQuery, query, unmarkIsOpen]);
+  const isOpen = Boolean((results?.length || switchPm) && !isManuallyClosed);
 
   useEffect(() => {
     if (!isOpen && !username) {
@@ -53,43 +75,32 @@ export default function useInlineBotTooltip(
     }
   }, [isOpen, resetAllInlineBots, username]);
 
-  useEffect(() => {
-    if (isAllowed && usernameLowered && chatId) {
-      queryInlineBot({ chatId, username: usernameLowered, query: query! });
-    }
-  }, [query, isAllowed, queryInlineBot, chatId, usernameLowered]);
-
   const loadMore = useCallback(() => {
-    if (isAllowed && usernameLowered && chatId) {
-      queryInlineBot({
-        chatId, username: usernameLowered, query: query!, offset,
-      });
-    }
-  }, [isAllowed, usernameLowered, chatId, queryInlineBot, query, offset]);
+    if (!usernameLowered) return;
 
-  useEffect(() => {
-    if (isAllowed && botId && (switchPm || (results?.length))) {
-      markIsOpen();
-    } else {
-      unmarkIsOpen();
-    }
-  }, [botId, isAllowed, markIsOpen, results, switchPm, unmarkIsOpen]);
-
-  if (prevUsername !== username) {
-    resetInlineBot({ username: prevUsername! });
-  }
+    queryInlineBot({
+      chatId, username: usernameLowered, query, offset,
+    });
+  }, [chatId, offset, query, queryInlineBot, usernameLowered]);
 
   return {
     isOpen,
-    id: botId,
+    botId,
     isGallery,
     switchPm,
     results,
-    closeTooltip: unmarkIsOpen,
+    closeTooltip: markManuallyClosed,
     help: canShowHelp && help ? `@${username} ${help}` : undefined,
     loadMore,
   };
 }
+
+const buildQueryStateMemo = memoized((username: string, query: string, canShowHelp: boolean) => ({
+  username,
+  query,
+  canShowHelp,
+  usernameLowered: username.toLowerCase(),
+}));
 
 function parseBotQuery(html: string) {
   if (!html.startsWith('@')) {
@@ -102,12 +113,7 @@ function parseBotQuery(html: string) {
     return MEMO_NO_RESULT;
   }
 
-  return {
-    username: result[1],
-    query: result[2],
-    canShowHelp: result[2] === '' && !text.match(HAS_NEW_LINE),
-    usernameLowered: result[1].toLowerCase(),
-  };
+  return buildQueryStateMemo(result[1], result[2], result[2] === '' && !text.match(HAS_NEW_LINE));
 }
 
 function getPlainText(html: string) {
