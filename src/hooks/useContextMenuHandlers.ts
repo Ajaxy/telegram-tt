@@ -7,6 +7,7 @@ import {
 } from '../util/environment';
 
 const LONG_TAP_DURATION_MS = 200;
+const IOS_PWA_CONTEXT_MENU_DELAY_MS = 100;
 
 function stopEvent(e: Event) {
   e.stopImmediatePropagation();
@@ -83,17 +84,34 @@ const useContextMenuHandlers = (
       }
 
       // Temporarily intercept and clear the next click
-      element.addEventListener('touchend', function cancelClickOnce(e) {
-        element.removeEventListener('touchend', cancelClickOnce, true);
+      element.addEventListener('touchend', (e) => {
+        // On iOS in PWA mode, the context menu may cause click-through to the element in the menu upon opening
+        if (IS_IOS && IS_PWA) {
+          setTimeout(() => {
+            element.removeEventListener('mousedown', stopEvent, {
+              capture: true,
+            });
+            element.removeEventListener('click', stopEvent, {
+              capture: true,
+            });
+          }, IOS_PWA_CONTEXT_MENU_DELAY_MS);
+        }
         stopEvent(e);
-      }, true);
+      }, {
+        once: true,
+        capture: true,
+      });
 
       // On iOS15, in PWA mode, the context menu immediately closes after opening
       if (IS_PWA && IS_IOS) {
-        element.addEventListener('mousedown', function cancelClickOnce(e) {
-          element.removeEventListener('mousedown', cancelClickOnce, true);
-          stopEvent(e);
-        }, true);
+        element.addEventListener('mousedown', stopEvent, {
+          once: true,
+          capture: true,
+        });
+        element.addEventListener('click', stopEvent, {
+          once: true,
+          capture: true,
+        });
       }
 
       setIsContextMenuOpen(true);
