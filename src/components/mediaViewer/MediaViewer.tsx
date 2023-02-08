@@ -304,6 +304,7 @@ const MediaViewer: FC<StateProps> = ({
       id="MediaViewer"
       isOpen={isOpen}
       isHidden={isHidden}
+      shouldAnimateFirstRender
       noCloseTransition={shouldSkipHistoryAnimations}
     >
       <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
