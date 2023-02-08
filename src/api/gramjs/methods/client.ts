@@ -192,6 +192,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   shouldThrow?: boolean,
   shouldIgnoreUpdates?: undefined,
   dcId?: number,
+  shouldIgnoreErrors?: boolean,
 ): Promise<true | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
@@ -200,6 +201,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   shouldThrow?: boolean,
   shouldIgnoreUpdates?: boolean,
   dcId?: number,
+  shouldIgnoreErrors?: boolean,
 ): Promise<T['__response'] | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
@@ -208,6 +210,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   shouldThrow = false,
   shouldIgnoreUpdates = false,
   dcId?: number,
+  shouldIgnoreErrors = false,
 ) {
   if (!isConnected) {
     if (DEBUG) {
@@ -234,6 +237,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
     return shouldReturnTrue ? result && true : result;
   } catch (err: any) {
+    if (shouldIgnoreErrors) return undefined;
     if (DEBUG) {
       log('INVOKE ERROR', request.className);
       // eslint-disable-next-line no-console

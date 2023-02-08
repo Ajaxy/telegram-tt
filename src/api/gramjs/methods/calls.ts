@@ -226,7 +226,7 @@ export function toggleGroupCallStartSubscription({
   return invokeRequest(new GramJs.phone.ToggleGroupCallStartSubscription({
     call: buildInputGroupCall(call),
     subscribed,
-  }), true);
+  }), true, undefined, undefined, undefined, true);
 }
 
 export function leaveGroupCallPresentation({
