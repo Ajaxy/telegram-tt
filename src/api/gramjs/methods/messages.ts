@@ -1374,7 +1374,7 @@ export async function fetchSendAs({
 }) {
   const result = await invokeRequest(new GramJs.channels.GetSendAs({
     peer: buildInputPeer(chat.id, chat.accessHash),
-  }));
+  }), undefined, undefined, undefined, undefined, true);
 
   if (!result) {
     return undefined;
