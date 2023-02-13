@@ -48,8 +48,6 @@ import {
   selectFirstUnreadId,
   selectChat,
   selectIsServiceChatReady,
-  selectLocalAnimatedEmojiEffect,
-  selectLocalAnimatedEmoji,
   selectThreadIdFromMessage,
   selectTopicFromMessage,
   selectTabState,
@@ -153,13 +151,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         // Workaround for a weird behavior when interaction is received after watching reaction
         if (getMessageText(message) !== update.emoji) return;
 
-        const localEmoji = selectLocalAnimatedEmoji(global, update.emoji);
-
         const tabState = selectTabState(global, tabId);
         global = updateTabState(global, {
           activeEmojiInteractions: [...(tabState.activeEmojiInteractions || []), {
             id: tabState.activeEmojiInteractions?.length || 0,
-            animatedEffect: localEmoji ? selectLocalAnimatedEmojiEffect(localEmoji) : update.emoji,
+            animatedEffect: update.emoji,
             messageId: update.messageId,
           } as ActiveEmojiInteraction],
         }, tabId);

@@ -133,20 +133,6 @@ export function selectAnimatedEmojiSound<T extends GlobalState>(global: T, emoji
   return global?.appConfig?.emojiSounds[cleanEmoji(emoji)];
 }
 
-export function selectLocalAnimatedEmoji<T extends GlobalState>(global: T, emoji: string) {
-  const cleanedEmoji = cleanEmoji(emoji);
-
-  return cleanedEmoji === '🍑' ? 'Peach' : (cleanedEmoji === '🍆' ? 'Eggplant' : undefined);
-}
-
-export function selectLocalAnimatedEmojiEffect(emoji: string) {
-  return emoji === 'Eggplant' ? 'Cumshot' : undefined;
-}
-
-export function selectLocalAnimatedEmojiEffectByName(name: string) {
-  return name === 'Cumshot' ? '🍆' : undefined;
-}
-
 export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
   global: T, stickerSet: ApiStickerSetInfo | ApiStickerSet,
 ) {

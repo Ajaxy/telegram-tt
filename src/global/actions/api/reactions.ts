@@ -6,7 +6,6 @@ import {
   selectChat,
   selectChatMessage, selectCurrentChat, selectTabState,
   selectDefaultReaction,
-  selectLocalAnimatedEmojiEffectByName,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
   selectCurrentMessageList,
@@ -52,12 +51,12 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
 
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {
   const {
-    emoji, x, y, localEffect, startSize, isReversed, tabId = getCurrentTabId(),
+    emoji, x, y, startSize, isReversed, tabId = getCurrentTabId(),
   } = payload!;
 
   const activeEmojiInteraction = {
     id: interactionLocalId++,
-    animatedEffect: emoji || localEffect,
+    animatedEffect: emoji,
     x: subtractXForEmojiInteraction(global, x) + Math.random()
       * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
     y: y + Math.random() * INTERACTION_RANDOM_OFFSET - INTERACTION_RANDOM_OFFSET / 2,
@@ -72,19 +71,19 @@ addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): Action
 
 addActionHandler('sendEmojiInteraction', (global, actions, payload): ActionReturnType => {
   const {
-    messageId, chatId, emoji, interactions, localEffect,
+    messageId, chatId, emoji, interactions,
   } = payload!;
 
   const chat = selectChat(global, chatId);
 
-  if (!chat || (!emoji && !localEffect) || chatId === global.currentUserId) {
+  if (!chat || !emoji || chatId === global.currentUserId) {
     return;
   }
 
   void callApi('sendEmojiInteraction', {
     chat,
     messageId,
-    emoticon: emoji || selectLocalAnimatedEmojiEffectByName(localEffect!)!,
+    emoticon: emoji,
     timestamps: interactions,
   });
 });
