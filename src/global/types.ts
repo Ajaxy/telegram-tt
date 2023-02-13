@@ -1167,7 +1167,6 @@ export interface ActionPayloads {
     emoji: string;
     x: number;
     y: number;
-    localEffect?: string;
     startSize: number;
     isReversed?: boolean;
   } & WithTabId;
@@ -1181,7 +1180,6 @@ export interface ActionPayloads {
     chatId: string;
     emoji: string;
     interactions: number[];
-    localEffect?: string;
   };
   sendWatchingEmojiInteraction: {
     chatId: string;

@@ -19,10 +19,6 @@ import VoiceMini from '../../../assets/tgs/calls/VoiceMini.tgs';
 import VoiceMuted from '../../../assets/tgs/calls/VoiceMuted.tgs';
 import VoiceOutlined from '../../../assets/tgs/calls/VoiceOutlined.tgs';
 
-import Peach from '../../../assets/tgs/animatedEmojis/Peach.tgs';
-import Eggplant from '../../../assets/tgs/animatedEmojis/Eggplant.tgs';
-import Cumshot from '../../../assets/tgs/animatedEmojis/Cumshot.tgs';
-
 import JoinRequest from '../../../assets/tgs/invites/Requests.tgs';
 import Invite from '../../../assets/tgs/invites/Invite.tgs';
 
@@ -45,9 +41,6 @@ export const LOCAL_TGS_URLS = {
   VoiceMini,
   VoiceMuted,
   VoiceOutlined,
-  Peach,
-  Eggplant,
-  Cumshot,
   JoinRequest,
   Invite,
   QrPlane,

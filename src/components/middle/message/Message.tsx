@@ -59,7 +59,6 @@ import {
   selectDefaultReaction,
   selectReplySender,
   selectAnimatedEmoji,
-  selectLocalAnimatedEmoji,
   selectIsCurrentUserPremium,
   selectIsChatProtected,
   selectTopicFromMessage,
@@ -1262,9 +1261,7 @@ export default memo(withGlobal<OwnProps>(
     const { query: highlight } = selectCurrentTextSearch(global) || {};
 
     const singleEmoji = getMessageSingleRegularEmoji(message);
-    const animatedEmoji = singleEmoji && (
-      selectAnimatedEmoji(global, singleEmoji) || selectLocalAnimatedEmoji(global, singleEmoji)
-    ) ? singleEmoji : undefined;
+    const animatedEmoji = singleEmoji && selectAnimatedEmoji(global, singleEmoji) ? singleEmoji : undefined;
     const animatedCustomEmoji = getMessageSingleCustomEmoji(message);
 
     let isSelected: boolean;
