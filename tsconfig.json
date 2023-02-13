@@ -26,5 +26,6 @@
     "tests",
     "plugins",
     "dev",
+    "webpack.config.js",
   ]
 }

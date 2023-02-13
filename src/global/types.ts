@@ -2098,6 +2098,11 @@ export interface ActionPayloads {
   } & WithTabId;
   dismissNotification: { localId: string } & WithTabId;
 
+  updatePageTitle: {
+    isInactive?: boolean;
+    notificationCount?: number;
+  } & WithTabId | undefined;
+
   // Calls
   joinGroupCall: {
     chatId?: string;

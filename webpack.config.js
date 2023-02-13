@@ -23,7 +23,12 @@ const {
 
 dotenv.config();
 
-const { BASE_URL = 'https://web.telegram.org/z/' } = process.env;
+const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
+
+const {
+  BASE_URL = 'https://web.telegram.org/z/',
+  APP_TITLE = DEFAULT_APP_TITLE,
+} = process.env;
 
 module.exports = (_env, { mode = 'production' }) => {
   return {
@@ -34,7 +39,7 @@ module.exports = (_env, { mode = 'production' }) => {
     devServer: {
       port: 1234,
       host: '0.0.0.0',
-      allowedHosts: "all",
+      allowedHosts: 'all',
       hot: false,
       static: [
         {
@@ -99,9 +104,9 @@ module.exports = (_env, { mode = 'production' }) => {
                 modules: {
                   exportLocalsConvention: 'camelCase',
                   auto: true,
-                  localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]'
-                }
-              }
+                  localIdentName: mode === 'production' ? '[hash:base64]' : '[name]__[local]',
+                },
+              },
             },
             'postcss-loader',
             'sass-loader',
@@ -136,15 +141,15 @@ module.exports = (_env, { mode = 'production' }) => {
     plugins: [
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
-        /highlight\.js[\\\/]lib[\\\/]languages/,
-        /^((?!\.js\.js).)*$/
+        /highlight\.js[\\/]lib[\\/]languages/,
+        /^((?!\.js\.js).)*$/,
       ),
       ...(APP_MOCKED_CLIENT === '1' ? [new NormalModuleReplacementPlugin(
-        /src[\\\/]lib[\\\/]gramjs[\\\/]client[\\\/]TelegramClient\.js/,
-        './MockClient.ts'
+        /src[\\/]lib[\\/]gramjs[\\/]client[\\/]TelegramClient\.js/,
+        './MockClient.ts',
       )] : []),
       new HtmlWebpackPlugin({
-        appName: APP_ENV === 'production' ? 'Telegram Web' : 'Telegram Web Beta',
+        appTitle: APP_TITLE,
         appleIcon: APP_ENV === 'production' ? 'apple-touch-icon' : 'apple-touch-icon-dev',
         mainIcon: APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
         manifest: APP_ENV === 'production' ? 'site.webmanifest' : 'site_dev.webmanifest',
@@ -159,11 +164,14 @@ module.exports = (_env, { mode = 'production' }) => {
       new EnvironmentPlugin({
         APP_ENV,
         APP_MOCKED_CLIENT,
+        // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
         APP_VERSION: appVersion,
+        APP_TITLE,
         RELEASE_DATETIME: Date.now(),
         TELEGRAM_T_API_ID: undefined,
         TELEGRAM_T_API_HASH: undefined,
+        // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
       }),
       new DefinePlugin({
@@ -193,7 +201,7 @@ module.exports = (_env, { mode = 'production' }) => {
     ...(APP_ENV !== 'production' && {
       optimization: {
         chunkIds: 'named',
-      }
+      },
     }),
   };
 };

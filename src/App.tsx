@@ -5,8 +5,8 @@ import { getActions, withGlobal } from './global';
 import type { GlobalState } from './global/types';
 import type { UiLoaderPage } from './components/common/UiLoader';
 
-import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/environment';
+import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { selectTabState } from './global/selectors';
 import { updateSizes } from './util/windowSize';
 import { addActiveTabChangeListener } from './util/activeTabMonitor';
@@ -40,6 +40,8 @@ enum AppScreens {
   inactive,
 }
 
+const INACTIVE_PAGE_TITLE = `${PAGE_TITLE} ${INACTIVE_MARKER}`;
+
 const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
@@ -47,7 +49,7 @@ const App: FC<StateProps> = ({
   hasWebAuthTokenFailed,
   isInactiveAuth,
 }) => {
-  const { disconnect } = getActions();
+  const { disconnect, updatePageTitle } = getActions();
 
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
@@ -144,20 +146,20 @@ const App: FC<StateProps> = ({
 
     addActiveTabChangeListener(() => {
       disconnect();
-      document.title = `${PAGE_TITLE}${INACTIVE_MARKER}`;
+      document.title = INACTIVE_PAGE_TITLE;
 
       markInactive();
     });
-  }, [activeKey, disconnect, markInactive]);
+  }, [activeKey, disconnect, markInactive, updatePageTitle]);
 
   useEffect(() => {
     if (isInactiveAuth) {
-      document.title = `${PAGE_TITLE}${INACTIVE_MARKER}`;
+      document.title = INACTIVE_PAGE_TITLE;
       markInactive();
     } else {
       unmarkInactive();
     }
-  }, [isInactiveAuth, markInactive, unmarkInactive]);
+  }, [isInactiveAuth, markInactive, unmarkInactive, updatePageTitle]);
 
   const prevActiveKey = usePrevious(activeKey);
 
