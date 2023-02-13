@@ -1,6 +1,6 @@
 .root {
   --radius: 0.5rem;
-  --first-column-background-color: var(--color-item-active);
+  --first-column-background-color: var(--color-background-selected);
 
   :global(.is-ios) & {
     --radius: 0.75rem;
@@ -19,8 +19,24 @@
 
   pointer-events: none;
 
-  &:hover {
-    --first-column-background-color: var(--color-borders);
+  @media (hover: hover) {
+    :global(.ListItem-button:hover) & {
+      --first-column-background-color: var(--color-forum-unread-topic-hover);
+    }
+
+    &:hover {
+      --first-column-background-color: var(--color-forum-hover-unread-topic-hover) !important;
+    }
+  }
+
+  @media not (hover: hover) {
+    :global(.ListItem-button:active) & {
+      --first-column-background-color: var(--color-forum-unread-topic-hover);
+    }
+
+    &:active {
+      --first-column-background-color: var(--color-forum-hover-unread-topic-hover) !important;
+    }
   }
 }
 
@@ -52,7 +68,6 @@
   }
 
   &.main-column, &.last-message, .after-wrapper {
-    transition: background-color 0.15s ease-in-out;
     background: var(--first-column-background-color);
   }
 }
