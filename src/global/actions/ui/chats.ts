@@ -66,6 +66,8 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     }
   }
 
+  actions.updatePageTitle({ tabId });
+
   return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory, tabId);
 });
 

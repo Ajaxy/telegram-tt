@@ -19,8 +19,8 @@ export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebZ-Beta-04-01';
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;
 
-export const PAGE_TITLE = 'Telegram';
-export const INACTIVE_MARKER = ' [Inactive]';
+export const PAGE_TITLE = process.env.APP_TITLE!;
+export const INACTIVE_MARKER = '[Inactive]';
 
 export const DEBUG_PAYMENT_SMART_GLOCAL = false;
 

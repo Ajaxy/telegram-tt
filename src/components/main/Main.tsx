@@ -13,7 +13,7 @@ import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
 
 import '../../global/actions/all';
 import {
-  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, PAGE_TITLE,
+  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
 } from '../../config';
 import { IS_ANDROID } from '../../util/environment';
 import {
@@ -43,7 +43,6 @@ import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
 import useAppLayout from '../../hooks/useAppLayout';
-import updatePageTitle from '../../util/updatePageTitle';
 import updateIcon from '../../util/updateIcon';
 
 import StickerSetModal from '../common/StickerSetModal.async';
@@ -214,6 +213,7 @@ const Main: FC<OwnProps & StateProps> = ({
     openChat,
     toggleLeftColumn,
     loadRecentEmojiStatuses,
+    updatePageTitle,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -415,11 +415,11 @@ const Main: FC<OwnProps & StateProps> = ({
     onTabFocusChange({ isBlurred: false });
 
     if (!document.title.includes(INACTIVE_MARKER)) {
-      updatePageTitle(PAGE_TITLE);
+      updatePageTitle();
     }
 
     updateIcon(false);
-  }, [onTabFocusChange]);
+  }, [onTabFocusChange, updatePageTitle]);
 
   const handleStickerSetModalClose = useCallback(() => {
     closeStickerSetModal();

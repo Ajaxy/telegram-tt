@@ -1,24 +1,26 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addCallback } from '../../../lib/teact/teactn';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 
 import type { ApiError, ApiNotification } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
+import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
   APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
 } from '../../../config';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
-  selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectIsTrustedBot,
+  selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectIsTrustedBot, selectChat,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { unique } from '../../../util/iteratees';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import updateIcon from '../../../util/updateIcon';
-import updatePageTitle from '../../../util/updatePageTitle';
-import type { ActionReturnType, GlobalState } from '../../types';
+import setPageTitle from '../../../util/updatePageTitle';
 import { updateTabState } from '../../reducers/tabs';
-import { addCallback } from '../../../lib/teact/teactn';
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 
 export const APP_VERSION_URL = 'version.txt';
@@ -601,29 +603,61 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
   };
 });
 
+addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType => {
+  const { isInactive, notificationCount, tabId = getCurrentTabId() } = payload || {};
+
+  if (isInactive) {
+    setPageTitle(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
+    return;
+  }
+
+  if (notificationCount) {
+    setPageTitle(`${notificationCount} notification${notificationCount > 1 ? 's' : ''}`);
+    return;
+  }
+
+  const messageList = selectCurrentMessageList(global, tabId);
+  if (messageList) {
+    const { chatId, threadId } = messageList;
+    const currentChat = selectChat(global, chatId);
+    if (currentChat) {
+      if (currentChat.isForum && currentChat.topics?.[threadId]) {
+        setPageTitle(`${currentChat.title} › ${currentChat.topics[threadId].title}`);
+        return;
+      }
+
+      setPageTitle(currentChat.title);
+      return;
+    }
+  }
+
+  setPageTitle(PAGE_TITLE);
+});
+
 addCallback((global: GlobalState) => {
   if (global.notificationIndex === undefined || global.allNotificationsCount === undefined) return;
+  const { updatePageTitle } = getActions();
 
   const index = global.notificationIndex;
   const allNotificationsCount = global.allNotificationsCount;
 
   if (document.title.includes(INACTIVE_MARKER) || !global.initialUnreadNotifications) {
     updateIcon(false);
-    updatePageTitle(PAGE_TITLE);
+    updatePageTitle();
     return;
   }
 
   if (index % 2 === 0) {
     const newUnread = allNotificationsCount - global.initialUnreadNotifications;
     if (newUnread > 0) {
-      updatePageTitle(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
+      updatePageTitle({
+        notificationCount: newUnread,
+      });
       updateIcon(true);
-    } else {
-      updatePageTitle(PAGE_TITLE);
-      updateIcon(false);
+      return;
     }
-  } else {
-    updatePageTitle(PAGE_TITLE);
-    updateIcon(false);
   }
+
+  updatePageTitle();
+  updateIcon(false);
 });
