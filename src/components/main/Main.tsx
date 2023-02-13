@@ -222,15 +222,16 @@ const Main: FC<OwnProps & StateProps> = ({
     console.log('>>> RENDER MAIN');
   }
 
-  // If you open the chat in the mobile version, switch to the desktop version, close the chat and
-  // switch back to the mobile version, you get a blank screen
   const { isDesktop } = useAppLayout();
   useEffect(() => {
-    const areColumnsConflicting = isLeftColumnOpen === isMiddleColumnOpen;
-    if (areColumnsConflicting && !isDesktop) {
+    if (!isLeftColumnOpen && !isMiddleColumnOpen && !isDesktop) {
+      // Always display at least one column
+      toggleLeftColumn();
+    } else if (isLeftColumnOpen && isMiddleColumnOpen && isMobile) {
+      // Can't have two active columns at the same time
       toggleLeftColumn();
     }
-  }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, toggleLeftColumn]);
+  }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
 
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 
