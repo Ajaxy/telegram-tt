@@ -42,6 +42,14 @@ export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
 
+export enum MouseButton {
+  Main = 0,
+  Auxiliary = 1,
+  Secondary = 2,
+  Fourth = 3,
+  Fifth = 4,
+}
+
 export const IS_PWA = (
   window.matchMedia('(display-mode: standalone)').matches
   || (window.navigator as any).standalone

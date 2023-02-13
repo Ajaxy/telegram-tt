@@ -1489,6 +1489,7 @@ export interface ActionPayloads {
   } & WithTabId;
   openChatInNewTab: {
     chatId: string;
+    threadId?: number;
   };
   onTabFocusChange: {
     isBlurred: boolean;

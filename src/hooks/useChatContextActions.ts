@@ -2,6 +2,7 @@ import { useMemo } from '../lib/teact/teact';
 import { getActions } from '../global';
 
 import type { ApiChat, ApiUser } from '../api/types';
+import type { MenuItemContextAction } from '../components/ui/ListItem';
 
 import { IS_MULTITAB_SUPPORTED } from '../util/environment';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
@@ -57,6 +58,8 @@ const useChatContextActions = ({
         openChatInNewTab({ chatId: chat.id });
       },
     };
+
+    const newTabActionSeparator = actionOpenInNewTab && { isSeparator: true, key: 'newTabSeparator' };
 
     const actionAddToFolder = canChangeFolder ? {
       title: lang('ChatList.Filter.AddToFolder'),
@@ -119,6 +122,7 @@ const useChatContextActions = ({
 
     return compact([
       actionOpenInNewTab,
+      newTabActionSeparator,
       actionAddToFolder,
       actionMaskAsRead,
       actionMarkAsUnread,
@@ -127,7 +131,7 @@ const useChatContextActions = ({
       !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       actionReport,
       actionDelete,
-    ]);
+    ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
     handleDelete, handleReport, folderId, isSelf, isServiceNotifications,

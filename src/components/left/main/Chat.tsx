@@ -1,7 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat,
@@ -17,6 +17,7 @@ import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
+import { IS_MULTITAB_SUPPORTED } from '../../../util/environment';
 import {
   isUserId,
   getPrivateChatUserId,
@@ -37,6 +38,7 @@ import {
   selectThreadParam, selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { createLocationHash } from '../../../util/routing';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
@@ -225,6 +227,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     <ListItem
       ref={ref}
       className={className}
+      href={IS_MULTITAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}` : undefined}
       style={`top: ${offsetTop}px`}
       ripple={!isForum && !isMobile}
       contextActions={contextActions}
