@@ -24,6 +24,7 @@ type OwnProps = {
   isOpen: boolean;
   id?: string;
   className?: string;
+  bubbleClassName?: string;
   style?: string;
   bubbleStyle?: string;
   ariaLabelledBy?: string;
@@ -54,6 +55,7 @@ const Menu: FC<OwnProps> = ({
   isOpen,
   id,
   className,
+  bubbleClassName,
   style,
   bubbleStyle,
   ariaLabelledBy,
@@ -116,12 +118,13 @@ const Menu: FC<OwnProps> = ({
     noCloseOnBackdrop ? undefined : onClose,
   );
 
-  const bubbleClassName = buildClassName(
+  const bubbleFullClassName = buildClassName(
     'bubble menu-container custom-scroll',
     positionY,
     positionX,
     footer && 'with-footer',
     transitionClassNames,
+    bubbleClassName,
   );
 
   const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
@@ -154,7 +157,7 @@ const Menu: FC<OwnProps> = ({
       <div
         role="presentation"
         ref={menuRef}
-        className={bubbleClassName}
+        className={bubbleFullClassName}
         style={buildStyle(
           `transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY}`,
           bubbleStyle,

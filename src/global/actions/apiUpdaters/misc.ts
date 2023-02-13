@@ -38,6 +38,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.loadRecentStickers();
       break;
 
+    case 'updateRecentEmojiStatuses':
+      actions.loadRecentEmojiStatuses();
+      break;
+
     case 'updateMoveStickerSetToTop': {
       const oldOrder = update.isCustomEmoji ? global.customEmojis.added.setIds : global.stickers.added.setIds;
       if (!oldOrder) return global;

@@ -21,7 +21,7 @@ import useCustomEmoji from '../../common/hooks/useCustomEmoji';
 import CustomEmoji from '../../common/CustomEmoji';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import AnimatedSticker from '../../common/AnimatedSticker';
-import CustomReactionAnimation from './CustomReactionAnimation';
+import CustomEmojiEffect from './CustomEmojiEffect';
 
 import styles from './ReactionAnimatedEmoji.module.scss';
 
@@ -136,7 +136,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             onEnded={handleEnded}
           />
           {isCustom ? (
-            !assignedEffectId && isIntersecting && <CustomReactionAnimation reaction={reaction} />
+            !assignedEffectId && isIntersecting && <CustomEmojiEffect reaction={reaction} />
           ) : (
             <AnimatedSticker
               key={centerIconId}

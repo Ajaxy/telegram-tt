@@ -13,7 +13,6 @@ import generateIdFor from '../../util/generateIdFor';
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useSyncEffect from '../../hooks/useSyncEffect';
-import useAppLayout from '../../hooks/useAppLayout';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -89,8 +88,8 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const containerId = useMemo(() => generateIdFor(ID_STORE, true), []);
 
-  const { isMobile } = useAppLayout();
   const [animation, setAnimation] = useState<RLottieInstance>();
+  const animationRef = useRef<RLottieInstance>();
   const wasPlaying = useRef(false);
   const isFrozen = useRef(false);
   const isFirstRender = useRef(true);
@@ -140,7 +139,6 @@ const AnimatedSticker: FC<OwnProps> = ({
           quality,
           isLowPriority,
           coords: sharedCanvasCoords,
-          isMobile,
         },
         color,
         onEnded,
@@ -152,6 +150,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       }
 
       setAnimation(newAnimation);
+      animationRef.current = newAnimation;
     };
 
     if (RLottie) {
@@ -167,7 +166,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [
     animation, animationId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop,
-    containerId, sharedCanvas, sharedCanvasCoords, isMobile,
+    containerId, sharedCanvas, sharedCanvasCoords,
   ]);
 
   useEffect(() => {
@@ -178,11 +177,12 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   useEffect(() => {
     return () => {
-      if (animation) {
-        animation.removeContainer(containerId);
+      if (animationRef.current) {
+        animationRef.current.removeContainer(containerId);
+        animationRef.current = undefined;
       }
     };
-  }, [animation, containerId]);
+  }, [containerId]);
 
   const playAnimation = useCallback((shouldRestart = false) => {
     if (animation && (playRef.current || playSegmentRef.current)) {
@@ -235,14 +235,11 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [noLoop, animation]);
 
-  useSyncEffect(([prevSharedCanvasCoords, prevIsMobile]) => {
-    if (
-      (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords)
-      || (prevIsMobile !== undefined && isMobile !== prevIsMobile)
-    ) {
-      animation?.setSharedCanvasCoords(containerId, sharedCanvasCoords, isMobile);
+  useSyncEffect(([prevSharedCanvasCoords]) => {
+    if (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords) {
+      animation?.setSharedCanvasCoords(containerId, sharedCanvasCoords);
     }
-  }, [sharedCanvasCoords, isMobile, containerId, animation]);
+  }, [sharedCanvasCoords, containerId, animation]);
 
   useEffect(() => {
     if (!animation) {

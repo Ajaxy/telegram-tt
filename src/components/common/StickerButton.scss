@@ -16,6 +16,13 @@
     width: var(--custom-emoji-size);
     height: var(--custom-emoji-size);
     margin: 0.3125rem;
+
+    &.status-default {
+      font-size: 2rem;
+
+      padding: 0.25rem;
+      color: var(--color-text);
+    }
   }
 
   &.set-expand {
@@ -117,13 +124,14 @@
 
     opacity: 0;
   }
+}
 
-  .sticker-context-menu {
-    position: absolute;
-    cursor: default;
+.sticker-context-menu {
+  position: absolute;
+  cursor: default;
+  z-index: var(--z-header-menu);
 
-    .bubble {
-      width: auto;
-    }
+  .bubble {
+    width: auto;
   }
 }

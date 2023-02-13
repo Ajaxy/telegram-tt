@@ -1,0 +1,17 @@
+.menuContent {
+  --offset-y: 3.25rem !important;
+  --offset-x: auto !important;
+  --color-text: var(--color-primary);
+
+  left: 0.5rem;
+  width: 100%;
+  max-width: 26rem;
+  height: 26rem;
+  padding: 0 !important;
+
+  @media (max-width: 26rem) {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    width: calc(100vw - 1rem);
+  }
+}

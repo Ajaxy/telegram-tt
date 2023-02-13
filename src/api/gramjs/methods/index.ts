@@ -35,15 +35,15 @@ export {
 
 export {
   fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
-  updateContact, importContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam,
+  updateContact, importContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam, updateEmojiStatus,
 } from './users';
 
 export {
-  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers,
+  fetchStickerSets, fetchRecentStickers, fetchFavoriteStickers, fetchFeaturedStickers, fetchRecentEmojiStatuses,
   faveSticker, fetchStickers, fetchSavedGifs, saveGif, searchStickers, installStickerSet, uninstallStickerSet,
   searchGifs, fetchAnimatedEmojis, fetchStickersForEmoji, fetchEmojiKeywords, fetchAnimatedEmojiEffects,
   removeRecentSticker, clearRecentStickers, fetchCustomEmoji, fetchPremiumGifts, fetchCustomEmojiSets,
-  fetchFeaturedEmojiStickers, fetchGenericEmojiEffects, fetchDefaultTopicIcons,
+  fetchFeaturedEmojiStickers, fetchGenericEmojiEffects, fetchDefaultTopicIcons, fetchDefaultStatusEmojis,
 } from './symbols';
 
 export {

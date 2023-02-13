@@ -20,15 +20,16 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
-import useAppLayout from '../../../../hooks/useAppLayout';
+import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 
 const SIZE = 1.25 * REM;
+const THROTTLE_MS = 300;
 
 type CustomEmojiPlayer = {
   play: () => void;
   pause: () => void;
   destroy: () => void;
-  updatePosition: (x: number, y: number, isMobile?: boolean) => void;
+  updatePosition: (x: number, y: number) => void;
 };
 
 export default function useInputCustomEmojis(
@@ -41,8 +42,6 @@ export default function useInputCustomEmojis(
   isActive?: boolean,
 ) {
   const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
-
-  const { isMobile } = useAppLayout();
 
   const removeContainers = useCallback((ids: string[]) => {
     ids.forEach((id) => {
@@ -80,7 +79,7 @@ export default function useInputCustomEmojis(
 
       if (mapRef.current.has(id)) {
         const player = mapRef.current.get(id)!;
-        player.updatePosition(x, y, isMobile);
+        player.updatePosition(x, y);
         return;
       }
 
@@ -99,7 +98,6 @@ export default function useInputCustomEmojis(
         mediaUrl,
         isHq,
         position: { x, y },
-        isMobile,
       });
       animation.play();
 
@@ -107,10 +105,7 @@ export default function useInputCustomEmojis(
     });
 
     removeContainers(Array.from(removedContainers));
-  }, [
-    absoluteContainerRef, inputRef, prefixId, isMobile, removeContainers, sharedCanvasHqRef,
-    sharedCanvasRef,
-  ]);
+  }, [absoluteContainerRef, inputRef, prefixId, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -129,7 +124,13 @@ export default function useInputCustomEmojis(
     synchronizeElements();
   }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef, isActive]);
 
-  useResizeObserver(sharedCanvasRef, synchronizeElements, true);
+  const throttledSynchronizeElements = useThrottledCallback(
+    synchronizeElements,
+    [synchronizeElements],
+    THROTTLE_MS,
+    false,
+  );
+  useResizeObserver(sharedCanvasRef, throttledSynchronizeElements);
 
   const freezeAnimation = useCallback(() => {
     mapRef.current.forEach((player) => {
@@ -162,7 +163,6 @@ function createPlayer({
   mediaUrl,
   position,
   isHq,
-  isMobile,
 }: {
   customEmoji: ApiSticker;
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -172,7 +172,6 @@ function createPlayer({
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
-  isMobile?: boolean;
 }): CustomEmojiPlayer {
   if (customEmoji.isLottie) {
     const lottie = RLottie.init(
@@ -185,15 +184,14 @@ function createPlayer({
         size: SIZE,
         coords: position,
         isLowPriority: !isHq,
-        isMobile,
       },
     );
     return {
       play: () => lottie.play(),
       pause: () => lottie.pause(),
       destroy: () => lottie.removeContainer(uniqueId),
-      updatePosition: (x: number, y: number, isMobileNew?: boolean) => {
-        return lottie.setSharedCanvasCoords(uniqueId, { x, y }, isMobileNew);
+      updatePosition: (x: number, y: number) => {
+        return lottie.setSharedCanvasCoords(uniqueId, { x, y });
       },
     };
   }

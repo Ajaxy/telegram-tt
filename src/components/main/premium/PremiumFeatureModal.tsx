@@ -34,6 +34,7 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   more_upload: 'PremiumPreviewUploads',
   advanced_chat_management: 'PremiumPreviewAdvancedChatManagement',
   animated_userpics: 'PremiumPreviewAnimatedProfiles',
+  emoji_status: 'PremiumPreviewEmojiStatus',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
@@ -48,6 +49,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   more_upload: 'PremiumPreviewUploadsDescription',
   advanced_chat_management: 'PremiumPreviewAdvancedChatManagementDescription',
   animated_userpics: 'PremiumPreviewAnimatedProfilesDescription',
+  emoji_status: 'PremiumPreviewEmojiStatusDescription',
 };
 
 export const PREMIUM_FEATURE_SECTIONS = [
@@ -62,6 +64,7 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'advanced_chat_management',
   'profile_badge',
   'animated_userpics',
+  'emoji_status',
 ];
 
 const PREMIUM_BOTTOM_VIDEOS: string[] = [
@@ -70,6 +73,7 @@ const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'advanced_chat_management',
   'profile_badge',
   'animated_userpics',
+  'emoji_status',
 ];
 
 type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType, 'uploadMaxFileparts'>;

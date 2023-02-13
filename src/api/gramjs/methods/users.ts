@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import type {
-  OnApiUpdate, ApiUser, ApiChat,
+  OnApiUpdate, ApiUser, ApiChat, ApiSticker,
 } from '../../types';
 
 import { COMMON_CHATS_LIMIT, PROFILE_PHOTOS_LIMIT } from '../../../config';
@@ -13,6 +13,7 @@ import {
   buildInputContact,
   buildMtpPeerId,
   getEntityTypeById,
+  buildInputEmojiStatus,
 } from '../gramjsBuilders';
 import { buildApiUser, buildApiUserFromFull, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -293,6 +294,12 @@ export function reportSpam(userOrChat: ApiUser | ApiChat) {
 
   return invokeRequest(new GramJs.messages.ReportSpam({
     peer: buildInputPeer(id, accessHash),
+  }), true);
+}
+
+export function updateEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
+  return invokeRequest(new GramJs.account.UpdateEmojiStatus({
+    emojiStatus: buildInputEmojiStatus(emojiStatus, expires),
   }), true);
 }
 

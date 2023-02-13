@@ -168,6 +168,7 @@ export const STICKER_SIZE_INLINE_BOT_RESULT = 100;
 export const STICKER_SIZE_JOIN_REQUESTS = 140;
 export const STICKER_SIZE_INVITES = 140;
 export const RECENT_STICKERS_LIMIT = 20;
+export const RECENT_STATUS_LIMIT = 20;
 export const EMOJI_STATUS_LOOP_LIMIT = 2;
 export const EMOJI_SIZES = 7;
 export const RECENT_SYMBOL_SET_ID = 'recent';
@@ -175,6 +176,7 @@ export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const CHAT_STICKER_SET_ID = 'chatStickers';
 export const PREMIUM_STICKER_SET_ID = 'premium';
 export const DEFAULT_TOPIC_ICON_STICKER_ID = 'topic-default-icon';
+export const DEFAULT_STATUS_ICON_ID = 'status-default-icon';
 export const EMOJI_IMG_REGEX = /<img[^>]+alt="([^"]+)"(?![^>]*data-document-id)[^>]*>/gm;
 
 export const BASE_EMOJI_KEYWORD_LANG = 'en';

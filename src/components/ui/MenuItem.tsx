@@ -8,14 +8,13 @@ import { IS_COMPACT_MENU } from '../../util/environment';
 
 import './MenuItem.scss';
 
-type OnClickHandler = (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>) => void;
-
 export type MenuItemProps = {
   icon?: string;
   customIcon?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
-  onClick?: OnClickHandler;
+  onClick?: (e: React.SyntheticEvent<HTMLDivElement | HTMLAnchorElement>, arg?: number) => void;
+  clickArg?: number;
   onContextMenu?: (e: React.UIEvent) => void;
   href?: string;
   download?: string;
@@ -39,6 +38,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     ariaLabel,
     withWrap,
     onContextMenu,
+    clickArg,
   } = props;
 
   const lang = useLang();
@@ -50,8 +50,8 @@ const MenuItem: FC<MenuItemProps> = (props) => {
       return;
     }
 
-    onClick(e);
-  }, [disabled, onClick]);
+    onClick(e, clickArg);
+  }, [clickArg, disabled, onClick]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode !== 13 && e.keyCode !== 32) {
@@ -65,8 +65,8 @@ const MenuItem: FC<MenuItemProps> = (props) => {
       return;
     }
 
-    onClick(e);
-  }, [disabled, onClick]);
+    onClick(e, clickArg);
+  }, [clickArg, disabled, onClick]);
 
   const fullClassName = buildClassName(
     'MenuItem',

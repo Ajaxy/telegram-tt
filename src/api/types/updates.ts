@@ -359,6 +359,10 @@ export type ApiUpdateUserEmojiStatus = {
   emojiStatus?: ApiEmojiStatus;
 };
 
+export type ApiUpdateRecentEmojiStatuses = {
+  '@type': 'updateRecentEmojiStatuses';
+};
+
 export type ApiUpdateUserFullInfo = {
   '@type': 'updateUserFullInfo';
   id: string;
@@ -624,7 +628,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
-  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics
+  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

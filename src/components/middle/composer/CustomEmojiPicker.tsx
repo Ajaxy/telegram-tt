@@ -12,7 +12,8 @@ import {
   FAVORITE_SYMBOL_SET_ID,
   PREMIUM_STICKER_SET_ID,
   RECENT_SYMBOL_SET_ID,
-  SLIDE_TRANSITION_DURATION, STICKER_PICKER_MAX_SHARED_COVERS,
+  SLIDE_TRANSITION_DURATION,
+  STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -44,16 +45,23 @@ type OwnProps = {
   chatId?: string;
   className?: string;
   loadAndPlay: boolean;
+  isStatusPicker?: boolean;
+  idPrefix?: string;
   withDefaultTopicIcons?: boolean;
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
+  onContextMenuOpen?: NoneToVoidFunction;
+  onContextMenuClose?: NoneToVoidFunction;
+  onContextMenuClick?: NoneToVoidFunction;
 };
 
 type StateProps = {
+  customEmojisById?: Record<string, ApiSticker>;
+  recentCustomEmojiIds?: string[];
+  recentStatusEmojis?: ApiSticker[];
   stickerSetsById: Record<string, ApiStickerSet>;
   addedCustomEmojiIds?: string[];
-  customEmojisById: Record<string, ApiSticker>;
-  recentCustomEmojiIds: string[];
   defaultTopicIconsId?: string;
+  defaultStatusIconsId?: string;
   customEmojiFeaturedIds?: string[];
   canAnimate?: boolean;
   isSavedMessages?: boolean;
@@ -63,6 +71,7 @@ type StateProps = {
 const SMOOTH_SCROLL_DISTANCE = 500;
 const HEADER_BUTTON_WIDTH = 52; // px (including margin)
 const STICKER_INTERSECTION_THROTTLE = 200;
+const DEFAULT_ID_PREFIX = 'custom-emoji-set';
 
 const stickerSetIntersections: boolean[] = [];
 
@@ -72,14 +81,21 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   addedCustomEmojiIds,
   customEmojisById,
   recentCustomEmojiIds,
+  recentStatusEmojis,
   stickerSetsById,
+  idPrefix = DEFAULT_ID_PREFIX,
   customEmojiFeaturedIds,
   canAnimate,
+  isStatusPicker,
   isSavedMessages,
   isCurrentUserPremium,
   withDefaultTopicIcons,
   defaultTopicIconsId,
+  defaultStatusIconsId,
   onCustomEmojiSelect,
+  onContextMenuOpen,
+  onContextMenuClose,
+  onContextMenuClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,17 +108,23 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
 
+  const recentCustomEmojis = useMemo(() => {
+    return isStatusPicker
+      ? recentStatusEmojis
+      : Object.values(pickTruthy(customEmojisById!, recentCustomEmojiIds!));
+  }, [customEmojisById, isStatusPicker, recentCustomEmojiIds, recentStatusEmojis]);
+
   const { observe: observeIntersection } = useIntersectionObserver({
     rootRef: containerRef,
     throttleMs: STICKER_INTERSECTION_THROTTLE,
   }, (entries) => {
     entries.forEach((entry) => {
       const { id } = entry.target as HTMLDivElement;
-      if (!id || !id.startsWith('custom-emoji-set-')) {
+      if (!id || !id.startsWith(idPrefix)) {
         return;
       }
 
-      const index = Number(id.replace('custom-emoji-set-', ''));
+      const index = Number(id.replace(`${idPrefix}-`, ''));
       stickerSetIntersections[index] = entry.isIntersecting;
     });
 
@@ -122,10 +144,6 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const areAddedLoaded = Boolean(addedCustomEmojiIds);
 
-  const recentCustomEmojis = useMemo(() => {
-    return Object.values(pickTruthy(customEmojisById, recentCustomEmojiIds));
-  }, [customEmojisById, recentCustomEmojiIds]);
-
   const allSets = useMemo(() => {
     if (!addedCustomEmojiIds) {
       return MEMO_EMPTY_ARRAY;
@@ -133,7 +151,19 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
     const defaultSets: StickerSetOrRecent[] = [];
 
-    if (withDefaultTopicIcons) {
+    if (isStatusPicker) {
+      const defaultStatusIconsPack = stickerSetsById[defaultStatusIconsId!];
+      if (defaultStatusIconsPack.stickers?.length) {
+        const stickers = (defaultStatusIconsPack.stickers || []).concat(recentCustomEmojis || []);
+        defaultSets.push({
+          ...defaultStatusIconsPack,
+          stickers,
+          count: stickers.length,
+          id: RECENT_SYMBOL_SET_ID,
+          title: lang('RecentStickers'),
+        });
+      }
+    } else if (withDefaultTopicIcons) {
       const defaultTopicIconsPack = stickerSetsById[defaultTopicIconsId!];
       if (defaultTopicIconsPack.stickers?.length) {
         defaultSets.push({
@@ -142,7 +172,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           title: lang('RecentStickers'),
         });
       }
-    } else if (recentCustomEmojis.length) {
+    } else if (recentCustomEmojis?.length) {
       defaultSets.push({
         id: RECENT_SYMBOL_SET_ID,
         accessHash: '0',
@@ -162,8 +192,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       ...setsToDisplay,
     ];
   }, [
-    addedCustomEmojiIds, defaultTopicIconsId, customEmojiFeaturedIds, lang, recentCustomEmojis, stickerSetsById,
-    withDefaultTopicIcons,
+    addedCustomEmojiIds, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
+    customEmojiFeaturedIds, stickerSetsById, defaultStatusIconsId, lang, defaultTopicIconsId,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -194,9 +224,9 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
   const selectStickerSet = useCallback((index: number) => {
     setActiveSetIndex(index);
-    const stickerSetEl = document.getElementById(`custom-emoji-set-${index}`)!;
+    const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
     fastSmoothScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
-  }, []);
+  }, [idPrefix]);
 
   const handleEmojiSelect = useCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
@@ -298,14 +328,19 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             stickerSet={stickerSet}
             loadAndPlay={Boolean(canAnimate && loadAndPlay)}
             index={i}
+            idPrefix={idPrefix}
             observeIntersection={observeIntersection}
             shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
             isSavedMessages={isSavedMessages}
-            shouldHideRecentHeader={withDefaultTopicIcons}
+            isStatusPicker={isStatusPicker}
+            shouldHideRecentHeader={withDefaultTopicIcons || isStatusPicker}
             withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
-            isCustomEmojiPicker
+            withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
             isCurrentUserPremium={isCurrentUserPremium}
             onStickerSelect={handleEmojiSelect}
+            onContextMenuOpen={onContextMenuOpen}
+            onContextMenuClose={onContextMenuClose}
+            onContextMenuClick={onContextMenuClick}
           />
         ))}
       </div>
@@ -314,7 +349,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }): StateProps => {
+  (global, { chatId, isStatusPicker }): StateProps => {
     const {
       stickers: {
         setsById: stickerSetsById,
@@ -322,6 +357,9 @@ export default memo(withGlobal<OwnProps>(
       customEmojis: {
         byId: customEmojisById,
         featuredIds: customEmojiFeaturedIds,
+        statusRecent: {
+          emojis: recentStatusEmojis,
+        },
       },
       recentCustomEmojis: recentCustomEmojiIds,
     } = global;
@@ -329,15 +367,17 @@ export default memo(withGlobal<OwnProps>(
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
 
     return {
+      customEmojisById: !isStatusPicker ? customEmojisById : undefined,
+      recentCustomEmojiIds: !isStatusPicker ? recentCustomEmojiIds : undefined,
+      recentStatusEmojis: isStatusPicker ? recentStatusEmojis : undefined,
       stickerSetsById,
       addedCustomEmojiIds: global.customEmojis.added.setIds,
       canAnimate: global.settings.byKey.shouldLoopStickers,
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
-      customEmojisById,
-      recentCustomEmojiIds,
       customEmojiFeaturedIds,
       defaultTopicIconsId: global.defaultTopicIconsId,
+      defaultStatusIconsId: global.defaultStatusIconsId,
     };
   },
 )(CustomEmojiPicker));

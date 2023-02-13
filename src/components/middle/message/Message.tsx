@@ -113,6 +113,7 @@ import useOuterHandlers from './hooks/useOuterHandlers';
 import useInnerHandlers from './hooks/useInnerHandlers';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useResizeObserver from '../../../hooks/useResizeObserver';
+import useThrottledCallback from '../../../hooks/useThrottledCallback';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -252,6 +253,7 @@ const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
 const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
+const THROTTLE_MS = 300;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -613,7 +615,9 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [focusLastMessage]);
 
-  useResizeObserver(shouldFocusOnResize ? ref : undefined, handleResize, true);
+  const throttledResize = useThrottledCallback(handleResize, [handleResize], THROTTLE_MS, false);
+
+  useResizeObserver(shouldFocusOnResize ? ref : undefined, throttledResize);
 
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;

@@ -718,12 +718,17 @@ export type GlobalState = {
       stickers?: ApiSticker[];
     };
     featuredIds?: string[];
+    statusRecent: {
+      hash?: string;
+      emojis?: ApiSticker[];
+    };
   };
 
   animatedEmojis?: ApiStickerSet;
   animatedEmojiEffects?: ApiStickerSet;
   genericEmojiEffects?: ApiStickerSet;
   defaultTopicIconsId?: string;
+  defaultStatusIconsId?: string;
   premiumGifts?: ApiStickerSet;
   emojiKeywords: Partial<Record<LangCode, EmojiKeywords>>;
 
@@ -1886,6 +1891,8 @@ export interface ActionPayloads {
   };
   clearRecentCustomEmoji: undefined;
   loadFeaturedEmojiStickers: undefined;
+  loadDefaultStatusIcons: undefined;
+  loadRecentEmojiStatuses: undefined;
 
   // Bots
   sendBotCommand: {
@@ -2212,6 +2219,10 @@ export interface ActionPayloads {
   } & WithTabId) | undefined;
 
   closeGiftPremiumModal: WithTabId | undefined;
+  setEmojiStatus: {
+    emojiStatus: ApiSticker;
+    expires?: number;
+  };
 
   // Invoice
   openInvoice: ApiInputInvoice & WithTabId;

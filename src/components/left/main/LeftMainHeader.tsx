@@ -25,7 +25,9 @@ import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
-import { selectCurrentMessageList, selectTabState, selectTheme } from '../../../global/selectors';
+import {
+  selectCurrentMessageList, selectIsCurrentUserPremium, selectTabState, selectTheme,
+} from '../../../global/selectors';
 import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
@@ -43,6 +45,7 @@ import PickerSelectedItem from '../../common/PickerSelectedItem';
 import Switcher from '../../ui/Switcher';
 import ShowTransition from '../../ui/ShowTransition';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
+import StatusButton from './StatusButton';
 
 import './LeftMainHeader.scss';
 
@@ -70,6 +73,7 @@ type StateProps =
     animationLevel: AnimationLevel;
     chatsById?: Record<string, ApiChat>;
     isMessageListOpen: boolean;
+    isCurrentUserPremium?: boolean;
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
@@ -92,6 +96,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   onReset,
   searchQuery,
   isLoading,
+  isCurrentUserPremium,
   shouldSkipTransition,
   currentUserId,
   globalSearchChatId,
@@ -430,6 +435,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             />
           )}
         </SearchInput>
+        {isCurrentUserPremium && <StatusButton />}
         {hasPasscode && (
           <Button
             round
@@ -438,7 +444,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             color="translucent"
             ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
             onClick={handleLockScreen}
-            className="passcode-lock"
+            className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >
             <i className="icon-lock" />
           </Button>
@@ -482,6 +488,7 @@ export default memo(withGlobal<OwnProps>(
       isSyncing,
       isMessageListOpen: Boolean(selectCurrentMessageList(global)),
       isConnectionStatusMinimized,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canInstall: Boolean(tabState.canInstall),

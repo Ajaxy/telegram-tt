@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -41,6 +41,7 @@ import PremiumChats from '../../../assets/premium/PremiumChats.svg';
 import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
 import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
+import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
 
 import styles from './PremiumMainModal.module.scss';
 
@@ -58,6 +59,7 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   more_upload: PremiumFile,
   advanced_chat_management: PremiumChats,
   animated_userpics: PremiumVideo,
+  emoji_status: PremiumStatus,
 };
 
 export type OwnProps = {
@@ -176,6 +178,11 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     showConfetti();
   }, [isPremium, showConfetti]);
 
+  const filteredSections = useMemo(() => {
+    if (!premiumPromoOrder) return PREMIUM_FEATURE_SECTIONS;
+    return premiumPromoOrder.filter((section) => PREMIUM_FEATURE_SECTIONS.includes(section));
+  }, [premiumPromoOrder]);
+
   if (!promo) return undefined;
 
   // TODO Support all subscription options
@@ -254,8 +261,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             </div>
 
             <div className={buildClassName(styles.list, isPremium && styles.noButton)}>
-              {(premiumPromoOrder || PREMIUM_FEATURE_SECTIONS).map((section, index) => {
-                if (!PREMIUM_FEATURE_SECTIONS.includes(section)) return undefined;
+              {filteredSections.map((section, index) => {
                 return (
                   <PremiumFeatureItem
                     key={section}

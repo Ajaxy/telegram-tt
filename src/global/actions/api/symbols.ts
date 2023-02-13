@@ -18,7 +18,9 @@ import {
   updateStickersForEmoji,
   rebuildStickersForEmoji,
   updateCustomEmojiForEmoji,
-  updateCustomEmojiSets, updateStickerSearch,
+  updateCustomEmojiSets,
+  updateRecentStatusCustomEmojis,
+  updateStickerSearch,
 } from '../../reducers';
 import searchWords from '../../../util/searchWords';
 import { selectTabState, selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
@@ -243,6 +245,21 @@ addActionHandler('loadDefaultTopicIcons', async (global): Promise<void> => {
     ...global,
     defaultTopicIconsId: fullSet.id,
   };
+  setGlobal(global);
+});
+
+addActionHandler('loadDefaultStatusIcons', async (global): Promise<void> => {
+  const stickerSet = await callApi('fetchDefaultStatusEmojis');
+  if (!stickerSet) {
+    return;
+  }
+  global = getGlobal();
+
+  const { set, stickers } = stickerSet;
+  const fullSet = { ...set, stickers };
+
+  global = updateStickerSet(global, fullSet.id, fullSet);
+  global = { ...global, defaultStatusIconsId: fullSet.id };
   setGlobal(global);
 });
 
@@ -743,6 +760,17 @@ addActionHandler('openStickerSet', async (global, actions, payload): Promise<voi
   global = updateTabState(global, {
     openedStickerSetShortName: set.shortName,
   }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadRecentEmojiStatuses', async (global): Promise<void> => {
+  const result = await callApi('fetchRecentEmojiStatuses');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = updateRecentStatusCustomEmojis(global, result.hash, result.emojiStatuses!);
   setGlobal(global);
 });
 

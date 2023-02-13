@@ -115,7 +115,7 @@ const StickerView: FC<OwnProps> = ({
   const noTransition = isLottie && preloadedPreviewData;
 
   const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
-  const realSize = bounds.size || size;
+  const realSize = size || bounds.size;
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
