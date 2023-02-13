@@ -5,8 +5,10 @@ import {
 import { round } from '../util/math';
 
 import useResizeObserver from './useResizeObserver';
+import useThrottledCallback from './useThrottledCallback';
 
 const ANIMATION_END_TIMEOUT = 500;
+const THROTTLE_MS = 300;
 
 export default function useBoundsInSharedCanvas(
   containerRef: React.RefObject<HTMLDivElement>,
@@ -39,9 +41,11 @@ export default function useBoundsInSharedCanvas(
     setSize(Math.round(targetBounds.width));
   }, [containerRef, sharedCanvasRef]);
 
+  const throttledRecalculate = useThrottledCallback(recalculate, [recalculate], THROTTLE_MS, false);
+
   useLayoutEffect(recalculate, [recalculate]);
 
-  useResizeObserver(sharedCanvasRef, recalculate, true);
+  useResizeObserver(sharedCanvasRef, throttledRecalculate);
 
   const coords = useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);
 

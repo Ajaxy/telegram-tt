@@ -9,6 +9,7 @@ import type { StickerSetOrRecent } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
+  DEFAULT_STATUS_ICON_ID,
   DEFAULT_TOPIC_ICON_STICKER_ID,
   EMOJI_SIZE_PICKER, FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, STICKER_SIZE_PICKER,
 } from '../../../config';
@@ -32,18 +33,23 @@ type OwnProps = {
   stickerSet: StickerSetOrRecent;
   loadAndPlay: boolean;
   index: number;
+  idPrefix?: string;
   shouldRender: boolean;
   favoriteStickers?: ApiSticker[];
   isSavedMessages?: boolean;
+  isStatusPicker?: boolean;
   isCurrentUserPremium?: boolean;
-  isCustomEmojiPicker?: boolean;
   shouldHideRecentHeader?: boolean;
   withDefaultTopicIcon?: boolean;
+  withDefaultStatusIcon?: boolean;
   observeIntersection: ObserveFn;
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
+  onContextMenuOpen?: NoneToVoidFunction;
+  onContextMenuClose?: NoneToVoidFunction;
+  onContextMenuClick?: NoneToVoidFunction;
 };
 
 const ITEMS_PER_ROW_FALLBACK = 8;
@@ -52,18 +58,23 @@ const StickerSet: FC<OwnProps> = ({
   stickerSet,
   loadAndPlay,
   index,
+  idPrefix,
   shouldRender,
   favoriteStickers,
   isSavedMessages,
+  isStatusPicker,
   isCurrentUserPremium,
-  isCustomEmojiPicker,
   shouldHideRecentHeader,
   withDefaultTopicIcon,
+  withDefaultStatusIcon,
   observeIntersection,
   onStickerSelect,
   onStickerUnfave,
   onStickerFave,
   onStickerRemoveRecent,
+  onContextMenuOpen,
+  onContextMenuClose,
+  onContextMenuClick,
 }) => {
   const {
     clearRecentStickers,
@@ -93,7 +104,7 @@ const StickerSet: FC<OwnProps> = ({
 
   const stickerMarginPx = isMobile ? 8 : 16;
   const emojiMarginPx = isMobile ? 8 : 10;
-  const containerPaddingPx = isMobile ? 8 : 0;
+  const containerPaddingPx = isMobile && !isStatusPicker ? 8 : 0;
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
@@ -123,6 +134,17 @@ const StickerSet: FC<OwnProps> = ({
   const handleDefaultTopicIconClick = useCallback(() => {
     onStickerSelect?.({
       id: DEFAULT_TOPIC_ICON_STICKER_ID,
+      isLottie: false,
+      isVideo: false,
+      stickerSetInfo: {
+        shortName: 'dummy',
+      },
+    } satisfies ApiSticker);
+  }, [onStickerSelect]);
+
+  const handleDefaultStatusIconClick = useCallback(() => {
+    onStickerSelect?.({
+      id: DEFAULT_STATUS_ICON_ID,
       isLottie: false,
       isVideo: false,
       stickerSetInfo: {
@@ -183,7 +205,7 @@ const StickerSet: FC<OwnProps> = ({
     <div
       ref={ref}
       key={stickerSet.id}
-      id={`${isCustomEmojiPicker ? 'custom-emoji-set' : 'sticker-set'}-${index}`}
+      id={`${idPrefix || 'sticker-set'}-${index}`}
       className={
         buildClassName('symbol-set', isLocked && 'symbol-set-locked')
       }
@@ -231,6 +253,16 @@ const StickerSet: FC<OwnProps> = ({
             <img src={grey} alt="Reset" />
           </Button>
         )}
+        {withDefaultStatusIcon && (
+          <Button
+            className="StickerButton custom-emoji status-default"
+            color="translucent"
+            onClick={handleDefaultStatusIconClick}
+            key="default-status-icon"
+          >
+            <i className="icon-premium" />
+          </Button>
+        )}
         {shouldRender && stickerSet.stickers && stickerSet.stickers
           .slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
           .map((sticker, i) => {
@@ -248,6 +280,7 @@ const StickerSet: FC<OwnProps> = ({
                 observeIntersection={observeIntersection}
                 noAnimate={!loadAndPlay}
                 isSavedMessages={isSavedMessages}
+                isStatusPicker={isStatusPicker}
                 canViewSet
                 isCurrentUserPremium={isCurrentUserPremium}
                 sharedCanvasRef={canvasRef}
@@ -256,6 +289,9 @@ const StickerSet: FC<OwnProps> = ({
                 onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
                 onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
                 onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
+                onContextMenuOpen={onContextMenuOpen}
+                onContextMenuClose={onContextMenuClose}
+                onContextMenuClick={onContextMenuClick}
               />
             );
           })}

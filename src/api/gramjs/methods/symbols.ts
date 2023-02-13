@@ -8,9 +8,10 @@ import { invokeRequest } from './client';
 import {
   buildStickerSet, buildStickerSetCovered, processStickerPackResult, processStickerResult,
 } from '../apiBuilders/symbols';
+import { buildApiUserEmojiStatus } from '../apiBuilders/users';
 import { buildInputStickerSet, buildInputDocument, buildInputStickerSetShortName } from '../gramjsBuilders';
 import { buildVideoFromDocument } from '../apiBuilders/messages';
-import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STICKERS_LIMIT } from '../../../config';
+import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT } from '../../../config';
 
 import localDb from '../localDb';
 
@@ -263,6 +264,21 @@ export async function fetchDefaultTopicIcons() {
   };
 }
 
+export async function fetchDefaultStatusEmojis() {
+  const result = await invokeRequest(new GramJs.messages.GetStickerSet({
+    stickerset: new GramJs.InputStickerSetEmojiDefaultStatuses(),
+  }));
+
+  if (!(result instanceof GramJs.messages.StickerSet)) {
+    return undefined;
+  }
+
+  return {
+    set: buildStickerSet(result.set),
+    stickers: processStickerResult(result.documents),
+  };
+}
+
 export async function searchStickers({ query, hash = '0' }: { query: string; hash?: string }) {
   const result = await invokeRequest(new GramJs.messages.SearchStickerSets({
     q: query,
@@ -415,6 +431,26 @@ export async function fetchEmojiKeywords({ language, fromVersion }: {
 
       return acc;
     }, {} as Record<string, string[]>),
+  };
+}
+
+export async function fetchRecentEmojiStatuses(hash = '0') {
+  const result = await invokeRequest(new GramJs.account.GetRecentEmojiStatuses({ hash: BigInt(hash) }));
+
+  if (!result || result instanceof GramJs.account.EmojiStatusesNotModified) {
+    return undefined;
+  }
+
+  const documentIds = result.statuses
+    .slice(0, RECENT_STATUS_LIMIT)
+    .map(buildApiUserEmojiStatus)
+    .filter(Boolean)
+    .map(({ documentId }) => documentId);
+  const emojiStatuses = await fetchCustomEmoji({ documentId: documentIds });
+
+  return {
+    hash: String(result.hash),
+    emojiStatuses,
   };
 }
 

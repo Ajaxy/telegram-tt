@@ -242,6 +242,22 @@ export function updateCustomEmojiForEmoji<T extends GlobalState>(
   };
 }
 
+export function updateRecentStatusCustomEmojis<T extends GlobalState>(
+  global: T, hash: string, emojis: ApiSticker[],
+): T {
+  return {
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      statusRecent: {
+        ...global.customEmojis.statusRecent,
+        hash,
+        emojis,
+      },
+    },
+  };
+}
+
 export function rebuildStickersForEmoji<T extends GlobalState>(global: T): T {
   if (global.stickers.forEmoji) {
     const { emoji, stickers, hash } = global.stickers.forEmoji;

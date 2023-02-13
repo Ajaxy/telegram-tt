@@ -11,6 +11,7 @@ import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMe
 import { IS_TOUCH_ENV } from '../../util/environment';
 import { getPropertyHexColor } from '../../util/themeStyle';
 import { hexToRgb } from '../../util/switchTheme';
+import { getServerTimeOffset } from '../../util/serverTime';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
@@ -33,6 +34,7 @@ type OwnProps<T> = {
   className?: string;
   noContextMenu?: boolean;
   isSavedMessages?: boolean;
+  isStatusPicker?: boolean;
   canViewSet?: boolean;
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
@@ -43,7 +45,18 @@ type OwnProps<T> = {
   onFaveClick?: (sticker: ApiSticker) => void;
   onUnfaveClick?: (sticker: ApiSticker) => void;
   onRemoveRecentClick?: (sticker: ApiSticker) => void;
+  onContextMenuOpen?: NoneToVoidFunction;
+  onContextMenuClose?: NoneToVoidFunction;
+  onContextMenuClick?: NoneToVoidFunction;
 };
+
+const contentForStatusMenuContext = [
+  { title: 'SetTimeoutFor.Hours', value: 1, arg: 3600 },
+  { title: 'SetTimeoutFor.Hours', value: 2, arg: 7200 },
+  { title: 'SetTimeoutFor.Hours', value: 8, arg: 28800 },
+  { title: 'SetTimeoutFor.Days', value: 1, arg: 86400 },
+  { title: 'SetTimeoutFor.Days', value: 2, arg: 172800 },
+];
 
 const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult | undefined = undefined>({
   sticker,
@@ -53,6 +66,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   className,
   noContextMenu,
   isSavedMessages,
+  isStatusPicker,
   canViewSet,
   observeIntersection,
   isCurrentUserPremium,
@@ -63,10 +77,15 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   onFaveClick,
   onUnfaveClick,
   onRemoveRecentClick,
+  onContextMenuOpen,
+  onContextMenuClose,
+  onContextMenuClick,
 }: OwnProps<T>) => {
-  const { openStickerSet, openPremiumModal } = getActions();
+  const { openStickerSet, openPremiumModal, setEmojiStatus } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const menuRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
   const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
   const hasCustomColor = sticker.shouldUseTextColor;
@@ -99,6 +118,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
+  const shouldRenderContextMenu = Boolean(!noContextMenu && contextMenuPosition);
 
   const getTriggerElement = useCallback(() => ref.current, []);
 
@@ -108,9 +128,13 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   );
 
   const getMenuElement = useCallback(
-    () => ref.current!.querySelector('.sticker-context-menu .bubble'),
-    [],
+    () => {
+      return isStatusPicker ? menuRef.current : ref.current!.querySelector('.sticker-context-menu .bubble');
+    },
+    [isStatusPicker],
   );
+
+  const getLayout = () => ({ withPortal: isStatusPicker });
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
@@ -119,7 +143,16 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     getTriggerElement,
     getRootElement,
     getMenuElement,
+    getLayout,
   );
+
+  useEffect(() => {
+    if (isContextMenuOpen) {
+      onContextMenuOpen?.();
+    } else {
+      onContextMenuClose?.();
+    }
+  }, [isContextMenuOpen, onContextMenuClose, onContextMenuOpen]);
 
   useEffect(() => {
     if (!isIntersecting) handleContextMenuClose();
@@ -170,6 +203,18 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     openStickerSet({ stickerSetInfo });
   }, [openStickerSet, stickerSetInfo]);
 
+  const handleEmojiStatusExpiresClick = useCallback((e: React.SyntheticEvent, duration = 0) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    handleContextMenuClose();
+    onContextMenuClick?.();
+    setEmojiStatus({
+      emojiStatus: sticker,
+      expires: Date.now() / 1000 + duration + getServerTimeOffset(),
+    });
+  }, [setEmojiStatus, sticker, handleContextMenuClose, onContextMenuClick]);
+
   const shouldShowCloseButton = !IS_TOUCH_ENV && onRemoveRecentClick;
 
   const fullClassName = buildClassName(
@@ -181,9 +226,21 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   );
 
   const contextMenuItems = useMemo(() => {
-    if (noContextMenu || isCustomEmoji) return [];
+    if (!shouldRenderContextMenu || noContextMenu || (isCustomEmoji && !isStatusPicker)) return [];
 
     const items: ReactNode[] = [];
+
+    if (isCustomEmoji) {
+      contentForStatusMenuContext.forEach((item) => {
+        items.push(
+          <MenuItem onClick={handleEmojiStatusExpiresClick} clickArg={item.arg}>
+            {lang(item.title, item.value, 'i')}
+          </MenuItem>,
+        );
+      });
+
+      return items;
+    }
 
     if (onUnfaveClick) {
       items.push(
@@ -228,9 +285,9 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     }
     return items;
   }, [
-    canViewSet, handleContextFave, handleContextRemoveRecent, handleContextUnfave, handleOpenSet, handleSendQuiet,
-    handleSendScheduled, isLocked, isSavedMessages, lang, onFaveClick, onRemoveRecentClick, onUnfaveClick, onClick,
-    noContextMenu, isCustomEmoji,
+    shouldRenderContextMenu, noContextMenu, isCustomEmoji, isStatusPicker, onUnfaveClick, onFaveClick, isLocked,
+    onClick, canViewSet, onRemoveRecentClick, handleEmojiStatusExpiresClick, lang, handleContextUnfave,
+    handleContextFave, isSavedMessages, handleSendScheduled, handleSendQuiet, handleOpenSet, handleContextRemoveRecent,
   ]);
 
   return (
@@ -278,8 +335,9 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           <i className="icon-close" />
         </Button>
       )}
-      {Boolean(contextMenuItems.length) && contextMenuPosition !== undefined && (
+      {Boolean(contextMenuItems.length) && (
         <Menu
+          ref={menuRef}
           isOpen={isContextMenuOpen}
           transformOriginX={transformOriginX}
           transformOriginY={transformOriginY}
@@ -288,6 +346,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           style={menuStyle}
           className="sticker-context-menu"
           autoClose
+          withPortal={isStatusPicker}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         >

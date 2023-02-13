@@ -107,6 +107,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     byId: {},
     added: {},
     forEmoji: {},
+    statusRecent: {},
   },
 
   emojiKeywords: {},

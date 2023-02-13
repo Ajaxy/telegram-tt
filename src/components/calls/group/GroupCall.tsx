@@ -108,7 +108,6 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   const isConnecting = connectionState !== 'connected';
   const canSelfUnmute = meParticipant?.canSelfUnmute;
   const shouldRaiseHand = !canSelfUnmute && meParticipant?.isMuted;
-
   const handleOpenParticipantMenu = useCallback((anchor: HTMLDivElement, participant: TypeGroupCallParticipant) => {
     const rect = anchor.getBoundingClientRect();
     const container = containerRef.current!;

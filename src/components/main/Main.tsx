@@ -20,6 +20,7 @@ import {
   selectChatMessage,
   selectTabState,
   selectCurrentMessageList,
+  selectIsCurrentUserPremium,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
@@ -128,6 +129,7 @@ type StateProps = {
   deleteFolderDialogId?: number;
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
+  isCurrentUserPremium?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -176,6 +178,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isPremiumModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
+  isCurrentUserPremium,
   deleteFolderDialogId,
   isMasterTab,
 }) => {
@@ -194,6 +197,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadDefaultTopicIcons,
     loadAddedStickers,
     loadFavoriteStickers,
+    loadDefaultStatusIcons,
     ensureTimeFormat,
     closeStickerSetModal,
     closeCustomEmojiSets,
@@ -209,6 +213,7 @@ const Main: FC<OwnProps & StateProps> = ({
     checkAppVersion,
     openChat,
     toggleLeftColumn,
+    loadRecentEmojiStatuses,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -245,12 +250,17 @@ const Main: FC<OwnProps & StateProps> = ({
       loadContactList();
       loadPremiumGifts();
       loadDefaultTopicIcons();
+      loadDefaultStatusIcons();
       checkAppVersion();
+      if (isCurrentUserPremium) {
+        loadRecentEmojiStatuses();
+      }
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons, isMasterTab,
+    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons,
+    loadDefaultStatusIcons, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab,
   ]);
 
   // Language-based API calls
@@ -553,6 +563,7 @@ export default memo(withGlobal<OwnProps>(
       webApp,
       currentUser,
       urlAuth,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,

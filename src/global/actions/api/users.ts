@@ -347,3 +347,9 @@ addActionHandler('reportSpam', (global, actions, payload): ActionReturnType => {
 
   void callApi('reportSpam', userOrChat);
 });
+
+addActionHandler('setEmojiStatus', (global, actions, payload): ActionReturnType => {
+  const { emojiStatus, expires } = payload!;
+
+  void callApi('updateEmojiStatus', emojiStatus, expires);
+});

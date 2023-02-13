@@ -54,8 +54,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ? String(mtpUser.photo.photoId)
     : undefined;
   const userType = buildApiUserType(mtpUser);
-
   const usernames = buildApiUsernames(mtpUser);
+  const emojiStatus = mtpUser.emojiStatus ? buildApiUserEmojiStatus(mtpUser.emojiStatus) : undefined;
 
   return {
     id: buildApiPeerId(id, 'user'),
@@ -74,7 +74,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     noStatus: !mtpUser.status,
     ...(mtpUser.accessHash && { accessHash: String(mtpUser.accessHash) }),
     ...(avatarHash && { avatarHash }),
-    ...(mtpUser.emojiStatus && { emojiStatus: buildApiUserEmojiStatus(mtpUser.emojiStatus) }),
+    emojiStatus,
     hasVideoAvatar,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
     ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),

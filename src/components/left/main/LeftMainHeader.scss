@@ -90,8 +90,24 @@
     @include overflow-y-overlay();
   }
 
-  .passcode-lock {
+  .extra-spacing {
+    position: relative;
     margin-left: 0.8125rem;
+  }
+
+  .emoji-status-effect {
+    top: 50%;
+    left: 50%;
+  }
+
+  .emoji-status {
+    --custom-emoji-size: 1.5rem;
+    --color-text: var(--color-primary);
+  }
+
+  .PremiumIcon {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   // @optimization

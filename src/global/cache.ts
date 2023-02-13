@@ -249,7 +249,12 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
       byId: {},
       lastRendered: [],
       forEmoji: {},
+      statusRecent: {},
     };
+  }
+
+  if (!cached.customEmojis.statusRecent) {
+    cached.customEmojis.statusRecent = {};
   }
 
   if (!cached.recentCustomEmojis) {
@@ -426,6 +431,7 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
     lastRendered: idsToSave,
     forEmoji: {},
     added: {},
+    statusRecent: {},
   };
 }
 

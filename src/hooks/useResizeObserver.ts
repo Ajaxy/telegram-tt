@@ -1,18 +1,20 @@
 import { useEffect } from '../lib/teact/teact';
-import { throttle } from '../util/schedulers';
 
-const THROTTLE = 300;
+import type { CallbackManager } from '../util/callbacks';
+
+import { createCallbackManager } from '../util/callbacks';
+
+const elementObserverMap = new Map<HTMLElement, [ResizeObserver, CallbackManager]>();
 
 export default function useResizeObserver(
   ref: React.RefObject<HTMLElement> | undefined,
   onResize: (entry: ResizeObserverEntry) => void,
-  withThrottle = false,
 ) {
   useEffect(() => {
     if (!('ResizeObserver' in window) || !ref?.current) {
       return undefined;
     }
-
+    const el = ref.current;
     const callback: ResizeObserverCallback = ([entry]) => {
       // During animation
       if (!(entry.target as HTMLElement).offsetParent) {
@@ -21,12 +23,23 @@ export default function useResizeObserver(
 
       onResize(entry);
     };
-    const observer = new ResizeObserver(withThrottle ? throttle(callback, THROTTLE, false) : callback);
 
-    observer.observe(ref.current);
+    let [observer, callbackManager] = elementObserverMap.get(el) || [undefined, undefined];
+    if (!observer) {
+      callbackManager = createCallbackManager();
+      observer = new ResizeObserver(callbackManager.runCallbacks);
+      elementObserverMap.set(el, [observer, callbackManager]);
+      observer.observe(el);
+    }
+    callbackManager!.addCallback(callback);
 
     return () => {
-      observer.disconnect();
+      callbackManager!.removeCallback(callback);
+      if (!callbackManager!.hasCallbacks()) {
+        observer!.unobserve(el);
+        observer!.disconnect();
+        elementObserverMap.delete(el);
+      }
     };
-  }, [onResize, ref, withThrottle]);
+  }, [onResize, ref]);
 }
