@@ -25,6 +25,64 @@
       max-height: calc(100vh - 3.25rem - 5rem);
 
       overflow-x: auto;
+
+      padding-bottom: env(safe-area-inset-bottom);
+
+      @supports not (padding-bottom: env(safe-area-inset-bottom)) {
+        padding-bottom: 0;
+      }
+    }
+
+    .symbol-menu-button {
+      flex-shrink: 0;
+      background: none !important;
+      width: 3.5rem !important;
+      height: 3.5rem !important;
+      padding: 0 !important;
+      align-self: flex-end;
+    }
+
+    .symbol-menu-button, .mobile-symbol-menu-button {
+      margin-right: -1.75rem;
+      margin-left: -0.5rem !important;
+      color: var(--color-composer-button);
+    }
+
+    .mobile-symbol-menu-button {
+      margin-left: 0 !important;
+      margin-right: -1.25rem !important;
+      width: 2.875rem;
+      height: 2.875rem;
+    }
+  }
+
+
+  :global(body.keyboard-visible) & :global(.modal-content) {
+    padding-bottom: 0;
+  }
+
+  &.mobile :global {
+    .modal-dialog {
+      margin: 0;
+      max-width: 100% !important;
+      align-self: end;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+
+
+  &.mobile:global(:not(.open)) :global(.modal-dialog) {
+    transform: translate3d(0, 8rem, 0);
+  }
+
+  &.mobile.symbolMenuOpen :global(.modal-dialog) {
+    transition: var(--layer-transition);
+
+    transform: translate3d(0, calc((var(--symbol-menu-footer-height) + var(--symbol-menu-height) - env(safe-area-inset-bottom)) * -1), 0);
+
+    @supports not (bottom: env(safe-area-inset-bottom)) {
+      transform: translate3d(0, calc((var(--symbol-menu-footer-height) + var(--symbol-menu-height)) * -1), 0);
     }
   }
 

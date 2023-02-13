@@ -175,7 +175,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
           {renderingStickerSet ? renderText(renderingStickerSet.title, ['emoji', 'links']) : lang('AccDescrStickerSet')}
         </div>
         <DropdownMenu
-          className="stickers-more-menu"
+          className="stickers-more-menu with-menu-transitions"
           trigger={MoreMenuButton}
           positionX="right"
         >

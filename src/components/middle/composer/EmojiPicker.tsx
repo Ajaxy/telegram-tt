@@ -164,7 +164,8 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
 
   const selectCategory = useCallback((index: number) => {
     setActiveCategoryIndex(index);
-    const categoryEl = document.getElementById(`emoji-category-${index}`)!;
+    const categoryEl = containerRef.current!.closest<HTMLElement>('.SymbolMenu-main')!
+      .querySelector(`#emoji-category-${index}`)! as HTMLElement;
     fastSmoothScroll(containerRef.current!, categoryEl, 'start', FOCUS_MARGIN, SMOOTH_SCROLL_DISTANCE);
   }, []);
 

@@ -1,6 +1,17 @@
 @import "../../../styles/mixins";
 
 .SymbolMenu {
+  &.attachment-modal-symbol-menu {
+    position: absolute;
+    z-index: 10000;
+  }
+
+  &:not(.mobile-menu) {
+    @media (max-height: 800px) {
+      --symbol-menu-height: 40vh;
+    }
+  }
+
   &.mobile-menu {
     position: fixed;
     left: 0;
@@ -19,12 +30,21 @@
       0
     );
 
-    &.open {
+    &.open:not(.in-attachment-modal) {
       transform: translate3d(0, 0, 0);
 
       body.is-media-viewer-open & {
         transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
       }
+    }
+
+    &.open.in-attachment-modal {
+      z-index: calc(var(--z-modal) + 1);
+      transform: translate3d(
+          0,
+          calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)),
+          0
+      );
     }
 
     // Target: Old Firefox (Waterfox Classic)
@@ -106,6 +126,11 @@
       right: auto;
       width: 3.5rem;
       height: 4.5rem;
+    }
+
+    &.attachment-modal-symbol-menu > .backdrop {
+      bottom: 0;
+      top: auto;
     }
   }
 

@@ -111,6 +111,7 @@ export const EDITABLE_INPUT_ID = 'editable-message-text';
 export const EDITABLE_INPUT_MODAL_ID = 'editable-message-text-modal';
 // eslint-disable-next-line max-len
 export const EDITABLE_INPUT_CSS_SELECTOR = `.messages-layout .Transition__slide--active #${EDITABLE_INPUT_ID}, .messages-layout .Transition > .to #${EDITABLE_INPUT_ID}`;
+export const EDITABLE_INPUT_MODAL_CSS_SELECTOR = `#${EDITABLE_INPUT_MODAL_ID}`;
 
 export const CUSTOM_APPENDIX_ATTRIBUTE = 'data-has-custom-appendix';
 export const MESSAGE_CONTENT_CLASS_NAME = 'message-content';

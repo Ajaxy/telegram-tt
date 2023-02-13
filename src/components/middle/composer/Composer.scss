@@ -163,58 +163,59 @@
     animation: 0.25s ease-in-out forwards show-send-as-button;
     transform-origin: right;
   }
+}
 
-  .mobile-symbol-menu-button {
-    width: 2.875rem;
-    height: 2.875rem;
-    position: relative;
+.mobile-symbol-menu-button {
+  width: 2.875rem;
+  height: 2.875rem;
+  position: relative;
 
-    .icon-smile,
-    .icon-keyboard,
+  .icon-smile,
+  .icon-keyboard,
+  .Spinner {
+    position: absolute;
+  }
+
+  .Spinner {
+    --spinner-size: 1.5rem;
+  }
+
+  .icon-smile {
+    animation: grow-icon 0.4s ease-out;
+  }
+
+  .icon-keyboard,
+  .Spinner {
+    animation: hide-icon 0.4s forwards ease-out;
+  }
+
+  &.not-ready > i {
+    animation-duration: 0ms !important;
+  }
+
+  &.is-loading {
     .Spinner {
-      position: absolute;
-    }
-
-    .Spinner {
-      --spinner-size: 1.5rem;
-    }
-
-    .icon-smile {
       animation: grow-icon 0.4s ease-out;
     }
 
     .icon-keyboard,
+    .icon-smile {
+      animation: hide-icon 0.4s forwards ease-out;
+    }
+  }
+
+  &.menu-opened {
+    .icon-keyboard {
+      animation: grow-icon 0.4s ease-out;
+    }
+
+    .icon-smile,
     .Spinner {
       animation: hide-icon 0.4s forwards ease-out;
     }
-
-    &.not-ready > i {
-      animation-duration: 0ms !important;
-    }
-
-    &.is-loading {
-      .Spinner {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .icon-keyboard,
-      .icon-smile {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
-
-    &.menu-opened {
-      .icon-keyboard {
-        animation: grow-icon 0.4s ease-out;
-      }
-
-      .icon-smile,
-      .Spinner {
-        animation: hide-icon 0.4s forwards ease-out;
-      }
-    }
   }
 }
+
 
 #message-compose {
   flex-grow: 1;
@@ -394,6 +395,12 @@
       line-height: 2.875rem;
     }
   }
+}
+
+.symbol-menu-trigger {
+  left: -1rem;
+  bottom: 0;
+  position: absolute;
 }
 
 @media (min-width: 600px) {
