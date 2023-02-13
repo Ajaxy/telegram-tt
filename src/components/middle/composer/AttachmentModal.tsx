@@ -4,7 +4,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiAttachment, ApiChatMember, ApiSticker } from '../../../api/types';
+import type {
+  ApiAttachment, ApiChatMember, ApiSticker,
+} from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { Signal } from '../../../util/signals';
 
@@ -46,6 +48,7 @@ import CustomEmojiTooltip from './CustomEmojiTooltip.async';
 import AttachmentModalItem from './AttachmentModalItem';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
+import SymbolMenuButton from './SymbolMenuButton';
 
 import styles from './AttachmentModal.module.scss';
 
@@ -66,6 +69,9 @@ export type OwnProps = {
   onClear: NoneToVoidFunction;
   onSendSilent: (sendCompressed: boolean, sendGrouped: boolean) => void;
   onSendScheduled: (sendCompressed: boolean, sendGrouped: boolean) => void;
+  onCustomEmojiSelect: (emoji: ApiSticker) => void;
+  onRemoveSymbol: VoidFunction;
+  onEmojiSelect: (emoji: string) => void;
 };
 
 type StateProps = {
@@ -111,6 +117,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onClear,
   onSendSilent,
   onSendScheduled,
+  onCustomEmojiSelect,
+  onRemoveSymbol,
+  onEmojiSelect,
 }) => {
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
@@ -125,6 +134,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const prevAttachments = usePrevious(attachments);
   const renderingAttachments = attachments.length ? attachments : prevAttachments;
   const { isMobile } = useAppLayout();
+
+  const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
 
   const [shouldSendCompressed, setShouldSendCompressed] = useState(
     shouldSuggestCompression ?? attachmentSettings.shouldCompress,
@@ -142,6 +153,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const isOpen = Boolean(attachments.length);
   const renderingIsOpen = Boolean(renderingAttachments?.length);
   const [isHovered, markHovered, unmarkHovered] = useFlag();
+
+  useEffect(() => {
+    if (!isOpen) {
+      closeSymbolMenu();
+    }
+  }, [closeSymbolMenu, isOpen]);
 
   const [hasMedia, hasOnlyMedia] = useMemo(() => {
     const onlyMedia = Boolean(renderingAttachments?.every((a) => a.quick || a.audio));
@@ -388,7 +405,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         </Button>
         <div className="modal-title">{title}</div>
         <DropdownMenu
-          className="attachment-modal-more-menu"
+          className="attachment-modal-more-menu with-menu-transitions"
           trigger={MoreMenuButton}
           positionX="right"
         >
@@ -453,6 +470,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         styles.root,
         isHovered && styles.hovered,
         !areAttachmentsNotScrolled && styles.headerBorder,
+        isMobile && styles.mobile,
+        isSymbolMenuOpen && styles.symbolMenuOpen,
       )}
       noBackdropClose
     >
@@ -517,6 +536,20 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
             onClose={closeCustomEmojiTooltip}
           />
           <div className={styles.caption}>
+            <SymbolMenuButton
+              chatId={chatId}
+              threadId={threadId}
+              isMobile={isMobile}
+              isReady={isReady}
+              isSymbolMenuOpen={isSymbolMenuOpen}
+              openSymbolMenu={openSymbolMenu}
+              closeSymbolMenu={closeSymbolMenu}
+              onCustomEmojiSelect={onCustomEmojiSelect}
+              onRemoveSymbol={onRemoveSymbol}
+              onEmojiSelect={onEmojiSelect}
+              isAttachmentModal
+              className="attachment-modal-symbol-menu with-menu-transitions"
+            />
             <MessageInput
               ref={inputRef}
               id="caption-input-text"
@@ -532,6 +565,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               onScroll={handleCaptionScroll}
               canAutoFocus={Boolean(isReady && isForCurrentMessageList && attachments.length)}
               captionLimit={leftChars}
+              shouldSuppressFocus={isMobile && isSymbolMenuOpen}
+              onSuppressedFocus={closeSymbolMenu}
             />
             <div className={styles.sendWrapper}>
               <Button

@@ -67,7 +67,7 @@
     }
   }
 
-  body.has-open-dialog &:not(.CustomSendMenu):not(.web-app-more-menu):not(.attachment-modal-more-menu):not(.stickers-more-menu) .bubble {
+  body.has-open-dialog &:not(.with-menu-transitions) .bubble {
     transition: none !important;
   }
 

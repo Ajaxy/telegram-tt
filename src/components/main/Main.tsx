@@ -226,7 +226,8 @@ const Main: FC<OwnProps & StateProps> = ({
   // switch back to the mobile version, you get a blank screen
   const { isDesktop } = useAppLayout();
   useEffect(() => {
-    if (!isMiddleColumnOpen && !isLeftColumnOpen && !isDesktop) {
+    const areColumnsConflicting = isLeftColumnOpen === isMiddleColumnOpen;
+    if (areColumnsConflicting && !isDesktop) {
       toggleLeftColumn();
     }
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, toggleLeftColumn]);

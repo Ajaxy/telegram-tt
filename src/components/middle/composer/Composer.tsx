@@ -29,7 +29,7 @@ import {
   REPLIES_USER_ID,
   SEND_MESSAGE_ACTION_INTERVAL,
   EDITABLE_INPUT_CSS_SELECTOR,
-  MAX_UPLOAD_FILEPART_SIZE,
+  MAX_UPLOAD_FILEPART_SIZE, EDITABLE_INPUT_MODAL_ID,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/environment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -93,7 +93,6 @@ import useInterval from '../../../hooks/useInterval';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import useVoiceRecording from './hooks/useVoiceRecording';
 import useClipboardPaste from './hooks/useClipboardPaste';
-import useDraft from './hooks/useDraft';
 import useEditing from './hooks/useEditing';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -105,6 +104,7 @@ import useAttachmentModal from './hooks/useAttachmentModal';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
 import useDerivedState from '../../../hooks/useDerivedState';
 import { useStateRef } from '../../../hooks/useStateRef';
+import useDraft from './hooks/useDraft';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
 import Button from '../../ui/Button';
@@ -112,7 +112,6 @@ import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Spinner from '../../ui/Spinner';
 import AttachMenu from './AttachMenu';
 import Avatar from '../../common/Avatar';
-import SymbolMenu from './SymbolMenu.async';
 import InlineBotTooltip from './InlineBotTooltip.async';
 import MentionTooltip from './MentionTooltip.async';
 import CustomSendMenu from './CustomSendMenu.async';
@@ -130,6 +129,7 @@ import DropArea, { DropAreaState } from './DropArea.async';
 import WebPagePreview from './WebPagePreview';
 import SendAsMenu from './SendAsMenu.async';
 import BotMenuButton from './BotMenuButton';
+import SymbolMenuButton from './SymbolMenuButton';
 
 import './Composer.scss';
 
@@ -280,8 +280,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendMessage,
     clearDraft,
     showDialog,
-    setStickerSearchQuery,
-    setGifSearchQuery,
     forwardMessages,
     openPollModal,
     closePollModal,
@@ -374,7 +372,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   const [isSymbolMenuOpen, openSymbolMenu, closeSymbolMenu] = useFlag();
   const [isSendAsMenuOpen, openSendAsMenu, closeSendAsMenu] = useFlag();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
-  const [isSymbolMenuLoaded, onSymbolMenuLoadingComplete] = useFlag();
   const [isHoverDisabled, disableHover, enableHover] = useFlag();
 
   const {
@@ -525,30 +522,9 @@ const Composer: FC<OwnProps & StateProps> = ({
     insertHtmlAndUpdateCursor(newHtml, inputId);
   }, [insertHtmlAndUpdateCursor]);
 
-  const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
-    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
-      .join('')
-      .replace(/\u200b+/g, '\u200b');
-    insertHtmlAndUpdateCursor(newHtml, inputId);
-  }, [insertHtmlAndUpdateCursor]);
-
   const insertCustomEmojiAndUpdateCursor = useCallback((emoji: ApiSticker, inputId: string = EDITABLE_INPUT_ID) => {
     insertHtmlAndUpdateCursor(buildCustomEmojiHtml(emoji), inputId);
   }, [insertHtmlAndUpdateCursor]);
-
-  const removeSymbol = useCallback(() => {
-    const selection = window.getSelection()!;
-
-    if (selection.rangeCount) {
-      const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange, EDITABLE_INPUT_ID)) {
-        document.execCommand('delete', false);
-        return;
-      }
-    }
-
-    setHtml(deleteLastCharacterOutsideSelection(getHtml()));
-  }, [getHtml, setHtml]);
 
   useDraft(draft, chatId, threadId, getHtml, setHtml, editingMessage, lastSyncTime);
 
@@ -867,12 +843,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     openBotCommandMenu();
   }, [closeSymbolMenu, openBotCommandMenu]);
 
-  const handleActivateSymbolMenu = useCallback(() => {
-    closeBotCommandMenu();
-    closeSendAsMenu();
-    openSymbolMenu();
-  }, [closeBotCommandMenu, closeSendAsMenu, openSymbolMenu]);
-
   const handleMessageSchedule = useCallback((
     args: ScheduledMessageArgs, scheduledAt: number,
   ) => {
@@ -928,14 +898,39 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
 
-  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker, inputId?: string) => {
     if (!emoji.isFree && !isCurrentUserPremium && !isChatWithSelf) {
       showCustomEmojiPremiumNotification();
       return;
     }
 
-    insertCustomEmojiAndUpdateCursor(emoji);
+    insertCustomEmojiAndUpdateCursor(emoji, inputId);
   }, [insertCustomEmojiAndUpdateCursor, isChatWithSelf, isCurrentUserPremium, showCustomEmojiPremiumNotification]);
+
+  const handleCustomEmojiSelectAttachmentModal = useCallback((emoji: ApiSticker) => {
+    handleCustomEmojiSelect(emoji, EDITABLE_INPUT_MODAL_ID);
+  }, [handleCustomEmojiSelect]);
+
+  const handleGifSelect = useCallback((gif: ApiVideo, isSilent?: boolean, isScheduleRequested?: boolean) => {
+    if (shouldSchedule || isScheduleRequested) {
+      forceShowSymbolMenu();
+      requestCalendar((scheduledAt) => {
+        cancelForceShowSymbolMenu();
+        handleMessageSchedule({ gif, isSilent }, scheduledAt);
+        requestAnimationFrame(() => {
+          resetComposer(true);
+        });
+      });
+    } else {
+      sendMessage({ gif, isSilent });
+      requestAnimationFrame(() => {
+        resetComposer(true);
+      });
+    }
+  }, [
+    shouldSchedule, forceShowSymbolMenu, requestCalendar, cancelForceShowSymbolMenu, handleMessageSchedule,
+    resetComposer, sendMessage,
+  ]);
 
   const handleStickerSelect = useCallback((
     sticker: ApiSticker,
@@ -962,27 +957,6 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder });
       requestAnimationFrame(() => {
         resetComposer(shouldPreserveInput);
-      });
-    }
-  }, [
-    shouldSchedule, forceShowSymbolMenu, requestCalendar, cancelForceShowSymbolMenu, handleMessageSchedule,
-    resetComposer, sendMessage,
-  ]);
-
-  const handleGifSelect = useCallback((gif: ApiVideo, isSilent?: boolean, isScheduleRequested?: boolean) => {
-    if (shouldSchedule || isScheduleRequested) {
-      forceShowSymbolMenu();
-      requestCalendar((scheduledAt) => {
-        cancelForceShowSymbolMenu();
-        handleMessageSchedule({ gif, isSilent }, scheduledAt);
-        requestAnimationFrame(() => {
-          resetComposer(true);
-        });
-      });
-    } else {
-      sendMessage({ gif, isSilent });
-      requestAnimationFrame(() => {
-        resetComposer(true);
       });
     }
   }, [
@@ -1059,31 +1033,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [handleMessageSchedule, handleSend, handleSendAttachments, requestCalendar, shouldSchedule]);
 
-  const handleSearchOpen = useCallback((type: 'stickers' | 'gifs') => {
-    if (type === 'stickers') {
-      setStickerSearchQuery({ query: '' });
-      setGifSearchQuery({ query: undefined });
-    } else {
-      setGifSearchQuery({ query: '' });
-      setStickerSearchQuery({ query: undefined });
-    }
-  }, [setStickerSearchQuery, setGifSearchQuery]);
-
-  const handleSymbolMenuOpen = useCallback(() => {
-    const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
-
-    if (!isMobile || messageInput !== document.activeElement) {
-      openSymbolMenu();
-      return;
-    }
-
-    messageInput?.blur();
-    setTimeout(() => {
-      closeBotCommandMenu();
-      openSymbolMenu();
-    }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
-  }, [openSymbolMenu, closeBotCommandMenu, isMobile]);
-
   const handleSendAsMenuOpen = useCallback(() => {
     const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
 
@@ -1101,6 +1050,35 @@ const Composer: FC<OwnProps & StateProps> = ({
       openSendAsMenu();
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
   }, [closeBotCommandMenu, closeSymbolMenu, openSendAsMenu, isMobile]);
+
+  const insertTextAndUpdateCursor = useCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
+    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+      .join('')
+      .replace(/\u200b+/g, '\u200b');
+    insertHtmlAndUpdateCursor(newHtml, inputId);
+  }, [insertHtmlAndUpdateCursor]);
+
+  const insertTextAndUpdateCursorAttachmentModal = useCallback((text: string) => {
+    insertTextAndUpdateCursor(text, EDITABLE_INPUT_MODAL_ID);
+  }, [insertTextAndUpdateCursor]);
+
+  const removeSymbol = useCallback((inputId = EDITABLE_INPUT_ID) => {
+    const selection = window.getSelection()!;
+
+    if (selection.rangeCount) {
+      const selectionRange = selection.getRangeAt(0);
+      if (isSelectionInsideInput(selectionRange, inputId)) {
+        document.execCommand('delete', false);
+        return;
+      }
+    }
+
+    setHtml(deleteLastCharacterOutsideSelection(getHtml()));
+  }, [getHtml, setHtml]);
+
+  const removeSymbolAttachmentModal = useCallback(() => {
+    removeSymbol(EDITABLE_INPUT_MODAL_ID);
+  }, [removeSymbol]);
 
   const handleAllScheduledClick = useCallback(() => {
     openChat({
@@ -1193,14 +1171,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     isHoverDisabled && 'hover-disabled',
   );
 
-  const symbolMenuButtonClassName = buildClassName(
-    'mobile-symbol-menu-button',
-    !isReady && 'not-ready',
-    isSymbolMenuLoaded
-      ? (isSymbolMenuOpen && 'menu-opened')
-      : (isSymbolMenuOpen && 'is-loading'),
-  );
-
   const handleSendScheduled = useCallback(() => {
     requestCalendar((scheduledAt) => {
       handleMessageSchedule({}, scheduledAt);
@@ -1260,6 +1230,9 @@ const Composer: FC<OwnProps & StateProps> = ({
         onFileAppend={handleAppendFiles}
         onClear={handleClearAttachments}
         onAttachmentsUpdate={handleSetAttachments}
+        onCustomEmojiSelect={handleCustomEmojiSelectAttachmentModal}
+        onRemoveSymbol={removeSymbolAttachmentModal}
+        onEmojiSelect={insertTextAndUpdateCursorAttachmentModal}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1359,29 +1332,25 @@ const Composer: FC<OwnProps & StateProps> = ({
               />
             </Button>
           )}
-          {isMobile ? (
-            <Button
-              className={symbolMenuButtonClassName}
-              round
-              color="translucent"
-              onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
-              ariaLabel="Choose emoji, sticker or GIF"
-            >
-              <i className="icon-smile" />
-              <i className="icon-keyboard" />
-              {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
-            </Button>
-          ) : (
-            <ResponsiveHoverButton
-              className={buildClassName('symbol-menu-button', isSymbolMenuOpen && 'activated')}
-              round
-              color="translucent"
-              onActivate={handleActivateSymbolMenu}
-              ariaLabel="Choose emoji, sticker or GIF"
-            >
-              <i className="icon-smile" />
-            </ResponsiveHoverButton>
-          )}
+          <SymbolMenuButton
+            chatId={chatId}
+            threadId={threadId}
+            isMobile={isMobile}
+            isReady={isReady}
+            isSymbolMenuOpen={isSymbolMenuOpen}
+            openSymbolMenu={openSymbolMenu}
+            closeSymbolMenu={closeSymbolMenu}
+            canSendStickers={canSendStickers}
+            canSendGifs={canSendGifs}
+            onGifSelect={handleGifSelect}
+            onStickerSelect={handleStickerSelect}
+            onCustomEmojiSelect={handleCustomEmojiSelect}
+            onRemoveSymbol={removeSymbol}
+            onEmojiSelect={insertTextAndUpdateCursor}
+            closeBotCommandMenu={closeBotCommandMenu}
+            closeSendAsMenu={closeSendAsMenu}
+            isSymbolMenuForced={isSymbolMenuForced}
+          />
           <MessageInput
             ref={inputRef}
             id="message-input-text"
@@ -1485,23 +1454,6 @@ const Composer: FC<OwnProps & StateProps> = ({
             onEmojiSelect={insertEmoji}
             onCustomEmojiSelect={insertEmoji}
             onClose={closeEmojiTooltip}
-          />
-          <SymbolMenu
-            chatId={chatId}
-            threadId={threadId}
-            isOpen={isSymbolMenuOpen || isSymbolMenuForced}
-            canSendGifs={canSendGifs}
-            canSendStickers={canSendStickers}
-            onLoad={onSymbolMenuLoadingComplete}
-            onClose={closeSymbolMenu}
-            onEmojiSelect={insertTextAndUpdateCursor}
-            onStickerSelect={handleStickerSelect}
-            onCustomEmojiSelect={handleCustomEmojiSelect}
-            onGifSelect={handleGifSelect}
-            onRemoveSymbol={removeSymbol}
-            onSearchOpen={handleSearchOpen}
-            addRecentEmoji={addRecentEmoji}
-            addRecentCustomEmoji={addRecentCustomEmoji}
           />
         </div>
       </div>

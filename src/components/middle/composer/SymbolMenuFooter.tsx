@@ -10,6 +10,7 @@ type OwnProps = {
   onSwitchTab: (tab: SymbolMenuTabs) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
+  isAttachmentModal?: boolean;
 };
 
 export enum SymbolMenuTabs {
@@ -34,7 +35,7 @@ const SYMBOL_MENU_TAB_ICONS = {
 };
 
 const SymbolMenuFooter: FC<OwnProps> = ({
-  activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen,
+  activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen, isAttachmentModal,
 }) => {
   const lang = useLang();
 
@@ -79,8 +80,8 @@ const SymbolMenuFooter: FC<OwnProps> = ({
 
       {renderTabButton(SymbolMenuTabs.Emoji)}
       {renderTabButton(SymbolMenuTabs.CustomEmoji)}
-      {renderTabButton(SymbolMenuTabs.Stickers)}
-      {renderTabButton(SymbolMenuTabs.GIFs)}
+      {!isAttachmentModal && renderTabButton(SymbolMenuTabs.Stickers)}
+      {!isAttachmentModal && renderTabButton(SymbolMenuTabs.GIFs)}
 
       {(activeTab === SymbolMenuTabs.Emoji || activeTab === SymbolMenuTabs.CustomEmoji) && (
         <Button

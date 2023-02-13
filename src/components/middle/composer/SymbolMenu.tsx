@@ -35,24 +35,31 @@ export type OwnProps = {
   chatId: string;
   threadId?: number;
   isOpen: boolean;
-  canSendStickers: boolean;
-  canSendGifs: boolean;
+  canSendStickers?: boolean;
+  canSendGifs?: boolean;
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
-  onStickerSelect: (
+  onStickerSelect?: (
     sticker: ApiSticker,
     isSilent?: boolean,
     shouldSchedule?: boolean,
     shouldPreserveInput?: boolean,
     shouldUpdateStickerSetsOrder?: boolean
   ) => void;
-  onGifSelect: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: () => void;
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
   addRecentEmoji: GlobalActions['addRecentEmoji'];
   addRecentCustomEmoji: GlobalActions['addRecentCustomEmoji'];
+  className?: string;
+  isAttachmentModal?: boolean;
+  positionX?: 'left' | 'right';
+  positionY?: 'top' | 'bottom';
+  transformOriginX?: number;
+  transformOriginY?: number;
+  style?: string;
 };
 
 type StateProps = {
@@ -75,13 +82,20 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onLoad,
   onClose,
   onEmojiSelect,
+  isAttachmentModal,
   onCustomEmojiSelect,
   onStickerSelect,
+  className,
   onGifSelect,
   onRemoveSymbol,
   onSearchOpen,
   addRecentEmoji,
   addRecentCustomEmoji,
+  positionX,
+  positionY,
+  transformOriginX,
+  transformOriginY,
+  style,
 }) => {
   const { loadPremiumSetStickers, loadFeaturedEmojiStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -109,7 +123,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [isCurrentUserPremium, lastSyncTime, loadFeaturedEmojiStickers, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
-    if (!isMobile) {
+    if (!isMobile || isAttachmentModal) {
       return undefined;
     }
 
@@ -128,7 +142,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         });
       }
     };
-  }, [isMobile, isOpen]);
+  }, [isAttachmentModal, isMobile, isOpen]);
 
   const recentEmojisRef = useRef(recentEmojis);
   recentEmojisRef.current = recentEmojis;
@@ -180,7 +194,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const handleStickerSelect = useCallback((
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldUpdateStickerSetsOrder?: boolean,
   ) => {
-    onStickerSelect(sticker, isSilent, shouldSchedule, true, shouldUpdateStickerSetsOrder);
+    onStickerSelect?.(sticker, isSilent, shouldSchedule, true, shouldUpdateStickerSetsOrder);
   }, [onStickerSelect]);
 
   const lang = useLang();
@@ -204,6 +218,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           />
         );
       case SymbolMenuTabs.Stickers:
+        if (!canSendStickers) return undefined;
+
         return (
           <StickerPicker
             className="picker-tab"
@@ -215,6 +231,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           />
         );
       case SymbolMenuTabs.GIFs:
+        if (!canSendGifs || !onGifSelect) return undefined;
+
         return (
           <GifPicker
             className="picker-tab"
@@ -259,6 +277,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         onSwitchTab={setActiveTab}
         onRemoveSymbol={onRemoveSymbol}
         onSearchOpen={handleSearch}
+        isAttachmentModal={isAttachmentModal}
       />
     </>
   );
@@ -268,15 +287,24 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const className = buildClassName(
+    const mobileClassName = buildClassName(
       'SymbolMenu mobile-menu',
       transitionClassNames,
       isLeftColumnShown && 'left-column-open',
+      isAttachmentModal && 'in-attachment-modal',
     );
+
+    if (isAttachmentModal) {
+      return (
+        <div className={mobileClassName}>
+          {content}
+        </div>
+      );
+    }
 
     return (
       <Portal>
-        <div className={className}>
+        <div className={mobileClassName}>
           {content}
         </div>
       </Portal>
@@ -286,15 +314,19 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   return (
     <Menu
       isOpen={isOpen}
-      positionX="left"
-      positionY="bottom"
+      positionX={isAttachmentModal ? positionX : 'left'}
+      positionY={isAttachmentModal ? positionY : 'bottom'}
       onClose={onClose}
-      className="SymbolMenu"
+      withPortal={isAttachmentModal}
+      className={buildClassName('SymbolMenu', className)}
       onCloseAnimationEnd={onClose}
       onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
       noCompact
+      transformOriginX={transformOriginX}
+      transformOriginY={transformOriginY}
+      style={style}
     >
       {content}
     </Menu>
