@@ -1,5 +1,5 @@
 import React, {
-  memo, useLayoutEffect, useMemo, useRef,
+  memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -13,7 +13,6 @@ import { IS_COMPACT_MENU } from '../../../util/environment';
 import { isSameReaction, canSendReaction, getReactionUniqueKey } from '../../../global/helpers';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useFlag from '../../../hooks/useFlag';
 
 import ReactionSelectorReaction from './ReactionSelectorReaction';
 
@@ -44,15 +43,9 @@ const ReactionSelector: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const itemsScrollRef = useRef<HTMLDivElement>(null);
-  const [isHorizontalScrollEnabled, enableHorizontalScroll] = useFlag(false);
-  useHorizontalScroll(itemsScrollRef, !isHorizontalScrollEnabled);
-
-  useLayoutEffect(() => {
-    enableHorizontalScroll();
-  }, [enableHorizontalScroll]);
+  useHorizontalScroll(itemsScrollRef);
 
   const handleWheel = (e: React.WheelEvent | React.TouchEvent) => {
-    if (!itemsScrollRef) return;
     const deltaY = 'deltaY' in e ? e.deltaY : getTouchY(e);
 
     if (deltaY && e.cancelable) {
