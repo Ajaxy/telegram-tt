@@ -11,6 +11,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import type { AnimationLevel } from '../../../types';
 
+import { IS_MULTITAB_SUPPORTED } from '../../../util/environment';
 import {
   selectCanDeleteTopic,
   selectChat,
@@ -19,9 +20,11 @@ import {
   selectOutgoingStatus, selectThreadInfo, selectThreadParam, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import useChatListEntry from './hooks/useChatListEntry';
+import { createLocationHash } from '../../../util/routing';
 import renderText from '../../common/helpers/renderText';
 import { getMessageAction } from '../../../global/helpers';
+
+import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -143,6 +146,7 @@ const Topic: FC<OwnProps & StateProps> = ({
       )}
       onClick={handleOpenTopic}
       style={style}
+      href={IS_MULTITAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', topic.id)}` : undefined}
       contextActions={contextActions}
       ref={ref}
     >

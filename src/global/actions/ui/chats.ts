@@ -72,9 +72,9 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 });
 
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
-  const { chatId } = payload;
+  const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
-  window.open(createMessageHashUrl(chatId, 'thread', MAIN_THREAD_ID), '_blank');
+  window.open(createMessageHashUrl(chatId, 'thread', threadId), '_blank');
 });
 
 addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnType => {

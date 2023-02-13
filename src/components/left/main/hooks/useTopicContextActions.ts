@@ -1,12 +1,14 @@
 import { getActions } from '../../../../global';
+import { useMemo } from '../../../../lib/teact/teact';
 
 import type { ApiChat, ApiTopic } from '../../../../api/types';
+import type { MenuItemContextAction } from '../../../ui/ListItem';
 
 import { compact } from '../../../../util/iteratees';
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
+import { IS_MULTITAB_SUPPORTED } from '../../../../util/environment';
 
 import useLang from '../../../../hooks/useLang';
-import { useMemo } from '../../../../lib/teact/teact';
 
 export default function useTopicContextActions(
   topic: ApiTopic,
@@ -29,10 +31,21 @@ export default function useTopicContextActions(
       toggleTopicPinned,
       markTopicRead,
       updateTopicMutedState,
+      openChatInNewTab,
     } = getActions();
 
     const canToggleClosed = getCanManageTopic(chat, topic);
     const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
+
+    const actionOpenInNewTab = IS_MULTITAB_SUPPORTED && {
+      title: 'Open in new tab',
+      icon: 'open-in-new-tab',
+      handler: () => {
+        openChatInNewTab({ chatId: chat.id, threadId: topicId });
+      },
+    };
+
+    const newTabActionSeparator = actionOpenInNewTab && { isSeparator: true, key: 'newTabSeparator' };
 
     const actionUnreadMark = topic.unreadCount || !wasOpened
       ? {
@@ -88,11 +101,13 @@ export default function useTopicContextActions(
     } : undefined;
 
     return compact([
+      actionOpenInNewTab,
+      newTabActionSeparator,
       actionPin,
       actionUnreadMark,
       actionMute,
       actionCloseTopic,
       actionDelete,
-    ]);
+    ]) as MenuItemContextAction[];
   }, [topic, chat, wasOpened, lang, canDelete, handleDelete]);
 }

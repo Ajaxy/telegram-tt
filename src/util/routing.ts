@@ -7,7 +7,7 @@ let parsedInitialLocationHash: Record<string, string> | undefined;
 let messageHash: string | undefined;
 let isAlreadyParsed = false;
 
-export const createLocationHash = (chatId: string, type: string, threadId: number): string => {
+export const createLocationHash = (chatId: string, type: MessageListType, threadId: number): string => {
   const displayType = type === 'thread' ? undefined : type;
   const parts = threadId === MAIN_THREAD_ID ? [chatId, displayType] : [chatId, threadId, displayType];
 
@@ -44,7 +44,7 @@ export function parseLocationHash() {
   };
 }
 
-export const createMessageHashUrl = (chatId: string, type: string, threadId: number): string => {
+export const createMessageHashUrl = (chatId: string, type: MessageListType, threadId: number): string => {
   const url = new URL(window.location.href);
   url.hash = createLocationHash(chatId, type, threadId);
   return url.href;
