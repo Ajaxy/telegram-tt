@@ -57,5 +57,7 @@
   "--color-topic-green": ["#44774A", "#8eee98"],
   "--color-topic-rose": ["#9B576B", "#ff93b2"],
   "--color-topic-red": ["#EB6858", "#fb6f5f"],
-  "--color-topic-grey": ["#6C6C6C", "#999999"]
+  "--color-topic-grey": ["#6C6C6C", "#999999"],
+  "--color-forum-unread-topic-hover": ["#e9e9e9", "#363636"],
+  "--color-forum-hover-unread-topic-hover": ["#e2e2e2", "#3f3f3f"]
 }
