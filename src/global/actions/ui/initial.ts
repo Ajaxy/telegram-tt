@@ -51,6 +51,13 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
 
     global = getGlobal();
     if (!global.passcode.hasPasscode || !global.passcode.isScreenLocked) {
+      if (global.connectionState === 'connectionStateReady') {
+        global = {
+          ...global,
+          connectionState: 'connectionStateConnecting',
+        };
+        setGlobal(global);
+      }
       actions.initApi();
 
       const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
