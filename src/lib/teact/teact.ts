@@ -1,11 +1,6 @@
 import type { ReactElement } from 'react';
 import { DEBUG, DEBUG_MORE } from '../../config';
-import {
-  throttleWithRafFallback,
-  throttleWithPrimaryRafFallback,
-  throttleWithTickEnd,
-  throttleWithPrimaryTickEnd,
-} from '../../util/schedulers';
+import { throttleWithRafFallback } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { handleError } from '../../util/handleError';
@@ -126,6 +121,9 @@ export type TeactNode =
   | number
   | boolean
   | TeactNode[];
+
+type Effect = () => (NoneToVoidFunction | void);
+type EffectCleanup = NoneToVoidFunction;
 
 const Fragment = Symbol('Fragment');
 
@@ -306,6 +304,10 @@ document.addEventListener('dblclick', () => {
 
 let instancesPendingUpdate = new Set<ComponentInstance>();
 let idsToExcludeFromUpdate = new Set<number>();
+let pendingEffects = new Map<string, Effect>();
+let pendingCleanups = new Map<string, EffectCleanup>();
+let pendingLayoutEffects = new Map<string, Effect>();
+let pendingLayoutCleanups = new Map<string, EffectCleanup>();
 
 const runUpdatePassOnRaf = throttleWithRafFallback(() => {
   idsToExcludeFromUpdate = new Set();
@@ -316,9 +318,15 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
 
   instancesPendingUpdate = new Set();
 
-  instancesToUpdate.forEach((instance) => {
-    prepareComponentForFrame(instance);
-  });
+  const currentCleanups = pendingCleanups;
+  pendingCleanups = new Map();
+  currentCleanups.forEach((cb) => cb());
+
+  const currentEffects = pendingEffects;
+  pendingEffects = new Map();
+  currentEffects.forEach((cb) => cb());
+
+  instancesToUpdate.forEach(prepareComponentForFrame);
 
   instancesToUpdate.forEach((instance) => {
     if (idsToExcludeFromUpdate!.has(instance.id)) {
@@ -327,6 +335,14 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
 
     forceUpdateComponent(instance);
   });
+
+  const currentLayoutCleanups = pendingLayoutCleanups;
+  pendingLayoutCleanups = new Map();
+  currentLayoutCleanups.forEach((cb) => cb());
+
+  const currentLayoutEffects = pendingLayoutEffects;
+  pendingLayoutEffects = new Map();
+  currentLayoutEffects.forEach((cb) => cb());
 });
 
 function scheduleUpdate(componentInstance: ComponentInstance) {
@@ -561,9 +577,8 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
 }
 
 function useEffectBase(
-  schedulerFn: (cb: NoneToVoidFunction) => void,
-  primarySchedulerFn: (cb: NoneToVoidFunction) => void,
-  effect: () => NoneToVoidFunction | void,
+  isLayout: boolean,
+  effect: Effect,
   dependencies?: readonly any[],
   debugKey?: string,
 ) {
@@ -643,8 +658,16 @@ function useEffectBase(
   }
 
   function schedule() {
-    primarySchedulerFn(execCleanup);
-    schedulerFn(exec);
+    const effectId = `${componentInstance.id}_${cursor}`;
+
+    if (isLayout) {
+      pendingLayoutCleanups.set(effectId, execCleanup);
+      pendingLayoutEffects.set(effectId, exec);
+    } else {
+      pendingCleanups.set(effectId, execCleanup);
+      pendingEffects.set(effectId, exec);
+      runUpdatePassOnRaf();
+    }
   }
 
   if (dependencies && byCursor[cursor]?.dependencies) {
@@ -703,26 +726,12 @@ function useEffectBase(
   renderingInstance.hooks.effects.cursor++;
 }
 
-export function useEffect(
-  effect: () => NoneToVoidFunction | void,
-  dependencies?: readonly any[],
-  debugKey?: string,
-) {
-  const schedulerFn = useMemo(() => throttleWithRafFallback((cb: NoneToVoidFunction) => cb()), []);
-  const primarySchedulerFn = useMemo(() => throttleWithPrimaryRafFallback((cb: NoneToVoidFunction) => cb()), []);
-
-  return useEffectBase(schedulerFn, primarySchedulerFn, effect, dependencies, debugKey);
+export function useEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
+  return useEffectBase(false, effect, dependencies, debugKey);
 }
 
-export function useLayoutEffect(
-  effect: () => NoneToVoidFunction | void,
-  dependencies?: readonly any[],
-  debugKey?: string,
-) {
-  const schedulerFn = useMemo(() => throttleWithTickEnd((cb: NoneToVoidFunction) => cb()), []);
-  const primarySchedulerFn = useMemo(() => throttleWithPrimaryTickEnd((cb: NoneToVoidFunction) => cb()), []);
-
-  return useEffectBase(schedulerFn, primarySchedulerFn, effect, dependencies, debugKey);
+export function useLayoutEffect(effect: Effect, dependencies?: readonly any[], debugKey?: string) {
+  return useEffectBase(true, effect, dependencies, debugKey);
 }
 
 export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {

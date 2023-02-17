@@ -142,7 +142,8 @@ let timeout: NodeJS.Timeout | undefined;
 
 const FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
 
-// May result in an immediate execution if called from another `requestAnimationFrame` callback
+// May result in an immediate execution if called from another RAF callback which was scheduled
+// (and therefore is executed) earlier than RAF callback scheduled by `fastRaf`
 export function fastRaf(callback: NoneToVoidFunction, isPrimary = false, withTimeoutFallback = false) {
   if (!fastRafCallbacks) {
     fastRafCallbacks = !withTimeoutFallback && !isPrimary ? [callback] : [];
