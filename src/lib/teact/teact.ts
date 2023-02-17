@@ -461,10 +461,9 @@ export function unmountComponent(componentInstance: ComponentInstance) {
       effect.cleanup?.();
     } catch (err: any) {
       handleError(err);
-    } finally {
-      effect.cleanup = undefined;
     }
 
+    effect.cleanup = undefined;
     effect.releaseSignals?.();
   });
 
@@ -586,10 +585,6 @@ function useEffectBase(
   const componentInstance = renderingInstance;
 
   function execCleanup() {
-    if (!componentInstance.isMounted) {
-      return;
-    }
-
     const { cleanup } = byCursor[cursor];
     if (!cleanup) {
       return;
@@ -618,17 +613,15 @@ function useEffectBase(
       // eslint-disable-next-line no-console
       console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`);
       handleError(err);
-    } finally {
-      byCursor[cursor].cleanup = undefined;
     }
+
+    byCursor[cursor].cleanup = undefined;
   }
 
   function exec() {
     if (!componentInstance.isMounted) {
       return;
     }
-
-    execCleanup();
 
     try {
       // eslint-disable-next-line @typescript-eslint/naming-convention
