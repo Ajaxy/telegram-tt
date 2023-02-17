@@ -136,9 +136,10 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
             .filter(Boolean)
           : [];
 
-        const allMessages = ([] as ApiMessage[]).concat(result.messages, localMessages, topicLastMessages);
-        const byId = buildCollectionByKey(allMessages, 'id');
-        const listedIds = Object.keys(byId).map(Number);
+        const allMessages = ([] as ApiMessage[]).concat(result.messages, localMessages);
+        const allMessagesWithTopicLastMessages = allMessages.concat(topicLastMessages);
+        const byId = buildCollectionByKey(allMessagesWithTopicLastMessages, 'id');
+        const listedIds = allMessages.map(({ id }) => id);
 
         if (!wasReset) {
           global = {
