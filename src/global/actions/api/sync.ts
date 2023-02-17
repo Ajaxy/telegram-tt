@@ -236,7 +236,10 @@ addCallback((global: GlobalState) => {
   const { connectionState, authState } = global;
   const { isMasterTab } = selectTabState(global);
   if (!isMasterTab || (previousGlobal?.connectionState === connectionState
-    && previousGlobal?.authState === authState)) return;
+    && previousGlobal?.authState === authState)) {
+    previousGlobal = global;
+    return;
+  }
 
   if (connectionState === 'connectionStateReady' && authState === 'authorizationStateReady') {
     // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
