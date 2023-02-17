@@ -95,11 +95,19 @@ export function selectTabThreadParam<T extends GlobalState, K extends keyof TabT
   return selectTabState(global, tabId).tabThreads[chatId]?.[threadId]?.[key];
 }
 
-export function selectThreadParam<K extends keyof Thread>(
-  global: GlobalState,
+export function selectThreadParam<T extends GlobalState, K extends keyof Thread>(
+  global: T,
   chatId: string,
   threadId: number,
   key: K,
+) {
+  return selectThread(global, chatId, threadId)?.[key];
+}
+
+export function selectThread<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: number,
 ) {
   const messageInfo = global.messages.byChatId[chatId];
   if (!messageInfo) {
@@ -111,7 +119,7 @@ export function selectThreadParam<K extends keyof Thread>(
     return undefined;
   }
 
-  return thread[key];
+  return thread;
 }
 
 export function selectListedIds<T extends GlobalState>(global: T, chatId: string, threadId: number) {

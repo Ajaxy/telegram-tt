@@ -55,7 +55,7 @@ import {
   selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
   selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState,
+  selectTabState, selectThread,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -1898,17 +1898,27 @@ async function loadChats<T extends GlobalState>(
 
   const idsToUpdateDraft = isFullDraftSync ? result.chatIds : Object.keys(result.draftsById);
   idsToUpdateDraft.forEach((chatId) => {
+    const draft = result.draftsById[chatId];
+    const thread = selectThread(global, chatId, MAIN_THREAD_ID);
+
+    if (!draft && !thread) return;
+
     if (!selectDraft(global, chatId, MAIN_THREAD_ID)?.isLocal) {
       global = replaceThreadParam(
-        global, chatId, MAIN_THREAD_ID, 'draft', result.draftsById[chatId],
+        global, chatId, MAIN_THREAD_ID, 'draft', draft,
       );
     }
   });
 
   const idsToUpdateReplyingToId = isFullDraftSync ? result.chatIds : Object.keys(result.replyingToById);
   idsToUpdateReplyingToId.forEach((chatId) => {
+    const replyingToById = result.replyingToById[chatId];
+    const thread = selectThread(global, chatId, MAIN_THREAD_ID);
+
+    if (!replyingToById && !thread) return;
+
     global = replaceThreadParam(
-      global, chatId, MAIN_THREAD_ID, 'replyingToId', result.replyingToById[chatId],
+      global, chatId, MAIN_THREAD_ID, 'replyingToId', replyingToById,
     );
   });
 
