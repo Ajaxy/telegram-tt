@@ -177,10 +177,7 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   useEffect(() => {
     return () => {
-      if (animationRef.current) {
-        animationRef.current.removeContainer(containerId);
-        animationRef.current = undefined;
-      }
+      animationRef.current?.removeContainer(containerId);
     };
   }, [containerId]);
 
