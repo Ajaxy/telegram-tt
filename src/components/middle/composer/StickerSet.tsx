@@ -104,7 +104,6 @@ const StickerSet: FC<OwnProps> = ({
 
   const stickerMarginPx = isMobile ? 8 : 16;
   const emojiMarginPx = isMobile ? 8 : 10;
-  const containerPaddingPx = isMobile && !isStatusPicker ? 8 : 0;
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
@@ -159,8 +158,8 @@ const StickerSet: FC<OwnProps> = ({
   const calculateItemsPerRow = useCallback((width: number) => {
     if (!width) return ITEMS_PER_ROW_FALLBACK;
 
-    return Math.floor((width - containerPaddingPx) / (itemSize + margin));
-  }, [containerPaddingPx, itemSize, margin]);
+    return Math.floor(width / (itemSize + margin));
+  }, [itemSize, margin]);
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
     setItemsPerRow(calculateItemsPerRow(entry.contentRect.width));

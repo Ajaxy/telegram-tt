@@ -255,14 +255,14 @@
   }
 
   .symbol-set-container {
-    display: flex;
+    display: grid;
     justify-content: space-between;
-    flex-wrap: wrap;
+    grid-template-columns: repeat(auto-fill, var(--emoji-size, 4rem));
+    grid-gap: 0.625rem;
+    padding: 0.3125rem;
 
-    // Fix for the last row alignment
-    &::after {
-      content: "";
-      flex: auto;
+    @media (max-width: 600px) {
+      grid-gap: 0.5rem;
     }
 
     &:not(.shown) {
@@ -271,6 +271,11 @@
 
     &.closing {
       transition: none;
+    }
+
+    > .EmojiButton,
+    > .StickerButton {
+      margin: 0;
     }
   }
 }
