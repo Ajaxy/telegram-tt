@@ -38,6 +38,7 @@ export type TransitionProps = {
 const classNames = {
   active: 'Transition__slide--active',
 };
+const FALLBACK_ANIMATION_END = 1000;
 
 const Transition: FC<TransitionProps> = ({
   ref,
@@ -211,7 +212,7 @@ const Transition: FC<TransitionProps> = ({
           : childNodes[activeIndex];
 
       if (watchedNode) {
-        waitForAnimationEnd(watchedNode, onAnimationEnd);
+        waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
       } else {
         onAnimationEnd();
       }
