@@ -1015,7 +1015,7 @@ const Message: FC<OwnProps & StateProps> = ({
     if (senderPeer && !(isCustomShape && viaBotId)) {
       senderTitle = getSenderTitle(lang, senderPeer);
 
-      if (!asForwarded) {
+      if (!asForwarded && !isOwn) {
         senderColor = `color-${getUserColorKey(senderPeer)}`;
       }
     } else if (forwardInfo?.hiddenUserName) {
