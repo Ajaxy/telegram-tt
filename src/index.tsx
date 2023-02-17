@@ -12,7 +12,7 @@ import { setupBeforeInstallPrompt } from './util/installPrompt';
 import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED } from './util/environment';
 import './global/init';
 
-import { DEBUG, MULTITAB_LOCALSTORAGE_KEY } from './config';
+import { APP_VERSION, DEBUG, MULTITAB_LOCALSTORAGE_KEY } from './config';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
 import { onBeforeUnload } from './util/schedulers';
@@ -31,7 +31,7 @@ async function init() {
   if (IS_MULTITAB_SUPPORTED) {
     subscribeToMultitabBroadcastChannel();
 
-    await requestGlobal();
+    await requestGlobal(APP_VERSION);
     localStorage.setItem(MULTITAB_LOCALSTORAGE_KEY, '1');
     onBeforeUnload(() => {
       const global = getGlobal();

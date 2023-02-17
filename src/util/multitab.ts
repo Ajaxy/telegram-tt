@@ -7,7 +7,7 @@ import type { ApiInitialArgs } from '../api/types';
 import type { GlobalState } from '../global/types';
 
 import { IS_MULTITAB_SUPPORTED } from './environment';
-import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
+import { APP_VERSION, DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
 import { deepMerge } from './deepMerge';
 import { selectTabState } from '../global/selectors';
 import {
@@ -27,6 +27,7 @@ import { omit } from './iteratees';
 type BroadcastChannelRequestGlobal = {
   type: 'requestGlobal';
   token?: number;
+  appVersion: string;
 };
 
 type BroadcastChannelGlobalUpdate = {
@@ -221,8 +222,17 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
     }
 
     case 'requestGlobal': {
+      const { appVersion } = data;
+      if (appVersion !== APP_VERSION) {
+        // If app version on the other tab was updated, reload the current page immediately and don't respond
+        // to the other tab's request because our current global might be incompatible with the new version
+        window.location.reload();
+        return;
+      }
+
       if (!isFirstGlobalResolved) return;
       const global = getGlobal();
+
       if (!selectTabState(global).isMasterTab) return;
 
       channel.postMessage({
@@ -328,10 +338,11 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
   }
 }
 
-export function requestGlobal(): Promise<void> {
+export function requestGlobal(appVersion: string): Promise<void> {
   if (channel) {
     channel.postMessage({
       type: 'requestGlobal',
+      appVersion,
     });
   }
 
