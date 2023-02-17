@@ -63,11 +63,23 @@ import { buildApiCallDiscardReason } from './calls';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { getServerTimeOffset } from '../../../util/serverTime';
 
+const TIMESTAMP_BASE = 1676e9; // 2023-02-10
+const TIMESTAMP_PRECISION = 1e2; // 0.1s
+const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
+
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
 
 let localMessageCounter = LOCAL_MESSAGE_MIN_ID;
-const getNextLocalMessageId = () => ++localMessageCounter;
+
+// Local IDs need to be fractional to allow service notifications to be placed between real messages.
+// It also allows to avoid collisions when sending messages from multiple tabs due to timestamp-based whole part.
+// To support up to 1M local messages, the whole part must be below 8.5B (https://stackoverflow.com/a/57225494/903919).
+// The overflow will happen when `datePart` is >3.59B which will be in June 2034.
+function getNextLocalMessageId() {
+  const datePart = Math.round((Date.now() - TIMESTAMP_BASE) / TIMESTAMP_PRECISION);
+  return LOCAL_MESSAGE_MIN_ID + datePart + (++localMessageCounter / LOCAL_MESSAGES_LIMIT);
+}
 
 let currentUserId!: string;
 
