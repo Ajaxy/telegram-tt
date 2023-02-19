@@ -49,13 +49,15 @@ const DeleteProfilePhotoModal: FC<OwnProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       onEnter={handleDeletePhoto}
-      className="delete"
-      title="Are you sure?"
+      className="delete dialog-buttons-column"
+      title={lang('AreYouSure')}
     >
-      <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeletePhoto}>
-        {lang('Preview.DeletePhoto')}
-      </Button>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      <div className="dialog-buttons mt-2">
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeletePhoto}>
+          {lang('Preview.DeletePhoto')}
+        </Button>
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+      </div>
     </Modal>
   );
 };

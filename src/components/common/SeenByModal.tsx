@@ -65,13 +65,15 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
           </ListItem>
         ))}
       </div>
-      <Button
-        className="confirm-dialog-button"
-        isText
-        onClick={handleCloseSeenByModal}
-      >
-        {lang('Close')}
-      </Button>
+      <div className="dialog-buttons mt-2">
+        <Button
+          className="confirm-dialog-button"
+          isText
+          onClick={handleCloseSeenByModal}
+        >
+          {lang('Close')}
+        </Button>
+      </div>
     </Modal>
   );
 };

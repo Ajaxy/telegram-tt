@@ -239,12 +239,14 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
       >
         <h4>{error.description || 'Error'}</h4>
         <p>{error.description || 'Error'}</p>
-        <Button
-          isText
-          onClick={handleClearPaymentError}
-        >
-          {lang('OK')}
-        </Button>
+        <div className="dialog-buttons mt-2">
+          <Button
+            isText
+            onClick={handleClearPaymentError}
+          >
+            {lang('OK')}
+          </Button>
+        </div>
       </Modal>
     );
   }
@@ -518,12 +520,14 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           Sorry, Telegram WebZ doesn&apos;t support payments with this provider yet. <br />
           Please use one of our mobile apps to do this.
         </p>
-        <Button
-          isText
-          onClick={closeModal}
-        >
-          {lang('OK')}
-        </Button>
+        <div className="dialog-buttons mt-2">
+          <Button
+            isText
+            onClick={closeModal}
+          >
+            {lang('OK')}
+          </Button>
+        </div>
       </Modal>
     );
   }
