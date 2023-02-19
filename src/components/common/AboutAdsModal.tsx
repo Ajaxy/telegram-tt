@@ -36,7 +36,9 @@ const AboutAdsModal: FC<OwnProps> = ({
         />
       </p>
       <p>{renderText(lang('SponsoredMessageInfoDescription4'), ['br'])}</p>
-      <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Close')}</Button>
+      <div className="dialog-buttons mt-2">
+        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Close')}</Button>
+      </div>
     </Modal>
   );
 };
