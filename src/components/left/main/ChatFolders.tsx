@@ -69,10 +69,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   useEffect(() => {
-    if (lastSyncTime && !orderedFolderIds) {
+    if (lastSyncTime) {
       loadChatFolders();
     }
-  }, [lastSyncTime, loadChatFolders, orderedFolderIds]);
+  }, [lastSyncTime, loadChatFolders]);
 
   const allChatsFolder = useMemo(() => {
     return {
