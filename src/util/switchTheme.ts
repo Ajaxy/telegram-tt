@@ -1,7 +1,6 @@
 import type { ISettings } from '../types';
 
-import { animateSingle } from './animation';
-import { fastRaf } from './schedulers';
+import { animate } from './animation';
 
 import themeColors from '../styles/themes.json';
 import { lerp } from './math';
@@ -56,14 +55,12 @@ const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
   isInitialized = true;
 
   if (shouldAnimate) {
-    fastRaf(() => {
-      animateSingle(() => {
-        const t = Math.min((Date.now() - startAt) / DURATION_MS, 1);
+    animate(() => {
+      const t = Math.min((Date.now() - startAt) / DURATION_MS, 1);
 
-        applyColorAnimationStep(startIndex, endIndex, transition(t));
+      applyColorAnimationStep(startIndex, endIndex, transition(t));
 
-        return t < 1;
-      });
+      return t < 1;
     });
   } else {
     applyColorAnimationStep(startIndex, endIndex);
