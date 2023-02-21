@@ -129,14 +129,6 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     actions.toggleChatUnread({ id });
   }
 
-  // Please telegram send us some updates about linked chat 🙏
-  if (chat?.lastMessage?.repliesThreadInfo) {
-    actions.requestThreadInfoUpdate({
-      chatId: chat.lastMessage.repliesThreadInfo.chatId,
-      threadId: chat.lastMessage.repliesThreadInfo.threadId,
-    });
-  }
-
   if (!chat) {
     if (id === currentUserId) {
       void callApi('fetchChat', { type: 'self' });
