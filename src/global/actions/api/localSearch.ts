@@ -19,7 +19,6 @@ import {
   addChatMessagesById,
   addChats,
   addUsers,
-  updateListedIds,
   updateLocalMediaSearchResults,
   updateLocalTextSearchResults,
 } from '../../reducers';
@@ -176,7 +175,6 @@ async function searchSharedMedia<T extends GlobalState>(
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChatMessagesById(global, chat.id, byId);
   global = updateLocalMediaSearchResults(global, chat.id, threadId, type, newFoundIds, totalCount, nextOffsetId, tabId);
-  global = updateListedIds(global, chat.id, threadId, newFoundIds);
   setGlobal(global);
 
   if (!isBudgetPreload) {
