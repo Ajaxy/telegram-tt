@@ -847,6 +847,11 @@ export async function editChatFolder({
   id: number;
   folderUpdate: ApiChatFolder;
 }) {
+  // Telegram ignores excluded chats if they also present in the included list
+  folderUpdate.excludedChatIds = folderUpdate.excludedChatIds.filter((chatId) => {
+    return !folderUpdate.includedChatIds.includes(chatId);
+  });
+
   const filter = buildFilterFromApiFolder(folderUpdate);
 
   const isActionSuccessful = await invokeRequest(new GramJs.messages.UpdateDialogFilter({
