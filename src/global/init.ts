@@ -3,6 +3,7 @@ import {
 } from './index';
 
 import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from './initialState';
+import { IS_MULTITAB_SUPPORTED } from '../util/environment';
 import { IS_MOCKED_CLIENT } from '../config';
 import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';
@@ -62,8 +63,8 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     },
   };
 
-  if (isMasterTab) {
-    initialTabState.isMasterTab = isMasterTab;
+  if (isMasterTab || !IS_MULTITAB_SUPPORTED) {
+    initialTabState.isMasterTab = true;
   }
 
   Object.keys(global.messages.byChatId).forEach((chatId) => {
@@ -120,6 +121,10 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
         isInactive: true,
       }, otherTabId);
     });
+  }
+
+  if (!IS_MULTITAB_SUPPORTED) {
+    actions.initApi();
   }
 
   return updateTabState(global, {
