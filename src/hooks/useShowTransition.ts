@@ -47,7 +47,7 @@ const useShowTransition = (
   }
 
   // `noCloseTransition`, when set to true, should remove the open class immediately
-  const shouldHaveOpenClassName = hasOpenClassName && !(noCloseTransition && !isOpen);
+  const shouldHaveOpenClassName = (hasOpenClassName && !(noCloseTransition && !isOpen)) || (noOpenTransition && isOpen);
   const isClosing = Boolean(closeTimeoutRef.current);
   const shouldRender = isOpen || isClosing;
   const transitionClassNames = buildClassName(
