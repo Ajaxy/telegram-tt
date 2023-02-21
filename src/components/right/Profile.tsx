@@ -35,11 +35,9 @@ import {
   selectTheme,
   selectActiveDownloadIds,
   selectUser,
-  selectListedIds,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
-import { pickTruthy } from '../../util/iteratees';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useProfileState from './hooks/useProfileState';
@@ -82,7 +80,6 @@ type StateProps = {
   currentUserId?: string;
   resolvedUserId?: string;
   messagesById?: Record<number, ApiMessage>;
-  messageIds?: number[];
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
   hasCommonChatsTab?: boolean;
@@ -124,7 +121,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   currentUserId,
   messagesById,
   foundIds,
-  messageIds,
   mediaSearchType,
   hasCommonChatsTab,
   hasMembersTab,
@@ -178,10 +174,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
 
-  const chatMessages = useMemo(() => {
-    return messageIds && messagesById ? pickTruthy(messagesById, messageIds) : {};
-  }, [messagesById, messageIds]);
-
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     loadMoreMembers,
     loadCommonChats,
@@ -193,7 +185,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     usersById,
     userStatusesById,
     chatsById,
-    chatMessages,
+    messagesById,
     foundIds,
     lastSyncTime,
     topicId,
@@ -311,7 +303,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   }
 
   function renderContent() {
-    if (!viewportIds || !canRenderContent || !chatMessages) {
+    if (!viewportIds || !canRenderContent || !messagesById) {
       const noSpinner = isFirstTab && !canRenderContent;
       const forceRenderHiddenMembers = Boolean(resultType === 'members' && areMembersHidden);
 
@@ -363,20 +355,20 @@ const Profile: FC<OwnProps & StateProps> = ({
         teactFastList
       >
         {resultType === 'media' ? (
-          (viewportIds as number[])!.map((id) => chatMessages[id] && (
+          (viewportIds as number[])!.map((id) => messagesById[id] && (
             <Media
               key={id}
-              message={chatMessages[id]}
-              isProtected={isChatProtected || chatMessages[id].isProtected}
+              message={messagesById[id]}
+              isProtected={isChatProtected || messagesById[id].isProtected}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
             />
           ))
         ) : resultType === 'documents' ? (
-          (viewportIds as number[])!.map((id) => chatMessages[id] && (
+          (viewportIds as number[])!.map((id) => messagesById[id] && (
             <Document
               key={id}
-              message={chatMessages[id]}
+              message={messagesById[id]}
               withDate
               smaller
               className="scroll-item"
@@ -386,45 +378,45 @@ const Profile: FC<OwnProps & StateProps> = ({
             />
           ))
         ) : resultType === 'links' ? (
-          (viewportIds as number[])!.map((id) => chatMessages[id] && (
+          (viewportIds as number[])!.map((id) => messagesById[id] && (
             <WebLink
               key={id}
-              message={chatMessages[id]}
-              isProtected={isChatProtected || chatMessages[id].isProtected}
+              message={messagesById[id]}
+              isProtected={isChatProtected || messagesById[id].isProtected}
               observeIntersection={observeIntersectionForMedia}
               onMessageClick={handleMessageFocus}
             />
           ))
         ) : resultType === 'audio' ? (
-          (viewportIds as number[])!.map((id) => chatMessages[id] && (
+          (viewportIds as number[])!.map((id) => messagesById[id] && (
             <Audio
               key={id}
               theme={theme}
-              message={chatMessages[id]}
+              message={messagesById[id]}
               origin={AudioOrigin.SharedMedia}
-              date={chatMessages[id].date}
+              date={messagesById[id].date}
               lastSyncTime={lastSyncTime}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
-              canDownload={!isChatProtected && !chatMessages[id].isProtected}
+              canDownload={!isChatProtected && !messagesById[id].isProtected}
               isDownloading={activeDownloadIds.includes(id)}
             />
           ))
         ) : resultType === 'voice' ? (
-          (viewportIds as number[])!.map((id) => chatMessages[id] && (
+          (viewportIds as number[])!.map((id) => messagesById[id] && (
             <Audio
               key={id}
               theme={theme}
-              message={chatMessages[id]}
-              senderTitle={getSenderName(lang, chatMessages[id], chatsById, usersById)}
+              message={messagesById[id]}
+              senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
               origin={AudioOrigin.SharedMedia}
-              date={chatMessages[id].date}
+              date={messagesById[id].date}
               lastSyncTime={lastSyncTime}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
-              canDownload={!isChatProtected && !chatMessages[id].isProtected}
+              canDownload={!isChatProtected && !messagesById[id].isProtected}
               isDownloading={activeDownloadIds.includes(id)}
             />
           ))
@@ -538,7 +530,6 @@ export default memo(withGlobal<OwnProps>(
     const messagesById = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
-    const messageIds = selectListedIds(global, chatId, topicId || MAIN_THREAD_ID);
 
     const { byId: usersById, statusesById: userStatusesById } = global.users;
     const { byId: chatsById } = global.chats;
@@ -570,7 +561,6 @@ export default memo(withGlobal<OwnProps>(
       resolvedUserId,
       messagesById,
       foundIds,
-      messageIds,
       mediaSearchType,
       hasCommonChatsTab,
       hasMembersTab,
