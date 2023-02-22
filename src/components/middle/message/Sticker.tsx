@@ -16,6 +16,7 @@ import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import usePrevious from '../../../hooks/usePrevious';
 
 import StickerView from '../../common/StickerView';
 import AnimatedSticker from '../../common/AnimatedSticker';
@@ -71,12 +72,14 @@ const Sticker: FC<OwnProps> = ({
     onStopEffect?.();
   }, [onStopEffect, stopPlayingEffect]);
 
+  const previousShouldPlayEffect = usePrevious(shouldPlayEffect);
+
   useEffect(() => {
-    if (hasEffect && canPlay && shouldPlayEffect) {
+    if (hasEffect && canPlay && (shouldPlayEffect || previousShouldPlayEffect)) {
       startPlayingEffect();
       onPlayEffect?.();
     }
-  }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, startPlayingEffect]);
+  }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, previousShouldPlayEffect, startPlayingEffect]);
 
   const openModal = useCallback(() => {
     openStickerSet({
