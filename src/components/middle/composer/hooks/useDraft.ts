@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
+import type { ApiDraft } from '../../../../global/types';
+import type { ApiMessage } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
 import { ApiMessageEntityTypes } from '../../../../api/types';
@@ -26,7 +27,7 @@ function freeze() {
 }
 
 const useDraft = (
-  draft: ApiFormattedText | undefined,
+  draft: ApiDraft | undefined,
   chatId: string,
   threadId: number,
   getHtml: Signal<string>,
@@ -38,7 +39,7 @@ const useDraft = (
 
   const isEditing = Boolean(editedMessage);
 
-  const updateDraft = useCallback((prevState: { chatId?: string; threadId?: number } = {}) => {
+  const updateDraft = useCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
     if (isEditing || !lastSyncTime) return;
 
     const html = getHtml();
@@ -48,14 +49,20 @@ const useDraft = (
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
         draft: parseMessageInput(html),
+        shouldForce,
       });
     } else {
       clearDraft({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
+        shouldForce,
       });
     }
   }, [chatId, threadId, isEditing, lastSyncTime, getHtml, saveDraft, clearDraft]);
+
+  const forceUpdateDraft = useCallback(() => {
+    updateDraft(undefined, true);
+  }, [updateDraft]);
 
   const updateDraftRef = useStateRef(updateDraft);
   const runDebouncedForSaveDraft = useRunDebounced(DRAFT_DEBOUNCE, true, undefined, [chatId, threadId]);
@@ -67,7 +74,9 @@ const useDraft = (
         setHtml('');
       }
 
-      return;
+      if (!draft?.shouldForce) {
+        return;
+      }
     }
 
     if (editedMessage || !draft) {
@@ -130,8 +139,8 @@ const useDraft = (
     });
   }, [chatIdRef, getHtml, runDebouncedForSaveDraft, threadIdRef, updateDraftRef]);
 
-  useBackgroundMode(updateDraft);
-  useBeforeUnload(updateDraft);
+  useBackgroundMode(forceUpdateDraft);
+  useBeforeUnload(forceUpdateDraft);
 };
 
 export default useDraft;

@@ -4,7 +4,9 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { TabState, MessageListType, GlobalState } from '../../../global/types';
+import type {
+  TabState, MessageListType, GlobalState, ApiDraft,
+} from '../../../global/types';
 import type {
   ApiAttachment,
   ApiBotInlineResult,
@@ -147,7 +149,7 @@ type StateProps =
   {
     editingMessage?: ApiMessage;
     chat?: ApiChat;
-    draft?: ApiFormattedText;
+    draft?: ApiDraft;
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
