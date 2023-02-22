@@ -6,7 +6,7 @@ import { updateChat } from '../../reducers';
 import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
 import { notifyAboutCall } from '../../../util/notifications';
 import { selectGroupCall, selectPhoneCallUser } from '../../selectors/calls';
-import { checkNavigatorUserMediaPermissions, initializeSoundsForSafari } from '../ui/calls';
+import { checkNavigatorUserMediaPermissions, initializeSounds } from '../ui/calls';
 import { onTickEnd } from '../../../util/schedulers';
 import type { ActionReturnType } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
@@ -115,7 +115,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           });
         });
 
-        void initializeSoundsForSafari();
+        initializeSounds();
         void checkNavigatorUserMediaPermissions(global, actions, call.isVideo, getCurrentTabId());
         global = {
           ...global,

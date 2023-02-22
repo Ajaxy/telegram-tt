@@ -32,6 +32,8 @@ import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import { fastRaf } from '../../util/schedulers';
+import { Bundles, loadBundle } from '../../util/moduleLoader';
+import updateIcon from '../../util/updateIcon';
 
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
@@ -43,7 +45,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
 import useAppLayout from '../../hooks/useAppLayout';
-import updateIcon from '../../util/updateIcon';
+import useTimeout from '../../hooks/useTimeout';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -132,6 +134,7 @@ type StateProps = {
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
@@ -221,6 +224,11 @@ const Main: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  // Preload Calls bundle to initialize sounds for iOS
+  useTimeout(() => {
+    void loadBundle(Bundles.Calls);
+  }, CALL_BUNDLE_LOADING_DELAY_MS);
 
   const { isDesktop } = useAppLayout();
   useEffect(() => {

@@ -5,12 +5,13 @@ import { getActions, withGlobal } from './global';
 import type { GlobalState } from './global/types';
 import type { UiLoaderPage } from './components/common/UiLoader';
 
-import { IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/environment';
+import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/environment';
 import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { selectTabState } from './global/selectors';
 import { updateSizes } from './util/windowSize';
 import { addActiveTabChangeListener } from './util/activeTabMonitor';
 import { hasStoredSession } from './util/sessions';
+import { setupBeforeInstallPrompt } from './util/installPrompt';
 import buildClassName from './util/buildClassName';
 import { parseInitialLocationHash } from './util/routing';
 import useFlag from './hooks/useFlag';
@@ -54,6 +55,12 @@ const App: FC<StateProps> = ({
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
   const isMobileOs = PLATFORM_ENV === 'iOS' || PLATFORM_ENV === 'Android';
+
+  useEffect(() => {
+    if (IS_INSTALL_PROMPT_SUPPORTED) {
+      setupBeforeInstallPrompt();
+    }
+  }, []);
 
   // Prevent drop on elements that do not accept it
   useEffect(() => {
