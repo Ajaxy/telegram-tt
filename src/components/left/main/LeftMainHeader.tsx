@@ -81,7 +81,6 @@ type StateProps =
   & Pick<GlobalState, 'connectionState' | 'isSyncing'> & Pick<TabState, 'canInstall'>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
-const LEGACY_VERSION_URL = 'https://web.telegram.org/?legacy=1';
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
@@ -237,10 +236,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     skipLockOnUnload();
   }, [skipLockOnUnload]);
 
-  const handleSwitchToLegacy = useCallback(() => {
-    skipLockOnUnload();
-  }, [skipLockOnUnload]);
-
   const handleOpenTipsChat = useCallback(() => {
     openChatByUsername({ username: lang('Settings.TipsUsername') });
   }, [lang, openChatByUsername]);
@@ -346,22 +341,13 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         </MenuItem>
       )}
       {withOtherVersions && (
-        <>
-          <MenuItem
-            icon="char-K"
-            href={WEBK_VERSION_URL}
-            onClick={handleSwitchToWebK}
-          >
-            Switch to K Version
-          </MenuItem>
-          <MenuItem
-            icon="char-W"
-            href={LEGACY_VERSION_URL}
-            onClick={handleSwitchToLegacy}
-          >
-            Switch to Old Version
-          </MenuItem>
-        </>
+        <MenuItem
+          icon="char-K"
+          href={WEBK_VERSION_URL}
+          onClick={handleSwitchToWebK}
+        >
+          Switch to K Version
+        </MenuItem>
       )}
       {canInstall && (
         <MenuItem
@@ -374,8 +360,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     </>
   ), [
     animationLevel, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick,
-    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToLegacy,
-    handleSwitchToWebK, lang, onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
+    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToWebK, lang,
+    onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
   ]);
 
   return (
