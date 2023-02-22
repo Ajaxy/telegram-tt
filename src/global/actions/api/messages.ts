@@ -2,7 +2,7 @@ import type { RequiredGlobalActions } from '../../index';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type {
-  ActionReturnType, GlobalState, TabArgs,
+  ActionReturnType, ApiDraft, GlobalState, TabArgs,
 } from '../../types';
 import type {
   ApiAttachment,
@@ -356,7 +356,9 @@ addActionHandler('cancelSendingMessage', (global, actions, payload): ActionRetur
 });
 
 addActionHandler('saveDraft', async (global, actions, payload): Promise<void> => {
-  const { chatId, threadId, draft } = payload!;
+  const {
+    chatId, threadId, draft, shouldForce,
+  } = payload;
   if (!draft) {
     return;
   }
@@ -366,6 +368,13 @@ addActionHandler('saveDraft', async (global, actions, payload): Promise<void> =>
   const user = selectUser(global, chatId)!;
   if (user && isDeletedUser(user)) return;
 
+  draft.isLocal = true;
+  draft.shouldForce = shouldForce;
+  global = replaceThreadParam(global, chatId, threadId, 'draft', draft);
+  global = updateChat(global, chatId, { draftDate: Math.round(Date.now() / 1000) });
+
+  setGlobal(global);
+
   const result = await callApi('saveDraft', {
     chat,
     text,
@@ -374,8 +383,8 @@ addActionHandler('saveDraft', async (global, actions, payload): Promise<void> =>
     threadId: selectThreadTopMessageId(global, chatId, threadId),
   });
 
-  if (!result) {
-    draft.isLocal = true;
+  if (result) {
+    draft.isLocal = false;
   }
 
   global = getGlobal();
@@ -386,7 +395,9 @@ addActionHandler('saveDraft', async (global, actions, payload): Promise<void> =>
 });
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
-  const { chatId, threadId = MAIN_THREAD_ID, localOnly } = payload!;
+  const {
+    chatId, threadId = MAIN_THREAD_ID, localOnly, shouldForce,
+  } = payload;
   if (!selectDraft(global, chatId, threadId)) {
     return undefined;
   }
@@ -397,7 +408,8 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
     void callApi('clearDraft', chat, selectThreadTopMessageId(global, chatId, threadId));
   }
 
-  global = replaceThreadParam(global, chatId, threadId, 'draft', undefined);
+  const newDraft: ApiDraft | undefined = shouldForce ? { shouldForce, text: '' } : undefined;
+  global = replaceThreadParam(global, chatId, threadId, 'draft', newDraft);
   global = updateChat(global, chatId, { draftDate: undefined });
 
   return global;
