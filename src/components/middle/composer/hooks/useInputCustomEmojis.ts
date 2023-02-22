@@ -121,7 +121,10 @@ export default function useInputCustomEmojis(
       return;
     }
 
-    synchronizeElements();
+    // Wait one frame for DOM to update
+    fastRaf(() => {
+      synchronizeElements();
+    });
   }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef, isActive]);
 
   const throttledSynchronizeElements = useThrottledCallback(
