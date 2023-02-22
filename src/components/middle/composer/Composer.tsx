@@ -1267,6 +1267,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         isOpen={isBotCommandTooltipOpen}
         withUsername={Boolean(chatBotCommands)}
         botCommands={botTooltipCommands}
+        getHtml={getHtml}
         onClick={handleBotCommandSelect}
         onClose={closeBotCommandTooltip}
       />
