@@ -8,8 +8,7 @@ import {
   getActions, getGlobal,
 } from './global';
 import updateWebmanifest from './util/updateWebmanifest';
-import { setupBeforeInstallPrompt } from './util/installPrompt';
-import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED } from './util/environment';
+import { IS_MULTITAB_SUPPORTED } from './util/environment';
 import './global/init';
 
 import { APP_VERSION, DEBUG, MULTITAB_LOCALSTORAGE_KEY } from './config';
@@ -58,10 +57,6 @@ async function init() {
   }
 
   updateWebmanifest();
-
-  if (IS_INSTALL_PROMPT_SUPPORTED) {
-    setupBeforeInstallPrompt();
-  }
 
   TeactDOM.render(
     <App />,

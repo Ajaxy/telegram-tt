@@ -26,16 +26,43 @@ import * as langProvider from '../../../util/langProvider';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
-// Workaround for Safari not playing audio without user interaction
+// This is a tiny MP3 file that is silent - retrieved from https://bigsoundbank.com and then modified
+// eslint-disable-next-line max-len
+const silentSound = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+
 let audioElement: HTMLAudioElement | undefined;
 let audioContext: AudioContext | undefined;
-
 let sounds: Record<CallSound, HTMLAudioElement>;
-let initializationPromise: Promise<void> | undefined = Promise.resolve();
 
-export const initializeSoundsForSafari = () => {
-  if (!initializationPromise) return Promise.resolve();
+// Workaround: this function is called once on the first user interaction.
+// After that, it will be possible to play the notification on iOS without problems.
+// https://rosswintle.uk/2019/01/skirting-the-ios-safari-audio-auto-play-policy-for-ui-sound-effects/
+export function initializeSoundsForSafari() {
+  initializeSounds();
 
+  return Promise.all(Object.values(sounds).map((sound) => {
+    const prevSrc = sound.src;
+    sound.src = silentSound;
+    sound.muted = true;
+    sound.volume = 0.0001;
+    return sound.play()
+      .then(() => {
+        sound.pause();
+        sound.volume = 1;
+        sound.currentTime = 0;
+        sound.muted = false;
+
+        requestAnimationFrame(() => {
+          sound.src = prevSrc;
+        });
+      });
+  }));
+}
+
+export function initializeSounds() {
+  if (sounds) {
+    return;
+  }
   const joinAudio = new Audio('./voicechat_join.mp3');
   const connectingAudio = new Audio('./voicechat_connecting.mp3');
   connectingAudio.loop = true;
@@ -60,22 +87,7 @@ export const initializeSoundsForSafari = () => {
     busy: busyAudio,
     ringing: ringingAudio,
   };
-
-  initializationPromise = Promise.all(Object.values(sounds).map((sound) => {
-    sound.muted = true;
-    sound.volume = 0.0001;
-    return sound.play().then(() => {
-      sound.pause();
-      sound.volume = 1;
-      sound.currentTime = 0;
-      sound.muted = false;
-    });
-  })).then(() => {
-    initializationPromise = undefined;
-  });
-
-  return initializationPromise;
-};
+}
 
 async function fetchGroupCall<T extends GlobalState>(global: T, groupCall: Partial<ApiGroupCall>) {
   const result = await callApi('getGroupCall', {
@@ -258,7 +270,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
 
   createAudioElement();
 
-  await initializeSoundsForSafari();
+  initializeSounds();
   global = getGlobal();
   void checkNavigatorUserMediaPermissions(global, actions, true, tabId);
 
@@ -338,11 +350,7 @@ addActionHandler('playGroupCallSound', (global, actions, payload): ActionReturnT
     safePlay(sounds[sound]);
   };
 
-  if (initializationPromise) {
-    initializationPromise.then(doPlay);
-  } else {
-    doPlay();
-  }
+  doPlay();
 });
 
 addActionHandler('loadMoreGroupCallParticipants', (global): ActionReturnType => {
@@ -376,7 +384,7 @@ addActionHandler('requestCall', async (global, actions, payload): Promise<void> 
     return;
   }
 
-  await initializeSoundsForSafari();
+  initializeSounds();
   global = getGlobal();
   void checkNavigatorUserMediaPermissions(global, actions, isVideo, tabId);
 
