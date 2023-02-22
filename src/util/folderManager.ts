@@ -8,7 +8,7 @@ import type { ApiChat, ApiChatFolder, ApiUser } from '../api/types';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, DEBUG, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../config';
-import { selectNotifySettings, selectNotifyExceptions } from '../global/selectors';
+import { selectNotifySettings, selectNotifyExceptions, selectTabState } from '../global/selectors';
 import { selectIsChatMuted } from '../global/helpers';
 import { onIdle, throttle } from './schedulers';
 import { areSortedArraysEqual, unique } from './iteratees';
@@ -107,7 +107,9 @@ export function init() {
   addActionHandler('reset', reset);
 
   const global = getGlobal();
-  updateFolders(global, true, true, true);
+  if (!selectTabState(global).isMasterTab) {
+    updateFolders(global, true, true, true);
+  }
   updateFolderManager(global);
 }
 
