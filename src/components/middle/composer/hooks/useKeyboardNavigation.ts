@@ -20,7 +20,7 @@ export function useKeyboardNavigation({
   noArrowNavigation?: boolean;
   items?: any[];
   shouldSelectOnTab?: boolean;
-  onSelect: AnyToVoidFunction;
+  onSelect: (item: any) => void | boolean;
   onClose: NoneToVoidFunction;
 }) {
   const [selectedItemIndex, setSelectedItemIndex] = useState(-1);
@@ -42,10 +42,15 @@ export function useKeyboardNavigation({
     if (items && items.length && selectedItemIndex > -1) {
       const item = items[selectedItemIndex];
       if (item) {
+        if (onSelect(item) === false) {
+          return false;
+        }
+
         e.preventDefault();
-        onSelect(item);
       }
     }
+
+    return true;
   }, [items, onSelect, selectedItemIndex]);
 
   const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;

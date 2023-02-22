@@ -8,7 +8,7 @@ import useFlag from '../../../../hooks/useFlag';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
 
-const RE_COMMAND = /^\/([\w@]{1,32}\s?)?/i;
+const RE_COMMAND = /^\/([\w@]{1,32})?$/i;
 
 const THROTTLE = 300;
 
