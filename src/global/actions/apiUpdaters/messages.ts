@@ -188,9 +188,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateMessage': {
       const { chatId, id, message } = update;
 
-      const currentMessage = selectChatMessage(global, chatId, id);
-      const chat = selectChat(global, chatId);
-
       global = updateWithLocalMedia(global, chatId, id, message);
 
       const newMessage = selectChatMessage(global, chatId, id)!;
@@ -202,6 +199,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           message.repliesThreadInfo,
         );
       }
+
+      const currentMessage = selectChatMessage(global, chatId, id);
+      const chat = selectChat(global, chatId);
 
       if (currentMessage) {
         global = updateChatLastMessage(global, chatId, newMessage);
@@ -672,31 +672,34 @@ function updateReactions<T extends GlobalState>(
 }
 
 function updateWithLocalMedia(
-  global: RequiredGlobalState, chatId: string, id: number, message: Partial<ApiMessage>, isScheduled = false,
+  global: RequiredGlobalState, chatId: string, id: number, messageUpdate: Partial<ApiMessage>, isScheduled = false,
 ) {
-  // Preserve locally uploaded media.
   const currentMessage = isScheduled
     ? selectScheduledMessage(global, chatId, id)
     : selectChatMessage(global, chatId, id);
-  if (currentMessage && message.content) {
+
+  // Preserve locally uploaded media.
+  if (currentMessage && messageUpdate.content) {
     const {
       photo, video, sticker, document,
     } = getMessageContent(currentMessage);
-    if (photo && message.content.photo) {
-      message.content.photo.blobUrl = photo.blobUrl;
-      message.content.photo.thumbnail = photo.thumbnail;
-    } else if (video && message.content.video) {
-      message.content.video.blobUrl = video.blobUrl;
-    } else if (sticker && message.content.sticker) {
-      message.content.sticker.isPreloadedGlobally = sticker.isPreloadedGlobally;
-    } else if (document && message.content.document) {
-      message.content.document.previewBlobUrl = document.previewBlobUrl;
+    if (photo && messageUpdate.content.photo) {
+      messageUpdate.content.photo.blobUrl = photo.blobUrl;
+      messageUpdate.content.photo.thumbnail = photo.thumbnail;
+    } else if (video && messageUpdate.content.video) {
+      messageUpdate.content.video.blobUrl = video.blobUrl;
+    } else if (sticker && messageUpdate.content.sticker) {
+      messageUpdate.content.sticker.isPreloadedGlobally = sticker.isPreloadedGlobally;
+    } else if (document && messageUpdate.content.document) {
+      messageUpdate.content.document.previewBlobUrl = document.previewBlobUrl;
     }
   }
 
+  const newMessage = currentMessage ? { ...currentMessage, ...messageUpdate } : messageUpdate;
+
   return isScheduled
-    ? updateScheduledMessage(global, chatId, id, message)
-    : updateChatMessage(global, chatId, id, message);
+    ? updateScheduledMessage(global, chatId, id, newMessage)
+    : updateChatMessage(global, chatId, id, newMessage);
 }
 
 function updateThreadUnread<T extends GlobalState>(
