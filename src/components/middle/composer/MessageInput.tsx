@@ -71,7 +71,7 @@ const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
 const SELECTION_RECALCULATE_DELAY_MS = 260;
-const TEXT_FORMATTER_SAFE_AREA_PX = 90;
+const TEXT_FORMATTER_SAFE_AREA_PX = 140;
 // For some reason Safari inserts `<br>` after user removes text from input
 const SAFARI_BR = '<br>';
 const IGNORE_KEYS = [
