@@ -678,10 +678,8 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
     removeEventListener(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
-    element.removeAttribute(key);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
-    delete (element as any)[MAPPED_ATTRIBUTES[key] || key];
+    element.removeAttribute(key);
   }
 }
 
