@@ -98,6 +98,8 @@
     .label {
       display: block;
       text-align: initial;
+      flex-wrap: wrap;
+      column-gap: 0.25rem;
     }
 
     .subLabel {
