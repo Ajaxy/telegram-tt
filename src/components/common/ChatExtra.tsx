@@ -8,6 +8,7 @@ import type { GlobalState } from '../../global/types';
 import type {
   ApiChat, ApiCountryCode, ApiUser, ApiUsername,
 } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { TME_LINK_PREFIX } from '../../config';
 import {
@@ -45,7 +46,6 @@ type StateProps =
     canInviteUsers?: boolean;
     isMuted?: boolean;
     phoneCodeList: ApiCountryCode[];
-    isForum?: boolean;
     topicId?: number;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
@@ -60,7 +60,6 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   canInviteUsers,
   isMuted,
   phoneCodeList,
-  isForum,
   topicId,
 }) => {
   const {
@@ -81,40 +80,46 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
+
   useEffect(() => {
     if (lastSyncTime && userId) {
       loadFullUser({ userId });
     }
   }, [loadFullUser, userId, lastSyncTime]);
+
+  const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
+
   const activeUsernames = useMemo(() => {
     const result = usernames?.filter((u) => u.isActive);
 
     return result?.length ? result : undefined;
   }, [usernames]);
+
   const activeChatUsernames = useMemo(() => {
     const result = !user ? chatUsernames?.filter((u) => u.isActive) : undefined;
 
     return result?.length ? result : undefined;
   }, [chatUsernames, user]);
+
   const link = useMemo(() => {
     if (!chat) {
       return undefined;
     }
 
-    return isForum
+    return isTopicInfo
       ? getTopicLink(chat.id, activeChatUsernames?.[0].username, topicId)
       : getChatLink(chat);
-  }, [chat, isForum, activeChatUsernames, topicId]);
+  }, [chat, isTopicInfo, activeChatUsernames, topicId]);
 
   const handleNotificationChange = useCallback(() => {
     setAreNotificationsEnabled((current) => {
       const newAreNotificationsEnabled = !current;
 
       runDebounced(() => {
-        if (topicId) {
+        if (isTopicInfo) {
           updateTopicMutedState({
             chatId: chatId!,
-            topicId,
+            topicId: topicId!,
             isMuted: !newAreNotificationsEnabled,
           });
         } else {
@@ -124,7 +129,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
       return newAreNotificationsEnabled;
     });
-  }, [chatId, topicId, updateChatMutedState, updateTopicMutedState]);
+  }, [chatId, isTopicInfo, topicId, updateChatMutedState, updateTopicMutedState]);
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
     return undefined;
@@ -147,41 +152,43 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
         .map((s) => {
           return (s === 'USERNAMES' ? (
             <>
-              {otherUsernames.map(({ username: nick }, idx) => (
-                <>
-                  {idx > 0 ? ', ' : ''}
-                  <a
-                    key={nick}
-                    href={`${TME_LINK_PREFIX}${nick}`}
-                    onClick={(e) => {
-                      stopEvent(e);
-                      copy(`@${nick}`, lang(isChat ? 'Link' : 'Username'));
-                    }}
-                    className="text-entity-link username-link"
-                  >
-                    {`@${nick}`}
-                  </a>
-                </>
-              ))}
+              {otherUsernames.map(({ username: nick }, idx) => {
+                const textToCopy = isChat ? `${TME_LINK_PREFIX}${nick}` : `@${nick}`;
+                return (
+                  <>
+                    {idx > 0 ? ', ' : ''}
+                    <a
+                      key={nick}
+                      href={`${TME_LINK_PREFIX}${nick}`}
+                      onClick={(e) => {
+                        stopEvent(e);
+                        copy(textToCopy, lang(isChat ? 'Link' : 'Username'));
+                      }}
+                      className="text-entity-link username-link"
+                    >
+                      {`@${nick}`}
+                    </a>
+                  </>
+                );
+              })}
             </>
           ) : s);
         })
       : undefined;
 
-    const publicLink = isForum
-      ? getTopicLink('', mainUsername.username, topicId)
-      : `@${mainUsername.username}`;
+    const username = isChat ? `t.me/${mainUsername.username}` : mainUsername.username;
+    const textToCopy = isChat ? `${TME_LINK_PREFIX}${mainUsername.username}` : `@${mainUsername.username}`;
 
     return (
       <ListItem
-        icon="mention"
+        icon={isChat ? 'link' : 'mention'}
         multiline
         narrow
         ripple
         // eslint-disable-next-line react/jsx-no-bind
-        onClick={() => copy(publicLink, lang(isChat ? 'Link' : 'Username'))}
+        onClick={() => copy(textToCopy, lang(isChat ? 'Link' : 'Username'))}
       >
-        <span className="title" dir="auto">{publicLink}</span>
+        <span className="title" dir="auto">{username}</span>
         <span className="subtitle">
           {usernameLinks && <span className="other-usernames">{usernameLinks}</span>}
           {lang(isChat ? 'Link' : 'Username')}
@@ -213,8 +220,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
           <span className="subtitle">{lang(userId ? 'UserBio' : 'Info')}</span>
         </ListItem>
       )}
-      {activeChatUsernames && renderUsernames(activeChatUsernames, true)}
-      {!activeChatUsernames && canInviteUsers && link && (
+      {activeChatUsernames && !isTopicInfo && renderUsernames(activeChatUsernames, true)}
+      {((!activeChatUsernames && canInviteUsers) || isTopicInfo) && link && (
         <ListItem
           icon="link"
           multiline
@@ -265,7 +272,6 @@ export default memo(withGlobal<OwnProps>(
       user,
       canInviteUsers,
       isMuted,
-      isForum,
       topicId,
     };
   },
