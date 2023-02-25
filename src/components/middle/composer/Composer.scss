@@ -466,8 +466,7 @@
   flex-grow: 1;
 
   .form-control {
-    padding: calc((3.5rem - var(--composer-text-size, 1rem) * 1.375) / 2 - var(--border-width, 0) * 2)
-      calc(0.9rem - var(--border-width));
+    padding: calc((3.5rem - var(--composer-text-size, 1rem) * 1.375) / 2) 0.875rem;
     overflow: hidden;
     height: auto;
     line-height: 1.375;

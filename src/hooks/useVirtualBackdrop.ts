@@ -9,12 +9,13 @@ export default function useVirtualBackdrop(
   isOpen: boolean,
   menuRef: RefObject<HTMLElement>,
   onClose?: () => void | undefined,
+  ignoreRightClick?: boolean,
 ) {
   useEffect(() => {
-    const handleEvent = (e: Event) => {
+    const handleEvent = (e: MouseEvent) => {
       const menu = menuRef.current;
       const target = e.target as HTMLElement | null;
-      if (!menu || !target) {
+      if (!menu || !target || (ignoreRightClick && e.button === 2)) {
         return;
       }
 
@@ -24,9 +25,7 @@ export default function useVirtualBackdrop(
       ) {
         e.preventDefault();
         e.stopPropagation();
-        if (onClose) {
-          onClose();
-        }
+        onClose?.();
       }
     };
 
@@ -37,5 +36,5 @@ export default function useVirtualBackdrop(
     return () => {
       document.removeEventListener('mousedown', handleEvent);
     };
-  }, [isOpen, menuRef, onClose]);
+  }, [ignoreRightClick, isOpen, menuRef, onClose]);
 }
