@@ -8,7 +8,6 @@ import {
   selectDefaultReaction,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
-  selectCurrentMessageList,
 } from '../../selectors';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import {
@@ -157,17 +156,6 @@ addActionHandler('toggleReaction', (global, actions, payload): ActionReturnType 
   }
 
   return addMessageReaction(global, message, reactions);
-});
-
-addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
-  const { id, tabId = getCurrentTabId() } = payload;
-  const currentChatId = selectCurrentMessageList(global, tabId)?.chatId;
-
-  if (currentChatId === id) return global;
-
-  return updateTabState(global, {
-    activeReactions: {},
-  }, tabId);
 });
 
 addActionHandler('stopActiveReaction', (global, actions, payload): ActionReturnType => {
