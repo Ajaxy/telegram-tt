@@ -23,6 +23,13 @@
     }
   }
 
+  body.is-android & {
+    &:not(:last-of-type)::after {
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers-android);
+    }
+  }
+
   .ListItem-button {
     width: 100%;
     background-color: var(--background-color);
