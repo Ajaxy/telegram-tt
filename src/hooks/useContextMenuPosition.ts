@@ -103,11 +103,14 @@ export default function useContextMenuPosition(
     const addedYForPortalPositioning = (withPortal ? triggerRect.top : 0);
     const addedXForPortalPositioning = (withPortal ? triggerRect.left : 0);
 
+    const leftWithPossibleNegative = Math.min(
+      x - triggerRect.left,
+      rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX,
+    );
     const left = (horizontalPosition === 'left'
-      ? Math.max(MENU_POSITION_VISUAL_COMFORT_SPACE_PX, Math.min(
-        x - triggerRect.left,
-        rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX,
-      ))
+      ? (withPortal
+        ? Math.max(MENU_POSITION_VISUAL_COMFORT_SPACE_PX, leftWithPossibleNegative)
+        : leftWithPossibleNegative)
       : (x - triggerRect.left)) + addedXForPortalPositioning;
     const top = y - triggerRect.top + addedYForPortalPositioning;
 
