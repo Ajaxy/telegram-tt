@@ -74,6 +74,17 @@
     }
   }
 
+  &.size-small-mobile {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
+
+    .emoji {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+
   &.size-medium {
     width: 2.75rem;
     height: 2.75rem;
