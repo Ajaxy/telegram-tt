@@ -34,14 +34,17 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     }, tabId);
   }
 
-  if (!currentMessageList
-    || (
-      currentMessageList.chatId !== id
-      || currentMessageList.threadId !== threadId
-      || currentMessageList.type !== type
-    )) {
+  if (!currentMessageList || (
+    currentMessageList.chatId !== id
+    || currentMessageList.threadId !== threadId
+    || currentMessageList.type !== type
+  )) {
     if (id) {
       global = replaceTabThreadParam(global, id, threadId, 'replyStack', [], tabId);
+
+      global = updateTabState(global, {
+        activeReactions: {},
+      }, tabId);
     }
 
     global = exitMessageSelectMode(global, tabId);
