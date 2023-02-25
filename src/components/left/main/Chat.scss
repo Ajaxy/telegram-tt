@@ -117,6 +117,7 @@
         --color-text-secondary: var(--color-white);
         --color-error: var(--color-white);
         --color-pinned: var(--color-white);
+        --color-chat-username: var(--color-white);
       }
 
       .icon-muted {
@@ -155,6 +156,10 @@
     .ListItem-button {
       border-radius: 0 !important;
     }
+  }
+
+  &.forum {
+    --color-chat-username: var(--color-text);
   }
 
   .ripple-container {
@@ -233,7 +238,12 @@
       }
 
       .sender-name {
-        color: var(--color-text);
+        color: var(--color-chat-username);
+
+        body.is-macos &,
+        body.is-ios & {
+          color: var(--color-text);
+        }
       }
 
       .draft {

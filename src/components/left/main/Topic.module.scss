@@ -24,6 +24,10 @@
   :global(body.is-ios) &::after {
     left: 0.75rem !important;
   }
+
+  &::after {
+    left: 0.75rem !important;
+  }
 }
 
 .closed-icon {
