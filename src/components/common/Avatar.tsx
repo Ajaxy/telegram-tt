@@ -45,7 +45,7 @@ cn.icon = cn('icon');
 
 type OwnProps = {
   className?: string;
-  size?: 'micro' | 'tiny' | 'mini' | 'small' | 'medium' | 'large' | 'jumbo';
+  size?: 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'jumbo';
   chat?: ApiChat;
   user?: ApiUser;
   photo?: ApiPhoto;

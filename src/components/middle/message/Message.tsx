@@ -691,7 +691,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <Avatar
-        size="small"
+        size={isMobile ? 'small-mobile' : 'small'}
         user={avatarUser}
         chat={avatarChat}
         text={hiddenName}
