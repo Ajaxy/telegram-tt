@@ -188,6 +188,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateMessage': {
       const { chatId, id, message } = update;
 
+      const currentMessage = selectChatMessage(global, chatId, id);
+      const chat = selectChat(global, chatId);
+
       global = updateWithLocalMedia(global, chatId, id, message);
 
       const newMessage = selectChatMessage(global, chatId, id)!;
@@ -199,9 +202,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           message.repliesThreadInfo,
         );
       }
-
-      const currentMessage = selectChatMessage(global, chatId, id);
-      const chat = selectChat(global, chatId);
 
       if (currentMessage) {
         global = updateChatLastMessage(global, chatId, newMessage);
