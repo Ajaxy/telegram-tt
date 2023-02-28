@@ -29,6 +29,7 @@ type StateProps = {
   canChangeSensitive?: boolean;
   canDisplayAutoarchiveSetting: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
+  canDisplayChatInTitle?: boolean;
   privacyPhoneNumber?: ApiPrivacySettings;
   privacyLastSeen?: ApiPrivacySettings;
   privacyProfilePhoto?: ApiPrivacySettings;
@@ -50,6 +51,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canChangeSensitive,
   canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
+  canDisplayChatInTitle,
   privacyPhoneNumber,
   privacyLastSeen,
   privacyProfilePhoto,
@@ -71,6 +73,8 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     updateGlobalPrivacySettings,
     loadWebAuthorizations,
     showNotification,
+    setSettingOption,
+    updatePageTitle,
   } = getActions();
 
   useEffect(() => {
@@ -109,6 +113,13 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
       });
     }
   }, [isCurrentUserPremium, lang, onScreenSelect, showNotification]);
+
+  const handleChatInTitleChange = useCallback((isChecked: boolean) => {
+    setSettingOption({
+      canDisplayChatInTitle: isChecked,
+    });
+    updatePageTitle();
+  }, []);
 
   const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
     updateContentSettings(isChecked);
@@ -316,6 +327,17 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </div>
       )}
 
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('lng_settings_window_system')}
+        </h4>
+        <Checkbox
+          label={lang('lng_settings_title_chat_name')}
+          checked={Boolean(canDisplayChatInTitle)}
+          onCheck={handleChatInTitleChange}
+        />
+      </div>
+
       {canChangeSensitive && (
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -340,6 +362,7 @@ export default memo(withGlobal<OwnProps>(
       settings: {
         byKey: {
           hasPassword, isSensitiveEnabled, canChangeSensitive, shouldArchiveAndMuteNewNonContact,
+          canDisplayChatInTitle,
         },
         privacy,
       },
@@ -368,6 +391,7 @@ export default memo(withGlobal<OwnProps>(
       privacyGroupChats: privacy.chatInvite,
       privacyPhoneCall: privacy.phoneCall,
       privacyPhoneP2P: privacy.phoneP2P,
+      canDisplayChatInTitle,
     };
   },
 )(SettingsPrivacy));

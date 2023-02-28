@@ -23,7 +23,7 @@ import setPageTitle from '../../../util/updatePageTitle';
 import { updateTabState } from '../../reducers/tabs';
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 import * as langProvider from '../../../util/langProvider';
-import { getAllowedAttachmentOptions } from '../../helpers';
+import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 
 export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
@@ -658,6 +658,8 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType => {
   const { isInactive, notificationCount, tabId = getCurrentTabId() } = payload || {};
+  const { canDisplayChatInTitle } = global.settings.byKey;
+  const currentUserId = global.currentUserId;
 
   if (isInactive) {
     setPageTitle(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
@@ -670,16 +672,17 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   }
 
   const messageList = selectCurrentMessageList(global, tabId);
-  if (messageList) {
+  if (messageList && canDisplayChatInTitle) {
     const { chatId, threadId } = messageList;
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
+      const title = getChatTitle(langProvider.translate, currentChat, undefined, chatId === currentUserId);
       if (currentChat.isForum && currentChat.topics?.[threadId]) {
-        setPageTitle(`${currentChat.title} › ${currentChat.topics[threadId].title}`);
+        setPageTitle(`${title} › ${currentChat.topics[threadId].title}`);
         return;
       }
 
-      setPageTitle(currentChat.title);
+      setPageTitle(title);
       return;
     }
   }
