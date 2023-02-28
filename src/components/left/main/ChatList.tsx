@@ -1,7 +1,7 @@
 import React, {
-  memo, useEffect, useRef, useCallback, useMemo,
+  memo, useEffect, useRef, useCallback,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../global';
+import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
@@ -11,13 +11,13 @@ import type { GlobalState } from '../../../global/types';
 
 import {
   ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID, ARCHIVE_MINIMIZED_HEIGHT, CHAT_HEIGHT_FORUM_PX,
+  ARCHIVED_FOLDER_ID,
+  ARCHIVE_MINIMIZED_HEIGHT,
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
 import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
-import { selectChat } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -26,7 +26,6 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 import useChatOrderDiff from './hooks/useChatOrderDiff';
-import useCollapseWithForumPanel from './hooks/useCollapseWithForumPanel';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -134,8 +133,6 @@ const ChatList: FC<OwnProps> = ({
     throttleMs: INTERSECTION_THROTTLE,
   });
 
-  useCollapseWithForumPanel(containerRef, isForumPanelOpen);
-
   const handleArchivedClick = useCallback(() => {
     onLeftColumnContentChange(LeftColumnContent.Archived);
     closeForumPanel();
@@ -165,32 +162,14 @@ const ChatList: FC<OwnProps> = ({
     shouldIgnoreDragRef.current = true;
   }, []);
 
-  const viewportOffsetPx = useMemo(() => {
-    if (!viewportIds?.length) return 0;
-    const global = getGlobal();
-    const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    return archiveHeight + orderedIds!.reduce((acc, id, i) => {
-      if (i >= viewportOffset) {
-        return acc;
-      }
-      return acc + (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
-    }, 0);
-  }, [archiveHeight, orderedIds, viewportIds]);
-
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    const global = getGlobal();
 
     const pinnedCount = getPinnedChatsCount(resolvedFolderId) || 0;
 
-    let currentChatListHeight = viewportOffsetPx;
-
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
-      const expendedOffsetTop = currentChatListHeight;
-      const collapsedOffsetTop = archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
-
-      currentChatListHeight += (selectChat(global, id)?.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
+      const offsetTop = archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
 
       return (
         <Chat
@@ -201,8 +180,7 @@ const ChatList: FC<OwnProps> = ({
           folderId={folderId}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
-          offsetTop={isForumPanelOpen ? collapsedOffsetTop : expendedOffsetTop}
-          offsetCollapseDelta={expendedOffsetTop - collapsedOffsetTop}
+          offsetTop={offsetTop}
           observeIntersection={observe}
           onDragEnter={handleDragEnter}
         />

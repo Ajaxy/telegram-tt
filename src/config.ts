@@ -63,7 +63,6 @@ export const MESSAGE_LIST_VIEWPORT_LIMIT = MESSAGE_LIST_SLICE * 2;
 
 export const ARCHIVE_MINIMIZED_HEIGHT = 36;
 export const CHAT_HEIGHT_PX = 72;
-export const CHAT_HEIGHT_FORUM_PX = 94;
 export const TOPIC_HEIGHT_PX = 65;
 export const CHAT_LIST_SLICE = isBigScreen ? 30 : 25;
 export const CHAT_LIST_LOAD_SLICE = 100;

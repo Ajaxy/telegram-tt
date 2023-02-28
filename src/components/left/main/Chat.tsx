@@ -66,7 +66,6 @@ type OwnProps = {
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
   offsetTop: number;
-  offsetCollapseDelta: number;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
 };
@@ -111,7 +110,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   actionTargetMessage,
   actionTargetChatId,
   offsetTop,
-  offsetCollapseDelta,
   draft,
   animationLevel,
   isSelected,
@@ -233,7 +231,6 @@ const Chat: FC<OwnProps & StateProps> = ({
       contextActions={contextActions}
       onClick={handleClick}
       onDragEnter={handleDragEnter}
-      offsetCollapseDelta={offsetCollapseDelta}
       withPortalForMenu
     >
       <div className="status">

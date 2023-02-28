@@ -90,7 +90,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       style={overwrittenWidth ? `--overwritten-width: ${overwrittenWidth}px` : undefined}
     >
       {lastActiveTopic && (
-        <span className={styles.titleRow}>
+        <div className={styles.titleRow}>
           <div
             className={buildClassName(
               styles.mainColumn,
@@ -129,10 +129,10 @@ const ChatForumLastMessage: FC<OwnProps> = ({
           </div>
 
           <div className={styles.ellipsis} />
-        </span>
+        </div>
       )}
       {!lastActiveTopic && <div className={buildClassName(styles.titleRow, styles.loading)}>{lang('Loading')}</div>}
-      <span
+      <div
         className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && styles.unread)}
         ref={lastMessageRef}
         onMouseDown={handleOpenTopic}
@@ -143,7 +143,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
             <div className={styles.after} />
           </div>
         )}
-      </span>
+      </div>
 
     </div>
   );
