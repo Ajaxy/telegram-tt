@@ -98,7 +98,7 @@ const useDraft = (
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [
     chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis,
   ] as const);
@@ -106,9 +106,9 @@ const useDraft = (
   // Save draft on chat change
   useEffect(() => {
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       if (!isEditing) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
         updateDraftRef.current({ chatId, threadId });
       }
 

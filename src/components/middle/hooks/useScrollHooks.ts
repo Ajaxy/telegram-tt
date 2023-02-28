@@ -34,7 +34,7 @@ export default function useScrollHooks(
       debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Backwards }), 1000, true, false),
       debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Forwards }), 1000, true, false),
     ] : []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
     [loadViewportMessages, messageIds],
   );
 

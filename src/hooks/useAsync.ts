@@ -19,7 +19,7 @@ const useAsync = <T>(fn: () => Promise<T>, deps: any[], defaultValue?: T) => {
     return () => {
       wasCancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, deps);
   return { isLoading, error, result };
 };

@@ -147,7 +147,7 @@ export function useIntersectionObserver({
       controller.observer.unobserve(target);
     };
     // Arguments should never change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [isDisabled]);
 
   return { observe, freeze, unfreeze };

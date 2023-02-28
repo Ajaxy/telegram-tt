@@ -43,6 +43,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
       showEffect();
       unmarkShouldShowEffect();
     }
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [emojiStatus, shouldShowEffect, showEffect, unmarkShouldShowEffect] as const);
 
   const handleEmojiStatusSet = useCallback((sticker: ApiSticker) => {

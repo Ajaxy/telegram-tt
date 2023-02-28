@@ -14,7 +14,7 @@ export default function useBlurSync(dataUri: string | false | undefined) {
   let isChanged = false;
 
   useSyncEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
     isChanged = true;
 
     blurredRef.current = undefined;

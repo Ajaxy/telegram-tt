@@ -582,9 +582,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   const stopRecordingVoiceRef = useStateRef(stopRecordingVoice);
   useEffect(() => {
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       stopRecordingVoiceRef.current();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       resetComposerRef.current();
     };
   }, [chatId, threadId, resetComposerRef, stopRecordingVoiceRef]);

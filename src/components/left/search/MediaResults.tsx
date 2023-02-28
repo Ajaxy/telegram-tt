@@ -62,7 +62,7 @@ const MediaResults: FC<OwnProps & StateProps> = ({
         });
       });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
   }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
 
   const foundMessages = useMemo(() => {

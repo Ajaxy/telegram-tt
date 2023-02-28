@@ -9,7 +9,7 @@ export default function useThrottledCallback<T extends AnyToVoidFunction>(
   msOrRaf: number | typeof fastRaf,
   noFirst = false,
 ) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   const fnMemo = useCallback(fn, deps);
 
   return useMemo(() => {
