@@ -25,7 +25,7 @@ try {
   RE_USERNAME_SEARCH = /(^|\s)@[-_\p{L}\p{M}\p{N}]*$/gui;
 } catch (e) {
   // Support for older versions of Firefox
-  RE_USERNAME_SEARCH = /(^|\s)@[-_\d\wа-яё]*$/gi;
+  RE_USERNAME_SEARCH = /(^|\s)@[-_\d\wа-яёґєії]*$/gi;
 }
 
 export default function useMentionTooltip(

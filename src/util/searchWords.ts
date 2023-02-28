@@ -4,7 +4,7 @@ try {
   RE_NOT_LETTER = /[^\p{L}\p{M}]+/ui;
 } catch (e) {
   // Support for older versions of firefox
-  RE_NOT_LETTER = /[^\wа-яё]+/i;
+  RE_NOT_LETTER = /[^\wа-яёґєії]+/i;
 }
 
 export default function searchWords(haystack: string, needle: string | string[]) {

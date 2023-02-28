@@ -27,6 +27,7 @@ interface Library {
   byKeyword: Record<string, Emoji[]>;
   names: string[];
   byName: Record<string, Emoji[]>;
+  maxKeyLength: number;
 }
 
 let emojiDataPromise: Promise<EmojiModule>;
@@ -34,6 +35,7 @@ let emojiRawData: EmojiRawData;
 let emojiData: EmojiData;
 
 let RE_EMOJI_SEARCH: RegExp;
+let RE_LOWERCASE_TEST: RegExp;
 const EMOJIS_LIMIT = 36;
 const FILTER_MIN_LENGTH = 2;
 
@@ -44,10 +46,12 @@ const prepareLibraryMemo = memoized(prepareLibrary);
 const searchInLibraryMemo = memoized(searchInLibrary);
 
 try {
-  RE_EMOJI_SEARCH = /(^|\s):[-+_:\p{L}\p{N}]*$/gui;
+  RE_EMOJI_SEARCH = /(^|\s):(?!\s)[-+_:'\s\p{L}\p{N}]*$/gui;
+  RE_LOWERCASE_TEST = /\p{Ll}/u;
 } catch (e) {
   // Support for older versions of firefox
-  RE_EMOJI_SEARCH = /(^|\s):[-+_:\d\wа-яё]*$/gi;
+  RE_EMOJI_SEARCH = /(^|\s):(?!\s)[-+_:'\s\d\wа-яёґєії]*$/gi;
+  RE_LOWERCASE_TEST = /[a-zяёґєії]/;
 }
 
 export default function useEmojiTooltip(
@@ -141,12 +145,13 @@ export default function useEmojiTooltip(
 
     if (!filter) {
       matched = prepareRecentEmojisMemo(byId, recentEmojiIds, EMOJIS_LIMIT);
-    } else if (filter.length >= FILTER_MIN_LENGTH) {
+    } else if ((filter.length === 1 && RE_LOWERCASE_TEST.test(filter)) || filter.length >= FILTER_MIN_LENGTH) {
       const library = prepareLibraryMemo(byId, baseEmojiKeywords, emojiKeywords);
-      matched = searchInLibraryMemo(library, filter, EMOJIS_LIMIT);
+      matched = searchInLibraryMemo(library, filter.toLowerCase(), EMOJIS_LIMIT);
     }
 
     if (!matched.length) {
+      updateFiltered(MEMO_EMPTY_ARRAY);
       return;
     }
 
@@ -172,7 +177,7 @@ export default function useEmojiTooltip(
 
 async function ensureEmojiData() {
   if (!emojiDataPromise) {
-    emojiDataPromise = import('emoji-data-ios/emoji-data.json') as unknown as Promise<EmojiModule>;
+    emojiDataPromise = import('emoji-data-ios/emoji-data.json');
     emojiRawData = (await emojiDataPromise).default;
 
     emojiData = uncompressEmoji(emojiRawData);
@@ -224,21 +229,27 @@ function prepareLibrary(
   }, {} as Record<string, Emoji[]>);
 
   const names = Object.keys(byName);
+  const maxKeyLength = keywords.reduce((max, keyword) => Math.max(max, keyword.length), 0);
 
   return {
     byKeyword,
     keywords,
     byName,
     names,
+    maxKeyLength,
   };
 }
 
 function searchInLibrary(library: Library, filter: string, limit: number) {
   const {
-    byKeyword, keywords, byName, names,
+    byKeyword, keywords, byName, names, maxKeyLength,
   } = library;
 
-  let matched: Emoji[] = MEMO_EMPTY_ARRAY;
+  let matched: Emoji[] = [];
+
+  if (filter.length > maxKeyLength) {
+    return MEMO_EMPTY_ARRAY;
+  }
 
   const matchedKeywords = keywords.filter((keyword) => keyword.startsWith(filter)).sort();
   matched = matched.concat(Object.values(pickTruthy(byKeyword!, matchedKeywords)).flat());
@@ -248,6 +259,10 @@ function searchInLibrary(library: Library, filter: string, limit: number) {
   matched = matched.concat(Object.values(pickTruthy(byName, matchedNames)).flat());
 
   matched = unique(matched);
+
+  if (!matched.length) {
+    return MEMO_EMPTY_ARRAY;
+  }
 
   return matched.slice(0, limit);
 }
