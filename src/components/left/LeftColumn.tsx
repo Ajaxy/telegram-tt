@@ -1,9 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
+import type { GlobalState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
@@ -36,6 +37,7 @@ type StateProps = {
   isForumPanelOpen?: boolean;
   forumPanelChatId?: string;
   isClosingSearch?: boolean;
+  archiveSettings: GlobalState['archiveSettings'];
 };
 
 enum ContentType {
@@ -66,6 +68,7 @@ const LeftColumn: FC<StateProps> = ({
   isForumPanelOpen,
   forumPanelChatId,
   isClosingSearch,
+  archiveSettings,
 }) => {
   const {
     setGlobalSearchQuery,
@@ -352,6 +355,11 @@ const LeftColumn: FC<StateProps> = ({
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   }, [currentUserId, openChat]);
 
+  const handleArchivedChats = useCallback((e: KeyboardEvent) => {
+    e.preventDefault();
+    setContent(LeftColumnContent.Archived);
+  }, []);
+
   const handleHotkeySettings = useCallback((e: KeyboardEvent) => {
     e.preventDefault();
     setContent(LeftColumnContent.Settings);
@@ -360,7 +368,10 @@ const LeftColumn: FC<StateProps> = ({
   useHotkeys({
     'Mod+Shift+F': handleHotkeySearch,
     'Mod+Shift+S': handleHotkeySavedMessages,
-    'Mod+0': handleHotkeySavedMessages,
+    ...(IS_PWA && {
+      'Mod+0': handleHotkeySavedMessages,
+      'Mod+9': handleArchivedChats,
+    }),
     ...(IS_MAC_OS && IS_PWA && { 'Mod+,': handleHotkeySettings }),
   });
 
@@ -411,7 +422,11 @@ const LeftColumn: FC<StateProps> = ({
                   isActive={isActive}
                   onReset={handleReset}
                   onTopicSearch={handleTopicSearch}
+                  foldersDispatch={foldersDispatch}
+                  onSettingsScreenSelect={handleSettingsScreenSelect}
+                  onLeftColumnContentChange={setContent}
                   isForumPanelOpen={isForumPanelOpen}
+                  archiveSettings={archiveSettings}
                 />
               );
             case ContentType.Settings:
@@ -458,7 +473,7 @@ const LeftColumn: FC<StateProps> = ({
                   foldersDispatch={foldersDispatch}
                   onContentChange={setContent}
                   onSearchQuery={handleSearchQuery}
-                  onScreenSelect={handleSettingsScreenSelect}
+                  onSettingsScreenSelect={handleSettingsScreenSelect}
                   onReset={handleReset}
                   shouldSkipTransition={shouldSkipHistoryAnimations}
                   isUpdateAvailable={isUpdateAvailable}
@@ -498,6 +513,7 @@ export default memo(withGlobal(
         hasPasscode,
       },
       isUpdateAvailable,
+      archiveSettings,
     } = global;
 
     const currentChat = selectCurrentChat(global);
@@ -519,6 +535,7 @@ export default memo(withGlobal(
       isForumPanelOpen,
       forumPanelChatId,
       isClosingSearch: tabState.globalSearch.isClosing,
+      archiveSettings,
     };
   },
 )(LeftColumn));

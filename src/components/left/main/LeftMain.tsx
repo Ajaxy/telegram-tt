@@ -23,6 +23,7 @@ import Button from '../../ui/Button';
 import ForumPanel from './ForumPanel';
 
 import './LeftMain.scss';
+import { getActions } from '../../../global';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -36,7 +37,7 @@ type OwnProps = {
   isClosingSearch?: boolean;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
-  onScreenSelect: (screen: SettingsScreens) => void;
+  onSettingsScreenSelect: (screen: SettingsScreens) => void;
   onTopicSearch: NoneToVoidFunction;
   onReset: () => void;
 };
@@ -58,10 +59,11 @@ const LeftMain: FC<OwnProps> = ({
   isForumPanelOpen,
   onSearchQuery,
   onContentChange,
-  onScreenSelect,
+  onSettingsScreenSelect,
   onReset,
   onTopicSearch,
 }) => {
+  const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
 
   const { shouldRenderForumPanel, handleForumPanelAnimationEnd } = useForumPanelRender(isForumPanelOpen);
@@ -107,7 +109,8 @@ const LeftMain: FC<OwnProps> = ({
 
   const handleSelectArchived = useCallback(() => {
     onContentChange(LeftColumnContent.Archived);
-  }, [onContentChange]);
+    closeForumPanel();
+  }, [closeForumPanel, onContentChange]);
 
   const handleUpdateClick = useCallback(() => {
     window.location.reload();
@@ -172,7 +175,8 @@ const LeftMain: FC<OwnProps> = ({
               return (
                 <ChatFolders
                   shouldHideFolderTabs={isForumPanelVisible}
-                  onScreenSelect={onScreenSelect}
+                  onSettingsScreenSelect={onSettingsScreenSelect}
+                  onLeftColumnContentChange={onContentChange}
                   foldersDispatch={foldersDispatch}
                 />
               );

@@ -18,8 +18,8 @@ import styles from './EmptyFolder.module.scss';
 type OwnProps = {
   folderId?: number;
   folderType: 'all' | 'archived' | 'folder';
-  foldersDispatch?: FolderEditDispatch;
-  onScreenSelect?: (screen: SettingsScreens) => void;
+  foldersDispatch: FolderEditDispatch;
+  onSettingsScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type StateProps = {
@@ -30,15 +30,15 @@ type StateProps = {
 const ICON_SIZE = 96;
 
 const EmptyFolder: FC<OwnProps & StateProps> = ({
-  chatFolder, animatedEmoji, foldersDispatch, onScreenSelect,
+  chatFolder, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
 }) => {
   const lang = useLang();
   const { isMobile } = useAppLayout();
 
   const handleEditFolder = useCallback(() => {
-    foldersDispatch!({ type: 'editFolder', payload: chatFolder });
-    onScreenSelect!(SettingsScreens.FoldersEditFolderFromChatList);
-  }, [chatFolder, foldersDispatch, onScreenSelect]);
+    foldersDispatch({ type: 'editFolder', payload: chatFolder });
+    onSettingsScreenSelect(SettingsScreens.FoldersEditFolderFromChatList);
+  }, [chatFolder, foldersDispatch, onSettingsScreenSelect]);
 
   return (
     <div className={styles.root}>
@@ -49,7 +49,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
       <p className={styles.description} dir="auto">
         {lang(chatFolder ? 'ChatList.EmptyChatListFilterText' : 'Chat.EmptyChat')}
       </p>
-      {chatFolder && foldersDispatch && onScreenSelect && (
+      {chatFolder && (
         <Button
           ripple={!isMobile}
           fluid

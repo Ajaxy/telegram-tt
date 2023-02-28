@@ -78,7 +78,7 @@ type StateProps =
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing'> & Pick<TabState, 'canInstall'>;
+  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'> & Pick<TabState, 'canInstall'>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
@@ -110,6 +110,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   areChatsLoaded,
   hasPasscode,
   canInstall,
+  archiveSettings,
 }) => {
   const {
     openChat,
@@ -276,15 +277,17 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       >
         {lang('SavedMessages')}
       </MenuItem>
-      <MenuItem
-        icon="archive"
-        onClick={onSelectArchived}
-      >
-        <span className="menu-item-name">{lang('ArchivedChats')}</span>
-        {archivedUnreadChatsCount > 0 && (
-          <div className="right-badge">{archivedUnreadChatsCount}</div>
-        )}
-      </MenuItem>
+      {archiveSettings.isHidden && (
+        <MenuItem
+          icon="archive"
+          onClick={onSelectArchived}
+        >
+          <span className="menu-item-name">{lang('ArchivedChats')}</span>
+          {archivedUnreadChatsCount > 0 && (
+            <div className="right-badge">{archivedUnreadChatsCount}</div>
+          )}
+        </MenuItem>
+      )}
       <MenuItem
         icon="user"
         onClick={onSelectContacts}
@@ -359,9 +362,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       )}
     </>
   ), [
-    animationLevel, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick,
-    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToWebK, lang,
-    onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
+    animationLevel, archiveSettings.isHidden, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange,
+    handleBugReportClick, handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved,
+    handleSwitchToWebK, lang, onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
   ]);
 
   return (
@@ -457,7 +460,9 @@ export default memo(withGlobal<OwnProps>(
     const {
       query: searchQuery, fetchingStatus, chatId, date,
     } = tabState.globalSearch;
-    const { currentUserId, connectionState, isSyncing } = global;
+    const {
+      currentUserId, connectionState, isSyncing, archiveSettings,
+    } = global;
     const { byId: chatsById } = global.chats;
     const { isConnectionStatusMinimized, animationLevel } = global.settings.byKey;
 
@@ -478,6 +483,7 @@ export default memo(withGlobal<OwnProps>(
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canInstall: Boolean(tabState.canInstall),
+      archiveSettings,
     };
   },
 )(LeftMainHeader));

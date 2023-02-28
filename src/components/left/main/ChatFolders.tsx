@@ -5,8 +5,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChatFolder } from '../../../api/types';
-import type { SettingsScreens } from '../../../types';
+import type { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { GlobalState } from '../../../global/types';
 
 import { ALL_FOLDER_ID } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
@@ -25,8 +26,9 @@ import TabList from '../../ui/TabList';
 import ChatList from './ChatList';
 
 type OwnProps = {
-  onScreenSelect: (screen: SettingsScreens) => void;
+  onSettingsScreenSelect: (screen: SettingsScreens) => void;
   foldersDispatch: FolderEditDispatch;
+  onLeftColumnContentChange: (content: LeftColumnContent) => void;
   shouldHideFolderTabs?: boolean;
 };
 
@@ -39,6 +41,8 @@ type StateProps = {
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
+  hasArchivedChats?: boolean;
+  archiveSettings: GlobalState['archiveSettings'];
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
@@ -46,7 +50,8 @@ const FIRST_FOLDER_INDEX = 0;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   foldersDispatch,
-  onScreenSelect,
+  onSettingsScreenSelect,
+  onLeftColumnContentChange,
   chatFoldersById,
   orderedFolderIds,
   activeChatFolder,
@@ -56,6 +61,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   maxFolders,
   shouldHideFolderTabs,
+  hasArchivedChats,
+  archiveSettings,
 }) => {
   const {
     loadChatFolders,
@@ -122,7 +129,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   // Prevent `activeTab` pointing at non-existing folder after update
   useEffect(() => {
-    if (!folderTabs || !folderTabs.length) {
+    if (!folderTabs?.length) {
       return;
     }
 
@@ -211,7 +218,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         isForumPanelOpen={isForumPanelOpen}
         lastSyncTime={lastSyncTime}
         foldersDispatch={foldersDispatch}
-        onScreenSelect={onScreenSelect}
+        onSettingsScreenSelect={onSettingsScreenSelect}
+        onLeftColumnContentChange={onLeftColumnContentChange}
+        canDisplayArchive={hasArchivedChats && !archiveSettings.isHidden}
+        archiveSettings={archiveSettings}
       />
     );
   }
@@ -249,8 +259,14 @@ export default memo(withGlobal<OwnProps>(
         byId: chatFoldersById,
         orderedIds: orderedFolderIds,
       },
+      chats: {
+        listIds: {
+          archived,
+        },
+      },
       currentUserId,
       lastSyncTime,
+      archiveSettings,
     } = global;
     const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
 
@@ -262,7 +278,9 @@ export default memo(withGlobal<OwnProps>(
       isForumPanelOpen: selectIsForumPanelOpen(global),
       lastSyncTime,
       shouldSkipHistoryAnimations,
+      hasArchivedChats: Boolean(archived?.length),
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
+      archiveSettings,
     };
   },
 )(ChatFolders));

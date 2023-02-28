@@ -81,24 +81,22 @@
 .chat-list {
   background: var(--color-background);
   height: 100%;
-  padding: 0.5rem 0.125rem 0.5rem 0.4375rem;
+  padding: 0.5rem 0.4375rem 0.5rem 0.4375rem;
 
   overflow-y: auto;
-  body.is-android & {
-    @include overflow-y-overlay();
-  }
+  @include overflow-y-overlay();
 
   &.forum-panel-open {
     .info {
-      transform: translateX(-25%);
       opacity: 0;
+      transform: translateX(-25%);
     }
 
     .Chat[dir="rtl"] .info {
       transform: translateX(25%);
     }
 
-    .ListItem-button {
+    .group .ListItem-button {
       height: 4.5rem;
     }
   }
@@ -159,6 +157,6 @@
   }
 
   &.deleted-account {
-    --color-user: #9eaab5;
+    --color-user: var(--color-deleted-account);
   }
 }

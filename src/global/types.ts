@@ -781,6 +781,11 @@ export type GlobalState = {
   serviceNotifications: ServiceNotification[];
 
   byTabId: Record<number, TabState>;
+
+  archiveSettings: {
+    isMinimized: boolean;
+    isHidden: boolean;
+  };
 };
 
 export type CallSound = (
@@ -2086,6 +2091,11 @@ export interface ActionPayloads {
   updateAttachmentSettings: {
     shouldCompress?: boolean;
     shouldSendGrouped?: boolean;
+  };
+
+  updateArchiveSettings: {
+    isMinimized?: boolean;
+    isHidden?: boolean;
   };
 
   openUrl: {
