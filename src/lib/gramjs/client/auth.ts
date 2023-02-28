@@ -318,6 +318,10 @@ async function sendCode(
             settings: new Api.CodeSettings(),
         }));
 
+        if (!(sendResult instanceof Api.auth.SentCode)) {
+            throw Error('Unexpected SentCodeSuccess');
+        }
+
         // If we already sent a SMS, do not resend the phoneCode (hash may be empty)
         if (!forceSMS || (sendResult.type instanceof Api.auth.SentCodeTypeSms)) {
             return {
@@ -330,6 +334,10 @@ async function sendCode(
             phoneNumber,
             phoneCodeHash: sendResult.phoneCodeHash,
         }));
+
+        if (!(resendResult instanceof Api.auth.SentCode)) {
+            throw Error('Unexpected SentCodeSuccess');
+        }
 
         return {
             phoneCodeHash: resendResult.phoneCodeHash,
