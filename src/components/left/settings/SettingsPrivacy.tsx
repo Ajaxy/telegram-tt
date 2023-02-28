@@ -27,6 +27,7 @@ type StateProps = {
   webAuthCount: number;
   isSensitiveEnabled?: boolean;
   canChangeSensitive?: boolean;
+  canDisplayAutoarchiveSetting: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   privacyPhoneNumber?: ApiPrivacySettings;
   privacyLastSeen?: ApiPrivacySettings;
@@ -47,6 +48,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   webAuthCount,
   isSensitiveEnabled,
   canChangeSensitive,
+  canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
   privacyPhoneNumber,
   privacyLastSeen,
@@ -300,17 +302,19 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
       </div>
 
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          {lang('NewChatsFromNonContacts')}
-        </h4>
-        <Checkbox
-          label={lang('ArchiveAndMute')}
-          subLabel={lang('ArchiveAndMuteInfo')}
-          checked={Boolean(shouldArchiveAndMuteNewNonContact)}
-          onCheck={handleArchiveAndMuteChange}
-        />
-      </div>
+      {canDisplayAutoarchiveSetting && (
+        <div className="settings-item">
+          <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('NewChatsFromNonContacts')}
+          </h4>
+          <Checkbox
+            label={lang('ArchiveAndMute')}
+            subLabel={lang('ArchiveAndMuteInfo')}
+            checked={Boolean(shouldArchiveAndMuteNewNonContact)}
+            onCheck={handleArchiveAndMuteChange}
+          />
+        </div>
+      )}
 
       {canChangeSensitive && (
         <div className="settings-item">
@@ -343,6 +347,7 @@ export default memo(withGlobal<OwnProps>(
       passcode: {
         hasPasscode,
       },
+      appConfig,
     } = global;
 
     return {
@@ -352,6 +357,7 @@ export default memo(withGlobal<OwnProps>(
       blockedCount: blocked.totalCount,
       webAuthCount: global.activeWebSessions.orderedHashes.length,
       isSensitiveEnabled,
+      canDisplayAutoarchiveSetting: Boolean(appConfig?.canDisplayAutoarchiveSetting),
       shouldArchiveAndMuteNewNonContact,
       canChangeSensitive,
       privacyPhoneNumber: privacy.phoneNumber,
