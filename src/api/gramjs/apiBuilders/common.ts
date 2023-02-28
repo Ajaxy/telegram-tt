@@ -6,6 +6,7 @@ import type {
 } from '../../types';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
+import { compact } from '../../../util/iteratees';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
 
@@ -74,11 +75,13 @@ export function buildApiPhoto(photo: GramJs.Photo, isSpoiler?: boolean): ApiPhot
     thumbnail: buildApiThumbnailFromStripped(photo.sizes),
     sizes,
     isSpoiler,
-    ...(photo.videoSizes && { videoSizes: photo.videoSizes.map(buildApiVideoSize), isVideo: true }),
+    ...(photo.videoSizes && { videoSizes: compact(photo.videoSizes.map(buildApiVideoSize)), isVideo: true }),
   };
 }
 
-export function buildApiVideoSize(videoSize: GramJs.VideoSize): ApiVideoSize {
+export function buildApiVideoSize(videoSize: GramJs.TypeVideoSize): ApiVideoSize | undefined {
+  if (!(videoSize instanceof GramJs.VideoSize)) return undefined;
+
   const {
     videoStartTs, size, h, w, type,
   } = videoSize;

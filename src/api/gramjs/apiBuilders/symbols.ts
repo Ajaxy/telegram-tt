@@ -5,6 +5,7 @@ import type {
 
 import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 import localDb from '../localDb';
+import { compact } from '../../../util/iteratees';
 
 const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
 const VIDEO_STICKER_MIME_TYPE = 'video/webm';
@@ -81,7 +82,9 @@ export function buildStickerFromDocument(document: GramJs.TypeDocument, isNoPrem
 
   const { w: width, h: height } = cachedThumb as GramJs.PhotoCachedSize || sizeAttribute || {};
 
-  const hasEffect = !isNoPremium && videoThumbs?.some(({ type }) => type === 'f');
+  const hasEffect = !isNoPremium && videoThumbs && compact(videoThumbs
+    ?.filter((thumb) => thumb instanceof GramJs.VideoSize) as GramJs.VideoSize[])
+    .some(({ type }) => type === 'f');
 
   return {
     id: String(document.id),
