@@ -18,4 +18,20 @@
     width: 100%;
     height: 100%;
   }
+
+  .MessageOutgoingStatus--failed::before {
+    content: "";
+    display: block;
+    position: absolute;
+    inset: 0.25rem;
+    border-radius: 50%;
+    background: white;
+  }
+
+  .icon-message-failed {
+    background: none;
+    color: var(--color-error);
+    z-index: 1;
+    position: relative;
+  }
 }

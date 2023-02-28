@@ -8,6 +8,9 @@ import type { ApiChat, ApiChatBannedRights } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { selectChat } from '../../../global/selectors';
+import stopEvent from '../../../util/stopEvent';
+import buildClassName from '../../../util/buildClassName';
+import useManagePermissions from '../hooks/useManagePermissions';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -33,6 +36,12 @@ type StateProps = {
   isFormFullyDisabled?: boolean;
 };
 
+const ITEM_HEIGHT = 24 + 32;
+const SHIFT_HEIGHT_MINUS = 1;
+const BEFORE_ITEMS_COUNT = 2;
+const BEFORE_USER_INFO_HEIGHT = 96;
+const ITEMS_COUNT = 9;
+
 const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   chat,
   selectedChatMemberId,
@@ -43,9 +52,17 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
 }) => {
   const { updateChatMemberBannedRights } = getActions();
 
-  const [permissions, setPermissions] = useState<ApiChatBannedRights>({});
-  const [havePermissionChanged, setHavePermissionChanged] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const selectedChatMember = useMemo(() => {
+    if (!chat || !chat.fullInfo || !chat.fullInfo.members) {
+      return undefined;
+    }
+
+    return chat.fullInfo.members.find(({ userId }) => userId === selectedChatMemberId);
+  }, [chat, selectedChatMemberId]);
+
+  const {
+    permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
+  } = useManagePermissions(selectedChatMember?.bannedRights || chat?.defaultBannedRights);
   const [isBanConfirmationDialogOpen, openBanConfirmationDialog, closeBanConfirmationDialog] = useFlag();
   const lang = useLang();
 
@@ -56,42 +73,11 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const selectedChatMember = useMemo(() => {
-    if (!chat || !chat.fullInfo || !chat.fullInfo.members) {
-      return undefined;
-    }
-
-    return chat.fullInfo.members.find(({ userId }) => userId === selectedChatMemberId);
-  }, [chat, selectedChatMemberId]);
-
   useEffect(() => {
     if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.GroupPermissions);
     }
   }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
-
-  useEffect(() => {
-    setPermissions((selectedChatMember?.bannedRights) || (chat?.defaultBannedRights) || {});
-    setHavePermissionChanged(false);
-    setIsLoading(false);
-  }, [chat, selectedChatMember]);
-
-  const handlePermissionChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name } = e.target;
-
-    function getUpdatedPermissionValue(value: true | undefined) {
-      return value ? undefined : true;
-    }
-
-    setPermissions((p) => ({
-      ...p,
-      [name]: getUpdatedPermissionValue(p[name as Exclude<keyof ApiChatBannedRights, 'untilDate'>]),
-      ...(name === 'sendStickers' && {
-        sendGifs: getUpdatedPermissionValue(p[name]),
-      }),
-    }));
-    setHavePermissionChanged(true);
-  }, []);
 
   const handleSavePermissions = useCallback(() => {
     if (!chat || !selectedChatMemberId) {
@@ -104,7 +90,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
       userId: selectedChatMemberId,
       bannedRights: permissions,
     });
-  }, [chat, selectedChatMemberId, permissions, updateChatMemberBannedRights]);
+  }, [chat, selectedChatMemberId, setIsLoading, updateChatMemberBannedRights, permissions]);
 
   const handleBanFromGroup = useCallback(() => {
     if (!chat || !selectedChatMemberId) {
@@ -132,116 +118,216 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
     return chat.defaultBannedRights[key];
   }, [chat, isFormFullyDisabled]);
 
+  const [isMediaDropdownOpen, setIsMediaDropdownOpen] = useState(false);
+  const handleOpenMediaDropdown = useCallback((e: React.MouseEvent) => {
+    stopEvent(e);
+    setIsMediaDropdownOpen(!isMediaDropdownOpen);
+  }, [isMediaDropdownOpen]);
+
   if (!selectedChatMember) {
     return undefined;
   }
 
   return (
-    <div className="Management">
+    <div
+      className="Management with-shifted-dropdown"
+      style={`--shift-height: ${ITEMS_COUNT * ITEM_HEIGHT - SHIFT_HEIGHT_MINUS}px;`
+           + `--before-shift-height: ${BEFORE_ITEMS_COUNT * ITEM_HEIGHT + BEFORE_USER_INFO_HEIGHT}px;`}
+    >
       <div className="custom-scroll">
-        <div className="section">
+        <div className="section without-bottom-shadow">
           <ListItem inactive className="chat-item-clickable">
-            <PrivateChatInfo userId={selectedChatMember.userId} />
+            <PrivateChatInfo userId={selectedChatMember.userId} forceShowSelf />
           </ListItem>
 
           <h3 className="section-heading mt-4" dir="auto">{lang('UserRestrictionsCanDo')}</h3>
 
           <div className="ListItem no-selection">
             <Checkbox
-              name="sendMessages"
-              checked={!permissions.sendMessages}
+              name="sendPlain"
+              checked={!permissions.sendPlain}
               label={lang('UserRestrictionsSend')}
               blocking
-              disabled={getControlIsDisabled('sendMessages')}
+              disabled={getControlIsDisabled('sendPlain')}
               onChange={handlePermissionChange}
             />
           </div>
+
           <div className="ListItem no-selection">
             <Checkbox
               name="sendMedia"
               checked={!permissions.sendMedia}
               label={lang('UserRestrictionsSendMedia')}
               blocking
+              rightIcon={isMediaDropdownOpen ? 'up' : 'down'}
               disabled={getControlIsDisabled('sendMedia')}
               onChange={handlePermissionChange}
+              onClickLabel={handleOpenMediaDropdown}
             />
           </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="sendStickers"
-              checked={!permissions.sendStickers && !permissions.sendGifs}
-              label={lang('UserRestrictionsSendStickers')}
-              blocking
-              disabled={getControlIsDisabled('sendStickers')}
-              onChange={handlePermissionChange}
-            />
+
+          <div className="DropdownListTrap">
+            <div
+              className={buildClassName(
+                'DropdownList',
+                isMediaDropdownOpen && 'DropdownList--open',
+              )}
+            >
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendPhotos"
+                  checked={!permissions.sendPhotos}
+                  label={lang('UserRestrictionsSendPhotos')}
+                  blocking
+                  disabled={getControlIsDisabled('sendPhotos')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendVideos"
+                  checked={!permissions.sendVideos}
+                  label={lang('UserRestrictionsSendVideos')}
+                  blocking
+                  disabled={getControlIsDisabled('sendVideos')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendStickers"
+                  checked={!permissions.sendStickers && !permissions.sendGifs}
+                  label={lang('UserRestrictionsSendStickers')}
+                  blocking
+                  disabled={getControlIsDisabled('sendStickers')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendAudios"
+                  checked={!permissions.sendAudios}
+                  label={lang('UserRestrictionsSendMusic')}
+                  blocking
+                  disabled={getControlIsDisabled('sendAudios')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendDocs"
+                  checked={!permissions.sendDocs}
+                  label={lang('UserRestrictionsSendFiles')}
+                  blocking
+                  disabled={getControlIsDisabled('sendDocs')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendVoices"
+                  checked={!permissions.sendVoices}
+                  label={lang('UserRestrictionsSendVoices')}
+                  blocking
+                  disabled={getControlIsDisabled('sendVoices')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendRoundvideos"
+                  checked={!permissions.sendRoundvideos}
+                  label={lang('UserRestrictionsSendRound')}
+                  blocking
+                  disabled={getControlIsDisabled('sendRoundvideos')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="embedLinks"
+                  checked={!permissions.embedLinks}
+                  label={lang('UserRestrictionsEmbedLinks')}
+                  blocking
+                  disabled={getControlIsDisabled('embedLinks')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="sendPolls"
+                  checked={!permissions.sendPolls}
+                  label={lang('UserRestrictionsSendPolls')}
+                  blocking
+                  disabled={getControlIsDisabled('sendPolls')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+            </div>
           </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="sendPolls"
-              checked={!permissions.sendPolls}
-              label={lang('UserRestrictionsSendPolls')}
-              blocking
-              disabled={getControlIsDisabled('sendPolls')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="embedLinks"
-              checked={!permissions.embedLinks}
-              label={lang('UserRestrictionsEmbedLinks')}
-              blocking
-              disabled={getControlIsDisabled('embedLinks')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="inviteUsers"
-              checked={!permissions.inviteUsers}
-              label={lang('UserRestrictionsInviteUsers')}
-              blocking
-              disabled={getControlIsDisabled('inviteUsers')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="pinMessages"
-              checked={!permissions.pinMessages}
-              label={lang('UserRestrictionsPinMessages')}
-              blocking
-              disabled={getControlIsDisabled('pinMessages')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-          <div className="ListItem no-selection">
-            <Checkbox
-              name="changeInfo"
-              checked={!permissions.changeInfo}
-              label={lang('UserRestrictionsChangeInfo')}
-              blocking
-              disabled={getControlIsDisabled('changeInfo')}
-              onChange={handlePermissionChange}
-            />
-          </div>
-          {isForum && (
+
+          <div className={buildClassName('part', isMediaDropdownOpen && 'shifted')}>
+
             <div className="ListItem no-selection">
               <Checkbox
-                name="manageTopics"
-                checked={!permissions.manageTopics}
-                label={lang('CreateTopicsPermission')}
+                name="inviteUsers"
+                checked={!permissions.inviteUsers}
+                label={lang('UserRestrictionsInviteUsers')}
                 blocking
-                disabled={getControlIsDisabled('manageTopics')}
+                disabled={getControlIsDisabled('inviteUsers')}
                 onChange={handlePermissionChange}
               />
             </div>
-          )}
+            <div className="ListItem no-selection">
+              <Checkbox
+                name="pinMessages"
+                checked={!permissions.pinMessages}
+                label={lang('UserRestrictionsPinMessages')}
+                blocking
+                disabled={getControlIsDisabled('pinMessages')}
+                onChange={handlePermissionChange}
+              />
+            </div>
+            <div className="ListItem no-selection">
+              <Checkbox
+                name="changeInfo"
+                checked={!permissions.changeInfo}
+                label={lang('UserRestrictionsChangeInfo')}
+                blocking
+                disabled={getControlIsDisabled('changeInfo')}
+                onChange={handlePermissionChange}
+              />
+            </div>
+            {isForum && (
+              <div className="ListItem no-selection">
+                <Checkbox
+                  name="manageTopics"
+                  checked={!permissions.manageTopics}
+                  label={lang('CreateTopicsPermission')}
+                  blocking
+                  disabled={getControlIsDisabled('manageTopics')}
+                  onChange={handlePermissionChange}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {!isFormFullyDisabled && (
-          <div className="section">
+          <div
+            className={buildClassName(
+              'section',
+              isMediaDropdownOpen && 'shifted',
+            )}
+          >
             <ListItem icon="delete-user" ripple destructive onClick={openBanConfirmationDialog}>
               {lang('UserRestrictionsBlock')}
             </ListItem>

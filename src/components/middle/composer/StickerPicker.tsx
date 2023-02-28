@@ -44,7 +44,7 @@ type OwnProps = {
   threadId?: number;
   className: string;
   loadAndPlay: boolean;
-  canSendStickers: boolean;
+  canSendStickers?: boolean;
   onStickerSelect: (
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldUpdateStickerSetsOrder?: boolean,
   ) => void;

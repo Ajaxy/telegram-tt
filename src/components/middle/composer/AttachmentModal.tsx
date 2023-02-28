@@ -61,6 +61,8 @@ export type OwnProps = {
   isReady?: boolean;
   shouldSchedule?: boolean;
   shouldSuggestCompression?: boolean;
+  shouldForceCompression?: boolean;
+  shouldForceAsFile?: boolean;
   isForCurrentMessageList?: boolean;
   onCaptionUpdate: (html: string) => void;
   onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
@@ -109,6 +111,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   customEmojiForEmoji,
   attachmentSettings,
   shouldSuggestCompression,
+  shouldForceCompression,
+  shouldForceAsFile,
   isForCurrentMessageList,
   onAttachmentsUpdate,
   onCaptionUpdate,
@@ -140,6 +144,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   const [shouldSendCompressed, setShouldSendCompressed] = useState(
     shouldSuggestCompression ?? attachmentSettings.shouldCompress,
   );
+  const isSendingCompressed = Boolean((shouldSendCompressed || shouldForceCompression) && !shouldForceAsFile);
   const [shouldSendGrouped, setShouldSendGrouped] = useState(attachmentSettings.shouldSendGrouped);
 
   const {
@@ -241,15 +246,15 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (isOpen) {
       const send = (shouldSchedule || shouldSendScheduled) ? onSendScheduled
         : isSilent ? onSendSilent : onSend;
-      send(shouldSendCompressed, shouldSendGrouped);
+      send(isSendingCompressed, shouldSendGrouped);
       updateAttachmentSettings({
-        shouldCompress: shouldSendCompressed,
+        shouldCompress: isSendingCompressed,
         shouldSendGrouped,
       });
     }
   }, [
-    isOpen, shouldSchedule, onSendScheduled, onSend, updateAttachmentSettings, shouldSendCompressed, shouldSendGrouped,
-    onSendSilent,
+    isOpen, shouldSchedule, onSendScheduled, onSendSilent, onSend, isSendingCompressed, shouldSendGrouped,
+    updateAttachmentSettings,
   ]);
 
   const handleSendSilent = useCallback(() => {
@@ -366,7 +371,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     return leftCharsBeforeLimit <= MAX_LEFT_CHARS_TO_SHOW ? leftCharsBeforeLimit : undefined;
   }, [captionLimit, getHtml, renderingIsOpen]);
 
-  const isQuickGallery = shouldSendCompressed && hasOnlyMedia;
+  const isQuickGallery = isSendingCompressed && hasOnlyMedia;
 
   const [areAllPhotos, areAllVideos, areAllAudios] = useMemo(() => {
     if (!isQuickGallery || !renderingAttachments) return [false, false, false];
@@ -413,7 +418,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
           {hasMedia && (
             <>
               {
-                shouldSendCompressed ? (
+                !shouldForceAsFile && !shouldForceCompression && (isSendingCompressed ? (
                   // eslint-disable-next-line react/jsx-no-bind
                   <MenuItem icon="document" onClick={() => setShouldSendCompressed(false)}>
                     {lang(isMultiple ? 'Attachment.SendAsFiles' : 'Attachment.SendAsFile')}
@@ -423,9 +428,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   <MenuItem icon="photo" onClick={() => setShouldSendCompressed(true)}>
                     {isMultiple ? 'Send All as Media' : 'Send as Media'}
                   </MenuItem>
-                )
+                ))
               }
-              {shouldSendCompressed && (
+              {isSendingCompressed && (
                 hasSpoiler ? (
                   <MenuItem icon="spoiler-disable" onClick={handleDisableSpoilers}>
                     {lang('Attachment.DisableSpoiler')}
@@ -496,7 +501,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
           {renderingAttachments.map((attachment, i) => (
             <AttachmentModalItem
               attachment={attachment}
-              shouldDisplayCompressed={shouldSendCompressed}
+              shouldDisplayCompressed={isSendingCompressed}
               shouldDisplayGrouped={shouldSendGrouped}
               isSingle={renderingAttachments.length === 1}
               index={i}
@@ -548,6 +553,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               onRemoveSymbol={onRemoveSymbol}
               onEmojiSelect={onEmojiSelect}
               isAttachmentModal
+              canSendPlainText
               className="attachment-modal-symbol-menu with-menu-transitions"
             />
             <MessageInput

@@ -19,7 +19,11 @@ const MessageOutgoingStatus: FC<OwnProps> = ({ status }) => {
   return (
     <div className="MessageOutgoingStatus">
       <Transition name="reveal" activeKey={Keys[status]}>
-        <i className={`icon-message-${status}`} />
+        {status === 'failed' ? (
+          <div className="MessageOutgoingStatus--failed">
+            <i className="icon-message-failed" />
+          </div>
+        ) : <i className={`icon-message-${status}`} />}
       </Transition>
     </div>
   );

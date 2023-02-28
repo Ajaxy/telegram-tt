@@ -508,6 +508,15 @@
     text-overflow: ellipsis;
     max-width: 100%;
 
+    &.with-icon {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .placeholder-icon {
+      margin-inline-end: 0.25rem;
+    }
+
     @media (min-width: 600px) {
       left: 0.75rem;
     }

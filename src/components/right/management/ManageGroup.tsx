@@ -63,9 +63,24 @@ type StateProps = {
 const GROUP_TITLE_EMPTY = 'Group title can\'t be empty';
 const GROUP_MAX_DESCRIPTION = 255;
 
+const ALL_PERMISSIONS: Array<keyof ApiChatBannedRights> = [
+  'sendMessages',
+  'embedLinks',
+  'sendPolls',
+  'changeInfo',
+  'inviteUsers',
+  'pinMessages',
+  'manageTopics',
+  'sendPhotos',
+  'sendVideos',
+  'sendRoundvideos',
+  'sendVoices',
+  'sendAudios',
+  'sendDocs',
+];
 // Some checkboxes control multiple rights, and some rights are not controlled from Permissions screen,
 // so we need to define the amount manually
-const TOTAL_PERMISSIONS_COUNT = 9;
+const TOTAL_PERMISSIONS_COUNT = ALL_PERMISSIONS.length + 1;
 
 const ManageGroup: FC<OwnProps & StateProps> = ({
   chatId,
@@ -245,16 +260,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
       return 0;
     }
 
-    let totalCount = [
-      'sendMessages',
-      'sendMedia',
-      'embedLinks',
-      'sendPolls',
-      'changeInfo',
-      'inviteUsers',
-      'pinMessages',
-      'manageTopics',
-    ].filter(
+    let totalCount = ALL_PERMISSIONS.filter(
       (key) => !chat.defaultBannedRights![key as keyof ApiChatBannedRights],
     ).length;
 
@@ -347,7 +353,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('ChannelPermissions')}</span>
             <span className="subtitle" dir="auto">
-              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT}
+              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT - (chat.isForum ? 0 : 1)}
             </span>
           </ListItem>
           <ListItem

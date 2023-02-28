@@ -30,6 +30,7 @@ import Portal from '../../ui/Portal';
 import './SymbolMenu.scss';
 
 const ANIMATION_DURATION = 350;
+const STICKERS_TAB_INDEX = 2;
 
 export type OwnProps = {
   chatId: string;
@@ -55,6 +56,7 @@ export type OwnProps = {
   addRecentCustomEmoji: GlobalActions['addRecentCustomEmoji'];
   className?: string;
   isAttachmentModal?: boolean;
+  canSendPlainText?: boolean;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   transformOriginX?: number;
@@ -83,6 +85,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   onClose,
   onEmojiSelect,
   isAttachmentModal,
+  canSendPlainText,
   onCustomEmojiSelect,
   onStickerSelect,
   className,
@@ -113,6 +116,12 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     onLoad();
   }, [onLoad]);
+
+  // If we can't send plain text, we should always show the stickers tab
+  useEffect(() => {
+    if (canSendPlainText) return;
+    setActiveTab(STICKERS_TAB_INDEX);
+  }, [canSendPlainText]);
 
   useEffect(() => {
     if (!lastSyncTime) return;
@@ -218,8 +227,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           />
         );
       case SymbolMenuTabs.Stickers:
-        if (!canSendStickers) return undefined;
-
         return (
           <StickerPicker
             className="picker-tab"
@@ -231,8 +238,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           />
         );
       case SymbolMenuTabs.GIFs:
-        if (!canSendGifs || !onGifSelect) return undefined;
-
         return (
           <GifPicker
             className="picker-tab"
@@ -278,6 +283,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         onRemoveSymbol={onRemoveSymbol}
         onSearchOpen={handleSearch}
         isAttachmentModal={isAttachmentModal}
+        canSendPlainText={canSendPlainText}
       />
     </>
   );

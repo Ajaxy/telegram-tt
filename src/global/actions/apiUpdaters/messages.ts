@@ -627,6 +627,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       setGlobal(global);
       break;
     }
+
+    case 'updateMessageSendFailed': {
+      const { chatId, localId, error } = update;
+
+      if (error.match(/CHAT_SEND_.+?FORBIDDEN/)) {
+        Object.values(global.byTabId).forEach(({ id: tabId }) => {
+          actions.showAllowedMessageTypesNotification({ chatId, tabId });
+        });
+      }
+
+      global = updateChatMessage(global, chatId, localId, { sendingState: 'messageSendingStateFailed' });
+      setGlobal(global);
+    }
   }
 });
 

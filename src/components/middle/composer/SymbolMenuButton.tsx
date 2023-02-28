@@ -44,6 +44,7 @@ type OwnProps = {
   closeSendAsMenu?: VoidFunction;
   isSymbolMenuForced?: boolean;
   isAttachmentModal?: boolean;
+  canSendPlainText?: boolean;
   className?: string;
 };
 
@@ -61,6 +62,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   onStickerSelect,
   onGifSelect,
   isAttachmentModal,
+  canSendPlainText,
   onRemoveSymbol,
   onEmojiSelect,
   closeBotCommandMenu,
@@ -196,6 +198,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         addRecentEmoji={addRecentEmoji}
         addRecentCustomEmoji={addRecentCustomEmoji}
         isAttachmentModal={isAttachmentModal}
+        canSendPlainText={canSendPlainText}
         className={className}
         positionX={isAttachmentModal ? positionX : undefined}
         positionY={isAttachmentModal ? positionY : undefined}
