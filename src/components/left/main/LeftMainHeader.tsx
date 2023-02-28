@@ -362,9 +362,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       )}
     </>
   ), [
-    animationLevel, archiveSettings.isHidden, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange,
-    handleBugReportClick, handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved,
-    handleSwitchToWebK, lang, onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions,
+    animationLevel, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick, lang,
+    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToWebK,
+    onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions, archiveSettings,
   ]);
 
   return (

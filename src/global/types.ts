@@ -2310,7 +2310,7 @@ export interface ActionPayloads {
   toggleForum: {
     chatId: string;
     isEnabled: boolean;
-  };
+  } & WithTabId;
   createTopic: {
     chatId: string;
     title: string;
