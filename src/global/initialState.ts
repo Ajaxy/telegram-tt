@@ -186,6 +186,11 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   transcriptions: {},
 
   byTabId: {},
+
+  archiveSettings: {
+    isMinimized: false,
+    isHidden: false,
+  },
 };
 
 export const INITIAL_TAB_STATE: TabState = {

@@ -332,6 +332,7 @@ export function typify<
 
 if (DEBUG) {
   (window as any).getGlobal = getGlobal;
+  (window as any).setGlobal = setGlobal;
 
   document.addEventListener('dblclick', () => {
     // eslint-disable-next-line no-console

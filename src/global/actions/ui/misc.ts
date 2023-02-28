@@ -561,6 +561,19 @@ addActionHandler('closeEditTopicPanel', (global, actions, payload): ActionReturn
   }, tabId);
 });
 
+addActionHandler('updateArchiveSettings', (global, actions, payload): ActionReturnType => {
+  const { archiveSettings } = global;
+  const { isHidden = archiveSettings.isHidden, isMinimized = archiveSettings.isMinimized } = payload;
+
+  return {
+    ...global,
+    archiveSettings: {
+      isHidden,
+      isMinimized,
+    },
+  };
+});
+
 addActionHandler('checkAppVersion', (global): ActionReturnType => {
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 

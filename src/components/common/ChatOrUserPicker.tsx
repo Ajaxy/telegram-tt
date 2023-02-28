@@ -235,7 +235,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
               <ListItem
                 key={id}
                 className="chat-item-clickable force-rounded-corners small-icon"
-                style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
+                style={`height: ${CHAT_HEIGHT_PX}px; top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
                 onClick={handleClick}
                 clickArg={id}
               >

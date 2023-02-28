@@ -195,10 +195,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.serviceNotifications = [];
   }
 
-  if (!cached.groupCalls) {
-    cached.groupCalls = initialState.groupCalls;
-  }
-
   if (!cached.users.statusesById) {
     cached.users.statusesById = {};
   }
@@ -336,10 +332,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.availableReactions = cached.availableReactions
       .map((r) => ({ ...r, reaction: { emoticon: r.reaction as unknown as string } }));
   }
-
-  if (!cached.attachmentSettings) {
-    cached.attachmentSettings = initialState.attachmentSettings;
-  }
 }
 
 function updateCache() {
@@ -390,6 +382,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'attachmentSettings',
       'leftColumnWidth',
       'lastIsChatInfoShown',
+      'archiveSettings',
       'mediaViewer',
       'audioPlayer',
     ]),

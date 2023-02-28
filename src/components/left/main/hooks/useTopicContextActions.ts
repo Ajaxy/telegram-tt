@@ -1,5 +1,5 @@
-import { getActions } from '../../../../global';
 import { useMemo } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import type { ApiChat, ApiTopic } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';

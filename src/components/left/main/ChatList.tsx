@@ -4,12 +4,14 @@ import React, {
 import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import { LeftColumnContent } from '../../../types';
+import type { SettingsScreens } from '../../../types';
+import type { GlobalState } from '../../../global/types';
 
 import {
   ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID, CHAT_HEIGHT_FORUM_PX,
+  ARCHIVED_FOLDER_ID, ARCHIVE_MINIMIZED_HEIGHT, CHAT_HEIGHT_FORUM_PX,
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
@@ -24,35 +26,43 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 import useChatOrderDiff from './hooks/useChatOrderDiff';
+import useCollapseWithForumPanel from './hooks/useCollapseWithForumPanel';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 import EmptyFolder from './EmptyFolder';
-import useCollapseWithForumPanel from './hooks/useCollapseWithForumPanel';
+import Archive from './Archive';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
   folderId?: number;
   isActive: boolean;
+  canDisplayArchive?: boolean;
+  archiveSettings: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
   lastSyncTime?: number;
-  foldersDispatch?: FolderEditDispatch;
-  onScreenSelect?: (screen: SettingsScreens) => void;
+  foldersDispatch: FolderEditDispatch;
+  onSettingsScreenSelect: (screen: SettingsScreens) => void;
+  onLeftColumnContentChange: (content: LeftColumnContent) => void;
 };
 
 const INTERSECTION_THROTTLE = 200;
 const DRAG_ENTER_DEBOUNCE = 500;
+const RESERVED_HOTKEYS = new Set(['9', '0']);
 
 const ChatList: FC<OwnProps> = ({
   folderType,
   folderId,
   isActive,
   isForumPanelOpen,
+  canDisplayArchive,
+  archiveSettings,
   foldersDispatch,
-  onScreenSelect,
+  onSettingsScreenSelect,
+  onLeftColumnContentChange,
 }) => {
-  const { openChat, openNextChat } = getActions();
+  const { openChat, openNextChat, closeForumPanel } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldIgnoreDragRef = useRef(false);
@@ -61,7 +71,13 @@ const ChatList: FC<OwnProps> = ({
     folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
   );
 
+  const shouldDisplayArchive = folderType === 'all' && canDisplayArchive;
+
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
+
+  const chatsHeight = (orderedIds?.length || 0) * CHAT_HEIGHT_PX;
+  const archiveHeight = shouldDisplayArchive
+    ? archiveSettings.isMinimized ? ARCHIVE_MINIMIZED_HEIGHT : CHAT_HEIGHT_PX : 0;
 
   const { orderDiffById, getAnimationType } = useChatOrderDiff(orderedIds);
 
@@ -88,10 +104,19 @@ const ChatList: FC<OwnProps> = ({
     function handleKeyDown(e: KeyboardEvent) {
       if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code.startsWith('Digit')) {
         const [, digit] = e.code.match(/Digit(\d)/) || [];
-        if (!digit) return;
+        if (!digit || RESERVED_HOTKEYS.has(digit)) return;
 
-        const position = Number(digit) - 1;
-        if (position > orderedIds!.length - 1 || position < 0) return;
+        const isArchiveInList = shouldDisplayArchive && !archiveSettings.isMinimized;
+
+        const shift = isArchiveInList ? -1 : 0;
+        const position = Number(digit) + shift - 1;
+
+        if (isArchiveInList && position === -1) {
+          onLeftColumnContentChange(LeftColumnContent.Archived);
+          return;
+        }
+
+        if (position > orderedIds!.length - 1) return;
 
         openChat({ id: orderedIds![position], shouldReplaceHistory: true });
       }
@@ -102,7 +127,7 @@ const ChatList: FC<OwnProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isActive, openChat, openNextChat, orderedIds]);
+  }, [archiveSettings, isActive, onLeftColumnContentChange, openChat, openNextChat, orderedIds, shouldDisplayArchive]);
 
   const { observe } = useIntersectionObserver({
     rootRef: containerRef,
@@ -110,6 +135,19 @@ const ChatList: FC<OwnProps> = ({
   });
 
   useCollapseWithForumPanel(containerRef, isForumPanelOpen);
+
+  const handleArchivedClick = useCallback(() => {
+    onLeftColumnContentChange(LeftColumnContent.Archived);
+    closeForumPanel();
+  }, [closeForumPanel, onLeftColumnContentChange]);
+
+  const handleArchivedDragEnter = useCallback(() => {
+    if (shouldIgnoreDragRef.current) {
+      shouldIgnoreDragRef.current = false;
+      return;
+    }
+    handleArchivedClick();
+  }, [handleArchivedClick]);
 
   const handleDragEnter = useDebouncedCallback((chatId: string) => {
     if (shouldIgnoreDragRef.current) {
@@ -131,13 +169,13 @@ const ChatList: FC<OwnProps> = ({
     if (!viewportIds?.length) return 0;
     const global = getGlobal();
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
-    return orderedIds!.reduce((acc, id, i) => {
+    return archiveHeight + orderedIds!.reduce((acc, id, i) => {
       if (i >= viewportOffset) {
         return acc;
       }
       return acc + (selectChat(global, id)!.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
     }, 0);
-  }, [orderedIds, viewportIds]);
+  }, [archiveHeight, orderedIds, viewportIds]);
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
@@ -150,7 +188,7 @@ const ChatList: FC<OwnProps> = ({
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
       const expendedOffsetTop = currentChatListHeight;
-      const collapsedOffsetTop = (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const collapsedOffsetTop = archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
 
       currentChatListHeight += (selectChat(global, id)?.isForum ? CHAT_HEIGHT_FORUM_PX : CHAT_HEIGHT_PX);
 
@@ -177,12 +215,21 @@ const ChatList: FC<OwnProps> = ({
       className={buildClassName('chat-list custom-scroll', isForumPanelOpen && 'forum-panel-open')}
       ref={containerRef}
       items={viewportIds}
+      itemSelector=".ListItem:not(.chat-item-archive)"
       preloadBackwards={CHAT_LIST_SLICE}
       withAbsolutePositioning
-      maxHeight={(orderedIds?.length || 0) * CHAT_HEIGHT_PX}
+      maxHeight={chatsHeight + archiveHeight}
       onLoadMore={getMore}
       onDragLeave={handleDragLeave}
     >
+      {shouldDisplayArchive && (
+        <Archive
+          key="archive"
+          archiveSettings={archiveSettings}
+          onClick={handleArchivedClick}
+          onDragEnter={handleArchivedDragEnter}
+        />
+      )}
       {viewportIds?.length ? (
         renderChats()
       ) : viewportIds && !viewportIds.length ? (
@@ -191,7 +238,7 @@ const ChatList: FC<OwnProps> = ({
             folderId={folderId}
             folderType={folderType}
             foldersDispatch={foldersDispatch}
-            onScreenSelect={onScreenSelect}
+            onSettingsScreenSelect={onSettingsScreenSelect}
           />
         )
       ) : (
