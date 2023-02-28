@@ -108,7 +108,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           }
 
           const { threadInfo } = selectThreadByMessage(global, message as ApiMessage) || {};
-          if (threadInfo) {
+          if (threadInfo && !isLocal) {
             actions.requestThreadInfoUpdate({ chatId, threadId: threadInfo.threadId });
           }
 
@@ -360,6 +360,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const chat = selectChat(global, chatId);
       if (chat?.isForum && threadInfo.lastReadInboxMessageId !== currentThreadInfo?.lastReadInboxMessageId) {
         actions.loadTopicById({ chatId, topicId: threadId });
+      }
+
+      // Update reply thread last read message id if already read in main thread
+      if (threadInfo.topMessageId === threadId && !chat?.isForum) {
+        const lastReadInboxMessageId = chat?.lastReadInboxMessageId;
+        const lastReadInboxMessageIdInThread = newThreadInfo.lastReadInboxMessageId || lastReadInboxMessageId;
+        if (lastReadInboxMessageId && lastReadInboxMessageIdInThread) {
+          global = updateThreadInfo(global, chatId, threadId, {
+            lastReadInboxMessageId: Math.max(lastReadInboxMessageIdInThread, lastReadInboxMessageId),
+          });
+        }
       }
 
       setGlobal(global);
@@ -758,8 +769,13 @@ function updateListedAndViewportIds<T extends GlobalState>(
     global = replaceThreadParam(global, chatId, threadInfo.threadId, 'threadInfo', {
       ...threadInfo,
       lastMessageId: message.id,
-      messagesCount: (threadInfo.messagesCount || 0) + 1,
     });
+
+    if (!isMessageLocal(message)) {
+      global = updateThreadInfo(global, chatId, threadInfo.threadId, {
+        messagesCount: (threadInfo.messagesCount || 0) + 1,
+      });
+    }
   }
 
   if (isUnreadChatNotLoaded) {

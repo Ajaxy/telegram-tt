@@ -1,10 +1,12 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
+import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
+import { MAIN_THREAD_ID } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 import { compact } from '../../util/iteratees';
 import { formatHumanDate } from '../../util/dateFormat';
@@ -21,8 +23,6 @@ import useMessageObservers from './hooks/useMessageObservers';
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
 import ActionMessage from './ActionMessage';
-import { getActions } from '../../global';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 interface OwnProps {
   isCurrentUserPremium?: boolean;
@@ -33,6 +33,8 @@ interface OwnProps {
   isViewportNewest: boolean;
   isUnread: boolean;
   withUsers: boolean;
+  isChannelChat: boolean | undefined;
+  isComments?: boolean;
   noAvatars: boolean;
   containerRef: RefObject<HTMLDivElement>;
   anchorIdRef: { current: string | undefined };
@@ -60,7 +62,9 @@ const MessageListContent: FC<OwnProps> = ({
   messageGroups,
   isViewportNewest,
   isUnread,
+  isComments,
   withUsers,
+  isChannelChat,
   noAvatars,
   containerRef,
   anchorIdRef,
@@ -190,6 +194,10 @@ const MessageListContent: FC<OwnProps> = ({
         // Service notifications saved in cache in previous versions may share the same `previousLocalId`
         const key = isServiceNotificationMessage(message) ? `${message.date}_${originalId}` : originalId;
 
+        const noComments = hasLinkedChat === false || !isChannelChat;
+
+        const isTopicTopMessage = message.id === threadTopMessageId;
+
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
           <Message
@@ -200,11 +208,12 @@ const MessageListContent: FC<OwnProps> = ({
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             album={album}
             noAvatars={noAvatars}
-            withAvatar={position.isLastInGroup && withUsers && !isOwn && !(message.id === threadTopMessageId)}
+            withAvatar={position.isLastInGroup && withUsers && !isOwn && (!isTopicTopMessage || !isComments)}
             withSenderName={position.isFirstInGroup && withUsers && !isOwn}
             threadId={threadId}
             messageListType={type}
-            noComments={hasLinkedChat === false}
+            noComments={noComments}
+            noReplies={!noComments || threadId !== MAIN_THREAD_ID}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isFirstInGroup={position.isFirstInGroup}
             isLastInGroup={position.isLastInGroup}

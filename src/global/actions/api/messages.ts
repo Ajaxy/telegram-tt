@@ -68,7 +68,6 @@ import {
   selectReplyingToId,
   selectEditingId,
   selectDraft,
-  selectThreadOriginChat,
   selectThreadTopMessageId,
   selectEditingScheduledId,
   selectEditingMessage,
@@ -239,12 +238,17 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   }
 
   const chat = selectChat(global, chatId)!;
-  const replyingToTopId = chat.isForum ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
+  const replyingToId = selectReplyingToId(global, chatId, threadId);
+  const replyingToMessage = replyingToId ? selectChatMessage(global, chatId, replyingToId) : undefined;
+
+  const replyingToTopId = chat.isForum
+    ? selectThreadTopMessageId(global, chatId, threadId)
+    : replyingToMessage?.replyToTopMessageId || replyingToMessage?.replyToMessageId;
 
   const params = {
     ...payload,
     chat,
-    replyingTo: selectReplyingToId(global, chatId, threadId),
+    replyingTo: replyingToId,
     replyingToTopId,
     noWebPage: selectNoWebPage(global, chatId, threadId),
     sendAs: selectSendAs(global, chatId),
@@ -549,7 +553,7 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
   }
 
   const { chatId, threadId } = currentMessageList;
-  const chat = selectThreadOriginChat(global, chatId, threadId);
+  const chat = selectChat(global, chatId);
   if (!chat) {
     return undefined;
   }
@@ -853,7 +857,7 @@ addActionHandler('rescheduleMessage', (global, actions, payload): ActionReturnTy
 
 addActionHandler('requestThreadInfoUpdate', async (global, actions, payload): Promise<void> => {
   const { chatId, threadId } = payload;
-  const chat = selectThreadOriginChat(global, chatId, threadId);
+  const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
@@ -939,7 +943,7 @@ async function loadViewportMessages<T extends GlobalState>(
 
   global = getGlobal();
   const result = await callApi('fetchMessages', {
-    chat: selectThreadOriginChat(global, chatId, threadId)!,
+    chat: selectChat(global, chatId)!,
     offsetId,
     addOffset,
     limit: MESSAGE_LIST_SLICE,

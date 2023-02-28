@@ -276,9 +276,9 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const user = selectUser(global, userId);
-    const chat = selectChat(global, userId)!;
+    const chat = selectChat(global, userId);
     const { progress } = selectTabState(global).management;
-    const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
+    const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
 
     return {
       user, progress, isMuted,

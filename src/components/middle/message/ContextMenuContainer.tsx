@@ -6,7 +6,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
 import type {
-  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet, ApiChatReactions, ApiReaction,
+  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet, ApiChatReactions, ApiReaction, ApiThreadInfo,
 } from '../../../api/types';
 import type { IAlbum, IAnchorPosition } from '../../../types';
 
@@ -48,8 +48,10 @@ export type OwnProps = {
   album?: IAlbum;
   anchor: IAnchorPosition;
   messageListType: MessageListType;
+  noReplies?: boolean;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
+  repliesThreadInfo?: ApiThreadInfo;
 };
 
 type StateProps = {
@@ -107,6 +109,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canReschedule,
   canReply,
   canPin,
+  repliesThreadInfo,
   canUnpin,
   canDelete,
   canReport,
@@ -129,11 +132,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canRevote,
   canClosePoll,
   activeDownloads,
+  noReplies,
   canShowSeenBy,
   canScheduleUntilOnline,
   threadId,
 }) => {
   const {
+    openChat,
     setReplyingToId,
     setEditingId,
     pinMessage,
@@ -253,6 +258,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setReplyingToId({ messageId: message.id });
     closeMenu();
   }, [setReplyingToId, message.id, closeMenu]);
+
+  const handleOpenThread = useCallback(() => {
+    openChat({
+      id: message.chatId,
+      threadId: message.id,
+    });
+    closeMenu();
+  }, [closeMenu, message.chatId, message.id, openChat]);
 
   const handleEdit = useCallback(() => {
     setEditingId({ messageId: message.id });
@@ -411,6 +424,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canDelete={canDelete}
         canReport={canReport}
         canPin={canPin}
+        repliesThreadInfo={repliesThreadInfo}
         canUnpin={canUnpin}
         canEdit={canEdit}
         canForward={canForward}
@@ -428,6 +442,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
+        noReplies={noReplies}
+        onOpenThread={handleOpenThread}
         onReply={handleReply}
         onEdit={handleEdit}
         onPin={handlePin}

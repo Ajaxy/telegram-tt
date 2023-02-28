@@ -160,6 +160,13 @@ export default function useInnerHandlers(
     selectMessage(e, groupedId);
   }, [selectMessage, groupedId]);
 
+  const handleOpenThread = useCallback(() => {
+    openChat({
+      id: message.chatId,
+      threadId: message.id,
+    });
+  }, [message.chatId, message.id, openChat]);
+
   const handleTopicChipClick = useCallback(() => {
     if (!messageTopic) return;
     focusMessage({
@@ -178,6 +185,7 @@ export default function useInnerHandlers(
     handleAudioPlay,
     handleAlbumMediaClick,
     handleMetaClick: selectWithGroupedId,
+    handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
     handleVoteSend,

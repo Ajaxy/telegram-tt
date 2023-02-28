@@ -3,7 +3,7 @@ import { addCallback, removeCallback } from '../lib/teact/teactn';
 
 import { addActionHandler, getGlobal } from './index';
 
-import type { ActionReturnType, GlobalState } from './types';
+import type { ActionReturnType, GlobalState, MessageList } from './types';
 import type { ApiChat, ApiUser } from '../api/types';
 import { MAIN_THREAD_ID } from '../api/types';
 
@@ -27,7 +27,7 @@ import {
 } from '../util/iteratees';
 import {
   selectChat,
-  selectCurrentMessageList,
+  selectCurrentMessageList, selectThreadOriginChat,
   selectVisibleUsers,
 } from './selectors';
 import { hasStoredSession } from '../util/sessions';
@@ -459,8 +459,19 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
   const { chats: { byId }, currentUserId } = global;
   const currentChatIds = compact(
     Object.values(global.byTabId)
-      .map(({ id: tabId }) => selectCurrentMessageList(global, tabId)),
-  ).map(({ chatId }) => chatId).filter((chatId) => isUserId(chatId));
+      .flatMap(({ id: tabId }): MessageList[] | undefined => {
+        const messageList = selectCurrentMessageList(global, tabId);
+        if (!messageList) return undefined;
+
+        const { chatId, threadId } = messageList;
+        const origin = selectThreadOriginChat(global, chatId, threadId);
+        return origin ? [{
+          chatId: origin.id,
+          threadId: MAIN_THREAD_ID,
+          type: 'thread',
+        }, messageList] : [messageList];
+      }),
+  ).map(({ chatId }) => chatId);
 
   const idsToSave = unique([
     ...currentUserId ? [currentUserId] : [],

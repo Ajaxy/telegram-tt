@@ -1572,6 +1572,11 @@ export interface ActionPayloads {
     shouldReplaceHistory?: boolean;
     noForumTopicPanel?: boolean;
   } & WithTabId;
+  openComments: {
+    id: string;
+    threadId: number;
+    originChannelId?: string;
+  } & WithTabId;
   loadFullChat: {
     chatId: string;
     force?: boolean;

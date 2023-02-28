@@ -235,7 +235,7 @@ export function buildApiMessageWithChatId(
     }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons, isHideKeyboardSelective }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
-    ...(replies?.comments && { repliesThreadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
+    ...(replies && { repliesThreadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
     ...(postAuthor && { postAuthorTitle: postAuthor }),
     isProtected,
     isForwardingAllowed,
@@ -1591,20 +1591,18 @@ function buildThreadInfo(
   messageReplies: GramJs.TypeMessageReplies, messageId: number, chatId: string,
 ): ApiThreadInfo | undefined {
   const {
-    channelId, replies, maxId, readMaxId, recentRepliers,
+    channelId, replies, maxId, readMaxId, recentRepliers, comments,
   } = messageReplies;
-  if (!channelId) {
-    return undefined;
-  }
 
-  const apiChannelId = buildApiPeerId(channelId, 'channel');
+  const apiChannelId = channelId ? buildApiPeerId(channelId, 'channel') : undefined;
   if (apiChannelId === DELETED_COMMENTS_CHANNEL_ID) {
     return undefined;
   }
 
-  const isPostThread = chatId !== apiChannelId;
+  const isPostThread = apiChannelId && chatId !== apiChannelId;
 
   return {
+    isComments: comments,
     threadId: messageId,
     ...(isPostThread ? {
       chatId: apiChannelId,

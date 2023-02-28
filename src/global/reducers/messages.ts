@@ -30,6 +30,7 @@ import {
 } from '../../util/iteratees';
 import { updateTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { isLocalMessageId } from '../helpers';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -254,7 +255,7 @@ export function deleteChatMessages<T extends GlobalState>(
     messageIds.forEach((messageId) => {
       if (listedIds?.includes(messageId)) {
         listedIds = listedIds.filter((id) => id !== messageId);
-        if (newMessageCount !== undefined) newMessageCount -= 1;
+        if (newMessageCount !== undefined && !isLocalMessageId(messageId)) newMessageCount -= 1;
       }
 
       if (pinnedIds?.includes(messageId)) {

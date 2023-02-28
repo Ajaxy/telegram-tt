@@ -177,7 +177,7 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights)
   );
 }
 
-export function getCanPostInChat(chat: ApiChat, threadId: number) {
+export function getCanPostInChat(chat: ApiChat, threadId: number, isComments?: boolean) {
   if (threadId !== MAIN_THREAD_ID) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
@@ -189,10 +189,10 @@ export function getCanPostInChat(chat: ApiChat, threadId: number) {
         return false;
       }
     }
-    return true; // TODO[forums] legacy value, check that again
   }
 
-  if (chat.isRestricted || chat.isForbidden || chat.migratedTo || chat.isNotJoined || isChatWithRepliesBot(chat.id)) {
+  if (chat.isRestricted || chat.isForbidden || chat.migratedTo
+    || (!isComments && chat.isNotJoined) || isChatWithRepliesBot(chat.id)) {
     return false;
   }
 

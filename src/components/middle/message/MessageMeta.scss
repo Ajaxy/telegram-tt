@@ -16,7 +16,8 @@
   .message-time,
   .message-imported,
   .message-signature,
-  .message-views {
+  .message-views,
+  .message-replies {
     font-size: 0.75rem;
     white-space: nowrap;
   }
@@ -53,6 +54,12 @@
     font-size: 1.125rem;
     position: relative;
     top: -0.0625rem;
+  }
+
+  .icon-reply-filled {
+    margin-left: 0.125rem;
+    margin-right: 0.375rem;
+    font-size: 0.75rem;
   }
 
   .has-solid-background & {

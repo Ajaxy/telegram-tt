@@ -105,8 +105,6 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
     const activeThreadId = currentThreadId || MAIN_THREAD_ID;
     const threadInfo = currentThreadId && currentChatId
       ? selectThreadInfo(global, currentChatId, currentThreadId) : undefined;
-    // TODO Fix comments chat id, or refetch chat thread here
-    const activeCurrentChatId = threadInfo?.originChannelId || currentChatId;
     // Memoize drafts
     const draftChatIds = Object.keys(global.messages.byChatId);
     // eslint-disable-next-line @typescript-eslint/no-loop-func
@@ -119,14 +117,14 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
       return acc;
     }, {});
 
-    const currentChat = activeCurrentChatId ? global.chats.byId[activeCurrentChatId] : undefined;
-    if (activeCurrentChatId && currentChat) {
+    const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
+    if (currentChatId && currentChat) {
       const result = await loadTopMessages(currentChat, activeThreadId, threadInfo?.lastReadInboxMessageId);
       global = getGlobal();
       const { chatId: newCurrentChatId } = selectCurrentMessageList(global, tabId) || {};
 
       if (result && newCurrentChatId === currentChatId) {
-        const currentChatMessages = selectChatMessages(global, activeCurrentChatId);
+        const currentChatMessages = selectChatMessages(global, currentChatId);
         const localMessages = currentChatId === SERVICE_NOTIFICATIONS_USER_ID
           ? global.serviceNotifications.filter(({ isDeleted }) => !isDeleted).map(({ message }) => message)
           : [];
@@ -158,18 +156,20 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
           wasReset = true;
         }
 
-        global = addChatMessagesById(global, activeCurrentChatId, byId);
-        global = updateListedIds(global, activeCurrentChatId, activeThreadId, listedIds);
+        global = addChatMessagesById(global, currentChatId, byId);
+        global = updateListedIds(global, currentChatId, activeThreadId, listedIds);
         // eslint-disable-next-line @typescript-eslint/no-loop-func
         Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
           const { chatId: otherChatId, threadId: otherThreadId } = selectCurrentMessageList(global, otherTabId) || {};
-          if (otherChatId === activeCurrentChatId && otherThreadId === activeThreadId) {
-            global = safeReplaceViewportIds(global, activeCurrentChatId, activeThreadId, listedIds, otherTabId);
+          if (otherChatId === currentChatId && otherThreadId === activeThreadId) {
+            global = safeReplaceViewportIds(global, currentChatId, activeThreadId, listedIds, otherTabId);
           }
         });
         global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
         global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
-        global = updateThreadInfos(global, activeCurrentChatId, result.repliesThreadInfos);
+        if (result.repliesThreadInfos.length) {
+          global = updateThreadInfos(global, currentChatId, result.repliesThreadInfos);
+        }
 
         areMessagesLoaded = true;
       }
@@ -184,10 +184,10 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
     setGlobal(global);
 
     if (currentChat?.isForum) {
-      actions.loadTopics({ chatId: activeCurrentChatId!, force: true });
+      actions.loadTopics({ chatId: currentChatId!, force: true });
       if (currentThreadId && currentThreadId !== MAIN_THREAD_ID) {
         actions.loadTopicById({
-          chatId: activeCurrentChatId!, topicId: currentThreadId, shouldCloseChatOnError: true,
+          chatId: currentChatId!, topicId: currentThreadId, shouldCloseChatOnError: true,
         });
       }
     }

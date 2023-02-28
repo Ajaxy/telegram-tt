@@ -170,6 +170,7 @@ type OwnProps =
     threadId: number;
     messageListType: MessageListType;
     noComments: boolean;
+    noReplies: boolean;
     appearanceOrder: number;
     memoFirstUnreadIdRef: { current: number | undefined };
   }
@@ -265,6 +266,7 @@ const Message: FC<OwnProps & StateProps> = ({
   withAvatar,
   withSenderName,
   noComments,
+  noReplies,
   appearanceOrder,
   isFirstInGroup,
   isPremium,
@@ -466,6 +468,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleAudioPlay,
     handleAlbumMediaClick,
     handleMetaClick,
+    handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
     handleVoteSend,
@@ -523,7 +526,7 @@ const Message: FC<OwnProps & StateProps> = ({
     message.hasUnreadMention && 'has-unread-mention',
     isSelected && 'is-selected',
     isInSelectMode && 'is-in-selection-mode',
-    isThreadTop && 'is-thread-top',
+    isThreadTop && !withAvatar && 'is-thread-top',
     Boolean(message.inlineButtons) && 'has-inline-buttons',
     isSwiped && 'is-swiped',
     transitionClassNames,
@@ -546,7 +549,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isCustomShape,
     isLastInGroup,
     asForwarded,
-    hasThread,
+    hasThread: hasThread && !noComments,
     forceSenderName,
     hasComments: repliesThreadInfo && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
@@ -708,11 +711,14 @@ const Message: FC<OwnProps & StateProps> = ({
     const meta = (
       <MessageMeta
         message={message}
+        noReplies={noReplies}
+        repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
         signature={signature}
         withReactionOffset={reactionsPosition === 'inside'}
         availableReactions={availableReactions}
         onClick={handleMetaClick}
+        onOpenThread={handleOpenThread}
       />
     );
 
@@ -1200,6 +1206,8 @@ const Message: FC<OwnProps & StateProps> = ({
           messageListType={messageListType}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
+          repliesThreadInfo={repliesThreadInfo}
+          noReplies={noReplies}
         />
       )}
     </div>
