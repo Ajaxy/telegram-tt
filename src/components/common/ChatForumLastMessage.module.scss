@@ -50,6 +50,7 @@
   display: flex;
   align-items: center;
   font-size: 0.9375rem;
+  line-height: 1.25rem;
   color: var(--color-text-secondary);
 }
 
@@ -57,7 +58,7 @@
   color: var(--color-text);
 
   &.main-column, &.last-message {
-    padding: 0 0.375rem;
+    padding: 0 0.3125rem;
   }
 
   &.main-column, &.last-message, .after-wrapper {
