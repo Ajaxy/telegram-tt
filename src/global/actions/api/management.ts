@@ -10,8 +10,8 @@ import {
 import {
   selectChat, selectCurrentMessageList, selectTabState, selectUser,
 } from '../../selectors';
-import { migrateChat } from './chats';
-import { getUserFirstOrLastName, isChatBasicGroup } from '../../helpers';
+import { ensureIsSuperGroup } from './chats';
+import { getUserFirstOrLastName } from '../../helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import * as langProvider from '../../../util/langProvider';
@@ -56,23 +56,17 @@ addActionHandler('updatePublicLink', async (global, actions, payload): Promise<v
   const { username, tabId = getCurrentTabId() } = payload;
 
   const { chatId } = selectCurrentMessageList(global, tabId) || {};
-  let chat = chatId && selectChat(global, chatId);
-  if (!chatId || !chat) {
+  if (!chatId) {
     return;
   }
 
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
+  if (!chat) return;
+
+  global = getGlobal();
+
   global = updateManagementProgress(global, ManagementProgress.InProgress, tabId);
   setGlobal(global);
-
-  if (isChatBasicGroup(chat)) {
-    chat = await migrateChat(global, actions, chat, tabId);
-
-    if (!chat) {
-      return;
-    }
-
-    actions.openChat({ id: chat.id, tabId });
-  }
 
   const result = await callApi('setChatUsername', { chat, username });
 

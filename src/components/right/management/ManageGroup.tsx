@@ -16,7 +16,6 @@ import {
   getHasAdminRight,
   isChatBasicGroup,
   isChatPublic,
-  isChatSuperGroup,
 } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
@@ -475,7 +474,7 @@ export default memo(withGlobal<OwnProps>(
     const hasLinkedChannel = Boolean(chat.fullInfo?.linkedChatId);
     const isBasicGroup = isChatBasicGroup(chat);
     const { invites } = management.byChatId[chatId] || {};
-    const canEditForum = !hasLinkedChannel && isChatSuperGroup(chat) && getHasAdminRight(chat, 'changeInfo');
+    const canEditForum = !hasLinkedChannel && (getHasAdminRight(chat, 'changeInfo') || chat.isCreator);
 
     return {
       chat,

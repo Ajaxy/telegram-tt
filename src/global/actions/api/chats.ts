@@ -55,7 +55,7 @@ import {
   selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
   selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState, selectThread, selectThreadOriginChat,
+  selectTabState, selectThreadOriginChat, selectThread,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -1082,22 +1082,12 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Pro
     tabId = getCurrentTabId(),
   } = payload!;
 
-  let chat = selectChat(global, chatId);
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
   if (!chat) {
     return;
   }
 
-  if (isChatBasicGroup(chat)) {
-    chat = await migrateChat(global, actions, chat, tabId);
-    global = getGlobal();
-
-    if (!chat) {
-      return;
-    }
-
-    actions.openChat({ id: chat.id, tabId });
-    return;
-  }
+  global = getGlobal();
 
   global = updateChat(global, chat.id, {
     fullInfo: {
@@ -1126,22 +1116,16 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
     chatId, userId, bannedRights,
     tabId = getCurrentTabId(),
   } = payload!;
-  let chat = selectChat(global, chatId);
+
   const user = selectUser(global, userId);
 
-  if (!chat || !user) {
+  if (!user) {
     return;
   }
 
-  if (isChatBasicGroup(chat)) {
-    chat = await migrateChat(global, actions, chat, tabId);
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
 
-    if (!chat) {
-      return;
-    }
-
-    actions.openChat({ id: chat.id, tabId });
-  }
+  if (!chat) return;
 
   await callApi('updateChatMemberBannedRights', { chat, user, bannedRights });
 
@@ -1185,20 +1169,14 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
     tabId = getCurrentTabId(),
   } = payload!;
 
-  let chat = selectChat(global, chatId);
   const user = selectUser(global, userId);
-  if (!chat || !user) {
+  if (!user) {
     return;
   }
 
-  if (isChatBasicGroup(chat)) {
-    chat = await migrateChat(global, actions, chat, tabId);
-    if (!chat) {
-      return;
-    }
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
 
-    actions.openChat({ id: chat.id, tabId });
-  }
+  if (!chat) return;
 
   await callApi('updateChatAdmin', {
     chat, user, adminRights, customTitle,
@@ -1368,20 +1346,13 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload): Promis
   const { channelId, chatId, tabId = getCurrentTabId() } = payload || {};
 
   const channel = selectChat(global, channelId);
-  let chat = selectChat(global, chatId);
-  if (!channel || !chat) {
+  if (!channel) {
     return;
   }
 
-  if (isChatBasicGroup(chat)) {
-    chat = await migrateChat(global, actions, chat, tabId);
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
 
-    if (!chat) {
-      return;
-    }
-
-    actions.openChat({ id: chat.id, tabId });
-  }
+  if (!chat) return;
 
   let { fullInfo } = chat;
   if (!fullInfo) {
@@ -1692,11 +1663,14 @@ addActionHandler('loadTopicById', async (global, actions, payload): Promise<void
 });
 
 addActionHandler('toggleForum', async (global, actions, payload): Promise<void> => {
-  const { chatId, isEnabled } = payload;
-  const chat = selectChat(global, chatId);
+  const { chatId, isEnabled, tabId = getCurrentTabId() } = payload;
+
+  const chat = await ensureIsSuperGroup(global, actions, chatId, tabId);
   if (!chat) {
     return;
   }
+
+  global = getGlobal();
 
   const prevIsForum = chat.isForum;
   global = updateChat(global, chatId, { isForum: isEnabled });
@@ -2197,4 +2171,25 @@ async function openAttachMenuFromLink<T extends GlobalState>(
     ...(typeof startAttach === 'string' && { startParam: startAttach }),
     tabId,
   });
+}
+
+export async function ensureIsSuperGroup<T extends GlobalState>(
+  global: T,
+  actions: RequiredGlobalActions,
+  chatId: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat || !isChatBasicGroup(chat)) {
+    return chat;
+  }
+
+  const newChat = await migrateChat(global, actions, chat, tabId);
+  if (!newChat) {
+    return undefined;
+  }
+
+  actions.openChat({ id: newChat.id, tabId });
+
+  return newChat;
 }
