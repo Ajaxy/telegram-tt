@@ -241,6 +241,8 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     if (DEBUG) {
       log('INVOKE ERROR', request.className);
       // eslint-disable-next-line no-console
+      console.debug('invokeRequest failed with payload', request);
+      // eslint-disable-next-line no-console
       console.error(err);
     }
 
