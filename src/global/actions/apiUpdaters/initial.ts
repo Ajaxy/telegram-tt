@@ -209,16 +209,7 @@ function onUpdateConnectionState<T extends GlobalState>(
   setGlobal(global);
 
   if (connectionState === 'connectionStateBroken') {
-    // When mounting Auth `initApi` will be called from an effect. Otherwise, we force it here.
-    const isOnAuth = !global.authState || [
-      'authorizationStateWaitPhoneNumber',
-      'authorizationStateWaitCode',
-      'authorizationStateWaitPassword',
-      'authorizationStateWaitRegistration',
-      'authorizationStateWaitQrCode',
-    ].includes(global.authState);
-
-    actions.signOut({ forceInitApi: isOnAuth });
+    actions.signOut({ forceInitApi: true });
   }
 }
 
