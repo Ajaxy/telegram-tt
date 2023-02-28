@@ -39,8 +39,17 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateUser': {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
-        if (update.id === global.currentUserId && update.user.isPremium && !selectIsCurrentUserPremium(global)) {
-          actions.openPremiumModal({ isSuccess: true, tabId });
+        if (update.id === global.currentUserId && update.user.isPremium !== selectIsCurrentUserPremium(global)) {
+          // TODO Do not display modal if premium is bought from another device
+          if (update.user.isPremium) actions.openPremiumModal({ isSuccess: true, tabId });
+
+          // Reset translation cache cause premium provides additional formatting
+          global = {
+            ...global,
+            translations: {
+              byChatId: {},
+            },
+          };
         }
       });
 

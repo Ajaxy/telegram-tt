@@ -160,6 +160,20 @@ export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
   'captionLength' | 'aboutLength' | 'stickersFaved' | 'savedGifs'
 )>;
 
+export type TranslatedMessage = {
+  isPending?: boolean;
+  text?: ApiFormattedText;
+};
+
+export type ChatTranslatedMessages = {
+  byLangCode: Record<string, Record<number, TranslatedMessage>>;
+};
+
+export type ChatRequestedTranslations = {
+  toLanguage?: string;
+  manualMessages?: Record<number, string>;
+};
+
 export type TabState = {
   id: number;
   isMasterTab: boolean;
@@ -520,6 +534,15 @@ export type TabState = {
     topicId: number;
     isLoading?: boolean;
   };
+
+  requestedTranslations: {
+    byChatId: Record<string, ChatRequestedTranslations>;
+  };
+  messageLanguageModal?: {
+    chatId: string;
+    messageId: number;
+    activeLanguage?: string;
+  };
 };
 
 export type GlobalState = {
@@ -785,6 +808,10 @@ export type GlobalState = {
   archiveSettings: {
     isMinimized: boolean;
     isHidden: boolean;
+  };
+
+  translations: {
+    byChatId: Record<string, ChatTranslatedMessages>;
   };
 };
 
@@ -1370,6 +1397,12 @@ export interface ActionPayloads {
   disableContextMenuHint: WithTabId | undefined;
   focusNextReply: WithTabId | undefined;
 
+  openMessageLanguageModal: {
+    chatId: string;
+    id: number;
+  } & WithTabId;
+  closeMessageLanguageModal: WithTabId | undefined;
+
   // poll result
   openPollResults: {
     chatId: string;
@@ -1663,6 +1696,23 @@ export interface ActionPayloads {
   loadExtendedMedia: {
     chatId: string;
     ids: number[];
+  };
+
+  requestMessageTranslation: {
+    chatId: string;
+    id: number;
+    toLanguageCode?: string;
+  } & WithTabId;
+
+  showOriginalMessage: {
+    chatId: string;
+    id: number;
+  } & WithTabId;
+
+  translateMessages: {
+    chatId: string;
+    messageIds: number[];
+    toLanguageCode?: string;
   };
 
   // Reactions

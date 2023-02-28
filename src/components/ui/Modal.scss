@@ -28,6 +28,16 @@
     }
   }
 
+  &.slim {
+    .modal-dialog {
+      max-width: 25rem;
+    }
+
+    .modal-content {
+      max-height: min(92vh, 32rem);
+    }
+  }
+
   .modal-container {
     position: fixed;
     top: 0;

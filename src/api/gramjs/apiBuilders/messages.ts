@@ -1616,3 +1616,12 @@ function buildThreadInfo(
     ...(recentRepliers && { recentReplierIds: recentRepliers.map(getApiChatIdFromMtpPeer) }),
   };
 }
+
+export function buildApiFormattedText(textWithEntities: GramJs.TextWithEntities): ApiFormattedText {
+  const { text, entities } = textWithEntities;
+
+  return {
+    text,
+    entities: entities.map(buildApiMessageEntity),
+  };
+}

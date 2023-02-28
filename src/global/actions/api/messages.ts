@@ -54,6 +54,9 @@ import {
   updateTopic,
   updateThreadInfo,
   replaceTabThreadParam,
+  updateRequestedMessageTranslation,
+  removeRequestedMessageTranslation,
+  updateMessageTranslation,
 } from '../../reducers';
 import {
   selectChat,
@@ -80,7 +83,9 @@ import {
   selectIsCurrentUserPremium,
   selectForwardsContainVoiceMessages,
   selectTabState,
-  selectThreadIdFromMessage, selectForwardsCanBeSentToChat,
+  selectThreadIdFromMessage,
+  selectLanguageCode,
+  selectForwardsCanBeSentToChat,
 } from '../../selectors';
 import {
   debounce, onTickEnd, rafPromise,
@@ -1409,6 +1414,49 @@ addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionRet
 
   actions.exitMessageSelectMode({ tabId });
   actions.forwardMessages({ isSilent: true, tabId });
+});
+
+addActionHandler('requestMessageTranslation', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, id, toLanguageCode = selectLanguageCode(global), tabId = getCurrentTabId(),
+  } = payload;
+
+  global = updateRequestedMessageTranslation(global, chatId, id, toLanguageCode, tabId);
+
+  return global;
+});
+
+addActionHandler('showOriginalMessage', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, id, tabId = getCurrentTabId(),
+  } = payload;
+
+  global = removeRequestedMessageTranslation(global, chatId, id, tabId);
+
+  return global;
+});
+
+addActionHandler('translateMessages', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageIds, toLanguageCode = selectLanguageCode(global),
+  } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  messageIds.forEach((id) => {
+    global = updateMessageTranslation(global, chatId, id, toLanguageCode, {
+      isPending: true,
+    });
+  });
+
+  callApi('translateText', {
+    chat,
+    messageIds,
+    toLanguageCode,
+  });
+
+  return global;
 });
 
 function countSortedIds(ids: number[], from: number, to: number) {

@@ -257,10 +257,6 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.recentCustomEmojis = [];
   }
 
-  if (cached.settings.byKey.shouldSuggestCustomEmoji === undefined) {
-    cached.settings.byKey.shouldSuggestCustomEmoji = true;
-  }
-
   if (!cached.stickers.premiumSet) {
     cached.stickers.premiumSet = {
       stickers: [],

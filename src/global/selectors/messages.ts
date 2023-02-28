@@ -1,5 +1,5 @@
 import type {
-  GlobalState, MessageListType, TabArgs, Thread, TabThread,
+  GlobalState, MessageListType, TabArgs, Thread, TabThread, ChatTranslatedMessages,
 } from '../types';
 import type {
   ApiChat,
@@ -1278,6 +1278,24 @@ export function selectForwardsContainVoiceMessages<T extends GlobalState>(
     const message = chatMessages[messageId];
     return Boolean(message.content.voice) || message.content.video?.isRound;
   });
+}
+
+export function selectChatTranslations<T extends GlobalState>(
+  global: T, chatId: string,
+): ChatTranslatedMessages {
+  return global.translations.byChatId[chatId];
+}
+
+export function selectMessageTranslations<T extends GlobalState>(
+  global: T, chatId: string, toLanguageCode: string,
+) {
+  return selectChatTranslations(global, chatId)?.byLangCode[toLanguageCode] || {};
+}
+
+export function selectRequestedTranslationLanguage<T extends GlobalState>(
+  global: T, chatId: string, messageId: number, tabId = getCurrentTabId(),
+): string | undefined {
+  return selectTabState(global, tabId).requestedTranslations.byChatId[chatId]?.manualMessages?.[messageId];
 }
 
 export function selectForwardsCanBeSentToChat<T extends GlobalState>(

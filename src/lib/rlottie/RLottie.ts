@@ -1,7 +1,9 @@
+import type { RLottieApi } from './rlottie.worker';
+
 import {
   DPR, IS_SAFARI, IS_ANDROID, IS_IOS,
 } from '../../util/environment';
-import WorkerConnector from '../../util/WorkerConnector';
+import { createConnector } from '../../util/PostMessageConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
 import { fastRaf } from '../../util/schedulers';
@@ -30,7 +32,7 @@ const LOW_PRIORITY_CACHE_MODULO = 0;
 const instancesById = new Map<string, RLottie>();
 
 const workers = new Array(MAX_WORKERS).fill(undefined).map(
-  () => new WorkerConnector(new Worker(new URL('./rlottie.worker.ts', import.meta.url))),
+  () => createConnector<RLottieApi>(new Worker(new URL('./rlottie.worker.ts', import.meta.url))),
 );
 let lastWorkerIndex = -1;
 
@@ -108,7 +110,7 @@ class RLottie {
     onLoad: NoneToVoidFunction | undefined,
     private id: string,
     private tgsUrl: string,
-    private params: Params = {},
+    private params: Params = { },
     private customColor?: [number, number, number],
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
@@ -360,7 +362,7 @@ class RLottie {
         this.id,
         this.tgsUrl,
         this.imgSize,
-        this.params.isLowPriority,
+        this.params.isLowPriority || false,
         this.customColor,
         this.onRendererInit.bind(this),
       ],
@@ -395,7 +397,7 @@ class RLottie {
       args: [
         this.id,
         this.tgsUrl,
-        this.params.isLowPriority,
+        this.params.isLowPriority || false,
         this.onChangeData.bind(this),
       ],
     });

@@ -29,6 +29,7 @@ export default function useInnerHandlers(
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
+    openMessageLanguageModal,
   } = getActions();
 
   const {
@@ -154,11 +155,17 @@ export default function useInnerHandlers(
     focusMessageInComments, replyToTopMessageId,
   ]);
 
-  const selectWithGroupedId = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const selectWithGroupedId = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     selectMessage(e, groupedId);
   }, [selectMessage, groupedId]);
+
+  const handleTranslationClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    openMessageLanguageModal({ chatId, id: messageId });
+  }, [chatId, messageId, openMessageLanguageModal]);
 
   const handleOpenThread = useCallback(() => {
     openChat({
@@ -185,6 +192,7 @@ export default function useInnerHandlers(
     handleAudioPlay,
     handleAlbumMediaClick,
     handleMetaClick: selectWithGroupedId,
+    handleTranslationClick,
     handleOpenThread,
     handleReadMedia,
     handleCancelUpload,

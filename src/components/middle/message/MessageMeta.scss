@@ -17,7 +17,8 @@
   .message-imported,
   .message-signature,
   .message-views,
-  .message-replies {
+  .message-replies,
+  .message-translated {
     font-size: 0.75rem;
     white-space: nowrap;
   }
@@ -34,6 +35,10 @@
 
   .message-views {
     margin-inline-start: 0.1875rem;
+  }
+
+  .message-translated {
+    margin-inline-end: 0.25rem;
   }
 
   .message-imported,

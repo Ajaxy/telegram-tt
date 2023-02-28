@@ -22,6 +22,7 @@ import type {
   ApiRequestInputInvoice,
   ApiChatReactions,
   ApiReaction,
+  ApiFormattedText,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -596,5 +597,12 @@ export function buildInputEmojiStatus(emojiStatus: ApiSticker, expires?: number)
 
   return new GramJs.EmojiStatus({
     documentId: BigInt(emojiStatus.id),
+  });
+}
+
+export function buildInputTextWithEntities(formatted: ApiFormattedText) {
+  return new GramJs.TextWithEntities({
+    text: formatted.text,
+    entities: formatted.entities?.map(buildMtpMessageEntity) || [],
   });
 }

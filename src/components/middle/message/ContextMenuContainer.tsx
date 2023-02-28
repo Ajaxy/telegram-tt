@@ -20,6 +20,8 @@ import {
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
   selectMessageCustomEmojiSets,
+  selectMessageTranslations,
+  selectRequestedTranslationLanguage,
   selectStickerSet,
 } from '../../../global/selectors';
 import {
@@ -27,6 +29,7 @@ import {
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo, getChatMessageLink,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { IS_TRANSLATION_SUPPORTED } from '../../../util/environment';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
@@ -49,6 +52,7 @@ export type OwnProps = {
   anchor: IAnchorPosition;
   messageListType: MessageListType;
   noReplies?: boolean;
+  detectedLanguage?: string;
   onClose: () => void;
   onCloseAnimationEnd: () => void;
   repliesThreadInfo?: ApiThreadInfo;
@@ -74,6 +78,9 @@ type StateProps = {
   canFaveSticker?: boolean;
   canUnfaveSticker?: boolean;
   canCopy?: boolean;
+  canTranslate?: boolean;
+  canShowOriginal?: boolean;
+  canSelectLanguage?: boolean;
   isPrivate?: boolean;
   isCurrentUserPremium?: boolean;
   hasFullInfo?: boolean;
@@ -101,8 +108,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   customEmojiSets,
   album,
   anchor,
-  onClose,
-  onCloseAnimationEnd,
   noOptions,
   canSendNow,
   hasFullInfo,
@@ -135,7 +140,12 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   noReplies,
   canShowSeenBy,
   canScheduleUntilOnline,
+  canTranslate,
+  canShowOriginal,
+  canSelectLanguage,
   threadId,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
   const {
     openChat,
@@ -161,6 +171,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     cancelPollVote,
     closePoll,
     toggleReaction,
+    requestMessageTranslation,
+    showOriginalMessage,
+    openMessageLanguageModal,
   } = getActions();
 
   const lang = useLang();
@@ -393,6 +406,30 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   }, [closeMenu, message, toggleReaction]);
 
+  const handleTranslate = useCallback(() => {
+    requestMessageTranslation({
+      chatId: message.chatId,
+      id: message.id,
+    });
+    closeMenu();
+  }, [closeMenu, message, requestMessageTranslation]);
+
+  const handleShowOriginal = useCallback(() => {
+    showOriginalMessage({
+      chatId: message.chatId,
+      id: message.id,
+    });
+    closeMenu();
+  }, [closeMenu, message, showOriginalMessage]);
+
+  const handleSelectLanguage = useCallback(() => {
+    openMessageLanguageModal({
+      chatId: message.chatId,
+      id: message.id,
+    });
+    closeMenu();
+  }, [closeMenu, message.chatId, message.id, openMessageLanguageModal]);
+
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 
   if (noOptions) {
@@ -438,6 +475,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canRevote={canRevote}
         canClosePoll={canClosePoll}
         canShowSeenBy={canShowSeenBy}
+        canTranslate={canTranslate}
+        canShowOriginal={canShowOriginal}
+        canSelectLanguage={canSelectLanguage}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
@@ -467,6 +507,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onShowSeenBy={handleOpenSeenByModal}
         onToggleReaction={handleToggleReaction}
         onShowReactors={handleOpenReactorListModal}
+        onTranslate={handleTranslate}
+        onShowOriginal={handleShowOriginal}
+        onSelectLanguage={handleSelectLanguage}
       />
       <DeleteMessageModal
         isOpen={isDeleteModalOpen}
@@ -499,7 +542,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, messageListType }): StateProps => {
+  (global, { message, messageListType, detectedLanguage }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
     const activeDownloads = selectActiveDownloadIds(global, message.chatId);
     const chat = selectChat(global, message.chatId);
@@ -524,6 +567,7 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
 
+    const isOwn = isOwnMessage(message);
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
@@ -532,7 +576,7 @@ export default memo(withGlobal<OwnProps>(
       && seenByMaxChatMembers
       && seenByExpiresAt
       && isChatGroup(chat)
-      && isOwnMessage(message)
+      && isOwn
       && !isScheduled
       && chat.membersCount
       && chat.membersCount <= seenByMaxChatMembers
@@ -549,6 +593,18 @@ export default memo(withGlobal<OwnProps>(
     const customEmojiSetsNotFiltered = customEmojiSetsInfo?.map((set) => selectStickerSet(global, set));
     const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
       ? customEmojiSetsNotFiltered : undefined;
+
+    const translationRequestLanguage = selectRequestedTranslationLanguage(global, message.chatId, message.id);
+    const hasTranslation = translationRequestLanguage
+      ? Boolean(selectMessageTranslations(global, message.chatId, translationRequestLanguage)[message.id]?.text)
+      : undefined;
+
+    const { canTranslate: isTranslationEnabled, language, doNotTranslate } = global.settings.byKey;
+
+    const canTranslateLanguage = !detectedLanguage
+      || (!doNotTranslate.includes(detectedLanguage) && language !== detectedLanguage);
+    const canTranslate = IS_TRANSLATION_SUPPORTED && isTranslationEnabled && message.content.text
+      && canTranslateLanguage && !isLocal && !isScheduled && !isAction && !hasTranslation && !message.emojiOnlyCount;
 
     return {
       availableReactions: global.availableReactions,
@@ -585,6 +641,9 @@ export default memo(withGlobal<OwnProps>(
       customEmojiSets,
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
       threadId,
+      canTranslate,
+      canShowOriginal: hasTranslation,
+      canSelectLanguage: hasTranslation,
     };
   },
 )(ContextMenuContainer));

@@ -44,7 +44,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v16';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v17';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -217,6 +217,25 @@ export const CONTENT_TYPES_WITH_PREVIEW = new Set([
 ]);
 
 export const CONTENT_NOT_SUPPORTED = 'The message is not supported on this version of Telegram.';
+
+// Taken from https://github.com/telegramdesktop/tdesktop/blob/41d9a9fcbd0c809c60ddbd9350791b1436aff7d9/Telegram/SourceFiles/ui/boxes/choose_language_box.cpp#L28
+export const SUPPORTED_TRANSLATION_LANGUAGES = [
+  // Official
+  'en', 'ar', 'be', 'ca', 'zh', 'nl', 'fr', 'de', 'id',
+  'it', 'ja', 'ko', 'pl', 'pt', 'ru', 'es', 'uk',
+  // Unnofficial
+  'af', 'sq', 'am', 'hy', 'az', 'eu', 'bn', 'bs', 'bg',
+  'ceb', 'zh-CN', 'zh-TW', 'co', 'hr', 'cs', 'da', 'eo',
+  'et', 'fi', 'fy', 'gl', 'ka', 'el', 'gu', 'ht', 'ha',
+  'haw', 'he', 'iw', 'hi', 'hmn', 'hu', 'is', 'ig', 'ga',
+  'jv', 'kn', 'kk', 'km', 'rw', 'ku', 'ky', 'lo', 'la',
+  'lv', 'lt', 'lb', 'mk', 'mg', 'ms', 'ml', 'mt', 'mi',
+  'mr', 'mn', 'my', 'ne', 'no', 'ny', 'or', 'ps', 'fa',
+  'pa', 'ro', 'sm', 'gd', 'sr', 'st', 'sn', 'sd', 'si',
+  'sk', 'sl', 'so', 'su', 'sw', 'sv', 'tl', 'tg', 'ta',
+  'tt', 'te', 'th', 'tr', 'tk', 'ur', 'ug', 'uz', 'vi',
+  'cy', 'xh', 'yi', 'yo', 'zu',
+];
 
 // eslint-disable-next-line max-len
 export const RE_LINK_TEMPLATE = '((ftp|https?):\\/\\/)?((www\\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\\.[a-zA-Z0-9()]{1,63})\\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)';

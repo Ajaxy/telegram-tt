@@ -13,7 +13,7 @@ import { pause } from './util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 
-const NETWORK_FIRST_ASSETS = new Set(['/', '/rlottie-wasm.wasm', '/webp_wasm.wasm']);
+const RE_NETWORK_FIRST_ASSETS = /\.(wasm|html)$/;
 const RE_CACHE_FIRST_ASSETS = /[\da-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|tgs|json|wasm)$/;
 const ACTIVATE_TIMEOUT = 3000;
 
@@ -64,7 +64,7 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   }
 
   if (url.startsWith('http')) {
-    if (NETWORK_FIRST_ASSETS.has(new URL(url).pathname)) {
+    if (new URL(url).pathname === '/' || url.match(RE_NETWORK_FIRST_ASSETS)) {
       e.respondWith(respondWithCacheNetworkFirst(e));
       return true;
     }

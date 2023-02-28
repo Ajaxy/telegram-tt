@@ -1,0 +1,30 @@
+@import "../../styles/mixins";
+
+.root {
+  :global(.modal-content) {
+    min-height: min(75vh, 32rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global(.matching-text-highlight) {
+    color: var(--color-primary);
+  }
+}
+
+.list-item {
+  text-align: left;
+
+  &[dir="rtl"] {
+    text-align: right;
+  }
+}
+
+.title, .subtitle {
+  text-align: inherit !important;
+}
+
+.languages {
+  overflow-y: auto;
+  @include overflow-y-overlay();
+}

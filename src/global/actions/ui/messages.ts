@@ -41,6 +41,7 @@ import {
   selectSender,
   selectChatScheduledMessages,
   selectTabState,
+  selectRequestedTranslationLanguage,
 } from '../../selectors';
 import { compact, findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -74,7 +75,7 @@ addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType
 });
 
 addActionHandler('setReplyingToId', (global, actions, payload): ActionReturnType => {
-  const { messageId, tabId = getCurrentTabId() } = payload!;
+  const { messageId, tabId = getCurrentTabId() } = payload;
   const currentMessageList = selectCurrentMessageList(global, tabId);
   if (!currentMessageList) {
     return undefined;
@@ -391,9 +392,9 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
     replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel,
     tabId = getCurrentTabId(),
-  } = payload!;
+  } = payload;
 
-  let { messageId } = payload!;
+  let { messageId } = payload;
 
   if (groupedId !== undefined) {
     const ids = selectForwardedMessageIdsByGroupId(global, groupedChatId!, groupedId);
@@ -759,7 +760,7 @@ addActionHandler('createServiceNotification', (global, actions, payload): Action
 });
 
 addActionHandler('openReactorListModal', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, tabId = getCurrentTabId() } = payload!;
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
     reactorModal: { chatId, messageId },
@@ -775,7 +776,7 @@ addActionHandler('closeReactorListModal', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('openSeenByModal', (global, actions, payload): ActionReturnType => {
-  const { chatId, messageId, tabId = getCurrentTabId() } = payload!;
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
 
   return updateTabState(global, {
     seenByModal: { chatId, messageId },
@@ -787,6 +788,24 @@ addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnTyp
 
   return updateTabState(global, {
     seenByModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('openMessageLanguageModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, id, tabId = getCurrentTabId() } = payload;
+
+  const activeLanguage = selectRequestedTranslationLanguage(global, chatId, id, tabId);
+
+  return updateTabState(global, {
+    messageLanguageModal: { chatId, messageId: id, activeLanguage },
+  }, tabId);
+});
+
+addActionHandler('closeMessageLanguageModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    messageLanguageModal: undefined,
   }, tabId);
 });
 

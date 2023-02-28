@@ -28,6 +28,7 @@ export { default as MessageSelectToolbar } from '../components/middle/MessageSel
 export { default as SeenByModal } from '../components/common/SeenByModal';
 export { default as ReactorListModal } from '../components/middle/ReactorListModal';
 export { default as EmojiInteractionAnimation } from '../components/middle/EmojiInteractionAnimation';
+export { default as MessageLanguageModal } from '../components/middle/MessageLanguageModal';
 
 // eslint-disable-next-line import/no-cycle
 export { default as LeftSearch } from '../components/left/search/LeftSearch';

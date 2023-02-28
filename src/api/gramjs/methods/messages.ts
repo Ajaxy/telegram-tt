@@ -16,6 +16,7 @@ import type {
   ApiSendMessageAction,
   ApiContact,
   ApiPoll,
+  ApiFormattedText,
 } from '../../types';
 import {
   MAIN_THREAD_ID,
@@ -36,6 +37,7 @@ import {
   buildLocalMessage,
   buildWebPage,
   buildApiSponsoredMessage,
+  buildApiFormattedText,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -51,6 +53,7 @@ import {
   isServiceMessageWithMedia,
   buildSendMessageAction,
   buildInputPollFromExisting,
+  buildInputTextWithEntities,
 } from '../gramjsBuilders';
 import localDb from '../localDb';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
@@ -68,6 +71,15 @@ import { getServerTimeOffset } from '../../../util/serverTime';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
+
+type TranslateTextParams = ({
+  text: ApiFormattedText[];
+} | {
+  chat: ApiChat;
+  messageIds: number[];
+}) & {
+  toLanguageCode: string;
+};
 
 let onUpdate: OnApiUpdate;
 
@@ -1559,4 +1571,39 @@ export async function transcribeAudio({
   });
 
   return result.transcriptionId.toString();
+}
+
+export async function translateText(params: TranslateTextParams) {
+  let result;
+  const isMessageTranslation = 'chat' in params;
+  if (isMessageTranslation) {
+    const { chat, messageIds, toLanguageCode } = params;
+    result = await invokeRequest(new GramJs.messages.TranslateText({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      id: messageIds,
+      toLang: toLanguageCode,
+    }));
+  } else {
+    const { text, toLanguageCode } = params;
+    result = await invokeRequest(new GramJs.messages.TranslateText({
+      text: text.map((t) => buildInputTextWithEntities(t)),
+      toLang: toLanguageCode,
+    }));
+  }
+
+  if (!result) return undefined;
+
+  const formattedText = result.result.map((r) => buildApiFormattedText(r));
+
+  if (isMessageTranslation) {
+    onUpdate({
+      '@type': 'updateMessageTranslations',
+      chatId: params.chat.id,
+      messageIds: params.messageIds,
+      translations: formattedText,
+      toLanguageCode: params.toLanguageCode,
+    });
+  }
+
+  return formattedText;
 }

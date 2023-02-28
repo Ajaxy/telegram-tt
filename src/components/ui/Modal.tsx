@@ -26,6 +26,7 @@ type OwnProps = {
   className?: string;
   isOpen?: boolean;
   header?: TeactNode;
+  isSlim?: boolean;
   hasCloseButton?: boolean;
   noBackdrop?: boolean;
   noBackdropClose?: boolean;
@@ -46,6 +47,7 @@ const Modal: FC<OwnProps & StateProps> = ({
   title,
   className,
   isOpen,
+  isSlim,
   header,
   hasCloseButton,
   noBackdrop,
@@ -136,6 +138,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     className,
     transitionClassNames,
     noBackdrop && 'transparent-backdrop',
+    isSlim && 'slim',
   );
 
   return (

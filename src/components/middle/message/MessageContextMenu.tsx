@@ -61,6 +61,9 @@ type OwnProps = {
   canCopy?: boolean;
   canCopyLink?: boolean;
   canSelect?: boolean;
+  canTranslate?: boolean;
+  canShowOriginal?: boolean;
+  canSelectLanguage?: boolean;
   isPrivate?: boolean;
   isCurrentUserPremium?: boolean;
   canDownload?: boolean;
@@ -99,6 +102,9 @@ type OwnProps = {
   onShowReactors?: () => void;
   onAboutAds?: () => void;
   onSponsoredHide?: () => void;
+  onTranslate?: () => void;
+  onShowOriginal?: () => void;
+  onSelectLanguage?: () => void;
   onToggleReaction?: (reaction: ApiReaction) => void;
 };
 
@@ -135,6 +141,9 @@ const MessageContextMenu: FC<OwnProps> = ({
   canSaveGif,
   canRevote,
   canClosePoll,
+  canTranslate,
+  canShowOriginal,
+  canSelectLanguage,
   isDownloading,
   repliesThreadInfo,
   canShowSeenBy,
@@ -170,6 +179,9 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyMessages,
   onAboutAds,
   onSponsoredHide,
+  onTranslate,
+  onShowOriginal,
+  onSelectLanguage,
 }) => {
   const { showNotification, openStickerSet, openCustomEmojiSets } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -318,6 +330,11 @@ const MessageContextMenu: FC<OwnProps> = ({
         )}
         {canUnfaveSticker && (
           <MenuItem icon="favorite" onClick={onUnfaveSticker}>{lang('Stickers.RemoveFromFavorites')}</MenuItem>
+        )}
+        {canTranslate && <MenuItem icon="language" onClick={onTranslate}>{lang('TranslateMessage')}</MenuItem>}
+        {canShowOriginal && <MenuItem icon="language" onClick={onShowOriginal}>{lang('ShowOriginalButton')}</MenuItem>}
+        {canSelectLanguage && (
+          <MenuItem icon="web" onClick={onSelectLanguage}>{lang('lng_settings_change_lang')}</MenuItem>
         )}
         {canCopy && copyOptions.map((option) => (
           <MenuItem key={option.label} icon={option.icon} onClick={option.handler}>{lang(option.label)}</MenuItem>

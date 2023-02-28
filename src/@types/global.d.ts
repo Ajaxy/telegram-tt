@@ -61,6 +61,7 @@ type AllEmojis = Record<string, Emoji | EmojiWithSkins>;
 declare module '*.png';
 declare module '*.svg';
 declare module '*.tgs';
+declare module '*.wasm';
 
 declare module '*.txt' {
   const content: string;

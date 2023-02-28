@@ -29,6 +29,7 @@ import SettingsQuickReaction from './SettingsQuickReaction';
 import SettingsPasscode from './passcode/SettingsPasscode';
 import SettingsStickers from './SettingsStickers';
 import SettingsCustomEmoji from './SettingsCustomEmoji';
+import SettingsDoNotTranslate from './SettingsDoNotTranslate';
 import SettingsExperimental from './SettingsExperimental';
 
 import './Settings.scss';
@@ -249,7 +250,15 @@ const Settings: FC<OwnProps> = ({
         );
       case SettingsScreens.Language:
         return (
-          <SettingsLanguage isActive={isScreenActive} onReset={handleReset} />
+          <SettingsLanguage
+            isActive={isScreenActive || screen === SettingsScreens.DoNotTranslate}
+            onReset={handleReset}
+            onScreenSelect={onScreenSelect}
+          />
+        );
+      case SettingsScreens.DoNotTranslate:
+        return (
+          <SettingsDoNotTranslate isActive={isScreenActive} onReset={handleReset} />
         );
       case SettingsScreens.Stickers:
         return (

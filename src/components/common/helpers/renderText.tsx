@@ -23,7 +23,6 @@ export type TextFilter = (
   'simple_markdown' | 'simple_markdown_html'
   );
 
-const RE_LETTER_OR_DIGIT = /^[\d\wа-яё]$/i;
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
 
 export default function renderText(
@@ -186,8 +185,7 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined): Tex
 
     const lowerCaseText = part.toLowerCase();
     const queryPosition = lowerCaseText.indexOf(highlight.toLowerCase());
-    const nextSymbol = lowerCaseText[queryPosition + highlight.length];
-    if (queryPosition < 0 || (nextSymbol && nextSymbol.match(RE_LETTER_OR_DIGIT))) {
+    if (queryPosition < 0) {
       result.push(part);
       return result;
     }
@@ -200,7 +198,6 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined): Tex
       </span>,
     );
     newParts.push(part.substring(queryPosition + highlight.length));
-
     return [...result, ...newParts];
   }, []);
 }
