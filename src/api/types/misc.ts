@@ -186,6 +186,7 @@ export interface ApiAppConfig {
   maxUserReactionsPremium: number;
   hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
+  canDisplayAutoarchiveSetting: boolean;
 }
 
 export interface ApiConfig {
