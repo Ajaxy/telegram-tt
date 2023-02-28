@@ -268,7 +268,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     return debounce(() => loadViewportMessages({ direction: LoadMoreDirection.Around }), 1000, true, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [loadViewportMessages, messageIds]);
 
   const { isScrolled, updateStickyDates } = useStickyDates();
@@ -491,7 +491,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       console.timeEnd('scrollTop');
     }
     // This should match deps for `useSyncEffect` above
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `as const` not yet supported by linter
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `as const` not yet supported by linter
   }, [messageIds, isViewportNewest, containerHeight, hasTools] as const);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {

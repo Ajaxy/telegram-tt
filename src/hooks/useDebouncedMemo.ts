@@ -21,7 +21,7 @@ export default function useDebouncedMemo<R extends any, D extends any[]>(
     runDebounced(() => {
       setValue(resolverFn());
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [...dependencies, isFrozen]);
 
   return value;

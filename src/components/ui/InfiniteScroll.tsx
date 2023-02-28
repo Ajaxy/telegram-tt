@@ -86,7 +86,7 @@ const InfiniteScroll: FC<OwnProps> = ({
         onLoadMore({ direction: LoadMoreDirection.Forwards });
       }, 1000, true, false),
     ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [onLoadMore, items]);
 
   // Initial preload

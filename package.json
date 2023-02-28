@@ -86,6 +86,7 @@
     "eslint-plugin-no-null": "^1.0.2",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-hooks-static-deps": "^1.0.7",
     "eslint-plugin-teactn": "git+https://github.com/korenskoy/eslint-plugin-teactn#c2c39dd005d58c07c24c4361de804dce1c6261b5",
     "git-revision-webpack-plugin": "^5.0.0",
     "gitlog": "^4.0.4",

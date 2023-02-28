@@ -106,7 +106,7 @@ const useAudioPlayer = (
     if (!isPlaying && !proxy.paused) {
       setIsPlaying(true);
       // `isPlayingSync` is only needed to help `setIsPlaying` because it is asynchronous
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       isPlayingSync = true;
     }
 

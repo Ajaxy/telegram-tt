@@ -58,7 +58,7 @@ const useEditing = (
         focusEditableElement(messageInput, true);
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `as const` not yet supported by linter
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `as const` not yet supported by linter
   }, [editedMessage, replyingToId, setHtml] as const);
 
   useEffect(() => {

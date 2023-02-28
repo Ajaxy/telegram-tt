@@ -16,6 +16,6 @@ export default function useVideoCleanup(videoRef: RefObject<HTMLVideoElement>, d
         });
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, dependencies);
 }

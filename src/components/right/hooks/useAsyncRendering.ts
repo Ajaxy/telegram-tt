@@ -20,7 +20,7 @@ export default function useAsyncRendering<T extends any[]>(dependencies: T, dela
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, dependencies);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function useAsyncRendering<T extends any[]>(dependencies: T, dela
     } else {
       exec();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, dependencies);
 
   return shouldRenderRef.current;

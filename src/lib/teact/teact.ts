@@ -759,7 +759,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
 }
 
 export function useCallback<F extends AnyFunction>(newCallback: F, dependencies: any[], debugKey?: string): F {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   return useMemo(() => newCallback, dependencies, debugKey);
 }
 
@@ -782,7 +782,7 @@ export function useRef<T>(initial?: T | null) {
 
 export function memo<T extends FC>(Component: T, debugKey?: string) {
   return function TeactMemoWrapper(props: Props) {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
     return useMemo(() => createElement(Component, props), Object.values(props), debugKey);
   } as T;
 }

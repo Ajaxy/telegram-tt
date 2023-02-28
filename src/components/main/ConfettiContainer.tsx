@@ -181,7 +181,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     return () => {
       clearTimeout(hideTimeout);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- Old timeout should be cleared only if new confetti is generated
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- Old timeout should be cleared only if new confetti is generated
   }, [lastConfettiTime, forceUpdate, updateCanvas]);
 
   if (!lastConfettiTime || Date.now() - lastConfettiTime > CONFETTI_FADEOUT_TIMEOUT) {

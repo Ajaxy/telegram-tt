@@ -10,6 +10,7 @@
     "no-async-without-await",
     "teactn",
     "no-null",
+    "react-hooks-static-deps",
     "eslint-multitab-tt"
   ],
   "rules": {
@@ -40,10 +41,17 @@
     "no-console": "error",
     "semi": "error",
     "no-implicit-coercion": "error",
-    "react-hooks/exhaustive-deps": [
+    "react-hooks/exhaustive-deps": "off",
+    "react-hooks-static-deps/exhaustive-deps": [
       "error",
       {
-        "additionalHooks": "(useSyncEffect|useAsync|useDebouncedCallback|useThrottledCallback|useEffectWithPrevDeps|useLayoutEffectWithPrevDeps|useDerivedState|useDerivedSignal|useThrottledResolver|useDebouncedResolver)$"
+        "additionalHooks": "(useSyncEffect|useAsync|useDebouncedCallback|useThrottledCallback|useEffectWithPrevDeps|useLayoutEffectWithPrevDeps|useDerivedState|useDerivedSignal|useThrottledResolver|useDebouncedResolver)$",
+        "staticHooks": {
+          "getActions": true,
+          "useFlag": [false, true, true],
+          "useForceUpdate": true,
+          "useReducer": [false, true]
+        }
       }
     ],
     "arrow-body-style": "off",

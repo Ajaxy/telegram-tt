@@ -17,7 +17,7 @@ export default function useReducer<State, Actions>(
   const dispatch = useCallback((action: ReducerAction<Actions>) => {
     state.current = reducerRef.current(state.current, action);
     forceUpdate();
-  }, [forceUpdate]);
+  }, []);
 
   return [
     state.current,

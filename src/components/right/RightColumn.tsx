@@ -235,7 +235,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     if (isOpen && isOverlaying) {
       close();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [isOverlaying]);
 
   // We need to clear profile state and management screen state, when changing chats
