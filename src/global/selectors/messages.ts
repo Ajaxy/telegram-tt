@@ -44,7 +44,7 @@ import {
   isServiceNotificationMessage,
   isUserId,
   isUserRightBanned,
-  canSendReaction,
+  canSendReaction, getAllowedAttachmentOptions,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -1277,5 +1277,44 @@ export function selectForwardsContainVoiceMessages<T extends GlobalState>(
   return messageIds.some((messageId) => {
     const message = chatMessages[messageId];
     return Boolean(message.content.voice) || message.content.video?.isRound;
+  });
+}
+
+export function selectForwardsCanBeSentToChat<T extends GlobalState>(
+  global: T,
+  toChatId: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { messageIds, fromChatId } = selectTabState(global, tabId).forwardMessages;
+  const chat = selectChat(global, toChatId);
+  if (!messageIds || !chat) return false;
+
+  const chatMessages = selectChatMessages(global, fromChatId!);
+  const {
+    canSendVoices, canSendRoundVideos, canSendStickers, canSendDocuments, canSendAudios, canSendVideos,
+    canSendPhotos, canSendGifs, canSendPlainText,
+  } = getAllowedAttachmentOptions(chat);
+  return !messageIds.some((messageId) => {
+    const message = chatMessages[messageId];
+    const isVoice = message.content.voice;
+    const isRoundVideo = message.content.video?.isRound;
+    const isPhoto = message.content.photo;
+    const isGif = message.content.video?.isGif;
+    const isVideo = message.content.video && !isRoundVideo && !isGif;
+    const isAudio = message.content.audio;
+    const isDocument = message.content.document;
+    const isSticker = message.content.sticker;
+    const isPlainText = message.content.text
+      && !isVoice && !isRoundVideo && !isSticker && !isDocument && !isAudio && !isVideo && !isPhoto && !isGif;
+
+    return (isVoice && !canSendVoices)
+      || (isRoundVideo && !canSendRoundVideos)
+      || (isSticker && !canSendStickers)
+      || (isDocument && !canSendDocuments)
+      || (isAudio && !canSendAudios)
+      || (isVideo && !canSendVideos)
+      || (isPhoto && !canSendPhotos)
+      || (isGif && !canSendGifs)
+      || (isPlainText && !canSendPlainText);
   });
 }

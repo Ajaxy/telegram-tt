@@ -294,6 +294,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     callAttachBot,
     addRecentCustomEmoji,
     showNotification,
+    showAllowedMessageTypesNotification,
   } = getActions();
 
   const lang = useLang();
@@ -356,7 +357,14 @@ const Composer: FC<OwnProps & StateProps> = ({
   const hasAttachments = Boolean(attachments.length);
 
   const {
+    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
+    canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
+  } = useMemo(() => getAllowedAttachmentOptions(chat, isChatWithBot), [chat, isChatWithBot]);
+
+  const {
     shouldSuggestCompression,
+    shouldForceCompression,
+    shouldForceAsFile,
     handleAppendFiles,
     handleFileSelect,
     onCaptionUpdate,
@@ -367,6 +375,11 @@ const Composer: FC<OwnProps & StateProps> = ({
     setHtml,
     setAttachments,
     fileSizeLimit,
+    chatId,
+    canSendAudios,
+    canSendVideos,
+    canSendPhotos,
+    canSendDocuments,
   });
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
@@ -402,10 +415,6 @@ const Composer: FC<OwnProps & StateProps> = ({
       sendMessageAction({ type: 'typing' });
     }
   }, [getHtml, isEditingRef, sendMessageAction]);
-
-  const {
-    canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
-  } = useMemo(() => getAllowedAttachmentOptions(chat, isChatWithBot), [chat, isChatWithBot]);
 
   const isAdmin = chat && isChatAdmin(chat);
   const slowMode = getChatSlowModeOptions(chat);
@@ -492,6 +501,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   );
 
   const insertHtmlAndUpdateCursor = useCallback((newHtml: string, inputId: string = EDITABLE_INPUT_ID) => {
+    if (inputId === EDITABLE_INPUT_ID && !canSendPlainText) return;
     const selection = window.getSelection()!;
     let messageInput: HTMLDivElement;
     if (inputId === EDITABLE_INPUT_ID) {
@@ -515,7 +525,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     requestAnimationFrame(() => {
       focusEditableElement(messageInput);
     });
-  }, [getHtml, setHtml]);
+  }, [canSendPlainText, getHtml, setHtml]);
 
   const insertFormattedTextAndUpdateCursor = useCallback((
     text: ApiFormattedText, inputId: string = EDITABLE_INPUT_ID,
@@ -1060,6 +1070,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     insertHtmlAndUpdateCursor(newHtml, inputId);
   }, [insertHtmlAndUpdateCursor]);
 
+  useEffect(() => {
+    if (canSendPlainText) return;
+
+    setHtml('');
+  }, [canSendPlainText, setHtml, attachments]);
+
   const insertTextAndUpdateCursorAttachmentModal = useCallback((text: string) => {
     insertTextAndUpdateCursor(text, EDITABLE_INPUT_MODAL_ID);
   }, [insertTextAndUpdateCursor]);
@@ -1107,7 +1123,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [isSelectModeActive, enableHover, disableHover, isReady]);
 
   const areVoiceMessagesNotAllowed = mainButtonState === MainButtonState.Record
-    && (!canAttachMedia || !canSendVoiceByPrivacy);
+    && (!canAttachMedia || !canSendVoiceByPrivacy || !canSendVoices);
 
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
@@ -1120,6 +1136,8 @@ const Composer: FC<OwnProps & StateProps> = ({
             showNotification({
               message: lang('VoiceMessagesRestrictedByPrivacy', chat?.title),
             });
+          } else if (!canSendVoices) {
+            showAllowedMessageTypesNotification({ chatId });
           }
         } else {
           startRecordingVoice();
@@ -1143,7 +1161,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [
     mainButtonState, handleSend, handleEditComplete, activeVoiceRecording, requestCalendar, areVoiceMessagesNotAllowed,
     canSendVoiceByPrivacy, showNotification, lang, chat?.title, startRecordingVoice, pauseRecordingVoice,
-    handleMessageSchedule,
+    handleMessageSchedule, chatId, showAllowedMessageTypesNotification, canSendVoices,
   ]);
 
   const prevEditedMessage = usePrevious(editingMessage, true);
@@ -1224,6 +1242,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         getHtml={getHtml}
         isReady={isReady}
         shouldSuggestCompression={shouldSuggestCompression}
+        shouldForceCompression={shouldForceCompression}
+        shouldForceAsFile={shouldForceAsFile}
         isForCurrentMessageList={isForCurrentMessageList}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
@@ -1335,37 +1355,43 @@ const Composer: FC<OwnProps & StateProps> = ({
               />
             </Button>
           )}
-          <SymbolMenuButton
-            chatId={chatId}
-            threadId={threadId}
-            isMobile={isMobile}
-            isReady={isReady}
-            isSymbolMenuOpen={isSymbolMenuOpen}
-            openSymbolMenu={openSymbolMenu}
-            closeSymbolMenu={closeSymbolMenu}
-            canSendStickers={canSendStickers}
-            canSendGifs={canSendGifs}
-            onGifSelect={handleGifSelect}
-            onStickerSelect={handleStickerSelect}
-            onCustomEmojiSelect={handleCustomEmojiSelect}
-            onRemoveSymbol={removeSymbol}
-            onEmojiSelect={insertTextAndUpdateCursor}
-            closeBotCommandMenu={closeBotCommandMenu}
-            closeSendAsMenu={closeSendAsMenu}
-            isSymbolMenuForced={isSymbolMenuForced}
-          />
+          {(canSendPlainText || canSendGifs || canSendStickers) && (
+            <SymbolMenuButton
+              chatId={chatId}
+              threadId={threadId}
+              isMobile={isMobile}
+              isReady={isReady}
+              isSymbolMenuOpen={isSymbolMenuOpen}
+              openSymbolMenu={openSymbolMenu}
+              closeSymbolMenu={closeSymbolMenu}
+              canSendStickers={canSendStickers}
+              canSendGifs={canSendGifs}
+              onGifSelect={handleGifSelect}
+              onStickerSelect={handleStickerSelect}
+              onCustomEmojiSelect={handleCustomEmojiSelect}
+              onRemoveSymbol={removeSymbol}
+              onEmojiSelect={insertTextAndUpdateCursor}
+              closeBotCommandMenu={closeBotCommandMenu}
+              closeSendAsMenu={closeSendAsMenu}
+              isSymbolMenuForced={isSymbolMenuForced}
+              canSendPlainText={canSendPlainText}
+            />
+          )}
           <MessageInput
             ref={inputRef}
             id="message-input-text"
             editableInputId={EDITABLE_INPUT_ID}
             chatId={chatId}
+            canSendPlainText={canSendPlainText}
             threadId={threadId}
             isActive={!hasAttachments}
             getHtml={getHtml}
             placeholder={
               activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER
                 ? ''
-                : botKeyboardPlaceholder || lang('Message')
+                : (canSendPlainText
+                  ? (botKeyboardPlaceholder || lang('Message'))
+                  : lang('Chat.PlaceholderTextNotAllowed'))
             }
             forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && isForCurrentMessageList && !hasAttachments}
@@ -1413,6 +1439,10 @@ const Composer: FC<OwnProps & StateProps> = ({
             isButtonVisible={!activeVoiceRecording && !editingMessage}
             canAttachMedia={canAttachMedia}
             canAttachPolls={canAttachPolls}
+            canSendPhotos={canSendPhotos}
+            canSendVideos={canSendVideos}
+            canSendDocuments={canSendDocuments}
+            canSendAudios={canSendAudios}
             onFileSelect={handleFileSelect}
             onPollCreate={openPollModal}
             isScheduled={shouldSchedule}

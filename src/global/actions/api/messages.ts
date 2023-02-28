@@ -80,7 +80,7 @@ import {
   selectIsCurrentUserPremium,
   selectForwardsContainVoiceMessages,
   selectTabState,
-  selectThreadIdFromMessage,
+  selectThreadIdFromMessage, selectForwardsCanBeSentToChat,
 } from '../../selectors';
 import {
   debounce, onTickEnd, rafPromise,
@@ -1375,6 +1375,11 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
       });
       return;
     }
+  }
+
+  if (!selectForwardsCanBeSentToChat(global, chatId, tabId)) {
+    actions.showAllowedMessageTypesNotification({ chatId, tabId });
+    return;
   }
 
   global = updateTabState(global, {

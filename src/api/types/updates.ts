@@ -243,9 +243,7 @@ export type ApiUpdateMessageSendFailed = {
   '@type': 'updateMessageSendFailed';
   chatId: string;
   localId: number;
-  sendingState: {
-    '@type': 'messageSendingStateFailed';
-  };
+  error: string;
 };
 
 export type ApiUpdateCommonBoxMessages = {

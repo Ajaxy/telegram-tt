@@ -15,13 +15,15 @@ import {
   selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectIsTrustedBot, selectChat,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
-import { unique } from '../../../util/iteratees';
+import { compact, unique } from '../../../util/iteratees';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import updateIcon from '../../../util/updateIcon';
 import setPageTitle from '../../../util/updatePageTitle';
 import { updateTabState } from '../../reducers/tabs';
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
+import * as langProvider from '../../../util/langProvider';
+import { getAllowedAttachmentOptions } from '../../helpers';
 
 export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
@@ -264,7 +266,7 @@ addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnT
 });
 
 addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId(), ...notification } = payload!;
+  const { tabId = getCurrentTabId(), ...notification } = payload;
   notification.localId = generateIdFor({});
 
   const newNotifications = [...selectTabState(global, tabId).notifications];
@@ -278,6 +280,44 @@ addActionHandler('showNotification', (global, actions, payload): ActionReturnTyp
   return updateTabState(global, {
     notifications: newNotifications,
   }, tabId);
+});
+
+addActionHandler('showAllowedMessageTypesNotification', (global, actions, payload): ActionReturnType => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const {
+    canSendPlainText, canSendPhotos, canSendVideos, canSendDocuments, canSendAudios,
+    canSendStickers, canSendRoundVideos, canSendVoices,
+  } = getAllowedAttachmentOptions(chat);
+  const allowedContent = compact([
+    canSendPlainText ? 'Chat.SendAllowedContentTypeText' : undefined,
+    canSendPhotos ? 'Chat.SendAllowedContentTypePhoto' : undefined,
+    canSendVideos ? 'Chat.SendAllowedContentTypeVideo' : undefined,
+    canSendVoices ? 'Chat.SendAllowedContentTypeVoiceMessage' : undefined,
+    canSendRoundVideos ? 'Chat.SendAllowedContentTypeVideoMessage' : undefined,
+    canSendDocuments ? 'Chat.SendAllowedContentTypeFile' : undefined,
+    canSendAudios ? 'Chat.SendAllowedContentTypeMusic' : undefined,
+    canSendStickers ? 'Chat.SendAllowedContentTypeSticker' : undefined,
+  ]).map((l) => langProvider.translate(l));
+
+  if (!allowedContent.length) {
+    actions.showNotification({
+      message: langProvider.translate('Chat.SendNotAllowedText'),
+      tabId,
+    });
+    return;
+  }
+
+  const lastDelimiter = langProvider.translate('AutoDownloadSettings.LastDelimeter');
+  const allowedContentString = allowedContent.join(', ').replace(/,([^,]*)$/, `${lastDelimiter}$1`);
+
+  actions.showNotification({
+    message: langProvider.translate('Chat.SendAllowedContentText', allowedContentString),
+    tabId,
+  });
 });
 
 addActionHandler('dismissNotification', (global, actions, payload): ActionReturnType => {
@@ -636,6 +676,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
 
 addCallback((global: GlobalState) => {
   if (global.notificationIndex === undefined || global.allNotificationsCount === undefined) return;
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   const { updatePageTitle } = getActions();
 
   const index = global.notificationIndex;

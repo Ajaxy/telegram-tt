@@ -217,6 +217,13 @@ export interface IAllowedAttachmentOptions {
   canSendStickers: boolean;
   canSendGifs: boolean;
   canAttachEmbedLinks: boolean;
+  canSendPhotos: boolean;
+  canSendVideos: boolean;
+  canSendRoundVideos: boolean;
+  canSendAudios: boolean;
+  canSendVoices: boolean;
+  canSendPlainText: boolean;
+  canSendDocuments: boolean;
 }
 
 export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = false): IAllowedAttachmentOptions {
@@ -227,6 +234,13 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
       canSendStickers: false,
       canSendGifs: false,
       canAttachEmbedLinks: false,
+      canSendPhotos: false,
+      canSendVideos: false,
+      canSendRoundVideos: false,
+      canSendAudios: false,
+      canSendVoices: false,
+      canSendPlainText: false,
+      canSendDocuments: false,
     };
   }
 
@@ -238,6 +252,13 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
     canSendStickers: isAdmin || !isUserRightBanned(chat, 'sendStickers'),
     canSendGifs: isAdmin || !isUserRightBanned(chat, 'sendGifs'),
     canAttachEmbedLinks: isAdmin || !isUserRightBanned(chat, 'embedLinks'),
+    canSendPhotos: isAdmin || !isUserRightBanned(chat, 'sendPhotos'),
+    canSendVideos: isAdmin || !isUserRightBanned(chat, 'sendVideos'),
+    canSendRoundVideos: isAdmin || !isUserRightBanned(chat, 'sendRoundvideos'),
+    canSendAudios: isAdmin || !isUserRightBanned(chat, 'sendAudios'),
+    canSendVoices: isAdmin || !isUserRightBanned(chat, 'sendVoices'),
+    canSendPlainText: isAdmin || !isUserRightBanned(chat, 'sendPlain'),
+    canSendDocuments: isAdmin || !isUserRightBanned(chat, 'sendDocs'),
   };
 }
 

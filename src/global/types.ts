@@ -2104,6 +2104,9 @@ export interface ActionPayloads {
     actionText?: string;
     action?: CallbackAction;
   } & WithTabId;
+  showAllowedMessageTypesNotification: {
+    chatId: string;
+  } & WithTabId;
   dismissNotification: { localId: string } & WithTabId;
 
   updatePageTitle: {

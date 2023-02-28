@@ -157,8 +157,15 @@ export interface ApiChatBannedRights {
   changeInfo?: true;
   inviteUsers?: true;
   pinMessages?: true;
-  untilDate?: number;
   manageTopics?: true;
+  sendPhotos?: true;
+  sendVideos?: true;
+  sendRoundvideos?: true;
+  sendAudios?: true;
+  sendVoices?: true;
+  sendDocs?: true;
+  sendPlain?: true;
+  untilDate?: number;
 }
 
 export interface ApiRestrictionReason {

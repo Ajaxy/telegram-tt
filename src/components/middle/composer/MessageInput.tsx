@@ -54,6 +54,7 @@ type OwnProps = {
   canAutoFocus: boolean;
   shouldSuppressFocus?: boolean;
   shouldSuppressTextFormatter?: boolean;
+  canSendPlainText?: boolean;
   onUpdate: (html: string) => void;
   onSuppressedFocus?: () => void;
   onSend: () => void;
@@ -102,6 +103,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   getHtml,
   placeholder,
   forcedPlaceholder,
+  canSendPlainText,
   canAutoFocus,
   noFocusInterception,
   shouldSuppressFocus,
@@ -117,6 +119,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const {
     editLastMessage,
     replyToNextMessage,
+    showAllowedMessageTypesNotification,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -405,6 +408,11 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
   }
 
+  function handleClick() {
+    if (isAttachmentModalInput || canSendPlainText) return;
+    showAllowedMessageTypesNotification({ chatId });
+  }
+
   useEffect(() => {
     if (IS_TOUCH_ENV) {
       return;
@@ -506,13 +514,17 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   return (
     <div id={id} onClick={shouldSuppressFocus ? onSuppressedFocus : undefined} dir={lang.isRtl ? 'rtl' : undefined}>
-      <div className={buildClassName('custom-scroll', SCROLLER_CLASS)} onScroll={onScroll}>
+      <div
+        className={buildClassName('custom-scroll', SCROLLER_CLASS)}
+        onScroll={onScroll}
+        onClick={!isAttachmentModalInput && !canSendPlainText ? handleClick : undefined}
+      >
         <div className="input-scroller-content">
           <div
             ref={inputRef}
             id={editableInputId || EDITABLE_INPUT_ID}
             className={className}
-            contentEditable
+            contentEditable={isAttachmentModalInput || canSendPlainText}
             role="textbox"
             dir="auto"
             tabIndex={0}
@@ -524,7 +536,18 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
             aria-label={placeholder}
           />
-          {!forcedPlaceholder && <span className="placeholder-text" dir="auto">{placeholder}</span>}
+          {!forcedPlaceholder && (
+            <span
+              className={buildClassName(
+                'placeholder-text',
+                !isAttachmentModalInput && !canSendPlainText && 'with-icon',
+              )}
+              dir="auto"
+            >
+              {!isAttachmentModalInput && !canSendPlainText && <i className="icon-lock-badge placeholder-icon" />}
+              {placeholder}
+            </span>
+          )}
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
           <canvas ref={sharedCanvasHqRef} className="shared-canvas" />
           <div ref={absoluteContainerRef} className="absolute-video-container" />

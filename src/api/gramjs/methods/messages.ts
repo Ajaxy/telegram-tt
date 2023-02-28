@@ -263,7 +263,7 @@ export function sendMessage(
 
   // This is expected to arrive after `updateMessageSendSucceeded` which replaces the local ID,
   // so in most cases this will be simply ignored
-  setTimeout(() => {
+  const timeout = setTimeout(() => {
     onUpdate({
       '@type': localMessage.isScheduled ? 'updateScheduledMessage' : 'updateMessage',
       id: localMessage.id,
@@ -326,21 +326,31 @@ export function sendMessage(
 
     const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
 
-    await invokeRequest(new RequestClass({
-      clearDraft: true,
-      message: text || '',
-      entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
-      peer: buildInputPeer(chat.id, chat.accessHash),
-      randomId,
-      ...(isSilent && { silent: isSilent }),
-      ...(scheduledAt && { scheduleDate: scheduledAt }),
-      ...(replyingTo && { replyToMsgId: replyingTo }),
-      ...(replyingToTopId && { topMsgId: replyingToTopId }),
-      ...(media && { media }),
-      ...(noWebPage && { noWebpage: noWebPage }),
-      ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-      ...(shouldUpdateStickerSetsOrder && { updateStickersetsOrder: shouldUpdateStickerSetsOrder }),
-    }), true);
+    try {
+      await invokeRequest(new RequestClass({
+        clearDraft: true,
+        message: text || '',
+        entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
+        peer: buildInputPeer(chat.id, chat.accessHash),
+        randomId,
+        ...(isSilent && { silent: isSilent }),
+        ...(scheduledAt && { scheduleDate: scheduledAt }),
+        ...(replyingTo && { replyToMsgId: replyingTo }),
+        ...(replyingToTopId && { topMsgId: replyingToTopId }),
+        ...(media && { media }),
+        ...(noWebPage && { noWebpage: noWebPage }),
+        ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+        ...(shouldUpdateStickerSetsOrder && { updateStickersetsOrder: shouldUpdateStickerSetsOrder }),
+      }), true, true);
+    } catch (error: any) {
+      onUpdate({
+        '@type': 'updateMessageSendFailed',
+        chatId: chat.id,
+        localId: localMessage.id,
+        error: error.message,
+      });
+      clearTimeout(timeout);
+    }
   })();
 
   return queue;
