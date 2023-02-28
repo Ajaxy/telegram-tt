@@ -71,7 +71,7 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
 
     if (t >= 1) {
       container.style.scrollSnapType = '';
-      container.dataset.scrollId = undefined;
+      delete container.dataset.scrollId;
       stopById.delete(id);
       resolve();
     }

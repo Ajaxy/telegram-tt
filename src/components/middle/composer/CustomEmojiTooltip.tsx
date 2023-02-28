@@ -59,7 +59,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 
   const {
     observe: observeIntersection,
-  } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE });
+  } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
