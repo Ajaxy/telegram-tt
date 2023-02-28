@@ -491,6 +491,7 @@ export type ApiReactionCustomEmoji = {
 export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
 
 export interface ApiThreadInfo {
+  isComments?: boolean;
   threadId: number;
   chatId: string;
   topMessageId?: number;

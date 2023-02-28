@@ -25,16 +25,16 @@ const CommentButton: FC<OwnProps> = ({
   threadInfo,
   disabled,
 }) => {
-  const { openChat } = getActions();
+  const { openComments } = getActions();
 
   const lang = useLang();
   const {
-    threadId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds,
+    threadId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
   } = threadInfo;
 
   const handleClick = useCallback(() => {
-    openChat({ id: chatId, threadId });
-  }, [openChat, chatId, threadId]);
+    openComments({ id: chatId, threadId, originChannelId });
+  }, [openComments, chatId, threadId, originChannelId]);
 
   const recentRepliers = useMemo(() => {
     if (!recentReplierIds?.length) {

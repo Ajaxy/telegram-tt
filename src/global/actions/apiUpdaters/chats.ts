@@ -1,9 +1,10 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
+import type { ApiUpdateChat } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
-import { buildCollectionByKey, pick } from '../../../util/iteratees';
+import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import {
   updateChat,
@@ -28,7 +29,15 @@ const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updateChat': {
-      const { isForum: prevIsForum } = selectChat(global, update.id) || {};
+      const { isForum: prevIsForum, lastReadOutboxMessageId } = selectChat(global, update.id) || {};
+
+      if (update.chat.lastReadOutboxMessageId && lastReadOutboxMessageId
+        && update.chat.lastReadOutboxMessageId < lastReadOutboxMessageId) {
+        update = {
+          ...update,
+          chat: omit(update.chat, ['lastReadInboxMessageId']),
+        };
+      }
 
       global = updateChat(global, update.id, update.chat, update.newProfilePhoto);
       setGlobal(global);
@@ -47,8 +56,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const { chatId: currentChatId } = selectCurrentMessageList(global, tabId) || {};
+        const chatUpdate = update as ApiUpdateChat;
         // The property `isForum` was changed in another client
-        if (currentChatId === update.id && 'isForum' in update.chat && prevIsForum !== update.chat.isForum) {
+        if (currentChatId === chatUpdate.id
+          && 'isForum' in chatUpdate.chat && prevIsForum !== chatUpdate.chat.isForum) {
           if (prevIsForum) {
             actions.closeForumPanel({ tabId });
           }

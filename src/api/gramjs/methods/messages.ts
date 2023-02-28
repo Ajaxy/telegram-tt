@@ -850,9 +850,9 @@ export async function markMessagesRead({
 }
 
 export async function requestThreadInfoUpdate({
-  chat, threadId,
+  chat, threadId, originChannelId,
 }: {
-  chat: ApiChat; threadId: number;
+  chat: ApiChat; threadId: number; originChannelId?: string;
 }) {
   if (threadId === MAIN_THREAD_ID) {
     return undefined;
@@ -881,15 +881,18 @@ export async function requestThreadInfoUpdate({
     return undefined;
   }
 
+  const topMessageId = topMessageResult.messages[topMessageResult.messages.length - 1].id;
+
   onUpdate({
     '@type': 'updateThreadInfo',
     chatId: discussionChatId,
-    threadId,
+    threadId: topMessageId,
     threadInfo: {
-      threadId,
-      topMessageId: topMessageResult.messages[topMessageResult.messages.length - 1].id,
+      threadId: topMessageId,
+      topMessageId,
       lastReadInboxMessageId: topMessageResult.readInboxMaxId,
       messagesCount: (repliesResult instanceof GramJs.messages.ChannelMessages) ? repliesResult.count : undefined,
+      ...(originChannelId ? { originChannelId } : undefined),
     },
     firstMessageId: repliesResult && 'messages' in repliesResult && repliesResult.messages.length
       ? repliesResult.messages[0].id
@@ -920,6 +923,7 @@ export async function requestThreadInfoUpdate({
   const users = topMessageResult.users.map(buildApiUser).filter(Boolean);
 
   return {
+    topMessageId,
     discussionChatId,
     users,
   };

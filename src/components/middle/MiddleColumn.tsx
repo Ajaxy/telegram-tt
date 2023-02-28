@@ -40,7 +40,7 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectReplyingToId,
-  selectTheme,
+  selectTheme, selectThreadInfo,
 } from '../../global/selectors';
 import {
   getCanPostInChat,
@@ -630,7 +630,9 @@ export default memo(withGlobal<OwnProps>(
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
 
-    const canPost = chat && getCanPostInChat(chat, threadId);
+    const threadInfo = selectThreadInfo(global, chatId, threadId);
+    const isComments = Boolean(threadInfo?.originChannelId);
+    const canPost = chat && getCanPostInChat(chat, threadId, isComments);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isScheduledMessageList = messageListType === 'scheduled';

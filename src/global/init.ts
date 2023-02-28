@@ -10,7 +10,6 @@ import { cloneDeep } from '../util/iteratees';
 import { replaceTabThreadParam, replaceThreadParam, updatePasscodeSettings } from './reducers';
 import { clearStoredSession } from '../util/sessions';
 import { parseLocationHash } from '../util/routing';
-import { MAIN_THREAD_ID } from '../api/types';
 import { selectTabState, selectThreadParam } from './selectors';
 import { Bundles, loadBundle } from '../util/moduleLoader';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
@@ -68,20 +67,24 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
   }
 
   Object.keys(global.messages.byChatId).forEach((chatId) => {
-    const lastViewportIds = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds');
-    // Check if migration from previous version is faulty
-    if (!lastViewportIds?.every((id) => isLocalMessageId(id) || global.messages.byChatId[chatId]?.byId[id])) {
-      global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'lastViewportIds', undefined);
-      return;
-    }
-    global = replaceTabThreadParam(
-      global,
-      chatId,
-      MAIN_THREAD_ID,
-      'viewportIds',
-      lastViewportIds,
-      tabId,
-    );
+    const threadsById = global.messages.byChatId[chatId].threadsById;
+    Object.keys(threadsById).forEach((thread) => {
+      const threadId = Number(thread);
+      const lastViewportIds = selectThreadParam(global, chatId, threadId, 'lastViewportIds');
+      // Check if migration from previous version is faulty
+      if (!lastViewportIds?.every((id) => isLocalMessageId(id) || global.messages.byChatId[chatId]?.byId[id])) {
+        global = replaceThreadParam(global, chatId, threadId, 'lastViewportIds', undefined);
+        return;
+      }
+      global = replaceTabThreadParam(
+        global,
+        chatId,
+        threadId,
+        'viewportIds',
+        lastViewportIds,
+        tabId,
+      );
+    });
   });
 
   // Temporary state fix

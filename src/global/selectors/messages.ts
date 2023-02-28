@@ -482,8 +482,14 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
     return message.id;
   }
 
-  // TODO ignore only basic group if reply threads are added
-  if (!chat?.isForum) return MAIN_THREAD_ID;
+  if (!chat?.isForum) {
+    if (chat && isChatBasicGroup(chat)) return MAIN_THREAD_ID;
+
+    if (chat && isChatSuperGroup(chat)) {
+      return replyToTopMessageId || replyToMessageId || MAIN_THREAD_ID;
+    }
+    return MAIN_THREAD_ID;
+  }
   if (!isTopicReply) return GENERAL_TOPIC_ID;
   return replyToTopMessageId || replyToMessageId || GENERAL_TOPIC_ID;
 }
@@ -531,7 +537,10 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
     && !chat.isForbidden
   );
 
-  const canReply = !isLocal && !isServiceNotification && !chat.isForbidden && getCanPostInChat(chat, threadId)
+  const threadInfo = selectThreadInfo(global, message.chatId, threadId);
+  const isComments = Boolean(threadInfo?.originChannelId);
+  const canReply = !isLocal && !isServiceNotification && !chat.isForbidden
+    && getCanPostInChat(chat, threadId, isComments)
     && (!messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics'));
 
   const hasPinPermission = isPrivate || (

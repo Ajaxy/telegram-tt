@@ -5,7 +5,14 @@ import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type {
-  ApiAvailableReaction, ApiChatReactions, ApiMessage, ApiReaction, ApiSponsoredMessage, ApiStickerSet, ApiUser,
+  ApiAvailableReaction,
+  ApiChatReactions,
+  ApiMessage,
+  ApiReaction,
+  ApiSponsoredMessage,
+  ApiStickerSet,
+  ApiThreadInfo,
+  ApiUser,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
@@ -39,6 +46,7 @@ type OwnProps = {
   maxUniqueReactions?: number;
   canReschedule?: boolean;
   canReply?: boolean;
+  repliesThreadInfo?: ApiThreadInfo;
   canPin?: boolean;
   canUnpin?: boolean;
   canDelete?: boolean;
@@ -62,9 +70,11 @@ type OwnProps = {
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
   seenByRecentUsers?: ApiUser[];
+  noReplies?: boolean;
   hasCustomEmoji?: boolean;
   customEmojiSets?: ApiStickerSet[];
   onReply?: () => void;
+  onOpenThread?: VoidFunction;
   onEdit?: () => void;
   onPin?: () => void;
   onUnpin?: () => void;
@@ -110,6 +120,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canBuyPremium,
   canReply,
   canEdit,
+  noReplies,
   canPin,
   canUnpin,
   canDelete,
@@ -125,6 +136,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canRevote,
   canClosePoll,
   isDownloading,
+  repliesThreadInfo,
   canShowSeenBy,
   canShowReactionsCount,
   canShowReactionList,
@@ -132,6 +144,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   hasCustomEmoji,
   customEmojiSets,
   onReply,
+  onOpenThread,
   onEdit,
   onPin,
   onUnpin,
@@ -294,6 +307,11 @@ const MessageContextMenu: FC<OwnProps> = ({
           <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>
         )}
         {canReply && <MenuItem icon="reply" onClick={onReply}>{lang('Reply')}</MenuItem>}
+        {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
+          <MenuItem icon="replies" onClick={onOpenThread}>
+            {lang('Conversation.ContextViewReplies', repliesThreadInfo!.messagesCount, 'i')}
+          </MenuItem>
+        )}
         {canEdit && <MenuItem icon="edit" onClick={onEdit}>{lang('Edit')}</MenuItem>}
         {canFaveSticker && (
           <MenuItem icon="favorite" onClick={onFaveSticker}>{lang('AddToFavorites')}</MenuItem>

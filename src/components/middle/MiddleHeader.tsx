@@ -89,6 +89,7 @@ type StateProps = {
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
   messagesCount?: number;
+  isComments?: boolean;
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
   hasButtonInHeader?: boolean;
@@ -116,6 +117,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   audioMessage,
   chat,
   messagesCount,
+  isComments,
   isChatWithSelf,
   lastSyncTime,
   hasButtonInHeader,
@@ -340,7 +342,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         {renderBackButton()}
         <h3>
           {messagesCount !== undefined ? (
-            messageListType === 'thread' ? (lang('CommentsCount', messagesCount, 'i'))
+            messageListType === 'thread' ? (
+              lang(isComments ? 'CommentsCount' : 'Replies', messagesCount, 'i'))
               : messageListType === 'pinned' ? (lang('PinnedMessagesCount', messagesCount, 'i'))
                 : messageListType === 'scheduled' ? (
                   isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')
@@ -422,13 +425,15 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         {renderInfo()}
       </Transition>
 
-      <GroupCallTopPane
-        hasPinnedOffset={
-          (shouldRenderPinnedMessage && Boolean(renderingPinnedMessage))
+      {threadId === MAIN_THREAD_ID && !chat?.isForum && (
+        <GroupCallTopPane
+          hasPinnedOffset={
+            (shouldRenderPinnedMessage && Boolean(renderingPinnedMessage))
           || (shouldRenderAudioPlayer && Boolean(renderingAudioMessage))
-        }
-        chatId={chatId}
-      />
+          }
+          chatId={chatId}
+        />
+      )}
 
       {shouldRenderPinnedMessage && renderingPinnedMessage && (
         <HeaderPinnedMessage
@@ -540,12 +545,14 @@ export default memo(withGlobal<OwnProps>(
       const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
       const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
       const topMessageSender = message ? selectForwardedSender(global, message) : undefined;
+      const threadInfo = selectThreadInfo(global, chatId, threadId);
 
       return {
         ...state,
         pinnedMessageIds: pinnedMessageId,
         canUnpin: false,
         topMessageSender,
+        isComments: Boolean(threadInfo?.originChannelId),
       };
     }
 

@@ -13,7 +13,7 @@ import {
   selectCurrentMessageList,
   selectIsChatWithSelf, selectIsCurrentUserPremium,
   selectShouldSchedule,
-  selectStickerSet,
+  selectStickerSet, selectThreadInfo,
 } from '../../global/selectors';
 import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -236,8 +236,10 @@ export default memo(withGlobal<OwnProps>(
     const { chatId, threadId } = currentMessageList || {};
     const chat = chatId && selectChat(global, chatId);
     const sendOptions = chat ? getAllowedAttachmentOptions(chat) : undefined;
+    const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
+    const isComments = Boolean(threadInfo?.originChannelId);
     const canSendStickers = Boolean(
-      chat && threadId && getCanPostInChat(chat, threadId) && sendOptions?.canSendStickers,
+      chat && threadId && getCanPostInChat(chat, threadId, isComments) && sendOptions?.canSendStickers,
     );
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 

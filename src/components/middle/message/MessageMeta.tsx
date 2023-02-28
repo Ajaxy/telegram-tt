@@ -2,7 +2,9 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus } from '../../../api/types';
+import type {
+  ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus, ApiThreadInfo,
+} from '../../../api/types';
 
 import { formatDateTimeToString, formatTime } from '../../../util/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
@@ -13,6 +15,7 @@ import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';
 
 import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
+import AnimatedCounter from '../../common/AnimatedCounter';
 
 import './MessageMeta.scss';
 
@@ -22,7 +25,10 @@ type OwnProps = {
   outgoingStatus?: ApiMessageOutgoingStatus;
   signature?: string;
   availableReactions?: ApiAvailableReaction[];
+  noReplies?: boolean;
+  repliesThreadInfo?: ApiThreadInfo;
   onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+  onOpenThread: () => void;
 };
 
 const MessageMeta: FC<OwnProps> = ({
@@ -30,7 +36,10 @@ const MessageMeta: FC<OwnProps> = ({
   outgoingStatus,
   signature,
   withReactionOffset,
+  repliesThreadInfo,
+  noReplies,
   onClick,
+  onOpenThread,
 }) => {
   const { showNotification } = getActions();
   const lang = useLang();
@@ -43,6 +52,11 @@ const MessageMeta: FC<OwnProps> = ({
       message: lang('ImportedInfo'),
     });
   };
+
+  function handleOpenThread(e: React.MouseEvent) {
+    e.stopPropagation();
+    onOpenThread();
+  }
 
   const title = useMemo(() => {
     if (!isActivated) return undefined;
@@ -83,6 +97,14 @@ const MessageMeta: FC<OwnProps> = ({
           </span>
           <i className="icon-channelviews" />
         </>
+      )}
+      {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
+        <span onClick={handleOpenThread}>
+          <span className="message-replies">
+            <AnimatedCounter text={formatIntegerCompact(repliesThreadInfo!.messagesCount!)} />
+          </span>
+          <i className="icon-reply-filled" />
+        </span>
       )}
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>

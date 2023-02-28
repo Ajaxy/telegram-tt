@@ -603,6 +603,14 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         lastReadInboxMessageId: update.readMaxId,
       },
     });
+  } else if (update instanceof GramJs.UpdateReadChannelDiscussionOutbox) {
+    onUpdate({
+      '@type': 'updateChat',
+      id: buildApiPeerId(update.channelId, 'channel'),
+      chat: {
+        lastReadOutboxMessageId: update.readMaxId,
+      },
+    });
   } else if (
     update instanceof GramJs.UpdateDialogPinned
     && update.peer instanceof GramJs.DialogPeer

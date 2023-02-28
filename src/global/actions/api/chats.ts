@@ -55,7 +55,7 @@ import {
   selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
   selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState, selectThread,
+  selectTabState, selectThread, selectThreadOriginChat,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -143,9 +143,37 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   }
 
   if (threadId !== MAIN_THREAD_ID) {
+    actions.requestThreadInfoUpdate({ chatId: id, threadId });
+  }
+});
+
+addActionHandler('openComments', async (global, actions, payload): Promise<void> => {
+  const {
+    id, threadId, originChannelId, tabId = getCurrentTabId(),
+  } = payload;
+
+  if (threadId !== MAIN_THREAD_ID) {
     const topMessageId = selectThreadTopMessageId(global, id, threadId);
     if (!topMessageId) {
-      actions.requestThreadInfoUpdate({ chatId: id, threadId });
+      const chat = selectThreadOriginChat(global, id, threadId);
+      if (!chat) {
+        return;
+      }
+
+      actions.openChat({ id: TMP_CHAT_ID, tabId });
+
+      const result = await callApi('requestThreadInfoUpdate', { chat, threadId, originChannelId });
+      if (!result) {
+        actions.openPreviousChat({ tabId });
+        return;
+      }
+      global = getGlobal();
+      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+      setGlobal(global);
+
+      actions.openChat({ id, threadId: result.topMessageId, tabId });
+    } else {
+      actions.openChat({ id, threadId: topMessageId, tabId });
     }
   }
 });

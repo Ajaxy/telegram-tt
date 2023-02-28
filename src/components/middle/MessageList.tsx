@@ -28,7 +28,7 @@ import {
   selectFirstMessageId,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
-  selectIsCurrentUserPremium, selectLastScrollOffset,
+  selectIsCurrentUserPremium, selectLastScrollOffset, selectThreadInfo,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -96,6 +96,7 @@ type StateProps = {
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
+  isComments?: boolean;
   isViewportNewest?: boolean;
   isRestricted?: boolean;
   restrictionReason?: ApiRestrictionReason;
@@ -144,6 +145,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   messageIds,
   messagesById,
   firstUnreadId,
+  isComments,
   isViewportNewest,
   threadFirstMessageId,
   isRestricted,
@@ -604,6 +606,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
         <MessageListContent
           isCurrentUserPremium={isCurrentUserPremium}
           chatId={chatId}
+          isComments={isComments}
+          isChannelChat={isChannelChat}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
           isViewportNewest={Boolean(isViewportNewest)}
@@ -645,6 +649,7 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatScheduledMessages(global, chatId)
       : selectChatMessages(global, chatId);
     const threadTopMessageId = selectThreadTopMessageId(global, chatId, threadId);
+    const threadInfo = selectThreadInfo(global, chatId, threadId);
 
     if (
       threadId !== MAIN_THREAD_ID && !chat?.isForum
@@ -687,6 +692,7 @@ export default memo(withGlobal<OwnProps>(
       isBot: Boolean(chatBot),
       messageIds,
       messagesById,
+      isComments: Boolean(threadInfo?.originChannelId),
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
       threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
