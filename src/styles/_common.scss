@@ -93,20 +93,8 @@
     }
 
     .Chat[dir="rtl"] .info {
-      transform: translateX(25%);
+      transform: translateX(20%);
     }
-
-    .group .ListItem-button {
-      height: 4.5rem;
-    }
-  }
-
-  .scroll-container {
-    position: relative;
-  }
-
-  .ListItem.chat-item-clickable {
-    margin: 0;
   }
 
   @media (max-width: 600px) {
@@ -114,10 +102,38 @@
     padding-right: 0;
   }
 
+  .scroll-container {
+    position: relative;
+  }
+
   .no-results {
     color: var(--color-text-meta);
     margin-top: 2rem;
     text-align: center;
+  }
+
+  .Avatar {
+    transition: transform var(--layer-transition);
+  }
+
+  .ListItem {
+    &.chat-item-clickable {
+      margin: 0;
+    }
+  }
+
+  body.is-ios &,
+  body.is-android & {
+    .ListItem::after {
+      opacity: 1;
+      transition: opacity var(--layer-transition);
+    }
+
+    &.forum-panel-open {
+      .ListItem::after {
+        opacity: 0;
+      }
+    }
   }
 }
 

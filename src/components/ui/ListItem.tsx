@@ -54,7 +54,6 @@ interface OwnProps {
   multiline?: boolean;
   isStatic?: boolean;
   contextActions?: MenuItemContextAction[];
-  offsetCollapseDelta?: number;
   withPortalForMenu?: boolean;
   href?: string;
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -85,7 +84,6 @@ const ListItem: FC<OwnProps> = ({
   isStatic,
   contextActions,
   withPortalForMenu,
-  offsetCollapseDelta,
   href,
   onMouseDown,
   onClick,
@@ -216,7 +214,6 @@ const ListItem: FC<OwnProps> = ({
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : undefined}
       style={style}
-      data-offset-collapse-delta={offsetCollapseDelta}
       onMouseDown={onMouseDown}
       onDragEnter={onDragEnter}
     >

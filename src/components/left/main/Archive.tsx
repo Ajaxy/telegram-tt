@@ -154,7 +154,6 @@ const Archive: FC<OwnProps> = ({
         'chat-item-archive',
       )}
       buttonClassName={styles.button}
-      offsetCollapseDelta={0}
       contextActions={contextActions}
       withPortalForMenu
     >

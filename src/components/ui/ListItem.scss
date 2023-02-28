@@ -3,7 +3,7 @@
 
   body.is-ios &,
   body.is-android & {
-    &:not(:last-of-type)::after {
+    &::after {
       content: "";
       position: absolute;
       bottom: 0;
@@ -12,6 +12,10 @@
       height: 0.0625rem;
       /* stylelint-disable-next-line plugin/whole-pixel */
       box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers);
+    }
+
+    &:last-of-type::after {
+      display: none;
     }
 
     &.small-icon::after {
@@ -23,11 +27,9 @@
     }
   }
 
-  body.is-android & {
-    &:not(:last-of-type)::after {
-      /* stylelint-disable-next-line plugin/whole-pixel */
-      box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers-android);
-    }
+  body.is-android &::after {
+    /* stylelint-disable-next-line plugin/whole-pixel */
+    box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers-android);
   }
 
   .ListItem-button {
@@ -38,10 +40,10 @@
     box-shadow: none !important;
     outline: none !important;
     display: flex;
+    align-items: center;
     padding: 1rem;
     position: relative;
     overflow: hidden;
-    line-height: 1.5rem;
     white-space: nowrap;
     color: var(--color-text);
     border-radius: var(--border-radius-default);
@@ -58,6 +60,10 @@
     > .Switcher {
       margin-left: auto;
     }
+  }
+
+  .title, .subtitle {
+    line-height: 1.5rem;
   }
 
   .user-status,
@@ -181,12 +187,11 @@
     }
 
     .Avatar {
-      flex-shrink: 0;
       margin-right: 0.5rem;
     }
 
     .info {
-      flex-grow: 1;
+      flex: 1;
       overflow: hidden;
     }
 
@@ -214,7 +219,6 @@
     .status,
     .typing-status {
       font-size: 1rem;
-      line-height: 1.6875rem;
       margin: 0;
       overflow: hidden;
       white-space: nowrap;
@@ -238,8 +242,14 @@
     .ChatInfo {
       display: flex;
       align-items: center;
-      flex-grow: 1;
+      flex: 1;
       overflow: hidden;
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
 
       .custom-title {
         padding-inline-start: 1rem;
