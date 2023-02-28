@@ -298,6 +298,10 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.CustomEmoji:
           setSettingsScreen(SettingsScreens.Stickers);
           return;
+
+        case SettingsScreens.DoNotTranslate:
+          setSettingsScreen(SettingsScreens.Language);
+          return;
         default:
           break;
       }

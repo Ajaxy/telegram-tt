@@ -1,0 +1,20 @@
+@import "../../../styles/mixins";
+
+.root, .item {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  overflow: hidden;
+  min-height: 25rem;
+}
+
+.checkbox {
+  margin: 0;
+}
+
+.languages {
+  overflow-y: auto;
+  @include overflow-y-overlay();
+}

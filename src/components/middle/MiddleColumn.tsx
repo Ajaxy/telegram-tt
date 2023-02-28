@@ -77,6 +77,7 @@ import SeenByModal from '../common/SeenByModal.async';
 import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import ReactorListModal from './ReactorListModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
+import MessageLanguageModal from './MessageLanguageModal.async';
 
 import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
@@ -111,6 +112,7 @@ type StateProps = {
   isSeenByModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
+  isMessageLanguageModalOpen?: boolean;
   animationLevel: AnimationLevel;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -156,6 +158,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   isSeenByModalOpen,
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
+  isMessageLanguageModalOpen,
   animationLevel,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -551,6 +554,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
+                <MessageLanguageModal isOpen={isMessageLanguageModalOpen} />
               </div>
             </Transition>
 
@@ -596,6 +600,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
+      messageLanguageModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { chats: { listIds }, lastSyncTime } = global;
@@ -613,6 +618,7 @@ export default memo(withGlobal<OwnProps>(
       isSeenByModalOpen: Boolean(seenByModal),
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
+      isMessageLanguageModalOpen: Boolean(messageLanguageModal),
       animationLevel: global.settings.byKey.animationLevel,
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,

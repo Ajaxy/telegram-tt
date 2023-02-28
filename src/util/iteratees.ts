@@ -117,6 +117,17 @@ export function split<T extends any>(array: T[], chunkSize: number) {
   return result;
 }
 
+export function partition<T extends unknown>(
+  array: T[], filter: (value: T, index: number, array: T[]) => boolean,
+): [T[], T[]] {
+  const pass: T[] = [];
+  const fail: T[] = [];
+
+  array.forEach((e, idx, arr) => (filter(e, idx, arr) ? pass : fail).push(e));
+
+  return [pass, fail];
+}
+
 export function cloneDeep<T>(value: T): T {
   if (!isObject(value)) {
     return value;

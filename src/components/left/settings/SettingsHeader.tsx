@@ -97,6 +97,8 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('PrivacySettings')}</h3>;
       case SettingsScreens.Language:
         return <h3>{lang('Language')}</h3>;
+      case SettingsScreens.DoNotTranslate:
+        return <h3>{lang('DoNotTranslate')}</h3>;
       case SettingsScreens.Stickers:
         return <h3>{lang('StickersName')}</h3>;
       case SettingsScreens.Experimental:

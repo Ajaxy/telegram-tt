@@ -27,8 +27,10 @@ type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
   noReplies?: boolean;
   repliesThreadInfo?: ApiThreadInfo;
-  onClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
-  onOpenThread: () => void;
+  isTranslated?: boolean;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onOpenThread: NoneToVoidFunction;
 };
 
 const MessageMeta: FC<OwnProps> = ({
@@ -38,7 +40,9 @@ const MessageMeta: FC<OwnProps> = ({
   withReactionOffset,
   repliesThreadInfo,
   noReplies,
+  isTranslated,
   onClick,
+  onTranslationClick,
   onOpenThread,
 }) => {
   const { showNotification } = getActions();
@@ -90,6 +94,9 @@ const MessageMeta: FC<OwnProps> = ({
       onClick={onClick}
       data-ignore-on-paste
     >
+      {isTranslated && (
+        <i className="icon-language message-translated" onClick={onTranslationClick} />
+      )}
       {Boolean(message.views) && (
         <>
           <span className="message-views">

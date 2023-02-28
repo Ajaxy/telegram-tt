@@ -165,6 +165,9 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       wasTimeFormatSetManually: false,
       isConnectionStatusMinimized: true,
       shouldArchiveAndMuteNewNonContact: false,
+      canTranslate: false,
+      canTranslateChats: true,
+      doNotTranslate: [],
     },
     themes: {
       light: {
@@ -184,6 +187,9 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   trustedBotIds: [],
 
   transcriptions: {},
+  translations: {
+    byChatId: {},
+  },
 
   byTabId: {},
 
@@ -266,5 +272,9 @@ export const INITIAL_TAB_STATE: TabState = {
 
   pollModal: {
     isOpen: false,
+  },
+
+  requestedTranslations: {
+    byChatId: {},
   },
 };

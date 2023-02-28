@@ -9,7 +9,9 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ActiveEmojiInteraction, ActiveReaction, MessageListType } from '../../../global/types';
+import type {
+  ActiveEmojiInteraction, ActiveReaction, ChatTranslatedMessages, MessageListType,
+} from '../../../global/types';
 import type {
   ApiMessage,
   ApiMessageOutgoingStatus,
@@ -63,6 +65,8 @@ import {
   selectIsChatProtected,
   selectTopicFromMessage,
   selectTabState,
+  selectChatTranslations,
+  selectRequestedTranslationLanguage,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -113,6 +117,9 @@ import useInnerHandlers from './hooks/useInnerHandlers';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useResizeObserver from '../../../hooks/useResizeObserver';
 import useThrottledCallback from '../../../hooks/useThrottledCallback';
+import useMessageTranslation from './hooks/useMessageTranslation';
+import usePrevious from '../../../hooks/usePrevious';
+import useTextLanguage from '../../../hooks/useTextLanguage';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -233,6 +240,9 @@ type StateProps = {
   senderAdminMember?: ApiChatMember;
   messageTopic?: ApiTopic;
   hasTopicChip?: boolean;
+  chatTranslations?: ChatTranslatedMessages;
+  areTranslationsEnabled?: boolean;
+  requestedTranslationLanguage?: string;
 };
 
 type MetaPosition =
@@ -329,6 +339,9 @@ const Message: FC<OwnProps & StateProps> = ({
   senderAdminMember,
   messageTopic,
   hasTopicChip,
+  chatTranslations,
+  areTranslationsEnabled,
+  requestedTranslationLanguage,
 }) => {
   const {
     toggleMessageSelection,
@@ -468,6 +481,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleAudioPlay,
     handleAlbumMediaClick,
     handleMetaClick,
+    handleTranslationClick,
     handleOpenThread,
     handleReadMedia,
     handleCancelUpload,
@@ -536,6 +550,17 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
+
+  const { result: detectedLanguage } = useTextLanguage(areTranslationsEnabled ? text?.text : undefined);
+
+  const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
+    chatTranslations, chatId, messageId, requestedTranslationLanguage,
+  );
+  // Used to display previous result while new one is loading
+  const previousTranslatedText = usePrevious(translatedText, true);
+
+  const currentText = isTranslationPending ? (previousTranslatedText || text) : translatedText;
+  const currentTranslatedText = translatedText || previousTranslatedText;
 
   const { phoneCall } = action || {};
 
@@ -663,13 +688,15 @@ const Message: FC<OwnProps & StateProps> = ({
     }
 
     if (width) {
-      calculatedWidth = Math.max(getMinMediaWidth(Boolean(text), withCommentButton), width);
+      calculatedWidth = Math.max(getMinMediaWidth(Boolean(currentText), withCommentButton), width);
       if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
   } else if (albumLayout) {
-    calculatedWidth = Math.max(getMinMediaWidth(Boolean(text), withCommentButton), albumLayout.containerStyle.width);
+    calculatedWidth = Math.max(
+      getMinMediaWidth(Boolean(currentText), withCommentButton), albumLayout.containerStyle.width,
+    );
     if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
       noMediaCorners = true;
     }
@@ -707,6 +734,22 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderMessageText(isForAnimation?: boolean) {
+    return (
+      <MessageText
+        message={message}
+        translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
+        isForAnimation={isForAnimation}
+        emojiSize={emojiSize}
+        highlight={highlight}
+        isProtected={isProtected}
+        observeIntersectionForLoading={observeIntersectionForLoading}
+        observeIntersectionForPlaying={observeIntersectionForPlaying}
+        withTranslucentThumbs={isCustomShape}
+      />
+    );
+  }
+
   function renderReactionsAndMeta() {
     const meta = (
       <MessageMeta
@@ -717,7 +760,9 @@ const Message: FC<OwnProps & StateProps> = ({
         signature={signature}
         withReactionOffset={reactionsPosition === 'inside'}
         availableReactions={availableReactions}
+        isTranslated={Boolean(requestedTranslationLanguage ? currentTranslatedText : undefined)}
         onClick={handleMetaClick}
+        onTranslationClick={handleTranslationClick}
         onOpenThread={handleOpenThread}
       />
     );
@@ -749,6 +794,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const hasCustomAppendix = isLastInGroup && !hasText && !asForwarded && !hasThread;
     const textContentClass = buildClassName(
       'text-content',
+      'clearfix',
       metaPosition === 'in-text' && 'with-meta',
       outgoingStatus && 'with-outgoing-icon',
     );
@@ -954,15 +1000,14 @@ const Message: FC<OwnProps & StateProps> = ({
 
         {!hasAnimatedEmoji && hasText && (
           <div className={textContentClass} dir="auto">
-            <MessageText
-              message={message}
-              emojiSize={emojiSize}
-              highlight={highlight}
-              isProtected={isProtected}
-              observeIntersectionForLoading={observeIntersectionForLoading}
-              observeIntersectionForPlaying={observeIntersectionForPlaying}
-              withTranslucentThumbs={isCustomShape}
-            />
+            {renderMessageText()}
+            {isTranslationPending && (
+              <div className="translation-animation">
+                <div className="text-loading">
+                  {renderMessageText(true)}
+                </div>
+              </div>
+            )}
             {metaPosition === 'in-text' && renderReactionsAndMeta()}
           </div>
         )}
@@ -1208,6 +1253,7 @@ const Message: FC<OwnProps & StateProps> = ({
           onCloseAnimationEnd={handleContextMenuHide}
           repliesThreadInfo={repliesThreadInfo}
           noReplies={noReplies}
+          detectedLanguage={detectedLanguage}
         />
       )}
     </div>
@@ -1300,6 +1346,8 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
 
     const isLocation = Boolean(getMessageLocation(message));
+    const chatTranslations = selectChatTranslations(global, chatId);
+    const requestedTranslationLanguage = selectRequestedTranslationLanguage(global, chatId, message.id);
 
     return {
       theme: selectTheme(global),
@@ -1355,6 +1403,9 @@ export default memo(withGlobal<OwnProps>(
       messageTopic,
       genericEffects: global.genericEmojiEffects,
       hasTopicChip,
+      chatTranslations,
+      areTranslationsEnabled: global.settings.byKey.canTranslate,
+      requestedTranslationLanguage,
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

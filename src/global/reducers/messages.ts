@@ -1,7 +1,9 @@
 import type {
   GlobalState, MessageList, MessageListType, TabArgs, Thread, TabThread,
 } from '../types';
-import type { ApiMessage, ApiSponsoredMessage, ApiThreadInfo } from '../../api/types';
+import type {
+  ApiMessage, ApiSponsoredMessage, ApiThreadInfo,
+} from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { FocusDirection } from '../../types';
 

@@ -1,6 +1,6 @@
 import { inflate } from 'pako/dist/pako_inflate';
-import createWorkerInterface from '../../util/createWorkerInterface';
-import type { CancellableCallback } from '../../util/WorkerConnector';
+import { createWorkerInterface } from '../../util/createPostMessageInterface';
+import type { CancellableCallback } from '../../util/PostMessageConnector';
 
 import 'script-loader!./rlottie-wasm';
 
@@ -164,9 +164,13 @@ function destroy(key: string, isRepeated = false) {
   }
 }
 
-createWorkerInterface({
+const api = {
   init,
   changeData,
   renderFrames,
   destroy,
-});
+};
+
+createWorkerInterface(api);
+
+export type RLottieApi = typeof api;

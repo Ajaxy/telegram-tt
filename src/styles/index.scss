@@ -125,6 +125,12 @@ body.cursor-ew-resize {
   }
 }
 
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
 /*
  See the article for more information on this visually-hidden pattern.
  https://snook.ca/archives/html_and_css/hiding-content-for-accessibility

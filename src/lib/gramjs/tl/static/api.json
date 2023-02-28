@@ -243,6 +243,7 @@
     "messages.setChatAvailableReactions",
     "messages.getAvailableReactions",
     "messages.setDefaultReaction",
+    "messages.translateText",
     "help.getAppConfig",
     "stats.getBroadcastStats",
     "stats.getMegagroupStats",

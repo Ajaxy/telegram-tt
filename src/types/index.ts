@@ -89,6 +89,9 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   wasTimeFormatSetManually: boolean;
   isConnectionStatusMinimized: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
+  canTranslate: boolean;
+  canTranslateChats: boolean;
+  doNotTranslate: string[];
 }
 
 export interface ApiPrivacySettings {
@@ -216,6 +219,7 @@ export enum SettingsScreens {
   Stickers,
   QuickReaction,
   CustomEmoji,
+  DoNotTranslate,
 }
 
 export type StickerSetOrRecent = Pick<ApiStickerSet, (

@@ -1,6 +1,7 @@
 
 src/lib/rlottie/rlottie-wasm.js
 src/lib/webp/webp_wasm.js
+src/lib/fasttextweb/fasttext-wasm.js
 
 src/lib/gramjs/tl/types-generator/template.js
 src/lib/gramjs/tl/api.d.ts

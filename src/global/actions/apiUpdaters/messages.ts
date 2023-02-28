@@ -27,6 +27,8 @@ import {
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
   deleteTopic,
+  updateMessageTranslations,
+  clearMessageTranslation,
 } from '../../reducers';
 import {
   selectChatMessage,
@@ -209,6 +211,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       if (message.reactions && chat) {
         global = updateReactions(global, chatId, id, message.reactions, chat, newMessage.isOutgoing, currentMessage);
+      }
+
+      if (message.content?.text?.text !== currentMessage?.content?.text?.text) {
+        global = clearMessageTranslation(global, chatId, id);
       }
 
       setGlobal(global);
@@ -639,6 +645,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       global = updateChatMessage(global, chatId, localId, { sendingState: 'messageSendingStateFailed' });
       setGlobal(global);
+      break;
+    }
+
+    case 'updateMessageTranslations': {
+      const {
+        chatId, messageIds, toLanguageCode, translations,
+      } = update;
+
+      global = updateMessageTranslations(global, chatId, messageIds, toLanguageCode, translations);
+
+      setGlobal(global);
+      break;
     }
   }
 });
@@ -877,6 +895,8 @@ function deleteMessages<T extends GlobalState>(
       global = updateChatMessage(global, chatId, id, {
         isDeleting: true,
       });
+
+      global = clearMessageTranslation(global, chatId, id);
 
       const newLastMessage = findLastMessage(global, chatId);
       if (newLastMessage) {
