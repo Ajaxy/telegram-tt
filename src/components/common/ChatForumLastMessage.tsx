@@ -11,11 +11,13 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FC } from '../../lib/teact/teact';
 import type { ApiChat } from '../../api/types';
 
-import { REM } from './helpers/mediaDimensions';
+import { IS_TOUCH_ENV } from '../../util/environment';
 import buildClassName from '../../util/buildClassName';
 import { getOrderedTopics } from '../../global/helpers';
-import renderText from './helpers/renderText';
+import { getIsMobile } from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
+import { REM } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
 
 import TopicIcon from './TopicIcon';
 
@@ -60,7 +62,13 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   function handleOpenTopic(e: React.MouseEvent<HTMLDivElement>) {
     if (lastActiveTopic.unreadCount === 0) return;
     e.stopPropagation();
-    openChat({ id: chat.id, threadId: lastActiveTopic.id, shouldReplaceHistory: true });
+    e.preventDefault();
+    openChat({
+      id: chat.id,
+      threadId: lastActiveTopic.id,
+      shouldReplaceHistory: true,
+      noForumTopicPanel: getIsMobile(),
+    });
   }
 
   useLayoutEffect(() => {
@@ -97,7 +105,8 @@ const ChatForumLastMessage: FC<OwnProps> = ({
               lastActiveTopic.unreadCount && styles.unread,
             )}
             ref={mainColumnRef}
-            onMouseDown={handleOpenTopic}
+            onMouseDown={IS_TOUCH_ENV ? undefined : handleOpenTopic}
+            onClick={IS_TOUCH_ENV ? handleOpenTopic : undefined}
           >
             <TopicIcon
               topic={lastActiveTopic}
@@ -135,7 +144,8 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       <div
         className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && styles.unread)}
         ref={lastMessageRef}
-        onMouseDown={handleOpenTopic}
+        onMouseDown={IS_TOUCH_ENV ? undefined : handleOpenTopic}
+        onClick={IS_TOUCH_ENV ? handleOpenTopic : undefined}
       >
         {lastMessage}
         {!overwrittenWidth && !isReversedCorner && (

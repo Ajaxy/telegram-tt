@@ -51,7 +51,7 @@
   }
 
   &:last-of-type {
-    padding-bottom: 0.5rem;
+    border-bottom: 0.5rem solid transparent; // `margin` does not help, and `padding` affects forum indicator height
   }
 
   @media (max-width: 600px) {
@@ -66,22 +66,9 @@
         border-color: var(--color-chat-hover);
       }
     }
-
-    &.selected-forum {
-      .avatar-badge-wrapper {
-        --outline-color: var(--color-chat-hover);
-      }
-    }
   }
 
   @media (min-width: 600px) {
-    &.selected-forum.forum,
-    &.selected-forum.forum:hover {
-      .avatar-badge-wrapper {
-        --outline-color: var(--color-chat-hover);
-      }
-    }
-
     &.selected:not(.forum),
     &.selected:not(.forum):hover {
       --background-color: var(--color-chat-active) !important;
@@ -144,7 +131,9 @@
   }
 
   &.selected-forum {
-    --background-color: var(--color-chat-hover) !important;
+    &::before {
+      transform: translateX(0) scaleY(1) !important;
+    }
   }
 
   @media (max-width: 600px) {
@@ -155,6 +144,30 @@
 
   &.forum {
     --color-chat-username: var(--color-text);
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.625rem;
+      bottom: 0.625rem;
+      left: -0.4375rem; // `.chat-list` left padding
+      width: 0.3125rem;
+
+      transform: translateX(-0.375rem) scaleY(0.5);
+      transition: transform var(--layer-transition);
+
+      background: var(--color-primary);
+      z-index: 1;
+
+      border-start-end-radius: var(--border-radius-default);
+      border-end-end-radius: var(--border-radius-default);
+    }
+
+    @media (max-width: 600px) {
+      &::before {
+        left: 0;
+      }
+    }
 
     .ListItem-button {
       padding-top: 0.25rem;

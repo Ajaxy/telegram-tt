@@ -95,6 +95,16 @@
     .Chat[dir="rtl"] .info {
       transform: translateX(20%);
     }
+
+    .Avatar {
+      transform: scale(0.9);
+    }
+  }
+
+  @media (min-width: 600px) {
+    &.forum-panel-open .selected-forum .Avatar {
+      transform: none;
+    }
   }
 
   @media (max-width: 600px) {

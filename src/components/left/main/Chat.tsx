@@ -157,7 +157,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const handleClick = useCallback(() => {
     if (isForum) {
-      openForumPanel({ chatId });
+      openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
       return;
     }
 
