@@ -50,7 +50,7 @@ const App: FC<StateProps> = ({
   hasWebAuthTokenFailed,
   isInactiveAuth,
 }) => {
-  const { disconnect, updatePageTitle } = getActions();
+  const { disconnect } = getActions();
 
   const [isInactive, markInactive, unmarkInactive] = useFlag(false);
   const { isMobile } = useAppLayout();
@@ -157,7 +157,7 @@ const App: FC<StateProps> = ({
 
       markInactive();
     });
-  }, [activeKey, disconnect, markInactive, updatePageTitle]);
+  }, [activeKey, disconnect, markInactive]);
 
   useEffect(() => {
     if (isInactiveAuth) {
@@ -166,7 +166,7 @@ const App: FC<StateProps> = ({
     } else {
       unmarkInactive();
     }
-  }, [isInactiveAuth, markInactive, unmarkInactive, updatePageTitle]);
+  }, [isInactiveAuth, markInactive, unmarkInactive]);
 
   const prevActiveKey = usePrevious(activeKey);
 

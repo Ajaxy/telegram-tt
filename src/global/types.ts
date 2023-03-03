@@ -560,8 +560,6 @@ export type GlobalState = {
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;
-  notificationIndex?: number;
-  allNotificationsCount?: number;
 
   audioPlayer: {
     lastPlaybackRate: number;
@@ -1533,7 +1531,7 @@ export interface ActionPayloads {
   };
   onTabFocusChange: {
     isBlurred: boolean;
-  };
+  } & WithTabId;
   onSomeTabSwitchedMultitabRole: undefined;
   afterHangUp: undefined;
   requestMasterAndCallAction: CallbackAction & WithTabId;
@@ -2169,10 +2167,7 @@ export interface ActionPayloads {
   } & WithTabId;
   dismissNotification: { localId: string } & WithTabId;
 
-  updatePageTitle: {
-    isInactive?: boolean;
-    notificationCount?: number;
-  } & WithTabId | undefined;
+  updatePageTitle: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {
