@@ -1,3 +1,29 @@
+## 1.60.0 (2023-03-03)
+
+### 🤩 **What’s New**
+* Archived Chats Header - Archived Chats are now accessible from the chat list in a collapsable header.
+* Reply Threads - You can tap to view all replies to a message in a separate window.
+* Emoji In Captions - You can now open the emoji panel 🙂 when adding a caption to media.
+* Message Translation - You can translate any message into another language from the context menu. To show this option, enable Translation in _Settings > Language_.
+* Emoji Statuses - Premium users can update their animated emoji status from the 🌟 at the top of their chat list.
+* Granular Media Permissions - Admins can choose which media types are allowed in their groups, each with separate toggles.
+
+### 😍 **What’s Better**
+* Multiple tabs can be opened by holding <Ctrl> (⌘ on macOS) and clicking on a chat.
+* Opening a chat changes the title of your browser tab to the chat name. This can be modified in _Settings > Privacy and Security_.
+* Bot reply keyboards are now supported in groups and channels.
+* The video and audio players always remember your last playback speed.
+* Opening topics has an improved animation.
+* Performance when typing messages has been drastically improved.
+* Fixed disappearing drafts.
+* Fixed missing results in Global Search.
+* Fixed rare issues with opening text format options.
+* Fixed pasting text from Google Docs.
+* Fixed auto-closing context menu on iOS PWA.
+* Fixed changing group and channel admin rights.
+* Various layout and performance improvements.
+
+
 ## 1.59.0 (2023-01-30)
 
 ### 👏 **Harder**
