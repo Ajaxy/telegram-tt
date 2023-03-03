@@ -40,7 +40,9 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectReplyingToId,
-  selectTheme, selectThreadInfo,
+  selectTheme,
+  selectThreadInfo,
+  selectChatMessage,
 } from '../../global/selectors';
 import {
   getCanPostInChat,
@@ -98,7 +100,8 @@ type StateProps = {
   canPost?: boolean;
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
-  hasPinnedOrAudioPlayer?: boolean;
+  hasPinned?: boolean;
+  hasAudioPlayer?: boolean;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
   customBackground?: string;
@@ -144,7 +147,8 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   canPost,
   currentUserBannedRights,
   defaultBannedRights,
-  hasPinnedOrAudioPlayer,
+  hasPinned,
+  hasAudioPlayer,
   pinnedMessagesCount,
   customBackground,
   theme,
@@ -199,7 +203,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   const isMobileSearchActive = isMobile && hasCurrentTextSearch;
   const closeAnimationDuration = isMobile ? 450 + ANIMATION_END_DELAY : undefined;
-  const hasTools = hasPinnedOrAudioPlayer && (
+  const hasTools = hasPinned && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
     || (
       isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
@@ -207,6 +211,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
     ) || (
       windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
       && windowWidth < SAFE_SCREEN_WIDTH_FOR_CHAT_INFO
+      && hasAudioPlayer
     )
   );
 
@@ -656,6 +661,9 @@ export default memo(withGlobal<OwnProps>(
     const shouldBlockSendInForum = chat?.isForum
       ? threadId === MAIN_THREAD_ID && !replyingToId && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)
       : false;
+    const audioMessage = audioChatId && audioMessageId
+      ? selectChatMessage(global, audioChatId, audioMessageId)
+      : undefined;
 
     return {
       ...state,
@@ -675,11 +683,11 @@ export default memo(withGlobal<OwnProps>(
       isScheduledMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
-      hasPinnedOrAudioPlayer: (
+      hasPinned: (
         (threadId !== MAIN_THREAD_ID && !chat?.isForum)
         || Boolean(!isPinnedMessageList && pinnedIds?.length)
-        || Boolean(audioChatId && audioMessageId)
       ),
+      hasAudioPlayer: Boolean(audioMessage),
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations,
       isChannel,
