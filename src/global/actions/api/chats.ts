@@ -1817,7 +1817,7 @@ async function loadChats<T extends GlobalState>(
   isFullDraftSync?: boolean,
 ) {
   global = getGlobal();
-  const lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
+  let lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,
     offsetDate,
@@ -1837,6 +1837,8 @@ async function loadChats<T extends GlobalState>(
   }
 
   global = getGlobal();
+
+  lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
 
   if (shouldReplace && listType === 'active') {
     // Always include service notifications chat
@@ -1882,9 +1884,20 @@ async function loadChats<T extends GlobalState>(
     global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
     global = replaceChatListIds(global, listType, chatIds);
   } else {
+    const newChats = buildCollectionByKey(result.chats, 'id');
+    if (chatIds.includes(SERVICE_NOTIFICATIONS_USER_ID)) {
+      const notificationsChat = newChats[SERVICE_NOTIFICATIONS_USER_ID];
+      if (notificationsChat && lastLocalServiceMessage) {
+        newChats[SERVICE_NOTIFICATIONS_USER_ID] = {
+          ...notificationsChat,
+          lastMessage: lastLocalServiceMessage,
+        };
+      }
+    }
+
     global = addUsers(global, buildCollectionByKey(result.users, 'id'));
     global = addUserStatuses(global, result.userStatusesById);
-    global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
+    global = updateChats(global, newChats);
     global = updateChatListIds(global, listType, chatIds);
   }
 
