@@ -791,7 +791,7 @@ const Message: FC<OwnProps & StateProps> = ({
       hasSubheader && 'with-subheader',
       noMediaCorners && 'no-media-corners',
     );
-    const hasCustomAppendix = isLastInGroup && !hasText && !asForwarded && !hasThread;
+    const hasCustomAppendix = isLastInGroup && !hasText && !asForwarded && !withCommentButton;
     const textContentClass = buildClassName(
       'text-content',
       'clearfix',
