@@ -235,7 +235,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }
 
     if (messageListType === 'thread' && currentTransitionKey === 0) {
-      if (isMobile || shouldShowCloseButton) {
+      if (!isTablet || shouldShowCloseButton) {
         e.stopPropagation(); // Stop propagation to prevent chat re-opening on tablets
         openChat({ id: undefined }, { forceOnHeavyAnimation: true });
       } else {
@@ -250,8 +250,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openPreviousChat();
     setBackButtonActive();
   }, [
-    messageListType, currentTransitionKey, isSelectModeActive, openPreviousChat, shouldShowCloseButton,
-    openChat, toggleLeftColumn, exitMessageSelectMode, setBackButtonActive, isMobile,
+    isMobile, isSelectModeActive, messageListType, currentTransitionKey, setBackButtonActive, isTablet,
+    shouldShowCloseButton,
   ]);
 
   const canToolsCollideWithChatInfo = (
