@@ -1,38 +1,34 @@
 import type { RequiredGlobalActions } from '../../index';
 import {
-  addActionHandler, getGlobal, setGlobal, getActions,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import type {
-  ActionReturnType, GlobalState, Thread,
-} from '../../types';
+import type { ActionReturnType, GlobalState, Thread } from '../../types';
 
-import {
-  DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
-} from '../../../config';
+import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
-  updateUsers,
-  updateChats,
-  updateThreadInfos,
-  updateListedIds,
-  safeReplaceViewportIds,
   addChatMessagesById,
+  safeReplaceViewportIds,
+  updateChats,
+  updateListedIds,
   updateThread,
+  updateThreadInfos,
+  updateUsers,
 } from '../../reducers';
 import {
+  selectChatMessage,
+  selectChatMessages,
   selectCurrentMessageList,
   selectDraft,
-  selectChatMessage,
-  selectThreadInfo,
-  selectEditingId,
   selectEditingDraft,
-  selectChatMessages,
+  selectEditingId,
   selectTabState,
+  selectThreadInfo,
 } from '../../selectors';
 import { init as initFolderManager } from '../../../util/folderManager';
 import { updateTabState } from '../../reducers/tabs';
@@ -99,24 +95,31 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
   let wasReset = false;
 
+  // Memoize drafts
+  const draftChatIds = Object.keys(global.messages.byChatId);
+  /* eslint-disable @typescript-eslint/indent */
+  const draftsByChatId = draftChatIds.reduce<Record<string, Record<number, Partial<Thread>>>>((acc, chatId) => {
+    acc[chatId] = Object
+      .keys(global.messages.byChatId[chatId].threadsById)
+      .reduce<Record<number, Partial<Thread>>>((acc2, threadId) => {
+        acc2[Number(threadId)] = {
+          draft: selectDraft(global, chatId, Number(threadId)),
+          editingId: selectEditingId(global, chatId, Number(threadId)),
+          editingDraft: selectEditingDraft(global, chatId, Number(threadId)),
+        };
+
+        return acc2;
+      }, {});
+    return acc;
+  }, {});
+  /* eslint-enable @typescript-eslint/indent */
+
   for (const { id: tabId } of Object.values(global.byTabId)) {
     global = getGlobal();
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global, tabId) || {};
     const activeThreadId = currentThreadId || MAIN_THREAD_ID;
     const threadInfo = currentThreadId && currentChatId
       ? selectThreadInfo(global, currentChatId, currentThreadId) : undefined;
-    // Memoize drafts
-    const draftChatIds = Object.keys(global.messages.byChatId);
-    // eslint-disable-next-line @typescript-eslint/no-loop-func
-    const draftsByChatId = draftChatIds.reduce<Record<string, Partial<Thread>>>((acc, chatId) => {
-      acc[chatId] = {};
-      acc[chatId].draft = selectDraft(global, chatId, activeThreadId);
-      acc[chatId].editingId = selectEditingId(global, chatId, activeThreadId);
-      acc[chatId].editingDraft = selectEditingDraft(global, chatId, activeThreadId);
-
-      return acc;
-    }, {});
-
     const currentChat = currentChatId ? global.chats.byId[currentChatId] : undefined;
     if (currentChatId && currentChat) {
       const result = await loadTopMessages(currentChat, activeThreadId, threadInfo?.lastReadInboxMessageId);
@@ -175,12 +178,6 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
       }
     }
 
-    // Restore drafts
-    // eslint-disable-next-line @typescript-eslint/no-loop-func
-    Object.keys(draftsByChatId).forEach((chatId) => {
-      global = updateThread(global, chatId, activeThreadId, draftsByChatId[chatId]);
-    });
-
     setGlobal(global);
 
     if (currentChat?.isForum) {
@@ -209,9 +206,18 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         tabThreads: {},
       }, otherTabId);
     });
-
-    setGlobal(global);
   }
+
+  // Restore drafts
+  // eslint-disable-next-line @typescript-eslint/no-loop-func
+  Object.keys(draftsByChatId).forEach((chatId) => {
+    const threads = draftsByChatId[chatId];
+    Object.keys(threads).forEach((threadId) => {
+      global = updateThread(global, chatId, Number(threadId), draftsByChatId[chatId][Number(threadId)]);
+    });
+  });
+
+  setGlobal(global);
 
   Object.values(global.byTabId).forEach(({ id: tabId }) => {
     const { chatId: audioChatId, messageId: audioMessageId } = selectTabState(global, tabId).audioPlayer;
