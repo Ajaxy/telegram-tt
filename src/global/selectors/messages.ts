@@ -800,7 +800,9 @@ export function selectFirstUnreadId<T extends GlobalState>(
       return (
         (!lastReadId || id > lastReadId)
         && byId[id]
-        && (!byId[id].isOutgoing || byId[id].isFromScheduled)
+        // For some reason outgoing topic actions are not marked as read, thus we need to mark them as read
+        // when the edit message hits the viewport
+        && ((!byId[id].isOutgoing || byId[id].content.action?.isTopicAction) || byId[id].isFromScheduled)
         && id > lastReadServiceNotificationId
       );
     });

@@ -899,6 +899,7 @@ function buildAction(
   let score: number | undefined;
   let months: number | undefined;
   let topicEmojiIconId: string | undefined;
+  let isTopicAction: boolean | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -1063,6 +1064,7 @@ function buildAction(
     } else {
       text = 'ChatList.UnsupportedMessage';
     }
+    isTopicAction = true;
   } else if (action instanceof GramJs.MessageActionAttachMenuBotAllowed) {
     text = 'ActionAttachMenuBotAllowed';
   } else if (action instanceof GramJs.MessageActionSuggestProfilePhoto) {
@@ -1097,6 +1099,7 @@ function buildAction(
     score,
     months,
     topicEmojiIconId,
+    isTopicAction,
   };
 }
 

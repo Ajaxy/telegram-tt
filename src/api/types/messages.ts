@@ -273,6 +273,7 @@ export interface ApiAction {
   score?: number;
   months?: number;
   topicEmojiIconId?: string;
+  isTopicAction?: boolean;
 }
 
 export interface ApiWebPage {
