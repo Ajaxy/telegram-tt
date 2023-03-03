@@ -25,6 +25,7 @@ import {
   ANIMATION_LEVEL_MIN,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   GENERAL_TOPIC_ID,
+  TMP_CHAT_ID,
 } from '../../config';
 import { MASK_IMAGE_DISABLED } from '../../util/environment';
 import { DropAreaState } from './composer/DropArea';
@@ -222,9 +223,9 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   const renderingCanStartBot = usePrevDuringAnimation(canStartBot, closeAnimationDuration);
   const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, closeAnimationDuration);
   const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
-    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe;
+    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && chatId !== TMP_CHAT_ID;
   const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
-  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration);
+  const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration) && chatId !== TMP_CHAT_ID;
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
   const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, closeAnimationDuration);
   const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, closeAnimationDuration);
