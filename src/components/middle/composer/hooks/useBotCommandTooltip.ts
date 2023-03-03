@@ -39,7 +39,7 @@ export default function useBotCommandTooltip(
     }
 
     const filter = command.substring(1);
-    const nextFilteredBotCommands = commands.filter((c) => !filter || c.command.includes(filter));
+    const nextFilteredBotCommands = commands.filter((c) => !filter || c.command.startsWith(filter));
 
     setFilteredBotCommands(
       nextFilteredBotCommands?.length ? nextFilteredBotCommands : undefined,

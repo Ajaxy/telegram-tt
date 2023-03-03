@@ -55,7 +55,7 @@ const BotCommandTooltip: FC<OwnProps & StateProps> = ({
 
   const handleSelect = useCallback((botCommand: ApiBotCommand) => {
     // We need an additional check because tooltip is updated with throttling
-    if (!botCommand.command.startsWith(getHtml())) {
+    if (!botCommand.command.startsWith(getHtml().slice(1))) {
       return false;
     }
 
