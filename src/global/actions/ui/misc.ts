@@ -1,11 +1,10 @@
-import { addCallback } from '../../../lib/teact/teactn';
 import {
-  addActionHandler, getActions, getGlobal, setGlobal,
+  addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 
 import type { ApiError, ApiNotification } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import type { ActionReturnType, GlobalState } from '../../types';
+import type { ActionReturnType } from '../../types';
 
 import {
   APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
@@ -19,7 +18,7 @@ import { compact, unique } from '../../../util/iteratees';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import updateIcon from '../../../util/updateIcon';
-import setPageTitle from '../../../util/updatePageTitle';
+import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
 import { updateTabState } from '../../reducers/tabs';
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 import * as langProvider from '../../../util/langProvider';
@@ -606,47 +605,34 @@ addActionHandler('afterHangUp', (global): ActionReturnType => {
 
 let notificationInterval: NodeJS.Timeout | undefined;
 
-const NOTIFICATION_INTERVAL = 1000;
+const NOTIFICATION_INTERVAL = 500;
 
 addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnType => {
-  const { isBlurred } = payload;
-  const token = getCurrentTabId();
+  const { isBlurred, tabId = getCurrentTabId() } = payload;
 
   if (!isBlurred) {
     actions.updateIsOnline(true);
   }
 
   const blurredTabTokens = unique(isBlurred
-    ? [...global.blurredTabTokens, token]
-    : global.blurredTabTokens.filter((t) => t !== token));
+    ? [...global.blurredTabTokens, tabId]
+    : global.blurredTabTokens.filter((t) => t !== tabId));
 
   if (blurredTabTokens.length === getAllMultitabTokens().length) {
     actions.updateIsOnline(false);
   }
 
-  const isNewlyBlurred = isBlurred && blurredTabTokens.length === 1;
-
-  if (isNewlyBlurred) {
+  if (isBlurred) {
     if (notificationInterval) clearInterval(notificationInterval);
 
     notificationInterval = setInterval(() => {
-      global = getGlobal();
-      global = {
-        ...global,
-        notificationIndex: (global.notificationIndex || 0) + 1,
-        allNotificationsCount: getAllNotificationsCount(),
-      };
-      setGlobal(global);
+      actions.updatePageTitle({
+        tabId,
+      });
     }, NOTIFICATION_INTERVAL);
-  }
-
-  if (!blurredTabTokens.length && notificationInterval) {
+  } else {
     clearInterval(notificationInterval);
     notificationInterval = undefined;
-    global = {
-      ...global,
-      notificationIndex: undefined,
-    };
   }
 
   return {
@@ -657,19 +643,29 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType => {
-  const { isInactive, notificationCount, tabId = getCurrentTabId() } = payload || {};
+  const { tabId = getCurrentTabId() } = payload || {};
   const { canDisplayChatInTitle } = global.settings.byKey;
   const currentUserId = global.currentUserId;
 
-  if (isInactive) {
-    setPageTitle(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
+  if (document.title.includes(INACTIVE_MARKER)) {
+    updateIcon(false);
+    setPageTitleInstant(`${PAGE_TITLE} ${INACTIVE_MARKER}`);
     return;
   }
 
-  if (notificationCount) {
-    setPageTitle(`${notificationCount} notification${notificationCount > 1 ? 's' : ''}`);
-    return;
+  if (global.initialUnreadNotifications && Math.round(Date.now() / 1000) % 2 === 0) {
+    const notificationCount = getAllNotificationsCount();
+
+    const newUnread = notificationCount - global.initialUnreadNotifications;
+
+    if (newUnread > 0) {
+      setPageTitleInstant(`${newUnread} notification${newUnread > 1 ? 's' : ''}`);
+      updateIcon(true);
+      return;
+    }
   }
+
+  updateIcon(false);
 
   const messageList = selectCurrentMessageList(global, tabId);
   if (messageList && canDisplayChatInTitle) {
@@ -687,34 +683,5 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     }
   }
 
-  setPageTitle(PAGE_TITLE);
-});
-
-addCallback((global: GlobalState) => {
-  if (global.notificationIndex === undefined || global.allNotificationsCount === undefined) return;
-  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
-  const { updatePageTitle } = getActions();
-
-  const index = global.notificationIndex;
-  const allNotificationsCount = global.allNotificationsCount;
-
-  if (document.title.includes(INACTIVE_MARKER) || !global.initialUnreadNotifications) {
-    updateIcon(false);
-    updatePageTitle();
-    return;
-  }
-
-  if (index % 2 === 0) {
-    const newUnread = allNotificationsCount - global.initialUnreadNotifications;
-    if (newUnread > 0) {
-      updatePageTitle({
-        notificationCount: newUnread,
-      });
-      updateIcon(true);
-      return;
-    }
-  }
-
-  updatePageTitle();
-  updateIcon(false);
+  setPageTitleInstant(PAGE_TITLE);
 });
