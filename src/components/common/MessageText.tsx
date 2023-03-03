@@ -1,4 +1,6 @@
-import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
+import React, {
+  memo, useMemo, useRef,
+} from '../../lib/teact/teact';
 
 import type { ApiFormattedText, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -7,6 +9,7 @@ import { ApiMessageEntityTypes } from '../../api/types';
 import trimText from '../../util/trimText';
 import { getMessageText, stripCustomEmoji } from '../../global/helpers';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
+import useSyncEffect from '../../hooks/useSyncEffect';
 
 interface OwnProps {
   message: ApiMessage;
@@ -44,11 +47,17 @@ function MessageText({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
 
+  const textCacheBusterRef = useRef(0);
+
   const formattedText = translatedText || message.content.text || undefined;
 
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
 
   const { text, entities } = adaptedFormattedText || {};
+
+  useSyncEffect(() => {
+    textCacheBusterRef.current += 1;
+  }, [text, entities]);
 
   const withSharedCanvas = useMemo(() => {
     const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
@@ -84,6 +93,7 @@ function MessageText({
           withTranslucentThumbs,
           sharedCanvasRef,
           sharedCanvasHqRef,
+          textCacheBusterRef.current.toString(),
         ),
       ].flat().filter(Boolean)}
     </>
