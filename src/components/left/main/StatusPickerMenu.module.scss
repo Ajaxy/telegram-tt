@@ -14,4 +14,8 @@
     right: 0.5rem !important;
     width: calc(100vw - 1rem);
   }
+
+  :global(.custom-emoji) {
+    color: var(--color-primary);
+  }
 }

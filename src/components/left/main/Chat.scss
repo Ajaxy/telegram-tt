@@ -73,8 +73,8 @@
     &.selected:not(.forum):hover {
       --background-color: var(--color-chat-active) !important;
 
-      .custom-emoji {
-        --color-text: var(--color-white);
+      .title .custom-emoji {
+        color: var(--color-white);
       }
 
       .VerifiedIcon, .PremiumIcon {
@@ -192,10 +192,6 @@
     background: var(--background-color);
   }
 
-  .custom-emoji {
-    --color-text: var(--color-primary);
-  }
-
   .avatar-badge-wrapper {
     position: absolute;
     bottom: 0;
@@ -215,6 +211,10 @@
 
   .info {
     transition: opacity 300ms ease, transform var(--layer-transition);
+
+    .title .custom-emoji {
+      color: var(--color-primary);
+    }
 
     .icon-muted {
       font-size: 1.25rem;

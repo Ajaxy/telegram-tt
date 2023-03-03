@@ -1,6 +1,6 @@
 import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -9,8 +9,6 @@ import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 import { IS_TOUCH_ENV } from '../../util/environment';
-import { getPropertyHexColor } from '../../util/themeStyle';
-import { hexToRgb } from '../../util/switchTheme';
 import { getServerTimeOffset } from '../../util/serverTime';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -18,6 +16,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useDynamicColorListener from '../../hooks/useDynamicColorListener';
 
 import StickerView from './StickerView';
 import Button from '../ui/Button';
@@ -87,22 +86,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   // eslint-disable-next-line no-null/no-null
   const menuRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
-  const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
   const hasCustomColor = sticker.shouldUseTextColor;
-
-  useEffect(() => {
-    if (!hasCustomColor) {
-      setCustomColor(undefined);
-      return;
-    }
-    const hexColor = getPropertyHexColor(getComputedStyle(ref.current!), '--color-text');
-    if (!hexColor) {
-      setCustomColor(undefined);
-      return;
-    }
-    const customColorRgb = hexToRgb(hexColor);
-    setCustomColor([customColorRgb.r, customColorRgb.g, customColorRgb.b]);
-  }, [hasCustomColor]);
+  const { rgbColor: customColor } = useDynamicColorListener(ref, !hasCustomColor);
 
   const {
     id, isCustomEmoji, hasEffect: isPremium, stickerSetInfo,
