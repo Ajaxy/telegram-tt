@@ -68,6 +68,13 @@
         text-overflow: ellipsis;
       }
 
+      &.with-checkbox {
+        body.is-ios &::after,
+        body.is-android &::after {
+          bottom: -1rem;
+        }
+      }
+
       &:not(.picker-list-item) .Checkbox {
         margin-top: 2rem;
         margin-bottom: 2rem;
