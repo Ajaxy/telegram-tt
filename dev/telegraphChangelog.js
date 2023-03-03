@@ -11,7 +11,7 @@ const version = require('../package.json').version;
 const gitOptions = {
   repo: '.',
   branch: 'master',
-  number: 200,
+  number: 500,
   fields: ['hash', 'subject', 'committerDate'],
 };
 
