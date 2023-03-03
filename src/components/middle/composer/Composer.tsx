@@ -361,6 +361,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendVoices, canSendPlainText, canSendAudios, canSendVideos, canSendPhotos, canSendDocuments,
   } = useMemo(() => getAllowedAttachmentOptions(chat, isChatWithBot), [chat, isChatWithBot]);
 
+  const isComposerBlocked = !canSendPlainText && !editingMessage;
+
   const {
     shouldSuggestCompression,
     shouldForceCompression,
@@ -501,7 +503,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   );
 
   const insertHtmlAndUpdateCursor = useCallback((newHtml: string, inputId: string = EDITABLE_INPUT_ID) => {
-    if (inputId === EDITABLE_INPUT_ID && !canSendPlainText) return;
+    if (inputId === EDITABLE_INPUT_ID && isComposerBlocked) return;
     const selection = window.getSelection()!;
     let messageInput: HTMLDivElement;
     if (inputId === EDITABLE_INPUT_ID) {
@@ -525,7 +527,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     requestAnimationFrame(() => {
       focusEditableElement(messageInput);
     });
-  }, [canSendPlainText, getHtml, setHtml]);
+  }, [isComposerBlocked, getHtml, setHtml]);
 
   const insertFormattedTextAndUpdateCursor = useCallback((
     text: ApiFormattedText, inputId: string = EDITABLE_INPUT_ID,
@@ -1071,10 +1073,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [insertHtmlAndUpdateCursor]);
 
   useEffect(() => {
-    if (canSendPlainText) return;
+    if (!isComposerBlocked) return;
 
     setHtml('');
-  }, [canSendPlainText, setHtml, attachments]);
+  }, [isComposerBlocked, setHtml, attachments]);
 
   const insertTextAndUpdateCursorAttachmentModal = useCallback((text: string) => {
     insertTextAndUpdateCursor(text, EDITABLE_INPUT_MODAL_ID);
@@ -1355,7 +1357,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               />
             </Button>
           )}
-          {(canSendPlainText || canSendGifs || canSendStickers) && (
+          {(!isComposerBlocked || canSendGifs || canSendStickers) && (
             <SymbolMenuButton
               chatId={chatId}
               threadId={threadId}
@@ -1374,7 +1376,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               closeBotCommandMenu={closeBotCommandMenu}
               closeSendAsMenu={closeSendAsMenu}
               isSymbolMenuForced={isSymbolMenuForced}
-              canSendPlainText={canSendPlainText}
+              canSendPlainText={!isComposerBlocked}
             />
           )}
           <MessageInput
@@ -1382,14 +1384,14 @@ const Composer: FC<OwnProps & StateProps> = ({
             id="message-input-text"
             editableInputId={EDITABLE_INPUT_ID}
             chatId={chatId}
-            canSendPlainText={canSendPlainText}
+            canSendPlainText={!isComposerBlocked}
             threadId={threadId}
             isActive={!hasAttachments}
             getHtml={getHtml}
             placeholder={
               activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER
                 ? ''
-                : (canSendPlainText
+                : (!isComposerBlocked
                   ? (botKeyboardPlaceholder || lang('Message'))
                   : lang('Chat.PlaceholderTextNotAllowed'))
             }
