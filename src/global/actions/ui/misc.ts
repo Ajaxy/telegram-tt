@@ -603,7 +603,7 @@ addActionHandler('afterHangUp', (global): ActionReturnType => {
   reestablishMasterToSelf();
 });
 
-let notificationInterval: NodeJS.Timeout | undefined;
+let notificationInterval: number | undefined;
 
 const NOTIFICATION_INTERVAL = 500;
 
@@ -625,7 +625,7 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
   if (isBlurred) {
     if (notificationInterval) clearInterval(notificationInterval);
 
-    notificationInterval = setInterval(() => {
+    notificationInterval = window.setInterval(() => {
       actions.updatePageTitle({
         tabId,
       });
