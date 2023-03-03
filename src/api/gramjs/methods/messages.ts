@@ -914,6 +914,7 @@ export async function requestThreadInfoUpdate({
       topMessageId,
       lastReadInboxMessageId: topMessageResult.readInboxMaxId,
       messagesCount: (repliesResult instanceof GramJs.messages.ChannelMessages) ? repliesResult.count : undefined,
+      lastMessageId: topMessageResult.maxId,
       ...(originChannelId ? { originChannelId } : undefined),
     },
     firstMessageId: repliesResult && 'messages' in repliesResult && repliesResult.messages.length
