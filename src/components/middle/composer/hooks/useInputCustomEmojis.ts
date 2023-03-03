@@ -21,6 +21,8 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
+import useDynamicColorListener from '../../../../hooks/useDynamicColorListener';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -41,6 +43,7 @@ export default function useInputCustomEmojis(
   prefixId?: string,
   isActive?: boolean,
 ) {
+  const { rgbColor: textColor } = useDynamicColorListener(inputRef);
   const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
   const removeContainers = useCallback((ids: string[]) => {
@@ -60,11 +63,12 @@ export default function useInputCustomEmojis(
     const customEmojies = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
 
     customEmojies.forEach((element) => {
-      const id = `${prefixId || ''}${element.dataset.uniqueId!}`;
-      const documentId = element.dataset.documentId!;
-      if (!id) {
+      if (!element.dataset.uniqueId) {
         return;
       }
+      const id = `${prefixId || ''}${element.dataset.uniqueId}${textColor?.join(',') || ''}`;
+      const documentId = element.dataset.documentId!;
+
       removedContainers.delete(id);
 
       const mediaUrl = getCustomEmojiMediaDataForInput(documentId);
@@ -95,9 +99,11 @@ export default function useInputCustomEmojis(
         sharedCanvasHqRef,
         absoluteContainerRef,
         uniqueId: id,
+        containerId: prefixId || id,
         mediaUrl,
         isHq,
         position: { x, y },
+        textColor,
       });
       animation.play();
 
@@ -105,7 +111,7 @@ export default function useInputCustomEmojis(
     });
 
     removeContainers(Array.from(removedContainers));
-  }, [absoluteContainerRef, inputRef, prefixId, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
+  }, [absoluteContainerRef, textColor, inputRef, prefixId, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -126,6 +132,12 @@ export default function useInputCustomEmojis(
       synchronizeElements();
     });
   }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef, isActive]);
+
+  useEffectWithPrevDeps(([prevTextColor]) => {
+    if (textColor !== prevTextColor) {
+      synchronizeElements();
+    }
+  }, [textColor, synchronizeElements]);
 
   const throttledSynchronizeElements = useThrottledCallback(
     synchronizeElements,
@@ -163,32 +175,38 @@ function createPlayer({
   sharedCanvasHqRef,
   absoluteContainerRef,
   uniqueId,
+  containerId,
   mediaUrl,
   position,
   isHq,
+  textColor,
 }: {
   customEmoji: ApiSticker;
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>;
   absoluteContainerRef: React.RefObject<HTMLElement>;
   uniqueId: string;
+  containerId: string;
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
+  textColor?: [number, number, number];
 }): CustomEmojiPlayer {
   if (customEmoji.isLottie) {
     const lottie = RLottie.init(
-      uniqueId,
+      containerId,
       isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,
       undefined,
-      customEmoji.id,
+      uniqueId,
       mediaUrl,
       {
         size: SIZE,
         coords: position,
         isLowPriority: !isHq,
       },
+      customEmoji.shouldUseTextColor ? textColor : undefined,
     );
+
     return {
       play: () => lottie.play(),
       pause: () => lottie.pause(),

@@ -281,7 +281,7 @@
         color: var(--color-user-#{$i});
 
         .custom-emoji {
-          --color-text: var(--color-user-#{$i});
+          color: var(--color-user-#{$i});
         }
 
         .PremiumIcon {

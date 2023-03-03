@@ -75,7 +75,6 @@ type StateProps = {
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
-  isEmojiStatusColored?: boolean;
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
@@ -103,7 +102,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   isMuted,
   user,
   userStatus,
-  isEmojiStatusColored,
   actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
@@ -256,7 +254,6 @@ const Chat: FC<OwnProps & StateProps> = ({
             withEmojiStatus
             isSavedMessages={chatId === user?.id && user?.isSelf}
             observeIntersection={observeIntersection}
-            key={!isMobile && isEmojiStatusColored ? `${isSelected}` : undefined}
           />
           {isMuted && <i className="icon-muted" />}
           <div className="separator" />
@@ -331,8 +328,6 @@ export default memo(withGlobal<OwnProps>(
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
 
-    const statusEmoji = user?.emojiStatus && global.customEmojis.byId[user.emojiStatus.documentId];
-
     return {
       chat,
       isMuted: selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global)),
@@ -354,7 +349,6 @@ export default memo(withGlobal<OwnProps>(
       userStatus,
       lastMessageTopic,
       typingStatus,
-      isEmojiStatusColored: statusEmoji?.shouldUseTextColor,
     };
   },
 )(Chat));

@@ -28,9 +28,10 @@
 
   .VerifiedIcon,
   .PremiumIcon {
-    z-index: 2;
     --color-fill: var(--color-white);
     --color-checkmark: var(--color-primary);
+
+    z-index: 2;
     opacity: 0.8;
   }
 
@@ -41,10 +42,10 @@
   }
 
   .custom-emoji {
+    --custom-emoji-size: 1.5rem;
+
+    color: var(--color-white);
     pointer-events: auto;
     cursor: pointer;
-
-    --custom-emoji-size: 1.5rem;
-    --color-text: var(--color-white);
   }
 }

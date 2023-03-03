@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useRef, useState,
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
@@ -7,13 +7,12 @@ import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes } from '../../api/types';
 
-import { getPropertyHexColor } from '../../util/themeStyle';
-import { hexToRgb } from '../../util/switchTheme';
 import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
 import useCustomEmoji from './hooks/useCustomEmoji';
+import useDynamicColorListener from '../../hooks/useDynamicColorListener';
 
 import StickerView from './StickerView';
 
@@ -75,22 +74,8 @@ const CustomEmoji: FC<OwnProps> = ({
   const loopCountRef = useRef(0);
   const [shouldLoop, setShouldLoop] = useState(true);
 
-  const [customColor, setCustomColor] = useState<[number, number, number] | undefined>();
   const hasCustomColor = customEmoji?.shouldUseTextColor;
-
-  useEffect(() => {
-    if (!hasCustomColor) {
-      setCustomColor(undefined);
-      return;
-    }
-    const hexColor = getPropertyHexColor(getComputedStyle(containerRef.current!), '--color-text');
-    if (!hexColor) {
-      setCustomColor(undefined);
-      return;
-    }
-    const customColorRgb = hexToRgb(hexColor);
-    setCustomColor([customColorRgb.r, customColorRgb.g, customColorRgb.b]);
-  }, [hasCustomColor]);
+  const { rgbColor: customColor } = useDynamicColorListener(containerRef, !hasCustomColor);
 
   const handleVideoEnded = useCallback((e) => {
     if (!loopLimit) return;
