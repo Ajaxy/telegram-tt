@@ -140,33 +140,6 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
 }
 
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
-  // Migrate from legacy setting names
-  if ('shouldAutoDownloadMediaFromContacts' in cached.settings.byKey) {
-    const {
-      shouldAutoDownloadMediaFromContacts,
-      shouldAutoDownloadMediaInPrivateChats,
-      shouldAutoDownloadMediaInGroups,
-      shouldAutoDownloadMediaInChannels,
-      shouldAutoPlayVideos,
-      shouldAutoPlayGifs,
-      ...rest
-    } = cached.settings.byKey;
-
-    cached.settings.byKey = {
-      ...rest,
-      canAutoLoadPhotoFromContacts: shouldAutoDownloadMediaFromContacts,
-      canAutoLoadVideoFromContacts: shouldAutoDownloadMediaFromContacts,
-      canAutoLoadPhotoInPrivateChats: shouldAutoDownloadMediaInPrivateChats,
-      canAutoLoadVideoInPrivateChats: shouldAutoDownloadMediaInPrivateChats,
-      canAutoLoadPhotoInGroups: shouldAutoDownloadMediaInGroups,
-      canAutoLoadVideoInGroups: shouldAutoDownloadMediaInGroups,
-      canAutoLoadPhotoInChannels: shouldAutoDownloadMediaInChannels,
-      canAutoLoadVideoInChannels: shouldAutoDownloadMediaInChannels,
-      canAutoPlayVideos: shouldAutoPlayVideos,
-      canAutoPlayGifs: shouldAutoPlayGifs,
-    };
-  }
-
   // Pre-fill settings with defaults
   cached.settings.byKey = {
     ...initialState.settings.byKey,
@@ -183,24 +156,8 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     ...cached.chatFolders,
   };
 
-  if (!cached.stickers.greeting) {
-    cached.stickers.greeting = initialState.stickers.greeting;
-  }
-
   if (!cached.stickers.premium) {
     cached.stickers.premium = initialState.stickers.premium;
-  }
-
-  if (!cached.serviceNotifications) {
-    cached.serviceNotifications = [];
-  }
-
-  if (!cached.users.statusesById) {
-    cached.users.statusesById = {};
-  }
-
-  if (!cached.messages.sponsoredByChatId) {
-    cached.messages.sponsoredByChatId = {};
   }
 
   if (!cached.attachMenu) {
@@ -327,6 +284,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (typeof cached.availableReactions?.[0].reaction === 'string') {
     cached.availableReactions = cached.availableReactions
       .map((r) => ({ ...r, reaction: { emoticon: r.reaction as unknown as string } }));
+  }
+
+  if (!cached.archiveSettings) {
+    cached.archiveSettings = initialState.archiveSettings;
   }
 }
 
