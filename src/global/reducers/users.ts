@@ -115,9 +115,15 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
   const user = byId[userId];
   const omitProps: (keyof ApiUser)[] = [];
 
-  const shouldOmitMinInfo = userUpdate.isMin && user && !user.isMin;
-  if (shouldOmitMinInfo) {
+  const shouldIgnoreUndefinedFields = userUpdate.isMin && user && !user.isMin;
+  if (shouldIgnoreUndefinedFields) {
     omitProps.push('isMin', 'accessHash');
+    Object.keys(userUpdate).forEach((key) => {
+      const prop = key as keyof ApiUser;
+      if (userUpdate[prop] === undefined) {
+        omitProps.push(prop);
+      }
+    });
   }
 
   if (areDeepEqual(user?.usernames, userUpdate.usernames)) {
