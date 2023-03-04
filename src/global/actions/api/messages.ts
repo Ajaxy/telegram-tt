@@ -1459,6 +1459,41 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
   return global;
 });
 
+addActionHandler('loadMessageViews', async (global, actions, payload): Promise<void> => {
+  const { chatId, ids } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('fetchMessageViews', {
+    chat,
+    ids,
+  });
+
+  if (!result) return;
+
+  global = getGlobal();
+  result.forEach((update) => {
+    global = updateChatMessage(global, chatId, update.id, {
+      views: update.views,
+      forwards: update.forwards,
+    });
+
+    const message = selectChatMessage(global, chatId, update.id);
+    if (!message) return;
+
+    const repliesChatId = message.repliesThreadInfo?.chatId;
+    const threadId = message.repliesThreadInfo?.threadId;
+    if (!repliesChatId || !threadId) return;
+
+    global = updateThreadInfo(global, repliesChatId, threadId, {
+      messagesCount: update.messagesCount,
+    });
+  });
+
+  setGlobal(global);
+});
+
 function countSortedIds(ids: number[], from: number, to: number) {
   let count = 0;
 

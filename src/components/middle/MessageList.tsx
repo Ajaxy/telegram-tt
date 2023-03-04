@@ -114,6 +114,7 @@ type StateProps = {
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
+const MESSAGE_COMMENTS_POLLING_INTERVAL = 15 * 1000;
 const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
@@ -164,6 +165,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
+    loadMessageViews,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -261,6 +263,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     loadMessageReactions({ chatId, ids });
   }, MESSAGE_REACTIONS_POLLING_INTERVAL);
+
+  useInterval(() => {
+    if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID) {
+      return;
+    }
+    const ids = messageIds.filter((id) => messagesById[id]?.repliesThreadInfo?.isComments);
+
+    if (!ids.length) return;
+
+    loadMessageViews({ chatId, ids });
+  }, MESSAGE_COMMENTS_POLLING_INTERVAL);
 
   const loadMoreAround = useMemo(() => {
     if (type !== 'thread') {

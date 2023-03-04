@@ -1666,6 +1666,10 @@ export interface ActionPayloads {
     chatId: string;
     offsetId?: number;
   };
+  loadMessageViews: {
+    chatId: string;
+    ids: number[];
+  };
   animateUnreadReaction: {
     messageIds: number[];
   } & WithTabId;

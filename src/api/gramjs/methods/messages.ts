@@ -871,6 +871,30 @@ export async function markMessagesRead({
   });
 }
 
+export async function fetchMessageViews({
+  chat, ids,
+}: {
+  chat: ApiChat; ids: number[];
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetMessagesViews({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: ids,
+    increment: false,
+  }));
+
+  if (!result) return undefined;
+
+  return ids.map((id, index) => {
+    const { views, forwards, replies } = result.views[index];
+    return {
+      id,
+      views,
+      forwards,
+      messagesCount: replies?.replies,
+    };
+  });
+}
+
 export async function requestThreadInfoUpdate({
   chat, threadId, originChannelId,
 }: {
