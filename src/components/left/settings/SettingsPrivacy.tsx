@@ -74,7 +74,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     loadWebAuthorizations,
     showNotification,
     setSettingOption,
-    updatePageTitle,
   } = getActions();
 
   useEffect(() => {
@@ -118,7 +117,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
     setSettingOption({
       canDisplayChatInTitle: isChecked,
     });
-    updatePageTitle();
   }, []);
 
   const handleUpdateContentSettings = useCallback((isChecked: boolean) => {
