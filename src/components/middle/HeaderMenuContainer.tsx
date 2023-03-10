@@ -335,6 +335,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
           style={`left: ${x}px;top: ${y}px;`}
           onClose={closeMenu}
         >
+          {isMobile && canSearch && (
+            <MenuItem
+              icon="search"
+              onClick={handleSearch}
+            >
+              {lang('Search')}
+            </MenuItem>
+          )}
           {withForumActions && canCreateTopic && (
             <>
               <MenuItem
@@ -433,14 +441,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               onClick={handleVideoCall}
             >
               {lang('VideoCall')}
-            </MenuItem>
-          )}
-          {isMobile && canSearch && (
-            <MenuItem
-              icon="search"
-              onClick={handleSearch}
-            >
-              {lang('Search')}
             </MenuItem>
           )}
           {canMute && (
