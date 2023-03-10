@@ -1373,7 +1373,7 @@ export function toggleForum({
   return invokeRequest(new GramJs.channels.ToggleForum({
     channel: buildInputPeer(id, accessHash),
     enabled: isEnabled,
-  }), true);
+  }), true, true);
 }
 
 export async function createTopic({

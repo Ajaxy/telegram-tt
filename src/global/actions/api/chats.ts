@@ -1676,7 +1676,16 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
   global = updateChat(global, chatId, { isForum: isEnabled });
   setGlobal(global);
 
-  const result = await callApi('toggleForum', { chat, isEnabled });
+  let result: true | undefined;
+  try {
+    result = await callApi('toggleForum', { chat, isEnabled });
+  } catch (error) {
+    if ((error as ApiError).message.startsWith('A wait of')) {
+      actions.showNotification({ message: langProvider.translate('FloodWait'), tabId });
+    } else {
+      actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+    }
+  }
 
   if (!result) {
     global = getGlobal();
