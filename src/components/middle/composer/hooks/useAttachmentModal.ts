@@ -108,6 +108,8 @@ export default function useAttachmentModal({
 }
 
 function getAttachmentType(attachment: ApiAttachment) {
+  if (attachment.shouldSendAsFile) return 'file';
+
   if (SUPPORTED_IMAGE_CONTENT_TYPES.has(attachment.mimeType)) {
     return 'image';
   }
