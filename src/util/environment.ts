@@ -87,8 +87,7 @@ if (IS_MOV_SUPPORTED) {
   CONTENT_TYPES_WITH_PREVIEW.add(VIDEO_MOV_TYPE);
 }
 
-export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''))
-  && !(IS_MAC_OS && IS_SAFARI); // Safari on MacOS has some issues with WebM
+export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''));
 
 export const DPR = window.devicePixelRatio || 1;
 
