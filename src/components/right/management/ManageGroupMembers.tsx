@@ -47,8 +47,8 @@ type StateProps = {
   globalUserIds?: string[];
   currentUserId?: string;
   canDeleteMembers?: boolean;
-  isBasicGroup?: boolean;
   areParticipantsHidden?: boolean;
+  canHideParticipants?: boolean;
 };
 
 const ManageGroupMembers: FC<OwnProps & StateProps> = ({
@@ -66,8 +66,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
   searchQuery,
   currentUserId,
   canDeleteMembers,
-  isBasicGroup,
   areParticipantsHidden,
+  canHideParticipants,
   onClose,
   onScreenSelect,
   onChatMemberSelect,
@@ -192,7 +192,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     <div className="Management">
       {noAdmins && renderSearchField()}
       <div className="custom-scroll">
-        {!isBasicGroup && (
+        {canHideParticipants && (
           <div className="section">
             <ListItem icon="group" ripple onClick={handleToggleParticipantsHidden}>
               <span>{lang('ChannelHideMembers')}</span>
@@ -255,6 +255,12 @@ export default memo(withGlobal<OwnProps>(
     const adminMembersById = chat?.fullInfo?.adminMembersById;
     const isChannel = chat && isChatChannel(chat);
     const { userIds: localContactIds } = global.contactList || {};
+    const hiddenMembersMinCount = global.appConfig?.hiddenMembersMinCount;
+
+    const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
+
+    const canHideParticipants = canDeleteMembers && !isChatBasicGroup(chat) && chat.membersCount !== undefined
+    && hiddenMembersMinCount !== undefined && chat.membersCount >= hiddenMembersMinCount;
 
     const {
       query: searchQuery,
@@ -263,10 +269,7 @@ export default memo(withGlobal<OwnProps>(
       localUserIds,
     } = selectTabState(global).userSearch;
 
-    const canDeleteMembers = chat && (chat.isCreator || getHasAdminRight(chat, 'banUsers'));
-
     return {
-      isBasicGroup: Boolean(chat && isChatBasicGroup(chat)),
       areParticipantsHidden: Boolean(chat && chat.fullInfo?.areParticipantsHidden),
       members,
       adminMembersById,
@@ -279,6 +282,7 @@ export default memo(withGlobal<OwnProps>(
       localUserIds,
       canDeleteMembers,
       currentUserId: global.currentUserId,
+      canHideParticipants,
     };
   },
 )(ManageGroupMembers));
