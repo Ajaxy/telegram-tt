@@ -17,12 +17,13 @@ import {
   isChatBasicGroup,
   isChatPublic,
 } from '../../../global/helpers';
-import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
+import { debounce } from '../../../util/schedulers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
+import useMedia from '../../../hooks/useMedia';
+import useLang from '../../../hooks/useLang';
+import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import AvatarEditable from '../../ui/AvatarEditable';
@@ -81,6 +82,8 @@ const ALL_PERMISSIONS: Array<keyof ApiChatBannedRights> = [
 // so we need to define the amount manually
 const TOTAL_PERMISSIONS_COUNT = ALL_PERMISSIONS.length + 1;
 
+const runDebounced = debounce((cb) => cb(), 500, false);
+
 const ManageGroup: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
@@ -121,6 +124,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const [about, setAbout] = useState(currentAbout);
   const [photo, setPhoto] = useState<File | undefined>();
   const [error, setError] = useState<string | undefined>();
+  const [isForumEnabled, setIsForumEnabled] = useState(chat.isForum);
   const imageHash = getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
   const isPublicGroup = useMemo(() => hasLinkedChannel || isChatPublic(chat), [chat, hasLinkedChannel]);
@@ -140,6 +144,11 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
       loadChatJoinRequests({ chatId });
     }
   }, [chatId, loadExportedChatInvites, lastSyncTime, canInvite, loadChatJoinRequests]);
+
+  // Resetting `isForum` switch on flood wait error
+  useEffect(() => {
+    setIsForumEnabled(Boolean(chat.isForum));
+  }, [chat.isForum]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -223,8 +232,16 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   }, [chat, togglePreHistoryHidden]);
 
   const handleForumToggle = useCallback(() => {
-    toggleForum({ chatId, isEnabled: !chat.isForum });
-  }, [chat.isForum, chatId, toggleForum]);
+    setIsForumEnabled((current) => {
+      const newIsForumEnabled = !current;
+
+      runDebounced(() => {
+        toggleForum({ chatId, isEnabled: newIsForumEnabled });
+      });
+
+      return newIsForumEnabled;
+    });
+  }, [chatId, toggleForum]);
 
   useEffect(() => {
     if (!isChannelsPremiumLimitReached) {
@@ -304,7 +321,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
       <div className="custom-scroll">
         <div className="section">
           <AvatarEditable
-            isForForum={chat.isForum}
+            isForForum={isForumEnabled}
             currentAvatarBlobUrl={currentAvatarBlobUrl}
             onChange={handleSetPhoto}
             disabled={!canChangeInfo}
@@ -352,7 +369,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           >
             <span className="title">{lang('ChannelPermissions')}</span>
             <span className="subtitle" dir="auto">
-              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT - (chat.isForum ? 0 : 1)}
+              {enabledPermissionsCount}/{TOTAL_PERMISSIONS_COUNT - (isForumEnabled ? 0 : 1)}
             </span>
           </ListItem>
           <ListItem
@@ -406,7 +423,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
                 <Switcher
                   id="group-notifications"
                   label={lang('ChannelTopics')}
-                  checked={chat.isForum}
+                  checked={isForumEnabled}
                   inactive
                 />
               </ListItem>
