@@ -40,18 +40,18 @@ export default function useInputCustomEmojis(
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>,
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
   absoluteContainerRef: React.RefObject<HTMLElement>,
-  prefixId?: string,
+  prefixId: string,
   isActive?: boolean,
 ) {
   const { rgbColor: textColor } = useDynamicColorListener(inputRef);
-  const mapRef = useRef<Map<string, CustomEmojiPlayer>>(new Map());
+  const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
-  const removeContainers = useCallback((ids: string[]) => {
+  const clearPlayers = useCallback((ids: string[]) => {
     ids.forEach((id) => {
-      const player = mapRef.current.get(id);
+      const player = playersById.current.get(id);
       if (player) {
         player.destroy();
-        mapRef.current.delete(id);
+        playersById.current.delete(id);
       }
     });
   }, []);
@@ -59,17 +59,17 @@ export default function useInputCustomEmojis(
   const synchronizeElements = useCallback(() => {
     if (!inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
     const global = getGlobal();
-    const removedContainers = new Set(mapRef.current.keys());
-    const customEmojies = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
+    const playerIdsToClear = new Set(playersById.current.keys());
+    const customEmojis = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
 
-    customEmojies.forEach((element) => {
+    customEmojis.forEach((element) => {
       if (!element.dataset.uniqueId) {
         return;
       }
-      const id = `${prefixId || ''}${element.dataset.uniqueId}${textColor?.join(',') || ''}`;
+      const playerId = `${prefixId}${element.dataset.uniqueId}${textColor?.join(',') || ''}`;
       const documentId = element.dataset.documentId!;
 
-      removedContainers.delete(id);
+      playerIdsToClear.delete(playerId);
 
       const mediaUrl = getCustomEmojiMediaDataForInput(documentId);
       if (!mediaUrl) {
@@ -81,8 +81,8 @@ export default function useInputCustomEmojis(
       const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
       const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
 
-      if (mapRef.current.has(id)) {
-        const player = mapRef.current.get(id)!;
+      if (playersById.current.has(playerId)) {
+        const player = playersById.current.get(playerId)!;
         player.updatePosition(x, y);
         return;
       }
@@ -92,14 +92,17 @@ export default function useInputCustomEmojis(
         return;
       }
       const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
+      const renderId = [
+        prefixId, documentId, textColor?.join(','),
+      ].filter(Boolean).join('_');
 
       const animation = createPlayer({
         customEmoji,
         sharedCanvasRef,
         sharedCanvasHqRef,
         absoluteContainerRef,
-        uniqueId: id,
-        containerId: prefixId || id,
+        renderId,
+        viewId: playerId,
         mediaUrl,
         isHq,
         position: { x, y },
@@ -107,11 +110,11 @@ export default function useInputCustomEmojis(
       });
       animation.play();
 
-      mapRef.current.set(id, animation);
+      playersById.current.set(playerId, animation);
     });
 
-    removeContainers(Array.from(removedContainers));
-  }, [absoluteContainerRef, textColor, inputRef, prefixId, removeContainers, sharedCanvasHqRef, sharedCanvasRef]);
+    clearPlayers(Array.from(playerIdsToClear));
+  }, [absoluteContainerRef, textColor, inputRef, prefixId, clearPlayers, sharedCanvasHqRef, sharedCanvasRef]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -123,7 +126,7 @@ export default function useInputCustomEmojis(
 
   useEffect(() => {
     if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive) {
-      removeContainers(Array.from(mapRef.current.keys()));
+      clearPlayers(Array.from(playersById.current.keys()));
       return;
     }
 
@@ -131,7 +134,7 @@ export default function useInputCustomEmojis(
     fastRaf(() => {
       synchronizeElements();
     });
-  }, [getHtml, synchronizeElements, inputRef, removeContainers, sharedCanvasRef, isActive]);
+  }, [getHtml, synchronizeElements, inputRef, clearPlayers, sharedCanvasRef, isActive]);
 
   useEffectWithPrevDeps(([prevTextColor]) => {
     if (textColor !== prevTextColor) {
@@ -148,13 +151,13 @@ export default function useInputCustomEmojis(
   useResizeObserver(sharedCanvasRef, throttledSynchronizeElements);
 
   const freezeAnimation = useCallback(() => {
-    mapRef.current.forEach((player) => {
+    playersById.current.forEach((player) => {
       player.pause();
     });
   }, []);
 
   const unfreezeAnimation = useCallback(() => {
-    mapRef.current.forEach((player) => {
+    playersById.current.forEach((player) => {
       player.play();
     });
   }, []);
@@ -174,8 +177,8 @@ function createPlayer({
   sharedCanvasRef,
   sharedCanvasHqRef,
   absoluteContainerRef,
-  uniqueId,
-  containerId,
+  renderId,
+  viewId,
   mediaUrl,
   position,
   isHq,
@@ -185,8 +188,8 @@ function createPlayer({
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>;
   absoluteContainerRef: React.RefObject<HTMLElement>;
-  uniqueId: string;
-  containerId: string;
+  renderId: string;
+  viewId: string;
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
@@ -194,11 +197,10 @@ function createPlayer({
 }): CustomEmojiPlayer {
   if (customEmoji.isLottie) {
     const lottie = RLottie.init(
-      containerId,
-      isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,
-      undefined,
-      uniqueId,
       mediaUrl,
+      isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,
+      renderId,
+      viewId,
       {
         size: SIZE,
         coords: position,
@@ -210,9 +212,9 @@ function createPlayer({
     return {
       play: () => lottie.play(),
       pause: () => lottie.pause(),
-      destroy: () => lottie.removeContainer(uniqueId),
+      destroy: () => lottie.removeView(viewId),
       updatePosition: (x: number, y: number) => {
-        return lottie.setSharedCanvasCoords(uniqueId, { x, y });
+        return lottie.setSharedCanvasCoords(viewId, { x, y });
       },
     };
   }

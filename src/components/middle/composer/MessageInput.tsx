@@ -155,7 +155,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     sharedCanvasRef,
     sharedCanvasHqRef,
     absoluteContainerRef,
-    isAttachmentModalInput ? 'attachment' : undefined,
+    isAttachmentModalInput ? 'attachment' : 'composer',
     isActive,
   );
 

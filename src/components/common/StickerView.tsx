@@ -121,7 +121,7 @@ const StickerView: FC<OwnProps> = ({
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
 
   const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
-  const idKey = [
+  const renderId = [
     (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, realSize, customColor?.join(','),
   ].filter(Boolean).join('_');
 
@@ -141,8 +141,8 @@ const StickerView: FC<OwnProps> = ({
       />
       {isLottie ? (
         <AnimatedSticker
-          key={idKey}
-          animationId={idKey}
+          key={renderId}
+          renderId={renderId}
           size={realSize}
           className={buildClassName(
             styles.media,

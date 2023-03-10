@@ -7,6 +7,7 @@ import { createConnector } from '../../util/PostMessageConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
 import { fastRaf } from '../../util/schedulers';
+import generateIdFor from '../../util/generateIdFor';
 
 interface Params {
   noLoop?: boolean;
@@ -28,8 +29,9 @@ const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
+const ID_STORE = {};
 
-const instancesById = new Map<string, RLottie>();
+const instancesByRenderId = new Map<string, RLottie>();
 
 const workers = new Array(MAX_WORKERS).fill(undefined).map(
   () => createConnector<RLottieApi>(new Worker(new URL('./rlottie.worker.ts', import.meta.url))),
@@ -39,7 +41,7 @@ let lastWorkerIndex = -1;
 class RLottie {
   // Config
 
-  private containers = new Map<string, {
+  private views = new Map<string, {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     isLoaded?: boolean;
@@ -90,40 +92,46 @@ class RLottie {
   private lastRenderAt?: number;
 
   static init(...args: ConstructorParameters<typeof RLottie>) {
-    const [container, canvas, onLoad, id, , params] = args;
-    let instance = instancesById.get(id);
+    const [
+      , canvas,
+      renderId,
+      viewId = generateIdFor(ID_STORE, true),
+      params, ,
+      onLoad,
+    ] = args;
+    let instance = instancesByRenderId.get(renderId);
 
     if (!instance) {
       // eslint-disable-next-line prefer-rest-params
       instance = new RLottie(...args);
-      instancesById.set(id, instance);
+      instancesByRenderId.set(renderId, instance);
     } else {
-      instance.addContainer(container, canvas, onLoad, params?.coords);
+      instance.addView(viewId, canvas, onLoad, params?.coords);
     }
 
     return instance;
   }
 
   constructor(
-    containerId: string,
-    container: HTMLDivElement | HTMLCanvasElement,
-    onLoad: NoneToVoidFunction | undefined,
-    private id: string,
     private tgsUrl: string,
-    private params: Params = { },
+    private container: HTMLDivElement | HTMLCanvasElement,
+    private renderId: string,
+    private viewId: string = generateIdFor(ID_STORE, true),
+    private params: Params = {},
     private customColor?: [number, number, number],
+    private onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
     private onLoop?: () => void,
   ) {
-    this.addContainer(containerId, container, onLoad, params.coords);
+    this.addView(viewId, container, onLoad, params.coords);
     this.initConfig();
     this.initRenderer();
   }
 
-  public removeContainer(containerId: string) {
+  public removeView(viewId: string) {
     const {
       canvas, ctx, isSharedCanvas, coords,
-    } = this.containers.get(containerId)!;
+    } = this.views.get(viewId)!;
 
     if (isSharedCanvas) {
       ctx.clearRect(coords!.x, coords!.y, this.imgSize, this.imgSize);
@@ -131,9 +139,9 @@ class RLottie {
       canvas.remove();
     }
 
-    this.containers.delete(containerId);
+    this.views.delete(viewId);
 
-    if (!this.containers.size) {
+    if (!this.views.size) {
       this.destroy();
     }
   }
@@ -142,9 +150,9 @@ class RLottie {
     return this.isAnimating || this.isWaiting;
   }
 
-  play(forceRestart = false, containerId?: string) {
-    if (containerId) {
-      this.containers.get(containerId)!.isPaused = false;
+  play(forceRestart = false, viewId?: string) {
+    if (viewId) {
+      this.views.get(viewId)!.isPaused = false;
     }
 
     if (this.isEnded && forceRestart) {
@@ -156,11 +164,11 @@ class RLottie {
     this.doPlay();
   }
 
-  pause(containerId?: string) {
-    if (containerId) {
-      this.containers.get(containerId)!.isPaused = true;
+  pause(viewId?: string) {
+    if (viewId) {
+      this.views.get(viewId)!.isPaused = true;
 
-      const areAllContainersPaused = Array.from(this.containers.values()).every(({ isPaused }) => isPaused);
+      const areAllContainersPaused = Array.from(this.views.values()).every(({ isPaused }) => isPaused);
       if (!areAllContainersPaused) {
         return;
       }
@@ -202,8 +210,8 @@ class RLottie {
     this.params.noLoop = noLoop;
   }
 
-  setSharedCanvasCoords(containerId: string, newCoords: Params['coords']) {
-    const containerInfo = this.containers.get(containerId)!;
+  setSharedCanvasCoords(viewId: string, newCoords: Params['coords']) {
+    const containerInfo = this.views.get(viewId)!;
     const {
       canvas, ctx,
     } = containerInfo;
@@ -230,8 +238,8 @@ class RLottie {
     }
   }
 
-  private addContainer(
-    containerId: string,
+  private addView(
+    viewId: string,
     container: HTMLDivElement | HTMLCanvasElement,
     onLoad?: NoneToVoidFunction,
     coords?: Params['coords'],
@@ -272,7 +280,7 @@ class RLottie {
 
       container.appendChild(canvas);
 
-      this.containers.set(containerId, {
+      this.views.set(viewId, {
         canvas, ctx, onLoad,
       });
     } else {
@@ -287,7 +295,7 @@ class RLottie {
 
       imgSize = Math.round(this.params.size! * sizeFactor);
 
-      this.containers.set(containerId, {
+      this.views.set(viewId, {
         canvas,
         ctx,
         isSharedCanvas: true,
@@ -328,7 +336,7 @@ class RLottie {
     this.clearCache();
     this.destroyRenderer();
 
-    instancesById.delete(this.id);
+    instancesByRenderId.delete(this.renderId);
   }
 
   private clearCache() {
@@ -359,7 +367,7 @@ class RLottie {
     workers[this.workerIndex].request({
       name: 'init',
       args: [
-        this.id,
+        this.renderId,
         this.tgsUrl,
         this.imgSize,
         this.params.isLowPriority || false,
@@ -372,7 +380,7 @@ class RLottie {
   private destroyRenderer() {
     workers[this.workerIndex].request({
       name: 'destroy',
-      args: [this.id],
+      args: [this.renderId],
     });
   }
 
@@ -395,7 +403,7 @@ class RLottie {
     workers[this.workerIndex].request({
       name: 'changeData',
       args: [
-        this.id,
+        this.renderId,
         this.tgsUrl,
         this.params.isLowPriority || false,
         this.onChangeData.bind(this),
@@ -441,7 +449,7 @@ class RLottie {
 
       // Paused from outside
       if (!this.isAnimating) {
-        const areAllLoaded = Array.from(this.containers.values()).every(({ isLoaded }) => isLoaded);
+        const areAllLoaded = Array.from(this.views.values()).every(({ isLoaded }) => isLoaded);
         if (areAllLoaded) {
           return false;
         }
@@ -464,7 +472,7 @@ class RLottie {
       }
 
       if (frameIndex !== this.prevFrameIndex) {
-        this.containers.forEach((containerData) => {
+        this.views.forEach((containerData) => {
           const {
             ctx, isLoaded, isPaused, coords: { x, y } = {}, onLoad,
           } = containerData;
@@ -554,7 +562,7 @@ class RLottie {
 
     workers[this.workerIndex].request({
       name: 'renderFrames',
-      args: [this.id, frameIndex, this.onFrameLoad.bind(this)],
+      args: [this.renderId, frameIndex, this.onFrameLoad.bind(this)],
     });
   }
 
