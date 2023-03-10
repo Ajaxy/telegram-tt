@@ -15,6 +15,7 @@ import './Reactions.scss';
 type OwnProps = {
   message: ApiMessage;
   isOutside?: boolean;
+  maxWidth?: number;
   activeReactions?: ActiveReaction[];
   availableReactions?: ApiAvailableReaction[];
   metaChildren?: React.ReactNode;
@@ -28,6 +29,7 @@ const MAX_RECENT_AVATARS = 3;
 const Reactions: FC<OwnProps> = ({
   message,
   isOutside,
+  maxWidth,
   activeReactions,
   availableReactions,
   metaChildren,
@@ -40,7 +42,10 @@ const Reactions: FC<OwnProps> = ({
   ), [message]);
 
   return (
-    <div className={buildClassName('Reactions', isOutside && 'is-outside')}>
+    <div
+      className={buildClassName('Reactions', isOutside && 'is-outside')}
+      style={maxWidth ? `max-width: ${maxWidth}px` : undefined}
+    >
       {message.reactions!.results.map((reaction) => (
         <ReactionButton
           key={getReactionUniqueKey(reaction.reaction)}

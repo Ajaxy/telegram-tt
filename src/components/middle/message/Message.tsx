@@ -262,6 +262,7 @@ const APPENDIX_NOT_OWN = { __html: '<svg width="9" height="20" xmlns="http://www
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
+const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
 const THROTTLE_MS = 300;
 
@@ -655,6 +656,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   let style = '';
   let calculatedWidth;
+  let reactionsMaxWidth;
   let noMediaCorners = false;
   const albumLayout = useMemo(() => {
     return isAlbum
@@ -704,6 +706,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   if (calculatedWidth) {
     style = `width: ${calculatedWidth + extraPadding}px`;
+    reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
   }
 
   const signature = (isChannel && message.postAuthorTitle)
@@ -1233,6 +1236,7 @@ const Message: FC<OwnProps & StateProps> = ({
           <Reactions
             message={reactionMessage!}
             isOutside
+            maxWidth={reactionsMaxWidth}
             activeReactions={activeReactions}
             availableReactions={availableReactions}
             genericEffects={genericEffects}
