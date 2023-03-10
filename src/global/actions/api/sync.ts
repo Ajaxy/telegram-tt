@@ -16,7 +16,7 @@ import {
   safeReplaceViewportIds,
   updateChats,
   updateListedIds,
-  updateThread,
+  updateThread, updateThreadInfo,
   updateThreadInfos,
   updateUsers,
 } from '../../reducers';
@@ -161,6 +161,9 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
 
         global = addChatMessagesById(global, currentChatId, byId);
         global = updateListedIds(global, currentChatId, activeThreadId, listedIds);
+        if (threadInfo?.originChannelId) {
+          global = updateThreadInfo(global, currentChatId, activeThreadId, threadInfo);
+        }
         // eslint-disable-next-line @typescript-eslint/no-loop-func
         Object.values(global.byTabId).forEach(({ id: otherTabId }) => {
           const { chatId: otherChatId, threadId: otherThreadId } = selectCurrentMessageList(global, otherTabId) || {};

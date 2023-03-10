@@ -15,7 +15,6 @@ import { Bundles, loadBundle } from '../util/moduleLoader';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
 import { updateTabState } from './reducers/tabs';
 import type { ActionReturnType, GlobalState } from './types';
-import { getIsMobile } from '../hooks/useAppLayout';
 import { isLocalMessageId } from './helpers';
 
 initCache();
@@ -114,7 +113,7 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     };
   });
 
-  const parsedMessageList = !getIsMobile() ? parseLocationHash() : undefined;
+  const parsedMessageList = parseLocationHash();
 
   if (global.authState !== 'authorizationStateReady'
     && !global.passcode.hasPasscode && !global.passcode.isScreenLocked) {
