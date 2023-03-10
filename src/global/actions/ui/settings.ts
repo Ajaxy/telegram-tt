@@ -1,4 +1,4 @@
-import { addActionHandler } from '../../index';
+import { addActionHandler, getActions } from '../../index';
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
 import switchTheme from '../../../util/switchTheme';
 import { ANIMATION_LEVEL_MAX, ANIMATION_LEVEL_MED, ANIMATION_LEVEL_MIN } from '../../../config';
@@ -12,6 +12,8 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
+  const { updatePageTitle } = getActions();
+
   const settings = global.settings.byKey;
   const prevSettings = prevGlobal?.settings.byKey;
   prevGlobal = global;
@@ -47,6 +49,10 @@ addCallback((global: GlobalState) => {
       `${Math.floor(settings.messageTextSize * 1.3125)}px`);
     document.documentElement.style.setProperty('--message-text-size', `${settings.messageTextSize}px`);
     document.documentElement.setAttribute('data-message-text-size', settings.messageTextSize.toString());
+  }
+
+  if (settings.canDisplayChatInTitle !== prevSettings.canDisplayChatInTitle) {
+    updatePageTitle();
   }
 });
 
