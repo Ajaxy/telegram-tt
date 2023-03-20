@@ -146,6 +146,7 @@ const MessageListContent: FC<OwnProps> = ({
           <ActionMessage
             key={message.id}
             message={message}
+            threadId={threadId}
             isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID)}
             observeIntersectionForReading={observeIntersectionForReading}
             observeIntersectionForLoading={observeIntersectionForLoading}

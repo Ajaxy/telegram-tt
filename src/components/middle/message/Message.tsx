@@ -1308,8 +1308,8 @@ export default memo(withGlobal<OwnProps>(
     const uploadProgress = selectUploadProgress(global, message);
     const isFocused = messageListType === 'thread' && (
       album
-        ? album.messages.some((m) => selectIsMessageFocused(global, m))
-        : selectIsMessageFocused(global, message)
+        ? album.messages.some((m) => selectIsMessageFocused(global, m, threadId))
+        : selectIsMessageFocused(global, message, threadId)
     );
 
     const {

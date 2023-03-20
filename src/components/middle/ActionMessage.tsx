@@ -36,6 +36,7 @@ import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
 
 type OwnProps = {
   message: ApiMessage;
+  threadId?: number;
   observeIntersectionForReading?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -234,7 +235,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message }): StateProps => {
+  (global, { message, threadId }): StateProps => {
     const { byId: usersById } = global.users;
     const userId = message.senderId;
     const { targetUserIds, targetChatId } = message.content.action || {};
@@ -243,7 +244,7 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, message.chatId, targetMessageId)
       : undefined;
 
-    const isFocused = selectIsMessageFocused(global, message);
+    const isFocused = threadId ? selectIsMessageFocused(global, message, threadId) : false;
     const {
       direction: focusDirection,
       noHighlight: noFocusHighlight,
