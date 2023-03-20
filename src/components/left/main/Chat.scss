@@ -156,6 +156,10 @@
       transform: translateX(-0.375rem) scaleY(0.5);
       transition: transform var(--layer-transition);
 
+      body.animation-level-0 & {
+        transition: none;
+      }
+
       background: var(--color-primary);
       z-index: 1;
 
@@ -206,11 +210,19 @@
 
     .Badge-transition {
       transition: opacity var(--layer-transition), transform var(--layer-transition);
+
+      body.animation-level-0 & {
+        transition: none;
+      }
     }
   }
 
   .info {
     transition: opacity 300ms ease, transform var(--layer-transition);
+
+    body.animation-level-0 & {
+      transition: none;
+    }
 
     .title .custom-emoji {
       color: var(--color-primary);

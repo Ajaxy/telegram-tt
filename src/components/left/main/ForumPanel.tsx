@@ -9,7 +9,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
   GENERAL_TOPIC_ID,
-  TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
+  TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA, ANIMATION_LEVEL_MIN,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/environment';
 import {
@@ -52,6 +52,7 @@ type StateProps = {
   chat?: ApiChat;
   currentTopicId?: number;
   lastSyncTime?: number;
+  animationLevel?: number;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -64,6 +65,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   onTopicSearch,
   onCloseAnimationEnd,
+  animationLevel,
 }) => {
   const {
     closeForumPanel, openChatWithInfo, loadTopics,
@@ -90,6 +92,12 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   const handleClose = useCallback(() => {
     closeForumPanel();
   }, [closeForumPanel]);
+
+  useEffect(() => {
+    if (animationLevel === ANIMATION_LEVEL_MIN && !isOpen) {
+      onCloseAnimationEnd?.();
+    }
+  }, [animationLevel, isOpen, onCloseAnimationEnd]);
 
   const handleToggleChatInfo = useCallback(() => {
     if (!chat) return;
@@ -196,6 +204,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         styles.root,
         isScrolled && styles.scrolled,
         lang.isRtl && styles.rtl,
+        animationLevel === ANIMATION_LEVEL_MIN && styles.noAnimation,
       )}
       onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
     >
@@ -277,6 +286,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       lastSyncTime: global.lastSyncTime,
       currentTopicId: chatId === currentChatId ? currentThreadId : undefined,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(ForumPanel));
