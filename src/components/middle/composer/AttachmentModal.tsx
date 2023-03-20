@@ -581,7 +581,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 onClick={handleSendClick}
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >
-                {lang('Send')}
+                {shouldSchedule ? lang('Next') : lang('Send')}
               </Button>
               {canShowCustomSendMenu && (
                 <CustomSendMenu
