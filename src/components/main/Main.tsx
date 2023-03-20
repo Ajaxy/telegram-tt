@@ -347,7 +347,7 @@ const Main: FC<OwnProps & StateProps> = ({
   }, [lastSyncTime, openChat]);
 
   const leftColumnTransition = useShowTransition(
-    isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
+    isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
   );
   const willAnimateLeftColumnRef = useRef(false);
   const forceUpdate = useForceUpdate();
@@ -376,7 +376,7 @@ const Main: FC<OwnProps & StateProps> = ({
   }, [animationLevel, forceUpdate, isLeftColumnOpen]);
 
   const rightColumnTransition = useShowTransition(
-    isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations,
+    isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
   );
   const willAnimateRightColumnRef = useRef(false);
   const [isNarrowMessageList, setIsNarrowMessageList] = useState(isRightColumnOpen);
