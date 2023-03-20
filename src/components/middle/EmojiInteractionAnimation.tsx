@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ActiveEmojiInteraction } from '../../global/types';
 
-import { IS_ANDROID } from '../../util/environment';
+import { IS_ANDROID } from '../../util/windowEnvironment';
 import useFlag from '../../hooks/useFlag';
 import useMedia from '../../hooks/useMedia';
 import buildClassName from '../../util/buildClassName';

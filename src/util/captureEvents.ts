@@ -1,4 +1,4 @@
-import { IS_IOS } from './environment';
+import { IS_IOS } from './windowEnvironment';
 import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';

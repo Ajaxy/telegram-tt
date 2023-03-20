@@ -1,6 +1,6 @@
 import { getActions, getGlobal } from '../global';
 
-import { IS_MULTITAB_SUPPORTED } from '../util/environment';
+import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
 import { DEBUG } from '../config';
 
 // eslint-disable-next-line import/no-cycle

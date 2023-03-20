@@ -8,7 +8,7 @@ import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getServerTimeOffset } from '../../util/serverTime';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';

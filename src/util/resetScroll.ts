@@ -1,4 +1,4 @@
-import { IS_IOS } from './environment';
+import { IS_IOS } from './windowEnvironment';
 import forceReflow from './forceReflow';
 
 const resetScroll = (container: HTMLDivElement, scrollTop?: number) => {

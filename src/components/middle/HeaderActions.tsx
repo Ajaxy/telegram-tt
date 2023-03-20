@@ -13,7 +13,7 @@ import type { IAnchorPosition } from '../../types';
 import { ManagementScreens } from '../../types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
-import { ARE_CALLS_SUPPORTED, IS_PWA } from '../../util/environment';
+import { ARE_CALLS_SUPPORTED, IS_PWA } from '../../util/windowEnvironment';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';

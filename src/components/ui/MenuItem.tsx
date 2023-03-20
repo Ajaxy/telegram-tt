@@ -4,7 +4,7 @@ import React, { useCallback } from '../../lib/teact/teact';
 import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
-import { IS_COMPACT_MENU } from '../../util/environment';
+import { IS_COMPACT_MENU } from '../../util/windowEnvironment';
 
 import './MenuItem.scss';
 

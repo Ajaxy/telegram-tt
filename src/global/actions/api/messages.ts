@@ -32,7 +32,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { IS_IOS } from '../../../util/environment';
+import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
   areSortedArraysIntersecting, buildCollectionByKey, omit, split, unique,

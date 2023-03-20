@@ -7,7 +7,7 @@ import { getActions } from '../../../global';
 import type { ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';

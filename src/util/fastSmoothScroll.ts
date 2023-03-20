@@ -7,7 +7,7 @@ import {
   FAST_SMOOTH_MAX_DISTANCE, FAST_SMOOTH_MAX_DURATION, FAST_SMOOTH_MIN_DURATION,
   FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE,
 } from '../config';
-import { IS_ANDROID } from './environment';
+import { IS_ANDROID } from './windowEnvironment';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { animateSingle } from './animation';
 import { fastRaf } from './schedulers';

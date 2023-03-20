@@ -3,7 +3,7 @@ import type React from '../../../../lib/teact/teact';
 import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/environment';
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import windowSize from '../../../../util/windowSize';
 import { captureEvents, SwipeDirection } from '../../../../util/captureEvents';
 import useFlag from '../../../../hooks/useFlag';

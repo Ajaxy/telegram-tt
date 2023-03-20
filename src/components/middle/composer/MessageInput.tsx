@@ -11,7 +11,7 @@ import type { Signal } from '../../../util/signals';
 import { EDITABLE_INPUT_ID } from '../../../config';
 import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
-} from '../../../util/environment';
+} from '../../../util/windowEnvironment';
 import { selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';

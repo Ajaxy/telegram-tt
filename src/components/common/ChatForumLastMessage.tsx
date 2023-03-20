@@ -11,7 +11,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FC } from '../../lib/teact/teact';
 import type { ApiChat } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { getOrderedTopics } from '../../global/helpers';
 import { getIsMobile } from '../../hooks/useAppLayout';

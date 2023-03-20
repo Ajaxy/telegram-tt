@@ -9,7 +9,7 @@ import type { RealTouchEvent } from '../../util/captureEvents';
 import { animateNumber, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD } from '../../util/captureEvents';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
 

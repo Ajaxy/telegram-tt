@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';
 import useMouseInside from '../../../hooks/useMouseInside';
 

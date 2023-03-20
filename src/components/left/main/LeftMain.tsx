@@ -7,7 +7,7 @@ import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';

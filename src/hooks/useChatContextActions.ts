@@ -4,7 +4,7 @@ import { getActions } from '../global';
 import type { ApiChat, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel, isChatGroup,

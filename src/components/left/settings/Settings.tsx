@@ -4,7 +4,7 @@ import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
 
-import { LAYERS_ANIMATION_NAME } from '../../../util/environment';
+import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 
 import Transition from '../../ui/Transition';

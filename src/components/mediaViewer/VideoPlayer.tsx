@@ -6,7 +6,7 @@ import { getActions } from '../../global';
 
 import type { ApiDimensions } from '../../api/types';
 
-import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/environment';
+import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/windowEnvironment';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
 import useBuffering from '../../hooks/useBuffering';

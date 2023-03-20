@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../lib/teact/teact';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/environment';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatPastTimeShort } from '../../util/dateFormat';
 import { getColorFromExtension, getFileSizeString } from './helpers/documentInfo';

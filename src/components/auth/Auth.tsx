@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type { GlobalState } from '../../global/types';
 
 import '../../global/actions/initial';
-import { PLATFORM_ENV } from '../../util/environment';
+import { PLATFORM_ENV } from '../../util/windowEnvironment';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 

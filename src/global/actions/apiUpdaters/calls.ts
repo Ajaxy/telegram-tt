@@ -3,7 +3,7 @@ import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '..
 import { omit } from '../../../util/iteratees';
 import { selectChat } from '../../selectors';
 import { updateChat } from '../../reducers';
-import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { notifyAboutCall } from '../../../util/notifications';
 import { selectGroupCall, selectPhoneCallUser } from '../../selectors/calls';
 import { checkNavigatorUserMediaPermissions, initializeSounds } from '../ui/calls';

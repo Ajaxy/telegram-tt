@@ -5,7 +5,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import { MIN_PASSWORD_LENGTH } from '../../config';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 import useLang from '../../hooks/useLang';

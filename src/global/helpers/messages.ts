@@ -11,7 +11,7 @@ import {
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { getUserFullName } from './users';
-import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/environment';
+import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/windowEnvironment';
 import { getChatTitle, isUserId } from './chats';
 import { getGlobal } from '../index';
 

@@ -3,7 +3,7 @@ import { getActions } from '../global';
 import type { ApiChatType } from '../api/types';
 
 import { API_CHAT_TYPES } from '../config';
-import { IS_SAFARI } from './environment';
+import { IS_SAFARI } from './windowEnvironment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |

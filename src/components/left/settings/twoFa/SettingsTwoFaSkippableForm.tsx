@@ -6,7 +6,7 @@ import { withGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { selectAnimatedEmoji } from '../../../../global/selectors';
 import renderText from '../../../common/helpers/renderText';
 import useFlag from '../../../../hooks/useFlag';

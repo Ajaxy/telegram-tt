@@ -1,4 +1,4 @@
-import { IS_TOUCH_ENV } from './environment';
+import { IS_TOUCH_ENV } from './windowEnvironment';
 
 export default function focusEditableElement(element: HTMLElement, force?: boolean, forcePlaceCaretAtEnd?: boolean) {
   if (!force && element === document.activeElement) {

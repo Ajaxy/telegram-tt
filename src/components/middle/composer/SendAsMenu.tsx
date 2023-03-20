@@ -7,7 +7,7 @@ import type { ApiSendAsPeerId } from '../../../api/types';
 
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { isUserId } from '../../../global/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';

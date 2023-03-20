@@ -32,7 +32,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { AudioOrigin } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   selectChat,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 
-import { IS_TOUCH_ENV } from '../util/environment';
+import { IS_TOUCH_ENV } from '../util/windowEnvironment';
 
 const MENU_CLOSE_TIMEOUT = 250;
 let closeTimeout: number | undefined;

@@ -11,7 +11,7 @@ import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
   selectTabState,

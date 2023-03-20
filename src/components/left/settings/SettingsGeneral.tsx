@@ -9,7 +9,7 @@ import { SettingsScreens } from '../../../types';
 
 import {
   getSystemTheme, IS_IOS, IS_MAC_OS, IS_TOUCH_ENV,
-} from '../../../util/environment';
+} from '../../../util/windowEnvironment';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
 import useLang from '../../../hooks/useLang';

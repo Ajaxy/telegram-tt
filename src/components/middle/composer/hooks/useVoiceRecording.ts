@@ -2,7 +2,7 @@ import {
   useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
 
-import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/environment';
+import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/windowEnvironment';
 import * as voiceRecording from '../../../../util/voiceRecording';
 import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 

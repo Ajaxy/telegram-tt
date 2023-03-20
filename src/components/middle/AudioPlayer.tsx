@@ -7,7 +7,7 @@ import type {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
 
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../config';
 
 import * as mediaLoader from '../../util/mediaLoader';

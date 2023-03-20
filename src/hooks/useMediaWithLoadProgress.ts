@@ -2,7 +2,7 @@ import {
   useEffect, useMemo, useRef, useState,
 } from '../lib/teact/teact';
 
-import { IS_PROGRESSIVE_SUPPORTED } from '../util/environment';
+import { IS_PROGRESSIVE_SUPPORTED } from '../util/windowEnvironment';
 import { ApiMediaFormat } from '../api/types';
 import { throttle } from '../util/schedulers';
 import * as mediaLoader from '../util/mediaLoader';

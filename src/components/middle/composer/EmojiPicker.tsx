@@ -12,7 +12,7 @@ import type {
 } from '../../../util/emoji';
 
 import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { uncompressEmoji } from '../../../util/emoji';
 import fastSmoothScroll from '../../../util/fastSmoothScroll';

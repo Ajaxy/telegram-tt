@@ -1,6 +1,6 @@
 import { createCallbackManager } from './callbacks';
 import { ESTABLISH_BROADCAST_CHANNEL_NAME } from '../config';
-import { IS_MULTITAB_SUPPORTED } from './environment';
+import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 import { getPasscodeHash, setPasscodeHash } from './passcode';
 
 const ESTABLISH_TIMEOUT = 100;

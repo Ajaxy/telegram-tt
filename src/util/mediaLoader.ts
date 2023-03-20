@@ -15,7 +15,7 @@ import * as cacheApi from './cacheApi';
 import { fetchBlob } from './files';
 import {
   IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported,
-} from './environment';
+} from './windowEnvironment';
 import { oggToWav } from './oggToWav';
 import { webpToPng } from './webpToPng';
 

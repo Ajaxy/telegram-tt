@@ -41,7 +41,7 @@ import {
   getPhotoFullDimensions,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
-import { DPR } from '../../util/environment';
+import { DPR } from '../../util/windowEnvironment';
 import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';

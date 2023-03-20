@@ -15,7 +15,7 @@ import {
 } from '../../../config';
 import {
   IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
-} from '../../../util/environment';
+} from '../../../util/windowEnvironment';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
 import { updateAppBadge } from '../../../util/appBadge';

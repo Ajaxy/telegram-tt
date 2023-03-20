@@ -10,7 +10,7 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 import type { GlobalState } from '../../../global/types';
 
 import { ALL_FOLDER_ID } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';

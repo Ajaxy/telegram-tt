@@ -1,5 +1,5 @@
 import { throttle } from './schedulers';
-import { IS_IOS } from './environment';
+import { IS_IOS } from './windowEnvironment';
 
 type IDimensions = {
   width: number;

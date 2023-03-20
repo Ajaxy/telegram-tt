@@ -19,7 +19,7 @@ import {
   IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
-import { IS_PWA } from '../../../util/environment';
+import { IS_PWA } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
 import switchTheme from '../../../util/switchTheme';

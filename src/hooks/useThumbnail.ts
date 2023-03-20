@@ -3,7 +3,7 @@ import { useLayoutEffect, useMemo, useState } from '../lib/teact/teact';
 import type { ApiMessage, ApiSticker } from '../api/types';
 
 import { DEBUG } from '../config';
-import { isWebpSupported } from '../util/environment';
+import { isWebpSupported } from '../util/windowEnvironment';
 import { EMPTY_IMAGE_DATA_URI, webpToPngBase64 } from '../util/webpToPng';
 import { getMessageMediaThumbDataUri } from '../global/helpers';
 import { selectTheme } from '../global/selectors';

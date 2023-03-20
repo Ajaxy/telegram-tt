@@ -3,7 +3,7 @@ import { getActions } from '../lib/teact/teactn';
 
 import { IS_TEST } from '../config';
 import { fastRaf } from '../util/schedulers';
-import { IS_IOS } from '../util/environment';
+import { IS_IOS } from '../util/windowEnvironment';
 
 import useSyncEffect from './useSyncEffect';
 import useEffectOnce from './useEffectOnce';

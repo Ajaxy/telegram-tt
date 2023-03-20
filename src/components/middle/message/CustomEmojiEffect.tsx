@@ -3,7 +3,7 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiEmojiStatus, ApiReactionCustomEmoji } from '../../../api/types';
 
-import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/environment';
+import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/windowEnvironment';
 import { getStickerPreviewHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';

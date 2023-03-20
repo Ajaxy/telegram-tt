@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 import type { GlobalState } from '../../global/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
 import useHistoryBack from '../../hooks/useHistoryBack';

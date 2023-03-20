@@ -6,7 +6,7 @@ import React, {
 import type { ApiVideo } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';

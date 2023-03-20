@@ -9,7 +9,7 @@ import { getStickerPreviewHash } from '../global/helpers';
 import * as mediaLoader from './mediaLoader';
 import { throttle } from './schedulers';
 import generateIdFor from './generateIdFor';
-import { IS_WEBM_SUPPORTED } from './environment';
+import { IS_WEBM_SUPPORTED } from './windowEnvironment';
 
 import placeholderSrc from '../assets/square.svg';
 import blankSrc from '../assets/blank.png';

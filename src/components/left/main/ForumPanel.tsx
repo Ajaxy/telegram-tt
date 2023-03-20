@@ -11,7 +11,7 @@ import {
   GENERAL_TOPIC_ID,
   TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA, ANIMATION_LEVEL_MIN,
 } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import {
   selectChat, selectCurrentMessageList, selectIsForumPanelOpen, selectTabState,
 } from '../../../global/selectors';
