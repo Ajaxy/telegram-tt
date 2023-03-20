@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
-import type { GlobalActions } from '../../../global/types';
+import type { GlobalActions } from '../../../global';
 
 import { COMPOSER_EMOJI_SIZE_PICKER } from '../../../config';
 import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';

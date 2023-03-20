@@ -1,92 +1,92 @@
 import type {
+  ApiAppConfig,
+  ApiAttachBot,
+  ApiAttachment,
+  ApiAvailableReaction,
+  ApiChannelStatistics,
   ApiChat,
+  ApiChatAdminRights,
+  ApiChatBannedRights,
+  ApiChatFolder,
+  ApiChatReactions,
+  ApiChatType,
+  ApiConfig,
+  ApiContact,
+  ApiCountry,
+  ApiCountryCode,
+  ApiError,
+  ApiExportedInvite,
+  ApiFormattedText,
+  ApiGlobalMessageSearchType,
+  ApiGroupCall,
+  ApiGroupStatistics,
+  ApiInputInvoice,
+  ApiInviteInfo,
+  ApiInvoice,
+  ApiKeyboardButton,
   ApiMessage,
+  ApiMessageEntity,
+  ApiMessageStatistics,
+  ApiNewPoll,
+  ApiNotification,
+  ApiPaymentCredentials,
+  ApiPaymentFormNativeParams,
+  ApiPaymentSavedInfo,
+  ApiPhoneCall,
+  ApiPhoto,
+  ApiPremiumPromo,
+  ApiReaction,
+  ApiReceipt,
+  ApiReportReason,
+  ApiSendMessageAction,
+  ApiSession,
+  ApiSessionData,
+  ApiSponsoredMessage,
+  ApiSticker,
+  ApiStickerSet,
+  ApiStickerSetInfo,
+  ApiThemeParameters,
   ApiThreadInfo,
-  ApiUser,
-  ApiUserStatus,
+  ApiTranscription,
+  ApiTypingStatus,
+  ApiUpdate,
   ApiUpdateAuthorizationStateType,
   ApiUpdateConnectionStateType,
-  ApiStickerSet,
-  ApiSticker,
-  ApiWebPage,
+  ApiUser,
+  ApiUserStatus,
   ApiVideo,
-  ApiFormattedText,
-  ApiChatFolder,
   ApiWallpaper,
-  ApiNotification,
-  ApiError,
-  ApiGlobalMessageSearchType,
-  ApiPaymentSavedInfo,
-  ApiSession,
-  ApiNewPoll,
-  ApiInviteInfo,
-  ApiCountryCode,
-  ApiCountry,
-  ApiGroupCall,
-  ApiAvailableReaction,
-  ApiAppConfig,
-  ApiSponsoredMessage,
-  ApiChannelStatistics,
-  ApiGroupStatistics,
-  ApiMessageStatistics,
-  ApiPaymentFormNativeParams,
-  ApiUpdate,
-  ApiReportReason,
-  ApiPhoto,
-  ApiKeyboardButton,
-  ApiThemeParameters,
-  ApiAttachBot,
-  ApiPhoneCall,
+  ApiWebPage,
   ApiWebSession,
-  ApiPremiumPromo,
-  ApiTranscription,
-  ApiInputInvoice,
-  ApiInvoice,
-  ApiStickerSetInfo,
-  ApiChatType,
-  ApiReceipt,
-  ApiPaymentCredentials,
-  ApiConfig,
-  ApiReaction,
-  ApiChatReactions,
-  ApiContact,
-  ApiExportedInvite,
-  ApiSendMessageAction,
-  ApiMessageEntity,
-  ApiAttachment,
-  ApiChatBannedRights,
-  ApiChatAdminRights,
-  ApiSessionData,
-  ApiTypingStatus,
 } from '../api/types';
 import type {
-  FocusDirection,
-  ISettings,
-  MediaViewerOrigin,
-  ChatCreationProgress,
-  ProfileEditProgress,
-  SharedMediaType,
-  GlobalSearchContent,
-  ManagementProgress,
-  PaymentStep,
-  ShippingOption,
   ApiInvoiceContainer,
   ApiPrivacyKey,
   ApiPrivacySettings,
-  ThemeKey,
-  IThemeSettings,
-  NotifyException,
-  LangCode,
-  EmojiKeywords,
-  InlineBotSettings,
-  NewChatMembersProgress,
   AudioOrigin,
-  ManagementState,
-  SettingsScreens,
+  ChatCreationProgress,
+  EmojiKeywords,
+  FocusDirection,
+  GlobalSearchContent,
+  InlineBotSettings,
+  ISettings,
+  IThemeSettings,
+  LangCode,
+  LoadMoreDirection,
+  ManagementProgress,
   ManagementScreens,
-  LoadMoreDirection, PrivacyVisibility,
+  ManagementState,
+  MediaViewerOrigin,
+  NewChatMembersProgress,
+  NotifyException,
+  PaymentStep,
+  PrivacyVisibility,
+  ProfileEditProgress,
+  SettingsScreens,
+  SharedMediaType,
+  ShippingOption,
+  ThemeKey,
 } from '../types';
-import { typify } from '../lib/teact/teactn';
 import type { P2pMessage } from '../lib/secret-sauce';
 import type { ApiCredentials } from '../components/payment/PaymentModal';
 
@@ -1364,7 +1364,7 @@ export interface ActionPayloads {
   };
   resetLeftColumnWidth: undefined;
 
-  copySelectedMessages: WithTabId;
+  copySelectedMessages: WithTabId | undefined;
   copyMessagesByIds: {
     messageIds?: number[];
   } & WithTabId;
@@ -2064,7 +2064,7 @@ export interface ActionPayloads {
 
   loadAttachBots: {
     hash?: string;
-  };
+  } | undefined;
 
   toggleAttachBot: {
     botId: string;
@@ -2129,9 +2129,9 @@ export interface ActionPayloads {
   };
 
   // Misc
-  openPollModal: {
+  openPollModal: ({
     isQuiz?: boolean;
-  } & WithTabId;
+  } & WithTabId) | undefined;
   closePollModal: WithTabId | undefined;
   requestConfetti: ({
     top: number;
@@ -2183,7 +2183,7 @@ export interface ActionPayloads {
   toggleGroupCallMute: {
     participantId: string;
     value: boolean;
-  };
+  } | undefined;
   toggleGroupCallPresentation: {
     value?: boolean;
   } | undefined;
@@ -2263,14 +2263,14 @@ export interface ActionPayloads {
   updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact: boolean };
 
   // Premium
-  openPremiumModal: {
+  openPremiumModal: ({
     initialSection?: string;
     fromUserId?: string;
     toUserId?: string;
     isSuccess?: boolean;
     isGift?: boolean;
     monthsAmount?: number;
-  } & WithTabId;
+  } & WithTabId) | undefined;
   closePremiumModal: ({
     isClosed?: boolean;
   } & WithTabId) | undefined;
@@ -2281,11 +2281,11 @@ export interface ActionPayloads {
   };
 
   loadPremiumGifts: undefined;
-  loadDefaultTopicIcons: never;
+  loadDefaultTopicIcons: undefined;
   loadPremiumStickers: undefined;
   loadPremiumSetStickers: {
     hash?: string;
-  };
+  } | undefined;
 
   openGiftPremiumModal: ({
     forUserId?: string;
@@ -2379,8 +2379,6 @@ export interface ActionPayloads {
 }
 
 export type RequiredGlobalState = GlobalState & { _: never };
-const typed = typify<GlobalState, ActionPayloads & RequiredActionPayloads>();
-export type GlobalActions = ReturnType<typeof typed.getActions>;
 export type ActionReturnType = GlobalState | void | Promise<void>;
 export type TabArgs<T> = T extends RequiredGlobalState ? [
   tabId: number,

@@ -810,7 +810,7 @@ addActionHandler('closeMessageLanguageModal', (global, actions, payload): Action
 });
 
 addActionHandler('copySelectedMessages', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+  const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
   if (!tabState.selectedMessages) {
     return;
