@@ -70,6 +70,7 @@ import { interpolateArray } from '../../../util/waveform';
 import { requestChatUpdate } from './chats';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { getServerTimeOffset } from '../../../util/serverTime';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -883,6 +884,9 @@ export async function fetchMessageViews({
       views,
       forwards,
       messagesCount: replies?.replies,
+      recentReplierIds: replies?.recentRepliers?.map(getApiChatIdFromMtpPeer),
+      maxId: replies?.maxId,
+      readMaxId: replies?.readMaxId,
     };
   });
 }
