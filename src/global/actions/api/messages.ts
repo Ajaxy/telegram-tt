@@ -1488,6 +1488,9 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
 
     global = updateThreadInfo(global, repliesChatId, threadId, {
       messagesCount: update.messagesCount,
+      recentReplierIds: update.recentReplierIds,
+      lastMessageId: update.maxId,
+      lastReadInboxMessageId: update.readMaxId,
     });
   });
 
