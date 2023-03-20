@@ -6,7 +6,7 @@ import type { MenuItemContextAction } from '../../../ui/ListItem';
 
 import { compact } from '../../../../util/iteratees';
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
-import { IS_MULTITAB_SUPPORTED } from '../../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/environment';
 
 import useLang from '../../../../hooks/useLang';
 
@@ -37,7 +37,7 @@ export default function useTopicContextActions(
     const canToggleClosed = getCanManageTopic(chat, topic);
     const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
 
-    const actionOpenInNewTab = IS_MULTITAB_SUPPORTED && {
+    const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
       title: 'Open in new tab',
       icon: 'open-in-new-tab',
       handler: () => {
