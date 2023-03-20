@@ -6,15 +6,16 @@ const CLOSE_DURATION = 350;
 const useShowTransition = (
   isOpen = false,
   onCloseTransitionEnd?: () => void,
-  noOpenTransition = false,
+  noFirstOpenTransition = false,
   className: string | false = 'fast',
   noCloseTransition = false,
   closeDuration = CLOSE_DURATION,
+  noOpenTransition = false,
 ) => {
   const [isClosed, setIsClosed] = useState(!isOpen);
   const closeTimeoutRef = useRef<number>();
   // СSS class should be added in a separate tick to turn on CSS transition.
-  const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noOpenTransition);
+  const [hasOpenClassName, setHasOpenClassName] = useState(isOpen && noFirstOpenTransition);
 
   if (isOpen) {
     setIsClosed(false);
