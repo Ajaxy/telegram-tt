@@ -101,7 +101,11 @@ const ManageUser: FC<OwnProps & StateProps> = ({
   const handleFirstNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setFirstName(e.target.value);
     setIsProfileFieldsTouched(true);
-  }, []);
+
+    if (error === ERROR_FIRST_NAME_MISSING) {
+      setError(undefined);
+    }
+  }, [error]);
 
   const handleLastNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setLastName(e.target.value);
@@ -119,6 +123,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
     if (!trimmedFirstName.length) {
       setError(ERROR_FIRST_NAME_MISSING);
+      return;
     }
 
     updateContact({
