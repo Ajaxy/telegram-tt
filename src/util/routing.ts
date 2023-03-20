@@ -1,11 +1,23 @@
 import type { MessageListType } from '../global/types';
 import { MAIN_THREAD_ID } from '../api/types';
-import { LOCATION_HASH } from '../hooks/useHistoryBack';
 import { IS_MOCKED_CLIENT } from '../config';
 
 let parsedInitialLocationHash: Record<string, string> | undefined;
 let messageHash: string | undefined;
 let isAlreadyParsed = false;
+
+let LOCATION_HASH: string | undefined = window.location.hash;
+
+export function getInitialLocationHash() {
+  return LOCATION_HASH;
+}
+
+export function resetInitialLocationHash() {
+  LOCATION_HASH = undefined;
+  isAlreadyParsed = false;
+  messageHash = undefined;
+  parsedInitialLocationHash = undefined;
+}
 
 export const createLocationHash = (chatId: string, type: MessageListType, threadId: number): string => {
   const displayType = type === 'thread' ? undefined : type;
@@ -55,21 +67,22 @@ export function parseInitialLocationHash() {
 
   if (isAlreadyParsed) return undefined;
 
-  if (!LOCATION_HASH) return undefined;
+  const locationHash = getInitialLocationHash();
+  if (!locationHash) return undefined;
 
-  let parsedHash = LOCATION_HASH ? LOCATION_HASH.replace(/^#/, '') : undefined;
-  if (parsedHash?.includes('?')) {
+  let parsedHash = locationHash.replace(/^#/, '');
+  if (parsedHash.includes('?')) {
     [messageHash, parsedHash] = parsedHash.split('?');
     if (!IS_MOCKED_CLIENT) {
       window.location.hash = messageHash;
     }
-  } else if (parsedHash?.includes('=')) {
+  } else if (parsedHash.includes('=')) {
     if (!IS_MOCKED_CLIENT) {
       window.location.hash = '';
     }
   }
 
-  parsedInitialLocationHash = parsedHash?.includes('=') ? parsedHash?.split('&').reduce((acc, cur) => {
+  parsedInitialLocationHash = parsedHash.includes('=') ? parsedHash.split('&').reduce((acc, cur) => {
     const [key, value] = cur.split('=');
     acc[key] = value;
     return acc;

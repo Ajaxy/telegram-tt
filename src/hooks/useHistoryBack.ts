@@ -8,7 +8,6 @@ import { IS_IOS } from '../util/windowEnvironment';
 import useSyncEffect from './useSyncEffect';
 import useEffectOnce from './useEffectOnce';
 
-export const LOCATION_HASH = window.location.hash;
 const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 // Carefully selected by swiping and observing visual changes
 // TODO: may be different on other devices such as iPad, maybe take dpi into account?
