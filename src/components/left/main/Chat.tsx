@@ -17,7 +17,7 @@ import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { IS_MULTITAB_SUPPORTED } from '../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/environment';
 import {
   isUserId,
   getPrivateChatUserId,
@@ -223,7 +223,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     <ListItem
       ref={ref}
       className={className}
-      href={IS_MULTITAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}` : undefined}
+      href={IS_OPEN_IN_NEW_TAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', MAIN_THREAD_ID)}` : undefined}
       style={`top: ${offsetTop}px`}
       ripple={!isForum && !isMobile}
       contextActions={contextActions}

@@ -4,7 +4,7 @@ import { getActions } from '../global';
 import type { ApiChat, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 
-import { IS_MULTITAB_SUPPORTED } from '../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/environment';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel, isChatGroup,
@@ -51,15 +51,13 @@ const useChatContextActions = ({
       openChatInNewTab,
     } = getActions();
 
-    const actionOpenInNewTab = IS_MULTITAB_SUPPORTED && {
+    const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
       title: 'Open in new tab',
       icon: 'open-in-new-tab',
       handler: () => {
         openChatInNewTab({ chatId: chat.id });
       },
     };
-
-    const newTabActionSeparator = actionOpenInNewTab && { isSeparator: true, key: 'newTabSeparator' };
 
     const actionAddToFolder = canChangeFolder ? {
       title: lang('ChatList.Filter.AddToFolder'),
@@ -122,7 +120,6 @@ const useChatContextActions = ({
 
     return compact([
       actionOpenInNewTab,
-      newTabActionSeparator,
       actionAddToFolder,
       actionMaskAsRead,
       actionMarkAsUnread,

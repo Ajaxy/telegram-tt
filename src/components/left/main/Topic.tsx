@@ -11,7 +11,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import type { AnimationLevel } from '../../../types';
 
-import { IS_MULTITAB_SUPPORTED } from '../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/environment';
 import {
   selectCanDeleteTopic,
   selectChat,
@@ -146,7 +146,7 @@ const Topic: FC<OwnProps & StateProps> = ({
       )}
       onClick={handleOpenTopic}
       style={style}
-      href={IS_MULTITAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', topic.id)}` : undefined}
+      href={IS_OPEN_IN_NEW_TAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', topic.id)}` : undefined}
       contextActions={contextActions}
       ref={ref}
     >
