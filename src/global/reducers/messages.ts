@@ -45,6 +45,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   threadId: number = MAIN_THREAD_ID,
   type: MessageListType = 'thread',
   shouldReplaceHistory?: boolean,
+  shouldReplaceLast?: boolean,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   const { messageLists } = selectTabState(global, tabId);
@@ -54,7 +55,7 @@ export function updateCurrentMessageList<T extends GlobalState>(
   } else if (chatId) {
     const last = messageLists[messageLists.length - 1];
     if (!last || last.chatId !== chatId || last.threadId !== threadId || last.type !== type) {
-      if (last && last.chatId === TMP_CHAT_ID) {
+      if (last && (last.chatId === TMP_CHAT_ID || shouldReplaceLast)) {
         newMessageLists = [...messageLists.slice(0, -1), { chatId, threadId, type }];
       } else {
         newMessageLists = [...messageLists, { chatId, threadId, type }];
@@ -310,7 +311,7 @@ export function deleteChatMessages<T extends GlobalState>(
         const originalPost = selectChatMessage(global, fromChatId!, fromMessageId!);
 
         if (canDeleteCurrentThread && currentThreadId === fromMessageId) {
-          global = updateCurrentMessageList(global, chatId, undefined, undefined, undefined, tabId);
+          global = updateCurrentMessageList(global, chatId, undefined, undefined, undefined, undefined, tabId);
         }
         if (originalPost) {
           global = updateChatMessage(global, fromChatId!, fromMessageId!, { repliesThreadInfo: undefined });

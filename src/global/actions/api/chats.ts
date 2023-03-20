@@ -160,7 +160,7 @@ addActionHandler('openComments', async (global, actions, payload): Promise<void>
         return;
       }
 
-      actions.openChat({ id: TMP_CHAT_ID, tabId });
+      actions.openChat({ id, threadId, tabId });
 
       const result = await callApi('requestThreadInfoUpdate', { chat, threadId, originChannelId });
       if (!result) {
@@ -171,7 +171,12 @@ addActionHandler('openComments', async (global, actions, payload): Promise<void>
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
       setGlobal(global);
 
-      actions.openChat({ id, threadId: result.topMessageId, tabId });
+      actions.openChat({
+        id,
+        threadId: result.topMessageId,
+        tabId,
+        shouldReplaceLast: true,
+      });
     } else {
       actions.openChat({ id, threadId: topMessageId, tabId });
     }

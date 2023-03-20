@@ -1606,6 +1606,7 @@ export interface ActionPayloads {
     threadId?: number;
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
+    shouldReplaceLast?: boolean;
     noForumTopicPanel?: boolean;
   } & WithTabId;
   openComments: {
