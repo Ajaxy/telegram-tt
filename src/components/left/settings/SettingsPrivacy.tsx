@@ -23,6 +23,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   hasPassword?: boolean;
   hasPasscode?: boolean;
+  isAuthRememberMe?: boolean;
   blockedCount: number;
   webAuthCount: number;
   isSensitiveEnabled?: boolean;
@@ -62,6 +63,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   privacyPhoneP2P,
   onScreenSelect,
   onReset,
+  isAuthRememberMe,
 }) => {
   const {
     loadPrivacySettings,
@@ -158,21 +160,23 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           {lang('BlockedUsers')}
           <span className="settings-item__current-value">{blockedCount || ''}</span>
         </ListItem>
-        <ListItem
-          icon="key"
-          narrow
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(
-            hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
-          )}
-        >
-          <div className="multiline-menu-item">
-            <span className="title">{lang('Passcode')}</span>
-            <span className="subtitle" dir="auto">
-              {lang(hasPasscode ? 'PasswordOn' : 'PasswordOff')}
-            </span>
-          </div>
-        </ListItem>
+        {isAuthRememberMe && (
+          <ListItem
+            icon="key"
+            narrow
+            // eslint-disable-next-line react/jsx-no-bind
+            onClick={() => onScreenSelect(
+              hasPasscode ? SettingsScreens.PasscodeEnabled : SettingsScreens.PasscodeDisabled,
+            )}
+          >
+            <div className="multiline-menu-item">
+              <span className="title">{lang('Passcode')}</span>
+              <span className="subtitle" dir="auto">
+                {lang(hasPasscode ? 'PasswordOn' : 'PasswordOff')}
+              </span>
+            </div>
+          </ListItem>
+        )}
         <ListItem
           icon="lock"
           narrow
@@ -390,6 +394,7 @@ export default memo(withGlobal<OwnProps>(
       privacyPhoneCall: privacy.phoneCall,
       privacyPhoneP2P: privacy.phoneP2P,
       canDisplayChatInTitle,
+      isAuthRememberMe: global.authRememberMe,
     };
   },
 )(SettingsPrivacy));

@@ -77,6 +77,7 @@ type StateProps =
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
+    isAuthRememberMe?: boolean;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'> & Pick<TabState, 'canInstall'>;
 
@@ -109,6 +110,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   isConnectionStatusMinimized,
   areChatsLoaded,
   hasPasscode,
+  isAuthRememberMe,
   canInstall,
   archiveSettings,
 }) => {
@@ -160,14 +162,14 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     } else {
       requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
     }
-  }, [hasPasscode, lockScreen, requestNextSettingsScreen]);
+  }, [hasPasscode]);
 
-  useHotkeys({
+  useHotkeys(isAuthRememberMe ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
     ...(IS_PWA && { 'Mod+L': handleLockScreenHotkey }),
-  });
+  } : undefined);
 
   const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
 
@@ -484,6 +486,7 @@ export default memo(withGlobal<OwnProps>(
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canInstall: Boolean(tabState.canInstall),
       archiveSettings,
+      isAuthRememberMe: global.authRememberMe,
     };
   },
 )(LeftMainHeader));
