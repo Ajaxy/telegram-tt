@@ -82,13 +82,8 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
       label: translatedName,
       subLabel: originalName,
       value: langCode,
-      disabled: langCode === language,
     }));
   }, [language]);
-
-  const allSelected = useMemo(() => {
-    return unique([...doNotTranslate, language]);
-  }, [doNotTranslate, language]);
 
   useEffect(() => {
     if (!isActive) setSearch('');
@@ -98,12 +93,13 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
     if (prevIsActive === isActive) return;
     if (isActive && displayedOptions.length) return;
 
-    const [selected, unselected] = partition(options, (option) => allSelected.includes(option.value));
-    const current = selected.find((option) => option.value === language);
-    const selectedFiltered = selected.filter((option) => option.value !== language);
+    const current = options.find((option) => option.value === language);
+    const otherLanguages = options.filter((option) => option.value !== language);
 
-    setDisplayedOptions([current!, ...selectedFiltered, ...unselected]);
-  }, [isActive, allSelected, displayedOptions.length, language, options]);
+    const [selected, unselected] = partition(otherLanguages, (option) => doNotTranslate.includes(option.value));
+
+    setDisplayedOptions([current!, ...selected, ...unselected]);
+  }, [isActive, doNotTranslate, displayedOptions.length, language, options]);
 
   const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.currentTarget;
@@ -156,9 +152,8 @@ const SettingsDoNotTranslate: FC<OwnProps & StateProps> = ({
               className={styles.checkbox}
               label={option.label}
               subLabel={option.subLabel}
-              checked={allSelected.includes(option.value)}
+              checked={doNotTranslate.includes(option.value)}
               value={option.value}
-              disabled={option.disabled}
               key={option.value}
               onChange={handleChange}
             />
