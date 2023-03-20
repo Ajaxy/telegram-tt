@@ -18,6 +18,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     threadId = MAIN_THREAD_ID,
     type = 'thread',
     shouldReplaceHistory = false,
+    shouldReplaceLast = false,
     noForumTopicPanel,
     tabId = getCurrentTabId(),
   } = payload;
@@ -71,7 +72,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 
   actions.updatePageTitle({ tabId });
 
-  return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory, tabId);
+  return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory, shouldReplaceLast, tabId);
 });
 
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
@@ -82,7 +83,7 @@ addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
-  return updateCurrentMessageList(global, undefined, undefined, undefined, undefined, tabId);
+  return updateCurrentMessageList(global, undefined, undefined, undefined, undefined, undefined, tabId);
 });
 
 addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnType => {
