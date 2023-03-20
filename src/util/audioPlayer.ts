@@ -3,7 +3,7 @@ import { getActions, getGlobal } from '../global';
 import { AudioOrigin, GlobalSearchContent } from '../types';
 import type { ApiMessage } from '../api/types';
 
-import { IS_SAFARI } from './environment';
+import { IS_SAFARI } from './windowEnvironment';
 import safePlay from './safePlay';
 import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSafariProgressiveAudio';
 import type { MessageKey } from '../global/helpers';

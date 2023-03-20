@@ -5,7 +5,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ApiSticker } from '../../api/types';
 
-import { IS_WEBM_SUPPORTED } from '../../util/environment';
+import { IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 import * as mediaLoader from '../../util/mediaLoader';
 import buildClassName from '../../util/buildClassName';
 import generateIdFor from '../../util/generateIdFor';

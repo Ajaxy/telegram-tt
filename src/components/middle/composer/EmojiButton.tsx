@@ -2,7 +2,7 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
 
-import { IS_EMOJI_SUPPORTED } from '../../../util/environment';
+import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 import { handleEmojiLoad, LOADED_EMOJIS } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
 

@@ -29,7 +29,7 @@ import {
   isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo, getChatMessageLink,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { IS_TRANSLATION_SUPPORTED } from '../../../util/environment';
+import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 

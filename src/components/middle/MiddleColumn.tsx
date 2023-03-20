@@ -27,7 +27,7 @@ import {
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
 } from '../../config';
-import { MASK_IMAGE_DISABLED } from '../../util/environment';
+import { MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,

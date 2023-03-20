@@ -12,7 +12,7 @@ import {
   IS_ANDROID,
   IS_IOS,
   IS_REQUEST_FULLSCREEN_SUPPORTED,
-} from '../../../util/environment';
+} from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';

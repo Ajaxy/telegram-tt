@@ -23,7 +23,7 @@ import {
   SHARED_MEDIA_SLICE,
   SLIDE_TRANSITION_DURATION,
 } from '../../config';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import {
   getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';

@@ -4,7 +4,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiVideo } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import {
   selectCurrentGifSearch,
   selectChat,

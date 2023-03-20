@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
 
 import { ALL_FOLDER_ID } from '../../config';
-import { IS_ANDROID, IS_IOS } from '../../util/environment';
+import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';
 
 import usePrevious from '../../hooks/usePrevious';

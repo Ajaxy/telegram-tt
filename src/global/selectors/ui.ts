@@ -1,7 +1,7 @@
 import type { GlobalState, TabArgs } from '../types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
-import { getSystemTheme } from '../../util/environment';
+import { getSystemTheme } from '../../util/windowEnvironment';
 import {
   selectCurrentMessageList, selectIsCreateTopicPanelOpen, selectIsEditTopicPanelOpen, selectIsPollResultsOpen,
 } from './messages';

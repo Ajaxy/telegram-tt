@@ -3,7 +3,7 @@ import React, { memo } from '../../../lib/teact/teact';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
 
-import { IS_COMPACT_MENU } from '../../../util/environment';
+import { IS_COMPACT_MENU } from '../../../util/windowEnvironment';
 import { createClassNameBuilder } from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';

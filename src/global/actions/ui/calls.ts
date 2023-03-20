@@ -21,7 +21,7 @@ import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../
 import { getMainUsername } from '../../helpers';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import safePlay from '../../../util/safePlay';
-import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import * as langProvider from '../../../util/langProvider';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';

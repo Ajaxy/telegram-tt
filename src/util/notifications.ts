@@ -28,7 +28,7 @@ import {
   selectNotifySettings,
   selectUser,
 } from '../global/selectors';
-import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './environment';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';

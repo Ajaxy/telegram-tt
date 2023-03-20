@@ -1,7 +1,7 @@
 import type { ApiMessageEntity, ApiFormattedText } from '../api/types';
 import { ApiMessageEntityTypes } from '../api/types';
 import { RE_LINK_TEMPLATE } from '../config';
-import { IS_EMOJI_SUPPORTED } from './environment';
+import { IS_EMOJI_SUPPORTED } from './windowEnvironment';
 
 export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
   B: ApiMessageEntityTypes.Bold,

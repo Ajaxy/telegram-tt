@@ -5,7 +5,7 @@ import type { ISettings } from '../../../types';
 import type { ApiDocument } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { IS_COMPACT_MENU } from '../../../util/environment';
+import { IS_COMPACT_MENU } from '../../../util/windowEnvironment';
 import useMedia from '../../../hooks/useMedia';
 import { getDocumentMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';

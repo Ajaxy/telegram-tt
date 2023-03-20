@@ -5,7 +5,7 @@ import React, {
 
 import type { BufferedRange } from '../../hooks/useBuffering';
 
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { formatFileSize } from '../../util/textFormat';

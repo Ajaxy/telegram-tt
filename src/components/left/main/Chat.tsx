@@ -17,7 +17,7 @@ import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   isUserId,
   getPrivateChatUserId,

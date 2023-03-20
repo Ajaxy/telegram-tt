@@ -1,6 +1,6 @@
 import { addActionHandler } from '../../index';
 
-import { IS_PRODUCTION_HOST } from '../../../util/environment';
+import { IS_PRODUCTION_HOST } from '../../../util/windowEnvironment';
 import { closeInvoice } from '../../reducers';
 import * as langProvider from '../../../util/langProvider';
 import { formatCurrency } from '../../../util/formatCurrency';

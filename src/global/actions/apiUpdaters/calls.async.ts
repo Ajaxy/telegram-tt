@@ -9,7 +9,7 @@ import {
   joinPhoneCall, processSignalingMessage,
 } from '../../../lib/secret-sauce';
 import type { ApiPhoneCall } from '../../../api/types';
-import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
 import * as langProvider from '../../../util/langProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';

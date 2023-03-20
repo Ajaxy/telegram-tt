@@ -4,7 +4,7 @@ import { getActions } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiBotCommand } from '../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useAppLayout from '../../../hooks/useAppLayout';
 

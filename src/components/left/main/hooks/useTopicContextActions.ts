@@ -6,7 +6,7 @@ import type { MenuItemContextAction } from '../../../ui/ListItem';
 
 import { compact } from '../../../../util/iteratees';
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment';
 
 import useLang from '../../../../hooks/useLang';
 

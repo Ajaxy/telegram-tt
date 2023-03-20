@@ -13,7 +13,7 @@ import type { AnimationLevel } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { ANIMATION_LEVEL_MAX, IS_TEST } from '../../config';
-import { VIDEO_AVATARS_DISABLED } from '../../util/environment';
+import { VIDEO_AVATARS_DISABLED } from '../../util/windowEnvironment';
 import {
   getChatAvatarHash,
   getChatTitle,

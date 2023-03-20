@@ -23,7 +23,7 @@ import {
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';

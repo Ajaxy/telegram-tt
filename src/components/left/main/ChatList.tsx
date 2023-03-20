@@ -16,7 +16,7 @@ import {
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
-import { IS_MAC_OS, IS_PWA } from '../../../util/environment';
+import { IS_MAC_OS, IS_PWA } from '../../../util/windowEnvironment';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import buildClassName from '../../../util/buildClassName';
 

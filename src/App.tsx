@@ -5,7 +5,7 @@ import { getActions, withGlobal } from './global';
 import type { GlobalState } from './global/types';
 import type { UiLoaderPage } from './components/common/UiLoader';
 
-import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/environment';
+import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/windowEnvironment';
 import { INACTIVE_MARKER, PAGE_TITLE } from './config';
 import { selectTabState } from './global/selectors';
 import { updateSizes } from './util/windowSize';

@@ -33,7 +33,7 @@ import {
   EDITABLE_INPUT_CSS_SELECTOR,
   MAX_UPLOAD_FILEPART_SIZE, EDITABLE_INPUT_MODAL_ID,
 } from '../../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/environment';
+import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import {
   selectChat,

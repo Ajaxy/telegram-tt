@@ -7,7 +7,7 @@ import type { Signal } from '../../../../util/signals';
 
 import { ApiMessageEntityTypes } from '../../../../api/types';
 import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
-import { IS_TOUCH_ENV } from '../../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../../../../util/parseMessageInput';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';

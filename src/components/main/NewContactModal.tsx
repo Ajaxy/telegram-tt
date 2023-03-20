@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiCountryCode, ApiUser, ApiUserStatus } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getUserStatus } from '../../global/helpers';
 import { selectUser, selectUserStatus } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';

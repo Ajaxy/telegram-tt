@@ -11,7 +11,7 @@ import {
 } from '../../common/helpers/mediaDimensions';
 import windowSize from '../../../util/windowSize';
 import stopEvent from '../../../util/stopEvent';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { getMessageHtmlId } from '../../../global/helpers';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 

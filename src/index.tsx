@@ -8,7 +8,7 @@ import {
   getActions, getGlobal,
 } from './global';
 import updateWebmanifest from './util/updateWebmanifest';
-import { IS_MULTITAB_SUPPORTED } from './util/environment';
+import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
 import './global/init';
 
 import { APP_VERSION, DEBUG, MULTITAB_LOCALSTORAGE_KEY } from './config';

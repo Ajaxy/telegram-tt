@@ -3,7 +3,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
   IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV,
-} from '../../../util/environment';
+} from '../../../util/windowEnvironment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
 import { selectTabState, selectNotifySettings, selectTheme } from '../../selectors';

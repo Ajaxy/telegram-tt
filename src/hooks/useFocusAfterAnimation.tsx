@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 
-import { IS_TOUCH_ENV } from '../util/environment';
+import { IS_TOUCH_ENV } from '../util/windowEnvironment';
 import { fastRaf } from '../util/schedulers';
 import { useEffect } from '../lib/teact/teact';
 

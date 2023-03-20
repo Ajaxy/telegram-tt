@@ -5,7 +5,7 @@ import type { WorkerMessageEvent, OriginRequest, ThenArg } from './types';
 import type { LocalDb } from '../localDb';
 import type { TypedBroadcastChannel } from '../../../util/multitab';
 
-import { IS_MULTITAB_SUPPORTED } from '../../../util/environment';
+import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
 import { pause } from '../../../util/schedulers';

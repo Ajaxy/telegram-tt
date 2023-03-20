@@ -3,7 +3,7 @@ import {
 } from './index';
 
 import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from './initialState';
-import { IS_MULTITAB_SUPPORTED } from '../util/environment';
+import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
 import { IS_MOCKED_CLIENT } from '../config';
 import { initCache, loadCache } from './cache';
 import { cloneDeep } from '../util/iteratees';

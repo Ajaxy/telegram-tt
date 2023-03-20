@@ -8,7 +8,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import { IS_WEBM_SUPPORTED } from '../../../util/environment';
+import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getActions } from '../../../global';
 
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';

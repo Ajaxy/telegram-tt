@@ -7,7 +7,7 @@ import type { ApiMessage } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { selectTabState } from '../../global/selectors';
-import { IS_OPFS_SUPPORTED, IS_SERVICE_WORKER_SUPPORTED, MAX_BUFFER_SIZE } from '../../util/environment';
+import { IS_OPFS_SUPPORTED, IS_SERVICE_WORKER_SUPPORTED, MAX_BUFFER_SIZE } from '../../util/windowEnvironment';
 import * as mediaLoader from '../../util/mediaLoader';
 import download from '../../util/download';
 import {

@@ -8,7 +8,7 @@ import React, {
 
 import { debounce } from '../../util/schedulers';
 import resetScroll from '../../util/resetScroll';
-import { IS_ANDROID } from '../../util/environment';
+import { IS_ANDROID } from '../../util/windowEnvironment';
 import buildStyle from '../../util/buildStyle';
 
 type OwnProps = {

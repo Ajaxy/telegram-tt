@@ -1,6 +1,6 @@
 import type { ApiMessage } from '../../../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../../util/environment';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../../util/windowEnvironment';
 import { getMessageMediaThumbDataUri } from '../../../../global/helpers';
 import useCanvasBlur from '../../../../hooks/useCanvasBlur';
 import useAppLayout from '../../../../hooks/useAppLayout';

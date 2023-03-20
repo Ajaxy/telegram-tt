@@ -1,7 +1,7 @@
 import { DEBUG_ALERT_MSG } from '../config';
 import { throttle } from './schedulers';
 import { getAllMultitabTokens } from './establishMultitabRole';
-import { IS_MULTITAB_SUPPORTED } from './environment';
+import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
 window.addEventListener('error', handleErrorEvent);
 window.addEventListener('unhandledrejection', handleErrorEvent);

@@ -1,4 +1,4 @@
-import { IS_IOS, IS_SAFARI } from '../util/environment';
+import { IS_IOS, IS_SAFARI } from '../util/windowEnvironment';
 import { initializeSoundsForSafari } from '../global/actions/ui/calls';
 
 export { default as GroupCall } from '../components/calls/group/GroupCall';

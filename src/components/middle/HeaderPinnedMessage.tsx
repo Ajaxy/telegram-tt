@@ -10,7 +10,7 @@ import {
   getMessageMediaHash, getMessageSingleInlineButton,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';

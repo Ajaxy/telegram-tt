@@ -6,7 +6,7 @@ import { LoadMoreDirection } from '../../../types';
 import type { MessageListType } from '../../../global/types';
 
 import { LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../../config';
-import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/environment';
+import { IS_SCROLL_PATCH_NEEDED, MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 import { debounce } from '../../../util/schedulers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';

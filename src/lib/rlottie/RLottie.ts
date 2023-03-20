@@ -2,7 +2,7 @@ import type { RLottieApi } from './rlottie.worker';
 
 import {
   DPR, IS_SAFARI, IS_ANDROID, IS_IOS,
-} from '../../util/environment';
+} from '../../util/windowEnvironment';
 import { createConnector } from '../../util/PostMessageConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';

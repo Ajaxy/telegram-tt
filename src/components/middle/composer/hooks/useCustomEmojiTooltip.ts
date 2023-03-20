@@ -7,7 +7,7 @@ import type { Signal } from '../../../../util/signals';
 
 import { getActions } from '../../../../global';
 import { EMOJI_IMG_REGEX } from '../../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
 import { getHtmlBeforeSelection } from '../../../../util/selection';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';

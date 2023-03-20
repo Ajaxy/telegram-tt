@@ -7,7 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
-import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';

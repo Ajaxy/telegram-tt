@@ -9,7 +9,7 @@ import type {
 
 import { getTouchY } from '../../../util/scrollLock';
 import { createClassNameBuilder } from '../../../util/buildClassName';
-import { IS_COMPACT_MENU } from '../../../util/environment';
+import { IS_COMPACT_MENU } from '../../../util/windowEnvironment';
 import { isSameReaction, canSendReaction, getReactionUniqueKey } from '../../../global/helpers';
 
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';

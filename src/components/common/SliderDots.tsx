@@ -4,7 +4,7 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 import buildClassName from '../../util/buildClassName';
 
 import styles from './SliderDots.module.scss';
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import Button from '../ui/Button';
 
 type OwnProps = {

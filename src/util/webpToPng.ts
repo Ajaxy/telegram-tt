@@ -1,4 +1,4 @@
-import { isWebpSupported } from './environment';
+import { isWebpSupported } from './windowEnvironment';
 import { dataUriToBlob, blobToDataUri } from './files';
 import { pause } from './schedulers';
 

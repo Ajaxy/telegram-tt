@@ -6,7 +6,7 @@ import type { LocalDb } from '../api/gramjs/localDb';
 import type { ApiInitialArgs } from '../api/types';
 import type { GlobalState } from '../global/types';
 
-import { IS_MULTITAB_SUPPORTED } from './environment';
+import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 import { APP_VERSION, DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
 import { deepMerge } from './deepMerge';
 import { selectTabState } from '../global/selectors';

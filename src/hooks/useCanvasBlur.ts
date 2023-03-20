@@ -1,6 +1,6 @@
 import { useEffect, useRef } from '../lib/teact/teact';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../util/environment';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../util/windowEnvironment';
 import fastBlur from '../lib/fastBlur';
 import useSyncEffect from './useSyncEffect';
 

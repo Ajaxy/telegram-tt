@@ -15,7 +15,7 @@ import '../../global/actions/all';
 import {
   BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
 } from '../../config';
-import { IS_ANDROID } from '../../util/environment';
+import { IS_ANDROID } from '../../util/windowEnvironment';
 import {
   selectChatMessage,
   selectTabState,

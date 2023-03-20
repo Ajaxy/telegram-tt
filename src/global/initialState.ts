@@ -7,7 +7,7 @@ import {
   DEFAULT_VOLUME,
   IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX, MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX,
 } from '../config';
-import { IS_IOS, IS_MAC_OS } from '../util/environment';
+import { IS_IOS, IS_MAC_OS } from '../util/windowEnvironment';
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
   attachMenu: { bots: {} },

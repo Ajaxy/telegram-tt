@@ -7,7 +7,7 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import { selectTabState, selectIsCurrentUserPremium } from '../../../global/selectors';

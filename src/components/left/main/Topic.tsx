@@ -11,7 +11,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import type { AnimationLevel } from '../../../types';
 
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/environment';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   selectCanDeleteTopic,
   selectChat,

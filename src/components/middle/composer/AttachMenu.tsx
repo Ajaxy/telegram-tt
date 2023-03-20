@@ -12,7 +12,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/environment';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { validateFiles } from '../../../util/files';
 

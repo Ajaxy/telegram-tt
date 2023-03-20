@@ -7,7 +7,7 @@ import type { ApiMessage, PhoneCallAction } from '../../../api/types';
 import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
 import { formatTimeDuration, formatTime } from '../../../util/dateFormat';
-import { ARE_CALLS_SUPPORTED } from '../../../util/environment';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 
 import Button from '../../ui/Button';
 

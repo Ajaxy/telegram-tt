@@ -5,7 +5,7 @@ import type { Signal } from '../../../../util/signals';
 
 import { getActions } from '../../../../global';
 import { EMOJI_IMG_REGEX } from '../../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/environment';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
 import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import twemojiRegex from '../../../../lib/twemojiRegex';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';

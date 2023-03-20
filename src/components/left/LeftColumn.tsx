@@ -7,7 +7,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { GlobalState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/environment';
+import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { selectTabState, selectCurrentChat, selectIsForumPanelOpen } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';

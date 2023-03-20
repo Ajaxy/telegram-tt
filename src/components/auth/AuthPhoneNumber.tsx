@@ -12,7 +12,7 @@ import type { GlobalState } from '../../global/types';
 import type { LangCode } from '../../types';
 import type { ApiCountryCode } from '../../api/types';
 
-import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/environment';
+import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';

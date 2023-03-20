@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from '../lib/teact/teact';
 import type { IAnchorPosition } from '../types';
 import {
   IS_TOUCH_ENV, IS_PWA, IS_IOS,
-} from '../util/environment';
+} from '../util/windowEnvironment';
 
 const LONG_TAP_DURATION_MS = 200;
 const IOS_PWA_CONTEXT_MENU_DELAY_MS = 100;

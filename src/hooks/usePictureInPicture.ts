@@ -1,6 +1,6 @@
 import { useLayoutEffect, useCallback, useState } from '../lib/teact/teact';
 import { DEBUG } from '../config';
-import { IS_IOS, IS_PWA } from '../util/environment';
+import { IS_IOS, IS_PWA } from '../util/windowEnvironment';
 import safePlay, { getIsVideoPlaying } from '../util/safePlay';
 
 type RefType = {

@@ -3,7 +3,7 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/environment';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import {
   getChatAvatarHash,
   getChatTitle,

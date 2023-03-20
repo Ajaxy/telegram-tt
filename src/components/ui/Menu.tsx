@@ -12,7 +12,7 @@ import buildStyle from '../../util/buildStyle';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import { IS_BACKDROP_BLUR_SUPPORTED, IS_COMPACT_MENU } from '../../util/environment';
+import { IS_BACKDROP_BLUR_SUPPORTED, IS_COMPACT_MENU } from '../../util/windowEnvironment';
 
 import Portal from './Portal';
 

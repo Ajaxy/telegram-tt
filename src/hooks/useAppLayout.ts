@@ -6,7 +6,7 @@ import {
 } from '../config';
 import { useEffect } from '../lib/teact/teact';
 
-import { IS_IOS } from '../util/environment';
+import { IS_IOS } from '../util/windowEnvironment';
 import { createCallbackManager } from '../util/callbacks';
 import { updateSizes } from '../util/windowSize';
 import useForceUpdate from './useForceUpdate';

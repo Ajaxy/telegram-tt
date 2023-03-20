@@ -7,7 +7,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_PICKER_HEADER } from '../../../config';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../global/selectors';
-import { IS_WEBM_SUPPORTED } from '../../../util/environment';
+import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getFirstLetters } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
 import { getStickerPreviewHash } from '../../../global/helpers';

@@ -8,7 +8,7 @@ import type {
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_TOUCH_ENV } from '../../util/environment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import {
   selectChat, selectChatMessage, selectTabState, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';

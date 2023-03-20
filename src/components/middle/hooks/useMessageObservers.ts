@@ -3,7 +3,7 @@ import { getActions } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
 
-import { IS_ANDROID } from '../../../util/environment';
+import { IS_ANDROID } from '../../../util/windowEnvironment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useBackgroundMode from '../../../hooks/useBackgroundMode';
 import useAppLayout from '../../../hooks/useAppLayout';

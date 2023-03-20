@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useRef, useCallback } from '../../lib/teact/teact';
 
-import { IS_TOUCH_ENV, MouseButton } from '../../util/environment';
+import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 
