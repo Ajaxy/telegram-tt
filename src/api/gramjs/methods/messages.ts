@@ -710,27 +710,15 @@ export async function deleteMessages({
   });
 }
 
-export async function deleteScheduledMessages({
+export function deleteScheduledMessages({
   chat, messageIds,
 }: {
   chat: ApiChat; messageIds: number[];
 }) {
-  const result = await invokeRequest(
-    new GramJs.messages.DeleteScheduledMessages({
-      peer: buildInputPeer(chat.id, chat.accessHash),
-      id: messageIds,
-    }),
-  );
-
-  if (!result) {
-    return;
-  }
-
-  onUpdate({
-    '@type': 'deleteScheduledMessages',
-    ids: messageIds,
-    chatId: chat.id,
-  });
+  invokeRequest(new GramJs.messages.DeleteScheduledMessages({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    id: messageIds,
+  }));
 }
 
 export async function deleteHistory({

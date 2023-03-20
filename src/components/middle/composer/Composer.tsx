@@ -106,6 +106,7 @@ import useAttachmentModal from './hooks/useAttachmentModal';
 import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
 import useDerivedState from '../../../hooks/useDerivedState';
 import { useStateRef } from '../../../hooks/useStateRef';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useDraft from './hooks/useDraft';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal.async';
@@ -886,8 +887,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   }, [handleSendAttachments, handleSend, sendInlineBotResult, sendMessage]);
 
-  useEffect(() => {
-    if (contentToBeScheduled) {
+  useEffectWithPrevDeps(([prevContentToBeScheduled]) => {
+    if (contentToBeScheduled && contentToBeScheduled !== prevContentToBeScheduled) {
       requestCalendar((scheduledAt) => {
         handleMessageSchedule(contentToBeScheduled, scheduledAt);
       });
