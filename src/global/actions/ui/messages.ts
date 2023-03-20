@@ -416,12 +416,12 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   }
   blurTimeout = window.setTimeout(() => {
     global = getGlobal();
-    global = updateFocusedMessage(global, undefined, undefined, undefined, undefined, tabId);
+    global = updateFocusedMessage(global, undefined, undefined, undefined, undefined, undefined, tabId);
     global = updateFocusDirection(global, undefined, tabId);
     setGlobal(global);
   }, noHighlight ? FOCUS_NO_HIGHLIGHT_DURATION : FOCUS_DURATION);
 
-  global = updateFocusedMessage(global, chatId, messageId, noHighlight, isResizingContainer, tabId);
+  global = updateFocusedMessage(global, chatId, messageId, threadId, noHighlight, isResizingContainer, tabId);
   global = updateFocusDirection(global, undefined, tabId);
 
   if (replyMessageId) {

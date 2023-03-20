@@ -501,13 +501,15 @@ function updateScheduledMessages<T extends GlobalState>(
 }
 
 export function updateFocusedMessage<T extends GlobalState>(
-  global: T, chatId?: string, messageId?: number, noHighlight = false, isResizingContainer = false,
+  global: T, chatId?: string, messageId?: number, threadId = MAIN_THREAD_ID, noHighlight = false,
+  isResizingContainer = false,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   return updateTabState(global, {
     focusedMessage: {
       ...selectTabState(global, tabId).focusedMessage,
       chatId,
+      threadId,
       messageId,
       noHighlight,
       isResizingContainer,

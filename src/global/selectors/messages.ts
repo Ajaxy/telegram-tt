@@ -367,10 +367,13 @@ export function selectFocusedMessageId<T extends GlobalState>(
 }
 
 export function selectIsMessageFocused<T extends GlobalState>(
-  global: T, message: ApiMessage,
+  global: T, message: ApiMessage, currentThreadId: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const focusedId = selectFocusedMessageId(global, message.chatId, tabId);
+  const threadId = selectTabState(global, tabId).focusedMessage?.threadId;
+
+  if (currentThreadId !== threadId) return false;
 
   return focusedId ? focusedId === message.id || focusedId === message.previousLocalId : false;
 }
