@@ -1,6 +1,5 @@
 import BigInt from 'big-integer';
 import type { Api as GramJs } from '../../lib/gramjs';
-import type { ApiMessage } from '../types';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import { DATA_BROADCAST_CHANNEL_NAME } from '../../config';
 import { constructors } from '../../lib/gramjs/tl';
@@ -10,7 +9,6 @@ import { throttle } from '../../util/schedulers';
 const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in self;
 
 export interface LocalDb {
-  localMessages: Record<string, ApiMessage>;
   // Used for loading avatars and media through in-memory Gram JS instances.
   chats: Record<string, GramJs.Chat | GramJs.Channel>;
   users: Record<string, GramJs.User>;

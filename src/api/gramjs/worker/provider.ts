@@ -25,7 +25,6 @@ let worker: Worker;
 const requestStates = new Map<string, RequestStates>();
 const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
 const savedLocalDb: LocalDb = {
-  localMessages: {},
   chats: {},
   users: {},
   messages: {},

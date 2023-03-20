@@ -30,7 +30,7 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { invokeRequest, uploadFile } from './client';
+import { handleUpdates, invokeRequest, uploadFile } from './client';
 import {
   buildApiMessage,
   buildLocalForwardedMessage,
@@ -38,6 +38,8 @@ import {
   buildWebPage,
   buildApiSponsoredMessage,
   buildApiFormattedText,
+  buildMessageTextContent,
+  buildMessageMediaContent,
 } from '../apiBuilders/messages';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -54,8 +56,8 @@ import {
   buildSendMessageAction,
   buildInputPollFromExisting,
   buildInputTextWithEntities,
+  buildMessageFromUpdate,
 } from '../gramjsBuilders';
-import localDb from '../localDb';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
 import {
@@ -287,7 +289,6 @@ export function sendMessage(
   }, FAST_SEND_TIMEOUT);
 
   const randomId = generateRandomBigInt();
-  localDb.localMessages[String(randomId)] = localMessage;
 
   if (groupedId) {
     return sendGroupedMedia({
@@ -339,7 +340,7 @@ export function sendMessage(
     const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
 
     try {
-      await invokeRequest(new RequestClass({
+      const update = await invokeRequest(new RequestClass({
         clearDraft: true,
         message: text || '',
         entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
@@ -353,7 +354,8 @@ export function sendMessage(
         ...(noWebPage && { noWebpage: noWebPage }),
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
         ...(shouldUpdateStickerSetsOrder && { updateStickersetsOrder: shouldUpdateStickerSetsOrder }),
-      }), true, true);
+      }), false, true, true);
+      if (update) handleLocalMessageUpdate(localMessage, update);
     } catch (error: any) {
       onUpdate({
         '@type': 'updateMessageSendFailed',
@@ -371,6 +373,7 @@ export function sendMessage(
 const groupedUploads: Record<string, {
   counter: number;
   singleMediaByIndex: Record<number, GramJs.InputSingleMedia>;
+  localMessages: Record<string, ApiMessage>;
 }> = {};
 
 function sendGroupedMedia(
@@ -406,6 +409,7 @@ function sendGroupedMedia(
     groupedUploads[groupedId] = {
       counter: 0,
       singleMediaByIndex: {},
+      localMessages: {},
     };
   }
 
@@ -453,15 +457,16 @@ function sendGroupedMedia(
       message: text || '',
       entities: entities ? entities.map(buildMtpMessageEntity) : undefined,
     });
+    groupedUploads[groupedId].localMessages[randomId.toString()] = localMessage;
 
     if (Object.keys(groupedUploads[groupedId].singleMediaByIndex).length < groupedUploads[groupedId].counter) {
       return;
     }
 
-    const { singleMediaByIndex } = groupedUploads[groupedId];
+    const { singleMediaByIndex, localMessages } = groupedUploads[groupedId];
     delete groupedUploads[groupedId];
 
-    await invokeRequest(new GramJs.messages.SendMultiMedia({
+    const update = await invokeRequest(new GramJs.messages.SendMultiMedia({
       clearDraft: true,
       peer: buildInputPeer(chat.id, chat.accessHash),
       multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
@@ -470,7 +475,9 @@ function sendGroupedMedia(
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-    }), true);
+    }), false, undefined, true);
+
+    if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
   })();
 
   return queue;
@@ -553,9 +560,6 @@ export async function editMessage({
     chatId: chat.id,
     message: messageUpdate,
   });
-
-  // TODO Revise intersecting with scheduled
-  localDb.localMessages[message.id] = { ...message, ...messageUpdate };
 
   const mtpEntities = entities && entities.map(buildMtpMessageEntity);
 
@@ -1267,6 +1271,7 @@ export async function forwardMessages({
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
+  const localMessages: Record<string, ApiMessage> = {};
 
   messages.forEach((message, index) => {
     const localMessage = buildLocalForwardedMessage({
@@ -1278,7 +1283,7 @@ export async function forwardMessages({
       noCaptions,
       isCurrentUserPremium,
     });
-    localDb.localMessages[String(randomIds[index])] = localMessage;
+    localMessages[randomIds[index].toString()] = localMessage;
 
     onUpdate({
       '@type': localMessage.isScheduled ? 'newScheduledMessage' : 'newMessage',
@@ -1288,7 +1293,7 @@ export async function forwardMessages({
     });
   });
 
-  await invokeRequest(new GramJs.messages.ForwardMessages({
+  const update = await invokeRequest(new GramJs.messages.ForwardMessages({
     fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),
     toPeer: buildInputPeer(toChat.id, toChat.accessHash),
     randomId: randomIds,
@@ -1300,7 +1305,8 @@ export async function forwardMessages({
     ...(toThreadId && { topMsgId: toThreadId }),
     ...(scheduledAt && { scheduleDate: scheduledAt }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-  }), true);
+  }), false, undefined, true);
+  if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
 }
 
 export async function findFirstMessageIdAfterDate({
@@ -1631,4 +1637,75 @@ export async function translateText(params: TranslateTextParams) {
   }
 
   return formattedText;
+}
+
+function handleMultipleLocalMessagesUpdate(
+  localMessages: Record<string, ApiMessage>, update: GramJs.TypeUpdates,
+) {
+  if (!('updates' in update)) return;
+  update.updates.forEach((u) => {
+    if (u instanceof GramJs.UpdateMessageID) {
+      const localMessage = localMessages[u.randomId.toString()];
+      handleLocalMessageUpdate(localMessage, u);
+    }
+  });
+}
+
+function handleLocalMessageUpdate(localMessage: ApiMessage, update: GramJs.TypeUpdates) {
+  let messageUpdate;
+  if (update instanceof GramJs.UpdateShortSentMessage || update instanceof GramJs.UpdateMessageID) {
+    messageUpdate = update;
+  } else if ('updates' in update) {
+    messageUpdate = update.updates.find((u): u is GramJs.UpdateMessageID => u instanceof GramJs.UpdateMessageID);
+  }
+
+  if (!messageUpdate) {
+    handleUpdates(update);
+    return;
+  }
+
+  let newContent: ApiMessage['content'] | undefined;
+  if (messageUpdate instanceof GramJs.UpdateShortSentMessage) {
+    if (localMessage.content.text && messageUpdate.entities) {
+      newContent = {
+        text: buildMessageTextContent(localMessage.content.text.text, messageUpdate.entities),
+      };
+    }
+    if (messageUpdate.media) {
+      newContent = {
+        ...newContent,
+        ...buildMessageMediaContent(messageUpdate.media),
+      };
+    }
+
+    const mtpMessage = buildMessageFromUpdate(messageUpdate.id, localMessage.chatId, messageUpdate);
+    if (isMessageWithMedia(mtpMessage)) {
+      addMessageToLocalDb(mtpMessage);
+    }
+  }
+
+  // Edge case for "Send When Online"
+  const isSentBefore = 'date' in messageUpdate && messageUpdate.date * 1000 < Date.now() + getServerTimeOffset() * 1000;
+
+  onUpdate({
+    '@type': localMessage.isScheduled && !isSentBefore
+      ? 'updateScheduledMessageSendSucceeded'
+      : 'updateMessageSendSucceeded',
+    chatId: localMessage.chatId,
+    localId: localMessage.id,
+    message: {
+      ...localMessage,
+      ...(newContent && {
+        content: {
+          ...localMessage.content,
+          ...newContent,
+        },
+      }),
+      id: messageUpdate.id,
+      sendingState: undefined,
+      ...('date' in messageUpdate && { date: messageUpdate.date }),
+    },
+  });
+
+  handleUpdates(update);
 }
