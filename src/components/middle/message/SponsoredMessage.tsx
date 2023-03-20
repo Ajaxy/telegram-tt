@@ -118,7 +118,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         <div className="content-inner" dir="auto">
           <div className="message-title" dir="ltr">
             {bot && renderText(getUserFullName(bot) || '')}
-            {channel && renderText(message.chatInviteTitle || getChatTitle(lang, channel, bot) || '')}
+            {channel && renderText(message.chatInviteTitle || getChatTitle(lang, channel) || '')}
           </div>
 
           <div className="text-content with-meta" dir="auto" ref={contentRef}>
