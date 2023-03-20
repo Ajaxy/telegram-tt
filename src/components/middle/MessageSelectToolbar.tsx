@@ -71,7 +71,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
 
-  useCopySelectedMessages(Boolean(isActive), copySelectedMessages);
+  useCopySelectedMessages(isActive);
 
   const handleExitMessageSelectMode = useCallback(() => {
     exitMessageSelectMode();

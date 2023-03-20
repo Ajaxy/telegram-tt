@@ -1,16 +1,14 @@
+import { getActions } from '../../../global';
+
 import { useHotkeys } from '../../../hooks/useHotkeys';
 
-const useCopySelectedMessages = (isActive: boolean, copySelectedMessages: NoneToVoidFunction) => {
+const useCopySelectedMessages = (isActive?: boolean) => {
   function handleCopy(e: KeyboardEvent) {
-    if (!isActive) {
-      return;
-    }
-
     e.preventDefault();
-    copySelectedMessages();
+    getActions().copySelectedMessages();
   }
 
-  useHotkeys({ 'Mod+C': handleCopy });
+  useHotkeys(isActive ? { 'Mod+C': handleCopy } : undefined);
 };
 
 export default useCopySelectedMessages;
