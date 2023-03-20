@@ -232,7 +232,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     }
 
     if (!shouldIgnoreUpdates) {
-      handleUpdatesFromRequest(request, result);
+      handleUpdates(result);
     }
 
     return shouldReturnTrue ? result && true : result;
@@ -256,7 +256,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   }
 }
 
-function handleUpdatesFromRequest<T extends GramJs.AnyRequest>(request: T, result: T['__response']) {
+export function handleUpdates(result: {}) {
   let manyUpdates;
   let singleUpdate;
 
@@ -279,10 +279,10 @@ function handleUpdatesFromRequest<T extends GramJs.AnyRequest>(request: T, resul
     injectUpdateEntities(manyUpdates);
 
     manyUpdates.updates.forEach((update) => {
-      updater(update, request);
+      updater(update);
     });
   } else if (singleUpdate) {
-    updater(singleUpdate, request);
+    updater(singleUpdate);
   }
 }
 

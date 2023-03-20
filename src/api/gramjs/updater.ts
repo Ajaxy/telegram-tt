@@ -12,7 +12,6 @@ import {
   buildApiMessageFromShort,
   buildApiMessageFromShortChat,
   buildMessageMediaContent,
-  buildMessageTextContent,
   buildPoll,
   buildPollResults,
   buildApiMessageFromNotification,
@@ -116,7 +115,7 @@ function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat
     });
 }
 
-export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
+export function updater(update: Update) {
   if (update instanceof connection.UpdateServerTimeOffset) {
     setServerTimeOffset(update.timeOffset);
 
@@ -440,70 +439,8 @@ export function updater(update: Update, originRequest?: GramJs.AnyRequest) {
         message,
       });
     }
-  } else if ((
-    originRequest instanceof GramJs.messages.SendMessage
-    || originRequest instanceof GramJs.messages.SendMedia
-    || originRequest instanceof GramJs.messages.SendMultiMedia
-    || originRequest instanceof GramJs.messages.ForwardMessages
-  ) && (
-    update instanceof GramJs.UpdateMessageID || update instanceof GramJs.UpdateShortSentMessage
-  )) {
-    let randomId;
-    if ('randomId' in update) {
-      randomId = update.randomId;
-    } else if ('randomId' in originRequest) {
-      randomId = originRequest.randomId;
-    }
-
-    const localMessage = randomId && localDb.localMessages[String(randomId)];
-    if (!localMessage) {
-      throw new Error('Local message not found');
-    }
-
-    let newContent: ApiMessage['content'] | undefined;
-    if (update instanceof GramJs.UpdateShortSentMessage) {
-      if (localMessage.content.text && update.entities) {
-        newContent = {
-          text: buildMessageTextContent(localMessage.content.text.text, update.entities),
-        };
-      }
-      if (update.media) {
-        newContent = {
-          ...newContent,
-          ...buildMessageMediaContent(update.media),
-        };
-      }
-
-      const mtpMessage = buildMessageFromUpdate(update.id, localMessage.chatId, update);
-      if (isMessageWithMedia(mtpMessage)) {
-        addMessageToLocalDb(mtpMessage);
-      }
-    }
-
+  } else if (update instanceof GramJs.UpdateMessageID || update instanceof GramJs.UpdateShortSentMessage) {
     sentMessageIds.add(update.id);
-
-    // Edge case for "Send When Online"
-    const isAlreadySent = 'date' in update && update.date * 1000 < Date.now() + getServerTimeOffset() * 1000;
-
-    onUpdate({
-      '@type': localMessage.isScheduled && !isAlreadySent
-        ? 'updateScheduledMessageSendSucceeded'
-        : 'updateMessageSendSucceeded',
-      chatId: localMessage.chatId,
-      localId: localMessage.id,
-      message: {
-        ...localMessage,
-        ...(newContent && {
-          content: {
-            ...localMessage.content,
-            ...newContent,
-          },
-        }),
-        id: update.id,
-        sendingState: undefined,
-        ...('date' in update && { date: update.date }),
-      },
-    });
   } else if (update instanceof GramJs.UpdateReadMessagesContents) {
     onUpdate({
       '@type': 'updateCommonBoxMessages',
