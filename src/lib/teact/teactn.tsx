@@ -300,11 +300,14 @@ export function typify<
 >() {
   type ProjectActionNames = keyof ActionPayloads;
 
+  // When payload is allowed to be `undefined` we consider it optional
   type ProjectActions = {
-    [ActionName in ProjectActionNames]: (
-      payload?: ActionPayloads[ActionName],
-      options?: ActionOptions,
-    ) => void;
+    [ActionName in ProjectActionNames]:
+    (undefined extends ActionPayloads[ActionName] ? (
+      (payload?: ActionPayloads[ActionName], options?: ActionOptions) => void
+    ) : (
+      (payload: ActionPayloads[ActionName], options?: ActionOptions) => void
+    ))
   };
 
   type ActionHandlers = {
