@@ -672,7 +672,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     const { chatId, threadId } = messageList;
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
-      const title = getChatTitle(langProvider.translate, currentChat, undefined, chatId === currentUserId);
+      const title = getChatTitle(langProvider.translate, currentChat, chatId === currentUserId);
       if (currentChat.isForum && currentChat.topics?.[threadId]) {
         setPageTitle(`${title} › ${currentChat.topics[threadId].title}`);
         return;

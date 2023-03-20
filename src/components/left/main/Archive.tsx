@@ -9,6 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
+import { getChatTitle } from '../../../global/helpers';
 
 import useLang from '../../../hooks/useLang';
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
@@ -50,10 +51,12 @@ const Archive: FC<OwnProps> = ({
         return undefined;
       }
 
+      const title = getChatTitle(lang, chat);
+
       return (
         <>
           <span className={buildClassName(styles.chat, archiveUnreadCount && chat.unreadCount && styles.unread)}>
-            {renderText(chat.title)}
+            {renderText(title)}
           </span>
           {isLast ? '' : ', '}
         </>

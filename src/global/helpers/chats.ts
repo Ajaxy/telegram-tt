@@ -80,9 +80,8 @@ export function getPrivateChatUserId(chat: ApiChat) {
   return chat.id;
 }
 
-// TODO Get rid of `user`
-export function getChatTitle(lang: LangFn, chat: ApiChat, user?: ApiUser, isSelf = false) {
-  if (isSelf || (user && chat.id === user.id && user.isSelf)) {
+export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
+  if (isSelf) {
     return lang('SavedMessages');
   }
   return chat.title || lang('HiddenName');
@@ -464,8 +463,15 @@ export function filterChatsByName(
     if (!chat) {
       return false;
     }
+    const isSelf = id === currentUserId;
 
-    return searchWords(getChatTitle(lang, chat, undefined, id === currentUserId));
+    const translatedTitle = getChatTitle(lang, chat, isSelf);
+    if (isSelf) {
+      // Search both "Saved Messages" and user title
+      return searchWords(translatedTitle) || searchWords(chat.title);
+    }
+
+    return searchWords(translatedTitle);
   });
 }
 

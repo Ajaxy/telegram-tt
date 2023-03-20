@@ -287,7 +287,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
       .filter(Boolean)
     : undefined;
   const privateChatUserId = getPrivateChatUserId(chat);
-  const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+  const isSelf = privateChatUserId === global.currentUserId;
 
   const topic = selectTopicFromMessage(global, message);
 
@@ -321,7 +321,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     body = 'New message';
   }
 
-  let title = isScreenLocked ? APP_NAME : getChatTitle(translate, chat, privateChatUser);
+  let title = isScreenLocked ? APP_NAME : getChatTitle(translate, chat, isSelf);
 
   if (message.isSilent) {
     title += ' 🔕';

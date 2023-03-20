@@ -1,7 +1,7 @@
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiUser } from '../../api/types';
 
 import { selectChat, selectUser } from '../../global/selectors';
@@ -28,6 +28,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   user?: ApiUser;
+  currentUserId?: string;
 };
 
 const PickerSelectedItem: FC<OwnProps & StateProps> = ({
@@ -35,11 +36,12 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   title,
   isMinimized,
   canClose,
-  onClick,
   clickArg,
   chat,
   user,
   className,
+  currentUserId,
+  onClick,
 }) => {
   const lang = useLang();
 
@@ -66,7 +68,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 
     const name = !chat || (user && !user.isSelf)
       ? getUserFirstOrLastName(user)
-      : getChatTitle(lang, chat, user);
+      : getChatTitle(lang, chat, chat.id === currentUserId);
 
     titleText = name ? renderText(name) : undefined;
   }
@@ -113,6 +115,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       user,
+      currentUserId: global.currentUserId,
     };
   },
 )(PickerSelectedItem));
