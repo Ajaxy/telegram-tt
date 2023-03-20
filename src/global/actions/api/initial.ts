@@ -30,7 +30,7 @@ import { forceWebsync } from '../../../util/websync';
 import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
 import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
 import { serializeGlobal } from '../../cache';
-import { parseInitialLocationHash } from '../../../util/routing';
+import { parseInitialLocationHash, resetInitialLocationHash } from '../../../util/routing';
 import type { ActionReturnType } from '../../types';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -157,6 +157,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
   if ('leaveGroupCall' in actions) actions.leaveGroupCall({ tabId: getCurrentTabId() });
 
   try {
+    resetInitialLocationHash();
     await unsubscribe();
     await callApi('destroy');
     await forceWebsync(false);
