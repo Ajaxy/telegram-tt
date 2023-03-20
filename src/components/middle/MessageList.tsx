@@ -248,10 +248,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
+
+    const orderRule: (keyof ApiMessage)[] = type === 'scheduled' ? ['date', 'id'] : ['id'];
     return listedMessages.length
-      ? groupMessages(orderBy(listedMessages, 'id'), memoUnreadDividerBeforeIdRef.current)
+      ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current)
       : undefined;
-  }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId]);
+  }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId, type]);
 
   useInterval(() => {
     if (!messageIds || !messagesById) {

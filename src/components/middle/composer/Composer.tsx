@@ -1248,6 +1248,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         shouldForceCompression={shouldForceCompression}
         shouldForceAsFile={shouldForceAsFile}
         isForCurrentMessageList={isForCurrentMessageList}
+        shouldSchedule={shouldSchedule}
         onCaptionUpdate={onCaptionUpdate}
         onSendSilent={handleSendSilentAttachments}
         onSend={handleSendAttachments}
