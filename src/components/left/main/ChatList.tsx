@@ -25,7 +25,7 @@ import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
-import useChatOrderDiff from './hooks/useChatOrderDiff';
+import useOrderDiff from './hooks/useOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -78,7 +78,7 @@ const ChatList: FC<OwnProps> = ({
   const archiveHeight = shouldDisplayArchive
     ? archiveSettings.isMinimized ? ARCHIVE_MINIMIZED_HEIGHT : CHAT_HEIGHT_PX : 0;
 
-  const { orderDiffById, getAnimationType } = useChatOrderDiff(orderedIds);
+  const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
 

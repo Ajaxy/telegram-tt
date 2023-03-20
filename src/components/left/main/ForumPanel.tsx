@@ -23,7 +23,7 @@ import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useChatOrderDiff from './hooks/useChatOrderDiff';
+import useOrderDiff from './hooks/useOrderDiff';
 import useLang from '../../../hooks/useLang';
 import usePrevious from '../../../hooks/usePrevious';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -119,7 +119,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       : [];
   }, [chat]);
 
-  const { orderDiffById, getAnimationType } = useChatOrderDiff(orderedIds);
+  const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
     if (!chat || !lastSyncTime) return;
