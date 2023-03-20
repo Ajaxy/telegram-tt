@@ -9,7 +9,6 @@ import type { ISettings, LangCode } from '../../../types';
 import type { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
-import { unique } from '../../../util/iteratees';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -79,17 +78,20 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   }, [setSettingOption]);
 
   const doNotTranslateText = useMemo(() => {
-    const allDoNotTranslateLanguages = unique([...doNotTranslate, language]);
+    if (!doNotTranslate.length) {
+      return undefined;
+    }
+
     // Do not translate current language
-    if (allDoNotTranslateLanguages.length === 1) {
+    if (doNotTranslate.length === 1) {
       if (!languages) {
         return lang('Loading');
       }
-      return languages.find(({ langCode }) => langCode === language)?.nativeName;
+      return languages.find(({ langCode }) => langCode === doNotTranslate[0])?.nativeName;
     }
 
-    return lang('Languages', allDoNotTranslateLanguages.length);
-  }, [doNotTranslate, lang, language, languages]);
+    return lang('Languages', doNotTranslate.length);
+  }, [doNotTranslate, lang, languages]);
 
   const handleDoNotSelectOpen = useCallback(() => {
     onScreenSelect(SettingsScreens.DoNotTranslate);

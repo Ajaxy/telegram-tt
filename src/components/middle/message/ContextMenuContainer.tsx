@@ -599,10 +599,9 @@ export default memo(withGlobal<OwnProps>(
       ? Boolean(selectMessageTranslations(global, message.chatId, translationRequestLanguage)[message.id]?.text)
       : undefined;
 
-    const { canTranslate: isTranslationEnabled, language, doNotTranslate } = global.settings.byKey;
+    const { canTranslate: isTranslationEnabled, doNotTranslate } = global.settings.byKey;
 
-    const canTranslateLanguage = !detectedLanguage
-      || (!doNotTranslate.includes(detectedLanguage) && language !== detectedLanguage);
+    const canTranslateLanguage = !detectedLanguage || !doNotTranslate.includes(detectedLanguage);
     const canTranslate = IS_TRANSLATION_SUPPORTED && isTranslationEnabled && message.content.text
       && canTranslateLanguage && !isLocal && !isScheduled && !isAction && !hasTranslation && !message.emojiOnlyCount;
 
