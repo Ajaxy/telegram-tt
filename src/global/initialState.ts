@@ -14,7 +14,6 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   blurredTabTokens: [],
   passcode: {},
   twoFaSettings: {},
-  serverTimeOffset: 0,
   isUpdateAvailable: false,
 
   audioPlayer: {
