@@ -555,7 +555,6 @@ export type GlobalState = {
   isSyncing?: boolean;
   isUpdateAvailable?: boolean;
   lastSyncTime?: number;
-  serverTimeOffset: number;
   blurredTabTokens: number[];
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
