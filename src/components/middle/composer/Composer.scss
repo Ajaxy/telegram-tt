@@ -68,11 +68,23 @@
       position: absolute;
     }
 
-    &:not(:active):not(:focus):not(:hover) {
-      .icon-send,
-      .icon-schedule,
-      .icon-check {
-        color: var(--color-primary);
+    @media (hover: hover) {
+      &:not(:active):not(:focus):not(:hover) {
+        .icon-send,
+        .icon-schedule,
+        .icon-check {
+          color: var(--color-primary);
+        }
+      }
+    }
+
+    @media (hover: none) {
+      &:not(:active):not(:focus) {
+        .icon-send,
+        .icon-schedule,
+        .icon-check {
+          color: var(--color-primary);
+        }
       }
     }
 
