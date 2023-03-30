@@ -9,6 +9,7 @@ import type { ISettings, LangCode } from '../../../types';
 import type { ApiLanguage } from '../../../api/types';
 
 import { setLanguage } from '../../../util/langProvider';
+import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -78,20 +79,17 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   }, [setSettingOption]);
 
   const doNotTranslateText = useMemo(() => {
-    if (!doNotTranslate.length) {
+    if (!IS_TRANSLATION_SUPPORTED || !doNotTranslate.length) {
       return undefined;
     }
 
-    // Do not translate current language
     if (doNotTranslate.length === 1) {
-      if (!languages) {
-        return lang('Loading');
-      }
-      return languages.find(({ langCode }) => langCode === doNotTranslate[0])?.nativeName;
+      const originalNames = new Intl.DisplayNames([language], { type: 'language' });
+      return originalNames.of(doNotTranslate[0])!;
     }
 
     return lang('Languages', doNotTranslate.length);
-  }, [doNotTranslate, lang, languages]);
+  }, [doNotTranslate, lang, language]);
 
   const handleDoNotSelectOpen = useCallback(() => {
     onScreenSelect(SettingsScreens.DoNotTranslate);
@@ -104,24 +102,26 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="settings-content settings-language custom-scroll">
-      <div className="settings-item">
-        <Checkbox
-          label={lang('ShowTranslateButton')}
-          checked={canTranslate}
-          onCheck={handleShouldTranslateChange}
-        />
-        {canTranslate && (
-          <ListItem
-            onClick={handleDoNotSelectOpen}
-          >
-            {lang('DoNotTranslate')}
-            <span className="settings-item__current-value">{doNotTranslateText}</span>
-          </ListItem>
-        )}
-        <p className="settings-item-description mb-0 mt-1">
-          {lang('lng_translate_settings_about')}
-        </p>
-      </div>
+      {IS_TRANSLATION_SUPPORTED && (
+        <div className="settings-item">
+          <Checkbox
+            label={lang('ShowTranslateButton')}
+            checked={canTranslate}
+            onCheck={handleShouldTranslateChange}
+          />
+          {canTranslate && (
+            <ListItem
+              onClick={handleDoNotSelectOpen}
+            >
+              {lang('DoNotTranslate')}
+              <span className="settings-item__current-value">{doNotTranslateText}</span>
+            </ListItem>
+          )}
+          <p className="settings-item-description mb-0 mt-1">
+            {lang('lng_translate_settings_about')}
+          </p>
+        </div>
+      )}
       <div className="settings-item">
         {options ? (
           <RadioGroup
