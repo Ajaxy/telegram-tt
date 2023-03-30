@@ -214,7 +214,7 @@ export function buildApiMessageWithChatId(
     isFromScheduled: mtpMessage.fromScheduled,
     isSilent: mtpMessage.silent,
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
-    ...(emojiOnlyCount && { emojiOnlyCount }),
+    emojiOnlyCount,
     ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
     ...(forumTopic && { isTopicReply: true }),
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
