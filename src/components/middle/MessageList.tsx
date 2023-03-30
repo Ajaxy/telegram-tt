@@ -506,8 +506,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       console.timeEnd('scrollTop');
     }
     // This should match deps for `useSyncEffect` above
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `as const` not yet supported by linter
-  }, [messageIds, isViewportNewest, containerHeight, hasTools] as const);
+  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {

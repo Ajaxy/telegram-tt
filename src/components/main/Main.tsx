@@ -373,7 +373,7 @@ const Main: FC<OwnProps & StateProps> = ({
       willAnimateLeftColumnRef.current = false;
       forceUpdate();
     });
-  }, [animationLevel, forceUpdate, isLeftColumnOpen]);
+  }, [isLeftColumnOpen, animationLevel, forceUpdate]);
 
   const rightColumnTransition = useShowTransition(
     isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
@@ -402,7 +402,7 @@ const Main: FC<OwnProps & StateProps> = ({
       forceUpdate();
       setIsNarrowMessageList(isRightColumnOpen);
     });
-  }, [animationLevel, forceUpdate, isRightColumnOpen]);
+  }, [isRightColumnOpen, animationLevel, forceUpdate]);
 
   const className = buildClassName(
     leftColumnTransition.hasShownClass && 'left-column-shown',

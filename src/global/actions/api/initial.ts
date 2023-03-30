@@ -182,7 +182,7 @@ addActionHandler('reset', (global, actions): ActionReturnType => {
   void cacheApi.clear(CUSTOM_BG_CACHE_NAME);
 
   const langCachePrefix = LANG_CACHE_NAME.replace(/\d+$/, '');
-  const langCacheVersion = (LANG_CACHE_NAME.match(/\d+$/) || [0])[0];
+  const langCacheVersion = Number((LANG_CACHE_NAME.match(/\d+$/) || ['0'])[0]);
   for (let i = 0; i < langCacheVersion; i++) {
     void cacheApi.clear(`${langCachePrefix}${i === 0 ? '' : i}`);
   }

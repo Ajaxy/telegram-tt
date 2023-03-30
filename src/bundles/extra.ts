@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-cycle
 export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
 
 export { default as ForwardRecipientPicker } from '../components/main/ForwardRecipientPicker';
@@ -30,29 +29,23 @@ export { default as ReactorListModal } from '../components/middle/ReactorListMod
 export { default as EmojiInteractionAnimation } from '../components/middle/EmojiInteractionAnimation';
 export { default as MessageLanguageModal } from '../components/middle/MessageLanguageModal';
 
-// eslint-disable-next-line import/no-cycle
 export { default as LeftSearch } from '../components/left/search/LeftSearch';
-// eslint-disable-next-line import/no-cycle
 export { default as Settings } from '../components/left/settings/Settings';
 export { default as ContactList } from '../components/left/main/ContactList';
 export { default as NewChat } from '../components/left/newChat/NewChat';
 export { default as NewChatStep1 } from '../components/left/newChat/NewChatStep1';
 export { default as NewChatStep2 } from '../components/left/newChat/NewChatStep2';
-// eslint-disable-next-line import/no-cycle
 export { default as ArchivedChats } from '../components/left/ArchivedChats';
 export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 
-// eslint-disable-next-line import/no-cycle
 export { default as ContextMenuContainer } from '../components/middle/message/ContextMenuContainer';
 export { default as SponsoredMessageContextMenuContainer }
   from '../components/middle/message/SponsoredMessageContextMenuContainer';
-// eslint-disable-next-line import/no-cycle
 export { default as StickerSetModal } from '../components/common/StickerSetModal';
 export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 export { default as MobileSearch } from '../components/middle/MobileSearch';
 
-// eslint-disable-next-line import/no-cycle
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';
 export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu';
@@ -68,13 +61,9 @@ export { default as EmojiTooltip } from '../components/middle/composer/EmojiTool
 export { default as InlineBotTooltip } from '../components/middle/composer/InlineBotTooltip';
 export { default as SendAsMenu } from '../components/middle/composer/SendAsMenu';
 
-// eslint-disable-next-line import/no-cycle
 export { default as RightSearch } from '../components/right/RightSearch';
-// eslint-disable-next-line import/no-cycle
 export { default as StickerSearch } from '../components/right/StickerSearch';
-// eslint-disable-next-line import/no-cycle
 export { default as GifSearch } from '../components/right/GifSearch';
-// eslint-disable-next-line import/no-cycle
 export { default as Statistics } from '../components/right/statistics/Statistics';
 export { default as MessageStatistics } from '../components/right/statistics/MessageStatistics';
 export { default as PollResults } from '../components/right/PollResults';
