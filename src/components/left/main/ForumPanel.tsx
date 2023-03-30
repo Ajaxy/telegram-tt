@@ -20,6 +20,7 @@ import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { fastRaf } from '../../../util/schedulers';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -46,6 +47,7 @@ type OwnProps = {
   isHidden?: boolean;
   onTopicSearch?: NoneToVoidFunction;
   onCloseAnimationEnd?: VoidFunction;
+  onOpenAnimationStart?: VoidFunction;
 };
 
 type StateProps = {
@@ -65,6 +67,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   lastSyncTime,
   onTopicSearch,
   onCloseAnimationEnd,
+  onOpenAnimationStart,
   animationLevel,
 }) => {
   const {
@@ -143,20 +146,27 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (prevIsVisible !== isVisible) {
-      const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
-      waitForTransitionEnd(ref.current!, () => {
-        dispatchHeavyAnimationStop();
-      });
+      // For performance reasons, we delay animation of the topic list panel to the next animation frame
+      fastRaf(() => {
+        if (!ref.current) return;
 
-      if (isVisible) {
-        shouldRenderRef.current = true;
-        ref.current!.style.transform = 'none';
-      } else {
-        shouldRenderRef.current = false;
-        ref.current!.style.transform = '';
-      }
+        const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+        waitForTransitionEnd(ref.current, () => {
+          dispatchHeavyAnimationStop();
+        });
+
+        onOpenAnimationStart?.();
+
+        if (isVisible) {
+          shouldRenderRef.current = true;
+          ref.current!.style.transform = 'none';
+        } else {
+          shouldRenderRef.current = false;
+          ref.current!.style.transform = '';
+        }
+      });
     }
-  }, [isVisible, prevIsVisible]);
+  }, [isVisible, onOpenAnimationStart, prevIsVisible]);
 
   useEffect(() => {
     if (!IS_TOUCH_ENV) {
