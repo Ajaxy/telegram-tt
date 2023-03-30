@@ -17,11 +17,12 @@ type OwnProps = {
   onClick: () => void;
   isHidden?: boolean;
   isForVideo: boolean;
+  isForceMobileVersion?: boolean;
   isProtected?: boolean;
 };
 
 const MediaViewerFooter: FC<OwnProps> = ({
-  text = '', isHidden, isForVideo, onClick, isProtected,
+  text = '', isHidden, isForVideo, onClick, isProtected, isForceMobileVersion,
 }) => {
   const [isMultiline, setIsMultiline] = useState(false);
   const { isMobile } = useAppLayout();
@@ -58,6 +59,7 @@ const MediaViewerFooter: FC<OwnProps> = ({
     isForVideo && 'is-for-video',
     isHidden && 'is-hidden',
     isProtected && 'is-protected',
+    isForceMobileVersion && 'mobile',
   );
 
   return (

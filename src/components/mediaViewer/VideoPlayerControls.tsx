@@ -94,7 +94,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const { isMobile } = useAppLayout();
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV) return undefined;
+    if (!IS_TOUCH_ENV && !isForceMobileVersion) return undefined;
     let timeout: number | undefined;
     if (!isVisible || !isPlaying || isSeeking || isPlaybackMenuOpen) {
       if (timeout) window.clearTimeout(timeout);
@@ -106,7 +106,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
     return () => {
       if (timeout) window.clearTimeout(timeout);
     };
-  }, [isPlaying, isVisible, isSeeking, setVisibility, isPlaybackMenuOpen]);
+  }, [isPlaying, isVisible, isSeeking, setVisibility, isPlaybackMenuOpen, isForceMobileVersion]);
 
   useEffect(() => {
     if (isVisible) {

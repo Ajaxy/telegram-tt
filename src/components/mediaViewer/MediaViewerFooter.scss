@@ -13,7 +13,7 @@
     padding: 0.5rem 0 0;
   }
 
-  @media (max-width: 600px) {
+  &.mobile {
     background: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0) 100%);
 
     &.is-for-video {
@@ -25,6 +25,14 @@
         opacity: 1;
         pointer-events: auto;
       }
+    }
+    .media-viewer-footer-content {
+      opacity: 1;
+      z-index: 1;
+    }
+    .media-text.multiline::before {
+      display: none;
+      background: none;
     }
   }
 
@@ -41,10 +49,6 @@
     transition: opacity 0.15s;
 
     &:hover {
-      opacity: 1;
-    }
-
-    @media (max-width: 600px) {
       opacity: 1;
     }
   }
@@ -84,11 +88,6 @@
         background: rgba(0, 0, 0, 0.75);
         border-radius: var(--border-radius-default);
         z-index: var(--z-below);
-
-        @media (max-width: 600px) {
-          display: none;
-          background: none;
-        }
       }
     }
   }
