@@ -855,7 +855,7 @@ function copyTextForMessages(global: GlobalState, chatId: string, messageIds: nu
   const resultText = messages.reduce((acc, message) => {
     const sender = selectSender(global, message);
     acc.push(`> ${sender ? getSenderTitle(lang, sender) : ''}:`);
-    acc.push(`${getMessageSummaryText(lang, message, false, 0, undefined, true)}\n`);
+    acc.push(`${getMessageSummaryText(lang, message, false, 0, true)}\n`);
 
     return acc;
   }, [] as string[]);

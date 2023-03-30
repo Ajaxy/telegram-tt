@@ -12,7 +12,7 @@ export function renderMessageSummaryHtml(
   const text = renderMessageText(
     message, undefined, undefined, undefined, undefined, undefined, true,
   )?.join('');
-  const description = getMessageSummaryDescription(lang, message, text, true, true);
+  const description = getMessageSummaryDescription(lang, message, text, true);
 
   return `${emojiWithSpace}${description}`;
 }
