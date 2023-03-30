@@ -70,7 +70,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestedLanguage = getSuggestedLanguage();
 
-  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage');
+  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage', true);
   const [country, setCountry] = useState<ApiCountryCode | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);

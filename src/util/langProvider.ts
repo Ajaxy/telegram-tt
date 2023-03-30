@@ -10,7 +10,7 @@ import * as cacheApi from './cacheApi';
 import { callApi } from '../api/gramjs';
 import { createCallbackManager } from './callbacks';
 import { formatInteger } from './textFormat';
-import { authLangPack } from './authLangPack';
+import { fallbackLangPackInitial } from './fallbackLangPackInitial';
 
 export interface LangFn {
   (key: string, value?: any, format?: 'i', pluralValue?: number): string;
@@ -105,16 +105,11 @@ function createLangFn() {
       }
     }
 
-    if (!langPack && !fallbackLangPack && !authLangPack[key]) {
-      return key;
-    }
-
-    const shouldImportFallback = !fallbackLangPack && !(langPack?.[key] || fallbackLangPack?.[key]);
-    if (shouldImportFallback) {
+    if (!fallbackLangPack) {
       void importFallbackLangPack();
     }
 
-    const langString = (langPack?.[key]) || (fallbackLangPack?.[key]) || authLangPack[key];
+    const langString = langPack?.[key] || fallbackLangPack?.[key] || fallbackLangPackInitial[key];
     if (!langString) {
       return key;
     }

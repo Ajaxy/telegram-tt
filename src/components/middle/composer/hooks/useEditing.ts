@@ -116,8 +116,7 @@ const useEditing = (
         noWebPage: false,
       });
     }
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `as const` not yet supported by linter
-  }, [editedMessage, chatId, getHtml, threadId] as const);
+  }, [editedMessage, chatId, getHtml, threadId, getShouldResetNoWebPageDebounced]);
 
   const restoreNewDraftAfterEditing = useCallback(() => {
     if (!draft) return;
