@@ -2,7 +2,7 @@
 
 import type { ApiLangPack } from '../api/types';
 
-export const authLangPack = {
+export const fallbackLangPackInitial = {
   WrongNumber: {
     key: 'WrongNumber',
     value: 'Wrong number?',
