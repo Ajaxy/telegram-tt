@@ -20,7 +20,7 @@ import {
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
-import { calculateMediaDimensions } from './helpers/mediaDimensions';
+import { calculateMediaDimensions, MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
@@ -44,6 +44,7 @@ export type OwnProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   uploadProgress?: number;
+  forcedWidth?: number;
   size?: 'inline' | 'pictogram';
   shouldAffectAppendix?: boolean;
   dimensions?: IMediaDimensions & { isSmall?: boolean };
@@ -65,6 +66,7 @@ const Photo: FC<OwnProps> = ({
   isInSelectMode,
   isSelected,
   uploadProgress,
+  forcedWidth,
   size = 'inline',
   dimensions,
   asForwarded,
@@ -92,9 +94,11 @@ const Photo: FC<OwnProps> = ({
   } = useMediaWithLoadProgress(getMessageMediaHash(message, size), !shouldLoad);
   const fullMediaData = localBlobUrl || mediaData;
 
+  const withBlurredBackground = Boolean(forcedWidth);
   const [withThumb] = useState(!fullMediaData);
   const noThumb = Boolean(fullMediaData);
   const thumbRef = useBlurredMediaThumbRef(message, noThumb);
+  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground);
   const thumbClassNames = useMediaTransition(!noThumb);
   const thumbDataUri = getMessageMediaThumbDataUri(message);
 
@@ -170,6 +174,7 @@ const Photo: FC<OwnProps> = ({
     !isUploading && !nonInteractive && 'interactive',
     isSmall && 'small-image',
     width === height && 'square-image',
+    height < MIN_MEDIA_HEIGHT && 'fix-min-height',
   );
 
   const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
@@ -183,10 +188,12 @@ const Photo: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
+      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
       <img
         src={fullMediaData}
-        className="full-media"
+        className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
         alt=""
+        style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
         draggable={!isProtected}
       />
       {withThumb && (

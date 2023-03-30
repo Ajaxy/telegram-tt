@@ -13,6 +13,7 @@ import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
+import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
 import Skeleton from '../../ui/Skeleton';
 
@@ -24,6 +25,7 @@ type OwnProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   theme: ISettings['theme'];
+  forcedWidth?: number;
 };
 
 const Invoice: FC<OwnProps> = ({
@@ -32,6 +34,7 @@ const Invoice: FC<OwnProps> = ({
   isInSelectMode,
   isSelected,
   theme,
+  forcedWidth,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -49,6 +52,8 @@ const Invoice: FC<OwnProps> = ({
   } = invoice!;
 
   const photoUrl = useMedia(getWebDocumentHash(photo));
+  const withBlurredBackground = Boolean(forcedWidth);
+  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground, photoUrl);
 
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {
     if (!shouldAffectAppendix) {
@@ -79,16 +84,26 @@ const Invoice: FC<OwnProps> = ({
         <div>{renderText(text, ['emoji', 'br'])}</div>
       )}
       <div className={`description ${photo ? 'has-image' : ''}`}>
-        {photoUrl && (
-          <img
-            className="invoice-image"
-            src={photoUrl}
-            alt=""
-            crossOrigin="anonymous"
-          />
-        )}
-        {!photoUrl && photo && (
-          <Skeleton width={photo.dimensions?.width} height={photo.dimensions?.height} forceAspectRatio />
+        {Boolean(photo) && (
+          <div className="invoice-image-container">
+            {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
+            {photoUrl && (
+              <img
+                className="invoice-image"
+                src={photoUrl}
+                alt=""
+                style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
+                crossOrigin="anonymous"
+              />
+            )}
+            {!photoUrl && photo && (
+              <Skeleton
+                width={forcedWidth || photo.dimensions?.width}
+                height={photo.dimensions?.height}
+                forceAspectRatio
+              />
+            )}
+          </div>
         )}
         <p className="description-text">
           {formatCurrency(amount, currency, lang.code)}

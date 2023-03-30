@@ -14,6 +14,11 @@
     object-fit: cover;
   }
 
+  .full-media.with-blurred-bg {
+    position: relative;
+    border-radius: 0 !important;
+  }
+
   video {
     background: no-repeat 50% 50%;
     background-size: contain;
@@ -23,10 +28,20 @@
     position: absolute;
     top: 0;
     left: 0;
+
+    &.with-blurred-bg {
+      border-radius: 0 !important;
+      left: 50%;
+      transform: translateX(-50%);
+    }
   }
 
   .media-loading {
     position: absolute;
+  }
+
+  &.fix-min-height {
+    min-height: 5rem;
   }
 }
 

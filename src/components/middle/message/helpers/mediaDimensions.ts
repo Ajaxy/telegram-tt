@@ -1,5 +1,5 @@
 import type { ApiMessage } from '../../../../api/types';
-import { calculateInlineImageDimensions, calculateVideoDimensions } from '../../../common/helpers/mediaDimensions';
+import { calculateInlineImageDimensions, calculateVideoDimensions, REM } from '../../../common/helpers/mediaDimensions';
 import {
   getMessageText,
   getMessagePhoto,
@@ -9,11 +9,11 @@ import {
   getMessageWebPageVideo,
 } from '../../../../global/helpers';
 
-const MIN_MEDIA_WIDTH = 100;
-const MIN_MEDIA_WIDTH_WITH_COMMENTS = 238;
-const MIN_MEDIA_WIDTH_WITH_TEXT = 175;
-const MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS = 238;
-const MIN_MEDIA_HEIGHT = 90;
+export const MIN_MEDIA_WIDTH_WITH_COMMENTS = 20 * REM;
+export const MIN_MEDIA_WIDTH_WITH_TEXT = 15 * REM;
+const MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS = 20 * REM;
+const MIN_MEDIA_WIDTH = 7 * REM;
+export const MIN_MEDIA_HEIGHT = 5 * REM;
 const SMALL_IMAGE_THRESHOLD = 12;
 
 export function getMinMediaWidth(hasText?: boolean, hasCommentButton?: boolean) {
