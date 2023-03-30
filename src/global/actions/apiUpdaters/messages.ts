@@ -324,6 +324,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       };
       Object.values(messages).forEach((message) => {
         const threadId = selectThreadIdFromMessage(global, message);
+        global = updateChatMessage(global, chatId, message.id, {
+          isPinned,
+        });
         if (threadId === MAIN_THREAD_ID) return;
         const currentUpdatedInThread = updatePerThread[threadId] || [];
         currentUpdatedInThread.push(message.id);
@@ -818,7 +821,7 @@ function updateListedAndViewportIds<T extends GlobalState>(
   Object.values(global.byTabId).forEach(({ id: tabId }) => {
     if (selectIsViewportNewest(global, chatId, MAIN_THREAD_ID, tabId)) {
       // Always keep the first unread message in the viewport list
-      const firstUnreadId = selectFirstUnreadId(global, chatId, MAIN_THREAD_ID, tabId);
+      const firstUnreadId = selectFirstUnreadId(global, chatId, MAIN_THREAD_ID);
       const candidateGlobal = addViewportId(global, chatId, MAIN_THREAD_ID, id, tabId);
       const newViewportIds = selectViewportIds(candidateGlobal, chatId, MAIN_THREAD_ID, tabId);
 

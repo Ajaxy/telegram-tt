@@ -423,6 +423,7 @@ export interface ApiMessage {
   isHideKeyboardSelective?: boolean;
   isFromScheduled?: boolean;
   isSilent?: boolean;
+  isPinned?: boolean;
   seenByUserIds?: string[];
   isProtected?: boolean;
   isForwardingAllowed?: boolean;

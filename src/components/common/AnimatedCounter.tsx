@@ -1,12 +1,12 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useMemo, useRef } from '../../lib/teact/teact';
+import React, {
+  useEffect, useMemo, useRef,
+} from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import { ANIMATION_LEVEL_MAX } from '../../config';
-import usePrevious from '../../hooks/usePrevious';
-import useForceUpdate from '../../hooks/useForceUpdate';
-import useTimeout from '../../hooks/useTimeout';
 import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
 
 import styles from './AnimatedCounter.module.scss';
 
@@ -14,22 +14,25 @@ type OwnProps = {
   text: string;
 };
 
-const ANIMATION_TIME = 200;
-
 const AnimatedCounter: FC<OwnProps> = ({
   text,
 }) => {
   const lang = useLang();
 
-  const prevText = usePrevious(text);
-  const forceUpdate = useForceUpdate();
-
-  const isAnimatingRef = useRef(false);
+  const prevTextRef = useRef<string>();
+  const [isAnimating, markAnimating, unmarkAnimating] = useFlag(false);
 
   const shouldAnimate = getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MAX;
 
   const textElement = useMemo(() => {
-    if (!shouldAnimate) return text;
+    if (!shouldAnimate) {
+      return text;
+    }
+    if (!isAnimating) {
+      return prevTextRef.current || text;
+    }
+
+    const prevText = prevTextRef.current;
 
     const elements = [];
     for (let i = 0; i < text.length; i++) {
@@ -37,8 +40,8 @@ const AnimatedCounter: FC<OwnProps> = ({
         elements.push(
           <div className={styles.characterContainer}>
             <div className={styles.character}>{text[i]}</div>
-            <div className={styles.characterOld}>{prevText[i]}</div>
-            <div className={styles.characterNew}>{text[i]}</div>
+            <div className={styles.characterOld} onAnimationEnd={unmarkAnimating}>{prevText[i]}</div>
+            <div className={styles.characterNew} onAnimationEnd={unmarkAnimating}>{text[i]}</div>
           </div>,
         );
       } else {
@@ -46,15 +49,14 @@ const AnimatedCounter: FC<OwnProps> = ({
       }
     }
 
-    isAnimatingRef.current = true;
+    prevTextRef.current = text;
 
     return elements;
-  }, [prevText, shouldAnimate, text]);
+  }, [shouldAnimate, isAnimating, text]);
 
-  useTimeout(() => {
-    isAnimatingRef.current = false;
-    forceUpdate();
-  }, isAnimatingRef.current ? ANIMATION_TIME : undefined);
+  useEffect(() => {
+    markAnimating();
+  }, [text]);
 
   return (
     <span className={styles.root} dir={lang.isRtl ? 'rtl' : undefined}>

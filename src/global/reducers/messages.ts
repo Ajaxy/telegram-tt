@@ -15,7 +15,6 @@ import {
   selectListedIds,
   selectChatMessages,
   selectViewportIds,
-  selectOutlyingIds,
   selectPinnedIds,
   selectThreadInfo,
   selectMessageIdsByGroupId,
@@ -25,10 +24,10 @@ import {
   selectChatMessage,
   selectCurrentMessageList,
   selectChat,
-  selectTabState,
+  selectTabState, selectOutlyingLists,
 } from '../selectors';
 import {
-  areSortedArraysEqual, omit, pickTruthy, unique,
+  areSortedArraysEqual, mergeIdRanges, omit, orderHistoryIds, pickTruthy, unique,
 } from '../../util/iteratees';
 import { updateTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -252,6 +251,7 @@ export function deleteChatMessages<T extends GlobalState>(
 
     let listedIds = selectListedIds(global, chatId, threadId);
     let pinnedIds = selectPinnedIds(global, chatId, threadId);
+    let outlyingLists = selectOutlyingLists(global, chatId, threadId);
     let mainPinnedIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID);
     let newMessageCount = threadInfo?.messagesCount;
 
@@ -260,6 +260,11 @@ export function deleteChatMessages<T extends GlobalState>(
         listedIds = listedIds.filter((id) => id !== messageId);
         if (newMessageCount !== undefined && !isLocalMessageId(messageId)) newMessageCount -= 1;
       }
+
+      outlyingLists = outlyingLists?.map((list) => {
+        if (!list.includes(messageId)) return list;
+        return list.filter((id) => id !== messageId);
+      });
 
       if (pinnedIds?.includes(messageId)) {
         pinnedIds = pinnedIds.filter((id) => id !== messageId);
@@ -271,24 +276,19 @@ export function deleteChatMessages<T extends GlobalState>(
     });
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
-      let outlyingIds = selectOutlyingIds(global, chatId, threadId, tabId);
       let viewportIds = selectViewportIds(global, chatId, threadId, tabId);
 
       messageIds.forEach((messageId) => {
-        if (outlyingIds?.includes(messageId)) {
-          outlyingIds = outlyingIds.filter((id) => id !== messageId);
-        }
-
         if (viewportIds?.includes(messageId)) {
           viewportIds = viewportIds.filter((id) => id !== messageId);
         }
       });
 
-      global = replaceTabThreadParam(global, chatId, threadId, 'outlyingIds', outlyingIds, tabId);
       global = replaceTabThreadParam(global, chatId, threadId, 'viewportIds', viewportIds, tabId);
     });
 
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
+    global = replaceThreadParam(global, chatId, threadId, 'outlyingLists', outlyingLists);
     global = replaceThreadParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
     global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', mainPinnedIds);
 
@@ -379,30 +379,35 @@ export function updateListedIds<T extends GlobalState>(
   ]));
 }
 
-export function updateOutlyingIds<T extends GlobalState>(
+export function removeOutlyingList<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: number,
+  list: number[],
+): T {
+  const outlyingLists = selectOutlyingLists(global, chatId, threadId);
+  if (!outlyingLists) {
+    return global;
+  }
+
+  const newOutlyingLists = outlyingLists.filter((l) => l !== list);
+
+  return replaceThreadParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
+}
+
+export function updateOutlyingLists<T extends GlobalState>(
   global: T,
   chatId: string,
   threadId: number,
   idsUpdate: number[],
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const outlyingIds = selectOutlyingIds(global, chatId, threadId, tabId);
-  const newIds = outlyingIds?.length
-    ? idsUpdate.filter((id) => !outlyingIds.includes(id))
-    : idsUpdate;
+  if (!idsUpdate.length) return global;
 
-  if (outlyingIds && !newIds.length) {
-    return global;
-  }
+  const outlyingLists = selectOutlyingLists(global, chatId, threadId);
 
-  return replaceTabThreadParam(global, chatId, threadId, 'outlyingIds', orderHistoryIds([
-    ...(outlyingIds || []),
-    ...newIds,
-  ]), tabId);
-}
+  const newOutlyingLists = mergeIdRanges(outlyingLists || [], idsUpdate);
 
-function orderHistoryIds(listedIds: number[]) {
-  return listedIds.sort((a, b) => a - b);
+  return replaceThreadParam(global, chatId, threadId, 'outlyingLists', newOutlyingLists);
 }
 
 export function addViewportId<T extends GlobalState>(
@@ -514,22 +519,6 @@ export function updateFocusedMessage<T extends GlobalState>(
       messageId,
       noHighlight,
       isResizingContainer,
-    },
-  }, tabId);
-}
-
-export function updateFocusedMessageReached<T extends GlobalState>(
-  global: T, hasReachedMessage: boolean,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
-  const focusedMessage = selectTabState(global, tabId).focusedMessage;
-
-  if (!focusedMessage) return global;
-
-  return updateTabState(global, {
-    focusedMessage: {
-      ...focusedMessage,
-      hasReachedMessage,
     },
   }, tabId);
 }

@@ -4,6 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
+import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -50,6 +51,7 @@ interface OwnProps {
   noAppearanceAnimation: boolean;
   onFabToggle: AnyToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
+  onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
 }
 
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
@@ -80,6 +82,7 @@ const MessageListContent: FC<OwnProps> = ({
   noAppearanceAnimation,
   onFabToggle,
   onNotchToggle,
+  onPinnedIntersectionChange,
 }) => {
   const { openHistoryCalendar } = getActions();
 
@@ -87,7 +90,7 @@ const MessageListContent: FC<OwnProps> = ({
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef);
+  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange);
 
   const {
     backwardsTriggerRef,
@@ -154,6 +157,7 @@ const MessageListContent: FC<OwnProps> = ({
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isLastInList={isLastInList}
+            onPinnedIntersectionChange={onPinnedIntersectionChange}
           />,
         ]);
       }
@@ -222,6 +226,7 @@ const MessageListContent: FC<OwnProps> = ({
             isLastInDocumentGroup={position.isLastInDocumentGroup}
             isLastInList={position.isLastInList}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
+            onPinnedIntersectionChange={onPinnedIntersectionChange}
           />,
           message.id === threadTopMessageId && (
             <div className="local-action-message" key="discussion-started">

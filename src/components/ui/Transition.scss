@@ -110,6 +110,78 @@
   }
 
   /*
+   * slide-vertical
+   */
+
+  &.slide-vertical {
+    > .to {
+      transform: translateY(100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-vertical-out var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-vertical-in var(--slide-transition);
+      }
+    }
+  }
+
+  &.slide-vertical.backwards {
+    > .to {
+      transform: translateY(-100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-vertical-in-backwards var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-vertical-out-backwards var(--slide-transition);
+      }
+    }
+  }
+
+  /*
+   * slide-vertical-fade
+   */
+
+  &.slide-vertical-fade {
+    > .to {
+      transform: translateY(100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-vertical-fade-out var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-vertical-fade-in var(--slide-transition);
+      }
+    }
+  }
+
+  &.slide-vertical-fade.backwards {
+    > .to {
+      transform: translateY(-100%);
+    }
+
+    &.animating {
+      > .from {
+        animation: slide-vertical-fade-in-backwards var(--slide-transition);
+      }
+
+      > .to {
+        animation: slide-vertical-fade-out-backwards var(--slide-transition);
+      }
+    }
+  }
+
+  /*
    * mv-slide
    */
 
@@ -482,6 +554,94 @@
     transform: translateX(0);
   }
 }
+
+/*
+ * slide-vertical
+ */
+@keyframes slide-vertical-in {
+  0% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-vertical-out {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes slide-vertical-in-backwards {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slide-vertical-out-backwards {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/*
+ * slide-vertical-fade
+ */
+
+@keyframes slide-vertical-fade-in {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-vertical-fade-out {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-vertical-fade-in-backwards {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-vertical-fade-out-backwards {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 
 /*
  * mv-slide

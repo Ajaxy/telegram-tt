@@ -66,6 +66,7 @@ import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
+import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -130,6 +131,7 @@ type StateProps = {
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
   lastSyncTime?: number;
+  pinnedIds?: number[];
 };
 
 function isImage(item: DataTransferItem) {
@@ -177,6 +179,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   shouldSendJoinRequest,
   shouldLoadFullChat,
   lastSyncTime,
+  pinnedIds,
 }) => {
   const {
     openChat,
@@ -350,6 +353,14 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
+  const {
+    onIntersectionChanged,
+    onFocusPinnedMessage,
+    getCurrentPinnedIndexes,
+    getLoadingPinnedId,
+    getForceNextPinnedInHeader,
+  } = usePinnedMessage(chatId, threadId, pinnedIds);
+
   const className = buildClassName(
     renderingHasTools && 'has-header-tools',
     MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
@@ -444,6 +455,9 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
               messageListType={renderingMessageListType}
               isReady={isReady}
               isMobile={isMobile}
+              getCurrentPinnedIndexes={getCurrentPinnedIndexes}
+              getLoadingPinnedId={getLoadingPinnedId}
+              onFocusPinnedMessage={onFocusPinnedMessage}
             />
             <Transition
               name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
@@ -464,6 +478,8 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
                 isReady={isReady}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
+                onPinnedIntersectionChange={onIntersectionChanged}
+                getForceNextPinnedInHeader={getForceNextPinnedInHeader}
               />
               <div className={footerClassName}>
                 {renderingCanPost && (
@@ -698,6 +714,7 @@ export default memo(withGlobal<OwnProps>(
       shouldJoinToSend,
       shouldSendJoinRequest,
       shouldLoadFullChat,
+      pinnedIds,
     };
   },
 )(MiddleColumn));

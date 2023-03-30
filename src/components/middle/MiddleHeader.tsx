@@ -1,11 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
-import cycleRestrict from '../../util/cycleRestrict';
 
 import type { GlobalState, MessageListType } from '../../global/types';
+import type { Signal } from '../../util/signals';
 import type {
   ApiChat, ApiMessage, ApiTypingStatus, ApiUser,
 } from '../../api/types';
@@ -51,6 +51,7 @@ import useLang from '../../hooks/useLang';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
 import usePrevious from '../../hooks/usePrevious';
 import useAppLayout from '../../hooks/useAppLayout';
+import useDerivedState from '../../hooks/useDerivedState';
 
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import GroupChatInfo from '../common/GroupChatInfo';
@@ -75,6 +76,9 @@ type OwnProps = {
   messageListType: MessageListType;
   isReady?: boolean;
   isMobile?: boolean;
+  getCurrentPinnedIndexes: Signal<Record<string, number>>;
+  getLoadingPinnedId: Signal<number | undefined>;
+  onFocusPinnedMessage: (messageId: number) => boolean;
 };
 
 type StateProps = {
@@ -93,7 +97,6 @@ type StateProps = {
   isChatWithSelf?: boolean;
   lastSyncTime?: number;
   hasButtonInHeader?: boolean;
-  hasReachedFocusedMessage?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
@@ -124,8 +127,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   connectionState,
-  hasReachedFocusedMessage,
   isSyncing,
+  getCurrentPinnedIndexes,
+  getLoadingPinnedId,
+  onFocusPinnedMessage,
 }) => {
   const {
     openChatWithInfo,
@@ -133,7 +138,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     focusMessage,
     openChat,
     openPreviousChat,
-    setReachedFocusedMessage,
     loadPinnedMessages,
     toggleLeftColumn,
     exitMessageSelectMode,
@@ -141,11 +145,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const isBackButtonActive = useRef(true);
-  const [isWaitingForPinnedMessageFocus, setWaitingForPinnedMessageFocus] = useState(false);
   const { isTablet } = useAppLayout();
 
-  const [pinnedMessageIndex, setPinnedMessageIndex] = useState(0);
-  const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[pinnedMessageIndex] : pinnedMessageIds;
+  const currentPinnedIndexes = useDerivedState(getCurrentPinnedIndexes);
+  const currentPinnedIndex = currentPinnedIndexes[`${chatId}_${threadId}`] || 0;
+  const waitingForPinnedId = useDerivedState(getLoadingPinnedId);
+  const pinnedMessageId = Array.isArray(pinnedMessageIds) ? pinnedMessageIds[currentPinnedIndex] : pinnedMessageIds;
   const pinnedMessage = messagesById && pinnedMessageId ? messagesById[pinnedMessageId] : undefined;
   const pinnedMessagesCount = Array.isArray(pinnedMessageIds)
     ? pinnedMessageIds.length : (pinnedMessageIds ? 1 : undefined);
@@ -159,25 +164,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
       loadPinnedMessages({ chatId, threadId });
     }
   }, [chatId, loadPinnedMessages, lastSyncTime, threadId, isReady, isForum]);
-
-  // Reset pinned index when switching chats and pinning/unpinning
-  useEffect(() => {
-    setPinnedMessageIndex(0);
-    setWaitingForPinnedMessageFocus(false);
-  }, [pinnedMessageIds]);
-
-  useEffect(() => {
-    if (hasReachedFocusedMessage && isWaitingForPinnedMessageFocus) {
-      setReachedFocusedMessage({ hasReached: false });
-      setWaitingForPinnedMessageFocus(false);
-
-      const newIndex = cycleRestrict(pinnedMessagesCount || 1, pinnedMessageIndex + 1);
-      setPinnedMessageIndex(newIndex);
-    }
-  }, [
-    hasReachedFocusedMessage, isWaitingForPinnedMessageFocus, pinnedMessageIndex, pinnedMessagesCount,
-    setReachedFocusedMessage,
-  ]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
@@ -199,14 +185,14 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   }, [pinMessage]);
 
   const handlePinnedMessageClick = useCallback((): void => {
-    if (pinnedMessage) {
+    if (!pinnedMessage) return;
+
+    if (onFocusPinnedMessage(pinnedMessage.id)) {
       focusMessage({
         chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id, noForumTopicPanel: true,
       });
-
-      setWaitingForPinnedMessageFocus(true);
     }
-  }, [pinnedMessage, focusMessage, threadId]);
+  }, [pinnedMessage, threadId, onFocusPinnedMessage]);
 
   const handleAllPinnedClick = useCallback(() => {
     openChat({ id: chatId, threadId, type: 'pinned' });
@@ -440,12 +426,14 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
           key={chatId}
           message={renderingPinnedMessage}
           count={renderingPinnedMessagesCount || 0}
-          index={pinnedMessageIndex}
+          index={currentPinnedIndex}
           customTitle={renderingPinnedMessageTitle}
-          className={buildClassName(pinnedMessageClassNames, isPinnedMessagesFullWidth && 'full-width')}
+          className={pinnedMessageClassNames}
           onUnpinMessage={renderingCanUnpin ? handleUnpinMessage : undefined}
           onClick={handlePinnedMessageClick}
           onAllPinnedClick={handleAllPinnedClick}
+          isLoading={waitingForPinnedId !== undefined}
+          isFullWidth={isPinnedMessagesFullWidth}
         />
       )}
 
@@ -514,7 +502,6 @@ export default memo(withGlobal<OwnProps>(
     );
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const typingStatus = selectThreadParam(global, chatId, threadId, 'typingStatus');
-    const focusedMessage = selectTabState(global).focusedMessage;
 
     const state: StateProps = {
       typingStatus,
@@ -531,7 +518,6 @@ export default memo(withGlobal<OwnProps>(
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
-      hasReachedFocusedMessage: !focusedMessage || focusedMessage.hasReachedMessage,
     };
 
     const messagesById = selectChatMessages(global, chatId);

@@ -1,0 +1,269 @@
+@import "../../styles/mixins";
+
+.root {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  cursor: default;
+  flex-direction: row-reverse;
+  background: var(--color-background);
+
+  :global {
+    .Button {
+      margin-left: 0.25rem;
+
+      &.tiny {
+        margin-right: 0.625rem;
+      }
+    }
+  }
+
+  :global(body.animation-level-1) & {
+    :global(.ripple-container) {
+      display: none;
+    }
+  }
+
+  :global(body.animation-level-0) & {
+    transition: none !important;
+  }
+
+  @media (min-width: 1276px) {
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.15s ease, transform var(--layer-transition);
+
+    :global(#Main.right-column-open) & {
+      transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
+    }
+  }
+
+  > :global(.Button) {
+    flex-shrink: 0;
+  }
+}
+
+.root:global(.full-width) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: var(--color-background);
+  padding: 0.25rem 0.8125rem 0.25rem 1rem;
+  box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
+  transform: translate3d(0, 0, 0);
+  transition: opacity 0.15s ease, transform var(--layer-transition);
+
+  &::before {
+    content: "";
+    display: block;
+    position: absolute;
+    top: -0.1875rem;
+    left: 0;
+    right: 0;
+    height: 0.125rem;
+    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
+  }
+
+  .pinnedMessage {
+    margin-top: 0;
+    margin-bottom: 0;
+    flex: 1;
+  }
+
+  .messageText {
+    max-width: none;
+  }
+
+  @media (min-width: 1276px) {
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.15s ease, transform var(--layer-transition);
+
+    :global(#Main.right-column-open) & {
+      padding-left: calc(var(--right-column-width) + 1rem);
+    }
+  }
+}
+
+.loading {
+  --spinner-size: 1.5rem;
+}
+
+.pinListIcon {
+  position: absolute;
+  transition: 0.25s ease-in-out opacity, 0.25s ease-in-out transform;
+}
+
+.pinListIconHidden {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.pinnedMessage {
+  display: flex;
+  flex-shrink: 1;
+  margin-top: -0.25rem;
+  margin-bottom: -0.25rem;
+  padding: 0.25rem;
+  padding-left: 0.375rem;
+  border-radius: var(--border-radius-messages-small);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  align-items: center;
+
+  &:hover:not(.no-hover) {
+    background-color: var(--color-interactive-element-hover);
+  }
+}
+
+
+.messageTextTransition {
+  height: 1.125rem;
+  width: 100%;
+  overflow: hidden;
+}
+
+.messageText {
+  overflow: hidden;
+  margin-inline-start: 0.375rem;
+  margin-top: 0.125rem;
+  max-width: 15rem;
+  min-width: 15rem;
+  flex-grow: 1;
+
+  transition: 0.25s ease-in-out transform;
+
+  &.withMedia {
+    transform: translateX(2.625rem);
+    margin-right: 2.625rem;
+    max-width: calc(15rem - 2.625rem);
+    min-width: calc(15rem - 2.625rem);
+  }
+
+  :global(.emoji-small) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (min-width: 1440px) and (max-width: 1500px) {
+    max-width: 14rem;
+  }
+}
+
+.title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1rem;
+  height: 1rem;
+  color: var(--color-primary);
+  margin-bottom: 0.125rem;
+  white-space: pre;
+  text-align: initial;
+
+  :global(body.is-ios) & {
+    font-size: 0.9375rem;
+  }
+}
+
+.summary {
+  font-size: 0.875rem;
+  line-height: 1.125rem;
+  height: 1.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+
+  :global(body.is-ios) & {
+    font-size: 0.9375rem;
+  }
+}
+
+.inlineButton {
+  display: block;
+  width: auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 1.5rem;
+  padding: 0 0.75rem;
+  font-weight: 500;
+  text-transform: none;
+  height: 2rem;
+  max-width: 10rem;
+  flex-shrink: 1;
+}
+
+.pictogramTransition {
+  position: absolute;
+  width: 2.25rem !important;
+  height: 2.25rem;
+  margin-inline-start: 0.5rem;
+  margin-top: 0.125rem;
+  overflow: hidden;
+}
+
+.pinnedThumb {
+  width: 100%;
+  height: 100%;
+
+  flex-shrink: 0;
+
+  border-radius: 0.25rem;
+  overflow: hidden;
+
+  & + .messageText {
+    max-width: 12rem;
+  }
+}
+
+.pinnedThumbImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 600px) {
+  .pinnedMessage {
+    flex-grow: 1;
+    padding-top: 0;
+    padding-bottom: 0;
+    max-width: unset;
+    margin-top: -0.1875rem;
+
+    &::before {
+      top: 0.125rem;
+      bottom: 0.125rem;
+    }
+
+    .messageText {
+      max-width: none;
+    }
+  }
+
+  .root:global(.full-width) {
+    display: none;
+  }
+
+  .root {
+    @include header-mobile();
+  }
+}
+
+@media (min-width: 1276px) and (max-width: 1439px) {
+  :global(:not(.tools-stacked)) .root {
+    opacity: 1;
+
+    :global(#Main.right-column-open) & {
+      opacity: 0;
+    }
+  }
+}
+
+:global(.tools-stacked.animated) .root {
+  animation: fade-in var(--layer-transition) forwards;
+
+  :global(body.animation-level-0) & {
+    animation: none;
+  }
+}

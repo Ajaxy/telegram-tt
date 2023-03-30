@@ -15,10 +15,7 @@ import type {
   ApiUser,
   ApiVideo,
 } from '../../../api/types';
-import {
-  MAIN_THREAD_ID,
-  MESSAGE_DELETED,
-} from '../../../api/types';
+import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
@@ -39,60 +36,62 @@ import {
   areSortedArraysIntersecting, buildCollectionByKey, omit, split, unique,
 } from '../../../util/iteratees';
 import {
-  addUsers,
   addChatMessagesById,
+  addChats,
+  addUsers,
+  removeOutlyingList,
+  removeRequestedMessageTranslation,
+  replaceScheduledMessages,
   replaceThreadParam,
   safeReplaceViewportIds,
-  updateChatMessage,
-  addChats,
-  updateListedIds,
-  updateOutlyingIds,
-  replaceScheduledMessages,
-  updateThreadInfos,
   updateChat,
-  updateThreadUnreadFromForwardedMessage,
-  updateSponsoredMessage,
-  updateTopic,
-  updateThreadInfo,
-  replaceTabThreadParam,
-  updateRequestedMessageTranslation,
-  removeRequestedMessageTranslation,
+  updateChatMessage,
+  updateListedIds,
   updateMessageTranslation,
+  updateOutlyingLists,
+  updateRequestedMessageTranslation,
+  updateSponsoredMessage,
+  updateThreadInfo,
+  updateThreadInfos,
+  updateThreadUnreadFromForwardedMessage,
+  updateTopic,
 } from '../../reducers';
 import {
   selectChat,
   selectChatMessage,
-  selectCurrentMessageList,
-  selectFocusedMessageId,
   selectCurrentChat,
+  selectCurrentMessageList,
+  selectDraft,
+  selectEditingId,
+  selectEditingMessage,
+  selectEditingScheduledId,
+  selectFirstUnreadId,
+  selectFocusedMessageId,
+  selectForwardsCanBeSentToChat,
+  selectForwardsContainVoiceMessages,
+  selectIsCurrentUserPremium,
+  selectLanguageCode,
   selectListedIds,
-  selectOutlyingIds,
-  selectViewportIds,
+  selectNoWebPage,
+  selectOutlyingListByMessageId,
   selectRealLastReadId,
   selectReplyingToId,
-  selectEditingId,
-  selectDraft,
-  selectThreadTopMessageId,
-  selectEditingScheduledId,
-  selectEditingMessage,
   selectScheduledMessage,
-  selectNoWebPage,
-  selectFirstUnreadId,
-  selectUser,
   selectSendAs,
   selectSponsoredMessage,
-  selectIsCurrentUserPremium,
-  selectForwardsContainVoiceMessages,
   selectTabState,
   selectThreadIdFromMessage,
-  selectLanguageCode,
-  selectForwardsCanBeSentToChat,
+  selectThreadTopMessageId,
+  selectUser,
+  selectViewportIds,
 } from '../../selectors';
+import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import {
-  debounce, onTickEnd, rafPromise,
-} from '../../../util/schedulers';
-import {
-  getMessageOriginalId, getUserFullName, isDeletedUser, isServiceNotificationMessage, isUserBot,
+  getMessageOriginalId,
+  getUserFullName,
+  isDeletedUser,
+  isServiceNotificationMessage,
+  isUserBot,
 } from '../../helpers';
 import { translate } from '../../../util/langProvider';
 import { ensureProtocol } from '../../../util/ensureProtocol';
@@ -109,6 +108,7 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   const {
     direction = LoadMoreDirection.Around,
     isBudgetPreload = false,
+    shouldForceRender = false,
     tabId = getCurrentTabId(),
   } = payload || {};
 
@@ -117,7 +117,7 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   if (!chatId || !threadId) {
     const currentMessageList = selectCurrentMessageList(global, tabId);
     if (!currentMessageList) {
-      return undefined;
+      return;
     }
 
     chatId = currentMessageList.chatId;
@@ -127,17 +127,18 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
   const chat = selectChat(global, chatId);
   // TODO Revise if `chat.isRestricted` check is needed
   if (!chat || chat.isRestricted) {
-    return undefined;
+    return;
   }
 
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
   const listedIds = selectListedIds(global, chatId, threadId);
-  const outlyingIds = selectOutlyingIds(global, chatId, threadId, tabId);
 
   if (!viewportIds || !viewportIds.length || direction === LoadMoreDirection.Around) {
     const offsetId = selectFocusedMessageId(global, chatId, tabId) || selectRealLastReadId(global, chatId, threadId);
     const isOutlying = Boolean(offsetId && listedIds && !listedIds.includes(offsetId));
-    const historyIds = (isOutlying ? outlyingIds : listedIds) || [];
+    const historyIds = (isOutlying
+      ? selectOutlyingListByMessageId(global, chatId, threadId, offsetId!)
+      : listedIds) || [];
     const {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
@@ -155,8 +156,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
     }
   } else {
     const offsetId = direction === LoadMoreDirection.Backwards ? viewportIds[0] : viewportIds[viewportIds.length - 1];
-    const isOutlying = Boolean(outlyingIds);
-    const historyIds = (isOutlying ? outlyingIds : listedIds)!;
+    const isOutlying = Boolean(listedIds && !listedIds.includes(offsetId));
+    const historyIds = (isOutlying
+      ? selectOutlyingListByMessageId(global, chatId, threadId, offsetId) : listedIds)!;
     const {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, direction);
@@ -172,11 +174,11 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
     });
 
     if (isBudgetPreload) {
-      return undefined;
+      return;
     }
   }
 
-  return global;
+  setGlobal(global, { forceOnHeavyAnimation: shouldForceRender });
 });
 
 async function loadWithBudget<T extends GlobalState>(
@@ -580,7 +582,7 @@ addActionHandler('markMessageListRead', (global, actions, payload): ActionReturn
   }
 
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
-  const minId = selectFirstUnreadId(global, chatId, threadId, tabId);
+  const minId = selectFirstUnreadId(global, chatId, threadId);
   if (!viewportIds || !minId || !chat.unreadCount) {
     return global;
   }
@@ -975,7 +977,7 @@ async function loadViewportMessages<T extends GlobalState>(
 
   global = addChatMessagesById(global, chatId, byId);
   global = isOutlying
-    ? updateOutlyingIds(global, chatId, threadId, ids, tabId)
+    ? updateOutlyingLists(global, chatId, threadId, ids)
     : updateListedIds(global, chatId, threadId, ids);
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
@@ -983,19 +985,19 @@ async function loadViewportMessages<T extends GlobalState>(
   global = updateThreadInfos(global, chatId, repliesThreadInfos);
 
   let listedIds = selectListedIds(global, chatId, threadId);
-  const outlyingIds = selectOutlyingIds(global, chatId, threadId, tabId);
+  const outlyingList = offsetId ? selectOutlyingListByMessageId(global, chatId, threadId, offsetId) : undefined;
 
-  if (isOutlying && listedIds && outlyingIds) {
-    if (!outlyingIds.length || areSortedArraysIntersecting(listedIds, outlyingIds)) {
-      global = updateListedIds(global, chatId, threadId, outlyingIds);
+  if (isOutlying && listedIds && outlyingList) {
+    if (!outlyingList.length || areSortedArraysIntersecting(listedIds, outlyingList)) {
+      global = updateListedIds(global, chatId, threadId, outlyingList);
       listedIds = selectListedIds(global, chatId, threadId);
-      global = replaceTabThreadParam(global, chatId, threadId, 'outlyingIds', undefined, tabId);
+      global = removeOutlyingList(global, chatId, threadId, outlyingList);
       isOutlying = false;
     }
   }
 
   if (!isBudgetPreload) {
-    const historyIds = isOutlying ? outlyingIds! : listedIds!;
+    const historyIds = isOutlying ? outlyingList! : listedIds!;
     const { newViewportIds } = getViewportSlice(historyIds, offsetId, direction);
     global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds!, tabId);
   }
@@ -1056,9 +1058,11 @@ function getViewportSlice(
   const { length } = sourceIds;
   const index = offsetId ? findClosestIndex(sourceIds, offsetId) : -1;
   const isBackwards = direction === LoadMoreDirection.Backwards;
+  const isAround = direction === LoadMoreDirection.Around;
   const indexForDirection = isBackwards ? index : (index + 1) || length;
-  const from = indexForDirection - MESSAGE_LIST_SLICE;
-  const to = indexForDirection + MESSAGE_LIST_SLICE - 1;
+  const sliceSize = isAround ? Math.round(MESSAGE_LIST_SLICE / 2) : MESSAGE_LIST_SLICE;
+  const from = indexForDirection - sliceSize;
+  const to = indexForDirection + sliceSize - 1;
   const newViewportIds = sourceIds.slice(Math.max(0, from), to + 1);
 
   let areSomeLocal;

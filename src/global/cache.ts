@@ -490,6 +490,7 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
       acc[Number(key)] = {
         ...t,
         listedIds: t.lastViewportIds,
+        pinnedIds: undefined,
       };
       return acc;
     }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);

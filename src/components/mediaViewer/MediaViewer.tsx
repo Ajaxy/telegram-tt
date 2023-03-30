@@ -17,9 +17,8 @@ import {
   selectCurrentMediaSearch, selectTabState,
   selectIsChatWithSelf,
   selectListedIds,
-  selectOutlyingIds,
   selectScheduledMessage,
-  selectUser,
+  selectUser, selectOutlyingListByMessageId,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -462,9 +461,9 @@ export default memo(withGlobal(
     let collectionIds: number[] | undefined;
 
     if (origin === MediaViewerOrigin.Inline
-      || origin === MediaViewerOrigin.Album
-      || origin === MediaViewerOrigin.SuggestedAvatar) {
-      collectionIds = selectOutlyingIds(global, chatId, threadId) || selectListedIds(global, chatId, threadId);
+      || origin === MediaViewerOrigin.Album) {
+      collectionIds = selectOutlyingListByMessageId(global, chatId, threadId, message.id)
+        || selectListedIds(global, chatId, threadId);
     } else if (origin === MediaViewerOrigin.SharedMedia) {
       const currentSearch = selectCurrentMediaSearch(global);
       const { foundIds } = (currentSearch && currentSearch.resultsByType && currentSearch.resultsByType.media) || {};

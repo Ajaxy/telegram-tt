@@ -126,10 +126,23 @@ export function selectListedIds<T extends GlobalState>(global: T, chatId: string
   return selectThreadParam(global, chatId, threadId, 'listedIds');
 }
 
-export function selectOutlyingIds<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, ...[tabId = getCurrentTabId()]: TabArgs<T>
+export function selectOutlyingListByMessageId<T extends GlobalState>(
+  global: T, chatId: string, threadId: number, messageId: number,
 ) {
-  return selectTabThreadParam(global, chatId, threadId, 'outlyingIds', tabId);
+  const outlyingLists = selectOutlyingLists(global, chatId, threadId);
+  if (!outlyingLists) {
+    return undefined;
+  }
+
+  return outlyingLists.find((list) => {
+    return list[0] <= messageId && list[list.length - 1] >= messageId;
+  });
+}
+
+export function selectOutlyingLists<T extends GlobalState>(
+  global: T, chatId: string, threadId: number,
+) {
+  return selectThreadParam(global, chatId, threadId, 'outlyingLists');
 }
 
 export function selectCurrentMessageIds<T extends GlobalState>(
@@ -764,7 +777,6 @@ export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: s
 
 export function selectFirstUnreadId<T extends GlobalState>(
   global: T, chatId: string, threadId: number,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const chat = selectChat(global, chatId);
 
@@ -780,10 +792,10 @@ export function selectFirstUnreadId<T extends GlobalState>(
     }
   }
 
-  const outlyingIds = selectOutlyingIds(global, chatId, threadId, tabId);
+  const outlyingLists = selectOutlyingLists(global, chatId, threadId);
   const listedIds = selectListedIds(global, chatId, threadId);
   const byId = selectChatMessages(global, chatId);
-  if (!byId || !(outlyingIds || listedIds)) {
+  if (!byId || !(outlyingLists?.length || listedIds)) {
     return undefined;
   }
 
@@ -811,8 +823,8 @@ export function selectFirstUnreadId<T extends GlobalState>(
     });
   }
 
-  if (outlyingIds) {
-    const found = findAfterLastReadId(outlyingIds);
+  if (outlyingLists?.length) {
+    const found = outlyingLists.map((list) => findAfterLastReadId(list)).filter(Boolean)[0];
     if (found) {
       return found;
     }

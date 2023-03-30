@@ -29,6 +29,7 @@ import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
 } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 import { AudioOrigin } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -185,6 +186,7 @@ type OwnProps =
     noReplies: boolean;
     appearanceOrder: number;
     memoFirstUnreadIdRef: { current: number | undefined };
+    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   }
   & MessagePositionProperties;
 
@@ -226,6 +228,7 @@ type StateProps = {
   isDownloading: boolean;
   threadId?: number;
   isPinnedList?: boolean;
+  isPinned?: boolean;
   canAutoLoadMedia?: boolean;
   canAutoPlayMedia?: boolean;
   hasLinkedChat?: boolean;
@@ -335,6 +338,7 @@ const Message: FC<OwnProps & StateProps> = ({
   activeEmojiInteractions,
   messageListType,
   isPinnedList,
+  isPinned,
   isDownloading,
   canAutoLoadMedia,
   canAutoPlayMedia,
@@ -350,6 +354,7 @@ const Message: FC<OwnProps & StateProps> = ({
   chatTranslations,
   areTranslationsEnabled,
   requestedTranslationLanguage,
+  onPinnedIntersectionChange,
 }) => {
   const {
     toggleMessageSelection,
@@ -397,11 +402,21 @@ const Message: FC<OwnProps & StateProps> = ({
 
     setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
+
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError,
   } = message;
+
+  useEffect(() => {
+    if (!isPinned) return undefined;
+    const id = album ? album.messages[album.messages.length - 1].id : messageId;
+
+    return () => {
+      onPinnedIntersectionChange({ viewportPinnedIdsToRemove: [id], isUnmount: true });
+    };
+  }, [album, isPinned, messageId, onPinnedIntersectionChange]);
 
   const isLocal = isMessageLocal(message);
   const isOwn = isOwnMessage(message);
@@ -772,6 +787,7 @@ const Message: FC<OwnProps & StateProps> = ({
     const meta = (
       <MessageMeta
         message={message}
+        isPinned={isPinned}
         noReplies={noReplies}
         repliesThreadInfo={repliesThreadInfo}
         outgoingStatus={outgoingStatus}
@@ -1172,6 +1188,7 @@ const Message: FC<OwnProps & StateProps> = ({
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
         data-has-unread-mention={message.hasUnreadMention || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
+        data-is-pinned={isPinned || undefined}
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
@@ -1407,6 +1424,7 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       isDownloading,
       isPinnedList: messageListType === 'pinned',
+      isPinned: message.isPinned || Boolean(message.forwardInfo?.isLinkedChannelPost),
       canAutoLoadMedia: selectCanAutoLoadMedia(global, message),
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
