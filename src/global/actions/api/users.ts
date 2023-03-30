@@ -246,7 +246,7 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload): Promise<
     return;
   }
 
-  if (user && !user?.fullInfo) {
+  if (user && !user.fullInfo?.profilePhoto) {
     const { id, accessHash } = user;
     user = await callApi('fetchFullUser', { id, accessHash });
     if (!user) return;

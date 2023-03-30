@@ -106,7 +106,7 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   const { photo, isFallback } = payload;
   const { currentUserId } = global;
   if (!currentUserId) return;
-  const currentUser = selectChat(global, currentUserId);
+  const currentUser = selectUser(global, currentUserId);
   if (!currentUser) return;
 
   global = updateUser(global, currentUserId, {
@@ -121,17 +121,9 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   const result = await callApi('updateProfilePhoto', photo, isFallback);
   if (!result) return;
 
-  const { photo: newPhoto, users } = result;
+  const { users } = result;
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(users, 'id'));
-
-  global = updateUser(global, currentUserId, {
-    avatarHash: newPhoto.id,
-    fullInfo: {
-      ...currentUser.fullInfo,
-      profilePhoto: newPhoto,
-    },
-  });
   setGlobal(global);
 
   actions.loadFullUser({ userId: currentUserId });
