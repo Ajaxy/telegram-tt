@@ -66,6 +66,7 @@ import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
+import useTimeout from '../../hooks/useTimeout';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Transition from '../ui/Transition';
@@ -138,6 +139,8 @@ function isImage(item: DataTransferItem) {
   return item.kind === 'file' && item.type && SUPPORTED_IMAGE_CONTENT_TYPES.has(item.type);
 }
 
+const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
+
 const MiddleColumn: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
@@ -206,7 +209,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
   const isMobileSearchActive = isMobile && hasCurrentTextSearch;
-  const closeAnimationDuration = isMobile ? 450 + ANIMATION_END_DELAY : undefined;
+  const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
   const hasTools = hasPinned && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
     || (
@@ -743,6 +746,12 @@ function useIsReady(
       setIsReady(true);
     }
   }, [withAnimations]);
+
+  useTimeout(() => {
+    if (!isReady) {
+      setIsReady(true);
+    }
+  }, LAYER_ANIMATION_DURATION_MS);
 
   function handleOpenEnd(e: React.TransitionEvent<HTMLDivElement>) {
     if (e.propertyName === 'transform' && e.target === e.currentTarget) {
