@@ -1,6 +1,7 @@
 .Album {
   position: relative;
   overflow: hidden;
+  margin: auto;
 
   .message-content.media.text & {
     margin: -0.3125rem -0.5rem 0.3125rem;

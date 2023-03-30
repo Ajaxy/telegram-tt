@@ -1,11 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { useCallback, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
+import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
@@ -42,6 +43,7 @@ export type OwnProps = {
   canAutoLoad?: boolean;
   canAutoPlay?: boolean;
   uploadProgress?: number;
+  forcedWidth?: number;
   dimensions?: IMediaDimensions;
   asForwarded?: boolean;
   lastSyncTime?: number;
@@ -60,6 +62,7 @@ const Video: FC<OwnProps> = ({
   canAutoLoad,
   canAutoPlay,
   uploadProgress,
+  forcedWidth,
   lastSyncTime,
   dimensions,
   asForwarded,
@@ -103,6 +106,7 @@ const Video: FC<OwnProps> = ({
 
   const thumbDataUri = getMessageMediaThumbDataUri(message);
   const hasThumb = Boolean(thumbDataUri);
+  const withBlurredBackground = Boolean(forcedWidth);
 
   const previewMediaHash = getMessageMediaHash(message, 'preview');
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
@@ -112,6 +116,7 @@ const Video: FC<OwnProps> = ({
 
   const noThumb = !hasThumb || previewBlobUrl || isPlayerReady;
   const thumbRef = useBlurredMediaThumbRef(message, noThumb);
+  const blurredBackgroundRef = useBlurredMediaThumbRef(message, !withBlurredBackground);
   const thumbClassNames = useMediaTransition(!noThumb);
 
   const isInline = fullMediaData && wasIntersectedRef.current;
@@ -182,7 +187,11 @@ const Video: FC<OwnProps> = ({
     hideSpoiler,
   ]);
 
-  const className = buildClassName('media-inner dark', !isUploading && 'interactive');
+  const className = buildClassName(
+    'media-inner dark',
+    !isUploading && 'interactive',
+    height < MIN_MEDIA_HEIGHT && 'fix-min-height',
+  );
 
   const dimensionsStyle = dimensions ? ` width: ${width}px; left: ${dimensions.x}px; top: ${dimensions.y}px;` : '';
   const style = `height: ${height}px;${dimensionsStyle}`;
@@ -195,11 +204,12 @@ const Video: FC<OwnProps> = ({
       style={style}
       onClick={isUploading ? undefined : handleClick}
     >
+      {withBlurredBackground && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
       {isInline && (
         <OptimizedVideo
           ref={videoRef}
           src={fullMediaData}
-          className="full-media"
+          className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
           canPlay={isPlayAllowed && isIntersectingForPlaying}
           muted
           loop
@@ -207,12 +217,14 @@ const Video: FC<OwnProps> = ({
           draggable={!isProtected}
           onTimeUpdate={handleTimeUpdate}
           onReady={markPlayerReady}
+          style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
         />
       )}
       <img
         src={previewBlobUrl}
-        className={buildClassName('thumbnail', previewClassNames)}
+        className={buildClassName('thumbnail', previewClassNames, withBlurredBackground && 'with-blurred-bg')}
         alt=""
+        style={forcedWidth ? `width: ${forcedWidth}px;` : undefined}
         draggable={!isProtected}
       />
       {hasThumb && !isPreviewPreloaded && (

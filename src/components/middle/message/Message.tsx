@@ -96,7 +96,12 @@ import {
   ROUND_VIDEO_DIMENSIONS_PX,
 } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
-import { getMinMediaWidth, calculateMediaDimensions } from './helpers/mediaDimensions';
+import {
+  getMinMediaWidth,
+  calculateMediaDimensions,
+  MIN_MEDIA_WIDTH_WITH_COMMENTS,
+  MIN_MEDIA_WIDTH_WITH_TEXT,
+} from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import calculateAuthorWidth from './helpers/calculateAuthorWidth';
@@ -223,6 +228,7 @@ type StateProps = {
   isPinnedList?: boolean;
   canAutoLoadMedia?: boolean;
   canAutoPlayMedia?: boolean;
+  hasLinkedChat?: boolean;
   shouldLoopStickers?: boolean;
   autoLoadFileMaxSizeMb: number;
   repliesThreadInfo?: ApiThreadInfo;
@@ -317,6 +323,7 @@ const Message: FC<OwnProps & StateProps> = ({
   animatedEmoji,
   animatedCustomEmoji,
   genericEffects,
+  hasLinkedChat,
   isInSelectMode,
   isSelected,
   isGroupSelected,
@@ -565,6 +572,10 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const { phoneCall } = action || {};
 
+  const isMediaWidthWithCommentButton = (repliesThreadInfo || (hasLinkedChat && isChannel && isLocal))
+    && !isInDocumentGroupNotLast
+    && messageListType === 'thread'
+    && !noComments;
   const withCommentButton = repliesThreadInfo && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
   const withQuickReactionButton = !IS_TOUCH_ENV && !phoneCall && !isInSelectMode && defaultReaction
@@ -657,6 +668,7 @@ const Message: FC<OwnProps & StateProps> = ({
   let style = '';
   let calculatedWidth;
   let reactionsMaxWidth;
+  let contentWidth: number | undefined;
   let noMediaCorners = false;
   const albumLayout = useMemo(() => {
     return isAlbum
@@ -690,14 +702,17 @@ const Message: FC<OwnProps & StateProps> = ({
     }
 
     if (width) {
-      calculatedWidth = Math.max(getMinMediaWidth(Boolean(currentText), withCommentButton), width);
+      if (width < (isMediaWidthWithCommentButton ? MIN_MEDIA_WIDTH_WITH_COMMENTS : MIN_MEDIA_WIDTH_WITH_TEXT)) {
+        contentWidth = width;
+      }
+      calculatedWidth = Math.max(getMinMediaWidth(Boolean(currentText), isMediaWidthWithCommentButton), width);
       if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
   } else if (albumLayout) {
     calculatedWidth = Math.max(
-      getMinMediaWidth(Boolean(currentText), withCommentButton), albumLayout.containerStyle.width,
+      getMinMediaWidth(Boolean(currentText), isMediaWidthWithCommentButton), albumLayout.containerStyle.width,
     );
     if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
       noMediaCorners = true;
@@ -900,6 +915,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isProtected={isProtected}
             asForwarded={asForwarded}
             theme={theme}
+            forcedWidth={contentWidth}
             onClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
           />
@@ -918,6 +934,7 @@ const Message: FC<OwnProps & StateProps> = ({
             message={message}
             observeIntersectionForLoading={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
+            forcedWidth={contentWidth}
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
@@ -1038,6 +1055,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isInSelectMode={isInSelectMode}
             isSelected={isSelected}
             theme={theme}
+            forcedWidth={contentWidth}
           />
         )}
         {location && (
@@ -1410,6 +1428,7 @@ export default memo(withGlobal<OwnProps>(
       chatTranslations,
       areTranslationsEnabled: global.settings.byKey.canTranslate,
       requestedTranslationLanguage,
+      hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

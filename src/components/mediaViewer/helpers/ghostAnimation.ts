@@ -335,7 +335,7 @@ function getNodes(origin: MediaViewerOrigin, message?: ApiMessage) {
     case MediaViewerOrigin.Inline:
     default:
       containerSelector = `.Transition__slide--active > .MessageList #${getMessageHtmlId(message!.id)}`;
-      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media, ${MESSAGE_CONTENT_SELECTOR} .thumbnail`;
+      mediaSelector = `${MESSAGE_CONTENT_SELECTOR} .full-media,${MESSAGE_CONTENT_SELECTOR} .thumbnail:not(.blurred-bg)`;
   }
 
   const container = document.querySelector<HTMLElement>(containerSelector)!;
