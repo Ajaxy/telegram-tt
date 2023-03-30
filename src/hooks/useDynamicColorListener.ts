@@ -6,8 +6,11 @@ import { getPropertyHexColor } from '../util/themeStyle';
 import useResizeObserver from './useResizeObserver';
 import useSyncEffect from './useSyncEffect';
 
-// Delay required to prevent constant re-rendering on theme change
-const TRANSITION_STYLE = '0.1s color linear 50ms';
+// Transition required to detect `color` property change.
+// Duration parameter describes a delay between color change and color state update.
+// Small values may cause large amount of re-renders.
+const TRANSITION_PROPERTY = 'color';
+const TRANSITION_STYLE = `60ms ${TRANSITION_PROPERTY} linear`;
 
 export default function useDynamicColorListener(ref?: React.RefObject<HTMLElement>, isDisabled?: boolean) {
   const [hexColor, setHexColor] = useState<string | undefined>();
@@ -19,7 +22,7 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
       return;
     }
 
-    const currentHexColor = getPropertyHexColor(getComputedStyle(ref.current), 'color');
+    const currentHexColor = getPropertyHexColor(getComputedStyle(ref.current), TRANSITION_PROPERTY);
     setHexColor(currentHexColor);
   }, [isDisabled, ref]);
 
@@ -50,7 +53,7 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
     }
 
     function handleTransitionEnd(e: TransitionEvent) {
-      if (e.propertyName !== 'color') return;
+      if (e.propertyName !== TRANSITION_PROPERTY) return;
       updateColor();
     }
 
