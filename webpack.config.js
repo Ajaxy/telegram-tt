@@ -141,14 +141,14 @@ module.exports = (_env, { mode = 'production' }) => {
     },
 
     plugins: [
-      {
+      ...(APP_ENV === 'staging' ? {
         apply: (compiler) => {
           compiler.hooks.compile.tap('Before Compilation', async () => {
             const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
             fs.writeFileSync(path.resolve('./public/reference.json'), stats);
           });
         },
-      },
+      } : []),
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
         /highlight\.js[\\/]lib[\\/]languages/,
@@ -200,10 +200,12 @@ module.exports = (_env, { mode = 'production' }) => {
         },
         saveReportTo: path.resolve('./public/statoscope-report.html'),
         saveStatsTo: path.resolve('./public/build-stats.json'),
-        additionalStats: ['./public/reference.json'],
         normalizeStats: true,
         open: 'file',
         extensions: [new WebpackContextExtension()],
+        ...(APP_ENV === 'staging' && {
+          additionalStats: ['./public/reference.json'],
+        }),
       }),
     ],
 
