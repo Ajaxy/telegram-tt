@@ -28,7 +28,7 @@ import {
   selectNotifySettings,
   selectUser,
 } from '../global/selectors';
-import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV, IS_SAFARI } from './windowEnvironment';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
@@ -43,7 +43,8 @@ function getDeviceToken(subscription: PushSubscription) {
 }
 
 function checkIfPushSupported() {
-  if (!IS_SERVICE_WORKER_SUPPORTED) return false;
+  // Disable push notifications in Safari until VAPID keys are implemented on the server
+  if (!IS_SERVICE_WORKER_SUPPORTED || IS_SAFARI) return false;
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
