@@ -25,8 +25,16 @@ import {
   selectStickerSet,
 } from '../../../global/selectors';
 import {
-  isActionMessage, isChatChannel,
-  isChatGroup, isOwnMessage, areReactionsEmpty, isUserId, isMessageLocal, getMessageVideo, getChatMessageLink,
+  isActionMessage,
+  isChatChannel,
+  isChatGroup,
+  isOwnMessage,
+  areReactionsEmpty,
+  isUserId,
+  isMessageLocal,
+  getMessageVideo,
+  getChatMessageLink,
+  isServiceNotificationMessage,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
@@ -572,6 +580,7 @@ export default memo(withGlobal<OwnProps>(
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
     const isLocal = isMessageLocal(message);
+    const isServiceNotification = isServiceNotificationMessage(message);
     const canShowSeenBy = Boolean(chat
       && seenByMaxChatMembers
       && seenByExpiresAt
@@ -603,7 +612,8 @@ export default memo(withGlobal<OwnProps>(
 
     const canTranslateLanguage = !detectedLanguage || !doNotTranslate.includes(detectedLanguage);
     const canTranslate = IS_TRANSLATION_SUPPORTED && isTranslationEnabled && message.content.text
-      && canTranslateLanguage && !isLocal && !isScheduled && !isAction && !hasTranslation && !message.emojiOnlyCount;
+      && canTranslateLanguage && !isLocal && !isServiceNotification && !isScheduled && !isAction && !hasTranslation
+      && !message.emojiOnlyCount;
 
     return {
       availableReactions: global.availableReactions,
