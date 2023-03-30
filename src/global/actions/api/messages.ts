@@ -22,6 +22,7 @@ import {
 import { LoadMoreDirection } from '../../../types';
 
 import {
+  GIF_MIME_TYPE,
   MAX_MEDIA_FILES_FOR_ALBUM,
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
@@ -1537,6 +1538,7 @@ function getAttachmentType(attachment: ApiAttachment) {
     shouldSendAsFile, mimeType,
   } = attachment;
   if (shouldSendAsFile) return 'file';
+  if (mimeType === GIF_MIME_TYPE) return 'gif';
   if (SUPPORTED_IMAGE_CONTENT_TYPES.has(mimeType) || SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) return 'media';
   if (SUPPORTED_AUDIO_CONTENT_TYPES.has(mimeType)) return 'audio';
   if (attachment.voice) return 'voice';
