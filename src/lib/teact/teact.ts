@@ -528,6 +528,8 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
   }
 }
 
+export function useState<T>(): [T | undefined, StateHookSetter<T | undefined>];
+export function useState<T>(initial: T, debugKey?: string): [T, StateHookSetter<T>];
 export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter<T>] {
   const { cursor, byCursor } = renderingInstance.hooks.state;
 

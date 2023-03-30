@@ -35,7 +35,7 @@ const useEditing = (
   replyingToId?: number,
 ): [VoidFunction, VoidFunction, boolean] => {
   const { editMessage, setEditingDraft, toggleMessageWebPage } = getActions();
-  const [shouldForceShowEditing, setShouldForceShowEditing] = useState<boolean>();
+  const [shouldForceShowEditing, setShouldForceShowEditing] = useState(false);
 
   useEffectWithPrevDeps(([prevEditedMessage, prevReplyingToId]) => {
     if (!editedMessage) {

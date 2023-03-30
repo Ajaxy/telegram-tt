@@ -94,7 +94,7 @@ const Video: FC<OwnProps> = ({
   const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
   const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && lastSyncTime);
-  const [isPlayAllowed, setIsPlayAllowed] = useState(canAutoPlay && !isSpoilerShown);
+  const [isPlayAllowed, setIsPlayAllowed] = useState(Boolean(canAutoPlay && !isSpoilerShown));
 
   const fullMediaHash = getMessageMediaHash(message, 'inline');
   const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));

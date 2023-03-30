@@ -12,8 +12,8 @@ export function useResize(
   cssPropertyName?: string,
 ) {
   const [isActive, markIsActive, unmarkIsActive] = useFlag();
-  const [initialMouseX, setInitialMouseX] = useState<number>();
-  const [initialElementWidth, setInitialElementWidth] = useState<number>();
+  const [initialMouseX, setInitialMouseX] = useState<number>(0);
+  const [initialElementWidth, setInitialElementWidth] = useState<number>(0);
 
   const setElementStyle = useCallback((width?: number) => {
     if (!elementRef.current) {
