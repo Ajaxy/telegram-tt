@@ -24,7 +24,7 @@ export type OwnProps = {
   playSegment?: [number, number];
   speed?: number;
   noLoop?: boolean;
-  size: number;
+  size?: number;
   quality?: number;
   color?: [number, number, number];
   isLowPriority?: boolean;

@@ -135,7 +135,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     if (isPublic && privacyType === 'private') {
       openUsernameLostDialog();
     } else {
-      updatePublicLink({ username: privacyType === 'public' ? editableUsername : '' });
+      updatePublicLink({ username: privacyType === 'public' ? (editableUsername || '') : '' });
     }
   }, [isPublic, openUsernameLostDialog, privacyType, updatePublicLink, editableUsername]);
 

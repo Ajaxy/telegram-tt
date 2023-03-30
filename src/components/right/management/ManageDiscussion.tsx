@@ -61,8 +61,8 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   const [linkedGroupId, setLinkedGroupId] = useState<string>();
   const [isConfirmUnlinkGroupDialogOpen, openConfirmUnlinkGroupDialog, closeConfirmUnlinkGroupDialog] = useFlag();
   const [isConfirmLinkGroupDialogOpen, openConfirmLinkGroupDialog, closeConfirmLinkGroupDialog] = useFlag();
-  const [isJoinToSend, setIsJoinToSend] = useState(linkedChat?.isJoinToSend);
-  const [isJoinRequest, setIsJoinRequest] = useState(linkedChat?.isJoinRequest);
+  const [isJoinToSend, setIsJoinToSend] = useState(Boolean(linkedChat?.isJoinToSend));
+  const [isJoinRequest, setIsJoinRequest] = useState(Boolean(linkedChat?.isJoinRequest));
   const lang = useLang();
   const linkedChatId = linkedChat?.id;
 
@@ -92,7 +92,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
 
   const handleLinkGroupSessions = useCallback(() => {
     closeConfirmLinkGroupDialog();
-    linkDiscussionGroup({ channelId: chatId, chatId: linkedGroupId });
+    linkDiscussionGroup({ channelId: chatId, chatId: linkedGroupId! });
   }, [closeConfirmLinkGroupDialog, linkDiscussionGroup, chatId, linkedGroupId]);
 
   const handleJoinToSendCheck = useCallback((checked: boolean) => {
@@ -128,11 +128,9 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   }
 
   function renderLinkGroupHeader() {
+    if (!linkedGroupId) return undefined;
     const linkedGroup = chatsByIds[linkedGroupId];
-
-    if (!linkedGroup) {
-      return undefined;
-    }
+    if (!linkedGroup) return undefined;
 
     return (
       <div className="modal-header">
@@ -148,11 +146,9 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
   }
 
   function renderLinkGroupConfirmText() {
+    if (!linkedGroupId) return undefined;
     const linkedGroup = chatsByIds[linkedGroupId];
-
-    if (!linkedGroup) {
-      return undefined;
-    }
+    if (!linkedGroup) return undefined;
 
     if (linkedGroup.hasPrivateLink) {
       return renderText(
