@@ -13,10 +13,9 @@ import type {
   ApiUpdateCurrentUser, ApiUpdateServerTimeOffset,
 } from '../../../api/types';
 import { SESSION_USER_KEY } from '../../../config';
-import { subscribe } from '../../../util/notifications';
 import { updateUser } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
-import { selectTabState, selectNotifySettings } from '../../selectors';
+import { selectTabState } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
 import { getShippingError, shouldClosePaymentModal } from '../../../util/getReadableErrorText';
 import { clearWebTokenAuth } from '../../../util/routing';
@@ -80,10 +79,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 });
 
 function onUpdateApiReady<T extends GlobalState>(global: T) {
-  const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
-  if (hasWebNotifications && hasPushNotifications) {
-    void subscribe();
-  }
   void setLanguage(global.settings.byKey.language);
 }
 

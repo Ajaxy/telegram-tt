@@ -840,6 +840,7 @@ export interface ActionPayloads {
   reset: undefined;
   disconnect: undefined;
   initApi: undefined;
+  initMain: undefined;
   sync: undefined;
   saveSession: {
     sessionData?: ApiSessionData;

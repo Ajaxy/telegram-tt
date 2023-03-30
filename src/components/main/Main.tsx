@@ -185,6 +185,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isMasterTab,
 }) => {
   const {
+    initMain,
     loadAnimatedEmojis,
     loadNotificationSettings,
     loadNotificationExceptions,
@@ -249,6 +250,7 @@ const Main: FC<OwnProps & StateProps> = ({
       updateIsOnline(true);
       loadConfig();
       loadAppConfig();
+      initMain();
       loadAvailableReactions();
       loadAnimatedEmojis();
       loadGenericEmojiEffects();
@@ -270,7 +272,7 @@ const Main: FC<OwnProps & StateProps> = ({
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
     loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons,
-    loadDefaultStatusIcons, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab,
+    loadDefaultStatusIcons, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab, initMain,
   ]);
 
   // Language-based API calls
