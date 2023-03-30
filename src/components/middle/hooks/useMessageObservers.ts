@@ -2,6 +2,7 @@ import type { RefObject } from 'react';
 import { getActions } from '../../../global';
 
 import type { MessageListType } from '../../../global/types';
+import type { PinnedIntersectionChangedCallback } from './usePinnedMessage';
 
 import { IS_ANDROID } from '../../../util/windowEnvironment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -15,8 +16,11 @@ export default function useMessageObservers(
   type: MessageListType,
   containerRef: RefObject<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
+  onPinnedIntersectionChange: PinnedIntersectionChangedCallback,
 ) {
-  const { markMessageListRead, markMentionsRead, animateUnreadReaction } = getActions();
+  const {
+    markMessageListRead, markMentionsRead, animateUnreadReaction,
+  } = getActions();
 
   const { isMobile } = useAppLayout();
   const INTERSECTION_MARGIN_FOR_LOADING = isMobile ? 300 : 500;
@@ -34,17 +38,28 @@ export default function useMessageObservers(
     let maxId = 0;
     const mentionIds: number[] = [];
     const reactionIds: number[] = [];
+    const viewportPinnedIdsToAdd: number[] = [];
+    const viewportPinnedIdsToRemove: number[] = [];
+    let isReversed = false;
 
     entries.forEach((entry) => {
-      const { isIntersecting, target } = entry;
+      const {
+        isIntersecting, target, boundingClientRect, rootBounds,
+      } = entry;
+
+      const { dataset } = target as HTMLDivElement;
+      const messageId = Number(dataset.lastMessageId || dataset.messageId);
 
       if (!isIntersecting) {
+        if (dataset.isPinned) {
+          if (rootBounds && boundingClientRect.bottom < rootBounds.top) {
+            isReversed = true;
+          }
+          viewportPinnedIdsToRemove.push(messageId);
+        }
         return;
       }
 
-      const { dataset } = target as HTMLDivElement;
-
-      const messageId = Number(dataset.lastMessageId || dataset.messageId);
       if (messageId > maxId) {
         maxId = messageId;
       }
@@ -55,6 +70,10 @@ export default function useMessageObservers(
 
       if (dataset.hasUnreadReaction) {
         reactionIds.push(messageId);
+      }
+
+      if (dataset.isPinned) {
+        viewportPinnedIdsToAdd.push(messageId);
       }
     });
 
@@ -68,6 +87,10 @@ export default function useMessageObservers(
 
     if (reactionIds.length) {
       animateUnreadReaction({ messageIds: reactionIds });
+    }
+
+    if (viewportPinnedIdsToAdd.length || viewportPinnedIdsToRemove.length) {
+      onPinnedIntersectionChange({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove, isReversed });
     }
   });
 

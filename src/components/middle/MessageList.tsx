@@ -10,6 +10,8 @@ import type {
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { AnimationLevel } from '../../types';
+import type { Signal } from '../../util/signals';
+import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import { LoadMoreDirection } from '../../types';
 
 import { ANIMATION_END_DELAY, LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../config';
@@ -28,7 +30,10 @@ import {
   selectFirstMessageId,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
-  selectIsCurrentUserPremium, selectLastScrollOffset, selectThreadInfo,
+  selectIsCurrentUserPremium,
+  selectLastScrollOffset,
+  selectThreadInfo,
+  selectTabState,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -82,6 +87,8 @@ type OwnProps = {
   hasTools?: boolean;
   withBottomShift?: boolean;
   withDefaultBg: boolean;
+  onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
+  getForceNextPinnedInHeader: Signal<boolean | undefined>;
 };
 
 type StateProps = {
@@ -162,6 +169,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   withBottomShift,
   withDefaultBg,
   topic,
+  onPinnedIntersectionChange,
+  getForceNextPinnedInHeader,
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
@@ -309,6 +318,12 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     runDebouncedForScroll(() => {
+      const global = getGlobal();
+      const forceNextPinnedInHeader = getForceNextPinnedInHeader() && !selectTabState(global).focusedMessage?.chatId;
+      if (forceNextPinnedInHeader) {
+        onPinnedIntersectionChange({ hasScrolled: true });
+      }
+
       isScrollingRef.current = false;
 
       fastRaf(() => {
@@ -323,7 +338,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
         }
       });
     });
-  }, [updateStickyDates, hasTools, type, setScrollOffset, chatId, threadId]);
+  }, [
+    updateStickyDates, hasTools, getForceNextPinnedInHeader, onPinnedIntersectionChange, type, chatId, threadId,
+  ]);
 
   // Container resize observer (caused by Composer reply/webpage panels)
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
@@ -643,6 +660,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
           onFabToggle={onFabToggle}
           onNotchToggle={onNotchToggle}
+          onPinnedIntersectionChange={onPinnedIntersectionChange}
         />
       ) : (
         <Loading color="white" backgroundColor="dark" />

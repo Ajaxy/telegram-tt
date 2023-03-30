@@ -245,7 +245,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const getLayout = useCallback(() => {
     const extraHeightAudioPlayer = (isMobile
       && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
-    const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessage-wrapper');
+    const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessageWrapper');
     const extraHeightPinned = (((isMobile && !extraHeightAudioPlayer)
       || (!isMobile && pinnedElement?.classList.contains('full-width')))
       && pinnedElement?.offsetHeight) || 0;

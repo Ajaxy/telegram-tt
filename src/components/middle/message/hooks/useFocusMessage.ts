@@ -1,5 +1,3 @@
-import { getActions } from '../../../../global';
-
 import type { FocusDirection } from '../../../../types';
 
 import { useLayoutEffect } from '../../../../lib/teact/teact';
@@ -17,15 +15,9 @@ export default function useFocusMessage(
   noFocusHighlight?: boolean,
   isResizingContainer?: boolean,
 ) {
-  const { setReachedFocusedMessage } = getActions();
-
   useLayoutEffect(() => {
     if (isFocused && elementRef.current) {
       const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList')!;
-
-      setReachedFocusedMessage({
-        hasReached: true,
-      });
 
       fastSmoothScroll(
         messagesContainer,
@@ -40,6 +32,6 @@ export default function useFocusMessage(
       );
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, setReachedFocusedMessage,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer,
   ]);
 }

@@ -8,6 +8,7 @@ import type {
   ApiUser, ApiMessage, ApiChat, ApiSticker, ApiTopic,
 } from '../../api/types';
 import type { FocusDirection } from '../../types';
+import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import {
   selectUser,
@@ -45,6 +46,7 @@ type OwnProps = {
   isLastInList?: boolean;
   isInsideTopic?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
+  onPinnedIntersectionChange?: PinnedIntersectionChangedCallback;
 };
 
 type StateProps = {
@@ -84,6 +86,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   observeIntersectionForReading,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
+  onPinnedIntersectionChange,
 }) => {
   const { openPremiumModal, requestConfetti } = getActions();
 
@@ -95,6 +98,14 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   useOnIntersect(ref, observeIntersectionForReading);
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight);
+
+  useEffect(() => {
+    if (!message.isPinned) return undefined;
+
+    return () => {
+      onPinnedIntersectionChange?.({ viewportPinnedIdsToRemove: [message.id], isUnmount: true });
+    };
+  }, [onPinnedIntersectionChange, message.isPinned, message.id]);
 
   const noAppearanceAnimation = appearanceOrder <= 0;
   const [isShown, markShown] = useFlag(noAppearanceAnimation);
@@ -209,6 +220,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       id={getMessageHtmlId(message.id)}
       className={className}
       data-message-id={message.id}
+      data-is-pinned={message.isPinned || undefined}
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >

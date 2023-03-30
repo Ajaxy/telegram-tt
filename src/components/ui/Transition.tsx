@@ -20,7 +20,8 @@ export type TransitionProps = {
   activeKey: number;
   name: (
     'none' | 'slide' | 'slide-rtl' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
-    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl'
+    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl' | 'slide-vertical'
+    | 'slide-vertical-fade'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;

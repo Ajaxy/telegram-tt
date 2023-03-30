@@ -1,47 +1,9 @@
 @import "../../styles/mixins";
 
 @mixin mobile-header-styles() {
-  .HeaderPinnedMessage-wrapper,
   .AudioPlayer {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    height: 2.875rem;
-    box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
+    @include header-mobile;
 
-    display: flex;
-    flex-direction: row-reverse;
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem;
-    padding-left: max(0.75rem, env(safe-area-inset-left));
-    padding-right: max(0.5rem, env(safe-area-inset-right));
-    background: var(--color-background);
-
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (padding-left: max(0.75rem, env(safe-area-inset-left))) {
-      padding-left: 0.75rem;
-      padding-right: 0.5rem;
-    }
-
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      top: -0.1875rem;
-      left: 0;
-      right: 0;
-      height: 0.125rem;
-      box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
-    }
-
-    .HeaderPinnedMessage {
-      max-width: unset;
-      margin-top: -0.1875rem;
-    }
-  }
-
-  .AudioPlayer {
     flex-direction: row;
     margin-top: 0;
     padding: 0.25rem 0.5rem;
@@ -58,25 +20,6 @@
     > .player-close {
       margin-left: auto;
     }
-  }
-
-  .HeaderPinnedMessage {
-    flex-grow: 1;
-    padding-top: 0;
-    padding-bottom: 0;
-
-    &::before {
-      top: 0.125rem;
-      bottom: 0.125rem;
-    }
-
-    .message-text {
-      max-width: none;
-    }
-  }
-
-  .HeaderPinnedMessage-wrapper.full-width {
-    display: none;
   }
 }
 
@@ -162,10 +105,6 @@
     overflow: hidden;
   }
 
-  body.animation-level-0 & .HeaderPinnedMessage-wrapper {
-    transition: none !important;
-  }
-
   .header-tools {
     display: flex;
     align-items: center;
@@ -208,7 +147,6 @@
   }
 
   @media (min-width: 1276px) and (max-width: 1439px) {
-    &:not(.tools-stacked) .HeaderPinnedMessage-wrapper,
     &:not(.tools-stacked) .AudioPlayer {
       opacity: 1;
 
@@ -228,7 +166,6 @@
     }
   }
 
-  &.tools-stacked.animated .HeaderPinnedMessage-wrapper,
   &.tools-stacked.animated .AudioPlayer {
     animation: fade-in var(--layer-transition) forwards;
 
@@ -383,219 +320,20 @@
     height: 2.5rem;
   }
 
-  .HeaderPinnedMessage-wrapper {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    cursor: default;
-    flex-direction: row-reverse;
-    background: var(--color-background);
-
-    body.animation-level-1 & {
-      .ripple-container {
-        display: none;
-      }
-    }
-
-    @media (min-width: 1276px) {
-      transform: translate3d(0, 0, 0);
-      transition: opacity 0.15s ease, transform var(--layer-transition);
-
-      #Main.right-column-open & {
-        transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
-      }
-    }
-
-    > .Button {
-      flex-shrink: 0;
-    }
-
-    &.full-width {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 100%;
-      background: var(--color-background);
-      padding: 0.25rem 0.8125rem 0.25rem 1rem;
-      box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
-      transform: translate3d(0, 0, 0);
-      transition: opacity 0.15s ease, transform var(--layer-transition);
-
-      &::before {
-        content: "";
-        display: block;
-        position: absolute;
-        top: -0.1875rem;
-        left: 0;
-        right: 0;
-        height: 0.125rem;
-        box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
-      }
-
-      .HeaderPinnedMessage {
-        margin-top: 0;
-        margin-bottom: 0;
-        flex: 1;
-
-        .message-text {
-          max-width: none;
-        }
-      }
-
-      @media (min-width: 1276px) {
-        transform: translate3d(0, 0, 0);
-        transition: opacity 0.15s ease, transform var(--layer-transition);
-
-        #Main.right-column-open & {
-          padding-left: calc(var(--right-column-width) + 1rem);
-        }
-      }
-    }
-  }
-
-  .HeaderPinnedMessage {
-    display: flex;
-    flex-shrink: 1;
-    margin-top: -0.25rem;
-    margin-bottom: -0.25rem;
-    padding: 0.25rem;
-    padding-left: 0.375rem;
-    border-radius: var(--border-radius-messages-small);
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    align-items: center;
-
-    &:hover:not(.no-hover) {
-      background-color: var(--color-interactive-element-hover);
-    }
-
-    .pinned-message-border {
-      position: relative;
-      height: 2.25rem;
-      margin: 0.125rem 0;
-      width: 0.125rem;
-      min-width: 0.125rem;
-      overflow: hidden;
-
-      .pinned-message-border-wrapper-1 {
-        height: 2.25rem;
-        width: 0.125rem;
-        border-radius: 0.0625rem;
-        background: var(--color-primary);
-      }
-
-      .pinned-message-border-wrapper {
-        background-color: var(--color-primary-opacity);
-        position: relative;
-        will-change: transform;
-        transition: transform 0.25s ease-in-out;
-      }
-
-      .pinned-message-border-mark {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 0.125rem;
-        background: var(--color-primary);
-        border-radius: 0.0625rem;
-        will-change: transform;
-        transition: transform 0.25s ease-in-out;
-      }
-    }
-
-    .message-text {
-      overflow: hidden;
-      margin-inline-start: 0.375rem;
-      margin-top: 0.125rem;
-      max-width: 15rem;
-      min-width: 8rem;
-      flex-grow: 1;
-
-      @media (min-width: 1440px) and (max-width: 1500px) {
-        max-width: 14rem;
-      }
-
-      .title {
-        font-weight: 500;
-        font-size: 0.875rem;
-        line-height: 1rem;
-        height: 1rem;
-        color: var(--color-primary);
-        margin-bottom: 0.125rem;
-        white-space: pre;
-        text-align: initial;
-
-        body.is-ios & {
-          font-size: 0.9375rem;
-        }
-      }
-
-      p {
-        font-size: 0.875rem;
-        line-height: 1.125rem;
-        height: 1.125rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0;
-
-        body.is-ios & {
-          font-size: 0.9375rem;
-        }
-      }
-    }
-
-    .inline-button {
-      display: block;
-      width: auto;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      border-radius: 1.5rem;
-      padding: 0 0.75rem;
-      font-weight: 500;
-      text-transform: none;
-      height: 2rem;
-      max-width: 10rem;
-      flex-shrink: 1;
-    }
-
-    .emoji-small {
-      width: 1rem;
-      height: 1rem;
-    }
-
-    .pinned-thumb {
-      position: relative;
-      width: 2.25rem;
-      height: 2.25rem;
-
-      margin-inline-start: 0.375rem;
-      margin-top: 0.125rem;
-      flex-shrink: 0;
-
-      border-radius: 0.25rem;
-      overflow: hidden;
-
-      & + .message-text {
-        max-width: 12rem;
-      }
-    }
-
-    .pinned-thumb-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
   .HeaderActions {
     flex-shrink: 0;
     margin-left: auto;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+
+    .Button {
+      margin-left: 0.25rem;
+
+      &.tiny {
+        margin-right: 0.625rem;
+      }
+    }
 
     .toggle-right-pane-button {
       &.active {
@@ -623,17 +361,6 @@
       flex-shrink: 0;
       right: 0;
       top: 0;
-    }
-  }
-
-  .HeaderPinnedMessage-wrapper,
-  .HeaderActions {
-    .Button {
-      margin-left: 0.25rem;
-
-      &.tiny {
-        margin-right: 0.625rem;
-      }
     }
   }
 

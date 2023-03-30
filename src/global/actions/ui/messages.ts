@@ -22,7 +22,7 @@ import {
   replaceThreadParam,
   replaceTabThreadParam,
   updateFocusDirection,
-  updateFocusedMessage, updateFocusedMessageReached,
+  updateFocusedMessage,
 } from '../../reducers';
 import {
   selectCurrentChat,
@@ -381,12 +381,6 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
   return undefined;
 });
 
-addActionHandler('setReachedFocusedMessage', (global, actions, payload): ActionReturnType => {
-  const { hasReached = false, tabId = getCurrentTabId() } = payload;
-
-  return updateFocusedMessageReached(global, hasReached, tabId);
-});
-
 addActionHandler('focusMessage', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
@@ -435,7 +429,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
   if (viewportIds && viewportIds.includes(messageId)) {
-    setGlobal(global);
+    setGlobal(global, { forceOnHeavyAnimation: true });
     actions.openChat({
       id: chatId,
       threadId,
@@ -450,14 +444,12 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     global = replaceTabThreadParam(global, chatId, threadId, 'viewportIds', undefined, tabId);
   }
 
-  global = replaceTabThreadParam(global, chatId, threadId, 'outlyingIds', undefined, tabId);
-
   if (viewportIds && !shouldSwitchChat) {
     const direction = messageId > viewportIds[0] ? FocusDirection.Down : FocusDirection.Up;
     global = updateFocusDirection(global, direction, tabId);
   }
 
-  setGlobal(global);
+  setGlobal(global, { forceOnHeavyAnimation: true });
 
   actions.openChat({
     id: chatId,
@@ -468,6 +460,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   });
   actions.loadViewportMessages({
     tabId,
+    shouldForceRender: true,
   });
   return undefined;
 });

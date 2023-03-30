@@ -28,6 +28,7 @@ type OwnProps = {
   noReplies?: boolean;
   repliesThreadInfo?: ApiThreadInfo;
   isTranslated?: boolean;
+  isPinned?: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onOpenThread: NoneToVoidFunction;
@@ -41,6 +42,7 @@ const MessageMeta: FC<OwnProps> = ({
   repliesThreadInfo,
   noReplies,
   isTranslated,
+  isPinned,
   onClick,
   onTranslationClick,
   onOpenThread,
@@ -112,6 +114,9 @@ const MessageMeta: FC<OwnProps> = ({
           </span>
           <i className="icon-reply-filled" />
         </span>
+      )}
+      {isPinned && (
+        <i className="icon-pinned-message message-pinned" />
       )}
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>

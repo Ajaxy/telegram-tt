@@ -66,12 +66,16 @@ const containers = new Map<string, {
 
 const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
+let forceOnHeavyAnimation = true;
+
 function runImmediateCallbacks() {
   immediateCallbacks.forEach((cb) => cb(currentGlobal));
 }
 
-function runCallbacks(forceOnHeavyAnimation = false) {
-  if (!forceOnHeavyAnimation && isHeavyAnimating()) {
+function runCallbacks() {
+  if (forceOnHeavyAnimation) {
+    forceOnHeavyAnimation = false;
+  } else if (isHeavyAnimating()) {
     fastRafWithFallback(runCallbacksThrottled);
     return;
   }
@@ -94,9 +98,14 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
     if (!options?.noUpdate) runImmediateCallbacks();
 
     if (options?.forceSyncOnIOs) {
-      runCallbacks(true);
+      forceOnHeavyAnimation = true;
+      runCallbacks();
     } else {
-      runCallbacksThrottled(options?.forceOnHeavyAnimation);
+      if (options?.forceOnHeavyAnimation) {
+        forceOnHeavyAnimation = true;
+      }
+
+      runCallbacksThrottled();
     }
   }
 }

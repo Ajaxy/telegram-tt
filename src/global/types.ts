@@ -121,7 +121,6 @@ export interface ActiveReaction {
 export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
-  outlyingIds?: number[];
   viewportIds?: number[];
 }
 
@@ -129,6 +128,7 @@ export interface Thread {
   lastScrollOffset?: number;
   lastViewportIds?: number[];
   listedIds?: number[];
+  outlyingLists?: number[][];
   pinnedIds?: number[];
   scheduledIds?: number[];
   editingId?: number;
@@ -228,7 +228,6 @@ export type TabState = {
     direction?: FocusDirection;
     noHighlight?: boolean;
     isResizingContainer?: boolean;
-    hasReachedMessage?: boolean;
   };
 
   selectedMessages?: {
@@ -1127,6 +1126,7 @@ export interface ActionPayloads {
     isBudgetPreload?: boolean;
     chatId?: string;
     threadId?: number;
+    shouldForceRender?: boolean;
   } & WithTabId;
   sendMessage: {
     text?: string;
@@ -1496,9 +1496,6 @@ export interface ActionPayloads {
   loadTopChats: undefined;
   showDialog: {
     data: TabState['dialogs'][number];
-  } & WithTabId;
-  setReachedFocusedMessage: {
-    hasReached?: boolean;
   } & WithTabId;
   focusMessage: {
     chatId: string;
