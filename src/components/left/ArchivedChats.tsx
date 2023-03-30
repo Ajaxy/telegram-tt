@@ -64,7 +64,11 @@ const ArchivedChats: FC<OwnProps> = ({
     transitionClassNames: titleClassNames,
   } = useShowTransition(!isForumPanelOpen);
 
-  const { shouldRenderForumPanel, handleForumPanelAnimationEnd } = useForumPanelRender(isForumPanelOpen);
+  const {
+    shouldRenderForumPanel, handleForumPanelAnimationEnd,
+    handleForumPanelAnimationStart, isAnimationStarted,
+  } = useForumPanelRender(isForumPanelOpen);
+  const isForumPanelVisible = isForumPanelOpen && isAnimationStarted;
 
   return (
     <div className="ArchivedChats">
@@ -78,7 +82,7 @@ const ArchivedChats: FC<OwnProps> = ({
           ariaLabel="Return to chat list"
           className={buildClassName(
             lang.isRtl && 'rtl',
-            isForumPanelOpen && lang.isRtl && 'right-aligned',
+            isForumPanelVisible && lang.isRtl && 'right-aligned',
             shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
           )}
           onTransitionEnd={handleDropdownMenuTransitionEnd}
@@ -101,7 +105,7 @@ const ArchivedChats: FC<OwnProps> = ({
       <ChatList
         folderType="archived"
         isActive={isActive}
-        isForumPanelOpen={isForumPanelOpen}
+        isForumPanelOpen={isForumPanelVisible}
         onSettingsScreenSelect={onSettingsScreenSelect}
         onLeftColumnContentChange={onLeftColumnContentChange}
         foldersDispatch={foldersDispatch}
@@ -111,6 +115,7 @@ const ArchivedChats: FC<OwnProps> = ({
         <ForumPanel
           isOpen={isForumPanelOpen}
           onTopicSearch={onTopicSearch}
+          onOpenAnimationStart={handleForumPanelAnimationStart}
           onCloseAnimationEnd={handleForumPanelAnimationEnd}
         />
       )}

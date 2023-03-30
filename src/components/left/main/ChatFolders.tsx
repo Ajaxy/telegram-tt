@@ -15,7 +15,7 @@ import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { selectTabState, selectIsForumPanelOpen } from '../../../global/selectors';
+import { selectTabState } from '../../../global/selectors';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -30,6 +30,7 @@ type OwnProps = {
   foldersDispatch: FolderEditDispatch;
   onLeftColumnContentChange: (content: LeftColumnContent) => void;
   shouldHideFolderTabs?: boolean;
+  isForumPanelOpen?: boolean;
 };
 
 type StateProps = {
@@ -37,7 +38,6 @@ type StateProps = {
   orderedFolderIds?: number[];
   activeChatFolder: number;
   currentUserId?: string;
-  isForumPanelOpen?: boolean;
   lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
@@ -275,7 +275,6 @@ export default memo(withGlobal<OwnProps>(
       orderedFolderIds,
       activeChatFolder,
       currentUserId,
-      isForumPanelOpen: selectIsForumPanelOpen(global),
       lastSyncTime,
       shouldSkipHistoryAnimations,
       hasArchivedChats: Boolean(archived?.length),

@@ -2,6 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
@@ -23,7 +24,6 @@ import Button from '../../ui/Button';
 import ForumPanel from './ForumPanel';
 
 import './LeftMain.scss';
-import { getActions } from '../../../global';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -66,8 +66,12 @@ const LeftMain: FC<OwnProps> = ({
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
 
-  const { shouldRenderForumPanel, handleForumPanelAnimationEnd } = useForumPanelRender(isForumPanelOpen);
-  const isForumPanelVisible = isForumPanelOpen && content === LeftColumnContent.ChatList;
+  const {
+    shouldRenderForumPanel, handleForumPanelAnimationEnd,
+    handleForumPanelAnimationStart, isAnimationStarted,
+  } = useForumPanelRender(isForumPanelOpen);
+  const isForumPanelRendered = isForumPanelOpen && content === LeftColumnContent.ChatList;
+  const isForumPanelVisible = isForumPanelRendered && isAnimationStarted;
 
   const {
     shouldRender: shouldRenderUpdateButton,
@@ -178,6 +182,7 @@ const LeftMain: FC<OwnProps> = ({
                   onSettingsScreenSelect={onSettingsScreenSelect}
                   onLeftColumnContentChange={onContentChange}
                   foldersDispatch={foldersDispatch}
+                  isForumPanelOpen={isForumPanelVisible}
                 />
               );
             case LeftColumnContent.GlobalSearch:
@@ -209,8 +214,9 @@ const LeftMain: FC<OwnProps> = ({
       {shouldRenderForumPanel && (
         <ForumPanel
           isOpen={isForumPanelOpen}
-          isHidden={!isForumPanelVisible}
+          isHidden={!isForumPanelRendered}
           onTopicSearch={onTopicSearch}
+          onOpenAnimationStart={handleForumPanelAnimationStart}
           onCloseAnimationEnd={handleForumPanelAnimationEnd}
         />
       )}
