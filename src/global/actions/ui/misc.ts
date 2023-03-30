@@ -1,10 +1,10 @@
 import {
-  addActionHandler, getGlobal, setGlobal,
+  addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
 
 import type { ApiError, ApiNotification } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import type { ActionReturnType } from '../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
   APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
@@ -23,6 +23,7 @@ import { updateTabState } from '../../reducers/tabs';
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
 import * as langProvider from '../../../util/langProvider';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
+import { addCallback } from '../../../lib/teact/teactn';
 
 export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis
@@ -668,7 +669,8 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   updateIcon(false);
 
   const messageList = selectCurrentMessageList(global, tabId);
-  if (messageList && canDisplayChatInTitle) {
+
+  if (messageList && canDisplayChatInTitle && !global.passcode.isScreenLocked) {
     const { chatId, threadId } = messageList;
     const currentChat = selectChat(global, chatId);
     if (currentChat) {
@@ -684,4 +686,17 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   }
 
   setPageTitleInstant(PAGE_TITLE);
+});
+
+let prevIsScreenLocked: boolean | undefined;
+addCallback((global: GlobalState) => {
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  const { updatePageTitle } = getActions();
+
+  const isLockedUpdated = global.passcode.isScreenLocked !== prevIsScreenLocked;
+  prevIsScreenLocked = global.passcode.isScreenLocked;
+
+  if (isLockedUpdated) {
+    updatePageTitle();
+  }
 });
