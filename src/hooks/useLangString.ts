@@ -7,7 +7,14 @@ const useLangString = (langCode: string | undefined, key: string): string | unde
   if (langCode) {
     langProvider
       .getTranslationForLangString(langCode, key)
-      .then(setTranslation);
+      .then((value) => {
+        // The string is not translated, maybe the language pack was not loaded due to network or a timeout errors
+        if (value === key) {
+          return;
+        }
+
+        setTranslation(value);
+      });
   }
 
   return translation;

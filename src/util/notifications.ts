@@ -51,9 +51,7 @@ function checkIfPushSupported() {
     return false;
   }
 
-  // Check the current Notification permission.
-  // If its denied, it's a permanent block until the
-  // user changes the permission
+  // If permission is denied, it is blocked until the user manually changes their settings
   if (Notification.permission === 'denied') {
     if (DEBUG) {
       // eslint-disable-next-line no-console

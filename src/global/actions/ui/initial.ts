@@ -59,11 +59,6 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
         setGlobal(global);
       }
       actions.initApi();
-
-      const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
-      if (hasWebNotifications && hasPushNotifications) {
-        void subscribe();
-      }
     }
 
     setGlobal(global);
@@ -84,6 +79,13 @@ addActionHandler('onSomeTabSwitchedMultitabRole', async (global): Promise<void> 
 
 addActionHandler('initShared', (): ActionReturnType => {
   startWebsync();
+});
+
+addActionHandler('initMain', (global): ActionReturnType => {
+  const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
+  if (hasWebNotifications && hasPushNotifications) {
+    void subscribe();
+  }
 });
 
 addCallback((global: GlobalState) => {
