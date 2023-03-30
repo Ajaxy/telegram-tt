@@ -252,6 +252,7 @@ addActionHandler('lockScreen', async (global): Promise<void> => {
     {
       isScreenLocked: true,
       invalidAttemptsCount: 0,
+      timeoutUntil: undefined,
     },
   );
   setGlobal(global);

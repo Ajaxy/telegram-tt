@@ -30,8 +30,6 @@ type StateProps = {
   passcodeSettings: GlobalState['passcode'];
 };
 
-const MAX_INVALID_ATTEMPTS = 5;
-const TIMEOUT_RESET_INVALID_ATTEMPTS_MS = 180000; // 3 minutes
 const ICON_SIZE = 160;
 
 const LockScreen: FC<OwnProps & StateProps> = ({
@@ -47,6 +45,7 @@ const LockScreen: FC<OwnProps & StateProps> = ({
 
   const {
     invalidAttemptsCount,
+    timeoutUntil,
     isLoading,
   } = passcodeSettings;
 
@@ -56,19 +55,14 @@ const LockScreen: FC<OwnProps & StateProps> = ({
   const [isSignOutDialogOpen, openSignOutConfirmation, closeSignOutConfirmation] = useFlag(false);
   const { shouldRender } = useShowTransition(isLocked);
 
-  useTimeout(
-    resetInvalidUnlockAttempts,
-    invalidAttemptsCount && invalidAttemptsCount >= MAX_INVALID_ATTEMPTS
-      ? TIMEOUT_RESET_INVALID_ATTEMPTS_MS
-      : undefined,
-  );
+  useTimeout(resetInvalidUnlockAttempts, timeoutUntil ? timeoutUntil - Date.now() : undefined);
 
   const handleClearError = useCallback(() => {
     setValidationError('');
   }, []);
 
   const handleSubmit = useCallback((passcode: string) => {
-    if (invalidAttemptsCount && invalidAttemptsCount >= MAX_INVALID_ATTEMPTS) {
+    if (timeoutUntil !== undefined) {
       setValidationError(lang('FloodWait'));
       return;
     }
@@ -78,15 +72,15 @@ const LockScreen: FC<OwnProps & StateProps> = ({
       logInvalidUnlockAttempt();
       setValidationError(lang('lng_passcode_wrong'));
     });
-  }, [invalidAttemptsCount, lang, logInvalidUnlockAttempt, unlockScreen]);
+  }, [lang, timeoutUntil]);
 
   useEffect(() => {
-    if (invalidAttemptsCount && invalidAttemptsCount >= MAX_INVALID_ATTEMPTS) {
+    if (timeoutUntil !== undefined) {
       setValidationError(lang('FloodWait'));
     } else if (invalidAttemptsCount === 0) {
       setValidationError('');
     }
-  }, [invalidAttemptsCount, lang]);
+  }, [timeoutUntil, lang, invalidAttemptsCount]);
 
   const handleSignOutMessage = useCallback(() => {
     closeSignOutConfirmation();

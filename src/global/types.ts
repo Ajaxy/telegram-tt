@@ -592,6 +592,7 @@ export type GlobalState = {
     isScreenLocked?: boolean;
     hasPasscode?: boolean;
     error?: string;
+    timeoutUntil?: number;
     invalidAttemptsCount?: number;
     invalidAttemptError?: string;
     isLoading?: boolean;
