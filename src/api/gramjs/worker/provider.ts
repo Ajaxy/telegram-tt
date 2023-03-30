@@ -21,7 +21,7 @@ type RequestStates = {
 const HEALTH_CHECK_TIMEOUT = 150;
 const HEALTH_CHECK_MIN_DELAY = 5 * 1000; // 5 sec
 
-let worker: Worker;
+let worker: Worker | undefined;
 const requestStates = new Map<string, RequestStates>();
 const requestStatesByCallback = new Map<AnyToVoidFunction, RequestStates>();
 const savedLocalDb: LocalDb = {
@@ -55,7 +55,11 @@ export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
   });
 }
 
+let updateCallback: OnApiUpdate;
+
 export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
+  updateCallback = onUpdate;
+
   if (!isMasterTab) {
     initApiOnMasterTab(initialArgs);
     return Promise.resolve();
@@ -212,14 +216,14 @@ export function cancelApiProgress(progressCallback: ApiOnProgress) {
 }
 
 export function cancelApiProgressMaster(messageId: string) {
-  worker.postMessage({
+  worker?.postMessage({
     type: 'cancelProgress',
     messageId,
   });
 }
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
-  worker.addEventListener('message', ({ data }: WorkerMessageEvent) => {
+  worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
     if (data.type === 'update') {
       onUpdate(data.update);
     } else if (data.type === 'methodResponse') {
@@ -330,7 +334,7 @@ function makeRequest(message: OriginRequest) {
       }
     });
 
-  worker.postMessage(payload);
+  worker?.postMessage(payload);
 
   return promise;
 }
@@ -360,7 +364,9 @@ async function ensureWorkerPing() {
     console.error(err);
 
     if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
-      window.location.reload();
+      worker?.terminate();
+      worker = undefined;
+      updateCallback({ '@type': 'requestInitApi' });
     }
   } finally {
     isResolved = true;

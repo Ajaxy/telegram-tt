@@ -57,6 +57,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       onUpdateCurrentUser(global, update);
       break;
 
+    case 'requestInitApi':
+      actions.initApi();
+      break;
+
     case 'error': {
       if (update.error.message === 'SESSION_REVOKED') {
         actions.signOut({ forceInitApi: true });
