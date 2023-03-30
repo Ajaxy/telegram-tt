@@ -357,6 +357,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'isScreenLocked',
       'hasPasscode',
       'invalidAttemptsCount',
+      'timeoutUntil',
     ]),
   };
 

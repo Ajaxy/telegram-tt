@@ -90,15 +90,23 @@ addActionHandler('decryptSession', (global, actions, payload): ActionReturnType 
   });
 });
 
+const MAX_INVALID_ATTEMPTS = 5;
+const TIMEOUT_RESET_INVALID_ATTEMPTS_MS = 1000 * 15;// 180000; // 3 minutes
+
 addActionHandler('logInvalidUnlockAttempt', (global): ActionReturnType => {
+  const invalidAttemptsCount = (global.passcode?.invalidAttemptsCount ?? 0) + 1;
+
   return updatePasscodeSettings(global, {
-    invalidAttemptsCount: (global.passcode?.invalidAttemptsCount ?? 0) + 1,
+    invalidAttemptsCount,
+    timeoutUntil: (invalidAttemptsCount >= MAX_INVALID_ATTEMPTS
+      ? Date.now() + TIMEOUT_RESET_INVALID_ATTEMPTS_MS : undefined),
   });
 });
 
 addActionHandler('resetInvalidUnlockAttempts', (global): ActionReturnType => {
   return updatePasscodeSettings(global, {
     invalidAttemptsCount: 0,
+    timeoutUntil: undefined,
   });
 });
 
