@@ -199,7 +199,8 @@ export function updater(update: Update) {
       });
     } else {
       onUpdate({
-        '@type': sentMessageIds.has(message.id) ? 'updateMessage' : 'newMessage',
+        // We don't have preview for 'via bot' messages, so `newMessage` update here is required
+        '@type': sentMessageIds.has(message.id) && !message.viaBotId ? 'updateMessage' : 'newMessage',
         id: message.id,
         chatId: message.chatId,
         message,
