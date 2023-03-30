@@ -18,10 +18,16 @@
     display: none;
   }
 
-  @media (max-width: 600px) {
+  &.mobile {
     position: fixed;
     padding: 2.25rem 0.5rem 0.75rem;
     background: none;
+    .player-seekline {
+      top: 1rem;
+    }
+    .playback-rate-menu .bubble {
+      bottom: 4.6875rem;
+    }
   }
 
   &.active {
@@ -44,6 +50,9 @@
     padding: 0;
     margin: 0.25rem;
     height: 2rem;
+    @media (max-width: 320px) {
+      margin: 0.125rem;
+    }
   }
 
   .volume-slider {
@@ -91,6 +100,9 @@
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: 0.5rem;
+    @media (max-width: 320px) {
+      margin: 0.25rem;
+    }
   }
 
   .player-seekline {
@@ -101,10 +113,6 @@
     height: 1rem;
     touch-action: none;
     cursor: pointer;
-
-    @media (max-width: 600px) {
-      top: 1rem;
-    }
 
     &-track {
       position: absolute;
@@ -155,9 +163,6 @@
       min-width: 3.5rem;
       margin-right: 5.8125rem;
       bottom: 4.1875rem;
-      @media (max-width: 600px) {
-        bottom: 4.6875rem;
-      }
     }
 
     &.no-fullscreen, &.no-pip {

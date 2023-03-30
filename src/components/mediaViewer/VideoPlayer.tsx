@@ -38,12 +38,12 @@ type OwnProps = {
   isProtected?: boolean;
   areControlsVisible: boolean;
   shouldCloseOnClick?: boolean;
+  isForceMobileVersion?: boolean;
   toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   isClickDisabled?: boolean;
 };
 
-const MOBILE_VERSION_CONTROL_WIDTH = 400;
 const MAX_LOOP_DURATION = 30; // Seconds
 
 const VideoPlayer: FC<OwnProps> = ({
@@ -59,6 +59,7 @@ const VideoPlayer: FC<OwnProps> = ({
   isMuted,
   playbackRate,
   onClose,
+  isForceMobileVersion,
   toggleControls,
   areControlsVisible,
   shouldCloseOnClick,
@@ -226,13 +227,15 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;
+  const shouldToggleControls = !IS_TOUCH_ENV && !isForceMobileVersion;
   const duration = videoRef.current?.duration || 0;
 
   return (
+    // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
     <div
       className="VideoPlayer"
-      onMouseMove={!IS_TOUCH_ENV ? handleVideoMove : undefined}
-      onMouseOut={!IS_TOUCH_ENV ? handleVideoLeave : undefined}
+      onMouseMove={shouldToggleControls ? handleVideoMove : undefined}
+      onMouseOut={shouldToggleControls ? handleVideoLeave : undefined}
     >
       <div
         style={wrapperStyle}
@@ -301,7 +304,7 @@ const VideoPlayer: FC<OwnProps> = ({
           duration={duration}
           isVisible={areControlsVisible}
           setVisibility={toggleControls}
-          isForceMobileVersion={posterSize && posterSize.width < MOBILE_VERSION_CONTROL_WIDTH}
+          isForceMobileVersion={isForceMobileVersion}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}
           onPictureInPictureChange={enterPictureInPicture}

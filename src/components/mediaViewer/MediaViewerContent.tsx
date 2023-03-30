@@ -57,6 +57,7 @@ type StateProps = {
 };
 
 const ANIMATION_DURATION = 350;
+const MOBILE_VERSION_CONTROL_WIDTH = 350;
 
 const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const {
@@ -105,6 +106,10 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     setControlsVisible?.(isVisible);
   }, [setControlsVisible]);
 
+  const toggleControlsOnMove = useCallback(() => {
+    toggleControls(true);
+  }, [toggleControls]);
+
   if (avatarOwner || actionPhoto) {
     if (!isVideoAvatar) {
       return (
@@ -149,21 +154,25 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const textParts = message.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
     : renderMessageText(message);
+
   const hasFooter = Boolean(textParts);
+  const posterSize = message && calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);
+  const isForceMobileVersion = isMobile || shouldForceMobileVersion(posterSize);
 
   return (
     <div
       className={buildClassName('MediaViewerContent', hasFooter && 'has-footer')}
+      onMouseMove={isForceMobileVersion && !IS_TOUCH_ENV ? toggleControlsOnMove : undefined}
     >
       {isPhoto && renderPhoto(
         bestData,
-        message && calculateMediaViewerDimensions(dimensions!, hasFooter),
+        posterSize,
         !isMobile && !isProtected,
         isProtected,
       )}
       {isVideo && (!isActive ? renderVideoPreview(
         bestImageData,
-        message && calculateMediaViewerDimensions(dimensions!, hasFooter, true),
+        posterSize,
         !isMobile && !isProtected,
         isProtected,
       ) : (
@@ -172,7 +181,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           url={bestData}
           isGif={isGif}
           posterData={bestImageData}
-          posterSize={message && calculateMediaViewerDimensions(dimensions!, hasFooter, true)}
+          posterSize={posterSize}
           loadProgress={loadProgress}
           fileSize={videoSize!}
           areControlsVisible={areControlsVisible}
@@ -182,6 +191,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           onClose={onClose}
           isMuted={isMuted}
           isHidden={isHidden}
+          isForceMobileVersion={isForceMobileVersion}
           isProtected={isProtected}
           volume={volume}
           isClickDisabled={isMoving}
@@ -193,6 +203,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           text={textParts}
           onClick={onFooterClick}
           isProtected={isProtected}
+          isForceMobileVersion={isForceMobileVersion}
           isHidden={IS_TOUCH_ENV ? !areControlsVisible : false}
           isForVideo={isVideo && !isGif}
         />
@@ -341,4 +352,9 @@ function renderVideoPreview(blobUrl?: string, imageSize?: ApiDimensions, canDrag
         <Spinner color="white" />
       </div>
     );
+}
+
+function shouldForceMobileVersion(posterSize?: { width: number; height: number }) {
+  if (!posterSize) return false;
+  return posterSize.width < MOBILE_VERSION_CONTROL_WIDTH;
 }
