@@ -59,12 +59,18 @@ export async function decryptSessionByCurrentHash() {
     throw new Error('[api/passcode] Missing required stored fields');
   }
 
-  const [sessionJson, globalJson] = await Promise.all([
-    aesDecrypt(sessionEncrypted, currentPasscodeHash),
-    aesDecrypt(globalEncrypted, currentPasscodeHash),
-  ]);
+  try {
+    const [sessionJson, globalJson] = await Promise.all([
+      aesDecrypt(sessionEncrypted, currentPasscodeHash),
+      aesDecrypt(globalEncrypted, currentPasscodeHash),
+    ]);
 
-  return { sessionJson, globalJson };
+    return { sessionJson, globalJson };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[api/passcode] Error decrypting session', err);
+    throw err;
+  }
 }
 
 export async function decryptSession(passcode: string) {
@@ -81,14 +87,20 @@ export async function decryptSession(passcode: string) {
     throw new Error('[api/passcode] Missing required stored fields');
   }
 
-  const [sessionJson, globalJson] = await Promise.all([
-    aesDecrypt(sessionEncrypted, passcodeHash),
-    aesDecrypt(globalEncrypted, passcodeHash),
-  ]);
+  try {
+    const [sessionJson, globalJson] = await Promise.all([
+      aesDecrypt(sessionEncrypted, passcodeHash),
+      aesDecrypt(globalEncrypted, passcodeHash),
+    ]);
 
-  currentPasscodeHash = passcodeHash;
+    currentPasscodeHash = passcodeHash;
 
-  return { sessionJson, globalJson };
+    return { sessionJson, globalJson };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[api/passcode] Error decrypting session', err);
+    throw err;
+  }
 }
 
 export function forgetPasscode() {
