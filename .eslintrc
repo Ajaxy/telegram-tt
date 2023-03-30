@@ -90,6 +90,12 @@
     "import/prefer-default-export": "off",
     "import/named": "off",
     "import/no-webpack-loader-syntax": "off",
+    "import/no-cycle": [
+      "error",
+      {
+        "allowUnsafeDynamicCyclicDependency": true // TODO: Fix this
+      }
+    ],
     "react/prop-types": "off",
     "react/jsx-one-expression-per-line": "off",
     "react/button-has-type": "off",

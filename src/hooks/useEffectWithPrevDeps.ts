@@ -1,7 +1,7 @@
 import { useEffect } from '../lib/teact/teact';
 import usePrevious from './usePrevious';
 
-const useEffectWithPrevDeps = <T extends readonly any[]>(
+const useEffectWithPrevDeps = <const T extends readonly any[]>(
   cb: (args: T | readonly []) => void, dependencies: T, debugKey?: string,
 ) => {
   const prevDeps = usePrevious<T>(dependencies);

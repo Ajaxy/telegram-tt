@@ -28,7 +28,7 @@ const PLURAL_RULES = {
   en: (n: number) => (n !== 1 ? 6 : 2),
   ar: (n: number) => (n === 0 ? 1 : n === 1 ? 2 : n === 2 ? 3 : n % 100 >= 3 && n % 100 <= 10 ? 4 : n % 100 >= 11 ? 5 : 6),
   be: (n: number) => {
-    const s = String(n).split('.'); const t0 = Number(s[0]) === n; const n10 = t0 && Number(s[0].slice(-1)); const n100 = t0 && Number(s[0].slice(-2));
+    const s = String(n).split('.'); const t0 = Number(s[0]) === n; const n10 = t0 ? Number(s[0].slice(-1)) : 0; const n100 = t0 ? Number(s[0].slice(-2)) : 0;
     return n10 === 1 && n100 !== 11 ? 2
       : (n10 >= 2 && n10 <= 4) && (n100 < 12 || n100 > 14) ? 4
         : (t0 && n10 === 0) || (n10 >= 5 && n10 <= 9) || (n100 >= 11 && n100 <= 14) ? 5

@@ -370,7 +370,7 @@ addActionHandler('requestMasterAndRequestCall', (global, actions, payload): Acti
   });
 });
 
-addActionHandler('requestCall', async (global, actions, payload): Promise<void> => {
+addActionHandler('requestCall', (global, actions, payload): ActionReturnType => {
   const { userId, isVideo, tabId = getCurrentTabId() } = payload;
 
   if (global.phoneCall) {

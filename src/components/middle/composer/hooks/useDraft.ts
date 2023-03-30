@@ -98,10 +98,7 @@ const useDraft = (
         }
       });
     }
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [
-    chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis,
-  ] as const);
+  }, [chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis]);
 
   // Save draft on chat change
   useEffect(() => {

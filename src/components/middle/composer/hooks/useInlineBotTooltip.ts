@@ -45,8 +45,7 @@ export default function useInlineBotTooltip(
     if (prevUsername) {
       resetInlineBot({ username: prevUsername });
     }
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [username, resetInlineBot] as const);
+  }, [username, resetInlineBot]);
 
   useEffect(() => {
     if (!usernameLowered) return;
