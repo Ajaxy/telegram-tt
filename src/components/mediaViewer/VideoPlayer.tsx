@@ -9,6 +9,7 @@ import type { ApiDimensions } from '../../api/types';
 import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/windowEnvironment';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
+import { clamp } from '../../util/math';
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreen from '../../hooks/useFullscreen';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
@@ -45,6 +46,7 @@ type OwnProps = {
 };
 
 const MAX_LOOP_DURATION = 30; // Seconds
+const REWIND_STEP = 5; // Seconds
 
 const VideoPlayer: FC<OwnProps> = ({
   url,
@@ -211,17 +213,35 @@ const VideoPlayer: FC<OwnProps> = ({
 
   useEffect(() => {
     if (!isMediaViewerOpen) return undefined;
-    const togglePayingStateBySpace = (e: KeyboardEvent) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !isInPictureInPicture) {
-        e.preventDefault();
-        togglePlayState(e);
+    const rewind = (dir: number) => {
+      const video = videoRef.current!;
+      video.currentTime = clamp(video.currentTime + dir * REWIND_STEP, 0, video.duration);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isInPictureInPicture) return;
+      switch (e.key) {
+        case ' ':
+        case 'Enter':
+          e.preventDefault();
+          togglePlayState(e);
+          break;
+        case 'Left': // IE/Edge specific value
+        case 'ArrowLeft':
+          e.preventDefault();
+          rewind(-1);
+          break;
+        case 'Right': // IE/Edge specific value
+        case 'ArrowRight':
+          e.preventDefault();
+          rewind(1);
+          break;
       }
     };
 
-    document.addEventListener('keydown', togglePayingStateBySpace, false);
+    document.addEventListener('keydown', handleKeyDown, false);
 
     return () => {
-      document.removeEventListener('keydown', togglePayingStateBySpace, false);
+      document.removeEventListener('keydown', handleKeyDown, false);
     };
   }, [togglePlayState, isMediaViewerOpen, isInPictureInPicture]);
 
