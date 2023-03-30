@@ -3,7 +3,7 @@ import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment } from '../../../api/types';
 
-import { SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../config';
+import { GIF_MIME_TYPE, SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../config';
 import { getFileExtension } from '../../common/helpers/documentInfo';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
@@ -93,7 +93,9 @@ const AttachmentModalItem: FC<OwnProps> = ({
   }, [attachment, displayType, index, onDelete]);
 
   const shouldSkipGrouping = displayType === 'file' || !shouldDisplayGrouped;
-  const shouldDisplaySpoiler = Boolean(displayType !== 'file' && attachment.shouldSendAsSpoiler);
+  const canDisplaySpoilerButton = attachment.mimeType !== GIF_MIME_TYPE;
+  const shouldDisplaySpoiler = Boolean(displayType !== 'file' && canDisplaySpoilerButton
+    && attachment.shouldSendAsSpoiler);
   const shouldRenderOverlay = displayType !== 'file';
 
   const rootClassName = buildClassName(
@@ -111,13 +113,15 @@ const AttachmentModalItem: FC<OwnProps> = ({
       />
       {shouldRenderOverlay && (
         <div className={styles.overlay}>
-          <i
-            className={buildClassName(
-              attachment.shouldSendAsSpoiler ? 'icon-spoiler-disable' : 'icon-spoiler',
-              styles.actionItem,
-            )}
-            onClick={handleSpoilerClick}
-          />
+          {canDisplaySpoilerButton && (
+            <i
+              className={buildClassName(
+                attachment.shouldSendAsSpoiler ? 'icon-spoiler-disable' : 'icon-spoiler',
+                styles.actionItem,
+              )}
+              onClick={handleSpoilerClick}
+            />
+          )}
           {onDelete && (
             <i className={buildClassName('icon-delete', styles.actionItem)} onClick={() => onDelete(index)} />
           )}

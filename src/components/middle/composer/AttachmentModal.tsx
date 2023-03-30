@@ -13,6 +13,7 @@ import type { Signal } from '../../../util/signals';
 import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
+  GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
@@ -328,7 +329,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   }, [attachments, onAttachmentsUpdate]);
 
   const handleEnableSpoilers = useCallback(() => {
-    onAttachmentsUpdate(attachments.map((a) => ({ ...a, shouldSendAsSpoiler: true })));
+    onAttachmentsUpdate(attachments.map((a) => ({
+      ...a,
+      shouldSendAsSpoiler: a.mimeType !== GIF_MIME_TYPE ? true : undefined,
+    })));
   }, [attachments, onAttachmentsUpdate]);
 
   const handleDisableSpoilers = useCallback(() => {
@@ -381,6 +385,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     return [everyPhoto, everyVideo, everyAudio];
   }, [renderingAttachments, isQuickGallery]);
 
+  const hasAnySpoilerable = useMemo(() => {
+    if (!renderingAttachments) return false;
+    return renderingAttachments.some((a) => a.mimeType !== GIF_MIME_TYPE
+      && !SUPPORTED_AUDIO_CONTENT_TYPES.has(a.mimeType));
+  }, [renderingAttachments]);
+
   if (!renderingAttachments) {
     return undefined;
   }
@@ -430,7 +440,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                   </MenuItem>
                 ))
               }
-              {isSendingCompressed && (
+              {isSendingCompressed && hasAnySpoilerable && (
                 hasSpoiler ? (
                   <MenuItem icon="spoiler-disable" onClick={handleDisableSpoilers}>
                     {lang('Attachment.DisableSpoiler')}
