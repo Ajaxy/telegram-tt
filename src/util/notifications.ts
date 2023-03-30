@@ -32,6 +32,7 @@ import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
+import { buildCollectionByKey } from './iteratees';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();
@@ -191,6 +192,28 @@ async function loadNotificationSettings() {
   return selectNotifySettings(global);
 }
 
+// Load custom emoji from the api if it's not cached already
+async function loadCustomEmoji(id: string) {
+  let global = getGlobal();
+  if (global.customEmojis.byId[id]) return;
+  const customEmoji = await callApi('fetchCustomEmoji', {
+    documentId: [id],
+  });
+  if (!customEmoji) return;
+  global = getGlobal();
+  global = {
+    ...global,
+    customEmojis: {
+      ...global.customEmojis,
+      byId: {
+        ...global.customEmojis.byId,
+        ...buildCollectionByKey(customEmoji, 'id'),
+      },
+    },
+  };
+  setGlobal(global);
+}
+
 export async function subscribe() {
   if (!checkIfPushSupported()) {
     // Ask for notification permissions only if service worker notifications are not supported
@@ -267,7 +290,8 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   let {
     senderId,
   } = message;
-  if (reaction) senderId = reaction.userId;
+  const hasReaction = Boolean(reaction);
+  if (hasReaction) senderId = reaction.userId;
 
   const { isScreenLocked } = global.passcode;
   const messageSender = senderId ? selectUser(global, senderId) : undefined;
@@ -311,7 +335,12 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     } else {
       // TODO[forums] Support ApiChat
       const senderName = getMessageSenderName(translate, chat.id, messageSender);
-      const summary = getMessageSummaryText(translate, message, false, 60, false);
+      let summary = getMessageSummaryText(translate, message, hasReaction, 60);
+
+      if (hasReaction) {
+        const emoji = getReactionEmoji(reaction);
+        summary = translate('PushReactText', [emoji, summary]);
+      }
 
       body = senderName ? `${senderName}: ${summary}` : summary;
     }
@@ -337,6 +366,18 @@ async function getAvatar(chat: ApiChat | ApiUser) {
     mediaData = mediaLoader.getFromMemory(imageHash);
   }
   return mediaData;
+}
+
+function getReactionEmoji(reaction: ApiUserReaction) {
+  let emoji;
+  if ('emoticon' in reaction.reaction) {
+    emoji = reaction.reaction.emoticon;
+  }
+  if ('documentId' in reaction.reaction) {
+    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
+    emoji = getGlobal().customEmojis.byId[reaction.reaction.documentId]?.emoji;
+  }
+  return emoji || '❤️';
 }
 
 export async function notifyAboutCall({
@@ -395,6 +436,11 @@ export async function notifyAboutMessage({
   const activeReaction = getMessageRecentReaction(message);
   // Do not notify about reactions on messages that are not outgoing
   if (isReaction && !activeReaction) return;
+
+  // If this is a custom emoji reaction we need to make sure it is loaded
+  if (isReaction && activeReaction && 'documentId' in activeReaction.reaction) {
+    await loadCustomEmoji(activeReaction.reaction.documentId);
+  }
 
   const icon = await getAvatar(chat);
 
