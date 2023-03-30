@@ -12,7 +12,7 @@ import { filterUsersByName, getMainUsername, getUserFirstOrLastName } from '../.
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
-import { getHtmlBeforeSelection } from '../../../../util/selection';
+import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
 
 import useFlag from '../../../../hooks/useFlag';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
@@ -96,6 +96,7 @@ export default function useMentionTooltip(
     }
 
     const mainUsername = getMainUsername(user);
+    const userFirstOrLastName = getUserFirstOrLastName(user) || '';
     const htmlToInsert = mainUsername
       ? `@${mainUsername}`
       : `<a
@@ -104,21 +105,27 @@ export default function useMentionTooltip(
           data-user-id="${user.id}"
           contenteditable="false"
           dir="auto"
-        >${getUserFirstOrLastName(user)}</a>`;
+        >${userFirstOrLastName}</a>`;
 
     const inputEl = inputRef.current!;
     const htmlBeforeSelection = getHtmlBeforeSelection(inputEl);
     const fixedHtmlBeforeSelection = cleanWebkitNewLines(htmlBeforeSelection);
     const atIndex = fixedHtmlBeforeSelection.lastIndexOf('@');
+    const shiftCaretPosition = (mainUsername ? mainUsername.length + 1 : userFirstOrLastName.length)
+      - (fixedHtmlBeforeSelection.length - atIndex);
 
     if (atIndex !== -1) {
       const newHtml = `${fixedHtmlBeforeSelection.substr(0, atIndex)}${htmlToInsert}&nbsp;`;
       const htmlAfterSelection = cleanWebkitNewLines(inputEl.innerHTML).substring(fixedHtmlBeforeSelection.length);
-
+      const caretPosition = getCaretPosition(inputEl);
       setHtml(`${newHtml}${htmlAfterSelection}`);
 
       requestAnimationFrame(() => {
+        const newCaretPosition = caretPosition + shiftCaretPosition + 1;
         focusEditableElement(inputEl, forceFocus);
+        if (newCaretPosition >= 0) {
+          setCaretPosition(inputEl, newCaretPosition);
+        }
       });
     }
 

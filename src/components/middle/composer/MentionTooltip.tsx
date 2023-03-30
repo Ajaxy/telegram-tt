@@ -45,6 +45,12 @@ const MentionTooltip: FC<OwnProps> = ({
     onInsertUserName(user, forceFocus);
   }, [onInsertUserName]);
 
+  const handleClick = useCallback((e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+
+    handleUserSelect(id);
+  }, [handleUserSelect]);
+
   const handleSelectMention = useCallback((member: ApiUser) => {
     handleUserSelect(member.id, true);
   }, [handleUserSelect]);
@@ -93,8 +99,8 @@ const MentionTooltip: FC<OwnProps> = ({
         <ListItem
           key={id}
           className="chat-item-clickable scroll-item"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => handleUserSelect(id)}
+          onClick={handleClick}
+          clickArg={id}
           focus={selectedMentionIndex === index}
         >
           <PrivateChatInfo
