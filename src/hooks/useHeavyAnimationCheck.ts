@@ -1,13 +1,14 @@
 import { useEffect } from '../lib/teact/teact';
-
-const ANIMATION_START_EVENT = 'tt-event-heavy-animation-start';
-const ANIMATION_END_EVENT = 'tt-event-heavy-animation-end';
-
-let timeout: number | undefined;
-let isAnimating = false;
+import { createCallbackManager } from '../util/callbacks';
 
 // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
 const AUTO_END_TIMEOUT = 1000;
+
+const startCallbacks = createCallbackManager();
+const endCallbacks = createCallbackManager();
+
+let timeout: number | undefined;
+let isAnimating = false;
 
 const useHeavyAnimationCheck = (
   handleAnimationStart: AnyToVoidFunction,
@@ -23,12 +24,12 @@ const useHeavyAnimationCheck = (
       handleAnimationStart();
     }
 
-    document.addEventListener(ANIMATION_START_EVENT, handleAnimationStart);
-    document.addEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
+    startCallbacks.addCallback(handleAnimationStart);
+    endCallbacks.addCallback(handleAnimationEnd);
 
     return () => {
-      document.removeEventListener(ANIMATION_END_EVENT, handleAnimationEnd);
-      document.removeEventListener(ANIMATION_START_EVENT, handleAnimationStart);
+      endCallbacks.removeCallback(handleAnimationEnd);
+      startCallbacks.removeCallback(handleAnimationStart);
     };
   }, [isDisabled, handleAnimationEnd, handleAnimationStart]);
 };
@@ -40,7 +41,7 @@ export function isHeavyAnimating() {
 export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
   if (!isAnimating) {
     isAnimating = true;
-    document.dispatchEvent(new Event(ANIMATION_START_EVENT));
+    startCallbacks.runCallbacks();
   }
 
   if (timeout) {
@@ -56,7 +57,7 @@ export function dispatchHeavyAnimationEvent(duration = AUTO_END_TIMEOUT) {
     }
 
     isAnimating = false;
-    document.dispatchEvent(new Event(ANIMATION_END_EVENT));
+    endCallbacks.runCallbacks();
   }
 
   timeout = window.setTimeout(onEnd, duration);
