@@ -1,8 +1,8 @@
 export function createCallbackManager() {
-  const callbacks: AnyToVoidFunction[] = [];
+  const callbacks = new Set<AnyToVoidFunction>();
 
   function addCallback(cb: AnyToVoidFunction) {
-    callbacks.push(cb);
+    callbacks.add(cb);
 
     return () => {
       removeCallback(cb);
@@ -10,10 +10,7 @@ export function createCallbackManager() {
   }
 
   function removeCallback(cb: AnyToVoidFunction) {
-    const index = callbacks.indexOf(cb);
-    if (index !== -1) {
-      callbacks.splice(index, 1);
-    }
+    callbacks.delete(cb);
   }
 
   function runCallbacks(...args: any[]) {
@@ -23,7 +20,7 @@ export function createCallbackManager() {
   }
 
   function hasCallbacks() {
-    return Boolean(callbacks.length);
+    return Boolean(callbacks.size);
   }
 
   return {
