@@ -67,7 +67,7 @@ import {
   selectTopicFromMessage,
   selectTabState,
   selectChatTranslations,
-  selectRequestedTranslationLanguage,
+  selectRequestedTranslationLanguage, selectCurrentMessageIds,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -211,6 +211,7 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   isResizingContainer?: boolean;
+  viewportIds?: number[];
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
@@ -315,6 +316,7 @@ const Message: FC<OwnProps & StateProps> = ({
   focusDirection,
   noFocusHighlight,
   isResizingContainer,
+  viewportIds,
   isForwarding,
   isChatWithSelf,
   isRepliesChat,
@@ -645,7 +647,7 @@ const Message: FC<OwnProps & StateProps> = ({
     replyMessage,
     message.id,
   );
-  useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer);
+  useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, viewportIds);
 
   const shouldFocusOnResize = isLastInGroup;
 
@@ -1450,7 +1452,12 @@ export default memo(withGlobal<OwnProps>(
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
-      ...(isFocused && { focusDirection, noFocusHighlight, isResizingContainer }),
+      ...(isFocused && {
+        focusDirection,
+        noFocusHighlight,
+        isResizingContainer,
+        viewportIds: selectCurrentMessageIds(global, chatId, threadId, messageListType),
+      }),
     };
   },
 )(Message));

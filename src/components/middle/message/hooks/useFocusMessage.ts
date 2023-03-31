@@ -14,6 +14,7 @@ export default function useFocusMessage(
   focusDirection?: FocusDirection,
   noFocusHighlight?: boolean,
   isResizingContainer?: boolean,
+  viewportIds?: number[],
 ) {
   useLayoutEffect(() => {
     if (isFocused && elementRef.current) {
@@ -32,6 +33,6 @@ export default function useFocusMessage(
       );
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, viewportIds,
   ]);
 }
