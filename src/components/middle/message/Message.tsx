@@ -1312,7 +1312,7 @@ export default memo(withGlobal<OwnProps>(
     } = ownProps;
     const {
       id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, repliesThreadInfo, forwardInfo,
-      transcriptionId,
+      transcriptionId, isPinned,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1426,7 +1426,7 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       isDownloading,
       isPinnedList: messageListType === 'pinned',
-      isPinned: message.isPinned || Boolean(message.forwardInfo?.isLinkedChannelPost),
+      isPinned,
       canAutoLoadMedia: selectCanAutoLoadMedia(global, message),
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
