@@ -141,14 +141,14 @@ module.exports = (_env, { mode = 'production' }) => {
     },
 
     plugins: [
-      ...(APP_ENV === 'staging' ? {
+      ...(APP_ENV === 'staging' ? [{
         apply: (compiler) => {
           compiler.hooks.compile.tap('Before Compilation', async () => {
             const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
             fs.writeFileSync(path.resolve('./public/reference.json'), stats);
           });
         },
-      } : []),
+      }] : []),
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
         /highlight\.js[\\/]lib[\\/]languages/,
