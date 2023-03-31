@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef } from '../lib/teact/teact';
 export default function useBackgroundMode(
   onBlur?: AnyToVoidFunction,
   onFocus?: AnyToVoidFunction,
+  isDisabled = false,
 ) {
   const wasBlurred = useRef<boolean>(false);
   const handleBlur = useCallback(() => {
@@ -19,6 +20,10 @@ export default function useBackgroundMode(
   }, [onFocus]);
 
   useEffect(() => {
+    if (isDisabled) {
+      return undefined;
+    }
+
     if (onBlur && !document.hasFocus()) {
       handleBlur();
     }
@@ -40,5 +45,5 @@ export default function useBackgroundMode(
         window.removeEventListener('blur', handleBlur);
       }
     };
-  }, [handleBlur, handleFocus, onBlur, onFocus]);
+  }, [handleBlur, handleFocus, isDisabled, onBlur, onFocus]);
 }

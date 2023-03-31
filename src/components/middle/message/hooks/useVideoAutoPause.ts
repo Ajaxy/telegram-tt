@@ -31,8 +31,8 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
     fastRaf(unfreezePlaying);
   }, [unfreezePlaying]);
 
-  useBackgroundMode(freezePlaying, unfreezePlayingOnRaf);
-  useHeavyAnimationCheck(freezePlaying, unfreezePlaying);
+  useBackgroundMode(freezePlaying, unfreezePlayingOnRaf, !canPlay);
+  useHeavyAnimationCheck(freezePlaying, unfreezePlaying, !canPlay);
 
   const handlePlaying = useCallback(() => {
     if (!canPlayRef.current || isFrozenRef.current) {

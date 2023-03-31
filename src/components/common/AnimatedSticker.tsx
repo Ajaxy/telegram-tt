@@ -13,6 +13,7 @@ import generateIdFor from '../../util/generateIdFor';
 import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import { useStateRef } from '../../hooks/useStateRef';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -94,10 +95,9 @@ const AnimatedSticker: FC<OwnProps> = ({
   const isFrozen = useRef(false);
   const isFirstRender = useRef(true);
 
-  const playRef = useRef();
-  playRef.current = play;
-  const playSegmentRef = useRef<[number, number]>();
-  playSegmentRef.current = playSegment;
+  const canPlay = play || playSegment;
+  const playRef = useStateRef(play);
+  const playSegmentRef = useStateRef(playSegment);
 
   const isUnmountedRef = useRef();
   useEffect(() => {
@@ -189,7 +189,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         animation.play(shouldRestart, viewId);
       }
     }
-  }, [animation, viewId]);
+  }, [animation, playRef, playSegmentRef, viewId]);
 
   const pauseAnimation = useCallback(() => {
     if (!animation) {
@@ -242,7 +242,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (!animation) {
       return;
     }
-    if (play || playSegment) {
+    if (canPlay) {
       if (isFrozen.current) {
         wasPlaying.current = true;
       } else {
@@ -256,7 +256,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         pauseAnimation();
       }
     }
-  }, [animation, play, playSegment, noLoop, playAnimation, pauseAnimation]);
+  }, [animation, canPlay, noLoop, playAnimation, pauseAnimation]);
 
   useEffect(() => {
     if (animation) {
@@ -269,11 +269,11 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation, forceOnHeavyAnimation);
+  useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation, !canPlay || forceOnHeavyAnimation);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
   // then we can play again.
-  useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf);
+  useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf, !canPlay);
 
   if (sharedCanvas) {
     return undefined;
