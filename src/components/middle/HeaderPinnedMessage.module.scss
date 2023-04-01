@@ -179,7 +179,8 @@
   }
 }
 
-.inlineButton {
+.inlineButton,
+.inlineButton:global(.Button.tiny) {
   display: block;
   width: auto;
   overflow: hidden;
