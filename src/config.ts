@@ -1,6 +1,6 @@
 import type { ApiLimitType } from './global/types';
 
-export const APP_NAME = process.env.APP_NAME || 'Telegram WebZ';
+export const APP_NAME = process.env.APP_NAME || 'Telegram WebA';
 export const APP_VERSION = process.env.APP_VERSION!;
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
@@ -14,7 +14,7 @@ export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
 
-export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebZ-Beta-04-01';
+export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
 
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;
@@ -245,7 +245,7 @@ export const RE_TELEGRAM_LINK = /^(https?:\/\/)?telegram\.org\//i;
 export const TME_LINK_PREFIX = 'https://t.me/';
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
 export const PURCHASE_USERNAME = 'auction';
-export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'k.t.me', 'z.t.me']);
+export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me']);
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
