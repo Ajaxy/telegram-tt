@@ -28,7 +28,7 @@ const STATOSCOPE_REFERENCE_URL = 'https://webz.dev/build-stats.json';
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
 const {
-  BASE_URL = 'https://web.telegram.org/z/',
+  BASE_URL = 'https://web.telegram.org/a/',
   APP_TITLE = DEFAULT_APP_TITLE,
 } = process.env;
 

@@ -517,7 +517,7 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
         onCloseAnimationEnd={handleModalClose}
       >
         <p>
-          Sorry, Telegram WebZ doesn&apos;t support payments with this provider yet. <br />
+          Sorry, Telegram WebA doesn&apos;t support payments with this provider yet. <br />
           Please use one of our mobile apps to do this.
         </p>
         <div className="dialog-buttons mt-2">
