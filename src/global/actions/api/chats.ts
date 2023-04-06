@@ -116,7 +116,7 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
 
 addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   const {
-    id, threadId = MAIN_THREAD_ID,
+    id, threadId = MAIN_THREAD_ID, noRequestThreadInfoUpdate,
   } = payload;
   if (!id) {
     return;
@@ -142,7 +142,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     actions.requestChatUpdate({ chatId: id });
   }
 
-  if (threadId !== MAIN_THREAD_ID) {
+  if (threadId !== MAIN_THREAD_ID && !noRequestThreadInfoUpdate) {
     actions.requestThreadInfoUpdate({ chatId: id, threadId });
   }
 });
@@ -160,7 +160,9 @@ addActionHandler('openComments', async (global, actions, payload): Promise<void>
         return;
       }
 
-      actions.openChat({ id, threadId, tabId });
+      actions.openChat({
+        id, threadId, tabId, noRequestThreadInfoUpdate: true,
+      });
 
       const result = await callApi('requestThreadInfoUpdate', { chat, threadId, originChannelId });
       if (!result) {
@@ -176,9 +178,15 @@ addActionHandler('openComments', async (global, actions, payload): Promise<void>
         threadId: result.topMessageId,
         tabId,
         shouldReplaceLast: true,
+        noRequestThreadInfoUpdate: true,
       });
     } else {
-      actions.openChat({ id, threadId: topMessageId, tabId });
+      actions.openChat({
+        id,
+        threadId: topMessageId,
+        tabId,
+        noRequestThreadInfoUpdate: true,
+      });
     }
   }
 });
