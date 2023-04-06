@@ -154,6 +154,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
         <div className="settings-wallpapers">
           {loadedWallpapers.map((wallpaper) => (
             <WallpaperTile
+              key={wallpaper.slug}
               wallpaper={wallpaper}
               theme={theme}
               isSelected={background === wallpaper.slug}
