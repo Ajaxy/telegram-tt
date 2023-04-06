@@ -413,7 +413,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (!isPinned) return undefined;
-    const id = album ? album.messages[album.messages.length - 1].id : messageId;
+    const id = album ? album.mainMessage.id : messageId;
 
     return () => {
       onPinnedIntersectionChange({ viewportPinnedIdsToRemove: [id], isUnmount: true });
@@ -1188,6 +1188,7 @@ const Message: FC<OwnProps & StateProps> = ({
         className="bottom-marker"
         data-message-id={messageId}
         data-last-message-id={album ? album.messages[album.messages.length - 1].id : undefined}
+        data-album-main-id={album ? album.mainMessage.id : undefined}
         data-has-unread-mention={message.hasUnreadMention || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
         data-is-pinned={isPinned || undefined}
