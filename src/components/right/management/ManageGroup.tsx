@@ -277,7 +277,10 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     }
 
     let totalCount = ALL_PERMISSIONS.filter(
-      (key) => !chat.defaultBannedRights![key as keyof ApiChatBannedRights],
+      (key) => {
+        if (key === 'manageTopics' && !isForumEnabled) return false;
+        return !chat.defaultBannedRights![key as keyof ApiChatBannedRights];
+      },
     ).length;
 
     const { sendStickers, sendGifs } = chat.defaultBannedRights;
@@ -288,7 +291,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
     }
 
     return totalCount;
-  }, [chat]);
+  }, [chat.defaultBannedRights, isForumEnabled]);
 
   const adminsCount = useMemo(() => {
     return Object.keys(chat.fullInfo?.adminMembersById || {}).length;
