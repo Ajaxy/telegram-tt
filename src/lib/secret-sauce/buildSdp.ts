@@ -16,6 +16,7 @@ export type Conference = {
 export type Ssrc = {
   userId: string;
   endpoint: string;
+  mid: string;
   isMain: boolean;
   isRemoved?: boolean;
   isVideo: boolean;
@@ -52,7 +53,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   add('t=0 0'); // time when session is valid
   add('a=ice-options:trickle');
   add('a=msid-semantic:WMS *');
-  add(`a=group:BUNDLE ${ssrcs.map((ssrc) => ssrc.endpoint).join(' ')}${isPresentation ? '' : ` ${isP2p ? '3' : '2'}`}`);
+  add(`a=group:BUNDLE ${ssrcs.map((ssrc) => ssrc.mid).join(' ')}${isPresentation ? '' : ` ${isP2p ? '3' : '2'}`}`);
   // ice-lite: is a minimal version of the ICE specification, intended only for servers running on a public IP address
   if (!isP2p) add('a=ice-lite');
 
@@ -110,7 +111,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
     add(`m=${type} ${entry.isMain ? 1 : 0} RTP/SAVPF ${payloadTypes.map((l) => l.id).join(' ')}`);
     add('c=IN IP4 0.0.0.0');
     add('b=AS:1300'); // 1300000 / 1000
-    add(`a=mid:${entry.endpoint}`);
+    add(`a=mid:${entry.mid}`);
     add('a=rtcp-mux');
     payloadTypes.forEach(addPayloadType);
 
@@ -159,7 +160,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   };
 
   if (!isP2p) {
-    ssrcs.filter((ssrc) => ssrc.endpoint === '0' || ssrc.endpoint === '1').map(addSsrcEntry);
+    ssrcs.filter((ssrc) => ssrc.mid === '0' || ssrc.mid === '1').map(addSsrcEntry);
   } else {
     ssrcs.filter(addSsrcEntry);
   }
@@ -175,7 +176,7 @@ export default (conference: Conference, isAnswer = false, isPresentation = false
   }
 
   if (!isP2p) {
-    ssrcs.filter((ssrc) => ssrc.endpoint !== '0' && ssrc.endpoint !== '1').map(addSsrcEntry);
+    ssrcs.filter((ssrc) => ssrc.mid !== '0' && ssrc.mid !== '1').map(addSsrcEntry);
   }
 
   return `${lines.join('\n')}\n`;
