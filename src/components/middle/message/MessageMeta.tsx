@@ -108,7 +108,7 @@ const MessageMeta: FC<OwnProps> = ({
         </>
       )}
       {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
-        <span onClick={handleOpenThread}>
+        <span onClick={handleOpenThread} className="message-replies-wrapper">
           <span className="message-replies">
             <AnimatedCounter text={formatIntegerCompact(repliesThreadInfo!.messagesCount!)} />
           </span>
