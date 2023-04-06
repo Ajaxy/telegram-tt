@@ -342,6 +342,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'archiveSettings',
       'mediaViewer',
       'audioPlayer',
+      'shouldShowContextMenuHint',
     ]),
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),

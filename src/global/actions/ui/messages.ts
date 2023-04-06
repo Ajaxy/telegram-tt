@@ -637,8 +637,8 @@ addActionHandler('toggleMessageSelection', (global, actions, payload): ActionRet
 
   setGlobal(global);
 
-  if (selectTabState(global, tabId).shouldShowContextMenuHint) {
-    actions.disableContextMenuHint({ tabId });
+  if (global.shouldShowContextMenuHint) {
+    actions.disableContextMenuHint();
     actions.showNotification({
       // eslint-disable-next-line max-len
       message: `To **edit** or **reply**, close this menu. Then ${IS_TOUCH_ENV ? 'long tap' : 'right click'} on a message.`,
@@ -647,16 +647,15 @@ addActionHandler('toggleMessageSelection', (global, actions, payload): ActionRet
   }
 });
 
-addActionHandler('disableContextMenuHint', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
-
-  if (!selectTabState(global, tabId).shouldShowContextMenuHint) {
+addActionHandler('disableContextMenuHint', (global): ActionReturnType => {
+  if (!global.shouldShowContextMenuHint) {
     return undefined;
   }
 
-  return updateTabState(global, {
+  return {
+    ...global,
     shouldShowContextMenuHint: false,
-  }, tabId);
+  };
 });
 
 addActionHandler('exitMessageSelectMode', (global, actions, payload): ActionReturnType => {
