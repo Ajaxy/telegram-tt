@@ -21,7 +21,7 @@ const pageTemplate = `
     <h3>Commits since ${version}</h3>\
     <p><i>This list is automatically updated when a new commit pushed to the beta repo</i></p>\
     <ul id="list"></ul>\
-    <aside><a href="https://t.me/webzchat">WebA Discussion</a> <b>|</b> <a href="https://t.me/webzcommentsru">WebA Обсуждение</a></aside>\
+    <aside><a href="https://t.me/webatalks">Web A Discussion</a> <b>|</b> <a href="https://t.me/webatalksru">Web A Обсуждение</a></aside>\
     <aside><i>Last update: ${new Date().toLocaleDateString('en-CA')}</i></aside>\
 </body>
 `.trim();
@@ -41,9 +41,9 @@ updateChangelog();
 async function updateTelegraph(dom) {
   const api = new Telegraph();
   const content = domToNode(dom.window.document.body).children;
-  const result = await api.editPage(AUTH_TOKEN, 'WebA-Beta-03-20', 'Telegram WebA Beta Changelog', content, {
-    author_name: 'WebA team',
-    author_url: 'https://t.me/webztalks',
+  const result = await api.editPage(AUTH_TOKEN, 'WebA-Beta-03-20', 'Telegram Web A Beta Changelog', content, {
+    author_name: 'Web A team',
+    author_url: 'https://t.me/webachannel',
   });
   // eslint-disable-next-line no-console
   console.log(result);
