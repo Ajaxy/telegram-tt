@@ -73,6 +73,10 @@
   &:hover {
     background-color: rgba(0, 0, 0, 0.15);
   }
+
+  @media (max-width: 600px) {
+    font-size: 1.25rem;
+  }
 }
 
 .delete-file {
