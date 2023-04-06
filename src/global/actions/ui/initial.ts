@@ -61,8 +61,6 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
       actions.initApi();
     }
 
-    setGlobal(global);
-
     startWebsync();
   }
 });
