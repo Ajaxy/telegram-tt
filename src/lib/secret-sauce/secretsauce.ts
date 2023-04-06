@@ -13,7 +13,7 @@ import {
 } from './utils';
 
 export type StreamType = 'audio' | 'video' | 'presentation';
-
+const DEFAULT_MID = 3;
 type GroupCallState = {
   connection?: RTCPeerConnection;
   screenshareConnection?: RTCPeerConnection;
@@ -45,6 +45,7 @@ type GroupCallState = {
   destination?: MediaStreamAudioDestinationNode;
   audioContext?: AudioContext;
   mediaStream?: MediaStream;
+  lastMid: number;
 };
 
 let state: GroupCallState | undefined;
@@ -429,6 +430,7 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
 
     if (!isAudioLeft && !hasAudio) {
       // console.log('add audio');
+      state!.lastMid = state!.lastMid + 1;
       conference.ssrcs!.push({
         userId: participant.id,
         isMain: false,
@@ -438,11 +440,14 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
           semantics: 'FID',
           sources: [participant.source],
         }],
+        mid: state!.lastMid.toString()
       });
     }
 
     if (!isVideoLeft && !hasVideo && participant.video) {
       // console.log('add video', participant.video);
+      state!.lastMid = state!.lastMid + 1;
+
       newEndpoints.push(participant.video.endpoint);
       conference.ssrcs!.push({
         userId: participant.id,
@@ -450,11 +455,13 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
         endpoint: participant.video.endpoint,
         isVideo: true,
         sourceGroups: participant.video.sourceGroups,
+        mid: state!.lastMid.toString()
       });
     }
 
     if (!isPresentationLeft && !hasPresentation && participant.presentation) {
       // console.log('add presentation');
+      state!.lastMid = state!.lastMid + 1;
       conference.ssrcs!.push({
         isPresentation: true,
         userId: participant.id,
@@ -462,6 +469,7 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
         endpoint: participant.presentation.endpoint,
         isVideo: true,
         sourceGroups: participant.presentation.sourceGroups,
+        mid: state!.lastMid.toString()
       });
     }
   });
@@ -722,6 +730,7 @@ function initializeConnection(
       isVideo: false,
       isPresentation,
       endpoint: isPresentation ? '1' : '0',
+      mid: isPresentation ? '1' : '0'
     } : undefined;
 
     const videoSsrc: Ssrc | undefined = sdp['ssrc-groups'] && {
@@ -731,6 +740,7 @@ function initializeConnection(
       isMain: true,
       isVideo: true,
       endpoint: isPresentation ? '0' : '1',
+      mid: isPresentation ? '0' : '1'
     };
 
     const conference = isPresentation ? state.screenshareConference : state.conference;
@@ -801,7 +811,7 @@ export async function startSharingScreen(): Promise<JoinGroupCallPayload | undef
     return await new Promise((resolve) => {
       const { connection, dataChannel } = initializeConnection([stream], resolve, true);
       state = {
-        ...state,
+        ...state!,
         screenshareConnection: connection,
         screenshareDataChannel: dataChannel,
       };
@@ -840,11 +850,12 @@ export function joinGroupCall(
     // destination,
     audioContext,
     mediaStream,
+    lastMid: DEFAULT_MID,
   };
 
   return new Promise((resolve) => {
     state = {
-      ...state,
+      ...state!,
       ...initializeConnection([state!.silence!, state!.black!], resolve),
     };
   });

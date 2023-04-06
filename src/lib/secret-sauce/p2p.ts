@@ -416,6 +416,7 @@ export async function processSignalingMessage(message: P2pMessage) {
             isMain: false,
             userId: '123',
             endpoint: '0',
+            mid: '0',
             sourceGroups: [{
               semantics: 'FID',
               sources: [message.audio.ssrc],
@@ -427,6 +428,7 @@ export async function processSignalingMessage(message: P2pMessage) {
             isMain: false,
             userId: '123',
             endpoint: '1',
+            mid: '1',
             sourceGroups: message.video.ssrcGroups.map((l) => ({
               semantics: l.semantics,
               sources: l.ssrcs,
@@ -438,6 +440,7 @@ export async function processSignalingMessage(message: P2pMessage) {
             isMain: false,
             userId: '123',
             endpoint: '2',
+            mid: '2',
             sourceGroups: message.screencast.ssrcGroups.map((l) => ({
               semantics: l.semantics,
               sources: l.ssrcs,
