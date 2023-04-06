@@ -73,6 +73,8 @@
   .subtitle {
     text-align: initial;
     unicode-bidi: plaintext;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .other-usernames {
