@@ -252,7 +252,7 @@
 }
 
 @media (min-width: 1276px) and (max-width: 1439px) {
-  :global(:not(.tools-stacked)) .root {
+  :global(.MiddleHeader:not(.tools-stacked)) .root {
     opacity: 1;
 
     :global(#Main.right-column-open) & {
