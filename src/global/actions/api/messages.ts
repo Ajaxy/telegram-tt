@@ -73,7 +73,7 @@ import {
   selectLanguageCode,
   selectListedIds,
   selectNoWebPage,
-  selectOutlyingListByMessageId,
+  selectOutlyingListByMessageId, selectPinnedIds,
   selectRealLastReadId,
   selectReplyingToId,
   selectScheduledMessage,
@@ -459,6 +459,10 @@ addActionHandler('unpinAllMessages', async (global, actions, payload): Promise<v
   await callApi('unpinAllMessages', { chat, threadId: topId });
 
   global = getGlobal();
+  const pinnedIds = selectPinnedIds(global, chatId, threadId);
+  pinnedIds?.forEach((id) => {
+    global = updateChatMessage(global, chatId, id, { isPinned: false });
+  });
   global = replaceThreadParam(global, chat.id, MAIN_THREAD_ID, 'pinnedIds', []);
   setGlobal(global);
 });
