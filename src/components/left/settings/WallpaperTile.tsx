@@ -44,6 +44,7 @@ const WallpaperTile: FC<OwnProps> = ({
     undefined,
     'slow',
   );
+  const isLoadingRef = useRef(false);
   const [isLoadAllowed, setIsLoadAllowed] = useState(false);
   const {
     mediaData: fullMedia, loadProgress,
@@ -68,8 +69,10 @@ const WallpaperTile: FC<OwnProps> = ({
   }, [fullMedia, onClick, slug]);
 
   useEffect(() => {
-    if (fullMedia) {
+    // If we've clicked on a wallpaper, select it when full media is loaded
+    if (fullMedia && isLoadingRef.current) {
       handleSelect();
+      isLoadingRef.current = false;
     }
   }, [fullMedia, handleSelect]);
 
@@ -77,6 +80,7 @@ const WallpaperTile: FC<OwnProps> = ({
     if (fullMedia) {
       handleSelect();
     } else {
+      isLoadingRef.current = true;
       setIsLoadAllowed((isAllowed) => !isAllowed);
     }
   }, [fullMedia, handleSelect]);
