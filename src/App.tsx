@@ -164,6 +164,7 @@ const App: FC<StateProps> = ({
       document.title = INACTIVE_PAGE_TITLE;
       markInactive();
     } else {
+      document.title = PAGE_TITLE;
       unmarkInactive();
     }
   }, [isInactiveAuth, markInactive, unmarkInactive]);
