@@ -33,7 +33,8 @@
       display: flex;
 
       .Avatar {
-        margin: 0 0 0 -0.25rem;
+        margin: 0;
+        margin-inline-start: -0.25rem;
         border: 0.0625rem solid var(--reaction-background);
         width: 1.5rem;
         height: 1.5rem;
@@ -50,16 +51,20 @@
       z-index: 1;
     }
 
+    .counter {
+      margin-inline-end: 0.125rem;
+    }
+
     &:hover {
       --reaction-background: var(--hover-color-reaction);
     }
 
     &:first-of-type {
-      margin-left: 0;
+      margin-inline-start: 0;
     }
 
     &:last-of-type {
-      margin-right: 0;
+      margin-inline-end: 0;
     }
   }
 
@@ -72,13 +77,13 @@
 
     .Button {
       &:first-of-type {
-        margin-left: 0.125rem;
-        margin-right: 0;
+        margin-inline-start: 0.125rem;
+        margin-inline-end: 0;
       }
 
       &:last-of-type {
-        margin-right: 0.125rem;
-        margin-left: 0;
+        margin-inline-end: 0.125rem;
+        margin-inline-start: 0;
       }
     }
   }
