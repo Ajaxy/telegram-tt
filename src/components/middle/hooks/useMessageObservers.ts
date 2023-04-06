@@ -49,13 +49,14 @@ export default function useMessageObservers(
 
       const { dataset } = target as HTMLDivElement;
       const messageId = Number(dataset.lastMessageId || dataset.messageId);
+      const albumMainId = dataset.albumMainId ? Number(dataset.albumMainId) : undefined;
 
       if (!isIntersecting) {
         if (dataset.isPinned) {
           if (rootBounds && boundingClientRect.bottom < rootBounds.top) {
             isReversed = true;
           }
-          viewportPinnedIdsToRemove.push(messageId);
+          viewportPinnedIdsToRemove.push(albumMainId || messageId);
         }
         return;
       }
@@ -73,7 +74,7 @@ export default function useMessageObservers(
       }
 
       if (dataset.isPinned) {
-        viewportPinnedIdsToAdd.push(messageId);
+        viewportPinnedIdsToAdd.push(albumMainId || messageId);
       }
     });
 
