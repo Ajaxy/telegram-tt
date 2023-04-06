@@ -400,8 +400,6 @@ console.log('Hello world!');
 * Service notifications containing media are now rendered properly.
 * Read receipts now appear in groups with exactly 100 members.
 
-🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webztalks)** and **[Russian](https://t.me/webzchannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
-
 ## 1.41.0 (2022-04-08)
 
 ### 👏 **Harder**
