@@ -211,10 +211,10 @@ const ManageUser: FC<OwnProps & StateProps> = ({
         {canSetPersonalPhoto && (
           <div className="section">
             <ListItem icon="camera-add" ripple onClick={handleSuggestPhoto}>
-              {lang('UserInfo.SuggestPhoto', user.firstName)}
+              <span className="list-item-ellipsis">{lang('UserInfo.SuggestPhoto', user.firstName)}</span>
             </ListItem>
             <ListItem icon="camera-add" ripple onClick={handleSetPersonalPhoto}>
-              {lang('UserInfo.SetCustomPhoto', user.firstName)}
+              <span className="list-item-ellipsis">{lang('UserInfo.SetCustomPhoto', user.firstName)}</span>
             </ListItem>
             {personalPhoto && (
               <ListItem
