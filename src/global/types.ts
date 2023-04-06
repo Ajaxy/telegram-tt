@@ -1606,6 +1606,7 @@ export interface ActionPayloads {
     shouldReplaceHistory?: boolean;
     shouldReplaceLast?: boolean;
     noForumTopicPanel?: boolean;
+    noRequestThreadInfoUpdate?: boolean;
   } & WithTabId;
   openComments: {
     id: string;

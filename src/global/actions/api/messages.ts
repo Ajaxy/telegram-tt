@@ -80,7 +80,7 @@ import {
   selectSendAs,
   selectSponsoredMessage,
   selectTabState,
-  selectThreadIdFromMessage,
+  selectThreadIdFromMessage, selectThreadOriginChat,
   selectThreadTopMessageId,
   selectUser,
   selectViewportIds,
@@ -870,7 +870,9 @@ addActionHandler('requestThreadInfoUpdate', async (global, actions, payload): Pr
     return;
   }
 
-  const result = await callApi('requestThreadInfoUpdate', { chat, threadId });
+  const originChannelId = selectThreadOriginChat(global, chatId, threadId)?.id;
+
+  const result = await callApi('requestThreadInfoUpdate', { chat, threadId, originChannelId });
   if (!result) return;
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
