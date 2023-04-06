@@ -421,8 +421,6 @@ export type TabState = {
     byChatId: Record<string, number[]>;
   };
 
-  shouldShowContextMenuHint?: boolean;
-
   statistics: {
     byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
     currentMessage?: ApiMessageStatistics;
@@ -558,6 +556,7 @@ export type GlobalState = {
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;
+  shouldShowContextMenuHint?: boolean;
 
   audioPlayer: {
     lastPlaybackRate: number;
@@ -1393,7 +1392,7 @@ export interface ActionPayloads {
     selectedAt?: number;
   } & WithTabId;
   closeHistoryCalendar: WithTabId | undefined;
-  disableContextMenuHint: WithTabId | undefined;
+  disableContextMenuHint: undefined;
   focusNextReply: WithTabId | undefined;
 
   openMessageLanguageModal: {

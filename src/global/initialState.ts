@@ -15,6 +15,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   passcode: {},
   twoFaSettings: {},
   isUpdateAvailable: false,
+  shouldShowContextMenuHint: true,
 
   audioPlayer: {
     lastPlaybackRate: DEFAULT_PLAYBACK_RATE,
@@ -259,8 +260,6 @@ export const INITIAL_TAB_STATE: TabState = {
   dialogs: [],
 
   activeReactions: {},
-
-  shouldShowContextMenuHint: true,
 
   activeDownloads: {
     byChatId: {},
