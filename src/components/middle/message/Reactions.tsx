@@ -7,6 +7,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { getReactionUniqueKey } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import useLang from '../../../hooks/useLang';
 
 import ReactionButton from './ReactionButton';
 
@@ -37,6 +38,8 @@ const Reactions: FC<OwnProps> = ({
   observeIntersection,
   noRecentReactors,
 }) => {
+  const lang = useLang();
+
   const totalCount = useMemo(() => (
     message.reactions!.results.reduce((acc, reaction) => acc + reaction.count, 0)
   ), [message]);
@@ -45,6 +48,7 @@ const Reactions: FC<OwnProps> = ({
     <div
       className={buildClassName('Reactions', isOutside && 'is-outside')}
       style={maxWidth ? `max-width: ${maxWidth}px` : undefined}
+      dir={lang.isRtl ? 'rtl' : 'ltr'}
     >
       {message.reactions!.results.map((reaction) => (
         <ReactionButton

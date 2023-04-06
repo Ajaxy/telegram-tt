@@ -5,6 +5,7 @@ import React, {
 import { getGlobal } from '../../global';
 
 import { ANIMATION_LEVEL_MAX } from '../../config';
+import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
@@ -12,10 +13,12 @@ import styles from './AnimatedCounter.module.scss';
 
 type OwnProps = {
   text: string;
+  className?: string;
 };
 
 const AnimatedCounter: FC<OwnProps> = ({
   text,
+  className,
 }) => {
   const lang = useLang();
 
@@ -59,7 +62,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   }, [text]);
 
   return (
-    <span className={styles.root} dir={lang.isRtl ? 'rtl' : undefined}>
+    <span className={buildClassName(styles.root, className)} dir={lang.isRtl ? 'rtl' : undefined}>
       {textElement}
     </span>
   );

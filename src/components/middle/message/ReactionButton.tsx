@@ -78,7 +78,7 @@ const ReactionButton: FC<{
         <div className="avatars">
           {recentReactors.map((user) => <Avatar user={user} size="micro" />)}
         </div>
-      ) : <AnimatedCounter text={formatIntegerCompact(reaction.count)} />}
+      ) : <AnimatedCounter text={formatIntegerCompact(reaction.count)} className="counter" />}
     </Button>
   );
 };
