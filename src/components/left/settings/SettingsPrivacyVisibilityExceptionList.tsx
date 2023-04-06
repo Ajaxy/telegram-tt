@@ -116,7 +116,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
         onClick={handleSubmit}
         ariaLabel={isAllowList ? lang('AlwaysAllow') : lang('NeverAllow')}
       >
-        <i className="icon-arrow-right" />
+        <i className="icon-check" />
       </FloatingActionButton>
     </div>
   );

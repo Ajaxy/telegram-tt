@@ -294,7 +294,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           onClick={handleVoiceMessagesClick}
         >
           <div className="multiline-menu-item">
-            <span className="title">{lang('PrivacyVoiceMessages')}</span>
+            <span className="title">{lang('PrivacyVoiceMessagesTitle')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacyVoiceMessages)}
             </span>

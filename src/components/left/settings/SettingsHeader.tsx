@@ -121,12 +121,19 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('PrivacyVoiceMessages')}</h3>;
       case SettingsScreens.PrivacyGroupChats:
         return <h3>{lang('AutodownloadGroupChats')}</h3>;
+      case SettingsScreens.PrivacyPhoneP2P:
+        return <h3>{lang('PrivacyP2P')}</h3>;
+      case SettingsScreens.PrivacyPhoneCall:
+        return <h3>{lang('Calls')}</h3>;
+
       case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
       case SettingsScreens.PrivacyVoiceMessagesAllowedContacts:
       case SettingsScreens.PrivacyGroupChatsAllowedContacts:
+      case SettingsScreens.PrivacyPhoneCallAllowedContacts:
+      case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
         return <h3>{lang('AlwaysShareWith')}</h3>;
       case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
@@ -134,6 +141,8 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyForwardingDeniedContacts:
       case SettingsScreens.PrivacyVoiceMessagesDeniedContacts:
       case SettingsScreens.PrivacyGroupChatsDeniedContacts:
+      case SettingsScreens.PrivacyPhoneCallDeniedContacts:
+      case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
         return <h3>{lang('NeverShareWith')}</h3>;
 
       case SettingsScreens.ActiveSessions:
