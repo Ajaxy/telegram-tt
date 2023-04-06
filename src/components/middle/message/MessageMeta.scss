@@ -24,6 +24,11 @@
     white-space: nowrap;
   }
 
+  .message-replies-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
   .message-time {
     margin-right: 0.1875rem;
   }
