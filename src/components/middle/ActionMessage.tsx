@@ -9,6 +9,7 @@ import type {
 } from '../../api/types';
 import type { FocusDirection } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { MessageListType } from '../../global/types';
 
 import {
   selectUser,
@@ -17,6 +18,7 @@ import {
   selectChat,
   selectTopicFromMessage,
   selectTabState,
+  selectCurrentMessageIds,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -38,6 +40,7 @@ import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
 type OwnProps = {
   message: ApiMessage;
   threadId?: number;
+  messageListType?: MessageListType;
   observeIntersectionForReading?: ObserveFn;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -60,6 +63,7 @@ type StateProps = {
   topic?: ApiTopic;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
+  viewportIds?: number[];
   premiumGiftSticker?: ApiSticker;
 };
 
@@ -79,6 +83,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   isFocused,
   focusDirection,
   noFocusHighlight,
+  viewportIds,
   premiumGiftSticker,
   isInsideTopic,
   topic,
@@ -97,7 +102,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   useOnIntersect(ref, observeIntersectionForReading);
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
-  useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight);
+  useFocusMessage(ref, message.id, message.chatId, isFocused, focusDirection, noFocusHighlight, viewportIds);
 
   useEffect(() => {
     if (!message.isPinned) return undefined;
@@ -247,13 +252,17 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, threadId }): StateProps => {
+  (global, { message, threadId, messageListType }): StateProps => {
+    const {
+      chatId, senderId, replyToMessageId, content,
+    } = message;
+
     const { byId: usersById } = global.users;
-    const userId = message.senderId;
-    const { targetUserIds, targetChatId } = message.content.action || {};
-    const targetMessageId = message.replyToMessageId;
+    const userId = senderId;
+    const { targetUserIds, targetChatId } = content.action || {};
+    const targetMessageId = replyToMessageId;
     const targetMessage = targetMessageId
-      ? selectChatMessage(global, message.chatId, targetMessageId)
+      ? selectChatMessage(global, chatId, targetMessageId)
       : undefined;
 
     const isFocused = threadId ? selectIsMessageFocused(global, message, threadId) : false;
@@ -262,8 +271,8 @@ export default memo(withGlobal<OwnProps>(
       noHighlight: noFocusHighlight,
     } = (isFocused && selectTabState(global).focusedMessage) || {};
 
-    const chat = selectChat(global, message.chatId);
-    const isChat = chat && (isChatChannel(chat) || userId === message.chatId);
+    const chat = selectChat(global, chatId);
+    const isChat = chat && (isChatChannel(chat) || userId === chatId);
     const senderUser = !isChat && userId ? selectUser(global, userId) : undefined;
     const senderChat = isChat ? chat : undefined;
     const premiumGiftSticker = global.premiumGifts?.stickers?.[0];
@@ -279,7 +288,13 @@ export default memo(withGlobal<OwnProps>(
       isFocused,
       premiumGiftSticker,
       topic,
-      ...(isFocused && { focusDirection, noFocusHighlight }),
+      ...(isFocused && {
+        focusDirection,
+        noFocusHighlight,
+        viewportIds: threadId && messageListType
+          ? selectCurrentMessageIds(global, chatId, threadId, messageListType)
+          : undefined,
+      }),
     };
   },
 )(ActionMessage));

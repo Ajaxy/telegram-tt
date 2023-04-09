@@ -150,6 +150,7 @@ const MessageListContent: FC<OwnProps> = ({
             key={message.id}
             message={message}
             threadId={threadId}
+            messageListType={type}
             isInsideTopic={Boolean(threadId && threadId !== MAIN_THREAD_ID)}
             observeIntersectionForReading={observeIntersectionForReading}
             observeIntersectionForLoading={observeIntersectionForLoading}

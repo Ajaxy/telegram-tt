@@ -647,7 +647,10 @@ const Message: FC<OwnProps & StateProps> = ({
     replyMessage,
     message.id,
   );
-  useFocusMessage(ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, viewportIds);
+
+  useFocusMessage(
+    ref, messageId, chatId, isFocused, focusDirection, noFocusHighlight, viewportIds, isResizingContainer,
+  );
 
   const shouldFocusOnResize = isLastInGroup;
 
