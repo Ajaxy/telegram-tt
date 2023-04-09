@@ -90,6 +90,7 @@ type StateProps = {
   attachmentSettings: GlobalState['attachmentSettings'];
 };
 
+const ATTACHMENT_MODAL_INPUT_ID = 'caption-input-text';
 const DROP_LEAVE_TIMEOUT_MS = 150;
 const MAX_LEFT_CHARS_TO_SHOW = 100;
 
@@ -352,6 +353,16 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }));
   }, [attachments, onAttachmentsUpdate]);
 
+  useEffect(() => {
+    const mainButton = mainButtonRef.current;
+    const input = document.getElementById(ATTACHMENT_MODAL_INPUT_ID);
+
+    if (!mainButton || !input) return;
+
+    const { width } = mainButton.getBoundingClientRect();
+    input.style.setProperty('--margin-for-scrollbar', `${width}px`);
+  }, [lang, isOpen]);
+
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
       <Button
@@ -568,7 +579,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
             />
             <MessageInput
               ref={inputRef}
-              id="caption-input-text"
+              id={ATTACHMENT_MODAL_INPUT_ID}
               chatId={chatId}
               threadId={threadId}
               isAttachmentModalInput
