@@ -1,4 +1,5 @@
 import type { LangFn } from '../hooks/useLang';
+import type { TimeFormat } from '../types';
 import withCache from './withCache';
 
 const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -290,7 +291,10 @@ export function formatDateToString(
   return formatDayToStringWithCache(dayStartAt, locale, noYear, monthFormat, noDay);
 }
 
-export function formatDateTimeToString(datetime: Date | number, locale = 'en-US', noSeconds?: boolean) {
+export function formatDateTimeToString(
+  datetime: Date | number, locale = 'en-US', noSeconds?: boolean,
+  timeFormat?: TimeFormat,
+) {
   const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
   return date.toLocaleString(
     locale,
@@ -301,6 +305,7 @@ export function formatDateTimeToString(datetime: Date | number, locale = 'en-US'
       hour: 'numeric',
       minute: 'numeric',
       second: noSeconds ? undefined : 'numeric',
+      hourCycle: timeFormat === '12h' ? 'h12' : 'h23',
     },
   );
 }
