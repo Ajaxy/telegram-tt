@@ -1,6 +1,6 @@
 import type { FocusDirection } from '../../../../types';
 
-import { useLayoutEffect } from '../../../../lib/teact/teact';
+import { useLayoutEffect, useMemo } from '../../../../lib/teact/teact';
 import fastSmoothScroll from '../../../../util/fastSmoothScroll';
 
 // This is used when the viewport was replaced.
@@ -9,13 +9,23 @@ const FOCUS_MARGIN = 20;
 
 export default function useFocusMessage(
   elementRef: { current: HTMLDivElement | null },
+  messageId: number,
   chatId: string,
   isFocused?: boolean,
   focusDirection?: FocusDirection,
   noFocusHighlight?: boolean,
-  isResizingContainer?: boolean,
   viewportIds?: number[],
+  isResizingContainer?: boolean,
 ) {
+  const viewportIndex = useMemo(() => {
+    if (!viewportIds) {
+      return 0;
+    }
+
+    const index = viewportIds.indexOf(messageId);
+    return Math.min(index, viewportIds.length - index - 1);
+  }, [messageId, viewportIds]);
+
   useLayoutEffect(() => {
     if (isFocused && elementRef.current) {
       const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList')!;
@@ -33,6 +43,6 @@ export default function useFocusMessage(
       );
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, viewportIds,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, viewportIndex,
   ]);
 }
