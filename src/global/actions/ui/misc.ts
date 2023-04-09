@@ -611,18 +611,6 @@ const NOTIFICATION_INTERVAL = 500;
 addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnType => {
   const { isBlurred, tabId = getCurrentTabId() } = payload;
 
-  if (!isBlurred) {
-    actions.updateIsOnline(true);
-  }
-
-  const blurredTabTokens = unique(isBlurred
-    ? [...global.blurredTabTokens, tabId]
-    : global.blurredTabTokens.filter((t) => t !== tabId));
-
-  if (blurredTabTokens.length === getAllMultitabTokens().length) {
-    actions.updateIsOnline(false);
-  }
-
   if (isBlurred) {
     if (notificationInterval) clearInterval(notificationInterval);
 
@@ -636,9 +624,12 @@ addActionHandler('onTabFocusChange', (global, actions, payload): ActionReturnTyp
     notificationInterval = undefined;
   }
 
+  global = updateTabState(global, {
+    isBlurred,
+  }, tabId);
+
   return {
     ...global,
-    blurredTabTokens,
     initialUnreadNotifications: isBlurred ? getAllNotificationsCount() : undefined,
   };
 });
@@ -689,14 +680,31 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
 });
 
 let prevIsScreenLocked: boolean | undefined;
+let prevBlurredTabsCount: number = 0;
+let onlineTimeout: number | undefined;
+const ONLINE_TIMEOUT = 100;
 addCallback((global: GlobalState) => {
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
-  const { updatePageTitle } = getActions();
+  const { updatePageTitle, updateIsOnline } = getActions();
 
   const isLockedUpdated = global.passcode.isScreenLocked !== prevIsScreenLocked;
-  prevIsScreenLocked = global.passcode.isScreenLocked;
+  const blurredTabsCount = Object.values(global.byTabId).filter((l) => l.isBlurred).length;
+  const isMasterTab = selectTabState(global, getCurrentTabId()).isMasterTab;
 
   if (isLockedUpdated) {
     updatePageTitle();
   }
+
+  if (blurredTabsCount !== prevBlurredTabsCount && isMasterTab) {
+    if (onlineTimeout) clearTimeout(onlineTimeout);
+
+    onlineTimeout = window.setTimeout(() => {
+      global = getGlobal();
+      const newBlurredTabsCount = Object.values(global.byTabId).filter((l) => l.isBlurred).length;
+      updateIsOnline(newBlurredTabsCount !== getAllMultitabTokens().length);
+    }, ONLINE_TIMEOUT);
+  }
+
+  prevIsScreenLocked = global.passcode.isScreenLocked;
+  prevBlurredTabsCount = blurredTabsCount;
 });
