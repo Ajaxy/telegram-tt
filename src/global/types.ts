@@ -176,6 +176,7 @@ export type ChatRequestedTranslations = {
 
 export type TabState = {
   id: number;
+  isBlurred?: boolean;
   isMasterTab: boolean;
   isInactive?: boolean;
   inviteHash?: string;
@@ -552,7 +553,6 @@ export type GlobalState = {
   isSyncing?: boolean;
   isUpdateAvailable?: boolean;
   lastSyncTime?: number;
-  blurredTabTokens: number[];
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;

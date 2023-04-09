@@ -11,7 +11,6 @@ import { IS_IOS, IS_MAC_OS } from '../util/windowEnvironment';
 
 export const INITIAL_GLOBAL_STATE: GlobalState = {
   attachMenu: { bots: {} },
-  blurredTabTokens: [],
   passcode: {},
   twoFaSettings: {},
   isUpdateAvailable: false,
