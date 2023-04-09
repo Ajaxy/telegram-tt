@@ -627,11 +627,12 @@
 }
 
 #caption-input-text {
+  --margin-for-scrollbar: 5rem;
   .input-scroller {
     min-height: 3.5rem;
     max-height: 10rem;
 
-    margin-right: -5.625rem;
+    margin-right: calc((var(--margin-for-scrollbar) + 1rem) * -1);
 
     &:has(.form-control:focus) {
       border-color: var(--color-primary);
@@ -639,7 +640,7 @@
   }
 
   .input-scroller-content {
-    margin-right: 5rem;
+    margin-right: calc(var(--margin-for-scrollbar) + 0.5rem);
   }
 
   .placeholder-text {
