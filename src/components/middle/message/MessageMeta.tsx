@@ -66,9 +66,11 @@ const MessageMeta: FC<OwnProps> = ({
 
   const title = useMemo(() => {
     if (!isActivated) return undefined;
-    const createDateTime = formatDateTimeToString(message.date * 1000, lang.code);
-    const editDateTime = message.isEdited && formatDateTimeToString(message.editDate! * 1000, lang.code);
-    const forwardedDateTime = message.forwardInfo && formatDateTimeToString(message.forwardInfo.date * 1000, lang.code);
+    const createDateTime = formatDateTimeToString(message.date * 1000, lang.code, undefined, lang.timeFormat);
+    const editDateTime = message.isEdited
+      && formatDateTimeToString(message.editDate! * 1000, lang.code, undefined, lang.timeFormat);
+    const forwardedDateTime = message.forwardInfo
+      && formatDateTimeToString(message.forwardInfo.date * 1000, lang.code, undefined, lang.timeFormat);
 
     let text = createDateTime;
     if (editDateTime) {
@@ -81,7 +83,9 @@ const MessageMeta: FC<OwnProps> = ({
     }
 
     return text;
-  }, [isActivated, lang, message]);
+    // We need to listen to timeformat change
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [isActivated, lang, message, lang.timeFormat]);
 
   const fullClassName = buildClassName(
     'MessageMeta',
