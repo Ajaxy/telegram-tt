@@ -119,17 +119,21 @@ export function getMessageSummaryDescription(
     game,
   } = message.content;
 
+  let hasUsedTruncatedText = false;
   let summary: string | TeactNode | undefined;
 
   if (message.groupedId) {
+    hasUsedTruncatedText = true;
     summary = truncatedText || lang('lng_in_dlg_album');
   }
 
   if (photo) {
+    hasUsedTruncatedText = true;
     summary = truncatedText || lang('AttachPhoto');
   }
 
   if (video) {
+    hasUsedTruncatedText = true;
     summary = truncatedText || lang(video.isGif ? 'AttachGif' : 'AttachVideo');
   }
 
@@ -142,10 +146,12 @@ export function getMessageSummaryDescription(
   }
 
   if (voice) {
+    hasUsedTruncatedText = true;
     summary = truncatedText || lang('AttachAudio');
   }
 
   if (document) {
+    hasUsedTruncatedText = !isExtended;
     summary = isExtended ? document.fileName : (truncatedText || document.fileName);
   }
 
@@ -162,7 +168,7 @@ export function getMessageSummaryDescription(
   }
 
   if (text) {
-    if (isExtended && summary) {
+    if (isExtended && summary && !hasUsedTruncatedText) {
       summary += `\n${truncatedText}`;
     } else {
       summary = truncatedText;
