@@ -109,7 +109,7 @@ export default function useChatListEntry({
       return <TypingStatus typingStatus={typingStatus} />;
     }
 
-    if (draft?.text.length) {
+    if (draft?.text.length && (!chat?.isForum || isTopic)) {
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>
