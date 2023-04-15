@@ -1,7 +1,9 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { useLayoutEffect, useRef } from '../../lib/teact/teact';
+import { addExtraClass, removeExtraClass, toggleExtraClass } from '../../lib/teact/teact-dom';
 import { getGlobal } from '../../global';
+
 import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
@@ -36,10 +38,10 @@ export type TransitionProps = {
   children: React.ReactNode | ChildrenFn;
 };
 
-const classNames = {
+const FALLBACK_ANIMATION_END = 1000;
+const CLASSES = {
   active: 'Transition__slide--active',
 };
-const FALLBACK_ANIMATION_END = 1000;
 
 const Transition: FC<TransitionProps> = ({
   ref,
@@ -92,21 +94,21 @@ const Transition: FC<TransitionProps> = ({
     }
 
     const container = containerRef.current!;
-
     const childElements = container.children;
+
     if (childElements.length === 1 && !activeKeyChanged) {
+      const firstChild = childElements[0] as HTMLElement;
       if (name.startsWith('slide-optimized')) {
-        (childElements[0] as HTMLElement).style.transition = 'none';
-        (childElements[0] as HTMLElement).style.transform = 'translate3d(0, 0, 0)';
+        firstChild.style.transition = 'none';
+        firstChild.style.transform = 'translate3d(0, 0, 0)';
       }
 
-      childElements[0].classList.add(classNames.active);
+      addExtraClass(firstChild, CLASSES.active);
 
       return;
     }
 
     const childNodes = Array.from(container.childNodes);
-
     if (!activeKeyChanged || !childNodes.length) {
       return;
     }
@@ -142,14 +144,16 @@ const Transition: FC<TransitionProps> = ({
       return;
     }
 
-    container.classList.remove('animating');
-    container.classList.toggle('backwards', isBackwards);
+    removeExtraClass(container, 'animating');
+    toggleExtraClass(container, 'backwards', isBackwards);
 
     if (name === 'none' || animationLevel === ANIMATION_LEVEL_MIN) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
-          node.classList.remove('from', 'through', 'to');
-          node.classList.toggle(classNames.active, i === activeIndex);
+          removeExtraClass(node, 'from');
+          removeExtraClass(node, 'through');
+          removeExtraClass(node, 'to');
+          toggleExtraClass(node, CLASSES.active, i === activeIndex);
         }
       });
 
@@ -160,19 +164,19 @@ const Transition: FC<TransitionProps> = ({
 
     childNodes.forEach((node, i) => {
       if (node instanceof HTMLElement) {
-        node.classList.remove(classNames.active);
-        node.classList.toggle('from', i === prevActiveIndex);
-        node.classList.toggle('through', (
-          (i > prevActiveIndex && i < activeIndex) || (i < prevActiveIndex && i > activeIndex)
-        ));
-        node.classList.toggle('to', i === activeIndex);
+        removeExtraClass(node, CLASSES.active);
+
+        toggleExtraClass(node, 'from', i === prevActiveIndex);
+        const isThrough = (i > prevActiveIndex && i < activeIndex) || (i < prevActiveIndex && i > activeIndex);
+        toggleExtraClass(node, 'through', isThrough);
+        toggleExtraClass(node, 'to', i === activeIndex);
       }
     });
 
     const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
     requestAnimationFrame(() => {
-      container.classList.add('animating');
+      addExtraClass(container, 'animating');
 
       onStart?.();
 
@@ -182,17 +186,20 @@ const Transition: FC<TransitionProps> = ({
             return;
           }
 
-          container.classList.remove('animating', 'backwards');
+          removeExtraClass(container, 'animating');
+          removeExtraClass(container, 'backwards');
 
           childNodes.forEach((node, i) => {
             if (node instanceof HTMLElement) {
-              node.classList.remove('from', 'through', 'to');
-              node.classList.toggle(classNames.active, i === activeIndex);
+              removeExtraClass(node, 'from');
+              removeExtraClass(node, 'through');
+              removeExtraClass(node, 'to');
+              toggleExtraClass(node, CLASSES.active, i === activeIndex);
             }
           });
 
           if (shouldRestoreHeight) {
-            const activeElement = container.querySelector<HTMLDivElement>(`.${classNames.active}`);
+            const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`);
 
             if (activeElement) {
               activeElement.style.height = 'auto';
@@ -237,7 +244,7 @@ const Transition: FC<TransitionProps> = ({
   useLayoutEffect(() => {
     if (shouldRestoreHeight) {
       const container = containerRef.current!;
-      const activeElement = container.querySelector<HTMLDivElement>(`.${classNames.active}`)
+      const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`)
         || container.querySelector<HTMLDivElement>('.from');
       const clientHeight = activeElement?.clientHeight;
       if (!clientHeight) {
@@ -250,6 +257,7 @@ const Transition: FC<TransitionProps> = ({
     }
   }, [shouldRestoreHeight, children]);
 
+  const asFastList = !renderCount;
   const renders = rendersRef.current;
   const renderKeys = Object.keys(renderCount ? new Array(renderCount).fill(undefined) : renders).map(Number);
   const contents = renderKeys.map((key) => {
@@ -273,7 +281,7 @@ const Transition: FC<TransitionProps> = ({
       ref={containerRef}
       id={id}
       className={buildClassName('Transition', className, name)}
-      teactFastList={!renderCount}
+      teactFastList={asFastList}
     >
       {contents}
     </div>
@@ -303,11 +311,11 @@ function performSlideOptimized(
   if (animationLevel === ANIMATION_LEVEL_MIN) {
     fromSlide.style.transition = 'none';
     fromSlide.style.transform = '';
-    fromSlide.classList.remove(classNames.active);
+    removeExtraClass(fromSlide, CLASSES.active);
 
     toSlide.style.transition = 'none';
     toSlide.style.transform = 'translate3d(0, 0, 0)';
-    toSlide.classList.add(classNames.active);
+    addExtraClass(toSlide, CLASSES.active);
 
     cleanup();
 
@@ -337,8 +345,8 @@ function performSlideOptimized(
     toSlide.style.transition = '';
     toSlide.style.transform = 'translate3d(0, 0, 0)';
 
-    fromSlide.classList.remove(classNames.active);
-    toSlide.classList.add(classNames.active);
+    removeExtraClass(fromSlide, CLASSES.active);
+    addExtraClass(toSlide, CLASSES.active);
 
     waitForTransitionEnd(fromSlide, () => {
       if (activeKey !== currentKeyRef.current) {
