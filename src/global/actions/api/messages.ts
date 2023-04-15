@@ -43,6 +43,7 @@ import {
   removeRequestedMessageTranslation,
   replaceScheduledMessages,
   replaceThreadParam,
+  safeReplacePinnedIds,
   safeReplaceViewportIds,
   updateChat,
   updateChatMessage,
@@ -73,14 +74,16 @@ import {
   selectLanguageCode,
   selectListedIds,
   selectNoWebPage,
-  selectOutlyingListByMessageId, selectPinnedIds,
+  selectOutlyingListByMessageId,
+  selectPinnedIds,
   selectRealLastReadId,
   selectReplyingToId,
   selectScheduledMessage,
   selectSendAs,
   selectSponsoredMessage,
   selectTabState,
-  selectThreadIdFromMessage, selectThreadOriginChat,
+  selectThreadIdFromMessage,
+  selectThreadOriginChat,
   selectThreadTopMessageId,
   selectUser,
   selectViewportIds,
@@ -1175,7 +1178,7 @@ addActionHandler('loadPinnedMessages', async (global, actions, payload): Promise
 
   global = getGlobal();
   global = addChatMessagesById(global, chat.id, byId);
-  global = replaceThreadParam(global, chat.id, threadId, 'pinnedIds', ids);
+  global = safeReplacePinnedIds(global, chat.id, threadId, ids);
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   global = addChats(global, buildCollectionByKey(chats, 'id'));
   setGlobal(global);

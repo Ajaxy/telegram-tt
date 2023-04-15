@@ -1,7 +1,17 @@
+import { useState } from '../lib/teact/teact';
+
 import { detectLanguage } from '../util/languageDetection';
-import useAsync from './useAsync';
+
+import useSyncEffect from './useSyncEffect';
 
 export default function useTextLanguage(text?: string) {
-  const language = useAsync(() => (text ? detectLanguage(text) : Promise.resolve(undefined)), [text], undefined);
+  const [language, setLanguage] = useState<string>();
+
+  useSyncEffect(() => {
+    if (text) {
+      detectLanguage(text).then(setLanguage);
+    }
+  }, [text]);
+
   return language;
 }

@@ -208,6 +208,14 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   const [isNotchShown, setIsNotchShown] = useState<boolean | undefined>();
   const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false);
 
+  const {
+    onIntersectionChanged,
+    onFocusPinnedMessage,
+    getCurrentPinnedIndexes,
+    getLoadingPinnedId,
+    getForceNextPinnedInHeader,
+  } = usePinnedMessage(chatId, threadId, pinnedIds);
+
   const isMobileSearchActive = isMobile && hasCurrentTextSearch;
   const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
   const hasTools = hasPinned && (
@@ -235,6 +243,10 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
   const renderingShouldJoinToSend = usePrevDuringAnimation(shouldJoinToSend, closeAnimationDuration);
   const renderingShouldSendJoinRequest = usePrevDuringAnimation(shouldSendJoinRequest, closeAnimationDuration);
+  const renderingOnPinnedIntersectionChange = usePrevDuringAnimation(
+    chatId ? onIntersectionChanged : undefined,
+    closeAnimationDuration,
+  );
 
   const prevTransitionKey = usePrevious(currentTransitionKey);
 
@@ -356,14 +368,6 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
-  const {
-    onIntersectionChanged,
-    onFocusPinnedMessage,
-    getCurrentPinnedIndexes,
-    getLoadingPinnedId,
-    getForceNextPinnedInHeader,
-  } = usePinnedMessage(chatId, threadId, pinnedIds);
-
   const className = buildClassName(
     renderingHasTools && 'has-header-tools',
     MASK_IMAGE_DISABLED ? 'mask-image-disabled' : 'mask-image-enabled',
@@ -449,13 +453,13 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
       />
       <div id="middle-column-portals" />
-      {renderingChatId && renderingThreadId && (
+      {Boolean(renderingChatId && renderingThreadId) && (
         <>
           <div className="messages-layout" onDragEnter={renderingCanPost ? handleDragEnter : undefined}>
             <MiddleHeader
-              chatId={renderingChatId}
-              threadId={renderingThreadId}
-              messageListType={renderingMessageListType}
+              chatId={renderingChatId!}
+              threadId={renderingThreadId!}
+              messageListType={renderingMessageListType!}
               isReady={isReady}
               isMobile={isMobile}
               getCurrentPinnedIndexes={getCurrentPinnedIndexes}
@@ -471,25 +475,25 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
             >
               <MessageList
                 key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
-                chatId={renderingChatId}
-                threadId={renderingThreadId}
-                type={renderingMessageListType}
-                canPost={renderingCanPost}
+                chatId={renderingChatId!}
+                threadId={renderingThreadId!}
+                type={renderingMessageListType!}
+                canPost={renderingCanPost!}
                 hasTools={renderingHasTools}
                 onFabToggle={setIsFabShown}
                 onNotchToggle={setIsNotchShown}
                 isReady={isReady}
                 withBottomShift={withMessageListBottomShift}
                 withDefaultBg={Boolean(!customBackground && !backgroundColor)}
-                onPinnedIntersectionChange={onIntersectionChanged}
+                onPinnedIntersectionChange={renderingOnPinnedIntersectionChange!}
                 getForceNextPinnedInHeader={getForceNextPinnedInHeader}
               />
               <div className={footerClassName}>
                 {renderingCanPost && (
                   <Composer
-                    chatId={renderingChatId}
-                    threadId={renderingThreadId}
-                    messageListType={renderingMessageListType}
+                    chatId={renderingChatId!}
+                    threadId={renderingThreadId!}
+                    messageListType={renderingMessageListType!}
                     dropAreaState={dropAreaState}
                     onDropHide={handleHideDropArea}
                     isReady={isReady}
@@ -519,8 +523,9 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
                     </div>
                   </div>
                 )}
-                {isMobile
-                  && (renderingCanSubscribe || (renderingShouldJoinToSend && !renderingShouldSendJoinRequest)) && (
+                {(
+                  isMobile && (renderingCanSubscribe || (renderingShouldJoinToSend && !renderingShouldSendJoinRequest))
+                ) && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
                       size="tiny"
@@ -584,7 +589,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
             </Transition>
 
             <FloatingActionButtons
-              isShown={renderingIsFabShown}
+              isShown={renderingIsFabShown!}
               canPost={renderingCanPost}
               withExtraShift={withExtraShift}
             />

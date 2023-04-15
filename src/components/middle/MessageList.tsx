@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -55,17 +55,17 @@ import resetScroll, { patchChromiumScroll } from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 
+import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useStickyDates from './hooks/useStickyDates';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLang from '../../hooks/useLang';
-import useWindowSize from '../../hooks/useWindowSize';
 import useInterval from '../../hooks/useInterval';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
 import useMedia from '../../hooks/useMedia';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useResizeObserver from '../../hooks/useResizeObserver';
+import useContainerHeight from './hooks/useContainerHeight';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -182,10 +182,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   // We update local cached `scrollOffsetRef` when opening chat.
   // Then we update global version every second on scrolling.
-  const scrollOffsetRef = useRef<number>((type === 'thread'
-    && selectScrollOffset(getGlobal(), chatId, threadId))
+  const scrollOffsetRef = useRef<number>(
+    (type === 'thread' && selectScrollOffset(getGlobal(), chatId, threadId))
     || selectLastScrollOffset(getGlobal(), chatId, threadId)
-    || 0);
+    || 0,
+  );
 
   const anchorIdRef = useRef<string>();
   const anchorTopRef = useRef<number>();
@@ -195,8 +196,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
-
-  const [containerHeight, setContainerHeight] = useState<number | undefined>();
 
   const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
   const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
@@ -247,8 +246,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const viewportIds = threadTopMessageId && threadFirstMessageId !== threadTopMessageId
+    const viewportIds = (
+      threadTopMessageId
+      && threadFirstMessageId !== threadTopMessageId
       && (!messageIds[0] || threadFirstMessageId === messageIds[0])
+    )
       ? [threadTopMessageId, ...messageIds]
       : messageIds;
 
@@ -342,18 +344,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     updateStickyDates, hasTools, getForceNextPinnedInHeader, onPinnedIntersectionChange, type, chatId, threadId,
   ]);
 
-  // Container resize observer (caused by Composer reply/webpage panels)
-  const handleResize = useCallback((entry: ResizeObserverEntry) => {
-    setContainerHeight(entry.contentRect.height);
-  }, []);
-  useResizeObserver(containerRef, handleResize);
-
-  // Memorize height for scroll animation
-  const { height: windowHeight } = useWindowSize();
-
-  useEffect(() => {
-    containerRef.current!.dataset.normalHeight = String(containerRef.current!.offsetHeight);
-  }, [windowHeight, canPost]);
+  const [getContainerHeight, prevContainerHeightRef] = useContainerHeight(containerRef, canPost && !isSelectModeActive);
 
   // Initial message loading
   useEffect(() => {
@@ -377,8 +368,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
   }, [isChatLoaded, messageIds, loadMoreAround, focusingId, isRestricted]);
 
-  // Remember scroll position before repositioning it
-  useSyncEffect(() => {
+  const rememberScrollPositionRef = useStateRef(() => {
     if (!messageIds || !listItemElementsRef.current) {
       return;
     }
@@ -395,13 +385,25 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     anchorIdRef.current = anchor.id;
     anchorTopRef.current = anchor.getBoundingClientRect().top;
-    // This should match deps for `useLayoutEffectWithPrevDeps` below
-  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
+  });
+
+  useSyncEffect(
+    () => rememberScrollPositionRef.current(),
+    // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
+    [messageIds, isViewportNewest, hasTools, rememberScrollPositionRef],
+  );
+  useEffect(
+    () => rememberScrollPositionRef.current(),
+    // This is only needed to react on signal updates
+    [getContainerHeight, rememberScrollPositionRef],
+  );
 
   // Handles updated message list, takes care of scroll repositioning
-  useLayoutEffectWithPrevDeps(([
-    prevMessageIds, prevIsViewportNewest, prevContainerHeight,
-  ]) => {
+  useLayoutEffectWithPrevDeps(([prevMessageIds, prevIsViewportNewest]) => {
+    const containerHeight = getContainerHeight();
+    const prevContainerHeight = prevContainerHeightRef.current;
+    prevContainerHeightRef.current = containerHeight;
+
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
 
@@ -476,7 +478,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       console.time('scrollTop');
     }
 
-    const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
+    const isResized = prevContainerHeight && prevContainerHeight !== containerHeight;
     const anchor = anchorIdRef.current && container.querySelector(`#${anchorIdRef.current}`);
     const unreadDivider = (
       !anchor
@@ -523,7 +525,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       console.timeEnd('scrollTop');
     }
     // This should match deps for `useSyncEffect` above
-  }, [messageIds, isViewportNewest, containerHeight, hasTools]);
+  }, [messageIds, isViewportNewest, getContainerHeight, prevContainerHeightRef, hasTools]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {
