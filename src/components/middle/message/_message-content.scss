@@ -770,6 +770,10 @@
       vertical-align: bottom;
     }
 
+    .MessageMeta {
+      z-index: 1;
+    }
+
     .text-content {
       word-break: normal;
       line-height: var(--emoji-only-size);

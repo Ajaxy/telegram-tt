@@ -181,6 +181,8 @@ class RLottie {
     }
 
     if (!this.params.isLowPriority) {
+      this.isWaiting = false;
+
       this.frames = this.frames.map((frame, i) => {
         if (i === this.prevFrameIndex) {
           return frame;
