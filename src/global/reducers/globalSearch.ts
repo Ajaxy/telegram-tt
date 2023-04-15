@@ -54,7 +54,9 @@ export function updateGlobalSearchResults<T extends GlobalState>(
   }
 
   const prevFoundIds = foundIdsForType || [];
-  const newFoundIds = newFoundMessages.map((message) => getComplexKey(message));
+  const newFoundIds = newFoundMessages
+    .map((message) => getComplexKey(message))
+    .filter((id) => !prevFoundIds.includes(id));
   const foundIds = Array.prototype.concat(prevFoundIds, newFoundIds);
   const foundOrPrevFoundIds = areSortedArraysEqual(prevFoundIds, foundIds) ? prevFoundIds : foundIds;
 
