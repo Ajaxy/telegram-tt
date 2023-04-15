@@ -29,18 +29,23 @@ export type TransitionProps = {
   shouldRestoreHeight?: boolean;
   shouldCleanup?: boolean;
   cleanupExceptionKey?: number;
+  // Used by async components which are usually remounted during first animation
+  shouldWrap?: boolean;
+  wrapExceptionKey?: number;
   isDisabled?: boolean;
   id?: string;
   className?: string;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
+  afterChildren?: React.ReactNode;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
 const CLASSES = {
   slide: 'Transition__slide',
   active: 'Transition__slide--active',
+  afterSlides: 'Transition__after-slides',
 };
 
 const Transition: FC<TransitionProps> = ({
@@ -52,11 +57,14 @@ const Transition: FC<TransitionProps> = ({
   shouldRestoreHeight,
   shouldCleanup,
   cleanupExceptionKey,
+  shouldWrap,
+  wrapExceptionKey,
   id,
   className,
   onStart,
   onStop,
   children,
+  afterChildren,
 }) => {
   // No need for a container to update on change
   const { animationLevel } = getGlobal().settings.byKey;
@@ -94,7 +102,8 @@ const Transition: FC<TransitionProps> = ({
     }
 
     const container = containerRef.current!;
-    const childElements = Array.from(container.children) as HTMLElement[];
+    const childElements = (Array.from(container.children) as HTMLElement[])
+      .filter((el) => !el.classList.contains(CLASSES.afterSlides));
 
     childElements.forEach((el) => {
       addExtraClass(el, CLASSES.slide);
@@ -113,7 +122,9 @@ const Transition: FC<TransitionProps> = ({
       return;
     }
 
-    const childNodes = Array.from(container.childNodes);
+    const childNodes = Array.from(container.childNodes)
+      .filter((el) => !(el instanceof HTMLElement && el.classList.contains(CLASSES.afterSlides)));
+
     if (!activeKeyChanged || !childNodes.length) {
       return;
     }
@@ -271,15 +282,20 @@ const Transition: FC<TransitionProps> = ({
       return undefined;
     }
 
-    return (
-      <div key={key} teactOrderKey={key}>{
-        typeof render === 'function'
-          ? render(key === activeKey, key === prevActiveKey, activeKey)
-          : render
-      }
-      </div>
-    );
+    const rendered = typeof render === 'function'
+      ? render(key === activeKey, key === prevActiveKey, activeKey)
+      : render;
+
+    return (shouldWrap && key !== wrapExceptionKey) || asFastList
+      ? <div key={key} teactOrderKey={key}>{rendered}</div>
+      : rendered;
   });
+
+  if (afterChildren) {
+    contents.push((
+      <div className={CLASSES.afterSlides}>{afterChildren}</div>
+    ));
+  }
 
   return (
     <div

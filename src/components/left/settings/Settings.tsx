@@ -451,6 +451,7 @@ const Settings: FC<OwnProps> = ({
       name={shouldSkipTransition ? 'none' : LAYERS_ANIMATION_NAME}
       activeKey={currentScreen}
       renderCount={TRANSITION_RENDER_COUNT}
+      shouldWrap
     >
       {renderCurrentSection}
     </Transition>

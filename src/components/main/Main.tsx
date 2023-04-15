@@ -1,7 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, memo, useCallback, useState, useRef,
+  useEffect, memo, useCallback, useState, useRef, useLayoutEffect,
 } from '../../lib/teact/teact';
+import { addExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { AnimationLevel, LangCode } from '../../types';
@@ -231,6 +232,9 @@ const Main: FC<OwnProps & StateProps> = ({
     void loadBundle(Bundles.Calls);
   }, CALL_BUNDLE_LOADING_DELAY_MS);
 
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const { isDesktop } = useAppLayout();
   useEffect(() => {
     if (!isLeftColumnOpen && !isMiddleColumnOpen && !isDesktop) {
@@ -348,6 +352,14 @@ const Main: FC<OwnProps & StateProps> = ({
     }
   }, [lastSyncTime, openChat]);
 
+  // Restore Transition slide class after async rendering
+  useLayoutEffect(() => {
+    const container = containerRef.current!;
+    if (container.parentNode!.childElementCount === 1) {
+      addExtraClass(container, 'Transition__slide--active');
+    }
+  }, []);
+
   const leftColumnTransition = useShowTransition(
     isLeftColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
   );
@@ -445,7 +457,7 @@ const Main: FC<OwnProps & StateProps> = ({
   usePreventPinchZoomGesture(isMediaViewerOpen);
 
   return (
-    <div id="Main" className={className}>
+    <div ref={containerRef} id="Main" className={className}>
       <LeftColumn />
       <MiddleColumn isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />

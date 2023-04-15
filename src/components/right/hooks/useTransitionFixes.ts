@@ -30,14 +30,14 @@ export default function useTransitionFixes(
     if (container.style.overflowY !== 'hidden') {
       const scrollBarWidth = container.offsetWidth - container.clientWidth;
       container.style.overflowY = 'hidden';
-      container.style.marginRight = `${scrollBarWidth}px`;
+      container.style.paddingRight = `${scrollBarWidth}px`;
     }
   }, [containerRef]);
 
   const releaseTransitionFix = useCallback(() => {
     const container = containerRef.current!;
     container.style.overflowY = 'scroll';
-    container.style.marginRight = '0';
+    container.style.paddingRight = '0';
   }, [containerRef]);
 
   return { applyTransitionFix, releaseTransitionFix };
