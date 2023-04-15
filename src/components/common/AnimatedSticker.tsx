@@ -190,7 +190,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
 
     if (playSegmentRef.current) {
-      animation.playSegment(playSegmentRef.current);
+      animation.playSegment(playSegmentRef.current, viewId);
     } else {
       animation.play(shouldRestart, viewId);
     }
