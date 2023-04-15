@@ -66,7 +66,6 @@ import usePrevious from '../../hooks/usePrevious';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
-import useTimeout from '../../hooks/useTimeout';
 import usePinnedMessage from './hooks/usePinnedMessage';
 
 import Transition from '../ui/Transition';
@@ -85,6 +84,7 @@ import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
 import MessageLanguageModal from './MessageLanguageModal.async';
 
 import './MiddleColumn.scss';
+
 import styles from './MiddleColumn.module.scss';
 
 interface OwnProps {
@@ -254,7 +254,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );
 
-  const { isReady, handleOpenEnd, handleSlideStop } = useIsReady(
+  const { isReady, handleCssTransitionEnd, handleSlideTransitionStop } = useIsReady(
     !shouldSkipHistoryAnimations && animationLevel !== ANIMATION_LEVEL_MIN,
     currentTransitionKey,
     prevTransitionKey,
@@ -434,7 +434,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
     <div
       id="MiddleColumn"
       className={className}
-      onTransitionEnd={handleOpenEnd}
+      onTransitionEnd={handleCssTransitionEnd}
       style={`
         --composer-hidden-scale: ${composerHiddenScale};
         --toolbar-hidden-scale: ${toolbarHiddenScale};
@@ -471,7 +471,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
               activeKey={currentTransitionKey}
               shouldCleanup
               cleanupExceptionKey={cleanupExceptionKey}
-              onStop={handleSlideStop}
+              onStop={handleSlideTransitionStop}
             >
               <MessageList
                 key={`${renderingChatId}-${renderingThreadId}-${renderingMessageListType}`}
@@ -741,6 +741,11 @@ function useIsReady(
   if (willSwitchMessageList) {
     if (withAnimations) {
       setIsReady(false);
+
+      // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
+      setTimeout(() => {
+        setIsReady(true);
+      }, LAYER_ANIMATION_DURATION_MS);
     } else {
       forceUpdate();
     }
@@ -752,25 +757,19 @@ function useIsReady(
     }
   }, [withAnimations]);
 
-  useTimeout(() => {
-    if (!isReady) {
-      setIsReady(true);
-    }
-  }, LAYER_ANIMATION_DURATION_MS);
-
-  function handleOpenEnd(e: React.TransitionEvent<HTMLDivElement>) {
+  function handleCssTransitionEnd(e: React.TransitionEvent<HTMLDivElement>) {
     if (e.propertyName === 'transform' && e.target === e.currentTarget) {
       setIsReady(Boolean(chatId));
     }
   }
 
-  function handleSlideStop() {
+  function handleSlideTransitionStop() {
     setIsReady(true);
   }
 
   return {
     isReady: isReady && !willSwitchMessageList,
-    handleOpenEnd: withAnimations ? handleOpenEnd : undefined,
-    handleSlideStop: withAnimations ? handleSlideStop : undefined,
+    handleCssTransitionEnd: withAnimations ? handleCssTransitionEnd : undefined,
+    handleSlideTransitionStop: withAnimations ? handleSlideTransitionStop : undefined,
   };
 }
