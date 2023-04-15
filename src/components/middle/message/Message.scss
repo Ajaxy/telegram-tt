@@ -80,6 +80,7 @@
     opacity: 0;
     transition: transform 0.2s ease-out, opacity 0.2s ease-out;
     transition-delay: 0.2s;
+    z-index: 1;
 
     &.visible {
       opacity: 1 !important;

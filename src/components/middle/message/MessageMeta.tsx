@@ -1,4 +1,4 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { FC, TeactNode } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -31,6 +31,7 @@ type OwnProps = {
   isPinned?: boolean;
   onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
   onTranslationClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  renderQuickReactionButton?: () => TeactNode | undefined;
   onOpenThread: NoneToVoidFunction;
 };
 
@@ -40,6 +41,7 @@ const MessageMeta: FC<OwnProps> = ({
   signature,
   withReactionOffset,
   repliesThreadInfo,
+  renderQuickReactionButton,
   noReplies,
   isTranslated,
   isPinned,
@@ -140,6 +142,7 @@ const MessageMeta: FC<OwnProps> = ({
       {outgoingStatus && (
         <MessageOutgoingStatus status={outgoingStatus} />
       )}
+      {renderQuickReactionButton && renderQuickReactionButton()}
     </span>
   );
 };
