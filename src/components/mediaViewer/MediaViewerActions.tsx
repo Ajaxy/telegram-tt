@@ -25,6 +25,7 @@ import useLang from '../../hooks/useLang';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useZoomChange from './hooks/useZoomChangeSignal';
 
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
@@ -48,7 +49,6 @@ type StateProps = {
 type OwnProps = {
   mediaData?: string;
   isVideo: boolean;
-  zoomLevelChange: number;
   message?: ApiMessage;
   canUpdateMedia?: boolean;
   isSingleMedia?: boolean;
@@ -61,7 +61,6 @@ type OwnProps = {
   onBeforeDelete: NoneToVoidFunction;
   onCloseMediaViewer: NoneToVoidFunction;
   onForward: NoneToVoidFunction;
-  setZoomLevelChange: (change: number) => void;
 };
 
 const MediaViewerActions: FC<OwnProps & StateProps> = ({
@@ -75,7 +74,6 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   isDownloading,
   isProtected,
   canReport,
-  zoomLevelChange,
   canDelete,
   canUpdate,
   messageListType,
@@ -84,9 +82,9 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   onCloseMediaViewer,
   onBeforeDelete,
   onForward,
-  setZoomLevelChange,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
+  const [getZoomChange, setZoomChange] = useZoomChange();
   const { isMobile } = useAppLayout();
 
   const {
@@ -111,14 +109,16 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
   }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
 
   const handleZoomOut = useCallback(() => {
-    const change = zoomLevelChange < 0 ? zoomLevelChange : 0;
-    setZoomLevelChange(change - 1);
-  }, [setZoomLevelChange, zoomLevelChange]);
+    const zoomChange = getZoomChange();
+    const change = zoomChange < 0 ? zoomChange : 0;
+    setZoomChange(change - 1);
+  }, [getZoomChange, setZoomChange]);
 
   const handleZoomIn = useCallback(() => {
-    const change = zoomLevelChange > 0 ? zoomLevelChange : 0;
-    setZoomLevelChange(change + 1);
-  }, [setZoomLevelChange, zoomLevelChange]);
+    const zoomChange = getZoomChange();
+    const change = zoomChange > 0 ? zoomChange : 0;
+    setZoomChange(change + 1);
+  }, [getZoomChange, setZoomChange]);
 
   const handleUpdate = useCallback(() => {
     if (!avatarPhoto || !avatarOwnerId) return;

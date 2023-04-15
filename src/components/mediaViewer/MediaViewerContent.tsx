@@ -19,6 +19,7 @@ import buildClassName from '../../util/buildClassName';
 import { useMediaProps } from './hooks/useMediaProps';
 import useAppLayout from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
+import useControlsSignal from './hooks/useControlsSignal';
 
 import Spinner from '../ui/Spinner';
 import MediaViewerFooter from './MediaViewerFooter';
@@ -36,8 +37,6 @@ type OwnProps = {
   animationLevel: AnimationLevel;
   onClose: () => void;
   onFooterClick: () => void;
-  setControlsVisible?: (isVisible: boolean) => void;
-  areControlsVisible: boolean;
   isMoving?: boolean;
 };
 
@@ -68,7 +67,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     message,
     origin,
     animationLevel,
-    areControlsVisible,
     isProtected,
     volume,
     playbackRate,
@@ -76,7 +74,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     isHidden,
     onClose,
     onFooterClick,
-    setControlsVisible,
     isMoving,
   } = props;
 
@@ -99,12 +96,10 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     message, avatarOwner, mediaId, origin, delay: isGhostAnimation && ANIMATION_DURATION,
   });
 
+  const [, toggleControls] = useControlsSignal();
+
   const isOpen = Boolean(avatarOwner || mediaId);
   const { isMobile } = useAppLayout();
-
-  const toggleControls = useCallback((isVisible) => {
-    setControlsVisible?.(isVisible);
-  }, [setControlsVisible]);
 
   const toggleControlsOnMove = useCallback(() => {
     toggleControls(true);
@@ -134,8 +129,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             loadProgress={loadProgress}
             fileSize={videoSize!}
             isMediaViewerOpen={isOpen && isActive}
-            areControlsVisible={areControlsVisible}
-            toggleControls={toggleControls}
             isProtected={isProtected}
             noPlay={!isActive}
             onClose={onClose}
@@ -184,9 +177,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           posterSize={posterSize}
           loadProgress={loadProgress}
           fileSize={videoSize!}
-          areControlsVisible={areControlsVisible}
           isMediaViewerOpen={isOpen && isActive}
-          toggleControls={toggleControls}
           noPlay={!isActive}
           onClose={onClose}
           isMuted={isMuted}
@@ -204,7 +195,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           onClick={onFooterClick}
           isProtected={isProtected}
           isForceMobileVersion={isForceMobileVersion}
-          isHidden={IS_TOUCH_ENV ? !areControlsVisible : false}
           isForVideo={isVideo && !isGif}
         />
       )}
