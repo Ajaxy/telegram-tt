@@ -146,7 +146,7 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(historyIds, offsetId, LoadMoreDirection.Around);
 
-    if (areSomeLocal && newViewportIds.length >= MESSAGE_LIST_SLICE) {
+    if (areSomeLocal) {
       global = safeReplaceViewportIds(global, chatId, threadId, newViewportIds, tabId);
     }
 
