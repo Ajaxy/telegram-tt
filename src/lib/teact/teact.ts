@@ -660,8 +660,9 @@ function useEffectBase(
     } else {
       pendingCleanups.set(effectId, execCleanup);
       pendingEffects.set(effectId, exec);
-      runUpdatePassOnRaf();
     }
+
+    runUpdatePassOnRaf();
   }
 
   if (dependencies && byCursor[cursor]?.dependencies) {

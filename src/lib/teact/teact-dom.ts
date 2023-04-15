@@ -42,8 +42,8 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 };
 const INDEX_KEY_PREFIX = '__indexKey#';
 
-const headsByElement = new WeakMap<HTMLElement, VirtualDomHead>();
-const extraClasses = new WeakMap<HTMLElement, Set<string>>();
+const headsByElement = new WeakMap<Element, VirtualDomHead>();
+const extraClasses = new WeakMap<Element, Set<string>>();
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_virtualTreeSize = 1;
@@ -700,7 +700,7 @@ function updateClassName(element: HTMLElement, value: string) {
   element.className = extraArray.join(' ');
 }
 
-export function addExtraClass(element: HTMLElement, className: string, forceSingle = false) {
+export function addExtraClass(element: Element, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (className.length > 1) {
@@ -722,7 +722,7 @@ export function addExtraClass(element: HTMLElement, className: string, forceSing
   }
 }
 
-export function removeExtraClass(element: HTMLElement, className: string, forceSingle = false) {
+export function removeExtraClass(element: Element, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (className.length > 1) {
@@ -746,7 +746,7 @@ export function removeExtraClass(element: HTMLElement, className: string, forceS
   }
 }
 
-export function toggleExtraClass(element: HTMLElement, className: string, force?: boolean, forceSingle = false) {
+export function toggleExtraClass(element: Element, className: string, force?: boolean, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (className.length > 1) {
