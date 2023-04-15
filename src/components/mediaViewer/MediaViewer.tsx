@@ -32,6 +32,7 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import { exitPictureInPictureIfNeeded } from '../../hooks/usePictureInPicture';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
@@ -149,8 +150,12 @@ const MediaViewer: FC<StateProps> = ({
     }
 
     disableDirectTextInput();
+    const stopPriorityPlayback = dispatchPriorityPlaybackEvent();
 
-    return enableDirectTextInput;
+    return () => {
+      stopPriorityPlayback();
+      enableDirectTextInput();
+    };
   }, [isOpen]);
 
   useEffect(() => {

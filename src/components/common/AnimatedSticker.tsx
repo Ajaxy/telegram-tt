@@ -10,8 +10,9 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateIdFor from '../../util/generateIdFor';
 
-import useHeavyAnimationCheck from '../../hooks/useHeavyAnimationCheck';
-import useBackgroundMode from '../../hooks/useBackgroundMode';
+import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
+import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import { useStateRef } from '../../hooks/useStateRef';
 
@@ -91,8 +92,6 @@ const AnimatedSticker: FC<OwnProps> = ({
 
   const [animation, setAnimation] = useState<RLottieInstance>();
   const animationRef = useRef<RLottieInstance>();
-  const wasPlaying = useRef(false);
-  const isFrozen = useRef(false);
   const isFirstRender = useRef(true);
 
   const canPlay = play || playSegment;
@@ -182,49 +181,30 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [viewId]);
 
   const playAnimation = useCallback((shouldRestart = false) => {
-    if (animation && (playRef.current || playSegmentRef.current)) {
-      if (playSegmentRef.current) {
-        animation.playSegment(playSegmentRef.current);
-      } else {
-        animation.play(shouldRestart, viewId);
-      }
+    if (
+      !animation
+      || !(playRef.current || playSegmentRef.current)
+      || isFrozen()
+    ) {
+      return;
+    }
+
+    if (playSegmentRef.current) {
+      animation.playSegment(playSegmentRef.current);
+    } else {
+      animation.play(shouldRestart, viewId);
     }
   }, [animation, playRef, playSegmentRef, viewId]);
 
+  const playAnimationOnRaf = useCallback(() => {
+    fastRaf(playAnimation);
+  }, [playAnimation]);
+
   const pauseAnimation = useCallback(() => {
-    if (!animation) {
-      return;
+    if (animation?.isPlaying()) {
+      animation.pause(viewId);
     }
-
-    animation.pause(viewId);
   }, [animation, viewId]);
-
-  const freezeAnimation = useCallback(() => {
-    isFrozen.current = true;
-
-    if (!animation) {
-      return;
-    }
-
-    if (!wasPlaying.current) {
-      wasPlaying.current = animation.isPlaying();
-    }
-
-    pauseAnimation();
-  }, [animation, pauseAnimation]);
-
-  const unfreezeAnimation = useCallback(() => {
-    if (wasPlaying.current) {
-      playAnimation(noLoop);
-    }
-
-    wasPlaying.current = false;
-    isFrozen.current = false;
-  }, [noLoop, playAnimation]);
-
-  const unfreezeAnimationOnRaf = useCallback(() => {
-    fastRaf(unfreezeAnimation);
-  }, [unfreezeAnimation]);
 
   useSyncEffect(([prevNoLoop]) => {
     if (prevNoLoop !== undefined && noLoop !== prevNoLoop) {
@@ -242,19 +222,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (!animation) {
       return;
     }
+
     if (canPlay) {
-      if (isFrozen.current) {
-        wasPlaying.current = true;
-      } else {
+      if (!isFrozen()) {
         playAnimation(noLoop);
       }
     } else {
-      // eslint-disable-next-line no-lonely-if
-      if (isFrozen.current) {
-        wasPlaying.current = false;
-      } else {
-        pauseAnimation();
-      }
+      pauseAnimation();
     }
   }, [animation, canPlay, noLoop, playAnimation, pauseAnimation]);
 
@@ -269,11 +243,12 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(freezeAnimation, unfreezeAnimation, !canPlay || forceOnHeavyAnimation);
+  useHeavyAnimationCheck(pauseAnimation, playAnimation, !canPlay || forceOnHeavyAnimation);
+  usePriorityPlaybackCheck(pauseAnimation, playAnimation, !canPlay);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
   // then we can play again.
-  useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf, !canPlay);
+  useBackgroundMode(pauseAnimation, playAnimationOnRaf, !canPlay);
 
   if (sharedCanvas) {
     return undefined;
@@ -294,3 +269,7 @@ const AnimatedSticker: FC<OwnProps> = ({
 };
 
 export default memo(AnimatedSticker);
+
+function isFrozen() {
+  return isHeavyAnimating() || isPriorityPlaybackActive() || isBackgroundModeActive();
+}
