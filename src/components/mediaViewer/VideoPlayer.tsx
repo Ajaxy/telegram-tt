@@ -16,6 +16,7 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useAppLayout from '../../hooks/useAppLayout';
+import useControlsSignal from './hooks/useControlsSignal';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -37,10 +38,8 @@ type OwnProps = {
   isHidden?: boolean;
   playbackRate: number;
   isProtected?: boolean;
-  areControlsVisible: boolean;
   shouldCloseOnClick?: boolean;
   isForceMobileVersion?: boolean;
-  toggleControls: (isVisible: boolean) => void;
   onClose: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   isClickDisabled?: boolean;
 };
@@ -62,8 +61,6 @@ const VideoPlayer: FC<OwnProps> = ({
   playbackRate,
   onClose,
   isForceMobileVersion,
-  toggleControls,
-  areControlsVisible,
   shouldCloseOnClick,
   isProtected,
   isClickDisabled,
@@ -97,6 +94,8 @@ const VideoPlayer: FC<OwnProps> = ({
     enterPictureInPicture,
     isInPictureInPicture,
   ] = usePictureInPicture(videoRef, handleEnterFullscreen, handleLeaveFullscreen);
+
+  const [, toggleControls] = useControlsSignal();
 
   const handleVideoMove = useCallback(() => {
     toggleControls(true);
@@ -214,8 +213,12 @@ const VideoPlayer: FC<OwnProps> = ({
   useEffect(() => {
     if (!isMediaViewerOpen) return undefined;
     const rewind = (dir: number) => {
+      if (!isFullscreen) return;
       const video = videoRef.current!;
-      video.currentTime = clamp(video.currentTime + dir * REWIND_STEP, 0, video.duration);
+      const newTime = clamp(video.currentTime + dir * REWIND_STEP, 0, video.duration);
+      if (Number.isFinite(newTime)) {
+        video.currentTime = newTime;
+      }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isInPictureInPicture) return;
@@ -243,7 +246,7 @@ const VideoPlayer: FC<OwnProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown, false);
     };
-  }, [togglePlayState, isMediaViewerOpen, isInPictureInPicture]);
+  }, [togglePlayState, isMediaViewerOpen, isFullscreen, isInPictureInPicture]);
 
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;
@@ -322,8 +325,6 @@ const VideoPlayer: FC<OwnProps> = ({
           isFullscreen={isFullscreen}
           fileSize={fileSize}
           duration={duration}
-          isVisible={areControlsVisible}
-          setVisibility={toggleControls}
           isForceMobileVersion={isForceMobileVersion}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}

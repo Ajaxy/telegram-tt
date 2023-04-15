@@ -3,10 +3,13 @@ import React, { useEffect, useState } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from '../common/helpers/mediaDimensions';
 import { throttle } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import useAppLayout from '../../hooks/useAppLayout';
+import useControlsSignal from './hooks/useControlsSignal';
+import useDerivedState from '../../hooks/useDerivedState';
 
 import './MediaViewerFooter.scss';
 
@@ -15,17 +18,18 @@ const RESIZE_THROTTLE_MS = 500;
 type OwnProps = {
   text: TextPart | TextPart[];
   onClick: () => void;
-  isHidden?: boolean;
   isForVideo: boolean;
   isForceMobileVersion?: boolean;
   isProtected?: boolean;
 };
 
 const MediaViewerFooter: FC<OwnProps> = ({
-  text = '', isHidden, isForVideo, onClick, isProtected, isForceMobileVersion,
+  text = '', isForVideo, onClick, isProtected, isForceMobileVersion,
 }) => {
   const [isMultiline, setIsMultiline] = useState(false);
   const { isMobile } = useAppLayout();
+  const [getIsVisible] = useControlsSignal();
+  const isHidden = useDerivedState(() => (IS_TOUCH_ENV ? !getIsVisible() : false), [getIsVisible]);
 
   useEffect(() => {
     const footerContent = document.querySelector('.MediaViewerFooter .media-text') as HTMLDivElement | null;

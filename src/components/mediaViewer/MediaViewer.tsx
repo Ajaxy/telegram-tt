@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
@@ -38,6 +38,7 @@ import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import { useMediaProps } from './hooks/useMediaProps';
 import useAppLayout from '../../hooks/useAppLayout';
+import { useStateRef } from '../../hooks/useStateRef';
 
 import ReportModal from '../common/ReportModal';
 import Button from '../ui/Button';
@@ -103,7 +104,6 @@ const MediaViewer: FC<StateProps> = ({
 
   /* Controls */
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
-  const [zoomLevelChange, setZoomLevelChange] = useState<number>(1);
 
   const {
     webPagePhoto,
@@ -220,20 +220,23 @@ const MediaViewer: FC<StateProps> = ({
 
   const handleClose = useCallback(() => closeMediaViewer(), [closeMediaViewer]);
 
+  const mediaIdRef = useStateRef(mediaId);
   const handleFooterClick = useCallback(() => {
     handleClose();
 
-    if (!chatId || !mediaId) return;
+    const currentMediaId = mediaIdRef.current;
+
+    if (!chatId || !currentMediaId) return;
 
     if (isMobile) {
       setTimeout(() => {
         toggleChatInfo({ force: false }, { forceSyncOnIOs: true });
-        focusMessage({ chatId, threadId, messageId: mediaId });
+        focusMessage({ chatId, threadId, messageId: currentMediaId });
       }, ANIMATION_DURATION);
     } else {
-      focusMessage({ chatId, threadId, messageId: mediaId });
+      focusMessage({ chatId, threadId, messageId: currentMediaId });
     }
-  }, [handleClose, isMobile, chatId, threadId, focusMessage, toggleChatInfo, mediaId]);
+  }, [handleClose, mediaIdRef, chatId, isMobile, threadId]);
 
   const handleForward = useCallback(() => {
     openForwardMenu({
@@ -342,8 +345,6 @@ const MediaViewer: FC<StateProps> = ({
           onReport={openReportModal}
           onCloseMediaViewer={handleClose}
           onForward={handleForward}
-          zoomLevelChange={zoomLevelChange}
-          setZoomLevelChange={setZoomLevelChange}
         />
         <ReportModal
           isOpen={isReportModalOpen}
@@ -364,7 +365,6 @@ const MediaViewer: FC<StateProps> = ({
         origin={origin}
         isOpen={isOpen}
         hasFooter={hasFooter}
-        zoomLevelChange={zoomLevelChange}
         isVideo={isVideo}
         animationLevel={animationLevel}
         onClose={handleClose}

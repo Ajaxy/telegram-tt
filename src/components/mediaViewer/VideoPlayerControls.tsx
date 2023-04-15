@@ -13,6 +13,8 @@ import { captureEvents } from '../../util/captureEvents';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useControlsSignal from './hooks/useControlsSignal';
+import useDerivedState from '../../hooks/useDerivedState';
 
 import Button from '../ui/Button';
 import RangeSlider from '../ui/RangeSlider';
@@ -32,7 +34,6 @@ type OwnProps = {
   isFullscreenSupported: boolean;
   isPictureInPictureSupported: boolean;
   isFullscreen: boolean;
-  isVisible: boolean;
   isBuffered: boolean;
   volume: number;
   isMuted: boolean;
@@ -43,7 +44,6 @@ type OwnProps = {
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: (playbackRate: number) => void;
   onPlayPause: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  setVisibility: (isVisible: boolean) => void;
   onSeek: (position: number) => void;
 };
 
@@ -70,7 +70,6 @@ const VideoPlayerControls: FC<OwnProps> = ({
   isPlaying,
   isFullscreenSupported,
   isFullscreen,
-  isVisible,
   isBuffered,
   volume,
   isMuted,
@@ -82,7 +81,6 @@ const VideoPlayerControls: FC<OwnProps> = ({
   isPictureInPictureSupported,
   onPictureInPictureChange,
   onPlayPause,
-  setVisibility,
   onSeek,
 }) => {
   const [isPlaybackMenuOpen, openPlaybackMenu, closePlaybackMenu] = useFlag();
@@ -92,6 +90,8 @@ const VideoPlayerControls: FC<OwnProps> = ({
   const isSeeking = isSeekingRef.current;
 
   const { isMobile } = useAppLayout();
+  const [getIsVisible, setVisibility] = useControlsSignal();
+  const isVisible = useDerivedState(getIsVisible);
 
   useEffect(() => {
     if (!IS_TOUCH_ENV && !isForceMobileVersion) return undefined;
