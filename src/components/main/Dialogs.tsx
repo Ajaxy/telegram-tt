@@ -18,8 +18,6 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
 
-import './Dialogs.scss';
-
 type StateProps = {
   dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
   animationLevel: AnimationLevel;
@@ -179,11 +177,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, animationLevel }) => {
     return renderError(dialog);
   };
 
-  return (
-    <div id="Dialogs">
-      {Boolean(dialogs.length) && renderDialog(dialogs[dialogs.length - 1])}
-    </div>
-  );
+  return Boolean(dialogs.length) && renderDialog(dialogs[dialogs.length - 1]);
 };
 
 function getErrorHeader(error: ApiError) {

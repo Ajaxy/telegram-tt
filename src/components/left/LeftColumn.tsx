@@ -406,95 +406,98 @@ const LeftColumn: FC<StateProps> = ({
     setSettingsScreen(screen);
   }, []);
 
+  function renderContent(isActive: boolean) {
+    switch (contentType) {
+      case ContentType.Archived:
+        return (
+          <ArchivedChats
+            isActive={isActive}
+            onReset={handleReset}
+            onTopicSearch={handleTopicSearch}
+            foldersDispatch={foldersDispatch}
+            onSettingsScreenSelect={handleSettingsScreenSelect}
+            onLeftColumnContentChange={setContent}
+            isForumPanelOpen={isForumPanelOpen}
+            archiveSettings={archiveSettings}
+          />
+        );
+      case ContentType.Settings:
+        return (
+          <Settings
+            isActive={isActive}
+            currentScreen={settingsScreen}
+            foldersState={foldersState}
+            foldersDispatch={foldersDispatch}
+            onScreenSelect={handleSettingsScreenSelect}
+            onReset={handleReset}
+            shouldSkipTransition={shouldSkipHistoryAnimations}
+          />
+        );
+      case ContentType.NewChannel:
+        return (
+          <NewChat
+            key={lastResetTime}
+            isActive={isActive}
+            isChannel
+            content={content}
+            onContentChange={setContent}
+            onReset={handleReset}
+          />
+        );
+      case ContentType.NewGroup:
+        return (
+          <NewChat
+            key={lastResetTime}
+            isActive={isActive}
+            content={content}
+            onContentChange={setContent}
+            onReset={handleReset}
+          />
+        );
+      default:
+        return (
+          <LeftMain
+            content={content}
+            isClosingSearch={isClosingSearch}
+            searchQuery={searchQuery}
+            searchDate={searchDate}
+            contactsFilter={contactsFilter}
+            foldersDispatch={foldersDispatch}
+            onContentChange={setContent}
+            onSearchQuery={handleSearchQuery}
+            onSettingsScreenSelect={handleSettingsScreenSelect}
+            onReset={handleReset}
+            shouldSkipTransition={shouldSkipHistoryAnimations}
+            isUpdateAvailable={isUpdateAvailable}
+            isForumPanelOpen={isForumPanelOpen}
+            onTopicSearch={handleTopicSearch}
+          />
+        );
+    }
+  }
+
   return (
-    <div
-      id="LeftColumn"
+    <Transition
       ref={resizeRef}
+      name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}
+      renderCount={RENDER_COUNT}
+      activeKey={contentType}
+      shouldCleanup
+      cleanupExceptionKey={ContentType.Main}
+      id="LeftColumn"
     >
-      <Transition
-        name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}
-        renderCount={RENDER_COUNT}
-        activeKey={contentType}
-        shouldCleanup
-        cleanupExceptionKey={ContentType.Main}
-      >
-        {(isActive) => {
-          switch (contentType) {
-            case ContentType.Archived:
-              return (
-                <ArchivedChats
-                  isActive={isActive}
-                  onReset={handleReset}
-                  onTopicSearch={handleTopicSearch}
-                  foldersDispatch={foldersDispatch}
-                  onSettingsScreenSelect={handleSettingsScreenSelect}
-                  onLeftColumnContentChange={setContent}
-                  isForumPanelOpen={isForumPanelOpen}
-                  archiveSettings={archiveSettings}
-                />
-              );
-            case ContentType.Settings:
-              return (
-                <Settings
-                  isActive={isActive}
-                  currentScreen={settingsScreen}
-                  foldersState={foldersState}
-                  foldersDispatch={foldersDispatch}
-                  onScreenSelect={handleSettingsScreenSelect}
-                  onReset={handleReset}
-                  shouldSkipTransition={shouldSkipHistoryAnimations}
-                />
-              );
-            case ContentType.NewChannel:
-              return (
-                <NewChat
-                  key={lastResetTime}
-                  isActive={isActive}
-                  isChannel
-                  content={content}
-                  onContentChange={setContent}
-                  onReset={handleReset}
-                />
-              );
-            case ContentType.NewGroup:
-              return (
-                <NewChat
-                  key={lastResetTime}
-                  isActive={isActive}
-                  content={content}
-                  onContentChange={setContent}
-                  onReset={handleReset}
-                />
-              );
-            default:
-              return (
-                <LeftMain
-                  content={content}
-                  isClosingSearch={isClosingSearch}
-                  searchQuery={searchQuery}
-                  searchDate={searchDate}
-                  contactsFilter={contactsFilter}
-                  foldersDispatch={foldersDispatch}
-                  onContentChange={setContent}
-                  onSearchQuery={handleSearchQuery}
-                  onSettingsScreenSelect={handleSettingsScreenSelect}
-                  onReset={handleReset}
-                  shouldSkipTransition={shouldSkipHistoryAnimations}
-                  isUpdateAvailable={isUpdateAvailable}
-                  isForumPanelOpen={isForumPanelOpen}
-                  onTopicSearch={handleTopicSearch}
-                />
-              );
-          }
-        }}
-      </Transition>
-      <div
-        className="resize-handle"
-        onMouseDown={initResize}
-        onMouseUp={handleMouseUp}
-        onDoubleClick={resetResize}
-      />
-    </div>
+      {(isActive) => (
+        <>
+          {renderContent(isActive)}
+          <div
+            className="resize-handle"
+            onMouseDown={initResize}
+            onMouseUp={handleMouseUp}
+            onDoubleClick={resetResize}
+          />
+        </>
+      )}
+    </Transition>
   );
 };
 
