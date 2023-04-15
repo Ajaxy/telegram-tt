@@ -335,6 +335,10 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
     forceUpdateComponent(instance);
   });
 
+  runImmediateEffects();
+});
+
+export function runImmediateEffects() {
   const currentLayoutCleanups = pendingLayoutCleanups;
   pendingLayoutCleanups = new Map();
   currentLayoutCleanups.forEach((cb) => cb());
@@ -342,7 +346,7 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
   const currentLayoutEffects = pendingLayoutEffects;
   pendingLayoutEffects = new Map();
   currentLayoutEffects.forEach((cb) => cb());
-});
+}
 
 function scheduleUpdate(componentInstance: ComponentInstance) {
   instancesPendingUpdate.add(componentInstance);
