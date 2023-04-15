@@ -54,9 +54,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.loadStickerSets();
       break;
 
-    case 'updateStickerSetsOrder':
-      actions.reorderStickerSets({ order: update.order, isCustomEmoji: update.isCustomEmoji });
+    case 'updateStickerSetsOrder': {
+      // Filter out invalid set IDs, which may be sent by the server
+      const order = update.order.filter((setId) => Boolean(global.stickers.setsById[setId]));
+
+      actions.reorderStickerSets({ order, isCustomEmoji: update.isCustomEmoji });
       break;
+    }
 
     case 'updateSavedGifs':
       actions.loadSavedGifs();
