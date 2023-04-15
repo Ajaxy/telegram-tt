@@ -30,7 +30,7 @@ export default function useOuterHandlers(
   handleBeforeContextMenu: (e: React.MouseEvent) => void,
   chatId: string,
   isContextMenuShown: boolean,
-  contentRef: RefObject<HTMLDivElement>,
+  quickReactionRef: RefObject<HTMLDivElement>,
   isOwn: boolean,
   shouldHandleMouseLeave: boolean,
 ) {
@@ -46,16 +46,18 @@ export default function useOuterHandlers(
   }
 
   function handleMouseMove(e: React.MouseEvent) {
-    const container = contentRef.current;
-    if (!container) return;
+    const quickReactionContainer = quickReactionRef.current;
+    if (!quickReactionContainer) return;
 
     const { clientX, clientY } = e;
     const {
-      x, width, y, height,
-    } = container.getBoundingClientRect();
+      x: quickReactionX, width: quickReactionWidth, y: quickReactionY, height: quickReactionHeight,
+    } = quickReactionContainer.getBoundingClientRect();
+    const x = quickReactionX + quickReactionWidth / 2;
+    const y = quickReactionY + quickReactionHeight / 2;
 
-    const isVisibleX = Math.abs((isOwn ? (clientX - x) : (x + width - clientX))) < QUICK_REACTION_AREA_WIDTH;
-    const isVisibleY = Math.abs(y + height - clientY) < QUICK_REACTION_AREA_HEIGHT;
+    const isVisibleX = Math.abs(x - clientX) < QUICK_REACTION_AREA_WIDTH;
+    const isVisibleY = Math.abs(y - clientY) < QUICK_REACTION_AREA_HEIGHT;
     if (isVisibleX && isVisibleY) {
       markQuickReactionVisible();
     } else {
@@ -63,7 +65,8 @@ export default function useOuterHandlers(
     }
   }
 
-  function handleSendQuickReaction() {
+  function handleSendQuickReaction(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    e.stopPropagation();
     sendDefaultReaction({
       chatId,
       messageId,

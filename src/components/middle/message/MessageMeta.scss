@@ -168,8 +168,6 @@
 
 .Message:not(.own) {
   .custom-shape .with-subheader + .MessageMeta {
-    right: auto;
-    left: 13.25rem;
     bottom: 0.25rem;
   }
 }

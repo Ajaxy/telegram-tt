@@ -263,6 +263,9 @@ type ReactionsPosition =
   'inside'
   | 'outside'
   | 'none';
+type QuickReactionPosition =
+  'in-content'
+  | 'in-meta';
 
 const NBSP = '\u00A0';
 // eslint-disable-next-line max-len
@@ -371,7 +374,7 @@ const Message: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
-  const contentRef = useRef<HTMLDivElement>(null);
+  const quickReactionRef = useRef<HTMLDivElement>(null);
 
   const messageHeightRef = useRef(0);
 
@@ -492,7 +495,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleBeforeContextMenu,
     chatId,
     isContextMenuShown,
-    contentRef,
+    quickReactionRef,
     isOwn,
     isInDocumentGroupNotLast,
   );
@@ -641,6 +644,8 @@ const Message: FC<OwnProps & StateProps> = ({
     reactionsPosition = 'none';
   }
 
+  const quickReactionPosition: QuickReactionPosition = isCustomShape ? 'in-meta' : 'in-content';
+
   useEnsureMessage(
     isRepliesChat && message.replyToChatId ? message.replyToChatId : chatId,
     hasReply ? message.replyToMessageId : undefined,
@@ -788,6 +793,25 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
+  function renderQuickReactionButton() {
+    if (!defaultReaction) return undefined;
+
+    return (
+      <div
+        className={buildClassName('quick-reaction', isQuickReactionVisible && !activeReactions && 'visible')}
+        onClick={handleSendQuickReaction}
+        ref={quickReactionRef}
+      >
+        <ReactionStaticEmoji
+          reaction={defaultReaction}
+          size={QUICK_REACTION_SIZE}
+          availableReactions={availableReactions}
+          observeIntersection={observeIntersectionForPlaying}
+        />
+      </div>
+    );
+  }
+
   function renderReactionsAndMeta() {
     const meta = (
       <MessageMeta
@@ -798,6 +822,9 @@ const Message: FC<OwnProps & StateProps> = ({
         outgoingStatus={outgoingStatus}
         signature={signature}
         withReactionOffset={reactionsPosition === 'inside'}
+        renderQuickReactionButton={
+          withQuickReactionButton && quickReactionPosition === 'in-meta' ? renderQuickReactionButton : undefined
+        }
         availableReactions={availableReactions}
         isTranslated={Boolean(requestedTranslationLanguage ? currentTranslatedText : undefined)}
         onClick={handleMetaClick}
@@ -1216,7 +1243,6 @@ const Message: FC<OwnProps & StateProps> = ({
         className={buildClassName('message-content-wrapper', contentClassName.includes('text') && 'can-select-text')}
       >
         <div
-          ref={contentRef}
           className={contentClassName}
           style={style}
           dir="auto"
@@ -1256,19 +1282,7 @@ const Message: FC<OwnProps & StateProps> = ({
           {withAppendix && (
             <div className="svg-appendix" dangerouslySetInnerHTML={isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN} />
           )}
-          {withQuickReactionButton && (
-            <div
-              className={buildClassName('quick-reaction', isQuickReactionVisible && !activeReactions && 'visible')}
-              onClick={handleSendQuickReaction}
-            >
-              <ReactionStaticEmoji
-                reaction={defaultReaction}
-                size={QUICK_REACTION_SIZE}
-                availableReactions={availableReactions}
-                observeIntersection={observeIntersectionForPlaying}
-              />
-            </div>
-          )}
+          {withQuickReactionButton && quickReactionPosition === 'in-content' && renderQuickReactionButton()}
         </div>
         {message.inlineButtons && (
           <InlineButtons message={message} onClick={clickBotInlineButton} />
