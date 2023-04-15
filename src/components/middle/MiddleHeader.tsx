@@ -270,7 +270,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldRenderPinnedMessage,
     transitionClassNames: pinnedMessageClassNames,
-  } = useShowTransition(Boolean(pinnedMessage));
+  } = useShowTransition(Boolean(pinnedMessage), undefined, true);
 
   const renderingPinnedMessage = useCurrentOrPrev(pinnedMessage, true);
   const renderingPinnedMessagesCount = useCurrentOrPrev(pinnedMessagesCount, true);
