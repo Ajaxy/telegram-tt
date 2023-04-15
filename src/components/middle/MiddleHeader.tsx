@@ -42,6 +42,7 @@ import {
   selectThreadParam,
   selectThreadTopMessageId,
 } from '../../global/selectors';
+import cycleRestrict from '../../util/cycleRestrict';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -184,15 +185,17 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     pinMessage({ messageId, isUnpin: true });
   }, [pinMessage]);
 
-  const handlePinnedMessageClick = useCallback((): void => {
-    if (!pinnedMessage) return;
+  const handlePinnedMessageClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+    const messageId = e.shiftKey && Array.isArray(pinnedMessageIds)
+      ? pinnedMessageIds[cycleRestrict(pinnedMessageIds.length, pinnedMessageIds.indexOf(pinnedMessageId!) - 2)]
+      : pinnedMessageId!;
 
-    if (onFocusPinnedMessage(pinnedMessage.id)) {
+    if (onFocusPinnedMessage(messageId)) {
       focusMessage({
-        chatId: pinnedMessage.chatId, threadId, messageId: pinnedMessage.id, noForumTopicPanel: true,
+        chatId, threadId, messageId, noForumTopicPanel: true,
       });
     }
-  }, [pinnedMessage, threadId, onFocusPinnedMessage]);
+  }, [pinnedMessageIds, pinnedMessageId, onFocusPinnedMessage, chatId, threadId]);
 
   const handleAllPinnedClick = useCallback(() => {
     openChat({ id: chatId, threadId, type: 'pinned' });
@@ -415,7 +418,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         <GroupCallTopPane
           hasPinnedOffset={
             (shouldRenderPinnedMessage && Boolean(renderingPinnedMessage))
-          || (shouldRenderAudioPlayer && Boolean(renderingAudioMessage))
+            || (shouldRenderAudioPlayer && Boolean(renderingAudioMessage))
           }
           chatId={chatId}
         />

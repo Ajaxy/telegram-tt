@@ -39,7 +39,7 @@ type OwnProps = {
   customTitle?: string;
   className?: string;
   onUnpinMessage?: (id: number) => void;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
   onAllPinnedClick?: () => void;
   isLoading?: boolean;
   isFullWidth?: boolean;
