@@ -2,6 +2,7 @@ import { useLayoutEffect, useCallback, useState } from '../lib/teact/teact';
 import { DEBUG } from '../config';
 import { IS_IOS, IS_PWA } from '../util/windowEnvironment';
 import safePlay, { getIsVideoPlaying } from '../util/safePlay';
+import { createSignal } from '../util/signals';
 
 type RefType = {
   current: HTMLVideoElement | null;
@@ -10,13 +11,20 @@ type RefType = {
 type ReturnType = [boolean, () => void, boolean] | [false];
 type CallbackType = () => void;
 
+const signal = createSignal(false);
+const setIsPictureInPicture = signal[1];
+
+export function usePictureInPictureSignal() {
+  return signal;
+}
+
 export default function usePictureInPicture(
   elRef: RefType,
   onEnter: CallbackType,
   onLeave: CallbackType,
 ): ReturnType {
   const [isSupported, setIsSupported] = useState(false);
-  const [isInPictureInPicture, setIsInPictureInPicture] = useState(false);
+  const [isActive, setIsActive] = useState(false);
 
   useLayoutEffect(() => {
     // PIP is not supported in PWA on iOS, despite being detected
@@ -31,11 +39,13 @@ export default function usePictureInPicture(
     setIsSupported(true);
     const onEnterInternal = () => {
       onEnter();
-      setIsInPictureInPicture(true);
+      setIsActive(true);
+      setIsPictureInPicture(true);
     };
     const onLeaveInternal = () => {
+      setIsPictureInPicture(false);
+      setIsActive(false);
       onLeave();
-      setIsInPictureInPicture(false);
     };
     video.addEventListener('enterpictureinpicture', onEnterInternal);
     video.addEventListener('leavepictureinpicture', onLeaveInternal);
@@ -77,7 +87,7 @@ export default function usePictureInPicture(
     return [false];
   }
 
-  return [isSupported, enterPictureInPicture, isInPictureInPicture];
+  return [isSupported, enterPictureInPicture, isActive];
 }
 
 function getSetPresentationMode(video: HTMLVideoElement) {
