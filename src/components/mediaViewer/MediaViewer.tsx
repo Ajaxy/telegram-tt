@@ -33,7 +33,7 @@ import useFlag from '../../hooks/useFlag';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
-import { exitPictureInPictureIfNeeded } from '../../hooks/usePictureInPicture';
+import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../hooks/usePictureInPicture';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import { useMediaProps } from './hooks/useMediaProps';
@@ -144,8 +144,9 @@ const MediaViewer: FC<StateProps> = ({
     animationKey.current = selectedMediaIndex;
   }
 
+  const [getIsPictureInPicture] = usePictureInPictureSignal();
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || getIsPictureInPicture()) {
       return undefined;
     }
 
@@ -156,7 +157,7 @@ const MediaViewer: FC<StateProps> = ({
       stopPriorityPlayback();
       enableDirectTextInput();
     };
-  }, [isOpen]);
+  }, [isOpen, getIsPictureInPicture]);
 
   useEffect(() => {
     if (isVisible) {
