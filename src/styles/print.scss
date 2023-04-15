@@ -32,7 +32,7 @@
   .MessageList,
   .messages-layout,
   .Transition,
-  .Transition > * {
+  .Transition > .Transition__slide {
     height: auto !important;
     overflow: visible !important;
     display: block !important;

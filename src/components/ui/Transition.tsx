@@ -3,7 +3,6 @@ import type { FC } from '../../lib/teact/teact';
 import React, { useLayoutEffect, useRef } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass, toggleExtraClass } from '../../lib/teact/teact-dom';
 import { getGlobal } from '../../global';
-
 import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
@@ -40,6 +39,7 @@ export type TransitionProps = {
 
 const FALLBACK_ANIMATION_END = 1000;
 const CLASSES = {
+  slide: 'Transition__slide',
   active: 'Transition__slide--active',
 };
 
@@ -94,10 +94,15 @@ const Transition: FC<TransitionProps> = ({
     }
 
     const container = containerRef.current!;
-    const childElements = container.children;
+    const childElements = Array.from(container.children) as HTMLElement[];
+
+    childElements.forEach((el) => {
+      addExtraClass(el, CLASSES.slide);
+    });
 
     if (childElements.length === 1 && !activeKeyChanged) {
-      const firstChild = childElements[0] as HTMLElement;
+      const firstChild = childElements[0];
+
       if (name.startsWith('slide-optimized')) {
         firstChild.style.transition = 'none';
         firstChild.style.transform = 'translate3d(0, 0, 0)';

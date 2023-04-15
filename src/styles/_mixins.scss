@@ -1,6 +1,6 @@
 // @optimization
 @mixin while-transition() {
-  .Transition > div:not(.Transition__slide--active) & {
+  .Transition__slide:not(.Transition__slide--active) & {
     @content;
   }
 }

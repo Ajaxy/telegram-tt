@@ -1,11 +1,10 @@
 .Transition {
   position: relative;
 
-  > * {
+  > .Transition__slide {
     width: 100%;
     height: 100%;
     animation-fill-mode: forwards !important;
-    transition: background-color 0.2s;
 
     &.from,
     &.to {
@@ -35,7 +34,7 @@
       transform: translate3d(0, 0, 0);
     }
 
-    #root & > div {
+    #root & > .Transition__slide {
       position: absolute;
       display: block !important;
       top: 0;
@@ -186,7 +185,7 @@
    */
 
   &.mv-slide {
-    > * > div {
+    > .Transition__slide > div {
       animation-fill-mode: forwards !important;
     }
 
@@ -351,7 +350,7 @@
     --background-color: var(--color-background);
     background: black;
 
-    > div {
+    > .Transition__slide {
       background: var(--background-color);
     }
 
@@ -392,7 +391,7 @@
    */
 
   &.push-slide {
-    > div {
+    > .Transition__slide {
       background: var(--color-background);
     }
 
