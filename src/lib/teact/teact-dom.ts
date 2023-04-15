@@ -700,7 +700,18 @@ function updateClassName(element: HTMLElement, value: string) {
   element.className = extraArray.join(' ');
 }
 
-export function addExtraClass(element: HTMLElement, className: string) {
+export function addExtraClass(element: HTMLElement, className: string, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (className.length > 1) {
+      classNames.forEach((cn) => {
+        addExtraClass(element, cn, true);
+      });
+
+      return;
+    }
+  }
+
   element.classList.add(className);
 
   const classList = extraClasses.get(element);
@@ -711,7 +722,18 @@ export function addExtraClass(element: HTMLElement, className: string) {
   }
 }
 
-export function removeExtraClass(element: HTMLElement, className: string) {
+export function removeExtraClass(element: HTMLElement, className: string, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (className.length > 1) {
+      classNames.forEach((cn) => {
+        removeExtraClass(element, cn, true);
+      });
+
+      return;
+    }
+  }
+
   element.classList.remove(className);
 
   const classList = extraClasses.get(element);
@@ -724,7 +746,18 @@ export function removeExtraClass(element: HTMLElement, className: string) {
   }
 }
 
-export function toggleExtraClass(element: HTMLElement, className: string, force?: boolean) {
+export function toggleExtraClass(element: HTMLElement, className: string, force?: boolean, forceSingle = false) {
+  if (!forceSingle) {
+    const classNames = className.split(' ');
+    if (className.length > 1) {
+      classNames.forEach((cn) => {
+        toggleExtraClass(element, cn, force, true);
+      });
+
+      return;
+    }
+  }
+
   element.classList.toggle(className, force);
 
   if (element.classList.contains(className)) {

@@ -1,9 +1,12 @@
 .Transition {
   position: relative;
+  width: 100%;
+  height: 100%;
 
   > .Transition__slide {
     width: 100%;
     height: 100%;
+
     animation-fill-mode: forwards !important;
 
     &.from,
@@ -25,9 +28,6 @@
     transition: none !important;
   }
 
-  /*
-   * slide
-   */
   &.slide-optimized,
   &.slide-optimized-rtl {
     contain: strict;
@@ -40,8 +40,9 @@
       position: absolute;
       top: 0;
       left: 0;
-      transition: transform var(--slide-transition);
       transform: scale(0);
+
+      transition: transform var(--slide-transition);
     }
   }
 
@@ -109,10 +110,6 @@
     }
   }
 
-  /*
-   * slide-vertical
-   */
-
   &.slide-vertical {
     > .to {
       transform: translateY(100%);
@@ -145,10 +142,6 @@
     }
   }
 
-  /*
-   * slide-vertical-fade
-   */
-
   &.slide-vertical-fade {
     > .to {
       transform: translateY(100%);
@@ -180,10 +173,6 @@
       }
     }
   }
-
-  /*
-   * mv-slide
-   */
 
   &.mv-slide {
     > .Transition__slide > div {
@@ -221,19 +210,18 @@
     }
   }
 
-  /*
-   * slide-fade
-   */
   &.slide-fade {
     > .from {
-      transform-origin: left;
       transform: translateX(0);
+      transform-origin: left;
+
       opacity: 1;
     }
 
     > .to {
-      transform-origin: left;
       transform: translateX(1.5rem);
+      transform-origin: left;
+
       opacity: 0;
     }
 
@@ -251,39 +239,40 @@
   &.slide-fade.backwards {
     > .from {
       transform: translateX(0);
+
       opacity: 1;
     }
 
     > .to {
       transform: translateX(-1.5rem);
+
       opacity: 0;
     }
 
     &.animating {
       > .from {
         animation: fade-in-backwards-opacity var(--slide-transition),
-          slide-fade-in-backwards-move var(--slide-transition);
+        slide-fade-in-backwards-move var(--slide-transition);
       }
 
       > .to {
         animation: fade-out-backwards-opacity var(--slide-transition),
-          slide-fade-out-backwards-move var(--slide-transition);
+        slide-fade-out-backwards-move var(--slide-transition);
       }
     }
   }
 
-  /*
-   * zoom-fade
-   */
   &.zoom-fade {
     > .from {
-      transform-origin: center;
       transform: scale(1);
+      transform-origin: center;
+
       opacity: 1;
     }
 
     > .to {
       transform-origin: center;
+
       opacity: 0;
       // We can omit `transform: scale(1.1);` here because `opacity` is 0.
       // We need to for proper position calculation in `InfiniteScroll`.
@@ -320,9 +309,6 @@
     }
   }
 
-  /*
-   * fade
-   */
   &.fade {
     > .from {
       opacity: 1;
@@ -343,12 +329,49 @@
     }
   }
 
-  /*
-   * slide-layers
-   */
+  &.semi-fade {
+    > .Transition__slide {
+      isolation: isolate;
+    }
+
+    > .from {
+      opacity: 1;
+    }
+
+    > .to {
+      opacity: 0;
+    }
+
+    &.animating {
+      > .to {
+        animation: fade-in-opacity 250ms ease;
+      }
+    }
+  }
+
+  &.semi-fade.backwards {
+    > .from {
+      opacity: 1;
+    }
+
+    > .to {
+      opacity: 1;
+    }
+
+    &.animating {
+      > .from {
+        animation: fade-in-backwards-opacity 250ms ease;
+      }
+
+      > .to {
+        animation: none !important;
+      }
+    }
+  }
 
   &.slide-layers {
     --background-color: var(--color-background);
+
     background: black !important;
 
     > .Transition__slide {
@@ -373,6 +396,7 @@
   &.slide-layers.backwards {
     > .to {
       transform: translateX(-20%);
+
       opacity: 0.75;
     }
 
@@ -387,18 +411,15 @@
     }
   }
 
-  /*
-   * push-slide
-   */
-
   &.push-slide {
     > .Transition__slide {
       background: var(--color-background);
     }
 
     > .from {
-      transform-origin: center;
       transform: scale(1);
+      transform-origin: center;
+
       opacity: 1;
 
       .custom-scroll {
@@ -428,6 +449,7 @@
   &.push-slide.backwards {
     > .to {
       transform: scale(0.7);
+
       opacity: 0;
     }
 
@@ -442,9 +464,6 @@
     }
   }
 
-  /*
-   * slide-fade
-   */
   &.reveal {
     > .to {
       clip-path: inset(0 100% 0 0);
@@ -478,9 +497,6 @@
   }
 }
 
-/*
- * common
- */
 @keyframes fade-in-opacity {
   0% {
     opacity: 0;
@@ -517,9 +533,6 @@
   }
 }
 
-/*
- * slide
- */
 @keyframes slide-in {
   0% {
     transform: translateX(100%);
@@ -556,9 +569,6 @@
   }
 }
 
-/*
- * slide-vertical
- */
 @keyframes slide-vertical-in {
   0% {
     transform: translateY(100%);
@@ -595,17 +605,15 @@
   }
 }
 
-/*
- * slide-vertical-fade
- */
-
 @keyframes slide-vertical-fade-in {
   0% {
     transform: translateY(100%);
+
     opacity: 0;
   }
   100% {
     transform: translateY(0);
+
     opacity: 1;
   }
 }
@@ -613,10 +621,12 @@
 @keyframes slide-vertical-fade-out {
   0% {
     transform: translateY(0);
+
     opacity: 1;
   }
   100% {
     transform: translateY(-100%);
+
     opacity: 0;
   }
 }
@@ -624,10 +634,12 @@
 @keyframes slide-vertical-fade-in-backwards {
   0% {
     transform: translateY(0);
+
     opacity: 1;
   }
   100% {
     transform: translateY(100%);
+
     opacity: 0;
   }
 }
@@ -635,18 +647,16 @@
 @keyframes slide-vertical-fade-out-backwards {
   0% {
     transform: translateY(-100%);
+
     opacity: 0;
   }
   100% {
     transform: translateY(0);
+
     opacity: 1;
   }
 }
 
-
-/*
- * mv-slide
- */
 @keyframes mv-slide-in {
   0% {
     transform: translateX(100vw);
@@ -683,9 +693,6 @@
   }
 }
 
-/*
- * slide-fade
- */
 @keyframes slide-fade-in-move {
   0% {
     transform: translateX(1.5rem);
@@ -722,9 +729,6 @@
   }
 }
 
-/*
- * zoom-fade
- */
 @keyframes zoom-fade-in-move {
   0% {
     transform: scale(1.1);
@@ -752,16 +756,15 @@
   }
 }
 
-/*
- * slide-layers
- */
 @keyframes slide-layers-out {
   0% {
     transform: translateX(0);
+
     opacity: 1;
   }
   100% {
     transform: translateX(-20%);
+
     opacity: calc(1 - var(--layer-blackout-opacity));
   }
 }
@@ -769,25 +772,25 @@
 @keyframes slide-layers-out-backwards {
   0% {
     transform: translateX(-20%);
+
     opacity: calc(1 - var(--layer-blackout-opacity));
   }
   100% {
     transform: translateX(0);
+
     opacity: 1;
   }
 }
 
-/*
- * push-slide
- */
-
 @keyframes push-out {
   0% {
     transform: scale(1);
+
     opacity: 1;
   }
   100% {
     transform: scale(0.7);
+
     opacity: 0;
   }
 }
@@ -795,17 +798,16 @@
 @keyframes push-out-backwards {
   0% {
     transform: scale(0.7);
+
     opacity: 0;
   }
   100% {
     transform: scale(1);
+
     opacity: 1;
   }
 }
 
-/*
- * slide
- */
 @keyframes slide-in-200 {
   0% {
     transform: translateX(200%);
@@ -824,9 +826,6 @@
   }
 }
 
-/*
- * slide
- */
 @keyframes reveal-in {
   0% {
     clip-path: inset(0 100% 0 0);
@@ -836,9 +835,6 @@
   }
 }
 
-/*
- * slide
- */
 @keyframes reveal-in-backwards {
   0% {
     clip-path: inset(0 0 0 0);
