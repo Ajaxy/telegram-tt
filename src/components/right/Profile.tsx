@@ -454,7 +454,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     <InfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
-      itemSelector={buildInfiniteScrollItemSelector(resultType)}
+      itemSelector={`.shared-media-transition > .Transition__slide--active.${resultType}-list > .scroll-item`}
       items={canRenderContent ? viewportIds : undefined}
       cacheBuster={cacheBuster}
       sensitiveArea={PROFILE_SENSITIVE_AREA}
@@ -513,15 +513,6 @@ function renderProfileInfo(chatId: string, resolvedUserId: string | undefined, i
       <ChatExtra chatOrUserId={resolvedUserId || chatId} />
     </div>
   );
-}
-
-function buildInfiniteScrollItemSelector(resultType: string) {
-  return [
-    // Used on first render
-    `.shared-media-transition > div:only-child > .${resultType}-list > .scroll-item`,
-    // Used after transition
-    `.shared-media-transition > .Transition__slide--active > .${resultType}-list > .scroll-item`,
-  ].join(', ');
 }
 
 export default memo(withGlobal<OwnProps>(

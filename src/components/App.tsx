@@ -47,6 +47,7 @@ enum AppScreens {
   inactive,
 }
 
+const TRANSITION_RENDER_COUNT = Object.keys(AppScreens).length / 2;
 const INACTIVE_PAGE_TITLE = `${PAGE_TITLE} ${INACTIVE_MARKER}`;
 
 const App: FC<StateProps> = ({
@@ -204,7 +205,7 @@ const App: FC<StateProps> = ({
   }, [theme]);
 
   return (
-    <UiLoader key="Loader" page={page} isMobile={isMobile}>
+    <UiLoader page={page} isMobile={isMobile}>
       <Transition
         name="fade"
         activeKey={activeKey}
@@ -213,6 +214,7 @@ const App: FC<StateProps> = ({
           'full-height',
           (activeKey === AppScreens.auth || prevActiveKey === AppScreens.auth) && 'is-auth',
         )}
+        renderCount={TRANSITION_RENDER_COUNT}
       >
         {renderContent}
       </Transition>

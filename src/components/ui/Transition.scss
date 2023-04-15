@@ -12,8 +12,10 @@
       top: 0;
       left: 0;
     }
+  }
 
-    &:not(.Transition__slide--active):not(.from):not(.to) {
+  &:not(.slide-optimized):not(.slide-optimized-rtl) {
+    > .Transition__slide:not(.Transition__slide--active):not(.from):not(.to) {
       display: none !important; // Best performance when animating container
       //transform: scale(0); // Shortest initial delay
     }
@@ -36,7 +38,6 @@
 
     #root & > .Transition__slide {
       position: absolute;
-      display: block !important;
       top: 0;
       left: 0;
       transition: transform var(--slide-transition);
@@ -348,7 +349,7 @@
 
   &.slide-layers {
     --background-color: var(--color-background);
-    background: black;
+    background: black !important;
 
     > .Transition__slide {
       background: var(--background-color);
@@ -427,6 +428,7 @@
   &.push-slide.backwards {
     > .to {
       transform: scale(0.7);
+      opacity: 0;
     }
 
     &.animating {

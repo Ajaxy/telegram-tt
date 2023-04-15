@@ -484,19 +484,19 @@ const LeftColumn: FC<StateProps> = ({
       activeKey={contentType}
       shouldCleanup
       cleanupExceptionKey={ContentType.Main}
+      shouldWrap
+      wrapExceptionKey={ContentType.Main}
       id="LeftColumn"
-    >
-      {(isActive) => (
-        <>
-          {renderContent(isActive)}
-          <div
-            className="resize-handle"
-            onMouseDown={initResize}
-            onMouseUp={handleMouseUp}
-            onDoubleClick={resetResize}
-          />
-        </>
+      afterChildren={(
+        <div
+          className="resize-handle"
+          onMouseDown={initResize}
+          onMouseUp={handleMouseUp}
+          onDoubleClick={resetResize}
+        />
       )}
+    >
+      {renderContent}
     </Transition>
   );
 };

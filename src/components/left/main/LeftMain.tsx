@@ -172,6 +172,8 @@ const LeftMain: FC<OwnProps> = ({
         activeKey={content}
         shouldCleanup
         cleanupExceptionKey={LeftColumnContent.ChatList}
+        shouldWrap
+        wrapExceptionKey={LeftColumnContent.ChatList}
       >
         {(isActive) => {
           switch (content) {
