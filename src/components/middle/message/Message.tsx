@@ -93,6 +93,7 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import {
   calculateDimensionsForMessageMedia,
+  getStickerDimensions,
   REM,
   ROUND_VIDEO_DIMENSIONS_PX,
 } from '../../common/helpers/mediaDimensions';
@@ -747,6 +748,10 @@ const Message: FC<OwnProps & StateProps> = ({
   if (calculatedWidth) {
     style = `width: ${calculatedWidth + extraPadding}px`;
     reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
+  } else if (sticker) {
+    const { width } = getStickerDimensions(sticker, isMobile);
+    style = `width: ${width + extraPadding}px`;
+    reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
   }
 
   const signature = (isChannel && message.postAuthorTitle)
