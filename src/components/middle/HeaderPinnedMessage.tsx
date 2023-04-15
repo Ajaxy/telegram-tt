@@ -105,12 +105,14 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           ariaLabel={lang('EventLogFilterPinnedMessages')}
           onClick={!shouldShowLoader ? onAllPinnedClick : undefined}
         >
-          <Spinner
-            color="blue"
-            className={buildClassName(
-              styles.loading, styles.pinListIcon, !shouldShowLoader && styles.pinListIconHidden,
-            )}
-          />
+          {isLoading && (
+            <Spinner
+              color="blue"
+              className={buildClassName(
+                styles.loading, styles.pinListIcon, !shouldShowLoader && styles.pinListIconHidden,
+              )}
+            />
+          )}
           <i
             className={buildClassName(
               'icon-pin-list', styles.pinListIcon, shouldShowLoader && styles.pinListIconHidden,
