@@ -35,7 +35,7 @@ interface VirtualElementText {
 
 export interface VirtualElementTag {
   type: VirtualElementTypesEnum.Tag;
-  target?: Node;
+  target?: HTMLElement;
   tag: string;
   props: Props;
   children: VirtualElementChildren;
@@ -50,7 +50,6 @@ export interface VirtualElementComponent {
 
 export interface VirtualElementFragment {
   type: VirtualElementTypesEnum.Fragment;
-  target?: Node;
   children: VirtualElementChildren;
 }
 

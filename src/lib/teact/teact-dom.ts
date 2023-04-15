@@ -43,6 +43,8 @@ const MAPPED_ATTRIBUTES: { [k: string]: string } = {
 const INDEX_KEY_PREFIX = '__indexKey#';
 
 const headsByElement = new WeakMap<HTMLElement, VirtualDomHead>();
+const extraClasses = new WeakMap<HTMLElement, Set<string>>();
+
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_virtualTreeSize = 1;
 
@@ -319,15 +321,18 @@ function remount(
   }
 }
 
-export function unmountRealTree($element: VirtualElement) {
+function unmountRealTree($element: VirtualElement) {
   if (isComponentElement($element)) {
     unmountComponent($element.componentInstance);
-  } else {
+  } else if (!isFragmentElement($element)) {
     if (isTagElement($element)) {
-      if ($element.target) {
-        removeAllDelegatedListeners($element.target as HTMLElement);
+      const { target } = $element;
 
-        if ($element.props.ref?.current === $element.target) {
+      if (target) {
+        extraClasses.delete(target);
+        removeAllDelegatedListeners(target);
+
+        if ($element.props.ref?.current === target) {
           $element.props.ref.current = undefined;
         }
       }
@@ -629,10 +634,8 @@ function updateAttributes($current: VirtualElementTag, $new: VirtualElementTag, 
 }
 
 function setAttribute(element: HTMLElement, key: string, value: any) {
-  // An optimization attempt
   if (key === 'className') {
-    element.className = value;
-    // An optimization attempt
+    updateClassName(element, value);
   } else if (key === 'value') {
     const inputEl = element as HTMLInputElement;
 
@@ -668,7 +671,7 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
 
 function removeAttribute(element: HTMLElement, key: string, value: any) {
   if (key === 'className') {
-    element.className = '';
+    updateClassName(element, '');
   } else if (key === 'value') {
     (element as HTMLInputElement).value = '';
   } else if (key === 'style') {
@@ -679,6 +682,55 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
     removeEventListener(element, key, value, key.endsWith('Capture'));
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     element.removeAttribute(key);
+  }
+}
+
+function updateClassName(element: HTMLElement, value: string) {
+  const extra = extraClasses.get(element);
+  if (!extra) {
+    element.className = value;
+    return;
+  }
+
+  const extraArray = Array.from(extra);
+  if (value) {
+    extraArray.push(value);
+  }
+
+  element.className = extraArray.join(' ');
+}
+
+export function addExtraClass(element: HTMLElement, className: string) {
+  element.classList.add(className);
+
+  const classList = extraClasses.get(element);
+  if (classList) {
+    classList.add(className);
+  } else {
+    extraClasses.set(element, new Set([className]));
+  }
+}
+
+export function removeExtraClass(element: HTMLElement, className: string) {
+  element.classList.remove(className);
+
+  const classList = extraClasses.get(element);
+  if (classList) {
+    classList.delete(className);
+
+    if (!classList.size) {
+      extraClasses.delete(element);
+    }
+  }
+}
+
+export function toggleExtraClass(element: HTMLElement, className: string, force?: boolean) {
+  element.classList.toggle(className, force);
+
+  if (element.classList.contains(className)) {
+    addExtraClass(element, className);
+  } else {
+    removeExtraClass(element, className);
   }
 }
 
