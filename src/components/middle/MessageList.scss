@@ -452,7 +452,7 @@
     }
   }
 
-  .animating > div > & {
+  .Transition.animating > .Transition__slide > & {
     &::-webkit-scrollbar {
       width: 0;
     }

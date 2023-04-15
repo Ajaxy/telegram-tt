@@ -60,7 +60,7 @@
     // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
     min-width: 0;
 
-    > div {
+    > .Transition__slide {
       display: flex;
       align-items: center;
       width: 100%;
