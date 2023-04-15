@@ -17,7 +17,7 @@ import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multi
 import { onBeforeUnload } from './util/schedulers';
 import { selectTabState } from './global/selectors';
 
-import App from './App';
+import App from './components/App';
 
 import './styles/index.scss';
 

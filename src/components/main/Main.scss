@@ -28,22 +28,17 @@
 }
 
 #LeftColumn {
-  width: 33vw;
-
   --left-column-min-width: 16rem;
   --left-column-max-width: 26.5rem;
 
+  width: 33vw;
   min-width: var(--left-column-min-width);
   max-width: var(--left-column-max-width);
-
   height: 100%;
   position: relative;
-  background-color: var(--color-background);
+  overflow: hidden;
 
-  & > div {
-    height: 100%;
-    overflow: hidden;
-  }
+  background-color: var(--color-background);
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);

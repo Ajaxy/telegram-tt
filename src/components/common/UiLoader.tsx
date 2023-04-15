@@ -3,16 +3,10 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 
 import { ApiMediaFormat } from '../../api/types';
 import type { TabState } from '../../global/types';
-import type { ThemeKey } from '../../types';
 import type { FC } from '../../lib/teact/teact';
 
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
-import {
-  selectIsRightColumnShown,
-  selectTheme,
-  selectTabState,
-} from '../../global/selectors';
-import { DARK_THEME_BG_COLOR, LIGHT_THEME_BG_COLOR } from '../../config';
+import { selectIsRightColumnShown, selectTabState } from '../../global/selectors';
 import { pause } from '../../util/schedulers';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
@@ -25,6 +19,7 @@ import useShowTransition from '../../hooks/useShowTransition';
 import useEffectOnce from '../../hooks/useEffectOnce';
 
 import styles from './UiLoader.module.scss';
+import appStyles from '../App.module.scss';
 
 // Workaround for incorrect bundling by Webpack: force including in the main chunk
 import '../ui/Modal.scss';
@@ -54,7 +49,6 @@ type OwnProps = {
 type StateProps = Pick<TabState, 'uiReadyState' | 'shouldSkipHistoryAnimations'> & {
   isRightColumnShown?: boolean;
   leftColumnWidth?: number;
-  theme: ThemeKey;
 };
 
 const MAX_PRELOAD_DELAY = 700;
@@ -111,7 +105,6 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   isRightColumnShown,
   shouldSkipHistoryAnimations,
   leftColumnWidth,
-  theme,
 }) => {
   const { setIsUiReady } = getActions();
 
@@ -154,11 +147,7 @@ const UiLoader: FC<OwnProps & StateProps> = ({
   });
 
   return (
-    <div
-      id="UiLoader"
-      className={styles.bg}
-      style={`--theme-background-color: ${theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR}`}
-    >
+    <>
       {children}
       {shouldRenderMask && !shouldSkipHistoryAnimations && Boolean(page) && (
         <div className={buildClassName(styles.mask, transitionClassNames)}>
@@ -168,23 +157,22 @@ const UiLoader: FC<OwnProps & StateProps> = ({
                 className={styles.left}
                 style={leftColumnWidth ? `width: ${leftColumnWidth}px` : undefined}
               />
-              <div className={buildClassName(styles.middle, styles.bg)} />
+              <div className={buildClassName(styles.middle, appStyles.bg)} />
               {isRightColumnShown && <div className={styles.right} />}
             </div>
           ) : (page === 'inactive' || page === 'lock') ? (
-            <div className={buildClassName(styles.blank, styles.bg)} />
+            <div className={buildClassName(styles.blank, appStyles.bg)} />
           ) : (
             <div className={styles.blank} />
           )}
         </div>
       )}
-    </div>
+    </>
   );
 };
 
 export default withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
-    const theme = selectTheme(global);
     const tabState = selectTabState(global);
 
     return {
@@ -192,7 +180,6 @@ export default withGlobal<OwnProps>(
       uiReadyState: tabState.uiReadyState,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       leftColumnWidth: global.leftColumnWidth,
-      theme,
     };
   },
 )(UiLoader);

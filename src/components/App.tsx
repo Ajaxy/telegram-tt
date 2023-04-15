@@ -1,30 +1,35 @@
-import type { FC } from './lib/teact/teact';
-import React, { useEffect } from './lib/teact/teact';
-import { getActions, withGlobal } from './global';
+import type { FC } from '../lib/teact/teact';
+import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
+import { getActions, withGlobal } from '../global';
 
-import type { GlobalState } from './global/types';
-import type { UiLoaderPage } from './components/common/UiLoader';
+import type { GlobalState } from '../global/types';
+import type { UiLoaderPage } from './common/UiLoader';
+import type { ThemeKey } from '../types';
 
-import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from './util/windowEnvironment';
-import { INACTIVE_MARKER, PAGE_TITLE } from './config';
-import { selectTabState } from './global/selectors';
-import { updateSizes } from './util/windowSize';
-import { addActiveTabChangeListener } from './util/activeTabMonitor';
-import { hasStoredSession } from './util/sessions';
-import { setupBeforeInstallPrompt } from './util/installPrompt';
-import buildClassName from './util/buildClassName';
-import { parseInitialLocationHash } from './util/routing';
-import useFlag from './hooks/useFlag';
-import usePrevious from './hooks/usePrevious';
-import useAppLayout from './hooks/useAppLayout';
+import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from '../util/windowEnvironment';
+import {
+  DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE,
+} from '../config';
+import { selectTabState, selectTheme } from '../global/selectors';
+import { updateSizes } from '../util/windowSize';
+import { addActiveTabChangeListener } from '../util/activeTabMonitor';
+import { hasStoredSession } from '../util/sessions';
+import buildClassName from '../util/buildClassName';
+import { parseInitialLocationHash } from '../util/routing';
+import useFlag from '../hooks/useFlag';
+import usePrevious from '../hooks/usePrevious';
+import useAppLayout from '../hooks/useAppLayout';
 
-import Auth from './components/auth/Auth';
-import Main from './components/main/Main.async';
-import LockScreen from './components/main/LockScreen.async';
-import AppInactive from './components/main/AppInactive';
-import Transition from './components/ui/Transition';
-import UiLoader from './components/common/UiLoader';
+import Auth from './auth/Auth';
+import Main from './main/Main.async';
+import LockScreen from './main/LockScreen.async';
+import AppInactive from './main/AppInactive';
+import Transition from './ui/Transition';
+import UiLoader from './common/UiLoader';
 // import Test from './components/test/TestNoRedundancy';
+
+import styles from './App.module.scss';
+import { setupBeforeInstallPrompt } from '../util/installPrompt';
 
 type StateProps = {
   authState: GlobalState['authState'];
@@ -32,6 +37,7 @@ type StateProps = {
   hasPasscode?: boolean;
   isInactiveAuth?: boolean;
   hasWebAuthTokenFailed?: boolean;
+  theme: ThemeKey;
 };
 
 enum AppScreens {
@@ -47,8 +53,9 @@ const App: FC<StateProps> = ({
   authState,
   isScreenLocked,
   hasPasscode,
-  hasWebAuthTokenFailed,
   isInactiveAuth,
+  hasWebAuthTokenFailed,
+  theme,
 }) => {
   const { disconnect } = getActions();
 
@@ -185,6 +192,17 @@ const App: FC<StateProps> = ({
     }
   }
 
+  useLayoutEffect(() => {
+    document.body.classList.add(styles.bg);
+  }, []);
+
+  useLayoutEffect(() => {
+    document.body.style.setProperty(
+      '--theme-background-color',
+      theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
+    );
+  }, [theme]);
+
   return (
     <UiLoader key="Loader" page={page} isMobile={isMobile}>
       <Transition
@@ -210,6 +228,7 @@ export default withGlobal(
       hasPasscode: global.passcode?.hasPasscode,
       isInactiveAuth: selectTabState(global).isInactive,
       hasWebAuthTokenFailed: global.hasWebAuthTokenFailed || global.hasWebAuthTokenPasswordRequired,
+      theme: selectTheme(global),
     };
   },
 )(App);
