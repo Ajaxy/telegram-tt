@@ -5,7 +5,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ApiSticker } from '../../api/types';
 
-import { IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 import * as mediaLoader from '../../util/mediaLoader';
 import buildClassName from '../../util/buildClassName';
 import generateIdFor from '../../util/generateIdFor';
@@ -18,6 +18,7 @@ import useThumbnail from '../../hooks/useThumbnail';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
 import useBoundsInSharedCanvas from '../../hooks/useBoundsInSharedCanvas';
+import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -107,7 +108,10 @@ const StickerView: FC<OwnProps> = ({
   const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia, undefined, cacheBuster);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !preloadedPreviewData));
-  const isFullMediaReady = fullMediaData && (isStatic || isPlayerReady);
+  // Delay mounting on Android until heavy animation ends
+  const [isReadyToMount, markReadyToMount, unmarkReadyToMount] = useFlag(!IS_ANDROID || !isHeavyAnimating());
+  useHeavyAnimationCheck(unmarkReadyToMount, markReadyToMount, isReadyToMount);
+  const isFullMediaReady = isReadyToMount && fullMediaData && (isStatic || isPlayerReady);
 
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
@@ -138,7 +142,7 @@ const StickerView: FC<OwnProps> = ({
         alt=""
         draggable={false}
       />
-      {isLottie ? (
+      {isReadyToMount && (isLottie ? (
         <AnimatedSticker
           key={renderId}
           renderId={renderId}
@@ -180,7 +184,7 @@ const StickerView: FC<OwnProps> = ({
           alt={emoji}
           draggable={false}
         />
-      )}
+      ))}
     </>
   );
 };
