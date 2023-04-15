@@ -58,7 +58,7 @@ type OwnProps = {
   animationLevel?: AnimationLevel;
   noPersonalPhoto?: boolean;
   lastSyncTime?: number;
-  showVideoOverwrite?: boolean;
+  forceVideo?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
 };
@@ -76,7 +76,7 @@ const Avatar: FC<OwnProps> = ({
   noLoop,
   loopIndefinitely,
   lastSyncTime,
-  showVideoOverwrite,
+  forceVideo,
   animationLevel,
   noPersonalPhoto,
   observeIntersection,
@@ -86,22 +86,22 @@ const Avatar: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
-  const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const isDeleted = user && isDeletedUser(user);
   const isReplies = user && isChatWithRepliesBot(user.id);
   const isForum = chat?.isForum;
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
-  const shouldShowUserVideo = !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
-    && user?.isPremium && user?.hasVideoAvatar;
-  const shouldShowPhotoVideo = showVideoOverwrite && photo?.isVideo;
-  const shouldShowVideo = (
-    isIntersecting && withVideo && (shouldShowPhotoVideo || shouldShowUserVideo)
+  const canShowVideo = (
+    withVideo && !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
+    && user?.isPremium && user?.hasVideoAvatar
   );
   const profilePhoto = user?.fullInfo?.personalPhoto || user?.fullInfo?.profilePhoto || user?.fullInfo?.fallbackPhoto;
   const hasProfileVideo = profilePhoto?.isVideo;
-  const shouldLoadVideo = shouldShowVideo && (hasProfileVideo || shouldShowPhotoVideo);
+  const isIntersectingForVideo = useIsIntersecting(
+    ref, canShowVideo && hasProfileVideo ? observeIntersection : undefined,
+  );
+  const shouldLoadVideo = isIntersectingForVideo && (canShowVideo || (forceVideo && photo?.isVideo));
 
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
@@ -125,7 +125,7 @@ const Avatar: FC<OwnProps> = ({
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl, lastSyncTime);
   const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
-  const shouldPlayVideo = Boolean(isIntersecting && videoBlobUrl && shouldLoadVideo);
+  const shouldPlayVideo = Boolean(isIntersectingForVideo && videoBlobUrl && shouldLoadVideo);
 
   const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
 
@@ -143,10 +143,10 @@ const Avatar: FC<OwnProps> = ({
 
   const userId = user?.id;
   useEffect(() => {
-    if (userId && shouldShowVideo && !profilePhoto) {
+    if (userId && canShowVideo && !profilePhoto) {
       loadFullUser({ userId });
     }
-  }, [loadFullUser, profilePhoto, userId, shouldShowVideo]);
+  }, [loadFullUser, profilePhoto, userId, canShowVideo]);
 
   const lang = useLang();
 
