@@ -116,7 +116,7 @@ class RLottie {
     private tgsUrl: string,
     private container: HTMLDivElement | HTMLCanvasElement,
     private renderId: string,
-    private viewId: string = generateIdFor(ID_STORE, true),
+    viewId: string = generateIdFor(ID_STORE, true),
     private params: Params = {},
     private customColor?: [number, number, number],
     private onLoad?: NoneToVoidFunction | undefined,
@@ -197,10 +197,14 @@ class RLottie {
     }
   }
 
-  playSegment([startFrameIndex, stopFrameIndex]: [number, number]) {
+  playSegment([startFrameIndex, stopFrameIndex]: [number, number], viewId?: string) {
+    if (viewId) {
+      this.views.get(viewId)!.isPaused = false;
+    }
     this.approxFrameIndex = Math.floor(startFrameIndex / this.reduceFactor);
     this.stopFrameIndex = Math.floor(stopFrameIndex / this.reduceFactor);
     this.direction = startFrameIndex < stopFrameIndex ? 1 : -1;
+
     this.doPlay();
   }
 
