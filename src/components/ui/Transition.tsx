@@ -1,5 +1,4 @@
 import type { RefObject } from 'react';
-import type { FC } from '../../lib/teact/teact';
 import React, { useLayoutEffect, useRef } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass, toggleExtraClass } from '../../lib/teact/teact-dom';
 import { getGlobal } from '../../global';
@@ -19,10 +18,11 @@ export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
+  nextKey?: number;
   name: (
     'none' | 'slide' | 'slide-rtl' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
-    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl' | 'slide-vertical'
-    | 'slide-vertical-fade'
+    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl' | 'semi-fade'
+    | 'slide-vertical' | 'slide-vertical-fade'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
@@ -32,9 +32,9 @@ export type TransitionProps = {
   // Used by async components which are usually remounted during first animation
   shouldWrap?: boolean;
   wrapExceptionKey?: number;
-  isDisabled?: boolean;
   id?: string;
   className?: string;
+  slideClassName?: string;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
@@ -48,9 +48,10 @@ const CLASSES = {
   afterSlides: 'Transition__after-slides',
 };
 
-const Transition: FC<TransitionProps> = ({
+function Transition({
   ref,
   activeKey,
+  nextKey,
   name,
   direction = 'auto',
   renderCount,
@@ -61,11 +62,12 @@ const Transition: FC<TransitionProps> = ({
   wrapExceptionKey,
   id,
   className,
+  slideClassName,
   onStart,
   onStop,
   children,
   afterChildren,
-}) => {
+}: TransitionProps) {
   // No need for a container to update on change
   const { animationLevel } = getGlobal().settings.byKey;
   const currentKeyRef = useRef<number>();
@@ -87,6 +89,9 @@ const Transition: FC<TransitionProps> = ({
   }
 
   rendersRef.current[activeKey] = children;
+  if (nextKey) {
+    rendersRef.current[nextKey] = children;
+  }
 
   useLayoutEffect(() => {
     function cleanup() {
@@ -102,30 +107,38 @@ const Transition: FC<TransitionProps> = ({
     }
 
     const container = containerRef.current!;
-    const childElements = (Array.from(container.children) as HTMLElement[])
-      .filter((el) => !el.classList.contains(CLASSES.afterSlides));
-
-    childElements.forEach((el) => {
-      addExtraClass(el, CLASSES.slide);
-    });
-
-    if (childElements.length === 1 && !activeKeyChanged) {
-      const firstChild = childElements[0];
-
-      if (name.startsWith('slide-optimized')) {
-        firstChild.style.transition = 'none';
-        firstChild.style.transform = 'translate3d(0, 0, 0)';
-      }
-
-      addExtraClass(firstChild, CLASSES.active);
-
-      return;
-    }
+    const keys = Object.keys(rendersRef.current).map(Number);
+    const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
+    const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
     const childNodes = Array.from(container.childNodes)
       .filter((el) => !(el instanceof HTMLElement && el.classList.contains(CLASSES.afterSlides)));
+    if (!childNodes.length) {
+      return;
+    }
 
-    if (!activeKeyChanged || !childNodes.length) {
+    const childElements = (Array.from(container.children) as HTMLElement[])
+      .filter((el) => !el.classList.contains(CLASSES.afterSlides));
+    childElements.forEach((el) => {
+      addExtraClass(el, CLASSES.slide);
+
+      if (slideClassName) {
+        addExtraClass(el, slideClassName);
+      }
+    });
+
+    if (!activeKeyChanged) {
+      if (childElements.length === 1 || (nextKey !== undefined && childElements.length === 2)) {
+        const firstChild = childNodes[activeIndex] as HTMLElement;
+
+        if (name.startsWith('slide-optimized')) {
+          firstChild.style.transition = 'none';
+          firstChild.style.transform = 'translate3d(0, 0, 0)';
+        }
+
+        addExtraClass(firstChild, CLASSES.active);
+      }
+
       return;
     }
 
@@ -136,10 +149,6 @@ const Transition: FC<TransitionProps> = ({
       || (direction === 'auto' && prevActiveKey > activeKey)
       || (direction === 'inverse' && prevActiveKey < activeKey)
     );
-
-    const keys = Object.keys(rendersRef.current).map(Number);
-    const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
-    const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
     if (name === 'slide-optimized' || name === 'slide-optimized-rtl') {
       performSlideOptimized(
@@ -243,6 +252,7 @@ const Transition: FC<TransitionProps> = ({
     });
   }, [
     activeKey,
+    nextKey,
     prevActiveKey,
     activeKeyChanged,
     direction,
@@ -252,6 +262,7 @@ const Transition: FC<TransitionProps> = ({
     renderCount,
     shouldRestoreHeight,
     shouldCleanup,
+    slideClassName,
     cleanupExceptionKey,
     animationLevel,
     forceUpdate,
@@ -307,7 +318,7 @@ const Transition: FC<TransitionProps> = ({
       {contents}
     </div>
   );
-};
+}
 
 export default Transition;
 
