@@ -18,6 +18,7 @@ import {
 import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
@@ -187,7 +188,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
 
   return (
     <Modal
-      className="StickerSetModal"
+      className={buildClassName('StickerSetModal', isEmoji && 'custom-emoji')}
       isOpen={isOpen}
       onClose={onClose}
       header={renderHeader()}

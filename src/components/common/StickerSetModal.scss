@@ -1,4 +1,12 @@
 .StickerSetModal {
+  &.custom-emoji {
+    --emoji-size: 2.25rem;
+
+    .stickers {
+      padding: 0 0.5rem;
+    }
+  }
+
   .modal-dialog {
     width: 26.25rem;
     max-width: 100%;
@@ -16,7 +24,7 @@
 
   .modal-content {
     text-align: center;
-    padding: 0;
+    padding: 0 !important;
   }
 
   .stickers {
