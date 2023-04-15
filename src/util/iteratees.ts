@@ -148,43 +148,6 @@ function isObject(value: any): value is object {
   return typeof value === 'object' && value !== null;
 }
 
-export function orderHistoryIds(listedIds: number[]) {
-  return listedIds.sort((a, b) => a - b);
-}
-
-export function mergeIdRanges(ranges: number[][], idsUpdate: number[]): number[][] {
-  let hasIntersection = false;
-  let newOutlyingLists = ranges.length ? ranges.map((list) => {
-    if (areSortedArraysIntersecting(list, idsUpdate) && !hasIntersection) {
-      hasIntersection = true;
-      return orderHistoryIds(unique(list.concat(idsUpdate)));
-    }
-    return list;
-  }) : [idsUpdate];
-
-  if (!hasIntersection) {
-    newOutlyingLists = newOutlyingLists.concat([idsUpdate]);
-  }
-
-  newOutlyingLists.sort((a, b) => a[0] - b[0]);
-
-  let length = newOutlyingLists.length;
-  for (let i = 0; i < length; i++) {
-    const array = newOutlyingLists[i];
-    const prevArray = newOutlyingLists[i - 1];
-
-    if (prevArray && (prevArray.includes(array[0]) || prevArray.includes(array[0] - 1))) {
-      newOutlyingLists[i - 1] = orderHistoryIds(unique(array.concat(prevArray)));
-      newOutlyingLists.splice(i, 1);
-
-      length--;
-      i--;
-    }
-  }
-
-  return newOutlyingLists;
-}
-
 export function findLast<T>(array: Array<T>, predicate: (value: T, index: number, obj: T[]) => boolean): T | undefined {
   let cursor = array.length;
 

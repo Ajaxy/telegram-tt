@@ -734,6 +734,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
 
   if (
     byCursor[cursor] === undefined
+    || dependencies.length !== byCursor[cursor].dependencies.length
     || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
   ) {
     if (DEBUG && debugKey) {
@@ -741,7 +742,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
       console.log(
         `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`,
         byCursor[cursor]
-          ? getUnequalProps(dependencies, byCursor[cursor].dependencies).join(', ')
+          ? getUnequalProps(byCursor[cursor].dependencies, dependencies).join(', ')
           : '[first render]',
       );
     }

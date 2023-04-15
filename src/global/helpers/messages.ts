@@ -14,6 +14,7 @@ import { getUserFullName } from './users';
 import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/windowEnvironment';
 import { getChatTitle, isUserId } from './chats';
 import { getGlobal } from '../index';
+import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 
@@ -252,4 +253,45 @@ export function getMessageSingleInlineButton(message: ApiMessage) {
   return message.inlineButtons?.length === 1
     && message.inlineButtons[0].length === 1
     && message.inlineButtons[0][0];
+}
+
+export function orderHistoryIds(listedIds: number[]) {
+  return listedIds.sort((a, b) => a - b);
+}
+
+export function orderPinnedIds(pinnedIds: number[]) {
+  return pinnedIds.sort((a, b) => b - a);
+}
+
+export function mergeIdRanges(ranges: number[][], idsUpdate: number[]): number[][] {
+  let hasIntersection = false;
+  let newOutlyingLists = ranges.length ? ranges.map((list) => {
+    if (areSortedArraysIntersecting(list, idsUpdate) && !hasIntersection) {
+      hasIntersection = true;
+      return orderHistoryIds(unique(list.concat(idsUpdate)));
+    }
+    return list;
+  }) : [idsUpdate];
+
+  if (!hasIntersection) {
+    newOutlyingLists = newOutlyingLists.concat([idsUpdate]);
+  }
+
+  newOutlyingLists.sort((a, b) => a[0] - b[0]);
+
+  let length = newOutlyingLists.length;
+  for (let i = 0; i < length; i++) {
+    const array = newOutlyingLists[i];
+    const prevArray = newOutlyingLists[i - 1];
+
+    if (prevArray && (prevArray.includes(array[0]) || prevArray.includes(array[0] - 1))) {
+      newOutlyingLists[i - 1] = orderHistoryIds(unique(array.concat(prevArray)));
+      newOutlyingLists.splice(i, 1);
+
+      length--;
+      i--;
+    }
+  }
+
+  return newOutlyingLists;
 }

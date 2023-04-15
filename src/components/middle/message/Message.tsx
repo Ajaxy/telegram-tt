@@ -576,7 +576,7 @@ const Message: FC<OwnProps & StateProps> = ({
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
 
-  const { result: detectedLanguage } = useTextLanguage(areTranslationsEnabled ? text?.text : undefined);
+  const detectedLanguage = useTextLanguage(areTranslationsEnabled ? text?.text : undefined);
 
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
     chatTranslations, chatId, messageId, requestedTranslationLanguage,

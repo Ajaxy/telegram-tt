@@ -27,11 +27,13 @@ import {
   selectTabState, selectOutlyingLists,
 } from '../selectors';
 import {
-  areSortedArraysEqual, mergeIdRanges, omit, orderHistoryIds, pickTruthy, unique,
+  areSortedArraysEqual, omit, pickTruthy, unique,
 } from '../../util/iteratees';
 import { updateTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { isLocalMessageId } from '../helpers';
+import {
+  isLocalMessageId, mergeIdRanges, orderHistoryIds, orderPinnedIds,
+} from '../helpers';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;
@@ -451,6 +453,24 @@ export function safeReplaceViewportIds<T extends GlobalState>(
     'viewportIds',
     areSortedArraysEqual(currentIds, newIds) ? currentIds : newIds,
     tabId,
+  );
+}
+
+export function safeReplacePinnedIds<T extends GlobalState>(
+  global: T,
+  chatId: string,
+  threadId: number,
+  newPinnedIds: number[],
+): T {
+  const currentIds = selectPinnedIds(global, chatId, threadId) || [];
+  const newIds = orderPinnedIds(newPinnedIds);
+
+  return replaceThreadParam(
+    global,
+    chatId,
+    threadId,
+    'pinnedIds',
+    areSortedArraysEqual(currentIds, newIds) ? currentIds : newIds,
   );
 }
 
