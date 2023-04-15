@@ -5,6 +5,7 @@
   flex-wrap: wrap;
   margin-top: 0.25rem;
   overflow: visible;
+  max-width: calc(var(--max-width) + 2.25rem);
 
   .Button {
     --reaction-background: var(--color-reaction);
