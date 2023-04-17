@@ -1,6 +1,6 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -29,7 +29,7 @@ import buildClassName, { createClassNameBuilder } from '../../util/buildClassNam
 import renderText from './helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';
-import useShowTransition from '../../hooks/useShowTransition';
+import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 
@@ -127,7 +127,13 @@ const Avatar: FC<OwnProps> = ({
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(isIntersectingForVideo && videoBlobUrl && shouldLoadVideo);
 
-  const { transitionClassNames } = useShowTransition(hasBlobUrl, undefined, hasBlobUrl, 'slow');
+  const transitionClassNames = useMediaTransition(hasBlobUrl);
+
+  const isOnline = !isSavedMessages && user && userStatus && isUserOnline(user, userStatus);
+  const onlineTransitionClassNames = useMediaTransition(isOnline);
+  const onlineClassNamesPrefixed = useMemo(() => {
+    return onlineTransitionClassNames.split(' ').map((c) => (c === 'shown' ? 'online' : `online-${c}`)).join(' ');
+  }, [onlineTransitionClassNames]);
 
   const handleVideoEnded = useCallback((e) => {
     const video = e.currentTarget;
@@ -193,7 +199,6 @@ const Avatar: FC<OwnProps> = ({
     content = getFirstLetters(text, 2);
   }
 
-  const isOnline = !isSavedMessages && user && userStatus && isUserOnline(user, userStatus);
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
@@ -202,7 +207,7 @@ const Avatar: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
-    isOnline && 'online',
+    onlineClassNamesPrefixed,
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
