@@ -748,7 +748,7 @@ const Message: FC<OwnProps & StateProps> = ({
   if (calculatedWidth) {
     style = `width: ${calculatedWidth + extraPadding}px`;
     reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
-  } else if (sticker) {
+  } else if (sticker && !hasSubheader) {
     const { width } = getStickerDimensions(sticker, isMobile);
     style = `width: ${width + extraPadding}px`;
     reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
