@@ -62,10 +62,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
 
     case 'error': {
-      if (update.error.message === 'SESSION_REVOKED') {
-        actions.signOut({ forceInitApi: true });
-      }
-
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const paymentShippingError = getShippingError(update.error);
         if (paymentShippingError) {
