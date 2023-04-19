@@ -265,7 +265,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.AddingMembers:
         return (
           <AddChatMembers
-            key={chatId!}
+            key={`add_chat_members_${chatId!}`}
             chatId={chatId!}
             isActive={isOpen && isActive}
             onNextStep={handleAppendingChatMembers}
@@ -275,7 +275,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.ChatInfo:
         return (
           <Profile
-            key={chatId!}
+            key={`profile_${chatId!}`}
             chatId={chatId!}
             topicId={isInsideTopic ? threadId : undefined}
             profileState={profileState}
@@ -284,11 +284,18 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           />
         );
       case RightColumnContent.Search:
-        return <RightSearch chatId={chatId!} threadId={threadId!} onClose={close} isActive={isOpen && isActive} />;
+        return (
+          <RightSearch
+            chatId={`right_search_${chatId!}`}
+            threadId={threadId!}
+            onClose={close}
+            isActive={isOpen && isActive}
+          />
+        );
       case RightColumnContent.Management:
         return (
           <Management
-            key={chatId!}
+            key={`management_${chatId!}`}
             chatId={chatId!}
             currentScreen={managementScreen}
             isPromotedByCurrentUser={isPromotedByCurrentUser}
