@@ -148,6 +148,7 @@ type OwnProps = {
 
 type StateProps =
   {
+    isOnActiveTab: boolean;
     editingMessage?: ApiMessage;
     chat?: ApiChat;
     draft?: ApiDraft;
@@ -222,6 +223,7 @@ const SENDING_ANIMATION_DURATION = 350;
 const APPENDIX = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" class="corner"/></g></svg>';
 
 const Composer: FC<OwnProps & StateProps> = ({
+  isOnActiveTab,
   dropAreaState,
   shouldSchedule,
   canScheduleUntilOnline,
@@ -429,7 +431,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     filteredCustomEmojis,
     insertEmoji,
   } = useEmojiTooltip(
-    Boolean(isReady && isForCurrentMessageList && shouldSuggestStickers && !hasAttachments),
+    Boolean(isReady && isOnActiveTab && isForCurrentMessageList && shouldSuggestStickers && !hasAttachments),
     getHtml,
     setHtml,
     undefined,
@@ -443,7 +445,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     closeCustomEmojiTooltip,
     insertCustomEmoji,
   } = useCustomEmojiTooltip(
-    Boolean(isReady && isForCurrentMessageList && shouldSuggestCustomEmoji && !hasAttachments),
+    Boolean(isReady && isOnActiveTab && isForCurrentMessageList && shouldSuggestCustomEmoji && !hasAttachments),
     getHtml,
     setHtml,
     getSelectionRange,
@@ -455,7 +457,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     isStickerTooltipOpen,
     closeStickerTooltip,
   } = useStickerTooltip(
-    Boolean(isReady && isForCurrentMessageList && shouldSuggestStickers && canSendStickers && !hasAttachments),
+    Boolean(isReady
+      && isOnActiveTab
+      && isForCurrentMessageList
+      && shouldSuggestStickers
+      && canSendStickers
+      && !hasAttachments),
     getHtml,
     stickersForEmoji,
   );
@@ -1582,6 +1589,7 @@ export default memo(withGlobal<OwnProps>(
     const tabState = selectTabState(global);
 
     return {
+      isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
       connectionState: global.connectionState,
       replyingToId,
