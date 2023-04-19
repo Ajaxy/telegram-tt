@@ -307,8 +307,11 @@ let pendingEffects = new Map<string, Effect>();
 let pendingCleanups = new Map<string, EffectCleanup>();
 let pendingLayoutEffects = new Map<string, Effect>();
 let pendingLayoutCleanups = new Map<string, EffectCleanup>();
+let areImmediateEffectsPending = false;
 
 const runUpdatePassOnRaf = throttleWithRafFallback(() => {
+  areImmediateEffectsPending = true;
+
   idsToExcludeFromUpdate = new Set();
 
   const instancesToUpdate = Array
@@ -335,8 +338,13 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
     forceUpdateComponent(instance);
   });
 
+  areImmediateEffectsPending = false;
   runImmediateEffects();
 });
+
+export function willRunImmediateEffects() {
+  return areImmediateEffectsPending;
+}
 
 export function runImmediateEffects() {
   const currentLayoutCleanups = pendingLayoutCleanups;
