@@ -26,6 +26,7 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
   const { isMasterTab, tabId = getCurrentTabId() } = payload;
 
   if (isMasterTab === selectTabState(global, tabId).isMasterTab) {
+    callApi('broadcastLocalDbUpdateFull');
     return;
   }
 
