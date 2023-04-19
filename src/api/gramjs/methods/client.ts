@@ -381,7 +381,7 @@ async function handleTerminatedSession() {
       id: new GramJs.InputUserSelf(),
     }), undefined, true);
   } catch (err: any) {
-    if (err.message === 'AUTH_KEY_UNREGISTERED') {
+    if (err.message === 'AUTH_KEY_UNREGISTERED' || err.message === 'SESSION_REVOKED') {
       onUpdate({
         '@type': 'updateConnectionState',
         connectionState: 'connectionStateBroken',
