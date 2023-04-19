@@ -286,7 +286,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.Search:
         return (
           <RightSearch
-            chatId={`right_search_${chatId!}`}
+            key={`right_search_${chatId!}`}
+            chatId={chatId!}
             threadId={threadId!}
             onClose={close}
             isActive={isOpen && isActive}
