@@ -51,7 +51,7 @@ import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-import resetScroll, { patchChromiumScroll } from '../../util/resetScroll';
+import resetScroll from '../../util/resetScroll';
 import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
 import renderText from '../common/helpers/renderText';
 
@@ -299,9 +299,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
-  const isScrollingRef = useRef<boolean>();
-  const isScrollPatchNeededRef = useRef<boolean>();
-
   const handleScroll = useCallback(() => {
     if (isScrollTopJustUpdatedRef.current) {
       isScrollTopJustUpdatedRef.current = false;
@@ -313,8 +310,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    isScrollingRef.current = true;
-
     if (!memoFocusingIdRef.current) {
       updateStickyDates(container, hasTools);
     }
@@ -325,8 +320,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
       if (forceNextPinnedInHeader) {
         onPinnedIntersectionChange({ hasScrolled: true });
       }
-
-      isScrollingRef.current = false;
 
       fastRaf(() => {
         if (!container.parentElement) {
@@ -493,11 +486,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
       newScrollTop = scrollHeight - offsetHeight;
     } else if (anchor) {
-      if (isScrollPatchNeededRef.current) {
-        isScrollPatchNeededRef.current = false;
-        patchChromiumScroll(container);
-      }
-
       const newAnchorTop = anchor.getBoundingClientRect().top;
       newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
     } else if (unreadDivider) {
@@ -654,8 +642,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
           threadId={threadId}
           type={type}
           isReady={isReady}
-          isScrollingRef={isScrollingRef}
-          isScrollPatchNeededRef={isScrollPatchNeededRef}
           threadTopMessageId={threadTopMessageId}
           hasLinkedChat={hasLinkedChat}
           isSchedule={messageGroups ? type === 'scheduled' : false}

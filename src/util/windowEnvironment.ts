@@ -110,14 +110,12 @@ export const IS_OFFSET_PATH_SUPPORTED = CSS.supports('offset-rotate: 0deg');
 export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()')
   || CSS.supports('-webkit-backdrop-filter: blur()');
 export const IS_COMPACT_MENU = !IS_TOUCH_ENV;
-export const IS_SCROLL_PATCH_NEEDED = !IS_MAC_OS && !IS_MOBILE;
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);
 export const IS_TRANSLATION_SUPPORTED = Boolean(Intl.DisplayNames);
 
-// Smaller area reduces scroll jumps caused by `patchChromiumScroll`
-export const MESSAGE_LIST_SENSITIVE_AREA = IS_SCROLL_PATCH_NEEDED ? 300 : 750;
+export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 
 export const MAX_BUFFER_SIZE = (IS_MOBILE ? 512 : 2000) * 1024 ** 2; // 512 OR 2000 MB
 
