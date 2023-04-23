@@ -79,6 +79,14 @@ export const PROFILE_SENSITIVE_AREA = 500;
 export const TOPIC_LIST_SENSITIVE_AREA = 600;
 export const COMMON_CHATS_LIMIT = 100;
 export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
+
+// As in Telegram for Android
+// https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
+export const TOP_REACTIONS_LIMIT = 100;
+
+// As in Telegram for Android
+// https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7781
+export const RECENT_REACTIONS_LIMIT = 50;
 export const REACTION_LIST_LIMIT = 100;
 export const REACTION_UNREAD_SLICE = 100;
 export const MENTION_UNREAD_SLICE = 100;
@@ -172,6 +180,8 @@ export const RECENT_STICKERS_LIMIT = 20;
 export const RECENT_STATUS_LIMIT = 20;
 export const EMOJI_STATUS_LOOP_LIMIT = 2;
 export const EMOJI_SIZES = 7;
+export const TOP_SYMBOL_SET_ID = 'top';
+export const POPULAR_SYMBOL_SET_ID = 'popular';
 export const RECENT_SYMBOL_SET_ID = 'recent';
 export const FAVORITE_SYMBOL_SET_ID = 'favorite';
 export const CHAT_STICKER_SET_ID = 'chatStickers';

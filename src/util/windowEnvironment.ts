@@ -109,7 +109,6 @@ if (IS_OPFS_SUPPORTED) {
 export const IS_OFFSET_PATH_SUPPORTED = CSS.supports('offset-rotate: 0deg');
 export const IS_BACKDROP_BLUR_SUPPORTED = CSS.supports('backdrop-filter: blur()')
   || CSS.supports('-webkit-backdrop-filter: blur()');
-export const IS_COMPACT_MENU = !IS_TOUCH_ENV;
 export const IS_INSTALL_PROMPT_SUPPORTED = 'onbeforeinstallprompt' in window;
 export const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in window;
 export const IS_OPEN_IN_NEW_TAB_SUPPORTED = IS_MULTITAB_SUPPORTED && !(IS_PWA && IS_MOBILE);

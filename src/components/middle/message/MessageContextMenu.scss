@@ -21,8 +21,20 @@
   }
 
   &.with-reactions .bubble {
-    margin-top: 3.5rem;
+    background: none;
+    backdrop-filter: none;
+    box-shadow: none;
+    padding: 3.5rem 0 0 !important;
   }
+
+  &.with-reactions .scrollable-content {
+    background: var(--color-background-compact-menu);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+    border-radius: var(--border-radius-default);
+    padding: 0.25rem 0;
+  }
+
 
   .backdrop {
     touch-action: none;

@@ -45,6 +45,7 @@ export { default as StickerSetModal } from '../components/common/StickerSetModal
 export { default as CustomEmojiSetsModal } from '../components/common/CustomEmojiSetsModal';
 export { default as HeaderMenuContainer } from '../components/middle/HeaderMenuContainer';
 export { default as MobileSearch } from '../components/middle/MobileSearch';
+export { default as ReactionPicker } from '../components/middle/message/ReactionPicker';
 
 export { default as AttachmentModal } from '../components/middle/composer/AttachmentModal';
 export { default as PollModal } from '../components/middle/composer/PollModal';

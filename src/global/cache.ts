@@ -334,6 +334,8 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'topInlineBots',
       'recentEmojis',
       'recentCustomEmojis',
+      'topReactions',
+      'recentReactions',
       'push',
       'serviceNotifications',
       'attachmentSettings',

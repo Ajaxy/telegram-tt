@@ -236,10 +236,19 @@
     position: absolute;
     font-size: 1rem;
     cursor: pointer;
-  }
+    border-radius: 50%;
+    padding: 0.25rem;
+    transition: background-color 0.15s;
 
-  &-container {
-    text-align: initial;
+    &:active,
+    &:focus {
+      background-color: var(--color-interactive-element-hover);
+    }
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--color-interactive-element-hover);
+      }
+    }
   }
 
   &-button {
@@ -253,29 +262,30 @@
   @include while-transition() {
     overflow: hidden;
   }
+}
 
-  .symbol-set-container {
-    display: grid;
-    justify-content: space-between;
-    grid-template-columns: repeat(auto-fill, var(--emoji-size, 4rem));
-    grid-gap: 0.625rem;
-    padding: 0.3125rem;
+.symbol-set-container {
+  display: grid !important;
+  justify-content: space-between;
+  grid-template-columns: repeat(auto-fill, var(--emoji-size, 4rem));
+  grid-gap: 0.625rem;
+  padding: 0.3125rem;
+  text-align: initial;
 
-    @media (max-width: 600px) {
-      grid-gap: 0.5rem;
-    }
+  @media (max-width: 600px) {
+    grid-gap: 0.5rem;
+  }
 
-    &:not(.shown) {
-      display: block;
-    }
+  &:not(.shown) {
+    display: block;
+  }
 
-    &.closing {
-      transition: none;
-    }
+  &.closing {
+    transition: none;
+  }
 
-    > .EmojiButton,
-    > .StickerButton {
-      margin: 0;
-    }
+  > .EmojiButton,
+  > .StickerButton {
+    margin: 0;
   }
 }

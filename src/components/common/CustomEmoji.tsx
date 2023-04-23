@@ -29,6 +29,7 @@ type OwnProps = {
   loopLimit?: number;
   style?: string;
   isBig?: boolean;
+  noPlay?: boolean;
   withGridFix?: boolean;
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
@@ -48,6 +49,7 @@ const CustomEmoji: FC<OwnProps> = ({
   documentId,
   size = STICKER_SIZE,
   isBig,
+  noPlay,
   className,
   loopLimit,
   style,
@@ -129,6 +131,7 @@ const CustomEmoji: FC<OwnProps> = ({
           sticker={customEmoji}
           isSmall={!isBig}
           size={size}
+          noPlay={noPlay}
           customColor={customColor}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}

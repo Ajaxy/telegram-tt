@@ -1,22 +1,11 @@
 .ReactionSelectorReaction {
-  margin-left: 0.5rem;
+  margin-inline-start: 0.25rem;
   position: relative;
   min-width: 2rem;
   min-height: 2rem;
 
   &:first-child {
-    margin-left: 0;
-  }
-
-  &__static {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-image: url('../../../assets/reaction-thumbs.png');
-    background-repeat: no-repeat;
-    background-size: auto 100%;
+    margin-inline-start: 0;
   }
 
   .AnimatedSticker {
@@ -36,8 +25,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
+    width: 2.375rem;
+    height: 2.375rem;
     border-radius: 50%;
     background-color: var(--color-background-compact-menu-hover);
   }

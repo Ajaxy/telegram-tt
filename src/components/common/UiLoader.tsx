@@ -26,7 +26,6 @@ import '../ui/Modal.scss';
 import './Avatar.scss';
 
 import telegramLogoPath from '../../assets/telegram-logo.svg';
-import reactionThumbsPath from '../../assets/reaction-thumbs.png';
 import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 import spoilerMaskPath from '../../assets/spoilers/mask.svg';
@@ -81,7 +80,6 @@ const preloadTasks = {
     loadModule(Bundles.Main)
       .then(preloadFonts),
     preloadAvatars(),
-    preloadImage(reactionThumbsPath),
     preloadImage(spoilerMaskPath),
   ]),
   authPhoneNumber: () => Promise.all([

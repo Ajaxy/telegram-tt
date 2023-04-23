@@ -16,7 +16,7 @@ import useMedia from '../../hooks/useMedia';
 import useBuffering from '../../hooks/useBuffering';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useLang from '../../hooks/useLang';
-import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../hooks/useMenuPosition';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 
 import Spinner from '../ui/Spinner';
@@ -83,7 +83,7 @@ const GifButton: FC<OwnProps> = ({
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useContextMenuPosition(
+  } = useMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,

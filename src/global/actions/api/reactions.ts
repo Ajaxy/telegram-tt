@@ -1,7 +1,10 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
-import * as mediaLoader from '../../../util/mediaLoader';
+
+import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
+
+import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
   selectChat,
   selectChatMessage, selectCurrentChat, selectTabState,
@@ -13,12 +16,11 @@ import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions
 import {
   addChatMessagesById, addChats, addUsers, updateChatMessage,
 } from '../../reducers';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import { ANIMATION_LEVEL_MAX } from '../../../config';
-import { isSameReaction, getUserReactions, isMessageLocal } from '../../helpers';
-import type { ActionReturnType } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
+import * as mediaLoader from '../../../util/mediaLoader';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { isSameReaction, getUserReactions, isMessageLocal } from '../../helpers';
 
 const INTERACTION_RANDOM_OFFSET = 40;
 
@@ -37,6 +39,9 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
     }
     if (availableReaction.centerIcon) {
       mediaLoader.fetch(`sticker${availableReaction.centerIcon.id}`, ApiMediaFormat.BlobUrl);
+    }
+    if (availableReaction.appearAnimation) {
+      mediaLoader.fetch(`sticker${availableReaction.appearAnimation.id}`, ApiMediaFormat.BlobUrl);
     }
   });
 
@@ -104,15 +109,20 @@ addActionHandler('sendDefaultReaction', (global, actions, payload): ActionReturn
   });
 });
 
-addActionHandler('toggleReaction', (global, actions, payload): ActionReturnType => {
-  const { chatId, reaction, tabId = getCurrentTabId() } = payload;
+addActionHandler('toggleReaction', async (global, actions, payload): Promise<void> => {
+  const {
+    chatId,
+    reaction,
+    shouldAddToRecent,
+    tabId = getCurrentTabId(),
+  } = payload;
   let { messageId } = payload;
 
   const chat = selectChat(global, chatId);
   let message = selectChatMessage(global, chatId, messageId);
 
   if (!chat || !message) {
-    return undefined;
+    return;
   }
 
   const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
@@ -131,14 +141,10 @@ addActionHandler('toggleReaction', (global, actions, payload): ActionReturnType 
     ? userReactions.filter((userReaction) => !isSameReaction(userReaction, reaction)) : [...userReactions, reaction];
 
   const limit = selectMaxUserReactions(global);
-
   const reactions = newUserReactions.slice(-limit);
-
-  void callApi('sendReaction', { chat, messageId, reactions });
-
   const { animationLevel } = global.settings.byKey;
-
   const tabState = selectTabState(global, tabId);
+
   if (animationLevel === ANIMATION_LEVEL_MAX) {
     const newActiveReactions = hasReaction ? omit(tabState.activeReactions, [messageId]) : {
       ...tabState.activeReactions,
@@ -155,7 +161,21 @@ addActionHandler('toggleReaction', (global, actions, payload): ActionReturnType 
     }, tabId);
   }
 
-  return addMessageReaction(global, message, reactions);
+  global = addMessageReaction(global, message, reactions);
+  setGlobal(global);
+
+  try {
+    await callApi('sendReaction', {
+      chat,
+      messageId,
+      reactions,
+      shouldAddToRecent,
+    });
+  } catch (error) {
+    global = getGlobal();
+    global = addMessageReaction(global, message, userReactions);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('stopActiveReaction', (global, actions, payload): ActionReturnType => {
@@ -394,4 +414,46 @@ addActionHandler('readAllReactions', (global, actions, payload): ActionReturnTyp
     unreadReactionsCount: undefined,
     unreadReactions: undefined,
   });
+});
+
+addActionHandler('loadTopReactions', async (global): Promise<void> => {
+  const result = await callApi('fetchTopReactions', {});
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    topReactions: result.reactions,
+  };
+  setGlobal(global);
+});
+
+addActionHandler('loadRecentReactions', async (global): Promise<void> => {
+  const result = await callApi('fetchRecentReactions', {});
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    recentReactions: result.reactions,
+  };
+  setGlobal(global);
+});
+
+addActionHandler('clearRecentReactions', async (global): Promise<void> => {
+  const result = await callApi('clearRecentReactions');
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global = {
+    ...global,
+    recentReactions: [],
+  };
+  setGlobal(global);
 });

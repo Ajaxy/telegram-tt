@@ -76,6 +76,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
 
   recentEmojis: ['grinning', 'kissing_heart', 'christmas_tree', 'brain', 'trophy', 'duck', 'cherries'],
   recentCustomEmojis: ['5377305978079288312'],
+  topReactions: [],
+  recentReactions: [],
 
   stickers: {
     setsById: {},

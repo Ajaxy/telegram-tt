@@ -21,7 +21,7 @@ import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
-import CustomEmojiPicker from './CustomEmojiPicker';
+import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
 import SymbolMenuFooter, { SYMBOL_MENU_TAB_TITLES, SymbolMenuTabs } from './SymbolMenuFooter';
@@ -100,7 +100,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   transformOriginY,
   style,
 }) => {
-  const { loadPremiumSetStickers, loadFeaturedEmojiStickers } = getActions();
+  const { loadPremiumSetStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
   const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
@@ -124,12 +124,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [canSendPlainText]);
 
   useEffect(() => {
-    if (!lastSyncTime) return;
-    if (isCurrentUserPremium) {
+    if (lastSyncTime && isCurrentUserPremium) {
       loadPremiumSetStickers();
     }
-    loadFeaturedEmojiStickers();
-  }, [isCurrentUserPremium, lastSyncTime, loadFeaturedEmojiStickers, loadPremiumSetStickers]);
+  }, [isCurrentUserPremium, lastSyncTime, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
     if (!isMobile || isAttachmentModal) {

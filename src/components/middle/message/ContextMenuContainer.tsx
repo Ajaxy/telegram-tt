@@ -61,13 +61,14 @@ export type OwnProps = {
   messageListType: MessageListType;
   noReplies?: boolean;
   detectedLanguage?: string;
-  onClose: () => void;
-  onCloseAnimationEnd: () => void;
   repliesThreadInfo?: ApiThreadInfo;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd: NoneToVoidFunction;
 };
 
 type StateProps = {
   availableReactions?: ApiAvailableReaction[];
+  topReactions?: ApiReaction[];
   customEmojiSetsInfo?: ApiStickerSetInfo[];
   customEmojiSets?: ApiStickerSet[];
   noOptions?: boolean;
@@ -106,8 +107,11 @@ type StateProps = {
   threadId?: number;
 };
 
+const REACTION_PICKER_APPEARANCE_DURATION_MS = 250;
+
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   availableReactions,
+  topReactions,
   isOpen,
   messageListType,
   chatUsername,
@@ -182,11 +186,13 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     requestMessageTranslation,
     showOriginalMessage,
     openMessageLanguageModal,
+    openReactionPicker,
   } = getActions();
 
   const lang = useLang();
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [noAnimationOnClose, setNoAnimationOnClose] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -255,7 +261,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setIsReportModalOpen(true);
   }, []);
 
-  const closeMenu = useCallback(() => {
+  const closeMenu = useCallback((noCloseAnimation = false) => {
+    setNoAnimationOnClose(noCloseAnimation);
     setIsMenuOpen(false);
     onClose();
   }, [onClose]);
@@ -409,10 +416,17 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleToggleReaction = useCallback((reaction: ApiReaction) => {
     toggleReaction({
-      chatId: message.chatId, messageId: message.id, reaction,
+      chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
     });
     closeMenu();
   }, [closeMenu, message, toggleReaction]);
+
+  const handleReactionPickerOpen = useCallback((position: IAnchorPosition) => {
+    openReactionPicker({ chatId: message.chatId, messageId: message.id, position });
+    setTimeout(() => {
+      closeMenu(true);
+    }, REACTION_PICKER_APPEARANCE_DURATION_MS);
+  }, [closeMenu, message.chatId, message.id]);
 
   const handleTranslate = useCallback(() => {
     requestMessageTranslation({
@@ -453,6 +467,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     <div className={buildClassName('ContextMenuContainer', transitionClassNames)}>
       <MessageContextMenu
         availableReactions={availableReactions}
+        topReactions={topReactions}
         message={message}
         isPrivate={isPrivate}
         isCurrentUserPremium={isCurrentUserPremium}
@@ -488,6 +503,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canSelectLanguage={canSelectLanguage}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
+        noTransition={noAnimationOnClose}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
         noReplies={noReplies}
@@ -515,6 +531,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onShowSeenBy={handleOpenSeenByModal}
         onToggleReaction={handleToggleReaction}
         onShowReactors={handleOpenReactorListModal}
+        onReactionPickerOpen={handleReactionPickerOpen}
         onTranslate={handleTranslate}
         onShowOriginal={handleShowOriginal}
         onSelectLanguage={handleSelectLanguage}
@@ -617,6 +634,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       availableReactions: global.availableReactions,
+      topReactions: global.topReactions,
       noOptions,
       canSendNow: isScheduled,
       canReschedule: isScheduled,

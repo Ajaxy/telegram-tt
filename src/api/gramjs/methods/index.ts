@@ -87,8 +87,8 @@ export {
 } from './calls';
 
 export {
-  getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList,
-  setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction,
+  getAvailableReactions, sendReaction, sendEmojiInteraction, fetchMessageReactionsList, clearRecentReactions,
+  setDefaultReaction, fetchMessageReactions, sendWatchingEmojiInteraction, fetchRecentReactions, fetchTopReactions,
 } from './reactions';
 
 export {

@@ -1,54 +1,67 @@
-import type { FC } from '../../../lib/teact/teact';
+import type { RefObject } from 'react';
 import React, {
   useState, useEffect, memo, useRef, useMemo, useCallback,
-} from '../../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../../global';
+} from '../../lib/teact/teact';
+import { getGlobal, withGlobal } from '../../global';
 
-import type { ApiStickerSet, ApiSticker } from '../../../api/types';
-import type { StickerSetOrRecent } from '../../../types';
+import type { FC } from '../../lib/teact/teact';
+import type {
+  ApiStickerSet, ApiSticker, ApiReaction, ApiAvailableReaction,
+} from '../../api/types';
+import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
 import {
   CHAT_STICKER_SET_ID,
   FAVORITE_SYMBOL_SET_ID,
+  POPULAR_SYMBOL_SET_ID,
   PREMIUM_STICKER_SET_ID,
   RECENT_SYMBOL_SET_ID,
   SLIDE_TRANSITION_DURATION,
   STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
-} from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import fastSmoothScroll from '../../../util/fastSmoothScroll';
-import buildClassName from '../../../util/buildClassName';
-import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
-import { pickTruthy, unique } from '../../../util/iteratees';
+  TOP_SYMBOL_SET_ID,
+} from '../../config';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import fastSmoothScroll from '../../util/fastSmoothScroll';
+import buildClassName from '../../util/buildClassName';
+import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';
+import { pickTruthy, unique } from '../../util/iteratees';
+import { isSameReaction } from '../../global/helpers';
 import {
   selectIsAlwaysHighPriorityEmoji,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
-} from '../../../global/selectors';
+} from '../../global/selectors';
 
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
+import useAsyncRendering from '../right/hooks/useAsyncRendering';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useHorizontalScroll from '../../hooks/useHorizontalScroll';
+import useLang from '../../hooks/useLang';
+import useAppLayout from '../../hooks/useAppLayout';
 
-import Loading from '../../ui/Loading';
-import Button from '../../ui/Button';
-import StickerButton from '../../common/StickerButton';
+import Loading from '../ui/Loading';
+import Button from '../ui/Button';
+import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
-import StickerSetCover from './StickerSetCover';
+import StickerSetCover from '../middle/composer/StickerSetCover';
 
-import './StickerPicker.scss';
+import '../middle/composer/StickerPicker.scss';
+import styles from './CustomEmojiPicker.module.scss';
 
 type OwnProps = {
+  scrollContainerRef?: RefObject<HTMLDivElement>;
+  scrollHeaderRef?: RefObject<HTMLDivElement>;
   chatId?: string;
   className?: string;
   loadAndPlay: boolean;
-  isStatusPicker?: boolean;
   idPrefix?: string;
   withDefaultTopicIcons?: boolean;
   onCustomEmojiSelect: (sticker: ApiSticker) => void;
+  onReactionSelect?: (reaction: ApiReaction) => void;
+  selectedReactionIds?: string[];
+  isStatusPicker?: boolean;
+  isReactionPicker?: boolean;
   onContextMenuOpen?: NoneToVoidFunction;
   onContextMenuClose?: NoneToVoidFunction;
   onContextMenuClick?: NoneToVoidFunction;
@@ -58,7 +71,10 @@ type StateProps = {
   customEmojisById?: Record<string, ApiSticker>;
   recentCustomEmojiIds?: string[];
   recentStatusEmojis?: ApiSticker[];
+  topReactions?: ApiReaction[];
+  recentReactions?: ApiReaction[];
   stickerSetsById: Record<string, ApiStickerSet>;
+  availableReactions?: ApiAvailableReaction[];
   addedCustomEmojiIds?: string[];
   defaultTopicIconsId?: string;
   defaultStatusIconsId?: string;
@@ -72,20 +88,37 @@ const SMOOTH_SCROLL_DISTANCE = 500;
 const HEADER_BUTTON_WIDTH = 52; // px (including margin)
 const STICKER_INTERSECTION_THROTTLE = 200;
 const DEFAULT_ID_PREFIX = 'custom-emoji-set';
+const TOP_REACTIONS_COUNT = 16;
+const RECENT_REACTIONS_COUNT = 32;
+const FADED_BUTTON_SET_IDS = new Set([RECENT_SYMBOL_SET_ID, FAVORITE_SYMBOL_SET_ID, POPULAR_SYMBOL_SET_ID]);
+const STICKER_SET_IDS_WITH_COVER = new Set([
+  RECENT_SYMBOL_SET_ID,
+  FAVORITE_SYMBOL_SET_ID,
+  POPULAR_SYMBOL_SET_ID,
+  CHAT_STICKER_SET_ID,
+  PREMIUM_STICKER_SET_ID,
+]);
 
 const stickerSetIntersections: boolean[] = [];
 
 const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
+  scrollContainerRef,
+  scrollHeaderRef,
   className,
   loadAndPlay,
   addedCustomEmojiIds,
   customEmojisById,
   recentCustomEmojiIds,
+  selectedReactionIds,
   recentStatusEmojis,
   stickerSetsById,
+  topReactions,
+  recentReactions,
+  availableReactions,
   idPrefix = DEFAULT_ID_PREFIX,
   customEmojiFeaturedIds,
   canAnimate,
+  isReactionPicker,
   isStatusPicker,
   isSavedMessages,
   isCurrentUserPremium,
@@ -93,20 +126,28 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   defaultTopicIconsId,
   defaultStatusIconsId,
   onCustomEmojiSelect,
+  onReactionSelect,
   onContextMenuOpen,
   onContextMenuClose,
   onContextMenuClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
+  let containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
-  const headerRef = useRef<HTMLDivElement>(null);
+  let headerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
+  if (scrollContainerRef) {
+    containerRef = scrollContainerRef;
+  }
+  if (scrollHeaderRef) {
+    headerRef = scrollHeaderRef;
+  }
 
   const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
+  const { isMobile } = useAppLayout();
 
   const recentCustomEmojis = useMemo(() => {
     return isStatusPicker
@@ -149,9 +190,43 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       return MEMO_EMPTY_ARRAY;
     }
 
-    const defaultSets: StickerSetOrRecent[] = [];
+    const defaultSets: StickerSetOrReactionsSetOrRecent[] = [];
 
-    if (isStatusPicker) {
+    if (isReactionPicker) {
+      const topReactionsSlice = topReactions?.slice(0, TOP_REACTIONS_COUNT) || [];
+      if (topReactionsSlice?.length) {
+        defaultSets.push({
+          id: TOP_SYMBOL_SET_ID,
+          accessHash: '',
+          title: lang('Reactions'),
+          reactions: topReactionsSlice,
+          count: topReactionsSlice.length,
+          isEmoji: true,
+        });
+      }
+
+      const cleanRecentReactions = (recentReactions || [])
+        .filter((reaction) => !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction)))
+        .slice(0, RECENT_REACTIONS_COUNT);
+      const cleanAvailableReactions = (availableReactions || [])
+        .map(({ reaction }) => reaction)
+        .filter((reaction) => {
+          return !topReactionsSlice.some((topReaction) => isSameReaction(topReaction, reaction))
+            && !cleanRecentReactions.some((topReaction) => isSameReaction(topReaction, reaction));
+        });
+      if (cleanAvailableReactions?.length || cleanRecentReactions?.length) {
+        const isPopular = !cleanRecentReactions?.length;
+        const allRecentReactions = cleanRecentReactions.concat(cleanAvailableReactions);
+        defaultSets.push({
+          id: isPopular ? POPULAR_SYMBOL_SET_ID : RECENT_SYMBOL_SET_ID,
+          accessHash: '',
+          title: lang(isPopular ? 'PopularReactions' : 'RecentStickers'),
+          reactions: allRecentReactions,
+          count: allRecentReactions.length,
+          isEmoji: true,
+        });
+      }
+    } else if (isStatusPicker) {
       const defaultStatusIconsPack = stickerSetsById[defaultStatusIconsId!];
       if (defaultStatusIconsPack.stickers?.length) {
         const stickers = (defaultStatusIconsPack.stickers || []).concat(recentCustomEmojis || []);
@@ -179,7 +254,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         title: lang('RecentStickers'),
         stickers: recentCustomEmojis,
         count: recentCustomEmojis.length,
-        isEmoji: true as true,
+        isEmoji: true,
       });
     }
 
@@ -192,8 +267,9 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       ...setsToDisplay,
     ];
   }, [
-    addedCustomEmojiIds, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
-    customEmojiFeaturedIds, stickerSetsById, defaultStatusIconsId, lang, defaultTopicIconsId,
+    addedCustomEmojiIds, isReactionPicker, isStatusPicker, withDefaultTopicIcons, recentCustomEmojis,
+    customEmojiFeaturedIds, stickerSetsById, topReactions, availableReactions, lang, recentReactions,
+    defaultStatusIconsId, defaultTopicIconsId,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -201,10 +277,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     && allSets.filter((set) => set.stickers?.length).length === 0
   ), [allSets, areAddedLoaded]);
 
-  const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
-  const shouldRenderContents = areAddedLoaded && canRenderContents && !noPopulatedSets;
+  const canRenderContent = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
+  const shouldRenderContent = areAddedLoaded && canRenderContent && !noPopulatedSets;
 
-  useHorizontalScroll(headerRef, !shouldRenderContents);
+  useHorizontalScroll(headerRef, !(isMobile && shouldRenderContent));
 
   // Scroll container and header when active set changes
   useEffect(() => {
@@ -232,7 +308,11 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     onCustomEmojiSelect(emoji);
   }, [onCustomEmojiSelect]);
 
-  function renderCover(stickerSet: StickerSetOrRecent, index: number) {
+  const handleReactionSelect = useCallback((reaction: ApiReaction) => {
+    onReactionSelect?.(reaction);
+  }, [onReactionSelect]);
+
+  function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',
@@ -242,25 +322,24 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     const withSharedCanvas = index < STICKER_PICKER_MAX_SHARED_COVERS;
     const isHq = selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSet as ApiStickerSet);
 
-    if (stickerSet.id === RECENT_SYMBOL_SET_ID
-      || stickerSet.id === FAVORITE_SYMBOL_SET_ID
-      || stickerSet.id === CHAT_STICKER_SET_ID
-      || stickerSet.id === PREMIUM_STICKER_SET_ID
-      || stickerSet.hasThumbnail
-      || !firstSticker
-    ) {
+    if (stickerSet.id === TOP_SYMBOL_SET_ID) {
+      return undefined;
+    }
+
+    if (STICKER_SET_IDS_WITH_COVER.has(stickerSet.id) || stickerSet.hasThumbnail || !firstSticker) {
+      const isFaded = FADED_BUTTON_SET_IDS.has(stickerSet.id);
       return (
         <Button
           key={stickerSet.id}
           className={buttonClassName}
           ariaLabel={stickerSet.title}
           round
-          faded={stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === FAVORITE_SYMBOL_SET_ID}
+          faded={isFaded}
           color="translucent"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => selectStickerSet(index)}
         >
-          {stickerSet.id === RECENT_SYMBOL_SET_ID ? (
+          {(stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === POPULAR_SYMBOL_SET_ID) ? (
             <i className="icon-recent" />
           ) : (
             <StickerSetCover
@@ -272,29 +351,29 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           )}
         </Button>
       );
-    } else {
-      return (
-        <StickerButton
-          key={stickerSet.id}
-          sticker={firstSticker}
-          size={STICKER_SIZE_PICKER_HEADER}
-          title={stickerSet.title}
-          className={buttonClassName}
-          noAnimate={!canAnimate || !loadAndPlay}
-          observeIntersection={observeIntersectionForCovers}
-          noContextMenu
-          isCurrentUserPremium
-          sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
-          onClick={selectStickerSet}
-          clickArg={index}
-        />
-      );
     }
+
+    return (
+      <StickerButton
+        key={stickerSet.id}
+        sticker={firstSticker}
+        size={STICKER_SIZE_PICKER_HEADER}
+        title={stickerSet.title}
+        className={buttonClassName}
+        noAnimate={!canAnimate || !loadAndPlay}
+        observeIntersection={observeIntersectionForCovers}
+        noContextMenu
+        isCurrentUserPremium
+        sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
+        onClick={selectStickerSet}
+        clickArg={index}
+      />
+    );
   }
 
-  const fullClassName = buildClassName('StickerPicker', 'CustomEmojiPicker', className);
+  const fullClassName = buildClassName('StickerPicker', styles.root, className);
 
-  if (!shouldRenderContents) {
+  if (!shouldRenderContent) {
     return (
       <div className={fullClassName}>
         {noPopulatedSets ? (
@@ -322,34 +401,43 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         ref={containerRef}
         className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
       >
-        {allSets.map((stickerSet, i) => (
-          <StickerSet
-            key={stickerSet.id}
-            stickerSet={stickerSet}
-            loadAndPlay={Boolean(canAnimate && loadAndPlay)}
-            index={i}
-            idPrefix={idPrefix}
-            observeIntersection={observeIntersection}
-            shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
-            isSavedMessages={isSavedMessages}
-            isStatusPicker={isStatusPicker}
-            shouldHideRecentHeader={withDefaultTopicIcons || isStatusPicker}
-            withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
-            withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
-            isCurrentUserPremium={isCurrentUserPremium}
-            onStickerSelect={handleEmojiSelect}
-            onContextMenuOpen={onContextMenuOpen}
-            onContextMenuClose={onContextMenuClose}
-            onContextMenuClick={onContextMenuClick}
-          />
-        ))}
+        {allSets.map((stickerSet, i) => {
+          const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
+            || (stickerSet.id === RECENT_SYMBOL_SET_ID && (withDefaultTopicIcons || isStatusPicker));
+
+          return (
+            <StickerSet
+              key={stickerSet.id}
+              stickerSet={stickerSet}
+              loadAndPlay={Boolean(canAnimate && loadAndPlay)}
+              index={i}
+              idPrefix={idPrefix}
+              observeIntersection={observeIntersection}
+              shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+              isSavedMessages={isSavedMessages}
+              isStatusPicker={isStatusPicker}
+              isReactionPicker={isReactionPicker}
+              shouldHideHeader={shouldHideHeader}
+              withDefaultTopicIcon={withDefaultTopicIcons && stickerSet.id === RECENT_SYMBOL_SET_ID}
+              withDefaultStatusIcon={isStatusPicker && stickerSet.id === RECENT_SYMBOL_SET_ID}
+              isCurrentUserPremium={isCurrentUserPremium}
+              selectedReactionIds={selectedReactionIds}
+              availableReactions={availableReactions}
+              onReactionSelect={handleReactionSelect}
+              onStickerSelect={handleEmojiSelect}
+              onContextMenuOpen={onContextMenuOpen}
+              onContextMenuClose={onContextMenuClose}
+              onContextMenuClick={onContextMenuClick}
+            />
+          );
+        })}
       </div>
     </div>
   );
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId, isStatusPicker }): StateProps => {
+  (global, { chatId, isStatusPicker, isReactionPicker }): StateProps => {
     const {
       stickers: {
         setsById: stickerSetsById,
@@ -362,6 +450,8 @@ export default memo(withGlobal<OwnProps>(
         },
       },
       recentCustomEmojis: recentCustomEmojiIds,
+      recentReactions,
+      topReactions,
     } = global;
 
     const isSavedMessages = Boolean(chatId && selectIsChatWithSelf(global, chatId));
@@ -378,6 +468,9 @@ export default memo(withGlobal<OwnProps>(
       customEmojiFeaturedIds,
       defaultTopicIconsId: global.defaultTopicIconsId,
       defaultStatusIconsId: global.defaultStatusIconsId,
+      topReactions: isReactionPicker ? topReactions : undefined,
+      recentReactions: isReactionPicker ? recentReactions : undefined,
+      availableReactions: isReactionPicker ? global.availableReactions : undefined,
     };
   },
 )(CustomEmojiPicker));

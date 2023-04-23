@@ -10,7 +10,7 @@ import type { ApiVideo, ApiSticker } from '../../../api/types';
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_MODAL_CSS_SELECTOR } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import useFlag from '../../../hooks/useFlag';
-import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 
 import Button from '../../ui/Button';
 import Spinner from '../../ui/Spinner';
@@ -146,7 +146,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useContextMenuPosition(
+  } = useMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,

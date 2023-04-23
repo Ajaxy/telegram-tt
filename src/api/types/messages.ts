@@ -459,6 +459,7 @@ export interface ApiReactionCount {
 
 export interface ApiAvailableReaction {
   selectAnimation?: ApiDocument;
+  appearAnimation?: ApiDocument;
   activateAnimation?: ApiDocument;
   effectAnimation?: ApiDocument;
   staticIcon?: ApiDocument;

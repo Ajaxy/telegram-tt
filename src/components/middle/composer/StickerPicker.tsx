@@ -4,7 +4,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiStickerSet, ApiSticker, ApiChat } from '../../../api/types';
-import type { StickerSetOrRecent } from '../../../types';
+import type { StickerSetOrReactionsSetOrRecent } from '../../../types';
 import type { FC } from '../../../lib/teact/teact';
 
 import {
@@ -33,7 +33,7 @@ import Avatar from '../../common/Avatar';
 import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
 import StickerButton from '../../common/StickerButton';
-import StickerSet from './StickerSet';
+import StickerSet from '../../common/StickerSet';
 import StickerSetCover from './StickerSetCover';
 import PremiumIcon from '../../common/PremiumIcon';
 
@@ -263,7 +263,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     removeRecentSticker({ sticker });
   }, [removeRecentSticker]);
 
-  function renderCover(stickerSet: StickerSetOrRecent, index: number) {
+  function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
     const buttonClassName = buildClassName(
       'symbol-set-button sticker-set-button',

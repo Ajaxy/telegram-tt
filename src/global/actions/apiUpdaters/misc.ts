@@ -38,6 +38,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.loadRecentStickers();
       break;
 
+    case 'updateRecentReactions':
+      actions.loadRecentReactions();
+      break;
+
     case 'updateRecentEmojiStatuses':
       actions.loadRecentEmojiStatuses();
       break;
