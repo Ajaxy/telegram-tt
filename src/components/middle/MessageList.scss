@@ -459,7 +459,7 @@
     }
 
     body.is-symbol-menu-open & {
-      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height) + var(--symbol-menu-footer-height))), 0);
+      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
     }
   }
 

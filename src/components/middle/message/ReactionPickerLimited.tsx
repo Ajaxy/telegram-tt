@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import React, { memo, useRef, useMemo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
@@ -18,7 +17,6 @@ import ReactionEmoji from '../../common/ReactionEmoji';
 import styles from './ReactionPickerLimited.module.scss';
 
 type OwnProps = {
-  scrollContainerRef?: RefObject<HTMLDivElement>;
   chatId: string;
   loadAndPlay: boolean;
   onReactionSelect?: (reaction: ApiReaction) => void;
@@ -34,7 +32,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const REACTION_SIZE = 40;
+const REACTION_SIZE = 36;
 const GRID_GAP_THRESHOLD = 600;
 const MODAL_PADDING_SIZE_REM = 0.5;
 const MODAL_MAX_HEIGHT_REM = 18;
@@ -43,7 +41,6 @@ const GRID_GAP_DESKTOP_REM = 0.625;
 const GRID_GAP_MOBILE_REM = 0.5;
 
 const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
-  scrollContainerRef,
   loadAndPlay,
   enabledReactions,
   availableReactions,
@@ -52,16 +49,11 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
   onReactionSelect,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  let containerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
   const { width: windowWidth } = useWindowSize();
   const { isTouchScreen } = useAppLayout();
-  if (scrollContainerRef) {
-    containerRef = scrollContainerRef;
-  }
 
   const allAvailableReactions = useMemo(() => {
     if (!enabledReactions) {
@@ -83,17 +75,14 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
     const itemsInRow = Math.floor((availableWidth + gapWidth) / (REACTION_SIZE + gapWidth));
     const rowsCount = Math.ceil(allAvailableReactions.length / itemsInRow);
 
-    const pickerMaxHeight = rowsCount * REACTION_SIZE + (rowsCount + 1) * gapWidth + MODAL_PADDING_SIZE_REM * REM;
+    const pickerMaxHeight = rowsCount * REACTION_SIZE + (rowsCount - 1) * gapWidth + MODAL_PADDING_SIZE_REM * REM * 2;
 
     return Math.min(MODAL_MAX_HEIGHT_REM * REM, pickerMaxHeight);
   }, [allAvailableReactions.length, windowWidth]);
 
   return (
     <div className={styles.root} style={`height: ${pickerHeight}px`}>
-      <div
-        ref={containerRef}
-        className={buildClassName(styles.wrapper, 'no-selection', isTouchScreen ? 'no-scrollbar' : 'custom-scroll')}
-      >
+      <div className={buildClassName(styles.wrapper, 'no-selection', isTouchScreen ? 'no-scrollbar' : 'custom-scroll')}>
         <div className="symbol-set-container shared-canvas-container">
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
           <canvas ref={sharedCanvasHqRef} className="shared-canvas" />

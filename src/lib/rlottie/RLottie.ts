@@ -24,7 +24,7 @@ type Frame =
   | typeof WAITING
   | ImageBitmap;
 
-const MAX_WORKERS = 4;
+const MAX_WORKERS = Math.min(navigator.hardwareConcurrency || 4, 4);
 const HIGH_PRIORITY_QUALITY = (IS_ANDROID || IS_IOS) ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;

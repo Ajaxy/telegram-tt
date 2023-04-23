@@ -51,6 +51,7 @@ type OwnProps = {
   selectedReactionIds?: string[];
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
+  isTranslucent?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlayingItems: ObserveFn;
   observeIntersectionForShowingItems: ObserveFn;
@@ -87,6 +88,7 @@ const StickerSet: FC<OwnProps> = ({
   withDefaultTopicIcon,
   selectedReactionIds,
   withDefaultStatusIcon,
+  isTranslucent,
   observeIntersection,
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
@@ -129,8 +131,9 @@ const StickerSet: FC<OwnProps> = ({
   // `isNearActive` is set in advance during animation, but it is not reliable for short sets
   const shouldRender = isNearActive || isIntersecting;
 
-  const stickerMarginPx = isMobile ? 8 : 16;
+  const stickerMarginPx = isMobile ? 8 : 4;
   const emojiMarginPx = isMobile ? 8 : 10;
+  const emojiVerticalMarginPx = isMobile ? 8 : 4;
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
   const isPopular = stickerSet.id === POPULAR_SYMBOL_SET_ID;
@@ -186,13 +189,14 @@ const StickerSet: FC<OwnProps> = ({
 
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
   const margin = isEmoji ? emojiMarginPx : stickerMarginPx;
+  const verticalMargin = isEmoji ? emojiVerticalMarginPx : stickerMarginPx;
 
   const calculateItemsPerRow = useCallback((width: number) => {
     if (!width) {
       return getItemsPerRowFallback(windowWidth);
     }
 
-    return Math.floor(width / (itemSize + margin));
+    return Math.floor((width + margin) / (itemSize + margin));
   }, [itemSize, margin, windowWidth]);
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
@@ -225,12 +229,15 @@ const StickerSet: FC<OwnProps> = ({
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
   const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
 
-  const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, totalItemsCount) / itemsPerRow) * (itemSize + margin);
-  const height = isCut ? heightWhenCut : Math.ceil(totalItemsCount / itemsPerRow) * (itemSize + margin);
+  const itemHeight = itemSize + verticalMargin;
+  const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, totalItemsCount) / itemsPerRow)
+    * itemHeight - verticalMargin;
+  const height = isCut ? heightWhenCut : Math.ceil(totalItemsCount / itemsPerRow) * itemHeight - verticalMargin;
 
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
   ), [favoriteStickers]);
+  const withAddSetButton = !shouldHideHeader && !isRecent && isEmoji && !isInstalled && !isPopular;
 
   return (
     <div
@@ -243,14 +250,17 @@ const StickerSet: FC<OwnProps> = ({
     >
       {!shouldHideHeader && (
         <div className="symbol-set-header">
-          <p className="symbol-set-name">
+          <p className={buildClassName('symbol-set-name', withAddSetButton && 'symbol-set-name-external')}>
             {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
             {stickerSet.title}
+            {withAddSetButton && Boolean(stickerSet.stickers) && (
+              <span className="symbol-set-amount">{lang('Stickers', stickerSet.stickers.length, 'i')}</span>
+            )}
           </p>
           {isRecent && (
             <i className="symbol-set-remove icon icon-close" onClick={openConfirmModal} />
           )}
-          {!isRecent && isEmoji && !isInstalled && !isPopular && (
+          {withAddSetButton && (
             <Button
               className="symbol-set-add-button"
               withPremiumGradient={isPremiumSet && !isCurrentUserPremium}
@@ -335,6 +345,7 @@ const StickerSet: FC<OwnProps> = ({
                 canViewSet
                 isCurrentUserPremium={isCurrentUserPremium}
                 sharedCanvasRef={canvasRef}
+                withTranslucentThumb={isTranslucent}
                 onClick={onStickerSelect}
                 clickArg={sticker}
                 isSelected={isSelected}

@@ -1,5 +1,14 @@
 .root {
-  --emoji-size: 2.5rem;
+  --emoji-size: 2.25rem;
 
+  height: 100%;
   max-height: calc(100 * var(--vh));
+
+  :global(.symbol-set-container) {
+    --symbol-set-gap-size: 0.625rem;
+  }
+}
+
+.activated {
+  background-color: var(--color-interactive-element-hover);
 }

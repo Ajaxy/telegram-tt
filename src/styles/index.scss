@@ -278,7 +278,8 @@ body:not(.is-ios) {
   position: relative;
 }
 
-.shared-canvas, .absolute-video-container {
+.shared-canvas,
+.absolute-video-container {
   position: absolute;
   top: 0;
   left: 0;

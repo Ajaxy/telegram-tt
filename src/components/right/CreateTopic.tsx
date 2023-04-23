@@ -135,6 +135,7 @@ const CreateTopic: FC<OwnProps & StateProps> = ({
         <div className={buildClassName(styles.section, styles.bottom)}>
           <CustomEmojiPicker
             idPrefix="create-topic-icons-set-"
+            isHidden={!isActive}
             loadAndPlay={isActive}
             onCustomEmojiSelect={handleCustomEmojiSelect}
             className={styles.iconPicker}

@@ -2,21 +2,27 @@ import type { RefObject } from 'react';
 
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
-import { useRef } from '../../../lib/teact/teact';
+import { useCallback, useRef, useState } from '../../../lib/teact/teact';
 import { ANIMATION_END_DELAY } from '../../../config';
+import animateScroll from '../../../util/animateScroll';
+import { REM } from '../helpers/mediaDimensions';
 
 const STICKER_INTERSECTION_THROTTLE = 200;
 const STICKER_INTERSECTION_MARGIN = 100;
 const SLIDE_TRANSITION_DURATION = 350 + ANIMATION_END_DELAY;
+const SCROLL_MAX_DISTANCE_WHEN_CLOSE = 200;
+const SCROLL_MAX_DISTANCE_WHEN_FAR = 80;
+const FOCUS_MARGIN = 0.5 * REM;
 
 export function useStickerPickerObservers(
   containerRef: RefObject<HTMLDivElement>,
   headerRef: RefObject<HTMLDivElement>,
   idPrefix: string,
-  setActiveSetIndex: (index: number) => void,
   isHidden?: boolean,
 ) {
   const stickerSetIntersectionsRef = useRef<boolean[]>([]);
+
+  const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
 
   const {
     observe: observeIntersectionForSet,
@@ -79,10 +85,29 @@ export function useStickerPickerObservers(
     }
   }, [freezeForSet, freezeForShowingItems, isHidden, unfreezeForSet, unfreezeForShowingItems]);
 
+  const selectStickerSet = useCallback((index: number) => {
+    setActiveSetIndex((currentIndex) => {
+      const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
+      const isClose = Math.abs(currentIndex - index) === 1;
+
+      animateScroll(
+        containerRef.current!,
+        stickerSetEl,
+        'start',
+        FOCUS_MARGIN,
+        isClose ? SCROLL_MAX_DISTANCE_WHEN_CLOSE : SCROLL_MAX_DISTANCE_WHEN_FAR,
+      );
+
+      return index;
+    });
+  }, [containerRef, idPrefix]);
+
   return {
+    activeSetIndex,
     observeIntersectionForSet,
     observeIntersectionForShowingItems,
     observeIntersectionForPlayingItems,
     observeIntersectionForCovers,
+    selectStickerSet,
   };
 }

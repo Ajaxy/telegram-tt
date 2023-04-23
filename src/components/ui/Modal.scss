@@ -3,7 +3,7 @@
   z-index: var(--z-modal);
 
   &.confirm {
-    z-index: var(--z-lock-screen);
+    z-index: var(--z-modal-confirm);
   }
 
   &.delete,

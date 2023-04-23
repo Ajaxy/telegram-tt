@@ -218,8 +218,9 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             className="picker-tab"
             isHidden={!isOpen || !isActive}
             loadAndPlay={isOpen && (isActive || isFrom)}
-            onCustomEmojiSelect={handleCustomEmojiSelect}
             chatId={chatId}
+            isTranslucent={!isMobile}
+            onCustomEmojiSelect={handleCustomEmojiSelect}
           />
         );
       case SymbolMenuTabs.Stickers:
@@ -229,9 +230,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             isHidden={!isOpen || !isActive}
             loadAndPlay={canSendStickers ? isOpen && (isActive || isFrom) : false}
             canSendStickers={canSendStickers}
-            onStickerSelect={handleStickerSelect}
             chatId={chatId}
             threadId={threadId}
+            isTranslucent={!isMobile}
+            onStickerSelect={handleStickerSelect}
           />
         );
       case SymbolMenuTabs.GIFs:
@@ -256,7 +258,11 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     <>
       <div className="SymbolMenu-main" onClick={stopPropagation}>
         {isActivated && (
-          <Transition name="slide" activeKey={activeTab} renderCount={Object.values(SYMBOL_MENU_TAB_TITLES).length}>
+          <Transition
+            name="slide"
+            activeKey={activeTab}
+            renderCount={Object.values(SYMBOL_MENU_TAB_TITLES).length}
+          >
             {renderContent}
           </Transition>
         )}

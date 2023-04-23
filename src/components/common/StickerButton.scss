@@ -1,16 +1,16 @@
 .StickerButton {
-  --custom-emoji-size: 2.5rem;
+  --custom-emoji-size: 2.25rem;
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
 
   display: inline-block;
-  width: 4rem;
-  height: 4rem;
-  margin: 0.5rem;
+  width: 4.5rem;
+  height: 4.5rem;
   border-radius: var(--border-radius-messages-small);
   background: transparent no-repeat center;
   background-size: contain;
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
   position: relative;
+  flex-shrink: 0;
 
   &.custom-emoji {
     color: var(--color-primary);
@@ -30,6 +30,8 @@
   &.set-expand {
     padding: 0;
     vertical-align: bottom;
+    align-self: center;
+    justify-self: center;
   }
 
   .sticker-locked {
@@ -100,8 +102,7 @@
   }
 
   .AnimatedSticker,
-  img,
-  video {
+  .sticker-media {
     position: absolute;
     top: 0;
     left: 0;
@@ -109,8 +110,7 @@
     height: 100%;
   }
 
-  img,
-  video {
+  .sticker-media {
     object-fit: contain;
     -webkit-touch-callout: none;
     user-select: none;
@@ -118,8 +118,8 @@
 
   .sticker-remove-button {
     position: absolute;
-    top: -0.5rem;
-    right: -0.5rem;
+    top: -0.125rem;
+    right: -0.125rem;
     width: 1.25rem;
     height: 1.25rem;
     padding: 0.125rem;
@@ -139,5 +139,9 @@
 
   .bubble {
     width: auto !important;
+  }
+
+  .SymbolMenu & .bubble {
+    --offset-y: 0;
   }
 }

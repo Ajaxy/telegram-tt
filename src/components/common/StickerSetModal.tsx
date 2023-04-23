@@ -25,6 +25,7 @@ import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 import useSchedule from '../../hooks/useSchedule';
 import usePrevious from '../../hooks/usePrevious';
+import useScrolledState from '../../hooks/useScrolledState';
 
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -88,6 +89,10 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   const isEmoji = renderingStickerSet?.isEmoji;
 
   const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline);
+  const {
+    handleScroll: handleContentScroll,
+    isAtBeginning: shouldHideTopBorder,
+  } = useScrolledState();
 
   const {
     observe: observeIntersection,
@@ -167,8 +172,10 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   }, [isMobile]);
 
   function renderHeader() {
+    const fullClassName = buildClassName('modal-header', !shouldHideTopBorder && 'with-top-border');
+
     return (
-      <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
           <i className="icon icon-close" />
         </Button>
@@ -195,8 +202,8 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     >
       {renderingStickerSet?.stickers ? (
         <>
-          <div ref={containerRef} className="stickers custom-scroll">
-            <div className="shared-canvas-container">
+          <div ref={containerRef} className="stickers custom-scroll" onScroll={handleContentScroll}>
+            <div className="shared-canvas-container stickers-grid">
               <canvas ref={sharedCanvasRef} className="shared-canvas" />
               {renderingStickerSet.stickers.map((sticker) => (
                 <StickerButton

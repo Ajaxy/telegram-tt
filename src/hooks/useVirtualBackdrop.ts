@@ -10,8 +10,13 @@ export default function useVirtualBackdrop(
   menuRef: RefObject<HTMLElement>,
   onClose?: () => void | undefined,
   ignoreRightClick?: boolean,
+  excludedClosestSelector?: string,
 ) {
   useEffect(() => {
+    if (!isOpen || !onClose) {
+      return undefined;
+    }
+
     const handleEvent = (e: MouseEvent) => {
       const menu = menuRef.current;
       const target = e.target as HTMLElement | null;
@@ -19,22 +24,22 @@ export default function useVirtualBackdrop(
         return;
       }
 
-      if (
+      if ((
         !menu.contains(e.target as Node | null)
         || target.classList.contains(BACKDROP_CLASSNAME)
-      ) {
+      ) && !(excludedClosestSelector && (
+        target.matches(excludedClosestSelector) || target.closest(excludedClosestSelector)
+      ))) {
         e.preventDefault();
         e.stopPropagation();
         onClose?.();
       }
     };
 
-    if (isOpen && onClose) {
-      document.addEventListener('mousedown', handleEvent);
-    }
+    document.addEventListener('mousedown', handleEvent);
 
     return () => {
       document.removeEventListener('mousedown', handleEvent);
     };
-  }, [ignoreRightClick, isOpen, menuRef, onClose]);
+  }, [excludedClosestSelector, ignoreRightClick, isOpen, menuRef, onClose]);
 }

@@ -12,7 +12,6 @@ import { createClassNameBuilder } from '../../../util/buildClassName';
 import {
   isSameReaction, canSendReaction, getReactionUniqueKey, sortReactions,
 } from '../../../global/helpers';
-import useAppLayout from '../../../hooks/useAppLayout';
 import useLang from '../../../hooks/useLang';
 
 import ReactionSelectorReaction from './ReactionSelectorReaction';
@@ -50,7 +49,6 @@ const ReactionSelector: FC<OwnProps> = ({
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
-  const { isTouchScreen } = useAppLayout();
   const lang = useLang();
 
   const availableReactions = useMemo(() => {
@@ -94,7 +92,7 @@ const ReactionSelector: FC<OwnProps> = ({
   if (!reactionsToRender.length) return undefined;
 
   return (
-    <div className={cn('&', !isTouchScreen && 'withBlur', lang.isRtl && 'isRtl')} ref={ref}>
+    <div className={cn('&', lang.isRtl && 'isRtl')} ref={ref}>
       <div className={cn('bubble-small', lang.isRtl && 'isRtl')} />
       <div className={cn('items-wrapper')}>
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />

@@ -146,6 +146,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
               <div className={buildClassName(styles.section, styles.bottom)}>
                 <CustomEmojiPicker
                   idPrefix="edit-topic-icons-set-"
+                  isHidden={!isActive}
                   loadAndPlay={isActive}
                   onCustomEmojiSelect={handleCustomEmojiSelect}
                   className={styles.iconPicker}

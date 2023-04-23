@@ -203,8 +203,9 @@ const MessageContextMenu: FC<OwnProps> = ({
   const isSponsoredMessage = !('id' in message);
   const messageId = !isSponsoredMessage ? message.id : '';
 
+  const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
-  const { isMobile } = useAppLayout();
+  const { isMobile, isDesktop } = useAppLayout();
 
   const handleAfterCopy = useCallback(() => {
     showNotification({
@@ -256,7 +257,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
     const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessageWrapper');
     const extraHeightPinned = (((isMobile && !extraHeightAudioPlayer)
-      || (!isMobile && pinnedElement?.classList.contains('full-width')))
+        || (!isMobile && pinnedElement?.classList.contains('full-width')))
       && pinnedElement?.offsetHeight) || 0;
 
     return {
@@ -264,10 +265,10 @@ const MessageContextMenu: FC<OwnProps> = ({
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
       marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
-      shouldAvoidNegativePosition: true,
+      shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
-  }, [isMobile, withReactions]);
+  }, [isDesktop, isMobile, withReactions]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -285,10 +286,15 @@ const MessageContextMenu: FC<OwnProps> = ({
   } = useMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
   useEffect(() => {
-    disableScrolling(withScroll ? scrollableRef.current : undefined, '.ReactionSelector');
+    disableScrolling(withScroll ? scrollableRef.current : undefined, '.ReactionPicker');
 
     return enableScrolling;
   }, [withScroll]);
+
+  const handleOpenReactionPicker = useCallback((position: IAnchorPosition) => {
+    onReactionPickerOpen!(position);
+    hideItems();
+  }, [onReactionPickerOpen]);
 
   return (
     <Menu
@@ -319,12 +325,15 @@ const MessageContextMenu: FC<OwnProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
-          onShowMore={onReactionPickerOpen!}
+          onShowMore={handleOpenReactionPicker}
         />
       )}
 
       <div
-        className="scrollable-content custom-scroll"
+        className={buildClassName(
+          'MessageContextMenu_items scrollable-content custom-scroll',
+          areItemsHidden && 'MessageContextMenu_items-hidden',
+        )}
         style={menuStyle}
         ref={scrollableRef}
       >

@@ -2,14 +2,19 @@
   position: absolute;
   font-size: 1rem;
 
-  .scrollable-content {
+  &_items {
     overflow: auto;
     overflow: overlay;
     padding: 0.5rem 0;
     overscroll-behavior: contain;
+
+    &-hidden {
+      opacity: 0;
+      transition: 300ms opacity;
+    }
   }
 
-  &.compact .scrollable-content {
+  &.compact &_items {
     padding: 0.25rem 0;
   }
 
@@ -25,7 +30,7 @@
     padding: 3.5rem 0 0 !important;
   }
 
-  &.with-reactions .scrollable-content {
+  &.with-reactions &_items {
     background: var(--color-background-compact-menu);
     backdrop-filter: blur(10px);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);

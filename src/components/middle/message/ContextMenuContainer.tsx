@@ -108,8 +108,6 @@ type StateProps = {
   threadId?: number;
 };
 
-const REACTION_PICKER_APPEARANCE_DURATION_MS = 250;
-
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   availableReactions,
   topReactions,
@@ -193,7 +191,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const { transitionClassNames } = useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
   const [isMenuOpen, setIsMenuOpen] = useState(true);
-  const [noAnimationOnClose, setNoAnimationOnClose] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
@@ -262,8 +259,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     setIsReportModalOpen(true);
   }, []);
 
-  const closeMenu = useCallback((noCloseAnimation = false) => {
-    setNoAnimationOnClose(noCloseAnimation);
+  const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
     onClose();
   }, [onClose]);
@@ -424,10 +420,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleReactionPickerOpen = useCallback((position: IAnchorPosition) => {
     openReactionPicker({ chatId: message.chatId, messageId: message.id, position });
-    setTimeout(() => {
-      closeMenu(true);
-    }, REACTION_PICKER_APPEARANCE_DURATION_MS);
-  }, [closeMenu, message.chatId, message.id]);
+  }, [message.chatId, message.id]);
 
   const handleTranslate = useCallback(() => {
     requestMessageTranslation({
@@ -504,7 +497,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canSelectLanguage={canSelectLanguage}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
-        noTransition={noAnimationOnClose}
         isDownloading={isDownloading}
         seenByRecentUsers={seenByRecentUsers}
         noReplies={noReplies}

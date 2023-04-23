@@ -63,29 +63,31 @@ const GifPicker: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 
   return (
-    <div
-      ref={containerRef}
-      className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
-    >
-      {!canSendGifs ? (
-        <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
-      ) : canRenderContents && savedGifs && savedGifs.length ? (
-        savedGifs.map((gif) => (
-          <GifButton
-            key={gif.id}
-            gif={gif}
-            observeIntersection={observeIntersection}
-            isDisabled={!loadAndPlay}
-            onClick={canSendGifs ? onGifSelect : undefined}
-            onUnsaveClick={handleUnsaveClick}
-            isSavedMessages={isSavedMessages}
-          />
-        ))
-      ) : canRenderContents && savedGifs ? (
-        <div className="picker-disabled">No saved GIFs.</div>
-      ) : (
-        <Loading />
-      )}
+    <div>
+      <div
+        ref={containerRef}
+        className={buildClassName('GifPicker', className, IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+      >
+        {!canSendGifs ? (
+          <div className="picker-disabled">Sending GIFs is not allowed in this chat.</div>
+        ) : canRenderContents && savedGifs && savedGifs.length ? (
+          savedGifs.map((gif) => (
+            <GifButton
+              key={gif.id}
+              gif={gif}
+              observeIntersection={observeIntersection}
+              isDisabled={!loadAndPlay}
+              onClick={canSendGifs ? onGifSelect : undefined}
+              onUnsaveClick={handleUnsaveClick}
+              isSavedMessages={isSavedMessages}
+            />
+          ))
+        ) : canRenderContents && savedGifs ? (
+          <div className="picker-disabled">No saved GIFs.</div>
+        ) : (
+          <Loading />
+        )}
+      </div>
     </div>
   );
 };

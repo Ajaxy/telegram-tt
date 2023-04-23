@@ -20,7 +20,9 @@ import { updateTabState } from '../../reducers/tabs';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { isSameReaction, getUserReactions, isMessageLocal } from '../../helpers';
+import {
+  isSameReaction, getUserReactions, isMessageLocal, getDocumentMediaHash,
+} from '../../helpers';
 
 const INTERACTION_RANDOM_OFFSET = 40;
 
@@ -42,6 +44,9 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
     }
     if (availableReaction.appearAnimation) {
       mediaLoader.fetch(`sticker${availableReaction.appearAnimation.id}`, ApiMediaFormat.BlobUrl);
+    }
+    if (availableReaction.selectAnimation) {
+      mediaLoader.fetch(getDocumentMediaHash(availableReaction.selectAnimation), ApiMediaFormat.BlobUrl);
     }
   });
 

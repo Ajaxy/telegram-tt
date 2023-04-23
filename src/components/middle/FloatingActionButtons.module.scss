@@ -78,7 +78,7 @@
 
   @media (max-width: 600px) {
     body.is-symbol-menu-open & {
-      bottom: calc(var(--base-bottom-pos) + var(--symbol-menu-height) + var(--symbol-menu-footer-height));
+      bottom: calc(var(--base-bottom-pos) + var(--symbol-menu-height));
     }
   }
 }

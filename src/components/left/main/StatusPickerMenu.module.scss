@@ -2,12 +2,19 @@
   --offset-y: 3.25rem !important;
   --offset-x: auto !important;
   --color-text: var(--color-primary);
+  --color-background: var(--color-background-compact-menu);
+  --border-radius-default: 1.25rem;
 
   left: 0.5rem;
   width: 100%;
-  max-width: 26rem;
-  height: 26rem;
+  max-width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
+  height: var(--symbol-menu-height);
   padding: 0 !important;
+  backdrop-filter: blur(10px);
+
+  @supports (overflow: overlay) {
+    width: var(--symbol-menu-width);
+  }
 
   @media (max-width: 26rem) {
     left: 0.5rem !important;
