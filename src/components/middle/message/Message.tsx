@@ -691,7 +691,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const throttledResize = useThrottledCallback(handleResize, [handleResize], THROTTLE_MS, false);
 
-  useResizeObserver(shouldFocusOnResize ? ref : undefined, throttledResize);
+  useResizeObserver(ref, throttledResize, !shouldFocusOnResize);
 
   useEffect(() => {
     const bottomMarker = bottomMarkerRef.current;
