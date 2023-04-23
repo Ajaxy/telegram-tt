@@ -24,87 +24,44 @@ export default function fastSmoothScroll(
   forceDuration?: number,
   forceNormalContainerHeight?: boolean,
 ) {
-  const scrollFrom = calculateScrollFrom(container, element, maxDistance, forceDirection);
-
-  if (forceDirection === FocusDirection.Static) {
-    scrollWithJs(container, element, scrollFrom, position, margin, 0);
-    return;
-  }
-
-  if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
+  if (
+    forceDirection === FocusDirection.Static
+    || getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN
+  ) {
     forceDuration = 0;
   }
 
-  scrollWithJs(container, element, scrollFrom, position, margin, forceDuration, forceNormalContainerHeight);
-}
-
-export function isAnimatingScroll() {
-  return isAnimating;
-}
-
-function calculateScrollFrom(
-  container: HTMLElement,
-  element: HTMLElement,
-  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
-  forceDirection?: FocusDirection,
-) {
-  const { offsetTop: elementTop } = element;
-  const { scrollTop } = container;
-
-  if (forceDirection === undefined) {
-    const offset = elementTop - container.scrollTop;
-
-    if (offset < -maxDistance) {
-      return scrollTop + (offset + maxDistance);
-    } else if (offset > maxDistance) {
-      return scrollTop + (offset - maxDistance);
-    }
-  } else if (forceDirection === FocusDirection.Up) {
-    return elementTop + maxDistance;
-  } else if (forceDirection === FocusDirection.Down) {
-    return Math.max(0, elementTop - maxDistance);
-  }
-
-  return scrollTop;
-}
-
-function scrollWithJs(
-  container: HTMLElement,
-  element: HTMLElement,
-  scrollFrom: number,
-  position: ScrollLogicalPosition | 'centerOrTop',
-  margin = 0,
-  forceDuration?: number,
-  forceNormalContainerHeight?: boolean,
-) {
   const { offsetTop: elementTop, offsetHeight: elementHeight } = element;
   const { scrollTop: currentScrollTop, offsetHeight: containerHeight, scrollHeight } = container;
   const targetContainerHeight = forceNormalContainerHeight && container.dataset.normalHeight
     ? Number(container.dataset.normalHeight)
     : containerHeight;
 
-  if (currentScrollTop !== scrollFrom) {
-    container.scrollTop = scrollFrom;
-  }
-
-  let path!: number;
-
+  let scrollTo!: number;
   switch (position) {
     case 'start':
-      path = (elementTop - margin) - scrollFrom + (IS_ANDROID ? 1 : 0);
+      scrollTo = (elementTop - margin) + (IS_ANDROID ? 1 : 0);
       break;
     case 'end':
-      path = (elementTop + elementHeight + margin) - (scrollFrom + targetContainerHeight);
+      scrollTo = (elementTop + elementHeight + margin) - targetContainerHeight;
       break;
     // 'nearest' is not supported yet
     case 'nearest':
     case 'center':
     case 'centerOrTop':
-      path = elementHeight < targetContainerHeight
-        ? (elementTop + elementHeight / 2) - (scrollFrom + targetContainerHeight / 2)
-        : (elementTop - margin) - scrollFrom;
+      scrollTo = elementHeight < targetContainerHeight
+        ? (elementTop + elementHeight / 2 - targetContainerHeight / 2)
+        : (elementTop - margin);
       break;
   }
+
+  const scrollFrom = calculateScrollFrom(container, scrollTo, maxDistance, forceDirection);
+
+  if (currentScrollTop !== scrollFrom) {
+    container.scrollTop = scrollFrom;
+  }
+
+  let path = scrollTo - scrollFrom;
 
   if (path < 0) {
     const remainingPath = -scrollFrom;
@@ -128,7 +85,7 @@ function scrollWithJs(
   isAnimating = true;
 
   const absPath = Math.abs(path);
-  const transition = absPath < FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
+  const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
   const duration = forceDuration || (
     FAST_SMOOTH_MIN_DURATION
     + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
@@ -152,6 +109,35 @@ function scrollWithJs(
       return isAnimating;
     });
   });
+}
+
+export function isAnimatingScroll() {
+  return isAnimating;
+}
+
+function calculateScrollFrom(
+  container: HTMLElement,
+  scrollTo: number,
+  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
+  forceDirection?: FocusDirection,
+) {
+  const { scrollTop } = container;
+
+  if (forceDirection === undefined) {
+    const offset = scrollTo - scrollTop;
+
+    if (offset < -maxDistance) {
+      return scrollTop + (offset + maxDistance);
+    } else if (offset > maxDistance) {
+      return scrollTop + (offset - maxDistance);
+    }
+  } else if (forceDirection === FocusDirection.Up) {
+    return scrollTo + maxDistance;
+  } else if (forceDirection === FocusDirection.Down) {
+    return Math.max(0, scrollTo - maxDistance);
+  }
+
+  return scrollTop;
 }
 
 function longTransition(t: number) {
