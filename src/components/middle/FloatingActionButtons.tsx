@@ -9,7 +9,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import fastSmoothScroll from '../../util/fastSmoothScroll';
+import animateScroll from '../../util/animateScroll';
 
 import ScrollDownButton from './ScrollDownButton';
 
@@ -79,7 +79,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
         return;
       }
 
-      fastSmoothScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
+      animateScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
     }
   }, [isShown, messageListType, focusNextReply]);
 

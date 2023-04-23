@@ -3,7 +3,7 @@ import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
 
 import { ALL_FOLDER_ID } from '../../config';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
-import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';
+import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 
 import usePrevious from '../../hooks/usePrevious';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
@@ -63,7 +63,7 @@ const TabList: FC<OwnProps> = ({
       return;
     }
 
-    fastSmoothScrollHorizontal(container, newLeft, SCROLL_DURATION);
+    animateHorizontalScroll(container, newLeft, SCROLL_DURATION);
   }, [activeTab]);
 
   const lang = useLang();

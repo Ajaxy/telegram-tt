@@ -21,6 +21,7 @@ import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useScrollHooks from './hooks/useScrollHooks';
 import useMessageObservers from './hooks/useMessageObservers';
+import usePrevious from '../../hooks/usePrevious';
 
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
@@ -114,11 +115,15 @@ const MessageListContent: FC<OwnProps> = ({
       <span>{lang('UnreadMessages')}</span>
     </div>
   );
-
   const messageCountToAnimate = noAppearanceAnimation ? 0 : messageGroups.reduce((acc, messageGroup) => {
     return acc + messageGroup.senderGroups.flat().length;
   }, 0);
   let appearanceIndex = 0;
+
+  const prevMessageIds = usePrevious(messageIds);
+  const isNewMessage = Boolean(
+    messageIds && prevMessageIds && messageIds[messageIds.length - 2] === prevMessageIds[prevMessageIds.length - 1],
+  );
 
   const dateGroups = messageGroups.map((
     dateGroup: MessageDateGroup,
@@ -155,6 +160,7 @@ const MessageListContent: FC<OwnProps> = ({
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
+            isJustAdded={isLastInList && isNewMessage}
             isLastInList={isLastInList}
             onPinnedIntersectionChange={onPinnedIntersectionChange}
           />,
@@ -219,6 +225,7 @@ const MessageListContent: FC<OwnProps> = ({
             noComments={noComments}
             noReplies={!noComments || threadId !== MAIN_THREAD_ID}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
+            isJustAdded={position.isLastInList && isNewMessage}
             isFirstInGroup={position.isFirstInGroup}
             isLastInGroup={position.isLastInGroup}
             isFirstInDocumentGroup={position.isFirstInDocumentGroup}

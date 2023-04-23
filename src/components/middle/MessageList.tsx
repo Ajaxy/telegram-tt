@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../lib/teact/teact';
+import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 import { requestForcedReflow, forceMeasure, requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import type { FC } from '../../lib/teact/teact';
@@ -58,7 +59,7 @@ import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import resetScroll from '../../util/resetScroll';
-import fastSmoothScroll, { isAnimatingScroll } from '../../util/fastSmoothScroll';
+import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import renderText from '../common/helpers/renderText';
 
 import { useStateRef } from '../../hooks/useStateRef';
@@ -397,40 +398,50 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   // Handles updated message list, takes care of scroll repositioning
   useLayoutEffectWithPrevDeps(([prevMessageIds, prevIsViewportNewest]) => {
+    if (process.env.APP_ENV === 'perf') {
+      // eslint-disable-next-line no-console
+      console.time('scrollTop');
+    }
+
     const containerHeight = getContainerHeight();
     const prevContainerHeight = prevContainerHeightRef.current;
     prevContainerHeightRef.current = containerHeight;
 
+    const container = containerRef.current!;
+    listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
+    const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
+
+    const hasLastMessageChanged = (
+      messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
+    );
+    const hasViewportShifted = (
+      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
+    );
+    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
+
+    // Add extra height when few messages to allow scroll animation
+    if (
+      isViewportNewest
+      && wasMessageAdded
+      && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
+      && !container.parentElement!.classList.contains('force-messages-scroll')
+      && forceMeasure(() => (
+        (container.firstElementChild as HTMLDivElement)!.clientHeight <= container.offsetHeight * 2
+      ))
+    ) {
+      addExtraClass(container.parentElement!, 'force-messages-scroll');
+      container.parentElement!.classList.add('force-messages-scroll');
+
+      setTimeout(() => {
+        if (container.parentElement) {
+          removeExtraClass(container.parentElement!, 'force-messages-scroll');
+        }
+      }, MESSAGE_ANIMATION_DURATION);
+    }
+
     requestForcedReflow(() => {
-      const container = containerRef.current!;
-      listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
-
-      const hasLastMessageChanged = (
-        messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
-      );
-      const hasViewportShifted = (
-        messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
-      );
-      const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
-      const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
-
-      // Add extra height when few messages to allow smooth scroll animation. Uses assumption that `parentElement`
-      // is a Transition slide and its CSS class can not be reset in a declarative way.
-      const shouldForceScroll = (
-        isViewportNewest
-        && wasMessageAdded
-        && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
-        && !container.parentElement!.classList.contains('force-messages-scroll')
-        && (container.firstElementChild as HTMLDivElement)!.clientHeight <= container.offsetHeight * 2
-      );
-
-      const {
-        scrollTop,
-        scrollHeight,
-        offsetHeight,
-      } = container;
+      const { scrollTop, scrollHeight, offsetHeight } = container;
       const scrollOffset = scrollOffsetRef.current;
-      const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
 
       let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
       if (wasMessageAdded) {
@@ -441,34 +452,19 @@ const MessageList: FC<OwnProps & StateProps> = ({
         bottomOffset -= lastItemHeight;
       }
       const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
+      const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
-      let newScrollTop!: number;
-
+      // Animate incoming message
       if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
-        if (lastItemElement) {
-          // Break out of `forceLayout`
-          requestMeasure(() => {
-            fastSmoothScroll(
-              container,
-              lastItemElement,
-              'end',
-              BOTTOM_FOCUS_MARGIN,
-            );
-          });
-        }
-
-        newScrollTop = scrollHeight - offsetHeight;
-        scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
-
-        // Scroll still needs to be restored after container resize
-        if (!shouldForceScroll) {
-          return undefined;
-        }
-      }
-
-      if (process.env.APP_ENV === 'perf') {
-        // eslint-disable-next-line no-console
-        console.time('scrollTop');
+        // Break out of `forceLayout`
+        requestMeasure(() => {
+          animateScroll(
+            container,
+            lastItemElement!,
+            'end',
+            BOTTOM_FOCUS_MARGIN,
+          );
+        });
       }
 
       const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
@@ -483,6 +479,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         && container.querySelector<HTMLDivElement>(`.${UNREAD_DIVIDER_CLASS}`)
       );
 
+      let newScrollTop!: number;
       if (isAtBottom && isResized) {
         newScrollTop = scrollHeight - offsetHeight;
       } else if (anchor) {
@@ -498,17 +495,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
       }
 
       return () => {
-        if (shouldForceScroll) {
-          container.parentElement!.classList.add('force-messages-scroll');
-
-          setTimeout(() => {
-            if (container.parentElement) {
-              container.parentElement.classList.remove('force-messages-scroll');
-            }
-          }, MESSAGE_ANIMATION_DURATION);
-        }
-
         resetScroll(container, Math.ceil(newScrollTop));
+        restartCurrentScrollAnimation();
+
+        scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
 
         if (!memoFocusingIdRef.current) {
           isScrollTopJustUpdatedRef.current = true;
@@ -517,8 +507,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
             isScrollTopJustUpdatedRef.current = false;
           });
         }
-
-        scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
 
         if (process.env.APP_ENV === 'perf') {
           // eslint-disable-next-line no-console

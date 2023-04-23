@@ -144,7 +144,7 @@ export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
 
-export const FAST_SMOOTH_MIN_DURATION = 250;
+export const FAST_SMOOTH_MIN_DURATION = 300;
 export const FAST_SMOOTH_MAX_DURATION = 600;
 export const FAST_SMOOTH_MAX_DISTANCE = 750;
 export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
