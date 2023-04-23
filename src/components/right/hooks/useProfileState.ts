@@ -2,7 +2,7 @@ import { useCallback, useEffect } from '../../../lib/teact/teact';
 
 import { ProfileState } from '../../../types';
 
-import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import animateScroll from '../../../util/animateScroll';
 import { throttle } from '../../../util/schedulers';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 
@@ -27,7 +27,7 @@ export default function useProfileState(
       if (container.scrollTop < tabsEl.offsetTop) {
         onProfileStateChange(tabType === 'members' ? ProfileState.MemberList : ProfileState.SharedMedia);
         isScrollingProgrammatically = true;
-        fastSmoothScroll(container, tabsEl, 'start', undefined, undefined, undefined, TRANSITION_DURATION);
+        animateScroll(container, tabsEl, 'start', undefined, undefined, undefined, TRANSITION_DURATION);
         setTimeout(() => {
           isScrollingProgrammatically = false;
         }, PROGRAMMATIC_SCROLL_TIMEOUT_MS);
@@ -52,7 +52,7 @@ export default function useProfileState(
     }
 
     isScrollingProgrammatically = true;
-    fastSmoothScroll(
+    animateScroll(
       container,
       container.firstElementChild as HTMLElement,
       'start',

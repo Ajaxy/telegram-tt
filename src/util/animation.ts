@@ -24,6 +24,13 @@ export function animateSingle(tick: Function, schedulerFn: Scheduler, instance?:
   }
 }
 
+export function cancelSingleAnimation() {
+  const dumbScheduler = (cb: AnyFunction) => cb;
+  const dumbCb = () => undefined;
+
+  animateSingle(dumbCb, dumbScheduler);
+}
+
 export function animate(tick: Function, schedulerFn: Scheduler) {
   schedulerFn(() => {
     if (tick()) {

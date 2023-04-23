@@ -18,7 +18,6 @@ import {
   selectChat,
   selectTopicFromMessage,
   selectTabState,
-  selectCurrentMessageIds,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -46,6 +45,7 @@ type OwnProps = {
   observeIntersectionForPlaying?: ObserveFn;
   isEmbedded?: boolean;
   appearanceOrder?: number;
+  isJustAdded?: boolean;
   isLastInList?: boolean;
   isInsideTopic?: boolean;
   memoFirstUnreadIdRef?: { current: number | undefined };
@@ -63,7 +63,6 @@ type StateProps = {
   topic?: ApiTopic;
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
-  viewportIds?: number[];
   premiumGiftSticker?: ApiSticker;
 };
 
@@ -73,6 +72,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   message,
   isEmbedded,
   appearanceOrder = 0,
+  isJustAdded,
   isLastInList,
   usersById,
   senderUser,
@@ -83,7 +83,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   isFocused,
   focusDirection,
   noFocusHighlight,
-  viewportIds,
   premiumGiftSticker,
   isInsideTopic,
   topic,
@@ -102,7 +101,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   useOnIntersect(ref, observeIntersectionForReading);
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
-  useFocusMessage(ref, message.id, message.chatId, isFocused, focusDirection, noFocusHighlight, viewportIds);
+  useFocusMessage(ref, message.id, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
 
   useEffect(() => {
     if (!message.isPinned) return undefined;
@@ -252,7 +251,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { message, threadId, messageListType }): StateProps => {
+  (global, { message, threadId }): StateProps => {
     const {
       chatId, senderId, replyToMessageId, content,
     } = message;
@@ -291,9 +290,6 @@ export default memo(withGlobal<OwnProps>(
       ...(isFocused && {
         focusDirection,
         noFocusHighlight,
-        viewportIds: threadId && messageListType
-          ? selectCurrentMessageIds(global, chatId, threadId, messageListType)
-          : undefined,
       }),
     };
   },

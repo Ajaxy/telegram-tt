@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useEffect, useRef } from '../../lib/teact/teact';
+import React, { useCallback, useEffect, useRef } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
@@ -78,9 +78,19 @@ const Modal: FC<OwnProps & StateProps> = ({
     return enableDirectTextInput;
   }, [isOpen]);
 
-  useEffect(() => (isOpen
-    ? captureKeyboardListeners({ onEsc: onClose, onEnter })
-    : undefined), [isOpen, onClose, onEnter]);
+  const handleEnter = useCallback((e: KeyboardEvent) => {
+    if (!onEnter) {
+      return false;
+    }
+
+    e.preventDefault();
+    onEnter();
+    return true;
+  }, [onEnter]);
+
+  useEffect(() => (
+    isOpen ? captureKeyboardListeners({ onEsc: onClose, onEnter: handleEnter }) : undefined
+  ), [isOpen, onClose, handleEnter]);
   useEffect(() => (isOpen && modalRef.current ? trapFocus(modalRef.current) : undefined), [isOpen]);
 
   useHistoryBack({

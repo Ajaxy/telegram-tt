@@ -8,7 +8,7 @@ const DEFAULT_DURATION = 300;
 
 const stopById: Map<string, VoidFunction> = new Map();
 
-export default function fastSmoothScrollHorizontal(container: HTMLElement, left: number, duration = DEFAULT_DURATION) {
+export default function animateHorizontalScroll(container: HTMLElement, left: number, duration = DEFAULT_DURATION) {
   if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
     duration = 0;
   }

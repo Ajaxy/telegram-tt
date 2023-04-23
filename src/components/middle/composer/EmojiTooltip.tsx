@@ -8,7 +8,7 @@ import type { FC } from '../../../lib/teact/teact';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
-import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
+import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -51,7 +51,7 @@ function setItemVisible(index: number, containerRef: Record<string, any>) {
     const position = index > visibleIndexes[visibleIndexes.length - 1] ? 'start' : 'end';
     const newLeft = position === 'start' ? index * EMOJI_BUTTON_WIDTH : 0;
 
-    fastSmoothScrollHorizontal(container, newLeft);
+    animateHorizontalScroll(container, newLeft);
   }
 }
 

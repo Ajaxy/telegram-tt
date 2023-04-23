@@ -1,3 +1,4 @@
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { getGlobal } from '../global';
 
 import { FocusDirection } from '../types';
@@ -11,41 +12,40 @@ import {
 } from '../config';
 import { IS_ANDROID } from './windowEnvironment';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
-import { animateSingle } from './animation';
-import { requestForcedReflow, requestMutation } from '../lib/fasterdom/fasterdom';
+import { animateSingle, cancelSingleAnimation } from './animation';
+
+type Params = Parameters<typeof createMutateFunction>;
 
 let isAnimating = false;
+let currentArgs: Parameters<typeof createMutateFunction> | undefined;
 
-export default function fastSmoothScroll(
-  container: HTMLElement,
-  element: HTMLElement,
-  position: ScrollLogicalPosition | 'centerOrTop',
-  margin = 0,
-  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
-  forceDirection?: FocusDirection,
-  forceDuration?: number,
-  forceNormalContainerHeight?: boolean,
-  withForcedReflow = false,
-) {
-  const args = [
-    container,
-    element,
-    position,
-    margin,
-    maxDistance,
-    forceDirection,
-    forceDuration,
-    forceNormalContainerHeight,
-  ] as const;
+export default function animateScroll(...args: Params | [...Params, boolean]) {
+  currentArgs = args.slice(0, 8) as Params;
 
-  if (withForcedReflow) {
-    requestForcedReflow(() => measure(...args));
-  } else {
-    requestMutation(measure(...args));
+  const mutate = createMutateFunction(...currentArgs);
+
+  const shouldReturnMutationFn = args[8];
+  if (shouldReturnMutationFn) {
+    return mutate;
   }
+
+  requestMutation(mutate);
+  return undefined;
 }
 
-function measure(
+export function restartCurrentScrollAnimation() {
+  if (!isAnimating) {
+    return;
+  }
+
+  cancelSingleAnimation();
+
+  requestMeasure(() => {
+    requestMutation(createMutateFunction(...currentArgs!));
+  });
+}
+
+function createMutateFunction(
   container: HTMLElement,
   element: HTMLElement,
   position: ScrollLogicalPosition | 'centerOrTop',
@@ -88,12 +88,7 @@ function measure(
 
   const scrollFrom = calculateScrollFrom(container, scrollTo, maxDistance, forceDirection);
 
-  if (currentScrollTop !== scrollFrom) {
-    container.scrollTop = scrollFrom;
-  }
-
   let path = scrollTo - scrollFrom;
-
   if (path < 0) {
     const remainingPath = -scrollFrom;
     path = Math.max(path, remainingPath);
@@ -102,12 +97,14 @@ function measure(
     path = Math.min(path, remainingPath);
   }
 
-  return () => {
-    if (currentScrollTop !== scrollFrom) {
-      container.scrollTop = scrollFrom;
-    }
+  const absPath = Math.abs(path);
 
-    if (path === 0) {
+  return () => {
+    if (absPath < 1) {
+      if (currentScrollTop !== scrollFrom) {
+        container.scrollTop = scrollFrom;
+      }
+
       return;
     }
 
@@ -120,7 +117,6 @@ function measure(
 
     isAnimating = true;
 
-    const absPath = Math.abs(path);
     const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
     const duration = forceDuration || (
       FAST_SMOOTH_MIN_DURATION
@@ -132,12 +128,14 @@ function measure(
     animateSingle(() => {
       const t = Math.min((Date.now() - startAt) / duration, 1);
       const currentPath = path * (1 - transition(t));
+      const newScrollTop = Math.round(target - currentPath);
 
-      container.scrollTop = Math.round(target - currentPath);
+      container.scrollTop = newScrollTop;
 
-      isAnimating = t < 1;
+      isAnimating = t < 1 && newScrollTop !== target;
 
       if (!isAnimating) {
+        currentArgs = undefined;
         onHeavyAnimationStop();
       }
 
@@ -176,7 +174,7 @@ function calculateScrollFrom(
 }
 
 function shortTransition(t: number) {
-  return 1 - ((1 - t) ** 3);
+  return 1 - ((1 - t) ** 3.5);
 }
 
 function longTransition(t: number) {

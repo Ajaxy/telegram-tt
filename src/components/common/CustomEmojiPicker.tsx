@@ -23,9 +23,9 @@ import {
 } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import fastSmoothScroll from '../../util/fastSmoothScroll';
+import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
-import fastSmoothScrollHorizontal from '../../util/fastSmoothScrollHorizontal';
+import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import { pickTruthy, unique } from '../../util/iteratees';
 import { isSameReaction } from '../../global/helpers';
 import {
@@ -275,13 +275,13 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
 
     const newLeft = activeSetIndex * HEADER_BUTTON_WIDTH - (header.offsetWidth / 2 - HEADER_BUTTON_WIDTH / 2);
 
-    fastSmoothScrollHorizontal(header, newLeft);
+    animateHorizontalScroll(header, newLeft);
   }, [areAddedLoaded, activeSetIndex]);
 
   const selectStickerSet = useCallback((index: number) => {
     setActiveSetIndex(index);
     const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
-    fastSmoothScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
+    animateScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
   }, [idPrefix]);
 
   const handleEmojiSelect = useCallback((emoji: ApiSticker) => {

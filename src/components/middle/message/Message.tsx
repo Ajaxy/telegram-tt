@@ -67,7 +67,7 @@ import {
   selectTopicFromMessage,
   selectTabState,
   selectChatTranslations,
-  selectRequestedTranslationLanguage, selectCurrentMessageIds,
+  selectRequestedTranslationLanguage,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -109,7 +109,7 @@ import renderText from '../../common/helpers/renderText';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
-import { isAnimatingScroll } from '../../../util/fastSmoothScroll';
+import { isAnimatingScroll } from '../../../util/animateScroll';
 
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -186,6 +186,7 @@ type OwnProps =
     noComments: boolean;
     noReplies: boolean;
     appearanceOrder: number;
+    isJustAdded: boolean;
     memoFirstUnreadIdRef: { current: number | undefined };
     onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   }
@@ -212,7 +213,6 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   isResizingContainer?: boolean;
-  viewportIds?: number[];
   isForwarding?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
@@ -293,6 +293,7 @@ const Message: FC<OwnProps & StateProps> = ({
   noComments,
   noReplies,
   appearanceOrder,
+  isJustAdded,
   isFirstInGroup,
   isPremium,
   isLastInGroup,
@@ -320,7 +321,6 @@ const Message: FC<OwnProps & StateProps> = ({
   focusDirection,
   noFocusHighlight,
   isResizingContainer,
-  viewportIds,
   isForwarding,
   isChatWithSelf,
   isRepliesChat,
@@ -412,7 +412,12 @@ const Message: FC<OwnProps & StateProps> = ({
     setTimeout(markShown, appearanceOrder * APPEARANCE_DELAY);
   }, [appearanceOrder, markShown, noAppearanceAnimation]);
 
-  const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
+  const { transitionClassNames } = useShowTransition(
+    isShown || isJustAdded,
+    undefined,
+    noAppearanceAnimation && !isJustAdded,
+    false,
+  );
 
   const {
     id: messageId, chatId, forwardInfo, viaBotId, isTranscriptionError,
@@ -576,6 +581,7 @@ const Message: FC<OwnProps & StateProps> = ({
     Boolean(message.inlineButtons) && 'has-inline-buttons',
     isSwiped && 'is-swiped',
     transitionClassNames,
+    isJustAdded && 'is-just-added',
     (Boolean(activeReactions) || hasActiveStickerEffect) && 'has-active-reaction',
   );
 
@@ -658,7 +664,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useFocusMessage(
-    ref, messageId, chatId, isFocused, focusDirection, noFocusHighlight, viewportIds, isResizingContainer,
+    ref, messageId, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded,
   );
 
   const signature = (isChannel && message.postAuthorTitle)
@@ -1480,7 +1486,6 @@ export default memo(withGlobal<OwnProps>(
         focusDirection,
         noFocusHighlight,
         isResizingContainer,
-        viewportIds: selectCurrentMessageIds(global, chatId, threadId, messageListType),
       }),
     };
   },

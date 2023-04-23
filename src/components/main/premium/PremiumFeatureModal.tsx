@@ -8,7 +8,7 @@ import type { ApiLimitType, GlobalState } from '../../../global/types';
 
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
-import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
+import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import useFlag from '../../../hooks/useFlag';
 import renderText from '../../common/helpers/renderText';
 import usePrevious from '../../../hooks/usePrevious';
@@ -185,7 +185,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     const index = PREMIUM_FEATURE_SECTIONS.indexOf(initialSection);
     setCurrentSlideIndex(index);
     startScrolling();
-    fastSmoothScrollHorizontal(scrollContainer, scrollContainer.clientWidth * index, 0)
+    animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 0)
       .then(stopScrolling);
   }, [currentSlideIndex, initialSection, prevInitialSection, startScrolling, stopScrolling]);
 
@@ -196,7 +196,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     setCurrentSlideIndex(index);
 
     startScrolling();
-    await fastSmoothScrollHorizontal(scrollContainer, scrollContainer.clientWidth * index, 800);
+    await animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 800);
     stopScrolling();
   }, [startScrolling, stopScrolling]);
 

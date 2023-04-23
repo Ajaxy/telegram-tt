@@ -89,7 +89,24 @@ export function useIntersectionObserver({
   function initController() {
     const callbacks = new Map();
     const entriesAccumulator = new Map<Element, IntersectionObserverEntry>();
-    const observerCallbackSync = () => {
+
+    let observerCallback: typeof observerCallbackSync;
+    if (typeof throttleScheduler === 'function') {
+      observerCallback = throttleWith(throttleScheduler, observerCallbackSync);
+    } else if (throttleMs) {
+      observerCallback = throttle(observerCallbackSync, throttleMs, !shouldSkipFirst);
+    } else if (debounceMs) {
+      observerCallback = debounce(observerCallbackSync, debounceMs, !shouldSkipFirst);
+    } else {
+      observerCallback = observerCallbackSync;
+    }
+
+    function observerCallbackSync() {
+      if (freezeFlagsRef.current) {
+        onUnfreezeRef.current = observerCallback;
+        return;
+      }
+
       const entries = Array.from(entriesAccumulator.values());
 
       entries.forEach((entry: IntersectionObserverEntry) => {
@@ -104,17 +121,6 @@ export function useIntersectionObserver({
       }
 
       entriesAccumulator.clear();
-    };
-
-    let observerCallback: typeof observerCallbackSync;
-    if (typeof throttleScheduler === 'function') {
-      observerCallback = throttleWith(throttleScheduler, observerCallbackSync);
-    } else if (throttleMs) {
-      observerCallback = throttle(observerCallbackSync, throttleMs, !shouldSkipFirst);
-    } else if (debounceMs) {
-      observerCallback = debounce(observerCallbackSync, debounceMs, !shouldSkipFirst);
-    } else {
-      observerCallback = observerCallbackSync;
     }
 
     const observer = new IntersectionObserver(
@@ -124,9 +130,7 @@ export function useIntersectionObserver({
         });
 
         if (freezeFlagsRef.current) {
-          onUnfreezeRef.current = () => {
-            observerCallback();
-          };
+          onUnfreezeRef.current = observerCallback;
         } else {
           observerCallback();
         }

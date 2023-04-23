@@ -15,10 +15,10 @@ import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config'
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { uncompressEmoji } from '../../../util/emoji';
-import fastSmoothScroll from '../../../util/fastSmoothScroll';
+import animateScroll from '../../../util/animateScroll';
 import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
-import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
+import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
@@ -122,7 +122,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
 
     const newLeft = activeCategoryIndex * HEADER_BUTTON_WIDTH - header.offsetWidth / 2 + HEADER_BUTTON_WIDTH / 2;
 
-    fastSmoothScrollHorizontal(header, newLeft);
+    animateHorizontalScroll(header, newLeft);
   }, [categories, activeCategoryIndex]);
 
   const lang = useLang();
@@ -165,7 +165,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     setActiveCategoryIndex(index);
     const categoryEl = containerRef.current!.closest<HTMLElement>('.SymbolMenu-main')!
       .querySelector(`#emoji-category-${index}`)! as HTMLElement;
-    fastSmoothScroll(containerRef.current!, categoryEl, 'start', FOCUS_MARGIN, SMOOTH_SCROLL_DISTANCE);
+    animateScroll(containerRef.current!, categoryEl, 'start', FOCUS_MARGIN, SMOOTH_SCROLL_DISTANCE);
   }, []);
 
   const handleEmojiSelect = useCallback((emoji: string, name: string) => {

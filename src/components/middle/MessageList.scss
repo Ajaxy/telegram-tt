@@ -125,6 +125,17 @@
       opacity: 0;
     }
 
+    body.animation-level-0 & {
+      opacity: 1;
+      transform: none;
+      display: flex !important;
+      transition: none !important;
+    }
+
+    &.is-just-added:not(.own) {
+      transform: none;
+    }
+
     // Restore stacking context
     // https://developer.mozilla.org/ru/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context
     &.open.shown {
