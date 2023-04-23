@@ -37,6 +37,7 @@ type OwnProps = {
   shouldSkipTransition?: boolean;
   footer?: string;
   noCloseOnBackdrop?: boolean;
+  backdropExcludedSelector?: string;
   noCompact?: boolean;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onCloseAnimationEnd?: () => void;
@@ -68,6 +69,7 @@ const Menu: FC<OwnProps> = ({
   autoClose = false,
   footer,
   noCloseOnBackdrop = false,
+  backdropExcludedSelector,
   noCompact,
   onCloseAnimationEnd,
   onClose,
@@ -118,6 +120,8 @@ const Menu: FC<OwnProps> = ({
     isOpen,
     backdropContainerRef,
     noCloseOnBackdrop ? undefined : onClose,
+    undefined,
+    backdropExcludedSelector,
   );
 
   const bubbleFullClassName = buildClassName(

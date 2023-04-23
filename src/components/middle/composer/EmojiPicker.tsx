@@ -12,6 +12,7 @@ import type {
 } from '../../../util/emoji';
 
 import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
+import { REM } from '../../common/helpers/mediaDimensions';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { uncompressEmoji } from '../../../util/emoji';
@@ -24,6 +25,7 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useScrolledState from '../../../hooks/useScrolledState';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';
@@ -54,8 +56,8 @@ const ICONS_BY_CATEGORY: Record<string, string> = {
 
 const OPEN_ANIMATION_DELAY = 200;
 const SMOOTH_SCROLL_DISTANCE = 100;
-const FOCUS_MARGIN = 50;
-const HEADER_BUTTON_WIDTH = 42; // px. Includes margins
+const FOCUS_MARGIN = 3.25 * REM;
+const HEADER_BUTTON_WIDTH = 2.625 * REM; // Includes margins
 const INTERSECTION_THROTTLE = 200;
 
 const categoryIntersections: boolean[] = [];
@@ -78,6 +80,10 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
   const [emojis, setEmojis] = useState<AllEmojis>();
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
   const { isMobile } = useAppLayout();
+  const {
+    handleScroll: handleContentScroll,
+    isAtBeginning: shouldHideTopBorder,
+  } = useScrolledState();
 
   const { observe: observeIntersection } = useIntersectionObserver({
     rootRef: containerRef,
@@ -200,13 +206,23 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const headerClassName = buildClassName(
+    'EmojiPicker-header',
+    !shouldHideTopBorder && 'with-top-border',
+  );
+
   return (
     <div className={containerClassName}>
-      <div ref={headerRef} className="EmojiPicker-header" dir={lang.isRtl ? 'rtl' : ''}>
+      <div
+        ref={headerRef}
+        className={headerClassName}
+        dir={lang.isRtl ? 'rtl' : undefined}
+      >
         {allCategories.map(renderCategoryButton)}
       </div>
       <div
         ref={containerRef}
+        onScroll={handleContentScroll}
         className={buildClassName('EmojiPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
       >
         {allCategories.map((category, i) => (

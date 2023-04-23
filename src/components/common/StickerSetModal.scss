@@ -14,12 +14,17 @@
 
   @media (max-width: 600px) {
     .modal-dialog {
-      width: 18.875rem;
+      width: 20.375rem;
     }
   }
 
   .modal-header {
     padding: 0.5rem 1rem;
+
+    &.with-top-border {
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      box-shadow: inset 0 -0.5px 0 0 var(--color-borders-alternate);
+    }
   }
 
   .modal-content {
@@ -37,6 +42,20 @@
     text-align: left;
   }
 
+  .stickers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--emoji-size, 4.5rem));
+    justify-content: space-between;
+    row-gap: 0.25rem;
+    column-gap: var(--symbol-set-gap-size, 0.625rem);
+    text-align: initial;
+    padding-bottom: 0.25rem;
+
+    @media (max-width: 600px) {
+      grid-gap: 0.5rem;
+    }
+  }
+
   .button-wrapper {
     padding: 0.5rem 0;
     border-top: 1px solid var(--color-borders);
@@ -45,6 +64,10 @@
     button {
       display: inline-block;
     }
+  }
+
+  .StickerButton {
+    margin: 0;
   }
 
   .Loading {

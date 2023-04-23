@@ -35,11 +35,6 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
 }) => {
   const { loadFeaturedEmojiStickers } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const scrollHeaderRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
   const transformOriginX = useRef<number>();
   const [isContextMenuShown, markContextMenuShown, unmarkContextMenuShown] = useFlag();
   useEffect(() => {
@@ -51,15 +46,6 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
       loadFeaturedEmojiStickers();
     }
   }, [areFeaturedStickersLoaded, isOpen, loadFeaturedEmojiStickers]);
-
-  const handleResetScrollPosition = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-    if (scrollHeaderRef.current) {
-      scrollHeaderRef.current.scrollLeft = 0;
-    }
-  }, []);
 
   const handleEmojiSelect = useCallback((sticker: ApiSticker) => {
     onEmojiStatusSelect(sticker);
@@ -76,14 +62,13 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
         onClose={onClose}
         transformOriginX={transformOriginX.current}
         noCloseOnBackdrop={isContextMenuShown}
-        onCloseAnimationEnd={handleResetScrollPosition}
       >
         <CustomEmojiPicker
           idPrefix="status-emoji-set-"
           loadAndPlay={isOpen}
+          isHidden={!isOpen}
           isStatusPicker
-          scrollHeaderRef={scrollHeaderRef}
-          scrollContainerRef={scrollContainerRef}
+          isTranslucent
           onContextMenuOpen={markContextMenuShown}
           onContextMenuClose={unmarkContextMenuShown}
           onCustomEmojiSelect={handleEmojiSelect}

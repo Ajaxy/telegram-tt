@@ -10,14 +10,24 @@
 }
 
 .menuContent {
-  width: 26.25rem;
-  height: 26.25rem;
+  --color-background: var(--color-background-compact-menu);
+  --border-radius-default: 1.25rem;
+
+  width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
+  height: var(--symbol-menu-height);
   padding: 0 !important;
-  transform-origin: 50% 3.5rem !important;
+  transform-origin: 9rem 4.625rem !important;
+  backdrop-filter: blur(10px);
+
+  @supports (overflow: overlay) {
+    width: var(--symbol-menu-width);
+  }
 
   &:global(.bubble) {
-    transform: scale(0.7) !important;
-    transition: opacity 140ms cubic-bezier(0.2, 0, 0.2, 1), transform 140ms cubic-bezier(0.2, 0, 0.2, 1) !important;
+    transform: scale(0.8) !important;
+    transition: opacity 150ms cubic-bezier(0.2, 0, 0.2, 1), transform 150ms cubic-bezier(0.2, 0, 0.2, 1) !important;
+    --offset-x: -0.75rem;
+    --offset-y: calc(100% + 0.625rem);
   }
 
   &:global(.bubble.open) {
@@ -42,6 +52,11 @@
 
 .onlyReactions {
   height: auto;
+  transform-origin: 9rem 1.75rem !important;
+
+  &:global(.bubble) {
+    --offset-y: calc(100% + 0.1875rem);
+  }
 }
 
 .hidden {

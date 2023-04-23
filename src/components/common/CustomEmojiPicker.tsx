@@ -1,6 +1,5 @@
-import type { RefObject } from 'react';
 import React, {
-  useState, useEffect, memo, useRef, useMemo, useCallback,
+  useEffect, memo, useRef, useMemo, useCallback,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../global';
 
@@ -21,9 +20,9 @@ import {
   STICKER_SIZE_PICKER_HEADER,
   TOP_SYMBOL_SET_ID,
 } from '../../config';
+import { REM } from './helpers/mediaDimensions';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import { pickTruthy, unique } from '../../util/iteratees';
@@ -39,6 +38,7 @@ import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
+import useScrolledState from '../../hooks/useScrolledState';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
@@ -46,12 +46,10 @@ import StickerButton from './StickerButton';
 import StickerSet from './StickerSet';
 import StickerSetCover from '../middle/composer/StickerSetCover';
 
-import '../middle/composer/StickerPicker.scss';
+import pickerStyles from '../middle/composer/StickerPicker.module.scss';
 import styles from './CustomEmojiPicker.module.scss';
 
 type OwnProps = {
-  scrollContainerRef?: RefObject<HTMLDivElement>;
-  scrollHeaderRef?: RefObject<HTMLDivElement>;
   chatId?: string;
   className?: string;
   isHidden?: boolean;
@@ -63,6 +61,7 @@ type OwnProps = {
   selectedReactionIds?: string[];
   isStatusPicker?: boolean;
   isReactionPicker?: boolean;
+  isTranslucent?: boolean;
   onContextMenuOpen?: NoneToVoidFunction;
   onContextMenuClose?: NoneToVoidFunction;
   onContextMenuClick?: NoneToVoidFunction;
@@ -85,8 +84,8 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const SMOOTH_SCROLL_DISTANCE = 100;
-const HEADER_BUTTON_WIDTH = 52; // px (including margin)
+const HEADER_BUTTON_WIDTH = 2.5 * REM; // px (including margin)
+
 const DEFAULT_ID_PREFIX = 'custom-emoji-set';
 const TOP_REACTIONS_COUNT = 16;
 const RECENT_REACTIONS_COUNT = 32;
@@ -100,8 +99,6 @@ const STICKER_SET_IDS_WITH_COVER = new Set([
 ]);
 
 const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
-  scrollContainerRef,
-  scrollHeaderRef,
   className,
   isHidden,
   loadAndPlay,
@@ -119,6 +116,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   canAnimate,
   isReactionPicker,
   isStatusPicker,
+  isTranslucent,
   isSavedMessages,
   isCurrentUserPremium,
   withDefaultTopicIcons,
@@ -131,22 +129,19 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   onContextMenuClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  let containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
-  let headerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
-  if (scrollContainerRef) {
-    containerRef = scrollContainerRef;
-  }
-  if (scrollHeaderRef) {
-    headerRef = scrollHeaderRef;
-  }
 
-  const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
   const { isMobile } = useAppLayout();
+  const {
+    handleScroll: handleContentScroll,
+    isAtBeginning: shouldHideTopBorder,
+  } = useScrolledState();
 
   const recentCustomEmojis = useMemo(() => {
     return isStatusPicker
@@ -155,11 +150,13 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   }, [customEmojisById, isStatusPicker, recentCustomEmojiIds, recentStatusEmojis]);
 
   const {
+    activeSetIndex,
     observeIntersectionForSet,
     observeIntersectionForPlayingItems,
     observeIntersectionForShowingItems,
     observeIntersectionForCovers,
-  } = useStickerPickerObservers(containerRef, headerRef, idPrefix, setActiveSetIndex, isHidden);
+    selectStickerSet,
+  } = useStickerPickerObservers(containerRef, headerRef, idPrefix, isHidden);
 
   const lang = useLang();
 
@@ -260,7 +257,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   const canRenderContent = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
   const shouldRenderContent = areAddedLoaded && canRenderContent && !noPopulatedSets;
 
-  useHorizontalScroll(headerRef, !(isMobile && shouldRenderContent));
+  useHorizontalScroll(headerRef, isMobile || !shouldRenderContent);
 
   // Scroll container and header when active set changes
   useEffect(() => {
@@ -278,12 +275,6 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     animateHorizontalScroll(header, newLeft);
   }, [areAddedLoaded, activeSetIndex]);
 
-  const selectStickerSet = useCallback((index: number) => {
-    setActiveSetIndex(index);
-    const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
-    animateScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
-  }, [idPrefix]);
-
   const handleEmojiSelect = useCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
   }, [onCustomEmojiSelect]);
@@ -295,8 +286,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
     const buttonClassName = buildClassName(
-      'symbol-set-button sticker-set-button',
-      index === activeSetIndex && 'activated',
+      pickerStyles.stickerCover,
+      index === activeSetIndex && styles.activated,
     );
 
     const withSharedCanvas = index < STICKER_PICKER_MAX_SHARED_COVERS;
@@ -307,6 +298,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     }
 
     if (STICKER_SET_IDS_WITH_COVER.has(stickerSet.id) || stickerSet.hasThumbnail || !firstSticker) {
+      const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === POPULAR_SYMBOL_SET_ID;
       const isFaded = FADED_BUTTON_SET_IDS.has(stickerSet.id);
       return (
         <Button
@@ -317,9 +309,9 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           faded={isFaded}
           color="translucent"
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => selectStickerSet(index)}
+          onClick={() => selectStickerSet(isRecent ? 0 : index)}
         >
-          {(stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === POPULAR_SYMBOL_SET_ID) ? (
+          {isRecent ? (
             <i className="icon icon-recent" />
           ) : (
             <StickerSetCover
@@ -345,6 +337,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         noContextMenu
         isCurrentUserPremium
         sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
+        withTranslucentThumb={isTranslucent}
         onClick={selectStickerSet}
         clickArg={index}
       />
@@ -357,7 +350,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     return (
       <div className={fullClassName}>
         {noPopulatedSets ? (
-          <div className="picker-disabled">{lang('NoStickers')}</div>
+          <div className={pickerStyles.pickerDisabled}>{lang('NoStickers')}</div>
         ) : (
           <Loading />
         )}
@@ -365,11 +358,23 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const headerClassName = buildClassName(
+    pickerStyles.header,
+    'no-selection no-scrollbar',
+    !shouldHideTopBorder && pickerStyles.headerWithBorder,
+  );
+  const listClassName = buildClassName(
+    pickerStyles.main,
+    pickerStyles.main_customEmoji,
+    'no-selection',
+    IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
+  );
+
   return (
     <div className={fullClassName}>
       <div
         ref={headerRef}
-        className="StickerPicker-header no-selection no-scrollbar"
+        className={headerClassName}
       >
         <div className="shared-canvas-container">
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
@@ -379,7 +384,8 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       </div>
       <div
         ref={containerRef}
-        className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+        onScroll={handleContentScroll}
+        className={listClassName}
       >
         {allSets.map((stickerSet, i) => {
           const shouldHideHeader = stickerSet.id === TOP_SYMBOL_SET_ID
@@ -405,6 +411,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               isCurrentUserPremium={isCurrentUserPremium}
               selectedReactionIds={selectedReactionIds}
               availableReactions={availableReactions}
+              isTranslucent={isTranslucent}
               onReactionSelect={handleReactionSelect}
               onStickerSelect={handleEmojiSelect}
               onContextMenuOpen={onContextMenuOpen}

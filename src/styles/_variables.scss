@@ -88,6 +88,7 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-text-green-rgb: #{toRGB($color-text-green)};
   --color-borders: #{$color-borders};
   --color-borders-input: #{$color-borders};
+  --color-borders-alternate: rgba(0, 0, 0, 0.1);
   --color-dividers: #{$color-dividers};
   --color-dividers-android: #{$color-dividers-android};
   --color-webpage-initial-background: #{$color-dark-gray};
@@ -197,8 +198,8 @@ $color-message-reaction-own-hover: #b5e0a4;
   --custom-emoji-size: 1.25rem;
   --custom-emoji-border-radius: 0;
 
-  --symbol-menu-width: 26.25rem;
-  --symbol-menu-height: 23.25rem;
+  --symbol-menu-width: 24rem;
+  --symbol-menu-height: 22.375rem;
   --symbol-menu-footer-height: 3rem;
 
   @media (min-width: 1276px) and (max-width: 1920px) {
@@ -212,14 +213,17 @@ $color-message-reaction-own-hover: #b5e0a4;
   @media (max-width: 600px) {
     --right-column-width: 100vw;
     --symbol-menu-width: 100vw;
-    --symbol-menu-height: 14.6875rem;
+    --symbol-menu-height: 17.6875rem;
   }
 
+  --z-modal-confirm: 10000;
+  --z-symbol-menu-modal: 5000;
   --z-lock-screen: 3000;
   --z-ui-loader-mask: 2000;
   --z-notification: 1700;
   --z-confetti: 1600;
   --z-reaction-picker: 1200;
+  --z-reaction-interaction-effect: 1000;
   --z-right-column: 900;
   --z-header-menu: 990;
   --z-header-menu-backdrop: 980;

@@ -157,7 +157,7 @@ export default function useInputCustomEmojis(
   }, []);
 
   const unfreezeAnimation = useCallback(() => {
-    playersById.current.forEach((player) => {
+    playersById.current?.forEach((player) => {
       player.play();
     });
   }, []);

@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, memo, useRef, useMemo, useCallback,
+  useEffect, memo, useRef, useMemo, useCallback,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -16,10 +16,10 @@ import {
   STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
+import { REM } from '../../common/helpers/mediaDimensions';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { isUserId } from '../../../global/helpers';
-import animateScroll from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { pickTruthy, uniqueByField } from '../../../util/iteratees';
@@ -32,6 +32,7 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
 import { useStickerPickerObservers } from '../../common/hooks/useStickerPickerObservers';
+import useScrolledState from '../../../hooks/useScrolledState';
 
 import Avatar from '../../common/Avatar';
 import Loading from '../../ui/Loading';
@@ -41,13 +42,14 @@ import StickerSet from '../../common/StickerSet';
 import StickerSetCover from './StickerSetCover';
 import PremiumIcon from '../../common/PremiumIcon';
 
-import './StickerPicker.scss';
+import styles from './StickerPicker.module.scss';
 
 type OwnProps = {
   chatId: string;
   threadId?: number;
   className: string;
   isHidden?: boolean;
+  isTranslucent?: boolean;
   loadAndPlay: boolean;
   canSendStickers?: boolean;
   onStickerSelect: (
@@ -68,14 +70,14 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const SMOOTH_SCROLL_DISTANCE = 100;
-const HEADER_BUTTON_WIDTH = 52; // px (including margin)
+const HEADER_BUTTON_WIDTH = 2.5 * REM; // px (including margin)
 
 const StickerPicker: FC<OwnProps & StateProps> = ({
   chat,
   threadId,
   className,
   isHidden,
+  isTranslucent,
   loadAndPlay,
   canSendStickers,
   recentStickers,
@@ -104,16 +106,21 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [activeSetIndex, setActiveSetIndex] = useState<number>(0);
+  const {
+    handleScroll: handleContentScroll,
+    isAtBeginning: shouldHideTopBorder,
+  } = useScrolledState();
 
   const sendMessageAction = useSendMessageAction(chat!.id, threadId);
 
   const {
+    activeSetIndex,
     observeIntersectionForSet,
     observeIntersectionForPlayingItems,
     observeIntersectionForShowingItems,
     observeIntersectionForCovers,
-  } = useStickerPickerObservers(containerRef, headerRef, 'sticker-set', setActiveSetIndex, isHidden);
+    selectStickerSet,
+  } = useStickerPickerObservers(containerRef, headerRef, 'sticker-set', isHidden);
 
   const lang = useLang();
 
@@ -204,7 +211,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
   const shouldRenderContents = areAddedLoaded && canRenderContents && !noPopulatedSets && canSendStickers;
 
-  useHorizontalScroll(headerRef, !shouldRenderContents);
+  useHorizontalScroll(headerRef, !shouldRenderContents || !headerRef.current);
 
   // Scroll container and header when active set changes
   useEffect(() => {
@@ -221,12 +228,6 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
     animateHorizontalScroll(header, newLeft);
   }, [areAddedLoaded, activeSetIndex]);
-
-  const selectStickerSet = useCallback((index: number) => {
-    setActiveSetIndex(index);
-    const stickerSetEl = document.getElementById(`sticker-set-${index}`)!;
-    animateScroll(containerRef.current!, stickerSetEl, 'start', undefined, SMOOTH_SCROLL_DISTANCE);
-  }, []);
 
   const handleStickerSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
     onStickerSelect(sticker, isSilent, shouldSchedule, true);
@@ -252,11 +253,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];
-    const buttonClassName = buildClassName(
-      'symbol-set-button sticker-set-button',
-      index === activeSetIndex && 'activated',
-    );
-
+    const buttonClassName = buildClassName(styles.stickerCover, index === activeSetIndex && styles.activated);
     const withSharedCanvas = index < STICKER_PICKER_MAX_SHARED_COVERS;
 
     if (stickerSet.id === RECENT_SYMBOL_SET_ID
@@ -308,6 +305,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           noContextMenu
           isCurrentUserPremium
           sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
+          withTranslucentThumb={isTranslucent}
           onClick={selectStickerSet}
           clickArg={index}
         />
@@ -315,15 +313,15 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     }
   }
 
-  const fullClassName = buildClassName('StickerPicker', className);
+  const fullClassName = buildClassName(styles.root, className);
 
   if (!shouldRenderContents) {
     return (
       <div className={fullClassName}>
         {!canSendStickers ? (
-          <div className="picker-disabled">{lang('ErrorSendRestrictedStickersAll')}</div>
+          <div className={styles.pickerDisabled}>{lang('ErrorSendRestrictedStickersAll')}</div>
         ) : noPopulatedSets ? (
-          <div className="picker-disabled">{lang('NoStickers')}</div>
+          <div className={styles.pickerDisabled}>{lang('NoStickers')}</div>
         ) : (
           <Loading />
         )}
@@ -331,12 +329,15 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     );
   }
 
+  const headerClassName = buildClassName(
+    styles.header,
+    'no-selection no-scrollbar',
+    !shouldHideTopBorder && styles.headerWithBorder,
+  );
+
   return (
     <div className={fullClassName}>
-      <div
-        ref={headerRef}
-        className="StickerPicker-header no-selection no-scrollbar"
-      >
+      <div ref={headerRef} className={headerClassName}>
         <div className="shared-canvas-container">
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
           {allSets.map(renderCover)}
@@ -345,7 +346,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
-        className={buildClassName('StickerPicker-main no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
+        onScroll={handleContentScroll}
+        className={buildClassName(styles.main, 'no-selection', IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll')}
       >
         {allSets.map((stickerSet, i) => (
           <StickerSet
@@ -360,6 +362,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             favoriteStickers={favoriteStickers}
             isSavedMessages={isSavedMessages}
             isCurrentUserPremium={isCurrentUserPremium}
+            isTranslucent={isTranslucent}
             onStickerSelect={handleStickerSelect}
             onStickerUnfave={handleStickerUnfave}
             onStickerFave={handleStickerFave}

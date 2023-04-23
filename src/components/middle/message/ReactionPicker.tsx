@@ -33,8 +33,8 @@ interface StateProps {
   position?: IAnchorPosition;
 }
 
-const FULL_PICKER_SHIFT_DELTA = { x: -30, y: -66 };
-const LIMITED_PICKER_SHIFT_DELTA = { x: -25, y: -10 };
+const FULL_PICKER_SHIFT_DELTA = { x: -23, y: -64 };
+const LIMITED_PICKER_SHIFT_DELTA = { x: -21, y: -10 };
 
 const ReactionPicker: FC<OwnProps & StateProps> = ({
   isOpen,
@@ -43,13 +43,6 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   withCustomReactions,
 }) => {
   const { toggleReaction, closeReactionPicker } = getActions();
-
-  // eslint-disable-next-line no-null/no-null
-  const scrollHeaderRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const limitedScrollContainerRef = useRef<HTMLDivElement>(null);
 
   const renderedMessageId = useCurrentOrPrev(message?.id, true);
   const renderedChatId = useCurrentOrPrev(message?.chatId, true);
@@ -72,18 +65,6 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   const {
     positionX, positionY, transformOriginX, transformOriginY, style,
   } = useMenuPosition(renderingPosition, getTriggerElement, getRootElement, getMenuElement, getLayout);
-
-  const handleResetScrollPosition = useCallback(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-    if (scrollHeaderRef.current) {
-      scrollHeaderRef.current.scrollLeft = 0;
-    }
-    if (limitedScrollContainerRef.current) {
-      limitedScrollContainerRef.current.scrollTop = 0;
-    }
-  }, []);
 
   const handleToggleCustomReaction = useCallback((sticker: ApiSticker) => {
     if (!renderedChatId || !renderedMessageId) {
@@ -120,17 +101,12 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     }, []);
   }, [message?.reactions?.results]);
 
-  const bubbleFullClassName = buildClassName(
-    styles.menuContent,
-    !withCustomReactions && styles.onlyReactions,
-  );
-
   return (
     <Menu
       isOpen={isOpen}
       ref={menuRef}
-      className={styles.menu}
-      bubbleClassName={bubbleFullClassName}
+      className={buildClassName(styles.menu, 'ReactionPicker')}
+      bubbleClassName={buildClassName(styles.menuContent, !withCustomReactions && styles.onlyReactions)}
       withPortal
       noCompact
       positionX={positionX}
@@ -138,25 +114,24 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       transformOriginX={transformOriginX}
       transformOriginY={transformOriginY}
       style={style}
+      backdropExcludedSelector=".Modal.confirm"
       onClose={closeReactionPicker}
-      onCloseAnimationEnd={handleResetScrollPosition}
     >
       <CustomEmojiPicker
         idPrefix="message-emoji-set-"
-        loadAndPlay={isOpen}
+        isHidden={!isOpen || !withCustomReactions}
+        loadAndPlay={Boolean(isOpen && withCustomReactions)}
         isReactionPicker
         className={!withCustomReactions ? styles.hidden : undefined}
-        scrollHeaderRef={scrollHeaderRef}
-        scrollContainerRef={scrollContainerRef}
+        selectedReactionIds={selectedReactionIds}
+        isTranslucent
         onCustomEmojiSelect={handleToggleCustomReaction}
         onReactionSelect={handleToggleReaction}
-        selectedReactionIds={selectedReactionIds}
       />
       {!withCustomReactions && Boolean(renderedChatId) && (
         <ReactionPickerLimited
           chatId={renderedChatId}
           loadAndPlay={isOpen}
-          scrollContainerRef={limitedScrollContainerRef}
           onReactionSelect={handleToggleReaction}
           selectedReactionIds={selectedReactionIds}
         />

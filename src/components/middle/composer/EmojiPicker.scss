@@ -1,30 +1,38 @@
+@import "../../../styles/mixins";
+
 .EmojiPicker {
-  --emoji-size: 2.5rem;
+  --emoji-size: 2.25rem;
+  --color-primary: var(--color-text);
 
   height: 100%;
 
   &-main {
     height: calc(100% - 3rem);
     overflow-y: auto;
-    padding: 0.4375rem;
+    padding: 0.5rem 0.75rem;
 
     @media (max-width: 600px) {
       padding: 0.5rem 0.25rem;
     }
+
+    @include overflow-y-overlay();
   }
 
   &-header {
     height: 3rem;
-    border-bottom: 1px solid var(--color-borders);
     display: flex;
     align-items: center;
     justify-content: space-around;
-    box-shadow: 0 0 2px var(--color-default-shadow);
+
+    &.with-top-border {
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      box-shadow: inset 0 -0.5px 0 0 var(--color-borders-alternate);
+    }
 
     @media (max-width: 600px) {
       overflow-x: auto;
       overflow-y: hidden;
-      display: block;
+      justify-content: space-between;
       white-space: nowrap;
       padding: 0.4375rem 0;
 

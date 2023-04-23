@@ -1,19 +1,31 @@
+@import "../../../styles/mixins";
+
 .GifPicker {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   grid-auto-rows: 6.25rem;
-  grid-gap: 0.25rem;
+  grid-gap: 0.125rem;
   grid-auto-flow: dense;
-  height: 100%;
+  height: calc(100% - 0.1875rem);
   overflow-y: auto;
-  padding: 0.25rem;
+  margin: 0 0.1875rem;
+  padding-bottom: 0.1875rem;
+  border-radius: 1.125rem 1.125rem 0 0;
+  position: relative;
+  top: 0.1875rem;
 
-  @supports (overflow: overlay) {
-    overflow-y: overlay;
-  }
+  @include overflow-y-overlay();
 
   .Loading, .picker-disabled {
     grid-column: 1 / -1;
     height: var(--menu-height);
+  }
+
+  .SymbolMenu.mobile-menu & {
+    border-radius: 0;
+  }
+
+  .bubble {
+    border-radius: var(--border-radius-default) !important;
   }
 }

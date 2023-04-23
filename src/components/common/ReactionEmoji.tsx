@@ -49,7 +49,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   ), [availableReactions, reaction]);
   const thumbDataUri = availableReaction?.staticIcon?.thumbnail?.dataUri;
   const animationId = availableReaction?.selectAnimation?.id;
-  const coords = useCoordsInSharedCanvas(ref, sharedCanvasHqRef);
+  const coords = useCoordsInSharedCanvas(ref, sharedCanvasRef);
   const mediaData = useMedia(
     availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation) : undefined,
     !animationId,
@@ -82,15 +82,18 @@ const ReactionEmoji: FC<OwnProps> = ({
           observeIntersectionForPlaying={observeIntersection}
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
+          withTranslucentThumb
         />
       ) : (
         <AnimatedIconWithPreview
           tgsUrl={mediaData}
           thumbDataUri={thumbDataUri}
           play={loadAndPlay}
+          noLoop={false}
           size={EMOJI_SIZE_PICKER}
+          isLowPriority
           className={transitionClassNames}
-          sharedCanvas={sharedCanvasHqRef!.current || undefined}
+          sharedCanvas={sharedCanvasRef!.current || undefined}
           sharedCanvasCoords={coords}
         />
       )}

@@ -97,7 +97,7 @@ const StickerView: FC<OwnProps> = ({
   const thumbDataUri = useThumbnail(sticker);
   // Use preview instead of thumb but only if it's already loaded
   const [preloadedPreviewData] = useState(mediaLoader.getFromMemory(previewMediaHash));
-  const thumbData = preloadedPreviewData || thumbDataUri;
+  const thumbData = customColor ? thumbDataUri : (preloadedPreviewData || thumbDataUri);
 
   const shouldForcePreview = isUnsupportedVideo || (isStatic && isSmall);
   fullMediaHash ||= shouldForcePreview ? previewMediaHash : `sticker${id}`;
@@ -138,6 +138,7 @@ const StickerView: FC<OwnProps> = ({
           isThumbOpaque && styles.thumbOpaque,
           thumbClassName,
           thumbClassNames,
+          'sticker-media',
         )}
         alt=""
         draggable={false}
@@ -168,7 +169,7 @@ const StickerView: FC<OwnProps> = ({
       ) : isVideo ? (
         <OptimizedVideo
           canPlay={shouldPlay && shouldLoop}
-          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
+          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
           src={fullMediaData}
           playsInline
           muted
@@ -179,7 +180,7 @@ const StickerView: FC<OwnProps> = ({
         />
       ) : (
         <img
-          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames)}
+          className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
           src={fullMediaData}
           alt={emoji}
           draggable={false}

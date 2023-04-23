@@ -3,7 +3,8 @@ import React, { memo, useRef } from '../../../lib/teact/teact';
 import type { FC } from '../../../lib/teact/teact';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { RECENT_SYMBOL_SET_ID } from '../../../config';
+import { REM } from '../../common/helpers/mediaDimensions';
+import { EMOJI_SIZE_PICKER, RECENT_SYMBOL_SET_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import windowSize from '../../../util/windowSize';
 
@@ -15,9 +16,10 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import EmojiButton from './EmojiButton';
 
 const EMOJIS_PER_ROW_ON_DESKTOP = 8;
-const EMOJI_MARGIN = 10;
-const MOBILE_CONTAINER_PADDING = 8;
-const EMOJI_SIZE = 40;
+const EMOJI_MARGIN = 0.625 * REM;
+const EMOJI_VERTICAL_MARGIN = 0.25 * REM;
+const EMOJI_VERTICAL_MARGIN_MOBILE = 0.5 * REM;
+const MOBILE_CONTAINER_PADDING = 0.5 * REM;
 
 type OwnProps = {
   category: EmojiCategory;
@@ -42,9 +44,12 @@ const EmojiCategory: FC<OwnProps> = ({
   const { isMobile } = useAppLayout();
 
   const emojisPerRow = isMobile
-    ? Math.floor((windowSize.get().width - MOBILE_CONTAINER_PADDING) / (EMOJI_SIZE + EMOJI_MARGIN))
+    ? Math.floor(
+      (windowSize.get().width - MOBILE_CONTAINER_PADDING + EMOJI_MARGIN) / (EMOJI_SIZE_PICKER + EMOJI_MARGIN),
+    )
     : EMOJIS_PER_ROW_ON_DESKTOP;
-  const height = Math.ceil(category.emojis.length / emojisPerRow) * (EMOJI_SIZE + EMOJI_MARGIN);
+  const height = Math.ceil(category.emojis.length / emojisPerRow)
+    * (EMOJI_SIZE_PICKER + (isMobile ? EMOJI_VERTICAL_MARGIN_MOBILE : EMOJI_VERTICAL_MARGIN));
 
   return (
     <div

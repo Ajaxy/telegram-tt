@@ -38,6 +38,7 @@ type OwnProps<T> = {
   isSelected?: boolean;
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  withTranslucentThumb?: boolean;
   observeIntersection: ObserveFn;
   observeIntersectionForShowing?: ObserveFn;
   noShowPremium?: boolean;
@@ -75,6 +76,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   isCurrentUserPremium,
   noShowPremium,
   sharedCanvasRef,
+  withTranslucentThumb,
   onClick,
   clickArg,
   onFaveClick,
@@ -125,7 +127,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
     [isStatusPicker],
   );
 
-  const getLayout = () => ({ withPortal: isStatusPicker });
+  const getLayout = () => ({ withPortal: isStatusPicker, shouldAvoidNegativePosition: true });
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
@@ -303,6 +305,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           noPlay={!shouldPlay}
           withSharedAnimation
           sharedCanvasRef={sharedCanvasRef}
+          withTranslucentThumb={withTranslucentThumb}
           customColor={customColor}
         />
       )}

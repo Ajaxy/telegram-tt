@@ -68,7 +68,7 @@ const StickerSetCover: FC<OwnProps> = ({
   }, [isIntersecting, loadStickers, stickerSet]);
 
   return (
-    <div ref={containerRef} className="sticker-set-cover">
+    <div ref={containerRef} className={buildClassName(styles.root, 'sticker-set-cover')}>
       {isReady ? (
         isLottie ? (
           <AnimatedSticker
@@ -91,7 +91,7 @@ const StickerSetCover: FC<OwnProps> = ({
         ) : (
           <img
             src={mediaData || staticMediaData}
-            className={transitionClassNames}
+            className={buildClassName(styles.image, transitionClassNames)}
             alt=""
           />
         )
