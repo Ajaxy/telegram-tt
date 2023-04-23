@@ -28,7 +28,7 @@ export type OwnProps = {
   playSegment?: [number, number];
   speed?: number;
   noLoop?: boolean;
-  size?: number;
+  size: number;
   quality?: number;
   color?: [number, number, number];
   isLowPriority?: boolean;
@@ -126,14 +126,14 @@ const AnimatedSticker: FC<OwnProps> = ({
       tgsUrl,
       container,
       renderId || generateIdFor(ID_STORE, true),
-      viewId,
       {
-        noLoop,
         size,
+        noLoop,
         quality,
         isLowPriority,
         coords: sharedCanvasCoords,
       },
+      viewId,
       color,
       onLoad,
       onEnded,
@@ -152,18 +152,12 @@ const AnimatedSticker: FC<OwnProps> = ({
   ]);
 
   useEffect(() => {
-    if (animation || !tgsUrl || (sharedCanvas && !sharedCanvasCoords)) {
-      return;
-    }
-
     if (RLottie) {
       init();
     } else {
-      ensureLottie().then(() => {
-        requestMeasure(init);
-      });
+      ensureLottie().then(init);
     }
-  }, [animation, init, sharedCanvas, sharedCanvasCoords, tgsUrl]);
+  }, [init]);
 
   const throttledInit = useThrottledCallback(init, [init], THROTTLE_MS);
   useSharedIntersectionObserver(sharedCanvas, throttledInit);

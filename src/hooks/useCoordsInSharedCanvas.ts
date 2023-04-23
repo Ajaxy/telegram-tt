@@ -10,13 +10,12 @@ import useSharedIntersectionObserver from './useSharedIntersectionObserver';
 
 const THROTTLE_MS = 150;
 
-export default function useBoundsInSharedCanvas(
+export default function useCoordsInSharedCanvas(
   containerRef: React.RefObject<HTMLDivElement>,
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
 ) {
   const [x, setX] = useState<number>();
   const [y, setY] = useState<number>();
-  const [size, setSize] = useState<number>();
 
   const recalculate = useCallback(() => {
     const container = containerRef.current;
@@ -43,7 +42,6 @@ export default function useBoundsInSharedCanvas(
     // Factor coords are used to support rendering while being rescaled (e.g. message appearance animation)
     setX(round((targetBounds.left - canvasBounds.left) / canvasBounds.width, 4) || 0);
     setY(round((targetBounds.top - canvasBounds.top) / canvasBounds.height, 4) || 0);
-    setSize(Math.round(targetBounds.width));
   }, [containerRef, sharedCanvasRef]);
 
   useEffect(recalculate, [recalculate]);
@@ -52,7 +50,5 @@ export default function useBoundsInSharedCanvas(
   useResizeObserver(sharedCanvasRef, throttledRecalculate);
   useSharedIntersectionObserver(sharedCanvasRef, throttledRecalculate);
 
-  const coords = useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);
-
-  return { coords, size };
+  return useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);
 }

@@ -11,8 +11,8 @@ import cycleRestrict from '../../util/cycleRestrict';
 import generateIdFor from '../../util/generateIdFor';
 
 interface Params {
+  size: number;
   noLoop?: boolean;
-  size?: number;
   quality?: number;
   isLowPriority?: boolean;
   coords?: { x: number; y: number };
@@ -96,8 +96,8 @@ class RLottie {
     const [
       , canvas,
       renderId,
-      viewId = generateIdFor(ID_STORE, true),
-      params, ,
+      params,
+      viewId = generateIdFor(ID_STORE, true), ,
       onLoad,
     ] = args;
     let instance = instancesByRenderId.get(renderId);
@@ -117,8 +117,8 @@ class RLottie {
     private tgsUrl: string,
     private container: HTMLDivElement | HTMLCanvasElement,
     private renderId: string,
+    private params: Params,
     viewId: string = generateIdFor(ID_STORE, true),
-    private params: Params = {},
     private customColor?: [number, number, number],
     private onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
@@ -264,19 +264,7 @@ class RLottie {
         throw new Error('[RLottie] Container is not mounted');
       }
 
-      let { size } = this.params;
-
-      if (!size) {
-        size = (
-          container.offsetWidth
-          || parseInt(container.style.width, 10)
-          || container.parentNode.offsetWidth
-        );
-
-        if (!size) {
-          throw new Error('[RLottie] Failed to detect width from container');
-        }
-      }
+      const { size } = this.params;
 
       imgSize = Math.round(size * sizeFactor);
 
@@ -309,7 +297,7 @@ class RLottie {
       const canvas = container;
       const ctx = canvas.getContext('2d')!;
 
-      imgSize = Math.round(this.params.size! * sizeFactor);
+      imgSize = Math.round(this.params.size * sizeFactor);
 
       if (!this.imgSize) {
         this.imgSize = imgSize;
@@ -323,8 +311,8 @@ class RLottie {
         ctx,
         isSharedCanvas: true,
         coords: {
-          x: Math.round((coords?.x || 0) * canvasWidth),
-          y: Math.round((coords?.y || 0) * canvasHeight),
+          x: Math.round(coords!.x * canvasWidth),
+          y: Math.round(coords!.y * canvasHeight),
         },
         onLoad,
       });
@@ -337,8 +325,8 @@ class RLottie {
 
   private calcSizeFactor() {
     const {
-      isLowPriority,
       size,
+      isLowPriority,
       // Reduced quality only looks acceptable on big enough images
       quality = isLowPriority && (!size || size > LOW_PRIORITY_QUALITY_SIZE_THRESHOLD)
         ? LOW_PRIORITY_QUALITY : HIGH_PRIORITY_QUALITY,

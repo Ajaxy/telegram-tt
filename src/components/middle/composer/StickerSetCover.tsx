@@ -15,7 +15,7 @@ import { getStickerPreviewHash } from '../../../global/helpers';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
-import useBoundsInSharedCanvas from '../../../hooks/useBoundsInSharedCanvas';
+import useCoordsInSharedCanvas from '../../../hooks/useCoordsInSharedCanvas';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -54,7 +54,7 @@ const StickerSetCover: FC<OwnProps> = ({
   const isReady = mediaData || staticMediaData;
   const transitionClassNames = useMediaTransition(isReady);
 
-  const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
+  const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   useEffect(() => {
     if (isIntersecting && !stickerSet.stickers?.length) {
@@ -74,11 +74,11 @@ const StickerSetCover: FC<OwnProps> = ({
           <AnimatedSticker
             className={transitionClassNames}
             tgsUrl={mediaData}
-            size={size || bounds.size}
+            size={size}
             play={isIntersecting && !noAnimate}
             isLowPriority={!selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSet)}
             sharedCanvas={sharedCanvasRef?.current || undefined}
-            sharedCanvasCoords={bounds.coords}
+            sharedCanvasCoords={coords}
           />
         ) : (isVideo && !shouldFallbackToStatic) ? (
           <OptimizedVideo

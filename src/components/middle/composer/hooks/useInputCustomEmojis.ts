@@ -200,12 +200,12 @@ function createPlayer({
       mediaUrl,
       isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,
       renderId,
-      viewId,
       {
         size: SIZE,
         coords: position,
         isLowPriority: !isHq,
       },
+      viewId,
       customEmoji.shouldUseTextColor ? textColor : undefined,
     );
 
