@@ -15,6 +15,8 @@ import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/
 import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { useStateRef } from '../../hooks/useStateRef';
+import useSharedIntersectionObserver from '../../hooks/useSharedIntersectionObserver';
+import useThrottledCallback from '../../hooks/useThrottledCallback';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -46,8 +48,8 @@ let RLottie: RLottieClass;
 
 // Time for the main interface to completely load
 const LOTTIE_LOAD_DELAY = 3000;
+const THROTTLE_MS = 150;
 const ID_STORE = {};
-const ANIMATION_END_TIMEOUT = 500;
 
 async function ensureLottie() {
   if (!lottiePromise) {
@@ -98,76 +100,73 @@ const AnimatedSticker: FC<OwnProps> = ({
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
 
-  const isUnmountedRef = useRef();
+  const isUnmountedRef = useRef(false);
   useEffect(() => {
     return () => {
       isUnmountedRef.current = true;
     };
   }, []);
 
+  const init = useCallback(() => {
+    if (
+      animationRef.current
+      || isUnmountedRef.current
+      || !tgsUrl
+      || (sharedCanvas && (!sharedCanvasCoords || !sharedCanvas.offsetWidth || !sharedCanvas.offsetHeight))
+    ) {
+      return;
+    }
+
+    const container = containerRef.current || sharedCanvas;
+    if (!container) {
+      return;
+    }
+
+    const newAnimation = RLottie.init(
+      tgsUrl,
+      container,
+      renderId || generateIdFor(ID_STORE, true),
+      viewId,
+      {
+        noLoop,
+        size,
+        quality,
+        isLowPriority,
+        coords: sharedCanvasCoords,
+      },
+      color,
+      onLoad,
+      onEnded,
+      onLoop,
+    );
+
+    if (speed) {
+      newAnimation.setSpeed(speed);
+    }
+
+    setAnimation(newAnimation);
+    animationRef.current = newAnimation;
+  }, [
+    color, isLowPriority, noLoop, onEnded, onLoad, onLoop, quality,
+    renderId, sharedCanvas, sharedCanvasCoords, size, speed, tgsUrl, viewId,
+  ]);
+
   useEffect(() => {
     if (animation || !tgsUrl || (sharedCanvas && !sharedCanvasCoords)) {
       return;
     }
 
-    const exec = () => {
-      if (isUnmountedRef.current) {
-        return;
-      }
-
-      const container = containerRef.current || sharedCanvas;
-      if (!container) {
-        return;
-      }
-
-      // Wait until element is properly mounted
-      if (sharedCanvas && !sharedCanvas.offsetParent) {
-        // `requestMeasure` is useful as timeouts are run in parallel with image loadings and thus causing reflow
-        setTimeout(() => requestMeasure(exec), ANIMATION_END_TIMEOUT);
-        return;
-      }
-
-      const newAnimation = RLottie.init(
-        tgsUrl,
-        container,
-        renderId || generateIdFor(ID_STORE, true),
-        viewId,
-        {
-          noLoop,
-          size,
-          quality,
-          isLowPriority,
-          coords: sharedCanvasCoords,
-        },
-        color,
-        onLoad,
-        onEnded,
-        onLoop,
-      );
-
-      if (speed) {
-        newAnimation.setSpeed(speed);
-      }
-
-      setAnimation(newAnimation);
-      animationRef.current = newAnimation;
-    };
-
     if (RLottie) {
-      exec();
+      init();
     } else {
       ensureLottie().then(() => {
-        requestMeasure(() => {
-          if (containerRef.current) {
-            exec();
-          }
-        });
+        requestMeasure(init);
       });
     }
-  }, [
-    animation, renderId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop, viewId,
-    sharedCanvas, sharedCanvasCoords,
-  ]);
+  }, [animation, init, sharedCanvas, sharedCanvasCoords, tgsUrl]);
+
+  const throttledInit = useThrottledCallback(init, [init], THROTTLE_MS);
+  useSharedIntersectionObserver(sharedCanvas, throttledInit);
 
   useEffect(() => {
     if (!animation) return;

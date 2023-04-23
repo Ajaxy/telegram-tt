@@ -1,15 +1,14 @@
 import {
   useCallback, useEffect, useMemo, useState,
 } from '../lib/teact/teact';
-import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 import { round } from '../util/math';
 
 import useResizeObserver from './useResizeObserver';
 import useThrottledCallback from './useThrottledCallback';
+import useSharedIntersectionObserver from './useSharedIntersectionObserver';
 
-const ANIMATION_END_TIMEOUT = 500;
-const THROTTLE_MS = 300;
+const THROTTLE_MS = 150;
 
 export default function useBoundsInSharedCanvas(
   containerRef: React.RefObject<HTMLDivElement>,
@@ -27,9 +26,7 @@ export default function useBoundsInSharedCanvas(
     }
 
     // Wait until elements are properly mounted
-    if (!container.offsetParent || !canvas.offsetParent) {
-      // `requestMeasure` is useful as timeouts are run in parallel with image loadings and thus causing reflow
-      setTimeout(() => requestMeasure(recalculate), ANIMATION_END_TIMEOUT);
+    if (!canvas.offsetWidth || !canvas.offsetHeight) {
       return;
     }
 
@@ -49,6 +46,7 @@ export default function useBoundsInSharedCanvas(
 
   const throttledRecalculate = useThrottledCallback(recalculate, [recalculate], THROTTLE_MS);
   useResizeObserver(sharedCanvasRef, throttledRecalculate);
+  useSharedIntersectionObserver(sharedCanvasRef, throttledRecalculate);
 
   const coords = useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);
 

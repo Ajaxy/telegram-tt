@@ -12,12 +12,12 @@ import useSyncEffect from './useSyncEffect';
 const TRANSITION_PROPERTY = 'color';
 const TRANSITION_STYLE = `60ms ${TRANSITION_PROPERTY} linear`;
 
-export default function useDynamicColorListener(ref?: React.RefObject<HTMLElement>, isDisabled?: boolean) {
+export default function useDynamicColorListener(ref: React.RefObject<HTMLElement>, isDisabled?: boolean) {
   const [hexColor, setHexColor] = useState<string | undefined>();
   const rgbColorRef = useRef<[number, number, number] | undefined>();
 
   const updateColor = useCallback(() => {
-    if (!ref?.current || isDisabled) {
+    if (!ref.current || isDisabled) {
       setHexColor(undefined);
       return;
     }
@@ -28,7 +28,7 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
 
   // Element does not receive `transitionend` event if parent has `display: none`.
   // We will receive `resize` event when parent is shown again.
-  useResizeObserver(!isDisabled ? ref : undefined, updateColor);
+  useResizeObserver(ref, updateColor, isDisabled);
 
   // Update RGB color only when hex color changes
   useSyncEffect(() => {
@@ -42,7 +42,7 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
   }, [hexColor]);
 
   useLayoutEffect(() => {
-    const el = ref?.current;
+    const el = ref.current;
     if (!el || isDisabled) {
       return undefined;
     }
@@ -55,7 +55,7 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
   }, [isDisabled, ref]);
 
   useEffect(() => {
-    const el = ref?.current;
+    const el = ref.current;
     if (!el) {
       return undefined;
     }

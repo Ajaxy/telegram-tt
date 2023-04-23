@@ -5,34 +5,34 @@ import type { CallbackManager } from '../util/callbacks';
 import { createCallbackManager } from '../util/callbacks';
 import { useStateRef } from './useStateRef';
 
-const elementObserverMap = new Map<HTMLElement, [ResizeObserver, CallbackManager]>();
+const elementObserverMap = new Map<HTMLElement, [IntersectionObserver, CallbackManager]>();
 
-export default function useResizeObserver(
-  ref: React.RefObject<HTMLElement> | undefined,
-  onResize: (entry: ResizeObserverEntry) => void,
+export default function useSharedIntersectionObserver(
+  refOrElement: React.RefObject<HTMLElement> | HTMLElement | undefined,
+  onIntersectionChange: (entry: IntersectionObserverEntry) => void,
   isDisabled = false,
 ) {
-  const onResizeRef = useStateRef(onResize);
+  const onIntersectionChangeRef = useStateRef(onIntersectionChange);
 
   useEffect(() => {
-    const el = ref?.current;
+    const el = refOrElement && 'current' in refOrElement ? refOrElement.current : refOrElement;
     if (!el || isDisabled) {
       return undefined;
     }
 
-    const callback: ResizeObserverCallback = ([entry]) => {
+    const callback: IntersectionObserverCallback = ([entry]) => {
       // Ignore updates when element is not properly mounted (`display: none`)
-      if (entry.contentRect.width === 0 && entry.contentRect.height === 0) {
+      if (!(entry.target as HTMLElement).offsetWidth || !(entry.target as HTMLElement).offsetHeight) {
         return;
       }
 
-      onResizeRef.current(entry);
+      onIntersectionChangeRef.current(entry);
     };
 
     let [observer, callbackManager] = elementObserverMap.get(el) || [undefined, undefined];
     if (!observer) {
       callbackManager = createCallbackManager();
-      observer = new ResizeObserver(callbackManager.runCallbacks);
+      observer = new IntersectionObserver(callbackManager.runCallbacks);
       elementObserverMap.set(el, [observer, callbackManager]);
       observer.observe(el);
     }
@@ -46,5 +46,5 @@ export default function useResizeObserver(
         elementObserverMap.delete(el);
       }
     };
-  }, [isDisabled, onResizeRef, ref]);
+  }, [isDisabled, onIntersectionChangeRef, refOrElement]);
 }
