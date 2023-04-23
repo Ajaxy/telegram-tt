@@ -10,7 +10,7 @@ import { EMOJI_SIZE_PICKER } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { getDocumentMediaHash, isSameReaction } from '../../global/helpers';
 
-import useBoundsInSharedCanvas from '../../hooks/useBoundsInSharedCanvas';
+import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useMedia from '../../hooks/useMedia';
 
@@ -49,7 +49,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   ), [availableReactions, reaction]);
   const thumbDataUri = availableReaction?.staticIcon?.thumbnail?.dataUri;
   const animationId = availableReaction?.selectAnimation?.id;
-  const bounds = useBoundsInSharedCanvas(ref, sharedCanvasHqRef);
+  const coords = useCoordsInSharedCanvas(ref, sharedCanvasHqRef);
   const mediaData = useMedia(
     availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation) : undefined,
     !animationId,
@@ -91,7 +91,7 @@ const ReactionEmoji: FC<OwnProps> = ({
           size={EMOJI_SIZE_PICKER}
           className={transitionClassNames}
           sharedCanvas={sharedCanvasHqRef!.current || undefined}
-          sharedCanvasCoords={bounds.coords}
+          sharedCanvasCoords={coords}
         />
       )}
     </div>

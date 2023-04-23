@@ -17,7 +17,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useThumbnail from '../../hooks/useThumbnail';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
-import useBoundsInSharedCanvas from '../../hooks/useBoundsInSharedCanvas';
+import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 
 import AnimatedSticker from './AnimatedSticker';
@@ -118,7 +118,7 @@ const StickerView: FC<OwnProps> = ({
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
   const noTransition = isLottie && preloadedPreviewData;
 
-  const bounds = useBoundsInSharedCanvas(containerRef, sharedCanvasRef);
+  const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
@@ -160,7 +160,7 @@ const StickerView: FC<OwnProps> = ({
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           sharedCanvas={sharedCanvasRef?.current || undefined}
-          sharedCanvasCoords={bounds.coords}
+          sharedCanvasCoords={coords}
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}
           onEnded={onAnimatedStickerLoop}
