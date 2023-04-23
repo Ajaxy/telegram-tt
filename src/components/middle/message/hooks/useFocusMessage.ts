@@ -4,7 +4,8 @@ import { useLayoutEffect, useMemo } from '../../../../lib/teact/teact';
 import fastSmoothScroll from '../../../../util/fastSmoothScroll';
 
 // This is used when the viewport was replaced.
-const RELOCATED_FOCUS_OFFSET = 1000;
+const BOTTOM_FOCUS_OFFSET = 500;
+const RELOCATED_FOCUS_OFFSET = 750;
 const FOCUS_MARGIN = 20;
 
 export default function useFocusMessage(
@@ -29,14 +30,15 @@ export default function useFocusMessage(
   useLayoutEffect(() => {
     if (isFocused && elementRef.current) {
       const messagesContainer = elementRef.current.closest<HTMLDivElement>('.MessageList')!;
+      // `noFocusHighlight` is always called with “scroll-to-bottom” buttons
+      const isToBottom = noFocusHighlight;
 
       fastSmoothScroll(
         messagesContainer,
         elementRef.current,
-        // `noFocusHighlight` always called from “scroll-to-bottom” buttons
-        noFocusHighlight ? 'end' : 'centerOrTop',
+        isToBottom ? 'end' : 'centerOrTop',
         FOCUS_MARGIN,
-        focusDirection !== undefined ? RELOCATED_FOCUS_OFFSET : undefined,
+        focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
         focusDirection,
         undefined,
         isResizingContainer,
