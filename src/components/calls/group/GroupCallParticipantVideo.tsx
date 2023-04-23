@@ -4,11 +4,11 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
 
 import { GROUP_CALL_THUMB_VIDEO_DISABLED } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectUser } from '../../../global/selectors';
+import { selectChat, selectUser, selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -25,6 +25,7 @@ type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   chat?: ApiChat;
+  userProfilePhoto?: ApiPhoto;
   currentUserId?: string;
   isActive?: boolean;
 };
@@ -34,6 +35,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   onClick,
   user,
   chat,
+  userProfilePhoto,
   isActive,
   isFullscreen,
 }) => {
@@ -56,11 +58,11 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
     >
       {isFullscreen && (
         <button className="back-button">
-          <i className="icon-arrow-left" />
+          <i className="icon icon-arrow-left" />
           {lang('Back')}
         </button>
       )}
-      <Avatar user={user} chat={chat} className="thumbnail-avatar" />
+      <Avatar user={user} chat={chat} userProfilePhoto={userProfilePhoto} className="thumbnail-avatar" />
       {!GROUP_CALL_THUMB_VIDEO_DISABLED && (
         <div className="thumbnail-wrapper">
           <video className="thumbnail" muted autoPlay playsInline srcObject={streams?.[type]} />
@@ -68,9 +70,9 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
       )}
       <video className="video" muted autoPlay playsInline srcObject={streams?.[type]} />
       <div className="info">
-        <i className="icon-microphone-alt" />
+        <i className="icon icon-microphone-alt" />
         <span className="name">{user?.firstName || chat?.title}</span>
-        {type === 'presentation' && <i className="last-icon icon-active-sessions" />}
+        {type === 'presentation' && <i className="icon last-icon icon-active-sessions" />}
       </div>
     </div>
   );
@@ -82,6 +84,7 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       user: participant.isUser ? selectUser(global, participant.id) : undefined,
       chat: !participant.isUser ? selectChat(global, participant.id) : undefined,
+      userProfilePhoto: participant.isUser ? selectUserPhotoFromFullInfo(global, participant.id) : undefined,
       isActive: (participant.amplitude || 0) > THRESHOLD,
     };
   },

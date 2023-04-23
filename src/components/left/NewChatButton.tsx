@@ -67,8 +67,8 @@ const NewChatButton: FC<OwnProps> = ({
         ariaLabel={lang(isMenuOpen ? 'Close' : 'NewMessageTitle')}
         tabIndex={-1}
       >
-        <i className="icon-new-chat-filled" />
-        <i className="icon-close" />
+        <i className="icon icon-new-chat-filled" />
+        <i className="icon icon-close" />
       </Button>
       <Menu
         isOpen={isMenuOpen}

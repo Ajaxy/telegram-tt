@@ -31,7 +31,10 @@ const TopicDefaultIcon: FC<OwnProps> = ({
 
   if (topicId === GENERAL_TOPIC_ID) {
     return (
-      <i className={buildClassName(styles.root, className, 'icon-hashtag', 'general-forum-icon')} onClick={onClick} />
+      <i
+        className={buildClassName(styles.root, className, 'icon', 'icon-hashtag', 'general-forum-icon')}
+        onClick={onClick}
+      />
     );
   }
   return (

@@ -58,7 +58,7 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
           size="smaller"
           isRtl={lang.isRtl}
         >
-          <i className="icon-settings" />
+          <i className="icon icon-settings" />
           <div className={styles.buttonText}>
             {lang('ChatList.EmptyChatListEditFilter')}
           </div>

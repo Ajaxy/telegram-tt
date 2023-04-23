@@ -5,13 +5,12 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { AnimationLevel, ISettings } from '../../../types';
-import { LeftColumnContent, SettingsScreens } from '../../../types';
-import type { ApiChat } from '../../../api/types';
 import type { TabState, GlobalState } from '../../../global/types';
 
+import { LeftColumnContent, SettingsScreens } from '../../../types';
+
 import {
-  ANIMATION_LEVEL_MAX,
-  APP_NAME, APP_VERSION,
+  APP_NAME, APP_VERSION, ARCHIVED_FOLDER_ID,
   BETA_CHANGELOG_URL,
   DEBUG,
   FEEDBACK_URL,
@@ -22,13 +21,11 @@ import {
 import { IS_PWA } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
-import switchTheme from '../../../util/switchTheme';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
 import {
   selectCurrentMessageList, selectIsCurrentUserPremium, selectTabState, selectTheme,
 } from '../../../global/selectors';
-import { isChatArchived } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import { useHotkeys } from '../../../hooks/useHotkeys';
@@ -48,6 +45,7 @@ import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import StatusButton from './StatusButton';
 
 import './LeftMainHeader.scss';
+import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 type OwnProps = {
   shouldHideSearch?: boolean;
@@ -71,7 +69,6 @@ type StateProps =
     searchDate?: number;
     theme: ISettings['theme'];
     animationLevel: AnimationLevel;
-    chatsById?: Record<string, ApiChat>;
     isMessageListOpen: boolean;
     isCurrentUserPremium?: boolean;
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
@@ -79,7 +76,8 @@ type StateProps =
     hasPasscode?: boolean;
     isAuthRememberMe?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'> & Pick<TabState, 'canInstall'>;
+  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'>
+  & Pick<TabState, 'canInstall'>;
 
 const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
@@ -103,7 +101,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   searchDate,
   theme,
   animationLevel,
-  chatsById,
   connectionState,
   isSyncing,
   isMessageListOpen,
@@ -136,19 +133,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       ? formatDateToString(new Date(searchDate * 1000))
       : undefined;
   }, [searchDate]);
-  const archivedUnreadChatsCount = useMemo(() => {
-    if (!hasMenu || !chatsById) {
-      return 0;
-    }
 
-    return Object.values(chatsById).reduce((total, chat) => {
-      if (!isChatArchived(chat)) {
-        return total;
-      }
-
-      return chat.unreadCount ? total + 1 : total;
-    }, 0);
-  }, [hasMenu, chatsById]);
+  const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
     lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
@@ -215,8 +201,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
     setSettingOption({ theme: newTheme });
     setSettingOption({ shouldUseSystemTheme: false });
-    switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
-  }, [animationLevel, setSettingOption, theme]);
+  }, [setSettingOption, theme]);
 
   const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -347,7 +332,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       )}
       {withOtherVersions && (
         <MenuItem
-          icon="char-K"
+          icon="K"
+          isCharIcon
           href={WEBK_VERSION_URL}
           onClick={handleSwitchToWebK}
         >
@@ -437,7 +423,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >
-            <i className="icon-lock" />
+            <i className="icon icon-lock" />
           </Button>
         )}
         <ShowTransition
@@ -465,14 +451,12 @@ export default memo(withGlobal<OwnProps>(
     const {
       currentUserId, connectionState, isSyncing, archiveSettings,
     } = global;
-    const { byId: chatsById } = global.chats;
     const { isConnectionStatusMinimized, animationLevel } = global.settings.byKey;
 
     return {
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
       currentUserId,
-      chatsById,
       globalSearchChatId: chatId,
       searchDate: date,
       theme: selectTheme(global),

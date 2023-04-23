@@ -71,7 +71,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
       />
       {Boolean(duration) && <div className={styles.duration}>{formatMediaDuration(duration)}</div>}
       <div className={styles.buy}>
-        <i className={buildClassName('icon-lock', styles.lock)} />
+        <i className={buildClassName('icon', 'icon-lock', styles.lock)} />
         {lang('Checkout.PayPrice', formatCurrency(amount, currency))}
       </div>
     </div>

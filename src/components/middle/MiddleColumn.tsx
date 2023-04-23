@@ -33,8 +33,9 @@ import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
   selectChatBot,
+  selectChatFullInfo,
+  selectChatMessage,
   selectCurrentMessageList,
-  selectTabState,
   selectCurrentTextSearch,
   selectIsChatBotNotStarted,
   selectIsInSelectMode,
@@ -42,9 +43,9 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectReplyingToId,
+  selectTabState,
   selectTheme,
   selectThreadInfo,
-  selectChatMessage,
 } from '../../global/selectors';
 import {
   getCanPostInChat,
@@ -514,7 +515,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
                       className="unpin-all-button"
                       onClick={handleOpenUnpinModal}
                     >
-                      <i className="icon-unpin" />
+                      <i className="icon icon-unpin" />
                       <span>{lang('Chat.Pinned.UnpinAll', pinnedMessagesCount, 'i')}</span>
                     </Button>
                   </div>
@@ -686,7 +687,9 @@ export default memo(withGlobal<OwnProps>(
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && isBotNotStarted;
-    const shouldLoadFullChat = Boolean(chat && isChatGroup(chat) && !chat.fullInfo && lastSyncTime);
+    const shouldLoadFullChat = Boolean(
+      chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id) && lastSyncTime,
+    );
     const replyingToId = selectReplyingToId(global, chatId, threadId);
     const shouldBlockSendInForum = chat?.isForum
       ? threadId === MAIN_THREAD_ID && !replyingToId && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)

@@ -91,7 +91,7 @@ const LeftSearch: FC<OwnProps & StateProps> = ({
     <div className="LeftSearch" ref={containerRef} onKeyDown={handleKeyDown}>
       <TabList activeTab={activeTab} tabs={chatId ? CHAT_TABS : TABS} onSwitchTab={handleSwitchTab} />
       <Transition
-        name={lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized'}
+        name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
         renderCount={TRANSITION_RENDER_COUNT}
         activeKey={currentContent}
       >

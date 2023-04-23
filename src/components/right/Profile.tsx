@@ -28,12 +28,13 @@ import {
   getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';
 import {
-  selectChatMessages,
+  selectActiveDownloadIds,
   selectChat,
+  selectChatFullInfo,
+  selectChatMessages,
   selectCurrentMediaSearch,
   selectIsRightColumnShown,
   selectTheme,
-  selectActiveDownloadIds,
   selectUser,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -454,7 +455,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     <InfiniteScroll
       ref={containerRef}
       className="Profile custom-scroll"
-      itemSelector={`.shared-media-transition > .Transition__slide--active.${resultType}-list > .scroll-item`}
+      itemSelector={`.shared-media-transition > .Transition_slide-active.${resultType}-list > .scroll-item`}
       items={canRenderContent ? viewportIds : undefined}
       cacheBuster={cacheBuster}
       sensitiveArea={PROFILE_SENSITIVE_AREA}
@@ -472,7 +473,7 @@ const Profile: FC<OwnProps & StateProps> = ({
         >
           <Transition
             ref={transitionRef}
-            name={lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized'}
+            name={lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
             activeKey={activeKey}
             renderCount={tabs.length}
             shouldRestoreHeight
@@ -492,7 +493,7 @@ const Profile: FC<OwnProps & StateProps> = ({
           onClick={handleNewMemberDialogOpen}
           ariaLabel={lang('lng_channel_add_users')}
         >
-          <i className="icon-add-user-filled" />
+          <i className="icon icon-add-user-filled" />
         </FloatingActionButton>
       )}
       {canDeleteMembers && (
@@ -518,6 +519,7 @@ function renderProfileInfo(chatId: string, resolvedUserId: string | undefined, i
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, topicId, isMobile }): StateProps => {
     const chat = selectChat(global, chatId);
+    const chatFullInfo = selectChatFullInfo(global, chatId);
     const messagesById = selectChatMessages(global, chatId);
     const { currentType: mediaSearchType, resultsByType } = selectCurrentMediaSearch(global) || {};
     const { foundIds } = (resultsByType && mediaSearchType && resultsByType[mediaSearchType]) || {};
@@ -528,10 +530,10 @@ export default memo(withGlobal<OwnProps>(
     const isGroup = chat && isChatGroup(chat);
     const isChannel = chat && isChatChannel(chat);
     const hasMembersTab = !topicId && (isGroup || (isChannel && isChatAdmin(chat!)));
-    const members = chat?.fullInfo?.members;
-    const adminMembersById = chat?.fullInfo?.adminMembersById;
+    const members = chatFullInfo?.members;
+    const adminMembersById = chatFullInfo?.adminMembersById;
     const areMembersHidden = hasMembersTab && chat
-      && (chat.isForbidden || (chat.fullInfo && !chat.fullInfo.canViewMembers));
+      && (chat.isForbidden || (chatFullInfo && !chatFullInfo.canViewMembers));
     const canAddMembers = hasMembersTab && chat
       && (getHasAdminRight(chat, 'inviteUsers') || !isUserRightBanned(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);

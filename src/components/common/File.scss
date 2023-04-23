@@ -97,7 +97,7 @@
   }
 
   &.interactive .file-icon-container {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     &:hover {
       .file-icon::after {

@@ -3,7 +3,7 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus, ApiPhoto,
 } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 import type { LangFn } from '../../../hooks/useLang';
@@ -17,7 +17,7 @@ import {
   getMessageSticker,
   getMessageIsSpoiler,
 } from '../../../global/helpers';
-import { selectChat, selectUser } from '../../../global/selectors';
+import { selectChat, selectUser, selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
@@ -43,6 +43,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   privateChatUser?: ApiUser;
+  userProfilePhoto?: ApiPhoto;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   lastSyncTime?: number;
   animationLevel?: AnimationLevel;
@@ -54,6 +55,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   privateChatUser,
+  userProfilePhoto,
   animationLevel,
   lastSyncTime,
 }) => {
@@ -86,6 +88,7 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
       <Avatar
         chat={chat}
         user={privateChatUser}
+        userProfilePhoto={userProfilePhoto}
         isSavedMessages={privateChatUser?.isSelf}
         lastSyncTime={lastSyncTime}
         withVideo
@@ -133,7 +136,7 @@ function renderSummary(
           buildClassName('media-preview--image', isRoundVideo && 'round', isSpoiler && 'media-preview-spoiler')
         }
       />
-      {getMessageVideo(message) && <i className="icon-play" />}
+      {getMessageVideo(message) && <i className="icon icon-play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
     </span>
   );
@@ -147,12 +150,17 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const privateChatUserId = getPrivateChatUserId(chat);
+    const privateChatUser = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
+    const userProfilePhoto = privateChatUser ? selectUserPhotoFromFullInfo(global, privateChatUser.id) : undefined;
 
     return {
       chat,
       lastSyncTime: global.lastSyncTime,
       animationLevel: global.settings.byKey.animationLevel,
-      ...(privateChatUserId && { privateChatUser: selectUser(global, privateChatUserId) }),
+      ...(privateChatUserId && {
+        privateChatUser,
+        userProfilePhoto,
+      }),
     };
   },
 )(ChatMessage));

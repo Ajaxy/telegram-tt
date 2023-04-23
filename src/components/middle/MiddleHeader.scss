@@ -60,7 +60,7 @@
     // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
     min-width: 0;
 
-    > .Transition__slide {
+    > .Transition_slide {
       display: flex;
       align-items: center;
       width: 100%;
@@ -204,7 +204,7 @@
   }
 
   .ChatInfo {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     display: flex;
     align-items: center;
 

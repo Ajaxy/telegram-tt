@@ -213,7 +213,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
         onClick={onBack}
         ariaLabel={lang('Back')}
       >
-        <i className="icon-arrow-left" />
+        <i className="icon icon-arrow-left" />
       </Button>
 
       <div className={styles.preview} />

@@ -23,9 +23,9 @@ export type TransitionProps = {
   activeKey: number;
   nextKey?: number;
   name: (
-    'none' | 'slide' | 'slide-rtl' | 'mv-slide' | 'slide-fade' | 'zoom-fade' | 'slide-layers'
-    | 'fade' | 'push-slide' | 'reveal' | 'slide-optimized' | 'slide-optimized-rtl' | 'semi-fade'
-    | 'slide-vertical' | 'slide-vertical-fade'
+    'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'slideLayers'
+    | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
+    | 'slideVertical' | 'slideVerticalFade'
   );
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
@@ -46,9 +46,12 @@ export type TransitionProps = {
 
 const FALLBACK_ANIMATION_END = 1000;
 const CLASSES = {
-  slide: 'Transition__slide',
-  active: 'Transition__slide--active',
-  afterSlides: 'Transition__after-slides',
+  slide: 'Transition_slide',
+  active: 'Transition_slide-active',
+  from: 'Transition_slide-from',
+  to: 'Transition_slide-to',
+  inactive: 'Transition_slide-inactive',
+  afterSlides: 'Transition_afterSlides',
 };
 
 function Transition({
@@ -96,6 +99,12 @@ function Transition({
     rendersRef.current[nextKey] = children;
   }
 
+  const isBackwards = (
+    direction === -1
+    || (direction === 'auto' && prevActiveKey > activeKey)
+    || (direction === 'inverse' && prevActiveKey < activeKey)
+  );
+
   useLayoutEffect(() => {
     function cleanup() {
       if (!shouldCleanup) {
@@ -109,6 +118,7 @@ function Transition({
       forceUpdate();
     }
 
+    const isSlideOptimized = name === 'slideOptimized' || name === 'slideOptimizedRtl';
     const container = containerRef.current!;
     const keys = Object.keys(rendersRef.current).map(Number);
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
@@ -134,12 +144,17 @@ function Transition({
       if (childElements.length === 1 || (nextKey !== undefined && childElements.length === 2)) {
         const firstChild = childNodes[activeIndex] as HTMLElement;
 
-        if (name.startsWith('slide-optimized')) {
+        addExtraClass(firstChild, CLASSES.active);
+
+        if (isSlideOptimized) {
           firstChild.style.transition = 'none';
           firstChild.style.transform = 'translate3d(0, 0, 0)';
         }
 
-        addExtraClass(firstChild, CLASSES.active);
+        if (childElements.length === 2) {
+          const nextChild = childElements[0] === firstChild ? childElements[1] : childElements[0];
+          addExtraClass(nextChild, CLASSES.inactive);
+        }
       }
 
       return;
@@ -147,13 +162,7 @@ function Transition({
 
     currentKeyRef.current = activeKey;
 
-    const isBackwards = (
-      direction === -1
-      || (direction === 'auto' && prevActiveKey > activeKey)
-      || (direction === 'inverse' && prevActiveKey < activeKey)
-    );
-
-    if (name === 'slide-optimized' || name === 'slide-optimized-rtl') {
+    if (isSlideOptimized) {
       performSlideOptimized(
         animationLevel,
         name,
@@ -175,10 +184,10 @@ function Transition({
     if (name === 'none' || animationLevel === ANIMATION_LEVEL_MIN) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
-          removeExtraClass(node, 'from');
-          removeExtraClass(node, 'through');
-          removeExtraClass(node, 'to');
+          removeExtraClass(node, CLASSES.from);
+          removeExtraClass(node, CLASSES.to);
           toggleExtraClass(node, CLASSES.active, i === activeIndex);
+          toggleExtraClass(node, CLASSES.inactive, i !== activeIndex);
         }
       });
 
@@ -190,19 +199,17 @@ function Transition({
     childNodes.forEach((node, i) => {
       if (node instanceof HTMLElement) {
         removeExtraClass(node, CLASSES.active);
-
-        toggleExtraClass(node, 'from', i === prevActiveIndex);
-        const isThrough = (i > prevActiveIndex && i < activeIndex) || (i < prevActiveIndex && i > activeIndex);
-        toggleExtraClass(node, 'through', isThrough);
-        toggleExtraClass(node, 'to', i === activeIndex);
+        toggleExtraClass(node, CLASSES.from, i === prevActiveIndex);
+        toggleExtraClass(node, CLASSES.to, i === activeIndex);
+        toggleExtraClass(node, CLASSES.inactive, i !== prevActiveIndex && i !== activeIndex);
       }
     });
 
     const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
     onStart?.();
 
-    addExtraClass(container, 'animating');
-    toggleExtraClass(container, 'backwards', isBackwards);
+    toggleExtraClass(container, `Transition-${name}`, !isBackwards);
+    toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
     function onAnimationEnd() {
       const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`);
@@ -213,15 +220,15 @@ function Transition({
           return;
         }
 
-        removeExtraClass(container, 'animating');
-        removeExtraClass(container, 'backwards');
+        removeExtraClass(container, `Transition-${name}`);
+        removeExtraClass(container, `Transition-${name}Backwards`);
 
         childNodes.forEach((node, i) => {
           if (node instanceof HTMLElement) {
-            removeExtraClass(node, 'from');
-            removeExtraClass(node, 'through');
-            removeExtraClass(node, 'to');
+            removeExtraClass(node, CLASSES.from);
+            removeExtraClass(node, CLASSES.to);
             toggleExtraClass(node, CLASSES.active, i === activeIndex);
+            toggleExtraClass(node, CLASSES.inactive, i !== activeIndex);
           }
         });
 
@@ -239,11 +246,9 @@ function Transition({
       });
     }
 
-    const watchedNode = name === 'mv-slide'
-      ? childNodes[activeIndex]?.firstChild
-      : name === 'reveal' && isBackwards
-        ? childNodes[prevActiveIndex]
-        : childNodes[activeIndex];
+    const watchedNode = name === 'reveal' && isBackwards
+      ? childNodes[prevActiveIndex]
+      : childNodes[activeIndex];
 
     if (watchedNode) {
       waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
@@ -255,7 +260,7 @@ function Transition({
     nextKey,
     prevActiveKey,
     activeKeyChanged,
-    direction,
+    isBackwards,
     name,
     onStart,
     onStop,
@@ -275,7 +280,7 @@ function Transition({
 
     const container = containerRef.current!;
     const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`)
-      || container.querySelector<HTMLDivElement>('.from');
+      || container.querySelector<HTMLDivElement>(`.${CLASSES.from}`);
     if (!activeElement) {
       return;
     }
@@ -320,7 +325,7 @@ function Transition({
     <div
       ref={containerRef}
       id={id}
-      className={buildClassName('Transition', className, name)}
+      className={buildClassName('Transition', className)}
       teactFastList={asFastList}
     >
       {contents}
@@ -332,7 +337,7 @@ export default Transition;
 
 function performSlideOptimized(
   animationLevel: GlobalState['settings']['byKey']['animationLevel'],
-  name: 'slide-optimized' | 'slide-optimized-rtl',
+  name: 'slideOptimized' | 'slideOptimizedRtl',
   isBackwards: boolean,
   cleanup: NoneToVoidFunction,
   activeKey: number,
@@ -349,6 +354,9 @@ function performSlideOptimized(
   }
 
   if (animationLevel === ANIMATION_LEVEL_MIN) {
+    toggleExtraClass(container, `Transition-${name}`, !isBackwards);
+    toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
+
     fromSlide.style.transition = 'none';
     fromSlide.style.transform = '';
     removeExtraClass(fromSlide, CLASSES.active);
@@ -362,13 +370,16 @@ function performSlideOptimized(
     return;
   }
 
-  if (name === 'slide-optimized-rtl') {
+  if (name === 'slideOptimizedRtl') {
     isBackwards = !isBackwards;
   }
 
   const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
   onStart?.();
+
+  toggleExtraClass(container, `Transition-${name}`, !isBackwards);
+  toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
   fromSlide.style.transition = 'none';
   fromSlide.style.transform = 'translate3d(0, 0, 0)';

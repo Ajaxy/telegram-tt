@@ -1,6 +1,6 @@
 // @optimization
 @mixin while-transition() {
-  .Transition__slide:not(.Transition__slide--active) & {
+  .Transition_slide:not(.Transition_slide-active) & {
     @content;
   }
 }
@@ -29,7 +29,7 @@
 
     &::-ms-track {
       width: 100%;
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       background: transparent;
       border-color: transparent;
@@ -45,11 +45,11 @@
     }
 
     &::-webkit-slider-runnable-track {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
     }
 
     &::-moz-range-track, &::-moz-range-progress {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
     }
   }
 }

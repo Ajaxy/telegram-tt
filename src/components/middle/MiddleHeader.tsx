@@ -409,7 +409,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   return (
     <div className="MiddleHeader" ref={componentRef}>
       <Transition
-        name={shouldSkipHistoryAnimations ? 'none' : 'slide-fade'}
+        name={shouldSkipHistoryAnimations ? 'none' : 'slideFade'}
         activeKey={currentTransitionKey}
         shouldCleanup
         cleanupExceptionKey={cleanupExceptionKey}
@@ -531,8 +531,6 @@ export default memo(withGlobal<OwnProps>(
       return state;
     }
 
-    Object.assign(state, { messagesById });
-
     if (threadId !== MAIN_THREAD_ID && !chat?.isForum) {
       const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
       const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
@@ -542,6 +540,7 @@ export default memo(withGlobal<OwnProps>(
       return {
         ...state,
         pinnedMessageIds: pinnedMessageId,
+        messagesById,
         canUnpin: false,
         topMessageSender,
         isComments: Boolean(threadInfo?.originChannelId),
@@ -558,6 +557,7 @@ export default memo(withGlobal<OwnProps>(
       return {
         ...state,
         pinnedMessageIds,
+        messagesById,
         canUnpin,
       };
     }

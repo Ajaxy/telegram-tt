@@ -15,6 +15,7 @@ import {
   selectAllowedMessageActions,
   selectCanScheduleUntilOnline,
   selectChat,
+  selectChatFullInfo,
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
@@ -592,6 +593,7 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll,
     } = (threadId && selectAllowedMessageActions(global, message, threadId)) || {};
 
+    const isPrivate = chat && isUserId(chat.id);
     const isOwn = isOwnMessage(message);
     const isPinned = messageListType === 'pinned';
     const isScheduled = messageListType === 'scheduled';
@@ -607,8 +609,8 @@ export default memo(withGlobal<OwnProps>(
       && chat.membersCount
       && chat.membersCount <= seenByMaxChatMembers
       && message.date > Date.now() / 1000 - seenByExpiresAt);
-    const isPrivate = chat && isUserId(chat.id);
     const isAction = isActionMessage(message);
+    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, message.chatId) : undefined;
     const canShowReactionsCount = !isLocal && !isChannel && !isScheduled && !isAction && !isPrivate && message.reactions
       && !areReactionsEmpty(message.reactions) && message.reactions.canSeeList;
     const isProtected = selectIsMessageProtected(global, message);
@@ -656,11 +658,11 @@ export default memo(withGlobal<OwnProps>(
       canClosePoll: !isScheduled && canClosePoll,
       activeDownloads,
       canShowSeenBy,
-      enabledReactions: chat?.isForbidden ? undefined : chat?.fullInfo?.enabledReactions,
+      enabledReactions: chat?.isForbidden ? undefined : chatFullInfo?.enabledReactions,
       maxUniqueReactions,
       isPrivate,
       isCurrentUserPremium,
-      hasFullInfo: Boolean(chat?.fullInfo),
+      hasFullInfo: Boolean(chatFullInfo),
       canShowReactionsCount,
       canShowReactionList: !isLocal && !isAction && !isScheduled && chat?.id !== SERVICE_NOTIFICATIONS_USER_ID,
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),

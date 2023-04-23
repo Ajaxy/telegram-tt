@@ -50,7 +50,7 @@
   }
 
   .ListItem-button {
-    i {
+    .icon {
       opacity: 0.9;
     }
   }
@@ -58,7 +58,7 @@
   &.color-primary .ListItem-button {
     color: var(--color-primary);
 
-    i {
+    .icon {
       opacity: 1;
       color: inherit;
     }

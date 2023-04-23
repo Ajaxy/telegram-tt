@@ -122,13 +122,14 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
         role="button"
         tabIndex={0}
         className={buildClassName(
+          'div-button',
           'item',
           destructive && 'destructive',
         )}
         onClick={onClick}
         title={label}
       >
-        <i className={`icon-${icon}`} />
+        <i className={buildClassName('icon', `icon-${icon}`)} />
       </div>
     );
   };
@@ -142,7 +143,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
           onClick={handleExitMessageSelectMode}
           ariaLabel="Exit select mode"
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
         <span className="MessageSelectToolbar-count" title={formattedMessagesCount}>
           {formattedMessagesCount}

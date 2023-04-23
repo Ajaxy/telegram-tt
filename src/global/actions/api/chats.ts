@@ -49,13 +49,15 @@ import {
   updateTopic,
   updateThreadInfo,
   updateListedTopicIds,
+  updateChatFullInfo,
+  replaceChatFullInfo,
 } from '../../reducers';
 import {
   selectChat, selectUser, selectChatListType, selectIsChatPinned,
   selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
   selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState, selectThreadOriginChat, selectThread,
+  selectTabState, selectThreadOriginChat, selectThread, selectChatFullInfo,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -1101,13 +1103,7 @@ addActionHandler('togglePreHistoryHidden', async (global, actions, payload): Pro
   }
 
   global = getGlobal();
-
-  global = updateChat(global, chat.id, {
-    fullInfo: {
-      ...chat.fullInfo,
-      isPreHistoryHidden: isEnabled,
-    },
-  });
+  global = updateChatFullInfo(global, chat.id, { isPreHistoryHidden: isEnabled });
   setGlobal(global);
 
   void callApi('togglePreHistoryHidden', { chat, isEnabled });
@@ -1144,34 +1140,30 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
 
   global = getGlobal();
 
-  const chatAfterUpdate = selectChat(global, chatId);
-
-  if (!chatAfterUpdate || !chatAfterUpdate.fullInfo) {
+  const updatedFullInfo = selectChatFullInfo(global, chatId);
+  if (!updatedFullInfo) {
     return;
   }
 
-  const { members, kickedMembers } = chatAfterUpdate.fullInfo;
+  const { members, kickedMembers } = updatedFullInfo;
 
   const isBanned = Boolean(bannedRights.viewMessages);
   const isUnblocked = !Object.keys(bannedRights).length;
 
-  global = updateChat(global, chatId, {
-    fullInfo: {
-      ...chatAfterUpdate.fullInfo,
-      ...(members && isBanned && {
-        members: members.filter((m) => m.userId !== userId),
-      }),
-      ...(members && !isBanned && {
-        members: members.map((m) => (
-          m.userId === userId
-            ? { ...m, bannedRights }
-            : m
-        )),
-      }),
-      ...(isUnblocked && kickedMembers && {
-        kickedMembers: kickedMembers.filter((m) => m.userId !== userId),
-      }),
-    },
+  global = updateChatFullInfo(global, chatId, {
+    ...(members && isBanned && {
+      members: members.filter((m) => m.userId !== userId),
+    }),
+    ...(members && !isBanned && {
+      members: members.map((m) => (
+        m.userId === userId
+          ? { ...m, bannedRights }
+          : m
+      )),
+    }),
+    ...(isUnblocked && kickedMembers && {
+      kickedMembers: kickedMembers.filter((m) => m.userId !== userId),
+    }),
   });
   setGlobal(global);
 });
@@ -1219,15 +1211,11 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
     }
   }
 
-  global = getGlobal();
-
-  global = updateChat(global, chatId, {
-    fullInfo: {
-      ...chatAfterUpdate.fullInfo,
-      ...(newAdminMembersById && { adminMembersById: newAdminMembersById }),
-    },
-  });
-  setGlobal(global);
+  if (newAdminMembersById) {
+    global = getGlobal();
+    global = updateChatFullInfo(global, chatId, { adminMembersById: newAdminMembersById });
+    setGlobal(global);
+  }
 });
 
 addActionHandler('updateChat', async (global, actions, payload): Promise<void> => {
@@ -1236,6 +1224,7 @@ addActionHandler('updateChat', async (global, actions, payload): Promise<void> =
   } = payload;
 
   const chat = selectChat(global, chatId);
+  const fullInfo = selectChatFullInfo(global, chatId);
   if (!chat) {
     return;
   }
@@ -1248,7 +1237,7 @@ addActionHandler('updateChat', async (global, actions, payload): Promise<void> =
     chat.title !== title
       ? callApi('updateChatTitle', chat, title)
       : undefined,
-    chat.fullInfo && chat.fullInfo.about !== about
+    fullInfo?.about !== about
       ? callApi('updateChatAbout', chat, about)
       : undefined,
     photo
@@ -1265,13 +1254,8 @@ addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<vo
   const { photo, chatId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) return;
-  global = updateChat(global, chatId, {
-    avatarHash: undefined,
-    fullInfo: {
-      ...chat.fullInfo,
-      profilePhoto: undefined,
-    },
-  });
+  global = updateChat(global, chatId, { avatarHash: undefined });
+  global = updateChatFullInfo(global, chatId, { profilePhoto: undefined });
   setGlobal(global);
   // This method creates a new entry in photos array
   await callApi('editChatPhoto', {
@@ -1296,13 +1280,8 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<vo
     if (nextPhoto) {
       photosToDelete.push(nextPhoto);
     }
-    global = updateChat(global, chatId, {
-      avatarHash: undefined,
-      fullInfo: {
-        ...chat.fullInfo,
-        profilePhoto: undefined,
-      },
-    });
+    global = updateChat(global, chatId, { avatarHash: undefined });
+    global = updateChatFullInfo(global, chatId, { profilePhoto: undefined });
     setGlobal(global);
     // Set next photo as avatar
     await callApi('editChatPhoto', {
@@ -1367,7 +1346,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload): Promis
 
   if (!chat) return;
 
-  let { fullInfo } = chat;
+  let fullInfo = selectChatFullInfo(global, chat.id);
   if (!fullInfo) {
     const fullChat = await callApi('fetchFullChat', chat);
     if (!fullChat) {
@@ -1379,12 +1358,7 @@ addActionHandler('linkDiscussionGroup', async (global, actions, payload): Promis
 
   if (fullInfo!.isPreHistoryHidden) {
     global = getGlobal();
-    global = updateChat(global, chat.id, {
-      fullInfo: {
-        ...chat.fullInfo,
-        isPreHistoryHidden: false,
-      },
-    });
+    global = updateChatFullInfo(global, chat.id, { isPreHistoryHidden: false });
     setGlobal(global);
 
     await callApi('togglePreHistoryHidden', { chat, isEnabled: false });
@@ -1401,9 +1375,10 @@ addActionHandler('unlinkDiscussionGroup', async (global, actions, payload): Prom
     return;
   }
 
+  const fullInfo = selectChatFullInfo(global, channelId);
   let chat: ApiChat | undefined;
-  if (channel.fullInfo?.linkedChatId) {
-    chat = selectChat(global, channel.fullInfo.linkedChatId);
+  if (fullInfo?.linkedChatId) {
+    chat = selectChat(global, fullInfo.linkedChatId);
   }
 
   await callApi('setDiscussionGroup', { channel });
@@ -1448,7 +1423,7 @@ addActionHandler('loadMoreMembers', async (global, actions, payload): Promise<vo
     return;
   }
 
-  const offset = (chat.fullInfo?.members?.length) || undefined;
+  const offset = selectChatFullInfo(global, chat.id)?.members?.length;
   if (offset !== undefined && chat.membersCount !== undefined && offset >= chat.membersCount) return;
 
   const result = await callApi('fetchMembers', chat.id, chat.accessHash!, 'recent', offset);
@@ -1714,26 +1689,15 @@ addActionHandler('toggleParticipantsHidden', async (global, actions, payload): P
     return;
   }
 
-  const prevIsEnabled = chat.fullInfo?.areParticipantsHidden;
-
-  global = updateChat(global, chatId, {
-    fullInfo: {
-      ...chat.fullInfo,
-      areParticipantsHidden: isEnabled,
-    },
-  });
+  const prevIsEnabled = selectChatFullInfo(global, chat.id)?.areParticipantsHidden;
+  global = updateChatFullInfo(global, chatId, { areParticipantsHidden: isEnabled });
   setGlobal(global);
 
   const result = await callApi('toggleParticipantsHidden', { chat, isEnabled });
 
   if (!result && prevIsEnabled !== undefined) {
     global = getGlobal();
-    global = updateChat(global, chatId, {
-      fullInfo: {
-        ...chat.fullInfo,
-        areParticipantsHidden: prevIsEnabled,
-      },
-    });
+    global = updateChatFullInfo(global, chatId, { areParticipantsHidden: prevIsEnabled });
     setGlobal(global);
   }
 });
@@ -2000,11 +1964,10 @@ export async function loadFullChat<T extends GlobalState>(
     );
   }
 
-  global = updateChat(global, chat.id, {
-    fullInfo,
-    ...(membersCount && { membersCount }),
-  });
-
+  if (membersCount !== undefined) {
+    global = updateChat(global, chat.id, { membersCount });
+  }
+  global = replaceChatFullInfo(global, chat.id, fullInfo);
   setGlobal(global);
 
   const stickerSet = fullInfo.stickerSet;

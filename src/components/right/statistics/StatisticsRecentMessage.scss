@@ -1,6 +1,6 @@
 .StatisticsRecentMessage {
   position: relative;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   padding: 0.5rem 0.75rem;
 
   &:hover, &:active {

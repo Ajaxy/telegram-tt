@@ -103,7 +103,7 @@ const Archive: FC<OwnProps> = ({
         <div className="info-row">
           <div className={buildClassName('title', styles.title)}>
             <h3 dir="auto" className={buildClassName(styles.name, 'fullName')}>
-              <i className={buildClassName(styles.icon, 'icon-archive-filled')} />
+              <i className={buildClassName(styles.icon, 'icon', 'icon-archive-filled')} />
               {lang('ArchivedChats')}
             </h3>
           </div>
@@ -122,7 +122,7 @@ const Archive: FC<OwnProps> = ({
       <>
         <div className={buildClassName('status', styles.avatarWrapper)}>
           <div className={buildClassName('Avatar', styles.avatar)}>
-            <i className="icon-archive-filled" />
+            <i className="icon icon-archive-filled" />
           </div>
         </div>
         <div className={buildClassName(styles.info, 'info')}>

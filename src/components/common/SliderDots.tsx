@@ -45,7 +45,7 @@ const SliderDots: FC<OwnProps> = ({
           round
           onClick={handleGoBack}
         >
-          <i className="icon-previous" />
+          <i className="icon icon-previous" />
         </Button>
       )}
       <div className={styles.root} style={`--start-from: ${startFrom}; --length: ${length}; --count: ${count};`}>
@@ -80,7 +80,7 @@ const SliderDots: FC<OwnProps> = ({
           disabled={active === length - 1}
           onClick={handleGoForward}
         >
-          <i className="icon-next" />
+          <i className="icon icon-next" />
         </Button>
       )}
     </div>

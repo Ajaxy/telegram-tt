@@ -288,7 +288,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="Actions"
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, [isMobile]);
@@ -337,7 +337,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           {(!temporalInvites || !temporalInvites.length) && <NothingFound text="No links found" key="nothing" />}
           {temporalInvites?.map((invite) => (
             <ListItem
-              leftElement={<i className={`icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+              leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
               secondaryIcon="more"
               multiline
               // eslint-disable-next-line react/jsx-no-bind
@@ -366,7 +366,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
             </ListItem>
             {revokedExportedInvites?.map((invite) => (
               <ListItem
-                leftElement={<i className={`icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
+                leftElement={<i className={`icon icon-link link-status-icon ${getInviteIconClass(invite)}`} />}
                 secondaryIcon="more"
                 multiline
                 // eslint-disable-next-line react/jsx-no-bind

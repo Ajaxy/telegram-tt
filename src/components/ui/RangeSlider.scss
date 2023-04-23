@@ -6,7 +6,7 @@
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 50%;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   transform: scale(1);
   transition: transform 0.25s ease-in-out;
 
@@ -115,7 +115,7 @@
   .slider-option {
     font-size: 0.8125rem;
     text-align: center;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     color: var(--color-text-secondary);
     transition: color 0.2s ease;
 

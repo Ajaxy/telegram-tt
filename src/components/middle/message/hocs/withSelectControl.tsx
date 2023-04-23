@@ -64,7 +64,7 @@ export default function withSelectControl(WrappedComponent: FC) {
         {isInSelectMode && (
           <div className="message-select-control">
             {isSelected && (
-              <i className="icon-select" />
+              <i className="icon icon-select" />
             )}
           </div>
         )}

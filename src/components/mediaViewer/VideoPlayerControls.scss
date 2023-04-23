@@ -14,10 +14,6 @@
   opacity: 0;
   pointer-events: none;
 
-  #MediaViewer.zoomed & {
-    display: none;
-  }
-
   &.mobile {
     position: fixed;
     padding: 2.25rem 0.5rem 0.75rem;
@@ -112,7 +108,7 @@
     top: 1rem;
     height: 1rem;
     touch-action: none;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     &-track {
       position: absolute;

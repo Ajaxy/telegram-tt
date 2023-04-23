@@ -23,6 +23,8 @@ import type {
   ApiBotCommand,
   ApiBotMenuButton,
   ApiAttachMenuPeerType,
+  ApiChatFullInfo,
+  ApiPhoto,
 } from '../../../api/types';
 import type { InlineBotSettings, ISettings } from '../../../types';
 
@@ -32,40 +34,42 @@ import {
   REPLIES_USER_ID,
   SEND_MESSAGE_ACTION_INTERVAL,
   EDITABLE_INPUT_CSS_SELECTOR,
-  MAX_UPLOAD_FILEPART_SIZE, EDITABLE_INPUT_MODAL_ID,
+  MAX_UPLOAD_FILEPART_SIZE,
+  EDITABLE_INPUT_MODAL_ID,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import {
-  selectChat,
-  selectIsRightColumnShown,
-  selectIsInSelectMode,
-  selectNewestMessageWithBotKeyboardButtons,
-  selectDraft,
-  selectScheduledIds,
-  selectEditingMessage,
-  selectIsChatWithSelf,
-  selectChatBot,
-  selectChatMessage,
-  selectUser,
   selectCanScheduleUntilOnline,
-  selectEditingScheduledDraft,
-  selectEditingDraft,
-  selectRequestedDraftText,
-  selectTheme,
-  selectCurrentMessageList,
-  selectIsCurrentUserPremium,
+  selectChat,
+  selectChatBot,
+  selectChatFullInfo,
+  selectChatMessage,
   selectChatType,
-  selectRequestedDraftFiles,
-  selectTabState,
+  selectCurrentMessageList,
+  selectDraft,
+  selectEditingDraft,
+  selectEditingMessage,
+  selectEditingScheduledDraft,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
+  selectIsInSelectMode,
+  selectIsRightColumnShown,
+  selectNewestMessageWithBotKeyboardButtons,
   selectReplyingToId,
+  selectRequestedDraftFiles,
+  selectRequestedDraftText,
+  selectScheduledIds,
+  selectTabState,
+  selectTheme,
+  selectUser,
+  selectUserFullInfo, selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
-  getChatSlowModeOptions,
   isChatAdmin,
-  isChatSuperGroup,
   isChatChannel,
+  isChatSuperGroup,
   isUserId,
 } from '../../../global/helpers';
 import { formatMediaDuration, formatVoiceRecordDuration } from '../../../util/dateFormat';
@@ -186,6 +190,7 @@ type StateProps =
     chatBotCommands?: ApiBotCommand[];
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
+    sendAsUserProfilePhoto?: ApiPhoto;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
     requestedDraftText?: string;
@@ -198,6 +203,7 @@ type StateProps =
     isCurrentUserPremium?: boolean;
     canSendVoiceByPrivacy?: boolean;
     attachmentSettings: GlobalState['attachmentSettings'];
+    slowMode?: ApiChatFullInfo['slowMode'];
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -271,6 +277,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   chatBotCommands,
   sendAsUser,
   sendAsChat,
+  sendAsUserProfilePhoto,
   sendAsId,
   editingDraft,
   replyingToId,
@@ -281,6 +288,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   attachMenuPeerType,
   attachmentSettings,
   theme,
+  slowMode,
 }) => {
   const {
     sendMessage,
@@ -423,7 +431,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [getHtml, isEditingRef, sendMessageAction]);
 
   const isAdmin = chat && isChatAdmin(chat);
-  const slowMode = getChatSlowModeOptions(chat);
 
   const {
     isEmojiTooltipOpen,
@@ -917,7 +924,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (requestedDraftFiles?.length) {
-      handleFileSelect(requestedDraftFiles);
+      void handleFileSelect(requestedDraftFiles);
       resetOpenChatWithDraft();
     }
   }, [handleFileSelect, requestedDraftFiles, resetOpenChatWithDraft]);
@@ -1140,7 +1147,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const mainButtonHandler = useCallback(() => {
     switch (mainButtonState) {
       case MainButtonState.Send:
-        handleSend();
+        void handleSend();
         break;
       case MainButtonState.Record: {
         if (areVoiceMessagesNotAllowed) {
@@ -1152,7 +1159,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             showAllowedMessageTypesNotification({ chatId });
           }
         } else {
-          startRecordingVoice();
+          void startRecordingVoice();
         }
         break;
       }
@@ -1350,7 +1357,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               onActivate={handleActivateBotCommandMenu}
               ariaLabel="Open bot command keyboard"
             >
-              <i className="icon-bot-commands-filled" />
+              <i className="icon icon-bot-commands-filled" />
             </ResponsiveHoverButton>
           )}
           {canShowSendAs && (sendAsUser || sendAsChat) && (
@@ -1364,6 +1371,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               <Avatar
                 user={sendAsUser}
                 chat={sendAsChat}
+                userProfilePhoto={sendAsUserProfilePhoto}
                 size="tiny"
               />
             </Button>
@@ -1427,7 +1435,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               onClick={handleAllScheduledClick}
               ariaLabel="Open scheduled messages"
             >
-              <i className="icon-schedule" />
+              <i className="icon icon-schedule" />
             </Button>
           )}
           {Boolean(botKeyboardMessageId) && !activeVoiceRecording && !editingMessage && (
@@ -1438,7 +1446,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               onActivate={openBotKeyboard}
               ariaLabel="Open bot command keyboard"
             >
-              <i className="icon-bot-command" />
+              <i className="icon icon-bot-command" />
             </ResponsiveHoverButton>
           )}
           {activeVoiceRecording && Boolean(currentRecordTime) && (
@@ -1511,7 +1519,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           onClick={stopRecordingVoice}
           ariaLabel="Cancel voice recording"
         >
-          <i className="icon-delete" />
+          <i className="icon icon-delete" />
         </Button>
       )}
       <Button
@@ -1528,10 +1536,10 @@ const Composer: FC<OwnProps & StateProps> = ({
           mainButtonState === MainButtonState.Send && canShowCustomSendMenu ? handleContextMenu : undefined
         }
       >
-        <i className="icon-send" />
-        <i className="icon-schedule" />
-        <i className="icon-microphone-alt" />
-        <i className="icon-check" />
+        <i className="icon icon-send" />
+        <i className="icon icon-schedule" />
+        <i className="icon icon-microphone-alt" />
+        <i className="icon icon-check" />
       </Button>
       {canShowCustomSendMenu && (
         <CustomSendMenu
@@ -1557,6 +1565,8 @@ export default memo(withGlobal<OwnProps>(
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChatWithUser = isUserId(chatId);
+    const chatBotFullInfo = isChatWithBot ? selectUserFullInfo(global, chatBot.id) : undefined;
+    const chatFullInfo = !isChatWithUser ? selectChatFullInfo(global, chatId) : undefined;
     const messageWithActualBotKeyboard = (isChatWithBot || !isChatWithUser)
       && selectNewestMessageWithBotKeyboardButtons(global, chatId, threadId);
     const scheduledIds = selectScheduledIds(global, chatId, threadId);
@@ -1566,7 +1576,7 @@ export default memo(withGlobal<OwnProps>(
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
     const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
     const { currentUserId } = global;
-    const defaultSendAsId = chat?.fullInfo ? chat?.fullInfo?.sendAsId || currentUserId : undefined;
+    const defaultSendAsId = chatFullInfo ? chatFullInfo?.sendAsId || currentUserId : undefined;
     const sendAsId = chat?.sendAsPeerIds && defaultSendAsId && (
       chat.sendAsPeerIds.some((peer) => peer.id === defaultSendAsId)
         ? defaultSendAsId
@@ -1574,6 +1584,7 @@ export default memo(withGlobal<OwnProps>(
     );
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
+    const sendAsUserProfilePhoto = sendAsUser ? selectUserPhotoFromFullInfo(global, sendAsUser.id) : undefined;
     const requestedDraftText = selectRequestedDraftText(global, chatId);
     const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
     const currentMessageList = selectCurrentMessageList(global);
@@ -1581,7 +1592,8 @@ export default memo(withGlobal<OwnProps>(
       && threadId === currentMessageList?.threadId
       && messageListType === currentMessageList?.type;
     const user = selectUser(global, chatId);
-    const canSendVoiceByPrivacy = (user && !user.fullInfo?.noVoiceMessages) ?? true;
+    const canSendVoiceByPrivacy = (user && !selectUserFullInfo(global, user.id)?.noVoiceMessages) ?? true;
+    const slowMode = chatFullInfo?.slowMode;
 
     const editingDraft = messageListType === 'scheduled'
       ? selectEditingScheduledDraft(global, chatId)
@@ -1616,7 +1628,7 @@ export default memo(withGlobal<OwnProps>(
       pollModal: tabState.pollModal,
       stickersForEmoji: global.stickers.forEmoji.stickers,
       customEmojiForEmoji: global.customEmojis.forEmoji.stickers,
-      groupChatMembers: chat?.fullInfo?.members,
+      groupChatMembers: chatFullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
       lastSyncTime: global.lastSyncTime,
@@ -1628,11 +1640,12 @@ export default memo(withGlobal<OwnProps>(
       emojiKeywords: emojiKeywords?.keywords,
       inlineBots: tabState.inlineBots.byUsername,
       isInlineBotLoading: tabState.inlineBots.isLoading,
-      chatBotCommands: chat?.fullInfo && chat.fullInfo.botCommands,
-      botCommands: chatBot?.fullInfo ? (chatBot.fullInfo.botInfo?.commands || false) : undefined,
-      botMenuButton: chatBot?.fullInfo?.botInfo?.menuButton,
+      chatBotCommands: chatFullInfo?.botCommands,
+      botCommands: chatBotFullInfo ? (chatBotFullInfo.botInfo?.commands || false) : undefined,
+      botMenuButton: chatBotFullInfo?.botInfo?.menuButton,
       sendAsUser,
       sendAsChat,
+      sendAsUserProfilePhoto,
       sendAsId,
       editingDraft,
       requestedDraftText,
@@ -1645,6 +1658,7 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       canSendVoiceByPrivacy,
       attachmentSettings: global.attachmentSettings,
+      slowMode,
     };
   },
 )(Composer));

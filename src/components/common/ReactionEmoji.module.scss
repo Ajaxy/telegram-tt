@@ -1,7 +1,7 @@
 .root {
   --custom-emoji-size: 2.5rem;
 
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   display: inline-block;
   width: var(--custom-emoji-size);
   height: var(--custom-emoji-size);

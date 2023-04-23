@@ -102,7 +102,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={onReset}
           ariaLabel="Return to Chat List"
         >
-          <i className="icon-arrow-left" />
+          <i className="icon icon-arrow-left" />
         </Button>
         <h3>{lang('GroupAddMembers')}</h3>
       </div>
@@ -123,7 +123,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
         >
-          <i className="icon-arrow-right" />
+          <i className="icon icon-arrow-right" />
         </FloatingActionButton>
       </div>
     </div>

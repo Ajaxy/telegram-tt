@@ -11,6 +11,7 @@ import {
   INCLUDED_CHAT_TYPES,
   EXCLUDED_CHAT_TYPES,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import buildClassName from '../../../../util/buildClassName';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import useLang from '../../../../hooks/useLang';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
@@ -133,7 +134,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
         onClick={() => handleChatTypeClick(type.key)}
         ripple
       >
-        <i className={`icon-${type.icon}`} />
+        <i className={buildClassName('icon', `icon-${type.icon}`)} />
         <h3 className="chat-type" dir="auto">{lang(type.title)}</h3>
         <Checkbox
           label=""

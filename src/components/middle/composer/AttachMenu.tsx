@@ -136,7 +136,7 @@ const AttachMenu: FC<OwnProps> = ({
         ariaControls="attach-menu-controls"
         hasPopup
       >
-        <i className="icon-attach" />
+        <i className="icon icon-attach" />
       </ResponsiveHoverButton>
       <Menu
         id="attach-menu-controls"

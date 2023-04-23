@@ -87,7 +87,7 @@ const ArchivedChats: FC<OwnProps> = ({
           )}
           onTransitionEnd={handleDropdownMenuTransitionEnd}
         >
-          <i className="icon-arrow-left" />
+          <i className="icon icon-arrow-left" />
         </Button>
         {shouldRenderTitle && <h3 className={titleClassNames}>{lang('ArchivedChats')}</h3>}
         {archiveSettings.isHidden && (

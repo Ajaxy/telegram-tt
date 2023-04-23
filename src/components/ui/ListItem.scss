@@ -51,7 +51,7 @@
 
     text-decoration: none;
 
-    > i {
+    > .icon {
       font-size: 1.5rem;
       margin-right: 2rem;
       color: var(--color-text-secondary);
@@ -89,7 +89,7 @@
   }
 
   &.multiline {
-    .ListItem-button > i {
+    .ListItem-button > .icon {
       position: relative;
       top: 0.25rem;
     }
@@ -105,10 +105,10 @@
 
   &:not(.disabled):not(.is-static) {
     .ListItem-button {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       body.cursor-ew-resize & {
-        cursor: ew-resize !important;
+        cursor: var(--custom-cursor, ew-resize) !important;
       }
 
       @media (hover: hover) {
@@ -159,7 +159,7 @@
     .ListItem-button {
       color: var(--color-error);
 
-      i {
+      .icon {
         color: inherit;
       }
     }
@@ -443,7 +443,7 @@
   }
 
   &[dir="rtl"] {
-    .ListItem-button > i {
+    .ListItem-button > .icon {
       margin-left: 2rem;
       margin-right: 0;
     }

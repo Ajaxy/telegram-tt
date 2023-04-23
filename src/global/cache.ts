@@ -4,7 +4,9 @@ import { addCallback, removeCallback } from '../lib/teact/teactn';
 import { addActionHandler, getGlobal } from './index';
 
 import type { ActionReturnType, GlobalState, MessageList } from './types';
-import type { ApiChat, ApiUser } from '../api/types';
+import type {
+  ApiChat, ApiChatFullInfo, ApiUser, ApiUserFullInfo,
+} from '../api/types';
 import { MAIN_THREAD_ID } from '../api/types';
 
 import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';
@@ -224,6 +226,46 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.customEmojis.forEmoji = {};
   }
 
+  if (!cached.users.fullInfoById) {
+    const result = Object.entries(cached.users.byId).reduce((acc, [id, user]) => {
+      if ('fullInfo' in user) {
+        if (user.fullInfo !== undefined) {
+          acc.fullInfo[id] = user.fullInfo as ApiUserFullInfo;
+        }
+        delete user.fullInfo;
+      }
+      acc.users[id] = user;
+
+      return acc;
+    }, {
+      users: {} as Record<string, ApiUser>,
+      fullInfo: {} as Record<string, ApiUserFullInfo>,
+    });
+
+    cached.users.fullInfoById = result.fullInfo;
+    cached.users.byId = result.users;
+  }
+
+  if (!cached.chats.fullInfoById) {
+    const result = Object.entries(cached.chats.byId).reduce((acc, [id, chat]) => {
+      if ('fullInfo' in chat) {
+        if (chat.fullInfo !== undefined) {
+          acc.fullInfo[id] = chat.fullInfo as ApiChatFullInfo;
+        }
+        delete chat.fullInfo;
+      }
+      acc.chats[id] = chat;
+
+      return acc;
+    }, {
+      chats: {} as Record<string, ApiChat>,
+      fullInfo: {} as Record<string, ApiChatFullInfo>,
+    });
+
+    cached.chats.fullInfoById = result.fullInfo;
+    cached.chats.byId = result.chats;
+  }
+
   // TODO Remove in Jan 2023 (this was re-designed but can be hardcoded in cache)
   const { light: lightTheme } = cached.settings.themes;
   if (lightTheme?.patternColor === 'rgba(90, 110, 70, 0.6)' || !lightTheme?.patternColor) {
@@ -382,7 +424,7 @@ function reduceCustomEmojis<T extends GlobalState>(global: T): GlobalState['cust
 }
 
 function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
-  const { users: { byId, statusesById }, currentUserId } = global;
+  const { users: { byId, statusesById, fullInfoById }, currentUserId } = global;
   const currentChatIds = compact(
     Object.values(global.byTabId)
       .map(({ id: tabId }) => selectCurrentMessageList(global, tabId)),
@@ -406,6 +448,7 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   return {
     byId: pick(byId, idsToSave),
     statusesById: pick(statusesById, idsToSave),
+    fullInfoById: pick(fullInfoById, idsToSave),
   };
 }
 
@@ -440,6 +483,7 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
     ...global.chats,
     isFullyLoaded: {},
     byId: pick(global.chats.byId, idsToSave),
+    fullInfoById: pick(global.chats.fullInfoById, idsToSave),
   };
 }
 

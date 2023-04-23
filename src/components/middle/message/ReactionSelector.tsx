@@ -114,7 +114,7 @@ const ReactionSelector: FC<OwnProps> = ({
               className={cn('show-more')}
               onClick={handleShowMoreClick}
             >
-              <i className="icon-down" />
+              <i className="icon icon-down" />
             </Button>
           )}
         </div>

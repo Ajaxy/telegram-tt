@@ -180,7 +180,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
           round
           onClick={onPlayPause}
         >
-          <i className={isPlaying ? 'icon-pause' : 'icon-play'} />
+          <i className={buildClassName('icon', isPlaying ? 'icon-pause' : 'icon-play')} />
         </Button>
         <Button
           ariaLabel="Volume"
@@ -190,7 +190,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
           round
           onClick={onVolumeClick}
         >
-          <i className={volumeIcon} />
+          <i className={buildClassName('icon', volumeIcon)} />
         </Button>
         {!IS_IOS && (
           <RangeSlider bold className="volume-slider" value={isMuted ? 0 : volume * 100} onChange={onVolumeChange} />
@@ -221,7 +221,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
             round
             onClick={onPictureInPictureChange}
           >
-            <i className="icon-pip" />
+            <i className="icon icon-pip" />
           </Button>
         )}
         {isFullscreenSupported && (
@@ -233,7 +233,7 @@ const VideoPlayerControls: FC<OwnProps> = ({
             round
             onClick={onChangeFullscreen}
           >
-            <i className={isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'} />
+            <i className={buildClassName('icon ', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')} />
           </Button>
         )}
       </div>

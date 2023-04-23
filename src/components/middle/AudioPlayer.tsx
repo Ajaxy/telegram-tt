@@ -234,7 +234,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={requestPreviousTrack}
         ariaLabel="Previous track"
       >
-        <i className="icon-skip-previous" />
+        <i className="icon icon-skip-previous" />
       </Button>
       <Button
         round
@@ -245,8 +245,8 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={playPause}
         ariaLabel={isPlaying ? 'Pause audio' : 'Play audio'}
       >
-        <i className="icon-play" />
-        <i className="icon-pause" />
+        <i className="icon icon-play" />
+        <i className="icon icon-pause" />
       </Button>
       <Button
         round
@@ -258,7 +258,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={requestNextTrack}
         ariaLabel="Next track"
       >
-        <i className="icon-skip-next" />
+        <i className="icon icon-skip-next" />
       </Button>
 
       <div className="volume-button-wrapper">
@@ -271,7 +271,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
           onClick={handleVolumeClick}
           ripple={!isMobile}
         >
-          <i className={volumeIcon} />
+          <i className={buildClassName('icon', volumeIcon)} />
         </Button>
 
         {!IS_IOS && (
@@ -309,7 +309,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         onClick={handleClose}
         ariaLabel="Close player"
       >
-        <i className="icon-close" />
+        <i className="icon icon-close" />
       </Button>
     </div>
   );
@@ -349,7 +349,7 @@ function renderPlaybackRateMenuItem(
       // eslint-disable-next-line react/jsx-no-bind
       onClick={() => onClick(rate)}
       icon={isSelected ? 'check' : undefined}
-      customIcon={!isSelected ? <i className="icon-placeholder" /> : undefined}
+      customIcon={!isSelected ? <i className="icon icon-placeholder" /> : undefined}
     >
       {rate}X
     </MenuItem>

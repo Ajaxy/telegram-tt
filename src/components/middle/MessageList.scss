@@ -311,7 +311,7 @@
     line-height: 1rem !important;
     padding-bottom: 0.75rem !important;
     margin-top: 0.5rem;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     outline: none;
   }
 
@@ -323,7 +323,7 @@
     line-height: 1rem !important;
     padding-bottom: 0.75rem !important;
     margin-top: 0.5rem;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     outline: none;
 
     .Avatar {
@@ -367,7 +367,7 @@
     }
 
     &.interactive {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
     }
 
     span {
@@ -405,7 +405,7 @@
 
   .ActionMessage {
     .action-link {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       &:hover {
         text-decoration: underline;
@@ -463,15 +463,16 @@
     }
   }
 
-  .Transition.animating > .Transition__slide > & {
+  .Transition_slide-from > &,
+  .Transition_slide-to > & {
     &::-webkit-scrollbar {
-      width: 0;
+      width: 0 !important;
     }
 
     /* Styles for Firefox */
     @supports (scrollbar-width: none) {
-      padding-right: 0.6875rem;
-      scrollbar-width: none;
+      padding-right: 0.6875rem !important;
+      scrollbar-width: none !important;
     }
   }
 }

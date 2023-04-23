@@ -76,7 +76,7 @@
   background: var(--color-primary-opacity);
   color: var(--color-primary);
   transition: background-color 200ms, color 200ms;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   font-weight: 500;
 
   &:hover,

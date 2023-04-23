@@ -133,7 +133,7 @@ const SearchInput: FC<OwnProps> = ({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
       />
-      <i className="icon-search" />
+      <i className="icon icon-search" />
       <ShowTransition isOpen={Boolean(isLoading)} className="slow">
         <Loading color={spinnerColor} backgroundColor={spinnerBackgroundColor} onClick={onSpinnerClick} />
       </ShowTransition>
@@ -144,7 +144,7 @@ const SearchInput: FC<OwnProps> = ({
           color="translucent"
           onClick={onReset}
         >
-          <span className="icon-close" />
+          <span className="icon icon-close" />
         </Button>
       )}
     </div>

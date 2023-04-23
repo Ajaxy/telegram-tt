@@ -51,7 +51,7 @@ const BotMenuButton: FC<OwnProps> = ({
       onClick={onClick}
       ariaLabel="Open bot command keyboard"
     >
-      <i className={buildClassName('bot-menu-icon', 'icon-webapp', isOpen && 'open')} />
+      <i className={buildClassName('bot-menu-icon', 'icon', 'icon-webapp', isOpen && 'open')} />
       <span ref={textRef} className="bot-menu-text">{text}</span>
     </Button>
   );

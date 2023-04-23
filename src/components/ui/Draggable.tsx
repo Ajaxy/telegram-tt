@@ -157,12 +157,12 @@ const Draggable: FC<OwnProps> = ({
           aria-label={lang('i18n_dragToSort')}
           tabIndex={0}
           role="button"
-          className={buildClassName(styles.knob, 'draggable-knob')}
+          className={buildClassName(styles.knob, 'div-button', 'draggable-knob')}
           onMouseDown={handleMouseDown}
           onTouchStart={handleMouseDown}
           style={knobStyle}
         >
-          <i className="icon-sort" aria-hidden />
+          <i className="icon icon-sort" aria-hidden />
         </div>
       )}
     </div>

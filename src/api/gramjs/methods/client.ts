@@ -24,7 +24,7 @@ import {
 import { updater } from '../updater';
 import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
-import { buildApiUserFromFull } from '../apiBuilders/users';
+import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { addMessageToLocalDb, log } from '../helpers';
@@ -336,10 +336,11 @@ export async function fetchCurrentUser() {
     localDb.photos[user.photo.id.toString()] = user.photo;
   }
   localDb.users[buildApiPeerId(user.id, 'user')] = user;
-  const currentUser = buildApiUserFromFull(userFull);
+  const currentUserFullInfo = buildApiUserFullInfo(userFull);
+  const currentUser = buildApiUser(user)!;
 
   setMessageBuilderCurrentUserId(currentUser.id);
-  onCurrentUserUpdate(currentUser);
+  onCurrentUserUpdate(currentUser, currentUserFullInfo);
 
   currentUserId = currentUser.id;
   setIsPremium({ isPremium: Boolean(currentUser.isPremium) });

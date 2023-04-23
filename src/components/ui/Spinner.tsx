@@ -19,7 +19,7 @@ const Spinner: FC<{
       'Spinner', className, color, backgroundColor && 'with-background', backgroundColor && `bg-${backgroundColor}`,
     )}
     >
-      <div />
+      <div className="Spinner__inner" />
     </div>
   );
 };

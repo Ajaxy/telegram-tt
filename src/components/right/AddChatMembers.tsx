@@ -10,7 +10,7 @@ import type {
 import { NewChatMembersProgress } from '../../types';
 
 import { unique } from '../../util/iteratees';
-import { selectChat, selectTabState } from '../../global/selectors';
+import { selectChat, selectChatFullInfo, selectTabState } from '../../global/selectors';
 import {
   filterUsersByName, isChatChannel, isUserBot, sortChatIds,
 } from '../../global/helpers';
@@ -140,7 +140,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           {isLoading ? (
             <Spinner color="white" />
           ) : (
-            <i className="icon-arrow-right" />
+            <i className="icon icon-arrow-right" />
           )}
         </FloatingActionButton>
       </div>
@@ -166,7 +166,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       isChannel,
-      members: chat?.fullInfo?.members,
+      members: selectChatFullInfo(global, chatId)?.members,
       currentUserId,
       chatsById,
       localContactIds,

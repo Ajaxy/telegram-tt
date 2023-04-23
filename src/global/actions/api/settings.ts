@@ -20,7 +20,7 @@ import { getServerTime } from '../../../util/serverTime';
 import { selectChat, selectUser, selectTabState } from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
-  addNotifyExceptions, updateChat,
+  addNotifyExceptions, updateChat, updateUserFullInfo,
 } from '../../reducers';
 import { isUserId } from '../../helpers';
 import { updateTabState } from '../../reducers/tabs';
@@ -67,12 +67,9 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
           {
             firstName,
             lastName,
-            fullInfo: {
-              ...currentUser.fullInfo,
-              bio: about,
-            },
           },
         );
+        global = updateUserFullInfo(global, currentUser.id, { bio: about });
         setGlobal(global);
       }
     }
@@ -109,13 +106,8 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   const currentUser = selectUser(global, currentUserId);
   if (!currentUser) return;
 
-  global = updateUser(global, currentUserId, {
-    avatarHash: undefined,
-    fullInfo: {
-      ...currentUser.fullInfo,
-      profilePhoto: undefined,
-    },
-  });
+  global = updateUser(global, currentUserId, { avatarHash: undefined });
+  global = updateUserFullInfo(global, currentUserId, { profilePhoto: undefined });
   setGlobal(global);
 
   const result = await callApi('updateProfilePhoto', photo, isFallback);
@@ -137,17 +129,14 @@ addActionHandler('deleteProfilePhoto', async (global, actions, payload): Promise
   const currentUser = selectChat(global, currentUserId);
   if (!currentUser) return;
   if (currentUser.avatarHash === photo.id) {
-    global = updateUser(global, currentUserId, {
-      avatarHash: undefined,
-      fullInfo: {
-        ...currentUser.fullInfo,
-        profilePhoto: undefined,
-      },
-    });
+    global = updateUser(global, currentUserId, { avatarHash: undefined });
+    global = updateUserFullInfo(global, currentUserId, { profilePhoto: undefined });
     setGlobal(global);
   }
+
   const result = await callApi('deleteProfilePhotos', [photo]);
   if (!result) return;
+
   actions.loadFullUser({ userId: currentUserId });
   actions.loadProfilePhotos({ profileId: currentUserId });
 });

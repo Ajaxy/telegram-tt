@@ -65,7 +65,7 @@
     width: calc(100% - 16px);
     height: 100%;
     background: transparent !important;
-    cursor: grab;
+    cursor: var(--custom-cursor, grab);
     // transition: border-color 300ms ease-out;
   }
 
@@ -74,7 +74,7 @@
     height: 100%;
     position: relative;
     background: var(--minimap-mask);
-    cursor: ew-resize;
+    cursor: var(--custom-cursor, ew-resize);
     // transition: background-color 300ms ease-out;
 
     &::before, &::after {

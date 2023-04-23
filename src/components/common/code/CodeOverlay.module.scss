@@ -16,7 +16,7 @@
   border-radius: 0.125rem;
   margin: 0.125rem;
   transition: background-color 0.15s ease-in-out;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   &:hover, &.wrapOn {
     background-color: var(--color-background-compact-menu-hover);

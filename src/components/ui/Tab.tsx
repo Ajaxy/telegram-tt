@@ -110,12 +110,12 @@ const Tab: FC<OwnProps> = ({
       onMouseDown={!IS_TOUCH_ENV ? handleClick : undefined}
       ref={tabRef}
     >
-      <span>
+      <span className="Tab_inner">
         {renderText(title)}
         {Boolean(badgeCount) && (
           <span className={buildClassName('badge', isBadgeActive && classNames.badgeActive)}>{badgeCount}</span>
         )}
-        {isBlocked && <i className="icon-lock-badge blocked" />}
+        {isBlocked && <i className="icon icon-lock-badge blocked" />}
         <i className="platform" />
       </span>
     </div>

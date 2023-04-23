@@ -49,6 +49,7 @@ type OwnProps = {
   chat?: ApiChat;
   user?: ApiUser;
   photo?: ApiPhoto;
+  userProfilePhoto?: ApiPhoto;
   userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
@@ -69,6 +70,7 @@ const Avatar: FC<OwnProps> = ({
   chat,
   user,
   photo,
+  userProfilePhoto,
   userStatus,
   text,
   isSavedMessages,
@@ -96,8 +98,7 @@ const Avatar: FC<OwnProps> = ({
     withVideo && !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
     && user?.isPremium && user?.hasVideoAvatar
   );
-  const profilePhoto = user?.fullInfo?.personalPhoto || user?.fullInfo?.profilePhoto || user?.fullInfo?.fallbackPhoto;
-  const hasProfileVideo = profilePhoto?.isVideo;
+  const hasProfileVideo = userProfilePhoto?.isVideo;
   const isIntersectingForVideo = useIsIntersecting(
     ref, canShowVideo && hasProfileVideo ? observeIntersection : undefined,
   );
@@ -117,7 +118,7 @@ const Avatar: FC<OwnProps> = ({
     }
 
     if (hasProfileVideo) {
-      videoHash = getChatAvatarHash(user!, undefined, 'video');
+      videoHash = getChatAvatarHash(user!, undefined, 'video', undefined, userProfilePhoto);
     }
   }
 
@@ -149,10 +150,10 @@ const Avatar: FC<OwnProps> = ({
 
   const userId = user?.id;
   useEffect(() => {
-    if (userId && canShowVideo && !profilePhoto) {
+    if (userId && canShowVideo && !userProfilePhoto) {
       loadFullUser({ userId });
     }
-  }, [loadFullUser, profilePhoto, userId, canShowVideo]);
+  }, [loadFullUser, userProfilePhoto, userId, canShowVideo]);
 
   const lang = useLang();
 
@@ -160,11 +161,35 @@ const Avatar: FC<OwnProps> = ({
   const author = user ? getUserFullName(user) : (chat ? getChatTitle(lang, chat) : text);
 
   if (isSavedMessages) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-saved-messages')} role="img" aria-label={author} />;
+    content = (
+      <i
+        className={buildClassName(cn.icon,
+          'icon',
+          'icon-avatar-saved-messages')}
+        role="img"
+        aria-label={author}
+      />
+    );
   } else if (isDeleted) {
-    content = <i className={buildClassName(cn.icon, 'icon-avatar-deleted-account')} role="img" aria-label={author} />;
+    content = (
+      <i
+        className={buildClassName(cn.icon,
+          'icon',
+          'icon-avatar-deleted-account')}
+        role="img"
+        aria-label={author}
+      />
+    );
   } else if (isReplies) {
-    content = <i className={buildClassName(cn.icon, 'icon-reply-filled')} role="img" aria-label={author} />;
+    content = (
+      <i
+        className={buildClassName(cn.icon,
+          'icon',
+          'icon-reply-filled')}
+        role="img"
+        aria-label={author}
+      />
+    );
   } else if (hasBlobUrl) {
     content = (
       <>

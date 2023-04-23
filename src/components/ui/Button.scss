@@ -37,7 +37,7 @@
   padding: 0.625rem;
   color: white;
   line-height: 1.2;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   text-transform: uppercase;
   flex-shrink: 0;
   position: relative;
@@ -56,7 +56,7 @@
 
   &.disabled {
     opacity: 0.5 !important;
-    cursor: default;
+    cursor: var(--custom-cursor, default);
     &:not(.click-allowed) {
       pointer-events: none;
     }
@@ -66,7 +66,7 @@
     width: 3.5rem;
     border-radius: 50%;
 
-    i {
+    .icon {
       font-size: 1.5rem;
     }
   }
@@ -255,7 +255,7 @@
       padding-left: 0.75rem;
       padding-right: 1.25rem;
 
-      i {
+      .icon {
         font-size: 1.5rem;
         margin-right: 0.5rem;
       }
@@ -264,7 +264,7 @@
         padding-left: 1.25rem;
         padding-right: 0.75rem;
 
-        i {
+        .icon {
           margin-left: 0.5rem;
           margin-right: 0;
         }
@@ -293,7 +293,7 @@
       border-radius: 50%;
     }
 
-    i {
+    .icon {
       font-size: 1.25rem;
     }
 

@@ -55,7 +55,9 @@ const useShowTransition = (
     className && 'opacity-transition',
     className,
     shouldHaveOpenClassName && 'open',
+    !shouldHaveOpenClassName && 'not-open',
     shouldRender && 'shown',
+    !shouldRender && 'not-shown',
     isClosing && 'closing',
   );
 

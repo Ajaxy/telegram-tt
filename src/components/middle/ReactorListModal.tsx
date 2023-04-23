@@ -5,7 +5,6 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
@@ -21,7 +20,7 @@ import useFlag from '../../hooks/useFlag';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import Avatar from '../common/Avatar';
+import UserAvatar from '../common/UserAvatar';
 import ListItem from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import Loading from '../ui/Loading';
@@ -38,7 +37,6 @@ export type OwnProps = {
 export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUserIds'> & {
   chatId?: string;
   messageId?: number;
-  animationLevel: AnimationLevel;
   availableReactions?: ApiAvailableReaction[];
 };
 
@@ -49,7 +47,6 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   chatId,
   messageId,
   seenByUserIds,
-  animationLevel,
   availableReactions,
 }) => {
   const {
@@ -146,7 +143,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => setChosenTab(undefined)}
           >
-            <i className="icon-heart" />
+            <i className="icon icon-heart" />
             {Boolean(reactors?.count) && formatIntegerCompact(reactors.count)}
           </Button>
           {allReactions.map((reaction) => {
@@ -194,7 +191,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(userId)}
                     >
-                      <Avatar user={user} size="small" animationLevel={animationLevel} withVideo />
+                      <UserAvatar user={user} size="small" withVideo />
                       <FullNameTitle peer={user} withEmojiStatus />
                       {r.reaction && (
                         <ReactionStaticEmoji
@@ -234,7 +231,6 @@ export default memo(withGlobal<OwnProps>(
       reactions: message?.reactions,
       reactors: message?.reactors,
       seenByUserIds: message?.seenByUserIds,
-      animationLevel: global.settings.byKey.animationLevel,
       availableReactions: global.availableReactions,
     };
   },

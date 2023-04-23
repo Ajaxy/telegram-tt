@@ -72,7 +72,7 @@ const SettingsHeader: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, [isMobile]);
@@ -237,7 +237,7 @@ const SettingsHeader: FC<OwnProps> = ({
               onClick={onSaveFilter}
               ariaLabel={lang('AutoDeleteConfirm')}
             >
-              <i className="icon-check" />
+              <i className="icon icon-check" />
             </Button>
           </div>
         );
@@ -259,7 +259,7 @@ const SettingsHeader: FC<OwnProps> = ({
               onClick={() => onScreenSelect(SettingsScreens.EditProfile)}
               ariaLabel={lang('lng_settings_information')}
             >
-              <i className="icon-edit" />
+              <i className="icon icon-edit" />
             </Button>
             <DropdownMenu
               className="settings-more-menu"
@@ -282,7 +282,7 @@ const SettingsHeader: FC<OwnProps> = ({
         onClick={onReset}
         ariaLabel={lang('AccDescrGoBack')}
       >
-        <i className="icon-arrow-left" />
+        <i className="icon icon-arrow-left" />
       </Button>
       {renderHeaderContent()}
       <ConfirmDialog

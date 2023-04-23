@@ -69,7 +69,7 @@
   .quick-reaction {
     --custom-emoji-size: 1.75rem;
 
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     position: absolute;
     right: -0.875rem;
     bottom: -0.5rem;
@@ -267,7 +267,7 @@
   }
 
   .select-mode-active & {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     @media (min-width: 600px) {
       user-select: none;

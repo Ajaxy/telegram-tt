@@ -1,7 +1,7 @@
 .WallpaperTile {
   height: 0;
   padding-bottom: 100%;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   position: relative;
 
   .media-inner,

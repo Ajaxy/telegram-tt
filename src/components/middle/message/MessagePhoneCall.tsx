@@ -66,14 +66,18 @@ const MessagePhoneCall: FC<OwnProps> = ({
         disabled={!ARE_CALLS_SUPPORTED}
         ariaLabel={lang(isOutgoing ? 'CallAgain' : 'CallBack')}
       >
-        <i className={isVideo ? 'icon-video-outlined' : 'icon-phone'} />
+        <i className={buildClassName('icon', isVideo ? 'icon-video-outlined' : 'icon-phone')} />
       </Button>
       <div className={styles.info}>
         <div className={styles.reason}>{lang(reasonText)}</div>
         <div className={styles.meta}>
           <i
             className={buildClassName(
-              'icon-arrow-right', styles.arrow, isMissed && styles.missed, !isOutgoing && styles.incoming,
+              'icon',
+              'icon-arrow-right',
+              styles.arrow,
+              isMissed && styles.missed,
+              !isOutgoing && styles.incoming,
             )}
           />
           <span className={styles.duration}>

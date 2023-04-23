@@ -6,7 +6,7 @@ import { ManagementScreens } from '../../../types';
 import type { ApiChat, ApiChatMember } from '../../../api/types';
 
 import { getUserFullName, isChatChannel } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -26,12 +26,14 @@ type StateProps = {
   chat: ApiChat;
   currentUserId?: string;
   isChannel: boolean;
+  adminMembersById?: Record<string, ApiChatMember>;
 };
 
 const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
   chat,
   isChannel,
   currentUserId,
+  adminMembersById,
   onScreenSelect,
   onChatMemberSelect,
   onClose,
@@ -44,18 +46,14 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  const handleRecentActionsClick = useCallback(() => {
-    onScreenSelect(ManagementScreens.GroupRecentActions);
-  }, [onScreenSelect]);
-
   const canAddNewAdmins = Boolean(chat.isCreator || chat.adminRights?.addAdmins);
 
   const adminMembers = useMemo(() => {
-    if (!chat.fullInfo?.adminMembersById) {
+    if (!adminMembersById) {
       return [];
     }
 
-    return Object.values(chat.fullInfo.adminMembersById).sort((a, b) => {
+    return Object.values(adminMembersById).sort((a, b) => {
       if (a.isOwner) {
         return -1;
       } else if (b.isOwner) {
@@ -64,7 +62,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
 
       return 0;
     });
-  }, [chat]);
+  }, [adminMembersById]);
 
   const handleAdminMemberClick = useCallback((member: ApiChatMember) => {
     onChatMemberSelect(member.userId, member.promotedByUserId === currentUserId);
@@ -98,7 +96,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
           <ListItem
             icon="recent"
             multiline
-            onClick={handleRecentActionsClick}
+            disabled
           >
             <span className="title">{lang('EventLog')}</span>
             <span className="subtitle">{lang(isChannel ? 'EventLogInfoDetailChannel' : 'EventLogInfoDetail')}</span>
@@ -132,7 +130,7 @@ const ManageChatAdministrators: FC<OwnProps & StateProps> = ({
             onClick={handleAddAdminClick}
             ariaLabel={lang('Channel.Management.AddModerator')}
           >
-            <i className="icon-add-user-filled" />
+            <i className="icon icon-add-user-filled" />
           </FloatingActionButton>
         </div>
       </div>
@@ -148,6 +146,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       currentUserId: global.currentUserId,
       isChannel: isChatChannel(chat),
+      adminMembersById: selectChatFullInfo(global, chatId)?.adminMembersById,
     };
   },
 )(ManageChatAdministrators));

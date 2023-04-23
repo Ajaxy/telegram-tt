@@ -43,7 +43,7 @@ const AttachBotIcon: FC<OwnProps> = ({
   }, [mediaData, theme]);
 
   return (
-    <i className={buildClassName(styles.root, !isTouchScreen && styles.compact)}>
+    <i className={buildClassName(styles.root, 'icon', !isTouchScreen && styles.compact)}>
       <img src={iconSvg} alt="" className={buildClassName(styles.image, !isTouchScreen && styles.compact)} />
     </i>
   );

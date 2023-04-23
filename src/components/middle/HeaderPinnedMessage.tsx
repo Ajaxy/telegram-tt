@@ -123,7 +123,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           )}
           <i
             className={buildClassName(
-              'icon-pin-list', styles.pinListIcon, shouldShowLoader && styles.pinListIconHidden,
+              'icon', 'icon-pin-list', styles.pinListIcon, shouldShowLoader && styles.pinListIconHidden,
             )}
           />
         </Button>
@@ -136,7 +136,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           ariaLabel={lang('UnpinMessageAlertTitle')}
           onClick={openUnpinDialog}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       )}
       <ConfirmDialog
@@ -156,7 +156,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           count={count}
           index={index}
         />
-        <Transition activeKey={message.id} name="slide-vertical" className={styles.pictogramTransition}>
+        <Transition activeKey={message.id} name="slideVertical" className={styles.pictogramTransition}>
           {renderPictogram(
             mediaThumbnail,
             mediaBlobUrl,
@@ -171,7 +171,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
             {customTitle && renderText(customTitle)}
           </div>
-          <Transition activeKey={message.id} name="slide-vertical-fade" className={styles.messageTextTransition}>
+          <Transition activeKey={message.id} name="slideVerticalFade" className={styles.messageTextTransition}>
             <p dir="auto" className={styles.summary}>
               <MessageSummary lang={lang} message={message} noEmoji={Boolean(mediaThumbnail)} />
             </p>

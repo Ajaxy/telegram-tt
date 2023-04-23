@@ -9,7 +9,7 @@ import type {
 } from '../../../api/types';
 
 import { isSameReaction } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -169,7 +169,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
     </div>
@@ -181,7 +181,7 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId)!;
 
     return {
-      enabledReactions: chat.fullInfo?.enabledReactions,
+      enabledReactions: selectChatFullInfo(global, chatId)?.enabledReactions,
       availableReactions: global.availableReactions,
       chat,
     };

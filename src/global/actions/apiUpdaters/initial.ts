@@ -10,10 +10,11 @@ import type {
   ApiUpdateAuthorizationError,
   ApiUpdateConnectionState,
   ApiUpdateSession,
-  ApiUpdateCurrentUser, ApiUpdateServerTimeOffset,
+  ApiUpdateCurrentUser,
+  ApiUpdateServerTimeOffset,
 } from '../../../api/types';
 import { SESSION_USER_KEY } from '../../../config';
-import { updateUser } from '../../reducers';
+import { updateUser, updateUserFullInfo } from '../../reducers';
 import { setLanguage } from '../../../util/langProvider';
 import { selectTabState } from '../../selectors';
 import { forceWebsync } from '../../../util/websync';
@@ -226,12 +227,13 @@ function onUpdateServerTimeOffset(update: ApiUpdateServerTimeOffset) {
 }
 
 function onUpdateCurrentUser<T extends GlobalState>(global: T, update: ApiUpdateCurrentUser) {
-  const { currentUser } = update;
+  const { currentUser, currentUserFullInfo } = update;
 
   global = {
     ...updateUser(global, currentUser.id, currentUser),
     currentUserId: currentUser.id,
   };
+  global = updateUserFullInfo(global, currentUser.id, currentUserFullInfo);
   setGlobal(global);
 
   updateSessionUserId(currentUser.id);

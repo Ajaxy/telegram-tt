@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 
+import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
@@ -52,7 +53,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
         faded
         color="translucent"
       >
-        <i className={SYMBOL_MENU_TAB_ICONS[tab]} />
+        <i className={buildClassName('icon', SYMBOL_MENU_TAB_ICONS[tab])} />
       </Button>
     );
   }
@@ -76,7 +77,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           color="translucent"
           onClick={handleSearchOpen}
         >
-          <i className="icon-search" />
+          <i className="icon icon-search" />
         </Button>
       )}
 
@@ -94,7 +95,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
           faded
           color="translucent"
         >
-          <i className="icon-delete-left" />
+          <i className="icon icon-delete-left" />
         </Button>
       )}
     </div>

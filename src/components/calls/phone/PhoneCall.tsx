@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 import '../../../global/actions/calls';
 
-import type { ApiPhoneCall, ApiUser } from '../../../api/types';
+import type { ApiPhoneCall, ApiPhoto, ApiUser } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 
 import {
@@ -14,7 +14,7 @@ import {
   IS_REQUEST_FULLSCREEN_SUPPORTED,
 } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import { selectTabState } from '../../../global/selectors';
+import { selectTabState, selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { selectPhoneCallUser } from '../../../global/selectors/calls';
 import useLang from '../../../hooks/useLang';
@@ -39,6 +39,7 @@ import styles from './PhoneCall.module.scss';
 type StateProps = {
   user?: ApiUser;
   phoneCall?: ApiPhoneCall;
+  userProfilePhoto?: ApiPhoto;
   isOutgoing: boolean;
   isCallPanelVisible?: boolean;
   animationLevel: AnimationLevel;
@@ -46,6 +47,7 @@ type StateProps = {
 
 const PhoneCall: FC<StateProps> = ({
   user,
+  userProfilePhoto,
   isOutgoing,
   phoneCall,
   isCallPanelVisible,
@@ -238,6 +240,7 @@ const PhoneCall: FC<StateProps> = ({
     >
       <Avatar
         user={user}
+        userProfilePhoto={userProfilePhoto}
         size="jumbo"
         className={hasVideo || hasPresentation ? styles.blurred : ''}
         withVideo
@@ -279,7 +282,7 @@ const PhoneCall: FC<StateProps> = ({
             onClick={handleToggleFullscreen}
             ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
           >
-            <i className={isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'} />
+            <i className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')} />
           </Button>
         )}
 
@@ -290,7 +293,7 @@ const PhoneCall: FC<StateProps> = ({
           onClick={handleClose}
           className={styles.closeButton}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       </div>
       <div
@@ -372,10 +375,13 @@ export default memo(withGlobal(
   (global): StateProps => {
     const { phoneCall, currentUserId } = global;
     const { isCallPanelVisible, isMasterTab } = selectTabState(global);
+    const user = selectPhoneCallUser(global);
+    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
 
     return {
       isCallPanelVisible: Boolean(isCallPanelVisible),
-      user: selectPhoneCallUser(global),
+      user,
+      userProfilePhoto,
       isOutgoing: phoneCall?.adminId === currentUserId,
       phoneCall: isMasterTab ? phoneCall : undefined,
       animationLevel: global.settings.byKey.animationLevel,

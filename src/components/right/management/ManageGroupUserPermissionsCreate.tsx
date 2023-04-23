@@ -5,7 +5,7 @@ import { withGlobal } from '../../../global';
 import type { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { sortUserIds, isChatChannel } from '../../../global/helpers';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -93,7 +93,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { byId: usersById, statusesById: userStatusesById } = global.users;
-    const members = chat?.fullInfo?.members;
+    const members = selectChatFullInfo(global, chatId)?.members;
     const isChannel = chat && isChatChannel(chat);
 
     return {

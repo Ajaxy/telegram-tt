@@ -24,7 +24,7 @@ const DateSuggest: FC<OwnProps> = ({
             className="date-item"
             key={text}
           >
-            <i className="icon-calendar" />
+            <i className="icon icon-calendar" />
             <span>{text}</span>
           </div>
         );

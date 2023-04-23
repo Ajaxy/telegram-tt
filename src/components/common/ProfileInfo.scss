@@ -46,6 +46,6 @@
 
     color: var(--color-white);
     pointer-events: auto;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
   }
 }

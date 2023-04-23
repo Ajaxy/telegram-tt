@@ -115,7 +115,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         </p>
         <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
       </div>
-      {hasContextMenu && <i className="embedded-more icon-more" />}
+      {hasContextMenu && <i className="embedded-more icon icon-more" />}
     </div>
   );
 };

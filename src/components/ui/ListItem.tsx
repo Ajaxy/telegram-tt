@@ -229,7 +229,7 @@ const ListItem: FC<OwnProps> = ({
       >
         {leftElement}
         {icon && (
-          <i className={`icon-${icon}`} />
+          <i className={`icon icon-${icon}`} />
         )}
         {multiline && (<div className="multiline-item">{children}</div>)}
         {!multiline && children}
@@ -245,7 +245,7 @@ const ListItem: FC<OwnProps> = ({
             onClick={IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
             onMouseDown={!IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
           >
-            <i className={`icon-${secondaryIcon}`} />
+            <i className={`icon icon-${secondaryIcon}`} />
           </Button>
         )}
         {rightElement}

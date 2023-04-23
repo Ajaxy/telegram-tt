@@ -16,7 +16,6 @@ import ManageChatPrivacyType from './ManageChatPrivacyType';
 import ManageDiscussion from './ManageDiscussion';
 import ManageGroupUserPermissions from './ManageGroupUserPermissions';
 import ManageChatAdministrators from './ManageChatAdministrators';
-import ManageGroupRecentActions from './ManageGroupRecentActions';
 import ManageGroupAdminRights from './ManageGroupAdminRights';
 import ManageGroupMembers from './ManageGroupMembers';
 import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate';
@@ -189,15 +188,6 @@ const Management: FC<OwnProps & StateProps> = ({
             ManagementScreens.ChatNewAdminRights,
             ManagementScreens.GroupRecentActions,
           ].includes(currentScreen)}
-          onClose={onClose}
-        />
-      );
-
-    case ManagementScreens.GroupRecentActions:
-      return (
-        <ManageGroupRecentActions
-          chatId={chatId}
-          isActive={isActive}
           onClose={onClose}
         />
       );

@@ -245,7 +245,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
               onClick={() => closePremiumModal()}
               ariaLabel={lang('Close')}
             >
-              <i className="icon-close" />
+              <i className="icon icon-close" />
             </Button>
             <img className={styles.logo} src={PremiumLogo} alt="" />
             <h2 className={styles.headerText}>

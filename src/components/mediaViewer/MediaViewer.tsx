@@ -3,7 +3,9 @@ import React, {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
+import type {
+  ApiChat, ApiMessage, ApiPhoto, ApiUser,
+} from '../../api/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
@@ -18,7 +20,9 @@ import {
   selectIsChatWithSelf,
   selectListedIds,
   selectScheduledMessage,
-  selectUser, selectOutlyingListByMessageId,
+  selectUser,
+  selectOutlyingListByMessageId,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -59,6 +63,7 @@ type StateProps = {
   canUpdateMedia?: boolean;
   origin?: MediaViewerOrigin;
   avatarOwner?: ApiChat | ApiUser;
+  avatarOwnerFallbackPhoto?: ApiPhoto;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
   collectionIds?: number[];
@@ -78,6 +83,7 @@ const MediaViewer: FC<StateProps> = ({
   canUpdateMedia,
   origin,
   avatarOwner,
+  avatarOwnerFallbackPhoto,
   message,
   chatMessages,
   collectionIds,
@@ -99,7 +105,7 @@ const MediaViewer: FC<StateProps> = ({
   /* Animation */
   const animationKey = useRef<number>();
   const prevSenderId = usePrevious<string | undefined>(senderId);
-  const headerAnimation = animationLevel === 2 ? 'slide-fade' : 'none';
+  const headerAnimation = animationLevel === 2 ? 'slideFade' : 'none';
   const isGhostAnimation = animationLevel === 2 && !shouldSkipHistoryAnimations;
 
   /* Controls */
@@ -296,7 +302,7 @@ const MediaViewer: FC<StateProps> = ({
         chatId={avatarOwner.id}
         isAvatar
         isFallbackAvatar={isUserId(avatarOwner.id)
-          && (avatarOwner as ApiUser).photos?.[mediaId!].id === (avatarOwner as ApiUser).fullInfo?.fallbackPhoto?.id}
+          && (avatarOwner as ApiUser).photos?.[mediaId!].id === avatarOwnerFallbackPhoto?.id}
       />
     ) : (
       <SenderInfo
@@ -325,7 +331,7 @@ const MediaViewer: FC<StateProps> = ({
             ariaLabel={lang('Close')}
             onClick={handleClose}
           >
-            <i className="icon-close" />
+            <i className="icon icon-close" />
           </Button>
         )}
         <Transition activeKey={animationKey.current!} name={headerAnimation}>
@@ -433,6 +439,7 @@ export default memo(withGlobal(
         mediaId,
         senderId: avatarOwnerId,
         avatarOwner: user || chat,
+        avatarOwnerFallbackPhoto: user ? selectUserFullInfo(global, avatarOwnerId)?.fallbackPhoto : undefined,
         isChatWithSelf,
         canUpdateMedia,
         animationLevel,

@@ -4,10 +4,12 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiChatAdminRights, ApiUser } from '../../../api/types';
+import type {
+  ApiChat, ApiChatAdminRights, ApiChatMember, ApiUser,
+} from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { getUserFullName, isChatBasicGroup, isChatChannel } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -34,6 +36,8 @@ type OwnProps = {
 type StateProps = {
   chat: ApiChat;
   usersById: Record<string, ApiUser>;
+  adminMembersById?: Record<string, ApiChatMember>;
+  hasFullInfo: boolean;
   currentUserId?: string;
   isChannel: boolean;
   isFormFullyDisabled: boolean;
@@ -51,6 +55,8 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   chat,
   usersById,
   currentUserId,
+  adminMembersById,
+  hasFullInfo,
   isChannel,
   isForum,
   isFormFullyDisabled,
@@ -72,7 +78,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
   });
 
   const selectedChatMember = useMemo(() => {
-    const selectedAdminMember = selectedUserId ? chat.fullInfo?.adminMembersById?.[selectedUserId] : undefined;
+    const selectedAdminMember = selectedUserId ? adminMembersById?.[selectedUserId] : undefined;
 
     // If `selectedAdminMember` variable is filled with a value, then we have already saved the administrator,
     // so now we need to return to the list of administrators
@@ -93,13 +99,13 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
     }
 
     return selectedAdminMember;
-  }, [chat.fullInfo?.adminMembersById, defaultRights, isNewAdmin, lang, selectedUserId]);
+  }, [adminMembersById, defaultRights, isNewAdmin, lang, selectedUserId]);
 
   useEffect(() => {
-    if (chat?.fullInfo && selectedUserId && !selectedChatMember) {
+    if (hasFullInfo && selectedUserId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.ChatAdministrators);
     }
-  }, [chat, onScreenSelect, selectedChatMember, selectedUserId]);
+  }, [chat, hasFullInfo, onScreenSelect, selectedChatMember, selectedUserId]);
 
   useEffect(() => {
     setPermissions(selectedChatMember?.adminRights || {});
@@ -366,7 +372,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
 
@@ -387,6 +393,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, isPromotedByCurrentUser }): StateProps => {
     const chat = selectChat(global, chatId)!;
+    const fullInfo = selectChatFullInfo(global, chatId);
     const { byId: usersById } = global.users;
     const { currentUserId } = global;
     const isChannel = isChatChannel(chat);
@@ -401,6 +408,8 @@ export default memo(withGlobal<OwnProps>(
       isForum,
       isFormFullyDisabled,
       defaultRights: chat.adminRights,
+      hasFullInfo: Boolean(fullInfo),
+      adminMembersById: fullInfo?.adminMembersById,
     };
   },
 )(ManageGroupAdminRights));

@@ -53,8 +53,8 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
   return (
     <div className="participants">
       <div className="invite-btn" onClick={handleCreateGroupCallInviteLink}>
-        <div className="icon">
-          <i className="icon-add-user" />
+        <div className="icon-wrapper">
+          <i className="icon icon-add-user" />
         </div>
         <div className="text">{lang('VoipGroupInviteMember')}</div>
       </div>

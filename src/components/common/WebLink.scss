@@ -33,7 +33,7 @@
     top: 0;
     width: 3rem;
     height: 3rem;
-    cursor: default !important;
+    cursor: var(--custom-cursor, default) !important;
     padding-bottom: unset !important;
     border-radius: var(--border-radius-messages-small) !important;
   }

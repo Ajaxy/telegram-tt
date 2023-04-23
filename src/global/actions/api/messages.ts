@@ -46,6 +46,7 @@ import {
   safeReplacePinnedIds,
   safeReplaceViewportIds,
   updateChat,
+  updateChatFullInfo,
   updateChatMessage,
   updateListedIds,
   updateMessageTranslation,
@@ -86,6 +87,7 @@ import {
   selectThreadOriginChat,
   selectThreadTopMessageId,
   selectUser,
+  selectUserFullInfo,
   selectViewportIds,
 } from '../../selectors';
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
@@ -1213,12 +1215,7 @@ addActionHandler('saveDefaultSendAs', (global, actions, payload): ActionReturnTy
 
   void callApi('saveDefaultSendAs', { sendAs: sendAsChat, chat });
 
-  return updateChat(global, chatId, {
-    fullInfo: {
-      ...chat.fullInfo,
-      sendAsId,
-    },
-  });
+  return updateChatFullInfo(global, chatId, { sendAsId });
 });
 
 addActionHandler('loadSendAs', async (global, actions, payload): Promise<void> => {
@@ -1379,13 +1376,16 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
   const { chatId, topicId, tabId = getCurrentTabId() } = payload;
   let user = selectUser(global, chatId);
   if (user && selectForwardsContainVoiceMessages(global, tabId)) {
-    if (!user.fullInfo) {
+    let fullInfo = selectUserFullInfo(global, chatId);
+    if (!fullInfo) {
       const { accessHash } = user;
-      user = await callApi('fetchFullUser', { id: chatId, accessHash });
+      const result = await callApi('fetchFullUser', { id: chatId, accessHash });
       global = getGlobal();
+      user = result?.user;
+      fullInfo = result?.fullInfo;
     }
 
-    if (user?.fullInfo!.noVoiceMessages) {
+    if (fullInfo!.noVoiceMessages) {
       actions.showDialog({
         data: {
           message: translate('VoiceMessagesRestrictedByPrivacy', getUserFullName(user)),

@@ -24,20 +24,20 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
     switch (type) {
       case 'url': {
         if (!RE_TME_LINK.test(button.url)) {
-          return <i className="icon-arrow-right" />;
+          return <i className="icon icon-arrow-right" />;
         }
         break;
       }
       case 'urlAuth':
-        return <i className="icon-arrow-right" />;
+        return <i className="icon icon-arrow-right" />;
       case 'buy':
       case 'receipt':
-        return <i className="icon-cart" />;
+        return <i className="icon icon-cart" />;
       case 'switchBotInline':
-        return <i className="icon-share-filled" />;
+        return <i className="icon icon-share-filled" />;
       case 'webView':
       case 'simpleWebView':
-        return <i className="icon-webapp" />;
+        return <i className="icon icon-webapp" />;
     }
     return undefined;
   };

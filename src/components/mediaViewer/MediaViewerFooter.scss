@@ -5,10 +5,6 @@
   width: 100%;
   transition: opacity 0.15s;
 
-  #MediaViewer.zoomed & {
-    display: none;
-  }
-
   @media (max-height: 640px) {
     padding: 0.5rem 0 0;
   }
@@ -44,7 +40,7 @@
     position: relative;
     max-width: var(--messages-container-width);
     margin: auto;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     opacity: 0.5;
     transition: opacity 0.15s;
 

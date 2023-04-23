@@ -299,7 +299,7 @@ const VideoPlayer: FC<OwnProps> = ({
       </div>
       {shouldRenderPlayButton && (
         <Button round className={`play-button ${playButtonClassNames}`} onClick={togglePlayState}>
-          <i className="icon-play" />
+          <i className="icon icon-play" />
         </Button>
       )}
       {shouldRenderSpinner && (

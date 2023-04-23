@@ -17,7 +17,7 @@
   }
 
   &.clickable {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     pointer-events: auto;
   }
 }

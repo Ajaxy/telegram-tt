@@ -3,7 +3,7 @@ import type { GlobalState } from '../types';
 import type { ApiGroupCall } from '../../api/types';
 import { selectGroupCall } from '../selectors/calls';
 import { omit } from '../../util/iteratees';
-import { updateChat } from './chats';
+import { updateChatFullInfo } from './chats';
 import { selectChat } from '../selectors';
 
 export function updateGroupCall<T extends GlobalState>(
@@ -53,11 +53,8 @@ export function removeGroupCall<T extends GlobalState>(
   if (groupCall && groupCall.chatId) {
     const chat = selectChat(global, groupCall.chatId);
     if (chat) {
-      global = updateChat(global, groupCall.chatId, {
-        fullInfo: {
-          ...chat.fullInfo,
-          groupCallId: undefined,
-        },
+      global = updateChatFullInfo(global, groupCall.chatId, {
+        groupCallId: undefined,
       });
     }
   }

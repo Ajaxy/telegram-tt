@@ -10,8 +10,8 @@ import type { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/t
 import stopEvent from '../../../util/stopEvent';
 import buildClassName from '../../../util/buildClassName';
 import { isChatPublic } from '../../../global/helpers';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
-import { selectChat } from '../../../global/selectors';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useManagePermissions from '../hooks/useManagePermissions';
 
@@ -33,6 +33,8 @@ type StateProps = {
   chat?: ApiChat;
   currentUserId?: string;
   hasLinkedChat?: boolean;
+  removedUsersCount: number;
+  members?: ApiChatMember[];
 };
 
 const ITEM_HEIGHT = 24 + 32;
@@ -84,6 +86,8 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
   chat,
   currentUserId,
   hasLinkedChat,
+  removedUsersCount,
+  members,
   onClose,
   isActive,
 }) => {
@@ -134,21 +138,13 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
     updateChatDefaultBannedRights({ chatId: chat.id, bannedRights: permissions });
   }, [chat, permissions, setIsLoading, updateChatDefaultBannedRights]);
 
-  const removedUsersCount = useMemo(() => {
-    if (!chat || !chat.fullInfo || !chat.fullInfo.kickedMembers) {
-      return 0;
-    }
-
-    return chat.fullInfo.kickedMembers.length;
-  }, [chat]);
-
   const exceptionMembers = useMemo(() => {
-    if (!chat || !chat.fullInfo || !chat.fullInfo.members) {
+    if (!members) {
       return [];
     }
 
-    return chat.fullInfo.members.filter(({ bannedRights }) => Boolean(bannedRights));
-  }, [chat]);
+    return members.filter(({ bannedRights }) => Boolean(bannedRights));
+  }, [members]);
 
   const getMemberExceptions = useCallback((member: ApiChatMember) => {
     const { bannedRights } = member;
@@ -417,7 +413,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
     </div>
@@ -427,8 +423,15 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
-    const hasLinkedChat = Boolean(chat?.fullInfo?.linkedChatId);
+    const fullInfo = selectChatFullInfo(global, chatId);
+    const hasLinkedChat = Boolean(fullInfo?.linkedChatId);
 
-    return { chat, currentUserId: global.currentUserId, hasLinkedChat };
+    return {
+      chat,
+      currentUserId: global.currentUserId,
+      hasLinkedChat,
+      removedUsersCount: fullInfo?.kickedMembers?.length || 0,
+      members: fullInfo?.members,
+    };
   },
 )(ManageGroupPermissions));

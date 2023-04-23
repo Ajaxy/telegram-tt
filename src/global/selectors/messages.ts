@@ -15,7 +15,7 @@ import {
   GENERAL_TOPIC_ID, LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import {
-  selectChat, selectChatBot, selectIsChatWithSelf,
+  selectChat, selectChatBot, selectChatFullInfo, selectIsChatWithSelf,
 } from './chats';
 import {
   selectIsCurrentUserPremium, selectIsUserOrChatContact, selectUser, selectUserStatus,
@@ -1200,7 +1200,7 @@ export function selectDefaultReaction<T extends GlobalState>(global: T, chatId: 
     return defaultReaction;
   }
 
-  const chatReactions = selectChat(global, chatId)?.fullInfo?.enabledReactions;
+  const chatReactions = selectChatFullInfo(global, chatId)?.enabledReactions;
   if (!chatReactions || !canSendReaction(defaultReaction, chatReactions)) {
     return undefined;
   }
@@ -1266,7 +1266,8 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
   // If some emoji still loading, do not return empty array
   if (!documents.every(Boolean)) return undefined;
   const sets = documents.map((doc) => doc.stickerSetInfo);
-  const setsWithoutDuplicates = sets.reduce((acc, set) => {
+
+  return sets.reduce((acc, set) => {
     if ('shortName' in set) {
       if (acc.some((s) => 'shortName' in s && s.shortName === set.shortName)) {
         return acc;
@@ -1281,7 +1282,6 @@ export function selectMessageCustomEmojiSets<T extends GlobalState>(
     acc.push(set); // Optimization
     return acc;
   }, [] as ApiStickerSetInfo[]);
-  return setsWithoutDuplicates;
 }
 
 export function selectForwardsContainVoiceMessages<T extends GlobalState>(

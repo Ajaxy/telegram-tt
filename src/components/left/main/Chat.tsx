@@ -5,13 +5,14 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat,
-  ApiUser,
+  ApiFormattedText,
   ApiMessage,
   ApiMessageOutgoingStatus,
-  ApiFormattedText,
-  ApiUserStatus,
+  ApiPhoto,
   ApiTopic,
   ApiTypingStatus,
+  ApiUser,
+  ApiUserStatus,
 } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
@@ -19,23 +20,25 @@ import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import {
-  isUserId,
-  getPrivateChatUserId,
   getMessageAction,
+  getPrivateChatUserId,
+  isUserId,
   selectIsChatMuted,
 } from '../../../global/helpers';
 import {
   selectChat,
-  selectUser,
   selectChatMessage,
-  selectOutgoingStatus,
-  selectDraft,
   selectCurrentMessageList,
-  selectNotifySettings,
+  selectDraft,
   selectNotifyExceptions,
-  selectUserStatus,
+  selectNotifySettings,
+  selectOutgoingStatus,
+  selectTabState,
+  selectThreadParam,
   selectTopicFromMessage,
-  selectThreadParam, selectTabState,
+  selectUser,
+  selectUserPhotoFromFullInfo,
+  selectUserStatus,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
@@ -75,6 +78,7 @@ type StateProps = {
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
+  userProfilePhoto?: ApiPhoto;
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
@@ -102,6 +106,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   isMuted,
   user,
   userStatus,
+  userProfilePhoto,
   actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
@@ -235,6 +240,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         <Avatar
           chat={chat}
           user={user}
+          userProfilePhoto={userProfilePhoto}
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
@@ -255,7 +261,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             isSavedMessages={chatId === user?.id && user?.isSelf}
             observeIntersection={observeIntersection}
           />
-          {isMuted && <i className="icon-muted" />}
+          {isMuted && <i className="icon icon-muted" />}
           <div className="separator" />
           {chat.lastMessage && (
             <LastMessageMeta
@@ -324,6 +330,7 @@ export default memo(withGlobal<OwnProps>(
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
+    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
     const lastMessageTopic = chat.lastMessage && selectTopicFromMessage(global, chat.lastMessage);
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
@@ -347,6 +354,7 @@ export default memo(withGlobal<OwnProps>(
       }),
       user,
       userStatus,
+      userProfilePhoto,
       lastMessageTopic,
       typingStatus,
     };

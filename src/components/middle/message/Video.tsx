@@ -234,7 +234,7 @@ const Video: FC<OwnProps> = ({
         />
       )}
       {isProtected && <span className="protector" />}
-      <i className={buildClassName('icon-large-play', playButtonClassNames)} />
+      <i className={buildClassName('icon', 'icon-large-play', playButtonClassNames)} />
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation
@@ -249,7 +249,7 @@ const Video: FC<OwnProps> = ({
         </div>
       )}
       {!isLoadAllowed && !fullMediaData && (
-        <i className="icon-download" />
+        <i className="icon icon-download" />
       )}
       {isTransferring ? (
         <span className="message-transfer-progress">

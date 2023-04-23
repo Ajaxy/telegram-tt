@@ -98,13 +98,13 @@ const AuthCode: FC<StateProps> = ({
         <h1>
           {authPhoneNumber}
           <div
-            className="auth-number-edit"
+            className="auth-number-edit div-button"
             onClick={handleReturnToAuthPhoneNumber}
             role="button"
             tabIndex={0}
             title={lang('WrongNumber')}
           >
-            <i className="icon-edit" />
+            <i className="icon icon-edit" />
           </div>
         </h1>
         <p className="note">

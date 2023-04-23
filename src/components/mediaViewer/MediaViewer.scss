@@ -130,7 +130,7 @@
     opacity: 0;
     transition: opacity 0.15s;
     outline: none;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     z-index: 1;
 
     @media (max-width: 600px) {

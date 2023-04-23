@@ -24,10 +24,26 @@ const RGB_VARIABLES = new Set([
   '--color-text-secondary',
 ]);
 
+const DISABLE_ANIMATION_CSS = `
+.no-animations #root *,
+.no-animations #root *::before,
+.no-animations #root *::after {
+  transition: none !important;
+}`;
+
 const colors = (Object.keys(themeColors) as Array<keyof typeof themeColors>).map((property) => ({
   property,
   colors: [hexToRgb(themeColors[property][0]), hexToRgb(themeColors[property][1])],
 }));
+
+const injectCss = (css: string) => {
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.appendChild(style);
+  return () => {
+    document.head.removeChild(style);
+  };
+};
 
 const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
   const themeClassName = `theme-${theme}`;
@@ -43,7 +59,9 @@ const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
 
   requestMutation(() => {
     document.documentElement.classList.remove(`theme-${isDarkTheme ? 'light' : 'dark'}`);
+    let uninjectCss: (() => void) | undefined;
     if (isInitialized) {
+      uninjectCss = injectCss(DISABLE_ANIMATION_CSS);
       document.documentElement.classList.add('no-animations');
     }
     document.documentElement.classList.add(themeClassName);
@@ -53,6 +71,7 @@ const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
 
     setTimeout(() => {
       requestMutation(() => {
+        uninjectCss?.();
         document.documentElement.classList.remove('no-animations');
       });
     }, ENABLE_ANIMATION_DELAY_MS);

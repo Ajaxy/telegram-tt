@@ -1,13 +1,13 @@
 import type { GlobalState } from '../types';
-import { selectChat } from './chats';
+import { selectChat, selectChatFullInfo } from './chats';
 import { isChatBasicGroup } from '../helpers';
 import { selectUser } from './users';
 
 export function selectChatGroupCall<T extends GlobalState>(global: T, chatId: string) {
-  const chat = selectChat(global, chatId);
-  if (!chat || !chat.fullInfo || !chat.fullInfo.groupCallId) return undefined;
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!fullInfo || !fullInfo.groupCallId) return undefined;
 
-  return selectGroupCall(global, chat.fullInfo.groupCallId);
+  return selectGroupCall(global, fullInfo.groupCallId);
 }
 
 export function selectGroupCall<T extends GlobalState>(global: T, groupCallId: string) {

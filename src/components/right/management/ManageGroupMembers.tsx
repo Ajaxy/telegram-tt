@@ -8,7 +8,7 @@ import type { ApiChatMember, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { unique } from '../../../util/iteratees';
-import { selectChat, selectTabState } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import {
   sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight, isChatBasicGroup,
 } from '../../../global/helpers';
@@ -251,8 +251,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
     const { statusesById: userStatusesById } = global.users;
-    const members = chat?.fullInfo?.members;
-    const adminMembersById = chat?.fullInfo?.adminMembersById;
+    const { members, adminMembersById, areParticipantsHidden } = selectChatFullInfo(global, chatId) || {};
     const isChannel = chat && isChatChannel(chat);
     const { userIds: localContactIds } = global.contactList || {};
     const hiddenMembersMinCount = global.appConfig?.hiddenMembersMinCount;
@@ -270,7 +269,7 @@ export default memo(withGlobal<OwnProps>(
     } = selectTabState(global).userSearch;
 
     return {
-      areParticipantsHidden: Boolean(chat && chat.fullInfo?.areParticipantsHidden),
+      areParticipantsHidden: Boolean(chat && areParticipantsHidden),
       members,
       adminMembersById,
       userStatusesById,

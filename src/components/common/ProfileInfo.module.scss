@@ -35,7 +35,7 @@
   font-size: 0.75rem;
   color: var(--color-white);
   opacity: 0.5;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   user-select: none;
   align-items: center;
   height: 1.5rem;
@@ -112,7 +112,7 @@
   opacity: 0.25;
   transition: opacity 0.15s;
   outline: none !important;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   z-index: 1;
 
   &:global(:hover),

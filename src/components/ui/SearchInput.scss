@@ -32,7 +32,7 @@
     background-color: var(--color-background);
 
     input {
-      & + i {
+      & + .icon {
         color: var(--color-primary);
       }
     }
@@ -53,7 +53,7 @@
     }
   }
 
-  > i {
+  > .icon {
     position: absolute;
     top: 0.5rem;
     left: 0.75rem;
@@ -87,7 +87,7 @@
       padding-left: calc(2.625rem - var(--border-width));
     }
 
-    i {
+    .icon {
       top: 0.5rem;
     }
   }
@@ -97,7 +97,7 @@
       direction: rtl;
     }
 
-    > i {
+    > .icon {
       left: auto;
       right: 0.75rem;
     }

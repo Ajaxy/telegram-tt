@@ -9,7 +9,9 @@ import type { ApiChat } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
-import { selectChat, selectTabState, selectManagement } from '../../../global/selectors';
+import {
+  selectChat, selectTabState, selectManagement, selectChatFullInfo,
+} from '../../../global/selectors';
 import { isChatChannel, isChatPublic } from '../../../global/helpers';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 
@@ -45,6 +47,7 @@ type StateProps = {
   error?: string;
   isProtected?: boolean;
   maxPublicLinks: number;
+  privateInviteLink?: string;
 };
 
 const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
@@ -57,6 +60,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   error,
   isProtected,
   maxPublicLinks,
+  privateInviteLink,
   onClose,
 }) => {
   const {
@@ -69,7 +73,6 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const firstEditableUsername = useMemo(() => chat.usernames?.find(({ isEditable }) => isEditable), [chat.usernames]);
   const currentUsername = firstEditableUsername?.username || '';
   const isPublic = useMemo(() => isChatPublic(chat), [chat]);
-  const privateLink = chat.fullInfo?.inviteLink;
 
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
   const [privacyType, setPrivacyType] = useState<PrivacyType>(isPublic ? 'public' : 'private');
@@ -97,10 +100,10 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   }, [currentUsername]);
 
   useEffect(() => {
-    if (privacyType && !privateLink) {
+    if (privacyType && !privateInviteLink) {
       updatePrivateLink();
     }
-  }, [privacyType, privateLink, updatePrivateLink]);
+  }, [privacyType, privateInviteLink, updatePrivateLink]);
 
   const handleUsernameChange = useCallback((value: string) => {
     setEditableUsername(value);
@@ -198,9 +201,9 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
         </div>
         {privacyType === 'private' ? (
           <div className="section" dir={lang.isRtl ? 'rtl' : undefined}>
-            {privateLink ? (
+            {privateInviteLink ? (
               <>
-                <SafeLink url={privateLink} className="group-link" text={privateLink} />
+                <SafeLink url={privateInviteLink} className="group-link" text={privateInviteLink} />
                 <p className="section-info" dir={lang.isRtl ? 'rtl' : undefined}>
                   {lang(`${langPrefix1}PrivateLinkHelp`)}
                 </p>
@@ -270,7 +273,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog
@@ -298,6 +301,7 @@ export default memo(withGlobal<OwnProps>(
       checkedUsername,
       isProtected: chat?.isProtected,
       maxPublicLinks: selectCurrentLimit(global, 'channelsPublic'),
+      privateInviteLink: selectChatFullInfo(global, chatId)?.inviteLink,
     };
   },
 )(ManageChatPrivacyType));

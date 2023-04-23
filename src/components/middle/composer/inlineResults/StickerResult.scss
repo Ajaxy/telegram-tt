@@ -4,7 +4,7 @@
   overflow: hidden;
   background: transparent no-repeat center;
   background-size: contain;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   transition: background-color 0.15s ease, opacity 0.3s ease !important;
   position: relative;
 

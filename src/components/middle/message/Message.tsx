@@ -24,6 +24,7 @@ import type {
   ApiTopic,
   ApiReaction,
   ApiStickerSet,
+  ApiPhoto,
 } from '../../../api/types';
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
@@ -68,6 +69,8 @@ import {
   selectTabState,
   selectChatTranslations,
   selectRequestedTranslationLanguage,
+  selectChatFullInfo,
+  selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -200,6 +203,8 @@ type StateProps = {
   canShowSender: boolean;
   originSender?: ApiUser | ApiChat;
   botSender?: ApiUser;
+  senderUserProfilePhoto?: ApiPhoto;
+  originSenderUserProfilePhoto?: ApiPhoto;
   isThreadTop?: boolean;
   shouldHideReply?: boolean;
   replyMessage?: ApiMessage;
@@ -308,6 +313,8 @@ const Message: FC<OwnProps & StateProps> = ({
   canShowSender,
   originSender,
   botSender,
+  senderUserProfilePhoto,
+  originSenderUserProfilePhoto,
   isThreadTop,
   shouldHideReply,
   replyMessage,
@@ -477,8 +484,10 @@ const Message: FC<OwnProps & StateProps> = ({
   const messageSender = canShowSender ? sender : undefined;
   const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
 
-  const avatarPeer = forwardInfo && (isChatWithSelf || isRepliesChat || !messageSender) ? originSender : messageSender;
+  const shouldPreferOriginSender = forwardInfo && (isChatWithSelf || isRepliesChat || !messageSender);
+  const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const senderPeer = forwardInfo ? originSender : messageSender;
+  const avatarUserProfilePhoto = shouldPreferOriginSender ? originSenderUserProfilePhoto : senderUserProfilePhoto;
 
   const {
     handleMouseDown,
@@ -781,6 +790,7 @@ const Message: FC<OwnProps & StateProps> = ({
         user={avatarUser}
         chat={avatarChat}
         text={hiddenName}
+        userProfilePhoto={avatarUserProfilePhoto}
         lastSyncTime={lastSyncTime}
         onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
         observeIntersection={observeIntersectionForLoading}
@@ -1127,6 +1137,7 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             theme={theme}
             peer={sender}
+            peerProfilePhoto={senderUserProfilePhoto}
           />
         )}
       </div>
@@ -1237,7 +1248,7 @@ const Message: FC<OwnProps & StateProps> = ({
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
-          {isSelected && <i className="icon-select" />}
+          {isSelected && <i className="icon icon-select" />}
         </div>
       )}
       {isLastInDocumentGroup && (
@@ -1246,7 +1257,7 @@ const Message: FC<OwnProps & StateProps> = ({
           onClick={handleDocumentGroupSelectAll}
         >
           {isGroupSelected && (
-            <i className="icon-select" />
+            <i className="icon icon-select" />
           )}
         </div>
       )}
@@ -1276,7 +1287,7 @@ const Message: FC<OwnProps & StateProps> = ({
               ariaLabel={lang('lng_context_forward_msg')}
               onClick={isLastInDocumentGroup ? handleGroupForward : handleForward}
             >
-              <i className="icon-share-filled" />
+              <i className="icon icon-share-filled" />
             </Button>
           ) : canShowActionButton && canFocus ? (
             <Button
@@ -1287,7 +1298,7 @@ const Message: FC<OwnProps & StateProps> = ({
               ariaLabel="Focus message"
               onClick={isPinnedList ? handleFocus : handleFocusForwarded}
             >
-              <i className="icon-arrow-right" />
+              <i className="icon icon-arrow-right" />
             </Button>
           ) : undefined}
           {withCommentButton && <CommentButton threadInfo={repliesThreadInfo!} disabled={noComments} />}
@@ -1351,6 +1362,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
     const chatUsernames = chat?.usernames;
+    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
 
     const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
     const forceSenderName = !isChatWithSelf && isAnonymousOwnMessage(message);
@@ -1359,8 +1371,12 @@ export default memo(withGlobal<OwnProps>(
     const originSender = selectForwardedSender(global, message);
     const botSender = viaBotId ? selectUser(global, viaBotId) : undefined;
     const senderAdminMember = sender?.id && isGroup
-      ? chat.fullInfo?.adminMembersById?.[sender?.id]
+      ? chatFullInfo?.adminMembersById?.[sender?.id]
       : undefined;
+    const senderUserProfilePhoto = canShowSender && sender && isUserId(sender.id)
+      ? selectUserPhotoFromFullInfo(global, sender.id) : undefined;
+    const originSenderUserProfilePhoto = originSender && isUserId(originSender.id)
+      ? selectUserPhotoFromFullInfo(global, originSender.id) : undefined;
 
     const threadTopMessageId = threadId ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
     const isThreadTop = message.id === threadTopMessageId;
@@ -1427,6 +1443,8 @@ export default memo(withGlobal<OwnProps>(
       canShowSender,
       originSender,
       botSender,
+      senderUserProfilePhoto,
+      originSenderUserProfilePhoto,
       shouldHideReply: shouldHideReply || isReplyToTopicStart,
       isThreadTop,
       replyMessage,
@@ -1478,7 +1496,7 @@ export default memo(withGlobal<OwnProps>(
       chatTranslations,
       areTranslationsEnabled: global.settings.byKey.canTranslate,
       requestedTranslationLanguage,
-      hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
+      hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

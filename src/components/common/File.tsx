@@ -95,7 +95,7 @@ const File: FC<OwnProps> = ({
     <div ref={elementRef} className={fullClassName} dir={lang.isRtl ? 'rtl' : undefined}>
       {isSelectable && (
         <div className="message-select-control">
-          {isSelected && <i className="icon-select" />}
+          {isSelected && <i className="icon icon-select" />}
         </div>
       )}
       <div className="file-icon-container" onClick={isUploading ? undefined : onClick}>
@@ -135,6 +135,7 @@ const File: FC<OwnProps> = ({
           <i
             className={buildClassName(
               'action-icon',
+              'icon',
               actionIcon || 'icon-download',
               shouldSpinnerRender && 'hidden',
             )}

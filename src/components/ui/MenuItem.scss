@@ -13,7 +13,7 @@
   white-space: nowrap;
   color: var(--color-text);
   --ripple-color: rgba(0, 0, 0, 0.08);
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   unicode-bidi: plaintext;
 
   .right-badge {
@@ -64,7 +64,7 @@
     }
   }
 
-  i {
+  .icon {
     font-size: 1.5rem;
     margin-right: 2rem;
     color: var(--color-icon-secondary);
@@ -80,13 +80,13 @@
 
   &.disabled {
     opacity: 0.5 !important;
-    cursor: default !important;
+    cursor: var(--custom-cursor, default) !important;
   }
 
   &.destructive {
     color: var(--color-error);
 
-    i {
+    .icon {
       color: inherit;
     }
   }
@@ -109,7 +109,7 @@
   }
 
   &[dir="rtl"] {
-    i {
+    .icon {
       margin-left: 2rem;
       margin-right: 0;
     }
@@ -135,7 +135,7 @@
     transform: scale(1);
     transition: 0.15s ease-in-out transform;
 
-    i {
+    .icon {
       max-width: 1.25rem;
       font-size: 1.25rem;
       margin-left: 0.5rem;

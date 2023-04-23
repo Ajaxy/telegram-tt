@@ -24,7 +24,7 @@
     font-weight: 400;
     color: var(--color-placeholders);
     transition: transform 0.15s ease-out, color 0.15s ease-out;
-    cursor: text;
+    cursor: var(--custom-cursor, text);
     pointer-events: none;
     transform-origin: left center;
     white-space: nowrap;
@@ -216,7 +216,7 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     outline: none !important;
 
     color: var(--color-text-secondary);

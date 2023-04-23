@@ -212,7 +212,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
             onClick={handleCreateFolder}
             isRtl={lang.isRtl}
           >
-            <i className="icon-add" />
+            <i className="icon icon-add" />
             {lang('CreateNewFilter')}
           </Button>
         )}
@@ -241,7 +241,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 >
                   <ListItem
                     key={folder.id}
-                    className="mb-2 no-icon settings-sortable-item"
+                    className="drag-item mb-2 no-icon settings-sortable-item"
                     narrow
                     inactive
                     multiline
@@ -267,7 +267,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 isDisabled={isBlocked || !isActive}
               >
                 <ListItem
-                  className="mb-2 no-icon settings-sortable-item"
+                  className="drag-item mb-2 no-icon settings-sortable-item"
                   narrow
                   secondaryIcon="more"
                   multiline
@@ -294,7 +294,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                 >
                   <span className="title">
                     {renderText(folder.title, ['emoji'])}
-                    {isBlocked && <i className="icon-lock-badge settings-folders-blocked-icon" />}
+                    {isBlocked && <i className="icon icon-lock-badge settings-folders-blocked-icon" />}
                   </span>
                   <span className="subtitle">{folder.subtitle}</span>
                 </ListItem>

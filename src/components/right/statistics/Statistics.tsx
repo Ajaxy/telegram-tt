@@ -12,7 +12,7 @@ import type {
   StatisticsRecentMessage as StatisticsRecentMessageType,
   StatisticsGraph,
 } from '../../../api/types';
-import { selectChat, selectStatistics } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo, selectStatistics } from '../../../global/selectors';
 
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
@@ -203,7 +203,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const statistics = selectStatistics(global, chatId);
     const chat = selectChat(global, chatId);
-    const dcId = chat?.fullInfo?.statisticsDcId;
+    const dcId = selectChatFullInfo(global, chatId)?.statisticsDcId;
     const isGroup = chat?.type === 'chatTypeSuperGroup';
 
     return {

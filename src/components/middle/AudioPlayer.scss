@@ -21,12 +21,12 @@
 
     margin: 0.125rem;
 
-    &.smaller i {
+    &.smaller .icon {
       font-size: 1.625rem;
       margin-top: -0.0625rem;
     }
 
-    i {
+    .icon {
       position: absolute;
       font-size: 1.9375rem;
       margin-top: -0.0625rem;
@@ -70,7 +70,7 @@
       bottom: 0;
       height: 1rem;
       width: 8rem;
-      cursor: default;
+      cursor: var(--custom-cursor, default);
       visibility: hidden;
     }
 
@@ -91,7 +91,7 @@
       width: 8rem;
       padding: 0.75rem;
       border-radius: 0.5rem;
-      cursor: default;
+      cursor: var(--custom-cursor, default);
       box-shadow: 0 1px 2px var(--color-default-shadow);
 
       .RangeSlider {
@@ -159,7 +159,7 @@
     padding: 0 0.5rem;
     position: relative;
     overflow: hidden;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     border-radius: var(--border-radius-messages-small);
 
     &:hover {

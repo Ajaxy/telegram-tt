@@ -14,11 +14,11 @@ import {
 import { buildApiUser } from '../apiBuilders/users';
 
 export async function fetchChannelStatistics({
-  chat,
-}: { chat: ApiChat }) {
+  chat, dcId,
+}: { chat: ApiChat; dcId?: number }) {
   const result = await invokeRequest(new GramJs.stats.GetBroadcastStats({
     channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-  }), undefined, undefined, undefined, chat.fullInfo!.statisticsDcId);
+  }), undefined, undefined, undefined, dcId);
 
   if (!result) {
     return undefined;
@@ -31,11 +31,11 @@ export async function fetchChannelStatistics({
 }
 
 export async function fetchGroupStatistics({
-  chat,
-}: { chat: ApiChat }) {
+  chat, dcId,
+}: { chat: ApiChat; dcId?: number }) {
   const result = await invokeRequest(new GramJs.stats.GetMegagroupStats({
     channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-  }), undefined, undefined, undefined, chat.fullInfo!.statisticsDcId);
+  }), undefined, undefined, undefined, dcId);
 
   if (!result) {
     return undefined;
@@ -52,14 +52,16 @@ export async function fetchGroupStatistics({
 export async function fetchMessageStatistics({
   chat,
   messageId,
+  dcId,
 }: {
   chat: ApiChat;
   messageId: number;
+  dcId?: number;
 }): Promise<ApiMessageStatistics | undefined> {
   const result = await invokeRequest(new GramJs.stats.GetMessageStats({
     channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
     msgId: messageId,
-  }), undefined, undefined, undefined, chat.fullInfo!.statisticsDcId);
+  }), undefined, undefined, undefined, dcId);
 
   if (!result) {
     return undefined;

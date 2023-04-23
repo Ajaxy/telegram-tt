@@ -374,7 +374,7 @@ const Main: FC<OwnProps & StateProps> = ({
   useLayoutEffect(() => {
     const container = containerRef.current!;
     if (container.parentNode!.childElementCount === 1) {
-      addExtraClass(container, 'Transition__slide--active');
+      addExtraClass(container, 'Transition_slide-active');
     }
   }, []);
 

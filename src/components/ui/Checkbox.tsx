@@ -104,7 +104,7 @@ const Checkbox: FC<OwnProps> = ({
       <div className="Checkbox-main">
         <span className="label" dir="auto">
           {typeof label === 'string' ? renderText(label) : label}
-          {rightIcon && <i className={`icon-${rightIcon} right-icon`} />}
+          {rightIcon && <i className={`icon icon-${rightIcon} right-icon`} />}
         </span>
         {subLabel && <span className="subLabel" dir="auto">{renderText(subLabel)}</span>}
       </div>

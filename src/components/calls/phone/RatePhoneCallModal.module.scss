@@ -6,7 +6,7 @@
 }
 
 .star {
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   color: var(--color-text-secondary);
 
   &:not(:first-child) {

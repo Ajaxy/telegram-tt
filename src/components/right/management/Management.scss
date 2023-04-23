@@ -205,7 +205,7 @@
   }
 
   .primary-link-input {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     margin-bottom: 1rem;
     padding-right: 3rem;
   }

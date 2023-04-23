@@ -7,11 +7,13 @@ import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import {
+  leaveChat,
+  replaceThreadParam,
   updateChat,
+  updateChatFullInfo,
   updateChatListIds,
   updateChatListType,
-  replaceThreadParam,
-  leaveChat, updateTopic,
+  updateTopic,
 } from '../../reducers';
 import {
   selectChat,
@@ -20,6 +22,7 @@ import {
   selectChatListType,
   selectCurrentMessageList,
   selectThreadParam,
+  selectChatFullInfo,
 } from '../../selectors';
 import { updateUnreadReactions } from '../../reducers/reactions';
 import type { ActionReturnType } from '../../types';
@@ -178,18 +181,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateChatFullInfo': {
-      const { fullInfo } = update;
-      const targetChat = global.chats.byId[update.id];
-      if (!targetChat) {
-        return undefined;
-      }
-
-      return updateChat(global, update.id, {
-        fullInfo: {
-          ...targetChat.fullInfo,
-          ...fullInfo,
-        },
-      });
+      return updateChatFullInfo(global, update.id, update.fullInfo);
     }
 
     case 'updatePinnedChatIds': {
@@ -301,15 +293,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     }
 
     case 'updateChatMembers': {
-      const targetChat = global.chats.byId[update.id];
+      const targetChatFullInfo = selectChatFullInfo(global, update.id);
       const { replacedMembers, addedMember, deletedMemberId } = update;
-      if (!targetChat) {
+      if (!targetChatFullInfo) {
         return undefined;
       }
 
       let shouldUpdate = false;
-      let members = targetChat.fullInfo?.members
-        ? [...targetChat.fullInfo.members]
+      let members = targetChatFullInfo?.members
+        ? [...targetChatFullInfo.members]
         : [];
 
       if (replacedMembers) {
@@ -335,14 +327,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const adminMembers = members.filter(({ isOwner, isAdmin }) => isOwner || isAdmin);
         // TODO Kicked members?
 
-        return updateChat(global, update.id, {
-          membersCount: members.length,
-          fullInfo: {
-            ...targetChat.fullInfo,
-            members,
-            adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
-          },
+        global = updateChat(global, update.id, { membersCount: members.length });
+        global = updateChatFullInfo(global, update.id, {
+          members,
+          adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
         });
+
+        return global;
       }
 
       return undefined;
@@ -393,12 +384,9 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         return undefined;
       }
 
-      global = updateChat(global, chatId, {
-        fullInfo: {
-          ...chat.fullInfo,
-          requestsPending,
-          recentRequesterIds,
-        },
+      global = updateChatFullInfo(global, chatId, {
+        requestsPending,
+        recentRequesterIds,
       });
       setGlobal(global);
 

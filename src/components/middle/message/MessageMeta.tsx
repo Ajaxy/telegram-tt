@@ -103,14 +103,14 @@ const MessageMeta: FC<OwnProps> = ({
       data-ignore-on-paste
     >
       {isTranslated && (
-        <i className="icon-language message-translated" onClick={onTranslationClick} />
+        <i className="icon icon-language message-translated" onClick={onTranslationClick} />
       )}
       {Boolean(message.views) && (
         <>
           <span className="message-views">
             {formatIntegerCompact(message.views!)}
           </span>
-          <i className="icon-channelviews" />
+          <i className="icon icon-channelviews" />
         </>
       )}
       {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
@@ -118,11 +118,11 @@ const MessageMeta: FC<OwnProps> = ({
           <span className="message-replies">
             <AnimatedCounter text={formatIntegerCompact(repliesThreadInfo!.messagesCount!)} />
           </span>
-          <i className="icon-reply-filled" />
+          <i className="icon icon-reply-filled" />
         </span>
       )}
       {isPinned && (
-        <i className="icon-pinned-message message-pinned" />
+        <i className="icon icon-pinned-message message-pinned" />
       )}
       {signature && (
         <span className="message-signature">{renderText(signature)}</span>

@@ -141,13 +141,13 @@ const PasswordForm: FC<OwnProps> = ({
         />
         <label>{error || hint || placeholder}</label>
         <div
-          className="toggle-password"
+          className="div-button toggle-password"
           onClick={togglePasswordVisibility}
           role="button"
           tabIndex={0}
           title="Toggle password visibility"
         >
-          <i className={isPasswordVisible ? 'icon-eye' : 'icon-eye-closed'} />
+          <i className={buildClassName('icon', isPasswordVisible ? 'icon-eye' : 'icon-eye-closed')} />
         </div>
       </div>
       {description && <p className="description">{description}</p>}

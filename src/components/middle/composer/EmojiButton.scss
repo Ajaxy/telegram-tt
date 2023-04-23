@@ -6,7 +6,7 @@
   height: 2.5rem;
   margin: 0.3125rem;
   border-radius: var(--border-radius-messages-small);
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   font-size: 1.75rem;
   line-height: 2.5rem;
 

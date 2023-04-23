@@ -45,7 +45,7 @@
       margin: 0 auto 0.5rem;
 
       &.no-photo {
-        cursor: default !important;
+        cursor: var(--custom-cursor, default) !important;
       }
     }
 

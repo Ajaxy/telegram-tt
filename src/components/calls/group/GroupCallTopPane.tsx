@@ -2,9 +2,9 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiGroupCall, ApiUser } from '../../../api/types';
+import type { ApiGroupCall } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 
 import { selectChatGroupCall } from '../../../global/selectors/calls';
@@ -14,6 +14,7 @@ import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
+import UserAvatar from '../../common/UserAvatar';
 
 import './GroupCallTopPane.scss';
 
@@ -26,8 +27,6 @@ type OwnProps = {
 type StateProps = {
   groupCall?: ApiGroupCall;
   isActive: boolean;
-  usersById: Record<string, ApiUser>;
-  chatsById: Record<string, ApiChat>;
   animationLevel: AnimationLevel;
 };
 
@@ -37,8 +36,6 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   className,
   groupCall,
   hasPinnedOffset,
-  usersById,
-  chatsById,
   animationLevel,
 }) => {
   const {
@@ -57,22 +54,28 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   const participants = groupCall?.participants;
 
   const fetchedParticipants = useMemo(() => {
-    if (participants) {
-      return Object.values(participants).filter((_, i) => i < 3).map(({ id, isUser }) => {
-        if (isUser) {
-          if (!usersById[id]) {
-            return undefined;
-          }
-          return { user: usersById[id] };
-        } else {
-          if (!chatsById[id]) {
-            return undefined;
-          }
-          return { chat: chatsById[id] };
+    if (!participants) {
+      return [];
+    }
+
+    // No need for expensive global updates on users and chats, so we avoid them
+    const usersById = getGlobal().users.byId;
+    const chatsById = getGlobal().chats.byId;
+
+    return Object.values(participants).filter((_, i) => i < 3).map(({ id, isUser }) => {
+      if (isUser) {
+        if (!usersById[id]) {
+          return undefined;
         }
-      }).filter(Boolean);
-    } else return [];
-  }, [chatsById, participants, usersById]);
+        return { user: usersById[id] };
+      } else {
+        if (!chatsById[id]) {
+          return undefined;
+        }
+        return { chat: chatsById[id] };
+      }
+    }).filter(Boolean);
+  }, [participants]);
 
   useEffect(() => {
     if (!groupCall?.id) return undefined;
@@ -111,7 +114,7 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
         {fetchedParticipants.map((p) => {
           if (!p) return undefined;
           if (p.user) {
-            return <Avatar key={p.user.id} user={p.user} animationLevel={animationLevel} />;
+            return <UserAvatar key={p.user.id} user={p.user} />;
           } else {
             return <Avatar key={p.chat.id} chat={p.chat} animationLevel={animationLevel} />;
           }
@@ -125,18 +128,18 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatId }) => {
+  (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId)!;
     const groupCall = selectChatGroupCall(global, chatId);
     const activeGroupCallId = selectTabState(global).isMasterTab ? global.groupCalls.activeGroupCallId : undefined;
+
     return {
       groupCall,
-      usersById: global.users.byId,
-      chatsById: global.chats.byId,
-      activeGroupCallId: global.groupCalls.activeGroupCallId,
-      isActive: ((!groupCall ? (chat && chat.isCallNotEmpty && chat.isCallActive)
-        : (groupCall.participantsCount > 0 && groupCall.isLoaded)))
-        && (activeGroupCallId !== groupCall?.id),
+      isActive: activeGroupCallId !== groupCall?.id && Boolean(
+        groupCall
+          ? groupCall.participantsCount > 0 && groupCall.isLoaded
+          : chat && chat.isCallNotEmpty && chat.isCallActive,
+      ),
       animationLevel: global.settings.byKey.animationLevel,
     };
   },

@@ -67,8 +67,6 @@ export interface ApiChat {
 
   // Obtained from GetChatSettings
   settings?: ApiChatSettings;
-  // Obtained from GetFullChat / GetFullChannel
-  fullInfo?: ApiChatFullInfo;
 
   joinRequests?: ApiChatInviteImporter[];
   isJoinToSend?: boolean;

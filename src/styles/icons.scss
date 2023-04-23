@@ -7,7 +7,7 @@
   font-display: block;
 }
 
-[class^="icon-"], [class*=" icon-"] {
+.icon {
   /* use !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
   font-family: 'icomoon' !important;
@@ -23,14 +23,12 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-[class^="icon-char-"], [class*=" icon-char-"] {
-  &::before {
-    font-family: Roboto, "Helvetica Neue", sans-serif;
-    content: attr(data-char);
-    width: 1.5rem;
-    text-align: center;
-    display: block;
-  }
+.icon-char::before {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  content: attr(data-char);
+  width: 1.5rem;
+  text-align: center;
+  display: block;
 }
 
 .icon-loop:before {

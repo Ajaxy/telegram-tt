@@ -41,6 +41,7 @@ import {
   selectLastScrollOffset,
   selectThreadInfo,
   selectTabState,
+  selectUserFullInfo, selectChatFullInfo,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -693,14 +694,16 @@ export default memo(withGlobal<OwnProps>(
     let isLoadingBotInfo = false;
     let botInfo;
     if (selectIsChatBotNotStarted(global, chatId)) {
-      if (chatBot.fullInfo) {
-        botInfo = chatBot.fullInfo.botInfo;
+      const chatBotFullInfo = selectUserFullInfo(global, chatBot.id);
+      if (chatBotFullInfo) {
+        botInfo = chatBotFullInfo.botInfo;
       } else {
         isLoadingBotInfo = true;
       }
     }
 
     const topic = chat.topics?.[threadId];
+    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
 
     return {
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
@@ -724,9 +727,7 @@ export default memo(withGlobal<OwnProps>(
       isLoadingBotInfo,
       botInfo,
       threadTopMessageId,
-      hasLinkedChat: chat.fullInfo && ('linkedChatId' in chat.fullInfo)
-        ? Boolean(chat.fullInfo.linkedChatId)
-        : undefined,
+      hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       lastSyncTime: global.lastSyncTime,
       topic,
       ...(withLastMessageWhenPreloading && { lastMessage }),

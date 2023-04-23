@@ -16,7 +16,7 @@
   line-height: 2rem;
   color: var(--accent-color);
   white-space: nowrap;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   transition: background-color 0.15s, color 0.15s;
   user-select: none;
 
@@ -213,7 +213,7 @@
   }
 
   &.disabled {
-    cursor: default;
+    cursor: var(--custom-cursor, default);
     pointer-events: none;
   }
 }

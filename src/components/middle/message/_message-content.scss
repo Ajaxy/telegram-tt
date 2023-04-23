@@ -269,7 +269,7 @@
 
     &.interactive,
     & > .interactive {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       &:hover {
         opacity: 0.85;
@@ -542,7 +542,7 @@
     align-items: center;
 
     &.interactive {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       &.dark video,
       &.dark canvas {
@@ -638,7 +638,7 @@
     &.opacity-transition {
       transition: opacity 0.15s ease;
 
-      &:not(.open) {
+      &.not-open {
         opacity: 0;
       }
     }
@@ -884,7 +884,7 @@
   color: var(--color-links) !important;
   text-decoration: none !important;
   word-break: break-word;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   unicode-bidi: initial;
 
   &:hover,
@@ -903,7 +903,7 @@
   border-radius: 4px;
 
   &.clickable {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
   }
 }
 

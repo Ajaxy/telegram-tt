@@ -550,7 +550,10 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
           onClick={step === PaymentStep.Checkout ? closeModal : handleBackClick}
           ariaLabel="Close"
         >
-          <i className={step === PaymentStep.Checkout ? 'icon-close' : 'icon-arrow-left'} />
+          <i className={buildClassName(
+            'icon', step === PaymentStep.Checkout ? 'icon-close' : 'icon-arrow-left',
+          )}
+          />
         </Button>
         <h3>{modalHeader}</h3>
       </div>

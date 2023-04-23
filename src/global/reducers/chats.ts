@@ -1,13 +1,13 @@
 import type { GlobalState } from '../types';
 import type {
-  ApiChat, ApiChatMember, ApiTopic, ApiPhoto,
+  ApiChat, ApiChatMember, ApiTopic, ApiPhoto, ApiChatFullInfo,
 } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
 import {
   areSortedArraysEqual, buildCollectionByKey, omit, unique,
 } from '../../util/iteratees';
-import { selectChat, selectChatListType } from '../selectors';
+import { selectChat, selectChatFullInfo, selectChatListType } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
 import { areDeepEqual } from '../../util/areDeepEqual';
 
@@ -71,6 +71,50 @@ export function updateChat<T extends GlobalState>(
     ...byId,
     [chatId]: updatedChat,
   });
+}
+
+export function updateChatFullInfo<T extends GlobalState>(
+  global: T, chatId: string, fullInfoUpdate: Partial<ApiChatFullInfo>,
+): T {
+  const currentFullInfo = selectChatFullInfo(global, chatId);
+  const updatedFullInfo = {
+    ...currentFullInfo,
+    ...fullInfoUpdate,
+  };
+
+  if (areDeepEqual(currentFullInfo, updatedFullInfo)) {
+    return global;
+  }
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      fullInfoById: {
+        ...global.chats.fullInfoById,
+        [chatId]: updatedFullInfo,
+      },
+    },
+  };
+}
+
+export function replaceChatFullInfo<T extends GlobalState>(global: T, chatId: string, fullInfo: ApiChatFullInfo): T {
+  const currentFullInfo = selectChatFullInfo(global, chatId);
+
+  if (areDeepEqual(currentFullInfo, fullInfo)) {
+    return global;
+  }
+
+  return {
+    ...global,
+    chats: {
+      ...global.chats,
+      fullInfoById: {
+        ...global.chats.fullInfoById,
+        [chatId]: fullInfo,
+      },
+    },
+  };
 }
 
 export function updateChats<T extends GlobalState>(global: T, newById: Record<string, ApiChat>): T {
@@ -248,10 +292,10 @@ export function leaveChat<T extends GlobalState>(global: T, leftChatId: string):
 }
 
 export function addChatMembers<T extends GlobalState>(global: T, chat: ApiChat, membersToAdd: ApiChatMember[]): T {
-  const currentMembers = chat.fullInfo?.members;
+  const currentMembers = selectChatFullInfo(global, chat.id)?.members;
   const newMemberIds = new Set(membersToAdd.map((m) => m.userId));
   const updatedMembers = [
-    ...currentMembers?.filter((m) => !newMemberIds.has(m.userId)) || [],
+    ...currentMembers?.filter(({ userId }) => !newMemberIds.has(userId)) || [],
     ...membersToAdd,
   ];
   const currentIds = currentMembers?.map(({ userId }) => userId) || [];
@@ -263,12 +307,9 @@ export function addChatMembers<T extends GlobalState>(global: T, chat: ApiChat, 
 
   const adminMembers = updatedMembers.filter(({ isAdmin, isOwner }) => isAdmin || isOwner);
 
-  return updateChat(global, chat.id, {
-    fullInfo: {
-      ...chat.fullInfo,
-      members: updatedMembers,
-      adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
-    },
+  return updateChatFullInfo(global, chat.id, {
+    members: updatedMembers,
+    adminMembersById: buildCollectionByKey(adminMembers, 'userId'),
   });
 }
 

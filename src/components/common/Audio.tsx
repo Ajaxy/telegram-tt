@@ -340,7 +340,7 @@ const Audio: FC<OwnProps> = ({
     <div className={fullClassName} dir={lang.isRtl ? 'rtl' : 'ltr'}>
       {isSelectable && (
         <div className="message-select-control">
-          {isSelected && <i className="icon-select" />}
+          {isSelected && <i className="icon icon-select" />}
         </div>
       )}
       <Button
@@ -354,8 +354,8 @@ const Audio: FC<OwnProps> = ({
         isRtl={lang.isRtl}
         backgroundImage={coverBlobUrl}
       >
-        <i className="icon-play" />
-        <i className="icon-pause" />
+        <i className="icon icon-play" />
+        <i className="icon icon-pause" />
       </Button>
       {shouldRenderSpinner && (
         <div className={buildClassName('media-loading', spinnerClassNames, shouldRenderCross && 'interactive')}>
@@ -376,7 +376,7 @@ const Audio: FC<OwnProps> = ({
           ariaLabel={isDownloading ? 'Cancel download' : 'Download'}
           onClick={handleDownloadClick}
         >
-          <i className={isDownloading ? 'icon-close' : 'icon-arrow-down'} />
+          <i className={buildClassName('icon', isDownloading ? 'icon-close' : 'icon-arrow-down')} />
         </Button>
       )}
       {origin === AudioOrigin.Search && renderWithTitle()}
@@ -519,6 +519,7 @@ function renderVoice(
           >
             <i className={buildClassName(
               'transcribe-icon',
+              'icon',
               (isTranscribed || isTranscriptionError) ? 'icon-down' : 'icon-transcribe',
               (isTranscribed || isTranscriptionError) && !isTranscriptionHidden && 'transcribe-shown',
             )}
@@ -606,11 +607,13 @@ function renderSeekline(
       ))}
       <span className="seekline-play-progress">
         <i
+          className="seekline-play-progress-inner"
           style={`transform: translateX(${playProgress * 100}%)`}
         />
       </span>
       <span className="seekline-thumb">
         <i
+          className="seekline-thumb-inner"
           style={`transform: translateX(${playProgress * 100}%)`}
         />
       </span>

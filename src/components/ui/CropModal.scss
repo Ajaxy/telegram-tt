@@ -1,6 +1,6 @@
 @mixin thumb-styles() {
   background: var(--color-primary);
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   transform: scale(1);
   transition: transform 0.25s ease-in-out;
 

@@ -11,7 +11,9 @@ import type { IAnchorPosition } from '../../../types';
 
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../global/helpers';
-import { selectChat, selectChatMessage, selectTabState } from '../../../global/selectors';
+import {
+  selectChat, selectChatFullInfo, selectChatMessage, selectTabState,
+} from '../../../global/selectors';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 
@@ -167,11 +169,12 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   const state = selectTabState(global);
   const { chatId, messageId, position } = state.reactionPicker || {};
   const chat = chatId ? selectChat(global, chatId) : undefined;
+  const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
   const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
   const isPrivateChat = chatId ? isUserId(chatId) : false;
-  const areSomeReactionsAllowed = chat?.fullInfo?.enabledReactions?.type === 'some';
-  const areCustomReactionsAllowed = chat?.fullInfo?.enabledReactions?.type === 'all'
-    && chat?.fullInfo?.enabledReactions?.areCustomAllowed;
+  const areSomeReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'some';
+  const areCustomReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'all'
+    && chatFullInfo?.enabledReactions?.areCustomAllowed;
 
   return {
     message,

@@ -70,7 +70,7 @@
   }
 
   &.interactive {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     &:hover {
       background-color: var(--color-interactive-element-hover);
@@ -124,7 +124,7 @@
     height: 1.25rem;
     padding: 0.125rem;
 
-    i {
+    .icon {
       font-size: 1rem;
     }
 
@@ -134,7 +134,7 @@
 
 .sticker-context-menu {
   position: absolute;
-  cursor: default;
+  cursor: var(--custom-cursor, default);
   z-index: var(--z-header-menu);
 
   .bubble {

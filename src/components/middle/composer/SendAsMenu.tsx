@@ -1,21 +1,22 @@
 import React, {
   useCallback, useEffect, useRef, memo,
 } from '../../../lib/teact/teact';
+import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSendAsPeerId } from '../../../api/types';
 
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { isUserId } from '../../../global/helpers';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
-import buildClassName from '../../../util/buildClassName';
-import { getActions, getGlobal } from '../../../global';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
+import UserAvatar from '../../common/UserAvatar';
 import Menu from '../../ui/Menu';
 import FullNameTitle from '../../common/FullNameTitle';
 
@@ -114,6 +115,8 @@ const SendAsMenu: FC<OwnProps> = ({
           }
         };
 
+        const avatarClassName = buildClassName(selectedSendAsId === id && 'selected');
+
         return (
           <ListItem
             key={id}
@@ -121,14 +124,22 @@ const SendAsMenu: FC<OwnProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={handleClick}
             focus={selectedSendAsIndex === index}
-            rightElement={!isCurrentUserPremium && isPremium && <i className="icon-lock-badge send-as-icon-locked" />}
+            rightElement={!isCurrentUserPremium && isPremium
+              && <i className="icon icon-lock-badge send-as-icon-locked" />}
           >
-            <Avatar
-              size="small"
-              user={user}
-              chat={chat}
-              className={buildClassName(selectedSendAsId === id && 'selected')}
-            />
+            {user ? (
+              <UserAvatar
+                user={user}
+                size="small"
+                className={avatarClassName}
+              />
+            ) : (
+              <Avatar
+                size="small"
+                chat={chat}
+                className={avatarClassName}
+              />
+            )}
             <div className="info">
               {userOrChat && <FullNameTitle peer={userOrChat} noFake />}
               <span className="subtitle">{user

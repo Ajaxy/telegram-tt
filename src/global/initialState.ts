@@ -38,6 +38,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   users: {
     byId: {},
     statusesById: {},
+    fullInfoById: {},
   },
 
   chats: {
@@ -46,6 +47,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     orderedPinnedIds: {},
     totalCount: {},
     byId: {},
+    fullInfoById: {},
   },
 
   messages: {

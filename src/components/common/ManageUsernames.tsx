@@ -165,7 +165,7 @@ const ManageUsernames: FC<OwnProps> = ({
               >
                 <ListItem
                   key={usernameData.username}
-                  className={buildClassName('mb-2 no-icon', styles.item)}
+                  className={buildClassName('drag-item mb-2 no-icon', styles.item)}
                   narrow
                   secondaryIcon="more"
                   icon={usernameData.isActive ? 'link' : 'link-broken'}

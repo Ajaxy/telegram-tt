@@ -248,7 +248,7 @@ const ManageInvite: FC<OwnProps & StateProps> = ({
           disabled={isSubmitBlocked}
           ariaLabel={editingInvite ? lang('SaveLink') : lang('CreateLink')}
         >
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         </FloatingActionButton>
       </div>
       <CalendarModal
