@@ -185,7 +185,7 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
         onClick={() => selectCategory(index)}
         ariaLabel={category.name}
       >
-        <i className={icon} />
+        <i className={buildClassName('icon', icon)} />
       </Button>
     );
   }

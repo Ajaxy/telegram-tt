@@ -152,7 +152,7 @@
       }
     }
 
-    &.not-ready > i {
+    &.not-ready > .icon {
       animation-duration: 0ms !important;
     }
 
@@ -201,7 +201,7 @@
     animation: hide-icon 0.4s forwards ease-out;
   }
 
-  &.not-ready > i {
+  &.not-ready > .icon {
     animation-duration: 0ms !important;
   }
 
@@ -356,7 +356,7 @@
       }
     }
 
-    &.scheduled-button i::after {
+    &.scheduled-button .icon::after {
       content: "";
       position: absolute;
       top: 0.75rem;
@@ -549,7 +549,7 @@
 
   .text-entity-link {
     color: var(--color-links) !important;
-    cursor: default;
+    cursor: var(--custom-cursor, default);
     text-decoration: none;
 
     &:hover,

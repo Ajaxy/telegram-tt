@@ -75,7 +75,7 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
 export const ARE_CALLS_SUPPORTED = !navigator.userAgent.includes('Firefox');
-export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slide-fade' : IS_IOS ? 'slide-layers' : 'push-slide';
+export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slideFade' : IS_IOS ? 'slideLayers' : 'pushSlide';
 
 const TEST_VIDEO = document.createElement('video');
 // `canPlayType(VIDEO_MOV_TYPE)` returns false negative at least for macOS Chrome and iOS Safari

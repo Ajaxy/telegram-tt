@@ -2,7 +2,7 @@ import { addActionHandler, getGlobal } from '../../index';
 import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
 import { omit } from '../../../util/iteratees';
 import { selectChat } from '../../selectors';
-import { updateChat } from '../../reducers';
+import { updateChat, updateChatFullInfo } from '../../reducers';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { notifyAboutCall } from '../../../util/notifications';
 import { selectGroupCall, selectPhoneCallUser } from '../../selectors/calls';
@@ -43,11 +43,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateGroupCallChatId': {
       const chat = selectChat(global, update.chatId);
       if (chat) {
-        global = updateChat(global, update.chatId, {
-          fullInfo: {
-            ...chat.fullInfo,
-            groupCallId: update.call.id,
-          },
+        global = updateChatFullInfo(global, update.chatId, {
+          groupCallId: update.call.id,
         });
       }
       return global;

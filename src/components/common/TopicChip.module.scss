@@ -10,7 +10,7 @@
   background-color: var(--background-color);
   border-radius: var(--border-radius-messages);
   color: var(--topic-button-accent-color);
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   &::before {
     content: "";

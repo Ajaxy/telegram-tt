@@ -271,7 +271,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           size="tiny"
           onClick={onClose}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       )}
       <SymbolMenuFooter

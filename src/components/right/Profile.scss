@@ -56,11 +56,11 @@
     .Tab {
       padding: 1rem 0.75rem;
 
-      span {
+      &_inner {
         white-space: nowrap;
       }
 
-      i {
+      .platform {
         bottom: -1rem;
       }
     }

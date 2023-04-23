@@ -84,7 +84,7 @@
       align-items: center;
       border-radius: 0.75rem;
       transition: 0.15s ease-out background-color;
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
       color: var(--color-text-secondary);
 
       &:hover {
@@ -97,7 +97,7 @@
         overflow: hidden;
       }
 
-      .icon {
+      .icon-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -127,7 +127,7 @@
     height: 8.75rem;
 
     button {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
     }
 
     &::before {

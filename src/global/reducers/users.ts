@@ -1,5 +1,5 @@
 import type { TabState, GlobalState, TabArgs } from '../types';
-import type { ApiUser, ApiUserStatus } from '../../api/types';
+import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from '../../api/types';
 
 import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
@@ -189,19 +189,13 @@ export function updateUserSearchFetchingStatus<T extends GlobalState>(
 }
 
 export function updateUserBlockedState<T extends GlobalState>(global: T, userId: string, isBlocked: boolean): T {
-  const { byId } = global.users;
-  const user = byId[userId];
-  if (!user || !user.fullInfo) {
+  const { fullInfoById } = global.users;
+  const fullInfo = fullInfoById[userId];
+  if (!fullInfo) {
     return global;
   }
 
-  return updateUser(global, userId, {
-    ...user,
-    fullInfo: {
-      ...user.fullInfo,
-      isBlocked,
-    },
-  });
+  return updateUserFullInfo(global, userId, { isBlocked });
 }
 
 export function replaceUserStatuses<T extends GlobalState>(global: T, newById: Record<string, ApiUserStatus>): T {
@@ -210,6 +204,26 @@ export function replaceUserStatuses<T extends GlobalState>(global: T, newById: R
     users: {
       ...global.users,
       statusesById: newById,
+    },
+  };
+}
+
+export function updateUserFullInfo<T extends GlobalState>(
+  global: T, userId: string, fullInfo: Partial<ApiUserFullInfo>,
+): T {
+  const userFullInfo = global.users.fullInfoById[userId];
+
+  return {
+    ...global,
+    users: {
+      ...global.users,
+      fullInfoById: {
+        ...global.users.fullInfoById,
+        [userId]: {
+          ...userFullInfo,
+          ...fullInfo,
+        },
+      },
     },
   };
 }

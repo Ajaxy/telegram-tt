@@ -35,7 +35,7 @@
   }
 
   .widget {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     text-indent: -999px;
     width: 2.125rem;
     height: 0.875rem;

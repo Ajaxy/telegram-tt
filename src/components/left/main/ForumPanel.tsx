@@ -224,7 +224,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
           onClick={handleClose}
           ariaLabel={lang('Close')}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
 
         {chat && (

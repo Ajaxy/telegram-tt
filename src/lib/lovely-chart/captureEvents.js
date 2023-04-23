@@ -24,7 +24,7 @@ export function captureEvents(element, options) {
     }
 
     if (options.draggingCursor) {
-      document.documentElement.classList.add(`cursor-${options.draggingCursor}`);
+      document.body.classList.add(`cursor-${options.draggingCursor}`);
     }
 
     options.onCapture && options.onCapture(e);
@@ -42,7 +42,7 @@ export function captureEvents(element, options) {
       }
 
       if (options.draggingCursor) {
-        document.documentElement.classList.remove(`cursor-${options.draggingCursor}`);
+        document.body.classList.remove(`cursor-${options.draggingCursor}`);
       }
 
       removeEventListener(document, 'mouseup', onRelease);

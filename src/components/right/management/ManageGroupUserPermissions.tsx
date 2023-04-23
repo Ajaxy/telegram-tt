@@ -4,10 +4,10 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiChatBannedRights } from '../../../api/types';
+import type { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import stopEvent from '../../../util/stopEvent';
 import buildClassName from '../../../util/buildClassName';
 import useManagePermissions from '../hooks/useManagePermissions';
@@ -33,6 +33,8 @@ type OwnProps = {
 
 type StateProps = {
   chat?: ApiChat;
+  hasFullInfo?: boolean;
+  members?: ApiChatMember[];
   isFormFullyDisabled?: boolean;
 };
 
@@ -45,6 +47,8 @@ const ITEMS_COUNT = 9;
 const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   chat,
   selectedChatMemberId,
+  hasFullInfo,
+  members,
   onScreenSelect,
   isFormFullyDisabled,
   onClose,
@@ -53,12 +57,12 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   const { updateChatMemberBannedRights } = getActions();
 
   const selectedChatMember = useMemo(() => {
-    if (!chat || !chat.fullInfo || !chat.fullInfo.members) {
+    if (!members) {
       return undefined;
     }
 
-    return chat.fullInfo.members.find(({ userId }) => userId === selectedChatMemberId);
-  }, [chat, selectedChatMemberId]);
+    return members.find(({ userId }) => userId === selectedChatMemberId);
+  }, [members, selectedChatMemberId]);
 
   const {
     permissions, havePermissionChanged, isLoading, handlePermissionChange, setIsLoading,
@@ -74,10 +78,10 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (chat?.fullInfo && selectedChatMemberId && !selectedChatMember) {
+    if (hasFullInfo && selectedChatMemberId && !selectedChatMember) {
       onScreenSelect(ManagementScreens.GroupPermissions);
     }
-  }, [chat, onScreenSelect, selectedChatMember, selectedChatMemberId]);
+  }, [chat, hasFullInfo, onScreenSelect, selectedChatMember, selectedChatMemberId]);
 
   const handleSavePermissions = useCallback(() => {
     if (!chat || !selectedChatMemberId) {
@@ -344,7 +348,7 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
 
@@ -363,8 +367,14 @@ const ManageGroupUserPermissions: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId, isPromotedByCurrentUser }): StateProps => {
     const chat = selectChat(global, chatId)!;
+    const fullInfo = selectChatFullInfo(global, chatId);
     const isFormFullyDisabled = !(chat.isCreator || isPromotedByCurrentUser);
 
-    return { chat, isFormFullyDisabled };
+    return {
+      chat,
+      isFormFullyDisabled,
+      hasFullInfo: Boolean(fullInfo),
+      members: fullInfo?.members,
+    };
   },
 )(ManageGroupUserPermissions));

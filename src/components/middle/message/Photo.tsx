@@ -208,7 +208,8 @@ const Photo: FC<OwnProps> = ({
           <ProgressSpinner progress={transferProgress} onClick={isUploading ? handleClick : undefined} />
         </div>
       )}
-      {shouldRenderDownloadButton && <i className={buildClassName('icon-download', downloadButtonClassNames)} />}
+      {shouldRenderDownloadButton
+        && <i className={buildClassName('icon', 'icon-download', downloadButtonClassNames)} />}
       <MediaSpoiler
         isVisible={isSpoilerShown}
         withAnimation

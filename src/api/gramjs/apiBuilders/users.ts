@@ -3,6 +3,7 @@ import type {
   ApiEmojiStatus,
   ApiPremiumGiftOption,
   ApiUser,
+  ApiUserFullInfo,
   ApiUserStatus,
   ApiUserType,
 } from '../../types';
@@ -10,7 +11,7 @@ import { buildApiPeerId } from './peers';
 import { buildApiBotInfo } from './bots';
 import { buildApiPhoto, buildApiUsernames } from './common';
 
-export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUser {
+export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
   const {
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
@@ -20,22 +21,19 @@ export function buildApiUserFromFull(mtpUserFull: GramJs.users.UserFull): ApiUse
     users,
   } = mtpUserFull;
 
-  const user = buildApiUser(users[0])!;
+  const userId = buildApiPeerId(users[0].id, 'user');
 
   return {
-    ...user,
-    fullInfo: {
-      ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
-      ...(fallbackPhoto instanceof GramJs.Photo && { fallbackPhoto: buildApiPhoto(fallbackPhoto) }),
-      ...(personalPhoto instanceof GramJs.Photo && { personalPhoto: buildApiPhoto(personalPhoto) }),
-      bio: about,
-      commonChatsCount,
-      pinnedMessageId: pinnedMsgId,
-      isBlocked: Boolean(blocked),
-      noVoiceMessages: voiceMessagesForbidden,
-      ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
-      ...(botInfo && { botInfo: buildApiBotInfo(botInfo, user.id) }),
-    },
+    bio: about,
+    commonChatsCount,
+    pinnedMessageId: pinnedMsgId,
+    isBlocked: Boolean(blocked),
+    noVoiceMessages: voiceMessagesForbidden,
+    ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
+    ...(fallbackPhoto instanceof GramJs.Photo && { fallbackPhoto: buildApiPhoto(fallbackPhoto) }),
+    ...(personalPhoto instanceof GramJs.Photo && { personalPhoto: buildApiPhoto(personalPhoto) }),
+    ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
+    ...(botInfo && { botInfo: buildApiBotInfo(botInfo, userId) }),
   };
 }
 

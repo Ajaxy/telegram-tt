@@ -1,4 +1,4 @@
-import type { ApiChatType, ApiChat } from '../../api/types';
+import type { ApiChatType, ApiChat, ApiChatFullInfo } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
@@ -14,6 +14,10 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
+}
+
+export function selectChatFullInfo<T extends GlobalState>(global: T, chatId: string): ApiChatFullInfo | undefined {
+  return global.chats.fullInfoById[chatId];
 }
 
 export function selectChatUser<T extends GlobalState>(global: T, chat: ApiChat) {
@@ -39,15 +43,16 @@ export function selectSupportChat<T extends GlobalState>(global: T) {
 }
 
 export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: ApiChat) {
-  if (isUserId(chat.id) || isChatChannel(chat) || !chat.fullInfo) {
+  const fullInfo = selectChatFullInfo(global, chat.id);
+  if (isUserId(chat.id) || isChatChannel(chat) || !fullInfo) {
     return undefined;
   }
 
-  if (!chat.fullInfo.members || chat.fullInfo.members.length === MEMBERS_LOAD_SLICE) {
-    return chat.fullInfo.onlineCount;
+  if (!fullInfo.members || fullInfo.members.length === MEMBERS_LOAD_SLICE) {
+    return fullInfo.onlineCount;
   }
 
-  return chat.fullInfo.members.reduce((onlineCount, { userId }) => {
+  return fullInfo.members.reduce((onlineCount, { userId }) => {
     if (
       userId !== global.currentUserId
       && global.users.byId[userId]
@@ -195,7 +200,7 @@ export function selectSendAs<T extends GlobalState>(global: T, chatId: string) {
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  const id = chat?.fullInfo?.sendAsId;
+  const id = selectChatFullInfo(global, chatId)?.sendAsId;
   if (!id) return undefined;
 
   return selectUser(global, id) || selectChat(global, id);

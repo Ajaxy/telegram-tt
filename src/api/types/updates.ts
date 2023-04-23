@@ -87,6 +87,7 @@ export type ApiUpdateConnectionState = {
 export type ApiUpdateCurrentUser = {
   '@type': 'updateCurrentUser';
   currentUser: ApiUser;
+  currentUserFullInfo: ApiUserFullInfo;
 };
 
 export type ApiUpdateChat = {
@@ -338,6 +339,7 @@ export type ApiUpdateUser = {
   '@type': 'updateUser';
   id: string;
   user: Partial<ApiUser>;
+  fullInfo?: ApiUserFullInfo;
 };
 
 export type ApiUpdateRequestUserUpdate = {

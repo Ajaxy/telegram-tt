@@ -18,6 +18,7 @@ import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 
 import Avatar from '../common/Avatar';
+import UserAvatar from '../common/UserAvatar';
 
 import './SenderInfo.scss';
 
@@ -79,7 +80,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>
       {isUserId(sender.id) ? (
-        <Avatar key={sender.id} size="medium" user={sender as ApiUser} animationLevel={animationLevel} withVideo />
+        <UserAvatar key={sender.id} size="medium" user={sender as ApiUser} withVideo />
       ) : (
         <Avatar key={sender.id} size="medium" chat={sender as ApiChat} animationLevel={animationLevel} withVideo />
       )}

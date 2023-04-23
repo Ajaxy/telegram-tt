@@ -4,18 +4,22 @@ import { callApi } from '../../../api/gramjs';
 import {
   updateStatistics, updateMessageStatistics, updateStatisticsGraph, addUsers,
 } from '../../reducers';
-import { selectChatMessages, selectChat } from '../../selectors';
+import { selectChatMessages, selectChat, selectChatFullInfo } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 addActionHandler('loadStatistics', async (global, actions, payload): Promise<void> => {
   const { chatId, isGroup, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
-  if (!chat?.fullInfo) {
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!chat || !fullInfo) {
     return;
   }
 
-  const result = await callApi(isGroup ? 'fetchGroupStatistics' : 'fetchChannelStatistics', { chat });
+  const result = await callApi(
+    isGroup ? 'fetchGroupStatistics' : 'fetchChannelStatistics',
+    { chat, dcId: fullInfo.statisticsDcId },
+  );
   if (!result) {
     return;
   }
@@ -38,11 +42,13 @@ addActionHandler('loadStatistics', async (global, actions, payload): Promise<voi
 addActionHandler('loadMessageStatistics', async (global, actions, payload): Promise<void> => {
   const { chatId, messageId, tabId = getCurrentTabId() } = payload;
   const chat = selectChat(global, chatId);
-  if (!chat?.fullInfo) {
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!chat || !fullInfo) {
     return;
   }
 
-  let result = await callApi('fetchMessageStatistics', { chat, messageId });
+  const dcId = fullInfo.statisticsDcId;
+  let result = await callApi('fetchMessageStatistics', { chat, messageId, dcId });
   if (!result) {
     result = {};
   }
@@ -53,7 +59,6 @@ addActionHandler('loadMessageStatistics', async (global, actions, payload): Prom
   result.views = views;
   result.forwards = forwards;
 
-  const dcId = chat.fullInfo!.statisticsDcId;
   const publicForwards = await callApi('fetchMessagePublicForwards', { chat, messageId, dcId });
   result.publicForwards = publicForwards?.length;
   result.publicForwardsData = publicForwards;
@@ -68,12 +73,12 @@ addActionHandler('loadStatisticsAsyncGraph', async (global, actions, payload): P
   const {
     chatId, token, name, isPercentage, tabId = getCurrentTabId(),
   } = payload;
-  const chat = selectChat(global, chatId);
-  if (!chat?.fullInfo) {
+  const fullInfo = selectChatFullInfo(global, chatId);
+  if (!fullInfo) {
     return;
   }
 
-  const dcId = chat.fullInfo!.statisticsDcId;
+  const dcId = fullInfo.statisticsDcId;
   const result = await callApi('fetchStatisticsAsyncGraph', { token, dcId, isPercentage });
 
   if (!result) {

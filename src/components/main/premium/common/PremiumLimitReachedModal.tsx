@@ -154,7 +154,7 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
     >
       {!canUpgrade && (
         <div className={styles.limitBadge}>
-          <i className={buildClassName(styles.limitIcon, icon)} />
+          <i className={buildClassName(styles.limitIcon, icon, 'icon')} />
           <div className={styles.limitValue}>{valueFormatter?.(
             lang, isPremium ? premiumValue : defaultValue,
           ) || (isPremium ? premiumValue : defaultValue)}
@@ -193,7 +193,7 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
           color="primary"
         >
           {lang('IncreaseLimit')}
-          <i className={buildClassName(styles.buttonIcon, 'icon-double-badge')} />
+          <i className={buildClassName(styles.buttonIcon, 'icon', 'icon-double-badge')} />
         </Button>
       )}
       </div>

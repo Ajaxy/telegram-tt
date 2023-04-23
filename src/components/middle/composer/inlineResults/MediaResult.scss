@@ -3,7 +3,7 @@
   padding-bottom: 100%;
   overflow: hidden;
   position: relative;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   img {
     position: absolute;

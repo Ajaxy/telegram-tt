@@ -4,7 +4,9 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+import type {
+  ApiMessage, ApiUser, ApiChat, ApiPhoto,
+} from '../../api/types';
 import type { AnimationLevel } from '../../types';
 
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
@@ -13,6 +15,7 @@ import {
   selectChatMessages,
   selectChat,
   selectCurrentTextSearch,
+  selectUserPhotoFromFullInfo,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -102,6 +105,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
       }
 
       const senderUser = message.senderId ? selectUser(getGlobal(), message.senderId) : undefined;
+      const senderUserProfilePhoto = senderUser ? selectUserPhotoFromFullInfo(getGlobal(), senderUser.id) : undefined;
 
       let senderChat;
       if (chat && isChatChannel(chat)) {
@@ -116,6 +120,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
       return {
         message,
         senderUser,
+        senderUserProfilePhoto,
         senderChat,
         onClick: () => focusMessage({ chatId, threadId, messageId: id }),
       };
@@ -130,11 +135,12 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   }, '.ListItem-button', true);
 
   const renderSearchResult = ({
-    message, senderUser, senderChat, onClick,
+    message, senderUser, senderChat, senderUserProfilePhoto, onClick,
   }: {
     message: ApiMessage;
     senderUser?: ApiUser;
     senderChat?: ApiChat;
+    senderUserProfilePhoto?: ApiPhoto;
     onClick: NoneToVoidFunction;
   }) => {
     const text = renderMessageSummary(lang, message, undefined, query);
@@ -146,7 +152,13 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         className="chat-item-clickable search-result-message m-0"
         onClick={onClick}
       >
-        <Avatar chat={senderChat} user={senderUser} animationLevel={animationLevel} withVideo />
+        <Avatar
+          chat={senderChat}
+          user={senderUser}
+          userProfilePhoto={senderUserProfilePhoto}
+          animationLevel={animationLevel}
+          withVideo
+        />
         <div className="info">
           <div className="search-result-message-top">
             <FullNameTitle peer={(senderUser || senderChat)!} />

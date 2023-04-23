@@ -6,7 +6,7 @@
   width: calc(50% - 0.25rem);
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: 0.25s ease-out width;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   .thumbnail-avatar {
     position: absolute;
@@ -57,7 +57,7 @@
     gap: 0.25rem;
     transition: 0.25s ease-out opacity, 0.25s ease-out background-color;
     opacity: 0;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     outline: none !important;
 
     &:hover {

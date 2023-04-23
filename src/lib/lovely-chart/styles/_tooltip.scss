@@ -20,7 +20,7 @@
   box-shadow: 0 1px 2px 1px rgba(211, 211, 211, 0.8);
   opacity: 0;
   transition: opacity 200ms ease-out;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   pointer-events: none;
 
   &.lovely-chart--state-shown {
@@ -29,7 +29,7 @@
   }
 
   &.lovely-chart--state-inactive {
-    cursor: default;
+    cursor: var(--custom-cursor, default);
 
     .lovely-chart--tooltip-title::after {
       display: none;

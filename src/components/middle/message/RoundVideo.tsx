@@ -219,11 +219,11 @@ const RoundVideo: FC<OwnProps> = ({
         </div>
       )}
       {!mediaData && !isLoadAllowed && (
-        <i className="icon-download" />
+        <i className="icon icon-download" />
       )}
       <div className="message-media-duration">
         {isActivated ? formatMediaDuration(playerRef.current!.currentTime) : formatMediaDuration(video.duration)}
-        {(!isActivated || playerRef.current!.paused) && <i className="icon-muted" />}
+        {(!isActivated || playerRef.current!.paused) && <i className="icon icon-muted" />}
       </div>
     </div>
   );

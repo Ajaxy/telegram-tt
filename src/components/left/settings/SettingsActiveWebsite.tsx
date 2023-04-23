@@ -2,10 +2,11 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiUser, ApiWebSession } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
+import type { ApiPhoto, ApiUser, ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
+import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -26,6 +27,7 @@ type OwnProps = {
 type StateProps = {
   session?: ApiWebSession;
   bot?: ApiUser;
+  botProfilePhoto?: ApiPhoto;
   animationLevel: AnimationLevel;
 };
 
@@ -33,6 +35,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   isOpen,
   session,
   bot,
+  botProfilePhoto,
   animationLevel,
   onClose,
 }) => {
@@ -41,6 +44,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
 
   const renderingSession = useCurrentOrPrev(session, true);
   const renderingBot = useCurrentOrPrev(bot, true);
+  const renderingBotProfilePhoto = useCurrentOrPrev(botProfilePhoto, true);
 
   const handleTerminateSessionClick = useCallback(() => {
     terminateWebAuthorization({ hash: session!.hash });
@@ -55,7 +59,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={onClose}>
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
         <div className="modal-title">{lang('WebSessionsTitle')}</div>
         <Button
@@ -76,7 +80,14 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
       onClose={onClose}
       className={styles.root}
     >
-      <Avatar className={styles.avatar} user={renderingBot} size="large" animationLevel={animationLevel} withVideo />
+      <Avatar
+        className={styles.avatar}
+        user={renderingBot}
+        userProfilePhoto={renderingBotProfilePhoto}
+        size="large"
+        animationLevel={animationLevel}
+        withVideo
+      />
       {renderingBot && <FullNameTitle className={styles.title} peer={renderingBot} />}
       <div className={styles.note}>
         {renderingSession?.domain}
@@ -99,12 +110,15 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { hash }) => {
+export default memo(withGlobal<OwnProps>((global, { hash }): StateProps => {
   const session = hash ? global.activeWebSessions.byHash[hash] : undefined;
   const bot = session ? global.users.byId[session.botId] : undefined;
+  const botProfilePhoto = bot ? selectUserPhotoFromFullInfo(global, bot.id) : undefined;
+
   return {
     session,
     bot,
+    botProfilePhoto,
     animationLevel: global.settings.byKey.animationLevel,
   };
 })(SettingsActiveWebsite));

@@ -2,9 +2,11 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiUserStatus } from '../../../api/types';
 
-import { deleteContact, replaceUserStatuses, updateUser } from '../../reducers';
+import {
+  deleteContact, replaceUserStatuses, updateUser, updateUserFullInfo,
+} from '../../reducers';
 import { throttle } from '../../../util/schedulers';
-import { selectIsCurrentUserPremium, selectUser } from '../../selectors';
+import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../selectors';
 import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
 const STATUS_UPDATE_THROTTLE = 3000;
@@ -53,7 +55,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       });
 
-      return updateUser(global, update.id, update.user);
+      global = updateUser(global, update.id, update.user);
+      if (update.fullInfo) {
+        global = updateUserFullInfo(global, update.id, update.fullInfo);
+      }
+
+      return global;
     }
 
     case 'updateRequestUserUpdate': {
@@ -73,34 +80,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateUserFullInfo': {
       const { id, fullInfo } = update;
-      const targetUser = global.users.byId[id];
-      if (!targetUser) {
-        return undefined;
-      }
 
-      return updateUser(global, id, {
-        fullInfo: {
-          ...targetUser.fullInfo,
-          ...fullInfo,
-        },
-      });
+      return updateUserFullInfo(global, id, fullInfo);
     }
 
     case 'updateBotMenuButton': {
       const { botId, button } = update;
 
-      const targetUser = selectUser(global, botId);
-      if (!targetUser?.fullInfo?.botInfo) {
+      const targetUserFullInfo = selectUserFullInfo(global, botId);
+      if (!targetUserFullInfo?.botInfo) {
         return undefined;
       }
 
-      return updateUser(global, botId, {
-        fullInfo: {
-          ...targetUser.fullInfo,
-          botInfo: {
-            ...targetUser.fullInfo.botInfo,
-            menuButton: button,
-          },
+      return updateUserFullInfo(global, botId, {
+        botInfo: {
+          ...targetUserFullInfo.botInfo,
+          menuButton: button,
         },
       });
     }

@@ -2,9 +2,9 @@ import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 
-import { selectChat, selectUser } from '../../global/selectors';
+import { selectChat, selectUser, selectUserPhotoFromFullInfo } from '../../global/selectors';
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
@@ -28,6 +28,7 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   user?: ApiUser;
+  userProfilePhoto?: ApiPhoto;
   currentUserId?: string;
 };
 
@@ -39,6 +40,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   clickArg,
   chat,
   user,
+  userProfilePhoto,
   className,
   currentUserId,
   onClick,
@@ -51,7 +53,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   if (icon && title) {
     iconElement = (
       <div className="item-icon">
-        <i className={`icon-${icon}`} />
+        <i className={buildClassName('icon', `icon-${icon}`)} />
       </div>
     );
 
@@ -61,6 +63,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
       <Avatar
         chat={chat}
         user={user}
+        userProfilePhoto={userProfilePhoto}
         size="small"
         isSavedMessages={user?.isSelf}
       />
@@ -96,7 +99,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
       )}
       {canClose && (
         <div className="item-remove">
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </div>
       )}
     </div>
@@ -111,10 +114,12 @@ export default memo(withGlobal<OwnProps>(
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
 
     return {
       chat,
       user,
+      userProfilePhoto,
       currentUserId: global.currentUserId,
     };
   },

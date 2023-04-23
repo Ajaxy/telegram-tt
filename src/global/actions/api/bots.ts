@@ -13,7 +13,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import {
   selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState,
-  selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId,
+  selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId, selectUserFullInfo,
 } from '../../selectors';
 import { addChats, addUsers, removeBlockedContact } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
@@ -386,14 +386,20 @@ addActionHandler('resetAllInlineBots', (global, actions, payload): ActionReturnT
 addActionHandler('startBot', async (global, actions, payload): Promise<void> => {
   const { botId, param } = payload;
 
-  let bot = selectUser(global, botId);
+  const bot = selectUser(global, botId);
   if (!bot) {
     return;
   }
-  if (!bot.fullInfo) await callApi('fetchFullUser', { id: bot.id, accessHash: bot.accessHash });
-  global = getGlobal();
-  bot = selectUser(global, botId)!;
-  if (bot.fullInfo?.isBlocked) await callApi('unblockContact', bot.id, bot.accessHash);
+
+  let fullInfo = selectUserFullInfo(global, botId);
+  if (!fullInfo) {
+    const result = await callApi('fetchFullUser', { id: bot.id, accessHash: bot.accessHash });
+    fullInfo = result?.fullInfo;
+  }
+
+  if (fullInfo?.isBlocked) {
+    await callApi('unblockContact', bot.id, bot.accessHash);
+  }
 
   await callApi('startBot', {
     bot,

@@ -1,4 +1,3 @@
-
 @keyframes bar-animation-transform-1 {
   0%   { transform: scaleY(0.33); }
   12.5%  { transform: scaleY(1.66); }
@@ -24,7 +23,7 @@
 }
 
 
-.ChatCallStatus {
+.root {
   position: absolute;
   right: 6px;
   bottom: 0;
@@ -35,47 +34,51 @@
   border: 2px solid var(--color-background);
   overflow: hidden;
   z-index: 1;
+}
 
-  .indicator {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    & > div {
-      width: 2px;
-      height: 6px;
-      background: var(--color-background);
-      border-radius: 1px;
-      margin: 1px;
-      will-change: transform;
-      transform: translateZ(0);
-    }
-    & > div:nth-child(odd) {
-      transform: scaleY(0.8);
-    }
-    & > div:nth-child(even) {
-      transform: scaleY(1.33);
-    }
+
+.indicator {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.indicatorInner {
+  width: 2px;
+  height: 6px;
+  background: var(--color-background);
+  border-radius: 1px;
+  margin: 1px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.indicatorInner:nth-child(odd) {
+  transform: scaleY(0.8);
+}
+
+.indicatorInner:nth-child(even) {
+  transform: scaleY(1.33);
+}
+
+.selected {
+  background-color: var(--color-white);
+  border-color: var(--color-chat-active);
+
+  .indicatorInner {
+    background-color: var(--color-chat-active);
+  }
+}
+
+.active {
+  .indicatorInner:nth-child(odd) {
+    animation: bar-animation-transform-2 3.2s normal infinite;
   }
 
-  &.selected {
-    background-color: var(--color-white);
-    border-color: var(--color-chat-active);
-    .indicator div{
-      background-color: var(--color-chat-active);
-    }
+  .indicatorInner:nth-child(even) {
+    animation: bar-animation-transform-1 3.2s normal infinite;
   }
-
-  &.active .indicator {
-    div:nth-child(odd) {
-      animation: bar-animation-transform-2 3.2s normal infinite;
-    }
-
-    div:nth-child(even) {
-      animation: bar-animation-transform-1 3.2s normal infinite;
-    }
-  }
-
 }

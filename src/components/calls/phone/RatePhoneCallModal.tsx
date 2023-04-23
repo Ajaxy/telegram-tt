@@ -56,6 +56,7 @@ const RatePhoneCallModal: FC<OwnProps> = ({
           return (
             <i
               className={buildClassName(
+                'icon',
                 isFilled ? 'icon-favorite-filled' : 'icon-favorite',
                 isFilled && styles.isFilled,
                 styles.star,

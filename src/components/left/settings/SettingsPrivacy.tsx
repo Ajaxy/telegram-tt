@@ -289,7 +289,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           narrow
           disabled={!isCurrentUserPremium}
           allowDisabledClick
-          rightElement={!isCurrentUserPremium && <i className="icon-lock-badge settings-icon-locked" />}
+          rightElement={!isCurrentUserPremium && <i className="icon icon-lock-badge settings-icon-locked" />}
           className="no-icon"
           onClick={handleVoiceMessagesClick}
         >

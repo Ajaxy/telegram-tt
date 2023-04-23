@@ -34,7 +34,7 @@ const ShowMoreButton: FC<OwnProps> = ({
       isRtl={lang.isRtl}
       onClick={onClick}
     >
-      <i className="icon-down" />
+      <i className="icon icon-down" />
       Show {count} more {count > 1 ? itemPluralName || `${itemName}s` : itemName}
     </Button>
   );

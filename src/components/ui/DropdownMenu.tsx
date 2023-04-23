@@ -85,7 +85,7 @@ const DropdownMenu: FC<OwnProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, [trigger]);

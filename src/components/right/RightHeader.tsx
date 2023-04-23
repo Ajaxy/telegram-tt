@@ -13,10 +13,12 @@ import { debounce } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import {
   selectChat,
+  selectChatFullInfo,
   selectCurrentGifSearch,
-  selectCurrentStickerSearch, selectTabState,
+  selectCurrentStickerSearch,
   selectCurrentTextSearch,
   selectIsChatWithSelf,
+  selectTabState,
   selectUser,
 } from '../../global/selectors';
 import {
@@ -328,7 +330,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
               onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel="Search messages by date"
             >
-              <i className="icon-calendar" />
+              <i className="icon icon-calendar" />
             </Button>
           </>
         );
@@ -375,7 +377,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Edit')}
                   onClick={handleEditInviteClick}
                 >
-                  <i className="icon-edit" />
+                  <i className="icon icon-edit" />
                 </Button>
               )}
               {currentInviteInfo && currentInviteInfo.isRevoked && (
@@ -387,7 +389,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                     ariaLabel={lang('Delete')}
                     onClick={openDeleteDialog}
                   >
-                    <i className="icon-delete" />
+                    <i className="icon icon-delete" />
                   </Button>
                   <ConfirmDialog
                     isOpen={isDeleteDialogOpen}
@@ -456,7 +458,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('AddContact')}
                   onClick={handleAddContact}
                 >
-                  <i className="icon-add-user" />
+                  <i className="icon icon-add-user" />
                 </Button>
               )}
               {canManage && !isInsideTopic && (
@@ -467,7 +469,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Edit')}
                   onClick={handleToggleManagement}
                 >
-                  <i className="icon-edit" />
+                  <i className="icon icon-edit" />
                 </Button>
               )}
               {canEditTopic && (
@@ -478,7 +480,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('EditTopic')}
                   onClick={toggleEditTopic}
                 >
-                  <i className="icon-edit" />
+                  <i className="icon icon-edit" />
                 </Button>
               )}
               {canViewStatistics && (
@@ -489,7 +491,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('Statistics')}
                   onClick={handleToggleStatistics}
                 >
-                  <i className="icon-stats" />
+                  <i className="icon icon-stats" />
                 </Button>
               )}
             </section>
@@ -526,7 +528,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         <div className={buttonClassName} />
       </Button>
       <Transition
-        name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'slide-fade'}
+        name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'slideFade'}
         activeKey={renderingContentKey}
       >
         {renderHeaderContent()}
@@ -562,7 +564,9 @@ export default memo(withGlobal<OwnProps>(
       && (isUserId(chat.id) || ((isChatAdmin(chat) || chat.isCreator) && !chat.isNotJoined)),
     );
     const isEditingInvite = Boolean(chatId && tabState.management.byChatId[chatId]?.editingInvite);
-    const canViewStatistics = !isInsideTopic && chat?.fullInfo?.canViewStatistics;
+    const canViewStatistics = !isInsideTopic && chatId
+      ? selectChatFullInfo(global, chatId)?.canViewStatistics
+      : undefined;
     const currentInviteInfo = chatId
       ? tabState.management.byChatId[chatId]?.inviteInfo?.invite : undefined;
 

@@ -95,7 +95,7 @@ const ReceiptModal: FC<OwnProps & StateProps> = ({
             onClick={closeModal}
             ariaLabel="Close"
           >
-            <i className="icon-close" />
+            <i className="icon icon-close" />
           </Button>
           <h3> {lang('PaymentReceipt')} </h3>
         </div>

@@ -76,7 +76,7 @@ const AvatarEditable: FC<OwnProps> = ({
           onChange={handleSelectFile}
           accept="image/png, image/jpeg"
         />
-        <i className="icon-camera-add" />
+        <i className="icon icon-camera-add" />
         {croppedBlobUrl && <img src={croppedBlobUrl} alt="Avatar" />}
       </label>
       <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />

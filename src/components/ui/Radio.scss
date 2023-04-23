@@ -5,7 +5,7 @@
   text-align: left;
   margin-bottom: 1.5rem;
   line-height: 1.5rem;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   &.disabled {
     pointer-events: none;
@@ -13,7 +13,7 @@
   }
 
   &.hidden-widget {
-    cursor: default;
+    cursor: var(--custom-cursor, default);
     .Radio-main {
       &::before,
       &::after {

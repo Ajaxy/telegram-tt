@@ -14,7 +14,7 @@
     border-radius: 50%;
     color: white;
     font-size: 3rem;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     position: relative;
     overflow: hidden;
     outline: none !important;
@@ -32,7 +32,7 @@
       height: 100%;
     }
 
-    i {
+    .icon {
       transform: scale(1);
       transition: transform 0.15s linear;
       z-index: var(--z-register-add-avatar);
@@ -41,7 +41,7 @@
     // @optimization The weirdest workaround for screen animation lag
     @include while-transition() {
       input,
-      i,
+      .icon,
       &::after {
         display: none !important;
       }
@@ -52,7 +52,7 @@
     }
 
     &:hover {
-      i {
+      .icon {
         transform: scale(1.2);
       }
     }
@@ -75,7 +75,7 @@
     &.disabled {
       pointer-events: none;
 
-      i {
+      .icon {
         display: none;
       }
 

@@ -156,10 +156,11 @@ const Topic: FC<OwnProps & StateProps> = ({
             <TopicIcon topic={topic} className={styles.topicIcon} />
             <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
           </div>
-          {topic.isMuted && <i className="icon-muted" />}
+          {topic.isMuted && <i className="icon icon-muted" />}
           <div className="separator" />
           {isClosed && (
             <i className={buildClassName(
+              'icon',
               'icon-lock-badge',
               styles.closedIcon,
             )}

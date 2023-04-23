@@ -92,7 +92,7 @@ const ContactList: FC<OwnProps & StateProps> = ({
         onClick={openNewContactDialog}
         ariaLabel={lang('CreateNewContact')}
       >
-        <i className="icon-add-user-filled" />
+        <i className="icon icon-add-user-filled" />
       </FloatingActionButton>
     </InfiniteScroll>
   );

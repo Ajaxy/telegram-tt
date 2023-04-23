@@ -235,7 +235,7 @@ const SettingsGeneralBackground: FC<OwnProps & StateProps> = ({
       <div className="predefined-colors">
         {PREDEFINED_COLORS.map((color) => (
           <div
-            className={color === `#${hex}` ? 'active' : undefined}
+            className={buildClassName('predefined-color', color === `#${hex}` ? 'active' : undefined)}
             data-color={color}
             style={`background-color: ${color};`}
             onClick={handlePredefinedColorClick}

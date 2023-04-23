@@ -80,7 +80,7 @@
     }
 
     &.clickable {
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
 
       &:hover {
         background-color: var(--color-interactive-element-hover);

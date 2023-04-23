@@ -142,7 +142,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, []);
@@ -185,7 +185,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         {isDownloading ? (
           <ProgressSpinner progress={downloadProgress} size="s" onClick={handleDownloadClick} />
         ) : (
-          <i className="icon-download" />
+          <i className="icon icon-download" />
         )}
       </Button>
     ) : (
@@ -197,7 +197,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         color="translucent-white"
         ariaLabel={lang('AccActionDownload')}
       >
-        <i className="icon-download" />
+        <i className="icon icon-download" />
       </Button>
     );
   }
@@ -292,7 +292,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Forward')}
           onClick={onForward}
         >
-          <i className="icon-forward" />
+          <i className="icon icon-forward" />
         </Button>
       )}
       {renderDownloadButton()}
@@ -303,7 +303,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomOut')}
         onClick={handleZoomOut}
       >
-        <i className="icon-zoom-out" />
+        <i className="icon icon-zoom-out" />
       </Button>
       <Button
         round
@@ -312,7 +312,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('MediaZoomIn')}
         onClick={handleZoomIn}
       >
-        <i className="icon-zoom-in" />
+        <i className="icon icon-zoom-in" />
       </Button>
       {canReport && (
         <Button
@@ -322,7 +322,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang(isVideo ? 'PeerInfo.ReportProfileVideo' : 'PeerInfo.ReportProfilePhoto')}
           onClick={onReport}
         >
-          <i className="icon-flag" />
+          <i className="icon icon-flag" />
         </Button>
       )}
       {canUpdate && (
@@ -333,7 +333,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('ProfilePhoto.SetMainPhoto')}
           onClick={handleUpdate}
         >
-          <i className="icon-copy-media" />
+          <i className="icon icon-copy-media" />
         </Button>
       )}
       {canDelete && (
@@ -344,7 +344,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           ariaLabel={lang('Delete')}
           onClick={openDeleteModal}
         >
-          <i className="icon-delete" />
+          <i className="icon icon-delete" />
         </Button>
       )}
       <Button
@@ -354,7 +354,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         ariaLabel={lang('Close')}
         onClick={onCloseMediaViewer}
       >
-        <i className="icon-close" />
+        <i className="icon icon-close" />
       </Button>
       {canDelete && renderDeleteModals()}
     </div>

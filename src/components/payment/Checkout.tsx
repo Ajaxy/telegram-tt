@@ -258,7 +258,7 @@ function renderCheckoutItem({
       inactive={!onClick}
       onClick={onClick}
     >
-      {customIcon && <i className={customIcon} />}
+      {customIcon && <i className={buildClassName('icon', customIcon)} />}
       <div className={styles.checkoutInfoItemInfoTitle}>
         {title || label}
       </div>

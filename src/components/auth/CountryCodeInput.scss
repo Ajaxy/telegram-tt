@@ -1,6 +1,6 @@
 .CountryCodeInput {
   .input-group {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     z-index: var(--z-country-code-input-group);
 

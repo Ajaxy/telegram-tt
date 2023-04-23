@@ -3,7 +3,7 @@
 #Settings {
   height: 100%;
 
-  > .Transition__slide {
+  > .Transition_slide {
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -98,7 +98,7 @@
 .settings-content-icon {
   margin-bottom: 2.5rem;
 
-  &.opacity-transition:not(.shown) {
+  &.opacity-transition.not-shown {
     display: block;
     visibility: hidden;
   }
@@ -242,7 +242,7 @@
       .ListItem-button {
         color: var(--color-error);
 
-        i {
+        .icon {
           color: inherit;
         }
       }

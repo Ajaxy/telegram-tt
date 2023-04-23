@@ -427,7 +427,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('spoiler')}
           onClick={handleSpoilerText}
         >
-          <i className="icon-eye-closed" />
+          <i className="icon icon-eye-closed" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button
@@ -436,7 +436,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('bold')}
           onClick={handleBoldText}
         >
-          <i className="icon-bold" />
+          <i className="icon icon-bold" />
         </Button>
         <Button
           color="translucent"
@@ -444,7 +444,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('italic')}
           onClick={handleItalicText}
         >
-          <i className="icon-italic" />
+          <i className="icon icon-italic" />
         </Button>
         <Button
           color="translucent"
@@ -452,7 +452,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('underline')}
           onClick={handleUnderlineText}
         >
-          <i className="icon-underlined" />
+          <i className="icon icon-underlined" />
         </Button>
         <Button
           color="translucent"
@@ -460,7 +460,7 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('strikethrough')}
           onClick={handleStrikethroughText}
         >
-          <i className="icon-strikethrough" />
+          <i className="icon icon-strikethrough" />
         </Button>
         <Button
           color="translucent"
@@ -468,18 +468,18 @@ const TextFormatter: FC<OwnProps> = ({
           className={getFormatButtonClassName('monospace')}
           onClick={handleMonospaceText}
         >
-          <i className="icon-monospace" />
+          <i className="icon icon-monospace" />
         </Button>
         <div className="TextFormatter-divider" />
         <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
-          <i className="icon-link" />
+          <i className="icon icon-link" />
         </Button>
       </div>
 
       <div className="TextFormatter-link-control">
         <div className="TextFormatter-buttons">
           <Button color="translucent" ariaLabel={lang('Cancel')} onClick={closeLinkControl}>
-            <i className="icon-arrow-left" />
+            <i className="icon icon-arrow-left" />
           </Button>
           <div className="TextFormatter-divider" />
 
@@ -508,7 +508,7 @@ const TextFormatter: FC<OwnProps> = ({
               className="color-primary"
               onClick={handleLinkUrlConfirm}
             >
-              <i className="icon-check" />
+              <i className="icon icon-check" />
             </Button>
           </div>
         </div>

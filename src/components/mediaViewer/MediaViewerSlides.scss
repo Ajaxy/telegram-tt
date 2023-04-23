@@ -14,10 +14,6 @@
   left: 0;
   right: 0;
   bottom: 0;
-
-  & * {
-    -ms-scroll-chaining: none;
-  }
 }
 
 .MediaViewerSlide {
@@ -37,6 +33,6 @@
   }
 
   &--moving {
-    cursor: move;
+    cursor: var(--custom-cursor, move);
   }
 }

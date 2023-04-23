@@ -2,7 +2,7 @@
   position: relative;
   width: 15rem;
   height: 15rem;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   .video-wrapper {
     position: absolute;

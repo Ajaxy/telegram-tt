@@ -8,7 +8,7 @@
   border-radius: var(--border-radius-messages-small);
   position: relative;
   overflow: hidden;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   direction: ltr;
 
   @for $i from 1 through 8 {

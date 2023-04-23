@@ -11,7 +11,7 @@
 .isDragging {
   z-index: 2;
 
-  > *:not(.knob) {
+  :global(.drag-item) {
     pointer-events: none;
   }
 }
@@ -29,7 +29,7 @@
   opacity: 0;
   transition: opacity 150ms;
 
-  cursor: grab !important;
+  cursor: var(--custom-cursor, grab) !important;
   transform: translateY(-50%);
 
   .container:hover & {
@@ -38,7 +38,7 @@
 
   .isDragging & {
     opacity: 1;
-    cursor: grabbing !important;
+    cursor: var(--custom-cursor, grabbing) !important;
   }
 
   @media (pointer: coarse) {

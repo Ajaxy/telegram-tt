@@ -50,7 +50,7 @@ const ScrollDownButton: FC<OwnProps> = ({
         onContextMenu={handleContextMenu}
         ariaLabel={lang(ariaLabelLang)}
       >
-        <i className={buildClassName(styles.icon, `icon-${icon}`)} />
+        <i className={buildClassName(styles.icon, 'icon', `icon-${icon}`)} />
       </Button>
       {Boolean(unreadCount) && <div className={styles.unreadCount}>{formatIntegerCompact(unreadCount)}</div>}
       {onReadAll && (

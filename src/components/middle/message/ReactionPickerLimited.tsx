@@ -8,7 +8,7 @@ import type { ApiReaction, ApiAvailableReaction, ApiChatReactions } from '../../
 import { REM } from '../../common/helpers/mediaDimensions';
 import buildClassName from '../../../util/buildClassName';
 import { getReactionUniqueKey, sortReactions } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChatFullInfo } from '../../../global/selectors';
 
 import useWindowSize from '../../../hooks/useWindowSize';
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -122,9 +122,8 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const chat = selectChat(global, chatId);
     const { availableReactions, topReactions } = global;
-    const { enabledReactions } = chat?.fullInfo || {};
+    const { enabledReactions } = selectChatFullInfo(global, chatId) || {};
 
     return {
       enabledReactions,

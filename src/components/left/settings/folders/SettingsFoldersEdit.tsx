@@ -285,7 +285,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         {state.isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
     </div>

@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiUser, ApiChat, ApiUserStatus, ApiTopic,
+  ApiUser, ApiChat, ApiUserStatus, ApiTopic, ApiPhoto,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
@@ -14,10 +14,18 @@ import { MediaViewerOrigin } from '../../types';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
+  selectChat,
+  selectChatFullInfo,
+  selectCurrentMessageList,
   selectTabState,
-  selectChat, selectCurrentMessageList, selectThreadMessagesCount, selectUser, selectUserStatus,
+  selectThreadMessagesCount,
+  selectUser,
+  selectUserFullInfo,
+  selectUserStatus,
 } from '../../global/selectors';
-import { getUserStatus, isChatChannel, isUserOnline } from '../../global/helpers';
+import {
+  getUserStatus, isChatChannel, isUserId, isUserOnline,
+} from '../../global/helpers';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -52,6 +60,10 @@ type StateProps =
     avatarOwnerId?: string;
     topic?: ApiTopic;
     messagesCount?: number;
+    userPersonalPhoto?: ApiPhoto;
+    userProfilePhoto?: ApiPhoto;
+    userFallbackPhoto?: ApiPhoto;
+    chatProfilePhoto?: ApiPhoto;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -71,6 +83,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   avatarOwnerId,
   topic,
   messagesCount,
+  userPersonalPhoto,
+  userProfilePhoto,
+  userFallbackPhoto,
+  chatProfilePhoto,
 }) => {
   const {
     loadFullUser,
@@ -87,7 +103,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
   const slideAnimation = hasSlideAnimation
-    ? animationLevel >= 1 ? (lang.isRtl ? 'slide-optimized-rtl' : 'slide-optimized') : 'none'
+    ? animationLevel >= 1 ? (lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized') : 'none'
     : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -216,12 +232,14 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     const photo = !isSavedMessages && photos.length > 0
       ? photos[currentPhotoIndex]
       : undefined;
+    const profilePhoto = photo || userPersonalPhoto || userProfilePhoto || chatProfilePhoto || userFallbackPhoto;
+
     return (
       <ProfilePhoto
         key={currentPhotoIndex}
         user={user}
         chat={chat}
-        photo={photo}
+        photo={profilePhoto}
         isSavedMessages={isSavedMessages}
         canPlayVideo={Boolean(isActive && canPlayVideo)}
         onClick={handleProfilePhotoClick}
@@ -259,18 +277,18 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     >
       <div className={styles.photoWrapper}>
         {renderPhotoTabs()}
-        {!forceShowSelf && user?.fullInfo?.personalPhoto && (
+        {!forceShowSelf && userPersonalPhoto && (
           <div className={buildClassName(
             styles.fallbackPhoto,
             isFirst && styles.fallbackPhotoVisible,
           )}
           >
             <div className={styles.fallbackPhotoContents}>
-              {lang(user.fullInfo.personalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
+              {lang(userPersonalPhoto.isVideo ? 'UserInfo.CustomVideo' : 'UserInfo.CustomPhoto')}
             </div>
           </div>
         )}
-        {forceShowSelf && user?.fullInfo?.fallbackPhoto && (
+        {forceShowSelf && userFallbackPhoto && (
           <div className={buildClassName(
             styles.fallbackPhoto,
             (isFirst || isLast) && styles.fallbackPhotoVisible,
@@ -279,12 +297,12 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             <div className={styles.fallbackPhotoContents} onClick={handleSelectFallbackPhoto}>
               {!isLast && (
                 <Avatar
-                  photo={user.fullInfo.fallbackPhoto}
+                  photo={userFallbackPhoto}
                   className={styles.fallbackPhotoAvatar}
                   size="mini"
                 />
               )}
-              {lang(user.fullInfo.fallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
+              {lang(userFallbackPhoto.isVideo ? 'UserInfo.PublicVideo' : 'UserInfo.PublicPhoto')}
             </div>
           </div>
         )}
@@ -333,6 +351,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId, forceShowSelf }): StateProps => {
     const { connectionState } = global;
     const user = selectUser(global, userId);
+    const isPrivate = isUserId(userId);
     const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
@@ -341,12 +360,18 @@ export default memo(withGlobal<OwnProps>(
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
     const topic = isForum && currentTopicId ? chat?.topics?.[currentTopicId] : undefined;
+    const userFullInfo = isPrivate ? selectUserFullInfo(global, userId) : undefined;
+    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, userId) : undefined;
 
     return {
       connectionState,
       user,
       userStatus,
       chat,
+      userPersonalPhoto: userFullInfo?.personalPhoto,
+      userProfilePhoto: userFullInfo?.profilePhoto,
+      userFallbackPhoto: userFullInfo?.fallbackPhoto,
+      chatProfilePhoto: chatFullInfo?.profilePhoto,
       isSavedMessages,
       animationLevel,
       mediaId,

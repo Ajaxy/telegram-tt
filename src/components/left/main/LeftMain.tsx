@@ -167,7 +167,7 @@ const LeftMain: FC<OwnProps> = ({
         isClosingSearch={isClosingSearch}
       />
       <Transition
-        name={shouldSkipTransition ? 'none' : 'zoom-fade'}
+        name={shouldSkipTransition ? 'none' : 'zoomFade'}
         renderCount={TRANSITION_RENDER_COUNT}
         activeKey={content}
         shouldCleanup

@@ -2,12 +2,12 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { getPrivacyKey } from './helpers/privacy';
-import { selectUser } from '../../../global/selectors';
+import { selectUser, selectUserFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -27,6 +27,8 @@ type StateProps =
     chatsById?: Record<string, ApiChat>;
     usersById?: Record<string, ApiUser>;
     currentUser: ApiUser;
+    hasCurrentUserFullInfo?: boolean;
+    currentUserFallbackPhoto?: ApiPhoto;
   };
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
@@ -41,6 +43,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   blockChatIds,
   chatsById,
   currentUser,
+  hasCurrentUserFullInfo,
+  currentUserFallbackPhoto,
 }) => {
   const { setPrivacyVisibility } = getActions();
 
@@ -231,7 +235,11 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
       </div>
 
       {screen === SettingsScreens.PrivacyProfilePhoto && exceptionLists.shouldShowAllowed && (
-        <SettingsPrivacyPublicProfilePhoto currentUser={currentUser} />
+        <SettingsPrivacyPublicProfilePhoto
+          currentUser={currentUser}
+          hasCurrentUserFullInfo={hasCurrentUserFullInfo}
+          currentUserFallbackPhoto={currentUserFallbackPhoto}
+        />
       )}
     </div>
   );
@@ -247,6 +255,7 @@ export default memo(withGlobal<OwnProps>(
     } = global;
 
     const currentUser = selectUser(global, global.currentUserId!)!;
+    const currentUserFullInfo = selectUserFullInfo(global, global.currentUserId!);
 
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
@@ -285,6 +294,8 @@ export default memo(withGlobal<OwnProps>(
     if (!privacySettings) {
       return {
         currentUser,
+        hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
+        currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
       };
     }
 
@@ -292,6 +303,8 @@ export default memo(withGlobal<OwnProps>(
       ...privacySettings,
       chatsById,
       currentUser,
+      hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
+      currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
     };
   },
 )(SettingsPrivacyVisibility));

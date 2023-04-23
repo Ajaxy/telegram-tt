@@ -135,7 +135,7 @@ const Modal: FC<OwnProps & StateProps> = ({
             ariaLabel={lang('Close')}
             onClick={onClose}
           >
-            <i className="icon-close" />
+            <i className="icon icon-close" />
           </Button>
         )}
         <div className="modal-title">{title}</div>

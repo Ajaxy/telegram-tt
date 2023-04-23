@@ -9,6 +9,7 @@ import type {
 import { isUserId } from '../../../global/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
+import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -62,6 +63,7 @@ const CommentButton: FC<OwnProps> = ({
               key={user.id}
               size="small"
               user={isUserId(user.id) ? user as ApiUser : undefined}
+              userProfilePhoto={isUserId(user.id) ? selectUserPhotoFromFullInfo(getGlobal(), user.id) : undefined}
               chat={!isUserId(user.id) ? user as ApiChat : undefined}
             />
           ))}
@@ -86,13 +88,13 @@ const CommentButton: FC<OwnProps> = ({
       dir={lang.isRtl ? 'rtl' : 'ltr'}
       onClick={handleClick}
     >
-      <i className="icon-comments-sticker" />
-      {(!recentRepliers || recentRepliers.length === 0) && <i className="icon-comments" />}
+      <i className="icon icon-comments-sticker" />
+      {(!recentRepliers || recentRepliers.length === 0) && <i className="icon icon-comments" />}
       {renderRecentRepliers()}
       <div className="label" dir="auto">
         {messagesCount ? commentsText : lang('LeaveAComment')}
       </div>
-      <i className="icon-next" />
+      <i className="icon icon-next" />
     </div>
   );
 };

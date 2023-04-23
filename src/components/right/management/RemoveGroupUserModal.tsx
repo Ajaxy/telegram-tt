@@ -4,9 +4,10 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChat } from '../../../api/types';
+import type { ApiChat, ApiChatMember } from '../../../api/types';
 
 import { filterUsersByName } from '../../../global/helpers';
+import { selectChatFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import ChatOrUserPicker from '../../common/ChatOrUserPicker';
@@ -19,11 +20,13 @@ export type OwnProps = {
 
 type StateProps = {
   currentUserId?: string;
+  chatMembers?: ApiChatMember[];
 };
 
 const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
   chat,
   currentUserId,
+  chatMembers,
   isOpen,
   onClose,
 }) => {
@@ -36,7 +39,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
   const [search, setSearch] = useState('');
 
   const usersId = useMemo(() => {
-    const availableMemberIds = (chat.fullInfo?.members || [])
+    const availableMemberIds = (chatMembers || [])
       .reduce((acc: string[], member) => {
         if (!member.isAdmin && !member.isOwner && member.userId !== currentUserId) {
           acc.push(member.userId);
@@ -48,7 +51,7 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
     const usersById = getGlobal().users.byId;
 
     return filterUsersByName(availableMemberIds, usersById, search);
-  }, [chat.fullInfo?.members, currentUserId, search]);
+  }, [chatMembers, currentUserId, search]);
 
   const handleRemoveUser = useCallback((userId: string) => {
     deleteChatMember({ chatId: chat.id, userId });
@@ -70,9 +73,12 @@ const RemoveGroupUserModal: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global): StateProps => {
+  (global, { chat }): StateProps => {
     const { currentUserId } = global;
 
-    return { currentUserId };
+    return {
+      currentUserId,
+      chatMembers: selectChatFullInfo(global, chat.id)?.members,
+    };
   },
 )(RemoveGroupUserModal));

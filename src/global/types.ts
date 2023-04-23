@@ -58,6 +58,8 @@ import type {
   ApiWallpaper,
   ApiWebPage,
   ApiWebSession,
+  ApiUserFullInfo,
+  ApiChatFullInfo,
 } from '../api/types';
 import type {
   ApiInvoiceContainer,
@@ -635,6 +637,8 @@ export type GlobalState = {
   users: {
     byId: Record<string, ApiUser>;
     statusesById: Record<string, ApiUserStatus>;
+    // Obtained from GetFullUser / UserFullInfo
+    fullInfoById: Record<string, ApiUserFullInfo>;
   };
 
   chats: {
@@ -657,6 +661,8 @@ export type GlobalState = {
       archived?: boolean;
     };
     forDiscussionIds?: string[];
+    // Obtained from GetFullChat / GetFullChannel
+    fullInfoById: Record<string, ApiChatFullInfo>;
   };
 
   messages: {

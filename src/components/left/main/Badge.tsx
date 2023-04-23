@@ -67,13 +67,13 @@ const Badge: FC<OwnProps> = ({
   function renderContent() {
     const unreadReactionsElement = unreadReactionsCount && (
       <div className={buildClassName('Badge reaction', shouldBeMuted && 'muted')}>
-        <i className="icon-heart" />
+        <i className="icon icon-heart" />
       </div>
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
       <div className="Badge mention">
-        <i className="icon-mention" />
+        <i className="icon icon-mention" />
       </div>
     );
 
@@ -89,7 +89,7 @@ const Badge: FC<OwnProps> = ({
 
     const pinnedElement = isPinned && !unreadCountElement && !unreadMentionsElement && !unreadReactionsElement && (
       <div className={className}>
-        <i className="icon-pinned-chat" />
+        <i className="icon icon-pinned-chat" />
       </div>
     );
 

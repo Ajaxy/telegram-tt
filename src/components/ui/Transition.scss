@@ -3,40 +3,37 @@
   width: 100%;
   height: 100%;
 
-  > .Transition__slide {
+  &_slide {
     width: 100%;
     height: 100%;
 
     animation-fill-mode: forwards !important;
 
-    &.from,
-    &.to {
+    &-from,
+    &-to {
       position: absolute;
       top: 0;
       left: 0;
     }
-  }
 
-  &:not(.slide-optimized):not(.slide-optimized-rtl) {
-    > .Transition__slide:not(.Transition__slide--active):not(.from):not(.to) {
+    &-inactive {
       display: none !important; // Best performance when animating container
       //transform: scale(0); // Shortest initial delay
     }
   }
 
-  &.skip-slide-transition {
-    transition: none !important;
-  }
-
-  &.slide-optimized,
-  &.slide-optimized-rtl {
+  &-slideOptimized,
+  &-slideOptimizedBackwards,
+  &-slideOptimizedRtl,
+  &-slideOptimizedRtlBackwards {
     contain: strict;
+
     body.is-safari & {
       // Create a new composite layer to reduce the page repaint area when switching a tab (as `contain` is not supported in Safari)
       transform: translate3d(0, 0, 0);
     }
 
-    #root & > .Transition__slide {
+    #root & > .Transition_slide {
       position: absolute;
       top: 0;
       left: 0;
@@ -46,381 +43,242 @@
     }
   }
 
-  &.slide {
-    > .to {
+  &-slide {
+    > .Transition_slide-to {
       transform: translateX(100%);
+      animation: slide-in var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-out var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-in var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-out var(--slide-transition);
     }
   }
 
-  &.slide.backwards {
-    > .to {
+  &-slideBackwards {
+    > .Transition_slide-to {
       transform: translateX(-100%);
+      animation: slide-out-backwards var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-in-backwards var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-out-backwards var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-in-backwards var(--slide-transition);
     }
   }
 
-  &.slide-rtl {
-    > .to {
+  &-slideRtl {
+    > .Transition_slide-to {
       transform: translateX(-100%);
+      animation: slide-in var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-out var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-in var(--slide-transition);
-      }
-    }
-
-    &.backwards {
-      > .to {
-        transform: translateX(100%);
-      }
-
-      &.animating {
-        > .from {
-          animation: slide-in-backwards var(--slide-transition);
-        }
-
-        > .to {
-          animation: slide-out-backwards var(--slide-transition);
-        }
-      }
+    > .Transition_slide-from {
+      animation: slide-out var(--slide-transition);
     }
   }
 
-  &.slide-vertical {
-    > .to {
+
+  &-slideRtlBackwards {
+    > .Transition_slide-to {
+      transform: translateX(100%);
+      animation: slide-out-backwards var(--slide-transition);
+    }
+
+    > .Transition_slide-from {
+      animation: slide-in-backwards var(--slide-transition);
+    }
+  }
+
+  &-slideVertical {
+    > .Transition_slide-to {
       transform: translateY(100%);
+      animation: slide-vertical-in var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-vertical-out var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-vertical-in var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-vertical-out var(--slide-transition);
     }
   }
 
-  &.slide-vertical.backwards {
-    > .to {
+  &-slideVerticalBackwards {
+    > .Transition_slide-to {
       transform: translateY(-100%);
+      animation: slide-vertical-out-backwards var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-vertical-in-backwards var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-vertical-out-backwards var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-vertical-in-backwards var(--slide-transition);
     }
   }
 
-  &.slide-vertical-fade {
-    > .to {
+  &-slideVerticalFade {
+    > .Transition_slide-to {
       transform: translateY(100%);
+      animation: slide-vertical-fade-in var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-vertical-fade-out var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-vertical-fade-in var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-vertical-fade-out var(--slide-transition);
     }
   }
 
-  &.slide-vertical-fade.backwards {
-    > .to {
+  &-slideVerticalFadeBackwards {
+    > .Transition_slide-to {
       transform: translateY(-100%);
+      animation: slide-vertical-fade-out-backwards var(--slide-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-vertical-fade-in-backwards var(--slide-transition);
-      }
-
-      > .to {
-        animation: slide-vertical-fade-out-backwards var(--slide-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-vertical-fade-in-backwards var(--slide-transition);
     }
   }
 
-  &.mv-slide {
-    > .Transition__slide > div {
-      animation-fill-mode: forwards !important;
-    }
-
-    > .to > div {
-      transform: translateX(100vw);
-    }
-
-    &.animating {
-      > .from > div {
-        animation: mv-slide-out 0.4s ease;
-      }
-
-      > .to > div {
-        animation: mv-slide-in 0.4s ease;
-      }
-    }
-  }
-
-  &.mv-slide.backwards {
-    > .to > div {
-      transform: translateX(-100vw);
-    }
-
-    &.animating {
-      > .from > div {
-        animation: mv-slide-in-backwards 0.4s ease;
-      }
-
-      > .to > div {
-        animation: mv-slide-out-backwards 0.4s ease;
-      }
-    }
-  }
-
-  &.slide-fade {
-    > .from {
+  &-slideFade {
+    > .Transition_slide-from {
       transform: translateX(0);
       transform-origin: left;
-
       opacity: 1;
+      animation: fade-out-opacity var(--slide-transition), slide-fade-out-move var(--slide-transition);
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform: translateX(1.5rem);
       transform-origin: left;
-
       opacity: 0;
-    }
-
-    &.animating {
-      > .from {
-        animation: fade-out-opacity var(--slide-transition), slide-fade-out-move var(--slide-transition);
-      }
-
-      > .to {
-        animation: fade-in-opacity var(--slide-transition), slide-fade-in-move var(--slide-transition);
-      }
+      animation: fade-in-opacity var(--slide-transition), slide-fade-in-move var(--slide-transition);
     }
   }
 
-  &.slide-fade.backwards {
-    > .from {
+  &-slideFadeBackwards {
+    > .Transition_slide-from {
       transform: translateX(0);
-
       opacity: 1;
+      animation: fade-in-backwards-opacity var(--slide-transition),
+      slide-fade-in-backwards-move var(--slide-transition);
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform: translateX(-1.5rem);
-
       opacity: 0;
-    }
-
-    &.animating {
-      > .from {
-        animation: fade-in-backwards-opacity var(--slide-transition),
-        slide-fade-in-backwards-move var(--slide-transition);
-      }
-
-      > .to {
-        animation: fade-out-backwards-opacity var(--slide-transition),
-        slide-fade-out-backwards-move var(--slide-transition);
-      }
+      animation: fade-out-backwards-opacity var(--slide-transition),
+      slide-fade-out-backwards-move var(--slide-transition);
     }
   }
 
-  &.zoom-fade {
-    > .from {
+  &-zoomFade {
+    > .Transition_slide-from {
       transform: scale(1);
       transform-origin: center;
-
       opacity: 1;
+      animation: fade-out-opacity 0.15s ease;
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform-origin: center;
-
       opacity: 0;
       // We can omit `transform: scale(1.1);` here because `opacity` is 0.
       // We need to for proper position calculation in `InfiniteScroll`.
-    }
 
-    &.animating {
-      > .from {
-        animation: fade-out-opacity 0.15s ease;
-      }
-
-      > .to {
-        animation: fade-in-opacity 0.15s ease, zoom-fade-in-move 0.15s ease;
-      }
+      animation: fade-in-opacity 0.15s ease, zoomFade-in-move 0.15s ease;
     }
   }
 
-  &.zoom-fade.backwards {
-    > .from {
+  &-zoomFadeBackwards {
+    > .Transition_slide-from {
       transform: scale(1);
+      animation: fade-in-backwards-opacity 0.1s ease, zoomFade-in-backwards-move 0.15s ease;
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform: scale(0.95);
-    }
-
-    &.animating {
-      > .from {
-        animation: fade-in-backwards-opacity 0.1s ease, zoom-fade-in-backwards-move 0.15s ease;
-      }
-
-      > .to {
-        animation: fade-out-backwards-opacity 0.15s ease, zoom-fade-out-backwards-move 0.15s ease;
-      }
+      animation: fade-out-backwards-opacity 0.15s ease, zoomFade-out-backwards-move 0.15s ease;
     }
   }
 
-  &.fade {
-    > .from {
+  &-fade,
+  &-fadeBackwards {
+    > .Transition_slide-from {
       opacity: 1;
+      animation: fade-out-opacity 0.15s ease;
     }
 
-    > .to {
+    > .Transition_slide-to {
       opacity: 0;
-    }
-
-    &.animating {
-      > .from {
-        animation: fade-out-opacity 0.15s ease;
-      }
-
-      > .to {
-        animation: fade-in-opacity 0.15s ease;
-      }
+      animation: fade-in-opacity 0.15s ease;
     }
   }
 
-  &.semi-fade {
-    > .Transition__slide {
+  &-semiFade {
+    > .Transition_slide {
       isolation: isolate;
     }
 
-    > .from {
+    > .Transition_slide-from {
       opacity: 1;
     }
 
-    > .to {
+    > .Transition_slide-to {
       opacity: 0;
-    }
-
-    &.animating {
-      > .to {
-        animation: fade-in-opacity 250ms ease;
-      }
+      animation: fade-in-opacity 250ms ease;
     }
   }
 
-  &.semi-fade.backwards {
-    > .from {
+  &-semiFadeBackwards {
+    > .Transition_slide-from {
       opacity: 1;
+      animation: fade-in-backwards-opacity 250ms ease;
     }
 
-    > .to {
+    > .Transition_slide-to {
       opacity: 1;
-    }
-
-    &.animating {
-      > .from {
-        animation: fade-in-backwards-opacity 250ms ease;
-      }
-
-      > .to {
-        animation: none !important;
-      }
+      animation: none !important;
     }
   }
 
-  &.slide-layers {
+  &-slideLayers {
     --background-color: var(--color-background);
 
     background: black !important;
 
-    > .Transition__slide {
+    > .Transition_slide {
       background: var(--background-color);
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform: translateX(100%);
+      animation: slide-in var(--layer-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-layers-out var(--layer-transition);
-      }
-
-      > .to {
-        animation: slide-in var(--layer-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-layers-out var(--layer-transition);
     }
   }
 
-  &.slide-layers.backwards {
-    > .to {
+  &-slideLayersBackwards {
+    --background-color: var(--color-background);
+
+    background: black !important;
+
+    > .Transition_slide-to {
       transform: translateX(-20%);
-
       opacity: 0.75;
+      animation: slide-layers-out-backwards var(--layer-transition);
     }
 
-    &.animating {
-      > .from {
-        animation: slide-in-backwards var(--layer-transition);
-      }
-
-      > .to {
-        animation: slide-layers-out-backwards var(--layer-transition);
-      }
+    > .Transition_slide-from {
+      animation: slide-in-backwards var(--layer-transition);
     }
   }
 
-  &.push-slide {
-    > .Transition__slide {
+  &-pushSlide {
+    > .Transition_slide {
       background: var(--color-background);
     }
 
-    > .from {
+    > .Transition_slide-from {
       transform: scale(1);
       transform-origin: center;
-
       opacity: 1;
+      animation: push-out 0.25s ease-in-out;
 
       .custom-scroll {
         scrollbar-color: transparent !important;
@@ -431,68 +289,44 @@
       }
     }
 
-    > .to {
+    > .Transition_slide-to {
       transform: translateX(100%);
-    }
-
-    &.animating {
-      > .from {
-        animation: push-out 0.25s ease-in-out;
-      }
-
-      > .to {
-        animation: slide-in-200 0.25s ease-in-out;
-      }
+      animation: slide-in-200 0.25s ease-in-out;
     }
   }
 
-  &.push-slide.backwards {
-    > .to {
+  &-pushSlideBackwards {
+    > .Transition_slide {
+      background: var(--color-background);
+    }
+
+    > .Transition_slide-to {
       transform: scale(0.7);
-
       opacity: 0;
+      animation: push-out-backwards 0.25s ease-in-out;
     }
 
-    &.animating {
-      > .from {
-        animation: slide-in-200-backwards 0.25s ease-in-out;
-      }
-
-      > .to {
-        animation: push-out-backwards 0.25s ease-in-out;
-      }
+    > .Transition_slide-from {
+      animation: slide-in-200-backwards 0.25s ease-in-out;
     }
   }
 
-  &.reveal {
-    > .to {
+  &-reveal {
+    > .Transition_slide-to {
       clip-path: inset(0 100% 0 0);
-    }
-
-    &.animating {
-      > .to {
-        animation: reveal-in 350ms ease-in;
-      }
+      animation: reveal-in 350ms ease-in;
     }
   }
 
-  &.reveal.backwards {
-    > .from {
+  &-revealBackwards {
+    > .Transition_slide-from {
       clip-path: inset(0 0 0 0);
+      animation: reveal-in-backwards 350ms ease-out;
     }
 
-    > .to {
+    > .Transition_slide-to {
       clip-path: none;
-    }
-
-    &.animating {
-      > .from {
-        animation: reveal-in-backwards 350ms ease-out;
-      }
-
-      > .to {
-        animation: none;
-      }
+      animation: none;
     }
   }
 }
@@ -657,42 +491,6 @@
   }
 }
 
-@keyframes mv-slide-in {
-  0% {
-    transform: translateX(100vw);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes mv-slide-out {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-100vw);
-  }
-}
-
-@keyframes mv-slide-in-backwards {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(100vw);
-  }
-}
-
-@keyframes mv-slide-out-backwards {
-  0% {
-    transform: translateX(-100vw);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
 @keyframes slide-fade-in-move {
   0% {
     transform: translateX(1.5rem);
@@ -729,7 +527,7 @@
   }
 }
 
-@keyframes zoom-fade-in-move {
+@keyframes zoomFade-in-move {
   0% {
     transform: scale(1.1);
   }
@@ -738,7 +536,7 @@
   }
 }
 
-@keyframes zoom-fade-in-backwards-move {
+@keyframes zoomFade-in-backwards-move {
   0% {
     transform: scale(1);
   }
@@ -747,7 +545,7 @@
   }
 }
 
-@keyframes zoom-fade-out-backwards-move {
+@keyframes zoomFade-out-backwards-move {
   0% {
     transform: scale(0.95);
   }

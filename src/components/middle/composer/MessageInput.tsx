@@ -550,7 +550,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
               )}
               dir="auto"
             >
-              {!isAttachmentModalInput && !canSendPlainText && <i className="icon-lock-badge placeholder-icon" />}
+              {!isAttachmentModalInput && !canSendPlainText
+                && <i className="icon icon-lock-badge placeholder-icon" />}
               {placeholder}
             </span>
           )}

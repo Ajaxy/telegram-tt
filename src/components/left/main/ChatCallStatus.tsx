@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import buildClassName from '../../../util/buildClassName';
 
-import './ChatCallStatus.scss';
+import styles from './ChatCallStatus.module.scss';
 
 type OwnProps = {
   isSelected?: boolean;
@@ -17,15 +17,15 @@ const ChatCallStatus: FC<OwnProps> = ({
 }) => {
   return (
     <div className={buildClassName(
-      'ChatCallStatus',
-      isActive && 'active',
-      isSelected && !isMobile && 'selected',
+      styles.root,
+      isActive && styles.active,
+      isSelected && !isMobile && styles.selected,
     )}
     >
-      <div className="indicator">
-        <div />
-        <div />
-        <div />
+      <div className={styles.indicator}>
+        <div className={styles.indicatorInner} />
+        <div className={styles.indicatorInner} />
+        <div className={styles.indicatorInner} />
       </div>
     </div>
   );

@@ -32,7 +32,7 @@
 
 .dot {
   flex: none;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   width: 8px;
   height: 8px;
   background: #DFE1E5;

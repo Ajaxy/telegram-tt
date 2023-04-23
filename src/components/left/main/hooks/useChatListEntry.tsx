@@ -226,7 +226,7 @@ function renderSummary(
           buildClassName('media-preview--image', isRoundVideo && 'round', isSpoiler && 'media-preview-spoiler')
         }
       />
-      {getMessageVideo(message) && <i className="icon-play" />}
+      {getMessageVideo(message) && <i className="icon icon-play" />}
       {messageSummary}
     </span>
   );

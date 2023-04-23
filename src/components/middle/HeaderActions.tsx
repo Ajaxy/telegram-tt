@@ -21,11 +21,12 @@ import {
 import {
   selectChat,
   selectChatBot,
-  selectIsUserBlocked,
+  selectChatFullInfo,
   selectIsChatBotNotStarted,
   selectIsChatWithSelf,
   selectIsInSelectMode,
   selectIsRightColumnShown,
+  selectIsUserBlocked,
 } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -238,7 +239,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleSearchClick}
               ariaLabel="Search in this chat"
             >
-              <i className="icon-search" />
+              <i className="icon icon-search" />
             </Button>
           )}
           {canCall && (
@@ -250,7 +251,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleRequestCall}
               ariaLabel="Call"
             >
-              <i className="icon-phone" />
+              <i className="icon icon-phone" />
             </Button>
           )}
         </>
@@ -265,7 +266,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           onClick={handleJoinRequestsClick}
           ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
-          <i className="icon-user" />
+          <i className="icon icon-user" />
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
       )}
@@ -280,7 +281,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         ariaLabel="More actions"
         onClick={handleHeaderMenuOpen}
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
       {menuPosition && (
         <HeaderMenuContainer
@@ -328,6 +329,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const bot = selectChatBot(global, chatId);
+    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
     const isDiscussionThread = messageListType === 'thread' && threadId !== MAIN_THREAD_ID;
@@ -345,8 +347,8 @@ export default memo(withGlobal<OwnProps>(
     const canEnterVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && chat.isCallActive;
     const canCreateVoiceChat = ARE_CALLS_SUPPORTED && isMainThread && !chat.isCallActive
       && (chat.adminRights?.manageCall || (chat.isCreator && isChatBasicGroup(chat)));
-    const canViewStatistics = isMainThread && chat.fullInfo?.canViewStatistics;
-    const pendingJoinRequests = isMainThread ? chat.fullInfo?.requestsPending : undefined;
+    const canViewStatistics = isMainThread && chatFullInfo?.canViewStatistics;
+    const pendingJoinRequests = isMainThread ? chatFullInfo?.requestsPending : undefined;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const noAnimation = global.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN;

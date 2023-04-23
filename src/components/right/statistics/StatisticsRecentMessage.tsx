@@ -73,7 +73,7 @@ function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRo
   return (
     <span className="media-preview">
       <img src={blobUrl} alt="" className={buildClassName('media-preview__image', isRoundVideo && 'round')} />
-      {getMessageVideo(message) && <i className="icon-play" />}
+      {getMessageVideo(message) && <i className="icon icon-play" />}
       {renderMessageSummary(lang, message, true)}
     </span>
   );

@@ -48,7 +48,7 @@
       height: 3rem;
       margin-inline-end: 0.75rem;
 
-      i {
+      .icon {
         font-size: 1.625rem;
 
         &.icon-pause {
@@ -57,7 +57,7 @@
       }
     }
 
-    i {
+    .icon {
       position: absolute;
 
       &.icon-play {
@@ -94,7 +94,7 @@
     border: 0.125rem solid var(--background-color);
     z-index: 1;
 
-    i {
+    .icon {
       font-size: 0.8125rem;
     }
   }
@@ -208,7 +208,7 @@
   }
 
   .waveform {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     margin-left: 1px;
     touch-action: none;
     display: flex;
@@ -273,7 +273,7 @@
     height: 1.25rem;
     position: relative;
     top: 3px;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     touch-action: none;
 
     &::before {
@@ -295,7 +295,7 @@
     width: 100%;
     top: 6px;
 
-    i {
+    &-inner {
       position: absolute;
       width: 100%;
       background-color: var(--color-interactive-active);
@@ -321,7 +321,7 @@
     top: 7px;
     left: 0;
 
-    i {
+    &-inner {
       pointer-events: none;
       position: absolute;
       width: 100%;

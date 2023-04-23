@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { Thread } from '../../global/types';
+import type { GlobalState, TabState } from '../../global/types';
 import type { ApiMessage } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -17,11 +17,8 @@ import {
 import useRunDebounced from '../../hooks/useRunDebounced';
 
 type StateProps = {
-  activeDownloads: Record<string, number[]>;
-  messages: Record<string, {
-    byId: Record<number, ApiMessage>;
-    threadsById: Record<number, Thread>;
-  }>;
+  activeDownloads: TabState['activeDownloads']['byChatId'];
+  messages?: GlobalState['messages']['byChatId'];
 };
 
 const GLOBAL_UPDATE_DEBOUNCE = 1000;
@@ -49,7 +46,7 @@ const DownloadManager: FC<StateProps> = ({
 
   useEffect(() => {
     const activeMessages = Object.entries(activeDownloads).map(([chatId, messageIds]) => (
-      messageIds.map((id) => messages[chatId].byId[id])
+      messageIds.map((id) => messages![chatId].byId[id])
     )).flat();
 
     if (!activeMessages.length) {
@@ -115,10 +112,11 @@ const DownloadManager: FC<StateProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const activeDownloads = selectTabState(global).activeDownloads.byChatId;
-    const messages = global.messages.byChatId;
+    const hasActiveDownloads = Object.values(activeDownloads).some((messageIds) => messageIds.length);
+
     return {
       activeDownloads,
-      messages,
+      messages: hasActiveDownloads ? global.messages.byChatId : undefined,
     };
   },
 )(DownloadManager));

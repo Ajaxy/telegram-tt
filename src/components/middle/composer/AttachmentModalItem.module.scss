@@ -68,7 +68,7 @@
 
   transition: 0.2s background-color ease-in-out;
 
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.15);

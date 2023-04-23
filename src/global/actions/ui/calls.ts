@@ -6,7 +6,7 @@ import {
 } from '../../index';
 import { callApi } from '../../../api/gramjs';
 import {
-  selectChat, selectTabState, selectUser,
+  selectChat, selectChatFullInfo, selectTabState, selectUser,
 } from '../../selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { fetchChatByUsername, loadFullChat } from '../api/chats';
@@ -199,7 +199,7 @@ addActionHandler('createGroupCallInviteLink', async (global, actions, payload): 
 
   const hasPublicUsername = Boolean(getMainUsername(chat));
 
-  let { inviteLink } = chat.fullInfo!;
+  let inviteLink = selectChatFullInfo(global, chat.id)?.inviteLink;
   if (hasPublicUsername) {
     inviteLink = await callApi('exportGroupCallInvite', {
       call: groupCall,

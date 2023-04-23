@@ -8,7 +8,7 @@
   margin-bottom: 0.5rem;
   padding-right: 1rem;
   border-radius: 1rem;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
   position: relative;
   overflow: hidden;
   flex-shrink: 1;
@@ -68,7 +68,7 @@
     flex-shrink: 0;
     transition: opacity 0.15s ease;
 
-    .Avatar__icon, i {
+    .icon {
       font-size: 1rem;
     }
   }
@@ -82,7 +82,7 @@
     background-color: var(--color-primary);
     color: white;
 
-    i {
+    .icon {
       font-size: 1.25rem;
       position: relative;
       top: -1px;

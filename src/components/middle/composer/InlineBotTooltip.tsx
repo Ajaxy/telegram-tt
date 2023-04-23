@@ -176,6 +176,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
           );
         case 'article':
         case 'audio':
+        case 'voice':
           return (
             <ArticleResult
               key={inlineBotResult.id}

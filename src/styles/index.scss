@@ -70,12 +70,13 @@ body.is-ios {
   --border-radius-messages-small: 0.5rem;
 }
 
-body.cursor-grabbing,
-body.cursor-grabbing * {
+body.cursor-grabbing {
+  --custom-cursor: grabbing;
   cursor: grabbing !important;
 }
 
 body.cursor-ew-resize {
+  --custom-cursor: ew-resize;
   cursor: ew-resize !important;
 }
 
@@ -118,7 +119,7 @@ body.cursor-ew-resize {
   bottom: 0;
   width: 0.25rem;
   z-index: var(--z-resize-handle);
-  cursor: ew-resize;
+  cursor: var(--custom-cursor, ew-resize);
 
   @media (min-width: 926px) {
     display: block;
@@ -142,25 +143,6 @@ body.cursor-ew-resize {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   z-index: -1;
-}
-
-.not-implemented {
-  opacity: 0.5;
-
-  &,
-  & * {
-    cursor: not-allowed !important;
-  }
-}
-
-* {
-  box-sizing: border-box;
-}
-
-.no-animations #root *,
-.no-animations #root *::before,
-.no-animations #root *::after {
-  transition: none !important;
 }
 
 .custom-scroll,
@@ -230,20 +212,20 @@ body:not(.is-ios) {
   }
 }
 
-div[role="button"] {
+.div-button {
   outline: none !important;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
 }
 
 .opacity-transition {
   opacity: 1;
   transition: opacity 0.15s ease;
 
-  &:not(.open) {
+  &.not-open {
     opacity: 0;
   }
 
-  &:not(.shown) {
+  &.not-shown {
     display: none;
   }
 

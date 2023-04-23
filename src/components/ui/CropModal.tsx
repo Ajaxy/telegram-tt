@@ -125,7 +125,7 @@ const CropModal: FC<OwnProps> = ({ file, onChange, onClose }: OwnProps) => {
         onClick={handleCropClick}
         ariaLabel={lang('CropImage')}
       >
-        <i className="icon-check" />
+        <i className="icon icon-check" />
       </Button>
     </Modal>
   );

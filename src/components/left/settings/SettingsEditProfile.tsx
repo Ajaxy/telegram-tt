@@ -11,7 +11,7 @@ import { ProfileEditProgress } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
 import { throttle } from '../../../util/schedulers';
-import { selectTabState, selectUser } from '../../../global/selectors';
+import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
@@ -282,7 +282,7 @@ const SettingsEditProfile: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
     </div>
@@ -313,16 +313,15 @@ export default memo(withGlobal<OwnProps>(
       firstName: currentFirstName,
       lastName: currentLastName,
       usernames,
-      fullInfo,
     } = currentUser;
-    const { bio: currentBio } = fullInfo || {};
+    const currentUserFullInfo = currentUserId ? selectUserFullInfo(global, currentUserId) : undefined;
     const currentAvatarHash = getChatAvatarHash(currentUser);
 
     return {
       currentAvatarHash,
       currentFirstName,
       currentLastName,
-      currentBio,
+      currentBio: currentUserFullInfo?.bio,
       progress,
       isUsernameAvailable,
       checkedUsername,

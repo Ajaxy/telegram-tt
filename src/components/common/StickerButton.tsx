@@ -310,12 +310,12 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
         <div
           className="sticker-locked"
         >
-          <i className="icon-lock-badge" />
+          <i className="icon icon-lock-badge" />
         </div>
       )}
       {!noShowPremium && isPremium && !isLocked && (
         <div className="sticker-premium">
-          <i className="icon-premium" />
+          <i className="icon icon-premium" />
         </div>
       )}
       {shouldShowCloseButton && (
@@ -325,7 +325,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           round
           onClick={handleRemoveClick}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       )}
       {Boolean(contextMenuItems.length) && (

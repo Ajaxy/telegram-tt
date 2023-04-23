@@ -244,11 +244,11 @@ const StickerSet: FC<OwnProps> = ({
       {!shouldHideHeader && (
         <div className="symbol-set-header">
           <p className="symbol-set-name">
-            {isLocked && <i className="symbol-set-locked-icon icon-lock-badge" />}
+            {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
             {stickerSet.title}
           </p>
           {isRecent && (
-            <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
+            <i className="symbol-set-remove icon icon-close" onClick={openConfirmModal} />
           )}
           {!isRecent && isEmoji && !isInstalled && !isPopular && (
             <Button
@@ -291,7 +291,7 @@ const StickerSet: FC<OwnProps> = ({
             onClick={handleDefaultStatusIconClick}
             key="default-status-icon"
           >
-            <i className="icon-premium" />
+            <i className="icon icon-premium" />
           </Button>
         )}
         {shouldRender && stickerSet.reactions?.map((reaction) => {

@@ -10,6 +10,7 @@ import './MenuItem.scss';
 
 export type MenuItemProps = {
   icon?: string;
+  isCharIcon?: boolean;
   customIcon?: React.ReactNode;
   className?: string;
   children: React.ReactNode;
@@ -27,6 +28,7 @@ export type MenuItemProps = {
 const MenuItem: FC<MenuItemProps> = (props) => {
   const {
     icon,
+    isCharIcon,
     customIcon,
     className,
     children,
@@ -81,7 +83,10 @@ const MenuItem: FC<MenuItemProps> = (props) => {
   const content = (
     <>
       {!customIcon && icon && (
-        <i className={`icon-${icon}`} data-char={icon.startsWith('char-') ? icon.replace('char-', '') : undefined} />
+        <i
+          className={isCharIcon ? 'icon icon-char' : `icon icon-${icon}`}
+          data-char={isCharIcon ? icon : undefined}
+        />
       )}
       {customIcon}
       {children}

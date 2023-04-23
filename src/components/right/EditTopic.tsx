@@ -121,7 +121,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
             <div className={buildClassName(styles.section, styles.top)}>
               <span className={styles.heading}>{lang('CreateTopicTitle')}</span>
               <Transition
-                name="zoom-fade"
+                name="zoomFade"
                 activeKey={Number(dummyTopic.iconEmojiId) || 0}
                 shouldCleanup
                 direction={1}
@@ -165,7 +165,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
     </div>

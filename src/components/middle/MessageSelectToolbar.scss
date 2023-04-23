@@ -135,27 +135,27 @@
       white-space: nowrap;
       color: var(--color-text);
       --ripple-color: rgba(0, 0, 0, 0.08);
-      cursor: pointer;
+      cursor: var(--custom-cursor, pointer);
       unicode-bidi: plaintext;
 
       padding: 0.6875rem;
       border-radius: 50%;
 
-      i {
+      .icon {
         font-size: 1.5rem;
         color: var(--color-text-secondary);
       }
 
       &.destructive {
         color: var(--color-error);
-        i {
+        .icon {
           color: inherit;
         }
       }
 
       &.disabled {
         opacity: 0.5;
-        cursor: default;
+        cursor: var(--custom-cursor, default);
         pointer-events: none;
       }
 

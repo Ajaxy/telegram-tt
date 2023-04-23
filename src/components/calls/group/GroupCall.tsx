@@ -143,7 +143,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel={lang('AccDescrMoreOptions')}
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, [lang]);
@@ -276,7 +276,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             onClick={handleToggleFullscreen}
             ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
           >
-            <i className={isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen'} />
+            <i className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')} />
           </Button>
         )}
         {isLandscapeLayout && (
@@ -286,7 +286,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
             color="translucent"
             onClick={handleToggleSidebar}
           >
-            <i className="icon-sidebar" />
+            <i className="icon icon-sidebar" />
           </Button>
         )}
         {((IS_SCREENSHARE_SUPPORTED && !shouldRaiseHand) || isAdmin) && (
@@ -319,7 +319,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           color="translucent"
           onClick={handleClose}
         >
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       </div>
 
@@ -359,7 +359,11 @@ const GroupCall: FC<OwnProps & StateProps> = ({
               )}
               onClick={handleClickVideoOrSpeaker}
             >
-              <i className={shouldRaiseHand ? 'icon-speaker' : (hasVideo ? 'icon-video-stop' : 'icon-video')} />
+              <i className={buildClassName(
+                'icon',
+                shouldRaiseHand ? 'icon-speaker' : (hasVideo ? 'icon-video-stop' : 'icon-video'),
+              )}
+              />
             </button>
           </div>
 
@@ -372,7 +376,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
 
         <div className="button-wrapper">
           <button className="small-button leave" onClick={handleLeaveGroupCall}>
-            <i className="icon-phone-discard" />
+            <i className="icon icon-phone-discard" />
           </button>
 
           <div className="button-text">

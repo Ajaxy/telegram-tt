@@ -30,7 +30,7 @@ const PremiumLimitsCompare: FC<OwnProps> = ({
     <div className={buildClassName(styles.root, className)}>
       {floatingBadgeIcon && (
         <div className={styles.floatingBadge}>
-          <i className={buildClassName(styles.floatingBadgeIcon, floatingBadgeIcon)} />
+          <i className={buildClassName(styles.floatingBadgeIcon, floatingBadgeIcon, 'icon')} />
           <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>{leftValue}</div>
           <div className={styles.floatingBadgeTriangle} dangerouslySetInnerHTML={{ __html: TRIANGLE_SVG }} />
         </div>

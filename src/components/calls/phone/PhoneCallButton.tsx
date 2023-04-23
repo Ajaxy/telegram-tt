@@ -36,7 +36,7 @@ const PhoneCallButton: FC<OwnProps> = ({
         onClick={onClick}
         disabled={isDisabled}
       >
-        {customIcon || <i className={buildClassName(iconClassName, `icon-${icon}`)} />}
+        {customIcon || <i className={buildClassName(iconClassName, 'icon', `icon-${icon}`)} />}
       </Button>
       <div className={styles.buttonText}>{label}</div>
     </div>

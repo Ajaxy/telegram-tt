@@ -1,7 +1,7 @@
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type {
@@ -21,6 +21,7 @@ import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
@@ -236,12 +237,12 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const getTriggerElement = useCallback(() => {
     return isSponsoredMessage
-      ? document.querySelector('.Transition__slide--active > .MessageList .SponsoredMessage')
-      : document.querySelector(`.Transition__slide--active > .MessageList div[data-message-id="${messageId}"]`);
+      ? document.querySelector('.Transition_slide-active > .MessageList .SponsoredMessage')
+      : document.querySelector(`.Transition_slide-active > .MessageList div[data-message-id="${messageId}"]`);
   }, [isSponsoredMessage, messageId]);
 
   const getRootElement = useCallback(
-    () => document.querySelector('.Transition__slide--active > .MessageList'),
+    () => document.querySelector('.Transition_slide-active > .MessageList'),
     [],
   );
 
@@ -394,6 +395,7 @@ const MessageContextMenu: FC<OwnProps> = ({
                 <Avatar
                   size="micro"
                   user={user}
+                  userProfilePhoto={selectUserPhotoFromFullInfo(getGlobal(), user.id)}
                 />
               ))}
             </div>

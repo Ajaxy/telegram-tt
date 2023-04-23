@@ -357,7 +357,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           onScreenSelect={setManagementScreen}
         />
         <Transition
-          name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoom-fade'}
+          name={(shouldSkipTransition || shouldSkipHistoryAnimations) ? 'none' : 'zoomFade'}
           renderCount={MAIN_SCREENS_COUNT + MANAGEMENT_SCREENS_COUNT}
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup

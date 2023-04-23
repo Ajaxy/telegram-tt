@@ -5,12 +5,18 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser } from '../../../api/types';
+import type { ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import {
-  selectChat, selectTabState, selectNotifyExceptions, selectNotifySettings, selectUser,
+  selectChat,
+  selectNotifyExceptions,
+  selectNotifySettings,
+  selectTabState,
+  selectUser,
+  selectUserFullInfo,
+  selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
@@ -37,8 +43,11 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
+  userProfilePhoto?: ApiPhoto;
   progress?: ManagementProgress;
   isMuted?: boolean;
+  personalPhoto?: ApiPhoto;
+  notPersonalPhoto?: ApiPhoto;
 };
 
 const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
@@ -46,10 +55,13 @@ const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
 const ManageUser: FC<OwnProps & StateProps> = ({
   userId,
   user,
+  userProfilePhoto,
   progress,
   isMuted,
   onClose,
   isActive,
+  personalPhoto,
+  notPersonalPhoto,
 }) => {
   const {
     updateContact,
@@ -171,8 +183,6 @@ const ManageUser: FC<OwnProps & StateProps> = ({
 
   const canSetPersonalPhoto = !isUserBot(user) && user.id !== SERVICE_NOTIFICATIONS_USER_ID;
   const isLoading = progress === ManagementProgress.InProgress;
-  const personalPhoto = user.fullInfo?.personalPhoto;
-  const notPersonalPhoto = user.fullInfo?.profilePhoto || user.fullInfo?.fallbackPhoto;
 
   return (
     <div className="Management">
@@ -223,6 +233,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
                     photo={notPersonalPhoto}
                     noPersonalPhoto
                     user={user}
+                    userProfilePhoto={userProfilePhoto}
                     size="mini"
                     className="personal-photo"
                   />
@@ -251,7 +262,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog
@@ -282,11 +293,15 @@ export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const user = selectUser(global, userId);
     const chat = selectChat(global, userId);
+    const userFullInfo = selectUserFullInfo(global, userId);
     const { progress } = selectTabState(global).management;
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
+    const personalPhoto = userFullInfo?.personalPhoto;
+    const notPersonalPhoto = userFullInfo?.profilePhoto || userFullInfo?.fallbackPhoto;
+    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
 
     return {
-      user, progress, isMuted,
+      user, progress, isMuted, personalPhoto, notPersonalPhoto, userProfilePhoto,
     };
   },
 )(ManageUser));

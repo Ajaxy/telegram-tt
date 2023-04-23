@@ -3,7 +3,9 @@ import type {
   ApiUser,
   ApiChatBannedRights,
   ApiChatAdminRights,
-  ApiChatFolder, ApiTopic, ApiUserFullInfo,
+  ApiChatFolder,
+  ApiTopic,
+  ApiPhoto,
 } from '../../api/types';
 import {
   MAIN_THREAD_ID,
@@ -87,25 +89,10 @@ export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
   return chat.title || lang('HiddenName');
 }
 
-export function getChatDescription(chat: ApiChat) {
-  if (!chat.fullInfo) {
-    return undefined;
-  }
-  return chat.fullInfo.about;
-}
-
 export function getChatLink(chat: ApiChat) {
-  const { usernames } = chat;
-  if (usernames) {
-    const activeUsername = usernames.find((u) => u.isActive);
-    if (activeUsername) {
-      return `${TME_LINK_PREFIX}${activeUsername.username}`;
-    }
-  }
+  const activeUsername = chat.usernames?.find((u) => u.isActive);
 
-  const { inviteLink } = chat.fullInfo || {};
-
-  return inviteLink;
+  return activeUsername ? `${TME_LINK_PREFIX}${activeUsername.username}` : undefined;
 }
 
 export function getChatMessageLink(chatId: string, chatUsername?: string, threadId?: number, messageId?: number) {
@@ -124,24 +111,14 @@ export function getChatAvatarHash(
   size: 'normal' | 'big' = 'normal',
   type: 'photo' | 'video' = 'photo',
   avatarHash = owner.avatarHash,
+  profilePhoto?: ApiPhoto,
 ) {
   if (!avatarHash) {
     return undefined;
   }
-  const { fullInfo } = owner;
 
   if (type === 'video') {
-    const userFullInfo = isUserId(owner.id) ? fullInfo as ApiUserFullInfo : undefined;
-    if (userFullInfo?.personalPhoto?.isVideo) {
-      return getVideoAvatarMediaHash(userFullInfo.personalPhoto);
-    }
-    if (fullInfo?.profilePhoto?.isVideo) {
-      return getVideoAvatarMediaHash(fullInfo.profilePhoto);
-    }
-    if (userFullInfo?.fallbackPhoto?.isVideo) {
-      return getVideoAvatarMediaHash(userFullInfo.fallbackPhoto);
-    }
-    return undefined;
+    return profilePhoto?.isVideo ? getVideoAvatarMediaHash(profilePhoto) : undefined;
   }
 
   switch (size) {
@@ -308,14 +285,6 @@ export function getForumComposerPlaceholder(
   }
 
   return undefined;
-}
-
-export function getChatSlowModeOptions(chat?: ApiChat) {
-  if (!chat || !chat.fullInfo) {
-    return undefined;
-  }
-
-  return chat.fullInfo.slowMode;
 }
 
 export function isChatArchived(chat: ApiChat) {

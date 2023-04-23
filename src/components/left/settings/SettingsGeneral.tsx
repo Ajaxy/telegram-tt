@@ -19,8 +19,6 @@ import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import RadioGroup from '../../ui/RadioGroup';
-import switchTheme from '../../../util/switchTheme';
-import { ANIMATION_LEVEL_MAX } from '../../../config';
 
 type OwnProps = {
   isActive?: boolean;
@@ -114,10 +112,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
     setSettingOption({ theme: newTheme });
     setSettingOption({ shouldUseSystemTheme: value === 'auto' });
-    if (newTheme !== theme) {
-      switchTheme(newTheme, animationLevel === ANIMATION_LEVEL_MAX);
-    }
-  }, [animationLevel, setSettingOption, theme]);
+  }, [setSettingOption]);
 
   const handleTimeFormatChange = useCallback((newTimeFormat: string) => {
     setSettingOption({ timeFormat: newTimeFormat as TimeFormat });

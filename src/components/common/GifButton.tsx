@@ -154,7 +154,7 @@ const GifButton: FC<OwnProps> = ({
           pill
           onClick={handleUnsaveClick}
         >
-          <i className="icon-close gif-unsave-button-icon" />
+          <i className="icon icon-close gif-unsave-button-icon" />
         </Button>
       )}
       {withThumb && (

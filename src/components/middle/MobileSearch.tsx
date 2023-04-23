@@ -160,7 +160,7 @@ const MobileSearchFooter: FC<StateProps> = ({
           color="translucent"
           onClick={handleCloseLocalTextSearch}
         >
-          <i className="icon-arrow-left" />
+          <i className="icon icon-arrow-left" />
         </Button>
         <SearchInput
           ref={inputRef}
@@ -187,7 +187,7 @@ const MobileSearchFooter: FC<StateProps> = ({
               onClick={() => openHistoryCalendar({ selectedAt: getDayStartAt(Date.now()) })}
               ariaLabel="Search messages by date"
             >
-              <i className="icon-calendar" />
+              <i className="icon icon-calendar" />
             </Button>
           )}
         </div>
@@ -198,7 +198,7 @@ const MobileSearchFooter: FC<StateProps> = ({
           onClick={handleUp}
           disabled={!foundIds || !foundIds.length || focusedIndex === foundIds.length - 1}
         >
-          <i className="icon-up" />
+          <i className="icon icon-up" />
         </Button>
         <Button
           round
@@ -207,7 +207,7 @@ const MobileSearchFooter: FC<StateProps> = ({
           onClick={handleDown}
           disabled={!foundIds || !foundIds.length || focusedIndex === 0}
         >
-          <i className="icon-down" />
+          <i className="icon icon-down" />
         </Button>
       </div>
     </div>

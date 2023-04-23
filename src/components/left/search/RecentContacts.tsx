@@ -5,7 +5,6 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import { getUserFirstOrLastName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
@@ -13,9 +12,9 @@ import { throttle } from '../../../util/schedulers';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 
-import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
 import LeftSearchResultChat from './LeftSearchResultChat';
+import UserAvatar from '../../common/UserAvatar';
 
 import './RecentContacts.scss';
 
@@ -27,7 +26,6 @@ type StateProps = {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
-  animationLevel: AnimationLevel;
 };
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
@@ -39,7 +37,6 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
   topUserIds,
   usersById,
   recentlyFoundChatIds,
-  animationLevel,
   onReset,
 }) => {
   const {
@@ -80,8 +77,13 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
         <div className="top-peers-section" dir={lang.isRtl ? 'rtl' : undefined}>
           <div ref={topUsersRef} className="top-peers no-selection">
             {topUserIds.map((userId) => (
-              <div className="top-peer-item" onClick={() => handleClick(userId)} dir={lang.isRtl ? 'rtl' : undefined}>
-                <Avatar user={usersById[userId]} animationLevel={animationLevel} withVideo />
+              <div
+                key={userId}
+                className="top-peer-item"
+                onClick={() => handleClick(userId)}
+                dir={lang.isRtl ? 'rtl' : undefined}
+              >
+                <UserAvatar user={usersById[userId]} withVideo />
                 <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}
@@ -101,7 +103,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
               onClick={handleClearRecentlyFoundChats}
               isRtl={lang.isRtl}
             >
-              <i className="icon-close" />
+              <i className="icon icon-close" />
             </Button>
           </h3>
           {recentlyFoundChatIds.map((id) => (
@@ -121,13 +123,11 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
     const { recentlyFoundChatIds } = global;
-    const { animationLevel } = global.settings.byKey;
 
     return {
       topUserIds,
       usersById,
       recentlyFoundChatIds,
-      animationLevel,
     };
   },
 )(RecentContacts));

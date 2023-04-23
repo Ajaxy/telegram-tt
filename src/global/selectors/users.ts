@@ -1,5 +1,7 @@
 import type { GlobalState } from '../types';
-import type { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
+import type {
+  ApiChat, ApiUser, ApiUserFullInfo, ApiUserStatus,
+} from '../../api/types';
 import { isUserBot } from '../helpers';
 
 export function selectUser<T extends GlobalState>(global: T, userId: string): ApiUser | undefined {
@@ -10,10 +12,18 @@ export function selectUserStatus<T extends GlobalState>(global: T, userId: strin
   return global.users.statusesById[userId];
 }
 
-export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: string) {
-  const user = selectUser(global, userId);
+export function selectUserFullInfo<T extends GlobalState>(global: T, userId: string): ApiUserFullInfo | undefined {
+  return global.users.fullInfoById[userId];
+}
 
-  return user?.fullInfo?.isBlocked;
+export function selectUserPhotoFromFullInfo<T extends GlobalState>(global: T, userId: string) {
+  const fullInfo = selectUserFullInfo(global, userId);
+
+  return fullInfo?.personalPhoto || fullInfo?.profilePhoto || fullInfo?.fallbackPhoto;
+}
+
+export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: string) {
+  return selectUserFullInfo(global, userId)?.isBlocked;
 }
 
 export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {

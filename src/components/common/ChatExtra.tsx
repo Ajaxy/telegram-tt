@@ -12,10 +12,15 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import { TME_LINK_PREFIX } from '../../config';
 import {
-  selectChat, selectCurrentMessageList, selectNotifyExceptions, selectNotifySettings, selectUser,
+  selectChat,
+  selectChatFullInfo,
+  selectCurrentMessageList,
+  selectNotifyExceptions,
+  selectNotifySettings,
+  selectUser,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import {
-  getChatDescription,
   getChatLink,
   getTopicLink,
   getHasAdminRight,
@@ -47,6 +52,8 @@ type StateProps =
     isMuted?: boolean;
     phoneCodeList: ApiCountryCode[];
     topicId?: number;
+    description?: string;
+    chatInviteLink?: string;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
 
@@ -61,6 +68,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   isMuted,
   phoneCodeList,
   topicId,
+  description,
+  chatInviteLink,
 }) => {
   const {
     loadFullUser,
@@ -71,7 +80,6 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
   const {
     id: userId,
-    fullInfo,
     usernames,
     phoneNumber,
     isSelf,
@@ -108,8 +116,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
     return isTopicInfo
       ? getTopicLink(chat.id, activeChatUsernames?.[0].username, topicId)
-      : getChatLink(chat);
-  }, [chat, isTopicInfo, activeChatUsernames, topicId]);
+      : getChatLink(chat) || chatInviteLink;
+  }, [chat, isTopicInfo, activeChatUsernames, topicId, chatInviteLink]);
 
   const handleNotificationChange = useCallback(() => {
     setAreNotificationsEnabled((current) => {
@@ -141,7 +149,6 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }
 
   const formattedNumber = phoneNumber && formatPhoneNumberWithCode(phoneCodeList, phoneNumber);
-  const description = (fullInfo?.bio) || getChatDescription(chat);
 
   function renderUsernames(usernameList: ApiUsername[], isChat?: boolean) {
     const [mainUsername, ...otherUsernames] = usernameList;
@@ -259,6 +266,11 @@ export default memo(withGlobal<OwnProps>(
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
     const { threadId } = selectCurrentMessageList(global) || {};
     const topicId = isForum ? threadId : undefined;
+    const chatInviteLink = chat ? selectChatFullInfo(global, chat.id)?.inviteLink : undefined;
+    let description = user ? selectUserFullInfo(global, user.id)?.bio : undefined;
+    if (!description && chat) {
+      description = selectChatFullInfo(global, chat.id)?.about;
+    }
 
     const canInviteUsers = chat && !user && (
       (!isChatChannel(chat) && !isUserRightBanned(chat, 'inviteUsers'))
@@ -273,6 +285,8 @@ export default memo(withGlobal<OwnProps>(
       canInviteUsers,
       isMuted,
       topicId,
+      chatInviteLink,
+      description,
     };
   },
 )(ChatExtra));

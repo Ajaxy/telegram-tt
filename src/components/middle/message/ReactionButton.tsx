@@ -11,6 +11,7 @@ import type { ActiveReaction } from '../../../global/types';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { isSameReaction, isReactionChosen } from '../../../global/helpers';
+import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -76,7 +77,14 @@ const ReactionButton: FC<{
       />
       {recentReactors?.length ? (
         <div className="avatars">
-          {recentReactors.map((user) => <Avatar user={user} size="micro" />)}
+          {recentReactors.map((user) => (
+            <Avatar
+              key={user.id}
+              user={user}
+              userProfilePhoto={selectUserPhotoFromFullInfo(getGlobal(), user.id)}
+              size="micro"
+            />
+          ))}
         </div>
       ) : <AnimatedCounter text={formatIntegerCompact(reaction.count)} className="counter" />}
     </Button>

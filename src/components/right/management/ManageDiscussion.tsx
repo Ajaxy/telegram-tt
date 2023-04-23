@@ -9,7 +9,7 @@ import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -208,7 +208,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
             icon="group"
             ripple
             teactOrderKey={0}
-            className="not-implemented"
+            disabled
           >
             {lang('DiscussionCreateGroup')}
           </ListItem>
@@ -283,9 +283,10 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const chat = selectChat(global, chatId);
+    const { linkedChatId } = selectChatFullInfo(global, chatId) || {};
     const { forDiscussionIds, byId: chatsByIds } = global.chats;
-    const linkedChat = chat?.fullInfo?.linkedChatId
-      ? selectChat(global, chat.fullInfo.linkedChatId)
+    const linkedChat = linkedChatId
+      ? selectChat(global, linkedChatId)
       : undefined;
 
     return {

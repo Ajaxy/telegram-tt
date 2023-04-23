@@ -119,7 +119,7 @@
     margin: 0 0.125rem;
     border-radius: var(--border-radius-messages-small);
     flex-shrink: 0;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
 
     &.active {
       background-color: var(--color-primary) !important;

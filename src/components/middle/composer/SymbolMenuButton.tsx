@@ -164,8 +164,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
           onClick={isSymbolMenuOpen ? closeSymbolMenu : handleSymbolMenuOpen}
           ariaLabel="Choose emoji, sticker or GIF"
         >
-          <i className="icon-smile" />
-          <i className="icon-keyboard" />
+          <i className="icon icon-smile" />
+          <i className="icon icon-keyboard" />
           {isSymbolMenuOpen && !isSymbolMenuLoaded && <Spinner color="gray" />}
         </Button>
       ) : (
@@ -177,7 +177,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
           ariaLabel="Choose emoji, sticker or GIF"
         >
           <div ref={triggerRef} className="symbol-menu-trigger" />
-          <i className="icon-smile" />
+          <i className="icon icon-smile" />
         </ResponsiveHoverButton>
       )}
 

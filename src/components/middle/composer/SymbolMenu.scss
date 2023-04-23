@@ -233,7 +233,7 @@
     right: 0;
     position: absolute;
     font-size: 1rem;
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     border-radius: 50%;
     padding: 0.25rem;
     transition: background-color 0.15s;

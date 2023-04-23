@@ -56,7 +56,7 @@ function renderTopic(lang: LangFn, topic: ApiTopic) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
-        <TopicIcon topic={topic} size={ICON_SIZE} className="icon topic-icon" />
+        <TopicIcon topic={topic} size={ICON_SIZE} className="no-messages-icon topic-icon" />
         <h3 className="title">{lang('Chat.EmptyTopicPlaceholder.Title')}</h3>
         <p className="description topic-description">{renderText(lang('Chat.EmptyTopicPlaceholder.Text'), ['br'])}</p>
       </div>
@@ -74,7 +74,7 @@ function renderSavedMessages(lang: LangFn) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
-        <i className="icon icon-cloud-download" />
+        <i className="icon no-messages-icon icon-cloud-download" />
         <h3 className="title">{lang('Conversation.CloudStorageInfo.Title')}</h3>
         <ul className="description">
           <li>{lang('Conversation.ClousStorageInfo.Description1')}</li>

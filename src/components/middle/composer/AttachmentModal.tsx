@@ -19,10 +19,11 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { isUserId } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 import { getHtmlTextLength } from './helpers/getHtmlTextLength';
-import { selectChat, selectIsChatWithSelf } from '../../../global/selectors';
+import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import buildClassName from '../../../util/buildClassName';
@@ -378,7 +379,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         onClick={onTrigger}
         ariaLabel="More actions"
       >
-        <i className="icon-more" />
+        <i className="icon icon-more" />
       </Button>
     );
   }, [isMobile]);
@@ -431,7 +432,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     return (
       <div className="modal-header-condensed" dir={lang.isRtl ? 'rtl' : undefined}>
         <Button round color="translucent" size="smaller" ariaLabel="Cancel attachments" onClick={onClear}>
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
         <div className="modal-title">{title}</div>
         <DropdownMenu
@@ -635,7 +636,7 @@ export default memo(withGlobal<OwnProps>(
       attachmentSettings,
     } = global;
 
-    const chat = selectChat(global, chatId);
+    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const { language, shouldSuggestCustomEmoji } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
@@ -644,7 +645,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       isChatWithSelf,
       currentUserId,
-      groupChatMembers: chat?.fullInfo?.members,
+      groupChatMembers: chatFullInfo?.members,
       recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,

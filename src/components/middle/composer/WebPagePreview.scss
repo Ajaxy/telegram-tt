@@ -16,7 +16,7 @@
   }
 
   // TODO Remove duplication with `.ComposerEmbeddedMessage`
-  & > div {
+  &_inner {
     display: flex;
     align-items: center;
     padding-right: 0.625rem;

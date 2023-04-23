@@ -158,7 +158,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       <>
         <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
           <Button round color="translucent" size="smaller" ariaLabel={lang('Back')} onClick={handleHeaderBackClick}>
-            <i className="icon-arrow-left" />
+            <i className="icon icon-arrow-left" />
           </Button>
           <InputText
             ref={topicSearchRef}
@@ -211,7 +211,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             ariaLabel={lang('Close')}
             onClick={onClose}
           >
-            <i className="icon-close" />
+            <i className="icon icon-close" />
           </Button>
           <InputText
             ref={searchRef}
@@ -266,7 +266,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <Transition activeKey={activeKey} name="slide-fade">
+      <Transition activeKey={activeKey} name="slideFade">
         {() => {
           return activeKey === TOPIC_LIST_SLIDE ? renderTopicList() : renderChatList();
         }}

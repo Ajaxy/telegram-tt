@@ -21,9 +21,9 @@ const MessageOutgoingStatus: FC<OwnProps> = ({ status }) => {
       <Transition name="reveal" activeKey={Keys[status]}>
         {status === 'failed' ? (
           <div className="MessageOutgoingStatus--failed">
-            <i className="icon-message-failed" />
+            <i className="icon icon-message-failed" />
           </div>
-        ) : <i className={`icon-message-${status}`} />}
+        ) : <i className={`icon icon-message-${status}`} />}
       </Transition>
     </div>
   );

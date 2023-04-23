@@ -320,7 +320,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           onClick={() => selectStickerSet(index)}
         >
           {(stickerSet.id === RECENT_SYMBOL_SET_ID || stickerSet.id === POPULAR_SYMBOL_SET_ID) ? (
-            <i className="icon-recent" />
+            <i className="icon icon-recent" />
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}

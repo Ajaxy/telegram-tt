@@ -78,7 +78,7 @@ const PollOption: FC<OwnProps> = ({
             shouldAnimate && 'animate',
           )}
           >
-            <i className={correctAnswer ? 'icon-check' : 'icon-close'} />
+            <i className={buildClassName('icon', correctAnswer ? 'icon-check' : 'icon-close')} />
           </span>
         )}
       </div>

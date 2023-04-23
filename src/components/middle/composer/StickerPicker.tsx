@@ -12,16 +12,20 @@ import {
   FAVORITE_SYMBOL_SET_ID,
   PREMIUM_STICKER_SET_ID,
   RECENT_SYMBOL_SET_ID,
-  SLIDE_TRANSITION_DURATION, STICKER_PICKER_MAX_SHARED_COVERS,
+  SLIDE_TRANSITION_DURATION,
+  STICKER_PICKER_MAX_SHARED_COVERS,
   STICKER_SIZE_PICKER_HEADER,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { isUserId } from '../../../global/helpers';
 import animateScroll from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { pickTruthy, uniqueByField } from '../../../util/iteratees';
-import { selectChat, selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
+import {
+  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium,
+} from '../../../global/selectors';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
@@ -57,6 +61,7 @@ type StateProps = {
   favoriteStickers: ApiSticker[];
   premiumStickers: ApiSticker[];
   stickerSetsById: Record<string, ApiStickerSet>;
+  chatStickerSetId?: string;
   addedSetIds?: string[];
   canAnimate?: boolean;
   isSavedMessages?: boolean;
@@ -78,6 +83,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   premiumStickers,
   addedSetIds,
   stickerSetsById,
+  chatStickerSetId,
   canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
@@ -161,8 +167,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       }
     }
 
-    if (chat?.fullInfo?.stickerSet) {
-      const fullSet = stickerSetsById[chat.fullInfo.stickerSet.id];
+    if (chatStickerSetId) {
+      const fullSet = stickerSetsById[chatStickerSetId];
       if (fullSet) {
         defaultSets.push({
           id: CHAT_STICKER_SET_ID,
@@ -179,7 +185,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
       ...existingAddedSetIds,
     ];
   }, [
-    addedSetIds, stickerSetsById, favoriteStickers, recentStickers, isCurrentUserPremium, chat, lang, premiumStickers,
+    addedSetIds, stickerSetsById, favoriteStickers, recentStickers, isCurrentUserPremium, chatStickerSetId, lang,
+    premiumStickers,
   ]);
 
   const noPopulatedSets = useMemo(() => (
@@ -273,9 +280,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           {stickerSet.id === PREMIUM_STICKER_SET_ID ? (
             <PremiumIcon withGradient big />
           ) : stickerSet.id === RECENT_SYMBOL_SET_ID ? (
-            <i className="icon-recent" />
+            <i className="icon icon-recent" />
           ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
-            <i className="icon-favorite" />
+            <i className="icon icon-favorite" />
           ) : stickerSet.id === CHAT_STICKER_SET_ID ? (
             <Avatar chat={chat} size="small" />
           ) : (
@@ -376,6 +383,7 @@ export default memo(withGlobal<OwnProps>(
 
     const isSavedMessages = selectIsChatWithSelf(global, chatId);
     const chat = selectChat(global, chatId);
+    const chatStickerSetId = !isUserId(chatId) ? selectChatFullInfo(global, chatId)?.stickerSet?.id : undefined;
 
     return {
       chat,
@@ -387,6 +395,7 @@ export default memo(withGlobal<OwnProps>(
       canAnimate: global.settings.byKey.shouldLoopStickers,
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      chatStickerSetId,
     };
   },
 )(StickerPicker));

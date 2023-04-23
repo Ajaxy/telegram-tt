@@ -5,7 +5,7 @@ import type { ActionReturnType } from '../../types';
 
 import { callApi } from '../../../api/gramjs';
 import {
-  addUsers, updateChat, updateManagement, updateManagementProgress,
+  addUsers, updateChat, updateChatFullInfo, updateManagement, updateManagementProgress,
 } from '../../reducers';
 import {
   selectChat, selectCurrentMessageList, selectTabState, selectUser,
@@ -392,13 +392,10 @@ addActionHandler('hideAllChatJoinRequests', async (global, actions, payload): Pr
   const targetChat = selectChat(global, chatId);
   if (!targetChat) return;
 
-  global = updateChat(global, chatId, {
-    joinRequests: [],
-    fullInfo: {
-      ...targetChat.fullInfo,
-      recentRequesterIds: [],
-      requestsPending: 0,
-    },
+  global = updateChat(global, chatId, { joinRequests: [] });
+  global = updateChatFullInfo(global, chatId, {
+    recentRequesterIds: [],
+    requestsPending: 0,
   });
   setGlobal(global);
 });

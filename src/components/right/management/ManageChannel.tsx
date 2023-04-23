@@ -5,14 +5,16 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ManagementScreens, ManagementProgress } from '../../../types';
-import type { ApiAvailableReaction, ApiChat, ApiExportedInvite } from '../../../api/types';
+import { ManagementProgress, ManagementScreens } from '../../../types';
+import type {
+  ApiAvailableReaction, ApiChat, ApiChatFullInfo, ApiExportedInvite,
+} from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getChatAvatarHash, getHasAdminRight, isChatPublic } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
-import { selectChat, selectTabState } from '../../../global/selectors';
+import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { formatInteger } from '../../../util/textFormat';
@@ -37,6 +39,7 @@ type OwnProps = {
 
 type StateProps = {
   chat: ApiChat;
+  chatFullInfo?: ApiChatFullInfo;
   progress?: ManagementProgress;
   isSignaturesShown: boolean;
   canChangeInfo?: boolean;
@@ -52,6 +55,7 @@ const CHANNEL_MAX_DESCRIPTION = 255;
 const ManageChannel: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
+  chatFullInfo,
   progress,
   isSignaturesShown,
   canChangeInfo,
@@ -75,8 +79,8 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const currentTitle = chat?.title || '';
-  const currentAbout = chat?.fullInfo ? (chat.fullInfo.about || '') : '';
-  const hasLinkedChat = chat?.fullInfo?.linkedChatId;
+  const currentAbout = chatFullInfo?.about || '';
+  const hasLinkedChat = Boolean(chatFullInfo?.linkedChatId);
 
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [isProfileFieldsTouched, setIsProfileFieldsTouched] = useState(false);
@@ -108,8 +112,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
     }
   }, [progress]);
 
-  const adminsCount = Object.keys(chat.fullInfo?.adminMembersById || {}).length;
-  const removedUsersCount = (chat?.fullInfo?.kickedMembers?.length) || 0;
+  const adminsCount = useMemo(() => {
+    return Object.keys(chatFullInfo?.adminMembersById || {}).length;
+  }, [chatFullInfo?.adminMembersById]);
+  const removedUsersCount = chatFullInfo?.kickedMembers?.length || 0;
 
   const handleClickEditType = useCallback(() => {
     onScreenSelect(ManagementScreens.ChatPrivacyType);
@@ -192,20 +198,19 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   }, [chat.isCreator, chat.id, closeDeleteDialog, closeManagement, leaveChannel, deleteChannel, openChat]);
 
   const chatReactionsDescription = useMemo(() => {
-    if (!chat.fullInfo?.enabledReactions) {
+    if (!chatFullInfo?.enabledReactions) {
       return lang('ReactionsOff');
     }
 
-    if (chat.fullInfo.enabledReactions.type === 'all') {
+    if (chatFullInfo.enabledReactions.type === 'all') {
       return lang('ReactionsAll');
     }
 
-    const enabledLength = chat.fullInfo.enabledReactions.allowed.length;
+    const enabledLength = chatFullInfo.enabledReactions.allowed.length;
     const totalLength = availableReactions?.filter((reaction) => !reaction.isInactive).length || 0;
 
-    const text = totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
-    return text;
-  }, [availableReactions, chat, lang]);
+    return totalLength ? `${enabledLength} / ${totalLength}` : `${enabledLength}`;
+  }, [availableReactions, chatFullInfo?.enabledReactions, lang]);
   const isChannelPublic = useMemo(() => isChatPublic(chat), [chat]);
 
   if (chat.isRestricted || chat.isForbidden) {
@@ -343,7 +348,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
         {isLoading ? (
           <Spinner color="white" />
         ) : (
-          <i className="icon-check" />
+          <i className="icon icon-check" />
         )}
       </FloatingActionButton>
       <ConfirmDialog
@@ -368,6 +373,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
+      chatFullInfo: selectChatFullInfo(global, chatId),
       progress,
       isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),

@@ -83,7 +83,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
             />
             {onDelete && (
               <i
-                className={buildClassName('icon-delete', styles.actionItem, styles.deleteFile)}
+                className={buildClassName('icon', 'icon-delete', styles.actionItem, styles.deleteFile)}
                 onClick={() => onDelete(index)}
               />
             )}
@@ -116,6 +116,7 @@ const AttachmentModalItem: FC<OwnProps> = ({
           {canDisplaySpoilerButton && (
             <i
               className={buildClassName(
+                'icon',
                 attachment.shouldSendAsSpoiler ? 'icon-spoiler-disable' : 'icon-spoiler',
                 styles.actionItem,
               )}
@@ -123,7 +124,10 @@ const AttachmentModalItem: FC<OwnProps> = ({
             />
           )}
           {onDelete && (
-            <i className={buildClassName('icon-delete', styles.actionItem)} onClick={() => onDelete(index)} />
+            <i
+              className={buildClassName('icon', 'icon-delete', styles.actionItem)}
+              onClick={() => onDelete(index)}
+            />
           )}
         </div>
       )}

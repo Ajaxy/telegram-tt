@@ -8,7 +8,7 @@
   }
 
   &:not(.inactive) {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
   }
 
   &.inactive {

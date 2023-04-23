@@ -1,12 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { getMainUsername, isUserId } from '../../../global/helpers';
+import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -81,7 +82,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
 
     return (
       <ListItem
-        key={contactId}
+        key={`blocked_${contactId}`}
         className={className}
         ripple
         narrow
@@ -94,7 +95,12 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
         }]}
         style={`top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
       >
-        <Avatar size="medium" user={user} chat={chat} />
+        <Avatar
+          size="medium"
+          user={user}
+          chat={chat}
+          userProfilePhoto={user ? selectUserPhotoFromFullInfo(getGlobal(), user.id) : undefined}
+        />
         <div className="contact-info" dir="auto">
           {userOrChat && <FullNameTitle peer={userOrChat} />}
           {user?.phoneNumber && (
@@ -133,7 +139,7 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
         onClick={openBlockUserModal}
         ariaLabel={lang('BlockContact')}
       >
-        <i className="icon-add" />
+        <i className="icon icon-add" />
       </FloatingActionButton>
       <BlockUserModal
         isOpen={isBlockUserModalOpen}

@@ -4,7 +4,7 @@
   padding: 0.25rem;
 
   &.interactive {
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
   }
 
   .Avatar {

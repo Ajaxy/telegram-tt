@@ -12,23 +12,26 @@ import { REPLIES_USER_ID } from '../../config';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
   selectChat,
-  selectNotifySettings,
-  selectNotifyExceptions,
-  selectUser,
   selectChatBot,
+  selectChatFullInfo,
+  selectCurrentMessageList,
   selectIsPremiumPurchaseBlocked,
-  selectCurrentMessageList, selectTabState,
+  selectNotifyExceptions,
+  selectNotifySettings,
+  selectTabState,
+  selectUser,
+  selectUserFullInfo,
 } from '../../global/selectors';
 import {
-  isUserId,
-  getCanDeleteChat,
-  selectIsChatMuted,
   getCanAddContact,
+  getCanDeleteChat,
+  getCanManageTopic,
+  getHasAdminRight,
   isChatChannel,
   isChatGroup,
-  getCanManageTopic,
+  isUserId,
   isUserRightBanned,
-  getHasAdminRight,
+  selectIsChatMuted,
 } from '../../global/helpers';
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -549,9 +552,11 @@ export default memo(withGlobal<OwnProps>(
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
     const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
+    const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
+    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const canGiftPremium = Boolean(
       global.lastSyncTime
-      && user?.fullInfo?.premiumGifts?.length
+      && userFullInfo?.premiumGifts?.length
       && !selectIsPremiumPurchaseBlocked(global),
     );
 
@@ -571,8 +576,8 @@ export default memo(withGlobal<OwnProps>(
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),
       canGiftPremium,
-      hasLinkedChat: Boolean(chat?.fullInfo?.linkedChatId),
-      botCommands: chatBot?.fullInfo?.botInfo?.commands,
+      hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
+      botCommands: chatBot ? userFullInfo?.botInfo?.commands : undefined,
       isChatInfoShown: selectTabState(global).isChatInfoShown
         && currentChatId === chatId && currentThreadId === threadId,
       canCreateTopic,

@@ -52,7 +52,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, animationLevel }) => {
           {renderText(title)}
         </div>
         <Button round color="translucent" size="smaller" ariaLabel={lang('Close')} onClick={closeModal}>
-          <i className="icon-close" />
+          <i className="icon icon-close" />
         </Button>
       </div>
     );

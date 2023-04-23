@@ -142,7 +142,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
         onClick={handleCloseReportPanel}
         ariaLabel={lang('Close')}
       >
-        <i className="icon-close" />
+        <i className="icon icon-close" />
       </Button>
       <ConfirmDialog
         isOpen={isBlockUserModalOpen}

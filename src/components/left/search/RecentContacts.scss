@@ -33,7 +33,7 @@
     padding: 0.625rem 0.25rem;
     margin-left: 0.5rem;
     border-radius: var(--border-radius-default);
-    cursor: pointer;
+    cursor: var(--custom-cursor, pointer);
     position: relative;
     overflow: hidden;
 

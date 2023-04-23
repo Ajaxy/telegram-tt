@@ -29,9 +29,6 @@ export interface ApiUser {
   fakeType?: ApiFakeType;
   isAttachBot?: boolean;
   emojiStatus?: ApiEmojiStatus;
-
-  // Obtained from GetFullUser / UserFullInfo
-  fullInfo?: ApiUserFullInfo;
 }
 
 export interface ApiUserFullInfo {
