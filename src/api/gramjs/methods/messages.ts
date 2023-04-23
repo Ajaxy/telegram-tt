@@ -1650,7 +1650,7 @@ function handleMultipleLocalMessagesUpdate(
       const localMessage = localMessages[u.randomId.toString()];
       handleLocalMessageUpdate(localMessage, u);
     } else {
-      handleUpdates(u);
+      updater(u);
     }
   });
 }
