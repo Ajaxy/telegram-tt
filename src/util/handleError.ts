@@ -3,11 +3,11 @@ import { throttle } from './schedulers';
 import { getAllMultitabTokens } from './establishMultitabRole';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
-window.addEventListener('error', handleErrorEvent);
-window.addEventListener('unhandledrejection', handleErrorEvent);
-
 // eslint-disable-next-line prefer-destructuring
 const APP_ENV = process.env.APP_ENV;
+
+window.addEventListener('error', handleErrorEvent);
+window.addEventListener('unhandledrejection', handleErrorEvent);
 
 function handleErrorEvent(e: ErrorEvent | PromiseRejectionEvent) {
   // https://stackoverflow.com/questions/49384120/resizeobserver-loop-limit-exceeded

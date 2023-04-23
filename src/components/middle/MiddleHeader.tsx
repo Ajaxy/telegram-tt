@@ -1,7 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState, MessageListType } from '../../global/types';
@@ -289,7 +290,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     || (shouldRenderAudioPlayer && renderingAudioMessage);
 
   // Logic for transition to and from custom display of AudioPlayer/PinnedMessage on smaller screens
-  useEffect(() => {
+  useLayoutEffect(() => {
     const componentEl = componentRef.current;
     if (!componentEl) {
       return;
@@ -309,7 +310,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
       // Remove animation class to prevent it messing up the show transitions
       setTimeout(() => {
-        componentEl.classList.remove('animated');
+        requestMutation(() => {
+          componentEl.classList.remove('animated');
+        });
       }, ANIMATION_DURATION);
     } else {
       componentEl.classList.remove('tools-stacked');

@@ -1,4 +1,5 @@
 import type { IOpusRecorder } from 'opus-recorder';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };
 
@@ -96,7 +97,7 @@ function subscribeToAnalyzer(recorder: IOpusRecorder, cb: Function) {
 
     cb(volume < MIN_VOLUME ? 0 : volume);
 
-    requestAnimationFrame(tick);
+    requestMeasure(tick);
   }
 
   tick();

@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useRef, useState,
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../lib/teact/teact';
 import { hexToRgb } from '../util/switchTheme';
 import { getPropertyHexColor } from '../util/themeStyle';
@@ -41,8 +41,22 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
     rgbColorRef.current = [r, g, b];
   }, [hexColor]);
 
+  useLayoutEffect(() => {
+    const el = ref?.current;
+    if (!el || isDisabled) {
+      return undefined;
+    }
+
+    el.style.setProperty('transition', TRANSITION_STYLE, 'important');
+
+    return () => {
+      el.style.removeProperty('transition');
+    };
+  }, [isDisabled, ref]);
+
   useEffect(() => {
-    if (!ref?.current) {
+    const el = ref?.current;
+    if (!el) {
       return undefined;
     }
 
@@ -57,12 +71,10 @@ export default function useDynamicColorListener(ref?: React.RefObject<HTMLElemen
       updateColor();
     }
 
-    const el = ref.current;
     el.addEventListener('transitionend', handleTransitionEnd);
-    el.style.setProperty('transition', TRANSITION_STYLE, 'important');
+
     return () => {
       el.removeEventListener('transitionend', handleTransitionEnd);
-      el.style.removeProperty('transition');
     };
   }, [isDisabled, ref, updateColor]);
 

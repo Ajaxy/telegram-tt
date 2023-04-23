@@ -1,10 +1,11 @@
 import type { RefObject, UIEvent } from 'react';
-import { LoadMoreDirection } from '../../types';
-
-import type { FC } from '../../lib/teact/teact';
 import React, {
   useCallback, useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
+import { requestForcedReflow } from '../../lib/fasterdom/fasterdom';
+
+import { LoadMoreDirection } from '../../types';
+import type { FC } from '../../lib/teact/teact';
 
 import { debounce } from '../../util/schedulers';
 import resetScroll from '../../util/resetScroll';
@@ -108,36 +109,41 @@ const InfiniteScroll: FC<OwnProps> = ({
 
   // Restore `scrollTop` after adding items
   useLayoutEffect(() => {
-    const container = containerRef.current!;
-    const state = stateRef.current;
+    requestForcedReflow(() => {
+      const container = containerRef.current!;
+      const state = stateRef.current;
 
-    state.listItemElements = container.querySelectorAll<HTMLDivElement>(itemSelector);
+      state.listItemElements = container.querySelectorAll<HTMLDivElement>(itemSelector);
 
-    let newScrollTop;
+      let newScrollTop: number;
 
-    if (state.currentAnchor && Array.from(state.listItemElements).includes(state.currentAnchor)) {
-      const { scrollTop } = container;
-      const newAnchorTop = state.currentAnchor.getBoundingClientRect().top;
-      newScrollTop = scrollTop + (newAnchorTop - state.currentAnchorTop!);
-    } else {
-      const nextAnchor = state.listItemElements[0];
-      if (nextAnchor) {
-        state.currentAnchor = nextAnchor;
-        state.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+      if (state.currentAnchor && Array.from(state.listItemElements).includes(state.currentAnchor)) {
+        const { scrollTop } = container;
+        const newAnchorTop = state.currentAnchor!.getBoundingClientRect().top;
+        newScrollTop = scrollTop + (newAnchorTop - state.currentAnchorTop!);
+      } else {
+        const nextAnchor = state.listItemElements[0];
+        if (nextAnchor) {
+          state.currentAnchor = nextAnchor;
+          state.currentAnchorTop = nextAnchor.getBoundingClientRect().top;
+        }
       }
-    }
 
-    if (withAbsolutePositioning || noScrollRestore) {
-      return;
-    }
+      if (withAbsolutePositioning || noScrollRestore) {
+        return undefined;
+      }
 
-    if (noScrollRestoreOnTop && container.scrollTop === 0) {
-      return;
-    }
+      const { scrollTop } = container;
+      if (noScrollRestoreOnTop && scrollTop === 0) {
+        return undefined;
+      }
 
-    resetScroll(container, newScrollTop);
+      return () => {
+        resetScroll(container, newScrollTop);
 
-    state.isScrollTopJustUpdated = true;
+        state.isScrollTopJustUpdated = true;
+      };
+    });
   }, [items, itemSelector, noScrollRestore, noScrollRestoreOnTop, cacheBuster, withAbsolutePositioning]);
 
   const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {

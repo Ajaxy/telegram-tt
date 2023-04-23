@@ -4,17 +4,48 @@ import { FocusDirection } from '../types';
 
 import {
   ANIMATION_LEVEL_MIN,
-  FAST_SMOOTH_MAX_DISTANCE, FAST_SMOOTH_MAX_DURATION, FAST_SMOOTH_MIN_DURATION,
+  FAST_SMOOTH_MIN_DURATION,
+  FAST_SMOOTH_MAX_DURATION,
+  FAST_SMOOTH_MAX_DISTANCE,
   FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE,
 } from '../config';
 import { IS_ANDROID } from './windowEnvironment';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { animateSingle } from './animation';
-import { fastRaf } from './schedulers';
+import { requestForcedReflow, requestMutation } from '../lib/fasterdom/fasterdom';
 
 let isAnimating = false;
 
 export default function fastSmoothScroll(
+  container: HTMLElement,
+  element: HTMLElement,
+  position: ScrollLogicalPosition | 'centerOrTop',
+  margin = 0,
+  maxDistance = FAST_SMOOTH_MAX_DISTANCE,
+  forceDirection?: FocusDirection,
+  forceDuration?: number,
+  forceNormalContainerHeight?: boolean,
+  withForcedReflow = false,
+) {
+  const args = [
+    container,
+    element,
+    position,
+    margin,
+    maxDistance,
+    forceDirection,
+    forceDuration,
+    forceNormalContainerHeight,
+  ] as const;
+
+  if (withForcedReflow) {
+    requestForcedReflow(() => measure(...args));
+  } else {
+    requestMutation(measure(...args));
+  }
+}
+
+function measure(
   container: HTMLElement,
   element: HTMLElement,
   position: ScrollLogicalPosition | 'centerOrTop',
@@ -71,29 +102,33 @@ export default function fastSmoothScroll(
     path = Math.min(path, remainingPath);
   }
 
-  if (path === 0) {
-    return;
-  }
+  return () => {
+    if (currentScrollTop !== scrollFrom) {
+      container.scrollTop = scrollFrom;
+    }
 
-  const target = scrollFrom + path;
+    if (path === 0) {
+      return;
+    }
 
-  if (forceDuration === 0) {
-    container.scrollTop = target;
-    return;
-  }
+    const target = scrollFrom + path;
 
-  isAnimating = true;
+    if (forceDuration === 0) {
+      container.scrollTop = target;
+      return;
+    }
 
-  const absPath = Math.abs(path);
-  const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
-  const duration = forceDuration || (
-    FAST_SMOOTH_MIN_DURATION
-    + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
-  );
-  const startAt = Date.now();
-  const onHeavyAnimationStop = dispatchHeavyAnimationEvent();
+    isAnimating = true;
 
-  fastRaf(() => {
+    const absPath = Math.abs(path);
+    const transition = absPath <= FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE ? shortTransition : longTransition;
+    const duration = forceDuration || (
+      FAST_SMOOTH_MIN_DURATION
+      + (absPath / FAST_SMOOTH_MAX_DISTANCE) * (FAST_SMOOTH_MAX_DURATION - FAST_SMOOTH_MIN_DURATION)
+    );
+    const startAt = Date.now();
+    const onHeavyAnimationStop = dispatchHeavyAnimationEvent();
+
     animateSingle(() => {
       const t = Math.min((Date.now() - startAt) / duration, 1);
       const currentPath = path * (1 - transition(t));
@@ -107,8 +142,8 @@ export default function fastSmoothScroll(
       }
 
       return isAnimating;
-    });
-  });
+    }, requestMutation);
+  };
 }
 
 export function isAnimatingScroll() {
@@ -140,10 +175,10 @@ function calculateScrollFrom(
   return scrollTop;
 }
 
-function longTransition(t: number) {
-  return 1 - ((1 - t) ** 5);
+function shortTransition(t: number) {
+  return 1 - ((1 - t) ** 3);
 }
 
-function shortTransition(t: number) {
-  return 1 - ((1 - t) ** 3.5);
+function longTransition(t: number) {
+  return 1 - ((1 - t) ** 6.5);
 }

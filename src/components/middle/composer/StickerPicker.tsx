@@ -24,10 +24,10 @@ import { pickTruthy, uniqueByField } from '../../../util/iteratees';
 import { selectChat, selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
+import { useStickerPickerObservers } from '../../common/hooks/useStickerPickerObservers';
 
 import Avatar from '../../common/Avatar';
 import Loading from '../../ui/Loading';
@@ -43,6 +43,7 @@ type OwnProps = {
   chatId: string;
   threadId?: number;
   className: string;
+  isHidden?: boolean;
   loadAndPlay: boolean;
   canSendStickers?: boolean;
   onStickerSelect: (
@@ -62,16 +63,14 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const SMOOTH_SCROLL_DISTANCE = 500;
+const SMOOTH_SCROLL_DISTANCE = 100;
 const HEADER_BUTTON_WIDTH = 52; // px (including margin)
-const STICKER_INTERSECTION_THROTTLE = 200;
-
-const stickerSetIntersections: boolean[] = [];
 
 const StickerPicker: FC<OwnProps & StateProps> = ({
   chat,
   threadId,
   className,
+  isHidden,
   loadAndPlay,
   canSendStickers,
   recentStickers,
@@ -103,31 +102,12 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   const sendMessageAction = useSendMessageAction(chat!.id, threadId);
 
-  const { observe: observeIntersection } = useIntersectionObserver({
-    rootRef: containerRef,
-    throttleMs: STICKER_INTERSECTION_THROTTLE,
-  }, (entries) => {
-    entries.forEach((entry) => {
-      const { id } = entry.target as HTMLDivElement;
-      if (!id || !id.startsWith('sticker-set-')) {
-        return;
-      }
-
-      const index = Number(id.replace('sticker-set-', ''));
-      stickerSetIntersections[index] = entry.isIntersecting;
-    });
-
-    const intersectingWithIndexes = stickerSetIntersections
-      .map((isIntersecting, index) => ({ index, isIntersecting }))
-      .filter(({ isIntersecting }) => isIntersecting);
-
-    if (!intersectingWithIndexes.length) {
-      return;
-    }
-
-    setActiveSetIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
-  });
-  const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: headerRef });
+  const {
+    observeIntersectionForSet,
+    observeIntersectionForPlayingItems,
+    observeIntersectionForShowingItems,
+    observeIntersectionForCovers,
+  } = useStickerPickerObservers(containerRef, headerRef, 'sticker-set', setActiveSetIndex, isHidden);
 
   const lang = useLang();
 
@@ -366,8 +346,10 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             stickerSet={stickerSet}
             loadAndPlay={Boolean(canAnimate && loadAndPlay)}
             index={i}
-            observeIntersection={observeIntersection}
-            shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+            observeIntersection={observeIntersectionForSet}
+            observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
+            observeIntersectionForShowingItems={observeIntersectionForShowingItems}
+            isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
             favoriteStickers={favoriteStickers}
             isSavedMessages={isSavedMessages}
             isCurrentUserPremium={isCurrentUserPremium}

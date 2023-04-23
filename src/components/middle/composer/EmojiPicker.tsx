@@ -53,8 +53,7 @@ const ICONS_BY_CATEGORY: Record<string, string> = {
 };
 
 const OPEN_ANIMATION_DELAY = 200;
-// Only a few categories are above this height.
-const SMOOTH_SCROLL_DISTANCE = 800;
+const SMOOTH_SCROLL_DISTANCE = 100;
 const FOCUS_MARGIN = 50;
 const HEADER_BUTTON_WIDTH = 42; // px. Includes margins
 const INTERSECTION_THROTTLE = 200;
@@ -94,15 +93,15 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
       categoryIntersections[index] = entry.isIntersecting;
     });
 
-    const intersectingWithIndexes = categoryIntersections
-      .map((isIntersecting, index) => ({ index, isIntersecting }))
-      .filter(({ isIntersecting }) => isIntersecting);
+    const minIntersectingIndex = categoryIntersections.reduce((lowestIndex, isIntersecting, index) => {
+      return isIntersecting && index < lowestIndex ? index : lowestIndex;
+    }, Infinity);
 
-    if (!intersectingWithIndexes.length) {
+    if (minIntersectingIndex === Infinity) {
       return;
     }
 
-    setActiveCategoryIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
+    setActiveCategoryIndex(minIntersectingIndex);
   });
 
   const canRenderContents = useAsyncRendering([], MENU_TRANSITION_DURATION);

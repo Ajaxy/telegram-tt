@@ -1,24 +1,33 @@
 import type { RefObject } from 'react';
+import {
+  useCallback, useEffect, useMemo, useRef,
+} from '../../../lib/teact/teact';
+import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
-import { useMemo, useRef } from '../../../lib/teact/teact';
 
 import { LoadMoreDirection } from '../../../types';
 import type { MessageListType } from '../../../global/types';
+import type { Signal } from '../../../util/signals';
 
 import { LOCAL_MESSAGE_MIN_ID } from '../../../config';
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 import { debounce } from '../../../util/schedulers';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
+import { useStateRef } from '../../../hooks/useStateRef';
+import { useSignalEffect } from '../../../hooks/useSignalEffect';
+import { useDebouncedSignal } from '../../../hooks/useAsyncResolvers';
 
 const FAB_THRESHOLD = 50;
 const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect
+const CONTAINER_HEIGHT_DEBOUNCE = 100;
 const TOOLS_FREEZE_TIMEOUT = 250; // Approximate message sending animation duration
 
 export default function useScrollHooks(
   type: MessageListType,
   containerRef: RefObject<HTMLDivElement>,
   messageIds: number[],
+  getContainerHeight: Signal<number | undefined>,
   isViewportNewest: boolean,
   isUnread: boolean,
   onFabToggle: AnyToVoidFunction,
@@ -58,11 +67,12 @@ export default function useScrollHooks(
       return;
     }
 
-    if (!containerRef.current) {
+    const container = containerRef.current;
+    if (!container) {
       return;
     }
 
-    const { offsetHeight, scrollHeight, scrollTop } = containerRef.current;
+    const { offsetHeight, scrollHeight, scrollTop } = container;
     const scrollBottom = Math.round(scrollHeight - scrollTop - offsetHeight);
     const isNearBottom = scrollBottom <= FAB_THRESHOLD;
     const isAtBottom = scrollBottom <= NOTCH_THRESHOLD;
@@ -113,6 +123,7 @@ export default function useScrollHooks(
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: FAB_THRESHOLD * 2,
+    throttleScheduler: requestMeasure,
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForFab);
@@ -124,20 +135,19 @@ export default function useScrollHooks(
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: NOTCH_THRESHOLD,
+    throttleScheduler: requestMeasure,
   }, toggleScrollTools);
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
-  const toggleScrollToolsRef = useRef<typeof toggleScrollTools>();
-  toggleScrollToolsRef.current = toggleScrollTools;
-  useSyncEffect(() => {
+  const toggleScrollToolsRef = useStateRef(toggleScrollTools);
+  useEffect(() => {
     if (isReady) {
       toggleScrollToolsRef.current!();
     }
-  }, [isReady]);
+  }, [isReady, toggleScrollToolsRef]);
 
-  // Workaround for FAB and notch flickering with tall incoming message
-  useSyncEffect(() => {
+  const freezeShortly = useCallback(() => {
     freezeForFab();
     freezeForNotch();
 
@@ -145,7 +155,14 @@ export default function useScrollHooks(
       unfreezeForNotch();
       unfreezeForFab();
     }, TOOLS_FREEZE_TIMEOUT);
-  }, [freezeForFab, freezeForNotch, messageIds, unfreezeForFab, unfreezeForNotch]);
+  }, [freezeForFab, freezeForNotch, unfreezeForFab, unfreezeForNotch]);
+
+  // Workaround for FAB and notch flickering with tall incoming message
+  useSyncEffect(freezeShortly, [freezeShortly, messageIds]);
+
+  // Workaround for notch flickering when opening Composer Embedded Message
+  const getContainerHeightDebounced = useDebouncedSignal(getContainerHeight, CONTAINER_HEIGHT_DEBOUNCE);
+  useSignalEffect(freezeShortly, [freezeShortly, getContainerHeightDebounced]);
 
   return { backwardsTriggerRef, forwardsTriggerRef, fabTriggerRef };
 }

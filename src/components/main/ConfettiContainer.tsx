@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
@@ -162,7 +163,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
     });
     confettiRef.current = confettiRef.current.filter((c) => !confettiToRemove.includes(c));
     if (confettiRef.current.length) {
-      requestAnimationFrame(updateCanvas);
+      requestMeasure(updateCanvas);
     } else {
       isRafStartedRef.current = false;
     }
@@ -175,7 +176,7 @@ const ConfettiContainer: FC<StateProps> = ({ confetti }) => {
       hideTimeout = setTimeout(forceUpdate, CONFETTI_FADEOUT_TIMEOUT);
       if (!isRafStartedRef.current) {
         isRafStartedRef.current = true;
-        requestAnimationFrame(updateCanvas);
+        requestMeasure(updateCanvas);
       }
     }
     return () => {

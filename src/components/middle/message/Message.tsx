@@ -106,7 +106,6 @@ import {
 } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
-import calculateAuthorWidth from './helpers/calculateAuthorWidth';
 import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
@@ -127,6 +126,7 @@ import useThrottledCallback from '../../../hooks/useThrottledCallback';
 import useMessageTranslation from './hooks/useMessageTranslation';
 import usePrevious from '../../../hooks/usePrevious';
 import useTextLanguage from '../../../hooks/useTextLanguage';
+import useAuthorWidth from '../hooks/useAuthorWidth';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -388,9 +388,12 @@ const Message: FC<OwnProps & StateProps> = ({
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
   const {
-    isContextMenuOpen, contextMenuPosition,
-    handleBeforeContextMenu, handleContextMenu: onContextMenu,
-    handleContextMenuClose, handleContextMenuHide,
+    isContextMenuOpen,
+    contextMenuPosition,
+    handleBeforeContextMenu,
+    handleContextMenu: onContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
   } = useContextMenuHandlers(ref, IS_TOUCH_ENV && isInSelectMode, true, IS_ANDROID);
 
   useEffect(() => {
@@ -560,7 +563,7 @@ const Message: FC<OwnProps & StateProps> = ({
     Boolean(message.views) && 'has-views',
     message.isEdited && 'was-edited',
     hasReply && 'has-reply',
-    isContextMenuShown && 'has-menu-open',
+    isContextMenuOpen && 'has-menu-open',
     isFocused && !noFocusHighlight && 'focused',
     isForwarding && 'is-forwarding',
     message.isDeleting && 'is-deleting',
@@ -658,13 +661,19 @@ const Message: FC<OwnProps & StateProps> = ({
     ref, messageId, chatId, isFocused, focusDirection, noFocusHighlight, viewportIds, isResizingContainer,
   );
 
+  const signature = (isChannel && message.postAuthorTitle)
+    || (!asForwarded && forwardInfo?.postAuthorTitle)
+    || undefined;
+  useAuthorWidth(ref, signature);
+
   const shouldFocusOnResize = isLastInGroup;
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
     const lastHeight = messageHeightRef.current;
 
-    const newHeight = entry.target.clientHeight;
+    const newHeight = entry.contentRect.height;
     messageHeightRef.current = newHeight;
+
     if (isAnimatingScroll() || !lastHeight || newHeight <= lastHeight) return;
 
     const container = entry.target.closest<HTMLDivElement>('.MessageList');
@@ -753,13 +762,6 @@ const Message: FC<OwnProps & StateProps> = ({
     style = `width: ${width + extraPadding}px`;
     reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
   }
-
-  const signature = (isChannel && message.postAuthorTitle)
-    || (!asForwarded && forwardInfo?.postAuthorTitle)
-    || undefined;
-  const metaSafeAuthorWidth = useMemo(() => {
-    return signature ? calculateAuthorWidth(signature) : undefined;
-  }, [signature]);
 
   function renderAvatar() {
     const isAvatarPeerUser = avatarPeer && isUserId(avatarPeer.id);
@@ -1208,7 +1210,6 @@ const Message: FC<OwnProps & StateProps> = ({
       ref={ref}
       id={getMessageHtmlId(message.id)}
       className={containerClassName}
-      style={metaSafeAuthorWidth ? `--meta-safe-author-width: ${metaSafeAuthorWidth}px` : undefined}
       data-message-id={messageId}
       onMouseDown={handleMouseDown}
       onClick={handleClick}

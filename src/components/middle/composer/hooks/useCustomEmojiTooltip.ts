@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 import twemojiRegex from '../../../../lib/twemojiRegex';
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
@@ -85,7 +86,7 @@ export default function useCustomEmojiTooltip(
 
     setHtml(`${newHtml}${htmlAfterSelection}`);
 
-    requestAnimationFrame(() => {
+    requestNextMutation(() => {
       focusEditableElement(inputEl, true, true);
     });
   }, [getLastEmoji, isEnabled, inputRef, setHtml]);

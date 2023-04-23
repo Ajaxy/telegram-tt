@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
+
 import useAppLayout from './useAppLayout';
 
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -17,7 +19,7 @@ export default function useInputFocusOnOpen(
     if (isOpen) {
       if (!isMobile) {
         setTimeout(() => {
-          requestAnimationFrame(() => {
+          requestMutation(() => {
             if (inputRef.current?.isConnected) {
               inputRef.current.focus();
             }

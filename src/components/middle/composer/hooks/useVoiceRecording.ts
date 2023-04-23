@@ -1,12 +1,15 @@
 import {
   useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import { IS_SAFARI, IS_VOICE_RECORDING_SUPPORTED } from '../../../../util/windowEnvironment';
 import * as voiceRecording from '../../../../util/voiceRecording';
 import captureEscKeyListener from '../../../../util/captureEscKeyListener';
 
-type ActiveVoiceRecording = { stop: () => Promise<voiceRecording.Result>; pause: NoneToVoidFunction } | undefined;
+type ActiveVoiceRecording =
+  { stop: () => Promise<voiceRecording.Result>; pause: NoneToVoidFunction }
+  | undefined;
 
 const useVoiceRecording = () => {
   // eslint-disable-next-line no-null/no-null
@@ -27,7 +30,9 @@ const useVoiceRecording = () => {
       const { stop, pause } = await voiceRecording.start((tickVolume: number) => {
         if (recordButtonRef.current) {
           if (startRecordTimeRef.current && Date.now() % 4 === 0) {
-            recordButtonRef.current.style.boxShadow = `0 0 0 ${(tickVolume || 0) * 50}px rgba(0,0,0,.15)`;
+            requestMutation(() => {
+              recordButtonRef.current!.style.boxShadow = `0 0 0 ${(tickVolume || 0) * 50}px rgba(0,0,0,.15)`;
+            });
           }
           setCurrentRecordTime(Date.now());
         }
@@ -47,9 +52,12 @@ const useVoiceRecording = () => {
       return undefined;
     }
 
-    if (recordButtonRef.current) {
-      recordButtonRef.current.style.boxShadow = 'none';
-    }
+    requestMutation(() => {
+      if (recordButtonRef.current) {
+        recordButtonRef.current!.style.boxShadow = 'none';
+      }
+    });
+
     try {
       return activeVoiceRecording!.pause();
     } catch (err) {
@@ -67,9 +75,13 @@ const useVoiceRecording = () => {
     setActiveVoiceRecording(undefined);
     startRecordTimeRef.current = undefined;
     setCurrentRecordTime(undefined);
-    if (recordButtonRef.current) {
-      recordButtonRef.current.style.boxShadow = 'none';
-    }
+
+    requestMutation(() => {
+      if (recordButtonRef.current) {
+        recordButtonRef.current!.style.boxShadow = 'none';
+      }
+    });
+
     try {
       return activeVoiceRecording!.stop();
     } catch (err) {

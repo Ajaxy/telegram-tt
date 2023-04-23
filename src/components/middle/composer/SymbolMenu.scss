@@ -24,11 +24,7 @@
     padding-right: env(safe-area-inset-right);
     padding-bottom: env(safe-area-inset-bottom);
     padding-left: env(safe-area-inset-left);
-    transform: translate3d(
-      0,
-      calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height) + env(safe-area-inset-bottom)),
-      0
-    );
+    transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height) + env(safe-area-inset-bottom)), 0);
 
     &.open:not(.in-attachment-modal) {
       transform: translate3d(0, 0, 0);
@@ -40,11 +36,7 @@
 
     &.open.in-attachment-modal {
       z-index: calc(var(--z-modal) + 1);
-      transform: translate3d(
-          0,
-          calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)),
-          0
-      );
+      transform: translate3d(0, calc(var(--symbol-menu-height) + var(--symbol-menu-footer-height)), 0);
     }
 
     // Target: Old Firefox (Waterfox Classic)
@@ -157,6 +149,12 @@
     padding: 0;
     overflow: hidden;
 
+    &:not(.open) {
+      transform: scale(0.85) !important;
+    }
+
+    transition-duration: 200ms !important;
+
     @supports (overflow: overlay) {
       width: var(--symbol-menu-width);
     }
@@ -244,6 +242,7 @@
     &:focus {
       background-color: var(--color-interactive-element-hover);
     }
+
     @media (hover: hover) {
       &:hover {
         background-color: var(--color-interactive-element-hover);

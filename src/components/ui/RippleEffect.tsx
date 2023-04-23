@@ -28,9 +28,8 @@ const RippleEffect: FC = () => {
       return;
     }
 
-    const container = e.currentTarget as HTMLDivElement;
-    const position = container.getBoundingClientRect() as DOMRect;
-
+    const container = e.currentTarget;
+    const position = container.getBoundingClientRect();
     const rippleSize = container.offsetWidth / 2;
 
     setRipples([
@@ -42,9 +41,7 @@ const RippleEffect: FC = () => {
       },
     ]);
 
-    requestAnimationFrame(() => {
-      cleanUpDebounced();
-    });
+    cleanUpDebounced();
   }, [ripples, cleanUpDebounced]);
 
   return (

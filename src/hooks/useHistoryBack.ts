@@ -1,8 +1,8 @@
 import { useCallback, useRef } from '../lib/teact/teact';
 import { getActions } from '../lib/teact/teactn';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 import { IS_TEST } from '../config';
-import { fastRaf } from '../util/schedulers';
 import { IS_IOS } from '../util/windowEnvironment';
 
 import useSyncEffect from './useSyncEffect';
@@ -109,7 +109,10 @@ function processStateOperations(stateOperations: HistoryOperationState[]) {
 }
 
 function deferHistoryOperation(historyOperation: HistoryOperation) {
-  if (!deferredHistoryOperations.length) fastRaf(applyDeferredHistoryOperations);
+  if (!deferredHistoryOperations.length) {
+    requestMeasure(applyDeferredHistoryOperations);
+  }
+
   deferredHistoryOperations.push(historyOperation);
 }
 

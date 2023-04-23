@@ -3,6 +3,7 @@ import {
   useCallback, useEffect, useState,
 } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiChatMember, ApiUser } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
@@ -120,7 +121,7 @@ export default function useMentionTooltip(
       const caretPosition = getCaretPosition(inputEl);
       setHtml(`${newHtml}${htmlAfterSelection}`);
 
-      requestAnimationFrame(() => {
+      requestNextMutation(() => {
         const newCaretPosition = caretPosition + shiftCaretPosition + 1;
         focusEditableElement(inputEl, forceFocus);
         if (newCaretPosition >= 0) {

@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
 import { useState, useEffect, useCallback } from '../lib/teact/teact';
+import { addExtraClass, removeExtraClass } from '../lib/teact/teact-dom';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 
 import type { IAnchorPosition } from '../types';
 import {
@@ -26,12 +28,16 @@ const useContextMenuHandlers = (
 
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
-      (e.target as HTMLElement).classList.add('no-selection');
+      requestMutation(() => {
+        addExtraClass(e.target as HTMLElement, 'no-selection');
+      });
     }
   }, [isMenuDisabled]);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    (e.target as HTMLElement).classList.remove('no-selection');
+    requestMutation(() => {
+      removeExtraClass(e.target as HTMLElement, 'no-selection');
+    });
 
     if (isMenuDisabled || (shouldDisableOnLink && (e.target as HTMLElement).matches('a[href]'))) {
       return;

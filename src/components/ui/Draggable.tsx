@@ -85,16 +85,14 @@ const Draggable: FC<OwnProps> = ({
   }, [id, onDrag, state.origin.x, state.origin.y]);
 
   const handleMouseUp = useCallback(() => {
-    requestAnimationFrame(() => {
-      setState((current) => ({
-        ...current,
-        isDragging: false,
-        width: undefined,
-        height: undefined,
-      }));
+    setState((current) => ({
+      ...current,
+      isDragging: false,
+      width: undefined,
+      height: undefined,
+    }));
 
-      onDragEnd();
-    });
+    onDragEnd();
   }, [onDragEnd]);
 
   useEffect(() => {

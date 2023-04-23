@@ -1,11 +1,11 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import React, {
   useEffect, useRef, memo, useCallback, useState, useMemo,
 } from '../../lib/teact/teact';
 
-import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateIdFor from '../../util/generateIdFor';
@@ -13,7 +13,7 @@ import generateIdFor from '../../util/generateIdFor';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
-import useSyncEffect from '../../hooks/useSyncEffect';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { useStateRef } from '../../hooks/useStateRef';
 
 export type OwnProps = {
@@ -122,7 +122,8 @@ const AnimatedSticker: FC<OwnProps> = ({
 
       // Wait until element is properly mounted
       if (sharedCanvas && !sharedCanvas.offsetParent) {
-        setTimeout(exec, ANIMATION_END_TIMEOUT);
+        // `requestMeasure` is useful as timeouts are run in parallel with image loadings and thus causing reflow
+        setTimeout(() => requestMeasure(exec), ANIMATION_END_TIMEOUT);
         return;
       }
 
@@ -156,7 +157,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       exec();
     } else {
       ensureLottie().then(() => {
-        fastRaf(() => {
+        requestMeasure(() => {
           if (containerRef.current) {
             exec();
           }
@@ -164,8 +165,8 @@ const AnimatedSticker: FC<OwnProps> = ({
       });
     }
   }, [
-    animation, renderId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop,
-    viewId, sharedCanvas, sharedCanvasCoords,
+    animation, renderId, tgsUrl, color, isLowPriority, noLoop, onLoad, quality, size, speed, onEnded, onLoop, viewId,
+    sharedCanvas, sharedCanvasCoords,
   ]);
 
   useEffect(() => {
@@ -197,7 +198,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   }, [animation, playRef, playSegmentRef, viewId]);
 
   const playAnimationOnRaf = useCallback(() => {
-    fastRaf(playAnimation);
+    requestMeasure(playAnimation);
   }, [playAnimation]);
 
   const pauseAnimation = useCallback(() => {
@@ -206,13 +207,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [animation, viewId]);
 
-  useSyncEffect(([prevNoLoop]) => {
+  useEffectWithPrevDeps(([prevNoLoop]) => {
     if (prevNoLoop !== undefined && noLoop !== prevNoLoop) {
       animation?.setNoLoop(noLoop);
     }
   }, [noLoop, animation]);
 
-  useSyncEffect(([prevSharedCanvasCoords]) => {
+  useEffectWithPrevDeps(([prevSharedCanvasCoords]) => {
     if (prevSharedCanvasCoords !== undefined && sharedCanvasCoords !== prevSharedCanvasCoords) {
       animation?.setSharedCanvasCoords(viewId, sharedCanvasCoords);
     }

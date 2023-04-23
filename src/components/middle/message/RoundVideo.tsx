@@ -1,23 +1,23 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
+import { ApiMediaFormat } from '../../../api/types';
 import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../global/helpers';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import safePlay from '../../../util/safePlay';
-import { fastRaf } from '../../../util/schedulers';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -92,7 +92,7 @@ const RoundVideo: FC<OwnProps> = ({
   const [isActivated, setIsActivated] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isActivated) {
       return;
     }
@@ -133,7 +133,7 @@ const RoundVideo: FC<OwnProps> = ({
     setProgress(0);
     safePlay(playerRef.current);
 
-    fastRaf(() => {
+    requestMutation(() => {
       playingProgressRef.current!.innerHTML = '';
     });
   }, []);

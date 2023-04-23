@@ -1,6 +1,7 @@
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -8,7 +9,6 @@ import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { fastRaf } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
 import { selectTabState, selectIsCurrentUserPremium } from '../../../global/selectors';
 
@@ -47,7 +47,7 @@ export type OwnProps = {
     isSilent?: boolean,
     shouldSchedule?: boolean,
     shouldPreserveInput?: boolean,
-    shouldUpdateStickerSetsOrder?: boolean
+    shouldUpdateStickerSetsOrder?: boolean,
   ) => void;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: () => void;
@@ -130,24 +130,21 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [isCurrentUserPremium, lastSyncTime, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
-    if (!isMobile || isAttachmentModal) {
+    if (!isMobile || !isOpen || isAttachmentModal) {
       return undefined;
     }
 
-    if (isOpen) {
-      document.body.classList.add('enable-symbol-menu-transforms');
-      document.body.classList.add('is-symbol-menu-open');
-    }
+    document.body.classList.add('enable-symbol-menu-transforms');
+    document.body.classList.add('is-symbol-menu-open');
 
     return () => {
-      if (isOpen) {
-        fastRaf(() => {
-          document.body.classList.remove('is-symbol-menu-open');
-          setTimeout(() => {
-            document.body.classList.remove('enable-symbol-menu-transforms');
-          }, ANIMATION_DURATION);
+      document.body.classList.remove('is-symbol-menu-open');
+
+      setTimeout(() => {
+        requestMutation(() => {
+          document.body.classList.remove('enable-symbol-menu-transforms');
         });
-      }
+      }, ANIMATION_DURATION);
     };
   }, [isAttachmentModal, isMobile, isOpen]);
 
@@ -219,6 +216,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         return (
           <CustomEmojiPicker
             className="picker-tab"
+            isHidden={!isOpen || !isActive}
             loadAndPlay={isOpen && (isActive || isFrom)}
             onCustomEmojiSelect={handleCustomEmojiSelect}
             chatId={chatId}
@@ -228,6 +226,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         return (
           <StickerPicker
             className="picker-tab"
+            isHidden={!isOpen || !isActive}
             loadAndPlay={canSendStickers ? isOpen && (isActive || isFrom) : false}
             canSendStickers={canSendStickers}
             onStickerSelect={handleStickerSelect}

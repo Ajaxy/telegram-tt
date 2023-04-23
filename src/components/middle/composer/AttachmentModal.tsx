@@ -1,6 +1,7 @@
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -360,7 +361,10 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (!mainButton || !input) return;
 
     const { width } = mainButton.getBoundingClientRect();
-    input.style.setProperty('--margin-for-scrollbar', `${width}px`);
+
+    requestMutation(() => {
+      input.style.setProperty('--margin-for-scrollbar', `${width}px`);
+    });
   }, [lang, isOpen]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {

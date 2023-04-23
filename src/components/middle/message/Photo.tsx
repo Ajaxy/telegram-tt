@@ -1,6 +1,7 @@
 import React, {
   useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
@@ -159,8 +160,10 @@ const Photo: FC<OwnProps> = ({
     const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
     if (fullMediaData) {
       getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
-        contentEl.style.setProperty('--appendix-bg', appendixBg);
-        contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        requestMutation(() => {
+          contentEl.style.setProperty('--appendix-bg', appendixBg);
+          contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        });
       });
     } else {
       contentEl.classList.add('has-appendix-thumb');

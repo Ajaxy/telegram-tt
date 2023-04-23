@@ -1,4 +1,5 @@
 import type { RequiredGlobalActions } from '../../index';
+import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import {
   addActionHandler, getGlobal,
   setGlobal,
@@ -52,7 +53,7 @@ export function initializeSoundsForSafari() {
         sound.currentTime = 0;
         sound.muted = false;
 
-        requestAnimationFrame(() => {
+        requestNextMutation(() => {
           sound.src = prevSrc;
         });
       });

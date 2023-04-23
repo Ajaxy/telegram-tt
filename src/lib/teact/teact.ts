@@ -1,11 +1,13 @@
 import type { ReactElement } from 'react';
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
+
 import { DEBUG, DEBUG_MORE } from '../../config';
-import { throttleWithRafFallback } from '../../util/schedulers';
+import { throttleWith } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
 import { getUnequalProps } from '../../util/arePropsShallowEqual';
-import { handleError } from '../../util/handleError';
 import { incrementOverlayCounter } from '../../util/debugOverlay';
 import { isSignal } from '../../util/signals';
+import safeExec from '../../util/safeExec';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
@@ -309,15 +311,26 @@ let pendingLayoutEffects = new Map<string, Effect>();
 let pendingLayoutCleanups = new Map<string, EffectCleanup>();
 let areImmediateEffectsPending = false;
 
-const runUpdatePassOnRaf = throttleWithRafFallback(() => {
+/*
+  Order:
+  - component effect cleanups
+  - component effects
+  - measure tasks
+  - mutation tasks
+  - component updates
+  - component layout effect cleanups
+  - component layout effects
+  - forced layout measure tasks
+  - forced layout mutation tasks
+ */
+
+const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
   areImmediateEffectsPending = true;
 
   idsToExcludeFromUpdate = new Set();
-
   const instancesToUpdate = Array
     .from(instancesPendingUpdate)
     .sort((a, b) => a.id - b.id);
-
   instancesPendingUpdate = new Set();
 
   const currentCleanups = pendingCleanups;
@@ -328,18 +341,19 @@ const runUpdatePassOnRaf = throttleWithRafFallback(() => {
   pendingEffects = new Map();
   currentEffects.forEach((cb) => cb());
 
-  instancesToUpdate.forEach(prepareComponentForFrame);
+  requestMutation(() => {
+    instancesToUpdate.forEach(prepareComponentForFrame);
+    instancesToUpdate.forEach((instance) => {
+      if (idsToExcludeFromUpdate!.has(instance.id)) {
+        return;
+      }
 
-  instancesToUpdate.forEach((instance) => {
-    if (idsToExcludeFromUpdate!.has(instance.id)) {
-      return;
-    }
+      forceUpdateComponent(instance);
+    });
 
-    forceUpdateComponent(instance);
+    areImmediateEffectsPending = false;
+    runImmediateEffects();
   });
-
-  areImmediateEffectsPending = false;
-  runImmediateEffects();
 });
 
 export function willRunImmediateEffects() {
@@ -356,18 +370,13 @@ export function runImmediateEffects() {
   currentLayoutEffects.forEach((cb) => cb());
 }
 
-function scheduleUpdate(componentInstance: ComponentInstance) {
-  instancesPendingUpdate.add(componentInstance);
-  runUpdatePassOnRaf();
-}
-
 export function renderComponent(componentInstance: ComponentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
 
   const { Component, props } = componentInstance;
-  let newRenderedValue;
+  let newRenderedValue: any;
 
-  try {
+  safeExec(() => {
     renderingInstance = componentInstance;
     componentInstance.hooks.state.cursor = 0;
     componentInstance.hooks.effects.cursor = 0;
@@ -414,13 +423,12 @@ export function renderComponent(componentInstance: ComponentInstance) {
         incrementOverlayCounter(`${componentName} duration`, duration);
       }
     }
-  } catch (err: any) {
+  }, () => {
     // eslint-disable-next-line no-console
     console.error(`[Teact] Error while rendering component ${componentInstance.name}`);
-    handleError(err);
 
     newRenderedValue = componentInstance.renderedValue;
-  }
+  });
 
   if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
@@ -468,10 +476,8 @@ export function unmountComponent(componentInstance: ComponentInstance) {
   idsToExcludeFromUpdate.add(componentInstance.id);
 
   componentInstance.hooks.effects.byCursor.forEach((effect) => {
-    try {
-      effect.cleanup?.();
-    } catch (err: any) {
-      handleError(err);
+    if (effect.cleanup) {
+      safeExec(effect.cleanup);
     }
 
     effect.cleanup = undefined;
@@ -559,7 +565,8 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
 
         byCursor[cursor].nextValue = newValue;
 
-        scheduleUpdate(componentInstance);
+        instancesPendingUpdate.add(componentInstance);
+        runUpdatePassOnRaf();
 
         if (DEBUG_MORE) {
           if (componentInstance.name !== 'TeactNContainer') {
@@ -597,81 +604,75 @@ function useEffectBase(
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const componentInstance = renderingInstance;
 
-  function execCleanup() {
+  const runEffectCleanup = () => safeExec(() => {
     const { cleanup } = byCursor[cursor];
     if (!cleanup) {
       return;
     }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      let DEBUG_startAt: number | undefined;
-      if (DEBUG) {
-        DEBUG_startAt = performance.now();
-      }
-
-      cleanup();
-
-      if (DEBUG) {
-        const duration = performance.now() - DEBUG_startAt!;
-        const componentName = componentInstance.name;
-        if (duration > DEBUG_EFFECT_THRESHOLD) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `[Teact] Slow cleanup at effect cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`,
-          );
-        }
-      }
-    } catch (err: any) {
-      // eslint-disable-next-line no-console
-      console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`);
-      handleError(err);
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    let DEBUG_startAt: number | undefined;
+    if (DEBUG) {
+      DEBUG_startAt = performance.now();
     }
 
-    byCursor[cursor].cleanup = undefined;
-  }
+    cleanup();
 
-  function exec() {
+    if (DEBUG) {
+      const duration = performance.now() - DEBUG_startAt!;
+      const componentName = componentInstance.name;
+      if (duration > DEBUG_EFFECT_THRESHOLD) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[Teact] Slow cleanup at effect cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`,
+        );
+      }
+    }
+  }, () => {
+    // eslint-disable-next-line no-console
+    console.error(`[Teact] Error in effect cleanup at cursor #${cursor} in ${componentInstance.name}`);
+  }, () => {
+    byCursor[cursor].cleanup = undefined;
+  });
+
+  const runEffect = () => safeExec(() => {
     if (!componentInstance.isMounted) {
       return;
     }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      let DEBUG_startAt: number | undefined;
-      if (DEBUG) {
-        DEBUG_startAt = performance.now();
-      }
-
-      const result = effect();
-      if (typeof result === 'function') {
-        byCursor[cursor].cleanup = result;
-      }
-
-      if (DEBUG) {
-        const duration = performance.now() - DEBUG_startAt!;
-        const componentName = componentInstance.name;
-        if (duration > DEBUG_EFFECT_THRESHOLD) {
-          // eslint-disable-next-line no-console
-          console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
-        }
-      }
-    } catch (err: any) {
-      // eslint-disable-next-line no-console
-      console.error(`[Teact] Error in effect at cursor #${cursor} in ${componentInstance.name}`);
-      handleError(err);
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    let DEBUG_startAt: number | undefined;
+    if (DEBUG) {
+      DEBUG_startAt = performance.now();
     }
-  }
+
+    const result = effect();
+    if (typeof result === 'function') {
+      byCursor[cursor].cleanup = result;
+    }
+
+    if (DEBUG) {
+      const duration = performance.now() - DEBUG_startAt!;
+      const componentName = componentInstance.name;
+      if (duration > DEBUG_EFFECT_THRESHOLD) {
+        // eslint-disable-next-line no-console
+        console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
+      }
+    }
+  }, () => {
+    // eslint-disable-next-line no-console
+    console.error(`[Teact] Error in effect at cursor #${cursor} in ${componentInstance.name}`);
+  });
 
   function schedule() {
     const effectId = `${componentInstance.id}_${cursor}`;
 
     if (isLayout) {
-      pendingLayoutCleanups.set(effectId, execCleanup);
-      pendingLayoutEffects.set(effectId, exec);
+      pendingLayoutCleanups.set(effectId, runEffectCleanup);
+      pendingLayoutEffects.set(effectId, runEffect);
     } else {
-      pendingCleanups.set(effectId, execCleanup);
-      pendingEffects.set(effectId, exec);
+      pendingCleanups.set(effectId, runEffectCleanup);
+      pendingEffects.set(effectId, runEffect);
     }
 
     runUpdatePassOnRaf();

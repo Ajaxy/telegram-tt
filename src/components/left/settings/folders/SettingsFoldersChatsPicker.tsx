@@ -2,6 +2,7 @@ import type { FC } from '../../../../lib/teact/teact';
 import React, {
   useCallback, useRef, useEffect, memo,
 } from '../../../../lib/teact/teact';
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../../global';
 
 import { isUserId } from '../../../../global/helpers';
@@ -66,7 +67,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     setTimeout(() => {
-      requestAnimationFrame(() => {
+      requestMutation(() => {
         inputRef.current!.focus();
       });
     }, FOCUS_DELAY_MS);

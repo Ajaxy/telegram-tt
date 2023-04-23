@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
-import { fastRaf } from '../../../../util/schedulers';
 import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../../hooks/useHeavyAnimationCheck';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../hooks/usePriorityPlaybackCheck';
@@ -18,7 +18,7 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
   }, [play]);
 
   const unfreezePlayingOnRaf = useCallback(() => {
-    fastRaf(unfreezePlaying);
+    requestMeasure(unfreezePlaying);
   }, [unfreezePlaying]);
 
   useBackgroundMode(pause, unfreezePlayingOnRaf, !canPlay);

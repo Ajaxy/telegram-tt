@@ -1,9 +1,11 @@
+import { requestMutation } from '../lib/fasterdom/fasterdom';
+
 import type { ISettings } from '../types';
 
 import { animate } from './animation';
+import { lerp } from './math';
 
 import themeColors from '../styles/themes.json';
-import { lerp } from './math';
 
 type RGBAColor = {
   r: number;
@@ -39,32 +41,36 @@ const switchTheme = (theme: ISettings['theme'], withAnimation: boolean) => {
   const startAt = Date.now();
   const themeColorTag = document.querySelector('meta[name="theme-color"]');
 
-  document.documentElement.classList.remove(`theme-${isDarkTheme ? 'light' : 'dark'}`);
-  if (isInitialized) {
-    document.documentElement.classList.add('no-animations');
-  }
-  document.documentElement.classList.add(themeClassName);
-  if (themeColorTag) {
-    themeColorTag.setAttribute('content', isDarkTheme ? '#212121' : '#fff');
-  }
+  requestMutation(() => {
+    document.documentElement.classList.remove(`theme-${isDarkTheme ? 'light' : 'dark'}`);
+    if (isInitialized) {
+      document.documentElement.classList.add('no-animations');
+    }
+    document.documentElement.classList.add(themeClassName);
+    if (themeColorTag) {
+      themeColorTag.setAttribute('content', isDarkTheme ? '#212121' : '#fff');
+    }
 
-  setTimeout(() => {
-    document.documentElement.classList.remove('no-animations');
-  }, ENABLE_ANIMATION_DELAY_MS);
+    setTimeout(() => {
+      requestMutation(() => {
+        document.documentElement.classList.remove('no-animations');
+      });
+    }, ENABLE_ANIMATION_DELAY_MS);
 
-  isInitialized = true;
+    isInitialized = true;
 
-  if (shouldAnimate) {
-    animate(() => {
-      const t = Math.min((Date.now() - startAt) / DURATION_MS, 1);
+    if (shouldAnimate) {
+      animate(() => {
+        const t = Math.min((Date.now() - startAt) / DURATION_MS, 1);
 
-      applyColorAnimationStep(startIndex, endIndex, transition(t));
+        applyColorAnimationStep(startIndex, endIndex, transition(t));
 
-      return t < 1;
-    });
-  } else {
-    applyColorAnimationStep(startIndex, endIndex);
-  }
+        return t < 1;
+      }, requestMutation);
+    } else {
+      applyColorAnimationStep(startIndex, endIndex);
+    }
+  });
 };
 
 function transition(t: number) {

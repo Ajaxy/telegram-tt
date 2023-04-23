@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 
 import { IS_TOUCH_ENV } from '../util/windowEnvironment';
-import { fastRaf } from '../util/schedulers';
 import { useEffect } from '../lib/teact/teact';
 
 const DEFAULT_DURATION = 400;
@@ -15,10 +15,8 @@ export default function useFocusAfterAnimation(
     }
 
     setTimeout(() => {
-      fastRaf(() => {
-        if (ref.current) {
-          ref.current.focus();
-        }
+      requestMutation(() => {
+        ref.current?.focus();
       });
     }, animationDuration);
   }, [ref, animationDuration]);

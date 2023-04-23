@@ -1,4 +1,5 @@
 import { getActions, getGlobal } from '../global';
+import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 
 import { AudioOrigin, GlobalSearchContent } from '../types';
 import type { ApiMessage } from '../api/types';
@@ -8,7 +9,6 @@ import safePlay from './safePlay';
 import { patchSafariProgressiveAudio, isSafariPatchInProgress } from './patchSafariProgressiveAudio';
 import type { MessageKey } from '../global/helpers';
 import { getMessageKey, parseMessageKey } from '../global/helpers';
-import { fastRaf } from './schedulers';
 import { selectCurrentMessageList, selectTabState } from '../global/selectors';
 
 type Handler = (eventName: string, e: Event) => void;
@@ -178,11 +178,11 @@ export function register(
 
     stop() {
       if (currentTrackId === trackId) {
-        // Hack, reset src to remove default media session notification
+        // Hack, reset `src` to remove default media session notification
         const prevSrc = audio.src;
         audio.pause();
-        // onPause not called otherwise, but required to sync UI
-        fastRaf(() => {
+        // `onPause` not called otherwise, but required to sync UI
+        requestNextMutation(() => {
           audio.src = '';
           audio.src = prevSrc;
         });

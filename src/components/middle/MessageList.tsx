@@ -1,12 +1,18 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../global';
+import { requestForcedReflow, forceMeasure, requestMeasure } from '../../lib/fasterdom/fasterdom';
 
+import type { FC } from '../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiBotInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
+
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { AnimationLevel } from '../../types';
@@ -47,7 +53,7 @@ import {
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
 import { DPR } from '../../util/windowEnvironment';
-import { fastRaf, debounce, onTickEnd } from '../../util/schedulers';
+import { debounce, onTickEnd } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
@@ -321,17 +327,15 @@ const MessageList: FC<OwnProps & StateProps> = ({
         onPinnedIntersectionChange({ hasScrolled: true });
       }
 
-      fastRaf(() => {
-        if (!container.parentElement) {
-          return;
-        }
+      if (!container.parentElement) {
+        return;
+      }
 
-        scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
+      scrollOffsetRef.current = container.scrollHeight - container.scrollTop;
 
-        if (type === 'thread') {
-          setScrollOffset({ chatId, threadId, scrollOffset: scrollOffsetRef.current });
-        }
-      });
+      if (type === 'thread') {
+        setScrollOffset({ chatId, threadId, scrollOffset: scrollOffsetRef.current });
+      }
     });
   }, [
     updateStickyDates, hasTools, getForceNextPinnedInHeader, onPinnedIntersectionChange, type, chatId, threadId,
@@ -381,7 +385,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   });
 
   useSyncEffect(
-    () => rememberScrollPositionRef.current(),
+    () => forceMeasure(() => rememberScrollPositionRef.current()),
     // This will run before modifying content and should match deps for `useLayoutEffectWithPrevDeps` below
     [messageIds, isViewportNewest, hasTools, rememberScrollPositionRef],
   );
@@ -397,123 +401,133 @@ const MessageList: FC<OwnProps & StateProps> = ({
     const prevContainerHeight = prevContainerHeightRef.current;
     prevContainerHeightRef.current = containerHeight;
 
-    const container = containerRef.current!;
-    listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
+    requestForcedReflow(() => {
+      const container = containerRef.current!;
+      listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
 
-    const hasLastMessageChanged = (
-      messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
-    );
-    const hasViewportShifted = (
-      messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
-    );
-    const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
-    const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
-
-    // Add extra height when few messages to allow smooth scroll animation. Uses assumption that `parentElement`
-    // is a Transition slide and its CSS class can not be reset in a declarative way.
-    const shouldForceScroll = (
-      isViewportNewest
-      && wasMessageAdded
-      && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
-      && !container.parentElement!.classList.contains('force-messages-scroll')
-      && (container.firstElementChild as HTMLDivElement)!.clientHeight <= container.offsetHeight * 2
-    );
-
-    if (shouldForceScroll) {
-      container.parentElement!.classList.add('force-messages-scroll');
-
-      setTimeout(() => {
-        if (container.parentElement) {
-          container.parentElement.classList.remove('force-messages-scroll');
-        }
-      }, MESSAGE_ANIMATION_DURATION);
-    }
-
-    const { scrollTop, scrollHeight, offsetHeight } = container;
-    const scrollOffset = scrollOffsetRef.current;
-    const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
-
-    let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
-    if (wasMessageAdded) {
-      // If two new messages come at once (e.g. when bot responds) then the first message will update `scrollOffset`
-      // right away (before animation) which creates inconsistency until the animation completes. To work around that,
-      // we calculate `isAtBottom` with a "buffer" of the latest message height (this is approximate).
-      const lastItemHeight = lastItemElement ? lastItemElement.offsetHeight : 0;
-      bottomOffset -= lastItemHeight;
-    }
-    const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
-
-    let newScrollTop!: number;
-
-    if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
-      if (lastItemElement) {
-        fastRaf(() => {
-          fastSmoothScroll(
-            container,
-            lastItemElement,
-            'end',
-            BOTTOM_FOCUS_MARGIN,
-          );
-        });
-      }
-
-      newScrollTop = scrollHeight - offsetHeight;
-      scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
-
-      // Scroll still needs to be restored after container resize
-      if (!shouldForceScroll) {
-        return;
-      }
-    }
-
-    if (process.env.APP_ENV === 'perf') {
-      // eslint-disable-next-line no-console
-      console.time('scrollTop');
-    }
-
-    const isResized = prevContainerHeight && prevContainerHeight !== containerHeight;
-    const anchor = anchorIdRef.current && container.querySelector(`#${anchorIdRef.current}`);
-    const unreadDivider = (
-      !anchor
-      && memoUnreadDividerBeforeIdRef.current
-      && container.querySelector<HTMLDivElement>(`.${UNREAD_DIVIDER_CLASS}`)
-    );
-
-    if (isAtBottom && isResized) {
-      if (isAnimatingScroll()) {
-        return;
-      }
-
-      newScrollTop = scrollHeight - offsetHeight;
-    } else if (anchor) {
-      const newAnchorTop = anchor.getBoundingClientRect().top;
-      newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
-    } else if (unreadDivider) {
-      newScrollTop = Math.min(
-        unreadDivider.offsetTop - (hasTools ? UNREAD_DIVIDER_TOP_WITH_TOOLS : UNREAD_DIVIDER_TOP),
-        scrollHeight - scrollOffset,
+      const hasLastMessageChanged = (
+        messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
       );
-    } else {
-      newScrollTop = scrollHeight - scrollOffset;
-    }
+      const hasViewportShifted = (
+        messageIds?.[0] !== prevMessageIds?.[0] && messageIds?.length === (MESSAGE_LIST_SLICE / 2 + 1)
+      );
+      const wasMessageAdded = hasLastMessageChanged && !hasViewportShifted;
+      const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
-    resetScroll(container, Math.ceil(newScrollTop));
+      // Add extra height when few messages to allow smooth scroll animation. Uses assumption that `parentElement`
+      // is a Transition slide and its CSS class can not be reset in a declarative way.
+      const shouldForceScroll = (
+        isViewportNewest
+        && wasMessageAdded
+        && (messageIds && messageIds.length < MESSAGE_LIST_SLICE / 2)
+        && !container.parentElement!.classList.contains('force-messages-scroll')
+        && (container.firstElementChild as HTMLDivElement)!.clientHeight <= container.offsetHeight * 2
+      );
 
-    if (!memoFocusingIdRef.current) {
-      isScrollTopJustUpdatedRef.current = true;
-      fastRaf(() => {
-        isScrollTopJustUpdatedRef.current = false;
-      });
-    }
+      const {
+        scrollTop,
+        scrollHeight,
+        offsetHeight,
+      } = container;
+      const scrollOffset = scrollOffsetRef.current;
+      const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
 
-    scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
+      let bottomOffset = scrollOffset - (prevContainerHeight || offsetHeight);
+      if (wasMessageAdded) {
+        // If two new messages come at once (e.g. when bot responds) then the first message will update `scrollOffset`
+        // right away (before animation) which creates inconsistency until the animation completes. To work around that,
+        // we calculate `isAtBottom` with a "buffer" of the latest message height (this is approximate).
+        const lastItemHeight = lastItemElement ? lastItemElement.offsetHeight : 0;
+        bottomOffset -= lastItemHeight;
+      }
+      const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
 
-    if (process.env.APP_ENV === 'perf') {
-      // eslint-disable-next-line no-console
-      console.timeEnd('scrollTop');
-    }
+      let newScrollTop!: number;
+
+      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
+        if (lastItemElement) {
+          // Break out of `forceLayout`
+          requestMeasure(() => {
+            fastSmoothScroll(
+              container,
+              lastItemElement,
+              'end',
+              BOTTOM_FOCUS_MARGIN,
+            );
+          });
+        }
+
+        newScrollTop = scrollHeight - offsetHeight;
+        scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
+
+        // Scroll still needs to be restored after container resize
+        if (!shouldForceScroll) {
+          return undefined;
+        }
+      }
+
+      if (process.env.APP_ENV === 'perf') {
+        // eslint-disable-next-line no-console
+        console.time('scrollTop');
+      }
+
+      const isResized = prevContainerHeight !== undefined && prevContainerHeight !== containerHeight;
+      if (isResized && isAnimatingScroll()) {
+        return undefined;
+      }
+
+      const anchor = anchorIdRef.current && container.querySelector(`#${anchorIdRef.current}`);
+      const unreadDivider = (
+        !anchor
+        && memoUnreadDividerBeforeIdRef.current
+        && container.querySelector<HTMLDivElement>(`.${UNREAD_DIVIDER_CLASS}`)
+      );
+
+      if (isAtBottom && isResized) {
+        newScrollTop = scrollHeight - offsetHeight;
+      } else if (anchor) {
+        const newAnchorTop = anchor.getBoundingClientRect().top;
+        newScrollTop = scrollTop + (newAnchorTop - (anchorTopRef.current || 0));
+      } else if (unreadDivider) {
+        newScrollTop = Math.min(
+          unreadDivider.offsetTop - (hasTools ? UNREAD_DIVIDER_TOP_WITH_TOOLS : UNREAD_DIVIDER_TOP),
+          scrollHeight - scrollOffset,
+        );
+      } else {
+        newScrollTop = scrollHeight - scrollOffset;
+      }
+
+      return () => {
+        if (shouldForceScroll) {
+          container.parentElement!.classList.add('force-messages-scroll');
+
+          setTimeout(() => {
+            if (container.parentElement) {
+              container.parentElement.classList.remove('force-messages-scroll');
+            }
+          }, MESSAGE_ANIMATION_DURATION);
+        }
+
+        resetScroll(container, Math.ceil(newScrollTop));
+
+        if (!memoFocusingIdRef.current) {
+          isScrollTopJustUpdatedRef.current = true;
+
+          requestMeasure(() => {
+            isScrollTopJustUpdatedRef.current = false;
+          });
+        }
+
+        scrollOffsetRef.current = Math.max(Math.ceil(scrollHeight - newScrollTop), offsetHeight);
+
+        if (process.env.APP_ENV === 'perf') {
+          // eslint-disable-next-line no-console
+          console.timeEnd('scrollTop');
+        }
+      };
+    });
     // This should match deps for `useSyncEffect` above
-  }, [messageIds, isViewportNewest, getContainerHeight, prevContainerHeightRef, hasTools]);
+  }, [messageIds, isViewportNewest, hasTools, getContainerHeight, prevContainerHeightRef]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {
@@ -631,6 +645,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isChannelChat={isChannelChat}
           messageIds={messageIds || [lastMessage!.id]}
           messageGroups={messageGroups || groupMessages([lastMessage!])}
+          getContainerHeight={getContainerHeight}
           isViewportNewest={Boolean(isViewportNewest)}
           isUnread={Boolean(firstUnreadId)}
           withUsers={withUsers}

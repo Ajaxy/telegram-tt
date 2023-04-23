@@ -3,6 +3,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 
 import type { ApiNewPoll } from '../../../api/types';
 
@@ -85,7 +86,8 @@ const PollModal: FC<OwnProps> = ({
 
   const addNewOption = useCallback((newOptions: string[] = []) => {
     setOptions([...newOptions, '']);
-    requestAnimationFrame(() => {
+
+    requestNextMutation(() => {
       const list = optionsListRef.current;
       if (!list) {
         return;
@@ -189,7 +191,7 @@ const PollModal: FC<OwnProps> = ({
       }
     }
 
-    requestAnimationFrame(() => {
+    requestNextMutation(() => {
       if (!optionsListRef.current) {
         return;
       }

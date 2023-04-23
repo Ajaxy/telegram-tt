@@ -1,3 +1,5 @@
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
+
 import type { RLottieApi } from './rlottie.worker';
 
 import {
@@ -6,7 +8,6 @@ import {
 import { createConnector } from '../../util/PostMessageConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
-import { fastRaf } from '../../util/schedulers';
 import generateIdFor from '../../util/generateIdFor';
 
 interface Params {
@@ -222,25 +223,29 @@ class RLottie {
       canvas, ctx,
     } = containerInfo;
 
+    let [canvasWidth, canvasHeight] = [canvas.width, canvas.height];
+
     if (!canvas.dataset.isJustCleaned || canvas.dataset.isJustCleaned === 'false') {
       const sizeFactor = this.calcSizeFactor();
-      ensureCanvasSize(canvas, sizeFactor);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ([canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor));
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       canvas.dataset.isJustCleaned = 'true';
-      fastRaf(() => {
+      requestMeasure(() => {
         canvas.dataset.isJustCleaned = 'false';
       });
     }
 
     containerInfo.coords = {
-      x: Math.round((newCoords?.x || 0) * canvas.width),
-      y: Math.round((newCoords?.y || 0) * canvas.height),
+      x: Math.round((newCoords?.x || 0) * canvasWidth),
+      y: Math.round((newCoords?.y || 0) * canvasHeight),
     };
 
     const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
 
     if (frame && frame !== WAITING) {
-      ctx.drawImage(frame, containerInfo.coords.x, containerInfo.coords.y);
+      requestMutation(() => {
+        ctx.drawImage(frame, containerInfo.coords!.x, containerInfo.coords!.y);
+      });
     }
   }
 
@@ -273,21 +278,28 @@ class RLottie {
         }
       }
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
-
-      canvas.style.width = `${size}px`;
-      canvas.style.height = `${size}px`;
-
       imgSize = Math.round(size * sizeFactor);
 
-      canvas.width = imgSize;
-      canvas.height = imgSize;
+      if (!this.imgSize) {
+        this.imgSize = imgSize;
+        this.imageData = new ImageData(imgSize, imgSize);
+      }
 
-      container.appendChild(canvas);
+      requestMutation(() => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
 
-      this.views.set(viewId, {
-        canvas, ctx, onLoad,
+        canvas.style.width = `${size}px`;
+        canvas.style.height = `${size}px`;
+
+        canvas.width = imgSize;
+        canvas.height = imgSize;
+
+        container.appendChild(canvas);
+
+        this.views.set(viewId, {
+          canvas, ctx, onLoad,
+        });
       });
     } else {
       if (!container.isConnected) {
@@ -297,25 +309,25 @@ class RLottie {
       const canvas = container;
       const ctx = canvas.getContext('2d')!;
 
-      ensureCanvasSize(canvas, sizeFactor);
-
       imgSize = Math.round(this.params.size! * sizeFactor);
+
+      if (!this.imgSize) {
+        this.imgSize = imgSize;
+        this.imageData = new ImageData(imgSize, imgSize);
+      }
+
+      const [canvasWidth, canvasHeight] = ensureCanvasSize(canvas, sizeFactor);
 
       this.views.set(viewId, {
         canvas,
         ctx,
         isSharedCanvas: true,
         coords: {
-          x: Math.round((coords?.x || 0) * canvas.width),
-          y: Math.round((coords?.y || 0) * canvas.height),
+          x: Math.round((coords?.x || 0) * canvasWidth),
+          y: Math.round((coords?.y || 0) * canvasHeight),
         },
         onLoad,
       });
-    }
-
-    if (!this.imgSize) {
-      this.imgSize = imgSize;
-      this.imageData = new ImageData(imgSize, imgSize);
     }
 
     if (this.isRendererInited) {
@@ -556,7 +568,7 @@ class RLottie {
       }
 
       return true;
-    });
+    }, requestMutation);
   }
 
   private getFrame(frameIndex: number) {
@@ -597,10 +609,15 @@ class RLottie {
 function ensureCanvasSize(canvas: HTMLCanvasElement, sizeFactor: number) {
   const expectedWidth = Math.round(canvas.offsetWidth * sizeFactor);
   const expectedHeight = Math.round(canvas.offsetHeight * sizeFactor);
+
   if (canvas.width !== expectedWidth || canvas.height !== expectedHeight) {
-    canvas.width = expectedWidth;
-    canvas.height = expectedHeight;
+    requestMutation(() => {
+      canvas.width = expectedWidth;
+      canvas.height = expectedHeight;
+    });
   }
+
+  return [expectedWidth, expectedHeight];
 }
 
 export default RLottie;

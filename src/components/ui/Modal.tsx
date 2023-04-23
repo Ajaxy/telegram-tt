@@ -10,7 +10,7 @@ import buildClassName from '../../util/buildClassName';
 import { enableDirectTextInput, disableDirectTextInput } from '../../util/directInputManager';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useShowTransition from '../../hooks/useShowTransition';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
@@ -88,7 +88,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  useEffectWithPrevDeps(([prevIsOpen]) => {
+  useLayoutEffectWithPrevDeps(([prevIsOpen]) => {
     document.body.classList.toggle('has-open-dialog', Boolean(isOpen));
 
     if (isOpen || (!isOpen && prevIsOpen !== undefined)) {

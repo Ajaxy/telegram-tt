@@ -3,6 +3,7 @@ import React, {
   useEffect, memo, useCallback, useState, useRef, useLayoutEffect,
 } from '../../lib/teact/teact';
 import { addExtraClass } from '../../lib/teact/teact-dom';
+import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { AnimationLevel, LangCode } from '../../types';
@@ -32,7 +33,6 @@ import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
-import { fastRaf } from '../../util/schedulers';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import updateIcon from '../../util/updateIcon';
 
@@ -393,7 +393,7 @@ const Main: FC<OwnProps & StateProps> = ({
     willAnimateLeftColumnRef.current = true;
 
     if (IS_ANDROID) {
-      fastRaf(() => {
+      requestNextMutation(() => {
         document.body.classList.toggle('android-left-blackout-open', !isLeftColumnOpen);
       });
     }

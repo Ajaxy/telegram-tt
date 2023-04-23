@@ -1,22 +1,22 @@
 import { useCallback, useMemo } from '../lib/teact/teact';
 
-import type { fastRaf } from '../util/schedulers';
-import { throttle, throttleWithRaf } from '../util/schedulers';
+import type { Scheduler } from '../util/schedulers';
+import { throttle, throttleWith } from '../util/schedulers';
 
 export default function useThrottledCallback<T extends AnyToVoidFunction>(
   fn: T,
   deps: any[],
-  msOrRaf: number | typeof fastRaf,
+  msOrSchedulerFn: number | Scheduler,
   noFirst = false,
 ) {
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   const fnMemo = useCallback(fn, deps);
 
   return useMemo(() => {
-    if (typeof msOrRaf === 'number') {
-      return throttle(fnMemo, msOrRaf, !noFirst);
+    if (typeof msOrSchedulerFn === 'number') {
+      return throttle(fnMemo, msOrSchedulerFn, !noFirst);
     } else {
-      return throttleWithRaf(fnMemo);
+      return throttleWith(msOrSchedulerFn, fnMemo);
     }
-  }, [fnMemo, msOrRaf, noFirst]);
+  }, [fnMemo, msOrSchedulerFn, noFirst]);
 }
