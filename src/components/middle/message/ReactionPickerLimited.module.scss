@@ -1,0 +1,11 @@
+.root {
+  --emoji-size: 2.5rem;
+}
+
+.wrapper {
+  position: relative;
+  height: auto;
+  max-height: 18rem;
+  overflow-y: auto;
+  padding: 0.5rem 0.25rem;
+}

@@ -13,6 +13,8 @@
   position: relative;
 
   &.custom-emoji {
+    color: var(--color-primary);
+
     width: var(--custom-emoji-size);
     height: var(--custom-emoji-size);
     margin: 0.3125rem;
@@ -61,6 +63,10 @@
     background: var(--premium-gradient);
 
     z-index: 1;
+  }
+
+  &.selected {
+    background-color: var(--color-interactive-element-hover);
   }
 
   &.interactive {

@@ -6,7 +6,10 @@ interface Layout {
   extraTopPadding?: number;
   marginSides?: number;
   extraMarginTop?: number;
+  menuElMinWidth?: number;
+  shouldAvoidNegativePosition?: boolean;
   withPortal?: boolean;
+  isDense?: boolean; //  Allows you to place the menu as close to the edges of the area as possible
 }
 
 const MENU_POSITION_VISUAL_COMFORT_SPACE_PX = 16;
@@ -15,7 +18,7 @@ const EMPTY_RECT = {
   width: 0, left: 0, height: 0, top: 0,
 };
 
-export default function useContextMenuPosition(
+export default function useMenuPosition(
   anchor: IAnchorPosition | undefined,
   getTriggerElement: () => HTMLElement | null,
   getRootElement: () => HTMLElement | null,
@@ -48,21 +51,25 @@ export default function useContextMenuPosition(
       extraTopPadding = 0,
       marginSides = 0,
       extraMarginTop = 0,
+      menuElMinWidth = 0,
+      shouldAvoidNegativePosition = false,
       withPortal = false,
+      isDense = false,
     } = getLayout?.() || {};
 
     const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
 
+    const { offsetWidth: menuElWidth, offsetHeight: menuElHeight } = menuEl || { offsetWidth: 0, offsetHeight: 0 };
     const menuRect = menuEl ? {
-      width: menuEl.offsetWidth,
-      height: menuEl.offsetHeight + marginTop!,
+      width: Math.max(menuElWidth, menuElMinWidth),
+      height: menuElHeight + marginTop!,
     } : EMPTY_RECT;
 
     const rootRect = rootEl ? rootEl.getBoundingClientRect() : EMPTY_RECT;
 
     let horizontalPosition: 'left' | 'right';
     let verticalPosition: 'top' | 'bottom';
-    if (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left) {
+    if (isDense || (x + menuRect.width + extraPaddingX < rootRect.width + rootRect.left)) {
       x += 3;
       horizontalPosition = 'left';
     } else if (x - menuRect.width - rootRect.left > 0) {
@@ -87,7 +94,7 @@ export default function useContextMenuPosition(
       }
     }
 
-    if (y + menuRect.height < rootRect.height + rootRect.top) {
+    if (isDense || (y + menuRect.height < rootRect.height + rootRect.top)) {
       verticalPosition = 'top';
     } else {
       verticalPosition = 'bottom';
@@ -107,12 +114,23 @@ export default function useContextMenuPosition(
       x - triggerRect.left,
       rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX,
     );
-    const left = (horizontalPosition === 'left'
-      ? (withPortal
+    let left = (horizontalPosition === 'left'
+      ? (withPortal || shouldAvoidNegativePosition
         ? Math.max(MENU_POSITION_VISUAL_COMFORT_SPACE_PX, leftWithPossibleNegative)
         : leftWithPossibleNegative)
       : (x - triggerRect.left)) + addedXForPortalPositioning;
-    const top = y - triggerRect.top + addedYForPortalPositioning;
+    let top = y - triggerRect.top + addedYForPortalPositioning;
+
+    if (isDense) {
+      left = Math.min(left, rootRect.width - menuRect.width - MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
+      top = Math.min(top, rootRect.height - menuRect.height - MENU_POSITION_VISUAL_COMFORT_SPACE_PX);
+    }
+
+    // Avoid hiding external parts of menus on mobile devices behind the edges of the screen (ReactionSelector for example)
+    const addedXForMenuPositioning = menuElMinWidth ? Math.max(0, (menuElMinWidth - menuElWidth) / 2) : 0;
+    if (left - addedXForMenuPositioning < 0 && shouldAvoidNegativePosition) {
+      left = addedXForMenuPositioning + MENU_POSITION_VISUAL_COMFORT_SPACE_PX;
+    }
 
     const menuMaxHeight = rootRect.height - MENU_POSITION_BOTTOM_MARGIN - (marginTop || 0);
 

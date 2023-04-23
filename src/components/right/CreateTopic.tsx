@@ -21,7 +21,7 @@ import TopicIcon from '../common/TopicIcon';
 import InputText from '../ui/InputText';
 import FloatingActionButton from '../ui/FloatingActionButton';
 import Spinner from '../ui/Spinner';
-import CustomEmojiPicker from '../middle/composer/CustomEmojiPicker';
+import CustomEmojiPicker from '../common/CustomEmojiPicker';
 import Transition from '../ui/Transition';
 
 import styles from './ManageTopic.module.scss';

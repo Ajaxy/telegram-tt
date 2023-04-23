@@ -54,7 +54,9 @@ import {
 } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { buildStickerFromDocument } from './symbols';
-import { buildApiPhoto, buildApiPhotoSize, buildApiThumbnailFromStripped } from './common';
+import {
+  buildApiPhoto, buildApiPhotoSize, buildApiThumbnailFromPath, buildApiThumbnailFromStripped,
+} from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
@@ -313,13 +315,14 @@ export function buildApiReaction(reaction: GramJs.TypeReaction): ApiReaction | u
 
 export function buildApiAvailableReaction(availableReaction: GramJs.AvailableReaction): ApiAvailableReaction {
   const {
-    selectAnimation, staticIcon, reaction, title,
+    selectAnimation, staticIcon, reaction, title, appearAnimation,
     inactive, aroundAnimation, centerIcon, effectAnimation, activateAnimation,
     premium,
   } = availableReaction;
 
   return {
     selectAnimation: buildApiDocument(selectAnimation),
+    appearAnimation: buildApiDocument(appearAnimation),
     activateAnimation: buildApiDocument(activateAnimation),
     effectAnimation: buildApiDocument(effectAnimation),
     staticIcon: buildApiDocument(staticIcon),
@@ -609,11 +612,17 @@ export function buildApiDocument(document: GramJs.TypeDocument): ApiDocument | u
     id, size, mimeType, date, thumbs, attributes,
   } = document;
 
-  const thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
+  const photoSize = thumbs && thumbs.find((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
+  let thumbnail = thumbs && buildApiThumbnailFromStripped(thumbs);
+  if (!thumbnail && thumbs && photoSize) {
+    const photoPath = thumbs.find((s: any): s is GramJs.PhotoPathSize => s instanceof GramJs.PhotoPathSize);
+    if (photoPath) {
+      thumbnail = buildApiThumbnailFromPath(photoPath, photoSize);
+    }
+  }
 
   let mediaType: ApiDocument['mediaType'] | undefined;
   let mediaSize: ApiDocument['mediaSize'] | undefined;
-  const photoSize = thumbs && thumbs.find((s: any): s is GramJs.PhotoSize => s instanceof GramJs.PhotoSize);
   if (photoSize) {
     mediaSize = {
       width: photoSize.w,

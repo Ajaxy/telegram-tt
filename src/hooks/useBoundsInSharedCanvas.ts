@@ -31,7 +31,9 @@ export default function useBoundsInSharedCanvas(
       return;
     }
 
-    const target = container.classList.contains('sticker-set-cover') ? container : container.querySelector('img')!;
+    const target = container.classList.contains('sticker-set-cover') || container.classList.contains('sticker-reaction')
+      ? container
+      : container.querySelector('img')!;
     const targetBounds = target.getBoundingClientRect();
     const canvasBounds = canvas.getBoundingClientRect();
 

@@ -888,6 +888,8 @@ export function updater(update: Update) {
     onUpdate({ '@type': 'updateFavoriteStickers' });
   } else if (update instanceof GramJs.UpdateRecentStickers) {
     onUpdate({ '@type': 'updateRecentStickers' });
+  } else if (update instanceof GramJs.UpdateRecentReactions) {
+    onUpdate({ '@type': 'updateRecentReactions' });
   } else if (update instanceof GramJs.UpdateMoveStickerSetToTop) {
     if (!update.masks) {
       onUpdate({

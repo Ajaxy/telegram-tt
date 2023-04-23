@@ -68,6 +68,7 @@ import type {
   EmojiKeywords,
   FocusDirection,
   GlobalSearchContent,
+  IAnchorPosition,
   InlineBotSettings,
   ISettings,
   IThemeSettings,
@@ -244,6 +245,12 @@ export type TabState = {
   reactorModal?: {
     chatId: string;
     messageId: number;
+  };
+
+  reactionPicker?: {
+    chatId?: string;
+    messageId?: number;
+    position?: IAnchorPosition;
   };
 
   inlineBots: {
@@ -687,6 +694,8 @@ export type GlobalState = {
 
   recentEmojis: string[];
   recentCustomEmojis: string[];
+  topReactions: ApiReaction[];
+  recentReactions: ApiReaction[];
 
   stickers: {
     setsById: Record<string, ApiStickerSet>;
@@ -1717,7 +1726,10 @@ export interface ActionPayloads {
   };
 
   // Reactions
+  loadTopReactions: undefined;
+  loadRecentReactions: undefined;
   loadAvailableReactions: undefined;
+  clearRecentReactions: undefined;
 
   loadMessageReactions: {
     chatId: string;
@@ -1728,6 +1740,7 @@ export interface ActionPayloads {
     chatId: string;
     messageId: number;
     reaction: ApiReaction;
+    shouldAddToRecent?: boolean;
   } & WithTabId;
 
   setDefaultReaction: {
@@ -1747,6 +1760,13 @@ export interface ActionPayloads {
     messageId: number;
     reaction: ApiReaction;
   } & WithTabId;
+
+  openReactionPicker: {
+    chatId: string;
+    messageId: number;
+    position: IAnchorPosition;
+  } & WithTabId;
+  closeReactionPicker: WithTabId | undefined;
 
   // Media Viewer & Audio Player
   openMediaViewer: {

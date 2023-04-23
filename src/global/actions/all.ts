@@ -11,6 +11,7 @@ import './ui/payments';
 import './ui/calls';
 import './ui/mediaViewer';
 import './ui/passcode';
+import './ui/reactions';
 
 import './api/initial';
 import './api/chats';

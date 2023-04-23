@@ -15,7 +15,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../hooks/useMenuPosition';
 import useDynamicColorListener from '../../hooks/useDynamicColorListener';
 
 import StickerView from './StickerView';
@@ -35,6 +35,7 @@ type OwnProps<T> = {
   isSavedMessages?: boolean;
   isStatusPicker?: boolean;
   canViewSet?: boolean;
+  isSelected?: boolean;
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   observeIntersection: ObserveFn;
@@ -68,6 +69,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   isStatusPicker,
   canViewSet,
   observeIntersection,
+  isSelected,
   isCurrentUserPremium,
   noShowPremium,
   sharedCanvasRef,
@@ -123,7 +125,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useContextMenuPosition(
+  } = useMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,
@@ -205,8 +207,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const fullClassName = buildClassName(
     'StickerButton',
     onClick && 'interactive',
+    isSelected && 'selected',
     isCustomEmoji && 'custom-emoji',
-    `sticker-button-${id}`,
     className,
   );
 

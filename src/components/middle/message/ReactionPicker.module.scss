@@ -1,0 +1,49 @@
+.menu {
+  position: absolute;
+  z-index: var(--z-reaction-picker);
+
+  @media (max-width: 600px) {
+    max-width: 100%;
+    left: 0 !important;
+    right: 0 !important;
+  }
+}
+
+.menuContent {
+  width: 26.25rem;
+  height: 26.25rem;
+  padding: 0 !important;
+  transform-origin: 50% 3.5rem !important;
+
+  &:global(.bubble) {
+    transform: scale(0.7) !important;
+    transition: opacity 140ms cubic-bezier(0.2, 0, 0.2, 1), transform 140ms cubic-bezier(0.2, 0, 0.2, 1) !important;
+  }
+
+  &:global(.bubble.open) {
+    transform: scale(1) !important;
+  }
+
+  @media (max-width: 440px) {
+    max-width: min(calc(100% - 1rem), 26.25rem);
+    left: 50% !important;
+    right: auto !important;
+
+    &:global(.bubble) {
+      transform: scale(0.5) translateX(-50%) !important;
+      transform-origin: 0 3.5rem !important;
+    }
+
+    &:global(.bubble.open) {
+      transform: scale(1) translateX(-50%) !important;
+    }
+  }
+}
+
+.onlyReactions {
+  height: auto;
+}
+
+.hidden {
+  display: none !important;
+}

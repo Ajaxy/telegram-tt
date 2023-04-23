@@ -26,7 +26,7 @@ import {
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
   selectIsServiceChatReady,
-  selectUser,
+  selectUser, selectIsReactionPickerOpen,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
@@ -47,6 +47,7 @@ import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck'
 import useInterval from '../../hooks/useInterval';
 import useAppLayout from '../../hooks/useAppLayout';
 import useTimeout from '../../hooks/useTimeout';
+import useFlag from '../../hooks/useFlag';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -81,6 +82,7 @@ import DeleteFolderDialog from './DeleteFolderDialog.async';
 import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import DraftRecipientPicker from './DraftRecipientPicker.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
+import ReactionPicker from '../middle/message/ReactionPicker.async';
 
 import './Main.scss';
 
@@ -131,11 +133,13 @@ type StateProps = {
   deleteFolderDialogId?: number;
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
+  isReactionPickerOpen: boolean;
   isCurrentUserPremium?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
+const REACTION_PICKER_LOADING_DELAY_MS = 7000; // 7 sec
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
@@ -181,6 +185,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isPremiumModalOpen,
   isPaymentModalOpen,
   isReceiptModalOpen,
+  isReactionPickerOpen,
   isCurrentUserPremium,
   deleteFolderDialogId,
   isMasterTab,
@@ -219,6 +224,9 @@ const Main: FC<OwnProps & StateProps> = ({
     toggleLeftColumn,
     loadRecentEmojiStatuses,
     updatePageTitle,
+    loadTopReactions,
+    loadRecentReactions,
+    loadFeaturedEmojiStickers,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -231,6 +239,9 @@ const Main: FC<OwnProps & StateProps> = ({
   useTimeout(() => {
     void loadBundle(Bundles.Calls);
   }, CALL_BUNDLE_LOADING_DELAY_MS);
+
+  const [shouldLoadReactionPicker, markShouldLoadReactionPicker] = useFlag(false);
+  useTimeout(markShouldLoadReactionPicker, REACTION_PICKER_LOADING_DELAY_MS);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -266,18 +277,25 @@ const Main: FC<OwnProps & StateProps> = ({
       loadContactList();
       loadPremiumGifts();
       loadDefaultTopicIcons();
-      loadDefaultStatusIcons();
       checkAppVersion();
-      if (isCurrentUserPremium) {
-        loadRecentEmojiStatuses();
-      }
+      loadTopReactions();
+      loadRecentReactions();
+      loadFeaturedEmojiStickers();
     }
   }, [
     lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
     loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons,
-    loadDefaultStatusIcons, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab, initMain,
+    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons, loadTopReactions,
+    loadDefaultStatusIcons, loadRecentReactions, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab, initMain,
   ]);
+
+  // Initial Premium API calls
+  useEffect(() => {
+    if (lastSyncTime && isMasterTab && isCurrentUserPremium) {
+      loadDefaultStatusIcons();
+      loadRecentEmojiStatuses();
+    }
+  }, [isCurrentUserPremium, isMasterTab, lastSyncTime, loadDefaultStatusIcons, loadRecentEmojiStatuses]);
 
   // Language-based API calls
   useEffect(() => {
@@ -502,6 +520,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog deleteFolderDialogId={deleteFolderDialogId} />
+      <ReactionPicker isOpen={isReactionPickerOpen} shouldLoad={shouldLoadReactionPicker} />
     </div>
   );
 };
@@ -559,6 +578,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
+      isReactionPickerOpen: selectIsReactionPickerOpen(global),
       hasNotifications: Boolean(notifications.length),
       hasDialogs: Boolean(dialogs.length),
       audioMessage,

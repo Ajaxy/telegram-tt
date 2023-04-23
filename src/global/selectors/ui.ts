@@ -74,3 +74,10 @@ export function selectIsForumPanelOpen<T extends GlobalState>(
     tabState.globalSearch.query === undefined || tabState.globalSearch.isClosing
   );
 }
+export function selectIsReactionPickerOpen<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { reactionPicker } = selectTabState(global, tabId);
+  return Boolean(reactionPicker?.position);
+}

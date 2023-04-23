@@ -4,7 +4,7 @@ import React, { useCallback } from '../../lib/teact/teact';
 import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
-import { IS_COMPACT_MENU } from '../../util/windowEnvironment';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import './MenuItem.scss';
 
@@ -42,6 +42,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
   } = props;
 
   const lang = useLang();
+  const { isTouchScreen } = useAppLayout();
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
       e.stopPropagation();
@@ -73,7 +74,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     className,
     disabled && 'disabled',
     destructive && 'destructive',
-    IS_COMPACT_MENU && 'compact',
+    !isTouchScreen && 'compact',
     withWrap && 'wrap',
   );
 

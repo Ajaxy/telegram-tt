@@ -3,7 +3,7 @@ import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiStickerSet,
+  ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet,
 } from '../api/types';
 
 export type TextPart = TeactNode;
@@ -223,10 +223,10 @@ export enum SettingsScreens {
   DoNotTranslate,
 }
 
-export type StickerSetOrRecent = Pick<ApiStickerSet, (
+export type StickerSetOrReactionsSetOrRecent = Pick<ApiStickerSet, (
   'id' | 'accessHash' | 'title' | 'count' | 'stickers' | 'hasThumbnail' | 'isLottie' | 'isVideos' | 'isEmoji' |
   'installedDate' | 'isArchived'
-)>;
+)> & { reactions?: ApiReaction[] };
 
 export enum LeftColumnContent {
   ChatList,

@@ -1,36 +1,43 @@
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
-} from '../../../lib/teact/teact';
-import { getActions, getGlobal } from '../../../global';
+} from '../../lib/teact/teact';
+import { getActions, getGlobal } from '../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { ApiSticker } from '../../../api/types';
-import type { StickerSetOrRecent } from '../../../types';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { FC } from '../../lib/teact/teact';
+import type { ApiAvailableReaction, ApiReaction, ApiSticker } from '../../api/types';
+import type { StickerSetOrReactionsSetOrRecent } from '../../types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   DEFAULT_STATUS_ICON_ID,
   DEFAULT_TOPIC_ICON_STICKER_ID,
-  EMOJI_SIZE_PICKER, FAVORITE_SYMBOL_SET_ID, RECENT_SYMBOL_SET_ID, STICKER_SIZE_PICKER,
-} from '../../../config';
-import buildClassName from '../../../util/buildClassName';
-import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../../global/selectors';
+  EMOJI_SIZE_PICKER,
+  FAVORITE_SYMBOL_SET_ID,
+  POPULAR_SYMBOL_SET_ID,
+  RECENT_SYMBOL_SET_ID,
+  STICKER_SIZE_PICKER,
+} from '../../config';
+import buildClassName from '../../util/buildClassName';
+import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
+import { getReactionUniqueKey } from '../../global/helpers';
 
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
-import useMediaTransition from '../../../hooks/useMediaTransition';
-import useResizeObserver from '../../../hooks/useResizeObserver';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
+import useMediaTransition from '../../hooks/useMediaTransition';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useAppLayout from '../../hooks/useAppLayout';
+import useWindowSize from '../../hooks/useWindowSize';
 
-import StickerButton from '../../common/StickerButton';
-import ConfirmDialog from '../../ui/ConfirmDialog';
-import Button from '../../ui/Button';
+import StickerButton from './StickerButton';
+import ConfirmDialog from '../ui/ConfirmDialog';
+import Button from '../ui/Button';
+import ReactionEmoji from './ReactionEmoji';
 
-import grey from '../../../assets/icons/forumTopic/grey.svg';
+import grey from '../../assets/icons/forumTopic/grey.svg';
 
 type OwnProps = {
-  stickerSet: StickerSetOrRecent;
+  stickerSet: StickerSetOrReactionsSetOrRecent;
   loadAndPlay: boolean;
   index: number;
   idPrefix?: string;
@@ -38,12 +45,16 @@ type OwnProps = {
   favoriteStickers?: ApiSticker[];
   isSavedMessages?: boolean;
   isStatusPicker?: boolean;
+  isReactionPicker?: boolean;
   isCurrentUserPremium?: boolean;
-  shouldHideRecentHeader?: boolean;
+  shouldHideHeader?: boolean;
+  selectedReactionIds?: string[];
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
   observeIntersection: ObserveFn;
+  availableReactions?: ApiAvailableReaction[];
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
+  onReactionSelect?: (reaction: ApiReaction) => void;
   onStickerUnfave?: (sticker: ApiSticker) => void;
   onStickerFave?: (sticker: ApiSticker) => void;
   onStickerRemoveRecent?: (sticker: ApiSticker) => void;
@@ -53,6 +64,10 @@ type OwnProps = {
 };
 
 const ITEMS_PER_ROW_FALLBACK = 8;
+const ITEMS_MOBILE_PER_ROW_FALLBACK = 7;
+const ITEMS_MINI_MOBILE_PER_ROW_FALLBACK = 6;
+const MOBILE_WIDTH_THRESHOLD_PX = 440;
+const MINI_MOBILE_WIDTH_THRESHOLD_PX = 362;
 
 const StickerSet: FC<OwnProps> = ({
   stickerSet,
@@ -61,13 +76,17 @@ const StickerSet: FC<OwnProps> = ({
   idPrefix,
   shouldRender,
   favoriteStickers,
+  availableReactions,
   isSavedMessages,
   isStatusPicker,
+  isReactionPicker,
   isCurrentUserPremium,
-  shouldHideRecentHeader,
+  shouldHideHeader,
   withDefaultTopicIcon,
+  selectedReactionIds,
   withDefaultStatusIcon,
   observeIntersection,
+  onReactionSelect,
   onStickerSelect,
   onStickerUnfave,
   onStickerFave,
@@ -79,6 +98,7 @@ const StickerSet: FC<OwnProps> = ({
   const {
     clearRecentStickers,
     clearRecentCustomEmoji,
+    clearRecentReactions,
     openPremiumModal,
     toggleStickerSet,
     loadStickers,
@@ -93,10 +113,11 @@ const StickerSet: FC<OwnProps> = ({
   const sharedCanvasHqRef = useRef<HTMLCanvasElement>(null);
 
   const lang = useLang();
+  const { width: windowWidth } = useWindowSize();
   const [isConfirmModalOpen, openConfirmModal, closeConfirmModal] = useFlag();
   const { isMobile } = useAppLayout();
 
-  const [itemsPerRow, setItemsPerRow] = useState(ITEMS_PER_ROW_FALLBACK);
+  const [itemsPerRow, setItemsPerRow] = useState(getItemsPerRowFallback(windowWidth));
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
@@ -106,17 +127,22 @@ const StickerSet: FC<OwnProps> = ({
   const emojiMarginPx = isMobile ? 8 : 10;
   const isRecent = stickerSet.id === RECENT_SYMBOL_SET_ID;
   const isFavorite = stickerSet.id === FAVORITE_SYMBOL_SET_ID;
+  const isPopular = stickerSet.id === POPULAR_SYMBOL_SET_ID;
   const isEmoji = stickerSet.isEmoji;
   const isPremiumSet = !isRecent && selectIsSetPremium(stickerSet);
 
   const handleClearRecent = useCallback(() => {
-    if (isEmoji) {
+    if (isReactionPicker) {
+      clearRecentReactions();
+    } else if (isEmoji) {
       clearRecentCustomEmoji();
     } else {
       clearRecentStickers();
     }
     closeConfirmModal();
-  }, [clearRecentCustomEmoji, clearRecentStickers, closeConfirmModal, isEmoji]);
+  }, [
+    clearRecentCustomEmoji, clearRecentReactions, clearRecentStickers, closeConfirmModal, isEmoji, isReactionPicker,
+  ]);
 
   const handleAddClick = useCallback(() => {
     if (isPremiumSet && !isCurrentUserPremium) {
@@ -156,10 +182,12 @@ const StickerSet: FC<OwnProps> = ({
   const margin = isEmoji ? emojiMarginPx : stickerMarginPx;
 
   const calculateItemsPerRow = useCallback((width: number) => {
-    if (!width) return ITEMS_PER_ROW_FALLBACK;
+    if (!width) {
+      return getItemsPerRowFallback(windowWidth);
+    }
 
     return Math.floor(width / (itemSize + margin));
-  }, [itemSize, margin]);
+  }, [itemSize, margin, windowWidth]);
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
     setItemsPerRow(calculateItemsPerRow(entry.contentRect.width));
@@ -172,7 +200,7 @@ const StickerSet: FC<OwnProps> = ({
   }, [calculateItemsPerRow]);
 
   useEffect(() => {
-    if (isIntersecting && !stickerSet.stickers?.length && stickerSet.accessHash) {
+    if (isIntersecting && !stickerSet.stickers?.length && !stickerSet.reactions?.length && stickerSet.accessHash) {
       loadStickers({
         stickerSetInfo: {
           id: stickerSet.id,
@@ -186,15 +214,13 @@ const StickerSet: FC<OwnProps> = ({
     && stickerSet.stickers?.some(({ isFree }) => !isFree);
 
   const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
-  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID;
+  const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID && stickerSet.id !== POPULAR_SYMBOL_SET_ID;
   const [isCut, , expand] = useFlag(canCut);
   const itemsBeforeCutout = itemsPerRow * 3 - 1;
   const totalItemsCount = withDefaultTopicIcon ? stickerSet.count + 1 : stickerSet.count;
 
   const heightWhenCut = Math.ceil(Math.min(itemsBeforeCutout, totalItemsCount) / itemsPerRow) * (itemSize + margin);
   const height = isCut ? heightWhenCut : Math.ceil(totalItemsCount / itemsPerRow) * (itemSize + margin);
-
-  const shouldHideHeader = isRecent && shouldHideRecentHeader;
 
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
@@ -218,7 +244,7 @@ const StickerSet: FC<OwnProps> = ({
           {isRecent && (
             <i className="symbol-set-remove icon-close" onClick={openConfirmModal} />
           )}
-          {!isRecent && isEmoji && !isInstalled && (
+          {!isRecent && isEmoji && !isInstalled && !isPopular && (
             <Button
               className="symbol-set-add-button"
               withPremiumGradient={isPremiumSet && !isCurrentUserPremium}
@@ -262,14 +288,33 @@ const StickerSet: FC<OwnProps> = ({
             <i className="icon-premium" />
           </Button>
         )}
-        {shouldRender && stickerSet.stickers && stickerSet.stickers
-          .slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
+        {shouldRender && stickerSet.reactions?.map((reaction) => {
+          const reactionId = getReactionUniqueKey(reaction);
+          const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
+
+          return (
+            <ReactionEmoji
+              key={`${stickerSet.id}_${reactionId}`}
+              reaction={reaction}
+              isSelected={isSelected}
+              loadAndPlay={loadAndPlay}
+              availableReactions={availableReactions}
+              observeIntersection={observeIntersection}
+              onClick={onReactionSelect!}
+              sharedCanvasRef={sharedCanvasRef}
+              sharedCanvasHqRef={sharedCanvasHqRef}
+            />
+          );
+        })}
+        {shouldRender && stickerSet.stickers?.slice(0, isCut ? itemsBeforeCutout : stickerSet.stickers.length)
           .map((sticker, i) => {
             const isHqEmoji = (isRecent || isFavorite)
               && selectIsAlwaysHighPriorityEmoji(getGlobal(), sticker.stickerSetInfo);
             const canvasRef = (canCut && i >= itemsBeforeCutout) || isHqEmoji
               ? sharedCanvasHqRef
               : sharedCanvasRef;
+            const reactionId = sticker.isCustomEmoji ? sticker.id : sticker.emoji;
+            const isSelected = reactionId ? selectedReactionIds?.includes(reactionId) : undefined;
 
             return (
               <StickerButton
@@ -285,6 +330,7 @@ const StickerSet: FC<OwnProps> = ({
                 sharedCanvasRef={canvasRef}
                 onClick={onStickerSelect}
                 clickArg={sticker}
+                isSelected={isSelected}
                 onUnfaveClick={isFavorite && favoriteStickerIdsSet?.has(sticker.id) ? onStickerUnfave : undefined}
                 onFaveClick={!favoriteStickerIdsSet?.has(sticker.id) ? onStickerFave : undefined}
                 onRemoveRecentClick={isRecent ? onStickerRemoveRecent : undefined}
@@ -309,7 +355,7 @@ const StickerSet: FC<OwnProps> = ({
 
       {isRecent && (
         <ConfirmDialog
-          text={lang('ClearRecentStickersAlertMessage')}
+          text={lang(isReactionPicker ? 'ClearRecentReactionsAlertMessage' : 'ClearRecentStickersAlertMessage')}
           isOpen={isConfirmModalOpen}
           onClose={closeConfirmModal}
           confirmHandler={handleClearRecent}
@@ -321,3 +367,11 @@ const StickerSet: FC<OwnProps> = ({
 };
 
 export default memo(StickerSet);
+
+function getItemsPerRowFallback(windowWidth: number): number {
+  return windowWidth > MOBILE_WIDTH_THRESHOLD_PX
+    ? ITEMS_PER_ROW_FALLBACK
+    : (windowWidth < MINI_MOBILE_WIDTH_THRESHOLD_PX
+      ? ITEMS_MINI_MOBILE_PER_ROW_FALLBACK
+      : ITEMS_MOBILE_PER_ROW_FALLBACK);
+}

@@ -7,7 +7,7 @@ import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useContextMenuPosition from '../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../hooks/useMenuPosition';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 
@@ -124,7 +124,7 @@ const ListItem: FC<OwnProps> = ({
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useContextMenuPosition(
+  } = useMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,

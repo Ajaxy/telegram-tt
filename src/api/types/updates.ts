@@ -400,6 +400,10 @@ export type ApiUpdateRecentStickers = {
   '@type': 'updateRecentStickers';
 };
 
+export type ApiUpdateRecentReactions = {
+  '@type': 'updateRecentReactions';
+};
+
 export type ApiUpdateMoveStickerSetToTop = {
   '@type': 'updateMoveStickerSetToTop';
   isCustomEmoji?: boolean;
@@ -638,7 +642,8 @@ export type ApiUpdate = (
   ApiUpdatePhoneCall | ApiUpdatePhoneCallSignalingData | ApiUpdatePhoneCallMediaState |
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
-  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses | ApiRequestInitApi
+  ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
+  ApiUpdateRecentReactions | ApiRequestInitApi
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -2,17 +2,18 @@ import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
-import useShowTransition from '../../hooks/useShowTransition';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useHistoryBack from '../../hooks/useHistoryBack';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import { IS_BACKDROP_BLUR_SUPPORTED, IS_COMPACT_MENU } from '../../util/windowEnvironment';
+import useShowTransition from '../../hooks/useShowTransition';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useAppLayout from '../../hooks/useAppLayout';
 
 import Portal from './Portal';
 
@@ -82,6 +83,7 @@ const Menu: FC<OwnProps> = ({
     menuRef = ref;
   }
   const backdropContainerRef = containerRef || menuRef;
+  const { isTouchScreen } = useAppLayout();
 
   const {
     transitionClassNames,
@@ -135,7 +137,7 @@ const Menu: FC<OwnProps> = ({
       id={id}
       className={buildClassName(
         'Menu no-selection',
-        !noCompact && IS_COMPACT_MENU && 'compact',
+        !noCompact && !isTouchScreen && 'compact',
         !IS_BACKDROP_BLUR_SUPPORTED && 'no-blur',
         className,
       )}

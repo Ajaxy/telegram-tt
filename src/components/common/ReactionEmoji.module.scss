@@ -1,0 +1,18 @@
+.root {
+  --custom-emoji-size: 2.5rem;
+
+  cursor: pointer;
+  display: inline-block;
+  width: var(--custom-emoji-size);
+  height: var(--custom-emoji-size);
+  border-radius: var(--border-radius-messages-small);
+  background: transparent no-repeat center;
+  background-size: contain;
+  transition: background-color 0.15s ease, opacity 0.3s ease !important;
+  position: relative;
+
+  &.selected,
+  &:hover {
+    background-color: var(--color-interactive-element-hover);
+  }
+}

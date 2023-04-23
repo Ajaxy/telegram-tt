@@ -16,6 +16,7 @@ import type {
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
+import { REM } from '../../common/helpers/mediaDimensions';
 import { getMessageCopyOptions } from './helpers/copyOptions';
 import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
 import { getUserFullName } from '../../../global/helpers';
@@ -23,7 +24,7 @@ import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
 import useFlag from '../../../hooks/useFlag';
-import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
 
@@ -38,6 +39,7 @@ import './MessageContextMenu.scss';
 
 type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
+  topReactions?: ApiReaction[];
   isOpen: boolean;
   anchor: IAnchorPosition;
   message: ApiMessage | ApiSponsoredMessage;
@@ -76,44 +78,48 @@ type OwnProps = {
   noReplies?: boolean;
   hasCustomEmoji?: boolean;
   customEmojiSets?: ApiStickerSet[];
-  onReply?: () => void;
+  noTransition?: boolean;
+  onReply?: NoneToVoidFunction;
   onOpenThread?: VoidFunction;
-  onEdit?: () => void;
-  onPin?: () => void;
-  onUnpin?: () => void;
-  onForward?: () => void;
-  onDelete?: () => void;
-  onReport?: () => void;
-  onFaveSticker?: () => void;
-  onUnfaveSticker?: () => void;
-  onSelect?: () => void;
-  onSend?: () => void;
-  onReschedule?: () => void;
-  onClose: () => void;
-  onCloseAnimationEnd?: () => void;
-  onCopyLink?: () => void;
+  onEdit?: NoneToVoidFunction;
+  onPin?: NoneToVoidFunction;
+  onUnpin?: NoneToVoidFunction;
+  onForward?: NoneToVoidFunction;
+  onDelete?: NoneToVoidFunction;
+  onReport?: NoneToVoidFunction;
+  onFaveSticker?: NoneToVoidFunction;
+  onUnfaveSticker?: NoneToVoidFunction;
+  onSelect?: NoneToVoidFunction;
+  onSend?: NoneToVoidFunction;
+  onReschedule?: NoneToVoidFunction;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
+  onCopyLink?: NoneToVoidFunction;
   onCopyMessages?: (messageIds: number[]) => void;
-  onCopyNumber?: () => void;
-  onDownload?: () => void;
-  onSaveGif?: () => void;
-  onCancelVote?: () => void;
-  onClosePoll?: () => void;
-  onShowSeenBy?: () => void;
-  onShowReactors?: () => void;
-  onAboutAds?: () => void;
-  onSponsoredHide?: () => void;
-  onTranslate?: () => void;
-  onShowOriginal?: () => void;
-  onSelectLanguage?: () => void;
+  onCopyNumber?: NoneToVoidFunction;
+  onDownload?: NoneToVoidFunction;
+  onSaveGif?: NoneToVoidFunction;
+  onCancelVote?: NoneToVoidFunction;
+  onClosePoll?: NoneToVoidFunction;
+  onShowSeenBy?: NoneToVoidFunction;
+  onShowReactors?: NoneToVoidFunction;
+  onAboutAds?: NoneToVoidFunction;
+  onSponsoredHide?: NoneToVoidFunction;
+  onTranslate?: NoneToVoidFunction;
+  onShowOriginal?: NoneToVoidFunction;
+  onSelectLanguage?: NoneToVoidFunction;
   onToggleReaction?: (reaction: ApiReaction) => void;
+  onReactionPickerOpen?: (position: IAnchorPosition) => void;
 };
 
 const SCROLLBAR_WIDTH = 10;
 const REACTION_BUBBLE_EXTRA_WIDTH = 32;
+const REACTION_SELECTOR_WIDTH_REM = 19.25;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
   availableReactions,
+  topReactions,
   isOpen,
   message,
   isPrivate,
@@ -152,6 +158,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   seenByRecentUsers,
   hasCustomEmoji,
   customEmojiSets,
+  noTransition,
   onReply,
   onOpenThread,
   onEdit,
@@ -179,6 +186,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyMessages,
   onAboutAds,
   onSponsoredHide,
+  onReactionPickerOpen,
   onTranslate,
   onShowOriginal,
   onSelectLanguage,
@@ -255,6 +263,8 @@ const MessageContextMenu: FC<OwnProps> = ({
       extraTopPadding: (document.querySelector<HTMLElement>('.MiddleHeader')!).offsetHeight,
       marginSides: withReactions ? REACTION_BUBBLE_EXTRA_WIDTH : undefined,
       extraMarginTop: extraHeightPinned + extraHeightAudioPlayer,
+      shouldAvoidNegativePosition: true,
+      menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
   }, [isMobile, withReactions]);
 
@@ -271,7 +281,7 @@ const MessageContextMenu: FC<OwnProps> = ({
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style, menuStyle, withScroll,
-  } = useContextMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
+  } = useMenuPosition(anchor, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
   useEffect(() => {
     disableScrolling(withScroll ? scrollableRef.current : undefined, '.ReactionSelector');
@@ -292,20 +302,23 @@ const MessageContextMenu: FC<OwnProps> = ({
       className={buildClassName(
         'MessageContextMenu', 'fluid', withReactions && 'with-reactions',
       )}
+      shouldSkipTransition={noTransition}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
       {withReactions && (
         <ReactionSelector
           enabledReactions={enabledReactions}
+          topReactions={topReactions}
+          allAvailableReactions={availableReactions}
           currentReactions={!isSponsoredMessage ? message.reactions?.results : undefined}
           maxUniqueReactions={maxUniqueReactions}
           onToggleReaction={onToggleReaction!}
           isPrivate={isPrivate}
-          availableReactions={availableReactions}
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          onShowMore={onReactionPickerOpen!}
         />
       )}
 

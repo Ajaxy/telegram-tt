@@ -5,10 +5,10 @@ import type { ISettings } from '../../../types';
 import type { ApiDocument } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { IS_COMPACT_MENU } from '../../../util/windowEnvironment';
-import useMedia from '../../../hooks/useMedia';
 import { getDocumentMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useMedia from '../../../hooks/useMedia';
 
 import styles from './AttachBotIcon.module.scss';
 
@@ -25,6 +25,7 @@ const COLOR_REPLACE_PATTERN = /#fff/gi;
 const AttachBotIcon: FC<OwnProps> = ({
   icon, theme,
 }) => {
+  const { isTouchScreen } = useAppLayout();
   const mediaData = useMedia(getDocumentMediaHash(icon), false, ApiMediaFormat.Text);
 
   const iconSvg = useMemo(() => {
@@ -42,8 +43,8 @@ const AttachBotIcon: FC<OwnProps> = ({
   }, [mediaData, theme]);
 
   return (
-    <i className={buildClassName(styles.root, IS_COMPACT_MENU && styles.compact)}>
-      <img src={iconSvg} alt="" className={buildClassName(styles.image, IS_COMPACT_MENU && styles.compact)} />
+    <i className={buildClassName(styles.root, !isTouchScreen && styles.compact)}>
+      <img src={iconSvg} alt="" className={buildClassName(styles.image, !isTouchScreen && styles.compact)} />
     </i>
   );
 };

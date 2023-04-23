@@ -29,7 +29,7 @@ import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useContextMenuPosition from '../../../hooks/useContextMenuPosition';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 
 import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
@@ -141,7 +141,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  } = useContextMenuPosition(
+  } = useMenuPosition(
     contextMenuPosition,
     getTriggerElement,
     getRootElement,
