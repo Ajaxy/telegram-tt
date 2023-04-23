@@ -1,7 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
   useRef,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   memo,
 } from '../../lib/teact/teact';
@@ -27,7 +27,7 @@ const PinnedMessageNavigation: FC<OwnProps> = ({
     return calculateMarkup(count, index);
   }, [count, index]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!containerRef.current) {
       return;
     }

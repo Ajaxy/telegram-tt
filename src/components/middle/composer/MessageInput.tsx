@@ -3,6 +3,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   useEffect, useRef, memo, useState, useCallback, useLayoutEffect,
 } from '../../../lib/teact/teact';
+import { requestMutation, requestForcedReflow } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
 import type { IAnchorPosition, ISettings } from '../../../types';
@@ -159,36 +160,41 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     isActive,
   );
 
-  const maxInputHeight = isMobile ? 256 : 416;
+  const maxInputHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : (isMobile ? 256 : 416);
   const updateInputHeight = useCallback((willSend = false) => {
-    const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
-    const clone = scrollerCloneRef.current!;
-    const currentHeight = Number(scroller.style.height.replace('px', ''));
-    const maxHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : maxInputHeight;
-    const newHeight = Math.min(clone.scrollHeight, maxHeight);
-    if (newHeight === currentHeight) {
-      return;
-    }
+    requestForcedReflow(() => {
+      const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
+      const currentHeight = Number(scroller.style.height.replace('px', ''));
+      const clone = scrollerCloneRef.current!;
+      const { scrollHeight } = clone;
+      const newHeight = Math.min(scrollHeight, maxInputHeight);
 
-    const transitionDuration = Math.round(
-      TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
-    );
+      if (newHeight === currentHeight) {
+        return undefined;
+      }
 
-    const exec = () => {
-      scroller.style.height = `${newHeight}px`;
-      scroller.style.transitionDuration = `${transitionDuration}ms`;
-      scroller.classList.toggle('overflown', clone.scrollHeight > maxHeight);
-    };
+      const isOverflown = scrollHeight > maxInputHeight;
 
-    if (willSend) {
-      // Sync with sending animation
-      requestAnimationFrame(exec);
-    } else {
-      exec();
-    }
-  }, [isAttachmentModalInput, maxInputHeight]);
+      function exec() {
+        const transitionDuration = Math.round(
+          TRANSITION_DURATION_FACTOR * Math.log(Math.abs(newHeight - currentHeight)),
+        );
+        scroller.style.height = `${newHeight}px`;
+        scroller.style.transitionDuration = `${transitionDuration}ms`;
+        scroller.classList.toggle('overflown', isOverflown);
+      }
 
-  useEffect(() => {
+      if (willSend) {
+        // Delay to next frame to sync with sending animation
+        requestMutation(exec);
+        return undefined;
+      } else {
+        return exec;
+      }
+    });
+  }, [maxInputHeight]);
+
+  useLayoutEffect(() => {
     if (!isAttachmentModalInput) return;
     updateInputHeight(false);
   }, [isAttachmentModalInput, updateInputHeight]);
@@ -481,7 +487,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     const captureFirstTab = debounce((e: KeyboardEvent) => {
       if (e.key === 'Tab' && !getIsDirectTextInputDisabled()) {
         e.preventDefault();
-        requestAnimationFrame(focusInput);
+        requestMutation(focusInput);
       }
     }, TAB_INDEX_PRIORITY_TIMEOUT, true, false);
 

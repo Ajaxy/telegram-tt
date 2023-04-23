@@ -16,8 +16,8 @@ export default function useResizeObserver(
     }
     const el = ref.current;
     const callback: ResizeObserverCallback = ([entry]) => {
-      // During animation
-      if (!(entry.target as HTMLElement).offsetParent) {
+      // Ignore updates when element is not properly mounted (`display: none`)
+      if (entry.contentRect.width === 0 && entry.contentRect.height === 0) {
         return;
       }
 

@@ -3,6 +3,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 
 import { MIN_PASSWORD_LENGTH } from '../../config';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
@@ -72,7 +73,7 @@ const PasswordForm: FC<OwnProps> = ({
 
   useEffect(() => {
     if (error) {
-      requestAnimationFrame(() => {
+      requestMutation(() => {
         inputRef.current!.focus();
         inputRef.current!.select();
       });

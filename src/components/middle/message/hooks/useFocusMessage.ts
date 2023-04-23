@@ -1,6 +1,7 @@
+import { useLayoutEffect, useMemo } from '../../../../lib/teact/teact';
+
 import type { FocusDirection } from '../../../../types';
 
-import { useLayoutEffect, useMemo } from '../../../../lib/teact/teact';
 import fastSmoothScroll from '../../../../util/fastSmoothScroll';
 
 // This is used when the viewport was replaced.
@@ -42,6 +43,8 @@ export default function useFocusMessage(
         focusDirection,
         undefined,
         isResizingContainer,
+        // We need this to override scroll setting from Message List layout effect
+        true,
       );
     }
   }, [

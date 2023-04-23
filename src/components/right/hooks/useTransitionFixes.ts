@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from '../../../lib/teact/teact';
+import { requestMutation, requestMeasure } from '../../../lib/fasterdom/fasterdom';
 
 export default function useTransitionFixes(
   containerRef: { current: HTMLDivElement | null },
@@ -11,7 +12,11 @@ export default function useTransitionFixes(
       const transitionEl = container.querySelector<HTMLDivElement>(transitionElSelector);
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList');
       if (transitionEl && tabsEl) {
-        transitionEl.style.minHeight = `${container.offsetHeight - tabsEl.offsetHeight}px`;
+        const newHeight = container.offsetHeight - tabsEl.offsetHeight;
+
+        requestMutation(() => {
+          transitionEl.style.minHeight = `${newHeight}px`;
+        });
       }
     }
 
@@ -26,12 +31,18 @@ export default function useTransitionFixes(
 
   // Workaround for scrollable content flickering during animation.
   const applyTransitionFix = useCallback(() => {
-    const container = containerRef.current!;
-    if (container.style.overflowY !== 'hidden') {
+    // This callback is called from `Transition.onStart` which is "mutate" phase
+    requestMeasure(() => {
+      const container = containerRef.current!;
+      if (container.style.overflowY === 'hidden') return;
+
       const scrollBarWidth = container.offsetWidth - container.clientWidth;
-      container.style.overflowY = 'hidden';
-      container.style.paddingRight = `${scrollBarWidth}px`;
-    }
+
+      requestMutation(() => {
+        container.style.overflowY = 'hidden';
+        container.style.paddingRight = `${scrollBarWidth}px`;
+      });
+    });
   }, [containerRef]);
 
   const releaseTransitionFix = useCallback(() => {

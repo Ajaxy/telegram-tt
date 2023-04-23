@@ -5,6 +5,7 @@ import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import type { Signal } from '../../util/signals';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -31,6 +32,7 @@ interface OwnProps {
   threadId: number;
   messageIds: number[];
   messageGroups: MessageDateGroup[];
+  getContainerHeight: Signal<number | undefined>;
   isViewportNewest: boolean;
   isUnread: boolean;
   withUsers: boolean;
@@ -60,6 +62,7 @@ const MessageListContent: FC<OwnProps> = ({
   threadId,
   messageIds,
   messageGroups,
+  getContainerHeight,
   isViewportNewest,
   isUnread,
   isComments,
@@ -96,6 +99,7 @@ const MessageListContent: FC<OwnProps> = ({
     type,
     containerRef,
     messageIds,
+    getContainerHeight,
     isViewportNewest,
     isUnread,
     onFabToggle,

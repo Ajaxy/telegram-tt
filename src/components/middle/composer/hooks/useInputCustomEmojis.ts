@@ -2,6 +2,7 @@ import {
   useCallback, useEffect, useRef,
 } from '../../../../lib/teact/teact';
 import RLottie from '../../../../lib/rlottie/RLottie';
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
@@ -14,7 +15,6 @@ import {
   removeCustomEmojiInputRenderCallback,
 } from '../../../../util/customEmojiManager';
 import { round } from '../../../../util/math';
-import { fastRaf } from '../../../../util/schedulers';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
 import { REM } from '../../../common/helpers/mediaDimensions';
 
@@ -131,7 +131,7 @@ export default function useInputCustomEmojis(
     }
 
     // Wait one frame for DOM to update
-    fastRaf(() => {
+    requestMeasure(() => {
       synchronizeElements();
     });
   }, [getHtml, synchronizeElements, inputRef, clearPlayers, sharedCanvasRef, isActive]);
@@ -163,7 +163,7 @@ export default function useInputCustomEmojis(
   }, []);
 
   const unfreezeAnimationOnRaf = useCallback(() => {
-    fastRaf(unfreezeAnimation);
+    requestMeasure(unfreezeAnimation);
   }, [unfreezeAnimation]);
 
   // Pausing frame may not happen in background,

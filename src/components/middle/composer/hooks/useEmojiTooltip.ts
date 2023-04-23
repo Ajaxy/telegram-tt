@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
@@ -123,7 +124,7 @@ export default function useEmojiTooltip(
         ? document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!
         : document.getElementById(inputId) as HTMLDivElement;
 
-      requestAnimationFrame(() => {
+      requestNextMutation(() => {
         focusEditableElement(messageInput, true, true);
       });
     }

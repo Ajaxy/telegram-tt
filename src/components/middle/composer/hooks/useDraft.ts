@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
 import type { ApiDraft } from '../../../../global/types';
@@ -21,7 +22,8 @@ let isFrozen = false;
 
 function freeze() {
   isFrozen = true;
-  requestAnimationFrame(() => {
+
+  requestMeasure(() => {
     isFrozen = false;
   });
 }
@@ -91,7 +93,7 @@ const useDraft = (
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });
 
     if (!IS_TOUCH_ENV) {
-      requestAnimationFrame(() => {
+      requestNextMutation(() => {
         const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
         if (messageInput) {
           focusEditableElement(messageInput, true);

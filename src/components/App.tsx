@@ -156,7 +156,9 @@ const App: FC<StateProps> = ({
 
   useEffect(() => {
     updateSizes();
+  }, []);
 
+  useEffect(() => {
     if (IS_MULTITAB_SUPPORTED) return;
 
     addActiveTabChangeListener(() => {

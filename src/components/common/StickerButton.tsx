@@ -39,6 +39,7 @@ type OwnProps<T> = {
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   observeIntersection: ObserveFn;
+  observeIntersectionForShowing?: ObserveFn;
   noShowPremium?: boolean;
   onClick?: (arg: OwnProps<T>['clickArg'], isSilent?: boolean, shouldSchedule?: boolean) => void;
   clickArg: T;
@@ -69,6 +70,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   isStatusPicker,
   canViewSet,
   observeIntersection,
+  observeIntersectionForShowing,
   isSelected,
   isCurrentUserPremium,
   noShowPremium,
@@ -99,6 +101,8 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const shouldLoad = isIntersecting;
   const shouldPlay = isIntersecting && !noAnimate;
+
+  const isIntesectingForShowing = useIsIntersecting(ref, observeIntersectionForShowing);
 
   const {
     isContextMenuOpen, contextMenuPosition,
@@ -287,19 +291,21 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
-      <StickerView
-        containerRef={ref}
-        sticker={sticker}
-        isSmall
-        size={size}
-        shouldLoop
-        shouldPreloadPreview
-        noLoad={!shouldLoad}
-        noPlay={!shouldPlay}
-        withSharedAnimation
-        sharedCanvasRef={sharedCanvasRef}
-        customColor={customColor}
-      />
+      {isIntesectingForShowing && (
+        <StickerView
+          containerRef={ref}
+          sticker={sticker}
+          isSmall
+          size={size}
+          shouldLoop
+          shouldPreloadPreview
+          noLoad={!shouldLoad}
+          noPlay={!shouldPlay}
+          withSharedAnimation
+          sharedCanvasRef={sharedCanvasRef}
+          customColor={customColor}
+        />
+      )}
       {!noShowPremium && isLocked && (
         <div
           className="sticker-locked"

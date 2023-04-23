@@ -1,5 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useState, useEffect, useRef } from '../../../lib/teact/teact';
+import React, {
+  useState, useEffect, useRef, useLayoutEffect,
+} from '../../../lib/teact/teact';
 
 import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
 
@@ -41,7 +43,7 @@ const PollOption: FC<OwnProps> = ({
     }
   }, [shouldAnimate, answerPercent]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const lineEl = lineRef.current;
 
     if (lineEl && shouldAnimate) {

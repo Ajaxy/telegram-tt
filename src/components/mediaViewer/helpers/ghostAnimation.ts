@@ -1,5 +1,6 @@
-import type { ApiDimensions, ApiMessage } from '../../../api/types';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
+import type { ApiDimensions, ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
@@ -62,27 +63,26 @@ export function animateOpening(
   const fromScaleX = fromWidth / toWidth;
   const fromScaleY = fromHeight / toHeight;
 
-  const ghost = createGhost(bestImageData || fromImage);
-  applyStyles(ghost, {
-    top: `${toTop}px`,
-    left: `${toLeft}px`,
-    width: `${toWidth}px`,
-    height: `${toHeight}px`,
-    transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScaleX}, ${fromScaleY})`,
-  });
-  applyShape(ghost, origin);
+  requestMutation(() => {
+    const ghost = createGhost(bestImageData || fromImage);
+    applyStyles(ghost, {
+      top: `${toTop}px`,
+      left: `${toLeft}px`,
+      width: `${toWidth}px`,
+      height: `${toHeight}px`,
+      transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScaleX}, ${fromScaleY})`,
+    });
+    applyShape(ghost, origin);
 
-  document.body.classList.add('ghost-animating');
-
-  requestAnimationFrame(() => {
     document.body.appendChild(ghost);
+    document.body.classList.add('ghost-animating');
 
-    requestAnimationFrame(() => {
+    requestMutation(() => {
       ghost.style.transform = '';
       clearShape(ghost);
 
       setTimeout(() => {
-        requestAnimationFrame(() => {
+        requestMutation(() => {
           if (document.body.contains(ghost)) {
             document.body.removeChild(ghost);
           }
@@ -146,43 +146,41 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
   }
 
   const existingGhost = document.getElementsByClassName('ghost')[0] as HTMLDivElement;
-
   const ghost = existingGhost || createGhost(bestImageData || toImage, origin);
-  if (!existingGhost) {
-    applyStyles(ghost, {
+
+  let styles: Record<string, string>;
+  if (existingGhost) {
+    const {
+      top, left, width, height,
+    } = existingGhost.getBoundingClientRect();
+    const scaleX = width / toWidth;
+    const scaleY = height / toHeight;
+
+    styles = {
+      transition: 'none',
+      top: `${toTop}px`,
+      left: `${toLeft}px`,
+      transformOrigin: 'top left',
+      transform: `translate3d(${left - toLeft}px, ${top - toTop}px, 0) scale(${scaleX}, ${scaleY})`,
+      width: `${toWidth}px`,
+      height: `${toHeight}px`,
+    };
+  } else {
+    styles = {
       top: `${toTop}px`,
       left: `${toLeft}px`,
       width: `${toWidth}px`,
       height: `${toHeight}px`,
       transform: `translate3d(${fromTranslateX}px, ${fromTranslateY}px, 0) scale(${fromScaleX}, ${fromScaleY})`,
-    });
+    };
   }
 
-  requestAnimationFrame(() => {
-    if (existingGhost) {
-      const {
-        top,
-        left,
-        width,
-        height,
-      } = existingGhost.getBoundingClientRect();
-      const scaleX = width / toWidth;
-      const scaleY = height / toHeight;
-
-      applyStyles(ghost, {
-        transition: 'none',
-        top: `${toTop}px`,
-        left: `${toLeft}px`,
-        transformOrigin: 'top left',
-        transform: `translate3d(${left - toLeft}px, ${top - toTop}px, 0) scale(${scaleX}, ${scaleY})`,
-        width: `${toWidth}px`,
-        height: `${toHeight}px`,
-      });
-    }
-    document.body.classList.add('ghost-animating');
+  requestMutation(() => {
+    applyStyles(ghost, styles);
     if (!existingGhost) document.body.appendChild(ghost);
+    document.body.classList.add('ghost-animating');
 
-    requestAnimationFrame(() => {
+    requestMutation(() => {
       if (existingGhost) {
         existingGhost.style.transition = '';
       }
@@ -196,7 +194,7 @@ export function animateClosing(origin: MediaViewerOrigin, bestImageData: string,
       applyShape(ghost, origin);
 
       setTimeout(() => {
-        requestAnimationFrame(() => {
+        requestMutation(() => {
           if (document.body.contains(ghost)) {
             document.body.removeChild(ghost);
           }

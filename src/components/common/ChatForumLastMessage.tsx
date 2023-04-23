@@ -1,6 +1,6 @@
 import React, {
   memo,
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -71,7 +71,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
     });
   }
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const lastMessageElement = lastMessageRef.current;
     const mainColumnElement = mainColumnRef.current;
     if (!lastMessageElement || !mainColumnElement) return;

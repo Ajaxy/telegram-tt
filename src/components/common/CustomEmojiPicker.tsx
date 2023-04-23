@@ -35,10 +35,10 @@ import {
 } from '../../global/selectors';
 
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
+import { useStickerPickerObservers } from './hooks/useStickerPickerObservers';
 
 import Loading from '../ui/Loading';
 import Button from '../ui/Button';
@@ -54,6 +54,7 @@ type OwnProps = {
   scrollHeaderRef?: RefObject<HTMLDivElement>;
   chatId?: string;
   className?: string;
+  isHidden?: boolean;
   loadAndPlay: boolean;
   idPrefix?: string;
   withDefaultTopicIcons?: boolean;
@@ -84,9 +85,8 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
 };
 
-const SMOOTH_SCROLL_DISTANCE = 500;
+const SMOOTH_SCROLL_DISTANCE = 100;
 const HEADER_BUTTON_WIDTH = 52; // px (including margin)
-const STICKER_INTERSECTION_THROTTLE = 200;
 const DEFAULT_ID_PREFIX = 'custom-emoji-set';
 const TOP_REACTIONS_COUNT = 16;
 const RECENT_REACTIONS_COUNT = 32;
@@ -99,12 +99,11 @@ const STICKER_SET_IDS_WITH_COVER = new Set([
   PREMIUM_STICKER_SET_ID,
 ]);
 
-const stickerSetIntersections: boolean[] = [];
-
 const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   scrollContainerRef,
   scrollHeaderRef,
   className,
+  isHidden,
   loadAndPlay,
   addedCustomEmojiIds,
   customEmojisById,
@@ -155,31 +154,12 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       : Object.values(pickTruthy(customEmojisById!, recentCustomEmojiIds!));
   }, [customEmojisById, isStatusPicker, recentCustomEmojiIds, recentStatusEmojis]);
 
-  const { observe: observeIntersection } = useIntersectionObserver({
-    rootRef: containerRef,
-    throttleMs: STICKER_INTERSECTION_THROTTLE,
-  }, (entries) => {
-    entries.forEach((entry) => {
-      const { id } = entry.target as HTMLDivElement;
-      if (!id || !id.startsWith(idPrefix)) {
-        return;
-      }
-
-      const index = Number(id.replace(`${idPrefix}-`, ''));
-      stickerSetIntersections[index] = entry.isIntersecting;
-    });
-
-    const intersectingWithIndexes = stickerSetIntersections
-      .map((isIntersecting, index) => ({ index, isIntersecting }))
-      .filter(({ isIntersecting }) => isIntersecting);
-
-    if (!intersectingWithIndexes.length) {
-      return;
-    }
-
-    setActiveSetIndex(intersectingWithIndexes[Math.floor(intersectingWithIndexes.length / 2)].index);
-  });
-  const { observe: observeIntersectionForCovers } = useIntersectionObserver({ rootRef: headerRef });
+  const {
+    observeIntersectionForSet,
+    observeIntersectionForPlayingItems,
+    observeIntersectionForShowingItems,
+    observeIntersectionForCovers,
+  } = useStickerPickerObservers(containerRef, headerRef, idPrefix, setActiveSetIndex, isHidden);
 
   const lang = useLang();
 
@@ -412,8 +392,10 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               loadAndPlay={Boolean(canAnimate && loadAndPlay)}
               index={i}
               idPrefix={idPrefix}
-              observeIntersection={observeIntersection}
-              shouldRender={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
+              observeIntersection={observeIntersectionForSet}
+              observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
+              observeIntersectionForShowingItems={observeIntersectionForShowingItems}
+              isNearActive={activeSetIndex >= i - 1 && activeSetIndex <= i + 1}
               isSavedMessages={isSavedMessages}
               isStatusPicker={isStatusPicker}
               isReactionPicker={isReactionPicker}

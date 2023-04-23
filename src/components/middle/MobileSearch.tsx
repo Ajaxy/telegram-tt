@@ -2,10 +2,12 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
 
+import { IS_IOS } from '../../util/windowEnvironment';
 import { debounce } from '../../util/schedulers';
 import {
   selectCurrentTextSearch,
@@ -69,12 +71,17 @@ const MobileSearchFooter: FC<StateProps> = ({
       const { activeElement } = document;
       if (activeElement && (activeElement === inputRef.current)) {
         const { pageTop, height } = visualViewport;
-        mainEl.style.transform = `translateY(${pageTop}px)`;
-        mainEl.style.height = `${height}px`;
-        document.documentElement.scrollTop = pageTop;
+
+        requestMutation(() => {
+          mainEl.style.transform = `translateY(${pageTop}px)`;
+          mainEl.style.height = `${height}px`;
+          document.documentElement.scrollTop = pageTop;
+        });
       } else {
-        mainEl.style.transform = '';
-        mainEl.style.height = '';
+        requestMutation(() => {
+          mainEl.style.transform = '';
+          mainEl.style.height = '';
+        });
       }
     };
 
@@ -96,13 +103,11 @@ const MobileSearchFooter: FC<StateProps> = ({
   }, [chat?.id, focusMessage, foundIds, threadId]);
 
   // Disable native up/down buttons on iOS
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!IS_IOS) return;
+
     Array.from(document.querySelectorAll<HTMLInputElement>('input')).forEach((input) => {
       input.disabled = Boolean(isActive && input !== inputRef.current);
-    });
-
-    Array.from(document.querySelectorAll<HTMLDivElement>('div[contenteditable]')).forEach((div) => {
-      div.contentEditable = isActive ? 'false' : 'true';
     });
   }, [isActive]);
 
@@ -113,7 +118,7 @@ const MobileSearchFooter: FC<StateProps> = ({
     }
   }, [isActive]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
     searchInput.blur();
   }, [isHistoryCalendarOpen]);

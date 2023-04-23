@@ -8,6 +8,7 @@ export const PRODUCTION_HOSTNAME = 'web.telegram.org';
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
+export const STRICTERDOM_ENABLED = DEBUG;
 
 export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
@@ -143,10 +144,10 @@ export const TMP_CHAT_ID = '0';
 
 export const ANIMATION_END_DELAY = 100;
 
-export const FAST_SMOOTH_MAX_DISTANCE = 1500;
 export const FAST_SMOOTH_MIN_DURATION = 250;
 export const FAST_SMOOTH_MAX_DURATION = 600;
-export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 750; // px
+export const FAST_SMOOTH_MAX_DISTANCE = 750;
+export const FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE = 300; // px
 
 // Average duration of message sending animation
 export const API_UPDATE_THROTTLE = Math.round((FAST_SMOOTH_MIN_DURATION + FAST_SMOOTH_MAX_DURATION) / 2);

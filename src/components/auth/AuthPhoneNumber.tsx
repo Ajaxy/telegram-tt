@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import monkeyPath from '../../assets/monkey.svg';
 
@@ -149,7 +150,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
   const isJustPastedRef = useRef(false);
   const handlePaste = useCallback(() => {
     isJustPastedRef.current = true;
-    requestAnimationFrame(() => {
+    requestMeasure(() => {
       isJustPastedRef.current = false;
     });
   }, []);

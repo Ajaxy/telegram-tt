@@ -1,7 +1,10 @@
 import type { RefObject } from 'react';
-import React, { useLayoutEffect, useRef } from '../../lib/teact/teact';
+import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass, toggleExtraClass } from '../../lib/teact/teact-dom';
+import { requestMutation, requestForcedReflow } from '../../lib/fasterdom/fasterdom';
+
 import { getGlobal } from '../../global';
+
 import type { GlobalState } from '../../global/types';
 
 import { ANIMATION_LEVEL_MIN } from '../../config';
@@ -169,9 +172,6 @@ function Transition({
       return;
     }
 
-    removeExtraClass(container, 'animating');
-    toggleExtraClass(container, 'backwards', isBackwards);
-
     if (name === 'none' || animationLevel === ANIMATION_LEVEL_MIN) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
@@ -199,57 +199,57 @@ function Transition({
     });
 
     const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
+    onStart?.();
 
-    requestAnimationFrame(() => {
-      addExtraClass(container, 'animating');
+    addExtraClass(container, 'animating');
+    toggleExtraClass(container, 'backwards', isBackwards);
 
-      onStart?.();
+    function onAnimationEnd() {
+      const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`);
+      const { clientHeight } = activeElement || {};
 
-      function onAnimationEnd() {
-        requestAnimationFrame(() => {
-          if (activeKey !== currentKeyRef.current) {
-            return;
+      requestMutation(() => {
+        if (activeKey !== currentKeyRef.current) {
+          return;
+        }
+
+        removeExtraClass(container, 'animating');
+        removeExtraClass(container, 'backwards');
+
+        childNodes.forEach((node, i) => {
+          if (node instanceof HTMLElement) {
+            removeExtraClass(node, 'from');
+            removeExtraClass(node, 'through');
+            removeExtraClass(node, 'to');
+            toggleExtraClass(node, CLASSES.active, i === activeIndex);
           }
-
-          removeExtraClass(container, 'animating');
-          removeExtraClass(container, 'backwards');
-
-          childNodes.forEach((node, i) => {
-            if (node instanceof HTMLElement) {
-              removeExtraClass(node, 'from');
-              removeExtraClass(node, 'through');
-              removeExtraClass(node, 'to');
-              toggleExtraClass(node, CLASSES.active, i === activeIndex);
-            }
-          });
-
-          if (shouldRestoreHeight) {
-            const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`);
-
-            if (activeElement) {
-              activeElement.style.height = 'auto';
-              container.style.height = `${activeElement.clientHeight}px`;
-            }
-          }
-
-          onStop?.();
-          dispatchHeavyAnimationStop();
-          cleanup();
         });
-      }
 
-      const watchedNode = name === 'mv-slide'
-        ? childNodes[activeIndex]?.firstChild
-        : name === 'reveal' && isBackwards
-          ? childNodes[prevActiveIndex]
-          : childNodes[activeIndex];
+        if (shouldRestoreHeight) {
+          if (activeElement) {
+            activeElement.style.height = 'auto';
+            container.style.height = `${clientHeight}px`;
+          }
+        }
 
-      if (watchedNode) {
-        waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
-      } else {
-        onAnimationEnd();
-      }
-    });
+        onStop?.();
+        dispatchHeavyAnimationStop();
+
+        cleanup();
+      });
+    }
+
+    const watchedNode = name === 'mv-slide'
+      ? childNodes[activeIndex]?.firstChild
+      : name === 'reveal' && isBackwards
+        ? childNodes[prevActiveIndex]
+        : childNodes[activeIndex];
+
+    if (watchedNode) {
+      waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
+    } else {
+      onAnimationEnd();
+    }
   }, [
     activeKey,
     nextKey,
@@ -268,20 +268,28 @@ function Transition({
     forceUpdate,
   ]);
 
-  useLayoutEffect(() => {
-    if (shouldRestoreHeight) {
-      const container = containerRef.current!;
-      const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`)
-        || container.querySelector<HTMLDivElement>('.from');
-      const clientHeight = activeElement?.clientHeight;
-      if (!clientHeight) {
-        return;
-      }
+  useEffect(() => {
+    if (!shouldRestoreHeight) {
+      return;
+    }
 
+    const container = containerRef.current!;
+    const activeElement = container.querySelector<HTMLDivElement>(`.${CLASSES.active}`)
+      || container.querySelector<HTMLDivElement>('.from');
+    if (!activeElement) {
+      return;
+    }
+
+    const { clientHeight } = activeElement || {};
+    if (!clientHeight) {
+      return;
+    }
+
+    requestMutation(() => {
       activeElement.style.height = 'auto';
       container.style.height = `${clientHeight}px`;
       container.style.flexBasis = `${clientHeight}px`;
-    }
+    });
   }, [shouldRestoreHeight, children]);
 
   const asFastList = !renderCount;
@@ -360,27 +368,33 @@ function performSlideOptimized(
 
   const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
 
-  requestAnimationFrame(() => {
-    onStart?.();
+  onStart?.();
 
-    fromSlide.style.transition = 'none';
-    fromSlide.style.transform = 'translate3d(0, 0, 0)';
+  fromSlide.style.transition = 'none';
+  fromSlide.style.transform = 'translate3d(0, 0, 0)';
 
-    toSlide.style.transition = 'none';
-    toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+  toSlide.style.transition = 'none';
+  toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
 
+  requestForcedReflow(() => {
     forceReflow(toSlide);
 
-    fromSlide.style.transition = '';
-    fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
+    return () => {
+      fromSlide.style.transition = '';
+      fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
 
-    toSlide.style.transition = '';
-    toSlide.style.transform = 'translate3d(0, 0, 0)';
+      toSlide.style.transition = '';
+      toSlide.style.transform = 'translate3d(0, 0, 0)';
 
-    removeExtraClass(fromSlide, CLASSES.active);
-    addExtraClass(toSlide, CLASSES.active);
+      removeExtraClass(fromSlide, CLASSES.active);
+      addExtraClass(toSlide, CLASSES.active);
+    };
+  });
 
-    waitForTransitionEnd(fromSlide, () => {
+  waitForTransitionEnd(fromSlide, () => {
+    const { clientHeight } = toSlide;
+
+    requestMutation(() => {
       if (activeKey !== currentKeyRef.current) {
         return;
       }
@@ -390,7 +404,7 @@ function performSlideOptimized(
 
       if (shouldRestoreHeight) {
         toSlide.style.height = 'auto';
-        container.style.height = `${toSlide.clientHeight}px`;
+        container.style.height = `${clientHeight}px`;
       }
 
       onStop?.();

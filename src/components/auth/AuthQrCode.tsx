@@ -1,6 +1,7 @@
 import React, {
-  useEffect, useRef, memo, useCallback,
+  useEffect, useRef, memo, useCallback, useLayoutEffect,
 } from '../../lib/teact/teact';
+import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -33,6 +34,7 @@ type StateProps =
 const DATA_PREFIX = 'tg://login?token=';
 const QR_SIZE = 280;
 const QR_PLANE_SIZE = 54;
+const QR_CODE_MUTATION_DURATION = 50; // The library is asynchronous and we need to wait for its mutation code
 
 let qrCodeStylingPromise: Promise<typeof import('qr-code-styling')>;
 
@@ -88,7 +90,7 @@ const AuthCode: FC<StateProps> = ({
 
   const transitionClassNames = useMediaTransition(isQrMounted);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!authQrCode || !qrCode) {
       return () => {
         unmarkQrMounted();
@@ -102,6 +104,8 @@ const AuthCode: FC<StateProps> = ({
     const container = qrCodeRef.current!;
     const data = `${DATA_PREFIX}${authQrCode.token}`;
 
+    disableStrict();
+
     qrCode.update({
       data,
     });
@@ -110,6 +114,11 @@ const AuthCode: FC<StateProps> = ({
       qrCode.append(container);
       markQrMounted();
     }
+
+    setTimeout(() => {
+      enableStrict();
+    }, QR_CODE_MUTATION_DURATION);
+
     return undefined;
   }, [connectionState, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
 

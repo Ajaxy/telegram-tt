@@ -1,11 +1,12 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
 import type { FC, FC_withDebug, Props } from './teact';
 import React, { useEffect, useState } from './teact';
+import { requestMeasure } from '../fasterdom/fasterdom';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import generateIdFor from '../../util/generateIdFor';
-import { fastRafWithFallback, throttleWithTickEnd } from '../../util/schedulers';
+import { throttleWithTickEnd } from '../../util/schedulers';
 import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
 import { handleError } from '../../util/handleError';
@@ -76,7 +77,7 @@ function runCallbacks() {
   if (forceOnHeavyAnimation) {
     forceOnHeavyAnimation = false;
   } else if (isHeavyAnimating()) {
-    fastRafWithFallback(runCallbacksThrottled);
+    requestMeasure(runCallbacksThrottled);
     return;
   }
 

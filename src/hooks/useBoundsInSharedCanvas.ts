@@ -1,6 +1,7 @@
 import {
-  useCallback, useLayoutEffect, useMemo, useState,
+  useCallback, useEffect, useMemo, useState,
 } from '../lib/teact/teact';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 import { round } from '../util/math';
 
@@ -27,7 +28,8 @@ export default function useBoundsInSharedCanvas(
 
     // Wait until elements are properly mounted
     if (!container.offsetParent || !canvas.offsetParent) {
-      setTimeout(recalculate, ANIMATION_END_TIMEOUT);
+      // `requestMeasure` is useful as timeouts are run in parallel with image loadings and thus causing reflow
+      setTimeout(() => requestMeasure(recalculate), ANIMATION_END_TIMEOUT);
       return;
     }
 
@@ -38,15 +40,14 @@ export default function useBoundsInSharedCanvas(
     const canvasBounds = canvas.getBoundingClientRect();
 
     // Factor coords are used to support rendering while being rescaled (e.g. message appearance animation)
-    setX(round((targetBounds.left - canvasBounds.left) / canvasBounds.width, 4));
-    setY(round((targetBounds.top - canvasBounds.top) / canvasBounds.height, 4));
+    setX(round((targetBounds.left - canvasBounds.left) / canvasBounds.width, 4) || 0);
+    setY(round((targetBounds.top - canvasBounds.top) / canvasBounds.height, 4) || 0);
     setSize(Math.round(targetBounds.width));
   }, [containerRef, sharedCanvasRef]);
 
-  const throttledRecalculate = useThrottledCallback(recalculate, [recalculate], THROTTLE_MS, false);
+  useEffect(recalculate, [recalculate]);
 
-  useLayoutEffect(recalculate, [recalculate]);
-
+  const throttledRecalculate = useThrottledCallback(recalculate, [recalculate], THROTTLE_MS);
   useResizeObserver(sharedCanvasRef, throttledRecalculate);
 
   const coords = useMemo(() => (x !== undefined && y !== undefined ? { x, y } : undefined), [x, y]);

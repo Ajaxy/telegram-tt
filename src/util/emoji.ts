@@ -1,4 +1,6 @@
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import EMOJI_REGEX, { removeVS16s } from '../lib/twemojiRegex';
+
 import withCache from './withCache';
 
 // Due to the fact that emoji from Apple do not contain some characters, it is necessary to remove them from emoji-data
@@ -32,8 +34,13 @@ function unifiedToNative(unified: string) {
 export const LOADED_EMOJIS = new Set<string>();
 
 export function handleEmojiLoad(event: React.SyntheticEvent<HTMLImageElement>) {
-  event.currentTarget.classList.add('open');
+  const emoji = event.currentTarget;
+
   LOADED_EMOJIS.add(event.currentTarget.dataset.path!);
+
+  requestMutation(() => {
+    emoji.classList.add('open');
+  });
 }
 
 export function fixNonStandardEmoji(text: string) {

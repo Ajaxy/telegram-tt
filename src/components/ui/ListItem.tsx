@@ -1,9 +1,9 @@
 import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useRef, useCallback } from '../../lib/teact/teact';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
-import { fastRaf } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -158,7 +158,7 @@ const ListItem: FC<OwnProps> = ({
 
     if (IS_TOUCH_ENV && !ripple) {
       markIsTouched();
-      fastRaf(unmarkIsTouched);
+      requestMeasure(unmarkIsTouched);
     }
   }, [allowDisabledClick, clickArg, disabled, markIsTouched, onClick, ripple, unmarkIsTouched, href]);
 

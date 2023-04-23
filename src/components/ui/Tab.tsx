@@ -1,8 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useRef, memo, useEffect } from '../../lib/teact/teact';
+import React, {
+  useRef,
+  memo,
+  useEffect,
+  useLayoutEffect, useCallback,
+} from '../../lib/teact/teact';
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 
-import buildClassName from '../../util/buildClassName';
+import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import forceReflow from '../../util/forceReflow';
+import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
 import './Tab.scss';
@@ -38,12 +45,14 @@ const Tab: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const tabRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // Set initial active state
     if (isActive && previousActiveTab === undefined && tabRef.current) {
-      tabRef.current.classList.add(classNames.active);
+      tabRef.current!.classList.add(classNames.active);
     }
+  }, [isActive, previousActiveTab]);
 
+  useEffect(() => {
     if (!isActive || previousActiveTab === undefined) {
       return;
     }
@@ -53,7 +62,9 @@ const Tab: FC<OwnProps> = ({
     if (!prevTabEl) {
       // The number of tabs in the parent component has decreased. It is necessary to add the active tab class name.
       if (isActive && !tabEl.classList.contains(classNames.active)) {
-        tabEl.classList.add(classNames.active);
+        requestMutation(() => {
+          tabEl.classList.add(classNames.active);
+        });
       }
       return;
     }
@@ -65,21 +76,38 @@ const Tab: FC<OwnProps> = ({
     const shiftLeft = prevPlatformEl.parentElement!.offsetLeft - platformEl.parentElement!.offsetLeft;
     const scaleFactor = prevPlatformEl.clientWidth / platformEl.clientWidth;
 
-    prevPlatformEl.classList.remove('animate');
-    platformEl.classList.remove('animate');
-    platformEl.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
-    forceReflow(platformEl);
-    platformEl.classList.add('animate');
-    platformEl.style.transform = 'none';
+    requestMutation(() => {
+      prevPlatformEl.classList.remove('animate');
+      platformEl.classList.remove('animate');
+      platformEl.style.transform = `translate3d(${shiftLeft}px, 0, 0) scale3d(${scaleFactor}, 1, 1)`;
 
-    prevTabEl.classList.remove(classNames.active);
-    tabEl.classList.add(classNames.active);
+      requestForcedReflow(() => {
+        forceReflow(platformEl);
+
+        return () => {
+          platformEl.classList.add('animate');
+          platformEl.style.transform = 'none';
+
+          prevTabEl.classList.remove(classNames.active);
+          tabEl.classList.add(classNames.active);
+        };
+      });
+    });
   }, [isActive, previousActiveTab]);
+
+  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.type === 'mousedown' && e.button !== MouseButton.Main) {
+      return;
+    }
+
+    onClick(clickArg);
+  }, [clickArg, onClick]);
 
   return (
     <div
       className={buildClassName('Tab', className)}
-      onClick={() => onClick(clickArg)}
+      onClick={IS_TOUCH_ENV ? handleClick : undefined}
+      onMouseDown={!IS_TOUCH_ENV ? handleClick : undefined}
       ref={tabRef}
     >
       <span>

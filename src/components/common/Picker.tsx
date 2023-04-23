@@ -2,6 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   useCallback, useRef, useEffect, memo,
 } from '../../lib/teact/teact';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 
 import { isUserId } from '../../global/helpers';
 
@@ -58,7 +59,7 @@ const Picker: FC<OwnProps> = ({
 
   useEffect(() => {
     setTimeout(() => {
-      requestAnimationFrame(() => {
+      requestMutation(() => {
         inputRef.current!.focus();
       });
     }, FOCUS_DELAY_MS);

@@ -1,6 +1,6 @@
 import { useCallback } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
-import { fastRaf } from '../../../util/schedulers';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 import useFlag from '../../../hooks/useFlag';
 
@@ -19,21 +19,23 @@ export default function useStickyDates() {
     markIsScrolled();
 
     if (!document.body.classList.contains('is-scrolling-messages')) {
-      fastRaf(() => {
+      requestMutation(() => {
         document.body.classList.add('is-scrolling-messages');
       });
     }
 
     runDebounced(() => {
-      fastRaf(() => {
+      const stuckDateEl = findStuckDate(container, hasTools);
+      if (stuckDateEl) {
+        requestMutation(() => {
+          stuckDateEl.classList.add('stuck');
+        });
+      }
+
+      requestMutation(() => {
         const currentStuck = document.querySelector('.stuck');
         if (currentStuck) {
           currentStuck.classList.remove('stuck');
-        }
-
-        const stuckDateEl = findStuckDate(container, hasTools);
-        if (stuckDateEl) {
-          stuckDateEl.classList.add('stuck');
         }
 
         document.body.classList.remove('is-scrolling-messages');

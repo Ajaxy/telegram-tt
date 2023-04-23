@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type React from '../../../../lib/teact/teact';
 import { useEffect, useRef } from '../../../../lib/teact/teact';
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
@@ -10,6 +11,7 @@ import useFlag from '../../../../hooks/useFlag';
 import { preventMessageInputBlur } from '../../helpers/preventMessageInputBlur';
 import stopEvent from '../../../../util/stopEvent';
 import { REM } from '../../../common/helpers/mediaDimensions';
+import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 
 const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;
 const SWIPE_ANIMATION_DURATION = 150;
@@ -45,7 +47,7 @@ export default function useOuterHandlers(
     handleBeforeContextMenu(e);
   }
 
-  function handleMouseMove(e: React.MouseEvent) {
+  const handleMouseMove = useThrottledCallback((e: React.MouseEvent) => {
     const quickReactionContainer = quickReactionRef.current;
     if (!quickReactionContainer) return;
 
@@ -63,7 +65,7 @@ export default function useOuterHandlers(
     } else {
       unmarkQuickReactionVisible();
     }
-  }
+  }, [quickReactionRef], requestMeasure);
 
   function handleSendQuickReaction(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.stopPropagation();

@@ -2,6 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatBannedRights } from '../../api/types';
@@ -27,7 +28,7 @@ import {
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
 } from '../../config';
-import { MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_IOS, MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectChat,
@@ -277,17 +278,21 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
 
   // Fix for mobile virtual keyboard
   useEffect(() => {
+    if (!IS_IOS && !IS_ANDROID) {
+      return undefined;
+    }
+
     const { visualViewport } = window;
     if (!visualViewport) {
       return undefined;
     }
 
     const handleResize = () => {
-      if (visualViewport.height !== document.documentElement.clientHeight) {
-        document.body.classList.add('keyboard-visible');
-      } else {
-        document.body.classList.remove('keyboard-visible');
-      }
+      const isFixNeeded = visualViewport.height !== document.documentElement.clientHeight;
+
+      requestMutation(() => {
+        document.body.classList.toggle('keyboard-visible', isFixNeeded);
+      });
     };
 
     visualViewport.addEventListener('resize', handleResize);

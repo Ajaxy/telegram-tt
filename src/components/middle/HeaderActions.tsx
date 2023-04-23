@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useState,
 } from '../../lib/teact/teact';
+import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType } from '../../global/types';
@@ -154,9 +155,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
       const searchInput = document.querySelector<HTMLInputElement>('#MobileSearch input')!;
       searchInput.focus();
     } else if (noAnimation) {
-      // The second RAF is necessary because teact must update the state and render the async component
-      requestAnimationFrame(() => {
-        requestAnimationFrame(setFocusInSearchInput);
+      // The second RAF is necessary because Teact must update the state and render the async component
+      requestMeasure(() => {
+        requestNextMutation(setFocusInSearchInput);
       });
     } else {
       setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);

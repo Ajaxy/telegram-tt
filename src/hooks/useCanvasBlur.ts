@@ -1,4 +1,5 @@
 import { useEffect, useRef } from '../lib/teact/teact';
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 
 import { IS_CANVAS_FILTER_SUPPORTED } from '../util/windowEnvironment';
 import fastBlur from '../lib/fastBlur';
@@ -37,25 +38,29 @@ export default function useCanvasBlur(
     const img = new Image();
 
     const processBlur = () => {
-      canvas.width = preferredWidth || img.width;
-      canvas.height = preferredHeight || img.height;
-
+      const width = preferredWidth || img.width;
+      const height = preferredHeight || img.height;
       const ctx = canvas.getContext('2d', { alpha: false })!;
 
-      if (IS_CANVAS_FILTER_SUPPORTED) {
-        ctx.filter = `blur(${radius}px)`;
-      }
+      requestMutation(() => {
+        canvas.width = width;
+        canvas.height = height;
 
-      ctx.drawImage(img, -radius * 2, -radius * 2, canvas.width + radius * 4, canvas.height + radius * 4);
+        if (IS_CANVAS_FILTER_SUPPORTED) {
+          ctx.filter = `blur(${radius}px)`;
+        }
 
-      if (!IS_CANVAS_FILTER_SUPPORTED) {
-        fastBlur(ctx, 0, 0, canvas.width, canvas.height, radius, ITERATIONS);
-      }
+        ctx.drawImage(img, -radius * 2, -radius * 2, width + radius * 4, height + radius * 4);
+
+        if (!IS_CANVAS_FILTER_SUPPORTED) {
+          fastBlur(ctx, 0, 0, width, height, radius, ITERATIONS);
+        }
+      });
     };
 
     img.onload = () => {
       if (withRaf) {
-        requestAnimationFrame(processBlur);
+        requestMeasure(processBlur);
       } else {
         processBlur();
       }

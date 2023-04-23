@@ -1,5 +1,6 @@
 import { throttle } from './schedulers';
 import { IS_IOS } from './windowEnvironment';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 
 type IDimensions = {
   width: number;
@@ -29,9 +30,11 @@ export function updateSizes(): IDimensions {
   } else {
     height = window.innerHeight;
   }
-  const vh = height * 0.01;
 
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  requestMutation(() => {
+    const vh = height * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  });
 
   return {
     width: window.innerWidth,

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
+import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
 import type { MessageListType } from '../../../../global/types';
@@ -12,7 +13,6 @@ import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../global/helpers';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
-import { fastRaf } from '../../../../util/schedulers';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { useDebouncedResolver } from '../../../../hooks/useAsyncResolvers';
@@ -57,8 +57,8 @@ const useEditing = (
 
     setHtml(html);
     setShouldForceShowEditing(true);
-    // `fastRaf` would execute syncronously in this case
-    requestAnimationFrame(() => {
+
+    requestNextMutation(() => {
       const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
       if (messageInput) {
         focusEditableElement(messageInput, true);
@@ -72,7 +72,7 @@ const useEditing = (
     }
 
     const shouldSetNoWebPage = !('webPage' in editedMessage.content)
-        && editedMessage.content.text?.entities?.some((entity) => URL_ENTITIES.has(entity.type));
+      && editedMessage.content.text?.entities?.some((entity) => URL_ENTITIES.has(entity.type));
 
     toggleMessageWebPage({
       chatId,
@@ -120,15 +120,18 @@ const useEditing = (
 
   const restoreNewDraftAfterEditing = useCallback(() => {
     if (!draft) return;
-    // Run 1 frame after editing draft reset
-    fastRaf(() => {
+
+    // Run one frame after editing draft reset
+    requestMeasure(() => {
       setHtml(getTextWithEntitiesAsHtml(draft));
-      const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
-      if (messageInput) {
-        requestAnimationFrame(() => {
+
+      // Wait one more frame until new HTML is rendered
+      requestNextMutation(() => {
+        const messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR);
+        if (messageInput) {
           focusEditableElement(messageInput, true);
-        });
-      }
+        }
+      });
     });
   }, [draft, setHtml]);
 

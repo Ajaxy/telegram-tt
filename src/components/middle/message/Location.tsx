@@ -1,6 +1,7 @@
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -34,8 +35,9 @@ import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevD
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/Skeleton';
 
-import mapPin from '../../../assets/map-pin.svg';
 import './Location.scss';
+
+import mapPin from '../../../assets/map-pin.svg';
 
 const MOVE_THRESHOLD = 0.0001; // ~11m
 const DEFAULT_MAP_CONFIG = {
@@ -156,9 +158,11 @@ const Location: FC<OwnProps> = ({
     if (mapBlobUrl) {
       const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
       getCustomAppendixBg(mapBlobUrl, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
-        contentEl.style.setProperty('--appendix-bg', appendixBg);
-        contentEl.classList.add('has-appendix-thumb');
-        contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        requestMutation(() => {
+          contentEl.style.setProperty('--appendix-bg', appendixBg);
+          contentEl.classList.add('has-appendix-thumb');
+          contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
+        });
       });
     }
   }, [shouldRenderText, isOwn, isInSelectMode, isSelected, theme, mapBlobUrl]);
@@ -182,11 +186,12 @@ const Location: FC<OwnProps> = ({
   }, !isExpired ? (secondsBeforeEnd || 0) * 1000 : undefined);
 
   useInterval(() => {
-    const countdownEl = countdownRef.current;
-
-    if (countdownEl) {
-      updateCountdown(countdownEl);
-    }
+    requestMutation(() => {
+      const countdownEl = countdownRef.current;
+      if (countdownEl) {
+        updateCountdown(countdownEl);
+      }
+    });
   }, secondsBeforeEnd ? 1000 : undefined);
 
   function renderInfo() {

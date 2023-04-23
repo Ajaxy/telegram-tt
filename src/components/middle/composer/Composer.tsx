@@ -2,6 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
+import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -532,7 +533,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     setHtml(`${getHtml()}${newHtml}`);
 
     // If selection is outside of input, set cursor at the end of input
-    requestAnimationFrame(() => {
+    requestNextMutation(() => {
       focusEditableElement(messageInput);
     });
   }, [isComposerBlocked, getHtml, setHtml]);
@@ -755,7 +756,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     clearDraft({ chatId, localOnly: true });
 
     // Wait until message animation starts
-    requestAnimationFrame(() => {
+    requestMeasure(() => {
       resetComposer();
     });
   }, [
@@ -842,7 +843,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     // Wait until message animation starts
-    requestAnimationFrame(() => {
+    requestMeasure(() => {
       resetComposer();
     });
   }, [
@@ -906,7 +907,8 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (requestedDraftText) {
       setHtml(requestedDraftText);
       resetOpenChatWithDraft();
-      requestAnimationFrame(() => {
+
+      requestNextMutation(() => {
         const messageInput = document.getElementById(EDITABLE_INPUT_ID)!;
         focusEditableElement(messageInput, true);
       });
@@ -939,13 +941,13 @@ const Composer: FC<OwnProps & StateProps> = ({
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
         handleMessageSchedule({ gif, isSilent }, scheduledAt);
-        requestAnimationFrame(() => {
+        requestMeasure(() => {
           resetComposer(true);
         });
       });
     } else {
       sendMessage({ gif, isSilent });
-      requestAnimationFrame(() => {
+      requestMeasure(() => {
         resetComposer(true);
       });
     }
@@ -971,13 +973,13 @@ const Composer: FC<OwnProps & StateProps> = ({
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
         handleMessageSchedule({ sticker, isSilent }, scheduledAt);
-        requestAnimationFrame(() => {
+        requestMeasure(() => {
           resetComposer(shouldPreserveInput);
         });
       });
     } else {
       sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder });
-      requestAnimationFrame(() => {
+      requestMeasure(() => {
         resetComposer(shouldPreserveInput);
       });
     }
@@ -1015,7 +1017,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     clearDraft({ chatId, localOnly: true });
-    requestAnimationFrame(() => {
+    requestMeasure(() => {
       resetComposer();
     });
   }, [
@@ -1025,7 +1027,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleBotCommandSelect = useCallback(() => {
     clearDraft({ chatId, localOnly: true });
-    requestAnimationFrame(() => {
+    requestMeasure(() => {
       resetComposer();
     });
   }, [chatId, clearDraft, resetComposer]);
@@ -1519,6 +1521,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         className={buildClassName(mainButtonState, !isReady && 'not-ready', activeVoiceRecording && 'recording')}
         disabled={areVoiceMessagesNotAllowed}
         allowDisabledClick
+        noFastClick
         ariaLabel={lang(sendButtonAriaLabel)}
         onClick={mainButtonHandler}
         onContextMenu={

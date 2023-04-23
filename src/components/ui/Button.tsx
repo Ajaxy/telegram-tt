@@ -3,6 +3,7 @@ import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef, useCallback, useState } from '../../lib/teact/teact';
 
+import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
@@ -34,6 +35,7 @@ export type OwnProps = {
   download?: string;
   disabled?: boolean;
   allowDisabledClick?: boolean;
+  noFastClick?: boolean;
   ripple?: boolean;
   faded?: boolean;
   tabIndex?: number;
@@ -85,6 +87,7 @@ const Button: FC<OwnProps> = ({
   download,
   disabled,
   allowDisabledClick,
+  noFastClick = color === 'danger',
   ripple,
   faded,
   tabIndex,
@@ -140,7 +143,11 @@ const Button: FC<OwnProps> = ({
     if ((allowDisabledClick || !disabled) && onMouseDown) {
       onMouseDown(e);
     }
-  }, [allowDisabledClick, disabled, noPreventDefault, onMouseDown]);
+
+    if (!IS_TOUCH_ENV && e.button === MouseButton.Main && !noFastClick) {
+      handleClick(e);
+    }
+  }, [allowDisabledClick, disabled, handleClick, noFastClick, noPreventDefault, onMouseDown]);
 
   if (href) {
     return (
@@ -172,7 +179,7 @@ const Button: FC<OwnProps> = ({
       id={id}
       type={type}
       className={fullClassName}
-      onClick={handleClick}
+      onClick={IS_TOUCH_ENV || noFastClick ? handleClick : undefined}
       onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}
       onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}

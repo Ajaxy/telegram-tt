@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useRef,
 } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
@@ -10,6 +10,7 @@ import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
 import fastSmoothScrollHorizontal from '../../../util/fastSmoothScrollHorizontal';
 
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -126,7 +127,11 @@ const EmojiTooltip: FC<OwnProps> = ({
     onClose,
   });
 
-  useEffect(() => {
+  useEffectWithPrevDeps(([prevSelectedIndex]) => {
+    if (prevSelectedIndex === undefined || prevSelectedIndex === -1) {
+      return;
+    }
+
     setItemVisible(selectedIndex, containerRef);
   }, [selectedIndex]);
 

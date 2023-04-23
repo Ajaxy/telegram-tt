@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import type { AnimationLevel, MediaViewerOrigin } from '../../types';
@@ -22,12 +22,12 @@ import useSignal from '../../hooks/useSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import useZoomChange from './hooks/useZoomChangeSignal';
+import { useSignalRef } from '../../hooks/useSignalRef';
+import useControlsSignal from './hooks/useControlsSignal';
 
 import MediaViewerContent from './MediaViewerContent';
 
 import './MediaViewerSlides.scss';
-import { useSignalRef } from '../../hooks/useSignalRef';
-import useControlsSignal from './hooks/useControlsSignal';
 
 const { easeOutCubic, easeOutQuart } = timingFunctions;
 
@@ -143,7 +143,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
   useTimeout(() => setControlsVisible(true), ANIMATION_DURATION);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const { x, y, scale } = getTransform();
     lockControls(scale !== 1);
     if (leftSlideRef.current) {
@@ -251,7 +251,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     const calculateOffsetBoundaries = (
       { x, y, scale }: Transform,
       offsetTop = 0,
-    ):[Transform, boolean, boolean] => {
+    ): [Transform, boolean, boolean] => {
       if (!initialContentRect) return [{ x, y, scale }, true, true];
       // Get current content boundaries
       let inBoundsX = true;
@@ -425,7 +425,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           content = activeSlideRef.current.querySelector('img, video');
           if (!content) return;
           // Store initial content rect, without transformations
-          initialContentRect = content.getBoundingClientRect();
+          initialContentRect = content!.getBoundingClientRect();
         }
       },
       onDrag: (event, captureEvent, {

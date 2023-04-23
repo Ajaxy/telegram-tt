@@ -2,6 +2,7 @@ import { getGlobal } from '../global';
 
 import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 
 const DEFAULT_DURATION = 300;
 
@@ -12,10 +13,6 @@ export default function fastSmoothScrollHorizontal(container: HTMLElement, left:
     duration = 0;
   }
 
-  return scrollWithJs(container, left, duration);
-}
-
-function scrollWithJs(container: HTMLElement, left: number, duration: number) {
   const isRtl = container.getAttribute('dir') === 'rtl';
   const {
     scrollLeft, offsetWidth: containerWidth, scrollWidth, dataset: { scrollId },
@@ -41,44 +38,44 @@ function scrollWithJs(container: HTMLElement, left: number, duration: number) {
 
   const target = scrollLeft + path;
 
-  if (duration === 0) {
-    container.scrollLeft = target;
-    return Promise.resolve();
-  }
+  return new Promise<void>((resolve) => {
+    requestMutation(() => {
+      if (duration === 0) {
+        container.scrollLeft = target;
+        resolve();
+        return;
+      }
 
-  let isStopped = false;
-  const id = Math.random().toString();
-  container.dataset.scrollId = id;
-  stopById.set(id, () => {
-    isStopped = true;
+      let isStopped = false;
+      const id = Math.random().toString();
+      container.dataset.scrollId = id;
+      stopById.set(id, () => {
+        isStopped = true;
+      });
+
+      container.style.scrollSnapType = 'none';
+
+      const startAt = Date.now();
+
+      animate(() => {
+        if (isStopped) return false;
+
+        const t = Math.min((Date.now() - startAt) / duration, 1);
+
+        const currentPath = path * (1 - transition(t));
+        container.scrollLeft = Math.round(target - currentPath);
+
+        if (t >= 1) {
+          container.style.scrollSnapType = '';
+          delete container.dataset.scrollId;
+          stopById.delete(id);
+          resolve();
+        }
+
+        return t < 1;
+      }, requestMutation);
+    });
   });
-
-  container.style.scrollSnapType = 'none';
-
-  let resolve: VoidFunction;
-  const promise = new Promise<void>((r) => {
-    resolve = r;
-  });
-  const startAt = Date.now();
-
-  animate(() => {
-    if (isStopped) return false;
-
-    const t = Math.min((Date.now() - startAt) / duration, 1);
-
-    const currentPath = path * (1 - transition(t));
-    container.scrollLeft = Math.round(target - currentPath);
-
-    if (t >= 1) {
-      container.style.scrollSnapType = '';
-      delete container.dataset.scrollId;
-      stopById.delete(id);
-      resolve();
-    }
-    return t < 1;
-  });
-
-  return promise;
 }
 
 function transition(t: number) {

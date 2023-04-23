@@ -2,6 +2,7 @@ import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
+import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat } from '../../../api/types';
@@ -20,7 +21,6 @@ import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
-import { fastRaf } from '../../../util/schedulers';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -147,13 +147,11 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (prevIsVisible !== isVisible) {
       // For performance reasons, we delay animation of the topic list panel to the next animation frame
-      fastRaf(() => {
+      requestNextMutation(() => {
         if (!ref.current) return;
 
         const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
-        waitForTransitionEnd(ref.current, () => {
-          dispatchHeavyAnimationStop();
-        });
+        waitForTransitionEnd(ref.current, dispatchHeavyAnimationStop);
 
         onOpenAnimationStart?.();
 

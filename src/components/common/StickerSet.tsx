@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
@@ -41,7 +41,7 @@ type OwnProps = {
   loadAndPlay: boolean;
   index: number;
   idPrefix?: string;
-  shouldRender: boolean;
+  isNearActive: boolean;
   favoriteStickers?: ApiSticker[];
   isSavedMessages?: boolean;
   isStatusPicker?: boolean;
@@ -51,7 +51,9 @@ type OwnProps = {
   selectedReactionIds?: string[];
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
-  observeIntersection: ObserveFn;
+  observeIntersection?: ObserveFn;
+  observeIntersectionForPlayingItems: ObserveFn;
+  observeIntersectionForShowingItems: ObserveFn;
   availableReactions?: ApiAvailableReaction[];
   onStickerSelect?: (sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onReactionSelect?: (reaction: ApiReaction) => void;
@@ -74,7 +76,7 @@ const StickerSet: FC<OwnProps> = ({
   loadAndPlay,
   index,
   idPrefix,
-  shouldRender,
+  isNearActive,
   favoriteStickers,
   availableReactions,
   isSavedMessages,
@@ -86,6 +88,8 @@ const StickerSet: FC<OwnProps> = ({
   selectedReactionIds,
   withDefaultStatusIcon,
   observeIntersection,
+  observeIntersectionForPlayingItems,
+  observeIntersectionForShowingItems,
   onReactionSelect,
   onStickerSelect,
   onStickerUnfave,
@@ -119,9 +123,11 @@ const StickerSet: FC<OwnProps> = ({
 
   const [itemsPerRow, setItemsPerRow] = useState(getItemsPerRowFallback(windowWidth));
 
-  const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const isIntersecting = useIsIntersecting(ref, observeIntersection ?? observeIntersectionForShowingItems);
+  const transitionClassNames = useMediaTransition(isIntersecting);
 
-  const transitionClassNames = useMediaTransition(shouldRender);
+  // `isNearActive` is set in advance during animation, but it is not reliable for short sets
+  const shouldRender = isNearActive || isIntersecting;
 
   const stickerMarginPx = isMobile ? 8 : 16;
   const emojiMarginPx = isMobile ? 8 : 10;
@@ -194,13 +200,13 @@ const StickerSet: FC<OwnProps> = ({
   }, [calculateItemsPerRow]);
   useResizeObserver(ref, handleResize);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!ref.current) return;
     setItemsPerRow(calculateItemsPerRow(ref.current.clientWidth));
   }, [calculateItemsPerRow]);
 
   useEffect(() => {
-    if (isIntersecting && !stickerSet.stickers?.length && !stickerSet.reactions?.length && stickerSet.accessHash) {
+    if (shouldRender && !stickerSet.stickers?.length && !stickerSet.reactions?.length && stickerSet.accessHash) {
       loadStickers({
         stickerSetInfo: {
           id: stickerSet.id,
@@ -208,7 +214,7 @@ const StickerSet: FC<OwnProps> = ({
         },
       });
     }
-  }, [isIntersecting, loadStickers, stickerSet]);
+  }, [shouldRender, loadStickers, stickerSet]);
 
   const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
     && stickerSet.stickers?.some(({ isFree }) => !isFree);
@@ -299,7 +305,7 @@ const StickerSet: FC<OwnProps> = ({
               isSelected={isSelected}
               loadAndPlay={loadAndPlay}
               availableReactions={availableReactions}
-              observeIntersection={observeIntersection}
+              observeIntersection={observeIntersectionForPlayingItems}
               onClick={onReactionSelect!}
               sharedCanvasRef={sharedCanvasRef}
               sharedCanvasHqRef={sharedCanvasHqRef}
@@ -321,7 +327,8 @@ const StickerSet: FC<OwnProps> = ({
                 key={sticker.id}
                 sticker={sticker}
                 size={itemSize}
-                observeIntersection={observeIntersection}
+                observeIntersection={observeIntersectionForPlayingItems}
+                observeIntersectionForShowing={observeIntersectionForShowingItems}
                 noAnimate={!loadAndPlay}
                 isSavedMessages={isSavedMessages}
                 isStatusPicker={isStatusPicker}

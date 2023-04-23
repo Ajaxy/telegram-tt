@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useMemo, useRef } from '../../../../lib/teact/teact';
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
 import type { AnimationLevel } from '../../../../types';
@@ -24,7 +25,6 @@ import useLang from '../../../../hooks/useLang';
 import useEnsureMessage from '../../../../hooks/useEnsureMessage';
 import useMedia from '../../../../hooks/useMedia';
 import { ChatAnimationTypes } from './useChatAnimationType';
-import { fastRaf } from '../../../../util/schedulers';
 
 import MessageSummary from '../../../common/MessageSummary';
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
@@ -169,14 +169,14 @@ export default function useChatListEntry({
     if (animationType === ChatAnimationTypes.Opacity) {
       element.style.opacity = '0';
 
-      fastRaf(() => {
+      requestMutation(() => {
         element.classList.add('animate-opacity');
         element.style.opacity = '1';
       });
     } else if (animationType === ChatAnimationTypes.Move) {
       element.style.transform = `translate3d(0, ${-orderDiff * CHAT_HEIGHT_PX}px, 0)`;
 
-      fastRaf(() => {
+      requestMutation(() => {
         element.classList.add('animate-transform');
         element.style.transform = '';
       });
@@ -185,7 +185,7 @@ export default function useChatListEntry({
     }
 
     setTimeout(() => {
-      fastRaf(() => {
+      requestMutation(() => {
         element.classList.remove('animate-opacity', 'animate-transform');
         element.style.opacity = '';
         element.style.transform = '';

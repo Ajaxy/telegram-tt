@@ -3,7 +3,11 @@ import {
   useEffect, useRef, useCallback, useState,
 } from '../lib/teact/teact';
 
-import { throttle, debounce } from '../util/schedulers';
+import type { Scheduler } from '../util/schedulers';
+
+import {
+  throttle, debounce, throttleWith,
+} from '../util/schedulers';
 import useEffectOnce from './useEffectOnce';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
 
@@ -26,6 +30,7 @@ interface Response {
 export function useIntersectionObserver({
   rootRef,
   throttleMs,
+  throttleScheduler,
   debounceMs,
   shouldSkipFirst,
   margin,
@@ -34,6 +39,7 @@ export function useIntersectionObserver({
 }: {
   rootRef: RefObject<HTMLDivElement>;
   throttleMs?: number;
+  throttleScheduler?: Scheduler;
   debounceMs?: number;
   shouldSkipFirst?: boolean;
   margin?: number;
@@ -99,10 +105,18 @@ export function useIntersectionObserver({
 
       entriesAccumulator.clear();
     };
-    const scheduler = throttleMs ? throttle : debounceMs ? debounce : undefined;
-    const observerCallback = scheduler
-      ? scheduler(observerCallbackSync, (throttleMs || debounceMs)!, !shouldSkipFirst)
-      : observerCallbackSync;
+
+    let observerCallback: typeof observerCallbackSync;
+    if (typeof throttleScheduler === 'function') {
+      observerCallback = throttleWith(throttleScheduler, observerCallbackSync);
+    } else if (throttleMs) {
+      observerCallback = throttle(observerCallbackSync, throttleMs, !shouldSkipFirst);
+    } else if (debounceMs) {
+      observerCallback = debounce(observerCallbackSync, debounceMs, !shouldSkipFirst);
+    } else {
+      observerCallback = observerCallbackSync;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
