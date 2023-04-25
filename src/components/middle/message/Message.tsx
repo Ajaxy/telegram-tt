@@ -24,7 +24,6 @@ import type {
   ApiTopic,
   ApiReaction,
   ApiStickerSet,
-  ApiPhoto,
 } from '../../../api/types';
 import type {
   AnimationLevel, FocusDirection, IAlbum, ISettings,
@@ -70,7 +69,6 @@ import {
   selectChatTranslations,
   selectRequestedTranslationLanguage,
   selectChatFullInfo,
-  selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -203,8 +201,6 @@ type StateProps = {
   canShowSender: boolean;
   originSender?: ApiUser | ApiChat;
   botSender?: ApiUser;
-  senderUserProfilePhoto?: ApiPhoto;
-  originSenderUserProfilePhoto?: ApiPhoto;
   isThreadTop?: boolean;
   shouldHideReply?: boolean;
   replyMessage?: ApiMessage;
@@ -313,8 +309,6 @@ const Message: FC<OwnProps & StateProps> = ({
   canShowSender,
   originSender,
   botSender,
-  senderUserProfilePhoto,
-  originSenderUserProfilePhoto,
   isThreadTop,
   shouldHideReply,
   replyMessage,
@@ -487,7 +481,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const shouldPreferOriginSender = forwardInfo && (isChatWithSelf || isRepliesChat || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
   const senderPeer = forwardInfo ? originSender : messageSender;
-  const avatarUserProfilePhoto = shouldPreferOriginSender ? originSenderUserProfilePhoto : senderUserProfilePhoto;
 
   const {
     handleMouseDown,
@@ -790,7 +783,6 @@ const Message: FC<OwnProps & StateProps> = ({
         user={avatarUser}
         chat={avatarChat}
         text={hiddenName}
-        userProfilePhoto={avatarUserProfilePhoto}
         lastSyncTime={lastSyncTime}
         onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
         observeIntersection={observeIntersectionForLoading}
@@ -1137,7 +1129,6 @@ const Message: FC<OwnProps & StateProps> = ({
             isSelected={isSelected}
             theme={theme}
             peer={sender}
-            peerProfilePhoto={senderUserProfilePhoto}
           />
         )}
       </div>
@@ -1373,10 +1364,6 @@ export default memo(withGlobal<OwnProps>(
     const senderAdminMember = sender?.id && isGroup
       ? chatFullInfo?.adminMembersById?.[sender?.id]
       : undefined;
-    const senderUserProfilePhoto = canShowSender && sender && isUserId(sender.id)
-      ? selectUserPhotoFromFullInfo(global, sender.id) : undefined;
-    const originSenderUserProfilePhoto = originSender && isUserId(originSender.id)
-      ? selectUserPhotoFromFullInfo(global, originSender.id) : undefined;
 
     const threadTopMessageId = threadId ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
     const isThreadTop = message.id === threadTopMessageId;
@@ -1443,8 +1430,6 @@ export default memo(withGlobal<OwnProps>(
       canShowSender,
       originSender,
       botSender,
-      senderUserProfilePhoto,
-      originSenderUserProfilePhoto,
       shouldHideReply: shouldHideReply || isReplyToTopicStart,
       isThreadTop,
       replyMessage,

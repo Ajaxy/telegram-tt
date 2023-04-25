@@ -14,7 +14,6 @@ import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
-import UserAvatar from '../../common/UserAvatar';
 
 import './GroupCallTopPane.scss';
 
@@ -113,11 +112,14 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
       <div className="avatars">
         {fetchedParticipants.map((p) => {
           if (!p) return undefined;
-          if (p.user) {
-            return <UserAvatar key={p.user.id} user={p.user} />;
-          } else {
-            return <Avatar key={p.chat.id} chat={p.chat} animationLevel={animationLevel} />;
-          }
+          return (
+            <Avatar
+              key={p.user ? p.user.id : p.chat.id}
+              chat={p.chat}
+              user={p.user}
+              animationLevel={animationLevel}
+            />
+          );
         })}
       </div>
       <Button round className="join">

@@ -1,13 +1,12 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { getMainUsername, isUserId } from '../../../global/helpers';
-import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -99,7 +98,6 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
           size="medium"
           user={user}
           chat={chat}
-          userProfilePhoto={user ? selectUserPhotoFromFullInfo(getGlobal(), user.id) : undefined}
         />
         <div className="contact-info" dir="auto">
           {userOrChat && <FullNameTitle peer={userOrChat} />}

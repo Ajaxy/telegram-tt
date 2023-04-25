@@ -16,12 +16,6 @@ export function selectUserFullInfo<T extends GlobalState>(global: T, userId: str
   return global.users.fullInfoById[userId];
 }
 
-export function selectUserPhotoFromFullInfo<T extends GlobalState>(global: T, userId: string) {
-  const fullInfo = selectUserFullInfo(global, userId);
-
-  return fullInfo?.personalPhoto || fullInfo?.profilePhoto || fullInfo?.fallbackPhoto;
-}
-
 export function selectIsUserBlocked<T extends GlobalState>(global: T, userId: string) {
   return selectUserFullInfo(global, userId)?.isBlocked;
 }
@@ -34,14 +28,6 @@ export function selectIsCurrentUserPremium<T extends GlobalState>(global: T) {
 
 export function selectIsPremiumPurchaseBlocked<T extends GlobalState>(global: T) {
   return global.appConfig?.isPremiumPurchaseBlocked ?? true;
-}
-
-// Slow, not to be used in `withGlobal`
-export function selectUserByUsername<T extends GlobalState>(global: T, username: string) {
-  const usernameLowered = username.toLowerCase();
-  return Object.values(global.users.byId).find(
-    (user) => user.usernames?.some((u) => u.username.toLowerCase() === usernameLowered),
-  );
 }
 
 // Slow, not to be used in `withGlobal`

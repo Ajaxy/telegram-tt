@@ -5,15 +5,13 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember, ApiPhoto,
+  ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import {
-  selectChatMessages, selectUser, selectUserPhotoFromFullInfo, selectUserStatus,
-} from '../../global/selectors';
+import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -47,7 +45,6 @@ type StateProps =
   {
     user?: ApiUser;
     userStatus?: ApiUserStatus;
-    userProfilePhoto?: ApiPhoto;
     isSavedMessages?: boolean;
     animationLevel: AnimationLevel;
     areMessagesLoaded: boolean;
@@ -69,7 +66,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   noRtl,
   user,
   userStatus,
-  userProfilePhoto,
   isSavedMessages,
   areMessagesLoaded,
   animationLevel,
@@ -175,7 +171,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         key={user.id}
         size={avatarSize}
         user={user}
-        userProfilePhoto={userProfilePhoto}
         isSavedMessages={isSavedMessages}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
         withVideo={withVideoAvatar}
@@ -196,13 +191,11 @@ export default memo(withGlobal<OwnProps>(
     const userStatus = selectUserStatus(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
     const areMessagesLoaded = Boolean(selectChatMessages(global, userId));
-    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
 
     return {
       lastSyncTime,
       user,
       userStatus,
-      userProfilePhoto,
       isSavedMessages,
       areMessagesLoaded,
       animationLevel: global.settings.byKey.animationLevel,

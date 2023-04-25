@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiMessage, ApiPoll, ApiUser, ApiPollAnswer,
@@ -19,7 +19,6 @@ import { formatMediaDuration } from '../../../util/dateFormat';
 import type { LangFn } from '../../../hooks/useLang';
 import useLang from '../../../hooks/useLang';
 import { getServerTimeOffset } from '../../../util/serverTime';
-import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';
@@ -235,7 +234,6 @@ const Poll: FC<OwnProps & StateProps> = ({
               key={user.id}
               size="micro"
               user={user}
-              userProfilePhoto={selectUserPhotoFromFullInfo(getGlobal(), user.id)}
             />
           ))}
         </div>

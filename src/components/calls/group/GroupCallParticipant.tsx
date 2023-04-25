@@ -4,10 +4,10 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectUser, selectUserPhotoFromFullInfo } from '../../../global/selectors';
+import { selectChat, selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 
@@ -23,7 +23,6 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
-  userProfilePhoto?: ApiPhoto;
   chat?: ApiChat;
 };
 
@@ -31,7 +30,6 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   openParticipantMenu,
   participant,
   user,
-  userProfilePhoto,
   chat,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -81,7 +79,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
       onClick={handleOnClick}
       ref={anchorRef}
     >
-      <Avatar user={user} chat={chat} userProfilePhoto={userProfilePhoto} size="medium" />
+      <Avatar user={user} chat={chat} size="medium" />
       <div className="info">
         <span className="name">{name}</span>
         <span className={buildClassName('about', aboutColor)}>{aboutText}</span>
@@ -98,7 +96,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       user: participant.isUser ? selectUser(global, participant.id) : undefined,
       chat: !participant.isUser ? selectChat(global, participant.id) : undefined,
-      userProfilePhoto: participant.isUser ? selectUserPhotoFromFullInfo(global, participant.id) : undefined,
     };
   },
 )(GroupCallParticipant));

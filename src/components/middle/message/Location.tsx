@@ -5,9 +5,7 @@ import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type {
-  ApiChat, ApiMessage, ApiPhoto, ApiUser,
-} from '../../../api/types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
@@ -55,7 +53,6 @@ const SVG_PIN = { __html: '<svg version="1.1" class="round-pin" xmlns="http://ww
 type OwnProps = {
   message: ApiMessage;
   peer?: ApiUser | ApiChat;
-  peerProfilePhoto?: ApiPhoto;
   lastSyncTime?: number;
   isInSelectMode?: boolean;
   isSelected?: boolean;
@@ -65,7 +62,6 @@ type OwnProps = {
 const Location: FC<OwnProps> = ({
   message,
   peer,
-  peerProfilePhoto,
   lastSyncTime,
   isInSelectMode,
   isSelected,
@@ -247,7 +243,7 @@ const Location: FC<OwnProps> = ({
     if (type === 'geoLive') {
       return (
         <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN}>
-          <Avatar chat={avatarChat} user={avatarUser} userProfilePhoto={peerProfilePhoto} className="location-avatar" />
+          <Avatar chat={avatarChat} user={avatarUser} className="location-avatar" />
           {location.heading !== undefined && (
             <div className="direction" style={`--direction: ${location.heading}deg`} />
           )}

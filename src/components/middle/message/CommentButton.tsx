@@ -9,7 +9,6 @@ import type {
 import { isUserId } from '../../../global/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
-import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -63,7 +62,6 @@ const CommentButton: FC<OwnProps> = ({
               key={user.id}
               size="small"
               user={isUserId(user.id) ? user as ApiUser : undefined}
-              userProfilePhoto={isUserId(user.id) ? selectUserPhotoFromFullInfo(getGlobal(), user.id) : undefined}
               chat={!isUserId(user.id) ? user as ApiChat : undefined}
             />
           ))}

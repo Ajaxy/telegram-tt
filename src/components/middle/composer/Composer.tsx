@@ -24,7 +24,6 @@ import type {
   ApiBotMenuButton,
   ApiAttachMenuPeerType,
   ApiChatFullInfo,
-  ApiPhoto,
 } from '../../../api/types';
 import type { InlineBotSettings, ISettings } from '../../../types';
 
@@ -63,7 +62,7 @@ import {
   selectTabState,
   selectTheme,
   selectUser,
-  selectUserFullInfo, selectUserPhotoFromFullInfo,
+  selectUserFullInfo,
 } from '../../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -190,7 +189,6 @@ type StateProps =
     chatBotCommands?: ApiBotCommand[];
     sendAsUser?: ApiUser;
     sendAsChat?: ApiChat;
-    sendAsUserProfilePhoto?: ApiPhoto;
     sendAsId?: string;
     editingDraft?: ApiFormattedText;
     requestedDraftText?: string;
@@ -277,7 +275,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   chatBotCommands,
   sendAsUser,
   sendAsChat,
-  sendAsUserProfilePhoto,
   sendAsId,
   editingDraft,
   replyingToId,
@@ -1373,7 +1370,6 @@ const Composer: FC<OwnProps & StateProps> = ({
               <Avatar
                 user={sendAsUser}
                 chat={sendAsChat}
-                userProfilePhoto={sendAsUserProfilePhoto}
                 size="tiny"
               />
             </Button>
@@ -1586,7 +1582,6 @@ export default memo(withGlobal<OwnProps>(
     );
     const sendAsUser = sendAsId ? selectUser(global, sendAsId) : undefined;
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
-    const sendAsUserProfilePhoto = sendAsUser ? selectUserPhotoFromFullInfo(global, sendAsUser.id) : undefined;
     const requestedDraftText = selectRequestedDraftText(global, chatId);
     const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
     const currentMessageList = selectCurrentMessageList(global);
@@ -1647,7 +1642,6 @@ export default memo(withGlobal<OwnProps>(
       botMenuButton: chatBotFullInfo?.botInfo?.menuButton,
       sendAsUser,
       sendAsChat,
-      sendAsUserProfilePhoto,
       sendAsId,
       editingDraft,
       requestedDraftText,

@@ -5,6 +5,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
+import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
@@ -20,7 +21,7 @@ import useFlag from '../../hooks/useFlag';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import UserAvatar from '../common/UserAvatar';
+import Avatar from '../common/Avatar';
 import ListItem from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import Loading from '../ui/Loading';
@@ -38,6 +39,7 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUser
   chatId?: string;
   messageId?: number;
   availableReactions?: ApiAvailableReaction[];
+  animationLevel?: AnimationLevel;
 };
 
 const ReactorListModal: FC<OwnProps & StateProps> = ({
@@ -48,6 +50,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   messageId,
   seenByUserIds,
   availableReactions,
+  animationLevel,
 }) => {
   const {
     loadReactors,
@@ -191,7 +194,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(userId)}
                     >
-                      <UserAvatar user={user} size="small" withVideo />
+                      <Avatar user={user} size="small" withVideo animationLevel={animationLevel} />
                       <FullNameTitle peer={user} withEmojiStatus />
                       {r.reaction && (
                         <ReactionStaticEmoji
@@ -232,6 +235,7 @@ export default memo(withGlobal<OwnProps>(
       reactors: message?.reactors,
       seenByUserIds: message?.seenByUserIds,
       availableReactions: global.availableReactions,
+      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(ReactorListModal));
