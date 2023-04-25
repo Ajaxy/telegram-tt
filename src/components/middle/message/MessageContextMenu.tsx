@@ -106,6 +106,7 @@ type OwnProps = {
   onShowReactors?: NoneToVoidFunction;
   onAboutAds?: NoneToVoidFunction;
   onSponsoredHide?: NoneToVoidFunction;
+  onSponsorInfo?: NoneToVoidFunction;
   onTranslate?: NoneToVoidFunction;
   onShowOriginal?: NoneToVoidFunction;
   onSelectLanguage?: NoneToVoidFunction;
@@ -187,6 +188,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   onCopyMessages,
   onAboutAds,
   onSponsoredHide,
+  onSponsorInfo,
   onReactionPickerOpen,
   onTranslate,
   onShowOriginal,
@@ -431,6 +433,9 @@ const MessageContextMenu: FC<OwnProps> = ({
               </MenuItem>
             )}
           </>
+        )}
+        {isSponsoredMessage && message.sponsorInfo && (
+          <MenuItem icon="channel" onClick={onSponsorInfo}>{lang('SponsoredMessageSponsor')}</MenuItem>
         )}
         {isSponsoredMessage && <MenuItem icon="help" onClick={onAboutAds}>{lang('SponsoredMessageInfo')}</MenuItem>}
         {isSponsoredMessage && onSponsoredHide && (

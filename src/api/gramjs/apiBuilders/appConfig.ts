@@ -67,7 +67,7 @@ function getLimit(appConfig: GramJsAppConfig, key: Limit, fallbackKey: ApiLimitT
   return [defaultLimit, premiumLimit] as const;
 }
 
-export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
+export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiAppConfig {
   const appConfig = buildJson(json) as GramJsAppConfig;
 
   return {
@@ -100,5 +100,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue): ApiAppConfig {
       channelsPublic: getLimit(appConfig, 'channels_public_limit', 'channelsPublic'),
       aboutLength: getLimit(appConfig, 'about_length_limit', 'aboutLength'),
     },
+    hash,
   };
 }

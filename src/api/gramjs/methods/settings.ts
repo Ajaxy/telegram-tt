@@ -561,11 +561,12 @@ export function updateContentSettings(isEnabled: boolean) {
   }));
 }
 
-export async function fetchAppConfig(): Promise<ApiAppConfig | undefined> {
-  const result = await invokeRequest(new GramJs.help.GetAppConfig());
-  if (!result) return undefined;
+export async function fetchAppConfig(hash?: number): Promise<ApiAppConfig | undefined> {
+  const result = await invokeRequest(new GramJs.help.GetAppConfig({ hash }));
+  if (!result || result instanceof GramJs.help.AppConfigNotModified) return undefined;
 
-  return buildAppConfig(result);
+  const { config, hash: resultHash } = result;
+  return buildAppConfig(config, resultHash);
 }
 
 export async function fetchConfig(): Promise<ApiConfig | undefined> {

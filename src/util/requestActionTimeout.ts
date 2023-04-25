@@ -1,12 +1,14 @@
-import type { GlobalActions } from '../global';
 import { getActions } from '../global';
+import type { CallbackAction } from '../global/types';
 
 const callbacks = new Map<string, number>();
 
-export default function requestActionTimeout(action: keyof GlobalActions, timeout: number) {
-  clearTimeout(callbacks.get(action));
+export default function requestActionTimeout(action: CallbackAction, timeout: number) {
+  const name = action.action;
+  clearTimeout(callbacks.get(name));
   const timerId = window.setTimeout(() => {
-    (getActions()[action] as VoidFunction)();
+    // @ts-ignore
+    getActions()[name](action.payload);
   }, timeout);
-  callbacks.set(action, timerId);
+  callbacks.set(name, timerId);
 }

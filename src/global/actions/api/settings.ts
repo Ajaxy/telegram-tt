@@ -645,11 +645,16 @@ addActionHandler('ensureTimeFormat', async (global, actions, payload): Promise<v
   }
 });
 
-addActionHandler('loadAppConfig', async (global): Promise<void> => {
-  const appConfig = await callApi('fetchAppConfig');
+addActionHandler('loadAppConfig', async (global, actions, payload): Promise<void> => {
+  const hash = payload?.hash;
+
+  const appConfig = await callApi('fetchAppConfig', hash);
   if (!appConfig) return;
 
-  requestActionTimeout('loadAppConfig', APP_CONFIG_REFETCH_INTERVAL);
+  requestActionTimeout({
+    action: 'loadAppConfig',
+    payload: { hash: appConfig.hash },
+  }, APP_CONFIG_REFETCH_INTERVAL);
 
   global = getGlobal();
   global = {
@@ -665,7 +670,10 @@ addActionHandler('loadConfig', async (global): Promise<void> => {
 
   global = getGlobal();
   const timeout = config.expiresAt - getServerTime();
-  requestActionTimeout('loadConfig', timeout * 1000);
+  requestActionTimeout({
+    action: 'loadConfig',
+    payload: undefined,
+  }, timeout * 1000);
 
   global = {
     ...global,

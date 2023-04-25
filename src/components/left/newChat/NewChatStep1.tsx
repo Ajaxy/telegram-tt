@@ -59,7 +59,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
 
   const handleFilterChange = useCallback((query: string) => {
     setGlobalSearchQuery({ query });
-  }, [setGlobalSearchQuery]);
+  }, []);
 
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
@@ -86,11 +86,9 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
   }, [localContactIds, chatsById, searchQuery, localUserIds, globalUserIds, selectedMemberIds]);
 
   const handleNextStep = useCallback(() => {
-    if (selectedMemberIds.length || isChannel) {
-      setGlobalSearchQuery({ query: '' });
-      onNextStep();
-    }
-  }, [selectedMemberIds.length, isChannel, setGlobalSearchQuery, onNextStep]);
+    setGlobalSearchQuery({ query: '' });
+    onNextStep();
+  }, [onNextStep]);
 
   return (
     <div className="NewChat step-1">
@@ -119,7 +117,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
         />
 
         <FloatingActionButton
-          isShown={Boolean(selectedMemberIds.length || isChannel)}
+          isShown
           onClick={handleNextStep}
           ariaLabel={isChannel ? 'Continue To Channel Info' : 'Continue To Group Info'}
         >
