@@ -71,7 +71,7 @@ const CustomEmoji: FC<OwnProps> = ({
   }
 
   // An alternative to `withGlobal` to avoid adding numerous global containers
-  const customEmoji = useCustomEmoji(documentId);
+  const { customEmoji, canPlay } = useCustomEmoji(documentId);
 
   const loopCountRef = useRef(0);
   const [shouldLoop, setShouldLoop] = useState(true);
@@ -131,13 +131,13 @@ const CustomEmoji: FC<OwnProps> = ({
           sticker={customEmoji}
           isSmall={!isBig}
           size={size}
-          noPlay={noPlay}
+          noPlay={noPlay || !canPlay}
           customColor={customColor}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
           shouldLoop={shouldLoop}
           loopLimit={loopLimit}
-          shouldPreloadPreview={shouldPreloadPreview}
+          shouldPreloadPreview={shouldPreloadPreview || noPlay || !canPlay}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}

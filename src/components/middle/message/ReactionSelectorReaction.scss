@@ -8,6 +8,14 @@
     margin-inline-start: 0;
   }
 
+  &__static-icon {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    width: 90%;
+    height: 90%;
+  }
+
   .AnimatedSticker {
     position: absolute;
     top: 0;
@@ -25,8 +33,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 2.375rem;
-    height: 2.375rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 50%;
     background-color: var(--color-background-compact-menu-hover);
   }

@@ -17,6 +17,7 @@ import renderText from '../../common/helpers/renderText';
 import { pick } from '../../../util/iteratees';
 import { REM } from '../../common/helpers/mediaDimensions';
 
+import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
@@ -36,14 +37,14 @@ type OwnProps = {
 
 type StateProps =
   Pick<ISettings, (
-    'shouldSuggestStickers' |
-    'shouldLoopStickers'
+    'shouldSuggestStickers'
   )> & {
     addedSetIds?: string[];
     customEmojiSetIds?: string[];
     stickerSetsById: Record<string, ApiStickerSet>;
     defaultReaction?: ApiReaction;
     availableReactions?: ApiAvailableReaction[];
+    canPlayAnimatedEmojis: boolean;
   };
 
 const SettingsStickers: FC<OwnProps & StateProps> = ({
@@ -53,8 +54,8 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
   stickerSetsById,
   defaultReaction,
   shouldSuggestStickers,
-  shouldLoopStickers,
   availableReactions,
+  canPlayAnimatedEmojis,
   onReset,
   onScreenSelect,
 }) => {
@@ -78,10 +79,6 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
     setSettingOption({ shouldSuggestStickers: newValue });
   }, [setSettingOption]);
 
-  const handleShouldLoopStickersChange = useCallback((newValue: boolean) => {
-    setSettingOption({ shouldLoopStickers: newValue });
-  }, [setSettingOption]);
-
   const stickerSets = useMemo(() => (
     addedSetIds && Object.values(pick(stickerSetsById, addedSetIds))
   ), [addedSetIds, stickerSetsById]);
@@ -98,11 +95,6 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           label={lang('SuggestStickers')}
           checked={shouldSuggestStickers}
           onCheck={handleSuggestStickersChange}
-        />
-        <Checkbox
-          label={lang('LoopAnimatedStickers')}
-          checked={shouldLoopStickers}
-          onCheck={handleShouldLoopStickersChange}
         />
         <ListItem
           className="mt-4"
@@ -141,6 +133,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
                 stickerSet={stickerSet}
                 observeIntersection={observeIntersectionForCovers}
                 onClick={handleStickerSetClick}
+                noPlay={!canPlayAnimatedEmojis}
               />
             ))}
           </div>
@@ -158,13 +151,13 @@ export default memo(withGlobal<OwnProps>(
     return {
       ...pick(global.settings.byKey, [
         'shouldSuggestStickers',
-        'shouldLoopStickers',
       ]),
       addedSetIds: global.stickers.added.setIds,
       customEmojiSetIds: global.customEmojis.added.setIds,
       stickerSetsById: global.stickers.setsById,
       defaultReaction: global.config?.defaultReaction,
       availableReactions: global.availableReactions,
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },
 )(SettingsStickers));

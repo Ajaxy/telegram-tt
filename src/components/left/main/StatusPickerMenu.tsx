@@ -7,6 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 
+import { selectIsContextMenuTranslucent } from '../../../global/selectors';
 import useFlag from '../../../hooks/useFlag';
 
 import Menu from '../../ui/Menu';
@@ -24,12 +25,14 @@ export type OwnProps = {
 
 interface StateProps {
   areFeaturedStickersLoaded?: boolean;
+  isTranslucent?: boolean;
 }
 
 const StatusPickerMenu: FC<OwnProps & StateProps> = ({
   isOpen,
   statusButtonRef,
   areFeaturedStickersLoaded,
+  isTranslucent,
   onEmojiStatusSelect,
   onClose,
 }) => {
@@ -68,7 +71,7 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
           loadAndPlay={isOpen}
           isHidden={!isOpen}
           isStatusPicker
-          isTranslucent
+          isTranslucent={isTranslucent}
           onContextMenuOpen={markContextMenuShown}
           onContextMenuClose={unmarkContextMenuShown}
           onCustomEmojiSelect={handleEmojiSelect}
@@ -82,5 +85,6 @@ const StatusPickerMenu: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   return {
     areFeaturedStickersLoaded: Boolean(global.customEmojis.featuredIds?.length),
+    isTranslucent: selectIsContextMenuTranslucent(global),
   };
 })(StatusPickerMenu));

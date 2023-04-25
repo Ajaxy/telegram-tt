@@ -93,7 +93,7 @@ const StatusButton: FC<StateProps> = ({ emojiStatus }) => {
   );
 };
 
-export default memo(withGlobal((global) => {
+export default memo(withGlobal((global): StateProps => {
   const { currentUserId } = global;
   const currentUser = currentUserId ? selectUser(global, currentUserId) : undefined;
 

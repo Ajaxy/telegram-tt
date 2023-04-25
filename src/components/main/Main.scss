@@ -62,7 +62,7 @@
     transform: translate3d(-5rem, 0, 0);
     transition: transform var(--layer-transition);
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
     }
 
@@ -79,10 +79,6 @@
       transition: opacity var(--layer-transition);
       z-index: 1;
       pointer-events: none;
-
-      body.animation-level-0 & {
-        transition: none;
-      }
 
       // @optimization
       body.is-android & {
@@ -159,12 +155,17 @@
     transform: translate3d(0, 0, 0);
     transition: transform var(--layer-transition);
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
     }
 
     #Main.left-column-open & {
       transform: translate3d(26.5rem, 0, 0);
+    }
+
+    body.no-right-column-animations #Main.right-column-open &,
+    body.no-right-column-animations #Main.right-column-shown & {
+      transition: none;
     }
   }
 
@@ -189,7 +190,15 @@
   }
 }
 
-body.is-android.animation-level-1 {
+body.is-android:not(.no-right-column-animations) {
+  --layer-transition: 250ms ease-in-out;
+
+  #RightColumn {
+    transition: transform var(--layer-transition), opacity var(--layer-transition);
+  }
+}
+
+body.is-android.no-page-transitions {
   --layer-transition: 250ms ease-in-out;
 
   #LeftColumn, #MiddleColumn, #RightColumn {

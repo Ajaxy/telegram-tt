@@ -33,7 +33,7 @@
     transform: scale(1.1);
   }
 
-  :global(body:not(.animation-level-0)) &.withTransition {
+  :global(body:not(.no-page-transitions)) &.withTransition {
     transition: background-color 0.2s;
 
     &.customBgImage::before {
@@ -46,14 +46,14 @@
   }
 
   @media screen and (min-width: 1276px) {
-    :global(body.animation-level-2) &:not(.customBgImage)::before {
+    :global(body:not(.no-page-transitions)) &:not(.customBgImage)::before {
       overflow: hidden;
       transform: scale(1);
       transform-origin: left center;
     }
   }
 
-  :global(html.theme-light body.animation-level-2) &:not(.customBgImage).withRightColumn::before {
+  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn::before {
     @media screen and (min-width: 1276px) {
       transform: scaleX(0.73) !important;
     }
@@ -65,7 +65,7 @@
     }
   }
 
-  :global(html.theme-light body.animation-level-2) &:not(.customBgImage).withRightColumn.withTransition::before {
+  :global(html.theme-light body:not(.no-page-transitions)) &:not(.customBgImage).withRightColumn.withTransition::before {
     transition: transform var(--layer-transition);
   }
 

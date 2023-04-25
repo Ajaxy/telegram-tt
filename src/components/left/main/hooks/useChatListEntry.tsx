@@ -2,7 +2,6 @@ import React, { useLayoutEffect, useMemo, useRef } from '../../../../lib/teact/t
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
-import type { AnimationLevel } from '../../../../types';
 import type { LangFn } from '../../../../hooks/useLang';
 import type {
   ApiChat, ApiTopic, ApiMessage, ApiTypingStatus, ApiUser,
@@ -46,7 +45,7 @@ export default function useChatListEntry({
   observeIntersection,
   animationType,
   orderDiff,
-  animationLevel,
+  withInterfaceAnimations,
   isTopic,
 }: {
   chat?: ApiChat;
@@ -64,7 +63,7 @@ export default function useChatListEntry({
 
   animationType: ChatAnimationTypes;
   orderDiff: number;
-  animationLevel?: AnimationLevel;
+  withInterfaceAnimations?: boolean;
 }) {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -113,7 +112,12 @@ export default function useChatListEntry({
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>
-          {renderTextWithEntities(draft.text, draft.entities, undefined, undefined, undefined, undefined, true)}
+          {renderTextWithEntities({
+            text: draft.text,
+            entities: draft.entities,
+            isSimple: true,
+            withTranslucentThumbs: true,
+          })}
         </p>
       );
     }
@@ -137,6 +141,8 @@ export default function useChatListEntry({
             actionTargetChatId,
             lastMessageTopic,
             { isEmbedded: true },
+            undefined,
+            undefined,
           )}
         </p>
       );
@@ -161,7 +167,7 @@ export default function useChatListEntry({
   useLayoutEffect(() => {
     const element = ref.current;
 
-    if (animationLevel === 0 || !element) {
+    if (!withInterfaceAnimations || !element) {
       return;
     }
 
@@ -191,7 +197,7 @@ export default function useChatListEntry({
         element.style.transform = '';
       });
     }, ANIMATION_DURATION + ANIMATION_END_DELAY);
-  }, [animationLevel, orderDiff, animationType]);
+  }, [withInterfaceAnimations, orderDiff, animationType]);
 
   return {
     renderSubtitle,

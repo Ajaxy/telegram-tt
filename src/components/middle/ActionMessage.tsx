@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
   ApiUser, ApiMessage, ApiChat, ApiSticker, ApiTopic,
@@ -18,6 +18,7 @@ import {
   selectChat,
   selectTopicFromMessage,
   selectTabState,
+  selectCanPlayAnimatedEmojis,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -53,7 +54,6 @@ type OwnProps = {
 };
 
 type StateProps = {
-  usersById: Record<string, ApiUser>;
   senderUser?: ApiUser;
   senderChat?: ApiChat;
   targetUserIds?: string[];
@@ -64,6 +64,7 @@ type StateProps = {
   focusDirection?: FocusDirection;
   noFocusHighlight?: boolean;
   premiumGiftSticker?: ApiSticker;
+  canPlayAnimatedEmojis?: boolean;
 };
 
 const APPEARANCE_DELAY = 10;
@@ -74,7 +75,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   appearanceOrder = 0,
   isJustAdded,
   isLastInList,
-  usersById,
   senderUser,
   senderChat,
   targetUserIds,
@@ -87,6 +87,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   isInsideTopic,
   topic,
   memoFirstUnreadIdRef,
+  canPlayAnimatedEmojis,
   observeIntersectionForReading,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -140,6 +141,8 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
+  // No need for expensive global updates on users and chats, so we avoid them
+  const usersById = getGlobal().users.byId;
   const targetUsers = useMemo(() => {
     return targetUserIds
       ? targetUserIds.map((userId) => usersById?.[userId]).filter(Boolean)
@@ -196,7 +199,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
         <AnimatedIconFromSticker
           key={message.id}
           sticker={premiumGiftSticker}
-          play
+          play={canPlayAnimatedEmojis}
           noLoop
           nonInteractive
         />
@@ -256,7 +259,6 @@ export default memo(withGlobal<OwnProps>(
       chatId, senderId, replyToMessageId, content,
     } = message;
 
-    const { byId: usersById } = global.users;
     const userId = senderId;
     const { targetUserIds, targetChatId } = content.action || {};
     const targetMessageId = replyToMessageId;
@@ -278,7 +280,6 @@ export default memo(withGlobal<OwnProps>(
     const topic = selectTopicFromMessage(global, message);
 
     return {
-      usersById,
       senderUser,
       senderChat,
       targetChatId,
@@ -287,6 +288,7 @@ export default memo(withGlobal<OwnProps>(
       isFocused,
       premiumGiftSticker,
       topic,
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       ...(isFocused && {
         focusDirection,
         noFocusHighlight,

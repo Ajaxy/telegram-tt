@@ -58,6 +58,11 @@
   overflow: hidden;
 
   backdrop-filter: blur(10px);
+
+  :global(body.no-menu-blur) & {
+    background-color: #707579;
+    backdrop-filter: none;
+  }
 }
 
 .action-item {

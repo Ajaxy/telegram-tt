@@ -13,7 +13,7 @@ import { EDITABLE_INPUT_ID } from '../../../config';
 import {
   IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
 } from '../../../util/windowEnvironment';
-import { selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
+import { selectCanPlayAnimatedEmojis, selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
 import { debounce } from '../../../util/schedulers';
 import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
@@ -67,6 +67,7 @@ type StateProps = {
   replyingToId?: number;
   isSelectModeActive?: boolean;
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
+  canPlayAnimatedEmojis: boolean;
 };
 
 const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
@@ -111,6 +112,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   shouldSuppressTextFormatter,
   replyingToId,
   isSelectModeActive,
+  canPlayAnimatedEmojis,
   messageSendKeyCombo,
   onUpdate,
   onSuppressedFocus,
@@ -157,6 +159,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     sharedCanvasHqRef,
     absoluteContainerRef,
     isAttachmentModalInput ? 'attachment' : 'composer',
+    canPlayAnimatedEmojis,
     isActive,
   );
 
@@ -590,6 +593,7 @@ export default memo(withGlobal<OwnProps>(
       messageSendKeyCombo,
       replyingToId: chatId && threadId ? selectReplyingToId(global, chatId, threadId) : undefined,
       isSelectModeActive: selectIsInSelectMode(global),
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },
 )(MessageInput));

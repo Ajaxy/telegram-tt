@@ -86,6 +86,13 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           {lang('Telegram.GeneralSettingsViewController')}
         </ListItem>
         <ListItem
+          icon="animations"
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.Performance)}
+        >
+          {lang('Animations and Performance')}
+        </ListItem>
+        <ListItem
           icon="unmute"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.Notifications)}

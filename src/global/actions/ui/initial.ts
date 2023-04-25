@@ -2,13 +2,14 @@ import { addCallback } from '../../../lib/teact/teactn';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
   IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV,
 } from '../../../util/windowEnvironment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
-import { selectTabState, selectNotifySettings, selectTheme } from '../../selectors';
+import {
+  selectTabState, selectNotifySettings, selectTheme, selectPerformanceSettings, selectCanAnimateInterface,
+} from '../../selectors';
 import { startWebsync, stopWebsync } from '../../../util/websync';
 import { subscribe, unsubscribe } from '../../../util/notifications';
 import { clearCaching, setupCaching } from '../../cache';
@@ -18,6 +19,7 @@ import { callApi } from '../../../api/gramjs';
 import type { ActionReturnType, GlobalState } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 
 const HISTORY_ANIMATION_DURATION = 450;
 
@@ -99,8 +101,9 @@ addCallback((global: GlobalState) => {
     shouldInit: false,
   }, tabState.id);
 
-  const { animationLevel, messageTextSize, language } = global.settings.byKey;
+  const { messageTextSize, language } = global.settings.byKey;
   const theme = selectTheme(global);
+  const performanceType = selectPerformanceSettings(global);
 
   void setLanguage(language, undefined, true);
 
@@ -112,8 +115,8 @@ addCallback((global: GlobalState) => {
     document.documentElement.style.setProperty('--message-text-size', `${messageTextSize}px`);
     document.documentElement.setAttribute('data-message-text-size', messageTextSize.toString());
     document.body.classList.add('initial');
-    document.body.classList.add(`animation-level-${animationLevel}`);
     document.body.classList.add(IS_TOUCH_ENV ? 'is-touch-env' : 'is-pointer-env');
+    applyPerformanceSettings(performanceType);
 
     if (IS_IOS) {
       document.body.classList.add('is-ios');
@@ -127,7 +130,7 @@ addCallback((global: GlobalState) => {
     }
   });
 
-  switchTheme(theme, animationLevel === ANIMATION_LEVEL_MAX);
+  switchTheme(theme, selectCanAnimateInterface(global));
 
   startWebsync();
 
@@ -208,10 +211,9 @@ function subscribeToSystemThemeChange() {
     // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     let global = getGlobal();
     const nextTheme = selectTheme(global);
-    const { animationLevel } = global.settings.byKey;
 
     if (nextTheme !== currentTheme) {
-      switchTheme(nextTheme, animationLevel === ANIMATION_LEVEL_MAX);
+      switchTheme(nextTheme, selectCanAnimateInterface(global));
       // Force-update component containers
       global = { ...global };
       setGlobal(global);

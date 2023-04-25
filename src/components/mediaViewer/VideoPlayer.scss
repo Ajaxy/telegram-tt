@@ -45,7 +45,7 @@
     height: 3.25rem;
     background-color: rgba(0, 0, 0, 0.5) !important;
     z-index: 3;
-    body:not(.animation-level-0) & {
+    body:not(.no-page-transitions) & {
       transition: opacity 0.3s ease !important;
     }
 

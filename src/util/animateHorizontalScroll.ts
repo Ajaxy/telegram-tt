@@ -1,15 +1,15 @@
 import { getGlobal } from '../global';
 
-import { ANIMATION_LEVEL_MIN } from '../config';
 import { animate } from './animation';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { selectCanAnimateInterface } from '../global/selectors';
 
 const DEFAULT_DURATION = 300;
 
 const stopById: Map<string, VoidFunction> = new Map();
 
 export default function animateHorizontalScroll(container: HTMLElement, left: number, duration = DEFAULT_DURATION) {
-  if (getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
+  if (!selectCanAnimateInterface(getGlobal())) {
     duration = 0;
   }
 

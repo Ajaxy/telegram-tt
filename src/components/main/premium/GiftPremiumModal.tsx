@@ -5,7 +5,6 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiPremiumGiftOption, ApiUser } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
@@ -36,7 +35,6 @@ type StateProps = {
   gifts?: ApiPremiumGiftOption[];
   monthlyCurrency?: string;
   monthlyAmount?: number;
-  animationLevel: AnimationLevel;
 };
 
 const GiftPremiumModal: FC<OwnProps & StateProps> = ({
@@ -45,7 +43,6 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   gifts,
   monthlyCurrency,
   monthlyAmount,
-  animationLevel,
 }) => {
   const { openPremiumModal, closeGiftPremiumModal, openUrl } = getActions();
 
@@ -131,8 +128,6 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
           user={renderedUser}
           size="jumbo"
           className={styles.avatar}
-          animationLevel={animationLevel}
-          withVideo
         />
         <h2 className={styles.headerText}>
           {lang('GiftTelegramPremiumTitle')}
@@ -179,6 +174,5 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     gifts,
     monthlyCurrency,
     monthlyAmount: monthlyAmount ? Number(monthlyAmount) : undefined,
-    animationLevel: global.settings.byKey.animationLevel,
   };
 })(GiftPremiumModal));

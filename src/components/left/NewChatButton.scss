@@ -11,7 +11,7 @@
     left: 1rem;
   }
 
-  body.animation-level-0 & {
+  body.no-page-transitions & {
     transform: none !important;
     opacity: 0;
 

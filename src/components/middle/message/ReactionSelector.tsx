@@ -30,6 +30,7 @@ type OwnProps = {
   isReady?: boolean;
   canBuyPremium?: boolean;
   isCurrentUserPremium?: boolean;
+  canPlayAnimatedEmojis?: boolean;
   onShowMore: (position: IAnchorPosition) => void;
 };
 
@@ -44,6 +45,7 @@ const ReactionSelector: FC<OwnProps> = ({
   maxUniqueReactions,
   isPrivate,
   isReady,
+  canPlayAnimatedEmojis,
   onToggleReaction,
   onShowMore,
 }) => {
@@ -103,6 +105,7 @@ const ReactionSelector: FC<OwnProps> = ({
               isReady={isReady}
               onToggleReaction={onToggleReaction}
               reaction={reaction}
+              noAppearAnimation={!canPlayAnimatedEmojis}
               chosen={userReactionIndexes.has(i)}
             />
           ))}

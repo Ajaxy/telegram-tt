@@ -8,7 +8,6 @@ import type {
   ApiUser, ApiChat, ApiUserStatus, ApiTopic, ApiPhoto,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
-import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
@@ -55,7 +54,6 @@ type StateProps =
     userStatus?: ApiUserStatus;
     chat?: ApiChat;
     isSavedMessages?: boolean;
-    animationLevel: AnimationLevel;
     mediaId?: number;
     avatarOwnerId?: string;
     topic?: ApiTopic;
@@ -78,7 +76,6 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   chat,
   isSavedMessages,
   connectionState,
-  animationLevel,
   mediaId,
   avatarOwnerId,
   topic,
@@ -103,7 +100,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
   const slideAnimation = hasSlideAnimation
-    ? animationLevel >= 1 ? (lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized') : 'none'
+    ? (lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized')
     : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
@@ -355,7 +352,6 @@ export default memo(withGlobal<OwnProps>(
     const userStatus = selectUserStatus(global, userId);
     const chat = selectChat(global, userId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
-    const { animationLevel } = global.settings.byKey;
     const { mediaId, avatarOwnerId } = selectTabState(global).mediaViewer;
     const isForum = chat?.isForum;
     const { threadId: currentTopicId } = selectCurrentMessageList(global) || {};
@@ -373,7 +369,6 @@ export default memo(withGlobal<OwnProps>(
       userFallbackPhoto: userFullInfo?.fallbackPhoto,
       chatProfilePhoto: chatFullInfo?.profilePhoto,
       isSavedMessages,
-      animationLevel,
       mediaId,
       avatarOwnerId,
       ...(topic && {

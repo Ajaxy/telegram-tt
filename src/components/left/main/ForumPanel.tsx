@@ -9,12 +9,11 @@ import type { ApiChat } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
-  GENERAL_TOPIC_ID,
-  TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA, ANIMATION_LEVEL_MIN,
+  GENERAL_TOPIC_ID, TOPICS_SLICE, TOPIC_HEIGHT_PX, TOPIC_LIST_SENSITIVE_AREA,
 } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import {
-  selectChat, selectCurrentMessageList, selectIsForumPanelOpen, selectTabState,
+  selectCanAnimateInterface, selectChat, selectCurrentMessageList, selectIsForumPanelOpen, selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderedTopics } from '../../../global/helpers';
@@ -54,7 +53,7 @@ type StateProps = {
   chat?: ApiChat;
   currentTopicId?: number;
   lastSyncTime?: number;
-  animationLevel?: number;
+  withInterfaceAnimations?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -68,7 +67,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   onTopicSearch,
   onCloseAnimationEnd,
   onOpenAnimationStart,
-  animationLevel,
+  withInterfaceAnimations,
 }) => {
   const {
     closeForumPanel, openChatWithInfo, loadTopics,
@@ -97,10 +96,10 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   }, [closeForumPanel]);
 
   useEffect(() => {
-    if (animationLevel === ANIMATION_LEVEL_MIN && !isOpen) {
+    if (!withInterfaceAnimations && !isOpen) {
       onCloseAnimationEnd?.();
     }
-  }, [animationLevel, isOpen, onCloseAnimationEnd]);
+  }, [withInterfaceAnimations, isOpen, onCloseAnimationEnd]);
 
   const handleToggleChatInfo = useCallback(() => {
     if (!chat) return;
@@ -212,7 +211,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
         styles.root,
         isScrolled && styles.scrolled,
         lang.isRtl && styles.rtl,
-        animationLevel === ANIMATION_LEVEL_MIN && styles.noAnimation,
+        !withInterfaceAnimations && styles.noAnimation,
       )}
       onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
     >
@@ -294,7 +293,7 @@ export default memo(withGlobal<OwnProps>(
       chat,
       lastSyncTime: global.lastSyncTime,
       currentTopicId: chatId === currentChatId ? currentThreadId : undefined,
-      animationLevel: global.settings.byKey.animationLevel,
+      withInterfaceAnimations: selectCanAnimateInterface(global),
     };
   },
 )(ForumPanel));

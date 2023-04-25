@@ -30,8 +30,6 @@ type StateProps = Pick<ISettings, (
   'canAutoLoadFileInPrivateChats' |
   'canAutoLoadFileInGroups' |
   'canAutoLoadFileInChannels' |
-  'canAutoPlayGifs' |
-  'canAutoPlayVideos' |
   'autoLoadFileMaxSizeMb'
 )>;
 
@@ -50,8 +48,6 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
   canAutoLoadFileInPrivateChats,
   canAutoLoadFileInGroups,
   canAutoLoadFileInChannels,
-  canAutoPlayGifs,
-  canAutoPlayVideos,
   autoLoadFileMaxSizeMb,
 }) => {
   const { setSettingOption } = getActions();
@@ -69,14 +65,6 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
 
   const handleFileSizeChange = useCallback((value: number) => {
     setSettingOption({ autoLoadFileMaxSizeMb: AUTODOWNLOAD_FILESIZE_MB_LIMITS[value] });
-  }, [setSettingOption]);
-
-  const handleCanAutoPlayGifsChange = useCallback((value: boolean) => {
-    setSettingOption({ canAutoPlayGifs: value });
-  }, [setSettingOption]);
-
-  const handleCanAutoPlayVideosChange = useCallback((value: boolean) => {
-    setSettingOption({ canAutoPlayVideos: value });
   }, [setSettingOption]);
 
   function renderContentSizeSlider() {
@@ -165,21 +153,6 @@ const SettingsDataStorage: FC<OwnProps & StateProps> = ({
         canAutoLoadFileInGroups,
         canAutoLoadFileInChannels,
       )}
-
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('AutoplayMedia')}</h4>
-
-        <Checkbox
-          label={lang('GifsTab2')}
-          checked={canAutoPlayGifs}
-          onCheck={handleCanAutoPlayGifsChange}
-        />
-        <Checkbox
-          label={lang('DataAndStorage.Autoplay.Videos')}
-          checked={canAutoPlayVideos}
-          onCheck={handleCanAutoPlayVideosChange}
-        />
-      </div>
     </div>
   );
 };
@@ -199,8 +172,6 @@ export default memo(withGlobal<OwnProps>(
       'canAutoLoadFileInPrivateChats',
       'canAutoLoadFileInGroups',
       'canAutoLoadFileInChannels',
-      'canAutoPlayGifs',
-      'canAutoPlayVideos',
       'autoLoadFileMaxSizeMb',
     ]);
   },

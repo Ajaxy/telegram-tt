@@ -2,7 +2,6 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { AnimationLevel } from '../../../types';
 import type { ApiUser, ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
@@ -26,14 +25,12 @@ type OwnProps = {
 type StateProps = {
   session?: ApiWebSession;
   bot?: ApiUser;
-  animationLevel: AnimationLevel;
 };
 
 const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
   isOpen,
   session,
   bot,
-  animationLevel,
   onClose,
 }) => {
   const { terminateWebAuthorization } = getActions();
@@ -80,8 +77,6 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
         className={styles.avatar}
         user={renderingBot}
         size="large"
-        animationLevel={animationLevel}
-        withVideo
       />
       {renderingBot && <FullNameTitle className={styles.title} peer={renderingBot} />}
       <div className={styles.note}>
@@ -112,6 +107,5 @@ export default memo(withGlobal<OwnProps>((global, { hash }): StateProps => {
   return {
     session,
     bot,
-    animationLevel: global.settings.byKey.animationLevel,
   };
 })(SettingsActiveWebsite));

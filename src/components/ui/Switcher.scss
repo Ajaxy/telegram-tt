@@ -13,7 +13,7 @@
     pointer-events: none;
   }
 
-  body.animation-level-0 &,
+  body.no-page-transitions &,
   &.no-animation {
     .widget,
     .widget::after {

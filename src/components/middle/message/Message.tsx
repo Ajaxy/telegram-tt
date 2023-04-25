@@ -25,9 +25,7 @@ import type {
   ApiReaction,
   ApiStickerSet,
 } from '../../../api/types';
-import type {
-  AnimationLevel, FocusDirection, IAlbum, ISettings,
-} from '../../../types';
+import type { FocusDirection, IAlbum, ISettings } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 import { AudioOrigin } from '../../../types';
@@ -69,6 +67,7 @@ import {
   selectChatTranslations,
   selectRequestedTranslationLanguage,
   selectChatFullInfo,
+  selectPerformanceSettingsValue,
 } from '../../../global/selectors';
 import {
   getMessageContent,
@@ -248,13 +247,14 @@ type StateProps = {
   transcribedText?: string;
   isTranscriptionError?: boolean;
   isPremium: boolean;
-  animationLevel: AnimationLevel;
   senderAdminMember?: ApiChatMember;
   messageTopic?: ApiTopic;
   hasTopicChip?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   areTranslationsEnabled?: boolean;
   requestedTranslationLanguage?: string;
+  withReactionEffects?: boolean;
+  withStickerEffects?: boolean;
 };
 
 type MetaPosition =
@@ -354,13 +354,14 @@ const Message: FC<OwnProps & StateProps> = ({
   repliesThreadInfo,
   hasUnreadReaction,
   memoFirstUnreadIdRef,
-  animationLevel,
   senderAdminMember,
   messageTopic,
   hasTopicChip,
   chatTranslations,
   areTranslationsEnabled,
   requestedTranslationLanguage,
+  withReactionEffects,
+  withStickerEffects,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -785,9 +786,6 @@ const Message: FC<OwnProps & StateProps> = ({
         text={hiddenName}
         lastSyncTime={lastSyncTime}
         onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
-        observeIntersection={observeIntersectionForLoading}
-        animationLevel={animationLevel}
-        withVideo
       />
     );
   }
@@ -861,6 +859,7 @@ const Message: FC<OwnProps & StateProps> = ({
         genericEffects={genericEffects}
         observeIntersection={observeIntersectionForPlaying}
         noRecentReactors={isChannel}
+        withEffects={withReactionEffects}
       />
     );
   }
@@ -917,6 +916,7 @@ const Message: FC<OwnProps & StateProps> = ({
                 memoFirstUnreadIdRef.current && messageId >= memoFirstUnreadIdRef.current
               ) || isLocal)
             ) || undefined}
+            withEffect={withStickerEffects}
             onPlayEffect={startStickerEffect}
             onStopEffect={stopStickerEffect}
           />
@@ -924,7 +924,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasAnimatedEmoji && animatedCustomEmoji && (
           <AnimatedCustomEmoji
             customEmojiId={animatedCustomEmoji}
-            withEffects={isUserId(chatId)}
+            withEffects={withStickerEffects && isUserId(chatId)}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             lastSyncTime={lastSyncTime}
@@ -937,7 +937,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {hasAnimatedEmoji && animatedEmoji && (
           <AnimatedEmoji
             emoji={animatedEmoji}
-            withEffects={isUserId(chatId)}
+            withEffects={withStickerEffects && isUserId(chatId)}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
             lastSyncTime={lastSyncTime}
@@ -1311,6 +1311,7 @@ const Message: FC<OwnProps & StateProps> = ({
             genericEffects={genericEffects}
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
+            withEffects={withReactionEffects}
           />
         )}
       </div>
@@ -1473,7 +1474,6 @@ export default memo(withGlobal<OwnProps>(
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
       transcribedText: transcriptionId !== undefined ? global.transcriptions[transcriptionId]?.text : undefined,
       isPremium: selectIsCurrentUserPremium(global),
-      animationLevel: global.settings.byKey.animationLevel,
       senderAdminMember,
       messageTopic,
       genericEffects: global.genericEmojiEffects,
@@ -1482,6 +1482,8 @@ export default memo(withGlobal<OwnProps>(
       areTranslationsEnabled: global.settings.byKey.canTranslate,
       requestedTranslationLanguage,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
+      withReactionEffects: selectPerformanceSettingsValue(global, 'reactionEffects'),
+      withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

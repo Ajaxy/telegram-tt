@@ -112,9 +112,16 @@
     margin-left: auto;
     flex-shrink: 0;
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       &,
       .AudioPlayer,
+      .HeaderActions {
+        transition: none !important;
+      }
+    }
+
+    body.no-right-column-animations & {
+      &,
       .HeaderActions {
         transition: none !important;
       }
@@ -169,7 +176,7 @@
   &.tools-stacked.animated .AudioPlayer {
     animation: fade-in var(--layer-transition) forwards;
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       animation: none;
     }
   }

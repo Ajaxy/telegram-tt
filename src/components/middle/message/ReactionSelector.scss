@@ -23,10 +23,13 @@
   &__bubble-big,
   &__bubble-small,
   &__items-wrapper {
-    background: var(--color-background-compact-menu);
-    backdrop-filter: blur(10px);
-
+    background: var(--color-background);
     filter: drop-shadow(0 0.25rem 0.125rem var(--color-default-shadow));
+
+    body:not(.no-menu-blur) & {
+      background: var(--color-background-compact-menu);
+      backdrop-filter: blur(10px);
+    }
 
     body.is-safari & {
       filter: none;

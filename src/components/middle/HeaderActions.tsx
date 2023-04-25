@@ -13,12 +13,12 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
 import { ManagementScreens } from '../../types';
 
-import { ANIMATION_LEVEL_MIN } from '../../config';
 import { ARE_CALLS_SUPPORTED, IS_PWA } from '../../util/windowEnvironment';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
 import {
+  selectCanAnimateInterface,
   selectChat,
   selectChatBot,
   selectChatFullInfo,
@@ -351,7 +351,7 @@ export default memo(withGlobal<OwnProps>(
     const pendingJoinRequests = isMainThread ? chatFullInfo?.requestsPending : undefined;
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
-    const noAnimation = global.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN;
+    const noAnimation = !selectCanAnimateInterface(global);
 
     return {
       noMenu: false,

@@ -79,13 +79,13 @@ function MessageText({
       {[
         withSharedCanvas && <canvas ref={sharedCanvasRef} className="shared-canvas" />,
         withSharedCanvas && <canvas ref={sharedCanvasHqRef} className="shared-canvas" />,
-        renderTextWithEntities(
-          trimText(text!, truncateLength),
+        renderTextWithEntities({
+          text: trimText(text!, truncateLength),
           entities,
           highlight,
           emojiSize,
           shouldRenderAsHtml,
-          message.id,
+          messageId: message.id,
           isSimple,
           isProtected,
           observeIntersectionForLoading,
@@ -93,8 +93,8 @@ function MessageText({
           withTranslucentThumbs,
           sharedCanvasRef,
           sharedCanvasHqRef,
-          textCacheBusterRef.current.toString(),
-        ),
+          cacheBuster: textCacheBusterRef.current.toString(),
+        }),
       ].flat().filter(Boolean)}
     </>
   );

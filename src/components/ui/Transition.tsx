@@ -5,28 +5,27 @@ import { requestMutation, requestForcedReflow } from '../../lib/fasterdom/faster
 
 import { getGlobal } from '../../global';
 
-import type { GlobalState } from '../../global/types';
-
-import { ANIMATION_LEVEL_MIN } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import forceReflow from '../../util/forceReflow';
 import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { selectCanAnimateInterface } from '../../global/selectors';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import usePrevious from '../../hooks/usePrevious';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 
 import './Transition.scss';
 
+type AnimationName = (
+  'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'slideLayers'
+  | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
+  | 'slideVertical' | 'slideVerticalFade'
+);
 export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => React.ReactNode;
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
   nextKey?: number;
-  name: (
-    'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'slideLayers'
-    | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
-    | 'slideVertical' | 'slideVerticalFade'
-  );
+  name: AnimationName;
   direction?: 'auto' | 'inverse' | 1 | -1;
   renderCount?: number;
   shouldRestoreHeight?: boolean;
@@ -53,6 +52,10 @@ const CLASSES = {
   inactive: 'Transition_slide-inactive',
   afterSlides: 'Transition_afterSlides',
 };
+const DISABLEABLE_ANIMATIONS = new Set<AnimationName>([
+  'slide', 'slideRtl', 'slideFade', 'zoomFade', 'slideLayers', 'pushSlide', 'reveal',
+  'slideOptimized', 'slideOptimizedRtl', 'slideVertical', 'slideVerticalFade',
+]);
 
 function Transition({
   ref,
@@ -74,9 +77,10 @@ function Transition({
   children,
   afterChildren,
 }: TransitionProps) {
-  // No need for a container to update on change
-  const { animationLevel } = getGlobal().settings.byKey;
   const currentKeyRef = useRef<number>();
+  // No need for a container to update on change
+  const shouldDisableAnimation = DISABLEABLE_ANIMATIONS.has(name)
+    && !selectCanAnimateInterface(getGlobal());
 
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -164,7 +168,7 @@ function Transition({
 
     if (isSlideOptimized) {
       performSlideOptimized(
-        animationLevel,
+        shouldDisableAnimation,
         name,
         isBackwards,
         cleanup,
@@ -181,7 +185,7 @@ function Transition({
       return;
     }
 
-    if (name === 'none' || animationLevel === ANIMATION_LEVEL_MIN) {
+    if (name === 'none' || shouldDisableAnimation) {
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           removeExtraClass(node, CLASSES.from);
@@ -269,7 +273,7 @@ function Transition({
     shouldCleanup,
     slideClassName,
     cleanupExceptionKey,
-    animationLevel,
+    shouldDisableAnimation,
     forceUpdate,
   ]);
 
@@ -336,7 +340,7 @@ function Transition({
 export default Transition;
 
 function performSlideOptimized(
-  animationLevel: GlobalState['settings']['byKey']['animationLevel'],
+  shouldDisableAnimation: boolean,
   name: 'slideOptimized' | 'slideOptimizedRtl',
   isBackwards: boolean,
   cleanup: NoneToVoidFunction,
@@ -353,7 +357,7 @@ function performSlideOptimized(
     return;
   }
 
-  if (animationLevel === ANIMATION_LEVEL_MIN) {
+  if (shouldDisableAnimation) {
     toggleExtraClass(container, `Transition-${name}`, !isBackwards);
     toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 

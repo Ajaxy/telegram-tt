@@ -16,7 +16,6 @@ import type {
 
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
-import type { AnimationLevel } from '../../types';
 import type { Signal } from '../../util/signals';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import { LoadMoreDirection } from '../../types';
@@ -41,7 +40,9 @@ import {
   selectLastScrollOffset,
   selectThreadInfo,
   selectTabState,
-  selectUserFullInfo, selectChatFullInfo,
+  selectUserFullInfo,
+  selectChatFullInfo,
+  selectPerformanceSettingsValue,
 } from '../../global/selectors';
 import {
   isChatChannel,
@@ -117,7 +118,6 @@ type StateProps = {
   restrictionReason?: ApiRestrictionReason;
   focusingId?: number;
   isSelectModeActive?: boolean;
-  animationLevel?: AnimationLevel;
   lastMessage?: ApiMessage;
   isLoadingBotInfo?: boolean;
   botInfo?: ApiBotInfo;
@@ -126,6 +126,7 @@ type StateProps = {
   hasLinkedChat?: boolean;
   lastSyncTime?: number;
   topic?: ApiTopic;
+  noMessageSendingAnimation?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
@@ -177,6 +178,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   withBottomShift,
   withDefaultBg,
   topic,
+  noMessageSendingAnimation,
   onPinnedIntersectionChange,
   getForceNextPinnedInHeader,
 }) => {
@@ -464,6 +466,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
             lastItemElement!,
             'end',
             BOTTOM_FOCUS_MARGIN,
+            undefined,
+            undefined,
+            noMessageSendingAnimation ? 0 : undefined,
           );
         });
       }
@@ -516,7 +521,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       };
     });
     // This should match deps for `useSyncEffect` above
-  }, [messageIds, isViewportNewest, hasTools, getContainerHeight, prevContainerHeightRef]);
+  }, [messageIds, isViewportNewest, hasTools, getContainerHeight, prevContainerHeightRef, noMessageSendingAnimation]);
 
   useEffectWithPrevDeps(([prevIsSelectModeActive]) => {
     if (prevIsSelectModeActive !== undefined) {
@@ -730,6 +735,7 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       lastSyncTime: global.lastSyncTime,
       topic,
+      noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },

@@ -21,8 +21,13 @@
 
     transition: transform var(--layer-transition), opacity 0.2s ease;
 
-    :global(body.animation-level-0) & {
+    :global(body.no-page-transitions) &,
+    :global(body.no-right-column-animations) & {
       transition: none !important;
+    }
+
+    :global(body:not(.no-right-column-animations) #Main.right-column-open) & {
+      transition: transform var(--layer-transition), opacity 0.2s ease;
     }
 
     :global(#Main.right-column-open) & {

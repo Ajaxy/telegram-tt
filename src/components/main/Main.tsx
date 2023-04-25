@@ -6,7 +6,7 @@ import { addExtraClass } from '../../lib/teact/teact-dom';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { AnimationLevel, LangCode } from '../../types';
+import type { LangCode } from '../../types';
 import type {
   ApiAttachBot,
   ApiChat, ApiMessage, ApiUser,
@@ -27,7 +27,10 @@ import {
   selectIsMediaViewerOpen,
   selectIsRightColumnShown,
   selectIsServiceChatReady,
-  selectUser, selectIsReactionPickerOpen,
+  selectUser,
+  selectIsReactionPickerOpen,
+  selectPerformanceSettingsValue,
+  selectCanAnimateInterface,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
@@ -109,7 +112,6 @@ type StateProps = {
   openedCustomEmojiSetIds?: string[];
   activeGroupCallId?: string;
   isServiceChatReady?: boolean;
-  animationLevel: AnimationLevel;
   language?: LangCode;
   wasTimeFormatSetManually?: boolean;
   isPhoneCallActive?: boolean;
@@ -135,6 +137,8 @@ type StateProps = {
   isReceiptModalOpen?: boolean;
   isReactionPickerOpen: boolean;
   isCurrentUserPremium?: boolean;
+  noRightColumnAnimation?: boolean;
+  withInterfaceAnimations?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -163,7 +167,7 @@ const Main: FC<OwnProps & StateProps> = ({
   openedStickerSetShortName,
   openedCustomEmojiSetIds,
   isServiceChatReady,
-  animationLevel,
+  withInterfaceAnimations,
   language,
   wasTimeFormatSetManually,
   addedSetIds,
@@ -189,6 +193,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isCurrentUserPremium,
   deleteFolderDialogId,
   isMasterTab,
+  noRightColumnAnimation,
 }) => {
   const {
     initMain,
@@ -386,7 +391,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   // Handle opening middle column
   useSyncEffect(([prevIsLeftColumnOpen]) => {
-    if (prevIsLeftColumnOpen === undefined || isLeftColumnOpen === prevIsLeftColumnOpen || animationLevel === 0) {
+    if (prevIsLeftColumnOpen === undefined || isLeftColumnOpen === prevIsLeftColumnOpen || !withInterfaceAnimations) {
       return;
     }
 
@@ -405,7 +410,7 @@ const Main: FC<OwnProps & StateProps> = ({
       willAnimateLeftColumnRef.current = false;
       forceUpdate();
     });
-  }, [isLeftColumnOpen, animationLevel, forceUpdate]);
+  }, [isLeftColumnOpen, withInterfaceAnimations, forceUpdate]);
 
   const rightColumnTransition = useShowTransition(
     isRightColumnOpen, undefined, true, undefined, shouldSkipHistoryAnimations, undefined, true,
@@ -419,7 +424,7 @@ const Main: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    if (animationLevel === 0) {
+    if (noRightColumnAnimation) {
       setIsNarrowMessageList(isRightColumnOpen);
       return;
     }
@@ -434,7 +439,7 @@ const Main: FC<OwnProps & StateProps> = ({
       forceUpdate();
       setIsNarrowMessageList(isRightColumnOpen);
     });
-  }, [isRightColumnOpen, animationLevel, forceUpdate]);
+  }, [isRightColumnOpen, noRightColumnAnimation, forceUpdate]);
 
   const className = buildClassName(
     leftColumnTransition.hasShownClass && 'left-column-shown',
@@ -534,7 +539,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       settings: {
         byKey: {
-          animationLevel, language, wasTimeFormatSetManually,
+          language, wasTimeFormatSetManually,
         },
       },
       lastSyncTime,
@@ -574,6 +579,8 @@ export default memo(withGlobal<OwnProps>(
     const gameTitle = gameMessage?.content.game?.title;
     const currentUser = global.currentUserId ? selectUser(global, global.currentUserId) : undefined;
     const { chatId } = selectCurrentMessageList(global) || {};
+    const noRightColumnAnimation = !selectPerformanceSettingsValue(global, 'rightColumnAnimations')
+        || !selectCanAnimateInterface(global);
 
     return {
       lastSyncTime,
@@ -593,7 +600,7 @@ export default memo(withGlobal<OwnProps>(
       openedCustomEmojiSetIds,
       isServiceChatReady: selectIsServiceChatReady(global),
       activeGroupCallId: isMasterTab ? global.groupCalls.activeGroupCallId : undefined,
-      animationLevel,
+      withInterfaceAnimations: selectCanAnimateInterface(global),
       language,
       wasTimeFormatSetManually,
       isPhoneCallActive: isMasterTab ? Boolean(global.phoneCall) : undefined,
@@ -619,6 +626,7 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogId: deleteFolderDialogModal,
       isMasterTab,
       requestedDraft,
+      noRightColumnAnimation,
     };
   },
 )(Main));

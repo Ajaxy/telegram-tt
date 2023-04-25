@@ -8,11 +8,9 @@ import type {
   ApiChat, ApiPhoto, ApiUser, ApiUserStatus,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { AnimationLevel } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { ANIMATION_LEVEL_MAX, IS_TEST } from '../../config';
-import { VIDEO_AVATARS_DISABLED } from '../../util/windowEnvironment';
+import { IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -30,7 +28,6 @@ import renderText from './helpers/renderText';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 
@@ -52,12 +49,9 @@ type OwnProps = {
   text?: string;
   isSavedMessages?: boolean;
   withVideo?: boolean;
-  noLoop?: boolean;
   loopIndefinitely?: boolean;
-  animationLevel?: AnimationLevel;
   noPersonalPhoto?: boolean;
   lastSyncTime?: number;
-  forceVideo?: boolean;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
 };
@@ -72,13 +66,9 @@ const Avatar: FC<OwnProps> = ({
   text,
   isSavedMessages,
   withVideo,
-  noLoop,
   loopIndefinitely,
   lastSyncTime,
-  forceVideo,
-  animationLevel,
   noPersonalPhoto,
-  observeIntersection,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -90,14 +80,7 @@ const Avatar: FC<OwnProps> = ({
   let imageHash: string | undefined;
   let videoHash: string | undefined;
 
-  const canShowVideo = (
-    withVideo && !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
-    && user?.isPremium && user?.hasVideoAvatar
-  );
-  const isIntersectingForVideo = useIsIntersecting(
-    ref, canShowVideo ? observeIntersection : undefined,
-  );
-  const shouldLoadVideo = isIntersectingForVideo && (canShowVideo || (forceVideo && photo?.isVideo));
+  const shouldLoadVideo = withVideo && photo?.isVideo;
 
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
@@ -117,7 +100,7 @@ const Avatar: FC<OwnProps> = ({
   const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl, lastSyncTime);
   const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
-  const shouldPlayVideo = Boolean(isIntersectingForVideo && videoBlobUrl && shouldLoadVideo);
+  const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
   const transitionClassNames = useMediaTransition(hasBlobUrl);
 
@@ -134,10 +117,10 @@ const Avatar: FC<OwnProps> = ({
     if (loopIndefinitely) return;
 
     videoLoopCountRef.current += 1;
-    if (videoLoopCountRef.current >= LOOP_COUNT || noLoop) {
+    if (videoLoopCountRef.current >= LOOP_COUNT) {
       video.style.display = 'none';
     }
-  }, [loopIndefinitely, noLoop, videoBlobUrl]);
+  }, [loopIndefinitely, videoBlobUrl]);
 
   const lang = useLang();
 

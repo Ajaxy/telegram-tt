@@ -44,7 +44,7 @@
         transition: transform var(--select-transition);
       }
 
-      body.animation-level-0 & {
+      body.no-message-composer-animations & {
         &,
         &::before {
           transition: none !important;
@@ -57,7 +57,7 @@
       opacity: 1;
       transition: opacity var(--select-transition);
 
-      body.animation-level-0 & {
+      body.no-message-composer-animations & {
         transition: none !important;
       }
     }
@@ -68,7 +68,7 @@
       transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
       color 0.15s;
 
-      body.animation-level-0 & {
+      body.no-message-composer-animations & {
         transition: none !important;
       }
     }
@@ -120,12 +120,12 @@
       opacity: 1;
       transition: opacity var(--select-transition);
 
-      body.animation-level-0 & {
+      body.no-page-transitions & {
         transition: none !important;
       }
     }
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none !important;
     }
 
@@ -162,8 +162,13 @@
     /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
     transition: top 200ms, transform var(--layer-transition);
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none !important;
+    }
+
+    body.no-right-column-animations & {
+      /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+      transition: top 200ms !important;
     }
 
     @media (min-width: 1276px) {

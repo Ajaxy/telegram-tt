@@ -5,7 +5,6 @@ import { withGlobal } from '../../global';
 import type {
   ApiChat, ApiDimensions, ApiMessage, ApiUser,
 } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import {
@@ -36,7 +35,7 @@ type OwnProps = {
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
   isActive?: boolean;
-  animationLevel: AnimationLevel;
+  withAnimation?: boolean;
   onClose: () => void;
   onFooterClick: () => void;
   isMoving?: boolean;
@@ -69,7 +68,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     chatId,
     message,
     origin,
-    animationLevel,
+    withAnimation,
     isProtected,
     volume,
     playbackRate,
@@ -81,8 +80,6 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   } = props;
 
   const lang = useLang();
-
-  const isGhostAnimation = animationLevel === 2;
 
   const {
     isVideo,
@@ -97,7 +94,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     videoSize,
     loadProgress,
   } = useMediaProps({
-    message, avatarOwner, mediaId, origin, delay: isGhostAnimation && ANIMATION_DURATION,
+    message, avatarOwner, mediaId, origin, delay: withAnimation ? ANIMATION_DURATION : false,
   });
 
   const [, toggleControls] = useControlsSignal();

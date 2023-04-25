@@ -24,8 +24,8 @@
   }
 
   &.with-reactions .bubble {
-    background: none;
-    backdrop-filter: none;
+    background: none !important;
+    backdrop-filter: none !important;
     box-shadow: none;
     padding: 3.5rem 0 0 !important;
   }
@@ -36,6 +36,11 @@
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     padding: 0.25rem 0;
+
+    body.no-menu-blur & {
+      background: var(--color-background);
+      backdrop-filter: none;
+    }
   }
 
   .backdrop {

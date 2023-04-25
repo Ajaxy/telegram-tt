@@ -22,6 +22,8 @@ import {
   ARCHIVED_FOLDER_ID,
   DEFAULT_PATTERN_COLOR,
   DEFAULT_LIMITS,
+  ANIMATION_LEVEL_MIN,
+  ANIMATION_LEVEL_MED,
 } from '../config';
 import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 import {
@@ -33,7 +35,7 @@ import {
   selectVisibleUsers,
 } from './selectors';
 import { hasStoredSession } from '../util/sessions';
-import { INITIAL_GLOBAL_STATE } from './initialState';
+import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANCE_STATE_MIN } from './initialState';
 import { isUserId } from './helpers';
 import { getOrderedIds } from '../util/folderManager';
 import { clearGlobalForLockScreen } from './reducers';
@@ -156,6 +158,31 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   cached.chatFolders = {
     ...initialState.chatFolders,
     ...cached.chatFolders,
+  };
+
+  if (!cached.settings.performance) {
+    if (cached.settings.byKey.animationLevel === ANIMATION_LEVEL_MIN) {
+      cached.settings.performance = INITIAL_PERFORMANCE_STATE_MIN;
+    } else if (cached.settings.byKey.animationLevel === ANIMATION_LEVEL_MED) {
+      cached.settings.performance = INITIAL_PERFORMANCE_STATE_MID;
+    } else {
+      cached.settings.performance = initialState.settings.performance;
+    }
+  }
+
+  if ('canAutoPlayVideos' in cached.settings.byKey) {
+    cached.settings.performance.autoplayVideos = cached.settings.byKey.canAutoPlayVideos;
+    delete cached.settings.byKey.canAutoPlayVideos;
+  }
+
+  if ('canAutoPlayGifs' in cached.settings.byKey) {
+    cached.settings.performance.autoplayGifs = cached.settings.byKey.canAutoPlayGifs;
+    delete cached.settings.byKey.canAutoPlayGifs;
+  }
+
+  cached.settings.performance = {
+    ...initialState.settings.performance,
+    ...cached.settings.performance,
   };
 
   if (!cached.stickers.premium) {
@@ -555,11 +582,12 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
 }
 
 function reduceSettings<T extends GlobalState>(global: T): GlobalState['settings'] {
-  const { byKey, themes } = global.settings;
+  const { byKey, themes, performance } = global.settings;
 
   return {
     byKey,
     themes,
+    performance,
     privacy: {},
     notifyExceptions: {},
   };

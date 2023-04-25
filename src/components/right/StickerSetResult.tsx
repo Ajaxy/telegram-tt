@@ -107,7 +107,7 @@ const StickerSetResult: FC<OwnProps & StateProps> = ({
             sticker={sticker}
             size={STICKER_SIZE_SEARCH}
             observeIntersection={observeIntersection}
-            noAnimate={!shouldPlay || isModalOpen}
+            noPlay={!shouldPlay || isModalOpen}
             clickArg={sticker}
             onClick={handleStickerClick}
             noContextMenu

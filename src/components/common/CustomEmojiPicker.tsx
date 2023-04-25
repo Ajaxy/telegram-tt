@@ -28,6 +28,7 @@ import animateHorizontalScroll from '../../util/animateHorizontalScroll';
 import { pickTruthy, unique } from '../../util/iteratees';
 import { isSameReaction } from '../../global/helpers';
 import {
+  selectCanPlayAnimatedEmojis,
   selectIsAlwaysHighPriorityEmoji,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
@@ -316,7 +317,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
-              noAnimate={!canAnimate || !loadAndPlay}
+              noPlay={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
               sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
             />
@@ -332,7 +333,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         size={STICKER_SIZE_PICKER_HEADER}
         title={stickerSet.title}
         className={buttonClassName}
-        noAnimate={!canAnimate || !loadAndPlay}
+        noPlay={!canAnimate || !loadAndPlay}
         observeIntersection={observeIntersectionForCovers}
         noContextMenu
         isCurrentUserPremium
@@ -451,7 +452,7 @@ export default memo(withGlobal<OwnProps>(
       recentStatusEmojis: isStatusPicker ? recentStatusEmojis : undefined,
       stickerSetsById,
       addedCustomEmojiIds: global.customEmojis.added.setIds,
-      canAnimate: global.settings.byKey.shouldLoopStickers,
+      canAnimate: selectCanPlayAnimatedEmojis(global),
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       customEmojiFeaturedIds,

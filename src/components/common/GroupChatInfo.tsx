@@ -9,7 +9,6 @@ import type {
   ApiChat, ApiTopic, ApiThreadInfo, ApiTypingStatus,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
-import type { AnimationLevel } from '../../types';
 import type { LangFn } from '../../hooks/useLang';
 import { MediaViewerOrigin } from '../../types';
 
@@ -20,7 +19,11 @@ import {
   isChatSuperGroup,
 } from '../../global/helpers';
 import {
-  selectChat, selectChatMessages, selectChatOnlineCount, selectThreadInfo, selectThreadMessagesCount,
+  selectChat,
+  selectChatMessages,
+  selectChatOnlineCount,
+  selectThreadInfo,
+  selectThreadMessagesCount,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -47,7 +50,6 @@ type OwnProps = {
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   withChatType?: boolean;
-  withVideoAvatar?: boolean;
   noRtl?: boolean;
   noAvatar?: boolean;
   onClick?: VoidFunction;
@@ -60,7 +62,6 @@ type StateProps =
     topic?: ApiTopic;
     onlineCount?: number;
     areMessagesLoaded: boolean;
-    animationLevel: AnimationLevel;
     messagesCount?: number;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
@@ -77,13 +78,11 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   withFullInfo,
   withUpdatingStatus,
   withChatType,
-  withVideoAvatar,
   threadInfo,
   noRtl,
   chat,
   onlineCount,
   areMessagesLoaded,
-  animationLevel,
   lastSyncTime,
   topic,
   messagesCount,
@@ -187,12 +186,14 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
           size={avatarSize}
           chat={chat}
           onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
-          withVideo={withVideoAvatar}
-          animationLevel={animationLevel}
         />
       )}
       {isTopic && (
-        <TopicIcon topic={topic!} className="topic-header-icon" size={TOPIC_ICON_SIZE} />
+        <TopicIcon
+          topic={topic!}
+          className="topic-header-icon"
+          size={TOPIC_ICON_SIZE}
+        />
       )}
       <div className="info">
         {topic
@@ -238,7 +239,6 @@ export default memo(withGlobal<OwnProps>(
       onlineCount,
       topic,
       areMessagesLoaded,
-      animationLevel: global.settings.byKey.animationLevel,
       messagesCount,
     };
   },

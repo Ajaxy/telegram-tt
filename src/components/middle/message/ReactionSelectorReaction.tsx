@@ -3,6 +3,7 @@ import React, { memo } from '../../../lib/teact/teact';
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
 
+import { REM } from '../../common/helpers/mediaDimensions';
 import { createClassNameBuilder } from '../../../util/buildClassName';
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
@@ -11,12 +12,13 @@ import AnimatedSticker from '../../common/AnimatedSticker';
 
 import './ReactionSelectorReaction.scss';
 
-const REACTION_SIZE = 32;
+const REACTION_SIZE = 2 * REM;
 
 type OwnProps = {
   reaction: ApiAvailableReaction;
   isReady?: boolean;
   chosen?: boolean;
+  noAppearAnimation?: boolean;
   onToggleReaction: (reaction: ApiReaction) => void;
 };
 
@@ -25,11 +27,13 @@ const cn = createClassNameBuilder('ReactionSelectorReaction');
 const ReactionSelectorReaction: FC<OwnProps> = ({
   reaction,
   isReady,
+  noAppearAnimation,
   chosen,
   onToggleReaction,
 }) => {
-  const mediaAppearData = useMedia(`sticker${reaction.appearAnimation?.id}`, !isReady);
-  const mediaData = useMedia(`document${reaction.selectAnimation?.id}`, !isReady);
+  const mediaAppearData = useMedia(`sticker${reaction.appearAnimation?.id}`, !isReady || noAppearAnimation);
+  const mediaData = useMedia(`document${reaction.selectAnimation?.id}`, !isReady || noAppearAnimation);
+  const staticIconData = useMedia(`document${reaction.staticIcon?.id}`, !noAppearAnimation);
   const [isAnimationLoaded, markAnimationLoaded] = useFlag();
 
   const [isFirstPlay, , unmarkIsFirstPlay] = useFlag(true);
@@ -45,7 +49,14 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
       onClick={handleClick}
       onMouseEnter={isReady && !isFirstPlay ? activate : undefined}
     >
-      {!isAnimationLoaded && (
+      {noAppearAnimation && (
+        <img
+          className={cn('static-icon')}
+          src={staticIconData}
+          alt=""
+        />
+      )}
+      {!isAnimationLoaded && !noAppearAnimation && (
         <AnimatedSticker
           key={reaction.appearAnimation?.id}
           tgsUrl={mediaAppearData}
@@ -55,7 +66,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           onEnded={unmarkIsFirstPlay}
         />
       )}
-      {!isFirstPlay && (
+      {!isFirstPlay && !noAppearAnimation && (
         <AnimatedSticker
           key={reaction.selectAnimation?.id}
           tgsUrl={mediaData}

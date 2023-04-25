@@ -128,7 +128,7 @@
 
   @media (min-width: 600px) {
     &:not(.has-ripple):not(.is-static),
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       .ListItem-button:active {
         --background-color: var(--color-item-active) !important;
       }

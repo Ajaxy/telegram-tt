@@ -23,6 +23,7 @@ type OwnProps = {
   genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
   noRecentReactors?: boolean;
+  withEffects?: boolean;
 };
 
 const MAX_RECENT_AVATARS = 3;
@@ -37,6 +38,7 @@ const Reactions: FC<OwnProps> = ({
   genericEffects,
   observeIntersection,
   noRecentReactors,
+  withEffects,
 }) => {
   const lang = useLang();
 
@@ -60,6 +62,7 @@ const Reactions: FC<OwnProps> = ({
           withRecentReactors={totalCount <= MAX_RECENT_AVATARS && !noRecentReactors}
           genericEffects={genericEffects}
           observeIntersection={observeIntersection}
+          withEffects={withEffects}
         />
       ))}
       {metaChildren}

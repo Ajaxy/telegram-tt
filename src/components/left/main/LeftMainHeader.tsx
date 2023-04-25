@@ -4,13 +4,15 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { GlobalState, TabState } from '../../../global/types';
 import type { AnimationLevel, ISettings } from '../../../types';
-import type { TabState, GlobalState } from '../../../global/types';
-
 import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import {
-  APP_NAME, APP_VERSION, ARCHIVED_FOLDER_ID,
+  ANIMATION_LEVEL_MAX,
+  ANIMATION_LEVEL_MIN,
+  APP_NAME, APP_VERSION,
+  ARCHIVED_FOLDER_ID,
   BETA_CHANGELOG_URL,
   DEBUG,
   FEEDBACK_URL,
@@ -18,6 +20,11 @@ import {
   IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
+import {
+  INITIAL_PERFORMANCE_STATE_MAX,
+  INITIAL_PERFORMANCE_STATE_MID,
+  INITIAL_PERFORMANCE_STATE_MIN,
+} from '../../../global/initialState';
 import { IS_PWA } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
@@ -32,6 +39,7 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import { getPromptInstall } from '../../../util/installPrompt';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
+import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useAppLayout from '../../../hooks/useAppLayout';
 
 import DropdownMenu from '../../ui/DropdownMenu';
@@ -43,9 +51,9 @@ import Switcher from '../../ui/Switcher';
 import ShowTransition from '../../ui/ShowTransition';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import StatusButton from './StatusButton';
+import Toggle from '../../ui/Toggle';
 
 import './LeftMainHeader.scss';
-import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 type OwnProps = {
   shouldHideSearch?: boolean;
@@ -79,7 +87,6 @@ type StateProps =
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'>
   & Pick<TabState, 'canInstall'>;
 
-const ANIMATION_LEVEL_OPTIONS = [0, 1, 2];
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
@@ -121,6 +128,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     requestNextSettingsScreen,
     skipLockOnUnload,
     openUrl,
+    updatePerformanceSettings,
   } = getActions();
 
   const lang = useLang();
@@ -206,12 +214,16 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
 
-    const newLevel = animationLevel === 0 ? 2 : 0;
-    ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {
-      document.body.classList.toggle(`animation-level-${i}`, newLevel === i);
-    });
+    let newLevel = animationLevel + 1;
+    if (newLevel > ANIMATION_LEVEL_MAX) {
+      newLevel = ANIMATION_LEVEL_MIN;
+    }
+    const performanceSettings = newLevel === ANIMATION_LEVEL_MIN
+      ? INITIAL_PERFORMANCE_STATE_MIN
+      : (newLevel === ANIMATION_LEVEL_MAX ? INITIAL_PERFORMANCE_STATE_MAX : INITIAL_PERFORMANCE_STATE_MID);
 
-    setSettingOption({ animationLevel: newLevel });
+    setSettingOption({ animationLevel: newLevel as AnimationLevel });
+    updatePerformanceSettings(performanceSettings);
   }, [animationLevel, setSettingOption]);
 
   const handleChangelogClick = useCallback(() => {
@@ -249,6 +261,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     : lang('Search');
 
   const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
+  const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
+    ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid')
+    : 'min';
 
   // Disable dropdown menu RTL animation for resize
   const {
@@ -304,11 +319,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         onClick={handleAnimationLevelChange}
       >
         <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
-        <Switcher
-          id="animations"
-          label="Toggle Animations"
-          checked={animationLevel > 0}
-        />
+        <Toggle value={animationLevelValue} />
       </MenuItem>
       <MenuItem
         icon="help"
@@ -350,7 +361,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       )}
     </>
   ), [
-    animationLevel, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick, lang,
+    animationLevelValue, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick, lang,
     handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToWebK,
     onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions, archiveSettings,
   ]);

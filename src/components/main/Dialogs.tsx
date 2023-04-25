@@ -5,7 +5,6 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
 } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 
 import { selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';
@@ -20,10 +19,9 @@ import Avatar from '../common/Avatar';
 
 type StateProps = {
   dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
-  animationLevel: AnimationLevel;
 };
 
-const Dialogs: FC<StateProps> = ({ dialogs, animationLevel }) => {
+const Dialogs: FC<StateProps> = ({ dialogs }) => {
   const {
     dismissDialog,
     acceptInviteConfirmation,
@@ -47,7 +45,7 @@ const Dialogs: FC<StateProps> = ({ dialogs, animationLevel }) => {
   function renderInviteHeader(title: string, photo?: ApiPhoto) {
     return (
       <div className="modal-header">
-        {photo && <Avatar size="small" photo={photo} animationLevel={animationLevel} withVideo />}
+        {photo && <Avatar size="small" photo={photo} withVideo />}
         <div className="modal-title">
           {renderText(title)}
         </div>
@@ -196,7 +194,6 @@ export default memo(withGlobal(
   (global): StateProps => {
     return {
       dialogs: selectTabState(global).dialogs,
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(Dialogs));

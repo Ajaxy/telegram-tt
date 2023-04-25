@@ -11,7 +11,13 @@ import {
 } from '../../../config';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
-  selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectIsTrustedBot, selectChat,
+  selectCanAnimateInterface,
+  selectChat,
+  selectChatMessage,
+  selectCurrentChat,
+  selectCurrentMessageList,
+  selectIsTrustedBot,
+  selectTabState,
 } from '../../selectors';
 import generateIdFor from '../../../util/generateIdFor';
 import { compact, unique } from '../../../util/iteratees';
@@ -436,8 +442,7 @@ addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType
   const {
     top, left, width, height, tabId = getCurrentTabId(),
   } = payload || {};
-  const { animationLevel } = global.settings.byKey;
-  if (animationLevel === 0) return undefined;
+  if (!selectCanAnimateInterface(global)) return undefined;
 
   return updateTabState(global, {
     confetti: {

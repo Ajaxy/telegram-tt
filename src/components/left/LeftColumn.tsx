@@ -157,6 +157,7 @@ const LeftColumn: FC<StateProps> = ({
         case SettingsScreens.Notifications:
         case SettingsScreens.DataStorage:
         case SettingsScreens.Privacy:
+        case SettingsScreens.Performance:
         case SettingsScreens.ActiveSessions:
         case SettingsScreens.Language:
         case SettingsScreens.Stickers:

@@ -22,7 +22,7 @@ import './AnimatedEmoji.scss';
 
 type OwnProps = {
   emoji: string;
-  withEffects: boolean;
+  withEffects?: boolean;
   isOwn?: boolean;
   observeIntersection?: ObserveFn;
   lastSyncTime?: number;

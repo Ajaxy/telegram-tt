@@ -145,6 +145,9 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
         return <h3>{lang('NeverShareWith')}</h3>;
 
+      case SettingsScreens.Performance:
+        return <h3>{lang('Animations and Performance')}</h3>;
+
       case SettingsScreens.ActiveSessions:
         return <h3>{lang('SessionsTitle')}</h3>;
       case SettingsScreens.ActiveWebsites:

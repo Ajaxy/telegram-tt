@@ -140,7 +140,7 @@
   .Avatar {
     transition: transform var(--layer-transition);
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
     }
   }

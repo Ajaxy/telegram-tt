@@ -20,10 +20,6 @@
   transition: background-color 0.15s, color 0.15s;
   user-select: none;
 
-  body.animation-level-0 & {
-    transition: none !important;
-  }
-
   .Message .has-appendix &::before {
     content: "";
     display: block;
@@ -39,10 +35,6 @@
 
     .theme-dark #root & {
       filter: invert(0.83);
-    }
-
-    body.animation-level-0 & {
-      transition: none !important;
     }
   }
 

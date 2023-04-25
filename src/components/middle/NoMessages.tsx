@@ -56,7 +56,11 @@ function renderTopic(lang: LangFn, topic: ApiTopic) {
   return (
     <div className="NoMessages">
       <div className="wrapper">
-        <TopicIcon topic={topic} size={ICON_SIZE} className="no-messages-icon topic-icon" />
+        <TopicIcon
+          topic={topic}
+          size={ICON_SIZE}
+          className="no-messages-icon topic-icon"
+        />
         <h3 className="title">{lang('Chat.EmptyTopicPlaceholder.Title')}</h3>
         <p className="description topic-description">{renderText(lang('Chat.EmptyTopicPlaceholder.Text'), ['br'])}</p>
       </div>

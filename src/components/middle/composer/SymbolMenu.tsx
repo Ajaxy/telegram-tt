@@ -10,7 +10,7 @@ import type { GlobalActions } from '../../../global';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { selectTabState, selectIsCurrentUserPremium } from '../../../global/selectors';
+import { selectTabState, selectIsCurrentUserPremium, selectIsContextMenuTranslucent } from '../../../global/selectors';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMouseInside from '../../../hooks/useMouseInside';
@@ -68,6 +68,7 @@ type StateProps = {
   isLeftColumnShown: boolean;
   isCurrentUserPremium?: boolean;
   lastSyncTime?: number;
+  isBackgroundTranslucent?: boolean;
 };
 
 let isActivated = false;
@@ -99,6 +100,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   transformOriginX,
   transformOriginY,
   style,
+  isBackgroundTranslucent,
 }) => {
   const { loadPremiumSetStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -219,7 +221,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             isHidden={!isOpen || !isActive}
             loadAndPlay={isOpen && (isActive || isFrom)}
             chatId={chatId}
-            isTranslucent={!isMobile}
+            isTranslucent={!isMobile && isBackgroundTranslucent}
             onCustomEmojiSelect={handleCustomEmojiSelect}
           />
         );
@@ -232,7 +234,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             canSendStickers={canSendStickers}
             chatId={chatId}
             threadId={threadId}
-            isTranslucent={!isMobile}
+            isTranslucent={!isMobile && isBackgroundTranslucent}
             onStickerSelect={handleStickerSelect}
           />
         );
@@ -348,6 +350,7 @@ export default memo(withGlobal<OwnProps>(
       isLeftColumnShown: selectTabState(global).isLeftColumnShown,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       lastSyncTime: global.lastSyncTime,
+      isBackgroundTranslucent: selectIsContextMenuTranslucent(global),
     };
   },
 )(SymbolMenu));

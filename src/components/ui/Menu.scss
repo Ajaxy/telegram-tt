@@ -38,7 +38,7 @@
       transition: opacity 0.2s ease-in, transform 0.2s ease-in !important;
     }
 
-    body.animation-level-0 & {
+    body.no-context-menu-animations & {
       transform: none !important;
       transition: opacity 0.15s !important;
     }
@@ -84,6 +84,11 @@
       background: var(--color-background-compact-menu);
       backdrop-filter: blur(10px);
       padding: 0.25rem 0;
+
+      body.no-menu-blur & {
+        background: var(--color-background);
+        backdrop-filter: none;
+      }
     }
 
     .footer {

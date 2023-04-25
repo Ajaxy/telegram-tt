@@ -78,6 +78,7 @@ type OwnProps = {
   noReplies?: boolean;
   hasCustomEmoji?: boolean;
   customEmojiSets?: ApiStickerSet[];
+  canPlayAnimatedEmojis?: boolean;
   noTransition?: boolean;
   onReply?: NoneToVoidFunction;
   onOpenThread?: VoidFunction;
@@ -159,6 +160,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   seenByRecentUsers,
   hasCustomEmoji,
   customEmojiSets,
+  canPlayAnimatedEmojis,
   noTransition,
   onReply,
   onOpenThread,
@@ -326,6 +328,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           isReady={isReady}
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
+          canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleOpenReactionPicker}
         />
       )}

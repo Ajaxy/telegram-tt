@@ -27,7 +27,7 @@
     pointer-events: none;
   }
 
-  :global(body.animation-level-0) & {
+  :global(body.no-page-transitions) & {
     transform: none !important;
 
     transition: opacity 0.15s;

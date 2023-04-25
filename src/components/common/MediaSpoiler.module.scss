@@ -16,7 +16,7 @@
   mask-repeat: no-repeat;
   mask-size: 0%;
 
-  :global(body.animation-level-2) & {
+  :global(body:not(.no-page-transitions)) & {
     animation: 500ms ease-in circle-cut forwards;
   }
 
@@ -90,7 +90,7 @@
   }
 }
 
-:global(body.animation-level-2) .dots {
+:global(body:not(.no-page-transitions)) .dots {
   animation: 20s linear infinite dots;
 
   &::before {

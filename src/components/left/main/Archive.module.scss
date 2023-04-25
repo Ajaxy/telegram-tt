@@ -53,8 +53,8 @@
 .info {
   transition: opacity 0.3s ease, transform var(--layer-transition);
 
-  :global(body.animation-level-0) & {
-    transition: none;
+  :global(body.no-page-transitions) & {
+    transition: opacity 0.3s ease;
   }
 }
 

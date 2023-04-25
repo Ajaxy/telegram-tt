@@ -31,6 +31,7 @@ import SettingsStickers from './SettingsStickers';
 import SettingsCustomEmoji from './SettingsCustomEmoji';
 import SettingsDoNotTranslate from './SettingsDoNotTranslate';
 import SettingsExperimental from './SettingsExperimental';
+import SettingsPerformance from './SettingsPerformance';
 
 import './Settings.scss';
 
@@ -421,6 +422,14 @@ const Settings: FC<OwnProps> = ({
             shownScreen={screen}
             isActive={isScreenActive}
             onScreenSelect={onScreenSelect}
+            onReset={handleReset}
+          />
+        );
+
+      case SettingsScreens.Performance:
+        return (
+          <SettingsPerformance
+            isActive={isScreenActive}
             onReset={handleReset}
           />
         );

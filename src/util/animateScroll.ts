@@ -4,7 +4,6 @@ import { getGlobal } from '../global';
 import { FocusDirection } from '../types';
 
 import {
-  ANIMATION_LEVEL_MIN,
   FAST_SMOOTH_MIN_DURATION,
   FAST_SMOOTH_MAX_DURATION,
   FAST_SMOOTH_MAX_DISTANCE,
@@ -13,6 +12,7 @@ import {
 import { IS_ANDROID } from './windowEnvironment';
 import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 import { animateSingle, cancelSingleAnimation } from './animation';
+import { selectCanAnimateInterface } from '../global/selectors';
 
 type Params = Parameters<typeof createMutateFunction>;
 
@@ -57,7 +57,7 @@ function createMutateFunction(
 ) {
   if (
     forceDirection === FocusDirection.Static
-    || getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MIN
+    || !selectCanAnimateInterface(getGlobal())
   ) {
     forceDuration = 0;
   }

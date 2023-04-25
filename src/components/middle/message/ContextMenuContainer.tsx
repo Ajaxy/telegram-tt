@@ -13,6 +13,7 @@ import type { IAlbum, IAnchorPosition } from '../../../types';
 import {
   selectActiveDownloadIds,
   selectAllowedMessageActions,
+  selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
   selectChat,
   selectChatFullInfo,
@@ -106,6 +107,7 @@ type StateProps = {
   canScheduleUntilOnline?: boolean;
   maxUniqueReactions?: number;
   threadId?: number;
+  canPlayAnimatedEmojis?: boolean;
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
@@ -147,6 +149,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   canSaveGif,
   canRevote,
   canClosePoll,
+  canPlayAnimatedEmojis,
   activeDownloads,
   noReplies,
   canShowSeenBy,
@@ -495,6 +498,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         canTranslate={canTranslate}
         canShowOriginal={canShowOriginal}
         canSelectLanguage={canSelectLanguage}
+        canPlayAnimatedEmojis={canPlayAnimatedEmojis}
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
@@ -665,6 +669,7 @@ export default memo(withGlobal<OwnProps>(
       canTranslate,
       canShowOriginal: hasTranslation,
       canSelectLanguage: hasTranslation,
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },
 )(ContextMenuContainer));

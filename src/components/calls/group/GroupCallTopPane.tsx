@@ -5,7 +5,6 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiGroupCall } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
@@ -26,7 +25,6 @@ type OwnProps = {
 type StateProps = {
   groupCall?: ApiGroupCall;
   isActive: boolean;
-  animationLevel: AnimationLevel;
 };
 
 const GroupCallTopPane: FC<OwnProps & StateProps> = ({
@@ -35,7 +33,6 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   className,
   groupCall,
   hasPinnedOffset,
-  animationLevel,
 }) => {
   const {
     requestMasterAndJoinGroupCall,
@@ -112,12 +109,12 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
       <div className="avatars">
         {fetchedParticipants.map((p) => {
           if (!p) return undefined;
+
           return (
             <Avatar
               key={p.user ? p.user.id : p.chat.id}
               chat={p.chat}
               user={p.user}
-              animationLevel={animationLevel}
             />
           );
         })}
@@ -142,7 +139,6 @@ export default memo(withGlobal<OwnProps>(
           ? groupCall.participantsCount > 0 && groupCall.isLoaded
           : chat && chat.isCallNotEmpty && chat.isCallActive,
       ),
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(GroupCallTopPane));
