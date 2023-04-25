@@ -1,7 +1,6 @@
 import {
   useCallback, useEffect, useRef,
 } from '../../../../lib/teact/teact';
-import RLottie from '../../../../lib/rlottie/RLottie';
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiSticker } from '../../../../api/types';
@@ -23,6 +22,7 @@ import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 import useDynamicColorListener from '../../../../hooks/useDynamicColorListener';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
+import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -97,7 +97,7 @@ export default function useInputCustomEmojis(
         prefixId, documentId, textColor?.join(','),
       ].filter(Boolean).join('_');
 
-      const animation = createPlayer({
+      createPlayer({
         customEmoji,
         sharedCanvasRef,
         sharedCanvasHqRef,
@@ -108,12 +108,13 @@ export default function useInputCustomEmojis(
         isHq,
         position: { x, y },
         textColor,
-      });
-      if (canPlayAnimatedEmojis) {
-        animation.play();
-      }
+      }).then((animation) => {
+        if (canPlayAnimatedEmojis) {
+          animation.play();
+        }
 
-      playersById.current.set(playerId, animation);
+        playersById.current.set(playerId, animation);
+      });
     });
 
     clearPlayers(Array.from(playerIdsToClear));
@@ -182,7 +183,7 @@ export default function useInputCustomEmojis(
   useBackgroundMode(freezeAnimation, unfreezeAnimationOnRaf);
 }
 
-function createPlayer({
+async function createPlayer({
   customEmoji,
   sharedCanvasRef,
   sharedCanvasHqRef,
@@ -204,8 +205,9 @@ function createPlayer({
   position: { x: number; y: number };
   isHq?: boolean;
   textColor?: [number, number, number];
-}): CustomEmojiPlayer {
+}): Promise<CustomEmojiPlayer> {
   if (customEmoji.isLottie) {
+    const RLottie = await ensureRLottie();
     const lottie = RLottie.init(
       mediaUrl,
       isHq ? sharedCanvasHqRef.current! : sharedCanvasRef.current!,

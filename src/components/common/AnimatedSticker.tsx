@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
+import type RLottieInstance from '../../lib/rlottie/RLottie';
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
 
 import React, {
   useEffect, useRef, memo, useCallback, useState, useMemo,
@@ -41,26 +43,8 @@ export type OwnProps = {
   onLoop?: NoneToVoidFunction;
 };
 
-type RLottieClass = typeof import('../../lib/rlottie/RLottie').default;
-type RLottieInstance = import('../../lib/rlottie/RLottie').default;
-let lottiePromise: Promise<RLottieClass>;
-let RLottie: RLottieClass;
-
-// Time for the main interface to completely load
-const LOTTIE_LOAD_DELAY = 3000;
 const THROTTLE_MS = 150;
 const ID_STORE = {};
-
-async function ensureLottie() {
-  if (!lottiePromise) {
-    lottiePromise = import('../../lib/rlottie/RLottie') as unknown as Promise<RLottieClass>;
-    RLottie = (await lottiePromise as any).default;
-  }
-
-  return lottiePromise;
-}
-
-setTimeout(ensureLottie, LOTTIE_LOAD_DELAY);
 
 const AnimatedSticker: FC<OwnProps> = ({
   ref,
@@ -122,7 +106,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       return;
     }
 
-    const newAnimation = RLottie.init(
+    const newAnimation = getRLottie().init(
       tgsUrl,
       container,
       renderId || generateIdFor(ID_STORE, true),
@@ -152,10 +136,10 @@ const AnimatedSticker: FC<OwnProps> = ({
   ]);
 
   useEffect(() => {
-    if (RLottie) {
+    if (getRLottie()) {
       init();
     } else {
-      ensureLottie().then(init);
+      ensureRLottie().then(init);
     }
   }, [init]);
 
