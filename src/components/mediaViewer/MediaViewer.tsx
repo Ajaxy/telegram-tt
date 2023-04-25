@@ -151,6 +151,7 @@ const MediaViewer: FC<StateProps> = ({
   }
 
   const [getIsPictureInPicture] = usePictureInPictureSignal();
+
   useEffect(() => {
     if (!isOpen || getIsPictureInPicture()) {
       return undefined;
