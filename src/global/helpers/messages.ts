@@ -295,3 +295,28 @@ export function mergeIdRanges(ranges: number[][], idsUpdate: number[]): number[]
 
   return newOutlyingLists;
 }
+
+export function extractMessageText(message: ApiMessage, inChatList = false) {
+  const contentText = message.content.text;
+  if (!contentText) return undefined;
+
+  const { text } = contentText;
+  let { entities } = contentText;
+
+  if (text && inChatList && message.chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+    const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
+    if (authCode) {
+      entities = [
+        ...entities || [],
+        {
+          type: ApiMessageEntityTypes.Spoiler,
+          offset: text.indexOf(authCode),
+          length: authCode.length,
+        },
+      ];
+      entities.sort((a, b) => (a.offset > b.offset ? 1 : -1));
+    }
+  }
+
+  return { text, entities };
+}

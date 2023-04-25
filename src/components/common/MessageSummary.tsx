@@ -10,6 +10,7 @@ import {
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
   getMessageSummaryText,
+  extractMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
@@ -25,6 +26,7 @@ interface OwnProps {
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
+  inChatList?: boolean;
 }
 
 function MessageSummary({
@@ -35,12 +37,13 @@ function MessageSummary({
   truncateLength = TRUNCATED_SUMMARY_LENGTH,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
-  withTranslucentThumbs,
+  withTranslucentThumbs = false,
+  inChatList = false,
 }: OwnProps) {
-  const { text, entities } = message.content.text || {};
-
+  const { text, entities } = extractMessageText(message, inChatList) || {};
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
   const hasCustomEmoji = entities?.some((e) => e.type === ApiMessageEntityTypes.CustomEmoji);
+
   if (!text || (!hasSpoilers && !hasCustomEmoji)) {
     const trimmedText = trimText(getMessageSummaryText(lang, message, noEmoji), truncateLength);
 
@@ -65,6 +68,7 @@ function MessageSummary({
         observeIntersectionForPlaying={observeIntersectionForPlaying}
         withTranslucentThumbs={withTranslucentThumbs}
         truncateLength={truncateLength}
+        inChatList={inChatList}
       />
     );
   }
