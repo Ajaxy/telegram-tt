@@ -206,7 +206,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       }
     } else if (isStatusPicker) {
       const defaultStatusIconsPack = stickerSetsById[defaultStatusIconsId!];
-      if (defaultStatusIconsPack.stickers?.length) {
+      if (defaultStatusIconsPack?.stickers?.length) {
         const stickers = (defaultStatusIconsPack.stickers || []).concat(recentCustomEmojis || []);
         defaultSets.push({
           ...defaultStatusIconsPack,
