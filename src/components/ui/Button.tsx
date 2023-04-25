@@ -18,7 +18,8 @@ export type OwnProps = {
   children: React.ReactNode;
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
-    'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black' | 'dark'
+    'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
+    | 'translucent-bordered' | 'dark'
   );
   backgroundImage?: string;
   id?: string;
