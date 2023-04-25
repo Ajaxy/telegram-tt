@@ -91,7 +91,8 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
-    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended,
+    fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
+    additionalInfo,
   } = mtpMessage;
   const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
   const chatInviteTitle = chatInvite
@@ -111,6 +112,8 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     ...(chatInvite && { chatInviteTitle }),
     ...(startParam && { startParam }),
     ...(channelPost && { channelPostId: channelPost }),
+    ...(sponsorInfo && { sponsorInfo }),
+    ...(additionalInfo && { additionalInfo }),
   };
 }
 
@@ -902,8 +905,12 @@ function buildAction(
   let call: Partial<ApiGroupCall> | undefined;
   let amount: number | undefined;
   let currency: string | undefined;
+  let giftCryptoInfo: {
+    currency: string;
+    amount: string;
+  } | undefined;
   let text: string;
-  const translationValues = [];
+  const translationValues: string[] = [];
   let type: ApiAction['type'] = 'other';
   let photo: ApiPhoto | undefined;
   let score: number | undefined;
@@ -1027,8 +1034,12 @@ function buildAction(
       };
     }
   } else if (action instanceof GramJs.MessageActionBotAllowed) {
-    text = 'Chat.Service.BotPermissionAllowed';
-    translationValues.push(action.domain);
+    if (action.domain) {
+      text = 'ActionBotAllowed';
+      translationValues.push(action.domain);
+    } else {
+      text = 'ActionAttachMenuBotAllowed';
+    }
   } else if (action instanceof GramJs.MessageActionCustomAction) {
     text = action.message;
   } else if (action instanceof GramJs.MessageActionChatJoinedByRequest) {
@@ -1052,6 +1063,13 @@ function buildAction(
       targetUserIds.push(targetPeerId);
     }
     currency = action.currency;
+    if (action.cryptoCurrency) {
+      const cryptoAmountWithDecimals = action.cryptoAmount!.divide(1e7).toJSNumber() / 100;
+      giftCryptoInfo = {
+        currency: action.cryptoCurrency,
+        amount: cryptoAmountWithDecimals.toFixed(2),
+      };
+    }
     amount = action.amount.toJSNumber();
     months = action.months;
   } else if (action instanceof GramJs.MessageActionTopicCreate) {
@@ -1075,8 +1093,6 @@ function buildAction(
       text = 'ChatList.UnsupportedMessage';
     }
     isTopicAction = true;
-  } else if (action instanceof GramJs.MessageActionAttachMenuBotAllowed) {
-    text = 'ActionAttachMenuBotAllowed';
   } else if (action instanceof GramJs.MessageActionSuggestProfilePhoto) {
     const isVideo = action.photo instanceof GramJs.Photo && action.photo.videoSizes?.length;
     text = senderId === currentUserId
@@ -1103,6 +1119,7 @@ function buildAction(
     photo, // TODO Only used internally now, will be used for the UI in future
     amount,
     currency,
+    giftCryptoInfo,
     translationValues,
     call,
     phoneCall,

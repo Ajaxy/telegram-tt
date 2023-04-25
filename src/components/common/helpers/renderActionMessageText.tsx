@@ -50,7 +50,7 @@ export function renderActionMessageText(
   }
 
   const {
-    text, translationValues, amount, currency, call, score, topicEmojiIconId,
+    text, translationValues, amount, currency, call, score, topicEmojiIconId, giftCryptoInfo,
   } = message.content.action;
   const content: TextPart[] = [];
   const noLinks = options.asPlainText || options.isEmbedded;
@@ -123,10 +123,17 @@ export function renderActionMessageText(
   }
 
   if (unprocessed.includes('%gift_payment_amount%')) {
+    const price = formatCurrency(amount!, currency!, lang.code);
+    let priceText = price;
+
+    if (giftCryptoInfo) {
+      priceText = `${giftCryptoInfo.amount} ${giftCryptoInfo.currency} (~${price})`;
+    }
+
     processed = processPlaceholder(
       unprocessed,
       '%gift_payment_amount%',
-      formatCurrency(amount!, currency!, lang.code),
+      priceText,
     );
     unprocessed = processed.pop() as string;
     content.push(...processed);

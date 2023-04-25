@@ -1423,7 +1423,7 @@ export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageI
     msgId: messageId,
   }));
 
-  return result ? result.map(String) : undefined;
+  return result ? result.map((readDate) => readDate.userId.toString()) : undefined;
 }
 
 export async function fetchSendAs({

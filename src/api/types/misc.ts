@@ -169,6 +169,7 @@ export interface ApiCountryCode extends ApiCountry {
 }
 
 export interface ApiAppConfig {
+  hash: number;
   emojiSounds: Record<string, string>;
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;

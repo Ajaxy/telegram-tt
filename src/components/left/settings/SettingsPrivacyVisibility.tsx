@@ -51,21 +51,12 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const visibilityOptions = useMemo(() => {
-    switch (screen) {
-      case SettingsScreens.PrivacyGroupChats:
-        return [
-          { value: 'everybody', label: lang('P2PEverybody') },
-          { value: 'contacts', label: lang('P2PContacts') },
-        ];
-
-      default:
-        return [
-          { value: 'everybody', label: lang('P2PEverybody') },
-          { value: 'contacts', label: lang('P2PContacts') },
-          { value: 'nobody', label: lang('P2PNobody') },
-        ];
-    }
-  }, [lang, screen]);
+    return [
+      { value: 'everybody', label: lang('P2PEverybody') },
+      { value: 'contacts', label: lang('P2PContacts') },
+      { value: 'nobody', label: lang('P2PNobody') },
+    ];
+  }, [lang]);
 
   const exceptionLists = {
     shouldShowDenied: visibility !== 'nobody',

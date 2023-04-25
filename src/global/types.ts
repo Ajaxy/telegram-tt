@@ -2277,7 +2277,9 @@ export interface ActionPayloads {
 
   // Settings
   loadConfig: undefined;
-  loadAppConfig: undefined;
+  loadAppConfig: {
+    hash: number;
+  } | undefined;
   requestNextSettingsScreen: {
     screen?: SettingsScreens;
   } & WithTabId;

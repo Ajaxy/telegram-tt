@@ -34,7 +34,7 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
   onCloseAnimationEnd,
   canBuyPremium,
 }) => {
-  const { openPremiumModal } = getActions();
+  const { openPremiumModal, showDialog } = getActions();
 
   const [isMenuOpen, , closeMenu] = useFlag(true);
   const { transitionClassNames } = useShowTransition(isMenuOpen, onCloseAnimationEnd, undefined, false);
@@ -50,6 +50,15 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
     onClose();
   }, [closeMenu, onClose, openPremiumModal]);
 
+  const handleSponsorInfo = useCallback(() => {
+    closeMenu();
+    showDialog({
+      data: {
+        message: [message.sponsorInfo, message.additionalInfo].join('\n'),
+      },
+    });
+  }, [message.additionalInfo, message.sponsorInfo]);
+
   if (!anchor) {
     return undefined;
   }
@@ -64,6 +73,7 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
         onCloseAnimationEnd={closeMenu}
         onAboutAds={handleAboutAdsOpen}
         onSponsoredHide={canBuyPremium ? handleSponsoredHide : undefined}
+        onSponsorInfo={handleSponsorInfo}
       />
     </div>
   );

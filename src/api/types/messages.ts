@@ -267,6 +267,10 @@ export interface ApiAction {
   photo?: ApiPhoto;
   amount?: number;
   currency?: string;
+  giftCryptoInfo?: {
+    currency: string;
+    amount: string;
+  };
   translationValues: string[];
   call?: Partial<ApiGroupCall>;
   phoneCall?: PhoneCallAction;
@@ -518,6 +522,8 @@ export type ApiSponsoredMessage = {
   chatInviteTitle?: string;
   text: ApiFormattedText;
   expiresAt: number;
+  sponsorInfo?: string;
+  additionalInfo?: string;
 };
 
 // KeyboardButtons
