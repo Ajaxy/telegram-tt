@@ -1133,33 +1133,6 @@ function buildAction(
 function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: boolean): ApiReplyKeyboard | undefined {
   const { replyMarkup, media } = message;
 
-  // TODO Move to the proper button inside preview
-  if (!replyMarkup) {
-    if (media instanceof GramJs.MessageMediaWebPage && media.webpage instanceof GramJs.WebPage) {
-      if (media.webpage.type === 'telegram_message') {
-        return {
-          inlineButtons: [[{
-            type: 'url',
-            text: 'Show Message',
-            url: media.webpage.url,
-          }]],
-        };
-      }
-      if (media.webpage.type === 'telegram_botapp') {
-        return {
-          inlineButtons: [[{
-            type: 'url',
-            text: 'Open App',
-            url: media.webpage.url,
-          }]],
-        };
-      }
-    }
-
-    return undefined;
-  }
-
-  // TODO
   if (!(replyMarkup instanceof GramJs.ReplyKeyboardMarkup || replyMarkup instanceof GramJs.ReplyInlineMarkup)) {
     return undefined;
   }

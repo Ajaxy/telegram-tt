@@ -175,10 +175,9 @@
   }
 
   &.translucent {
+    --ripple-color: var(--color-interactive-element-hover);
     background-color: transparent;
     color: var(--color-text-secondary);
-
-    --ripple-color: var(--color-interactive-element-hover);
 
     @include active-styles() {
       background-color: var(--color-interactive-element-hover);
@@ -194,9 +193,9 @@
   }
 
   &.translucent-white {
+    --ripple-color: rgba(255, 255, 255, 0.08);
     background-color: transparent;
     color: rgba(255, 255, 255, 0.5);
-    --ripple-color: rgba(255, 255, 255, 0.08);
 
     @include active-styles() {
       background-color: rgba(255, 255, 255, 0.08);
@@ -209,9 +208,9 @@
   }
 
   &.translucent-black {
+    --ripple-color: rgba(0, 0, 0, 0.08);
     background-color: transparent;
     color: rgba(0, 0, 0, 0.8);
-    --ripple-color: rgba(0, 0, 0, 0.08);
 
     @include active-styles() {
       background-color: rgba(0, 0, 0, 0.08);
@@ -219,6 +218,22 @@
 
     @include no-ripple-styles() {
       background-color: rgba(0, 0, 0, 0.16);
+    }
+  }
+
+  &.translucent-bordered {
+    --ripple-color: rgba(0, 0, 0, 0.08);
+    background-color: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+
+    @include active-styles() {
+      background-color: var(--accent-color);
+      color: var(--color-white);
+    }
+
+    @include no-ripple-styles() {
+      background-color: var(--active-color);
     }
   }
 
