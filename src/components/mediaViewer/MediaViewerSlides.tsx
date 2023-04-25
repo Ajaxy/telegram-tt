@@ -143,6 +143,10 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
   useTimeout(() => setControlsVisible(true), ANIMATION_DURATION);
 
+  useEffect(() => {
+    setActiveMediaId(mediaId);
+  }, [mediaId, setActiveMediaId]);
+
   useLayoutEffect(() => {
     const { x, y, scale } = getTransform();
     lockControls(scale !== 1);
