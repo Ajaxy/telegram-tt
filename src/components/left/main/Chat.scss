@@ -43,7 +43,7 @@
   // Super specific selector to override the same in `ListItem`
   @media (min-width: 600px) {
     &:not(.has-ripple):not(.is-static),
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       .ListItem-button:active {
         --background-color: var(--color-chat-hover) !important;
       }
@@ -156,7 +156,7 @@
       transform: translateX(-0.375rem) scaleY(0.5);
       transition: transform var(--layer-transition);
 
-      body.animation-level-0 & {
+      body.no-page-transitions & {
         transition: none;
       }
 
@@ -211,8 +211,8 @@
     .Badge-transition {
       transition: opacity var(--layer-transition), transform var(--layer-transition);
 
-      body.animation-level-0 & {
-        transition: none;
+      body.no-page-transitions & {
+        transition: opacity var(--layer-transition);
       }
     }
   }
@@ -220,8 +220,8 @@
   .info {
     transition: opacity 300ms ease, transform var(--layer-transition);
 
-    body.animation-level-0 & {
-      transition: none;
+    body.no-page-transitions & {
+      transition: opacity 300ms ease;
     }
 
     .title .custom-emoji {

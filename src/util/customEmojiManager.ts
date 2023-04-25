@@ -5,6 +5,7 @@ import { ApiMediaFormat } from '../api/types';
 import type { ApiSticker } from '../api/types';
 import type { GlobalState } from '../global/types';
 
+import { selectCanPlayAnimatedEmojis } from '../global/selectors';
 import { getStickerPreviewHash } from '../global/helpers';
 import * as mediaLoader from './mediaLoader';
 import { throttle } from './schedulers';
@@ -28,7 +29,10 @@ const renderHandlers = new Set<CustomEmojiInputRenderCallback>();
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
-  if (global.customEmojis.byId !== prevGlobal?.customEmojis.byId) {
+  if (
+    global.customEmojis.byId !== prevGlobal?.customEmojis.byId
+    || selectCanPlayAnimatedEmojis(global) !== selectCanPlayAnimatedEmojis(prevGlobal)
+  ) {
     for (const entry of handlers) {
       const [handler, id] = entry;
       if (global.customEmojis.byId[id]) {

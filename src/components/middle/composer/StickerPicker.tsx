@@ -24,7 +24,7 @@ import buildClassName from '../../../util/buildClassName';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import { pickTruthy, uniqueByField } from '../../../util/iteratees';
 import {
-  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium,
+  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectShouldLoopStickers,
 } from '../../../global/selectors';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
@@ -285,7 +285,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
-              noAnimate={!canAnimate || !loadAndPlay}
+              noPlay={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
               sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
             />
@@ -300,7 +300,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           size={STICKER_SIZE_PICKER_HEADER}
           title={stickerSet.title}
           className={buttonClassName}
-          noAnimate={!canAnimate || !loadAndPlay}
+          noPlay={!canAnimate || !loadAndPlay}
           observeIntersection={observeIntersectionForCovers}
           noContextMenu
           isCurrentUserPremium
@@ -395,7 +395,7 @@ export default memo(withGlobal<OwnProps>(
       premiumStickers: premiumSet.stickers,
       stickerSetsById: setsById,
       addedSetIds: added.setIds,
-      canAnimate: global.settings.byKey.shouldLoopStickers,
+      canAnimate: selectShouldLoopStickers(global),
       isSavedMessages,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       chatStickerSetId,

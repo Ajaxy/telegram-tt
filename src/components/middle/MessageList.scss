@@ -12,7 +12,7 @@
 
   transition: transform var(--layer-transition);
 
-  body.animation-level-0 & {
+  body.no-page-transitions & {
     transition: none !important;
   }
 
@@ -42,7 +42,7 @@
       bottom: 0;
     }
 
-    body.keyboard-visible.animation-level-0 & {
+    body.keyboard-visible.no-page-transitions & {
       transition: none !important;
     }
   }
@@ -125,10 +125,9 @@
       opacity: 0;
     }
 
-    body.animation-level-0 & {
+    body.no-message-sending-animations & {
       opacity: 1;
       transform: none;
-      display: flex !important;
       transition: none !important;
     }
 
@@ -155,7 +154,7 @@
       opacity: 0;
       transition: opacity var(--select-transition);
 
-      body.animation-level-0 & {
+      body.no-page-transitions & {
         transition: none !important;
       }
     }
@@ -362,7 +361,7 @@
       }
     }
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
     }
 
@@ -434,7 +433,7 @@
       width: calc(100% - var(--right-column-width));
     }
 
-    body.animation-level-0 & {
+    body.no-right-column-animations & {
       transition: none;
     }
 

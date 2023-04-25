@@ -98,7 +98,6 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
     <span className="action-message-suggested-avatar" tabIndex={0} role="button" onClick={handleViewSuggestedAvatar}>
       <Avatar
         photo={message.content.action!.photo}
-        forceVideo
         loopIndefinitely
         withVideo={isVideo}
         size="jumbo"

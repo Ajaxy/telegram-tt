@@ -10,6 +10,7 @@ import { LIKE_STICKER_ID } from '../../common/helpers/mediaDimensions';
 import {
   selectAnimatedEmojiEffect,
   selectAnimatedEmojiSound,
+  selectCanPlayAnimatedEmojis,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
@@ -21,7 +22,7 @@ import './AnimatedEmoji.scss';
 
 type OwnProps = {
   customEmojiId: string;
-  withEffects: boolean;
+  withEffects?: boolean;
   isOwn?: boolean;
   lastSyncTime?: number;
   forceLoadPreview?: boolean;
@@ -35,6 +36,7 @@ interface StateProps {
   sticker?: ApiSticker;
   effect?: ApiSticker;
   soundId?: string;
+  noPlay?: boolean;
 }
 
 const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
@@ -46,6 +48,7 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
   sticker,
   effect,
   soundId,
+  noPlay,
   observeIntersection,
 }) => {
   const {
@@ -65,6 +68,7 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
       style={style}
       size={size}
       isBig
+      noPlay={noPlay}
       withSharedAnimation
       forceOnHeavyAnimation
       observeIntersectionForLoading={observeIntersection}
@@ -75,9 +79,11 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>((global, { customEmojiId, withEffects }) => {
   const sticker = global.customEmojis.byId[customEmojiId];
+
   return {
     sticker,
     effect: sticker?.emoji && withEffects ? selectAnimatedEmojiEffect(global, sticker.emoji) : undefined,
     soundId: sticker?.emoji && selectAnimatedEmojiSound(global, sticker.emoji),
+    noPlay: !selectCanPlayAnimatedEmojis(global),
   };
 })(AnimatedCustomEmoji));

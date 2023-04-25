@@ -5,7 +5,6 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiWebSession } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
@@ -30,14 +29,12 @@ type OwnProps = {
 type StateProps = {
   byHash: Record<string, ApiWebSession>;
   orderedHashes: string[];
-  animationLevel: AnimationLevel;
 };
 
 const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
   isActive,
   byHash,
   orderedHashes,
-  animationLevel,
   onReset,
 }) => {
   const {
@@ -113,7 +110,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => handleOpenSessionModal(session.hash)}
       >
-        <Avatar className={styles.avatar} user={bot} size="tiny" withVideo animationLevel={animationLevel} />
+        <Avatar className={styles.avatar} user={bot} size="tiny" />
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           {bot && <FullNameTitle className={styles.title} peer={bot} />}
@@ -164,7 +161,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       byHash,
       orderedHashes,
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(SettingsActiveWebsites));

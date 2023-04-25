@@ -33,13 +33,14 @@ type OwnProps = {
   shouldLoop?: boolean;
   lastSyncTime?: number;
   shouldPlayEffect?: boolean;
+  withEffect?: boolean;
   onPlayEffect?: VoidFunction;
   onStopEffect?: VoidFunction;
 };
 
 const Sticker: FC<OwnProps> = ({
   message, observeIntersection, observeIntersectionForPlaying, shouldLoop, lastSyncTime,
-  shouldPlayEffect, onPlayEffect, onStopEffect,
+  shouldPlayEffect, withEffect, onPlayEffect, onStopEffect,
 }) => {
   const { showNotification, openStickerSet } = getActions();
 
@@ -75,11 +76,11 @@ const Sticker: FC<OwnProps> = ({
   const previousShouldPlayEffect = usePrevious(shouldPlayEffect);
 
   useEffect(() => {
-    if (hasEffect && canPlay && (shouldPlayEffect || previousShouldPlayEffect)) {
+    if (hasEffect && withEffect && canPlay && (shouldPlayEffect || previousShouldPlayEffect)) {
       startPlayingEffect();
       onPlayEffect?.();
     }
-  }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, previousShouldPlayEffect, startPlayingEffect]);
+  }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, previousShouldPlayEffect, startPlayingEffect, withEffect]);
 
   const openModal = useCallback(() => {
     openStickerSet({
@@ -89,7 +90,7 @@ const Sticker: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (hasEffect) {
-      if (isPlayingEffect) {
+      if (isPlayingEffect || !withEffect) {
         showNotification({
           message: lang('PremiumStickerTooltip'),
           action: {
@@ -101,7 +102,7 @@ const Sticker: FC<OwnProps> = ({
           actionText: lang('ViewAction'),
         });
         return;
-      } else {
+      } else if (withEffect) {
         startPlayingEffect();
         onPlayEffect?.();
         return;
@@ -110,7 +111,7 @@ const Sticker: FC<OwnProps> = ({
     openModal();
   }, [
     hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect,
-    sticker.stickerSetInfo,
+    sticker.stickerSetInfo, withEffect,
   ]);
 
   const isMemojiSticker = 'isMissing' in stickerSetInfo;
@@ -140,7 +141,7 @@ const Sticker: FC<OwnProps> = ({
         withSharedAnimation
         cacheBuster={lastSyncTime}
       />
-      {hasEffect && canLoad && isPlayingEffect && (
+      {hasEffect && withEffect && canLoad && isPlayingEffect && (
         <AnimatedSticker
           key={mediaHashEffect}
           className="effect-sticker"

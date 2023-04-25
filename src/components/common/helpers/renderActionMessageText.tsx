@@ -97,7 +97,9 @@ export function renderActionMessageText(
   content.push(...processed);
 
   if (unprocessed.includes('%action_topic%')) {
-    const topicEmoji = topic?.iconEmojiId ? <CustomEmoji documentId={topic.iconEmojiId} /> : '';
+    const topicEmoji = topic?.iconEmojiId
+      ? <CustomEmoji documentId={topic.iconEmojiId} />
+      : '';
     const topicString = topic ? `${topic.title}` : 'a topic';
     processed = processPlaceholder(
       unprocessed,

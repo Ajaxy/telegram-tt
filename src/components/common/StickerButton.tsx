@@ -28,7 +28,7 @@ import './StickerButton.scss';
 type OwnProps<T> = {
   sticker: ApiSticker;
   size: number;
-  noAnimate?: boolean;
+  noPlay?: boolean;
   title?: string;
   className?: string;
   noContextMenu?: boolean;
@@ -63,7 +63,7 @@ const contentForStatusMenuContext = [
 const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult | undefined = undefined>({
   sticker,
   size,
-  noAnimate,
+  noPlay,
   title,
   className,
   noContextMenu,
@@ -102,7 +102,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
 
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
   const shouldLoad = isIntersecting;
-  const shouldPlay = isIntersecting && !noAnimate;
+  const shouldPlay = isIntersecting && !noPlay;
 
   const isIntesectingForShowing = useIsIntersecting(ref, observeIntersectionForShowing);
 
@@ -326,6 +326,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           className="sticker-remove-button"
           color="dark"
           round
+          noFastClick
           onClick={handleRemoveClick}
         >
           <i className="icon icon-close" />

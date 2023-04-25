@@ -12,7 +12,7 @@ import type { IAnchorPosition } from '../../../types';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../global/helpers';
 import {
-  selectChat, selectChatFullInfo, selectChatMessage, selectTabState,
+  selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectTabState,
 } from '../../../global/selectors';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useMenuPosition from '../../../hooks/useMenuPosition';
@@ -31,6 +31,7 @@ interface StateProps {
   withCustomReactions?: boolean;
   message?: ApiMessage;
   position?: IAnchorPosition;
+  isTranslucent?: boolean;
 }
 
 const FULL_PICKER_SHIFT_DELTA = { x: -23, y: -64 };
@@ -40,6 +41,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   isOpen,
   message,
   position,
+  isTranslucent,
   withCustomReactions,
 }) => {
   const { toggleReaction, closeReactionPicker } = getActions();
@@ -124,7 +126,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
         isReactionPicker
         className={!withCustomReactions ? styles.hidden : undefined}
         selectedReactionIds={selectedReactionIds}
-        isTranslucent
+        isTranslucent={isTranslucent}
         onCustomEmojiSelect={handleToggleCustomReaction}
         onReactionSelect={handleToggleReaction}
       />
@@ -157,6 +159,7 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     withCustomReactions: chat?.isForbidden || areSomeReactionsAllowed
       ? false
       : areCustomReactionsAllowed || isPrivateChat,
+    isTranslucent: selectIsContextMenuTranslucent(global),
   };
 })(ReactionPicker));
 

@@ -13,7 +13,6 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -25,6 +24,7 @@ import {
   selectIsChatMuted,
 } from '../../../global/helpers';
 import {
+  selectCanAnimateInterface,
   selectChat,
   selectChatMessage,
   selectCurrentMessageList,
@@ -82,7 +82,6 @@ type StateProps = {
   lastMessageSender?: ApiUser | ApiChat;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiFormattedText;
-  animationLevel?: AnimationLevel;
   isSelected?: boolean;
   isSelectedForum?: boolean;
   canScrollDown?: boolean;
@@ -90,6 +89,7 @@ type StateProps = {
   lastSyncTime?: number;
   lastMessageTopic?: ApiTopic;
   typingStatus?: ApiTypingStatus;
+  withInterfaceAnimations?: boolean;
 };
 
 const Chat: FC<OwnProps & StateProps> = ({
@@ -110,7 +110,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   actionTargetChatId,
   offsetTop,
   draft,
-  animationLevel,
+  withInterfaceAnimations,
   isSelected,
   isSelectedForum,
   canScrollDown,
@@ -150,7 +150,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     lastMessageSender,
     observeIntersection,
     animationType,
-    animationLevel,
+    withInterfaceAnimations,
     orderDiff,
   });
 
@@ -239,13 +239,10 @@ const Chat: FC<OwnProps & StateProps> = ({
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
-          animationLevel={animationLevel}
-          withVideo
-          observeIntersection={observeIntersection}
         />
         <AvatarBadge chatId={chatId} />
         {chat.isCallActive && chat.isCallNotEmpty && (
-          <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={animationLevel !== 0} />
+          <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
         )}
       </div>
       <div className="info">
@@ -337,7 +334,6 @@ export default memo(withGlobal<OwnProps>(
       actionTargetChatId,
       actionTargetMessage,
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
-      animationLevel: global.settings.byKey.animationLevel,
       isSelected,
       isSelectedForum,
       canScrollDown: isSelected && messageListType === 'thread',
@@ -350,6 +346,7 @@ export default memo(withGlobal<OwnProps>(
       userStatus,
       lastMessageTopic,
       typingStatus,
+      withInterfaceAnimations: selectCanAnimateInterface(global),
     };
   },
 )(Chat));

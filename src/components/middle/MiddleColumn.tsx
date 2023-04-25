@@ -11,7 +11,7 @@ import type {
   MessageListType,
   ActiveEmojiInteraction,
 } from '../../global/types';
-import type { AnimationLevel, ThemeKey } from '../../types';
+import type { ThemeKey } from '../../types';
 
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
@@ -19,11 +19,9 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
-  ANIMATION_LEVEL_MAX,
   ANIMATION_END_DELAY,
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
-  ANIMATION_LEVEL_MIN,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
@@ -31,6 +29,7 @@ import {
 import { IS_ANDROID, IS_IOS, MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
 import { DropAreaState } from './composer/DropArea';
 import {
+  selectCanAnimateInterface,
   selectChat,
   selectChatBot,
   selectChatFullInfo,
@@ -121,7 +120,7 @@ type StateProps = {
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
   isMessageLanguageModalOpen?: boolean;
-  animationLevel: AnimationLevel;
+  withInterfaceAnimations?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   isChannel?: boolean;
@@ -171,7 +170,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
   isMessageLanguageModalOpen,
-  animationLevel,
+  withInterfaceAnimations,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
   isChannel,
@@ -257,7 +256,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   );
 
   const { isReady, handleCssTransitionEnd, handleSlideTransitionStop } = useIsReady(
-    !shouldSkipHistoryAnimations && animationLevel !== ANIMATION_LEVEL_MIN,
+    !shouldSkipHistoryAnimations && withInterfaceAnimations,
     currentTransitionKey,
     prevTransitionKey,
     chatId,
@@ -473,7 +472,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
               onFocusPinnedMessage={onFocusPinnedMessage}
             />
             <Transition
-              name={shouldSkipHistoryAnimations ? 'none' : animationLevel === ANIMATION_LEVEL_MAX ? 'slide' : 'fade'}
+              name={shouldSkipHistoryAnimations ? 'none' : withInterfaceAnimations ? 'slide' : 'fade'}
               activeKey={currentTransitionKey}
               shouldCleanup
               cleanupExceptionKey={cleanupExceptionKey}
@@ -655,7 +654,7 @@ export default memo(withGlobal<OwnProps>(
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
       isMessageLanguageModalOpen: Boolean(messageLanguageModal),
-      animationLevel: global.settings.byKey.animationLevel,
+      withInterfaceAnimations: selectCanAnimateInterface(global),
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,
       lastSyncTime,

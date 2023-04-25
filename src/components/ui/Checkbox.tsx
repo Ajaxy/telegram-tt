@@ -27,7 +27,7 @@ type OwnProps = {
   className?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onCheck?: (isChecked: boolean) => void;
-  onClickLabel?: (e: React.MouseEvent) => void;
+  onClickLabel?: (e: React.MouseEvent, value?: string) => void;
 };
 
 const Checkbox: FC<OwnProps> = ({
@@ -65,7 +65,7 @@ const Checkbox: FC<OwnProps> = ({
 
   function handleClick(event: React.MouseEvent) {
     if (event.target !== labelRef.current) {
-      onClickLabel?.(event);
+      onClickLabel?.(event, value);
     }
   }
 

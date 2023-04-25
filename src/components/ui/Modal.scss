@@ -78,7 +78,7 @@
 
     transition: transform 0.2s ease, opacity 0.2s ease;
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
       transform: none !important;
     }

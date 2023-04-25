@@ -219,7 +219,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
 
     return (
       <div className={styles.footerText} dir={lang.isRtl ? 'rtl' : undefined}>
-        {renderTextWithEntities(promo.statusText, promo.statusEntities)}
+        {renderTextWithEntities({
+          text: promo.statusText,
+          entities: promo.statusEntities,
+        })}
       </div>
     );
   }

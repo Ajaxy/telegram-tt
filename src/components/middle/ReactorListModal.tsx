@@ -5,10 +5,12 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 import { LoadMoreDirection } from '../../types';
 
-import { selectChatMessage, selectTabState } from '../../global/selectors';
+import {
+  selectChatMessage,
+  selectTabState,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
@@ -39,7 +41,6 @@ export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUser
   chatId?: string;
   messageId?: number;
   availableReactions?: ApiAvailableReaction[];
-  animationLevel?: AnimationLevel;
 };
 
 const ReactorListModal: FC<OwnProps & StateProps> = ({
@@ -50,7 +51,6 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   messageId,
   seenByUserIds,
   availableReactions,
-  animationLevel,
 }) => {
   const {
     loadReactors,
@@ -194,7 +194,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(userId)}
                     >
-                      <Avatar user={user} size="small" withVideo animationLevel={animationLevel} />
+                      <Avatar user={user} size="small" />
                       <FullNameTitle peer={user} withEmojiStatus />
                       {r.reaction && (
                         <ReactionStaticEmoji
@@ -235,7 +235,6 @@ export default memo(withGlobal<OwnProps>(
       reactors: message?.reactors,
       seenByUserIds: message?.seenByUserIds,
       availableReactions: global.availableReactions,
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(ReactorListModal));

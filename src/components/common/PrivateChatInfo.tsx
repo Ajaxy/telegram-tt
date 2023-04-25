@@ -8,10 +8,13 @@ import type {
   ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
-import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
+import {
+  selectChatMessages,
+  selectUser,
+  selectUserStatus,
+} from '../../global/selectors';
 import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -34,7 +37,6 @@ type OwnProps = {
   withUsername?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
-  withVideoAvatar?: boolean;
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
@@ -46,7 +48,6 @@ type StateProps =
     user?: ApiUser;
     userStatus?: ApiUserStatus;
     isSavedMessages?: boolean;
-    animationLevel: AnimationLevel;
     areMessagesLoaded: boolean;
   }
   & Pick<GlobalState, 'lastSyncTime'>;
@@ -60,7 +61,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   withUsername,
   withFullInfo,
   withUpdatingStatus,
-  withVideoAvatar,
   emojiStatusSize,
   noStatusOrTyping,
   noRtl,
@@ -68,7 +68,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   userStatus,
   isSavedMessages,
   areMessagesLoaded,
-  animationLevel,
   lastSyncTime,
   adminMember,
 }) => {
@@ -173,8 +172,6 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         user={user}
         isSavedMessages={isSavedMessages}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
-        withVideo={withVideoAvatar}
-        animationLevel={animationLevel}
       />
       <div className="info">
         {renderNameTitle()}
@@ -198,7 +195,6 @@ export default memo(withGlobal<OwnProps>(
       userStatus,
       isSavedMessages,
       areMessagesLoaded,
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(PrivateChatInfo));

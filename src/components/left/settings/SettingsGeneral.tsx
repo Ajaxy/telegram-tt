@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { AnimationLevel, ISettings, TimeFormat } from '../../../types';
+import type { ISettings, TimeFormat } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import {
@@ -37,12 +37,6 @@ type StateProps =
     shouldUseSystemTheme: boolean;
   };
 
-const ANIMATION_LEVEL_OPTIONS = [
-  'Solid and Steady',
-  'Nice and Fast',
-  'Lots of Stuff',
-];
-
 const TIME_FORMAT_OPTIONS: IRadioOption[] = [{
   label: '12-hour',
   value: '12h',
@@ -56,7 +50,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
   onScreenSelect,
   onReset,
   messageTextSize,
-  animationLevel,
   messageSendKeyCombo,
   timeFormat,
   theme,
@@ -87,14 +80,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
       subLabel: 'New line by Enter',
     },
   ] : undefined;
-
-  const handleAnimationLevelChange = useCallback((newLevel: number) => {
-    ANIMATION_LEVEL_OPTIONS.forEach((_, i) => {
-      document.body.classList.toggle(`animation-level-${i}`, newLevel === i);
-    });
-
-    setSettingOption({ animationLevel: newLevel as AnimationLevel });
-  }, [setSettingOption]);
 
   const handleMessageTextSizeChange = useCallback((newSize: number) => {
     document.documentElement.style.setProperty(
@@ -173,21 +158,6 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
           options={TIME_FORMAT_OPTIONS}
           selected={timeFormat}
           onChange={handleTimeFormatChange}
-        />
-      </div>
-
-      <div className="settings-item">
-        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-          Animation Level
-        </h4>
-        <p className="settings-item-description" dir={lang.isRtl ? 'rtl' : undefined}>
-          Choose the desired animations amount.
-        </p>
-
-        <RangeSlider
-          options={ANIMATION_LEVEL_OPTIONS}
-          value={animationLevel}
-          onChange={handleAnimationLevelChange}
         />
       </div>
 

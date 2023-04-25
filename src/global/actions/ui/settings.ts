@@ -1,13 +1,15 @@
 import { addActionHandler, getActions } from '../../index';
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
 import switchTheme from '../../../util/switchTheme';
-import { ANIMATION_LEVEL_MAX, ANIMATION_LEVEL_MED, ANIMATION_LEVEL_MIN } from '../../../config';
 import { setLanguage, setTimeFormat } from '../../../util/langProvider';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import type { ActionReturnType, GlobalState } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
 import { addCallback } from '../../../lib/teact/teactn';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
+import { selectCanAnimateInterface } from '../../selectors';
 
 let prevGlobal: GlobalState | undefined;
 
@@ -17,21 +19,23 @@ addCallback((global: GlobalState) => {
 
   const settings = global.settings.byKey;
   const prevSettings = prevGlobal?.settings.byKey;
+  const performance = global.settings.performance;
+  const prevPerformance = prevGlobal?.settings.performance;
   prevGlobal = global;
 
   if (!prevSettings) {
     return;
   }
 
-  if (settings.animationLevel !== prevSettings.animationLevel) {
-    [ANIMATION_LEVEL_MIN, ANIMATION_LEVEL_MED, ANIMATION_LEVEL_MAX].forEach((i) => {
-      document.body.classList.toggle(`animation-level-${i}`, settings.animationLevel === i);
+  if (performance !== prevPerformance) {
+    requestMutation(() => {
+      applyPerformanceSettings(performance);
     });
   }
 
   if (settings.theme !== prevSettings.theme) {
-    const animationLevel = document.hasFocus() ? global.settings.byKey.animationLevel : ANIMATION_LEVEL_MIN;
-    switchTheme(settings.theme, animationLevel === ANIMATION_LEVEL_MAX);
+    const withAnimation = document.hasFocus() ? selectCanAnimateInterface(global) : false;
+    switchTheme(settings.theme, withAnimation);
   }
 
   if (settings.language !== prevSettings.language) {
@@ -59,6 +63,21 @@ addCallback((global: GlobalState) => {
 
 addActionHandler('setSettingOption', (global, actions, payload): ActionReturnType => {
   return replaceSettings(global, payload);
+});
+
+addActionHandler('updatePerformanceSettings', (global, actions, payload): ActionReturnType => {
+  global = {
+    ...global,
+    settings: {
+      ...global.settings,
+      performance: {
+        ...global.settings.performance,
+        ...payload,
+      },
+    },
+  };
+
+  return global;
 });
 
 addActionHandler('setThemeSettings', (global, actions, payload): ActionReturnType => {

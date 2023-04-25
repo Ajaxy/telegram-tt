@@ -9,15 +9,19 @@ import type {
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
-import type { AnimationLevel } from '../../../types';
 
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import {
+  selectCanAnimateInterface,
   selectCanDeleteTopic,
   selectChat,
-  selectChatMessage, selectCurrentMessageList,
+  selectChatMessage,
+  selectCurrentMessageList,
   selectDraft,
-  selectOutgoingStatus, selectThreadInfo, selectThreadParam, selectUser,
+  selectOutgoingStatus,
+  selectThreadInfo,
+  selectThreadParam,
+  selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
@@ -57,11 +61,11 @@ type StateProps = {
   actionTargetUserIds?: string[];
   lastMessageSender?: ApiUser | ApiChat;
   actionTargetChatId?: string;
-  animationLevel?: AnimationLevel;
   typingStatus?: ApiTypingStatus;
   draft?: ApiFormattedText;
   canScrollDown?: boolean;
   wasTopicOpened?: boolean;
+  withInterfaceAnimations?: boolean;
 };
 
 const Topic: FC<OwnProps & StateProps> = ({
@@ -80,7 +84,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   actionTargetChatId,
   lastMessageSender,
   animationType,
-  animationLevel,
+  withInterfaceAnimations,
   orderDiff,
   typingStatus,
   draft,
@@ -122,7 +126,7 @@ const Topic: FC<OwnProps & StateProps> = ({
     typingStatus,
 
     animationType,
-    animationLevel,
+    withInterfaceAnimations,
     orderDiff,
   });
 
@@ -229,7 +233,7 @@ export default memo(withGlobal<OwnProps>(
       lastMessageSender,
       typingStatus,
       canDelete: selectCanDeleteTopic(global, chatId, topic.id),
-      animationLevel: global.settings.byKey.animationLevel,
+      withInterfaceAnimations: selectCanAnimateInterface(global),
       draft,
       ...(isOutgoing && lastMessage && {
         lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),

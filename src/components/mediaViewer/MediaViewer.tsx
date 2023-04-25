@@ -6,7 +6,6 @@ import React, {
 import type {
   ApiChat, ApiMessage, ApiPhoto, ApiUser,
 } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
 import { getActions, withGlobal } from '../../global';
@@ -23,6 +22,7 @@ import {
   selectUser,
   selectOutlyingListByMessageId,
   selectUserFullInfo,
+  selectPerformanceSettingsValue,
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -68,7 +68,7 @@ type StateProps = {
   chatMessages?: Record<number, ApiMessage>;
   collectionIds?: number[];
   isHidden?: boolean;
-  animationLevel: AnimationLevel;
+  withAnimation?: boolean;
   shouldSkipHistoryAnimations?: boolean;
 };
 
@@ -87,7 +87,7 @@ const MediaViewer: FC<StateProps> = ({
   message,
   chatMessages,
   collectionIds,
-  animationLevel,
+  withAnimation,
   isHidden,
   shouldSkipHistoryAnimations,
 }) => {
@@ -105,8 +105,8 @@ const MediaViewer: FC<StateProps> = ({
   /* Animation */
   const animationKey = useRef<number>();
   const prevSenderId = usePrevious<string | undefined>(senderId);
-  const headerAnimation = animationLevel === 2 ? 'slideFade' : 'none';
-  const isGhostAnimation = animationLevel === 2 && !shouldSkipHistoryAnimations;
+  const headerAnimation = withAnimation ? 'slideFade' : 'none';
+  const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
   /* Controls */
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
@@ -373,7 +373,7 @@ const MediaViewer: FC<StateProps> = ({
         isOpen={isOpen}
         hasFooter={hasFooter}
         isVideo={isVideo}
-        animationLevel={animationLevel}
+        withAnimation={withAnimation}
         onClose={handleClose}
         selectMedia={selectMedia}
         isHidden={isHidden}
@@ -394,21 +394,19 @@ export default memo(withGlobal(
       origin,
       isHidden,
     } = mediaViewer;
-    const {
-      animationLevel,
-    } = global.settings.byKey;
+    const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
     const { currentUserId } = global;
     let isChatWithSelf = !!chatId && selectIsChatWithSelf(global, chatId);
 
     if (origin === MediaViewerOrigin.SearchResult) {
       if (!(chatId && mediaId)) {
-        return { animationLevel, shouldSkipHistoryAnimations };
+        return { withAnimation, shouldSkipHistoryAnimations };
       }
 
       const message = selectChatMessage(global, chatId, mediaId);
       if (!message) {
-        return { animationLevel, shouldSkipHistoryAnimations };
+        return { withAnimation, shouldSkipHistoryAnimations };
       }
 
       return {
@@ -418,7 +416,7 @@ export default memo(withGlobal(
         isChatWithSelf,
         origin,
         message,
-        animationLevel,
+        withAnimation,
         isHidden,
         shouldSkipHistoryAnimations,
       };
@@ -443,7 +441,7 @@ export default memo(withGlobal(
         avatarOwnerFallbackPhoto: user ? selectUserFullInfo(global, avatarOwnerId)?.fallbackPhoto : undefined,
         isChatWithSelf,
         canUpdateMedia,
-        animationLevel,
+        withAnimation,
         origin,
         shouldSkipHistoryAnimations,
         isHidden,
@@ -451,7 +449,7 @@ export default memo(withGlobal(
     }
 
     if (!(chatId && threadId && mediaId)) {
-      return { animationLevel, shouldSkipHistoryAnimations };
+      return { withAnimation, shouldSkipHistoryAnimations };
     }
 
     let message: ApiMessage | undefined;
@@ -462,7 +460,7 @@ export default memo(withGlobal(
     }
 
     if (!message) {
-      return { animationLevel, shouldSkipHistoryAnimations };
+      return { withAnimation, shouldSkipHistoryAnimations };
     }
 
     let chatMessages: Record<number, ApiMessage> | undefined;
@@ -494,7 +492,7 @@ export default memo(withGlobal(
       message,
       chatMessages,
       collectionIds,
-      animationLevel,
+      withAnimation,
       isHidden,
       shouldSkipHistoryAnimations,
     };

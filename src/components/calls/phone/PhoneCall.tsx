@@ -6,7 +6,6 @@ import { getActions, withGlobal } from '../../../global';
 import '../../../global/actions/calls';
 
 import type { ApiPhoneCall, ApiUser } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import {
   IS_ANDROID,
@@ -41,7 +40,6 @@ type StateProps = {
   phoneCall?: ApiPhoneCall;
   isOutgoing: boolean;
   isCallPanelVisible?: boolean;
-  animationLevel: AnimationLevel;
 };
 
 const PhoneCall: FC<StateProps> = ({
@@ -49,7 +47,6 @@ const PhoneCall: FC<StateProps> = ({
   isOutgoing,
   phoneCall,
   isCallPanelVisible,
-  animationLevel,
 }) => {
   const lang = useLang();
   const {
@@ -240,9 +237,6 @@ const PhoneCall: FC<StateProps> = ({
         user={user}
         size="jumbo"
         className={hasVideo || hasPresentation ? styles.blurred : ''}
-        withVideo
-        noLoop={phoneCall?.state !== 'requesting'}
-        animationLevel={animationLevel}
       />
       {phoneCall?.screencastState === 'active' && streams?.presentation
         && <video className={styles.mainVideo} muted autoPlay playsInline srcObject={streams.presentation} />}
@@ -379,7 +373,6 @@ export default memo(withGlobal(
       user,
       isOutgoing: phoneCall?.adminId === currentUserId,
       phoneCall: isMasterTab ? phoneCall : undefined,
-      animationLevel: global.settings.byKey.animationLevel,
     };
   },
 )(PhoneCall));

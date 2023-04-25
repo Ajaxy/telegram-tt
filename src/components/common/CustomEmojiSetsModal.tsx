@@ -7,7 +7,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
-
+import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
@@ -24,10 +24,12 @@ export type OwnProps = {
 
 type StateProps = {
   customEmojiSets?: ApiStickerSet[];
+  canPlayAnimatedEmojis?: boolean;
 };
 
 const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
   customEmojiSets,
+  canPlayAnimatedEmojis,
   onClose,
 }) => {
   const { openStickerSet } = getActions();
@@ -64,6 +66,7 @@ const CustomEmojiSetsModal: FC<OwnProps & StateProps> = ({
             stickerSet={customEmojiSet}
             onClick={handleSetClick}
             observeIntersection={observeIntersectionForCovers}
+            noPlay={!canPlayAnimatedEmojis}
           />
         ))}
       </div>
@@ -77,6 +80,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       customEmojiSets,
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },
 )(CustomEmojiSetsModal));

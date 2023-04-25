@@ -20,6 +20,7 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectTabState,
+  selectCanAnimateInterface,
 } from '../../../global/selectors';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
@@ -295,7 +296,7 @@ export default memo(withGlobal<OwnProps>(
     const editingId = messageListType === 'scheduled'
       ? selectEditingScheduledId(global, chatId)
       : selectEditingId(global, chatId, threadId);
-    const shouldAnimate = global.settings.byKey.animationLevel >= 1;
+    const shouldAnimate = selectCanAnimateInterface(global);
     const isForwarding = toChatId === chatId;
     const forwardedMessages = forwardMessageIds?.map((id) => selectChatMessage(global, fromChatId!, id)!);
 

@@ -3,7 +3,7 @@ import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { AnimationLevel, MediaViewerOrigin } from '../../types';
+import type { MediaViewerOrigin } from '../../types';
 import type { RealTouchEvent } from '../../util/captureEvents';
 
 import { animateNumber, timingFunctions } from '../../util/animation';
@@ -43,7 +43,7 @@ type OwnProps = {
   threadId?: number;
   avatarOwnerId?: string;
   origin?: MediaViewerOrigin;
-  animationLevel: AnimationLevel;
+  withAnimation?: boolean;
   onClose: () => void;
   isHidden?: boolean;
   hasFooter?: boolean;
@@ -85,7 +85,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   isPhoto,
   isOpen,
   hasFooter,
-  animationLevel,
+  withAnimation,
   isHidden,
   ...rest
 }) => {
@@ -196,7 +196,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         selectMediaDebounced(mId);
         setIsActiveDebounced(true);
         lastTransform = { x: 0, y: 0, scale: 1 };
-        if (animationLevel === 0) {
+        if (!withAnimation) {
           setTransform(lastTransform);
           return true;
         }
@@ -643,7 +643,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     selectMediaDebounced,
     setIsActiveDebounced,
     clearSwipeDirectionDebounced,
-    animationLevel,
+    withAnimation,
     setIsMouseDown,
     setIsActive,
     isHidden,
@@ -703,7 +703,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           <MediaViewerContent
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
-            animationLevel={animationLevel}
+            withAnimation={withAnimation}
             isMoving={isMoving}
             mediaId={prevMediaId}
           />
@@ -722,7 +722,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           /* eslint-disable-next-line react/jsx-props-no-spreading */
           {...rest}
           mediaId={activeMediaId}
-          animationLevel={animationLevel}
+          withAnimation={withAnimation}
           isActive={isActive}
           isMoving={isMoving}
         />
@@ -732,7 +732,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           <MediaViewerContent
             /* eslint-disable-next-line react/jsx-props-no-spreading */
             {...rest}
-            animationLevel={animationLevel}
+            withAnimation={withAnimation}
             isMoving={isMoving}
             mediaId={nextMediaId}
           />

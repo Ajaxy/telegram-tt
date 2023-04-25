@@ -14,7 +14,7 @@
 }
 
 @mixin no-ripple-styles() {
-  body.animation-level-0 & {
+  body.no-page-transitions & {
     &:not(.disabled):not(:disabled) {
       &:active {
         @content;
@@ -50,7 +50,7 @@
   // @optimization
   &:active,
   &.clicked,
-  body.animation-level-0 & {
+  body.no-page-transitions & {
     transition: none !important;
   }
 

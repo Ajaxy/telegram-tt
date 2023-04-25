@@ -5,7 +5,6 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
-import type { AnimationLevel } from '../../../types';
 
 import { getUserFirstOrLastName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
@@ -14,8 +13,8 @@ import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
-import LeftSearchResultChat from './LeftSearchResultChat';
 import Avatar from '../../common/Avatar';
+import LeftSearchResultChat from './LeftSearchResultChat';
 
 import './RecentContacts.scss';
 
@@ -27,7 +26,6 @@ type StateProps = {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
-  animationLevel: AnimationLevel;
 };
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
@@ -39,7 +37,6 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
   topUserIds,
   usersById,
   recentlyFoundChatIds,
-  animationLevel,
   onReset,
 }) => {
   const {
@@ -86,7 +83,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
                 onClick={() => handleClick(userId)}
                 dir={lang.isRtl ? 'rtl' : undefined}
               >
-                <Avatar user={usersById[userId]} animationLevel={animationLevel} withVideo />
+                <Avatar user={usersById[userId]} />
                 <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}
@@ -126,13 +123,11 @@ export default memo(withGlobal<OwnProps>(
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
     const { recentlyFoundChatIds } = global;
-    const { animationLevel } = global.settings.byKey;
 
     return {
       topUserIds,
       usersById,
       recentlyFoundChatIds,
-      animationLevel,
     };
   },
 )(RecentContacts));

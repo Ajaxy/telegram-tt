@@ -83,6 +83,7 @@ import type {
   NewChatMembersProgress,
   NotifyException,
   PaymentStep,
+  PerformanceType,
   PrivacyVisibility,
   ProfileEditProgress,
   SettingsScreens,
@@ -800,6 +801,7 @@ export type GlobalState = {
 
   settings: {
     byKey: ISettings;
+    performance: PerformanceType;
     loadedWallpapers?: ApiWallpaper[];
     themes: Partial<Record<ThemeKey, IThemeSettings>>;
     privacy: Partial<Record<ApiPrivacyKey, ApiPrivacySettings>>;
@@ -918,6 +920,7 @@ export interface ActionPayloads {
 
   // settings
   setSettingOption: Partial<ISettings> | undefined;
+  updatePerformanceSettings: Partial<PerformanceType>;
   loadPasswordInfo: undefined;
   clearTwoFaError: undefined;
   updatePassword: {

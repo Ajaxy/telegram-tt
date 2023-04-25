@@ -4,7 +4,7 @@
   margin-top: -0.25rem;
   margin-bottom: -0.25rem;
 
-  body.animation-level-0 & {
+  body.no-page-transitions & {
     transition: none !important;
   }
 

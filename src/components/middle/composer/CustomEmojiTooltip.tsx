@@ -28,6 +28,7 @@ export type OwnProps = {
   addRecentCustomEmoji: GlobalActions['addRecentCustomEmoji'];
   onCustomEmojiSelect: (customEmoji: ApiSticker) => void;
   onClose: NoneToVoidFunction;
+  noPlay?: boolean;
 };
 
 type StateProps = {
@@ -46,6 +47,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
   customEmoji,
   isSavedMessages,
   isCurrentUserPremium,
+  noPlay,
 }) => {
   const { clearCustomEmojiForEmoji } = getActions();
 
@@ -97,6 +99,7 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
             isSavedMessages={isSavedMessages}
             canViewSet
             isCurrentUserPremium={isCurrentUserPremium}
+            noPlay={noPlay}
           />
         ))
       ) : shouldRender ? (

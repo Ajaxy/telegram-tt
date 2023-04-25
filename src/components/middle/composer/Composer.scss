@@ -156,8 +156,7 @@
       animation-duration: 0ms !important;
     }
 
-    body.animation-level-0 &,
-    body.animation-level-1 & {
+    body.no-message-composer-animations & {
       .icon-send,
       .icon-microphone-alt,
       .icon-check,
@@ -171,7 +170,7 @@
     z-index: 1;
   }
 
-  body:not(.animation-level-0) & .send-as-button.appear-animation {
+  body:not(.no-message-composer-animations) & .send-as-button.appear-animation {
     animation: 0.25s ease-in-out forwards show-send-as-button;
     transform-origin: right;
   }
@@ -447,7 +446,7 @@
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 100ms ease;
 
-  body.animation-level-0 & {
+  body.no-message-composer-animations & {
     transition: none !important;
   }
 

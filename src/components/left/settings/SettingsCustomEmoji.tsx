@@ -10,6 +10,7 @@ import type { ISettings } from '../../../types';
 import renderText from '../../common/helpers/renderText';
 import { pick } from '../../../util/iteratees';
 
+import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
@@ -27,6 +28,7 @@ type StateProps = Pick<ISettings, (
 )> & {
   customEmojiSetIds?: string[];
   stickerSetsById: Record<string, ApiStickerSet>;
+  canPlayAnimatedEmojis: boolean;
 };
 
 const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
@@ -34,6 +36,7 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
   customEmojiSetIds,
   stickerSetsById,
   shouldSuggestCustomEmoji,
+  canPlayAnimatedEmojis,
   onReset,
 }) => {
   const { openStickerSet, setSettingOption } = getActions();
@@ -78,6 +81,7 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
                 stickerSet={stickerSet}
                 observeIntersection={observeIntersectionForCovers}
                 onClick={handleStickerSetClick}
+                noPlay={!canPlayAnimatedEmojis}
               />
             ))}
           </div>
@@ -91,13 +95,14 @@ const SettingsCustomEmoji: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global) => {
+  (global): StateProps => {
     return {
       ...pick(global.settings.byKey, [
         'shouldSuggestCustomEmoji',
       ]),
       customEmojiSetIds: global.customEmojis.added.setIds,
       stickerSetsById: global.stickers.setsById,
+      canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };
   },
 )(SettingsCustomEmoji));

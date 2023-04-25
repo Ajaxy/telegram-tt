@@ -74,6 +74,8 @@
     position: absolute;
 
     .bubble {
+      --offset-y: 0;
+
       width: auto;
     }
   }

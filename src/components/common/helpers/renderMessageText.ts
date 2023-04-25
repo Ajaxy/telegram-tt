@@ -30,16 +30,16 @@ export function renderMessageText(
     return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined;
   }
 
-  return renderTextWithEntities(
-    trimText(text, truncateLength),
+  return renderTextWithEntities({
+    text: trimText(text, truncateLength),
     entities,
     highlight,
     emojiSize,
     shouldRenderAsHtml,
-    message.id,
+    messageId: message.id,
     isSimple,
     isProtected,
-  );
+  });
 }
 
 // TODO Use Message Summary component instead

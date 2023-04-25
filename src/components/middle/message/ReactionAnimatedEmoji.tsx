@@ -31,6 +31,7 @@ type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
   genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
+  withEffects?: boolean;
 };
 
 const CENTER_ICON_SIZE = 2.5 * REM;
@@ -42,6 +43,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   activeReactions,
   availableReactions,
   observeIntersection,
+  withEffects,
 }) => {
   const { stopActiveReaction } = getActions();
 
@@ -55,7 +57,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   ), [availableReactions, reaction]);
   const centerIconId = availableReaction?.centerIcon?.id;
 
-  const customEmoji = useCustomEmoji(isCustom ? reaction.documentId : undefined);
+  const { customEmoji } = useCustomEmoji(isCustom ? reaction.documentId : undefined);
 
   const assignedEffectId = useMemo(() => {
     if (!isCustom) return availableReaction?.aroundAnimation?.id;
@@ -93,7 +95,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
     activeReactions?.find((active) => isSameReaction(active.reaction, reaction))
   ), [activeReactions, reaction]);
 
-  const shouldPlay = Boolean(activeReaction && (isCustom || mediaDataCenterIcon) && mediaDataEffect);
+  const shouldPlay = Boolean(withEffects && activeReaction && (isCustom || mediaDataCenterIcon) && mediaDataEffect);
   const {
     shouldRender: shouldRenderAnimation,
     transitionClassNames: animationClassNames,

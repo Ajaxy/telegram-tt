@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState } from '../../lib/teact/teact';
+import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -95,19 +95,22 @@ const StickerView: FC<OwnProps> = ({
   const shouldPlay = isIntersectingForPlaying && !noPlay;
 
   const thumbDataUri = useThumbnail(sticker);
-  // Use preview instead of thumb but only if it's already loaded
-  const [preloadedPreviewData] = useState(mediaLoader.getFromMemory(previewMediaHash));
-  const thumbData = customColor ? thumbDataUri : (preloadedPreviewData || thumbDataUri);
+  // Use preview instead of thumb but only if it's already loaded or when playing an animation is disabled
+  const previewMediaDataFromCache: string | undefined = mediaLoader.getFromMemory(previewMediaHash);
+  const previewMediaData = useMedia(
+    previewMediaHash, Boolean(previewMediaDataFromCache || !noPlay), undefined, cacheBuster,
+  );
+  const thumbData = customColor ? thumbDataUri : (previewMediaData || thumbDataUri);
 
   const shouldForcePreview = isUnsupportedVideo || (isStatic && isSmall);
   fullMediaHash ||= shouldForcePreview ? previewMediaHash : `sticker${id}`;
 
   // If preloaded preview is forced, it will render as thumb, so no need to load it again
-  const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && preloadedPreviewData);
+  const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && previewMediaData);
 
   const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia, undefined, cacheBuster);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
-  const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !preloadedPreviewData));
+  const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
   // Delay mounting on Android until heavy animation ends
   const [isReadyToMount, markReadyToMount, unmarkReadyToMount] = useFlag(!IS_ANDROID || !isHeavyAnimating());
   useHeavyAnimationCheck(unmarkReadyToMount, markReadyToMount, isReadyToMount);
@@ -116,7 +119,7 @@ const StickerView: FC<OwnProps> = ({
   const isThumbOpaque = sharedCanvasRef && !withTranslucentThumb;
   const thumbClassNames = useMediaTransition(thumbData && !isFullMediaReady);
   const fullMediaClassNames = useMediaTransition(isFullMediaReady);
-  const noTransition = isLottie && preloadedPreviewData;
+  const noTransition = isLottie && previewMediaData;
 
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 

@@ -10,14 +10,18 @@
 }
 
 .menuContent {
-  --color-background: var(--color-background-compact-menu);
   --border-radius-default: 1.25rem;
+
+  :global(body:not(.no-menu-blur)) & {
+    --color-background: var(--color-background-compact-menu);
+
+    backdrop-filter: blur(10px);
+  }
 
   width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
   height: var(--symbol-menu-height);
   padding: 0 !important;
   transform-origin: 9rem 4.625rem !important;
-  backdrop-filter: blur(10px);
 
   @supports (overflow: overlay) {
     width: var(--symbol-menu-width);

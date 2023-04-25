@@ -41,6 +41,7 @@ export default function useInputCustomEmojis(
   sharedCanvasHqRef: React.RefObject<HTMLCanvasElement>,
   absoluteContainerRef: React.RefObject<HTMLElement>,
   prefixId: string,
+  canPlayAnimatedEmojis: boolean,
   isActive?: boolean,
 ) {
   const { rgbColor: textColor } = useDynamicColorListener(inputRef);
@@ -108,13 +109,18 @@ export default function useInputCustomEmojis(
         position: { x, y },
         textColor,
       });
-      animation.play();
+      if (canPlayAnimatedEmojis) {
+        animation.play();
+      }
 
       playersById.current.set(playerId, animation);
     });
 
     clearPlayers(Array.from(playerIdsToClear));
-  }, [absoluteContainerRef, textColor, inputRef, prefixId, clearPlayers, sharedCanvasHqRef, sharedCanvasRef]);
+  }, [
+    inputRef, sharedCanvasRef, sharedCanvasHqRef, clearPlayers, prefixId, textColor, absoluteContainerRef,
+    canPlayAnimatedEmojis,
+  ]);
 
   useEffect(() => {
     addCustomEmojiInputRenderCallback(synchronizeElements);
@@ -157,10 +163,14 @@ export default function useInputCustomEmojis(
   }, []);
 
   const unfreezeAnimation = useCallback(() => {
+    if (!canPlayAnimatedEmojis) {
+      return;
+    }
+
     playersById.current?.forEach((player) => {
       player.play();
     });
-  }, []);
+  }, [canPlayAnimatedEmojis]);
 
   const unfreezeAnimationOnRaf = useCallback(() => {
     requestMeasure(unfreezeAnimation);

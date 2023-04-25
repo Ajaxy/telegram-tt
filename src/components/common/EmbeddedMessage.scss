@@ -17,7 +17,7 @@
     }
   }
 
-  body.animation-level-1 & {
+  body.no-page-transitions & {
     .ripple-container {
       display: none;
     }

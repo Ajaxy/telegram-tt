@@ -339,7 +339,7 @@ const StickerSet: FC<OwnProps> = ({
                 size={itemSize}
                 observeIntersection={observeIntersectionForPlayingItems}
                 observeIntersectionForShowing={observeIntersectionForShowingItems}
-                noAnimate={!loadAndPlay}
+                noPlay={!loadAndPlay}
                 isSavedMessages={isSavedMessages}
                 isStatusPicker={isStatusPicker}
                 canViewSet

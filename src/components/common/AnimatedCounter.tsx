@@ -4,8 +4,8 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
-import { ANIMATION_LEVEL_MAX } from '../../config';
 import buildClassName from '../../util/buildClassName';
+import { selectCanAnimateInterface } from '../../global/selectors';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
@@ -25,7 +25,7 @@ const AnimatedCounter: FC<OwnProps> = ({
   const prevTextRef = useRef<string>();
   const [isAnimating, markAnimating, unmarkAnimating] = useFlag(false);
 
-  const shouldAnimate = getGlobal().settings.byKey.animationLevel === ANIMATION_LEVEL_MAX;
+  const shouldAnimate = selectCanAnimateInterface(getGlobal());
 
   const textElement = useMemo(() => {
     if (!shouldAnimate) {

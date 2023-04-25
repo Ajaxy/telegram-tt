@@ -3,7 +3,6 @@ import React, { useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
-import type { AnimationLevel } from '../../types';
 
 import { getSenderTitle, isUserId } from '../../global/helpers';
 import { formatMediaDateTime } from '../../util/dateFormat';
@@ -31,7 +30,6 @@ type OwnProps = {
 type StateProps = {
   sender?: ApiUser | ApiChat;
   message?: ApiMessage;
-  animationLevel: AnimationLevel;
 };
 
 const ANIMATION_DURATION = 350;
@@ -43,7 +41,6 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   isFallbackAvatar,
   isAvatar,
   message,
-  animationLevel,
 }) => {
   const {
     closeMediaViewer,
@@ -79,9 +76,9 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>
       {isUserId(sender.id) ? (
-        <Avatar key={sender.id} size="medium" user={sender as ApiUser} animationLevel={animationLevel} withVideo />
+        <Avatar key={sender.id} size="medium" user={sender as ApiUser} />
       ) : (
-        <Avatar key={sender.id} size="medium" chat={sender as ApiChat} animationLevel={animationLevel} withVideo />
+        <Avatar key={sender.id} size="medium" chat={sender as ApiChat} />
       )}
       <div className="meta">
         <div className="title" dir="auto">
@@ -99,16 +96,14 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
 
 export default withGlobal<OwnProps>(
   (global, { chatId, messageId, isAvatar }): StateProps => {
-    const { animationLevel } = global.settings.byKey;
     if (isAvatar && chatId) {
       return {
         sender: isUserId(chatId) ? selectUser(global, chatId) : selectChat(global, chatId),
-        animationLevel,
       };
     }
 
     if (!messageId || !chatId) {
-      return { animationLevel };
+      return {};
     }
 
     const message = selectChatMessage(global, chatId, messageId);
@@ -116,7 +111,6 @@ export default withGlobal<OwnProps>(
     return {
       message,
       sender: message && selectSender(global, message),
-      animationLevel,
     };
   },
 )(SenderInfo);

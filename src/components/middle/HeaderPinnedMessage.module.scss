@@ -18,19 +18,21 @@
     }
   }
 
-  :global(body.animation-level-1) & {
+  :global(body.no-page-transitions) & {
     :global(.ripple-container) {
       display: none;
     }
-  }
 
-  :global(body.animation-level-0) & {
     transition: none !important;
   }
 
   @media (min-width: 1276px) {
     transform: translate3d(0, 0, 0);
     transition: opacity 0.15s ease, transform var(--layer-transition);
+
+    :global(body.no-right-column-animations) & {
+      transition: opacity 0.15s ease;
+    }
 
     :global(#Main.right-column-open) & {
       transform: translate3d(calc(var(--right-column-width) * -1), 0, 0);
@@ -264,7 +266,7 @@
 :global(.tools-stacked.animated) .root {
   animation: fade-in var(--layer-transition) forwards;
 
-  :global(body.animation-level-0) & {
+  :global(body.no-page-transitions) & {
     animation: none;
   }
 }

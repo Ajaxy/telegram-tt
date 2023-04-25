@@ -17,8 +17,11 @@
   @include overflow-y-overlay();
 
   .Loading, .picker-disabled {
-    grid-column: 1 / -1;
-    height: var(--menu-height);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 
   .SymbolMenu.mobile-menu & {

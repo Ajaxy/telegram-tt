@@ -4,13 +4,15 @@ import { callApi } from '../../../api/gramjs';
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
-import { ANIMATION_LEVEL_MAX } from '../../../config';
 import {
   selectChat,
-  selectChatMessage, selectCurrentChat, selectTabState,
+  selectChatMessage,
+  selectCurrentChat,
   selectDefaultReaction,
   selectMaxUserReactions,
   selectMessageIdsByGroupId,
+  selectPerformanceSettingsValue,
+  selectTabState,
 } from '../../selectors';
 import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
 import {
@@ -147,10 +149,9 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
 
   const limit = selectMaxUserReactions(global);
   const reactions = newUserReactions.slice(-limit);
-  const { animationLevel } = global.settings.byKey;
   const tabState = selectTabState(global, tabId);
 
-  if (animationLevel === ANIMATION_LEVEL_MAX) {
+  if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
     const newActiveReactions = hasReaction ? omit(tabState.activeReactions, [messageId]) : {
       ...tabState.activeReactions,
       [messageId]: [
@@ -350,8 +351,6 @@ addActionHandler('fetchUnreadReactions', async (global, actions, payload): Promi
 addActionHandler('animateUnreadReaction', (global, actions, payload): ActionReturnType => {
   const { messageIds, tabId = getCurrentTabId() } = payload;
 
-  const { animationLevel } = global.settings.byKey;
-
   const chat = selectCurrentChat(global, tabId);
   if (!chat) return undefined;
 
@@ -372,7 +371,7 @@ addActionHandler('animateUnreadReaction', (global, actions, payload): ActionRetu
 
   actions.markMessagesRead({ messageIds, tabId });
 
-  if (animationLevel !== ANIMATION_LEVEL_MAX) return undefined;
+  if (selectPerformanceSettingsValue(global, 'reactionEffects')) return undefined;
 
   global = getGlobal();
 

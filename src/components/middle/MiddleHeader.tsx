@@ -361,7 +361,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withFullInfo
               withMediaViewer
               withUpdatingStatus
-              withVideoAvatar={isReady}
               emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
             />
@@ -376,7 +375,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer={threadId === MAIN_THREAD_ID}
               withFullInfo={threadId === MAIN_THREAD_ID}
               withUpdatingStatus
-              withVideoAvatar={isReady}
               noRtl
             />
           )}

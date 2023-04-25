@@ -27,22 +27,37 @@ interface IOrganizedEntity {
 
 const HQ_EMOJI_THRESHOLD = 64;
 
-export function renderTextWithEntities(
-  text: string,
-  entities?: ApiMessageEntity[],
-  highlight?: string,
-  emojiSize?: number,
-  shouldRenderAsHtml?: boolean,
-  messageId?: number,
-  isSimple?: boolean,
-  isProtected?: boolean,
-  observeIntersectionForLoading?: ObserveFn,
-  observeIntersectionForPlaying?: ObserveFn,
-  withTranslucentThumbs?: boolean,
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>,
-  cacheBuster?: string,
-) {
+export function renderTextWithEntities({
+  text,
+  entities,
+  highlight,
+  emojiSize,
+  shouldRenderAsHtml,
+  messageId,
+  isSimple,
+  isProtected,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
+  withTranslucentThumbs,
+  sharedCanvasRef,
+  sharedCanvasHqRef,
+  cacheBuster,
+}: {
+  text: string;
+  entities?: ApiMessageEntity[];
+  highlight?: string;
+  emojiSize?: number;
+  shouldRenderAsHtml?: boolean;
+  messageId?: number;
+  isSimple?: boolean;
+  isProtected?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
+  withTranslucentThumbs?: boolean;
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  cacheBuster?: string;
+}) {
   if (!entities || !entities.length) {
     return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
   }
@@ -183,13 +198,11 @@ export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
     return '';
   }
 
-  const result = renderTextWithEntities(
+  const result = renderTextWithEntities({
     text,
     entities,
-    undefined,
-    undefined,
-    true,
-  );
+    shouldRenderAsHtml: true,
+  });
 
   if (Array.isArray(result)) {
     return result.join('');

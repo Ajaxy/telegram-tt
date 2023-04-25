@@ -41,7 +41,7 @@
       transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
     }
 
-    body.animation-level-0 & {
+    body.no-page-transitions & {
       transition: none;
     }
 
@@ -140,12 +140,15 @@
   .bubble {
     --offset-y: 4rem;
 
-    background: var(--color-background-compact-menu);
-    backdrop-filter: blur(10px);
     border-radius: 1.25rem;
     width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
     padding: 0;
     overflow: hidden;
+
+    body:not(.no-menu-blur) & {
+      background: var(--color-background-compact-menu);
+      backdrop-filter: blur(10px);
+    }
 
     &:not(.open) {
       transform: scale(0.85) !important;

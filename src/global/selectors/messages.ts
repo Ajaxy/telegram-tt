@@ -44,7 +44,8 @@ import {
   isServiceNotificationMessage,
   isUserId,
   isUserRightBanned,
-  canSendReaction, getAllowedAttachmentOptions,
+  canSendReaction,
+  getAllowedAttachmentOptions,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -1113,26 +1114,6 @@ function canAutoLoadMedia<T extends GlobalState>({
     || (canAutoLoadMediaInGroups && isChatGroup(chat))
     || (canAutoLoadMediaInChannels && isChatChannel(chat)),
   );
-}
-
-export function selectCanAutoPlayMedia<T extends GlobalState>(global: T, message: ApiMessage) {
-  const video = getMessageVideo(message) || getMessageWebPageVideo(message);
-  if (!video) {
-    return undefined;
-  }
-
-  const {
-    canAutoPlayVideos,
-    canAutoPlayGifs,
-  } = global.settings.byKey;
-
-  const asGif = video.isGif || video.isRound;
-
-  return (canAutoPlayVideos && !asGif) || (canAutoPlayGifs && asGif);
-}
-
-export function selectShouldLoopStickers<T extends GlobalState>(global: T) {
-  return global.settings.byKey.shouldLoopStickers;
 }
 
 export function selectLastServiceNotification<T extends GlobalState>(global: T) {

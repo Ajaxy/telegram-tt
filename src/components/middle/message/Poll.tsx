@@ -245,7 +245,7 @@ const Poll: FC<OwnProps & StateProps> = ({
     return (
       isSolutionShown && poll.results.solution && (
         <Notification
-          message={renderTextWithEntities(poll.results.solution, poll.results.solutionEntities)}
+          message={renderTextWithEntities({ text: poll.results.solution, entities: poll.results.solutionEntities })}
           duration={SOLUTION_DURATION}
           onDismiss={handleSolutionHide}
           containerId={SOLUTION_CONTAINER_ID}

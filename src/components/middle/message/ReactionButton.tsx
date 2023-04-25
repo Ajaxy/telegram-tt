@@ -25,6 +25,7 @@ const ReactionButton: FC<{
   activeReactions?: ActiveReaction[];
   availableReactions?: ApiAvailableReaction[];
   withRecentReactors?: boolean;
+  withEffects?: boolean;
   genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
 }> = ({
@@ -33,6 +34,7 @@ const ReactionButton: FC<{
   activeReactions,
   availableReactions,
   withRecentReactors,
+  withEffects,
   genericEffects,
   observeIntersection,
 }) => {
@@ -73,6 +75,7 @@ const ReactionButton: FC<{
         availableReactions={availableReactions}
         genericEffects={genericEffects}
         observeIntersection={observeIntersection}
+        withEffects={withEffects}
       />
       {recentReactors?.length ? (
         <div className="avatars">

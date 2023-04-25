@@ -18,7 +18,7 @@ import './StickerSetCard.scss';
 
 type OwnProps = {
   stickerSet?: ApiStickerSet;
-  noAnimate?: boolean;
+  noPlay?: boolean;
   className?: string;
   observeIntersection: ObserveFn;
   onClick: (value: ApiSticker) => void;
@@ -26,7 +26,7 @@ type OwnProps = {
 
 const StickerSetCard: FC<OwnProps> = ({
   stickerSet,
-  noAnimate,
+  noPlay,
   className,
   observeIntersection,
   onClick,
@@ -55,7 +55,7 @@ const StickerSetCard: FC<OwnProps> = ({
           <StickerSetCover
             stickerSet={stickerSet}
             size={STICKER_SIZE_GENERAL_SETTINGS}
-            noAnimate={noAnimate}
+            noPlay={noPlay}
             observeIntersection={observeIntersection}
           />
         </Button>
@@ -66,7 +66,7 @@ const StickerSetCard: FC<OwnProps> = ({
           sticker={firstSticker}
           size={STICKER_SIZE_GENERAL_SETTINGS}
           title={stickerSet.title}
-          noAnimate={noAnimate}
+          noPlay={noPlay}
           observeIntersection={observeIntersection}
           noContextMenu
           isCurrentUserPremium

@@ -152,6 +152,7 @@ const GifButton: FC<OwnProps> = ({
           className="gif-unsave-button"
           color="dark"
           pill
+          noFastClick
           onClick={handleUnsaveClick}
         >
           <i className="icon icon-close gif-unsave-button-icon" />

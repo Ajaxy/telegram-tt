@@ -1,0 +1,94 @@
+.root {
+  --widget-width: 2.375rem;
+  --widget-height: 0.3125rem;
+  --thumb-size: 0.625rem;
+
+  display: inline-flex;
+  position: relative;
+}
+
+.alignToEnd {
+  margin-inline-start: auto;
+  margin-inline-end: 0.25rem;
+}
+
+.widget {
+  cursor: var(--custom-cursor, pointer);
+  position: relative;
+  width: var(--widget-width);
+  height: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    background-color: var(--color-background);
+    border-radius: calc(var(--thumb-size) / 2);
+    transition: transform 200ms;
+
+    :global(body.no-page-transitions) & {
+      transition: none !important;
+    }
+  }
+
+  &.min::after {
+    transform: translate(0, -50%);
+    /* stylelint-disable-next-line plugin/whole-pixel */
+    box-shadow: 0 0 0 0.109375rem var(--color-gray);
+  }
+
+  &.mid::after {
+    transform: translate(calc(var(--widget-width) / 2 - calc(var(--thumb-size) / 2)), -50%);
+    /* stylelint-disable-next-line plugin/whole-pixel */
+    box-shadow: 0 0 0 0.109375rem var(--color-primary);
+  }
+
+  &.max::after {
+    transform: translate(calc(var(--widget-width) - var(--thumb-size)), -50%);
+    /* stylelint-disable-next-line plugin/whole-pixel */
+    box-shadow: 0 0 0 0.109375rem var(--color-primary);
+  }
+}
+
+.filler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--widget-width);
+  height: var(--widget-height);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: var(--color-gray);
+  transform: translateY(-50%);
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--widget-width);
+    height: var(--widget-height);
+    border-radius: 0.25rem;
+    background-color: var(--color-primary);
+    transition: transform 200ms;
+
+    :global(body.no-page-transitions) & {
+      transition: none !important;
+    }
+  }
+
+  &.min::after {
+    transform: translateX(-100%);
+  }
+
+  &.mid::after {
+    transform: translateX(-50%);
+  }
+
+  &.max::after {
+    transform: translateX(0);
+  }
+}

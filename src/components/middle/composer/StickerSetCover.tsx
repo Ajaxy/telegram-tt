@@ -25,7 +25,7 @@ import styles from './StickerSetCover.module.scss';
 type OwnProps = {
   stickerSet: ApiStickerSet;
   size?: number;
-  noAnimate?: boolean;
+  noPlay?: boolean;
   observeIntersection: ObserveFn;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
 };
@@ -33,7 +33,7 @@ type OwnProps = {
 const StickerSetCover: FC<OwnProps> = ({
   stickerSet,
   size = STICKER_SIZE_PICKER_HEADER,
-  noAnimate,
+  noPlay,
   observeIntersection,
   sharedCanvasRef,
 }) => {
@@ -44,6 +44,7 @@ const StickerSetCover: FC<OwnProps> = ({
   const { hasThumbnail, isLottie, isVideos: isVideo } = stickerSet;
 
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);
+  const shouldPlay = isIntersecting && !noPlay;
 
   const shouldFallbackToStatic = stickerSet.stickers && isVideo && !IS_WEBM_SUPPORTED;
   const staticHash = shouldFallbackToStatic && getStickerPreviewHash(stickerSet.stickers![0].id);
@@ -75,7 +76,7 @@ const StickerSetCover: FC<OwnProps> = ({
             className={transitionClassNames}
             tgsUrl={mediaData}
             size={size}
-            play={isIntersecting && !noAnimate}
+            play={shouldPlay}
             isLowPriority={!selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSet)}
             sharedCanvas={sharedCanvasRef?.current || undefined}
             sharedCanvasCoords={coords}
@@ -84,7 +85,7 @@ const StickerSetCover: FC<OwnProps> = ({
           <OptimizedVideo
             className={buildClassName(styles.video, transitionClassNames)}
             src={mediaData}
-            canPlay={isIntersecting && !noAnimate}
+            canPlay={shouldPlay}
             loop
             disablePictureInPicture
           />
