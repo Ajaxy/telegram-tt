@@ -1,7 +1,10 @@
+import React, { memo, useState } from '../../../lib/teact/teact';
+
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 
@@ -14,8 +17,10 @@ export type OwnProps = {
   isOpen: boolean;
   isOpenToBottom?: boolean;
   isSavedMessages?: boolean;
+  canScheduleUntilOnline?: boolean;
   onSendSilent?: NoneToVoidFunction;
   onSendSchedule?: NoneToVoidFunction;
+  onSendWhenOnline?: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
   onCloseAnimationEnd?: NoneToVoidFunction;
 };
@@ -24,14 +29,24 @@ const CustomSendMenu: FC<OwnProps> = ({
   isOpen,
   isOpenToBottom = false,
   isSavedMessages,
+  canScheduleUntilOnline,
   onSendSilent,
   onSendSchedule,
+  onSendWhenOnline,
   onClose,
   onCloseAnimationEnd,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
+  const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] = useState(false);
 
   const lang = useLang();
+
+  useEffectWithPrevDeps(([prevIsOpen]) => {
+    // Avoid context menu item shuffling when opened
+    if (isOpen && !prevIsOpen) {
+      setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
+    }
+  }, [isOpen, canScheduleUntilOnline]);
 
   return (
     <Menu
@@ -50,6 +65,11 @@ const CustomSendMenu: FC<OwnProps> = ({
       {onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
           {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+        </MenuItem>
+      )}
+      {onSendSchedule && displayScheduleUntilOnline && (
+        <MenuItem icon="user-online" onClick={onSendWhenOnline}>
+          {lang('SendWhenOnline')}
         </MenuItem>
       )}
     </Menu>

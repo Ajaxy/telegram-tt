@@ -35,6 +35,7 @@ import {
   EDITABLE_INPUT_CSS_SELECTOR,
   MAX_UPLOAD_FILEPART_SIZE,
   EDITABLE_INPUT_MODAL_ID,
+  SCHEDULED_WHEN_ONLINE,
 } from '../../../config';
 import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
@@ -1218,6 +1219,10 @@ const Composer: FC<OwnProps & StateProps> = ({
     sendSilent();
   }, [sendSilent]);
 
+  const handleSendWhenOnline = useCallback(() => {
+    handleMessageSchedule({ }, SCHEDULED_WHEN_ONLINE);
+  }, [handleMessageSchedule]);
+
   const handleSendScheduledAttachments = useCallback((sendCompressed: boolean, sendGrouped: boolean) => {
     requestCalendar((scheduledAt) => {
       handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt);
@@ -1542,8 +1547,10 @@ const Composer: FC<OwnProps & StateProps> = ({
       {canShowCustomSendMenu && (
         <CustomSendMenu
           isOpen={isCustomSendMenuOpen}
+          canScheduleUntilOnline={canScheduleUntilOnline}
           onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
           onSendSchedule={!shouldSchedule ? handleSendScheduled : undefined}
+          onSendWhenOnline={handleSendWhenOnline}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
           isSavedMessages={isChatWithSelf}
