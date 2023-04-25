@@ -163,6 +163,8 @@
     "messages.toggleNoForwards",
     "messages.saveDefaultSendAs",
     "messages.getExtendedMedia",
+    "messages.getBotApp",
+    "messages.requestAppWebView",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

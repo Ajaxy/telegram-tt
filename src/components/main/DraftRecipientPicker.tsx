@@ -54,6 +54,7 @@ const DraftRecipientPicker: FC<OwnProps> = ({
     <RecipientPicker
       isOpen={isOpen}
       searchPlaceholder={lang('ForwardTo')}
+      filter={requestedDraft?.filter}
       onSelectRecipient={handleSelectRecipient}
       onClose={handleClose}
       onCloseAnimationEnd={unmarkIsShown}

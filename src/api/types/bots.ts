@@ -43,6 +43,11 @@ export interface ApiBotInlineSwitchPm {
   startParam: string;
 }
 
+export interface ApiBotInlineSwitchWebview {
+  text: string;
+  url: string;
+}
+
 export interface ApiBotCommand {
   botId: string;
   command: string;

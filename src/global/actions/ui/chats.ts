@@ -102,7 +102,7 @@ addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnTyp
 
 addActionHandler('openChatWithDraft', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, text, threadId, files, tabId = getCurrentTabId(),
+    chatId, text, threadId, files, filter, tabId = getCurrentTabId(),
   } = payload;
 
   if (chatId) {
@@ -114,6 +114,7 @@ addActionHandler('openChatWithDraft', (global, actions, payload): ActionReturnTy
       chatId,
       text,
       files,
+      filter,
     },
   }, tabId);
 });

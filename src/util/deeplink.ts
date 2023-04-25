@@ -36,6 +36,7 @@ export const processDeepLink = (url: string) => {
     case 'resolve': {
       const {
         domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
+        appname, startapp,
       } = params;
 
       const startAttach = params.hasOwnProperty('startattach') && !startattach ? true : startattach;
@@ -43,7 +44,13 @@ export const processDeepLink = (url: string) => {
       const threadId = Number(thread) || Number(topic) || undefined;
 
       if (domain !== 'telegrampassport') {
-        if (startAttach && choose) {
+        if (appname) {
+          openChatByUsername({
+            username: domain,
+            startApp: startapp,
+            originalParts: [domain, appname],
+          });
+        } else if (startAttach && choose) {
           processAttachBotParameters({
             username: domain,
             filter: choose,

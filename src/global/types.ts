@@ -452,6 +452,7 @@ export type TabState = {
     chatId?: string;
     text: string;
     files?: File[];
+    filter?: ApiChatType[];
   };
 
   pollModal: {
@@ -471,7 +472,8 @@ export type TabState = {
 
   botTrustRequest?: {
     botId: string;
-    type: 'game' | 'webApp';
+    type: 'game' | 'webApp' | 'botApp';
+    shouldRequestWriteAccess?: boolean;
     onConfirm?: CallbackAction;
   };
   requestedAttachBotInstall?: {
@@ -1260,6 +1262,8 @@ export interface ActionPayloads {
     startParam?: string;
     startAttach?: string | boolean;
     attach?: string;
+    startApp?: string;
+    originalParts?: string[];
   } & WithTabId;
   requestThreadInfoUpdate: {
     chatId: string;
@@ -1644,6 +1648,7 @@ export interface ActionPayloads {
     threadId?: number;
     text: string;
     files?: File[];
+    filter?: ApiChatType[];
   } & WithTabId;
   resetOpenChatWithDraft: WithTabId | undefined;
   toggleJoinToSend: {
@@ -2019,9 +2024,11 @@ export interface ActionPayloads {
   } & WithTabId;
 
   switchBotInline: {
-    messageId: number;
+    messageId?: number;
+    botId?: string;
     query: string;
     isSamePeer?: boolean;
+    filter?: ApiChatType[];
   } & WithTabId;
 
   openGame: {
@@ -2055,6 +2062,13 @@ export interface ActionPayloads {
     buttonText: string;
     theme?: ApiThemeParameters;
   } & WithTabId;
+  requestAppWebView: {
+    botId: string;
+    appName: string;
+    theme?: ApiThemeParameters;
+    startApp?: string;
+    isWriteAllowed?: boolean;
+  } & WithTabId;
   setWebAppPaymentSlug: {
     slug?: string;
   } & WithTabId;
@@ -2062,6 +2076,7 @@ export interface ActionPayloads {
   cancelBotTrustRequest: WithTabId | undefined;
   markBotTrusted: {
     botId: string;
+    isWriteAllowed?: boolean;
   } & WithTabId;
 
   cancelAttachBotInstall: WithTabId | undefined;

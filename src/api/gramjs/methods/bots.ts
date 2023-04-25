@@ -2,15 +2,24 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
+  ApiBotApp,
   ApiChat, ApiThemeParameters, ApiUser, OnApiUpdate,
 } from '../../types';
 
 import localDb from '../localDb';
+import { WEB_APP_PLATFORM } from '../../../config';
 import { invokeRequest } from './client';
-import { buildInputPeer, buildInputThemeParams, generateRandomBigInt } from '../gramjsBuilders';
+import {
+  buildInputBotApp, buildInputEntity, buildInputPeer, buildInputThemeParams, generateRandomBigInt,
+} from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildApiAttachBot, buildApiBotInlineMediaResult, buildApiBotInlineResult, buildBotSwitchPm,
+  buildApiAttachBot,
+  buildApiBotApp,
+  buildApiBotInlineMediaResult,
+  buildApiBotInlineResult,
+  buildBotSwitchPm,
+  buildBotSwitchWebview,
 } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
@@ -102,6 +111,7 @@ export async function fetchInlineBotResults({
     help: bot.botPlaceholder,
     nextOffset: getInlineBotResultsNextOffset(bot.usernames![0].username, result.nextOffset),
     switchPm: buildBotSwitchPm(result.switchPm),
+    switchWebview: buildBotSwitchWebview(result.switchWebview),
     users: result.users.map(buildApiUser).filter(Boolean),
     results: processInlineBotResult(String(result.queryId), result.results),
     cacheTime: result.cacheTime,
@@ -184,7 +194,7 @@ export async function requestWebView({
     startParam,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     fromBotMenu: isFromBotMenu || undefined,
-    platform: 'weba',
+    platform: WEB_APP_PLATFORM,
     ...(threadId && { topMsgId: threadId }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
@@ -210,7 +220,53 @@ export async function requestSimpleWebView({
     url,
     bot: buildInputPeer(bot.id, bot.accessHash),
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
-    platform: 'weba',
+    platform: WEB_APP_PLATFORM,
+  }));
+
+  return result?.url;
+}
+
+export async function fetchBotApp({
+  bot,
+  appName,
+}: {
+  bot: ApiUser;
+  appName: string;
+}) {
+  const result = await invokeRequest(new GramJs.messages.GetBotApp({
+    app: new GramJs.InputBotAppShortName({
+      botId: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+      shortName: appName,
+    }),
+  }));
+
+  if (!result || result instanceof GramJs.BotAppNotModified) {
+    return undefined;
+  }
+
+  return buildApiBotApp(result);
+}
+
+export async function requestAppWebView({
+  peer,
+  app,
+  startParam,
+  theme,
+  isWriteAllowed,
+}: {
+  peer: ApiChat | ApiUser;
+  app: ApiBotApp;
+  startParam?: string;
+  theme?: ApiThemeParameters;
+  isWriteAllowed?: boolean;
+}) {
+  const result = await invokeRequest(new GramJs.messages.RequestAppWebView({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    app: buildInputBotApp(app),
+    startParam,
+    themeParams: theme ? buildInputThemeParams(theme) : undefined,
+    platform: WEB_APP_PLATFORM,
+    writeAllowed: isWriteAllowed || undefined,
   }));
 
   return result?.url;

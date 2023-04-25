@@ -45,7 +45,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v17';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v18';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -233,7 +233,7 @@ export const SUPPORTED_TRANSLATION_LANGUAGES = [
   // Official
   'en', 'ar', 'be', 'ca', 'zh', 'nl', 'fr', 'de', 'id',
   'it', 'ja', 'ko', 'pl', 'pt', 'ru', 'es', 'uk',
-  // Unnofficial
+  // Unofficial
   'af', 'sq', 'am', 'hy', 'az', 'eu', 'bn', 'bs', 'bg',
   'ceb', 'zh-CN', 'zh-TW', 'co', 'hr', 'cs', 'da', 'eo',
   'et', 'fi', 'fy', 'gl', 'ka', 'el', 'gu', 'ht', 'ha',
@@ -257,6 +257,7 @@ export const TME_LINK_PREFIX = 'https://t.me/';
 export const USERNAME_PURCHASE_ERROR = 'USERNAME_PURCHASE_AVAILABLE';
 export const PURCHASE_USERNAME = 'auction';
 export const TME_WEB_DOMAINS = new Set(['t.me', 'web.t.me', 'a.t.me', 'k.t.me', 'z.t.me']);
+export const WEB_APP_PLATFORM = 'weba';
 
 // eslint-disable-next-line max-len
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
