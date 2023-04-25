@@ -16,6 +16,7 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useAppLayout from '../../hooks/useAppLayout';
+import useCurrentTimeSignal from './hooks/currentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 
 import Button from '../ui/Button';
@@ -31,6 +32,7 @@ type OwnProps = {
   posterSize?: ApiDimensions;
   loadProgress?: number;
   fileSize: number;
+  isPreviewDisabled?: boolean;
   isMediaViewerOpen?: boolean;
   noPlay?: boolean;
   volume: number;
@@ -45,6 +47,7 @@ type OwnProps = {
 };
 
 const MAX_LOOP_DURATION = 30; // Seconds
+const MIN_READY_STATE = 4;
 const REWIND_STEP = 5; // Seconds
 
 const VideoPlayer: FC<OwnProps> = ({
@@ -64,6 +67,7 @@ const VideoPlayer: FC<OwnProps> = ({
   shouldCloseOnClick,
   isProtected,
   isClickDisabled,
+  isPreviewDisabled,
 }) => {
   const {
     setMediaViewerVolume,
@@ -74,9 +78,10 @@ const VideoPlayer: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(!IS_TOUCH_ENV || !IS_IOS);
-  const [currentTime, setCurrentTime] = useState(0);
   const [isFullscreen, setFullscreen, exitFullscreen] = useFullscreen(videoRef, setIsPlaying);
   const { isMobile } = useAppLayout();
+  const duration = videoRef.current?.duration || 0;
+  const isLooped = isGif || duration <= MAX_LOOP_DURATION;
 
   const handleEnterFullscreen = useCallback(() => {
     // Yandex browser doesn't support PIP when video is hidden
@@ -95,7 +100,7 @@ const VideoPlayer: FC<OwnProps> = ({
     isInPictureInPicture,
   ] = usePictureInPicture(videoRef, handleEnterFullscreen, handleLeaveFullscreen);
 
-  const [, toggleControls] = useControlsSignal();
+  const [, toggleControls, lockControls] = useControlsSignal();
 
   const handleVideoMove = useCallback(() => {
     toggleControls(true);
@@ -110,8 +115,9 @@ const VideoPlayer: FC<OwnProps> = ({
   }, [toggleControls]);
 
   const {
-    isBuffered, bufferedRanges, bufferingHandlers, bufferedProgress,
+    isReady, isBuffered, bufferedRanges, bufferingHandlers, bufferedProgress,
   } = useBuffering();
+
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
@@ -120,6 +126,10 @@ const VideoPlayer: FC<OwnProps> = ({
     shouldRender: shouldRenderPlayButton,
     transitionClassNames: playButtonClassNames,
   } = useShowTransition(IS_IOS && !isPlaying && !shouldRenderSpinner, undefined, undefined, 'slow');
+
+  useEffect(() => {
+    lockControls(shouldRenderSpinner);
+  }, [lockControls, shouldRenderSpinner]);
 
   useEffect(() => {
     if (noPlay || !isMediaViewerOpen) {
@@ -131,15 +141,6 @@ const VideoPlayer: FC<OwnProps> = ({
       safePlay(videoRef.current!);
     }
   }, [noPlay, isMediaViewerOpen, url, setMediaViewerMuted]);
-
-  useEffect(() => {
-    if (videoRef.current!.currentTime === videoRef.current!.duration) {
-      setCurrentTime(0);
-      setIsPlaying(false);
-    } else {
-      setCurrentTime(videoRef.current!.currentTime);
-    }
-  }, [currentTime]);
 
   useEffect(() => {
     videoRef.current!.volume = volume;
@@ -164,7 +165,6 @@ const VideoPlayer: FC<OwnProps> = ({
     if (isClickDisabled) {
       return;
     }
-
     if (shouldCloseOnClick) {
       onClose(e);
     } else {
@@ -173,16 +173,25 @@ const VideoPlayer: FC<OwnProps> = ({
   }, [onClose, shouldCloseOnClick, togglePlayState, isClickDisabled]);
 
   useVideoCleanup(videoRef, []);
+  const [, setCurrentTime] = useCurrentTimeSignal();
 
   const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
-    setCurrentTime(e.currentTarget.currentTime);
-  }, []);
+    const video = e.currentTarget;
+    if (video.readyState >= MIN_READY_STATE) {
+      setCurrentTime(video.currentTime);
+    }
+    if (!isLooped && video.currentTime === video.duration) {
+      setCurrentTime(0);
+      setIsPlaying(false);
+    }
+  }, [isLooped, setCurrentTime]);
 
   const handleEnded = useCallback(() => {
+    if (isLooped) return;
     setCurrentTime(0);
     setIsPlaying(false);
     toggleControls(true);
-  }, [toggleControls]);
+  }, [isLooped, setCurrentTime, toggleControls]);
 
   const handleFullscreenChange = useCallback(() => {
     if (isFullscreen && exitFullscreen) {
@@ -251,7 +260,6 @@ const VideoPlayer: FC<OwnProps> = ({
   const wrapperStyle = posterSize && `width: ${posterSize.width}px; height: ${posterSize.height}px`;
   const videoStyle = `background-image: url(${posterData})`;
   const shouldToggleControls = !IS_TOUCH_ENV && !isForceMobileVersion;
-  const duration = videoRef.current?.duration || 0;
 
   return (
     // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
@@ -277,7 +285,7 @@ const VideoPlayer: FC<OwnProps> = ({
           autoPlay={IS_TOUCH_ENV}
           controlsList="nodownload"
           playsInline
-          loop={isGif || duration <= MAX_LOOP_DURATION}
+          loop={isLooped}
           // This is to force autoplaying on mobiles
           muted={isGif || isMuted}
           id="media-viewer-video"
@@ -313,18 +321,21 @@ const VideoPlayer: FC<OwnProps> = ({
           />
         </div>
       )}
-      {!isGif && !shouldRenderSpinner && (
+      {!isGif && (
         <VideoPlayerControls
+          url={url}
           isPlaying={isPlaying}
           bufferedRanges={bufferedRanges}
           bufferedProgress={bufferedProgress}
           isBuffered={isBuffered}
-          currentTime={currentTime}
           isFullscreenSupported={Boolean(setFullscreen)}
           isPictureInPictureSupported={isPictureInPictureSupported}
           isFullscreen={isFullscreen}
+          isPreviewDisabled={isPreviewDisabled}
           fileSize={fileSize}
           duration={duration}
+          isReady={isReady}
+          posterSize={posterSize}
           isForceMobileVersion={isForceMobileVersion}
           onSeek={handleSeek}
           onChangeFullscreen={handleFullscreenChange}

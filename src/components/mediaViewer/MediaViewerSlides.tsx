@@ -409,7 +409,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
     const cleanup = captureEvents(containerRef.current, {
       isNotPassive: true,
       withNativeDrag: true,
-      excludedClosestSelector: '.MediaViewerFooter, .ZoomControls',
+      excludedClosestSelector: '.MediaViewerFooter, .ZoomControls, .VideoPlayerControls',
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
       doubleTapZoom: DOUBLE_TAP_ZOOM,
@@ -775,7 +775,7 @@ function checkIfControlTarget(e: TouchEvent | MouseEvent) {
   if (checkIfInsideSelector(target, '.VideoPlayerControls')) {
     if (checkIfInsideSelector(
       target,
-      '.play, .fullscreen, .volume, .volume-slider, .playback-rate, .playback-rate-menu',
+      '.play, .fullscreen, .volume, .volume-slider, .playback-rate, .playback-rate-menu, .SeekLine',
     )) {
       return true;
     }

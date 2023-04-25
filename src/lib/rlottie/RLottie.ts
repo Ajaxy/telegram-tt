@@ -1,14 +1,12 @@
 import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
-import type { RLottieApi } from './rlottie.worker';
-
 import {
   DPR, IS_SAFARI, IS_ANDROID, IS_IOS,
 } from '../../util/windowEnvironment';
-import { createConnector } from '../../util/PostMessageConnector';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
 import generateIdFor from '../../util/generateIdFor';
+import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 
 interface Params {
   size: number;
@@ -24,7 +22,6 @@ type Frame =
   | typeof WAITING
   | ImageBitmap;
 
-const MAX_WORKERS = Math.min(navigator.hardwareConcurrency || 4, 4);
 const HIGH_PRIORITY_QUALITY = (IS_ANDROID || IS_IOS) ? 0.75 : 1;
 const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
@@ -32,11 +29,9 @@ const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
 const ID_STORE = {};
 
+const workers = launchMediaWorkers().map(({ connector }) => connector);
 const instancesByRenderId = new Map<string, RLottie>();
 
-const workers = new Array(MAX_WORKERS).fill(undefined).map(
-  () => createConnector<RLottieApi>(new Worker(new URL('./rlottie.worker.ts', import.meta.url))),
-);
 let lastWorkerIndex = -1;
 
 class RLottie {
@@ -371,7 +366,7 @@ class RLottie {
     this.workerIndex = cycleRestrict(MAX_WORKERS, ++lastWorkerIndex);
 
     workers[this.workerIndex].request({
-      name: 'init',
+      name: 'rlottie:init',
       args: [
         this.renderId,
         this.tgsUrl,
@@ -385,7 +380,7 @@ class RLottie {
 
   private destroyRenderer() {
     workers[this.workerIndex].request({
-      name: 'destroy',
+      name: 'rlottie:destroy',
       args: [this.renderId],
     });
   }
@@ -407,7 +402,7 @@ class RLottie {
     this.initConfig();
 
     workers[this.workerIndex].request({
-      name: 'changeData',
+      name: 'rlottie:changeData',
       args: [
         this.renderId,
         this.tgsUrl,
@@ -567,7 +562,7 @@ class RLottie {
     this.frames[frameIndex] = WAITING;
 
     workers[this.workerIndex].request({
-      name: 'renderFrames',
+      name: 'rlottie:renderFrames',
       args: [this.renderId, frameIndex, this.onFrameLoad.bind(this)],
     });
   }

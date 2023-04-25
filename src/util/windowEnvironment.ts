@@ -90,6 +90,8 @@ if (IS_MOV_SUPPORTED) {
 
 export const IS_WEBM_SUPPORTED = Boolean(TEST_VIDEO.canPlayType('video/webm; codecs="vp9"').replace('no', ''));
 
+export const ARE_WEBCODECS_SUPPORTED = 'VideoDecoder' in window;
+
 export const DPR = window.devicePixelRatio || 1;
 
 export const MASK_IMAGE_DISABLED = true;

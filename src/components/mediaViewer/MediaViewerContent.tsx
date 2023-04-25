@@ -8,7 +8,9 @@ import type {
 import type { AnimationLevel } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import {
+  IS_TOUCH_ENV, IS_IOS, IS_ANDROID, ARE_WEBCODECS_SUPPORTED,
+} from '../../util/windowEnvironment';
 import {
   selectChat, selectChatMessage, selectTabState, selectIsMessageProtected, selectScheduledMessage, selectUser,
 } from '../../global/selectors';
@@ -57,6 +59,7 @@ type StateProps = {
 
 const ANIMATION_DURATION = 350;
 const MOBILE_VERSION_CONTROL_WIDTH = 350;
+const IS_PREVIEW_DISABLED = (IS_IOS || IS_ANDROID) && !ARE_WEBCODECS_SUPPORTED;
 
 const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const {
@@ -89,6 +92,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
     bestData,
     dimensions,
     isGif,
+    isLocal,
     isVideoAvatar,
     videoSize,
     loadProgress,
@@ -111,7 +115,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
         <div key={chatId} className="MediaViewerContent">
           {renderPhoto(
             bestData,
-            calculateMediaViewerDimensions(dimensions, false),
+            calculateMediaViewerDimensions(dimensions!, false),
             !isMobile && !isProtected,
             isProtected,
           )}
@@ -130,6 +134,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
             fileSize={videoSize!}
             isMediaViewerOpen={isOpen && isActive}
             isProtected={isProtected}
+            isPreviewDisabled={IS_PREVIEW_DISABLED || isLocal}
             noPlay={!isActive}
             onClose={onClose}
             isMuted
@@ -179,6 +184,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
           fileSize={videoSize!}
           isMediaViewerOpen={isOpen && isActive}
           noPlay={!isActive}
+          isPreviewDisabled={IS_PREVIEW_DISABLED || isLocal}
           onClose={onClose}
           isMuted={isMuted}
           isHidden={isHidden}

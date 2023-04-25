@@ -3,12 +3,7 @@
   display: inline-flex;
   flex-direction: column;
   overflow: hidden;
-
-  @media (min-width: 601px) {
-    // Safari: custom controls are not displayed after exiting full screen mode.
-    z-index: 1;
-  }
-
+  
   @media (max-width: 600px) {
     overflow: visible;
   }

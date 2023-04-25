@@ -60,6 +60,9 @@ module.exports = (_env, { mode = 'production' }) => {
           directory: path.resolve(__dirname, 'src/lib/rlottie'),
         },
         {
+          directory: path.resolve(__dirname, 'src/lib/video-preview'),
+        },
+        {
           directory: path.resolve(__dirname, 'src/lib/secret-sauce'),
         },
       ],

@@ -1,0 +1,93 @@
+.container {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  top: 1rem;
+  height: 1rem;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.preview {
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  bottom: calc(100% + 0.5rem);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background: #000;
+}
+
+.previewCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+body:global(.is-touch-env) .preview {
+  bottom: calc(100% + 0.75rem);
+}
+
+.previewTime {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+}
+
+.previewTimeText {
+  border-top-left-radius: 0.125rem;
+  border-top-right-radius: 0.125rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 0.25rem 0.5rem;
+}
+
+.track {
+  position: absolute;
+  top: 50%;
+  height: 5px;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: var(--border-radius-default);
+  left: -0.25rem;
+  right: -0.25rem;
+}
+
+.buffered {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.5);
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: var(--border-radius-default);
+}
+
+.played {
+  background: var(--color-primary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: var(--border-radius-default);
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    right: 0;
+    top: 50%;
+    transform: translate(50%, -50%) scale(1);
+    transition: transform 0.2s ease;
+  }
+}
+
+body:global(.is-touch-env) .seeking {
+  &::after {
+    transform: translate(50%, -50%) scale(2);
+  }
+}

@@ -326,6 +326,9 @@ function getInputLocation(location) {
  * @returns {Number}
  */
 function getDownloadPartSize(fileSize) {
+    if (fileSize <= 65536) { // 64KB
+        return 64;
+    }
     if (fileSize <= 104857600) { // 100MB
         return 128;
     }

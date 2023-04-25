@@ -124,6 +124,7 @@
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#3c401da02c6792cea0b6c758795da406377bf667",
     "idb-keyval": "^6.2.0",
     "lowlight": "^2.8.1",
+    "mp4box": "^0.5.2",
     "opus-recorder": "github:Ajaxy/opus-recorder",
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",

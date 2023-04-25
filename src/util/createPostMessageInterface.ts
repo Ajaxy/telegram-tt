@@ -3,6 +3,7 @@ import type {
 } from './PostMessageConnector';
 
 import { DEBUG } from '../config';
+import { createCallbackManager } from './callbacks';
 
 declare const self: WorkerGlobalScope;
 
@@ -12,6 +13,9 @@ type ApiConfig =
   ((name: string, ...args: any[]) => any | [any, ArrayBuffer[]])
   | Record<string, Function>;
 type SendToOrigin = (data: WorkerMessageData, transferables?: Transferable[]) => void;
+
+const messageHandlers = createCallbackManager();
+onmessage = messageHandlers.runCallbacks;
 
 export function createWorkerInterface(api: ApiConfig, channel?: string) {
   function sendToOrigin(data: WorkerMessageData, transferables?: Transferable[]) {
@@ -26,11 +30,11 @@ export function createWorkerInterface(api: ApiConfig, channel?: string) {
 
   handleErrors(sendToOrigin);
 
-  onmessage = (message: OriginMessageEvent) => {
+  messageHandlers.addCallback((message: OriginMessageEvent) => {
     if (message.data?.channel === channel) {
       onMessage(api, message.data, sendToOrigin);
     }
-  };
+  });
 }
 
 async function onMessage(
@@ -62,7 +66,10 @@ async function onMessage(
       const {
         messageId, name, args, withCallback,
       } = data;
+
       try {
+        if (typeof api !== 'function' && !api[name]) return;
+
         if (messageId && withCallback) {
           const callback = (...callbackArgs: any[]) => {
             const lastArg = callbackArgs[callbackArgs.length - 1];

@@ -165,10 +165,10 @@ function destroy(key: string, isRepeated = false) {
 }
 
 const api = {
-  init,
-  changeData,
-  renderFrames,
-  destroy,
+  'rlottie:init': init,
+  'rlottie:changeData': changeData,
+  'rlottie:renderFrames': renderFrames,
+  'rlottie:destroy': destroy,
 };
 
 createWorkerInterface(api);

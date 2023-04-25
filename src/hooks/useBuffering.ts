@@ -17,6 +17,7 @@ export type BufferedRange = { start: number; end: number };
 
 const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunction) => {
   const [isBuffered, setIsBuffered] = useState(!noInitiallyBuffered);
+  const [isReady, setIsReady] = useState(false);
   const [bufferedProgress, setBufferedProgress] = useState(0);
   const [bufferedRanges, setBufferedRanges] = useState<BufferedRange[]>([]);
 
@@ -42,6 +43,7 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
       }
 
       setIsBufferedDebounced(media.readyState >= MIN_READY_STATE || media.currentTime > 0);
+      setIsReady((current) => current || media.readyState > MIN_READY_STATE);
     }
   }, [onTimeUpdate, setIsBufferedDebounced]);
 
@@ -55,6 +57,7 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
   };
 
   return {
+    isReady,
     isBuffered,
     bufferedProgress,
     bufferedRanges,
