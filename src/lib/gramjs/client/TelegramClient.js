@@ -904,6 +904,10 @@ class TelegramClient {
                 } else if (e instanceof errors.MsgWaitError) {
                     // we need to resend this after the old one was confirmed.
                     await promise.isReady();
+                } else if (e.message === 'CONNECTION_NOT_INITED') {
+                    await this.disconnect();
+                    await sleep(2000);
+                    await this.connect();
                 } else {
                     throw e;
                 }
