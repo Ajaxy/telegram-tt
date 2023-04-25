@@ -213,4 +213,4 @@ export function createConnector<T extends InputRequestTypes>(
   return connector;
 }
 
-export type Connector<T extends InputRequestTypes> = ReturnType<typeof createConnector<T>>;
+export type Connector<T extends InputRequestTypes = InputRequestTypes> = ReturnType<typeof createConnector<T>>;

@@ -213,7 +213,7 @@ const MediaViewer: FC<StateProps> = ({
   useEffect(() => {
     if (isGhostAnimation && isOpen && (!prevMessage || shouldAnimateOpening) && !prevAvatarOwner) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
-      animateOpening(hasFooter, origin!, bestImageData!, dimensions, isVideo, message);
+      animateOpening(hasFooter, origin!, bestImageData!, dimensions!, isVideo, message);
     }
 
     if (isGhostAnimation && !isOpen && (prevMessage || prevAvatarOwner)) {

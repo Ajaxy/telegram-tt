@@ -140,11 +140,11 @@ async function downloadFile2(
     end = end && end < fileSize ? end : fileSize - 1;
 
     if (!partSizeKb) {
-        partSizeKb = fileSize ? getDownloadPartSize(fileSize) : DEFAULT_CHUNK_SIZE;
+        partSizeKb = fileSize ? getDownloadPartSize(start ? (end - start + 1) : fileSize) : DEFAULT_CHUNK_SIZE;
     }
 
     const partSize = partSizeKb * 1024;
-    const partsCount = end ? Math.ceil((end - start) / partSize) : 1;
+    const partsCount = end ? Math.ceil((end + 1 - start + 1) / partSize) : 1;
     const noParallel = !end;
     const shouldUseMultipleConnections = fileSize
         && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE
@@ -183,6 +183,10 @@ async function downloadFile2(
 
         if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
             limit = ONE_MB - (offset % ONE_MB);
+            isPrecise = true;
+        }
+
+        if (offset % MIN_CHUNK_SIZE !== 0 || limit % MIN_CHUNK_SIZE !== 0) {
             isPrecise = true;
         }
 

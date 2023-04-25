@@ -1,5 +1,5 @@
 import type {
-  ApiMessage, ApiChat, ApiUser, ApiDimensions,
+  ApiMessage, ApiChat, ApiUser,
 } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import {
@@ -18,7 +18,8 @@ import {
   getMessageDocument,
   getPhotoFullDimensions,
   getVideoDimensions,
-  getMessageFileSize, getMessageActionPhoto,
+  getMessageFileSize,
+  getMessageActionPhoto,
 } from '../../../global/helpers';
 import { useMemo } from '../../../lib/teact/teact';
 import useMedia from '../../../hooks/useMedia';
@@ -121,25 +122,36 @@ export const useMediaProps = ({
   const bestData = localBlobUrl || fullMediaBlobUrl || (
     !isVideo ? previewBlobUrl || pictogramBlobUrl || bestImageData : undefined
   );
-
+  const isLocal = Boolean(localBlobUrl);
   const fileName = message
     ? getMessageFileName(message)
     : avatarOwner
       ? `avatar${avatarOwner!.id}.${avatarOwner?.hasVideoAvatar ? 'mp4' : 'jpg'}`
       : undefined;
 
-  let dimensions!: ApiDimensions;
-  if (message) {
-    if (isDocumentPhoto || isDocumentVideo) {
-      dimensions = getMessageDocument(message)!.mediaSize!;
-    } else if (photo || webPagePhoto || actionPhoto) {
-      dimensions = getPhotoFullDimensions((photo || webPagePhoto || actionPhoto)!)!;
-    } else if (video || webPageVideo) {
-      dimensions = getVideoDimensions((video || webPageVideo)!)!;
+  const dimensions = useMemo(() => {
+    if (message) {
+      if (isDocumentPhoto || isDocumentVideo) {
+        return getMessageDocument(message)!.mediaSize!;
+      } else if (photo || webPagePhoto) {
+        return getPhotoFullDimensions((photo || webPagePhoto)!)!;
+      } else if (video || webPageVideo) {
+        return getVideoDimensions((video || webPageVideo)!)!;
+      }
+    } else {
+      return isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
     }
-  } else {
-    dimensions = isVideoAvatar ? VIDEO_AVATAR_FULL_DIMENSIONS : AVATAR_FULL_DIMENSIONS;
-  }
+    return undefined;
+  }, [
+    isDocumentPhoto,
+    isDocumentVideo,
+    isVideoAvatar,
+    message,
+    photo,
+    video,
+    webPagePhoto,
+    webPageVideo,
+  ]);
 
   return {
     getMediaHash,
@@ -160,6 +172,7 @@ export const useMediaProps = ({
     isFromSharedMedia,
     avatarPhoto: avatarMedia,
     isVideoAvatar,
+    isLocal,
     loadProgress,
     videoSize,
   };

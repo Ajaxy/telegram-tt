@@ -59,7 +59,9 @@ export async function respondForDownload(e: FetchEvent) {
 
   const queue = new FilePartQueue<ArrayBuffer | undefined>();
   const enqueue = (offset: number) => {
-    queue.push(requestPart(e, { url, start: offset, end: offset + DOWNLOAD_PART_SIZE - 1 })
+    queue.push(requestPart(e, {
+      url, start: offset, end: offset + DOWNLOAD_PART_SIZE - 1,
+    })
       .then((part) => part?.arrayBuffer));
     return offset + DOWNLOAD_PART_SIZE;
   };
