@@ -7,7 +7,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { ApiMessageEntityTypes } from '../../api/types';
 import trimText from '../../util/trimText';
-import { getMessageText, stripCustomEmoji } from '../../global/helpers';
+import { extractMessageText, getMessageText, stripCustomEmoji } from '../../global/helpers';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
@@ -24,6 +24,7 @@ interface OwnProps {
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   shouldRenderAsHtml?: boolean;
+  inChatList?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -41,6 +42,7 @@ function MessageText({
   observeIntersectionForPlaying,
   withTranslucentThumbs,
   shouldRenderAsHtml,
+  inChatList,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -49,10 +51,8 @@ function MessageText({
 
   const textCacheBusterRef = useRef(0);
 
-  const formattedText = translatedText || message.content.text || undefined;
-
+  const formattedText = translatedText || extractMessageText(message, inChatList);
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
-
   const { text, entities } = adaptedFormattedText || {};
 
   useSyncEffect(() => {
