@@ -4,7 +4,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiPhoto, ApiPremiumGiftOption, ApiUser } from '../../../api/types';
+import type { ApiPremiumGiftOption, ApiUser } from '../../../api/types';
 import type { AnimationLevel } from '../../../types';
 
 import { formatCurrency } from '../../../util/formatCurrency';
@@ -14,7 +14,6 @@ import {
   selectTabState,
   selectUser,
   selectUserFullInfo,
-  selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -34,7 +33,6 @@ export type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
-  userProfilePhoto?: ApiPhoto;
   gifts?: ApiPremiumGiftOption[];
   monthlyCurrency?: string;
   monthlyAmount?: number;
@@ -44,7 +42,6 @@ type StateProps = {
 const GiftPremiumModal: FC<OwnProps & StateProps> = ({
   isOpen,
   user,
-  userProfilePhoto,
   gifts,
   monthlyCurrency,
   monthlyAmount,
@@ -54,7 +51,6 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const renderedUser = useCurrentOrPrev(user, true);
-  const renderedUserProfilePhoto = useCurrentOrPrev(userProfilePhoto, true);
   const renderedGifts = useCurrentOrPrev(gifts, true);
   const [selectedOption, setSelectedOption] = useState<number | undefined>();
   const firstGift = renderedGifts?.[0];
@@ -133,7 +129,6 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
         </Button>
         <Avatar
           user={renderedUser}
-          userProfilePhoto={renderedUserProfilePhoto}
           size="jumbo"
           className={styles.avatar}
           animationLevel={animationLevel}
@@ -177,12 +172,10 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const { forUserId, monthlyCurrency, monthlyAmount } = selectTabState(global).giftPremiumModal || {};
   const user = forUserId ? selectUser(global, forUserId) : undefined;
-  const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
   const gifts = user ? selectUserFullInfo(global, user.id)?.premiumGifts : undefined;
 
   return {
     user,
-    userProfilePhoto,
     gifts,
     monthlyCurrency,
     monthlyAmount: monthlyAmount ? Number(monthlyAmount) : undefined,

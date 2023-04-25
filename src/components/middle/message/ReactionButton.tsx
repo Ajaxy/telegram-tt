@@ -11,7 +11,6 @@ import type { ActiveReaction } from '../../../global/types';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { isSameReaction, isReactionChosen } from '../../../global/helpers';
-import { selectUserPhotoFromFullInfo } from '../../../global/selectors';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -81,7 +80,6 @@ const ReactionButton: FC<{
             <Avatar
               key={user.id}
               user={user}
-              userProfilePhoto={selectUserPhotoFromFullInfo(getGlobal(), user.id)}
               size="micro"
             />
           ))}

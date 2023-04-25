@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type {
   ApiUser, ApiMessage, ApiChat, ApiSticker, ApiTopic,
@@ -53,6 +53,7 @@ type OwnProps = {
 };
 
 type StateProps = {
+  usersById: Record<string, ApiUser>;
   senderUser?: ApiUser;
   senderChat?: ApiChat;
   targetUserIds?: string[];
@@ -73,6 +74,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   appearanceOrder = 0,
   isJustAdded,
   isLastInList,
+  usersById,
   senderUser,
   senderChat,
   targetUserIds,
@@ -138,8 +140,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   const { transitionClassNames } = useShowTransition(isShown, undefined, noAppearanceAnimation, false);
 
-  // No need for expensive global updates on users and chats, so we avoid them
-  const usersById = getGlobal().users.byId;
   const targetUsers = useMemo(() => {
     return targetUserIds
       ? targetUserIds.map((userId) => usersById?.[userId]).filter(Boolean)
@@ -256,6 +256,7 @@ export default memo(withGlobal<OwnProps>(
       chatId, senderId, replyToMessageId, content,
     } = message;
 
+    const { byId: usersById } = global.users;
     const userId = senderId;
     const { targetUserIds, targetChatId } = content.action || {};
     const targetMessageId = replyToMessageId;
@@ -277,6 +278,7 @@ export default memo(withGlobal<OwnProps>(
     const topic = selectTopicFromMessage(global, message);
 
     return {
+      usersById,
       senderUser,
       senderChat,
       targetChatId,

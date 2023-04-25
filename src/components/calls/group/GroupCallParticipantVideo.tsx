@@ -4,11 +4,11 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiUser } from '../../../api/types';
 
 import { GROUP_CALL_THUMB_VIDEO_DISABLED } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectUser, selectUserPhotoFromFullInfo } from '../../../global/selectors';
+import { selectChat, selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -25,7 +25,6 @@ type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   chat?: ApiChat;
-  userProfilePhoto?: ApiPhoto;
   currentUserId?: string;
   isActive?: boolean;
 };
@@ -35,7 +34,6 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   onClick,
   user,
   chat,
-  userProfilePhoto,
   isActive,
   isFullscreen,
 }) => {
@@ -62,7 +60,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
           {lang('Back')}
         </button>
       )}
-      <Avatar user={user} chat={chat} userProfilePhoto={userProfilePhoto} className="thumbnail-avatar" />
+      <Avatar user={user} chat={chat} className="thumbnail-avatar" />
       {!GROUP_CALL_THUMB_VIDEO_DISABLED && (
         <div className="thumbnail-wrapper">
           <video className="thumbnail" muted autoPlay playsInline srcObject={streams?.[type]} />
@@ -84,7 +82,6 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       user: participant.isUser ? selectUser(global, participant.id) : undefined,
       chat: !participant.isUser ? selectChat(global, participant.id) : undefined,
-      userProfilePhoto: participant.isUser ? selectUserPhotoFromFullInfo(global, participant.id) : undefined,
       isActive: (participant.amplitude || 0) > THRESHOLD,
     };
   },

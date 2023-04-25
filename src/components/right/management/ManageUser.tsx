@@ -16,7 +16,6 @@ import {
   selectTabState,
   selectUser,
   selectUserFullInfo,
-  selectUserPhotoFromFullInfo,
 } from '../../../global/selectors';
 import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
 import useFlag from '../../../hooks/useFlag';
@@ -43,7 +42,6 @@ type OwnProps = {
 
 type StateProps = {
   user?: ApiUser;
-  userProfilePhoto?: ApiPhoto;
   progress?: ManagementProgress;
   isMuted?: boolean;
   personalPhoto?: ApiPhoto;
@@ -55,7 +53,6 @@ const ERROR_FIRST_NAME_MISSING = 'Please provide first name';
 const ManageUser: FC<OwnProps & StateProps> = ({
   userId,
   user,
-  userProfilePhoto,
   progress,
   isMuted,
   onClose,
@@ -233,7 +230,6 @@ const ManageUser: FC<OwnProps & StateProps> = ({
                     photo={notPersonalPhoto}
                     noPersonalPhoto
                     user={user}
-                    userProfilePhoto={userProfilePhoto}
                     size="mini"
                     className="personal-photo"
                   />
@@ -298,10 +294,9 @@ export default memo(withGlobal<OwnProps>(
     const isMuted = chat && selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
     const personalPhoto = userFullInfo?.personalPhoto;
     const notPersonalPhoto = userFullInfo?.profilePhoto || userFullInfo?.fallbackPhoto;
-    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
 
     return {
-      user, progress, isMuted, personalPhoto, notPersonalPhoto, userProfilePhoto,
+      user, progress, isMuted, personalPhoto, notPersonalPhoto,
     };
   },
 )(ManageUser));

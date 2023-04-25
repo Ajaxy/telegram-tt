@@ -5,7 +5,6 @@ import type {
   ApiChatAdminRights,
   ApiChatFolder,
   ApiTopic,
-  ApiPhoto,
 } from '../../api/types';
 import {
   MAIN_THREAD_ID,
@@ -21,7 +20,6 @@ import { orderBy } from '../../util/iteratees';
 import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
-import { getVideoAvatarMediaHash } from './media';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
@@ -109,16 +107,10 @@ export function getTopicLink(chatId: string, chatUsername?: string, topicId?: nu
 export function getChatAvatarHash(
   owner: ApiChat | ApiUser,
   size: 'normal' | 'big' = 'normal',
-  type: 'photo' | 'video' = 'photo',
   avatarHash = owner.avatarHash,
-  profilePhoto?: ApiPhoto,
 ) {
   if (!avatarHash) {
     return undefined;
-  }
-
-  if (type === 'video') {
-    return profilePhoto?.isVideo ? getVideoAvatarMediaHash(profilePhoto) : undefined;
   }
 
   switch (size) {

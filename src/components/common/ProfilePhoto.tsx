@@ -59,7 +59,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   const canHaveMedia = userOrChat && !isSavedMessages && !isDeleted && !isRepliesChat;
   const { isVideo } = photo || {};
 
-  const avatarHash = canHaveMedia && getChatAvatarHash(userOrChat, 'normal', 'photo');
+  const avatarHash = canHaveMedia && getChatAvatarHash(userOrChat, 'normal');
   const avatarBlobUrl = useMedia(avatarHash, undefined, undefined, lastSyncTime);
 
   const photoHash = canHaveMedia && photo && !isVideo && `photo${photo.id}?size=c`;

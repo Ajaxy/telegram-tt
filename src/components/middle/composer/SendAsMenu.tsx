@@ -16,7 +16,6 @@ import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
-import UserAvatar from '../../common/UserAvatar';
 import Menu from '../../ui/Menu';
 import FullNameTitle from '../../common/FullNameTitle';
 
@@ -127,19 +126,12 @@ const SendAsMenu: FC<OwnProps> = ({
             rightElement={!isCurrentUserPremium && isPremium
               && <i className="icon icon-lock-badge send-as-icon-locked" />}
           >
-            {user ? (
-              <UserAvatar
-                user={user}
-                size="small"
-                className={avatarClassName}
-              />
-            ) : (
-              <Avatar
-                size="small"
-                chat={chat}
-                className={avatarClassName}
-              />
-            )}
+            <Avatar
+              size="small"
+              chat={chat}
+              user={user}
+              className={avatarClassName}
+            />
             <div className="info">
               {userOrChat && <FullNameTitle peer={userOrChat} noFake />}
               <span className="subtitle">{user

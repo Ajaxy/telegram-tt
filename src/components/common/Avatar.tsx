@@ -1,8 +1,7 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useCallback, useMemo, useRef,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type {
@@ -49,7 +48,6 @@ type OwnProps = {
   chat?: ApiChat;
   user?: ApiUser;
   photo?: ApiPhoto;
-  userProfilePhoto?: ApiPhoto;
   userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
@@ -70,7 +68,6 @@ const Avatar: FC<OwnProps> = ({
   chat,
   user,
   photo,
-  userProfilePhoto,
   userStatus,
   text,
   isSavedMessages,
@@ -84,7 +81,6 @@ const Avatar: FC<OwnProps> = ({
   observeIntersection,
   onClick,
 }) => {
-  const { loadFullUser } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
@@ -98,9 +94,8 @@ const Avatar: FC<OwnProps> = ({
     withVideo && !VIDEO_AVATARS_DISABLED && animationLevel === ANIMATION_LEVEL_MAX
     && user?.isPremium && user?.hasVideoAvatar
   );
-  const hasProfileVideo = userProfilePhoto?.isVideo;
   const isIntersectingForVideo = useIsIntersecting(
-    ref, canShowVideo && hasProfileVideo ? observeIntersection : undefined,
+    ref, canShowVideo ? observeIntersection : undefined,
   );
   const shouldLoadVideo = isIntersectingForVideo && (canShowVideo || (forceVideo && photo?.isVideo));
 
@@ -115,10 +110,6 @@ const Avatar: FC<OwnProps> = ({
       if (photo.isVideo && withVideo) {
         videoHash = `videoAvatar${photo.id}?size=u`;
       }
-    }
-
-    if (hasProfileVideo) {
-      videoHash = getChatAvatarHash(user!, undefined, 'video', undefined, userProfilePhoto);
     }
   }
 
@@ -147,13 +138,6 @@ const Avatar: FC<OwnProps> = ({
       video.style.display = 'none';
     }
   }, [loopIndefinitely, noLoop, videoBlobUrl]);
-
-  const userId = user?.id;
-  useEffect(() => {
-    if (userId && canShowVideo && !userProfilePhoto) {
-      loadFullUser({ userId });
-    }
-  }, [loadFullUser, userProfilePhoto, userId, canShowVideo]);
 
   const lang = useLang();
 

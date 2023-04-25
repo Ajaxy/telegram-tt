@@ -4,13 +4,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type {
-  ApiCountryCode, ApiPhoto, ApiUser, ApiUserStatus,
-} from '../../api/types';
+import type { ApiCountryCode, ApiUser, ApiUserStatus } from '../../api/types';
 
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getUserStatus } from '../../global/helpers';
-import { selectUser, selectUserPhotoFromFullInfo, selectUserStatus } from '../../global/selectors';
+import { selectUser, selectUserStatus } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import useLang from '../../hooks/useLang';
@@ -36,7 +34,6 @@ export type OwnProps = {
 type StateProps = {
   user?: ApiUser;
   userStatus?: ApiUserStatus;
-  userProfilePhoto?: ApiPhoto;
   phoneCodeList: ApiCountryCode[];
 };
 
@@ -46,14 +43,12 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
   isByPhoneNumber,
   user,
   userStatus,
-  userProfilePhoto,
   phoneCodeList,
 }) => {
   const { updateContact, importContact, closeNewContactDialog } = getActions();
 
   const lang = useLang();
   const renderingUser = useCurrentOrPrev(user);
-  const renderingUserProfilePhoto = useCurrentOrPrev(userProfilePhoto);
   const renderingIsByPhoneNumber = useCurrentOrPrev(isByPhoneNumber);
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +123,6 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
           <Avatar
             size="jumbo"
             user={renderingUser}
-            userProfilePhoto={renderingUserProfilePhoto}
             text={`${firstName} ${lastName}`}
           />
           <div className="NewContactModal__profile-info">
@@ -241,7 +235,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       user,
       userStatus: userId ? selectUserStatus(global, userId) : undefined,
-      userProfilePhoto: user ? selectUserPhotoFromFullInfo(global, user.id) : undefined,
       phoneCodeList: global.countryList.phoneCodes,
     };
   },

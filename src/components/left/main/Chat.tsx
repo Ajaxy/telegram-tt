@@ -8,7 +8,6 @@ import type {
   ApiFormattedText,
   ApiMessage,
   ApiMessageOutgoingStatus,
-  ApiPhoto,
   ApiTopic,
   ApiTypingStatus,
   ApiUser,
@@ -37,7 +36,6 @@ import {
   selectThreadParam,
   selectTopicFromMessage,
   selectUser,
-  selectUserPhotoFromFullInfo,
   selectUserStatus,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
@@ -78,7 +76,6 @@ type StateProps = {
   isMuted?: boolean;
   user?: ApiUser;
   userStatus?: ApiUserStatus;
-  userProfilePhoto?: ApiPhoto;
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
@@ -106,7 +103,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   isMuted,
   user,
   userStatus,
-  userProfilePhoto,
   actionTargetUserIds,
   lastMessageSender,
   lastMessageOutgoingStatus,
@@ -240,7 +236,6 @@ const Chat: FC<OwnProps & StateProps> = ({
         <Avatar
           chat={chat}
           user={user}
-          userProfilePhoto={userProfilePhoto}
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
           lastSyncTime={lastSyncTime}
@@ -330,7 +325,6 @@ export default memo(withGlobal<OwnProps>(
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
-    const userProfilePhoto = user ? selectUserPhotoFromFullInfo(global, user.id) : undefined;
     const lastMessageTopic = chat.lastMessage && selectTopicFromMessage(global, chat.lastMessage);
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
@@ -354,7 +348,6 @@ export default memo(withGlobal<OwnProps>(
       }),
       user,
       userStatus,
-      userProfilePhoto,
       lastMessageTopic,
       typingStatus,
     };
