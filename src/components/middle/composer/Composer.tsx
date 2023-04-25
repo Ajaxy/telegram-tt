@@ -496,6 +496,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     botId: inlineBotId,
     isGallery: isInlineBotTooltipGallery,
     switchPm: inlineBotSwitchPm,
+    switchWebview: inlineBotSwitchWebview,
     results: inlineBotResults,
     closeTooltip: closeInlineBotTooltip,
     help: inlineBotHelp,
@@ -1322,6 +1323,7 @@ const Composer: FC<OwnProps & StateProps> = ({
           isGallery={isInlineBotTooltipGallery}
           inlineBotResults={inlineBotResults}
           switchPm={inlineBotSwitchPm}
+          switchWebview={inlineBotSwitchWebview}
           loadMore={loadMoreForInlineBot}
           isSavedMessages={isChatWithSelf}
           canSendGifs={canSendGifs}

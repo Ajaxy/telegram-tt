@@ -1145,6 +1145,15 @@ function buildReplyButtons(message: UniversalMessage, shouldSkipBuyButton?: bool
           }]],
         };
       }
+      if (media.webpage.type === 'telegram_botapp') {
+        return {
+          inlineButtons: [[{
+            type: 'url',
+            text: 'Open App',
+            url: media.webpage.url,
+          }]],
+        };
+      }
     }
 
     return undefined;

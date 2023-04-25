@@ -1,6 +1,7 @@
 import type { TeactNode } from '../lib/teact/teact';
 import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
+  ApiBotInlineSwitchWebview,
   ApiChatInviteImporter,
   ApiExportedInvite,
   ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet,
@@ -396,5 +397,6 @@ export type InlineBotSettings = {
   results?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
   isGallery?: boolean;
   switchPm?: ApiBotInlineSwitchPm;
+  switchWebview?: ApiBotInlineSwitchWebview;
   cacheTime: number;
 };

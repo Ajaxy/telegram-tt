@@ -24,6 +24,7 @@ import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import PopupManager from '../../../util/PopupManager';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { translate } from '../../../util/langProvider';
 
 const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
@@ -290,18 +291,29 @@ addActionHandler('queryInlineBot', async (global, actions, payload): Promise<voi
 
 addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType => {
   const {
-    query, isSamePeer, messageId, tabId = getCurrentTabId(),
+    query, isSamePeer, messageId, filter, tabId = getCurrentTabId(),
+  } = payload;
+  let {
+    botId,
   } = payload;
   const chat = selectCurrentChat(global, tabId);
   if (!chat) {
     return undefined;
   }
-  const message = selectChatMessage(global, chat.id, messageId);
-  if (!message) {
+
+  if (!botId && messageId) {
+    const message = selectChatMessage(global, chat.id, messageId);
+    if (!message) {
+      return undefined;
+    }
+    botId = message.viaBotId || message.senderId;
+  }
+
+  if (!botId) {
     return undefined;
   }
 
-  const botSender = selectUser(global, message.viaBotId || message.senderId!);
+  const botSender = selectUser(global, botId);
   if (!botSender) {
     return undefined;
   }
@@ -309,6 +321,7 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
   actions.openChatWithDraft({
     text: `@${botSender.usernames![0].username} ${query}`,
     chatId: isSamePeer ? chat.id : undefined,
+    filter,
     tabId,
   });
   return undefined;
@@ -513,6 +526,65 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   setGlobal(global);
 });
 
+addActionHandler('requestAppWebView', async (global, actions, payload): Promise<void> => {
+  const {
+    botId, appName, startApp, theme, isWriteAllowed,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  const bot = selectUser(global, botId);
+  if (!bot) return;
+
+  const botApp = await callApi('fetchBotApp', {
+    bot,
+    appName,
+  });
+  global = getGlobal();
+
+  if (!botApp) {
+    actions.showNotification({ message: translate('lng_username_app_not_found'), tabId });
+    return;
+  }
+
+  if (botApp.isInactive && !selectIsTrustedBot(global, botId)) {
+    global = updateTabState(global, {
+      botTrustRequest: {
+        botId,
+        shouldRequestWriteAccess: botApp.shouldRequestWriteAccess,
+        type: 'botApp',
+        onConfirm: {
+          action: 'requestAppWebView',
+          payload,
+        },
+      },
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  const peer = selectCurrentChat(global, tabId);
+
+  const url = await callApi('requestAppWebView', {
+    peer: peer || bot,
+    app: botApp,
+    startParam: startApp,
+    isWriteAllowed,
+    theme,
+  });
+  global = getGlobal();
+
+  if (!url) return;
+
+  global = updateTabState(global, {
+    webApp: {
+      url,
+      botId,
+      buttonText: '',
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
 addActionHandler('prolongWebView', async (global, actions, payload): Promise<void> => {
   const {
     botId, peerId, isSilent, replyToMessageId, queryId, threadId,
@@ -582,7 +654,7 @@ addActionHandler('cancelBotTrustRequest', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType => {
-  const { botId, tabId = getCurrentTabId() } = payload;
+  const { botId, isWriteAllowed, tabId = getCurrentTabId() } = payload;
   const { trustedBotIds } = global;
 
   const newTrustedBotIds = new Set(trustedBotIds);
@@ -597,7 +669,10 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
   if (tabState.botTrustRequest?.onConfirm) {
     const { action, payload: callbackPayload } = tabState.botTrustRequest.onConfirm;
     // @ts-ignore
-    actions[action](callbackPayload);
+    actions[action]({
+      ...(callbackPayload as {}),
+      isWriteAllowed,
+    });
   }
 
   global = updateTabState(global, {
@@ -921,6 +996,7 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
     cacheTime: Date.now() + result.cacheTime * 1000,
     ...(newResults.length && { isGallery: result.isGallery }),
     ...(result.switchPm && { switchPm: result.switchPm }),
+    ...(result.switchWebview && { switchWebview: result.switchWebview }),
     canLoadMore: result.results.length > 0 && Boolean(result.nextOffset),
     results: newInlineBotData.offset === '' || newInlineBotData.offset === result.nextOffset
       ? result.results

@@ -77,6 +77,7 @@ import * as langProvider from '../../../util/langProvider';
 import { selectCurrentLimit } from '../../selectors/limits';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;
@@ -1005,6 +1006,8 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       startParam: params.start,
       startAttach,
       attach: params.attach,
+      startApp: params.startapp,
+      originalParts: [part1, part2, part3],
       tabId,
     });
   }
@@ -1022,11 +1025,13 @@ addActionHandler('acceptInviteConfirmation', async (global, actions, payload): P
 
 addActionHandler('openChatByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, messageId, commentId, startParam, startAttach, attach, threadId,
+    username, messageId, commentId, startParam, startAttach, attach, threadId, originalParts, startApp,
     tabId = getCurrentTabId(),
   } = payload!;
 
   const chat = selectCurrentChat(global, tabId);
+  const webAppName = originalParts?.[1];
+  const isWebApp = webAppName && !Number(webAppName);
 
   if (!commentId) {
     if (!startAttach && messageId && !startParam && chat?.usernames?.some((c) => c.username === username)) {
@@ -1035,13 +1040,15 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       });
       return;
     }
-    await openChatByUsername(global, actions, username, threadId, messageId, startParam, startAttach, attach, tabId);
-    return;
+    if (!isWebApp) {
+      await openChatByUsername(global, actions, username, threadId, messageId, startParam, startAttach, attach, tabId);
+      return;
+    }
   }
 
   const { chatId, type } = selectCurrentMessageList(global, tabId) || {};
   const usernameChat = selectChatByUsername(global, username);
-  if (chatId && messageId && usernameChat && type === 'thread') {
+  if (chatId && commentId && messageId && usernameChat && type === 'thread') {
     const threadInfo = selectThreadInfo(global, chatId, messageId);
 
     if (threadInfo && threadInfo.chatId === chatId) {
@@ -1055,15 +1062,28 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     }
   }
 
-  if (!messageId) return;
-
-  actions.openChat({ id: TMP_CHAT_ID, tabId });
+  if (!isWebApp) actions.openChat({ id: TMP_CHAT_ID, tabId });
 
   const chatByUsername = await fetchChatByUsername(global, username);
 
   if (!chatByUsername) return;
 
   global = getGlobal();
+
+  if (isWebApp && chatByUsername) {
+    const theme = extractCurrentThemeParams();
+
+    actions.requestAppWebView({
+      appName: webAppName,
+      botId: chatByUsername.id,
+      tabId,
+      startApp,
+      theme,
+    });
+    return;
+  }
+
+  if (!messageId) return;
 
   const threadInfo = selectThreadInfo(global, chatByUsername.id, messageId);
   let discussionChatId: string | undefined;

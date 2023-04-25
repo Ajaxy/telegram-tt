@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../lib/teact/teactn';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import useWindowSize from '../../../hooks/useWindowSize';
 
@@ -82,6 +83,12 @@ export type WebAppInboundEvent = {
   eventType: 'web_app_read_text_from_clipboard';
   eventData: {
     req_id: string;
+  };
+} | {
+  eventType: 'web_app_switch_inline_query';
+  eventData: {
+    query: string;
+    chat_types: ('users' | 'bots' | 'groups' | 'channels')[];
   };
 } | {
   eventType: 'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
@@ -171,6 +178,10 @@ const useWebAppFrame = (
   onEvent: (event: WebAppInboundEvent) => void,
   onLoad?: () => void,
 ) => {
+  const {
+    showNotification,
+  } = getActions();
+
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
@@ -266,23 +277,24 @@ const useWebAppFrame = (
       }
 
       if (data.eventType === 'web_app_read_text_from_clipboard') {
-        const { req_id: requestId } = data.eventData;
-        // eslint-disable-next-line no-null/no-null -- Required by spec
-        window.navigator.clipboard.readText().catch(() => null).then((text) => {
-          sendEvent({
-            eventType: 'clipboard_text_received',
-            eventData: {
-              req_id: requestId,
-              data: text,
-            },
-          });
+        sendEvent({
+          eventType: 'clipboard_text_received',
+          eventData: {
+            req_id: data.eventData.req_id,
+            // eslint-disable-next-line no-null/no-null
+            data: null,
+          },
+        });
+
+        showNotification({
+          message: 'Clipboard access is not supported in this client yet',
         });
       }
       onEvent(data);
     } catch (err) {
       // Ignore other messages
     }
-  }, [isSimpleView, onEvent, sendCustomStyle, sendEvent, sendTheme, sendViewport, onLoad, windowSize.isResizing]);
+  }, [isSimpleView, sendEvent, onEvent, sendCustomStyle, sendTheme, sendViewport, onLoad, windowSize.isResizing]);
 
   useEffect(() => {
     const { width, height, isResizing } = windowSize;

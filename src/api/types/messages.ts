@@ -637,6 +637,18 @@ export type ApiThemeParameters = {
   secondary_bg_color: string;
 };
 
+export type ApiBotApp = {
+  id: string;
+  accessHash: string;
+  title: string;
+  shortName: string;
+  description: string;
+  photo?: ApiPhoto;
+  document?: ApiDocument;
+  isInactive?: boolean;
+  shouldRequestWriteAccess?: boolean;
+};
+
 export const MAIN_THREAD_ID = -1;
 
 // `Symbol` can not be transferred from worker

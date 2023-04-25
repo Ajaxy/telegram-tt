@@ -23,6 +23,7 @@ import type {
   ApiChatReactions,
   ApiReaction,
   ApiFormattedText,
+  ApiBotApp,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -604,5 +605,12 @@ export function buildInputTextWithEntities(formatted: ApiFormattedText) {
   return new GramJs.TextWithEntities({
     text: formatted.text,
     entities: formatted.entities?.map(buildMtpMessageEntity) || [],
+  });
+}
+
+export function buildInputBotApp(app: ApiBotApp) {
+  return new GramJs.InputBotAppID({
+    id: BigInt(app.id),
+    accessHash: BigInt(app.accessHash),
   });
 }

@@ -15,6 +15,7 @@ import {
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { extractCurrentThemeParams, validateHexColor } from '../../util/themeStyle';
+import { convertToApiChatType } from '../../global/helpers';
 
 import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
@@ -94,18 +95,25 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     openInvoice,
     setWebAppPaymentSlug,
     showNotification,
+    switchBotInline,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
-  const [backgroundColor, setBackgroundColor] = useState(extractCurrentThemeParams().bg_color);
-  const [headerColor, setHeaderColor] = useState(extractCurrentThemeParams().bg_color);
+  const [backgroundColor, setBackgroundColor] = useState<string>();
+  const [headerColor, setHeaderColor] = useState<string>();
   const [confirmClose, setConfirmClose] = useState(false);
-  const [isCloseModalOpen, openCloseModal, closeCloseModal] = useFlag(false);
+  const [isCloseModalOpen, openCloseModal, closeModal] = useFlag(false);
   const [isLoaded, markLoaded, markUnloaded] = useFlag(false);
   const [popupParams, setPopupParams] = useState<PopupOptions | undefined>();
   const { isMobile } = useAppLayout();
   const prevPopupParams = usePrevious(popupParams);
   const renderingPopupParams = popupParams || prevPopupParams;
+
+  useEffect(() => {
+    const themeParams = extractCurrentThemeParams();
+    setBackgroundColor(themeParams.bg_color);
+    setHeaderColor(themeParams.bg_color);
+  }, []);
 
   // eslint-disable-next-line no-null/no-null
   const frameRef = useRef<HTMLIFrameElement>(null);
@@ -115,7 +123,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     url, buttonText, queryId, replyToMessageId, threadId,
   } = webApp || {};
   const isOpen = Boolean(url);
-  const isSimple = !queryId;
+  const isSimple = Boolean(buttonText);
 
   const handleEvent = useCallback((event: WebAppInboundEvent) => {
     const { eventType, eventData } = event;
@@ -197,6 +205,20 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       showNotification({
         message: 'Scan QR code is not supported in this client yet',
       });
+    }
+
+    if (eventType === 'web_app_switch_inline_query') {
+      const filter = eventData.chat_types?.map(convertToApiChatType).filter(Boolean);
+      const isSamePeer = !filter?.length;
+
+      switchBotInline({
+        botId: bot!.id,
+        query: eventData.query,
+        filter,
+        isSamePeer,
+      });
+
+      closeWebApp();
     }
   }, [
     bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug,
@@ -314,11 +336,11 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!isOpen) {
       setConfirmClose(false);
-      closeCloseModal();
+      closeModal();
       setPopupParams(undefined);
       markUnloaded();
     }
-  }, [closeCloseModal, isOpen, markUnloaded]);
+  }, [closeModal, isOpen, markUnloaded]);
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -460,7 +482,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       {confirmClose && (
         <ConfirmDialog
           isOpen={isCloseModalOpen}
-          onClose={closeCloseModal}
+          onClose={closeModal}
           title={lang('lng_bot_close_warning_title')}
           text={lang('lng_bot_close_warning')}
           confirmHandler={closeWebApp}

@@ -60,6 +60,7 @@ export default function useInlineBotTooltip(
   const {
     id: botId,
     switchPm,
+    switchWebview,
     offset,
     results,
     isGallery,
@@ -87,6 +88,7 @@ export default function useInlineBotTooltip(
     botId,
     isGallery,
     switchPm,
+    switchWebview,
     results,
     closeTooltip: markManuallyClosed,
     help: canShowHelp && help ? `@${username} ${help}` : undefined,

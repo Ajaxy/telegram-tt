@@ -511,7 +511,11 @@ const Main: FC<OwnProps & StateProps> = ({
       <PhoneCall isActive={isPhoneCallActive} />
       <UnreadCount isForAppBadge />
       <RatePhoneCallModal isOpen={isRatePhoneCallModalOpen} />
-      <BotTrustModal bot={botTrustRequestBot} type={botTrustRequest?.type} />
+      <BotTrustModal
+        bot={botTrustRequestBot}
+        type={botTrustRequest?.type}
+        shouldRequestWriteAccess={botTrustRequest?.shouldRequestWriteAccess}
+      />
       <AttachBotInstallModal bot={attachBotToInstall} />
       <AttachBotRecipientPicker requestedAttachBotInChat={requestedAttachBotInChat} />
       <MessageListHistoryHandler />

@@ -1,17 +1,21 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm } from '../../../api/types';
+import type { FC } from '../../../lib/teact/teact';
+import type {
+  ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm, ApiBotInlineSwitchWebview,
+} from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import buildClassName from '../../../util/buildClassName';
-import useShowTransition from '../../../hooks/useShowTransition';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { throttle } from '../../../util/schedulers';
+
+import useShowTransition from '../../../hooks/useShowTransition';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import usePrevious from '../../../hooks/usePrevious';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -35,6 +39,7 @@ export type OwnProps = {
   isGallery?: boolean;
   inlineBotResults?: (ApiBotInlineResult | ApiBotInlineMediaResult)[];
   switchPm?: ApiBotInlineSwitchPm;
+  switchWebview?: ApiBotInlineSwitchWebview;
   isSavedMessages?: boolean;
   canSendGifs?: boolean;
   onSelectResult: (
@@ -51,6 +56,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
   isGallery,
   inlineBotResults,
   switchPm,
+  switchWebview,
   isSavedMessages,
   canSendGifs,
   loadMore,
@@ -61,6 +67,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
   const {
     openChat,
     startBot,
+    requestSimpleWebView,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -99,6 +106,17 @@ const InlineBotTooltip: FC<OwnProps> = ({
     startBot({ botId: botId!, param: switchPm!.startParam });
   }, [botId, openChat, startBot, switchPm]);
 
+  const handleOpenWebview = useCallback(() => {
+    const theme = extractCurrentThemeParams();
+
+    requestSimpleWebView({
+      botId: botId!,
+      url: switchWebview!.url,
+      buttonText: switchWebview!.text,
+      theme,
+    });
+  }, [botId, switchWebview]);
+
   const prevInlineBotResults = usePrevious(
     inlineBotResults?.length
       ? inlineBotResults
@@ -122,6 +140,14 @@ const InlineBotTooltip: FC<OwnProps> = ({
     return (
       <ListItem ripple className="switch-pm scroll-item" onClick={handleSendPm}>
         <span className="title">{switchPm!.text}</span>
+      </ListItem>
+    );
+  }
+
+  function renderSwitchWebview() {
+    return (
+      <ListItem ripple className="switch-pm scroll-item" onClick={handleOpenWebview}>
+        <span className="title">{switchWebview!.text}</span>
       </ListItem>
     );
   }
@@ -203,6 +229,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
       sensitiveArea={160}
     >
       {switchPm && renderSwitchPm()}
+      {switchWebview && renderSwitchWebview()}
       {Boolean(renderedInlineBotResults?.length) && renderContent()}
     </InfiniteScroll>
   );
