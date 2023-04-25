@@ -61,7 +61,7 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
       title={title}
       confirmHandler={handleBotTrustAccept}
     >
-      {text}
+      {renderText(text, ['simple_markdown'])}
       {shouldRequestWriteAccess && (
         <Checkbox
           className="dialog-checkbox"
