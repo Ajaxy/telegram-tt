@@ -1,0 +1,71 @@
+.description {
+  text-align: center;
+  color: var(--color-text-secondary);
+  margin-bottom: 1rem;
+}
+
+.picker-wrapper {
+  overflow: auto;
+  max-height: 18rem;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.picker-header-info {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.selection-toggle {
+  color: var(--color-links);
+  cursor: var(--custom-cursor, pointer);
+}
+
+.foldersWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.folders {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+
+  position: relative;
+  margin-bottom: 1rem;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background-image: linear-gradient(
+      to right,
+      var(--color-background) 0%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0) 60%,
+      var(--color-background) 100%
+    );
+  }
+}
+
+.folder {
+  flex-grow: 0;
+}
+
+.button-text {
+  position: relative;
+}
+
+.button-badge {
+  position: absolute;
+  right: -0.25rem;
+  top: 50%;
+  transform: translate(100%, -50%);
+}

@@ -11,7 +11,8 @@ export function selectCurrentLimit<T extends GlobalState>(global: T, limit: ApiL
   const isPremium = selectIsCurrentUserPremium(global);
   const { limits } = appConfig;
 
-  const value = limits[limit][isPremium ? 1 : 0] ?? DEFAULT_LIMITS[limit][isPremium ? 1 : 0];
+  // When there are new limits when updating a layer, until we get a new configuration, we must use the default values
+  const value = limits[limit]?.[isPremium ? 1 : 0] ?? DEFAULT_LIMITS[limit][isPremium ? 1 : 0];
   if (limit === 'dialogFilters') return value + 1; // Server does not count "All" as folder, but we need to
   return value;
 }

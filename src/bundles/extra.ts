@@ -18,6 +18,8 @@ export { default as GiftPremiumModal } from '../components/main/premium/GiftPrem
 export { default as PremiumLimitReachedModal } from '../components/main/premium/common/PremiumLimitReachedModal';
 export { default as StatusPickerMenu } from '../components/left/main/StatusPickerMenu';
 
+export { default as ChatlistModal } from '../components/modals/chatlist/ChatlistModal';
+
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';

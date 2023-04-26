@@ -34,6 +34,7 @@ type OwnProps = {
   selectedIds: string[];
   selectedChatTypes: string[];
   filterValue?: string;
+  shouldHideChatTypes?: boolean;
   onSelectedIdsChange: (ids: string[]) => void;
   onSelectedChatTypesChange: (types: string[]) => void;
   onFilterChange: (value: string) => void;
@@ -55,6 +56,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
   selectedIds,
   selectedChatTypes,
   filterValue,
+  shouldHideChatTypes,
   onSelectedIdsChange,
   onSelectedChatTypesChange,
   onFilterChange,
@@ -200,11 +202,15 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
       >
         {(!viewportIds || !viewportIds.length || viewportIds.includes(chatIds[0])) && (
           <div key="header">
-            <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('FilterChatTypes')}
-            </h4>
-            {chatTypes.map(renderChatType)}
-            <div className="picker-list-divider" />
+            {!shouldHideChatTypes && (
+              <>
+                <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+                  {lang('FilterChatTypes')}
+                </h4>
+                {chatTypes.map(renderChatType)}
+                <div className="picker-list-divider" />
+              </>
+            )}
             <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
               {lang('FilterChats')}
             </h4>

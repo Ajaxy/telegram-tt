@@ -10,7 +10,7 @@ import { DEFAULT_LIMITS } from '../../../config';
 type LimitType = 'default' | 'premium';
 type Limit = 'upload_max_fileparts' | 'stickers_faved_limit' | 'saved_gifs_limit' | 'dialog_filters_chats_limit' |
 'dialog_filters_limit' | 'dialogs_folder_pinned_limit' | 'dialogs_pinned_limit' | 'caption_length_limit' |
-'channels_limit' | 'channels_public_limit' | 'about_length_limit';
+'channels_limit' | 'channels_public_limit' | 'about_length_limit' | 'chatlist_invites_limit' | 'chatlist_joined_limit';
 type LimitKey = `${Limit}_${LimitType}`;
 type LimitsConfig = Record<LimitKey, number>;
 
@@ -99,6 +99,8 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       channels: getLimit(appConfig, 'channels_limit', 'channels'),
       channelsPublic: getLimit(appConfig, 'channels_public_limit', 'channelsPublic'),
       aboutLength: getLimit(appConfig, 'about_length_limit', 'aboutLength'),
+      chatlistInvites: getLimit(appConfig, 'chatlist_invites_limit', 'chatlistInvites'),
+      chatlistJoined: getLimit(appConfig, 'chatlist_joined_limit', 'chatlistJoined'),
     },
     hash,
   };

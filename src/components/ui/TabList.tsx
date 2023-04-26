@@ -1,5 +1,7 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
+
+import type { FC } from '../../lib/teact/teact';
+import type { MenuItemContextAction } from './ListItem';
 
 import { ALL_FOLDER_ID } from '../../config';
 import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
@@ -19,6 +21,7 @@ export type TabWithProperties = {
   badgeCount?: number;
   isBlocked?: boolean;
   isBadgeActive?: boolean;
+  contextActions?: MenuItemContextAction[];
 };
 
 type OwnProps = {
@@ -27,6 +30,7 @@ type OwnProps = {
   activeTab: number;
   big?: boolean;
   onSwitchTab: (index: number) => void;
+  contextRootElementSelector?: string;
 };
 
 const TAB_SCROLL_THRESHOLD_PX = 16;
@@ -35,6 +39,7 @@ const SCROLL_DURATION = IS_IOS ? 450 : IS_ANDROID ? 400 : 300;
 
 const TabList: FC<OwnProps> = ({
   tabs, areFolders, activeTab, big, onSwitchTab,
+  contextRootElementSelector,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,6 +91,8 @@ const TabList: FC<OwnProps> = ({
           previousActiveTab={previousActiveTab}
           onClick={onSwitchTab}
           clickArg={i}
+          contextActions={tab.contextActions}
+          contextRootElementSelector={contextRootElementSelector}
         />
       ))}
     </div>

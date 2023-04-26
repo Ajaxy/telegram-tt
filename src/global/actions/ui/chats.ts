@@ -5,7 +5,9 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList,
 } from '../../reducers';
-import { selectChat, selectCurrentMessageList, selectTabState } from '../../selectors';
+import {
+  selectChat, selectCurrentMessageList, selectTabState,
+} from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
 import type { ActionReturnType } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
@@ -153,16 +155,16 @@ addActionHandler('openNextChat', (global, actions, payload): ActionReturnType =>
   actions.openChat({ id: nextId, shouldReplaceHistory: true, tabId });
 });
 
-addActionHandler('openDeleteChatFolderModal', (global, actions, payload): ActionReturnType => {
-  const { folderId, tabId = getCurrentTabId() } = payload;
-  return updateTabState(global, {
-    deleteFolderDialogModal: folderId,
-  }, tabId);
-});
-
 addActionHandler('closeDeleteChatFolderModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   return updateTabState(global, {
     deleteFolderDialogModal: undefined,
+  }, tabId);
+});
+
+addActionHandler('closeChatlistModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  return updateTabState(global, {
+    chatlistModal: undefined,
   }, tabId);
 });

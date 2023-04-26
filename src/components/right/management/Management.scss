@@ -200,24 +200,6 @@
 }
 
 .ManageInvites {
-  .primary-link {
-    position: relative;
-  }
-
-  .primary-link-input {
-    cursor: var(--custom-cursor, pointer);
-    margin-bottom: 1rem;
-    padding-right: 3rem;
-  }
-
-  .primary-link-more-menu {
-    position: absolute;
-    right: 0.5rem;
-    top: 50%;
-    transform: translate(0, -50%);
-    z-index: 1;
-  }
-
   .create-link {
     margin-bottom: 0.5rem;
   }

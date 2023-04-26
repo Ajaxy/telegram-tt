@@ -225,7 +225,7 @@ export function buildInputPollFromExisting(poll: ApiPoll, shouldClose = false) {
   });
 }
 
-export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFilter {
+export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFilter | GramJs.DialogFilterChatlist {
   const {
     emoticon,
     contacts,
@@ -252,6 +252,17 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
   const excludePeers = excludedChatIds
     ? excludedChatIds.map(buildInputPeerFromLocalDb).filter(Boolean)
     : [];
+
+  if (folder.isChatList) {
+    return new GramJs.DialogFilterChatlist({
+      id: folder.id,
+      title: folder.title,
+      emoticon: emoticon || undefined,
+      pinnedPeers,
+      includePeers,
+      hasMyInvites: folder.hasMyInvites,
+    });
+  }
 
   return new GramJs.DialogFilter({
     id: folder.id,

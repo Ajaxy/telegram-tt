@@ -9,7 +9,10 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type { LangCode } from '../../types';
 import type {
   ApiAttachBot,
-  ApiChat, ApiMessage, ApiUser,
+  ApiChat,
+  ApiChatFolder,
+  ApiMessage,
+  ApiUser,
 } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
 
@@ -31,6 +34,7 @@ import {
   selectIsReactionPickerOpen,
   selectPerformanceSettingsValue,
   selectCanAnimateInterface,
+  selectChatFolder,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
@@ -86,6 +90,7 @@ import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import DraftRecipientPicker from './DraftRecipientPicker.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
+import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 
 import './Main.scss';
 
@@ -132,11 +137,12 @@ type StateProps = {
   currentUser?: ApiUser;
   urlAuth?: TabState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
-  deleteFolderDialogId?: number;
+  deleteFolderDialog?: ApiChatFolder;
   isPaymentModalOpen?: boolean;
   isReceiptModalOpen?: boolean;
   isReactionPickerOpen: boolean;
   isCurrentUserPremium?: boolean;
+  chatlistModal?: TabState['chatlistModal'];
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
 };
@@ -191,8 +197,9 @@ const Main: FC<OwnProps & StateProps> = ({
   isReceiptModalOpen,
   isReactionPickerOpen,
   isCurrentUserPremium,
-  deleteFolderDialogId,
+  deleteFolderDialog,
   isMasterTab,
+  chatlistModal,
   noRightColumnAnimation,
 }) => {
   const {
@@ -509,6 +516,7 @@ const Main: FC<OwnProps & StateProps> = ({
         userId={newContactUserId}
         isByPhoneNumber={newContactByPhoneNumber}
       />
+      <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />
       <DownloadManager />
@@ -528,7 +536,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <PremiumLimitReachedModal limit={limitReached} />
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
-      <DeleteFolderDialog deleteFolderDialogId={deleteFolderDialogId} />
+      <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} shouldLoad={shouldLoadReactionPicker} />
     </div>
   );
@@ -569,6 +577,7 @@ export default memo(withGlobal<OwnProps>(
       payment,
       limitReachedModal,
       deleteFolderDialogModal,
+      chatlistModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -581,6 +590,8 @@ export default memo(withGlobal<OwnProps>(
     const { chatId } = selectCurrentMessageList(global) || {};
     const noRightColumnAnimation = !selectPerformanceSettingsValue(global, 'rightColumnAnimations')
         || !selectCanAnimateInterface(global);
+
+    const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
 
     return {
       lastSyncTime,
@@ -623,9 +634,10 @@ export default memo(withGlobal<OwnProps>(
       limitReached: limitReachedModal?.limit,
       isPaymentModalOpen: payment.isPaymentModalOpen,
       isReceiptModalOpen: Boolean(payment.receipt),
-      deleteFolderDialogId: deleteFolderDialogModal,
+      deleteFolderDialog,
       isMasterTab,
       requestedDraft,
+      chatlistModal,
       noRightColumnAnimation,
     };
   },

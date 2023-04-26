@@ -193,6 +193,7 @@ export enum SettingsScreens {
   FoldersCreateFolder,
   FoldersEditFolder,
   FoldersEditFolderFromChatList,
+  FoldersEditFolderInvites,
   FoldersIncludedChats,
   FoldersIncludedChatsFromChatList,
   FoldersExcludedChats,
@@ -228,6 +229,7 @@ export enum SettingsScreens {
   QuickReaction,
   CustomEmoji,
   DoNotTranslate,
+  FoldersShare,
 }
 
 export type StickerSetOrReactionsSetOrRecent = Pick<ApiStickerSet, (

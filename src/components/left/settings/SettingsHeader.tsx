@@ -201,8 +201,11 @@ const SettingsHeader: FC<OwnProps> = ({
         return <h3>{lang('Filters')}</h3>;
       case SettingsScreens.FoldersCreateFolder:
         return <h3>{lang('FilterNew')}</h3>;
+      case SettingsScreens.FoldersShare:
+        return <h3>{lang('FolderLinkScreen.Title')}</h3>;
       case SettingsScreens.FoldersEditFolder:
       case SettingsScreens.FoldersEditFolderFromChatList:
+      case SettingsScreens.FoldersEditFolderInvites:
         return (
           <div className="settings-main-header">
             <h3>{lang('FilterEdit')}</h3>

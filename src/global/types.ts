@@ -60,6 +60,8 @@ import type {
   ApiWebSession,
   ApiUserFullInfo,
   ApiChatFullInfo,
+  ApiChatlistInvite,
+  ApiChatlistExportedInvite,
 } from '../api/types';
 import type {
   ApiInvoiceContainer,
@@ -93,6 +95,8 @@ import type {
 } from '../types';
 import type { P2pMessage } from '../lib/secret-sauce';
 import type { ApiCredentials } from '../components/payment/PaymentModal';
+import type { FoldersActions } from '../hooks/reducers/useFoldersReducer';
+import type { ReducerAction } from '../hooks/useReducer';
 
 export type MessageListType =
   'thread'
@@ -157,7 +161,7 @@ export interface ServiceNotification {
 
 export type ApiLimitType = (
   'uploadMaxFileparts' | 'stickersFaved' | 'savedGifs' | 'dialogFiltersChats' | 'dialogFilters' | 'dialogFolderPinned' |
-  'captionLength' | 'channels' | 'channelsPublic' | 'aboutLength'
+  'captionLength' | 'channels' | 'channelsPublic' | 'aboutLength' | 'chatlistInvites' | 'chatlistJoined'
 );
 
 export type ApiLimitTypeWithModal = Exclude<ApiLimitType, (
@@ -206,6 +210,13 @@ export type TabState = {
   };
 
   nextSettingsScreen?: SettingsScreens;
+  nextFoldersAction?: ReducerAction<FoldersActions>;
+  shareFolderScreen?: {
+    folderId: number;
+    isFromSettings?: boolean;
+    url?: string;
+    isLoading?: boolean;
+  };
 
   isCallPanelVisible?: boolean;
   multitabNextAction?: CallbackAction;
@@ -553,6 +564,14 @@ export type TabState = {
     messageId: number;
     activeLanguage?: string;
   };
+
+  chatlistModal?: {
+    invite?: ApiChatlistInvite;
+    removal?: {
+      folderId: number;
+      suggestedPeerIds?: string[];
+    };
+  };
 };
 
 export type GlobalState = {
@@ -690,6 +709,7 @@ export type GlobalState = {
   chatFolders: {
     orderedIds?: number[];
     byId: Record<number, ApiChatFolder>;
+    invites: Record<number, ApiChatlistExportedInvite[]>;
     recommended?: ApiChatFolder[];
   };
 
@@ -1673,6 +1693,34 @@ export interface ActionPayloads {
     isEnabled: boolean;
   };
 
+  checkChatlistInvite: {
+    slug: string;
+  } & WithTabId;
+  joinChatlistInvite: {
+    invite: ApiChatlistInvite;
+    peerIds: string[];
+  } & WithTabId;
+  leaveChatlist: {
+    folderId: number;
+    peerIds?: string[];
+  } & WithTabId;
+  closeChatlistModal: WithTabId | undefined;
+  loadChatlistInvites: {
+    folderId: number;
+  };
+  createChatlistInvite: {
+    folderId: number;
+  } & WithTabId;
+  editChatlistInvite: {
+    folderId: number;
+    url: string;
+    peerIds: string[];
+  } & WithTabId;
+  deleteChatlistInvite: {
+    folderId: number;
+    url: string;
+  } & WithTabId;
+
   // Messages
   setEditingDraft: {
     text?: ApiFormattedText;
@@ -2300,10 +2348,24 @@ export interface ActionPayloads {
   } | undefined;
   requestNextSettingsScreen: {
     screen?: SettingsScreens;
+    foldersAction?: ReducerAction<FoldersActions>;
   } & WithTabId;
   sortChatFolders: { folderIds: number[] };
   closeDeleteChatFolderModal: WithTabId | undefined;
-  openDeleteChatFolderModal: { folderId: number } & WithTabId;
+  openDeleteChatFolderModal: {
+    folderId: number;
+    isConfirmedForChatlist?: boolean;
+  } & WithTabId;
+  openShareChatFolderModal: {
+    folderId: number;
+    url?: string;
+    noRequestNextScreen?: boolean;
+  } & WithTabId;
+  openEditChatFolder: {
+    folderId: number;
+    isOnlyInvites?: boolean;
+  } & WithTabId;
+  closeShareChatFolderModal: undefined | WithTabId;
   loadGlobalPrivacySettings: undefined;
   updateGlobalPrivacySettings: { shouldArchiveAndMuteNewNonContact: boolean };
 

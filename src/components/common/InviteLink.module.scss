@@ -1,0 +1,27 @@
+.primaryLink {
+  position: relative;
+}
+
+.input {
+  cursor: var(--custom-cursor, pointer);
+  margin-bottom: 1rem;
+  padding-right: 3rem;
+}
+
+.moreMenu {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translate(0, -50%);
+  z-index: 1;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.button {
+  width: auto;
+  flex: 1 0 auto;
+}

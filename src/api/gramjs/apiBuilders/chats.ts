@@ -14,6 +14,8 @@ import type {
   ApiTopic,
   ApiSendAsPeerId,
   ApiChatReactions,
+  ApiChatlistInvite,
+  ApiChatlistExportedInvite,
 } from '../../types';
 import { pick, pickTruthy } from '../../../util/iteratees';
 import {
@@ -363,7 +365,20 @@ export function buildChatTypingStatus(
   };
 }
 
-export function buildApiChatFolder(filter: GramJs.DialogFilter): ApiChatFolder {
+export function buildApiChatFolder(filter: GramJs.DialogFilter | GramJs.DialogFilterChatlist): ApiChatFolder {
+  if (filter instanceof GramJs.DialogFilterChatlist) {
+    return {
+      ...pickTruthy(filter, [
+        'id', 'title', 'emoticon',
+      ]),
+      excludedChatIds: [],
+      includedChatIds: filter.includePeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+      pinnedChatIds: filter.pinnedPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+      hasMyInvites: filter.hasMyInvites,
+      isChatList: true,
+    };
+  }
+
   return {
     ...pickTruthy(filter, [
       'id', 'title', 'emoticon', 'contacts', 'nonContacts', 'groups', 'bots',
@@ -382,7 +397,7 @@ export function buildApiChatFolderFromSuggested({
   filter: GramJs.TypeDialogFilter;
   description: string;
 }): ApiChatFolder | undefined {
-  if (!(filter instanceof GramJs.DialogFilter)) return undefined;
+  if (!(filter instanceof GramJs.DialogFilter || filter instanceof GramJs.DialogFilterChatlist)) return undefined;
   return {
     ...buildApiChatFolder(filter),
     description,
@@ -441,12 +456,14 @@ export function buildChatInviteImporter(importer: GramJs.ChatInviteImporter): Ap
     date,
     about,
     requested,
+    viaChatlist,
   } = importer;
   return {
     userId: buildApiPeerId(userId, 'user'),
     date,
     about,
     isRequested: requested,
+    isFromChatList: viaChatlist,
   };
 }
 
@@ -532,5 +549,47 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     fromId: getApiChatIdFromMtpPeer(fromId),
     // TODO[forums] `muteUntil` should not really be parsed here
     isMuted: silent || (muteUntil !== undefined ? muteUntil > 0 : undefined),
+  };
+}
+
+export function buildApiChatlistInvite(
+  invite: GramJs.chatlists.TypeChatlistInvite | undefined, slug: string,
+): ApiChatlistInvite | undefined {
+  if (invite instanceof GramJs.chatlists.ChatlistInvite) {
+    return {
+      slug,
+      title: invite.title,
+      emoticon: invite.emoticon,
+      peerIds: invite.peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    };
+  }
+
+  if (invite instanceof GramJs.chatlists.ChatlistInviteAlready) {
+    return {
+      slug,
+      folderId: invite.filterId,
+      missingPeerIds: invite.missingPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+      alreadyPeerIds: invite.alreadyPeers.map(getApiChatIdFromMtpPeer).filter(Boolean),
+    };
+  }
+
+  return undefined;
+}
+
+export function buildApiChatlistExportedInvite(
+  invite: GramJs.TypeExportedChatlistInvite | undefined,
+): ApiChatlistExportedInvite | undefined {
+  if (!(invite instanceof GramJs.ExportedChatlistInvite)) return undefined;
+
+  const {
+    title,
+    url,
+    peers,
+  } = invite;
+
+  return {
+    title,
+    url,
+    peerIds: peers.map(getApiChatIdFromMtpPeer).filter(Boolean),
   };
 }

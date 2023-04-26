@@ -6,10 +6,12 @@ import { getActions, withGlobal } from '../../global';
 import type { FC } from '../../lib/teact/teact';
 import type { GlobalState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
+import type { ReducerAction } from '../../hooks/useReducer';
+import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 
 import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { selectTabState, selectCurrentChat, selectIsForumPanelOpen } from '../../global/selectors';
+import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
@@ -32,6 +34,7 @@ type StateProps = {
   currentUserId?: string;
   hasPasscode?: boolean;
   nextSettingsScreen?: SettingsScreens;
+  nextFoldersAction?: ReducerAction<FoldersActions>;
   isChatOpen: boolean;
   isUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
@@ -63,6 +66,7 @@ const LeftColumn: FC<StateProps> = ({
   currentUserId,
   hasPasscode,
   nextSettingsScreen,
+  nextFoldersAction,
   isChatOpen,
   isUpdateAvailable,
   isForumPanelOpen,
@@ -115,6 +119,7 @@ const LeftColumn: FC<StateProps> = ({
   const handleReset = useCallback((forceReturnToChatList?: true | Event) => {
     function fullReset() {
       setContent(LeftColumnContent.ChatList);
+      setSettingsScreen(SettingsScreens.Main);
       setContactsFilter('');
       setGlobalSearchClosing({ isClosing: true });
       resetChatCreation();
@@ -285,12 +290,17 @@ const LeftColumn: FC<StateProps> = ({
           setSettingsScreen(SettingsScreens.Folders);
           return;
 
+        case SettingsScreens.FoldersShare:
+          setSettingsScreen(SettingsScreens.FoldersEditFolder);
+          return;
+
         case SettingsScreens.FoldersIncludedChatsFromChatList:
         case SettingsScreens.FoldersExcludedChatsFromChatList:
           setSettingsScreen(SettingsScreens.FoldersEditFolderFromChatList);
           return;
 
         case SettingsScreens.FoldersEditFolderFromChatList:
+        case SettingsScreens.FoldersEditFolderInvites:
           setContent(LeftColumnContent.ChatList);
           setSettingsScreen(SettingsScreens.Main);
           return;
@@ -394,7 +404,11 @@ const LeftColumn: FC<StateProps> = ({
       setSettingsScreen(nextSettingsScreen);
       requestNextSettingsScreen({ screen: undefined });
     }
-  }, [nextSettingsScreen, requestNextSettingsScreen]);
+
+    if (nextFoldersAction) {
+      foldersDispatch(nextFoldersAction);
+    }
+  }, [foldersDispatch, nextFoldersAction, nextSettingsScreen, requestNextSettingsScreen]);
 
   const {
     initResize, resetResize, handleMouseUp,
@@ -513,6 +527,7 @@ export default memo(withGlobal(
       shouldSkipHistoryAnimations,
       activeChatFolder,
       nextSettingsScreen,
+      nextFoldersAction,
     } = tabState;
     const {
       leftColumnWidth,
@@ -538,6 +553,7 @@ export default memo(withGlobal(
       currentUserId,
       hasPasscode,
       nextSettingsScreen,
+      nextFoldersAction,
       isChatOpen,
       isUpdateAvailable,
       isForumPanelOpen,

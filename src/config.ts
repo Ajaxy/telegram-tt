@@ -304,4 +304,6 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   channels: [500, 1000],
   channelsPublic: [10, 20],
   aboutLength: [70, 140],
+  chatlistInvites: [3, 100],
+  chatlistJoined: [2, 20],
 };

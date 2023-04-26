@@ -35,7 +35,7 @@ import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import Badge from './Badge';
+import ChatBadge from './ChatBadge';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import TopicIcon from '../../common/TopicIcon';
 
@@ -179,7 +179,7 @@ const Topic: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          <Badge
+          <ChatBadge
             chat={chat}
             isPinned={isPinned}
             isMuted={isMuted}

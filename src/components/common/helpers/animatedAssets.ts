@@ -5,6 +5,7 @@ import MonkeyPeek from '../../../assets/tgs/monkeys/TwoFactorSetupMonkeyPeek.tgs
 
 import FoldersAll from '../../../assets/tgs/settings/FoldersAll.tgs';
 import FoldersNew from '../../../assets/tgs/settings/FoldersNew.tgs';
+import FoldersShare from '../../../assets/tgs/settings/FoldersShare.tgs';
 import DiscussionGroups from '../../../assets/tgs/settings/DiscussionGroupsDucks.tgs';
 import Lock from '../../../assets/tgs/settings/Lock.tgs';
 import Congratulations from '../../../assets/tgs/settings/Congratulations.tgs';
@@ -31,6 +32,7 @@ export const LOCAL_TGS_URLS = {
   MonkeyPeek,
   FoldersAll,
   FoldersNew,
+  FoldersShare,
   DiscussionGroups,
   Lock,
   CameraFlip,

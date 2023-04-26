@@ -48,6 +48,7 @@ import {
   serializeBytes,
   log,
   swapLocalInvoiceMedia,
+  isChatFolder,
 } from './helpers';
 import {
   buildApiNotifyException,
@@ -579,7 +580,7 @@ export function updater(update: Update) {
     });
   } else if (update instanceof GramJs.UpdateDialogFilter) {
     const { id, filter } = update;
-    const folder = filter instanceof GramJs.DialogFilter ? buildApiChatFolder(filter) : undefined;
+    const folder = isChatFolder(filter) ? buildApiChatFolder(filter) : undefined;
 
     onUpdate({
       '@type': 'updateChatFolder',

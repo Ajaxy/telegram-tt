@@ -281,5 +281,13 @@
     "channels.deleteTopicHistory",
     "channels.toggleParticipantsHidden",
     "photos.uploadContactProfilePhoto",
-    "messages.getMessagesViews"
+    "messages.getMessagesViews",
+    "chatlists.exportChatlistInvite",
+    "chatlists.deleteExportedInvite",
+    "chatlists.editExportedInvite",
+    "chatlists.getExportedInvites",
+    "chatlists.checkChatlistInvite",
+    "chatlists.joinChatlistInvite",
+    "chatlists.getLeaveChatlistSuggestions",
+    "chatlists.leaveChatlist"
 ]

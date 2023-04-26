@@ -19,15 +19,13 @@ import useLang from '../../../hooks/useLang';
 import useInterval from '../../../hooks/useInterval';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useFlag from '../../../hooks/useFlag';
-import useAppLayout from '../../../hooks/useAppLayout';
 
 import ListItem from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
-import DropdownMenu from '../../ui/DropdownMenu';
-import MenuItem from '../../ui/MenuItem';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import AnimatedIcon from '../../common/AnimatedIcon';
+import InviteLink from '../../common/InviteLink';
 
 type OwnProps = {
   chatId: string;
@@ -79,7 +77,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   const [revokingInvite, setRevokingInvite] = useState<ApiExportedInvite | undefined>();
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const [deletingInvite, setDeletingInvite] = useState<ApiExportedInvite | undefined>();
-  const { isMobile } = useAppLayout();
 
   useHistoryBack({
     isActive,
@@ -181,10 +178,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     });
   }, [lang, showNotification]);
 
-  const handleCopyPrimaryClicked = useCallback(() => {
-    copyLink(primaryInviteLink!);
-  }, [copyLink, primaryInviteLink]);
-
   const prepareUsageText = (invite: ApiExportedInvite) => {
     const {
       usage = 0, usageLimit, expireDate, isPermanent, requested, isRevoked,
@@ -277,22 +270,6 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
     return actions;
   };
 
-  const PrimaryLinkMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
-      <Button
-        round
-        ripple={!isMobile}
-        size="smaller"
-        color="translucent"
-        className={isOpen ? 'active' : ''}
-        onClick={onTrigger}
-        ariaLabel="Actions"
-      >
-        <i className="icon icon-more" />
-      </Button>
-    );
-  }, [isMobile]);
-
   return (
     <div className="Management ManageInvites">
       <div className="custom-scroll">
@@ -305,30 +282,11 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (
-          <div className="section">
-            <p className="text-muted">
-              {chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
-            </p>
-            <div className="primary-link">
-              <input
-                className="form-control primary-link-input"
-                value={primaryInviteLink}
-                readOnly
-                onClick={handleCopyPrimaryClicked}
-              />
-              <DropdownMenu
-                className="primary-link-more-menu"
-                trigger={PrimaryLinkMenuButton}
-                positionX="right"
-              >
-                <MenuItem icon="copy" onClick={handleCopyPrimaryClicked}>{lang('Copy')}</MenuItem>
-                {!chat?.usernames && (
-                  <MenuItem icon="delete" onClick={handlePrimaryRevoke} destructive>{lang('RevokeButton')}</MenuItem>
-                )}
-              </DropdownMenu>
-            </div>
-            <Button onClick={handleCopyPrimaryClicked}>{lang('CopyLink')}</Button>
-          </div>
+          <InviteLink
+            inviteLink={primaryInviteLink}
+            onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
+            title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
+          />
         )}
         <div className="section" teactFastList>
           <Button isText key="create" className="create-link" onClick={handleCreateNewClick}>
