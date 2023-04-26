@@ -1,3 +1,21 @@
+## 1.61.0 (2023-04-26)
+
+**Telegram Web A was updated to version 1.61**
+
+### 🤩 **What’s New**
+* Shareable Chat Folders – Your chat folders can now be shared with friends or colleagues – adding the folder and **joining all its chats** in one tap.
+* Power Saving Mode – You can **extend battery life** and **improve performance** by turning on Power Saving Mode or individually disabling autoplay, animations and effects in __Settings > Animations and Performance__.
+* Better Bots – Telegram bots can completely replace any website. These bots can now be launched **in any chat** – try typing [@DurgerKingBot](https://t.me/DurgerKingBot) (followed by a space) in any chat, or posting [this link](https://t.me/DurgerKingBot/menu).
+* Enhanced Design – Enjoy transparent layers with **beautiful blur effects** when selecting emoji, stickers, reactions and statuses. Sending messages also has a satisfying **new animation**.
+* Infinite Reactions – Telegram Premium users can pick reactions from an infinite selection of custom emoji. They can also use **up to 3 reactions** on any message to combine multiple emotions. 👍🔥❤️
+* Preview in Media Viewer – Scrubbing through videos now shows a **thumbnail preview** to easily find specific scenes.
+* Group Chat Improvements – Create groups with **only yourself** or restrict anyone from adding you directly to groups (via __Settings > Privacy and Security > Group and Channels > Nobody__).
+* Send When Online – By right-clicking the Send button, you can schedule a message to be sent when the recipient comes online.
+
+### 😍 **What’s Better**
+* As usual, we've added a pack of optimizations and performance improvements. If you ever run into an issue with the app, be sure to [report it](https://bugs.telegram.org/?tag_ids=41&sort=time) on the Bugs and Suggestions Platform.
+
+
 ## 1.60.0 (2023-03-03)
 
 ### 🤩 **What’s New**
