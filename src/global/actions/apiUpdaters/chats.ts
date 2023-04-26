@@ -1,10 +1,11 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type { ApiUpdateChat } from '../../../api/types';
+import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
-import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import {
   leaveChat,
@@ -23,9 +24,10 @@ import {
   selectCurrentMessageList,
   selectThreadParam,
   selectChatFullInfo,
+  selectTabState,
 } from '../../selectors';
 import { updateUnreadReactions } from '../../reducers/reactions';
-import type { ActionReturnType } from '../../types';
+import { updateTabState } from '../../reducers/tabs';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 
@@ -247,16 +249,21 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const { id, folder } = update;
       const { byId: chatFoldersById, orderedIds } = global.chatFolders;
 
-      const newChatFoldersById = folder
-        ? { ...chatFoldersById, [id]: folder }
-        : pick(
-          chatFoldersById,
-          Object.keys(chatFoldersById).map(Number).filter((folderId) => folderId !== id),
-        );
+      const isDeleted = folder === undefined;
 
-      const newOrderedIds = folder
-        ? orderedIds && orderedIds.includes(id) ? orderedIds : [...(orderedIds || []), id]
-        : orderedIds ? orderedIds.filter((orderedId) => orderedId !== id) : undefined;
+      Object.values(global.byTabId).forEach(({ id: tabId }) => {
+        const tabState = selectTabState(global, tabId);
+        const isFolderActive = Object.values(chatFoldersById)[tabState.activeChatFolder - 1]?.id === id;
+
+        if (isFolderActive) {
+          global = updateTabState(global, { activeChatFolder: 0 }, tabId);
+        }
+      });
+
+      const newChatFoldersById = !isDeleted ? { ...chatFoldersById, [id]: folder } : omit(chatFoldersById, [id]);
+      const newOrderedIds = !isDeleted
+        ? orderedIds?.includes(id) ? orderedIds : [...(orderedIds || []), id]
+        : orderedIds?.filter((orderedId) => orderedId !== id);
 
       return {
         ...global,
