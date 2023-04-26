@@ -62,10 +62,6 @@ const useDraft = (
     }
   }, [chatId, threadId, isEditing, lastSyncTime, getHtml, saveDraft, clearDraft]);
 
-  const forceUpdateDraft = useCallback(() => {
-    updateDraft(undefined, true);
-  }, [updateDraft]);
-
   const updateDraftRef = useStateRef(updateDraft);
   const runDebouncedForSaveDraft = useRunDebounced(DRAFT_DEBOUNCE, true, undefined, [chatId, threadId]);
 
@@ -137,6 +133,10 @@ const useDraft = (
       }
     });
   }, [chatIdRef, getHtml, runDebouncedForSaveDraft, threadIdRef, updateDraftRef]);
+
+  function forceUpdateDraft() {
+    updateDraft(undefined, true);
+  }
 
   useBackgroundMode(forceUpdateDraft);
   useBeforeUnload(forceUpdateDraft);

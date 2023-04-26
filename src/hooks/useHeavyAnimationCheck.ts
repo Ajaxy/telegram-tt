@@ -1,5 +1,8 @@
 import { useEffect } from '../lib/teact/teact';
+
 import { createCallbackManager } from '../util/callbacks';
+
+import { useLastCallback } from './useLastCallback';
 
 // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
 const AUTO_END_TIMEOUT = 1000;
@@ -11,27 +14,30 @@ let timeout: number | undefined;
 let isAnimating = false;
 
 const useHeavyAnimationCheck = (
-  handleAnimationStart: AnyToVoidFunction,
-  handleAnimationEnd: AnyToVoidFunction,
+  onStart?: AnyToVoidFunction,
+  onEnd?: AnyToVoidFunction,
   isDisabled = false,
 ) => {
+  const lastOnStart = useLastCallback(onStart);
+  const lastOnEnd = useLastCallback(onEnd);
+
   useEffect(() => {
     if (isDisabled) {
       return undefined;
     }
 
     if (isAnimating) {
-      handleAnimationStart();
+      lastOnStart();
     }
 
-    startCallbacks.addCallback(handleAnimationStart);
-    endCallbacks.addCallback(handleAnimationEnd);
+    startCallbacks.addCallback(lastOnStart);
+    endCallbacks.addCallback(lastOnEnd);
 
     return () => {
-      endCallbacks.removeCallback(handleAnimationEnd);
-      startCallbacks.removeCallback(handleAnimationStart);
+      endCallbacks.removeCallback(lastOnEnd);
+      startCallbacks.removeCallback(lastOnStart);
     };
-  }, [isDisabled, handleAnimationEnd, handleAnimationStart]);
+  }, [isDisabled, lastOnEnd, lastOnStart]);
 };
 
 export function isHeavyAnimating() {
