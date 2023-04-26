@@ -12,7 +12,7 @@ import {
   selectIsForumPanelOpen,
 } from '../../../global/selectors';
 
-import Badge from './Badge';
+import ChatBadge from './ChatBadge';
 
 type OwnProps = {
   chatId: string;
@@ -31,7 +31,7 @@ const AvatarBadge: FC<OwnProps & StateProps> = ({
 }) => {
   return chat && (
     <div className="avatar-badge-wrapper">
-      <Badge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={!isForumPanelActive} />
+      <ChatBadge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={!isForumPanelActive} />
     </div>
   );
 };

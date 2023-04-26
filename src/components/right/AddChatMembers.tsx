@@ -128,6 +128,7 @@ const AddChatMembers: FC<OwnProps & StateProps> = ({
           isLoading={isSearching}
           onSelectedIdsChange={setSelectedMemberIds}
           onFilterChange={handleFilterChange}
+          isSearchable
           noScrollRestore={noPickerScrollRestore}
         />
 

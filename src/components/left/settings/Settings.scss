@@ -380,3 +380,11 @@
     margin-inline-end: 2rem;
   }
 }
+
+.settings-item-chatlist {
+  padding: 0;
+}
+
+.settings-item-chatlist .ListItem {
+  margin: inherit;
+}

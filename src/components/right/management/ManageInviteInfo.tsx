@@ -31,6 +31,8 @@ type StateProps = {
   isChannel?: boolean;
 };
 
+const BULLET = '\u2022';
+
 const ManageInviteInfo: FC<OwnProps & StateProps> = ({
   chatId,
   invite,
@@ -83,19 +85,23 @@ const ManageInviteInfo: FC<OwnProps & StateProps> = ({
           {!importers.length && (
             usageLimit ? lang('PeopleCanJoinViaLinkCount', usageLimit - usage) : lang('NoOneJoinedYet')
           )}
-          {importers.map((importer) => (
-            <ListItem
-              className="chat-item-clickable scroll-item small-icon"
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => openChat({ id: importer.userId })}
-            >
-              <PrivateChatInfo
-                userId={importer.userId}
-                status={formatMediaDateTime(lang, importer.date * 1000, true)}
-                forceShowSelf
-              />
-            </ListItem>
-          ))}
+          {importers.map((importer) => {
+            const joinTime = formatMediaDateTime(lang, importer.date * 1000, true);
+            const status = importer.isFromChatList ? `${joinTime} ${BULLET} ${lang('JoinedViaFolder')}` : joinTime;
+            return (
+              <ListItem
+                className="chat-item-clickable scroll-item small-icon"
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => openChat({ id: importer.userId })}
+              >
+                <PrivateChatInfo
+                  userId={importer.userId}
+                  status={status}
+                  forceShowSelf
+                />
+              </ListItem>
+            );
+          })}
         </p>
       </div>
     );

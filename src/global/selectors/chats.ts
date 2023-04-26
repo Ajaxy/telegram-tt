@@ -3,7 +3,14 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
 import {
-  getPrivateChatUserId, isChatChannel, isUserId, isHistoryClearMessage, isUserBot, isUserOnline,
+  getPrivateChatUserId,
+  isChatChannel,
+  isUserId,
+  isHistoryClearMessage,
+  isUserBot,
+  isUserOnline,
+  getHasAdminRight,
+  isChatSuperGroup,
 } from '../helpers';
 import { selectBot, selectUser } from './users';
 import {
@@ -238,4 +245,32 @@ export function filterChatIdsByType<T extends GlobalState>(
     }
     return filter.includes(type);
   });
+}
+
+export function selectCanInviteToChat<T extends GlobalState>(global: T, chatId: string) {
+  const chat = selectChat(global, chatId);
+  if (!chat) return false;
+
+  // https://github.com/TelegramMessenger/Telegram-iOS/blob/5126be83b3b9578fb014eb52ca553da9e7a8b83a/submodules/TelegramCore/Sources/TelegramEngine/Peers/Communities.swift#L6
+  return Boolean(!isUserId(chatId) && ((isChatChannel(chat) || isChatSuperGroup(chat)) ? (
+    chat.isCreator || getHasAdminRight(chat, 'inviteUsers')
+    || (chat.usernames?.length && !chat.isJoinRequest)
+  ) : (chat.isCreator || getHasAdminRight(chat, 'inviteUsers'))));
+}
+
+export function selectCanShareFolder<T extends GlobalState>(global: T, folderId: number) {
+  const folder = selectChatFolder(global, folderId);
+  if (!folder) return false;
+
+  const {
+    bots, groups, channels, contacts, nonContacts, includedChatIds, pinnedChatIds,
+    excludeArchived, excludeMuted, excludeRead, excludedChatIds,
+  } = folder;
+
+  return !bots && !groups && !channels && !contacts && !nonContacts
+    && !excludeArchived && !excludeMuted && !excludeRead && !excludedChatIds?.length
+    && (pinnedChatIds?.length || includedChatIds.length)
+    && folder.includedChatIds.concat(folder.pinnedChatIds || []).some((chatId) => {
+      return selectCanInviteToChat(global, chatId);
+    });
 }

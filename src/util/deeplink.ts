@@ -7,7 +7,7 @@ import { IS_SAFARI } from './windowEnvironment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice';
+'invoice' | 'addlist';
 
 export const processDeepLink = (url: string) => {
   const {
@@ -26,6 +26,7 @@ export const processDeepLink = (url: string) => {
     openInvoice,
     processAttachBotParameters,
     openChatWithDraft,
+    checkChatlistInvite,
   } = getActions();
 
   // Safari thinks the path in tg://path links is hostname for some reason
@@ -118,6 +119,11 @@ export const processDeepLink = (url: string) => {
       openChatWithDraft({ text: formatShareText(urlParam, text) });
       break;
     }
+    case 'addlist': {
+      checkChatlistInvite({ slug: params.slug });
+      break;
+    }
+
     case 'login': {
       // const { code, token } = params;
       break;

@@ -1,10 +1,12 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
+import { getActions, getGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
 
 import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
+import { selectTabState } from '../../../global/selectors';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 
 import Transition from '../../ui/Transition';
@@ -67,10 +69,12 @@ const FOLDERS_SCREENS = [
   SettingsScreens.FoldersCreateFolder,
   SettingsScreens.FoldersEditFolder,
   SettingsScreens.FoldersEditFolderFromChatList,
+  SettingsScreens.FoldersEditFolderInvites,
   SettingsScreens.FoldersIncludedChats,
   SettingsScreens.FoldersIncludedChatsFromChatList,
   SettingsScreens.FoldersExcludedChats,
   SettingsScreens.FoldersExcludedChatsFromChatList,
+  SettingsScreens.FoldersShare,
 ];
 
 const PRIVACY_SCREENS = [
@@ -137,11 +141,18 @@ const Settings: FC<OwnProps> = ({
   onReset,
   shouldSkipTransition,
 }) => {
+  const { closeShareChatFolderModal } = getActions();
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
 
   const handleReset = useCallback((forceReturnToChatList?: true | Event) => {
-    if (forceReturnToChatList === true) {
+    const isFromSettings = selectTabState(getGlobal()).shareFolderScreen?.isFromSettings;
+
+    if (currentScreen === SettingsScreens.FoldersShare) {
+      closeShareChatFolderModal();
+    }
+
+    if (forceReturnToChatList === true || (isFromSettings !== undefined && !isFromSettings)) {
       onReset(true);
       return;
     }
@@ -150,6 +161,7 @@ const Settings: FC<OwnProps> = ({
       currentScreen === SettingsScreens.FoldersCreateFolder
       || currentScreen === SettingsScreens.FoldersEditFolder
       || currentScreen === SettingsScreens.FoldersEditFolderFromChatList
+      || currentScreen === SettingsScreens.FoldersEditFolderInvites
     ) {
       setTimeout(() => {
         foldersDispatch({ type: 'reset' });
@@ -361,10 +373,12 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.FoldersCreateFolder:
       case SettingsScreens.FoldersEditFolder:
       case SettingsScreens.FoldersEditFolderFromChatList:
+      case SettingsScreens.FoldersEditFolderInvites:
       case SettingsScreens.FoldersIncludedChats:
       case SettingsScreens.FoldersIncludedChatsFromChatList:
       case SettingsScreens.FoldersExcludedChats:
       case SettingsScreens.FoldersExcludedChatsFromChatList:
+      case SettingsScreens.FoldersShare:
         return (
           <SettingsFolders
             currentScreen={currentScreen}

@@ -110,21 +110,21 @@
         color: var(--color-white) !important;
       }
 
-      .Badge:not(.pinned):not(.muted) {
+      .ChatBadge:not(.pinned):not(.muted) {
         color: var(--color-chat-active);
         background: var(--color-white);
       }
 
-      .Badge:not(.pinned).muted {
+      .ChatBadge:not(.pinned).muted {
         color: var(--color-white);
         background: #FFFFFF33;
       }
 
-      .avatar-badge-wrapper .Badge:not(.pinned) {
+      .avatar-badge-wrapper .ChatBadge:not(.pinned) {
         --outline-color: transparent;
       }
 
-      .avatar-badge-wrapper .Badge:not(.pinned).muted {
+      .avatar-badge-wrapper .ChatBadge:not(.pinned).muted {
         background: var(--color-gray);
       }
     }
@@ -204,11 +204,11 @@
 
     --outline-color: var(--color-background);
 
-    .Badge {
+    .ChatBadge {
       box-shadow: 0 0 0 2px var(--outline-color);
     }
 
-    .Badge-transition {
+    .ChatBadge-transition {
       transition: opacity var(--layer-transition), transform var(--layer-transition);
 
       body.no-page-transitions & {

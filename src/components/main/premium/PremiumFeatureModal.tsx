@@ -76,7 +76,7 @@ const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'emoji_status',
 ];
 
-type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType, 'uploadMaxFileparts'>;
+type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType, 'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined'>;
 
 const LIMITS_ORDER: ApiLimitTypeWithoutUpload[] = [
   'channels',

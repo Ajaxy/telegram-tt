@@ -40,6 +40,7 @@ import {
   buildApiChatSettings,
   buildApiChatReactions,
   buildApiTopic,
+  buildApiChatlistInvite, buildApiChatlistExportedInvite,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
@@ -56,7 +57,9 @@ import {
   buildInputPhoto,
   generateRandomBigInt,
 } from '../gramjsBuilders';
-import { addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb } from '../helpers';
+import {
+  addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb, isChatFolder,
+} from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildStickerSet } from '../apiBuilders/symbols';
@@ -816,7 +819,7 @@ export async function fetchChatFolders() {
   }
 
   const defaultFolderPosition = result.findIndex((folder) => folder instanceof GramJs.DialogFilterDefault);
-  const dialogFilters = result.filter((df): df is GramJs.DialogFilter => df instanceof GramJs.DialogFilter);
+  const dialogFilters = result.filter(isChatFolder);
   const orderedIds = dialogFilters.map(({ id }) => id);
   if (defaultFolderPosition !== -1) {
     orderedIds.splice(defaultFolderPosition, 0, ALL_FOLDER_ID);
@@ -1558,4 +1561,150 @@ export function editTopic({
     closed: isClosed,
     hidden: isHidden,
   }), true);
+}
+
+export async function checkChatlistInvite({
+  slug,
+}: {
+  slug: string;
+}) {
+  const result = await invokeRequest(new GramJs.chatlists.CheckChatlistInvite({
+    slug,
+  }));
+
+  const invite = buildApiChatlistInvite(result, slug);
+
+  if (!result || !invite) return undefined;
+
+  updateLocalDb(result);
+
+  return {
+    invite,
+    users: result.users.map(buildApiUser).filter(Boolean),
+    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+  };
+}
+
+export function joinChatlistInvite({
+  slug,
+  peers,
+}: {
+  slug: string;
+  peers: ApiChat[];
+}) {
+  return invokeRequest(new GramJs.chatlists.JoinChatlistInvite({
+    slug,
+    peers: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
+  }), true, true);
+}
+
+export async function fetchLeaveChatlistSuggestions({
+  folderId,
+}: {
+  folderId: number;
+}) {
+  const result = await invokeRequest(new GramJs.chatlists.GetLeaveChatlistSuggestions({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+  }));
+
+  if (!result) return undefined;
+
+  return result.map(getApiChatIdFromMtpPeer);
+}
+
+export function leaveChatlist({
+  folderId,
+  peers,
+}: {
+  folderId: number;
+  peers: ApiChat[];
+}) {
+  return invokeRequest(new GramJs.chatlists.LeaveChatlist({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+    peers: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
+  }), true);
+}
+
+export async function createChalistInvite({
+  folderId, title, peers,
+}: {
+  folderId: number;
+  title?: string;
+  peers: (ApiChat | ApiUser)[];
+}) {
+  const result = await invokeRequest(new GramJs.chatlists.ExportChatlistInvite({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+    title: title || '',
+    peers: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
+  }), undefined, true);
+
+  if (!result || result.filter instanceof GramJs.DialogFilterDefault) return undefined;
+
+  return {
+    filter: buildApiChatFolder(result.filter),
+    invite: buildApiChatlistExportedInvite(result.invite),
+  };
+}
+
+export function deleteChatlistInvite({
+  folderId, slug,
+}: {
+  folderId: number;
+  slug: string;
+}) {
+  return invokeRequest(new GramJs.chatlists.DeleteExportedInvite({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+    slug,
+  }));
+}
+
+export async function editChatlistInvite({
+  folderId, slug, title, peers,
+}: {
+  folderId: number;
+  slug: string;
+  title?: string;
+  peers: (ApiChat | ApiUser)[];
+}) {
+  const result = await invokeRequest(new GramJs.chatlists.EditExportedInvite({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+    slug,
+    title,
+    peers: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
+  }));
+  if (!result) return undefined;
+
+  return buildApiChatlistExportedInvite(result);
+}
+
+export async function fetchChatlistInvites({
+  folderId,
+}: {
+  folderId: number;
+}) {
+  const result = await invokeRequest(new GramJs.chatlists.GetExportedInvites({
+    chatlist: new GramJs.InputChatlistDialogFilter({
+      filterId: folderId,
+    }),
+  }));
+
+  if (!result) return undefined;
+
+  updateLocalDb(result);
+
+  return {
+    invites: result.invites.map(buildApiChatlistExportedInvite).filter(Boolean),
+    users: result.users.map(buildApiUser).filter(Boolean),
+    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+  };
 }

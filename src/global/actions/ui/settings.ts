@@ -1,15 +1,18 @@
+import { addCallback } from '../../../lib/teact/teactn';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { addActionHandler, getActions } from '../../index';
+
+import { SettingsScreens } from '../../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
+
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
 import switchTheme from '../../../util/switchTheme';
 import { setLanguage, setTimeFormat } from '../../../util/langProvider';
 import { IS_IOS } from '../../../util/windowEnvironment';
-import type { ActionReturnType, GlobalState } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
-import { addCallback } from '../../../lib/teact/teactn';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
-import { selectCanAnimateInterface } from '../../selectors';
+import { selectCanAnimateInterface, selectChatFolder } from '../../selectors';
 
 let prevGlobal: GlobalState | undefined;
 
@@ -87,8 +90,58 @@ addActionHandler('setThemeSettings', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('requestNextSettingsScreen', (global, actions, payload): ActionReturnType => {
-  const { screen, tabId = getCurrentTabId() } = payload;
+  const { screen, foldersAction, tabId = getCurrentTabId() } = payload;
   return updateTabState(global, {
     nextSettingsScreen: screen,
+    nextFoldersAction: foldersAction,
+  }, tabId);
+});
+
+addActionHandler('openEditChatFolder', (global, actions, payload): ActionReturnType => {
+  const { folderId, isOnlyInvites, tabId = getCurrentTabId() } = payload;
+
+  const chatFolder = selectChatFolder(global, folderId);
+  if (!chatFolder) return;
+
+  actions.requestNextSettingsScreen({
+    screen: isOnlyInvites ? SettingsScreens.FoldersEditFolderInvites : SettingsScreens.FoldersEditFolderFromChatList,
+    foldersAction: {
+      type: 'editFolder',
+      payload: chatFolder,
+    },
+    tabId,
+  });
+});
+
+addActionHandler('openShareChatFolderModal', (global, actions, payload): ActionReturnType => {
+  const {
+    folderId, url, noRequestNextScreen, tabId = getCurrentTabId(),
+  } = payload;
+
+  const chatFolder = selectChatFolder(global, folderId);
+  const isChatList = chatFolder?.isChatList;
+  if (isChatList && !noRequestNextScreen) {
+    actions.openEditChatFolder({ folderId, isOnlyInvites: true, tabId });
+    return undefined;
+  }
+
+  if (!noRequestNextScreen) actions.requestNextSettingsScreen({ screen: SettingsScreens.FoldersShare, tabId });
+
+  return updateTabState(global, {
+    shareFolderScreen: {
+      folderId,
+      isFromSettings: Boolean(noRequestNextScreen),
+      url,
+    },
+  }, tabId);
+});
+
+addActionHandler('closeShareChatFolderModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  actions.requestNextSettingsScreen({ screen: undefined, tabId });
+
+  return updateTabState(global, {
+    shareFolderScreen: undefined,
   }, tabId);
 });

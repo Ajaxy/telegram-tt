@@ -55,7 +55,7 @@ import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
 import ChatFolderModal from '../ChatFolderModal.async';
 import ChatCallStatus from './ChatCallStatus';
-import Badge from './Badge';
+import ChatBadge from './ChatBadge';
 import AvatarBadge from './AvatarBadge';
 
 import './Chat.scss';
@@ -264,7 +264,7 @@ const Chat: FC<OwnProps & StateProps> = ({
         </div>
         <div className="subtitle">
           {renderSubtitle()}
-          <Badge chat={chat} isPinned={isPinned} isMuted={isMuted} />
+          <ChatBadge chat={chat} isPinned={isPinned} isMuted={isMuted} />
         </div>
       </div>
       {shouldRenderDeleteModal && (

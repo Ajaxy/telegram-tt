@@ -153,6 +153,7 @@ export type ApiChatInviteImporter = {
   date: number;
   isRequested?: boolean;
   about?: string;
+  isFromChatList?: boolean;
 };
 
 export interface ApiCountry {

@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   useRef,
   memo,
@@ -7,10 +6,19 @@ import React, {
 } from '../../lib/teact/teact';
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 
+import type { FC } from '../../lib/teact/teact';
+import type { MenuItemContextAction } from './ListItem';
+
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import forceReflow from '../../util/forceReflow';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
+import useMenuPosition from '../../hooks/useMenuPosition';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+
+import Menu from './Menu';
+import MenuItem from './MenuItem';
+import MenuSeparator from './MenuSeparator';
 
 import './Tab.scss';
 
@@ -22,8 +30,10 @@ type OwnProps = {
   badgeCount?: number;
   isBadgeActive?: boolean;
   previousActiveTab?: number;
-  onClick: (arg: number) => void;
-  clickArg: number;
+  onClick?: (arg: number) => void;
+  clickArg?: number;
+  contextActions?: MenuItemContextAction[];
+  contextRootElementSelector?: string;
 };
 
 const classNames = {
@@ -41,6 +51,8 @@ const Tab: FC<OwnProps> = ({
   previousActiveTab,
   onClick,
   clickArg,
+  contextActions,
+  contextRootElementSelector,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const tabRef = useRef<HTMLDivElement>(null);
@@ -95,19 +107,59 @@ const Tab: FC<OwnProps> = ({
     });
   }, [isActive, previousActiveTab]);
 
+  const {
+    contextMenuPosition, handleContextMenu, handleBeforeContextMenu, handleContextMenuClose,
+    handleContextMenuHide, isContextMenuOpen,
+  } = useContextMenuHandlers(tabRef, !contextActions);
+
   const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (contextActions && (e.button === MouseButton.Secondary || !onClick)) {
+      handleBeforeContextMenu(e);
+    }
+
     if (e.type === 'mousedown' && e.button !== MouseButton.Main) {
       return;
     }
 
-    onClick(clickArg);
-  }, [clickArg, onClick]);
+    onClick?.(clickArg!);
+  }, [clickArg, contextActions, handleBeforeContextMenu, onClick]);
+
+  const getTriggerElement = useCallback(() => tabRef.current, []);
+
+  const getRootElement = useCallback(
+    () => (contextRootElementSelector
+      ? tabRef.current!.closest(contextRootElementSelector)
+      : document.body),
+    [contextRootElementSelector],
+  );
+
+  const getMenuElement = useCallback(
+    () => document.querySelector('#portals')!
+      .querySelector('.Tab-context-menu .bubble'),
+    [],
+  );
+
+  const getLayout = useCallback(
+    () => ({ withPortal: true }),
+    [],
+  );
+
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  );
 
   return (
     <div
-      className={buildClassName('Tab', className)}
+      className={buildClassName('Tab', onClick && 'Tab--interactive', className)}
       onClick={IS_TOUCH_ENV ? handleClick : undefined}
       onMouseDown={!IS_TOUCH_ENV ? handleClick : undefined}
+      onContextMenu={handleContextMenu}
       ref={tabRef}
     >
       <span className="Tab_inner">
@@ -118,6 +170,38 @@ const Tab: FC<OwnProps> = ({
         {isBlocked && <i className="icon icon-lock-badge blocked" />}
         <i className="platform" />
       </span>
+
+      {contextActions && contextMenuPosition !== undefined && (
+        <Menu
+          isOpen={isContextMenuOpen}
+          transformOriginX={transformOriginX}
+          transformOriginY={transformOriginY}
+          positionX={positionX}
+          positionY={positionY}
+          style={menuStyle}
+          className="Tab-context-menu"
+          autoClose
+          onClose={handleContextMenuClose}
+          onCloseAnimationEnd={handleContextMenuHide}
+          withPortal
+        >
+          {contextActions.map((action) => (
+            ('isSeparator' in action) ? (
+              <MenuSeparator key={action.key || 'separator'} />
+            ) : (
+              <MenuItem
+                key={action.title}
+                icon={action.icon}
+                destructive={action.destructive}
+                disabled={!action.handler}
+                onClick={action.handler}
+              >
+                {action.title}
+              </MenuItem>
+            )
+          ))}
+        </Menu>
+      )}
     </div>
   );
 };

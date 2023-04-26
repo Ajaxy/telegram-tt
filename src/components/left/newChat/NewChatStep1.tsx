@@ -112,6 +112,7 @@ const NewChatStep1: FC<OwnProps & StateProps> = ({
           filterPlaceholder={lang('SendMessageTo')}
           searchInputId="new-group-picker-search"
           isLoading={isSearching}
+          isSearchable
           onSelectedIdsChange={onSelectedMemberIdsChange}
           onFilterChange={handleFilterChange}
         />

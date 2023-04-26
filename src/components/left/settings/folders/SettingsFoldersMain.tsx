@@ -139,6 +139,7 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
         id: folder.id,
         title: folder.title,
         subtitle: getFolderDescriptionText(lang, folder, chatsCountByFolderId[folder.id]),
+        isChatList: folder.isChatList,
       };
     });
   }, [folderIds, foldersById, lang, chatsCountByFolderId]);
@@ -296,7 +297,10 @@ const SettingsFoldersMain: FC<OwnProps & StateProps> = ({
                     {renderText(folder.title, ['emoji'])}
                     {isBlocked && <i className="icon icon-lock-badge settings-folders-blocked-icon" />}
                   </span>
-                  <span className="subtitle">{folder.subtitle}</span>
+                  <span className="subtitle">
+                    {folder.isChatList && <i className="icon icon-link mr-1" />}
+                    {folder.subtitle}
+                  </span>
                 </ListItem>
               </Draggable>
             );

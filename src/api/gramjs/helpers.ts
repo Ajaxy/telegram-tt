@@ -24,6 +24,12 @@ export function resolveMessageApiChatId(mtpMessage: GramJs.TypeMessage) {
   return getApiChatIdFromMtpPeer(mtpMessage.peerId);
 }
 
+export function isChatFolder(
+  filter?: GramJs.TypeDialogFilter,
+): filter is GramJs.DialogFilter | GramJs.DialogFilterChatlist {
+  return filter instanceof GramJs.DialogFilter || filter instanceof GramJs.DialogFilterChatlist;
+}
+
 export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageService) {
   const messageFullId = `${resolveMessageApiChatId(message)}-${message.id}`;
 

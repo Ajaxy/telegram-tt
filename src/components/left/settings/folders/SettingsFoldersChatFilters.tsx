@@ -43,6 +43,8 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   const folderAllOrderedIds = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
   const folderArchivedOrderedIds = useFolderManagerForOrderedIds(ARCHIVED_FOLDER_ID);
 
+  const shouldHideChatTypes = state.folder.isChatList;
+
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on chats, so we avoid them
     const chatsById = getGlobal().chats.byId;
@@ -116,6 +118,7 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
       selectedIds={selectedChatIds}
       selectedChatTypes={selectedChatTypes}
       filterValue={chatFilter}
+      shouldHideChatTypes={shouldHideChatTypes}
       onSelectedIdsChange={handleSelectedIdsChange}
       onSelectedChatTypesChange={handleSelectedChatTypesChange}
       onFilterChange={handleFilterChange}

@@ -9,7 +9,7 @@ import buildClassName from '../../../util/buildClassName';
 import ShowTransition from '../../ui/ShowTransition';
 import AnimatedCounter from '../../common/AnimatedCounter';
 
-import './Badge.scss';
+import './ChatBadge.scss';
 
 type OwnProps = {
   chat: ApiChat;
@@ -21,7 +21,7 @@ type OwnProps = {
   forceHidden?: boolean;
 };
 
-const Badge: FC<OwnProps> = ({
+const ChatBadge: FC<OwnProps> = ({
   topic, chat, isPinned, isMuted, shouldShowOnlyMostImportant, wasTopicOpened, forceHidden,
 }) => {
   const {
@@ -58,7 +58,7 @@ const Badge: FC<OwnProps> = ({
 
   const isUnread = Boolean(unreadCount || hasUnreadMark);
   const className = buildClassName(
-    'Badge',
+    'ChatBadge',
     shouldBeMuted && 'muted',
     !isUnread && isPinned && 'pinned',
     isUnread && 'unread',
@@ -66,19 +66,19 @@ const Badge: FC<OwnProps> = ({
 
   function renderContent() {
     const unreadReactionsElement = unreadReactionsCount && (
-      <div className={buildClassName('Badge reaction', shouldBeMuted && 'muted')}>
+      <div className={buildClassName('ChatBadge reaction', shouldBeMuted && 'muted')}>
         <i className="icon icon-heart" />
       </div>
     );
 
     const unreadMentionsElement = unreadMentionsCount && (
-      <div className="Badge mention">
+      <div className="ChatBadge mention">
         <i className="icon icon-mention" />
       </div>
     );
 
     const unopenedTopicElement = isTopicUnopened && (
-      <div className={buildClassName('Badge unopened', shouldBeMuted && 'muted')} />
+      <div className={buildClassName('ChatBadge unopened', shouldBeMuted && 'muted')} />
     );
 
     const unreadCountElement = (hasUnreadMark || unreadCount) ? (
@@ -109,17 +109,17 @@ const Badge: FC<OwnProps> = ({
     }
 
     return (
-      <div className="Badge-wrapper">
+      <div className="ChatBadge-wrapper">
         {elements}
       </div>
     );
   }
 
   return (
-    <ShowTransition isCustom className="Badge-transition" isOpen={isShown}>
+    <ShowTransition isCustom className="ChatBadge-transition" isOpen={isShown}>
       {renderContent()}
     </ShowTransition>
   );
 };
 
-export default memo(Badge);
+export default memo(ChatBadge);
