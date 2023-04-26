@@ -77,6 +77,15 @@
     }
   }
 
+  .MenuItem .Toggle {
+    margin-inline-start: auto;
+  }
+
+  .MenuItem.compact .Toggle {
+    transform: scale(0.75);
+    margin-inline-end: -0.125rem;
+  }
+
   .MenuItem.compact .Switcher {
     transform: scale(0.75);
   }

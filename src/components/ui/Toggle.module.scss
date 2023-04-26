@@ -1,15 +1,10 @@
 .root {
-  --widget-width: 2.375rem;
-  --widget-height: 0.3125rem;
-  --thumb-size: 0.625rem;
+  --widget-width: 3.125rem;
+  --widget-height: 0.375rem;
+  --thumb-size: 1.125rem;
 
   display: inline-flex;
   position: relative;
-}
-
-.alignToEnd {
-  margin-inline-start: auto;
-  margin-inline-end: 0.25rem;
 }
 
 .widget {
@@ -28,6 +23,7 @@
     background-color: var(--color-background);
     border-radius: calc(var(--thumb-size) / 2);
     transition: transform 200ms;
+    border: 0.125rem solid var(--color-gray);
 
     :global(body.no-page-transitions) & {
       transition: none !important;
@@ -36,20 +32,16 @@
 
   &.min::after {
     transform: translate(0, -50%);
-    /* stylelint-disable-next-line plugin/whole-pixel */
-    box-shadow: 0 0 0 0.109375rem var(--color-gray);
   }
 
   &.mid::after {
     transform: translate(calc(var(--widget-width) / 2 - calc(var(--thumb-size) / 2)), -50%);
-    /* stylelint-disable-next-line plugin/whole-pixel */
-    box-shadow: 0 0 0 0.109375rem var(--color-primary);
+    border-color: var(--color-primary)
   }
 
   &.max::after {
-    transform: translate(calc(var(--widget-width) - var(--thumb-size)), -50%);
-    /* stylelint-disable-next-line plugin/whole-pixel */
-    box-shadow: 0 0 0 0.109375rem var(--color-primary);
+    transform: translate(calc(var(--widget-width) - var(--thumb-size) + 0.125rem), -50%);
+    border-color: var(--color-primary)
   }
 }
 
