@@ -1,5 +1,8 @@
 import { useEffect } from '../lib/teact/teact';
+
 import { createCallbackManager } from '../util/callbacks';
+
+import { useLastCallback } from './useLastCallback';
 
 const startCallbacks = createCallbackManager();
 const endCallbacks = createCallbackManager();
@@ -8,27 +11,30 @@ let timeout: number | undefined;
 let isActive = false;
 
 const usePriorityPlaybackCheck = (
-  handleAnimationStart: AnyToVoidFunction,
-  handleAnimationEnd: AnyToVoidFunction,
+  onStart?: AnyToVoidFunction,
+  onEnd?: AnyToVoidFunction,
   isDisabled = false,
 ) => {
+  const lastOnStart = useLastCallback(onStart);
+  const lastOnEnd = useLastCallback(onEnd);
+
   useEffect(() => {
     if (isDisabled) {
       return undefined;
     }
 
     if (isActive) {
-      handleAnimationStart();
+      lastOnStart();
     }
 
-    startCallbacks.addCallback(handleAnimationStart);
-    endCallbacks.addCallback(handleAnimationEnd);
+    startCallbacks.addCallback(lastOnStart);
+    endCallbacks.addCallback(lastOnEnd);
 
     return () => {
-      endCallbacks.removeCallback(handleAnimationEnd);
-      startCallbacks.removeCallback(handleAnimationStart);
+      endCallbacks.removeCallback(lastOnEnd);
+      startCallbacks.removeCallback(lastOnStart);
     };
-  }, [isDisabled, handleAnimationEnd, handleAnimationStart]);
+  }, [isDisabled, lastOnStart, lastOnEnd]);
 };
 
 export function isPriorityPlaybackActive() {

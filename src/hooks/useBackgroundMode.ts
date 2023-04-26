@@ -1,6 +1,7 @@
 import { useEffect } from '../lib/teact/teact';
 
 import { createCallbackManager } from '../util/callbacks';
+import { useLastCallback } from './useLastCallback';
 
 const blurCallbacks = createCallbackManager();
 const focusCallbacks = createCallbackManager();
@@ -26,33 +27,26 @@ export default function useBackgroundMode(
   onFocus?: AnyToVoidFunction,
   isDisabled = false,
 ) {
+  const lastOnBlur = useLastCallback(onBlur);
+  const lastOnFocus = useLastCallback(onFocus);
+
   useEffect(() => {
     if (isDisabled) {
       return undefined;
     }
 
     if (!isFocused) {
-      onBlur?.();
+      lastOnBlur();
     }
 
-    if (onBlur) {
-      blurCallbacks.addCallback(onBlur);
-    }
-
-    if (onFocus) {
-      focusCallbacks.addCallback(onFocus);
-    }
+    blurCallbacks.addCallback(lastOnBlur);
+    focusCallbacks.addCallback(lastOnFocus);
 
     return () => {
-      if (onFocus) {
-        focusCallbacks.removeCallback(onFocus);
-      }
-
-      if (onBlur) {
-        blurCallbacks.removeCallback(onBlur);
-      }
+      focusCallbacks.removeCallback(lastOnFocus);
+      blurCallbacks.removeCallback(lastOnBlur);
     };
-  }, [isDisabled, onBlur, onFocus]);
+  }, [isDisabled, lastOnBlur, lastOnFocus]);
 }
 
 export function isBackgroundModeActive() {
