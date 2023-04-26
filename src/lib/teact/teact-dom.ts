@@ -710,7 +710,7 @@ function updateClassName(element: HTMLElement, value: string) {
 export function addExtraClass(element: Element, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
-    if (className.length > 1) {
+    if (classNames.length > 1) {
       classNames.forEach((cn) => {
         addExtraClass(element, cn, true);
       });
@@ -732,7 +732,7 @@ export function addExtraClass(element: Element, className: string, forceSingle =
 export function removeExtraClass(element: Element, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
-    if (className.length > 1) {
+    if (classNames.length > 1) {
       classNames.forEach((cn) => {
         removeExtraClass(element, cn, true);
       });
@@ -756,7 +756,7 @@ export function removeExtraClass(element: Element, className: string, forceSingl
 export function toggleExtraClass(element: Element, className: string, force?: boolean, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
-    if (className.length > 1) {
+    if (classNames.length > 1) {
       classNames.forEach((cn) => {
         toggleExtraClass(element, cn, force, true);
       });

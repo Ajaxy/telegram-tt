@@ -175,11 +175,11 @@ function Transition({
         activeKey,
         currentKeyRef,
         container,
+        childNodes[activeIndex],
+        childNodes[prevActiveIndex],
         shouldRestoreHeight,
         onStart,
         onStop,
-        childNodes[activeIndex] as HTMLElement,
-        childNodes[prevActiveIndex] as HTMLElement,
       );
 
       return;
@@ -347,27 +347,27 @@ function performSlideOptimized(
   activeKey: number,
   currentKeyRef: { current: number | undefined },
   container: HTMLElement,
+  toSlide: ChildNode,
+  fromSlide?: ChildNode,
   shouldRestoreHeight?: boolean,
   onStart?: NoneToVoidFunction,
   onStop?: NoneToVoidFunction,
-  toSlide?: HTMLElement,
-  fromSlide?: HTMLElement,
 ) {
-  if (!fromSlide || !toSlide) {
-    return;
-  }
-
   if (shouldDisableAnimation) {
     toggleExtraClass(container, `Transition-${name}`, !isBackwards);
     toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
-    fromSlide.style.transition = 'none';
-    fromSlide.style.transform = '';
-    removeExtraClass(fromSlide, CLASSES.active);
+    if (fromSlide instanceof HTMLElement) {
+      fromSlide.style.transition = 'none';
+      fromSlide.style.transform = '';
+      removeExtraClass(fromSlide, CLASSES.active);
+    }
 
-    toSlide.style.transition = 'none';
-    toSlide.style.transform = 'translate3d(0, 0, 0)';
-    addExtraClass(toSlide, CLASSES.active);
+    if (toSlide instanceof HTMLElement) {
+      toSlide.style.transition = 'none';
+      toSlide.style.transform = 'translate3d(0, 0, 0)';
+      addExtraClass(toSlide, CLASSES.active);
+    }
 
     cleanup();
 
@@ -385,39 +385,50 @@ function performSlideOptimized(
   toggleExtraClass(container, `Transition-${name}`, !isBackwards);
   toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
-  fromSlide.style.transition = 'none';
-  fromSlide.style.transform = 'translate3d(0, 0, 0)';
+  if (fromSlide instanceof HTMLElement) {
+    fromSlide.style.transition = 'none';
+    fromSlide.style.transform = 'translate3d(0, 0, 0)';
+  }
 
-  toSlide.style.transition = 'none';
-  toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+  if (toSlide instanceof HTMLElement) {
+    toSlide.style.transition = 'none';
+    toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+  }
 
   requestForcedReflow(() => {
-    forceReflow(toSlide);
+    if (toSlide instanceof HTMLElement) {
+      forceReflow(toSlide);
+    }
 
     return () => {
-      fromSlide.style.transition = '';
-      fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
+      if (fromSlide instanceof HTMLElement) {
+        fromSlide.style.transition = '';
+        fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
+        removeExtraClass(fromSlide, CLASSES.active);
+      }
 
-      toSlide.style.transition = '';
-      toSlide.style.transform = 'translate3d(0, 0, 0)';
-
-      removeExtraClass(fromSlide, CLASSES.active);
-      addExtraClass(toSlide, CLASSES.active);
+      if (toSlide instanceof HTMLElement) {
+        toSlide.style.transition = '';
+        toSlide.style.transform = 'translate3d(0, 0, 0)';
+        addExtraClass(toSlide, CLASSES.active);
+      }
     };
   });
 
-  waitForTransitionEnd(fromSlide, () => {
-    const { clientHeight } = toSlide;
+  waitForTransitionEnd(toSlide, () => {
+    const clientHeight = toSlide instanceof HTMLElement ? toSlide.clientHeight : undefined;
 
     requestMutation(() => {
       if (activeKey !== currentKeyRef.current) {
         return;
       }
 
-      fromSlide.style.transition = 'none';
-      fromSlide.style.transform = '';
+      if (fromSlide instanceof HTMLElement) {
+        fromSlide.style.transition = 'none';
+        fromSlide.style.transform = '';
+      }
 
-      if (shouldRestoreHeight) {
+      if (shouldRestoreHeight && clientHeight && toSlide instanceof HTMLElement) {
         toSlide.style.height = 'auto';
         container.style.height = `${clientHeight}px`;
       }

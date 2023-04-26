@@ -42,8 +42,8 @@ type StateProps = {
 
 enum AppScreens {
   auth,
-  lock,
   main,
+  lock,
   inactive,
 }
 
