@@ -18,6 +18,7 @@ type OwnProps = {
 };
 
 const LOOP_LIMIT = 2;
+const DEFAULT_ICON_ID = '0';
 
 const TopicIcon: FC<OwnProps> = ({
   topic,
@@ -28,7 +29,7 @@ const TopicIcon: FC<OwnProps> = ({
   observeIntersection,
   onClick,
 }) => {
-  if (topic.iconEmojiId) {
+  if (topic.iconEmojiId && topic.iconEmojiId !== DEFAULT_ICON_ID) {
     return (
       <CustomEmoji
         documentId={topic.iconEmojiId}
