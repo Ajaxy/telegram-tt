@@ -1,17 +1,41 @@
 import type { Signal } from '../util/signals';
+import type { Scheduler } from '../util/schedulers';
 
 import useThrottledCallback from './useThrottledCallback';
 import useDebouncedCallback from './useDebouncedCallback';
 import useDerivedSignal from './useDerivedSignal';
 
-export function useThrottledResolver<T>(resolver: () => T, deps: any[], ms: number, noFirst = false) {
+export function useThrottledResolver<T>(
+  resolver: () => T,
+  deps: any[],
+  msOrSchedulerFn: number | Scheduler,
+  noFirst = false,
+) {
   return useThrottledCallback((setValue: (newValue: T) => void) => {
     setValue(resolver());
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, deps, ms, noFirst);
+  }, deps, msOrSchedulerFn, noFirst);
 }
 
-export function useDebouncedResolver<T>(resolver: () => T, deps: any[], ms: number, noFirst = false, noLast = false) {
+export function useThrottledSignal<T extends any>(
+  getValue: Signal<T>,
+  ms: number,
+  noFirst = false,
+): Signal<T> {
+  const throttledResolver = useThrottledResolver(() => getValue(), [getValue], ms, noFirst);
+
+  return useDerivedSignal(
+    throttledResolver, [throttledResolver, getValue], true,
+  );
+}
+
+export function useDebouncedResolver<T>(
+  resolver: () => T,
+  deps: any[],
+  ms: number,
+  noFirst = false,
+  noLast = false,
+) {
   return useDebouncedCallback((setValue: (newValue: T) => void) => {
     setValue(resolver());
     // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
