@@ -66,6 +66,11 @@ const SettingsFolders: FC<OwnProps> = ({
     currentScreen, onReset, onScreenSelect,
   ]);
 
+  const handleSaveFilter = useCallback(() => {
+    dispatch({ type: 'saveFilters' });
+    handleReset();
+  }, [dispatch, handleReset]);
+
   const handleCreateFolder = useCallback(() => {
     dispatch({ type: 'reset' });
     onScreenSelect(SettingsScreens.FoldersCreateFolder);
@@ -144,6 +149,7 @@ const SettingsFolders: FC<OwnProps> = ({
           state={state}
           dispatch={dispatch}
           onReset={handleReset}
+          onSaveFilter={handleSaveFilter}
           isActive={isActive}
         />
       );
@@ -155,6 +161,7 @@ const SettingsFolders: FC<OwnProps> = ({
           state={state}
           dispatch={dispatch}
           onReset={handleReset}
+          onSaveFilter={handleSaveFilter}
           isActive={isActive}
         />
       );

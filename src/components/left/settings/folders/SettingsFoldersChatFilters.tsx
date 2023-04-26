@@ -25,7 +25,8 @@ type OwnProps = {
   state: FoldersState;
   dispatch: FolderEditDispatch;
   isActive?: boolean;
-  onReset: () => void;
+  onReset: VoidFunction;
+  onSaveFilter: VoidFunction;
 };
 
 const SettingsFoldersChatFilters: FC<OwnProps> = ({
@@ -34,6 +35,7 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
   dispatch,
   isActive,
   onReset,
+  onSaveFilter,
 }) => {
   const { chatFilter } = state;
   const { selectedChatIds, selectedChatTypes } = selectChatFilters(state, mode, true);
@@ -122,6 +124,8 @@ const SettingsFoldersChatFilters: FC<OwnProps> = ({
       onSelectedIdsChange={handleSelectedIdsChange}
       onSelectedChatTypesChange={handleSelectedChatTypesChange}
       onFilterChange={handleFilterChange}
+      onSaveFilter={onSaveFilter}
+      isActive={isActive}
     />
   );
 };

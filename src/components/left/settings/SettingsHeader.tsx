@@ -19,7 +19,6 @@ type OwnProps = {
   currentScreen: SettingsScreens;
   editedFolderId?: number;
   onReset: () => void;
-  onSaveFilter: () => void;
   onScreenSelect: (screen: SettingsScreens) => void;
 };
 
@@ -27,7 +26,6 @@ const SettingsHeader: FC<OwnProps> = ({
   currentScreen,
   editedFolderId,
   onReset,
-  onSaveFilter,
   onScreenSelect,
 }) => {
   const {
@@ -227,27 +225,14 @@ const SettingsHeader: FC<OwnProps> = ({
       case SettingsScreens.FoldersExcludedChats:
       case SettingsScreens.FoldersExcludedChatsFromChatList:
         return (
-          <div className="settings-main-header">
-            {(currentScreen === SettingsScreens.FoldersIncludedChats
-              || currentScreen === SettingsScreens.FoldersIncludedChatsFromChatList) ? (
-                <h3>{lang('FilterInclude')}</h3>
-              ) : (
-                <h3>{lang('FilterExclude')}</h3>
-              )}
-
-            <Button
-              round
-              size="smaller"
-              color="translucent"
-              className="color-primary"
-              onClick={onSaveFilter}
-              ariaLabel={lang('AutoDeleteConfirm')}
-            >
-              <i className="icon icon-check" />
-            </Button>
-          </div>
+          <h3>
+            {lang(
+              currentScreen === SettingsScreens.FoldersIncludedChats
+                  || currentScreen === SettingsScreens.FoldersIncludedChatsFromChatList
+                ? 'FilterInclude' : 'FilterExclude',
+            )}
+          </h3>
         );
-
       default:
         return (
           <div className="settings-main-header">
