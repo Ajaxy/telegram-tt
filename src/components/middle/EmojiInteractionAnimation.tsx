@@ -103,7 +103,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
         key={`effect_${effectAnimationId}`}
         size={EFFECT_SIZE}
         tgsUrl={effectTgsUrl}
-        play={isPlaying}
+        play
         quality={IS_ANDROID ? 0.5 : undefined}
         forceOnHeavyAnimation
         noLoop
