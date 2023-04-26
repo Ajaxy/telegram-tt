@@ -80,7 +80,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   const animationRef = useRef<RLottieInstance>();
   const isFirstRender = useRef(true);
 
-  const canPlay = play || playSegment;
+  const playKey = play || playSegment;
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
 
@@ -162,7 +162,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (
       !animation
       || !(playRef.current || playSegmentRef.current)
-      || isFrozen()
+      || isFrozen(forceOnHeavyAnimation)
     ) {
       return;
     }
@@ -172,7 +172,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     } else {
       animation.play(shouldRestart, viewId);
     }
-  }, [animation, playRef, playSegmentRef, viewId]);
+  }, [animation, forceOnHeavyAnimation, playRef, playSegmentRef, viewId]);
 
   const playAnimationOnRaf = useCallback(() => {
     requestMeasure(playAnimation);
@@ -201,14 +201,14 @@ const AnimatedSticker: FC<OwnProps> = ({
       return;
     }
 
-    if (canPlay) {
-      if (!isFrozen()) {
+    if (playKey) {
+      if (!isFrozen(forceOnHeavyAnimation)) {
         playAnimation(noLoop);
       }
     } else {
       pauseAnimation();
     }
-  }, [animation, canPlay, noLoop, playAnimation, pauseAnimation]);
+  }, [animation, playKey, noLoop, playAnimation, pauseAnimation, forceOnHeavyAnimation]);
 
   useEffect(() => {
     if (animation) {
@@ -221,12 +221,12 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
   }, [playAnimation, animation, tgsUrl]);
 
-  useHeavyAnimationCheck(pauseAnimation, playAnimation, !canPlay || forceOnHeavyAnimation);
-  usePriorityPlaybackCheck(pauseAnimation, playAnimation, !canPlay);
+  useHeavyAnimationCheck(pauseAnimation, playAnimation, !playKey || forceOnHeavyAnimation);
+  usePriorityPlaybackCheck(pauseAnimation, playAnimation, !playKey);
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
   // then we can play again.
-  useBackgroundMode(pauseAnimation, playAnimationOnRaf, !canPlay);
+  useBackgroundMode(pauseAnimation, playAnimationOnRaf, !playKey);
 
   if (sharedCanvas) {
     return undefined;
@@ -248,6 +248,6 @@ const AnimatedSticker: FC<OwnProps> = ({
 
 export default memo(AnimatedSticker);
 
-function isFrozen() {
-  return isHeavyAnimating() || isPriorityPlaybackActive() || isBackgroundModeActive();
+function isFrozen(forceOnHeavyAnimation = false) {
+  return (!forceOnHeavyAnimation && isHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
 }
