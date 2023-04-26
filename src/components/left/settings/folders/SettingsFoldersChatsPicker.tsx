@@ -1,6 +1,6 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  useCallback, useRef, useEffect, memo,
+  useCallback, useRef, useEffect, memo, useState,
 } from '../../../../lib/teact/teact';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../../global';
@@ -24,6 +24,7 @@ import GroupChatInfo from '../../../common/GroupChatInfo';
 import PickerSelectedItem from '../../../common/PickerSelectedItem';
 import InfiniteScroll from '../../../ui/InfiniteScroll';
 import Loading from '../../../ui/Loading';
+import FloatingActionButton from '../../../ui/FloatingActionButton';
 
 import '../../../common/Picker.scss';
 import './SettingsFoldersChatsPicker.scss';
@@ -38,6 +39,8 @@ type OwnProps = {
   onSelectedIdsChange: (ids: string[]) => void;
   onSelectedChatTypesChange: (types: string[]) => void;
   onFilterChange: (value: string) => void;
+  onSaveFilter: VoidFunction;
+  isActive?: boolean;
 };
 
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -61,12 +64,21 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
   onSelectedChatTypesChange,
   onFilterChange,
   maxChats,
+  onSaveFilter,
+  isActive,
 }) => {
   const { openLimitReachedModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLInputElement>(null);
   const chatTypes = mode === 'included' ? INCLUDED_CHAT_TYPES : EXCLUDED_CHAT_TYPES;
   const shouldMinimize = selectedIds.length + selectedChatTypes.length > MAX_FULL_ITEMS;
+  const [isTouched, setIsTouched] = useState(false);
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsTouched(false);
+    }
+  }, [isActive]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -89,6 +101,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
       }
       newSelectedIds.push(id);
     }
+    setIsTouched(true);
     onSelectedIdsChange(newSelectedIds);
   }, [selectedIds, onSelectedIdsChange, maxChats, mode, openLimitReachedModal]);
 
@@ -99,6 +112,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
     } else {
       newSelectedChatTypes.push(key);
     }
+    setIsTouched(true);
     onSelectedChatTypesChange(newSelectedChatTypes);
   }, [selectedChatTypes, onSelectedChatTypesChange]);
 
@@ -225,6 +239,14 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
           <Loading key="loading" />
         )}
       </InfiniteScroll>
+
+      <FloatingActionButton
+        isShown={isTouched}
+        onClick={onSaveFilter}
+        ariaLabel={lang('Save')}
+      >
+        <i className="icon icon-check" />
+      </FloatingActionButton>
     </div>
   );
 };

@@ -186,11 +186,6 @@ const Settings: FC<OwnProps> = ({
     currentScreen, onReset, onScreenSelect,
   ]);
 
-  const handleSaveFilter = useCallback(() => {
-    foldersDispatch({ type: 'saveFilters' });
-    handleReset();
-  }, [foldersDispatch, handleReset]);
-
   function renderCurrentSectionContent(isScreenActive: boolean, screen: SettingsScreens) {
     const privacyAllowScreens: Record<number, boolean> = {
       [SettingsScreens.PrivacyPhoneNumber]: PRIVACY_PHONE_NUMBER_SCREENS.includes(screen),
@@ -459,7 +454,6 @@ const Settings: FC<OwnProps> = ({
         <SettingsHeader
           currentScreen={currentScreen}
           onReset={handleReset}
-          onSaveFilter={handleSaveFilter}
           onScreenSelect={onScreenSelect}
           editedFolderId={foldersState.folderId}
         />
