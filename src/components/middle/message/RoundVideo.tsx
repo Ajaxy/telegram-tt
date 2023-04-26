@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -25,6 +26,8 @@ import useMediaTransition from '../../../hooks/useMediaTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useFlag from '../../../hooks/useFlag';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
+import useSignal from '../../../hooks/useSignal';
+import { useThrottledSignal } from '../../../hooks/useAsyncResolvers';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -38,6 +41,8 @@ type OwnProps = {
   lastSyncTime?: number;
   isDownloading?: boolean;
 };
+
+const PROGRESS_THROTTLE = 16; // Min period needed for `playerEl.currentTime` to update
 
 let stopPrevious: NoneToVoidFunction;
 
@@ -89,8 +94,19 @@ const RoundVideo: FC<OwnProps> = ({
     transitionClassNames: spinnerClassNames,
   } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
 
-  const [isActivated, setIsActivated] = useState<boolean>(false);
-  const [progress, setProgress] = useState<number>(0);
+  const [isActivated, setIsActivated] = useState(false);
+
+  const [getProgress, setProgress] = useSignal(0);
+  const getThrottledProgress = useThrottledSignal(getProgress, PROGRESS_THROTTLE);
+
+  useEffect(() => {
+    if (!isActivated) {
+      return;
+    }
+
+    const playerEl = playerRef.current!;
+    setProgress(playerEl.currentTime / playerEl.duration);
+  }, [setProgress, isActivated, getThrottledProgress]);
 
   useLayoutEffect(() => {
     if (!isActivated) {
@@ -100,9 +116,7 @@ const RoundVideo: FC<OwnProps> = ({
     const svgCenter = ROUND_VIDEO_DIMENSIONS_PX / 2;
     const svgMargin = 6;
     const circumference = (svgCenter - svgMargin) * 2 * Math.PI;
-    const strokeDashOffset = circumference - progress * circumference;
-
-    const playerEl = playerRef.current!;
+    const strokeDashOffset = circumference - getThrottledProgress() * circumference;
     const playingProgressEl = playingProgressRef.current!;
     const svgEl = playingProgressEl.firstElementChild;
 
@@ -118,9 +132,7 @@ const RoundVideo: FC<OwnProps> = ({
     } else {
       (svgEl.firstElementChild as SVGElement).setAttribute('stroke-dashoffset', strokeDashOffset.toString());
     }
-
-    setProgress(playerEl.currentTime / playerEl.duration);
-  }, [isActivated, progress]);
+  }, [isActivated, getThrottledProgress]);
 
   const shouldPlay = Boolean(mediaData && isIntersecting);
 
@@ -136,7 +148,7 @@ const RoundVideo: FC<OwnProps> = ({
     requestMutation(() => {
       playingProgressRef.current!.innerHTML = '';
     });
-  }, []);
+  }, [setProgress]);
 
   const capturePlaying = useCallback(() => {
     stopPrevious?.();
@@ -179,7 +191,7 @@ const RoundVideo: FC<OwnProps> = ({
     const playerEl = e.currentTarget;
 
     setProgress(playerEl.currentTime / playerEl.duration);
-  }, []);
+  }, [setProgress]);
 
   return (
     <div
