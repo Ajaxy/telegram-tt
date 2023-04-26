@@ -291,7 +291,7 @@ const StickerSet: FC<OwnProps> = ({
             onClick={handleDefaultTopicIconClick}
             key="default-topic-icon"
           >
-            <img src={grey} alt="Reset" />
+            <img src={grey} alt="Reset" className="sticker-media" />
           </Button>
         )}
         {withDefaultStatusIcon && (
