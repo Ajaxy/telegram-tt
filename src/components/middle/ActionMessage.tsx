@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -149,19 +149,26 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [targetUserIds, usersById]);
 
-  const content = renderActionMessageText(
-    lang,
-    message,
-    senderUser,
-    senderChat,
-    targetUsers,
-    targetMessage,
-    targetChatId,
-    topic,
-    { isEmbedded },
-    observeIntersectionForLoading,
-    observeIntersectionForPlaying,
-  );
+  const renderContent = useCallback(() => {
+    return renderActionMessageText(
+      lang,
+      message,
+      senderUser,
+      senderChat,
+      targetUsers,
+      targetMessage,
+      targetChatId,
+      topic,
+      { isEmbedded },
+      observeIntersectionForLoading,
+      observeIntersectionForPlaying,
+    );
+  },
+  [
+    isEmbedded, lang, message, observeIntersectionForLoading, observeIntersectionForPlaying, senderChat,
+    senderUser, targetChatId, targetMessage, targetUsers, topic,
+  ]);
+
   const {
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
@@ -190,7 +197,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   }
 
   if (isEmbedded) {
-    return <span ref={ref} className="embedded-action-message">{content}</span>;
+    return <span ref={ref} className="embedded-action-message">{renderContent()}</span>;
   }
 
   function renderGift() {
@@ -231,12 +238,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
     >
-      {!isSuggestedAvatar && <span className="action-message-content">{content}</span>}
+      {!isSuggestedAvatar && <span className="action-message-content">{renderContent()}</span>}
       {isGift && renderGift()}
       {isSuggestedAvatar && (
         <ActionMessageSuggestedAvatar
           message={message}
-          content={content}
+          renderContent={renderContent}
         />
       )}
       {contextMenuPosition && (

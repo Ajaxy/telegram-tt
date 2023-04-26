@@ -19,12 +19,12 @@ import ConfirmDialog from '../ui/ConfirmDialog';
 
 type OwnProps = {
   message: ApiMessage;
-  content?: TextPart;
+  renderContent: () => TextPart | undefined;
 };
 
 const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   message,
-  content,
+  renderContent,
 }) => {
   const {
     openMediaViewer, uploadProfilePhoto, showNotification,
@@ -102,7 +102,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
         withVideo={isVideo}
         size="jumbo"
       />
-      <span>{content}</span>
+      <span>{renderContent()}</span>
 
       <span className="action-message-button">{lang(isVideo ? 'ViewVideoAction' : 'ViewPhotoAction')}</span>
       <CropModal
@@ -115,7 +115,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
         title={lang('SuggestedVideo')}
         confirmHandler={handleSetVideo}
         onClose={closeVideoModal}
-        textParts={content}
+        textParts={renderContent()}
       />
     </span>
   );
