@@ -1,43 +1,25 @@
-**Telegram Web A was updated to version 1.60**
+**Telegram Web A was updated to version 1.61**
 
 [🤩](customEmoji:5373026167722876724) **What’s New**
 
-• Archived Chats Header - Archived Chats are now accessible from the chat list in a collapsable header.
+• Shareable Chat Folders – Your chat folders can now be shared with friends or colleagues – adding the folder and **joining all its chats** in one tap.
 
-• Reply Threads - You can tap to view all replies to a message in a separate window.
+• Power Saving Mode – You can **extend battery life** and **improve performance** by turning on Power Saving Mode or individually disabling autoplay, animations and effects in __Settings > Animations and Performance__.
 
-• Emoji In Captions - You can now open the emoji panel [🙂](customEmoji:5971928678198676594) when adding a caption to media.
+• Better Bots – Telegram bots can completely replace any website. These bots can now be launched **in any chat** – try typing [@DurgerKingBot](https://t.me/DurgerKingBot) (followed by a space) in any chat, or posting [this link](https://t.me/DurgerKingBot/menu).
 
-• Message Translation - You can translate any message into another language from the context menu. To show this option, enable Translation in _Settings > Language_.
+• Enhanced Design – Enjoy transparent layers with **beautiful blur effects** when selecting emoji, stickers, reactions and statuses. Sending messages also has a satisfying **new animation**.
 
-• Emoji Statuses - Premium users can update their animated emoji status from the [🌟](customEmoji:6046154264353442824) at the top of their chat list.
+• Infinite Reactions – Telegram Premium users can pick reactions from an infinite selection of custom emoji. They can also use **up to 3 reactions** on any message to combine multiple emotions. [👍](customEmoji:5469770542288478598)[🔥](customEmoji:5420315771991497307)[❤️](customEmoji:5449505950283078474)
 
-• Granular Media Permissions - Admins can choose which media types are allowed in their groups, each with separate toggles.
+• Preview in Media Viewer – Scrubbing through videos now shows a **thumbnail preview** to easily find specific scenes.
+
+• Group Chat Improvements – Create groups with **only yourself** or restrict anyone from adding you directly to groups (via __Settings > Privacy and Security > Group and Channels > Nobody__).
+
+• Send When Online – By right-clicking the Send button, you can schedule a message to be sent when the recipient comes online.
 
 [😍](customEmoji:5372886001465170842) **What’s Better**
 
-• Multiple tabs can be opened by holding <Ctrl> (⌘ on macOS) and clicking on a chat.
+• As usual, we've added a pack of optimizations and performance improvements. If you ever run into an issue with the app, be sure to [report it](https://bugs.telegram.org/?tag_ids=41&sort=time) on the Bugs and Suggestions Platform.
 
-• Opening a chat changes the title of your browser tab to the chat name. This can be modified in _Settings > Privacy and Security_.
-
-• Bot reply keyboards are now supported in groups and channels.
-
-• The video and audio players always remember your last playback speed.
-
-• Opening topics has an improved animation.
-
-• Performance when typing messages has been drastically improved.
-
-• Fixed disappearing drafts.
-
-• Fixed missing results in Global Search.
-
-• Fixed rare issues with opening text format options.
-
-• Fixed pasting text from Google Docs.
-
-• Fixed auto-closing context menu on iOS PWA.
-
-• Fixed changing group and channel admin rights.
-
-• Various layout and performance improvements.
+🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webachannel)** and **[Russian](https://t.me/webachannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
