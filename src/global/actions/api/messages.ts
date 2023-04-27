@@ -1,5 +1,7 @@
 import type { RequiredGlobalActions } from '../../index';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 
 import type {
   ActionReturnType, ApiDraft, GlobalState, TabArgs,
@@ -1473,8 +1475,43 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
   return global;
 });
 
+// https://github.com/telegramdesktop/tdesktop/blob/11906297d82b6ff57b277da5251d2e6eb3d8b6d0/Telegram/SourceFiles/api/api_views.cpp#L22
+const SEND_VIEWS_TIMEOUT = 1000;
+let viewsIncrementTimeout: number | undefined;
+let idsToIncrementViews: Record<string, Set<number>> = {};
+
+function incrementViews() {
+  if (viewsIncrementTimeout) {
+    clearTimeout(viewsIncrementTimeout);
+    viewsIncrementTimeout = undefined;
+  }
+
+  // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
+  const { loadMessageViews } = getActions();
+  Object.entries(idsToIncrementViews).forEach(([chatId, ids]) => {
+    loadMessageViews({ chatId, ids: Array.from(ids), shouldIncrement: true });
+  });
+
+  idsToIncrementViews = {};
+}
+addActionHandler('scheduleForViewsIncrement', (global, actions, payload): ActionReturnType => {
+  const { ids, chatId } = payload;
+
+  if (!viewsIncrementTimeout) {
+    setTimeout(incrementViews, SEND_VIEWS_TIMEOUT);
+  }
+
+  if (!idsToIncrementViews[chatId]) {
+    idsToIncrementViews[chatId] = new Set();
+  }
+
+  ids.forEach((id) => {
+    idsToIncrementViews[chatId].add(id);
+  });
+});
+
 addActionHandler('loadMessageViews', async (global, actions, payload): Promise<void> => {
-  const { chatId, ids } = payload;
+  const { chatId, ids, shouldIncrement } = payload;
 
   const chat = selectChat(global, chatId);
   if (!chat) return;
@@ -1482,6 +1519,7 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
   const result = await callApi('fetchMessageViews', {
     chat,
     ids,
+    shouldIncrement,
   });
 
   if (!result) return;

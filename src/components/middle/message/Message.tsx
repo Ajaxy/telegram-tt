@@ -1236,6 +1236,7 @@ const Message: FC<OwnProps & StateProps> = ({
         data-has-unread-mention={message.hasUnreadMention || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
         data-is-pinned={isPinned || undefined}
+        data-should-update-views={message.views !== undefined}
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">
