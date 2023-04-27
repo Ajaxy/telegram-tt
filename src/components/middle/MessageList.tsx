@@ -20,7 +20,12 @@ import type { Signal } from '../../util/signals';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import { LoadMoreDirection } from '../../types';
 
-import { ANIMATION_END_DELAY, LOCAL_MESSAGE_MIN_ID, MESSAGE_LIST_SLICE } from '../../config';
+import {
+  ANIMATION_END_DELAY,
+  LOCAL_MESSAGE_MIN_ID,
+  MESSAGE_LIST_SLICE,
+  SERVICE_NOTIFICATIONS_USER_ID,
+} from '../../config';
 import {
   selectChatMessages,
   selectIsViewportNewest,
@@ -127,6 +132,7 @@ type StateProps = {
   lastSyncTime?: number;
   topic?: ApiTopic;
   noMessageSendingAnimation?: boolean;
+  isServiceNotificationsChat?: boolean;
 };
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
@@ -179,6 +185,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   withDefaultBg,
   topic,
   noMessageSendingAnimation,
+  isServiceNotificationsChat,
   onPinnedIntersectionChange,
   getForceNextPinnedInHeader,
 }) => {
@@ -270,11 +277,15 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
 
-    const orderRule: (keyof ApiMessage)[] = type === 'scheduled' ? ['date', 'id'] : ['id'];
+    // Service notifications have local IDs which may be not in sync with real message history
+    const orderRule: (keyof ApiMessage)[] = type === 'scheduled' || isServiceNotificationsChat
+      ? ['date', 'id']
+      : ['id'];
+
     return listedMessages.length
       ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current)
       : undefined;
-  }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId, type]);
+  }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId, type, isServiceNotificationsChat]);
 
   useInterval(() => {
     if (!messageIds || !messagesById) {
@@ -736,6 +747,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime: global.lastSyncTime,
       topic,
       noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
+      isServiceNotificationsChat: chatId === SERVICE_NOTIFICATIONS_USER_ID,
       ...(withLastMessageWhenPreloading && { lastMessage }),
     };
   },
