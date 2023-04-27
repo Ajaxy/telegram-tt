@@ -17,9 +17,11 @@ export default function useMessageObservers(
   containerRef: RefObject<HTMLDivElement>,
   memoFirstUnreadIdRef: { current: number | undefined },
   onPinnedIntersectionChange: PinnedIntersectionChangedCallback,
+  chatId: string,
 ) {
   const {
     markMessageListRead, markMentionsRead, animateUnreadReaction,
+    scheduleForViewsIncrement,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -40,6 +42,7 @@ export default function useMessageObservers(
     const reactionIds: number[] = [];
     const viewportPinnedIdsToAdd: number[] = [];
     const viewportPinnedIdsToRemove: number[] = [];
+    const scheduledToUpdateViews: number[] = [];
     let isReversed = false;
 
     entries.forEach((entry) => {
@@ -49,6 +52,7 @@ export default function useMessageObservers(
 
       const { dataset } = target as HTMLDivElement;
       const messageId = Number(dataset.lastMessageId || dataset.messageId);
+      const shouldUpdateViews = dataset.shouldUpdateViews === 'true';
       const albumMainId = dataset.albumMainId ? Number(dataset.albumMainId) : undefined;
 
       if (!isIntersecting) {
@@ -76,6 +80,10 @@ export default function useMessageObservers(
       if (dataset.isPinned) {
         viewportPinnedIdsToAdd.push(albumMainId || messageId);
       }
+
+      if (shouldUpdateViews) {
+        scheduledToUpdateViews.push(albumMainId || messageId);
+      }
     });
 
     if (memoFirstUnreadIdRef.current && maxId >= memoFirstUnreadIdRef.current) {
@@ -92,6 +100,10 @@ export default function useMessageObservers(
 
     if (viewportPinnedIdsToAdd.length || viewportPinnedIdsToRemove.length) {
       onPinnedIntersectionChange({ viewportPinnedIdsToAdd, viewportPinnedIdsToRemove, isReversed });
+    }
+
+    if (scheduledToUpdateViews.length) {
+      scheduleForViewsIncrement({ chatId, ids: scheduledToUpdateViews });
     }
   });
 

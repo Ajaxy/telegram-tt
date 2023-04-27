@@ -302,7 +302,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
     if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID) {
       return;
     }
-    const ids = messageIds.filter((id) => messagesById[id]?.repliesThreadInfo?.isComments);
+    const ids = messageIds.filter((id) => messagesById[id]?.repliesThreadInfo?.isComments
+      || messagesById[id]?.views !== undefined);
 
     if (!ids.length) return;
 

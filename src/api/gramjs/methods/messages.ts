@@ -875,14 +875,16 @@ export async function markMessagesRead({
 }
 
 export async function fetchMessageViews({
-  chat, ids,
+  chat, ids, shouldIncrement,
 }: {
-  chat: ApiChat; ids: number[];
+  chat: ApiChat;
+  ids: number[];
+  shouldIncrement?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.GetMessagesViews({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: ids,
-    increment: false,
+    increment: shouldIncrement,
   }));
 
   if (!result) return undefined;

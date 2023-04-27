@@ -90,7 +90,7 @@ const MessageListContent: FC<OwnProps> = ({
     observeIntersectionForReading,
     observeIntersectionForLoading,
     observeIntersectionForPlaying,
-  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange);
+  } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange, chatId);
 
   const {
     backwardsTriggerRef,

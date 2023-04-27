@@ -1736,9 +1736,14 @@ export interface ActionPayloads {
     chatId: string;
     offsetId?: number;
   };
+  scheduleForViewsIncrement: {
+    chatId: string;
+    ids: number[];
+  };
   loadMessageViews: {
     chatId: string;
     ids: number[];
+    shouldIncrement?: boolean;
   };
   animateUnreadReaction: {
     messageIds: number[];
