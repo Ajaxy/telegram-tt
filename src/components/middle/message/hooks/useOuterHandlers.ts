@@ -181,7 +181,9 @@ export default function useOuterHandlers(
   ]);
 
   function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
-    unmarkQuickReactionVisible();
+    // Because `mousemove` event is throttled, we need to also throttle `mouseleave` event,
+    // so the order of events is preserved
+    requestMeasure(unmarkQuickReactionVisible);
     if (shouldHandleMouseLeave) handleDocumentGroupMouseLeave(e);
   }
 
