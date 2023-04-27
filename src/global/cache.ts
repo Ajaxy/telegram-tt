@@ -40,6 +40,7 @@ import { isUserId } from './helpers';
 import { getOrderedIds } from '../util/folderManager';
 import { clearGlobalForLockScreen } from './reducers';
 import { encryptSession } from '../util/passcode';
+import { getIsMobile } from '../hooks/useAppLayout';
 
 const UPDATE_THROTTLE = 5000;
 
@@ -409,22 +410,22 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'serviceNotifications',
       'attachmentSettings',
       'leftColumnWidth',
-      'lastIsChatInfoShown',
       'archiveSettings',
       'mediaViewer',
       'audioPlayer',
       'shouldShowContextMenuHint',
+      'trustedBotIds',
+      'recentlyFoundChatIds',
     ]),
+    lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
     customEmojis: reduceCustomEmojis(global),
     users: reduceUsers(global),
     chats: reduceChats(global),
     messages: reduceMessages(global),
-    recentlyFoundChatIds: global.recentlyFoundChatIds,
     settings: reduceSettings(global),
     chatFolders: reduceChatFolders(global),
     groupCalls: reduceGroupCalls(global),
     availableReactions: reduceAvailableReactions(global),
-    trustedBotIds: global.trustedBotIds,
     passcode: pick(global.passcode, [
       'isScreenLocked',
       'hasPasscode',
