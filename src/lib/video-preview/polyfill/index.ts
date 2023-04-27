@@ -54,15 +54,9 @@ export async function load(
   await libav.load();
 
   if (options.polyfill) {
-    for (const exp of [
-      'EncodedVideoChunk',
-      'VideoFrame',
-      'VideoDecoder',
-    ]) {
-      if (!(global as any)[exp]) {
-        (global as any)[exp] = (this as any)[exp];
-      }
-    }
+    globalThis.VideoDecoder = vdec.VideoDecoder;
+    globalThis.VideoFrame = vf.VideoFrame;
+    globalThis.EncodedVideoChunk = evc.EncodedVideoChunk;
   }
 
   await rendering.load(libavOptions, !!options.polyfill);
