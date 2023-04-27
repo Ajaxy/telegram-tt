@@ -743,7 +743,7 @@ export default memo(withGlobal<OwnProps>(
       isLoadingBotInfo,
       botInfo,
       threadTopMessageId,
-      hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
+      hasLinkedChat: chatFullInfo ? Boolean(chatFullInfo.linkedChatId) : undefined,
       lastSyncTime: global.lastSyncTime,
       topic,
       noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
