@@ -15,7 +15,7 @@ import useLang from '../../../hooks/useLang';
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 import ListItem from '../../ui/ListItem';
-import AnimatedCounter from '../../common/AnimatedCounter';
+import Badge from '../../ui/Badge';
 
 import styles from './Archive.module.scss';
 
@@ -107,11 +107,10 @@ const Archive: FC<OwnProps> = ({
               {lang('ArchivedChats')}
             </h3>
           </div>
-          {Boolean(archiveUnreadCount) && (
-            <div className={styles.unreadCount}>
-              <AnimatedCounter text={formatIntegerCompact(archiveUnreadCount)} />
-            </div>
-          )}
+          <Badge
+            className={styles.unreadCount}
+            text={archiveUnreadCount ? formatIntegerCompact(archiveUnreadCount) : undefined}
+          />
         </div>
       </div>
     );
@@ -135,11 +134,10 @@ const Archive: FC<OwnProps> = ({
             <div className={buildClassName('status', styles.chatsPreview)}>
               {previewItems}
             </div>
-            {Boolean(archiveUnreadCount) && (
-              <div className="Badge">
-                <AnimatedCounter text={formatIntegerCompact(archiveUnreadCount)} />
-              </div>
-            )}
+            <Badge
+              className={styles.unreadCount}
+              text={archiveUnreadCount ? formatIntegerCompact(archiveUnreadCount) : undefined}
+            />
           </div>
         </div>
       </>
