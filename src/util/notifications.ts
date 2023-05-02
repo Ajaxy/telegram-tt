@@ -73,7 +73,7 @@ function checkIfPushSupported() {
   return true;
 }
 
-export function checkIfNotificationsSupported() {
+function checkIfNotificationsSupported() {
   // Let's check if the browser supports notifications
   if (!('Notification' in window)) {
     if (DEBUG) {
@@ -137,27 +137,20 @@ function checkIfShouldResubscribe(subscription: PushSubscription | null) {
 
 async function requestPermission() {
   if (!('Notification' in window)) return;
-  let permission = Notification.permission;
-  if (!['granted', 'denied'].includes(permission)) {
-    permission = await Notification.requestPermission();
+  if (!['granted', 'denied'].includes(Notification.permission)) {
+    await Notification.requestPermission();
   }
-  const isGranted = permission === 'granted';
-  const { updateWebNotificationSettings } = getActions();
-  updateWebNotificationSettings({
-    hasWebNotifications: isGranted,
-    hasPushNotifications: isGranted,
-  });
 }
 
 async function unsubscribeFromPush(subscription: PushSubscription | null) {
   const global = getGlobal();
-  const { deleteDeviceToken } = getActions();
+  const dispatch = getActions();
   if (subscription) {
     try {
       const deviceToken = getDeviceToken(subscription);
       await callApi('unregisterDevice', deviceToken);
       await subscription.unsubscribe();
-      deleteDeviceToken();
+      dispatch.deleteDeviceToken();
       return;
     } catch (error) {
       if (DEBUG) {
@@ -168,7 +161,7 @@ async function unsubscribeFromPush(subscription: PushSubscription | null) {
   }
   if (global.push) {
     await callApi('unregisterDevice', global.push.deviceToken);
-    deleteDeviceToken();
+    dispatch.deleteDeviceToken();
   }
 }
 
@@ -233,7 +226,6 @@ export async function subscribe() {
   let subscription = await serviceWorkerRegistration.pushManager.getSubscription();
   if (!checkIfShouldResubscribe(subscription)) return;
   await unsubscribeFromPush(subscription);
-  const { setDeviceToken, updateWebNotificationSettings } = getActions();
   try {
     subscription = await serviceWorkerRegistration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -244,13 +236,10 @@ export async function subscribe() {
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
     await callApi('registerDevice', deviceToken);
-    setDeviceToken(deviceToken);
-    updateWebNotificationSettings({
-      hasWebNotifications: true,
-      hasPushNotifications: true,
-    });
+    getActions()
+      .setDeviceToken(deviceToken);
   } catch (error: any) {
-    if (Notification.permission === 'denied') {
+    if (Notification.permission === 'denied' as NotificationPermission) {
       // The user denied the notification permission which
       // means we failed to subscribe and the user will need
       // to manually change the notification permission to
@@ -272,10 +261,6 @@ export async function subscribe() {
         await requestPermission();
       }
     }
-    updateWebNotificationSettings({
-      hasWebNotifications: false,
-      hasPushNotifications: false,
-    });
   }
 }
 

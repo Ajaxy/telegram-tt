@@ -6,7 +6,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
-import { playNotifySound, checkIfNotificationsSupported } from '../../../util/notifications';
+import { playNotifySound } from '../../../util/notifications';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';
@@ -55,8 +55,6 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
   }, [loadNotificationSettings]);
 
   const runDebounced = useRunDebounced(500, true);
-
-  const areNotificationsSupported = checkIfNotificationsSupported();
 
   const handleSettingsChange = useCallback((
     e: ChangeEvent<HTMLInputElement>,
@@ -149,12 +147,11 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line max-len
           subLabel={lang(hasWebNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasWebNotifications}
-          disabled={!areNotificationsSupported}
           onChange={handleWebNotificationsChange}
         />
         <Checkbox
           label="Offline notifications"
-          disabled={!hasWebNotifications || !areNotificationsSupported}
+          disabled={!hasWebNotifications}
           // eslint-disable-next-line max-len
           subLabel={lang(hasPushNotifications ? 'UserInfo.NotificationsEnabled' : 'UserInfo.NotificationsDisabled')}
           checked={hasPushNotifications}
@@ -165,7 +162,6 @@ const SettingsNotifications: FC<OwnProps & StateProps> = ({
             label="Sound"
             min={0}
             max={10}
-            disabled={!areNotificationsSupported}
             value={notificationSoundVolume}
             onChange={handleVolumeChange}
           />
