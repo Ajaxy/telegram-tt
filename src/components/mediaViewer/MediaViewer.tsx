@@ -274,14 +274,17 @@ const MediaViewer: FC<StateProps> = ({
     }
   }, [isGif, isVideo]);
 
+  const mediaIdsRef = useStateRef(mediaIds);
+
   const getMediaId = useCallback((fromId?: number, direction?: number): number | undefined => {
     if (fromId === undefined) return undefined;
-    const index = mediaIds.indexOf(fromId);
-    if ((direction === -1 && index > 0) || (direction === 1 && index < mediaIds.length - 1)) {
-      return mediaIds[index + direction];
+    const mIds = mediaIdsRef.current;
+    const index = mIds.indexOf(fromId);
+    if ((direction === -1 && index > 0) || (direction === 1 && index < mIds.length - 1)) {
+      return mIds[index + direction];
     }
     return undefined;
-  }, [mediaIds]);
+  }, [mediaIdsRef]);
 
   const handleBeforeDelete = useCallback(() => {
     if (mediaIds.length <= 1) {

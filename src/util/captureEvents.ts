@@ -347,6 +347,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     const delta = clamp(e.deltaY, -25, 25);
     wheelZoom -= delta * 0.01;
     wheelZoom = clamp(wheelZoom, minZoom * 0.5, maxZoom * 3);
+    isZooming = true;
     options.onZoom(e, {
       zoom: round(wheelZoom, 2),
       initialCenterX: initialTouchCenter.x,
@@ -404,9 +405,7 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
     if (!metaKeyPressed && !isZooming) {
       // Check if this event produced by user scroll and not by inertia
       const isUserEvent = lethargy.check(e);
-      if (wheelZoom !== 1) {
-        onWheelDrag(e);
-      } else if (isUserEvent) {
+      if (wheelZoom !== 1 || isUserEvent) {
         onWheelDrag(e);
       }
     }
