@@ -125,6 +125,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     focusLastMessage,
     loadTopics,
     openForumPanel,
+    closeForumPanel,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -156,7 +157,12 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const handleClick = useCallback(() => {
     if (isForum) {
-      openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
+      if (isSelectedForum) {
+        closeForumPanel(undefined, { forceOnHeavyAnimation: true });
+      } else {
+        openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
+      }
+
       return;
     }
 
@@ -165,7 +171,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
-  }, [isForum, openChat, chatId, isSelected, canScrollDown, openForumPanel, focusLastMessage]);
+  }, [isForum, chatId, isSelected, canScrollDown, isSelectedForum]);
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
