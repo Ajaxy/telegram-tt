@@ -77,9 +77,6 @@
   }
 
   @media (min-width: 1276px) {
-    transform: translate3d(0, 0, 0);
-    transition: opacity 0.15s ease, transform var(--layer-transition);
-
     :global(#Main.right-column-open) & {
       padding-left: calc(var(--right-column-width) + 1rem);
     }
