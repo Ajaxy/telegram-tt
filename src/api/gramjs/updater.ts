@@ -199,9 +199,10 @@ export function updater(update: Update) {
         message,
       });
     } else {
+      // We don't have preview for action or 'via bot' messages, so `newMessage` update here is required
+      const hasLocalCopy = sentMessageIds.has(message.id) && !message.viaBotId && !message.content.action;
       onUpdate({
-        // We don't have preview for 'via bot' messages, so `newMessage` update here is required
-        '@type': sentMessageIds.has(message.id) && !message.viaBotId ? 'updateMessage' : 'newMessage',
+        '@type': hasLocalCopy ? 'updateMessage' : 'newMessage',
         id: message.id,
         chatId: message.chatId,
         message,
