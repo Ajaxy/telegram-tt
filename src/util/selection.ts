@@ -92,3 +92,8 @@ export function setCaretPosition(element: Node, position: number) {
 
   return position;
 }
+
+export function removeAllSelections() {
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+}
