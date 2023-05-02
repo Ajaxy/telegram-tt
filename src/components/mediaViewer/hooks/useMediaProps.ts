@@ -133,8 +133,8 @@ export const useMediaProps = ({
     if (message) {
       if (isDocumentPhoto || isDocumentVideo) {
         return getMessageDocument(message)!.mediaSize!;
-      } else if (photo || webPagePhoto) {
-        return getPhotoFullDimensions((photo || webPagePhoto)!)!;
+      } else if (photo || webPagePhoto || actionPhoto) {
+        return getPhotoFullDimensions((photo || webPagePhoto || actionPhoto)!)!;
       } else if (video || webPageVideo) {
         return getVideoDimensions((video || webPageVideo)!)!;
       }
@@ -149,6 +149,7 @@ export const useMediaProps = ({
     message,
     photo,
     video,
+    actionPhoto,
     webPagePhoto,
     webPageVideo,
   ]);
