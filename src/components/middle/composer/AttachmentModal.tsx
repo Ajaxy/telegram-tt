@@ -28,6 +28,7 @@ import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import buildClassName from '../../../util/buildClassName';
 import { validateFiles } from '../../../util/files';
+import { removeAllSelections } from '../../../util/selection';
 
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
@@ -238,6 +239,12 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
       setShouldSendGrouped(attachmentSettings.shouldSendGrouped);
     }
   }, [attachmentSettings, isOpen, shouldSuggestCompression]);
+
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      removeAllSelections();
+    }
+  }, [isMobile, isOpen]);
 
   const {
     isContextMenuOpen: isCustomSendMenuOpen,
