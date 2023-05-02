@@ -11,11 +11,11 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FC } from '../../lib/teact/teact';
 import type { ApiChat } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { getOrderedTopics } from '../../global/helpers';
 import { getIsMobile } from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
+import { useFastClick } from '../../hooks/useFastClick';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
 
@@ -59,17 +59,22 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   const [isReversedCorner, setIsReversedCorner] = useState(false);
   const [overwrittenWidth, setOverwrittenWidth] = useState<number | undefined>(undefined);
 
-  function handleOpenTopic(e: React.MouseEvent<HTMLDivElement>) {
+  const {
+    handleClick: handleOpenTopicClick,
+    handleMouseDown: handleOpenTopicMouseDown,
+  } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
     if (lastActiveTopic.unreadCount === 0) return;
+
     e.stopPropagation();
     e.preventDefault();
+
     openChat({
       id: chat.id,
       threadId: lastActiveTopic.id,
       shouldReplaceHistory: true,
       noForumTopicPanel: getIsMobile(),
     });
-  }
+  });
 
   useEffect(() => {
     const lastMessageElement = lastMessageRef.current;
@@ -105,8 +110,8 @@ const ChatForumLastMessage: FC<OwnProps> = ({
               lastActiveTopic.unreadCount && styles.unread,
             )}
             ref={mainColumnRef}
-            onMouseDown={IS_TOUCH_ENV ? undefined : handleOpenTopic}
-            onClick={IS_TOUCH_ENV ? handleOpenTopic : undefined}
+            onClick={handleOpenTopicClick}
+            onMouseDown={handleOpenTopicMouseDown}
           >
             <TopicIcon
               topic={lastActiveTopic}
@@ -144,8 +149,8 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       <div
         className={buildClassName(styles.lastMessage, lastActiveTopic?.unreadCount && styles.unread)}
         ref={lastMessageRef}
-        onMouseDown={IS_TOUCH_ENV ? undefined : handleOpenTopic}
-        onClick={IS_TOUCH_ENV ? handleOpenTopic : undefined}
+        onClick={handleOpenTopicClick}
+        onMouseDown={handleOpenTopicMouseDown}
       >
         {lastMessage}
         {!overwrittenWidth && !isReversedCorner && (

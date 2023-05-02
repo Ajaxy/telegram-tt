@@ -10,13 +10,14 @@ import {
   getMessageMediaHash, getMessageSingleInlineButton,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import { useFastClick } from '../../hooks/useFastClick';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 
 import RippleEffect from '../ui/RippleEffect';
@@ -78,13 +79,7 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
   const [noHoverColor, markNoHoverColor, unmarkNoHoverColor] = useFlag();
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.type === 'mousedown' && e.button !== MouseButton.Main) {
-      return;
-    }
-
-    onClick?.(e);
-  }, [onClick]);
+  const { handleClick, handleMouseDown } = useFastClick(onClick);
 
   function renderPictogram(thumbDataUri?: string, blobUrl?: string, spoiler?: boolean) {
     const { width, height } = getPictogramDimensions();
@@ -148,8 +143,8 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
       />
       <div
         className={buildClassName(styles.pinnedMessage, noHoverColor && styles.noHover)}
-        onClick={IS_TOUCH_ENV ? handleClick : undefined}
-        onMouseDown={!IS_TOUCH_ENV ? handleClick : undefined}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
         dir={lang.isRtl ? 'rtl' : undefined}
       >
         <PinnedMessageNavigation
