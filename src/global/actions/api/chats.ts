@@ -327,7 +327,10 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
 });
 
 addActionHandler('loadTopChats', (global): ActionReturnType => {
-  runThrottledForLoadTopChats(() => loadChats(global, 'active'));
+  runThrottledForLoadTopChats(() => {
+    loadChats(global, 'active');
+    loadChats(global, 'archived');
+  });
 });
 
 addActionHandler('requestChatUpdate', (global, actions, payload): ActionReturnType => {
