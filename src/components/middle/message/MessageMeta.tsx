@@ -18,6 +18,7 @@ import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 import AnimatedCounter from '../../common/AnimatedCounter';
 
 import './MessageMeta.scss';
+import { useFastClick } from '../../../hooks/useFastClick';
 
 type OwnProps = {
   message: ApiMessage;
@@ -53,13 +54,15 @@ const MessageMeta: FC<OwnProps> = ({
   const lang = useLang();
   const [isActivated, markActivated] = useFlag();
 
-  const handleClick = (e: React.MouseEvent) => {
+  const { handleClick, handleMouseDown } = useFastClick(onClick);
+
+  function handleImportedClick(e: React.MouseEvent) {
     e.stopPropagation();
 
     showNotification({
       message: lang('ImportedInfo'),
     });
-  };
+  }
 
   function handleOpenThread(e: React.MouseEvent) {
     e.stopPropagation();
@@ -99,7 +102,8 @@ const MessageMeta: FC<OwnProps> = ({
     <span
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
-      onClick={onClick}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       data-ignore-on-paste
     >
       {isTranslated && (
@@ -130,10 +134,10 @@ const MessageMeta: FC<OwnProps> = ({
       <span className="message-time" title={title} onMouseEnter={markActivated}>
         {message.forwardInfo?.isImported && (
           <>
-            <span className="message-imported" onClick={handleClick}>
+            <span className="message-imported" onClick={handleImportedClick}>
               {formatDateTimeToString(message.forwardInfo.date * 1000, lang.code, true)}
             </span>
-            <span className="message-imported" onClick={handleClick}>{lang('ImportedMessage')}</span>
+            <span className="message-imported" onClick={handleImportedClick}>{lang('ImportedMessage')}</span>
           </>
         )}
         {message.isEdited && `${lang('EditedMessage')} `}

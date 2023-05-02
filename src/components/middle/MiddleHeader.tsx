@@ -67,6 +67,7 @@ import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import ChatReportPanel from './ChatReportPanel';
 
 import './MiddleHeader.scss';
+import { useFastClick } from '../../hooks/useFastClick';
 
 const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
@@ -178,9 +179,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const componentRef = useRef<HTMLDivElement>(null);
   const shouldAnimateTools = useRef<boolean>(true);
 
-  const handleHeaderClick = useCallback(() => {
+  const { handleClick: handleHeaderClick, handleMouseDown: handleHeaderMouseDown } = useFastClick(() => {
     openChatWithInfo({ id: chatId, threadId });
-  }, [openChatWithInfo, chatId, threadId]);
+  });
 
   const handleUnpinMessage = useCallback((messageId: number) => {
     pinMessage({ messageId, isUnpin: true });
@@ -350,7 +351,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     return (
       <>
         {(isLeftColumnHideable || currentTransitionKey > 0) && renderBackButton(shouldShowCloseButton, true)}
-        <div className="chat-info-wrapper" onClick={handleHeaderClick}>
+        <div
+          className="chat-info-wrapper"
+          onClick={handleHeaderClick}
+          onMouseDown={handleHeaderMouseDown}
+        >
           {isUserId(chatId) ? (
             <PrivateChatInfo
               key={chatId}

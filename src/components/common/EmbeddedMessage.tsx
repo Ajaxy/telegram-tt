@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, useRef } from '../../lib/teact/teact';
+import React, { useRef } from '../../lib/teact/teact';
 
 import type {
   ApiUser, ApiMessage, ApiChat,
@@ -18,7 +18,6 @@ import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
 
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
@@ -29,6 +28,7 @@ import MessageSummary from './MessageSummary';
 import MediaSpoiler from './MediaSpoiler';
 
 import './EmbeddedMessage.scss';
+import { useFastClick } from '../../hooks/useFastClick';
 
 type OwnProps = {
   className?: string;
@@ -72,13 +72,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
   const senderTitle = sender ? getSenderTitle(lang, sender) : message?.forwardInfo?.hiddenUserName;
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.type === 'mousedown' && e.button !== MouseButton.Main) {
-      return;
-    }
-
-    onClick?.();
-  }, [onClick]);
+  const { handleClick, handleMouseDown } = useFastClick(onClick);
 
   return (
     <div
@@ -88,8 +82,8 @@ const EmbeddedMessage: FC<OwnProps> = ({
         className,
         sender && !noUserColors && `color-${getUserColorKey(sender)}`,
       )}
-      onClick={message && IS_TOUCH_ENV ? handleClick : undefined}
-      onMouseDown={message && !IS_TOUCH_ENV ? handleClick : undefined}
+      onClick={message && handleClick}
+      onMouseDown={message && handleMouseDown}
     >
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       <div className="message-text">

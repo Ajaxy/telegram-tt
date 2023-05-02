@@ -9,17 +9,18 @@ import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/faster
 import type { FC } from '../../lib/teact/teact';
 import type { MenuItemContextAction } from './ListItem';
 
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
+import { MouseButton } from '../../util/windowEnvironment';
 import forceReflow from '../../util/forceReflow';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 import useMenuPosition from '../../hooks/useMenuPosition';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import { useFastClick } from '../../hooks/useFastClick';
 
 import Menu from './Menu';
 import MenuItem from './MenuItem';
-import MenuSeparator from './MenuSeparator';
 
+import MenuSeparator from './MenuSeparator';
 import './Tab.scss';
 
 type OwnProps = {
@@ -112,7 +113,7 @@ const Tab: FC<OwnProps> = ({
     handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(tabRef, !contextActions);
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const { handleClick, handleMouseDown } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
     if (contextActions && (e.button === MouseButton.Secondary || !onClick)) {
       handleBeforeContextMenu(e);
     }
@@ -122,7 +123,7 @@ const Tab: FC<OwnProps> = ({
     }
 
     onClick?.(clickArg!);
-  }, [clickArg, contextActions, handleBeforeContextMenu, onClick]);
+  });
 
   const getTriggerElement = useCallback(() => tabRef.current, []);
 
@@ -157,8 +158,8 @@ const Tab: FC<OwnProps> = ({
   return (
     <div
       className={buildClassName('Tab', onClick && 'Tab--interactive', className)}
-      onClick={IS_TOUCH_ENV ? handleClick : undefined}
-      onMouseDown={!IS_TOUCH_ENV ? handleClick : undefined}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onContextMenu={handleContextMenu}
       ref={tabRef}
     >

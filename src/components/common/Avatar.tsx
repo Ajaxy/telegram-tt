@@ -28,6 +28,7 @@ import renderText from './helpers/renderText';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
+import { useFastClick } from '../../hooks/useFastClick';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 
@@ -130,9 +131,11 @@ const Avatar: FC<OwnProps> = ({
   if (isSavedMessages) {
     content = (
       <i
-        className={buildClassName(cn.icon,
+        className={buildClassName(
+          cn.icon,
           'icon',
-          'icon-avatar-saved-messages')}
+          'icon-avatar-saved-messages',
+        )}
         role="img"
         aria-label={author}
       />
@@ -140,9 +143,11 @@ const Avatar: FC<OwnProps> = ({
   } else if (isDeleted) {
     content = (
       <i
-        className={buildClassName(cn.icon,
+        className={buildClassName(
+          cn.icon,
           'icon',
-          'icon-avatar-deleted-account')}
+          'icon-avatar-deleted-account',
+        )}
         role="img"
         aria-label={author}
       />
@@ -150,9 +155,11 @@ const Avatar: FC<OwnProps> = ({
   } else if (isReplies) {
     content = (
       <i
-        className={buildClassName(cn.icon,
+        className={buildClassName(
+          cn.icon,
           'icon',
-          'icon-reply-filled')}
+          'icon-reply-filled',
+        )}
         role="img"
         aria-label={author}
       />
@@ -205,11 +212,12 @@ const Avatar: FC<OwnProps> = ({
   );
 
   const hasMedia = Boolean(isSavedMessages || imgBlobUrl);
-  const handleClick = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+
+  const { handleClick, handleMouseDown } = useFastClick((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
     if (onClick) {
       onClick(e, hasMedia);
     }
-  }, [onClick, hasMedia]);
+  });
 
   const senderId = (user || chat) && (user || chat)!.id;
 
@@ -217,9 +225,10 @@ const Avatar: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
-      onClick={handleClick}
       data-test-sender-id={IS_TEST ? senderId : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
     >
       {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
     </div>

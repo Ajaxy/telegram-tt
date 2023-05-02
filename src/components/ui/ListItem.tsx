@@ -10,6 +10,7 @@ import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useMenuPosition from '../../hooks/useMenuPosition';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import { useFastClick } from '../../hooks/useFastClick';
 
 import RippleEffect from './RippleEffect';
 import Menu from './Menu';
@@ -31,7 +32,9 @@ type MenuItemContextActionSeparator = {
   key?: string;
 };
 
-export type MenuItemContextAction = MenuItemContextActionItem | MenuItemContextActionSeparator;
+export type MenuItemContextAction =
+  MenuItemContextActionItem
+  | MenuItemContextActionSeparator;
 
 interface OwnProps {
   ref?: RefObject<HTMLDivElement>;
@@ -62,6 +65,7 @@ interface OwnProps {
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
+
 const ListItem: FC<OwnProps> = ({
   ref,
   buttonRef,
@@ -162,15 +166,20 @@ const ListItem: FC<OwnProps> = ({
     }
   }, [allowDisabledClick, clickArg, disabled, markIsTouched, onClick, ripple, unmarkIsTouched, href]);
 
-  const handleSecondaryIconClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const {
+    handleClick: handleSecondaryIconClick,
+    handleMouseDown: handleSecondaryIconMouseDown,
+  } = useFastClick((e: React.MouseEvent<HTMLButtonElement>) => {
     if ((disabled && !allowDisabledClick) || e.button !== 0 || (!onSecondaryIconClick && !contextActions)) return;
+
     e.stopPropagation();
+
     if (onSecondaryIconClick) {
       onSecondaryIconClick(e);
     } else {
       handleContextMenu(e);
     }
-  };
+  });
 
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (inactive || IS_TOUCH_ENV) {
@@ -242,8 +251,8 @@ const ListItem: FC<OwnProps> = ({
             round
             color="translucent"
             size="smaller"
-            onClick={IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
-            onMouseDown={!IS_TOUCH_ENV ? handleSecondaryIconClick : undefined}
+            onClick={handleSecondaryIconClick}
+            onMouseDown={handleSecondaryIconMouseDown}
           >
             <i className={`icon icon-${secondaryIcon}`} />
           </Button>

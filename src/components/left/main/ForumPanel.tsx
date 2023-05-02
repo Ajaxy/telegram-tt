@@ -20,6 +20,7 @@ import { getOrderedTopics } from '../../../global/helpers';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { createLocationHash } from '../../../util/routing';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -139,6 +140,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   useHistoryBack({
     isActive: isVisible,
     onBack: handleClose,
+    hash: chat ? createLocationHash(chat.id, 'thread', MAIN_THREAD_ID) : undefined,
   });
 
   useEffect(() => (isVisible ? captureEscKeyListener(handleClose) : undefined), [handleClose, isVisible]);
