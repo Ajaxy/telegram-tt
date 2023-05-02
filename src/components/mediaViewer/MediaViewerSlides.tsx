@@ -99,6 +99,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const rightSlideRef = useRef<HTMLDivElement>(null);
   const lastTransformRef = useRef<Transform>({ x: 0, y: 0, scale: 1 });
   const swipeDirectionRef = useRef<SwipeDirection | undefined>(undefined);
+  const initialContentRectRef = useRef<DOMRect | undefined>(undefined);
   const isReleasedRef = useRef(false);
   const [isActive, setIsActive] = useState(true);
   const [getZoomChange] = useZoomChange();
@@ -130,7 +131,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
 
   const setIsActiveDebounced = useDebouncedCallback((value) => setIsActive(value), [], DEBOUNCE_ACTIVE, true);
 
-  const shouldCloseOnVideo = isGif && !IS_IOS;
+  const shouldCloseOnVideo = Boolean(isGif && !IS_IOS);
   const clickXThreshold = IS_TOUCH_ENV ? 40 : windowWidth / 10;
 
   const handleControlsVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -144,8 +145,12 @@ const MediaViewerSlides: FC<OwnProps> = ({
   useTimeout(() => setControlsVisible(true), ANIMATION_DURATION);
 
   useEffect(() => {
-    setActiveMediaId(mediaId);
-  }, [mediaId, setActiveMediaId]);
+    const { scale, x, y } = transformRef.current;
+    // Only update active media if slide is in default position
+    if (x === 0 && y === 0 && scale === 1) {
+      setActiveMediaId(mediaId);
+    }
+  }, [mediaId, setActiveMediaId, transformRef]);
 
   useLayoutEffect(() => {
     const { x, y, scale } = getTransform();
@@ -179,7 +184,6 @@ const MediaViewerSlides: FC<OwnProps> = ({
       y: 0,
     };
     let lastGestureTime = Date.now();
-    let initialContentRect: DOMRect;
     let content: HTMLElement | null;
     const setLastGestureTime = debounce(() => {
       lastGestureTime = Date.now();
@@ -256,6 +260,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
       { x, y, scale }: Transform,
       offsetTop = 0,
     ): [Transform, boolean, boolean] => {
+      const initialContentRect = initialContentRectRef.current;
       if (!initialContentRect) return [{ x, y, scale }, true, true];
       // Get current content boundaries
       let inBoundsX = true;
@@ -429,7 +434,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           content = activeSlideRef.current.querySelector('img, video');
           if (!content) return;
           // Store initial content rect, without transformations
-          initialContentRect = content!.getBoundingClientRect();
+          initialContentRectRef.current = content.getBoundingClientRect();
         }
       },
       onDrag: (event, captureEvent, {
