@@ -666,22 +666,13 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
 export async function pinMessage({
   chat, messageId, isUnpin, isOneSide, isSilent,
 }: { chat: ApiChat; messageId: number; isUnpin: boolean; isOneSide?: boolean; isSilent?: boolean }) {
-  const result = await invokeRequest(new GramJs.messages.UpdatePinnedMessage({
+  await invokeRequest(new GramJs.messages.UpdatePinnedMessage({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: messageId,
     ...(isUnpin && { unpin: true }),
     ...(isOneSide && { pmOneside: true }),
     ...(isSilent && { silent: true }),
-  }), undefined, undefined, true);
-
-  if (!(result instanceof GramJs.Updates)) return;
-
-  // For some reason, Telegram returns UpdateMessageID when pinning a message with a randomId that is unknown to us,
-  // which causes an 'updateMessage' update instead of 'newMessage'. We ignore this update.
-  result.updates.forEach((update) => {
-    if (update instanceof GramJs.UpdateMessageID) return;
-    updater(update);
-  });
+  }));
 }
 
 export async function unpinAllMessages({ chat, threadId }: { chat: ApiChat; threadId?: number }) {
