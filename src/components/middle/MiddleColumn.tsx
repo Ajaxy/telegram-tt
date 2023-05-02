@@ -14,17 +14,16 @@ import type {
 import type { ThemeKey } from '../../types';
 
 import {
-  MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
-  SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
   ANIMATION_END_DELAY,
   DARK_THEME_BG_COLOR,
   LIGHT_THEME_BG_COLOR,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
+  MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
 } from '../../config';
 import { IS_ANDROID, IS_IOS, MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
 import { DropAreaState } from './composer/DropArea';
@@ -106,6 +105,7 @@ type StateProps = {
   defaultBannedRights?: ApiChatBannedRights;
   hasPinned?: boolean;
   hasAudioPlayer?: boolean;
+  hasButtonInHeader?: boolean;
   pinnedMessagesCount?: number;
   theme: ThemeKey;
   customBackground?: string;
@@ -156,6 +156,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   defaultBannedRights,
   hasPinned,
   hasAudioPlayer,
+  hasButtonInHeader,
   pinnedMessagesCount,
   customBackground,
   theme,
@@ -221,14 +222,12 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
   const hasTools = hasPinned && (
     windowWidth < MOBILE_SCREEN_MAX_WIDTH
+    || hasAudioPlayer
     || (
       isRightColumnShown && windowWidth > MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
       && windowWidth < SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN
-    ) || (
-      windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN
-      && windowWidth < SAFE_SCREEN_WIDTH_FOR_CHAT_INFO
-      && hasAudioPlayer
     )
+    || (!isMobile && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES)
   );
 
   const renderingChatId = usePrevDuringAnimation(chatId, closeAnimationDuration);
@@ -720,6 +719,7 @@ export default memo(withGlobal<OwnProps>(
         || Boolean(!isPinnedMessageList && pinnedIds?.length)
       ),
       hasAudioPlayer: Boolean(audioMessage),
+      hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
       shouldSkipHistoryAnimations,
       isChannel,
