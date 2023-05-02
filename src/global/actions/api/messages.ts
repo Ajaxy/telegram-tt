@@ -523,6 +523,26 @@ addActionHandler('deleteHistory', async (global, actions, payload): Promise<void
   if (activeChat && activeChat.chatId === chatId) {
     actions.openChat({ id: undefined, tabId });
   }
+
+  // Delete chat from folders
+  const folders = global.chatFolders.byId;
+  Object.values(folders).forEach((folder) => {
+    if (folder.includedChatIds.includes(chatId) || folder.pinnedChatIds?.includes(chatId)) {
+      const newIncludedChatIds = folder.includedChatIds.filter((id) => id !== chatId);
+      const newPinnedChatIds = folder.pinnedChatIds?.filter((id) => id !== chatId);
+
+      const updatedFolder = {
+        ...folder,
+        includedChatIds: newIncludedChatIds,
+        pinnedChatIds: newPinnedChatIds,
+      };
+
+      callApi('editChatFolder', {
+        id: folder.id,
+        folderUpdate: updatedFolder,
+      });
+    }
+  });
 });
 
 addActionHandler('reportMessages', async (global, actions, payload): Promise<void> => {

@@ -242,7 +242,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     const isExpanded = mode === 'included' ? isIncludedChatsListExpanded : isExcludedChatsListExpanded;
     const allChatIds = mode === 'included' ? includedChatIds : excludedChatIds;
-    const leftChatsCount = allChatIds.length - selectedChatTypes.length - visibleChatIds.length;
+    const leftChatsCount = allChatIds.length - visibleChatIds.length;
     const clickHandler = mode === 'included'
       ? () => setIsIncludedChatsListExpanded(true)
       : () => setIsExcludedChatsListExpanded(true);

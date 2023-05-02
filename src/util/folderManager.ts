@@ -362,7 +362,9 @@ function updateChats(
 
   const newAllFolderListIds = global.chats.listIds.active;
   const newArchivedFolderListIds = global.chats.listIds.archived;
-  let allIds = [...newAllFolderListIds || [], ...newArchivedFolderListIds || []];
+
+  const newAllIds = [...newAllFolderListIds || [], ...newArchivedFolderListIds || []];
+  let allIds = newAllIds;
   if (newAllFolderListIds !== prevAllFolderListIds || newArchivedFolderListIds !== prevArchivedFolderListIds) {
     allIds = unique(allIds.concat(prevAllFolderListIds || [], prevArchivedFolderListIds || []));
   }
@@ -383,7 +385,11 @@ function updateChats(
     let newFolderIds: number[];
     if (chat) {
       const currentSummary = prepared.chatSummariesById.get(chatId);
-      const newSummary = buildChatSummary(chat, newNotifySettings, newNotifyExceptions, newUsersById[chatId]);
+      const isRemoved = !newAllIds.includes(chatId);
+      const newSummary = buildChatSummary(
+        chat, newNotifySettings, newNotifyExceptions, newUsersById[chatId], isRemoved,
+      );
+
       if (!areFoldersChanged && currentSummary && arePropsShallowEqual(newSummary, currentSummary)) {
         return;
       }
@@ -423,6 +429,7 @@ function buildChatSummary(
   notifySettings: NotifySettings,
   notifyExceptions?: Record<number, NotifyException>,
   user?: ApiUser,
+  isRemoved?: boolean,
 ): ChatSummary {
   const {
     id, type, lastMessage, isRestricted, isNotJoined, migratedTo, folderId,
@@ -447,7 +454,7 @@ function buildChatSummary(
   return {
     id,
     type,
-    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat),
+    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat && !isRemoved),
     isArchived: folderId === ARCHIVED_FOLDER_ID,
     isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),

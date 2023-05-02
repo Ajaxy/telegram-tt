@@ -7,7 +7,7 @@ import { ARCHIVED_FOLDER_ID } from '../../config';
 import {
   areSortedArraysEqual, buildCollectionByKey, omit, unique,
 } from '../../util/iteratees';
-import { selectChat, selectChatFullInfo, selectChatListType } from '../selectors';
+import { selectChat, selectChatFullInfo } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
 import { areDeepEqual } from '../../util/areDeepEqual';
 
@@ -275,18 +275,18 @@ export function updateChatListSecondaryInfo<T extends GlobalState>(
 }
 
 export function leaveChat<T extends GlobalState>(global: T, leftChatId: string): T {
-  const listType = selectChatListType(global, leftChatId);
-  if (!listType) {
-    return global;
-  }
-
-  const { [listType]: listIds } = global.chats.listIds;
-
-  if (listIds) {
-    global = replaceChatListIds(global, listType, listIds.filter((listId) => listId !== leftChatId));
-  }
+  global = removeChatFromChatLists(global, leftChatId);
 
   global = updateChat(global, leftChatId, { isNotJoined: true });
+
+  return global;
+}
+
+export function removeChatFromChatLists<T extends GlobalState>(global: T, chatId: string): T {
+  const lists = global.chats.listIds;
+  Object.entries(lists).forEach(([listType, listIds]) => {
+    global = replaceChatListIds(global, listType as keyof typeof lists, listIds.filter((id) => id !== chatId));
+  });
 
   return global;
 }

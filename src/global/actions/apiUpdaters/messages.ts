@@ -29,6 +29,7 @@ import {
   deleteTopic,
   updateMessageTranslations,
   clearMessageTranslation,
+  removeChatFromChatLists,
 } from '../../reducers';
 import {
   selectChatMessage,
@@ -133,7 +134,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       setGlobal(global);
 
-      // Edge case: New message in an old (not loaded) chat.
+      // Reload dialogs if chat is not present in the list
       if (!selectIsChatListed(global, chatId)) {
         actions.loadTopChats();
       }
@@ -435,6 +436,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       } else {
         actions.requestChatUpdate({ chatId });
       }
+
+      global = getGlobal();
+      global = removeChatFromChatLists(global, chatId);
+      setGlobal(global);
 
       break;
     }
