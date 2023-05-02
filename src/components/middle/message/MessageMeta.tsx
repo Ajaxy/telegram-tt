@@ -18,7 +18,6 @@ import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 import AnimatedCounter from '../../common/AnimatedCounter';
 
 import './MessageMeta.scss';
-import { useFastClick } from '../../../hooks/useFastClick';
 
 type OwnProps = {
   message: ApiMessage;
@@ -53,8 +52,6 @@ const MessageMeta: FC<OwnProps> = ({
   const { showNotification } = getActions();
   const lang = useLang();
   const [isActivated, markActivated] = useFlag();
-
-  const { handleClick, handleMouseDown } = useFastClick(onClick);
 
   function handleImportedClick(e: React.MouseEvent) {
     e.stopPropagation();
@@ -102,8 +99,7 @@ const MessageMeta: FC<OwnProps> = ({
     <span
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
+      onClick={onClick}
       data-ignore-on-paste
     >
       {isTranslated && (

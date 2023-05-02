@@ -22,13 +22,13 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
 import useLang from '../../hooks/useLang';
+import { useFastClick } from '../../hooks/useFastClick';
 
 import ActionMessage from '../middle/ActionMessage';
 import MessageSummary from './MessageSummary';
 import MediaSpoiler from './MediaSpoiler';
 
 import './EmbeddedMessage.scss';
-import { useFastClick } from '../../hooks/useFastClick';
 
 type OwnProps = {
   className?: string;
