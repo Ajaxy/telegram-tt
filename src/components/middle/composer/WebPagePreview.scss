@@ -80,21 +80,20 @@
     }
 
     .site-title,
+    .site-name,
     .site-description {
       flex: 1;
       max-width: 100%;
       max-height: 1rem;
+
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .site-title {
       margin-top: 0.125rem;
       margin-bottom: 0.1875rem;
-    }
-
-    .site-description {
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
     }
   }
 }
