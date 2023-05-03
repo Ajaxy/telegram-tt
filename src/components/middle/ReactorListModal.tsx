@@ -15,6 +15,7 @@ import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
 import { isSameReaction, getReactionUniqueKey } from '../../global/helpers';
+import { formatDateAtTime } from '../../util/dateFormat';
 
 import useLang from '../../hooks/useLang';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -28,6 +29,7 @@ import ListItem from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import Loading from '../ui/Loading';
 import FullNameTitle from '../common/FullNameTitle';
+import PrivateChatInfo from '../common/PrivateChatInfo';
 
 import './ReactorListModal.scss';
 
@@ -37,7 +39,7 @@ export type OwnProps = {
   isOpen: boolean;
 };
 
-export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByUserIds'> & {
+export type StateProps = Pick<ApiMessage, 'reactors' | 'reactions' | 'seenByDates'> & {
   chatId?: string;
   messageId?: number;
   availableReactions?: ApiAvailableReaction[];
@@ -49,7 +51,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
   reactions,
   chatId,
   messageId,
-  seenByUserIds,
+  seenByDates,
   availableReactions,
 }) => {
   const {
@@ -118,8 +120,11 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         .filter(({ reaction }) => isSameReaction(reaction, chosenTab))
         .map(({ userId }) => userId);
     }
+
+    const seenByUserIds = Object.keys(seenByDates || {});
+
     return unique(reactors?.reactions.map(({ userId }) => userId).concat(seenByUserIds || []) || []);
-  }, [chosenTab, reactors, seenByUserIds]);
+  }, [chosenTab, reactors, seenByDates]);
 
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMore, userIds, reactors && reactors.nextOffset === undefined,
@@ -138,7 +143,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
       onCloseAnimationEnd={handleCloseAnimationEnd}
     >
       {canShowFilters && (
-        <div className="Reactions">
+        <div className="Reactions" dir={lang.isRtl ? 'rtl' : undefined}>
           <Button
             className={buildClassName(!chosenTab && 'chosen')}
             size="tiny"
@@ -173,7 +178,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
         </div>
       )}
 
-      <div dir={lang.isRtl ? 'rtl' : undefined}>
+      <div dir={lang.isRtl ? 'rtl' : undefined} className="reactor-list-wrapper">
         {viewportIds?.length ? (
           <InfiniteScroll
             className="reactor-list custom-scroll"
@@ -185,8 +190,11 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                 const user = usersById[userId];
                 const userReactions = reactors?.reactions.filter((reactor) => reactor.userId === userId);
                 const items: React.ReactNode[] = [];
+                const seenByUser = seenByDates?.[userId];
+
                 userReactions?.forEach((r) => {
                   if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
+
                   items.push(
                     <ListItem
                       key={`${userId}-${getReactionUniqueKey(r.reaction)}`}
@@ -195,7 +203,13 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       onClick={() => handleClick(userId)}
                     >
                       <Avatar user={user} size="small" />
-                      <FullNameTitle peer={user} withEmojiStatus />
+                      <div className="info">
+                        <FullNameTitle peer={user} withEmojiStatus />
+                        <span className="status" dir="auto">
+                          <i className="icon icon-heart-outline status-icon" />
+                          {formatDateAtTime(lang, r.addedDate * 1000)}
+                        </span>
+                      </div>
                       {r.reaction && (
                         <ReactionStaticEmoji
                           className="reactors-list-emoji"
@@ -206,6 +220,24 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                     </ListItem>,
                   );
                 });
+
+                if (!chosenTab && !userReactions?.length) {
+                  items.push(
+                    <ListItem
+                      key={`${userId}-seen-by`}
+                      className="chat-item-clickable scroll-item small-icon"
+                      // eslint-disable-next-line react/jsx-no-bind
+                      onClick={() => handleClick(userId)}
+                    >
+                      <PrivateChatInfo
+                        userId={userId}
+                        noStatusOrTyping
+                        status={seenByUser ? formatDateAtTime(lang, seenByUser * 1000) : undefined}
+                        statusIcon="icon-message-read"
+                      />
+                    </ListItem>,
+                  );
+                }
                 return items;
               },
             )}
@@ -233,7 +265,7 @@ export default memo(withGlobal<OwnProps>(
       messageId,
       reactions: message?.reactions,
       reactors: message?.reactors,
-      seenByUserIds: message?.seenByUserIds,
+      seenByDates: message?.seenByDates,
       availableReactions: global.availableReactions,
     };
   },

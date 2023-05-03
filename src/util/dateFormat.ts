@@ -310,6 +310,31 @@ export function formatDateTimeToString(
   );
 }
 
+export function formatDateAtTime(
+  lang: LangFn,
+  datetime: number | Date,
+) {
+  const date = typeof datetime === 'number' ? new Date(datetime) : datetime;
+
+  const today = getDayStart(new Date());
+  const time = formatTime(lang, date);
+
+  if (toIsoString(date) === toIsoString(today)) {
+    return lang('Time.TodayAt', time);
+  }
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (toIsoString(date) === toIsoString(yesterday)) {
+    return lang('Time.YesterdayAt', time);
+  }
+
+  const noYear = date.getFullYear() === today.getFullYear();
+  const formattedDate = formatDateToString(date, lang.code, noYear);
+
+  return lang('formatDateAtTime', [formattedDate, time]);
+}
+
 function isValidDate(day: number, month: number, year = 2021): boolean {
   if (month > (MAX_MONTH_IN_YEAR - 1) || day > MAX_DAY_IN_MONTH) {
     return false;

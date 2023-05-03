@@ -1222,7 +1222,7 @@ addActionHandler('loadSeenBy', async (global, actions, payload): Promise<void> =
 
   global = getGlobal();
   global = updateChatMessage(global, chatId, messageId, {
-    seenByUserIds: result,
+    seenByDates: result,
   });
   setGlobal(global);
 });

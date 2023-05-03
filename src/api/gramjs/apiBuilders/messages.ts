@@ -286,7 +286,7 @@ function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCou
 
 export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction | undefined {
   const {
-    peerId, reaction, big, unread,
+    peerId, reaction, big, unread, date,
   } = userReaction;
 
   const apiReaction = buildApiReaction(reaction);
@@ -295,6 +295,7 @@ export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReactio
   return {
     userId: getApiChatIdFromMtpPeer(peerId),
     reaction: apiReaction,
+    addedDate: date,
     isUnread: unread,
     isBig: big,
   };

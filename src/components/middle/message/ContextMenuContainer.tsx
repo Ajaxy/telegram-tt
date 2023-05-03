@@ -240,14 +240,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       return Array.from(uniqueReactors).filter(Boolean).slice(0, 3);
     }
 
-    if (!message.seenByUserIds) {
+    if (!message.seenByDates) {
       return undefined;
     }
 
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    return message.seenByUserIds?.slice(0, 3).map((id) => usersById[id]).filter(Boolean);
-  }, [message.reactions?.recentReactions, message.seenByUserIds]);
+    return Object.keys(message.seenByDates).slice(0, 3).map((id) => usersById[id]).filter(Boolean);
+  }, [message.reactions?.recentReactions, message.seenByDates]);
 
   const isDownloading = album ? album.messages.some((msg) => activeDownloads.includes(msg.id))
     : activeDownloads.includes(message.id);

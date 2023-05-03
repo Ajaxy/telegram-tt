@@ -1416,7 +1416,13 @@ export async function fetchSeenBy({ chat, messageId }: { chat: ApiChat; messageI
     msgId: messageId,
   }));
 
-  return result ? result.map((readDate) => readDate.userId.toString()) : undefined;
+  return result
+    ? result.reduce((acc, readDate) => {
+      acc[readDate.userId.toString()] = readDate.date;
+
+      return acc;
+    }, {} as Record<string, number>)
+    : undefined;
 }
 
 export async function fetchSendAs({

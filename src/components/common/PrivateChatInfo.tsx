@@ -32,6 +32,7 @@ type OwnProps = {
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   status?: string;
+  statusIcon?: string;
   withDots?: boolean;
   withMediaViewer?: boolean;
   withUsername?: boolean;
@@ -56,6 +57,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   typingStatus,
   avatarSize = 'medium',
   status,
+  statusIcon,
   withDots,
   withMediaViewer,
   withUsername,
@@ -109,7 +111,10 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       return withDots ? (
         <DotAnimation className="status" content={status} />
       ) : (
-        <span className="status" dir="auto">{renderText(status)}</span>
+        <span className="status" dir="auto">
+          {statusIcon && <i className={`icon ${statusIcon} status-icon`} />}
+          {renderText(status)}
+        </span>
       );
     }
 
