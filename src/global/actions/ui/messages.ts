@@ -42,6 +42,7 @@ import {
   selectChatScheduledMessages,
   selectTabState,
   selectRequestedTranslationLanguage,
+  selectPinnedIds,
 } from '../../selectors';
 import { compact, findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -322,13 +323,22 @@ addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnTyp
     return;
   }
 
-  const { chatId, threadId } = currentMessageList;
+  const { chatId, threadId, type } = currentMessageList;
 
   let lastMessageId: number | undefined;
   if (threadId === MAIN_THREAD_ID) {
-    const chat = selectChat(global, chatId);
+    if (type === 'pinned') {
+      const pinnedMessageIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID);
+      if (!pinnedMessageIds?.length) {
+        return;
+      }
 
-    lastMessageId = chat?.lastMessage?.id;
+      lastMessageId = pinnedMessageIds[pinnedMessageIds.length - 1];
+    } else {
+      const chat = selectChat(global, chatId);
+
+      lastMessageId = chat?.lastMessage?.id;
+    }
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
 
@@ -342,6 +352,7 @@ addActionHandler('focusLastMessage', (global, actions, payload): ActionReturnTyp
   actions.focusMessage({
     chatId,
     threadId,
+    messageListType: type,
     messageId: lastMessageId,
     noHighlight: true,
     noForumTopicPanel: true,
@@ -433,6 +444,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     actions.openChat({
       id: chatId,
       threadId,
+      type: messageListType,
       shouldReplaceHistory,
       noForumTopicPanel,
       tabId,
@@ -454,6 +466,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   actions.openChat({
     id: chatId,
     threadId,
+    type: messageListType,
     shouldReplaceHistory,
     noForumTopicPanel,
     tabId,
