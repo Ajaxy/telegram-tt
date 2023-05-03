@@ -675,7 +675,7 @@ const Message: FC<OwnProps & StateProps> = ({
     || undefined;
   useAuthorWidth(ref, signature);
 
-  const shouldFocusOnResize = isLastInGroup;
+  const shouldFocusOnResize = isLastInList;
 
   const handleResize = useCallback((entry: ResizeObserverEntry) => {
     const lastHeight = messageHeightRef.current;
