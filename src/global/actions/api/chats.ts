@@ -2493,6 +2493,7 @@ export async function ensureIsSuperGroup<T extends GlobalState>(
     return undefined;
   }
 
+  actions.loadFullChat({ chatId: newChat.id, tabId });
   actions.openChat({ id: newChat.id, tabId });
 
   return newChat;
