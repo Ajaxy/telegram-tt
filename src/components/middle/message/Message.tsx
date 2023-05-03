@@ -1199,7 +1199,7 @@ const Message: FC<OwnProps & StateProps> = ({
           <span className="admin-title" dir="auto">{message.forwardInfo?.postAuthorTitle}</span>
         ) : message.postAuthorTitle && isGroup && !asForwarded ? (
           <span className="admin-title" dir="auto">{message.postAuthorTitle}</span>
-        ) : senderAdminMember && !asForwarded ? (
+        ) : senderAdminMember && !asForwarded && !viaBotId ? (
           <span className="admin-title" dir="auto">
             {senderAdminMember.customTitle || lang(
               senderAdminMember.isOwner ? 'GroupInfo.LabelOwner' : 'GroupInfo.LabelAdmin',
