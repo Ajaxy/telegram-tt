@@ -303,7 +303,9 @@ export function extractMessageText(message: ApiMessage, inChatList = false) {
   const { text } = contentText;
   let { entities } = contentText;
 
-  if (text && inChatList && message.chatId === SERVICE_NOTIFICATIONS_USER_ID) {
+  if (text && inChatList && message.chatId === SERVICE_NOTIFICATIONS_USER_ID
+    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
+    && !getGlobal().settings.byKey.shouldShowLoginCodeInChatList) {
     const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];
     if (authCode) {
       entities = [

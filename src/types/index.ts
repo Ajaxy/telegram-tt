@@ -99,6 +99,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   canTranslateChats: boolean;
   doNotTranslate: string[];
   canDisplayChatInTitle: boolean;
+  shouldShowLoginCodeInChatList?: boolean;
 }
 
 export interface ApiPrivacySettings {
