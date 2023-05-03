@@ -3,6 +3,7 @@ import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
 import { formatDateAtTime } from '../../util/dateFormat';
+import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
@@ -10,6 +11,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import PrivateChatInfo from './PrivateChatInfo';
 import ListItem from '../ui/ListItem';
+
+import styles from './SeenByModal.module.scss';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -60,7 +63,7 @@ function SeenByModal({
     <Modal
       isOpen={isOpen}
       onClose={closeSeenByModal}
-      className="narrow"
+      className={buildClassName(styles.modal, 'narrow')}
       title={`Seen by ${memberIds?.length} users`}
     >
       <div dir={lang.isRtl ? 'rtl' : undefined}>
