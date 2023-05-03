@@ -5,6 +5,18 @@
 
   .modal-content {
     overflow: hidden;
+    height: min(92vh, 32rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .reactor-list-wrapper {
+    flex-grow: 1;
+    min-height: 0;
+  }
+
+  .confirm-dialog-button {
+    align-self: flex-end;
   }
 
   .Reactions {
@@ -14,15 +26,15 @@
   .icon-heart {
     width: 1.125rem;
     height: 1.125rem;
-    margin-right: 0.25rem;
+    margin-inline-end: 0.25rem;
   }
 
   .reaction-filter-emoji {
-    margin-right: 0.25rem;
+    margin-inline-end: 0.25rem;
   }
 
   .reactor-list {
-    max-height: 400px;
+    max-height: 100%;
     overflow: auto;
     overflow-x: hidden;
   }
@@ -40,5 +52,9 @@
     width: 1.5rem;
     height: 1.5rem;
     margin-inline-start: auto;
+  }
+
+  .status {
+    color: var(--color-text-secondary);
   }
 }

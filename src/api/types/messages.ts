@@ -428,7 +428,7 @@ export interface ApiMessage {
   isFromScheduled?: boolean;
   isSilent?: boolean;
   isPinned?: boolean;
-  seenByUserIds?: string[];
+  seenByDates?: Record<string, number>;
   isProtected?: boolean;
   isForwardingAllowed?: boolean;
   transcriptionId?: string;
@@ -453,6 +453,7 @@ export interface ApiUserReaction {
   reaction: ApiReaction;
   isBig?: boolean;
   isUnread?: boolean;
+  addedDate: number;
 }
 
 export interface ApiReactionCount {

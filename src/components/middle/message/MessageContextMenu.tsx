@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -205,10 +205,12 @@ const MessageContextMenu: FC<OwnProps> = ({
   const withReactions = canShowReactionList && !noReactions;
   const isSponsoredMessage = !('id' in message);
   const messageId = !isSponsoredMessage ? message.id : '';
+  const seenByDates = !isSponsoredMessage ? message.seenByDates : undefined;
 
   const [areItemsHidden, hideItems] = useFlag();
   const [isReady, markIsReady, unmarkIsReady] = useFlag();
   const { isMobile, isDesktop } = useAppLayout();
+  const seenByDatesCount = useMemo(() => (seenByDates ? Object.keys(seenByDates).length : 0), [seenByDates]);
 
   const handleAfterCopy = useCallback(() => {
     showNotification({
@@ -384,21 +386,21 @@ const MessageContextMenu: FC<OwnProps> = ({
             className="MessageContextMenu--seen-by"
             icon={canShowReactionsCount ? 'heart-outline' : 'group'}
             onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
-            disabled={!canShowReactionsCount && !message.seenByUserIds?.length}
+            disabled={!canShowReactionsCount && !seenByDatesCount}
           >
             <span className="MessageContextMenu--seen-by-label">
               {canShowReactionsCount && message.reactors?.count ? (
-                canShowSeenBy && message.seenByUserIds?.length
+                canShowSeenBy && seenByDatesCount
                   ? lang(
                     'Chat.OutgoingContextMixedReactionCount',
-                    [message.reactors.count, message.seenByUserIds.length],
+                    [message.reactors.count, seenByDatesCount],
                   )
                   : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
               ) : (
-                message.seenByUserIds?.length === 1 && seenByRecentUsers
+                seenByDatesCount === 1 && seenByRecentUsers
                   ? renderText(getUserFullName(seenByRecentUsers[0])!)
-                  : (message.seenByUserIds?.length
-                    ? lang('Conversation.ContextMenuSeen', message.seenByUserIds.length, 'i')
+                  : (seenByDatesCount
+                    ? lang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
                     : lang('Conversation.ContextMenuNoViews')
                   )
               )}

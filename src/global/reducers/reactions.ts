@@ -80,6 +80,7 @@ export function addMessageReaction<T extends GlobalState>(
     recentReactions.unshift({
       userId: currentUserId!,
       reaction,
+      addedDate: Math.floor(Date.now() / 1000),
     });
   });
 

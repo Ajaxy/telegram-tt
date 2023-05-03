@@ -1,9 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { useCallback, memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import useLang from '../../hooks/useLang';
 import { selectChatMessage, selectTabState } from '../../global/selectors';
+import { formatDateAtTime } from '../../util/dateFormat';
+import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
 import Modal from '../ui/Modal';
@@ -16,21 +16,33 @@ export type OwnProps = {
 };
 
 export type StateProps = {
-  memberIds?: string[];
+  seenByDates?: Record<string, number>;
 };
 
 const CLOSE_ANIMATION_DURATION = 100;
 
-const SeenByModal: FC<OwnProps & StateProps> = ({
+function SeenByModal({
   isOpen,
-  memberIds,
-}) => {
+  seenByDates,
+}: OwnProps & StateProps) {
   const {
     openChat,
     closeSeenByModal,
   } = getActions();
 
   const lang = useLang();
+
+  const renderingSeenByDates = useCurrentOrPrev(seenByDates, true);
+  const memberIds = useMemo(() => {
+    if (!renderingSeenByDates) {
+      return undefined;
+    }
+
+    const result = Object.keys(renderingSeenByDates);
+    result.sort((leftId, rightId) => renderingSeenByDates[rightId] - renderingSeenByDates[leftId]);
+
+    return result;
+  }, [renderingSeenByDates]);
 
   const handleClick = useCallback((userId: string) => {
     closeSeenByModal();
@@ -44,8 +56,6 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
     closeSeenByModal();
   }, [closeSeenByModal]);
 
-  const renderingMemberIds = useCurrentOrPrev(memberIds, true);
-
   return (
     <Modal
       isOpen={isOpen}
@@ -54,14 +64,19 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
       title={`Seen by ${memberIds?.length} users`}
     >
       <div dir={lang.isRtl ? 'rtl' : undefined}>
-        {renderingMemberIds && renderingMemberIds.map((userId) => (
+        {memberIds && memberIds.map((userId) => (
           <ListItem
             key={userId}
             className="chat-item-clickable scroll-item small-icon"
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleClick(userId)}
           >
-            <PrivateChatInfo userId={userId} noStatusOrTyping />
+            <PrivateChatInfo
+              userId={userId}
+              noStatusOrTyping
+              status={formatDateAtTime(lang, renderingSeenByDates![userId] * 1000)}
+              statusIcon="icon-message-read"
+            />
           </ListItem>
         ))}
       </div>
@@ -76,7 +91,7 @@ const SeenByModal: FC<OwnProps & StateProps> = ({
       </div>
     </Modal>
   );
-};
+}
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
@@ -86,7 +101,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
-      memberIds: selectChatMessage(global, chatId, messageId)?.seenByUserIds,
+      seenByDates: selectChatMessage(global, chatId, messageId)?.seenByDates,
     };
   },
 )(SeenByModal));
