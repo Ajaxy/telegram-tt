@@ -204,6 +204,7 @@ type StateProps =
     canSendVoiceByPrivacy?: boolean;
     attachmentSettings: GlobalState['attachmentSettings'];
     slowMode?: ApiChatFullInfo['slowMode'];
+    shouldUpdateStickerSetOrder?: boolean;
   }
   & Pick<GlobalState, 'connectionState'>;
 
@@ -289,6 +290,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   attachmentSettings,
   theme,
   slowMode,
+  shouldUpdateStickerSetOrder,
 }) => {
   const {
     sendMessage,
@@ -757,7 +759,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       entities,
       scheduledAt,
       isSilent,
-      shouldUpdateStickerSetsOrder: true,
+      shouldUpdateStickerSetOrder,
       attachments: prepareAttachmentsToSend(attachmentsToSend, sendCompressed),
       shouldGroupMessages: sendGrouped,
     });
@@ -772,7 +774,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     });
   }, [
     attachmentSettings.shouldCompress, attachmentSettings.shouldSendGrouped, connectionState, getHtml,
-    validateTextLength, checkSlowMode, sendMessage, clearDraft, chatId, resetComposer,
+    validateTextLength, checkSlowMode, sendMessage, clearDraft, chatId, resetComposer, shouldUpdateStickerSetOrder,
   ]);
 
   const handleSendAttachments = useCallback((
@@ -834,7 +836,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         entities,
         scheduledAt,
         isSilent,
-        shouldUpdateStickerSetsOrder: true,
+        shouldUpdateStickerSetOrder,
       });
     }
 
@@ -860,6 +862,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [
     connectionState, attachments, activeVoiceRecording, getHtml, isForwarding, validateTextLength, clearDraft,
     chatId, stopRecordingVoice, sendAttachments, checkSlowMode, sendMessage, forwardMessages, resetComposer,
+    shouldUpdateStickerSetOrder,
   ]);
 
   const handleClickBotMenu = useCallback(() => {
@@ -972,7 +975,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isSilent?: boolean,
     isScheduleRequested?: boolean,
     shouldPreserveInput = false,
-    shouldUpdateStickerSetsOrder?: boolean,
+    canUpdateStickerSetsOrder?: boolean,
   ) => {
     sticker = {
       ...sticker,
@@ -989,14 +992,18 @@ const Composer: FC<OwnProps & StateProps> = ({
         });
       });
     } else {
-      sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder });
+      sendMessage({
+        sticker,
+        isSilent,
+        shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && canUpdateStickerSetsOrder,
+      });
       requestMeasure(() => {
         resetComposer(shouldPreserveInput);
       });
     }
   }, [
     shouldSchedule, forceShowSymbolMenu, requestCalendar, cancelForceShowSymbolMenu, handleMessageSchedule,
-    resetComposer, sendMessage,
+    resetComposer, sendMessage, shouldUpdateStickerSetOrder,
   ]);
 
   const handleInlineBotSelect = useCallback((
@@ -1581,7 +1588,9 @@ export default memo(withGlobal<OwnProps>(
     const messageWithActualBotKeyboard = (isChatWithBot || !isChatWithUser)
       && selectNewestMessageWithBotKeyboardButtons(global, chatId, threadId);
     const scheduledIds = selectScheduledIds(global, chatId, threadId);
-    const { language, shouldSuggestStickers, shouldSuggestCustomEmoji } = global.settings.byKey;
+    const {
+      language, shouldSuggestStickers, shouldSuggestCustomEmoji, shouldUpdateStickerSetOrder,
+    } = global.settings.byKey;
     const baseEmojiKeywords = global.emojiKeywords[BASE_EMOJI_KEYWORD_LANG];
     const emojiKeywords = language !== BASE_EMOJI_KEYWORD_LANG ? global.emojiKeywords[language] : undefined;
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
@@ -1645,6 +1654,7 @@ export default memo(withGlobal<OwnProps>(
       contentToBeScheduled: tabState.contentToBeScheduled,
       shouldSuggestStickers,
       shouldSuggestCustomEmoji,
+      shouldUpdateStickerSetOrder,
       recentEmojis: global.recentEmojis,
       baseEmojiKeywords: baseEmojiKeywords?.keywords,
       emojiKeywords: emojiKeywords?.keywords,

@@ -233,7 +233,7 @@ export function sendMessage(
     groupedId,
     noWebPage,
     sendAs,
-    shouldUpdateStickerSetsOrder,
+    shouldUpdateStickerSetOrder,
   }: {
     chat: ApiChat;
     text?: string;
@@ -250,7 +250,7 @@ export function sendMessage(
     groupedId?: string;
     noWebPage?: boolean;
     sendAs?: ApiUser | ApiChat;
-    shouldUpdateStickerSetsOrder?: boolean;
+    shouldUpdateStickerSetOrder?: boolean;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -355,7 +355,7 @@ export function sendMessage(
         ...(media && { media }),
         ...(noWebPage && { noWebpage: noWebPage }),
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-        ...(shouldUpdateStickerSetsOrder && { updateStickersetsOrder: shouldUpdateStickerSetsOrder }),
+        ...(shouldUpdateStickerSetOrder && { updateStickersetsOrder: shouldUpdateStickerSetOrder }),
       }), false, true, true);
       if (update) handleLocalMessageUpdate(localMessage, update);
     } catch (error: any) {

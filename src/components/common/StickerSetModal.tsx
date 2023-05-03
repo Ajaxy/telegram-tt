@@ -50,6 +50,7 @@ type StateProps = {
   shouldSchedule?: boolean;
   isSavedMessages?: boolean;
   isCurrentUserPremium?: boolean;
+  shouldUpdateStickerSetOrder?: boolean;
 };
 
 const INTERSECTION_THROTTLE = 200;
@@ -64,6 +65,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   shouldSchedule,
   isSavedMessages,
   isCurrentUserPremium,
+  shouldUpdateStickerSetOrder,
   onClose,
 }) => {
   const {
@@ -120,10 +122,14 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
         onClose();
       });
     } else {
-      sendMessage({ sticker, isSilent, shouldUpdateStickerSetsOrder: isAdded });
+      sendMessage({
+        sticker,
+        isSilent,
+        shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && isAdded,
+      });
       onClose();
     }
-  }, [onClose, requestCalendar, sendMessage, shouldSchedule, isAdded]);
+  }, [onClose, requestCalendar, sendMessage, shouldSchedule, isAdded, shouldUpdateStickerSetOrder]);
 
   const handleButtonClick = useCallback(() => {
     if (renderingStickerSet) {
@@ -263,6 +269,7 @@ export default memo(withGlobal<OwnProps>(
       shouldSchedule: selectShouldSchedule(global),
       stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      shouldUpdateStickerSetOrder: global.settings.byKey.shouldUpdateStickerSetOrder,
     };
   },
 )(StickerSetModal));

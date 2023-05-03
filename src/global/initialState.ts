@@ -214,6 +214,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       notificationSoundVolume: 5,
       shouldSuggestStickers: true,
       shouldSuggestCustomEmoji: true,
+      shouldUpdateStickerSetOrder: true,
       language: 'en',
       timeFormat: '24h',
       wasTimeFormatSetManually: false,

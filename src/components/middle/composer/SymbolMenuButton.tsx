@@ -35,7 +35,7 @@ type OwnProps = {
     isSilent?: boolean,
     shouldSchedule?: boolean,
     shouldPreserveInput?: boolean,
-    shouldUpdateStickerSetsOrder?: boolean
+    canUpdateStickerSetsOrder?: boolean
   ) => void;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: VoidFunction;

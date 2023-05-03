@@ -1178,7 +1178,7 @@ export interface ActionPayloads {
     gif?: ApiVideo;
     poll?: ApiNewPoll;
     contact?: Partial<ApiContact>;
-    shouldUpdateStickerSetsOrder?: boolean;
+    shouldUpdateStickerSetOrder?: boolean;
     shouldGroupMessages?: boolean;
   } & WithTabId;
   cancelSendingMessage: {
