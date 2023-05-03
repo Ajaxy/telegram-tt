@@ -155,14 +155,15 @@
     &.not-ready > .icon {
       animation-duration: 0ms !important;
     }
+  }
 
-    body.no-message-composer-animations & {
-      .icon-send,
-      .icon-microphone-alt,
-      .icon-check,
-      .icon-schedule {
-        animation-duration: 0ms !important;
-      }
+  &:not(.mounted) > .Button,
+  body.no-message-composer-animations & > .Button {
+    .icon-send,
+    .icon-microphone-alt,
+    .icon-check,
+    .icon-schedule {
+      animation-duration: 0ms !important;
     }
   }
 
