@@ -1,6 +1,13 @@
 // eslint-disable-next-line no-restricted-globals
 const cacheApi = self.caches;
 
+let isSupported: boolean | undefined;
+
+export async function isCacheApiSupported() {
+  isSupported = isSupported ?? await cacheApi.has('test').then(() => true).catch(() => false);
+  return isSupported;
+}
+
 export enum Type {
   Text,
   Blob,
@@ -67,7 +74,7 @@ export async function fetch(
 
 export async function save(cacheName: string, key: string, data: AnyLiteral | Blob | ArrayBuffer | string) {
   if (!cacheApi) {
-    return undefined;
+    return false;
   }
 
   try {
@@ -78,11 +85,12 @@ export async function save(cacheName: string, key: string, data: AnyLiteral | Bl
     const request = new Request(key.replace(/:/g, '_'));
     const response = new Response(cacheData);
     const cache = await cacheApi.open(cacheName);
-    return await cache.put(request, response);
+    await cache.put(request, response);
+    return true;
   } catch (err) {
     // eslint-disable-next-line no-console
     console.warn(err);
-    return undefined;
+    return false;
   }
 }
 

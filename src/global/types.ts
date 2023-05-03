@@ -579,6 +579,7 @@ export type GlobalState = {
   appConfig?: ApiAppConfig;
   hasWebAuthTokenFailed?: boolean;
   hasWebAuthTokenPasswordRequired?: true;
+  isCacheApiSupported?: boolean;
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
   isSyncing?: boolean;
@@ -2334,7 +2335,7 @@ export interface ActionPayloads {
   connectToActivePhoneCall: undefined;
 
   // Passcode
-  setPasscode: { passcode: string };
+  setPasscode: { passcode: string } & WithTabId;
   clearPasscode: undefined;
   lockScreen: undefined;
   decryptSession: { passcode: string };
