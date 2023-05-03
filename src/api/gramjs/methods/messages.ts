@@ -799,7 +799,7 @@ export async function sendMessageAction({
 }
 
 export async function markMessageListRead({
-  chat, threadId, maxId = -1,
+  chat, threadId, maxId = 0,
 }: {
   chat: ApiChat; threadId: number; maxId?: number;
 }) {
