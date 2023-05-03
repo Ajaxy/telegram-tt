@@ -117,7 +117,12 @@ function sha256(plaintext: string) {
 }
 
 async function store(key: string, value: ArrayBuffer) {
-  await cacheApi.save(PASSCODE_CACHE_NAME, key, value);
+  const isSuccessful = await cacheApi.save(PASSCODE_CACHE_NAME, key, value);
+  if (isSuccessful) {
+    return;
+  }
+
+  throw new Error('Failed to save to cache');
 }
 
 function load(key: string) {

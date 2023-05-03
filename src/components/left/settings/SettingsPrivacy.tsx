@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
-import { selectIsCurrentUserPremium } from '../../../global/selectors';
+import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -23,7 +23,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   hasPassword?: boolean;
   hasPasscode?: boolean;
-  isAuthRememberMe?: boolean;
+  canSetPasscode?: boolean;
   blockedCount: number;
   webAuthCount: number;
   isSensitiveEnabled?: boolean;
@@ -63,7 +63,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   privacyPhoneP2P,
   onScreenSelect,
   onReset,
-  isAuthRememberMe,
+  canSetPasscode,
 }) => {
   const {
     loadPrivacySettings,
@@ -160,7 +160,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           {lang('BlockedUsers')}
           <span className="settings-item__current-value">{blockedCount || ''}</span>
         </ListItem>
-        {isAuthRememberMe && (
+        {canSetPasscode && (
           <ListItem
             icon="key"
             narrow
@@ -394,7 +394,7 @@ export default memo(withGlobal<OwnProps>(
       privacyPhoneCall: privacy.phoneCall,
       privacyPhoneP2P: privacy.phoneP2P,
       canDisplayChatInTitle,
-      isAuthRememberMe: global.authRememberMe,
+      canSetPasscode: selectCanSetPasscode(global),
     };
   },
 )(SettingsPrivacy));

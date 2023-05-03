@@ -16,6 +16,7 @@ import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMulti
 import { updateTabState } from './reducers/tabs';
 import type { ActionReturnType, GlobalState } from './types';
 import { isLocalMessageId } from './helpers';
+import { isCacheApiSupported } from '../util/cacheApi';
 
 initCache();
 
@@ -128,6 +129,12 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
   if (!IS_MULTITAB_SUPPORTED) {
     actions.initApi();
   }
+
+  isCacheApiSupported().then((isSupported) => {
+    global = getGlobal();
+    global.isCacheApiSupported = isSupported;
+    setGlobal(global);
+  });
 
   return updateTabState(global, {
     messageLists: parsedMessageList ? [parsedMessageList] : initialTabState.messageLists,

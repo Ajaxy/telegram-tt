@@ -3,14 +3,15 @@ import { addActionHandler, setGlobal, getGlobal } from '../../index';
 import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
 import {
-  clearEncryptedSession, decryptSession, encryptSession, setupPasscode,
+  clearEncryptedSession, decryptSession, encryptSession, forgetPasscode, setupPasscode,
 } from '../../../util/passcode';
 import { forceUpdateCache, migrateCache, serializeGlobal } from '../../cache';
 import { onBeforeUnload } from '../../../util/schedulers';
 import { cloneDeep } from '../../../util/iteratees';
 import { INITIAL_GLOBAL_STATE } from '../../initialState';
 import type { ActionReturnType } from '../../types';
-import { signalPasscodeHash } from '../../../util/establishMultitabRole';
+import { getCurrentTabId, signalPasscodeHash } from '../../../util/establishMultitabRole';
+import { SettingsScreens } from '../../../types';
 
 let noLockOnUnload = false;
 onBeforeUnload(() => {
@@ -21,7 +22,7 @@ onBeforeUnload(() => {
 });
 
 addActionHandler('setPasscode', async (global, actions, payload): Promise<void> => {
-  const { passcode } = payload;
+  const { passcode, tabId = getCurrentTabId() } = payload;
   global = updatePasscodeSettings(global, {
     isLoading: true,
   });
@@ -36,18 +37,34 @@ addActionHandler('setPasscode', async (global, actions, payload): Promise<void> 
     isLoading: false,
   }));
 
-  await encryptSession(sessionJson, globalJson);
+  try {
+    await encryptSession(sessionJson, globalJson);
 
-  signalPasscodeHash();
-  global = getGlobal();
-  global = updatePasscodeSettings(global, {
-    hasPasscode: true,
-    error: undefined,
-    isLoading: false,
-  });
-  setGlobal(global);
+    signalPasscodeHash();
+    global = getGlobal();
+    global = updatePasscodeSettings(global, {
+      hasPasscode: true,
+      error: undefined,
+      isLoading: false,
+    });
+    setGlobal(global);
 
-  forceUpdateCache(true);
+    forceUpdateCache(true);
+  } catch (err: any) {
+    forgetPasscode();
+
+    global = getGlobal();
+    global = updatePasscodeSettings(global, {
+      isLoading: false,
+    });
+    setGlobal(global);
+
+    actions.showNotification({
+      message: 'Failed to set passcode',
+      tabId,
+    });
+    actions.requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled, tabId });
+  }
 });
 
 addActionHandler('clearPasscode', (global): ActionReturnType => {

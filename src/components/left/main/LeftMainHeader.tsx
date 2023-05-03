@@ -31,6 +31,7 @@ import { formatDateToString } from '../../../util/dateFormat';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
 import {
+  selectCanSetPasscode,
   selectCurrentMessageList, selectIsCurrentUserPremium, selectTabState, selectTheme,
 } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
@@ -82,7 +83,7 @@ type StateProps =
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
     areChatsLoaded?: boolean;
     hasPasscode?: boolean;
-    isAuthRememberMe?: boolean;
+    canSetPasscode?: boolean;
   }
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'>
   & Pick<TabState, 'canInstall'>;
@@ -114,7 +115,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   isConnectionStatusMinimized,
   areChatsLoaded,
   hasPasscode,
-  isAuthRememberMe,
+  canSetPasscode,
   canInstall,
   archiveSettings,
 }) => {
@@ -158,7 +159,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   }, [hasPasscode]);
 
-  useHotkeys(isAuthRememberMe ? {
+  useHotkeys(canSetPasscode ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
@@ -481,7 +482,7 @@ export default memo(withGlobal<OwnProps>(
       hasPasscode: Boolean(global.passcode.hasPasscode),
       canInstall: Boolean(tabState.canInstall),
       archiveSettings,
-      isAuthRememberMe: global.authRememberMe,
+      canSetPasscode: selectCanSetPasscode(global),
     };
   },
 )(LeftMainHeader));
