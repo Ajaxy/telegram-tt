@@ -37,7 +37,7 @@ type OwnProps = {
 
 type StateProps =
   Pick<ISettings, (
-    'shouldSuggestStickers'
+    'shouldSuggestStickers' | 'shouldUpdateStickerSetOrder'
   )> & {
     addedSetIds?: string[];
     customEmojiSetIds?: string[];
@@ -54,6 +54,7 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
   stickerSetsById,
   defaultReaction,
   shouldSuggestStickers,
+  shouldUpdateStickerSetOrder,
   availableReactions,
   canPlayAnimatedEmojis,
   onReset,
@@ -74,6 +75,10 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
       stickerSetInfo: sticker.stickerSetInfo,
     });
   }, [openStickerSet]);
+
+  const handleSuggestStickerSetOrderChange = useCallback((newValue: boolean) => {
+    setSettingOption({ shouldUpdateStickerSetOrder: newValue });
+  }, [setSettingOption]);
 
   const handleSuggestStickersChange = useCallback((newValue: boolean) => {
     setSettingOption({ shouldSuggestStickers: newValue });
@@ -121,6 +126,19 @@ const SettingsStickers: FC<OwnProps & StateProps> = ({
           </ListItem>
         )}
       </div>
+      <div className="settings-item">
+        <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
+          {lang('InstalledStickers.DynamicPackOrder')}
+        </h4>
+        <Checkbox
+          label={lang('InstalledStickers.DynamicPackOrder')}
+          checked={shouldUpdateStickerSetOrder}
+          onCheck={handleSuggestStickerSetOrderChange}
+        />
+        <p className="settings-item-description mt-3" dir="auto">
+          {lang('InstalledStickers.DynamicPackOrderInfo')}
+        </p>
+      </div>
       {stickerSets && (
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>
@@ -151,6 +169,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       ...pick(global.settings.byKey, [
         'shouldSuggestStickers',
+        'shouldUpdateStickerSetOrder',
       ]),
       addedSetIds: global.stickers.added.setIds,
       customEmojiSetIds: global.customEmojis.added.setIds,

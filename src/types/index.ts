@@ -86,6 +86,7 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   autoLoadFileMaxSizeMb: number;
   shouldSuggestStickers: boolean;
   shouldSuggestCustomEmoji: boolean;
+  shouldUpdateStickerSetOrder: boolean;
   hasPassword?: boolean;
   languages?: ApiLanguage[];
   language: LangCode;

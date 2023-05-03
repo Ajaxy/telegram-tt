@@ -53,7 +53,7 @@ type OwnProps = {
   loadAndPlay: boolean;
   canSendStickers?: boolean;
   onStickerSelect: (
-    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, shouldUpdateStickerSetsOrder?: boolean,
+    sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, canUpdateStickerSetsOrder?: boolean,
   ) => void;
 };
 
