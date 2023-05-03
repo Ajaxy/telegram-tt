@@ -51,14 +51,17 @@ export async function setChatUsername(
   }));
 
   const usernames = chat.usernames
-    ? chat.usernames.map((u) => (u.isEditable ? { ...u, username } : u))
+    ? chat.usernames
+      .map((u) => (u.isEditable ? { ...u, username } : u))
+      // User can remove username from chat when changing it type to private, so we need to filter out empty usernames
+      .filter((u) => u.username)
     : [{ username, isEditable: true, isActive: true }];
 
   if (result) {
     onUpdate({
       '@type': 'updateChat',
       id: chat.id,
-      chat: { usernames },
+      chat: { usernames: usernames.length ? usernames : undefined },
     });
   }
 
