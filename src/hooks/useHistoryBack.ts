@@ -231,13 +231,14 @@ window.addEventListener('popstate', ({ state }: PopStateEvent) => {
 export default function useHistoryBack({
   isActive,
   shouldBeReplaced,
+  shouldResetUrlHash,
   hash,
   onBack,
 }: {
   isActive?: boolean;
   shouldBeReplaced?: boolean;
   hash?: string;
-  title?: string;
+  shouldResetUrlHash?: boolean;
   onBack: VoidFunction;
 }) {
   // Active index of the record
@@ -279,9 +280,10 @@ export default function useHistoryBack({
         index: indexRef.current,
         historyUniqueSessionId,
       },
-      hash: hash ? `#${hash}` : undefined,
+      // Space is a hack to make the browser completely remove the hash
+      hash: hash ? `#${hash}` : (shouldResetUrlHash ? ' ' : undefined),
     });
-  }, [hash, onBack, shouldBeReplaced]);
+  }, [hash, onBack, shouldBeReplaced, shouldResetUrlHash]);
 
   const processBack = useCallback(() => {
     // Only process back on open records
