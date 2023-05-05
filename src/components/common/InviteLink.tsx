@@ -18,12 +18,14 @@ type OwnProps = {
   title?: string;
   inviteLink: string;
   onRevoke?: VoidFunction;
+  isDisabled?: boolean;
 };
 
 const InviteLink: FC<OwnProps> = ({
   title,
   inviteLink,
   onRevoke,
+  isDisabled,
 }) => {
   const lang = useLang();
   const { showNotification, openChatWithDraft } = getActions();
@@ -85,10 +87,20 @@ const InviteLink: FC<OwnProps> = ({
         </DropdownMenu>
       </div>
       <div className={styles.buttons}>
-        <Button onClick={handleCopyPrimaryClicked} className={styles.button}>
+        <Button
+          onClick={handleCopyPrimaryClicked}
+          className={styles.button}
+          size="smaller"
+          disabled={isDisabled}
+        >
           {lang('FolderLinkScreen.LinkActionCopy')}
         </Button>
-        <Button onClick={handleShare} className={styles.button}>
+        <Button
+          onClick={handleShare}
+          className={styles.button}
+          size="smaller"
+          disabled={isDisabled}
+        >
           {lang('FolderLinkScreen.LinkActionShare')}
         </Button>
       </div>

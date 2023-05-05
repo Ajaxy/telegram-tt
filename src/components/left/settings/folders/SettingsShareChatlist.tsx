@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
@@ -93,13 +93,19 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
 
   const [selectedIds, setSelectedIds] = useState<string[]>(peerIds || []);
 
-  useEffectWithPrevDeps(([prevIsLoading]) => {
-    if (isLoading && !prevIsLoading) {
+  const isFirstRenderRef = useRef(true);
+  useEffectWithPrevDeps(([prevUrl]) => {
+    if (prevUrl !== url) {
+      isFirstRenderRef.current = true;
+    }
+    if (!isFirstRenderRef.current) return;
+    isFirstRenderRef.current = false;
+    if (!url) {
       setSelectedIds(unlockedIds);
     } else if (peerIds) {
       setSelectedIds(peerIds);
     }
-  }, [isLoading, unlockedIds, peerIds]);
+  }, [url, unlockedIds, peerIds]);
 
   const handleClickDisabled = useCallback((id: string) => {
     const global = getGlobal();
@@ -135,9 +141,10 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   }, [folderId, selectedIds, url]);
 
   const chatsCount = selectedIds.length;
+  const isDisabled = !chatsCount || isLoading;
 
   return (
-    <div className="settings-content no-border custom-scroll">
+    <div className="settings-content no-border custom-scroll SettingsFoldersChatsPicker">
       <div className="settings-content-header">
         <AnimatedIcon
           size={STICKER_SIZE_FOLDER_SETTINGS}
@@ -154,6 +161,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
       <InviteLink
         inviteLink={isLoading ? lang('Loading') : url!}
         onRevoke={handleRevoke}
+        isDisabled={isDisabled}
       />
 
       <div className="settings-item settings-item-chatlist">
@@ -163,12 +171,13 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
           onSelectedIdsChange={handleSelectedIdsChange}
           selectedIds={selectedIds}
           onDisabledClick={handleClickDisabled}
+          isRoundCheckbox
         />
       </div>
 
       <FloatingActionButton
         isShown={isLoading || isTouched}
-        disabled={isLoading}
+        disabled={isDisabled}
         onClick={handleSubmit}
         ariaLabel="Save changes"
       >

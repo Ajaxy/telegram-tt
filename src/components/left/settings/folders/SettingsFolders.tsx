@@ -6,8 +6,10 @@ import type { ApiChatFolder } from '../../../../api/types';
 import { SettingsScreens } from '../../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
 
+import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
+
 import SettingsFoldersMain from './SettingsFoldersMain';
-import SettingsFoldersEdit from './SettingsFoldersEdit';
+import SettingsFoldersEdit, { ERROR_NO_CHATS, ERROR_NO_TITLE } from './SettingsFoldersEdit';
 import SettingsFoldersChatFilters from './SettingsFoldersChatFilters';
 import SettingsShareChatlist from './SettingsShareChatlist';
 
@@ -34,7 +36,11 @@ const SettingsFolders: FC<OwnProps> = ({
   onScreenSelect,
   onReset,
 }) => {
-  const { openShareChatFolderModal } = getActions();
+  const {
+    openShareChatFolderModal,
+    editChatFolder,
+    addChatFolder,
+  } = getActions();
 
   const handleReset = useCallback(() => {
     if (
@@ -66,10 +72,50 @@ const SettingsFolders: FC<OwnProps> = ({
     currentScreen, onReset, onScreenSelect,
   ]);
 
+  const isCreating = state.mode === 'create';
+
+  const saveState = useCallback((newState: FoldersState) => {
+    const { title } = newState.folder;
+
+    if (!title) {
+      dispatch({ type: 'setError', payload: ERROR_NO_TITLE });
+      return false;
+    }
+
+    const {
+      selectedChatIds: includedChatIds,
+      selectedChatTypes: includedChatTypes,
+    } = selectChatFilters(newState, 'included');
+
+    if (!includedChatIds.length && !Object.keys(includedChatTypes).length) {
+      dispatch({ type: 'setError', payload: ERROR_NO_CHATS });
+      return false;
+    }
+
+    if (!isCreating) {
+      editChatFolder({ id: newState.folderId!, folderUpdate: newState.folder });
+    } else {
+      addChatFolder({ folder: newState.folder as ApiChatFolder });
+    }
+
+    dispatch({ type: 'setError', payload: undefined });
+    dispatch({ type: 'setIsTouched', payload: false });
+
+    return true;
+  }, [dispatch, isCreating]);
+
+  const handleSaveFolder = useCallback((cb?: NoneToVoidFunction) => {
+    if (!saveState(state)) {
+      return;
+    }
+    cb?.();
+  }, [saveState, state]);
+
   const handleSaveFilter = useCallback(() => {
-    dispatch({ type: 'saveFilters' });
+    const newState = dispatch({ type: 'saveFilters' });
     handleReset();
-  }, [dispatch, handleReset]);
+    saveState(newState);
+  }, [dispatch, handleReset, saveState]);
 
   const handleCreateFolder = useCallback(() => {
     dispatch({ type: 'reset' });
@@ -97,8 +143,9 @@ const SettingsFolders: FC<OwnProps> = ({
 
   const handleShareFolder = useCallback(() => {
     openShareChatFolderModal({ folderId: state.folderId!, noRequestNextScreen: true });
+    dispatch({ type: 'setIsChatlist', payload: true });
     onScreenSelect(SettingsScreens.FoldersShare);
-  }, [onScreenSelect, state.folderId]);
+  }, [dispatch, onScreenSelect, state.folderId]);
 
   const handleOpenInvite = useCallback((url: string) => {
     openShareChatFolderModal({ folderId: state.folderId!, url, noRequestNextScreen: true });
@@ -139,6 +186,7 @@ const SettingsFolders: FC<OwnProps> = ({
           ].includes(shownScreen)}
           isOnlyInvites={currentScreen === SettingsScreens.FoldersEditFolderInvites}
           onBack={onReset}
+          onSaveFolder={handleSaveFolder}
         />
       );
     case SettingsScreens.FoldersIncludedChats:

@@ -1681,7 +1681,7 @@ export async function editChatlistInvite({
     slug,
     title,
     peers: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
-  }));
+  }), undefined, true);
   if (!result) return undefined;
 
   return buildApiChatlistExportedInvite(result);

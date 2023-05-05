@@ -6,6 +6,7 @@ import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import type { FC } from '../../lib/teact/teact';
 
 import { isUserId } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
@@ -32,6 +33,7 @@ type OwnProps = {
   isLoading?: boolean;
   noScrollRestore?: boolean;
   isSearchable?: boolean;
+  isRoundCheckbox?: boolean;
   lockedIds?: string[];
   onSelectedIdsChange?: (ids: string[]) => void;
   onFilterChange?: (value: string) => void;
@@ -55,6 +57,7 @@ const Picker: FC<OwnProps> = ({
   isLoading,
   noScrollRestore,
   isSearchable,
+  isRoundCheckbox,
   lockedIds,
   onSelectedIdsChange,
   onFilterChange,
@@ -161,24 +164,37 @@ const Picker: FC<OwnProps> = ({
           onLoadMore={getMore}
           noScrollRestore={noScrollRestore}
         >
-          {viewportIds.map((id) => (
-            <ListItem
-              key={id}
-              className="chat-item-clickable picker-list-item"
-              disabled={lockedIdsSet.has(id)}
-              allowDisabledClick={Boolean(onDisabledClick)}
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => handleItemClick(id)}
-              ripple
-            >
-              <Checkbox label="" disabled={lockedIdsSet.has(id)} checked={selectedIds.includes(id)} />
-              {isUserId(id) ? (
-                <PrivateChatInfo userId={id} />
-              ) : (
-                <GroupChatInfo chatId={id} />
-              )}
-            </ListItem>
-          ))}
+          {viewportIds.map((id) => {
+            const renderCheckbox = () => {
+              return (
+                <Checkbox
+                  label=""
+                  disabled={lockedIdsSet.has(id)}
+                  checked={selectedIds.includes(id)}
+                  round={isRoundCheckbox}
+                />
+              );
+            };
+            return (
+              <ListItem
+                key={id}
+                className={buildClassName('chat-item-clickable picker-list-item', isRoundCheckbox && 'chat-item')}
+                disabled={lockedIdsSet.has(id)}
+                allowDisabledClick={Boolean(onDisabledClick)}
+                // eslint-disable-next-line react/jsx-no-bind
+                onClick={() => handleItemClick(id)}
+                ripple
+              >
+                {!isRoundCheckbox ? renderCheckbox() : undefined}
+                {isUserId(id) ? (
+                  <PrivateChatInfo userId={id} />
+                ) : (
+                  <GroupChatInfo chatId={id} />
+                )}
+                {isRoundCheckbox ? renderCheckbox() : undefined}
+              </ListItem>
+            );
+          })}
         </InfiniteScroll>
       ) : !isLoading && viewportIds && !viewportIds.length ? (
         <p className="no-results">{notFoundText || 'Sorry, nothing found.'}</p>
