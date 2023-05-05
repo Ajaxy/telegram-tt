@@ -1,9 +1,9 @@
+import type { RefObject } from 'react';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { GlobalState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
 import type { ReducerAction } from '../../hooks/useReducer';
@@ -13,7 +13,6 @@ import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/windowEnvir
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
-import { useResize } from '../../hooks/useResize';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
@@ -25,12 +24,15 @@ import ArchivedChats from './ArchivedChats.async';
 
 import './LeftColumn.scss';
 
+interface OwnProps {
+  ref: RefObject<HTMLDivElement>;
+}
+
 type StateProps = {
   searchQuery?: string;
   searchDate?: number;
   isFirstChatFolderActive: boolean;
   shouldSkipHistoryAnimations?: boolean;
-  leftColumnWidth?: number;
   currentUserId?: string;
   hasPasscode?: boolean;
   nextSettingsScreen?: SettingsScreens;
@@ -57,12 +59,12 @@ enum ContentType {
 const RENDER_COUNT = Object.keys(ContentType).length / 2;
 const RESET_TRANSITION_DELAY_MS = 250;
 
-const LeftColumn: FC<StateProps> = ({
+function LeftColumn({
+  ref,
   searchQuery,
   searchDate,
   isFirstChatFolderActive,
   shouldSkipHistoryAnimations,
-  leftColumnWidth,
   currentUserId,
   hasPasscode,
   nextSettingsScreen,
@@ -73,7 +75,7 @@ const LeftColumn: FC<StateProps> = ({
   forumPanelChatId,
   isClosingSearch,
   archiveSettings,
-}) => {
+}: OwnProps & StateProps) {
   const {
     setGlobalSearchQuery,
     setGlobalSearchClosing,
@@ -82,14 +84,10 @@ const LeftColumn: FC<StateProps> = ({
     setGlobalSearchDate,
     loadPasswordInfo,
     clearTwoFaError,
-    setLeftColumnWidth,
-    resetLeftColumnWidth,
     openChat,
     requestNextSettingsScreen,
   } = getActions();
 
-  // eslint-disable-next-line no-null/no-null
-  const resizeRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<LeftColumnContent>(LeftColumnContent.ChatList);
   const [settingsScreen, setSettingsScreen] = useState(SettingsScreens.Main);
   const [contactsFilter, setContactsFilter] = useState<string>('');
@@ -410,12 +408,6 @@ const LeftColumn: FC<StateProps> = ({
     }
   }, [foldersDispatch, nextFoldersAction, nextSettingsScreen, requestNextSettingsScreen]);
 
-  const {
-    initResize, resetResize, handleMouseUp,
-  } = useResize(resizeRef, (n) => setLeftColumnWidth({
-    leftColumnWidth: n,
-  }), resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
-
   const handleSettingsScreenSelect = useCallback((screen: SettingsScreens) => {
     setContent(LeftColumnContent.Settings);
     setSettingsScreen(screen);
@@ -493,7 +485,7 @@ const LeftColumn: FC<StateProps> = ({
 
   return (
     <Transition
-      ref={resizeRef}
+      ref={ref}
       name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}
       renderCount={RENDER_COUNT}
       activeKey={contentType}
@@ -502,21 +494,13 @@ const LeftColumn: FC<StateProps> = ({
       shouldWrap
       wrapExceptionKey={ContentType.Main}
       id="LeftColumn"
-      afterChildren={(
-        <div
-          className="resize-handle"
-          onMouseDown={initResize}
-          onMouseUp={handleMouseUp}
-          onDoubleClick={resetResize}
-        />
-      )}
     >
       {renderContent}
     </Transition>
   );
-};
+}
 
-export default memo(withGlobal(
+export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const tabState = selectTabState(global);
     const {
@@ -530,7 +514,6 @@ export default memo(withGlobal(
       nextFoldersAction,
     } = tabState;
     const {
-      leftColumnWidth,
       currentUserId,
       passcode: {
         hasPasscode,
@@ -549,7 +532,6 @@ export default memo(withGlobal(
       searchDate: date,
       isFirstChatFolderActive: activeChatFolder === 0,
       shouldSkipHistoryAnimations,
-      leftColumnWidth,
       currentUserId,
       hasPasscode,
       nextSettingsScreen,

@@ -40,7 +40,6 @@ export type TransitionProps = {
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
-  afterChildren?: React.ReactNode;
 };
 
 const FALLBACK_ANIMATION_END = 1000;
@@ -50,7 +49,6 @@ const CLASSES = {
   from: 'Transition_slide-from',
   to: 'Transition_slide-to',
   inactive: 'Transition_slide-inactive',
-  afterSlides: 'Transition_afterSlides',
 };
 const DISABLEABLE_ANIMATIONS = new Set<AnimationName>([
   'slide', 'slideRtl', 'slideFade', 'zoomFade', 'slideLayers', 'pushSlide', 'reveal',
@@ -75,7 +73,6 @@ function Transition({
   onStart,
   onStop,
   children,
-  afterChildren,
 }: TransitionProps) {
   const currentKeyRef = useRef<number>();
   // No need for a container to update on change
@@ -128,14 +125,12 @@ function Transition({
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
 
-    const childNodes = Array.from(container.childNodes)
-      .filter((el) => !(el instanceof HTMLElement && el.classList.contains(CLASSES.afterSlides)));
+    const childNodes = Array.from(container.childNodes);
     if (!childNodes.length) {
       return;
     }
 
-    const childElements = (Array.from(container.children) as HTMLElement[])
-      .filter((el) => !el.classList.contains(CLASSES.afterSlides));
+    const childElements = Array.from(container.children) as HTMLElement[];
     childElements.forEach((el) => {
       addExtraClass(el, CLASSES.slide);
 
@@ -318,12 +313,6 @@ function Transition({
       ? <div key={key} teactOrderKey={key}>{rendered}</div>
       : rendered;
   });
-
-  if (afterChildren) {
-    contents.push((
-      <div className={CLASSES.afterSlides}>{afterChildren}</div>
-    ));
-  }
 
   return (
     <div

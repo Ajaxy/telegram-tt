@@ -1,4 +1,4 @@
-import type { FC } from '../../lib/teact/teact';
+import type { RefObject } from 'react';
 import React, {
   useEffect, useState, memo, useMemo, useCallback,
 } from '../../lib/teact/teact';
@@ -67,6 +67,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
 import usePinnedMessage from './hooks/usePinnedMessage';
+import { useResize } from '../../hooks/useResize';
 
 import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
@@ -88,6 +89,7 @@ import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
 
 interface OwnProps {
+  leftColumnRef: RefObject<HTMLDivElement>;
   isMobile?: boolean;
 }
 
@@ -99,7 +101,6 @@ type StateProps = {
   replyingToId?: number;
   isPrivate?: boolean;
   isPinnedMessageList?: boolean;
-  isScheduledMessageList?: boolean;
   canPost?: boolean;
   currentUserBannedRights?: ApiChatBannedRights;
   defaultBannedRights?: ApiChatBannedRights;
@@ -114,6 +115,7 @@ type StateProps = {
   isLeftColumnShown?: boolean;
   isRightColumnShown?: boolean;
   isBackgroundBlurred?: boolean;
+  leftColumnWidth?: number;
   hasCurrentTextSearch?: boolean;
   isSelectModeActive?: boolean;
   isSeenByModalOpen: boolean;
@@ -142,7 +144,8 @@ function isImage(item: DataTransferItem) {
 
 const LAYER_ANIMATION_DURATION_MS = 450 + ANIMATION_END_DELAY;
 
-const MiddleColumn: FC<OwnProps & StateProps> = ({
+function MiddleColumn({
+  leftColumnRef,
   chatId,
   threadId,
   messageListType,
@@ -165,6 +168,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   isLeftColumnShown,
   isRightColumnShown,
   isBackgroundBlurred,
+  leftColumnWidth,
   hasCurrentTextSearch,
   isSelectModeActive,
   isSeenByModalOpen,
@@ -185,7 +189,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
   shouldLoadFullChat,
   lastSyncTime,
   pinnedIds,
-}) => {
+}: OwnProps & StateProps) {
   const {
     openChat,
     openPreviousChat,
@@ -199,6 +203,8 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
     restartBot,
     showNotification,
     loadFullChat,
+    setLeftColumnWidth,
+    resetLeftColumnWidth,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -318,6 +324,12 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
       loadFullChat({ chatId });
     }
   }, [shouldLoadFullChat, chatId, isReady, loadFullChat]);
+
+  const {
+    initResize, resetResize, handleMouseUp,
+  } = useResize(leftColumnRef, (n) => setLeftColumnWidth({
+    leftColumnWidth: n,
+  }), resetLeftColumnWidth, leftColumnWidth, '--left-column-width');
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     const { items } = e.dataTransfer || {};
@@ -452,6 +464,12 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
       `}
       onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
+      <div
+        className="resize-handle"
+        onMouseDown={initResize}
+        onMouseUp={handleMouseUp}
+        onDoubleClick={resetResize}
+      />
       <div
         className={bgClassName}
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
@@ -622,7 +640,7 @@ const MiddleColumn: FC<OwnProps & StateProps> = ({
       <GiftPremiumModal isOpen={isGiftPremiumModalOpen} />
     </div>
   );
-};
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
@@ -637,7 +655,7 @@ export default memo(withGlobal<OwnProps>(
       messageLanguageModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
-    const { chats: { listIds }, lastSyncTime } = global;
+    const { chats: { listIds }, leftColumnWidth, lastSyncTime } = global;
 
     const state: StateProps = {
       theme,
@@ -656,6 +674,7 @@ export default memo(withGlobal<OwnProps>(
       withInterfaceAnimations: selectCanAnimateInterface(global),
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,
+      leftColumnWidth,
       lastSyncTime,
     };
 
@@ -675,7 +694,6 @@ export default memo(withGlobal<OwnProps>(
     const canPost = chat && getCanPostInChat(chat, threadId, isComments);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
-    const isScheduledMessageList = messageListType === 'scheduled';
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
     const isChannel = Boolean(chat && isChatChannel(chat));
     const canSubscribe = Boolean(
@@ -711,7 +729,6 @@ export default memo(withGlobal<OwnProps>(
         && !(shouldJoinToSend && chat?.isNotJoined)
         && !shouldBlockSendInForum,
       isPinnedMessageList,
-      isScheduledMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
       hasPinned: (

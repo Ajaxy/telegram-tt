@@ -115,7 +115,7 @@ body.cursor-ew-resize {
   display: none;
   position: absolute;
   top: 0;
-  right: -0.25rem;
+  left: 0;
   bottom: 0;
   width: 0.25rem;
   z-index: var(--z-resize-handle);

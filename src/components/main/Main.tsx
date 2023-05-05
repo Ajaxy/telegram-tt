@@ -257,6 +257,8 @@ const Main: FC<OwnProps & StateProps> = ({
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const leftColumnRef = useRef<HTMLDivElement>(null);
 
   const { isDesktop } = useAppLayout();
   useEffect(() => {
@@ -488,8 +490,8 @@ const Main: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
-      <LeftColumn />
-      <MiddleColumn isMobile={isMobile} />
+      <LeftColumn ref={leftColumnRef} />
+      <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
