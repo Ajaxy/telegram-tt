@@ -764,12 +764,29 @@ addActionHandler('addChatFolder', async (global, actions, payload): Promise<void
   // Clear fields from recommended folders
   const { id: recommendedId, description, ...newFolder } = folder;
 
+  const newId = maxId + 1;
+  const folderUpdate = {
+    id: newId,
+    ...newFolder,
+  };
   await callApi('editChatFolder', {
-    id: maxId + 1,
-    folderUpdate: {
-      id: maxId + 1,
-      ...newFolder,
+    id: newId,
+    folderUpdate,
+  });
+
+  // Update called from the above `callApi` is throttled, but we need to apply changes immediately
+  actions.apiUpdate({
+    '@type': 'updateChatFolder',
+    id: newId,
+    folder: folderUpdate,
+  });
+
+  actions.requestNextSettingsScreen({
+    foldersAction: {
+      type: 'setFolderId',
+      payload: maxId + 1,
     },
+    tabId,
   });
 
   if (!description) {
@@ -2019,33 +2036,43 @@ addActionHandler('editChatlistInvite', async (global, actions, payload): Promise
   }, tabId);
   setGlobal(global);
 
-  const result = await callApi('editChatlistInvite', { folderId, slug, peers });
+  try {
+    const result = await callApi('editChatlistInvite', { folderId, slug, peers });
 
-  if (!result) return;
+    if (!result) {
+      return;
+    }
 
-  global = getGlobal();
-  global = {
-    ...global,
-    chatFolders: {
-      ...global.chatFolders,
-      invites: {
-        ...global.chatFolders.invites,
-        [folderId]: global.chatFolders.invites[folderId]?.map((invite) => {
-          if (invite.url === url) {
-            return result;
-          }
-          return invite;
-        }),
+    global = getGlobal();
+    global = {
+      ...global,
+      chatFolders: {
+        ...global.chatFolders,
+        invites: {
+          ...global.chatFolders.invites,
+          [folderId]: global.chatFolders.invites[folderId]?.map((invite) => {
+            if (invite.url === url) {
+              return result;
+            }
+            return invite;
+          }),
+        },
       },
-    },
-  };
-  global = updateTabState(global, {
-    shareFolderScreen: {
-      ...selectTabState(global, tabId).shareFolderScreen!,
-      isLoading: false,
-    },
-  }, tabId);
-  setGlobal(global);
+    };
+    setGlobal(global);
+  } catch (error) {
+    actions.showDialog({ data: { ...(error as ApiError), hasErrorKey: true }, tabId });
+  } finally {
+    global = getGlobal();
+
+    global = updateTabState(global, {
+      shareFolderScreen: {
+        ...selectTabState(global, tabId).shareFolderScreen!,
+        isLoading: false,
+      },
+    }, tabId);
+    setGlobal(global);
+  }
 });
 
 addActionHandler('deleteChatlistInvite', async (global, actions, payload): Promise<void> => {

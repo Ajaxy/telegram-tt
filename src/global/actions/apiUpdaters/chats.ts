@@ -4,7 +4,7 @@ import type { ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
+import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
 import {
@@ -271,6 +271,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           ...global.chatFolders,
           byId: newChatFoldersById,
           orderedIds: newOrderedIds,
+          invites: omit(global.chatFolders.invites, [id]),
         },
       };
     }

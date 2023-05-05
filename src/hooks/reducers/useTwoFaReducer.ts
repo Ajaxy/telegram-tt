@@ -4,7 +4,7 @@ import useReducer from '../useReducer';
 export type TwoFaActions = (
   'setCurrentPassword' | 'setPassword' | 'setHint' | 'setEmail' | 'reset'
 );
-export type TwoFaDispatch = Dispatch<TwoFaActions>;
+export type TwoFaDispatch = Dispatch<TwoFaState, TwoFaActions>;
 
 export type TwoFaState = {
   currentPassword: string;

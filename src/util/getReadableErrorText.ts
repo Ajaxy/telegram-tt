@@ -69,6 +69,8 @@ const READABLE_ERROR_MESSAGES: Record<string, string> = {
   FRESH_CHANGE_ADMINS_FORBIDDEN: 'You were just elected admin, you can\'t add or modify other admins yet',
   INPUT_USER_DEACTIVATED: 'The specified user was deleted',
   BOT_PRECHECKOUT_TIMEOUT: 'The request for payment has expired',
+
+  PEERS_LIST_EMPTY: 'No chats are added to the list',
 };
 
 if (DEBUG) {

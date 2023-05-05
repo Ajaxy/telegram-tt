@@ -4,7 +4,7 @@ import useForceUpdate from './useForceUpdate';
 
 export type ReducerAction<Actions> = { type: Actions; payload?: any };
 export type StateReducer<State, Actions> = (state: State, action: ReducerAction<Actions>) => State;
-export type Dispatch<Actions> = (action: ReducerAction<Actions>) => void;
+export type Dispatch<State, Actions> = (action: ReducerAction<Actions>) => State;
 
 export default function useReducer<State, Actions>(
   reducer: StateReducer<State, Actions>,
@@ -17,10 +17,11 @@ export default function useReducer<State, Actions>(
   const dispatch = useCallback((action: ReducerAction<Actions>) => {
     state.current = reducerRef.current(state.current, action);
     forceUpdate();
+    return state.current;
   }, []);
 
   return [
     state.current,
     dispatch,
-  ] as [State, Dispatch<Actions>];
+  ] as [State, Dispatch<State, Actions>];
 }

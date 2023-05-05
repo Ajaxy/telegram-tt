@@ -122,9 +122,10 @@ export type FoldersState = {
 };
 export type FoldersActions = (
   'setTitle' | 'saveFilters' | 'editFolder' | 'reset' | 'setChatFilter' | 'setIsLoading' | 'setError' |
-  'editIncludeFilters' | 'editExcludeFilters' | 'setIncludeFilters' | 'setExcludeFilters'
+  'editIncludeFilters' | 'editExcludeFilters' | 'setIncludeFilters' | 'setExcludeFilters' | 'setIsTouched' |
+  'setFolderId' | 'setIsChatlist'
 );
-export type FolderEditDispatch = Dispatch<FoldersActions>;
+export type FolderEditDispatch = Dispatch<FoldersState, FoldersActions>;
 
 const INITIAL_STATE: FoldersState = {
   mode: 'create',
@@ -149,6 +150,12 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
           title: action.payload,
         },
         isTouched: true,
+      };
+    case 'setFolderId':
+      return {
+        ...state,
+        folderId: action.payload,
+        mode: 'edit',
       };
     case 'editIncludeFilters':
       return {
@@ -221,6 +228,12 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
         chatFilter: action.payload,
       };
     }
+    case 'setIsTouched': {
+      return {
+        ...state,
+        isTouched: action.payload,
+      };
+    }
     case 'setIsLoading': {
       return {
         ...state,
@@ -230,9 +243,18 @@ const foldersReducer: StateReducer<FoldersState, FoldersActions> = (
     case 'setError': {
       return {
         ...state,
+        isLoading: false,
         error: action.payload,
       };
     }
+    case 'setIsChatlist':
+      return {
+        ...state,
+        folder: {
+          ...state.folder,
+          isChatList: action.payload,
+        },
+      };
     case 'reset':
       return INITIAL_STATE;
     default:

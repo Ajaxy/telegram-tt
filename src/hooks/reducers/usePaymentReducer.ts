@@ -32,7 +32,7 @@ export type FormActions = (
   'changeBillingZip' | 'changeSaveInfo' | 'changeSaveCredentials' | 'setFormErrors' | 'resetState' | 'setTipAmount' |
   'changeSavedCredentialId'
 );
-export type FormEditDispatch = Dispatch<FormActions>;
+export type FormEditDispatch = Dispatch<FormState, FormActions>;
 
 const INITIAL_STATE: FormState = {
   streetLine1: '',

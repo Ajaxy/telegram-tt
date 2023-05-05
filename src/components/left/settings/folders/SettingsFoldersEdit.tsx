@@ -4,7 +4,7 @@ import React, {
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
+import type { ApiChatlistExportedInvite } from '../../../../api/types';
 
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
@@ -45,6 +45,7 @@ type OwnProps = {
   isOnlyInvites?: boolean;
   onReset: () => void;
   onBack: () => void;
+  onSaveFolder: (cb?: VoidFunction) => void;
 };
 
 type StateProps = {
@@ -59,8 +60,8 @@ const SUBMIT_TIMEOUT = 500;
 
 const INITIAL_CHATS_LIMIT = 5;
 
-const ERROR_NO_TITLE = 'Please provide a title for this folder.';
-const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
+export const ERROR_NO_TITLE = 'Please provide a title for this folder.';
+export const ERROR_NO_CHATS = 'ChatList.Filter.Error.Empty';
 
 const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   state,
@@ -78,10 +79,9 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   loadedArchivedChatIds,
   invites,
   maxInviteLinks,
+  onSaveFolder,
 }) => {
   const {
-    editChatFolder,
-    addChatFolder,
     loadChatlistInvites,
     openLimitReachedModal,
     showNotification,
@@ -154,38 +154,23 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
     dispatch({ type: 'setTitle', payload: currentTarget.value.trim() });
   }, [dispatch]);
 
-  const handleSaveFolder = useCallback((cb?: NoneToVoidFunction) => {
-    const { title } = state.folder;
-
-    if (!title) {
-      dispatch({ type: 'setError', payload: ERROR_NO_TITLE });
-      return;
-    }
-
-    if (!includedChatIds.length && !Object.keys(includedChatTypes).length) {
-      dispatch({ type: 'setError', payload: ERROR_NO_CHATS });
-      return;
-    }
-
-    if (!isCreating) {
-      editChatFolder({ id: state.folderId!, folderUpdate: state.folder });
-    } else {
-      addChatFolder({ folder: state.folder as ApiChatFolder });
-    }
-    cb?.();
-  }, [dispatch, includedChatIds.length, includedChatTypes, isCreating, state.folder, state.folderId]);
-
   const handleSubmit = useCallback(() => {
-    handleSaveFolder();
-
     dispatch({ type: 'setIsLoading', payload: true });
-    setTimeout(() => {
-      onReset();
-    }, SUBMIT_TIMEOUT);
-  }, [dispatch, handleSaveFolder, onReset]);
+
+    onSaveFolder(() => {
+      setTimeout(() => {
+        onReset();
+      }, SUBMIT_TIMEOUT);
+    });
+  }, [dispatch, onSaveFolder, onReset]);
 
   const handleCreateInviteClick = useCallback(() => {
-    if (!invites) return;
+    if (!invites) {
+      if (isCreating) {
+        onSaveFolder(onShareFolder);
+      }
+      return;
+    }
 
     // Ignoring global updates is a known drawback here
     if (!selectCanShareFolder(getGlobal(), state.folderId!)) {
@@ -195,7 +180,7 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
 
     if (invites.length < maxInviteLinks) {
       if (state.isTouched) {
-        handleSaveFolder(onShareFolder);
+        onSaveFolder(onShareFolder);
       } else {
         onShareFolder();
       }
@@ -204,15 +189,17 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
         limit: 'chatlistInvites',
       });
     }
-  }, [handleSaveFolder, invites, lang, maxInviteLinks, onShareFolder, state.folderId, state.isTouched]);
+  }, [
+    invites, state.folderId, state.isTouched, maxInviteLinks, isCreating, onSaveFolder, onShareFolder, lang,
+  ]);
 
   const handleEditInviteClick = useCallback((e: React.MouseEvent<HTMLElement>, url: string) => {
     if (state.isTouched) {
-      handleSaveFolder(() => onOpenInvite(url));
+      onSaveFolder(() => onOpenInvite(url));
     } else {
       onOpenInvite(url);
     }
-  }, [handleSaveFolder, onOpenInvite, state.isTouched]);
+  }, [onSaveFolder, onOpenInvite, state.isTouched]);
 
   function renderChatType(key: string, mode: 'included' | 'excluded') {
     const chatType = mode === 'included'
@@ -339,38 +326,36 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
           </div>
         )}
 
-        {!isCreating && (
-          <div className="settings-item pt-3">
-            <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
-              {lang('FolderLinkScreen.Title')}
-            </h4>
+        <div className="settings-item pt-3">
+          <h4 className="settings-item-header mb-3" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('FolderLinkScreen.Title')}
+          </h4>
 
+          <ListItem
+            className="settings-folders-list-item color-primary mb-0"
+            icon="add"
+            onClick={handleCreateInviteClick}
+          >
+            {lang('ChatListFilter.CreateLinkNew')}
+          </ListItem>
+
+          {invites?.map((invite) => (
             <ListItem
-              className="settings-folders-list-item color-primary mb-0"
-              icon="add"
-              onClick={handleCreateInviteClick}
+              className="settings-folders-list-item mb-0"
+              icon="link"
+              multiline
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={handleEditInviteClick}
+              clickArg={invite.url}
             >
-              {lang('ChatListFilter.CreateLinkNew')}
+              <span className="title" dir="auto">{invite.title || invite.url}</span>
+              <span className="subtitle">
+                {lang('ChatListFilter.LinkLabelChatCount', invite.peerIds.length, 'i')}
+              </span>
             </ListItem>
+          ))}
 
-            {invites?.map((invite) => (
-              <ListItem
-                className="settings-folders-list-item mb-0"
-                icon="link"
-                multiline
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={handleEditInviteClick}
-                clickArg={invite.url}
-              >
-                <span className="title" dir="auto">{invite.title || invite.url}</span>
-                <span className="subtitle">
-                  {lang('ChatListFilter.LinkLabelChatCount', invite.peerIds.length, 'i')}
-                </span>
-              </ListItem>
-            ))}
-
-          </div>
-        )}
+        </div>
       </div>
 
       <FloatingActionButton
