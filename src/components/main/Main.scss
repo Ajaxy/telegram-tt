@@ -35,6 +35,7 @@
   min-width: var(--left-column-min-width);
   max-width: var(--left-column-max-width);
   height: 100%;
+  overflow: hidden;
   position: relative;
 
   background-color: var(--color-background);

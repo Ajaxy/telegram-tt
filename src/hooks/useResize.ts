@@ -2,6 +2,7 @@ import type { RefObject } from 'react';
 import {
   useState, useEffect, useLayoutEffect, useCallback,
 } from '../lib/teact/teact';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import useFlag from './useFlag';
 
 export function useResize(
@@ -16,15 +17,17 @@ export function useResize(
   const [initialElementWidth, setInitialElementWidth] = useState<number>(0);
 
   const setElementStyle = useCallback((width?: number) => {
-    if (!elementRef.current) {
-      return;
-    }
+    requestMutation(() => {
+      if (!elementRef.current) {
+        return;
+      }
 
-    const widthPx = width ? `${width}px` : '';
-    elementRef.current.style.width = widthPx;
-    if (cssPropertyName) {
-      elementRef.current.style.setProperty(cssPropertyName, widthPx);
-    }
+      const widthPx = width ? `${width}px` : '';
+      elementRef.current.style.width = widthPx;
+      if (cssPropertyName) {
+        elementRef.current.style.setProperty(cssPropertyName, widthPx);
+      }
+    });
   }, [cssPropertyName, elementRef]);
 
   useLayoutEffect(() => {
@@ -36,13 +39,17 @@ export function useResize(
   }, [cssPropertyName, elementRef, initialWidth, setElementStyle]);
 
   function handleMouseUp() {
-    document.body.classList.remove('cursor-ew-resize');
+    requestMutation(() => {
+      document.body.classList.remove('cursor-ew-resize');
+    });
   }
 
   function initResize(e: React.MouseEvent<HTMLElement, MouseEvent>) {
     e.preventDefault();
 
-    document.body.classList.add('cursor-ew-resize');
+    requestMutation(() => {
+      document.body.classList.add('cursor-ew-resize');
+    });
 
     setInitialMouseX(e.clientX);
     setInitialElementWidth(elementRef.current!.offsetWidth);
