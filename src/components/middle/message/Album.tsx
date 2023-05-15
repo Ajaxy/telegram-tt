@@ -12,7 +12,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import withSelectControl from './hocs/withSelectControl';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import {
-  selectActiveDownloadIds,
+  selectActiveDownloads,
   selectCanAutoLoadMedia,
   selectCanAutoPlayMedia,
   selectTheme,
@@ -40,7 +40,7 @@ type OwnProps = {
 type StateProps = {
   theme: ISettings['theme'];
   uploadsById: GlobalState['fileUploads']['byMessageLocalId'];
-  activeDownloadIds: number[];
+  activeDownloadIds?: number[];
 };
 
 const Album: FC<OwnProps & StateProps> = ({
@@ -92,7 +92,7 @@ const Album: FC<OwnProps & StateProps> = ({
           isProtected={isProtected}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
-          isDownloading={activeDownloadIds.includes(message.id)}
+          isDownloading={activeDownloadIds?.includes(message.id)}
           theme={theme}
         />
       );
@@ -110,7 +110,7 @@ const Album: FC<OwnProps & StateProps> = ({
           isProtected={isProtected}
           onClick={onMediaClick}
           onCancelUpload={handleCancelUpload}
-          isDownloading={activeDownloadIds.includes(message.id)}
+          isDownloading={activeDownloadIds?.includes(message.id)}
           theme={theme}
         />
       );
@@ -135,11 +135,13 @@ export default withGlobal<OwnProps>(
   (global, { album }): StateProps => {
     const { chatId } = album.mainMessage;
     const theme = selectTheme(global);
-    const activeDownloadIds = selectActiveDownloadIds(global, chatId);
+    const activeDownloads = selectActiveDownloads(global, chatId);
+    const isScheduled = album.mainMessage.isScheduled;
+
     return {
       theme,
       uploadsById: global.fileUploads.byMessageLocalId,
-      activeDownloadIds,
+      activeDownloadIds: isScheduled ? activeDownloads?.scheduledIds : activeDownloads?.ids,
     };
   },
 )(Album);

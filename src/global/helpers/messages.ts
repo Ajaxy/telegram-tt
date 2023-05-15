@@ -230,7 +230,7 @@ export function getMessageContentFilename(message: ApiMessage) {
     return content.audio.fileName;
   }
 
-  const baseFilename = getMessageKey(message);
+  const baseFilename = `${getMessageKey(message)}${message.isScheduled ? '_scheduled' : ''}`;
 
   if (photo) {
     return `${baseFilename}.jpg`;

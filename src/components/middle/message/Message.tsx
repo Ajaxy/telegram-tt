@@ -228,7 +228,7 @@ type StateProps = {
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
-  isDownloading: boolean;
+  isDownloading?: boolean;
   threadId?: number;
   isPinnedList?: boolean;
   isPinned?: boolean;

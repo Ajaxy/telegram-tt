@@ -51,7 +51,7 @@ export type OwnProps = {
   dimensions?: IMediaDimensions & { isSmall?: boolean };
   asForwarded?: boolean;
   nonInteractive?: boolean;
-  isDownloading: boolean;
+  isDownloading?: boolean;
   isProtected?: boolean;
   theme: ISettings['theme'];
   onClick?: (id: number) => void;

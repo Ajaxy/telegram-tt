@@ -1,4 +1,4 @@
-import type { GlobalState } from '../../../../global/types';
+import type { GlobalState, TabState } from '../../../../global/types';
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
 } from '../../../../api/types';
@@ -15,7 +15,7 @@ export type StateProps = {
   foundIds?: string[];
   lastSyncTime?: number;
   searchChatId?: string;
-  activeDownloads: Record<string, number[]>;
+  activeDownloads: TabState['activeDownloads']['byChatId'];
   isChatProtected?: boolean;
 };
 

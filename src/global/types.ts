@@ -440,7 +440,12 @@ export type TabState = {
   openedCustomEmojiSetIds?: string[];
 
   activeDownloads: {
-    byChatId: Record<string, number[]>;
+    byChatId: {
+      [chatId: string]: {
+        ids?: number[];
+        scheduledIds?: number[];
+      };
+    };
   };
 
   statistics: {

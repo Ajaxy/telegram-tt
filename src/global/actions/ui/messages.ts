@@ -4,7 +4,7 @@ import type { ApiMessage } from '../../../api/types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
 import type {
-  TabState, GlobalState, ActionReturnType,
+  GlobalState, ActionReturnType,
 } from '../../types';
 
 import {
@@ -23,6 +23,8 @@ import {
   replaceTabThreadParam,
   updateFocusDirection,
   updateFocusedMessage,
+  cancelMessageMediaDownload,
+  addActiveMessageMediaDownload,
 } from '../../reducers';
 import {
   selectCurrentChat,
@@ -557,49 +559,23 @@ addActionHandler('openForwardMenuForSelectedMessages', (global, actions, payload
 addActionHandler('cancelMessageMediaDownload', (global, actions, payload): ActionReturnType => {
   const { message, tabId = getCurrentTabId() } = payload;
 
-  const tabState = selectTabState(global, tabId);
-  const byChatId = tabState.activeDownloads.byChatId[message.chatId];
-  if (!byChatId || !byChatId.length) return;
-
-  global = updateTabState(global, {
-    activeDownloads: {
-      byChatId: {
-        ...tabState.activeDownloads.byChatId,
-        [message.chatId]: byChatId.filter((id) => id !== message.id),
-      },
-    },
-  }, tabId);
-  setGlobal(global);
+  return cancelMessageMediaDownload(global, message, tabId);
 });
 
 addActionHandler('cancelMessagesMediaDownload', (global, actions, payload): ActionReturnType => {
   const { messages, tabId = getCurrentTabId() } = payload;
 
-  const byChatId = selectTabState(global, tabId).activeDownloads.byChatId;
-  const newByChatId: TabState['activeDownloads']['byChatId'] = {};
-  Object.keys(byChatId).forEach((chatId) => {
-    newByChatId[chatId] = byChatId[chatId].filter((id) => !messages.find((message) => message.id === id));
-  });
-  return updateTabState(global, {
-    activeDownloads: {
-      byChatId: newByChatId,
-    },
-  }, tabId);
+  for (const message of messages) {
+    global = cancelMessageMediaDownload(global, message, tabId);
+  }
+
+  return global;
 });
 
 addActionHandler('downloadMessageMedia', (global, actions, payload): ActionReturnType => {
   const { message, tabId = getCurrentTabId() } = payload;
 
-  const tabState = selectTabState(global, tabId);
-  global = updateTabState(global, {
-    activeDownloads: {
-      byChatId: {
-        ...tabState.activeDownloads.byChatId,
-        [message.chatId]: [...(tabState.activeDownloads.byChatId[message.chatId] || []), message.id],
-      },
-    },
-  }, tabId);
-  setGlobal(global);
+  return addActiveMessageMediaDownload(global, message, tabId);
 });
 
 addActionHandler('downloadSelectedMessages', (global, actions, payload): ActionReturnType => {

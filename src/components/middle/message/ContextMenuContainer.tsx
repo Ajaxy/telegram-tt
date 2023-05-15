@@ -4,14 +4,14 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { MessageListType } from '../../../global/types';
+import type { MessageListType, TabState } from '../../../global/types';
 import type {
   ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet, ApiChatReactions, ApiReaction, ApiThreadInfo,
 } from '../../../api/types';
 import type { IAlbum, IAnchorPosition } from '../../../types';
 
 import {
-  selectActiveDownloadIds,
+  selectActiveDownloads,
   selectAllowedMessageActions,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
@@ -101,7 +101,7 @@ type StateProps = {
   canSaveGif?: boolean;
   canRevote?: boolean;
   canClosePoll?: boolean;
-  activeDownloads: number[];
+  activeDownloads?: TabState['activeDownloads']['byChatId'][number];
   canShowSeenBy?: boolean;
   enabledReactions?: ApiChatReactions;
   canScheduleUntilOnline?: boolean;
@@ -249,8 +249,15 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     return Object.keys(message.seenByDates).slice(0, 3).map((id) => usersById[id]).filter(Boolean);
   }, [message.reactions?.recentReactions, message.seenByDates]);
 
-  const isDownloading = album ? album.messages.some((msg) => activeDownloads.includes(msg.id))
-    : activeDownloads.includes(message.id);
+  const isDownloading = useMemo(() => {
+    if (album) {
+      return album.messages.some((msg) => {
+        return activeDownloads?.[message.isScheduled ? 'scheduledIds' : 'ids']?.includes(msg.id);
+      });
+    }
+
+    return activeDownloads?.[message.isScheduled ? 'scheduledIds' : 'ids']?.includes(message.id);
+  }, [activeDownloads, album, message]);
 
   const handleDelete = useCallback(() => {
     setIsMenuOpen(false);
@@ -566,7 +573,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, messageListType, detectedLanguage }): StateProps => {
     const { threadId } = selectCurrentMessageList(global) || {};
-    const activeDownloads = selectActiveDownloadIds(global, message.chatId);
+    const activeDownloads = selectActiveDownloads(global, message.chatId);
     const chat = selectChat(global, message.chatId);
     const { seenByExpiresAt, seenByMaxChatMembers, maxUniqueReactions } = global.appConfig || {};
     const {
