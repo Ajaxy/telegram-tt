@@ -157,7 +157,7 @@ const Topic: FC<OwnProps & StateProps> = ({
       <div className="info">
         <div className="info-row">
           <div className={buildClassName('title')}>
-            <TopicIcon topic={topic} className={styles.topicIcon} />
+            <TopicIcon topic={topic} className={styles.topicIcon} observeIntersection={observeIntersection} />
             <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
           </div>
           {topic.isMuted && <i className="icon icon-muted" />}
