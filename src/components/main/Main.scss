@@ -81,12 +81,17 @@
       z-index: 1;
       pointer-events: none;
 
+      body.no-page-transitions & {
+        transition: none;
+      }
+
       // @optimization
       body.is-android & {
         display: none;
       }
 
-      body.is-android #Main.left-column-animating &, body.is-android #Main:not(.left-column-open) & {
+      body.is-android #Main.left-column-animating &,
+      body.is-android #Main:not(.left-column-open) & {
         display: block;
       }
 
@@ -187,63 +192,6 @@
 
     &:after {
       transition: none;
-    }
-  }
-}
-
-body.is-android:not(.no-right-column-animations) {
-  --layer-transition: 250ms ease-in-out;
-
-  #RightColumn {
-    transition: transform var(--layer-transition), opacity var(--layer-transition);
-  }
-}
-
-body.is-android.no-page-transitions {
-  --layer-transition: 250ms ease-in-out;
-
-  #LeftColumn, #MiddleColumn, #RightColumn {
-    transition: transform var(--layer-transition), opacity var(--layer-transition);
-  }
-
-  #Main.left-column-open:not(.left-column-animating) {
-    #MiddleColumn {
-      display: none;
-    }
-  }
-
-  #Main.left-column-open {
-    #MiddleColumn {
-      transform: translate3d(10vw, 0, 0);
-      opacity: 0;
-    }
-  }
-
-  #Main:not(.left-column-open) {
-    #LeftColumn {
-      transform: translate3d(0, 0, 0);
-      opacity: 0;
-    }
-  }
-
-  // @optimization
-  #Main:not(.right-column-open):not(.right-column-animating) {
-    #RightColumn {
-      display: none;
-    }
-  }
-
-  #Main:not(.right-column-open) {
-    #RightColumn {
-      transform: translate3d(10vw, 0, 0);
-      opacity: 0;
-    }
-  }
-
-  #Main.right-column-open {
-    #MiddleColumn {
-      transform: translate3d(0, 0, 0);
-      opacity: 0;
     }
   }
 }
