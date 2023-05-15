@@ -131,7 +131,7 @@
   .qr-inner {
     transition: none !important;
     &.open {
-      animation: qr-show 300ms ease-in-out forwards;
+      animation: qr-show 400ms ease-in-out forwards;
     }
 
     &:not(.shown) {
@@ -155,7 +155,7 @@
 
   .qr-container {
     background-color: white;
-    border-radius: var(--border-radius-default);
+    border-radius: 1.5rem;
     overflow: hidden;
   }
 
@@ -200,16 +200,13 @@
 @keyframes qr-show {
   0% {
     opacity: 0;
-    transform: scale(0.6);
+    transform: scale(0.7);
   }
-  30% {
-      opacity: 0.5;
-  }
-  75% {
+  50% {
+    opacity: 1;
     transform: scale(1.1);
   }
   100% {
-    opacity: 1;
     transform: scale(1);
   }
 }
