@@ -83,6 +83,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   options: {
     skipComponentUpdate?: boolean;
     nextSibling?: ChildNode;
+    forceMoveToEnd?: boolean;
     fragment?: DocumentFragment;
   } = {},
 ): T {
@@ -162,6 +163,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
           $new as VirtualElementComponent | VirtualElementFragment,
           parentEl,
           nextSibling,
+          options.forceMoveToEnd,
         );
       } else {
         const $currentAsReal = $current as VirtualElementReal;
@@ -176,7 +178,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
           $newAsTag.props.ref = $current.props.ref;
 
-          if (nextSibling) {
+          if (nextSibling || options.forceMoveToEnd) {
             insertBefore(parentEl, currentTarget, nextSibling);
           }
 
@@ -377,7 +379,11 @@ function getNextSibling($current: VirtualElement): ChildNode | undefined {
 }
 
 function renderChildren(
-  $current: VirtualElementParent, $new: VirtualElementParent, currentEl: HTMLElement, nextSibling?: ChildNode,
+  $current: VirtualElementParent,
+  $new: VirtualElementParent,
+  currentEl: HTMLElement,
+  nextSibling?: ChildNode,
+  forceMoveToEnd = false,
 ) {
   if (DEBUG) {
     DEBUG_checkKeyUniqueness($new.children);
@@ -394,8 +400,8 @@ function renderChildren(
 
   const fragment = newChildrenLength > currentChildrenLength ? document.createDocumentFragment() : undefined;
   const lastCurrentChild = $current.children[currentChildrenLength - 1];
-  const fragmentNextSibling = nextSibling || (
-    newChildrenLength > currentChildrenLength && lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined
+  const fragmentNextSibling = fragment && (
+    nextSibling || lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined
   );
 
   for (let i = 0; i < maxLength; i++) {
@@ -405,7 +411,7 @@ function renderChildren(
       $new.children[i],
       $new,
       i,
-      i >= currentChildrenLength ? { fragment } : { nextSibling },
+      i >= currentChildrenLength ? { fragment } : { nextSibling, forceMoveToEnd },
     );
 
     if ($newChild) {
@@ -519,12 +525,10 @@ function renderFastListChildren($current: VirtualElementParent, $new: VirtualEle
       currentPreservedIndex++;
     }
 
-    newChildren.push(
-      renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, {
-        // `+ 1` is needed because before moving down the node still takes place above
-        nextSibling: shouldMoveNode ? currentEl.childNodes[isMovingDown ? i + 1 : i] : undefined,
-      }),
-    );
+    const nextSibling = currentEl.childNodes[isMovingDown ? i + 1 : i];
+    const options = shouldMoveNode ? (nextSibling ? { nextSibling } : { forceMoveToEnd: true }) : undefined;
+
+    newChildren.push(renderWithVirtual(currentEl, currentChildInfo.$element, $newChild, $new, i, options));
   });
 
   // This appends new children to the bottom
