@@ -970,15 +970,24 @@ async function loadViewportMessages<T extends GlobalState>(
   const chatId = chat.id;
 
   let addOffset: number | undefined;
+  let sliceSize = MESSAGE_LIST_SLICE;
   switch (direction) {
     case LoadMoreDirection.Backwards:
-      addOffset = undefined;
+      if (offsetId) {
+        addOffset = -1;
+        sliceSize += 1;
+      } else {
+        addOffset = undefined;
+      }
       break;
     case LoadMoreDirection.Around:
       addOffset = -(Math.round(MESSAGE_LIST_SLICE / 2) + 1);
       break;
     case LoadMoreDirection.Forwards:
       addOffset = -(MESSAGE_LIST_SLICE + 1);
+      if (offsetId) {
+        sliceSize += 1;
+      }
       break;
   }
 
@@ -987,7 +996,7 @@ async function loadViewportMessages<T extends GlobalState>(
     chat: selectChat(global, chatId)!,
     offsetId,
     addOffset,
-    limit: MESSAGE_LIST_SLICE,
+    limit: sliceSize,
     threadId,
   });
 
