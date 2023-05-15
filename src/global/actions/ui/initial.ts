@@ -14,7 +14,7 @@ import { startWebsync, stopWebsync } from '../../../util/websync';
 import { subscribe, unsubscribe } from '../../../util/notifications';
 import { clearCaching, setupCaching } from '../../cache';
 import { decryptSessionByCurrentHash } from '../../../util/passcode';
-import { storeSession } from '../../../util/sessions';
+import { hasStoredSession, storeSession } from '../../../util/sessions';
 import { callApi } from '../../../api/gramjs';
 import type { ActionReturnType, GlobalState } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
@@ -51,7 +51,9 @@ addActionHandler('switchMultitabRole', async (global, actions, payload): Promise
       storeSession(session, session.userId);
     }
 
-    setupCaching();
+    if (hasStoredSession(true)) {
+      setupCaching();
+    }
 
     global = getGlobal();
     if (!global.passcode.hasPasscode || !global.passcode.isScreenLocked) {
