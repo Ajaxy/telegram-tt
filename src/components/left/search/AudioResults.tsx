@@ -103,7 +103,7 @@ const AudioResults: FC<OwnProps & StateProps> = ({
             onPlay={handlePlayAudio}
             onDateClick={handleMessageFocus}
             canDownload={!chatsById[message.chatId]?.isProtected && !message.isProtected}
-            isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
+            isDownloading={activeDownloads[message.chatId]?.ids?.includes(message.id)}
           />
         </div>
       );

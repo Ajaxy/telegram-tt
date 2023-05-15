@@ -39,7 +39,7 @@ type OwnProps = {
   className?: string;
   sender?: string;
   autoLoadFileMaxSizeMb?: number;
-  isDownloading: boolean;
+  isDownloading?: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
   onDateClick?: (messageId: number, chatId: string) => void;

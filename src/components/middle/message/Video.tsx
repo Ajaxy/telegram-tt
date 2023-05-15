@@ -47,7 +47,7 @@ export type OwnProps = {
   dimensions?: IMediaDimensions;
   asForwarded?: boolean;
   lastSyncTime?: number;
-  isDownloading: boolean;
+  isDownloading?: boolean;
   isProtected?: boolean;
   onClick?: (id: number) => void;
   onCancelUpload?: (message: ApiMessage) => void;

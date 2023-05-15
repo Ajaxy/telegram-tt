@@ -105,7 +105,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
             smaller
             sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
-            isDownloading={activeDownloads[message.chatId]?.includes(message.id)}
+            isDownloading={activeDownloads[message.chatId]?.ids?.includes(message.id)}
             observeIntersection={observeIntersectionForMedia}
             onDateClick={handleMessageFocus}
           />

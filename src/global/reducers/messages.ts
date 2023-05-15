@@ -691,3 +691,53 @@ export function updateTopicLastMessageId<T extends GlobalState>(
     },
   };
 }
+
+export function addActiveMessageMediaDownload<T extends GlobalState>(
+  global: T,
+  message: ApiMessage,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const tabState = selectTabState(global, tabId);
+  const byChatId = tabState.activeDownloads.byChatId[message.chatId] || {};
+  const currentIds = (message.isScheduled ? byChatId?.scheduledIds : byChatId?.ids) || [];
+
+  global = updateTabState(global, {
+    activeDownloads: {
+      byChatId: {
+        ...tabState.activeDownloads.byChatId,
+        [message.chatId]: {
+          ...byChatId,
+          [message.isScheduled ? 'scheduledIds' : 'ids']: unique([...currentIds, message.id]),
+        },
+      },
+    },
+  }, tabId);
+
+  return global;
+}
+
+export function cancelMessageMediaDownload<T extends GlobalState>(
+  global: T,
+  message: ApiMessage,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const tabState = selectTabState(global, tabId);
+  const byChatId = tabState.activeDownloads.byChatId[message.chatId];
+  if (!byChatId) return global;
+
+  const currentIds = (message.isScheduled ? byChatId.scheduledIds : byChatId.ids) || [];
+
+  global = updateTabState(global, {
+    activeDownloads: {
+      byChatId: {
+        ...tabState.activeDownloads.byChatId,
+        [message.chatId]: {
+          ...byChatId,
+          [message.isScheduled ? 'scheduledIds' : 'ids']: currentIds.filter((id) => id !== message.id),
+        },
+      },
+    },
+  }, tabId);
+
+  return global;
+}

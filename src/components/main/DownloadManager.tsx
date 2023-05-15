@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import { memo, useCallback, useEffect } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { GlobalState, TabState } from '../../global/types';
 import type { ApiMessage } from '../../api/types';
@@ -13,6 +13,7 @@ import download from '../../util/download';
 import {
   getMessageContentFilename, getMessageMediaFormat, getMessageMediaHash,
 } from '../../global/helpers';
+import { compact } from '../../util/iteratees';
 
 import useRunDebounced from '../../hooks/useRunDebounced';
 
@@ -28,7 +29,6 @@ const downloadedMessages = new Set<ApiMessage>();
 
 const DownloadManager: FC<StateProps> = ({
   activeDownloads,
-  messages,
 }) => {
   const { cancelMessagesMediaDownload, showNotification } = getActions();
 
@@ -45,9 +45,16 @@ const DownloadManager: FC<StateProps> = ({
   }, [cancelMessagesMediaDownload, runDebounced]);
 
   useEffect(() => {
-    const activeMessages = Object.entries(activeDownloads).map(([chatId, messageIds]) => (
-      messageIds.map((id) => messages![chatId].byId[id])
-    )).flat();
+    // No need for expensive global updates on messages, so we avoid them
+    const messages = getGlobal().messages.byChatId;
+    const scheduledMessages = getGlobal().scheduledMessages.byChatId;
+
+    const activeMessages = Object.entries(activeDownloads).map(([chatId, chatActiveDownloads]) => {
+      const chatMessages = chatActiveDownloads.ids?.map((id) => messages[chatId]?.byId[id]);
+      const chatScheduledMessages = chatActiveDownloads.scheduledIds?.map((id) => scheduledMessages[chatId]?.byId[id]);
+
+      return compact([...chatMessages || [], ...chatScheduledMessages || []]);
+    }).flat();
 
     if (!activeMessages.length) {
       processedMessages.clear();
@@ -104,7 +111,7 @@ const DownloadManager: FC<StateProps> = ({
         handleMessageDownloaded(message);
       });
     });
-  }, [messages, activeDownloads, cancelMessagesMediaDownload, handleMessageDownloaded, showNotification]);
+  }, [activeDownloads, cancelMessagesMediaDownload, handleMessageDownloaded, showNotification]);
 
   return undefined;
 };
@@ -112,11 +119,9 @@ const DownloadManager: FC<StateProps> = ({
 export default memo(withGlobal(
   (global): StateProps => {
     const activeDownloads = selectTabState(global).activeDownloads.byChatId;
-    const hasActiveDownloads = Object.values(activeDownloads).some((messageIds) => messageIds.length);
 
     return {
       activeDownloads,
-      messages: hasActiveDownloads ? global.messages.byChatId : undefined,
     };
   },
 )(DownloadManager));

@@ -28,7 +28,7 @@ import {
   getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';
 import {
-  selectActiveDownloadIds,
+  selectActiveDownloads,
   selectChat,
   selectChatFullInfo,
   selectChatMessages,
@@ -97,7 +97,7 @@ type StateProps = {
   isRightColumnShown: boolean;
   isRestricted?: boolean;
   lastSyncTime?: number;
-  activeDownloadIds: number[];
+  activeDownloadIds?: number[];
   isChatProtected?: boolean;
 };
 
@@ -373,7 +373,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               withDate
               smaller
               className="scroll-item"
-              isDownloading={activeDownloadIds.includes(id)}
+              isDownloading={activeDownloadIds?.includes(id)}
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
             />
@@ -401,7 +401,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
               canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={activeDownloadIds.includes(id)}
+              isDownloading={activeDownloadIds?.includes(id)}
             />
           ))
         ) : resultType === 'voice' ? (
@@ -418,7 +418,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
               canDownload={!isChatProtected && !messagesById[id].isProtected}
-              isDownloading={activeDownloadIds.includes(id)}
+              isDownloading={activeDownloadIds?.includes(id)}
             />
           ))
         ) : resultType === 'members' ? (
@@ -537,7 +537,7 @@ export default memo(withGlobal<OwnProps>(
     const canAddMembers = hasMembersTab && chat
       && (getHasAdminRight(chat, 'inviteUsers') || !isUserRightBanned(chat, 'inviteUsers') || chat.isCreator);
     const canDeleteMembers = hasMembersTab && chat && (getHasAdminRight(chat, 'banUsers') || chat.isCreator);
-    const activeDownloadIds = selectActiveDownloadIds(global, chatId);
+    const activeDownloads = selectActiveDownloads(global, chatId);
 
     let hasCommonChatsTab;
     let resolvedUserId;
@@ -564,7 +564,7 @@ export default memo(withGlobal<OwnProps>(
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isRestricted: chat?.isRestricted,
       lastSyncTime: global.lastSyncTime,
-      activeDownloadIds,
+      activeDownloadIds: activeDownloads?.ids,
       usersById,
       userStatusesById,
       chatsById,

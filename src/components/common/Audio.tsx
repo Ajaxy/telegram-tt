@@ -53,7 +53,7 @@ type OwnProps = {
   className?: string;
   isSelectable?: boolean;
   isSelected?: boolean;
-  isDownloading: boolean;
+  isDownloading?: boolean;
   isTranscribing?: boolean;
   isTranscribed?: boolean;
   canDownload?: boolean;

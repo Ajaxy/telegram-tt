@@ -185,6 +185,7 @@ export function buildApiMessageWithChatId(
   if (action) {
     content.action = action;
   }
+  const isScheduled = mtpMessage.date > (Math.round(Date.now() / 1000) + getServerTimeOffset());
 
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
@@ -216,6 +217,7 @@ export function buildApiMessageWithChatId(
     senderId: fromId || (mtpMessage.out && mtpMessage.post && currentUserId) || chatId,
     views: mtpMessage.views,
     forwards: mtpMessage.forwards,
+    isScheduled,
     isFromScheduled: mtpMessage.fromScheduled,
     isSilent: mtpMessage.silent,
     isPinned: mtpMessage.pinned,

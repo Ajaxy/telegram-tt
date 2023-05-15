@@ -725,14 +725,17 @@ export function selectIsDownloading<T extends GlobalState>(
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
   const activeInChat = selectTabState(global, tabId).activeDownloads.byChatId[message.chatId];
-  return activeInChat ? activeInChat.includes(message.id) : false;
+  if (!activeInChat) return false;
+
+  return Boolean(message.isScheduled
+    ? activeInChat.scheduledIds?.includes(message.id) : activeInChat.ids?.includes(message.id));
 }
 
-export function selectActiveDownloadIds<T extends GlobalState>(
+export function selectActiveDownloads<T extends GlobalState>(
   global: T, chatId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  return selectTabState(global, tabId).activeDownloads.byChatId[chatId] || MEMO_EMPTY_ARRAY;
+  return selectTabState(global, tabId).activeDownloads.byChatId[chatId];
 }
 
 export function selectUploadProgress<T extends GlobalState>(global: T, message: ApiMessage) {

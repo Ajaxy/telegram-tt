@@ -37,7 +37,7 @@ import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
 import './MediaViewerActions.scss';
 
 type StateProps = {
-  isDownloading: boolean;
+  isDownloading?: boolean;
   isProtected?: boolean;
   isChatProtected?: boolean;
   canDelete?: boolean;
