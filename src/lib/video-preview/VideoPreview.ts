@@ -2,10 +2,12 @@ import { requestMutation } from '../fasterdom/fasterdom';
 
 import { callApi } from '../../api/gramjs';
 import { ApiMediaFormat } from '../../api/types';
-import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_IOS, ARE_WEBCODECS_SUPPORTED } from '../../util/windowEnvironment';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 
+const IS_MOBILE = IS_ANDROID || IS_IOS;
 const PREVIEW_SIZE_RATIO = (IS_ANDROID || IS_IOS) ? 0.3 : 0.25;
+const MAX_FRAMES = ARE_WEBCODECS_SUPPORTED && !IS_MOBILE ? 80 : 40;
 const PREVIEW_MAX_SIDE = 200;
 
 const connections = launchMediaWorkers();
@@ -26,6 +28,7 @@ export class VideoPreview {
         name: 'video-preview:init',
         args: [
           url,
+          MAX_FRAMES,
           index,
           MAX_WORKERS,
           this.onFrame.bind(this),

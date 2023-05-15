@@ -2,9 +2,8 @@ import type { MP4ArrayBuffer, MP4VideoTrack, MP4Info } from 'mp4box';
 import MP4Box, { DataStream } from 'mp4box';
 import { requestPart } from './requestPart';
 
-const META_PART_SIZE = 64 * 1024;
+const META_PART_SIZE = 128 * 1024;
 const MIN_PART_SIZE = 1024;
-
 enum Status {
   loading = 'loading',
   ready = 'ready',
@@ -19,9 +18,10 @@ export type MP4DecoderConfig = {
 };
 
 type MP4DemuxerConfig = {
-  framesPerVideo: number;
   stepOffset: number;
   stepMultiplier: number;
+  isPolyfill: boolean;
+  maxFrames: number;
   onConfig: (config: any) => void;
   onChunk: (chunk: any) => void;
 };
@@ -33,11 +33,13 @@ export class MP4Demuxer {
 
   private status = Status.loading;
 
-  private readonly framesPerVideo: number;
-
   private readonly stepOffset: number;
 
   private readonly stepMultiplier: number;
+
+  private readonly maxFrames: number;
+
+  private readonly isPolyfill: boolean;
 
   private decodedSamples = new Set<string>();
 
@@ -50,14 +52,16 @@ export class MP4Demuxer {
   constructor(url: string, {
     onConfig,
     onChunk,
-    framesPerVideo,
     stepOffset,
     stepMultiplier,
+    isPolyfill,
+    maxFrames,
   }: MP4DemuxerConfig) {
     this.url = url;
-    this.framesPerVideo = framesPerVideo;
     this.stepOffset = stepOffset;
     this.stepMultiplier = stepMultiplier;
+    this.maxFrames = maxFrames;
+    this.isPolyfill = isPolyfill;
     this.onConfig = onConfig;
     this.onChunk = onChunk;
 
@@ -85,13 +89,14 @@ export class MP4Demuxer {
     }
   }
 
-  private async loadNextFrames(step: number, size: number, partSize: number) {
+  private async loadNextFrames(step: number, duration: number, partSize: number) {
     let tick = step * this.stepOffset;
     let lastSample = 0;
     let rap = this.file.seek(tick, true);
-    while (this.status !== Status.closed && rap.offset < size) {
+    while (this.status !== Status.closed) {
       try {
         await this.requestPart(rap.offset, partSize);
+        if (tick > duration) break;
         if (this.lastSample > 1 && lastSample < this.lastSample) {
           tick += step * this.stepMultiplier;
           lastSample = this.lastSample;
@@ -160,9 +165,10 @@ export class MP4Demuxer {
     const duration = info.duration / info.timescale;
 
     // If we set a part size too small, the onSamples callback is not called.
-    const partSize = roundPartSize(track.bitrate / 24);
-    const minStep = duration < 30 ? 2 : 3;
-    const step = Math.max(Math.floor(duration / this.framesPerVideo), minStep);
+    // If we use polyfill, we need to set a smaller part size to avoid decoding multiple frames.
+    const partSizeDivider = this.isPolyfill ? 24 : 12;
+    const partSize = roundPartSize(track.bitrate / partSizeDivider);
+    const step = calculateStep(duration, this.maxFrames);
 
     // Start demuxing.
     this.file.setExtractionOptions(track.id, undefined, { nbSamples: 1 });
@@ -171,7 +177,7 @@ export class MP4Demuxer {
     this.status = Status.ready;
 
     // // Load frames
-    void this.loadNextFrames(step, track.size, partSize);
+    void this.loadNextFrames(step, duration, partSize);
   }
 
   private onSamples(trackId: number, ref: any, samples: any) {
@@ -211,4 +217,8 @@ export class MP4Demuxer {
 
 function roundPartSize(size: number) {
   return size + MIN_PART_SIZE - (size % MIN_PART_SIZE);
+}
+
+function calculateStep(duration: number, max: number): number {
+  return Math.round((duration + max) / max);
 }
