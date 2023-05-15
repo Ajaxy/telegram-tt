@@ -127,6 +127,7 @@ import useMessageTranslation from './hooks/useMessageTranslation';
 import usePrevious from '../../../hooks/usePrevious';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useAuthorWidth from '../hooks/useAuthorWidth';
+import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -280,6 +281,7 @@ const QUICK_REACTION_SIZE = 1.75 * REM;
 const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
 const THROTTLE_MS = 300;
+const RESIZE_ANIMATION_DURATION = 400;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -687,6 +689,8 @@ const Message: FC<OwnProps & StateProps> = ({
 
     const container = entry.target.closest<HTMLDivElement>('.MessageList');
     if (!container) return;
+
+    dispatchHeavyAnimationEvent(RESIZE_ANIMATION_DURATION);
 
     const resizeDiff = newHeight - lastHeight;
     const { offsetHeight, scrollHeight, scrollTop } = container;
