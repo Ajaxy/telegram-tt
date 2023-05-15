@@ -319,7 +319,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const inputRef = useRef<HTMLDivElement>(null);
 
   const [getHtml, setHtml] = useSignal('');
-  const [getIsMounted, setIsMounted] = useSignal(false);
+  const [isMounted, setIsMounted] = useState(false);
   const getSelectionRange = useGetSelectionRange(EDITABLE_INPUT_CSS_SELECTOR);
   const lastMessageSendTimeSeconds = useRef<number>();
   const prevDropAreaState = usePrevious(dropAreaState);
@@ -1219,7 +1219,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     'Composer',
     !isSelectModeActive && 'shown',
     isHoverDisabled && 'hover-disabled',
-    getIsMounted() && 'mounted',
+    isMounted && 'mounted',
   );
 
   const handleSendScheduled = useCallback(() => {
