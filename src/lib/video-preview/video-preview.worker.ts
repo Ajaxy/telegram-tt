@@ -3,16 +3,21 @@ import type { CancellableCallback } from '../../util/PostMessageConnector';
 import { MP4Demuxer } from './MP4Demuxer';
 import * as LibAVWebCodecs from './polyfill';
 
-const MAX_PREVIEWS_PER_VIDEO = 300;
-
 let decoder: any;
 let demuxer: any;
 let onDestroy: VoidFunction | undefined;
 
 let isLoaded = false;
 
-async function init(url: string, workerIndex: number, workersTotal: number, onFrame: CancellableCallback) {
-  if (!('VideoDecoder' in globalThis)) {
+async function init(
+  url: string,
+  maxFrames: number,
+  workerIndex: number,
+  workersTotal: number,
+  onFrame: CancellableCallback,
+) {
+  const hasWebCodecs = 'VideoDecoder' in globalThis;
+  if (!hasWebCodecs) {
     await loadLibAV();
   }
 
@@ -38,9 +43,10 @@ async function init(url: string, workerIndex: number, workersTotal: number, onFr
   });
 
   demuxer = new MP4Demuxer(url, {
-    framesPerVideo: Math.round(MAX_PREVIEWS_PER_VIDEO / workersTotal),
     stepOffset: workerIndex,
     stepMultiplier: workersTotal,
+    isPolyfill: !hasWebCodecs,
+    maxFrames,
     onConfig(config) {
       decoder?.configure(config);
     },
