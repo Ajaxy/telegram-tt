@@ -105,6 +105,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
       {IS_TRANSLATION_SUPPORTED && (
         <div className="settings-item">
           <Checkbox
+            className="pb-2"
             label={lang('ShowTranslateButton')}
             checked={canTranslate}
             onCheck={handleShouldTranslateChange}
@@ -123,6 +124,7 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
         </div>
       )}
       <div className="settings-item">
+        <h4 className="settings-item-header mb-4">{lang('Localization.InterfaceLanguage')}</h4>
         {options ? (
           <RadioGroup
             name="language-settings"
