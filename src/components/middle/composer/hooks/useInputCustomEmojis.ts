@@ -1,7 +1,8 @@
 import {
   useCallback, useEffect, useRef,
 } from '../../../../lib/teact/teact';
-import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
+import { requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
@@ -16,13 +17,14 @@ import {
 import { round } from '../../../../util/math';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
 import { REM } from '../../../common/helpers/mediaDimensions';
+import { hexToRgb } from '../../../../util/switchTheme';
+import useColorFilter from '../../../../hooks/stickers/useColorFilter';
 
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
-import useDynamicColorListener from '../../../../hooks/useDynamicColorListener';
+import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
-import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -44,7 +46,8 @@ export default function useInputCustomEmojis(
   canPlayAnimatedEmojis: boolean,
   isActive?: boolean,
 ) {
-  const { rgbColor: textColor } = useDynamicColorListener(inputRef);
+  const customColor = useDynamicColorListener(inputRef);
+  const colorFilter = useColorFilter(customColor, true);
   const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
   const clearPlayers = useCallback((ids: string[]) => {
@@ -59,6 +62,11 @@ export default function useInputCustomEmojis(
 
   const synchronizeElements = useCallback(() => {
     if (!inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
+
+    requestMutation(() => {
+      document.documentElement.style.setProperty('--input-custom-emoji-filter', colorFilter || 'none');
+    });
+
     const global = getGlobal();
     const playerIdsToClear = new Set(playersById.current.keys());
     const customEmojis = Array.from(inputRef.current.querySelectorAll<HTMLElement>('.custom-emoji'));
@@ -67,7 +75,7 @@ export default function useInputCustomEmojis(
       if (!element.dataset.uniqueId) {
         return;
       }
-      const playerId = `${prefixId}${element.dataset.uniqueId}${textColor?.join(',') || ''}`;
+      const playerId = `${prefixId}${element.dataset.uniqueId}${customColor || ''}`;
       const documentId = element.dataset.documentId!;
 
       playerIdsToClear.delete(playerId);
@@ -77,50 +85,53 @@ export default function useInputCustomEmojis(
         return;
       }
 
-      const canvasBounds = sharedCanvasRef.current!.getBoundingClientRect();
-      const elementBounds = element.getBoundingClientRect();
-      const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
-      const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
+      requestMeasure(() => {
+        const canvasBounds = sharedCanvasRef.current!.getBoundingClientRect();
+        const elementBounds = element.getBoundingClientRect();
+        const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
+        const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
 
-      if (playersById.current.has(playerId)) {
-        const player = playersById.current.get(playerId)!;
-        player.updatePosition(x, y);
-        return;
-      }
-
-      const customEmoji = global.customEmojis.byId[documentId];
-      if (!customEmoji) {
-        return;
-      }
-      const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
-      const renderId = [
-        prefixId, documentId, textColor?.join(','),
-      ].filter(Boolean).join('_');
-
-      createPlayer({
-        customEmoji,
-        sharedCanvasRef,
-        sharedCanvasHqRef,
-        absoluteContainerRef,
-        renderId,
-        viewId: playerId,
-        mediaUrl,
-        isHq,
-        position: { x, y },
-        textColor,
-      }).then((animation) => {
-        if (canPlayAnimatedEmojis) {
-          animation.play();
+        if (playersById.current.has(playerId)) {
+          const player = playersById.current.get(playerId)!;
+          player.updatePosition(x, y);
+          return;
         }
 
-        playersById.current.set(playerId, animation);
+        const customEmoji = global.customEmojis.byId[documentId];
+        if (!customEmoji) {
+          return;
+        }
+        const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
+        const renderId = [
+          prefixId, documentId, customColor,
+        ].filter(Boolean).join('_');
+
+        createPlayer({
+          customEmoji,
+          sharedCanvasRef,
+          sharedCanvasHqRef,
+          absoluteContainerRef,
+          renderId,
+          viewId: playerId,
+          mediaUrl,
+          isHq,
+          position: { x, y },
+          textColor: customColor,
+          colorFilter,
+        }).then((animation) => {
+          if (canPlayAnimatedEmojis) {
+            animation.play();
+          }
+
+          playersById.current.set(playerId, animation);
+        });
       });
     });
 
     clearPlayers(Array.from(playerIdsToClear));
   }, [
-    inputRef, sharedCanvasRef, sharedCanvasHqRef, clearPlayers, prefixId, textColor, absoluteContainerRef,
-    canPlayAnimatedEmojis,
+    inputRef, sharedCanvasRef, sharedCanvasHqRef, clearPlayers, prefixId, customColor, absoluteContainerRef,
+    canPlayAnimatedEmojis, colorFilter,
   ]);
 
   useEffect(() => {
@@ -143,11 +154,11 @@ export default function useInputCustomEmojis(
     });
   }, [getHtml, synchronizeElements, inputRef, clearPlayers, sharedCanvasRef, isActive]);
 
-  useEffectWithPrevDeps(([prevTextColor]) => {
-    if (textColor !== prevTextColor) {
+  useEffectWithPrevDeps(([prevCustomColor]) => {
+    if (customColor !== prevCustomColor) {
       synchronizeElements();
     }
-  }, [textColor, synchronizeElements]);
+  }, [customColor, synchronizeElements]);
 
   const throttledSynchronizeElements = useThrottledCallback(
     synchronizeElements,
@@ -194,6 +205,7 @@ async function createPlayer({
   position,
   isHq,
   textColor,
+  colorFilter,
 }: {
   customEmoji: ApiSticker;
   sharedCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -204,9 +216,11 @@ async function createPlayer({
   mediaUrl: string;
   position: { x: number; y: number };
   isHq?: boolean;
-  textColor?: [number, number, number];
+  textColor?: string;
+  colorFilter?: string;
 }): Promise<CustomEmojiPlayer> {
   if (customEmoji.isLottie) {
+    const color = customEmoji.shouldUseTextColor && textColor ? hexToRgb(textColor) : undefined;
     const RLottie = await ensureRLottie();
     const lottie = RLottie.init(
       mediaUrl,
@@ -218,7 +232,7 @@ async function createPlayer({
         isLowPriority: !isHq,
       },
       viewId,
-      customEmoji.shouldUseTextColor ? textColor : undefined,
+      color ? [color.r, color.g, color.b] : undefined,
     );
 
     return {
@@ -232,7 +246,12 @@ async function createPlayer({
   }
 
   if (customEmoji.isVideo) {
-    const absoluteVideo = new AbsoluteVideo(mediaUrl, absoluteContainerRef.current!, { size: SIZE, position });
+    const style = colorFilter ? `filter: ${colorFilter};` : undefined;
+    const absoluteVideo = new AbsoluteVideo(
+      mediaUrl,
+      absoluteContainerRef.current!,
+      { size: SIZE, position, style },
+    );
     return {
       play: () => absoluteVideo.play(),
       pause: () => absoluteVideo.pause(),

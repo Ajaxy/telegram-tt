@@ -6,4 +6,8 @@
   > h3 {
     margin-bottom: 0;
   }
+
+  :global(.custom-emoji) {
+    color: var(--color-primary);
+  }
 }

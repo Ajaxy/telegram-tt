@@ -1,9 +1,11 @@
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import safePlay from './safePlay';
 
 type AbsoluteVideoOptions = {
   position: { x: number; y: number };
   noLoop?: boolean;
   size: number;
+  style?: string;
 };
 
 export default class AbsoluteVideo {
@@ -20,6 +22,9 @@ export default class AbsoluteVideo {
     this.video.src = videoUrl;
     this.video.disablePictureInPicture = true;
     this.video.muted = true;
+    if (options.style) {
+      this.video.setAttribute('style', options.style);
+    }
     this.video.style.position = 'absolute';
     this.video.load();
 
@@ -27,8 +32,11 @@ export default class AbsoluteVideo {
       this.video.loop = true;
     }
 
-    this.container.appendChild(this.video);
-    this.recalculatePositionAndSize();
+    requestMutation(() => {
+      this.container.appendChild(this.video!);
+
+      this.recalculatePositionAndSize();
+    });
   }
 
   public play() {
@@ -60,12 +68,17 @@ export default class AbsoluteVideo {
   }
 
   private recalculatePositionAndSize() {
-    if (!this.video) return;
     const { size, position: { x, y } } = this.options;
-    const { width, height } = this.container.getBoundingClientRect();
-    this.video.style.left = `${Math.round(x * width)}px`;
-    this.video.style.top = `${Math.round(y * height)}px`;
-    this.video.style.width = `${size}px`;
-    this.video.style.height = `${size}px`;
+    requestMeasure(() => {
+      if (!this.video) return;
+      const video = this.video;
+      const { width, height } = this.container.getBoundingClientRect();
+      requestMutation(() => {
+        video.style.left = `${Math.round(x * width)}px`;
+        video.style.top = `${Math.round(y * height)}px`;
+        video.style.width = `${size}px`;
+        video.style.height = `${size}px`;
+      });
+    });
   }
 }

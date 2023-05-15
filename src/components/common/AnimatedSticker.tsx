@@ -11,6 +11,7 @@ import React, {
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateIdFor from '../../util/generateIdFor';
+import { hexToRgb } from '../../util/switchTheme';
 
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
@@ -19,6 +20,8 @@ import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSharedIntersectionObserver from '../../hooks/useSharedIntersectionObserver';
 import useThrottledCallback from '../../hooks/useThrottledCallback';
+import useColorFilter from '../../hooks/stickers/useColorFilter';
+import useSyncEffect from '../../hooks/useSyncEffect';
 
 export type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -32,7 +35,7 @@ export type OwnProps = {
   noLoop?: boolean;
   size: number;
   quality?: number;
-  color?: [number, number, number];
+  color?: string;
   isLowPriority?: boolean;
   forceOnHeavyAnimation?: boolean;
   sharedCanvas?: HTMLCanvasElement;
@@ -80,9 +83,23 @@ const AnimatedSticker: FC<OwnProps> = ({
   const animationRef = useRef<RLottieInstance>();
   const isFirstRender = useRef(true);
 
+  const shouldUseColorFilter = !sharedCanvas && color;
+  const colorFilter = useColorFilter(shouldUseColorFilter ? color : undefined);
+
   const playKey = play || playSegment;
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
+
+  const rgbColor = useRef<[number, number, number] | undefined>();
+
+  useSyncEffect(() => {
+    if (color && !shouldUseColorFilter) {
+      const { r, g, b } = hexToRgb(color);
+      rgbColor.current = [r, g, b];
+    } else {
+      rgbColor.current = undefined;
+    }
+  }, [color, shouldUseColorFilter]);
 
   const isUnmountedRef = useRef(false);
   useEffect(() => {
@@ -118,7 +135,7 @@ const AnimatedSticker: FC<OwnProps> = ({
         coords: sharedCanvasCoords,
       },
       viewId,
-      color,
+      rgbColor.current,
       onLoad,
       onEnded,
       onLoop,
@@ -131,7 +148,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     setAnimation(newAnimation);
     animationRef.current = newAnimation;
   }, [
-    color, isLowPriority, noLoop, onEnded, onLoad, onLoop, quality,
+    isLowPriority, noLoop, onEnded, onLoad, onLoop, quality,
     renderId, sharedCanvas, sharedCanvasCoords, size, speed, tgsUrl, viewId,
   ]);
 
@@ -149,7 +166,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   useEffect(() => {
     if (!animation) return;
 
-    animation.setColor(color);
+    animation.setColor(rgbColor.current);
   }, [color, animation]);
 
   useEffect(() => {
@@ -239,6 +256,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       style={buildStyle(
         size !== undefined && `width: ${size}px; height: ${size}px;`,
         onClick && 'cursor: pointer',
+        colorFilter,
         style,
       )}
       onClick={onClick}
