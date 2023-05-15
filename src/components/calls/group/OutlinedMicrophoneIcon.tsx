@@ -51,11 +51,11 @@ const OutlinedMicrophoneIcon: FC<OwnProps> = ({
     // eslint-disable-next-line
   }, [isMuted, shouldRaiseHand, isRaiseHand]);
 
-  const microphoneColor: [number, number, number] | undefined = useMemo(() => {
-    return noColor ? [0xff, 0xff, 0xff] : (
-      isRaiseHand ? [0x4d, 0xa6, 0xe0]
-        : (shouldRaiseHand || isMutedByMe ? [0xFF, 0x70, 0x6F] : (
-          isSpeaking ? [0x57, 0xBC, 0x6C] : [0x84, 0x8D, 0x94]
+  const microphoneColor: string | undefined = useMemo(() => {
+    return noColor ? '#ffffff' : (
+      isRaiseHand ? '#4da6e0'
+        : (shouldRaiseHand || isMutedByMe ? '#ff706f' : (
+          isSpeaking ? '#57bc6c' : '#848d94'
         ))
     );
   }, [noColor, isRaiseHand, shouldRaiseHand, isMutedByMe, isSpeaking]);

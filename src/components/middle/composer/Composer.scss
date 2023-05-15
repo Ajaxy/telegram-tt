@@ -462,6 +462,10 @@
   .custom-emoji {
     margin: 0;
     vertical-align: text-top;
+
+    &.colorable {
+      filter: var(--input-custom-emoji-filter);
+    }
   }
 
   // Workaround to preserve correct input height

@@ -1,4 +1,6 @@
-import React, { memo, useMemo } from '../../lib/teact/teact';
+import React, {
+  memo, useMemo,
+} from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -19,6 +21,7 @@ import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import useColorFilter from '../../hooks/stickers/useColorFilter';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -33,7 +36,7 @@ type OwnProps = {
   fullMediaClassName?: string;
   isSmall?: boolean;
   size?: number;
-  customColor?: [number, number, number];
+  customColor?: string;
   loopLimit?: number;
   shouldLoop?: boolean;
   shouldPreloadPreview?: boolean;
@@ -86,6 +89,8 @@ const StickerView: FC<OwnProps> = ({
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerPreviewHash(sticker.id);
 
+  const filterStyle = useColorFilter(customColor);
+
   const isIntersectingForLoading = useIsIntersecting(containerRef, observeIntersectionForLoading);
   const shouldLoad = isIntersectingForLoading && !noLoad;
   const isIntersectingForPlaying = (
@@ -128,7 +133,10 @@ const StickerView: FC<OwnProps> = ({
 
   const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
   const renderId = [
-    (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix), id, size, customColor?.join(','),
+    (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix),
+    id,
+    size,
+    (withSharedAnimation ? customColor : undefined),
   ].filter(Boolean).join('_');
 
   return (
@@ -159,7 +167,6 @@ const StickerView: FC<OwnProps> = ({
           )}
           tgsUrl={fullMediaData}
           play={shouldPlay}
-          color={customColor}
           noLoop={!shouldLoop}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
@@ -168,6 +175,7 @@ const StickerView: FC<OwnProps> = ({
           onLoad={markPlayerReady}
           onLoop={onAnimatedStickerLoop}
           onEnded={onAnimatedStickerLoop}
+          color={customColor}
         />
       ) : isVideo ? (
         <OptimizedVideo
@@ -180,12 +188,14 @@ const StickerView: FC<OwnProps> = ({
           disablePictureInPicture
           onReady={markPlayerReady}
           onEnded={onVideoEnded}
+          style={filterStyle}
         />
       ) : (
         <img
           className={buildClassName(styles.media, fullMediaClassName, fullMediaClassNames, 'sticker-media')}
           src={fullMediaData}
           alt={emoji}
+          style={filterStyle}
           draggable={false}
         />
       ))}

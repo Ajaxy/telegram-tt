@@ -1,20 +1,17 @@
 import {
-  useCallback, useEffect, useLayoutEffect, useRef, useState,
-} from '../lib/teact/teact';
-import { hexToRgb } from '../util/switchTheme';
-import { getPropertyHexColor } from '../util/themeStyle';
-import useResizeObserver from './useResizeObserver';
-import useSyncEffect from './useSyncEffect';
+  useCallback, useEffect, useLayoutEffect, useState,
+} from '../../lib/teact/teact';
+import { getPropertyHexColor } from '../../util/themeStyle';
+import useResizeObserver from '../useResizeObserver';
 
 // Transition required to detect `color` property change.
 // Duration parameter describes a delay between color change and color state update.
 // Small values may cause large amount of re-renders.
 const TRANSITION_PROPERTY = 'color';
-const TRANSITION_STYLE = `60ms ${TRANSITION_PROPERTY} linear`;
+const TRANSITION_STYLE = `50ms ${TRANSITION_PROPERTY} linear`;
 
 export default function useDynamicColorListener(ref: React.RefObject<HTMLElement>, isDisabled?: boolean) {
   const [hexColor, setHexColor] = useState<string | undefined>();
-  const rgbColorRef = useRef<[number, number, number] | undefined>();
 
   const updateColor = useCallback(() => {
     if (!ref.current || isDisabled) {
@@ -29,17 +26,6 @@ export default function useDynamicColorListener(ref: React.RefObject<HTMLElement
   // Element does not receive `transitionend` event if parent has `display: none`.
   // We will receive `resize` event when parent is shown again.
   useResizeObserver(ref, updateColor, isDisabled);
-
-  // Update RGB color only when hex color changes
-  useSyncEffect(() => {
-    if (!hexColor) {
-      rgbColorRef.current = undefined;
-      return;
-    }
-
-    const { r, g, b } = hexToRgb(hexColor);
-    rgbColorRef.current = [r, g, b];
-  }, [hexColor]);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -78,8 +64,5 @@ export default function useDynamicColorListener(ref: React.RefObject<HTMLElement
     };
   }, [isDisabled, ref, updateColor]);
 
-  return {
-    hexColor,
-    rgbColor: rgbColorRef.current,
-  };
+  return hexColor;
 }

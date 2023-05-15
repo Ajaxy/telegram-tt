@@ -236,9 +236,7 @@ class RLottie {
     const frame = this.getFrame(this.prevFrameIndex) || this.getFrame(Math.round(this.approxFrameIndex));
 
     if (frame && frame !== WAITING) {
-      requestMutation(() => {
-        ctx.drawImage(frame, containerInfo.coords!.x, containerInfo.coords!.y);
-      });
+      ctx.drawImage(frame, containerInfo.coords!.x, containerInfo.coords!.y);
     }
   }
 

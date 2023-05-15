@@ -1,4 +1,5 @@
 import { addCallback } from '../lib/teact/teactn';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { getGlobal } from '../global';
 
 import { ApiMediaFormat } from '../api/types';
@@ -76,12 +77,20 @@ function processDomForCustomEmoji() {
     }
     const [isPlaceholder, src, uniqueId] = getInputCustomEmojiParams(customEmoji);
 
-    if (!isPlaceholder) {
-      emoji.src = src;
-      emoji.classList.remove('placeholder');
-      if (uniqueId) emoji.dataset.uniqueId = uniqueId;
+    if (customEmoji.shouldUseTextColor && !emoji.classList.contains('colorable')) {
+      requestMutation(() => {
+        emoji.classList.add('colorable');
+      });
+    }
 
-      callInputRenderHandlers(customEmoji.id);
+    if (!isPlaceholder) {
+      requestMutation(() => {
+        emoji.src = src;
+        emoji.classList.remove('placeholder');
+        if (uniqueId) emoji.dataset.uniqueId = uniqueId;
+
+        callInputRenderHandlers(customEmoji.id);
+      });
     }
   });
 }

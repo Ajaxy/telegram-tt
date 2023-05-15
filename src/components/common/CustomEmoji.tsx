@@ -12,7 +12,7 @@ import safePlay from '../../util/safePlay';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
 import useCustomEmoji from './hooks/useCustomEmoji';
-import useDynamicColorListener from '../../hooks/useDynamicColorListener';
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 
 import StickerView from './StickerView';
 
@@ -77,7 +77,7 @@ const CustomEmoji: FC<OwnProps> = ({
   const [shouldLoop, setShouldLoop] = useState(true);
 
   const hasCustomColor = customEmoji?.shouldUseTextColor;
-  const { rgbColor: customColor } = useDynamicColorListener(containerRef, !hasCustomColor);
+  const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
 
   const handleVideoEnded = useCallback((e) => {
     if (!loopLimit) return;
@@ -132,7 +132,6 @@ const CustomEmoji: FC<OwnProps> = ({
           isSmall={!isBig}
           size={size}
           noPlay={noPlay || !canPlay}
-          customColor={customColor}
           thumbClassName={styles.thumb}
           fullMediaClassName={styles.media}
           shouldLoop={shouldLoop}
@@ -146,6 +145,7 @@ const CustomEmoji: FC<OwnProps> = ({
           withTranslucentThumb={withTranslucentThumb}
           onVideoEnded={handleVideoEnded}
           onAnimatedStickerLoop={handleStickerLoop}
+          customColor={customColor}
         />
       )}
     </div>

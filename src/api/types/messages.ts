@@ -57,6 +57,7 @@ export interface ApiStickerSet {
   accessHash: string;
   title: string;
   hasThumbnail?: boolean;
+  thumbCustomEmojiId?: string;
   count: number;
   stickers?: ApiSticker[];
   packs?: Record<string, ApiSticker[]>;

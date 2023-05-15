@@ -147,7 +147,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         />
         <div className="info">
           <div className="search-result-message-top">
-            <FullNameTitle peer={(senderUser || senderChat)!} />
+            <FullNameTitle peer={(senderUser || senderChat)!} withEmojiStatus />
             <LastMessageMeta message={message} />
           </div>
           <div className="subtitle" dir="auto">

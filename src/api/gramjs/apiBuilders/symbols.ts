@@ -128,6 +128,7 @@ export function buildStickerSet(set: GramJs.StickerSet): ApiStickerSet {
     accessHash: String(accessHash),
     title,
     hasThumbnail: Boolean(thumbs?.length || thumbDocumentId),
+    thumbCustomEmojiId: thumbDocumentId?.toString(),
     count,
     shortName,
   };

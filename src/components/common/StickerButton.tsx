@@ -16,7 +16,7 @@ import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useMenuPosition from '../../hooks/useMenuPosition';
-import useDynamicColorListener from '../../hooks/useDynamicColorListener';
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 
 import StickerView from './StickerView';
 import Button from '../ui/Button';
@@ -93,7 +93,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   const menuRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
   const hasCustomColor = sticker.shouldUseTextColor;
-  const { rgbColor: customColor } = useDynamicColorListener(ref, !hasCustomColor);
+  const customColor = useDynamicColorListener(ref, !hasCustomColor);
 
   const {
     id, isCustomEmoji, hasEffect: isPremium, stickerSetInfo,

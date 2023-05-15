@@ -16,6 +16,9 @@ import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useMediaTransition from '../../../hooks/useMediaTransition';
 import useCoordsInSharedCanvas from '../../../hooks/useCoordsInSharedCanvas';
+import useCustomEmoji from '../../common/hooks/useCustomEmoji';
+import useDynamicColorListener from '../../../hooks/stickers/useDynamicColorListener';
+import useColorFilter from '../../../hooks/stickers/useColorFilter';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -41,7 +44,14 @@ const StickerSetCover: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { hasThumbnail, isLottie, isVideos: isVideo } = stickerSet;
+  const {
+    hasThumbnail, thumbCustomEmojiId, isLottie, isVideos: isVideo,
+  } = stickerSet;
+
+  const { customEmoji } = useCustomEmoji(thumbCustomEmojiId);
+  const hasCustomColor = customEmoji?.shouldUseTextColor;
+  const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
+  const colorFilter = useColorFilter(customColor);
 
   const isIntersecting = useIsIntersecting(containerRef, observeIntersection);
   const shouldPlay = isIntersecting && !noPlay;
@@ -86,12 +96,14 @@ const StickerSetCover: FC<OwnProps> = ({
             className={buildClassName(styles.video, transitionClassNames)}
             src={mediaData}
             canPlay={shouldPlay}
+            style={colorFilter}
             loop
             disablePictureInPicture
           />
         ) : (
           <img
             src={mediaData || staticMediaData}
+            style={colorFilter}
             className={buildClassName(styles.image, transitionClassNames)}
             alt=""
           />
