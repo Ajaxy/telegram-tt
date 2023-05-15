@@ -111,26 +111,6 @@ body.cursor-ew-resize {
   -webkit-user-select: none !important;
 }
 
-.resize-handle {
-  position: fixed;
-  display: none;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  z-index: -1;
-
-  @media (min-width: 926px) {
-    position: absolute;
-    display: block;
-    height: auto;
-    bottom: 0;
-    width: 0.25rem;
-    z-index: var(--z-resize-handle);
-    cursor: var(--custom-cursor, ew-resize);
-  }
-}
-
 .clearfix::after {
   content: "";
   clear: both;
