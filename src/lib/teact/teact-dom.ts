@@ -517,7 +517,7 @@ function renderFastListChildren($current: VirtualElementParent, $new: VirtualEle
     const newOrderKey = 'props' in $newChild ? $newChild.props.teactOrderKey : undefined;
     // That is indicated by a changed `teactOrderKey` value
     const shouldMoveNode = (
-      currentChildInfo.index !== currentPreservedIndex && currentChildInfo.orderKey !== newOrderKey
+      currentChildInfo.index !== currentPreservedIndex && (!newOrderKey || currentChildInfo.orderKey !== newOrderKey)
     );
     const isMovingDown = shouldMoveNode && currentPreservedIndex > currentChildInfo.index;
 
