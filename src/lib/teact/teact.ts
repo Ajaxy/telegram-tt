@@ -556,7 +556,7 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
       nextValue: initial,
       setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
         if (typeof newValue === 'function') {
-          newValue = (newValue as (current: T) => T)(byCursor[cursor].value);
+          newValue = (newValue as (current: T) => T)(byCursor[cursor].nextValue);
         }
 
         if (byCursor[cursor].nextValue === newValue) {
