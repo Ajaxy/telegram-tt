@@ -208,7 +208,7 @@ function MiddleColumn({
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
-  const { isTablet } = useAppLayout();
+  const { isTablet, isDesktop } = useAppLayout();
 
   const lang = useLang();
   const [dropAreaState, setDropAreaState] = useState(DropAreaState.None);
@@ -464,12 +464,14 @@ function MiddleColumn({
       `}
       onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
-      <div
-        className="resize-handle"
-        onMouseDown={initResize}
-        onMouseUp={handleMouseUp}
-        onDoubleClick={resetResize}
-      />
+      {isDesktop && (
+        <div
+          className="resize-handle"
+          onMouseDown={initResize}
+          onMouseUp={handleMouseUp}
+          onDoubleClick={resetResize}
+        />
+      )}
       <div
         className={bgClassName}
         style={customBackgroundValue ? `--custom-background: ${customBackgroundValue}` : undefined}
