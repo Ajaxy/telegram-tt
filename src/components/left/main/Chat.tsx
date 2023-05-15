@@ -205,7 +205,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     canChangeFolder,
   });
 
-  const isIntersecting = useIsIntersecting(ref, observeIntersection);
+  const isIntersecting = useIsIntersecting(ref, chat ? observeIntersection : undefined);
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
