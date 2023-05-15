@@ -36,6 +36,8 @@ async function init() {
     console.log('>>> INIT');
   }
 
+  if (!(window as any).isCompatTestPassed) return;
+
   if (IS_MULTITAB_SUPPORTED) {
     subscribeToMultitabBroadcastChannel();
 
