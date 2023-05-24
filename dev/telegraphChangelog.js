@@ -17,7 +17,7 @@ const gitOptions = {
 
 const pageTemplate = `
 <body>\
-    <aside><img src="https://webz.dev/icon-dev-512x512.png" /></aside>
+    <aside><img src="https://tga.dev/icon-dev-512x512.png" /></aside>
     <h3>Commits since ${version}</h3>\
     <p><i>This list is automatically updated when a new commit pushed to the beta repo</i></p>\
     <ul id="list"></ul>\
