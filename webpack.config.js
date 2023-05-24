@@ -24,7 +24,7 @@ const {
 
 dotenv.config();
 
-const STATOSCOPE_REFERENCE_URL = 'https://webz.dev/build-stats.json';
+const STATOSCOPE_REFERENCE_URL = 'https://tga.dev/build-stats.json';
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
 const {
