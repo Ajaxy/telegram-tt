@@ -422,6 +422,16 @@ const MessageList: FC<OwnProps & StateProps> = ({
     const prevContainerHeight = prevContainerHeightRef.current;
     prevContainerHeightRef.current = containerHeight;
 
+    // Skip initial resize observer callback
+    if (
+      messageIds === prevMessageIds
+      && isViewportNewest === prevIsViewportNewest
+      && containerHeight !== prevContainerHeight
+      && prevContainerHeight === undefined
+    ) {
+      return;
+    }
+
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
     const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
