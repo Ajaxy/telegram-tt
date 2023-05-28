@@ -70,10 +70,10 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
   }, [isLoading]);
 
   useEffect(() => {
-    if (!url && folderId) {
+    if (!url && folderId && isActive) {
       createChatlistInvite({ folderId });
     }
-  }, [folderId, url]);
+  }, [folderId, isActive, url]);
 
   const handleRevoke = useCallback(() => {
     if (!url || !folderId) return;
