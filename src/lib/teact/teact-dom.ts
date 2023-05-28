@@ -373,9 +373,7 @@ function getNextSibling($current: VirtualElement): ChildNode | undefined {
     return getNextSibling(lastChild);
   }
 
-  const target = $current.target!;
-  const { nextSibling } = target;
-  return nextSibling || undefined;
+  return $current.target!.nextSibling || undefined;
 }
 
 function renderChildren(
@@ -401,7 +399,7 @@ function renderChildren(
   const fragment = newChildrenLength > currentChildrenLength ? document.createDocumentFragment() : undefined;
   const lastCurrentChild = $current.children[currentChildrenLength - 1];
   const fragmentNextSibling = fragment && (
-    nextSibling || lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined
+    nextSibling || (lastCurrentChild ? getNextSibling(lastCurrentChild) : undefined)
   );
 
   for (let i = 0; i < maxLength; i++) {
