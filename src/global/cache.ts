@@ -561,11 +561,12 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
       ? Object.values(chat.topics).map(({ lastMessageId }) => lastMessageId) : [];
     const byId = pick(current.byId, viewportIdsToSave.concat(lastMessageIdsToSave));
     const threadsById = Object.keys(threadsToSave).reduce((acc, key) => {
-      const t = threadsToSave[Number(key)];
+      const thread = threadsToSave[Number(key)];
       acc[Number(key)] = {
-        ...t,
-        listedIds: t.lastViewportIds,
+        ...thread,
+        listedIds: thread.lastViewportIds,
         pinnedIds: undefined,
+        typingStatus: undefined,
       };
       return acc;
     }, {} as GlobalState['messages']['byChatId'][string]['threadsById']);
