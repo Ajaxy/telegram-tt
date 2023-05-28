@@ -1,11 +1,15 @@
-import type { Signal } from '../../../util/signals';
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback, useEffect, useRef,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiMessage, ApiMessageEntityTextUrl, ApiWebPage } from '../../../api/types';
+import type { FC } from '../../../lib/teact/teact';
+import type {
+  ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
+} from '../../../api/types';
 import { ApiMessageEntityTypes } from '../../../api/types';
 import type { ISettings } from '../../../types';
+import type { Signal } from '../../../util/signals';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
@@ -54,27 +58,32 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
     toggleMessageWebPage,
   } = getActions();
 
+  const formattedTextWithLinkRef = useRef<ApiFormattedText>();
+
   const detectLinkDebounced = useDebouncedResolver(() => {
-    const { text, entities } = parseMessageInput(getHtml());
-    const linkEntity = entities?.find((entity): entity is ApiMessageEntityTextUrl => (
+    const formattedText = parseMessageInput(getHtml());
+    const linkEntity = formattedText.entities?.find((entity): entity is ApiMessageEntityTextUrl => (
       entity.type === ApiMessageEntityTypes.TextUrl
     ));
 
-    return linkEntity?.url || text.match(RE_LINK)?.[0];
+    formattedTextWithLinkRef.current = formattedText;
+
+    return linkEntity?.url || formattedText.text.match(RE_LINK)?.[0];
   }, [getHtml], DEBOUNCE_MS, true);
 
   const getLink = useDerivedSignal(detectLinkDebounced, [detectLinkDebounced, getHtml], true);
 
   useEffect(() => {
     const link = getLink();
+    const formattedText = formattedTextWithLinkRef.current;
 
     if (link) {
-      loadWebPagePreview({ text: link });
+      loadWebPagePreview({ text: formattedText! });
     } else {
       clearWebPagePreview();
       toggleMessageWebPage({ chatId, threadId });
     }
-  }, [getLink, chatId, threadId, clearWebPagePreview, loadWebPagePreview, toggleMessageWebPage]);
+  }, [getLink, chatId, threadId]);
 
   useSyncEffect(() => {
     clearWebPagePreview();

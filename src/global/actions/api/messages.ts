@@ -664,7 +664,7 @@ addActionHandler('markMessagesRead', (global, actions, payload): ActionReturnTyp
 addActionHandler('loadWebPagePreview', async (global, actions, payload): Promise<void> => {
   const { text, tabId = getCurrentTabId() } = payload;
 
-  const webPagePreview = await callApi('fetchWebPagePreview', { message: text });
+  const webPagePreview = await callApi('fetchWebPagePreview', { text });
 
   global = getGlobal();
   global = updateTabState(global, {
