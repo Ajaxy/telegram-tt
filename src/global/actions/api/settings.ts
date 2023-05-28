@@ -13,7 +13,7 @@ import {
 import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
 import { callApi } from '../../../api/gramjs';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { subscribe, unsubscribe } from '../../../util/notifications';
+import { subscribe, unsubscribe, requestPermission } from '../../../util/notifications';
 import { setTimeFormat } from '../../../util/langProvider';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
@@ -353,15 +353,24 @@ addActionHandler('updateNotificationSettings', async (global, actions, payload):
   setGlobal(global);
 });
 
-addActionHandler('updateWebNotificationSettings', (global, actions, payload): ActionReturnType => {
+addActionHandler('updateWebNotificationSettings', async (global, actions, payload): Promise<void> => {
+  const oldSettings = global.settings.byKey;
   global = replaceSettings(global, payload);
   setGlobal(global);
-
-  const { hasPushNotifications, hasWebNotifications } = global.settings.byKey;
-  if (hasWebNotifications && hasPushNotifications) {
-    void subscribe();
-  } else {
-    void unsubscribe();
+  const { hasWebNotifications, hasPushNotifications } = global.settings.byKey;
+  if (!oldSettings.hasPushNotifications && hasPushNotifications) {
+    await subscribe();
+  }
+  if (oldSettings.hasPushNotifications && !hasPushNotifications) {
+    await unsubscribe();
+  }
+  if (!oldSettings.hasWebNotifications && hasWebNotifications) {
+    const isGranted = await requestPermission();
+    if (!isGranted) {
+      global = getGlobal();
+      global = replaceSettings(global, { hasWebNotifications: false });
+      setGlobal(global);
+    }
   }
 });
 

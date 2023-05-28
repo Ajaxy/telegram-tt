@@ -88,7 +88,17 @@ addActionHandler('initShared', (): ActionReturnType => {
 addActionHandler('initMain', (global): ActionReturnType => {
   const { hasWebNotifications, hasPushNotifications } = selectNotifySettings(global);
   if (hasWebNotifications && hasPushNotifications) {
-    void subscribe();
+    // Most of the browsers only show the notifications permission prompt after the first user gesture.
+    const events = ['click', 'keypress'];
+    const subscribeAfterUserGesture = () => {
+      void subscribe();
+      events.forEach((event) => {
+        document.removeEventListener(event, subscribeAfterUserGesture);
+      });
+    };
+    events.forEach((event) => {
+      document.addEventListener(event, subscribeAfterUserGesture, { once: true });
+    });
   }
 });
 
