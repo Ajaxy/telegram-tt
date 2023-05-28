@@ -214,7 +214,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   return { message, users };
 }
 
-let queue = Promise.resolve();
+let mediaQueue = Promise.resolve();
 
 export function sendMessage(
   {
@@ -236,6 +236,7 @@ export function sendMessage(
     shouldUpdateStickerSetOrder,
   }: {
     chat: ApiChat;
+    lastMessageId?: number;
     text?: string;
     entities?: ApiMessageEntity[];
     replyingTo?: number;
@@ -306,8 +307,7 @@ export function sendMessage(
     }, randomId, localMessage, onProgress);
   }
 
-  const prevQueue = queue;
-  queue = (async () => {
+  const sendPromise = (async () => {
     let media: GramJs.TypeInputMedia | undefined;
     if (attachment) {
       try {
@@ -318,7 +318,7 @@ export function sendMessage(
           console.warn(err);
         }
 
-        await prevQueue;
+        await mediaQueue;
 
         return;
       }
@@ -336,8 +336,6 @@ export function sendMessage(
         vcard: '',
       });
     }
-
-    await prevQueue;
 
     const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
 
@@ -369,7 +367,7 @@ export function sendMessage(
     }
   })();
 
-  return queue;
+  return sendPromise;
 }
 
 const groupedUploads: Record<string, {
@@ -417,8 +415,8 @@ function sendGroupedMedia(
 
   groupIndex = groupedUploads[groupedId].counter++;
 
-  const prevQueue = queue;
-  queue = (async () => {
+  const prevMediaQueue = mediaQueue;
+  mediaQueue = (async () => {
     let media;
     try {
       media = await uploadMedia(localMessage, attachment, onProgress!);
@@ -430,7 +428,7 @@ function sendGroupedMedia(
 
       groupedUploads[groupedId].counter--;
 
-      await prevQueue;
+      await prevMediaQueue;
 
       return;
     }
@@ -440,7 +438,7 @@ function sendGroupedMedia(
       media as GramJs.InputMediaUploadedPhoto | GramJs.InputMediaUploadedDocument,
     );
 
-    await prevQueue;
+    await prevMediaQueue;
 
     if (!inputMedia) {
       groupedUploads[groupedId].counter--;
@@ -482,7 +480,7 @@ function sendGroupedMedia(
     if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
   })();
 
-  return queue;
+  return mediaQueue;
 }
 
 async function fetchInputMedia(

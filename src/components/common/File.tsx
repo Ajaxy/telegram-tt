@@ -1,6 +1,8 @@
-import type { RefObject } from 'react';
+import React, {
+  memo, useRef, useState, useMemo,
+} from '../../lib/teact/teact';
+
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef, useState } from '../../lib/teact/teact';
 
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -20,7 +22,7 @@ import Link from '../ui/Link';
 import './File.scss';
 
 type OwnProps = {
-  ref?: RefObject<HTMLDivElement>;
+  ref?: React.RefObject<HTMLDivElement>;
   name: string;
   extension?: string;
   size: number;
@@ -80,6 +82,10 @@ const File: FC<OwnProps> = ({
 
   const color = getColorFromExtension(extension);
   const sizeString = getFileSizeString(size);
+  const subtitle = useMemo(() => {
+    if (!isTransferring || !transferProgress) return sizeString;
+    return `${getFileSizeString(size * transferProgress)} / ${sizeString}`;
+  }, [isTransferring, size, sizeString, transferProgress]);
 
   const { width, height } = getDocumentThumbnailDimensions(smaller);
 
@@ -146,7 +152,7 @@ const File: FC<OwnProps> = ({
         <div className="file-title" dir="auto" title={name}>{renderText(name)}</div>
         <div className="file-subtitle" dir="auto">
           <span>
-            {isTransferring && transferProgress ? `${Math.round(transferProgress * 100)}%` : sizeString}
+            {subtitle}
           </span>
           {sender && <span className="file-sender">{renderText(sender)}</span>}
           {!sender && Boolean(timestamp) && (

@@ -9,9 +9,10 @@ import { LoadMoreDirection } from '../../../types';
 import type { MessageListType } from '../../../global/types';
 import type { Signal } from '../../../util/signals';
 
-import { LOCAL_MESSAGE_MIN_ID } from '../../../config';
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 import { debounce } from '../../../util/schedulers';
+import { isLocalMessageId } from '../../../global/helpers';
+
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import { useStateRef } from '../../../hooks/useStateRef';
@@ -94,7 +95,7 @@ export default function useScrollHooks(
     }
 
     // Loading history while sending a message can return the same message and cause ambiguity
-    const isFirstMessageLocal = messageIds[0] > LOCAL_MESSAGE_MIN_ID;
+    const isFirstMessageLocal = isLocalMessageId(messageIds[0]);
     if (isFirstMessageLocal) {
       return;
     }
