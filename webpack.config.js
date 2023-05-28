@@ -25,6 +25,7 @@ const {
 dotenv.config();
 
 const STATOSCOPE_REFERENCE_URL = 'https://tga.dev/build-stats.json';
+let isReferenceFetched = false;
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
 const {
@@ -147,8 +148,14 @@ module.exports = (_env, { mode = 'production' }) => {
       ...(APP_ENV === 'staging' ? [{
         apply: (compiler) => {
           compiler.hooks.compile.tap('Before Compilation', async () => {
-            const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
-            fs.writeFileSync(path.resolve('./public/reference.json'), stats);
+            try {
+              const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
+              fs.writeFileSync(path.resolve('./public/reference.json'), stats);
+              isReferenceFetched = true;
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('Failed to fetch reference statoscope stats: ', err.message);
+            }
           });
         },
       }] : []),
@@ -206,7 +213,7 @@ module.exports = (_env, { mode = 'production' }) => {
         normalizeStats: true,
         open: 'file',
         extensions: [new WebpackContextExtension()],
-        ...(APP_ENV === 'staging' && {
+        ...(APP_ENV === 'staging' && isReferenceFetched && {
           additionalStats: ['./public/reference.json'],
         }),
       }),
