@@ -121,7 +121,7 @@
     "async-mutex": "^0.4.0",
     "big-integer": "github:painor/BigInteger.js",
     "croppie": "^2.6.5",
-    "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#3c401da02c6792cea0b6c758795da406377bf667",
+    "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#2886b318eae174527c4bc9fcd321940ef3a85527",
     "idb-keyval": "^6.2.0",
     "lowlight": "^2.8.1",
     "mp4box": "^0.5.2",

@@ -126,7 +126,7 @@ function isLastEmojiVersionSupported() {
   inlineEl.classList.add('emoji-test-element');
   document.body.appendChild(inlineEl);
 
-  inlineEl.innerText = '🫱🏻'; // Emoji from 14.0 version
+  inlineEl.innerText = '🫸🏻'; // Emoji from 15.0 version
   const newEmojiWidth = inlineEl.offsetWidth;
   inlineEl.innerText = '❤️'; // Emoji from 1.0 version
   const legacyEmojiWidth = inlineEl.offsetWidth;
