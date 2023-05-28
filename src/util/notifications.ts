@@ -13,7 +13,8 @@ import {
   getMessageRecentReaction,
   getMessageSenderName,
   getMessageSummaryText,
-  getPrivateChatUserId, getUserFullName,
+  getPrivateChatUserId,
+  getUserFullName,
   isActionMessage,
   isChatChannel,
   selectIsChatMuted,
@@ -28,7 +29,7 @@ import {
   selectNotifySettings,
   selectUser,
 } from '../global/selectors';
-import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV, IS_SAFARI } from './windowEnvironment';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
@@ -43,8 +44,7 @@ function getDeviceToken(subscription: PushSubscription) {
 }
 
 function checkIfPushSupported() {
-  // Disable push notifications in Safari until VAPID keys are implemented on the server
-  if (!IS_SERVICE_WORKER_SUPPORTED || IS_SAFARI) return false;
+  if (!IS_SERVICE_WORKER_SUPPORTED) return false;
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -73,7 +73,7 @@ function checkIfPushSupported() {
   return true;
 }
 
-function checkIfNotificationsSupported() {
+export function checkIfNotificationsSupported() {
   // Let's check if the browser supports notifications
   if (!('Notification' in window)) {
     if (DEBUG) {
@@ -135,22 +135,26 @@ function checkIfShouldResubscribe(subscription: PushSubscription | null) {
   return Date.now() - global.push.subscribedAt > expirationTime;
 }
 
-async function requestPermission() {
-  if (!('Notification' in window)) return;
-  if (!['granted', 'denied'].includes(Notification.permission)) {
-    await Notification.requestPermission();
+export async function requestPermission() {
+  if (!('Notification' in window)) {
+    return false;
   }
+  let permission = Notification.permission;
+  if (!['granted', 'denied'].includes(permission)) {
+    permission = await Notification.requestPermission();
+  }
+  return permission === 'granted';
 }
 
 async function unsubscribeFromPush(subscription: PushSubscription | null) {
   const global = getGlobal();
-  const dispatch = getActions();
+  const { deleteDeviceToken } = getActions();
   if (subscription) {
     try {
       const deviceToken = getDeviceToken(subscription);
       await callApi('unregisterDevice', deviceToken);
       await subscription.unsubscribe();
-      dispatch.deleteDeviceToken();
+      deleteDeviceToken();
       return;
     } catch (error) {
       if (DEBUG) {
@@ -161,7 +165,7 @@ async function unsubscribeFromPush(subscription: PushSubscription | null) {
   }
   if (global.push) {
     await callApi('unregisterDevice', global.push.deviceToken);
-    dispatch.deleteDeviceToken();
+    deleteDeviceToken();
   }
 }
 
@@ -215,11 +219,23 @@ async function loadCustomEmoji(id: string) {
   setGlobal(global);
 }
 
+let isSubscriptionFailed = false;
+export function checkIfOfflinePushFailed() {
+  return isSubscriptionFailed;
+}
+
 export async function subscribe() {
+  const { setDeviceToken, updateWebNotificationSettings } = getActions();
+  let hasWebNotifications = false;
+  let hasPushNotifications = false;
   if (!checkIfPushSupported()) {
     // Ask for notification permissions only if service worker notifications are not supported
     // As pushManager.subscribe automatically triggers permission popup
-    await requestPermission();
+    hasWebNotifications = await requestPermission();
+    updateWebNotificationSettings({
+      hasWebNotifications,
+      hasPushNotifications,
+    });
     return;
   }
   const serviceWorkerRegistration = await navigator.serviceWorker.ready;
@@ -236,10 +252,11 @@ export async function subscribe() {
       console.log('[PUSH] Received push subscription: ', deviceToken);
     }
     await callApi('registerDevice', deviceToken);
-    getActions()
-      .setDeviceToken(deviceToken);
+    setDeviceToken(deviceToken);
+    hasPushNotifications = true;
+    hasWebNotifications = true;
   } catch (error: any) {
-    if (Notification.permission === 'denied' as NotificationPermission) {
+    if (Notification.permission === 'denied') {
       // The user denied the notification permission which
       // means we failed to subscribe and the user will need
       // to manually change the notification permission to
@@ -248,20 +265,26 @@ export async function subscribe() {
         // eslint-disable-next-line no-console
         console.warn('[PUSH] The user has blocked push notifications.');
       }
-    } else if (DEBUG) {
+    } else {
       // A problem occurred with the subscription, this can
       // often be down to an issue or lack of the gcm_sender_id
       // and / or gcm_user_visible_only
-      // eslint-disable-next-line no-console
-      console.log('[PUSH] Unable to subscribe to push.', error);
-
+      if (DEBUG) {
+        // eslint-disable-next-line no-console
+        console.log('[PUSH] Unable to subscribe to push.', error);
+      }
       // Request permissions and fall back to local notifications
       // if pushManager.subscribe was aborted due to invalid VAPID key.
-      if (error.code === DOMException.ABORT_ERR) {
-        await requestPermission();
+      if ([DOMException.ABORT_ERR, DOMException.NOT_SUPPORTED_ERR].includes(error.code)) {
+        isSubscriptionFailed = true;
+        hasWebNotifications = await requestPermission();
       }
     }
   }
+  updateWebNotificationSettings({
+    hasWebNotifications,
+    hasPushNotifications,
+  });
 }
 
 function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
