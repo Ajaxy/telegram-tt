@@ -6,7 +6,7 @@
 
     if ((hostname === 'weba.telegram.org' || hostname === 'webz.telegram.org') && !localStorage.getItem('tt-global-state')) {
       window.location.href = 'https://web.telegram.org/a';
-    }</script><script defer="defer" src="main.db417d1e1ff89b3936de.js"></script><link href="main.c60951f6b66bf3781290.css" rel="stylesheet"></head><body id="root"><noscript><video src="./nojs.mp4" class="nojs-video" muted loop autoplay playsinline disablepictureinpicture></video><h1>Telegram Web</h1><p>Please, enable JavaScript to open the app.</p></noscript><div id="portals"></div><script>function compatTest() {
+    }</script><script defer="defer" src="main.7447e02f84c27e001f8f.js"></script><link href="main.913bbcccd0fe9098cdf3.css" rel="stylesheet"></head><body id="root"><noscript><video src="./nojs.mp4" class="nojs-video" muted loop autoplay playsinline disablepictureinpicture></video><h1>Telegram Web</h1><p>Please, enable JavaScript to open the app.</p></noscript><div id="portals"></div><script>function compatTest() {
       var hasPromise = typeof Promise !== 'undefined';
       var hasWebSockets = typeof WebSocket !== 'undefined';
       var hasWebCrypto = window.crypto && typeof window.crypto.subtle !== 'undefined';
@@ -14,16 +14,18 @@
 
       var isCompatible = hasPromise && hasWebSockets && hasWebCrypto && hasObjectFromEntries;
 
-      if (isCompatible) {
+      if (isCompatible || (window.localStorage && window.localStorage.getItem('tt-ignore-compat'))) {
         window.isCompatTestPassed = true;
         return;
       }
 
-      console.warn('Compatibility test report:');
-      console.warn('Promise', hasPromise);
-      console.warn('WebSocket', hasWebSockets);
-      console.warn('WebCrypto', hasWebCrypto);
-      console.warn('Object.fromEntries', hasObjectFromEntries);
+      if (window.console && console.warn) {
+        console.warn('Compatibility test report:');
+        console.warn('Promise', hasPromise);
+        console.warn('WebSocket', hasWebSockets);
+        console.warn('WebCrypto', hasWebCrypto);
+        console.warn('Object.fromEntries', hasObjectFromEntries);
+      }
 
       document.body.innerHTML = '<iframe src="./unsupported.html" width="100%" height="100%">';
     }
