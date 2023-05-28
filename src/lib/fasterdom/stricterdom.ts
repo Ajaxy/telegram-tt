@@ -60,6 +60,7 @@ export function setHandler(handler?: ErrorHandler) {
 function setupLayoutDetectors() {
   Object.entries(LAYOUT_CAUSES).forEach(([name, causes]) => {
     const entity = window[name as Entities];
+    if (!entity) return;
     const prototype = typeof entity === 'object' ? entity : entity.prototype;
 
     if ('props' in causes) {
@@ -100,6 +101,7 @@ function setupLayoutDetectors() {
 function clearLayoutDetectors() {
   Object.entries(LAYOUT_CAUSES).forEach(([name, causes]) => {
     const entity = window[name as Entities];
+    if (!entity) return;
     const prototype = typeof entity === 'object' ? entity : entity.prototype;
 
     if ('props' in causes) {

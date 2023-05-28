@@ -25,7 +25,9 @@ import {
   TMP_CHAT_ID,
   MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
 } from '../../config';
-import { IS_ANDROID, IS_IOS, MASK_IMAGE_DISABLED } from '../../util/windowEnvironment';
+import {
+  IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+} from '../../util/windowEnvironment';
 import { DropAreaState } from './composer/DropArea';
 import {
   selectCanAnimateInterface,
@@ -608,7 +610,7 @@ function MiddleColumn({
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
-                <MessageLanguageModal isOpen={isMessageLanguageModalOpen} />
+                {IS_TRANSLATION_SUPPORTED && <MessageLanguageModal isOpen={isMessageLanguageModalOpen} />}
               </div>
             </Transition>
 

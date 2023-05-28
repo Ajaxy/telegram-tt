@@ -77,16 +77,18 @@
 
       var isCompatible = hasPromise && hasWebSockets && hasWebCrypto && hasObjectFromEntries;
 
-      if (isCompatible) {
+      if (isCompatible || (window.localStorage && window.localStorage.getItem('tt-ignore-compat'))) {
         window.isCompatTestPassed = true;
         return;
       }
 
-      console.warn('Compatibility test report:');
-      console.warn('Promise', hasPromise);
-      console.warn('WebSocket', hasWebSockets);
-      console.warn('WebCrypto', hasWebCrypto);
-      console.warn('Object.fromEntries', hasObjectFromEntries);
+      if (window.console && console.warn) {
+        console.warn('Compatibility test report:');
+        console.warn('Promise', hasPromise);
+        console.warn('WebSocket', hasWebSockets);
+        console.warn('WebCrypto', hasWebCrypto);
+        console.warn('Object.fromEntries', hasObjectFromEntries);
+      }
 
       document.body.innerHTML = '<iframe src="./unsupported.html" width="100%" height="100%">';
     }
