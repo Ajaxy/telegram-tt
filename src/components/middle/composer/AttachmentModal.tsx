@@ -62,7 +62,7 @@ export type OwnProps = {
   attachments: ApiAttachment[];
   getHtml: Signal<string>;
   canShowCustomSendMenu?: boolean;
-  isReady?: boolean;
+  isReady: boolean;
   shouldSchedule?: boolean;
   shouldSuggestCompression?: boolean;
   shouldForceCompression?: boolean;
@@ -595,6 +595,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               chatId={chatId}
               threadId={threadId}
               isAttachmentModalInput
+              isReady={isReady}
               isActive={isOpen}
               getHtml={getHtml}
               editableInputId={EDITABLE_INPUT_MODAL_ID}
