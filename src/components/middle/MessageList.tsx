@@ -22,7 +22,6 @@ import { LoadMoreDirection } from '../../types';
 
 import {
   ANIMATION_END_DELAY,
-  LOCAL_MESSAGE_MIN_ID,
   MESSAGE_LIST_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
@@ -58,6 +57,7 @@ import {
   getDocumentMediaHash,
   getVideoDimensions,
   getPhotoFullDimensions,
+  isLocalMessageId,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
 import { DPR } from '../../util/windowEnvironment';
@@ -366,7 +366,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
 
     // Loading history while sending a message can return the same message and cause ambiguity
-    const isLastMessageLocal = messageIds && messageIds[messageIds.length - 1] > LOCAL_MESSAGE_MIN_ID;
+    const isLastMessageLocal = messageIds && isLocalMessageId(messageIds[messageIds.length - 1]);
     if (isLastMessageLocal) {
       return;
     }

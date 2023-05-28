@@ -12,7 +12,7 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  GENERAL_TOPIC_ID, LOCAL_MESSAGE_MIN_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import {
   selectChat, selectChatBot, selectChatFullInfo, selectIsChatWithSelf,
@@ -46,6 +46,7 @@ import {
   isUserRightBanned,
   canSendReaction,
   getAllowedAttachmentOptions,
+  isLocalMessageId,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -324,7 +325,7 @@ export function selectIsViewportNewest<T extends GlobalState>(
   }
 
   // Edge case: outgoing `lastMessage` is updated with a delay to optimize animation
-  if (lastMessageId > LOCAL_MESSAGE_MIN_ID && !selectChatMessage(global, chatId, lastMessageId)) {
+  if (isLocalMessageId(lastMessageId) && !selectChatMessage(global, chatId, lastMessageId)) {
     return true;
   }
 

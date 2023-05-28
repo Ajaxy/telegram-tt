@@ -6,7 +6,6 @@ import type { LangFn } from '../../hooks/useLang';
 
 import {
   CONTENT_NOT_SUPPORTED,
-  LOCAL_MESSAGE_MIN_ID,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
@@ -199,7 +198,7 @@ export function isMessageLocal(message: ApiMessage) {
 }
 
 export function isLocalMessageId(id: number) {
-  return id > LOCAL_MESSAGE_MIN_ID;
+  return !Number.isInteger(id);
 }
 
 export function isHistoryClearMessage(message: ApiMessage) {
