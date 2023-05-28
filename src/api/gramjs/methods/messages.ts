@@ -215,6 +215,7 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
 }
 
 let mediaQueue = Promise.resolve();
+let lastSendMessagePromise = Promise.resolve();
 
 export function sendMessage(
   {
@@ -307,7 +308,7 @@ export function sendMessage(
     }, randomId, localMessage, onProgress);
   }
 
-  const sendPromise = (async () => {
+  lastSendMessagePromise = (async () => {
     let media: GramJs.TypeInputMedia | undefined;
     if (attachment) {
       try {
@@ -367,7 +368,7 @@ export function sendMessage(
     }
   })();
 
-  return sendPromise;
+  return lastSendMessagePromise;
 }
 
 const groupedUploads: Record<string, {
@@ -479,6 +480,8 @@ function sendGroupedMedia(
 
     if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
   })();
+
+  lastSendMessagePromise = mediaQueue;
 
   return mediaQueue;
 }
@@ -1291,6 +1294,8 @@ export async function forwardMessages({
       message: localMessage,
     });
   });
+
+  await lastSendMessagePromise;
 
   const update = await invokeRequest(new GramJs.messages.ForwardMessages({
     fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),

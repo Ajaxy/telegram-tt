@@ -141,7 +141,7 @@ export function buildApiMessageFromNotification(
   notification: GramJs.UpdateServiceNotification,
   currentDate: number,
 ): ApiMessage {
-  const localId = getNextLocalMessageId();
+  const localId = getNextLocalMessageId(currentDate);
   const content = buildMessageContent(notification);
 
   return {
@@ -1359,7 +1359,7 @@ export function buildLocalForwardedMessage({
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
 }): ApiMessage {
-  const localId = getNextLocalMessageId();
+  const localId = getNextLocalMessageId(toChat?.lastMessage?.id);
   const {
     content,
     chatId: fromChatId,
