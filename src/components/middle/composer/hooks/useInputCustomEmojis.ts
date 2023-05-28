@@ -1,7 +1,7 @@
 import {
-  useCallback, useEffect, useRef,
+  useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../../../lib/teact/teact';
-import { requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 
 import type { ApiSticker } from '../../../../api/types';
@@ -12,7 +12,6 @@ import { selectIsAlwaysHighPriorityEmoji } from '../../../../global/selectors';
 import {
   addCustomEmojiInputRenderCallback,
   getCustomEmojiMediaDataForInput,
-  removeCustomEmojiInputRenderCallback,
 } from '../../../../util/customEmojiManager';
 import { round } from '../../../../util/math';
 import AbsoluteVideo from '../../../../util/AbsoluteVideo';
@@ -25,6 +24,7 @@ import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
+import { useLastCallback } from '../../../../hooks/useLastCallback';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -44,9 +44,10 @@ export default function useInputCustomEmojis(
   absoluteContainerRef: React.RefObject<HTMLElement>,
   prefixId: string,
   canPlayAnimatedEmojis: boolean,
+  isReady?: boolean,
   isActive?: boolean,
 ) {
-  const customColor = useDynamicColorListener(inputRef);
+  const customColor = useDynamicColorListener(inputRef, !isReady);
   const colorFilter = useColorFilter(customColor, true);
   const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
@@ -60,12 +61,8 @@ export default function useInputCustomEmojis(
     });
   }, []);
 
-  const synchronizeElements = useCallback(() => {
-    if (!inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
-
-    requestMutation(() => {
-      document.documentElement.style.setProperty('--input-custom-emoji-filter', colorFilter || 'none');
-    });
+  const synchronizeElements = useLastCallback(() => {
+    if (!isReady || !inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
 
     const global = getGlobal();
     const playerIdsToClear = new Set(playersById.current.keys());
@@ -85,65 +82,56 @@ export default function useInputCustomEmojis(
         return;
       }
 
-      requestMeasure(() => {
-        const canvasBounds = sharedCanvasRef.current!.getBoundingClientRect();
-        const elementBounds = element.getBoundingClientRect();
-        const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
-        const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
+      const canvasBounds = sharedCanvasRef.current!.getBoundingClientRect();
+      const elementBounds = element.getBoundingClientRect();
+      const x = round((elementBounds.left - canvasBounds.left) / canvasBounds.width, 4);
+      const y = round((elementBounds.top - canvasBounds.top) / canvasBounds.height, 4);
 
-        if (playersById.current.has(playerId)) {
-          const player = playersById.current.get(playerId)!;
-          player.updatePosition(x, y);
-          return;
+      if (playersById.current.has(playerId)) {
+        const player = playersById.current.get(playerId)!;
+        player.updatePosition(x, y);
+        return;
+      }
+
+      const customEmoji = global.customEmojis.byId[documentId];
+      if (!customEmoji) {
+        return;
+      }
+      const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
+      const renderId = [
+        prefixId, documentId, customColor,
+      ].filter(Boolean).join('_');
+
+      createPlayer({
+        customEmoji,
+        sharedCanvasRef,
+        sharedCanvasHqRef,
+        absoluteContainerRef,
+        renderId,
+        viewId: playerId,
+        mediaUrl,
+        isHq,
+        position: { x, y },
+        textColor: customColor,
+        colorFilter,
+      }).then((animation) => {
+        if (canPlayAnimatedEmojis) {
+          animation.play();
         }
 
-        const customEmoji = global.customEmojis.byId[documentId];
-        if (!customEmoji) {
-          return;
-        }
-        const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(global, customEmoji.stickerSetInfo);
-        const renderId = [
-          prefixId, documentId, customColor,
-        ].filter(Boolean).join('_');
-
-        createPlayer({
-          customEmoji,
-          sharedCanvasRef,
-          sharedCanvasHqRef,
-          absoluteContainerRef,
-          renderId,
-          viewId: playerId,
-          mediaUrl,
-          isHq,
-          position: { x, y },
-          textColor: customColor,
-          colorFilter,
-        }).then((animation) => {
-          if (canPlayAnimatedEmojis) {
-            animation.play();
-          }
-
-          playersById.current.set(playerId, animation);
-        });
+        playersById.current.set(playerId, animation);
       });
     });
 
     clearPlayers(Array.from(playerIdsToClear));
-  }, [
-    inputRef, sharedCanvasRef, sharedCanvasHqRef, clearPlayers, prefixId, customColor, absoluteContainerRef,
-    canPlayAnimatedEmojis, colorFilter,
-  ]);
+  });
 
   useEffect(() => {
-    addCustomEmojiInputRenderCallback(synchronizeElements);
-
-    return () => {
-      removeCustomEmojiInputRenderCallback(synchronizeElements);
-    };
+    return addCustomEmojiInputRenderCallback(synchronizeElements);
   }, [synchronizeElements]);
 
   useEffect(() => {
-    if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive) {
+    if (!getHtml() || !inputRef.current || !sharedCanvasRef.current || !isActive || !isReady) {
       clearPlayers(Array.from(playersById.current.keys()));
       return;
     }
@@ -152,10 +140,14 @@ export default function useInputCustomEmojis(
     requestMeasure(() => {
       synchronizeElements();
     });
-  }, [getHtml, synchronizeElements, inputRef, clearPlayers, sharedCanvasRef, isActive]);
+  }, [getHtml, synchronizeElements, inputRef, clearPlayers, sharedCanvasRef, isActive, isReady]);
+
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty('--input-custom-emoji-filter', colorFilter || 'none');
+  }, [colorFilter]);
 
   useEffectWithPrevDeps(([prevCustomColor]) => {
-    if (customColor !== prevCustomColor) {
+    if (prevCustomColor !== undefined && customColor !== prevCustomColor) {
       synchronizeElements();
     }
   }, [customColor, synchronizeElements]);

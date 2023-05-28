@@ -1,7 +1,7 @@
-export function createCallbackManager() {
-  const callbacks = new Set<AnyToVoidFunction>();
+export function createCallbackManager<T extends AnyToVoidFunction = AnyToVoidFunction>() {
+  const callbacks = new Set<T>();
 
-  function addCallback(cb: AnyToVoidFunction) {
+  function addCallback(cb: T) {
     callbacks.add(cb);
 
     return () => {
@@ -9,11 +9,11 @@ export function createCallbackManager() {
     };
   }
 
-  function removeCallback(cb: AnyToVoidFunction) {
+  function removeCallback(cb: T) {
     callbacks.delete(cb);
   }
 
-  function runCallbacks(...args: any[]) {
+  function runCallbacks(...args: Parameters<T>) {
     callbacks.forEach((callback) => {
       callback(...args);
     });
@@ -31,4 +31,5 @@ export function createCallbackManager() {
   };
 }
 
-export type CallbackManager = ReturnType<typeof createCallbackManager>;
+export type CallbackManager<T extends AnyToVoidFunction = AnyToVoidFunction>
+  = ReturnType<typeof createCallbackManager<T>>;

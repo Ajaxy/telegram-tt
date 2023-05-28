@@ -1421,6 +1421,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             chatId={chatId}
             canSendPlainText={!isComposerBlocked}
             threadId={threadId}
+            isReady={isReady}
             isActive={!hasAttachments}
             getHtml={getHtml}
             placeholder={

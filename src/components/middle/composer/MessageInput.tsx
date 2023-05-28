@@ -47,6 +47,7 @@ type OwnProps = {
   threadId: number;
   isAttachmentModalInput?: boolean;
   editableInputId?: string;
+  isReady: boolean;
   isActive: boolean;
   getHtml: Signal<string>;
   placeholder: string;
@@ -101,6 +102,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   captionLimit,
   isAttachmentModalInput,
   editableInputId,
+  isReady,
   isActive,
   getHtml,
   placeholder,
@@ -160,6 +162,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     absoluteContainerRef,
     isAttachmentModalInput ? 'attachment' : 'composer',
     canPlayAnimatedEmojis,
+    isReady,
     isActive,
   );
 
