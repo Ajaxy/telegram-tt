@@ -18,8 +18,7 @@ import {
   renderComponent,
   unmountComponent,
   isFragmentElement,
-  runImmediateEffects,
-  willRunImmediateEffects,
+  captureImmediateEffects,
 } from './teact';
 import { DEBUG } from '../../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
@@ -55,12 +54,10 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
     headsByElement.set(parentEl, { children: [] });
   }
 
+  const runImmediateEffects = captureImmediateEffects();
   const $head = headsByElement.get(parentEl)!;
   const $newElement = renderWithVirtual(parentEl, $head.children[0], $element, $head, 0);
-
-  if (!willRunImmediateEffects()) {
-    runImmediateEffects();
-  }
+  runImmediateEffects?.();
 
   $head.children = $newElement ? [$newElement] : [];
 

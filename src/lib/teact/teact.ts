@@ -309,7 +309,7 @@ let pendingEffects = new Map<string, Effect>();
 let pendingCleanups = new Map<string, EffectCleanup>();
 let pendingLayoutEffects = new Map<string, Effect>();
 let pendingLayoutCleanups = new Map<string, EffectCleanup>();
-let areImmediateEffectsPending = false;
+let areImmediateEffectsCaptured = false;
 
 /*
   Order:
@@ -325,7 +325,7 @@ let areImmediateEffectsPending = false;
  */
 
 const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
-  areImmediateEffectsPending = true;
+  const runImmediateEffects = captureImmediateEffects();
 
   idsToExcludeFromUpdate = new Set();
   const instancesToUpdate = Array
@@ -351,16 +351,20 @@ const runUpdatePassOnRaf = throttleWith(requestMeasure, () => {
       forceUpdateComponent(instance);
     });
 
-    areImmediateEffectsPending = false;
-    runImmediateEffects();
+    runImmediateEffects?.();
   });
 });
 
-export function willRunImmediateEffects() {
-  return areImmediateEffectsPending;
+export function captureImmediateEffects() {
+  if (areImmediateEffectsCaptured) {
+    return undefined;
+  }
+
+  areImmediateEffectsCaptured = true;
+  return runCapturedImmediateEffects;
 }
 
-export function runImmediateEffects() {
+function runCapturedImmediateEffects() {
   const currentLayoutCleanups = pendingLayoutCleanups;
   pendingLayoutCleanups = new Map();
   currentLayoutCleanups.forEach((cb) => cb());
@@ -368,6 +372,8 @@ export function runImmediateEffects() {
   const currentLayoutEffects = pendingLayoutEffects;
   pendingLayoutEffects = new Map();
   currentLayoutEffects.forEach((cb) => cb());
+
+  areImmediateEffectsCaptured = false;
 }
 
 export function renderComponent(componentInstance: ComponentInstance) {
