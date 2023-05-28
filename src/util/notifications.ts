@@ -264,11 +264,11 @@ export async function subscribe() {
   }
 }
 
-function checkIfShouldNotify(chat: ApiChat) {
+function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
   if (!areSettingsLoaded) return false;
   const global = getGlobal();
   const isMuted = selectIsChatMuted(chat, selectNotifySettings(global), selectNotifyExceptions(global));
-  if (isMuted || chat.isNotJoined || !chat.isListed) {
+  if ((isMuted && !message.isMentioned) || chat.isNotJoined || !chat.isListed) {
     return false;
   }
   // On touch devices show notifications when chat is not active
@@ -420,7 +420,7 @@ export async function notifyAboutMessage({
   isReaction = false,
 }: { chat: ApiChat; message: Partial<ApiMessage>; isReaction?: boolean }) {
   const { hasWebNotifications } = await loadNotificationSettings();
-  if (!checkIfShouldNotify(chat)) return;
+  if (!checkIfShouldNotify(chat, message)) return;
   const areNotificationsSupported = checkIfNotificationsSupported();
   if (!hasWebNotifications || !areNotificationsSupported) {
     if (!message.isSilent && !isReaction) {
