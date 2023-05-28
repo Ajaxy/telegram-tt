@@ -1022,7 +1022,7 @@ export interface ActionPayloads {
 
   // misc
   loadWebPagePreview: {
-    text: string;
+    text: ApiFormattedText;
   } & WithTabId;
   clearWebPagePreview: WithTabId | undefined;
   loadWallpapers: undefined;

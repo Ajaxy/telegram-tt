@@ -1140,9 +1140,15 @@ export async function searchMessagesGlobal({
   };
 }
 
-export async function fetchWebPagePreview({ message }: { message: string }) {
+export async function fetchWebPagePreview({
+  text,
+}: {
+  text: ApiFormattedText;
+}) {
+  const textWithEntities = buildInputTextWithEntities(text);
   const preview = await invokeRequest(new GramJs.messages.GetWebPagePreview({
-    message,
+    message: textWithEntities.text,
+    entities: textWithEntities.entities,
   }));
 
   return preview && buildWebPage(preview);
