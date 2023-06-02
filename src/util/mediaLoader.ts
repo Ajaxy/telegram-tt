@@ -8,7 +8,7 @@ import {
 } from '../api/types';
 
 import {
-  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
+  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS, IS_ELECTRON, ELECTRON_HOST_URL,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
@@ -27,7 +27,7 @@ const asCacheApiType = {
   [ApiMediaFormat.Stream]: undefined,
 };
 
-const PROGRESSIVE_URL_PREFIX = './progressive/';
+const PROGRESSIVE_URL_PREFIX = `${IS_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
 const URL_DOWNLOAD_PREFIX = './download/';
 
 const memoryCache = new Map<string, ApiPreparedMedia>();

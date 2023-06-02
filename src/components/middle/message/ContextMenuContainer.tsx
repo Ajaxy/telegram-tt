@@ -60,6 +60,7 @@ export type OwnProps = {
   message: ApiMessage;
   album?: IAlbum;
   anchor: IAnchorPosition;
+  targetHref?: string;
   messageListType: MessageListType;
   noReplies?: boolean;
   detectedLanguage?: string;
@@ -121,6 +122,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   customEmojiSets,
   album,
   anchor,
+  targetHref,
   noOptions,
   canSendNow,
   hasFullInfo,
@@ -480,6 +482,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         enabledReactions={enabledReactions}
         maxUniqueReactions={maxUniqueReactions}
         anchor={anchor}
+        targetHref={targetHref}
         canShowReactionsCount={canShowReactionsCount}
         canShowReactionList={canShowReactionList}
         canSendNow={canSendNow}

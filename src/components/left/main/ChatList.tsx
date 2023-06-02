@@ -16,7 +16,7 @@ import {
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
-import { IS_MAC_OS, IS_PWA } from '../../../util/windowEnvironment';
+import { IS_MAC_OS, IS_APP } from '../../../util/windowEnvironment';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import buildClassName from '../../../util/buildClassName';
 
@@ -96,7 +96,7 @@ const ChatList: FC<OwnProps> = ({
 
   // Support <Cmd>+<Digit> to navigate between chats
   useEffect(() => {
-    if (!isActive || !orderedIds || !IS_PWA) {
+    if (!isActive || !orderedIds || !IS_APP) {
       return undefined;
     }
 

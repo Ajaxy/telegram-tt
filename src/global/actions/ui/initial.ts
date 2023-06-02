@@ -1,9 +1,10 @@
 import { addCallback } from '../../../lib/teact/teactn';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
+import { IS_ELECTRON } from '../../../config';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV,
+  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS, IS_LINUX,
 } from '../../../util/windowEnvironment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
@@ -136,9 +137,16 @@ addCallback((global: GlobalState) => {
       document.body.classList.add('is-android');
     } else if (IS_MAC_OS) {
       document.body.classList.add('is-macos');
+    } else if (IS_WINDOWS) {
+      document.body.classList.add('is-windows');
+    } else if (IS_LINUX) {
+      document.body.classList.add('is-linux');
     }
     if (IS_SAFARI) {
       document.body.classList.add('is-safari');
+    }
+    if (IS_ELECTRON) {
+      document.body.classList.add('is-electron');
     }
   });
 

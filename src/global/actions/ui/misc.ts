@@ -7,7 +7,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
-  APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE,
+  APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE, IS_ELECTRON,
 } from '../../../config';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {
@@ -580,6 +580,10 @@ addActionHandler('updateArchiveSettings', (global, actions, payload): ActionRetu
 });
 
 addActionHandler('checkAppVersion', (global): ActionReturnType => {
+  if (IS_ELECTRON) {
+    return;
+  }
+
   const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
 
   fetch(`${APP_VERSION_URL}?${Date.now()}`)
@@ -602,6 +606,15 @@ addActionHandler('checkAppVersion', (global): ActionReturnType => {
         console.error('[checkAppVersion failed] ', err);
       }
     });
+});
+
+addActionHandler('setIsAppUpdateAvailable', (global, action, payload): ActionReturnType => {
+  global = getGlobal();
+  global = {
+    ...global,
+    isUpdateAvailable: Boolean(payload),
+  };
+  setGlobal(global);
 });
 
 addActionHandler('afterHangUp', (global): ActionReturnType => {

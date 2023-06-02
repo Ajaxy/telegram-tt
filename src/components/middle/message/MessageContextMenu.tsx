@@ -42,6 +42,7 @@ type OwnProps = {
   topReactions?: ApiReaction[];
   isOpen: boolean;
   anchor: IAnchorPosition;
+  targetHref?: string;
   message: ApiMessage | ApiSponsoredMessage;
   canSendNow?: boolean;
   enabledReactions?: ApiChatReactions;
@@ -129,6 +130,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   enabledReactions,
   maxUniqueReactions,
   anchor,
+  targetHref,
   canSendNow,
   canReschedule,
   canBuyPremium,
@@ -238,7 +240,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   const copyOptions = isSponsoredMessage
     ? []
     : getMessageCopyOptions(
-      message, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
+      message, targetHref, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
     );
 
   const getTriggerElement = useCallback(() => {

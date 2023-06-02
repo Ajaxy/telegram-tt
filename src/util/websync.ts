@@ -1,4 +1,6 @@
-import { APP_VERSION, DEBUG, IS_MOCKED_CLIENT } from '../config';
+import {
+  APP_VERSION, DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON,
+} from '../config';
 import { getGlobal } from '../global';
 import { hasStoredSession } from './sessions';
 
@@ -25,7 +27,7 @@ const saveSync = (authed: boolean) => {
 let lastTimeout: NodeJS.Timeout | undefined;
 
 export const forceWebsync = (authed: boolean) => {
-  if (IS_MOCKED_CLIENT) return undefined;
+  if (IS_MOCKED_CLIENT || IS_ELECTRON) return undefined;
   const currentTs = getTs();
 
   const { canRedirect, ts } = JSON.parse(localStorage.getItem(WEBSYNC_KEY) || '{}');
@@ -67,13 +69,13 @@ export const forceWebsync = (authed: boolean) => {
 };
 
 export function stopWebsync() {
-  if (DEBUG) return;
+  if (DEBUG || IS_ELECTRON) return;
 
   if (lastTimeout) clearTimeout(lastTimeout);
 }
 
 export function startWebsync() {
-  if (DEBUG) {
+  if (DEBUG || IS_ELECTRON) {
     return;
   }
 

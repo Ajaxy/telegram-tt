@@ -52,6 +52,7 @@ import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useConnectionStatus from '../../hooks/useConnectionStatus';
 import usePrevious from '../../hooks/usePrevious';
+import useElectronDrag from '../../hooks/useElectronDrag';
 import useAppLayout from '../../hooks/useAppLayout';
 import useDerivedState from '../../hooks/useDerivedState';
 
@@ -408,6 +409,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isAudioPlayerRendered = Boolean(shouldRenderAudioPlayer && renderingAudioMessage);
   const isPinnedMessagesFullWidth = isAudioPlayerRendered
     || (!isMobile && hasButtonInHeader && windowWidth < MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES);
+
+  useElectronDrag(componentRef);
 
   return (
     <div className="MiddleHeader" ref={componentRef}>

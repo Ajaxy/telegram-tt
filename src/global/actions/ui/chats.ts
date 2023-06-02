@@ -1,5 +1,6 @@
 import { addActionHandler, setGlobal } from '../../index';
 
+import { IS_ELECTRON } from '../../../config';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
@@ -80,7 +81,12 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
   const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
-  window.open(createMessageHashUrl(chatId, 'thread', threadId), '_blank');
+  const hashUrl = createMessageHashUrl(chatId, 'thread', threadId);
+  if (IS_ELECTRON) {
+    window.electron!.openNewWindow(hashUrl);
+  } else {
+    window.open(hashUrl, '_blank');
+  }
 });
 
 addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnType => {

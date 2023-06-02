@@ -25,6 +25,12 @@
     "test:record": "playwright codegen localhost:1235",
     "prepare": "husky install",
     "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json",
+    "electron:dev": "npm run electron:webpack && IS_ELECTRON=true concurrently -n main,renderer,electron \"npm run electron:webpack -- --watch\" \"npm run dev\" \"electronmon dist/electron\"",
+    "electron:webpack": "cross-env APP_ENV=$ENV webpack --config ./webpack-electron.config.ts",
+    "electron:build": "cross-env IS_ELECTRON=true npm run build:$ENV && electron-builder install-app-deps && electron-rebuild && ENV=$ENV npm run electron:webpack",
+    "electron:package:staging": "ENV=staging npm run electron:build && npx rimraf dist-electron && electron-builder build --win --mac --linux --config src/electron/config.yml",
+    "electron:package:production": "ENV=production npm run electron:build && npx rimraf dist-electron && electron-builder build --win --mac --linux --config src/electron/config.yml",
+    "electron:publish": "npm run electron:package:production -- -p always",
     "postinstall": "(cd dev/eslint-multitab && npm i)"
   },
   "engines": {
@@ -40,6 +46,9 @@
     "*.{ts,tsx,js}": "eslint --fix",
     "*.{css,scss}": "stylelint --fix"
   },
+  "electronmon": {
+    "logLevel": "quiet"
+  },
   "author": "Alexander Zinchuk (alexander@zinchuk.com)",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
@@ -51,6 +60,8 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.0",
+    "@babel/register": "^7.21.0",
+    "@electron/rebuild": "^3.2.10",
     "@glen/jest-raw-loader": "^2.0.0",
     "@playwright/test": "^1.31.2",
     "@statoscope/cli": "^5.26.1",
@@ -61,6 +72,8 @@
     "@types/jest": "^29.5.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
+    "@types/webpack": "^5.28.1",
+    "@types/webpack-dev-server": "^4.7.2",
     "@typescript-eslint/eslint-plugin": "^5.55.0",
     "@typescript-eslint/parser": "^5.55.0",
     "@webpack-cli/serve": "^2.0.1",
@@ -69,9 +82,15 @@
     "babel-plugin-transform-import-meta": "^2.2.0",
     "browserlist": "^1.0.1",
     "buffer": "^6.0.3",
+    "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.3",
     "dotenv": "^16.0.3",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "electron-updater": "^5.3.0",
+    "electron-window-state": "^5.0.3",
+    "electronmon": "^2.0.2",
     "eslint": "^8.36.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
@@ -129,7 +148,8 @@
     "os-browserify": "^0.3.0",
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
-    "qr-code-styling": "github:zubiden/qr-code-styling#dbbfed0"
+    "qr-code-styling": "github:zubiden/qr-code-styling#dbbfed0",
+    "v8-compile-cache": "^2.3.0"
   },
   "optionalDependencies": {
     "fsevents": "2.3.2"

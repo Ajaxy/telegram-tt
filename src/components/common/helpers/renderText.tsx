@@ -4,7 +4,9 @@ import type { TeactNode } from '../../../lib/teact/teact';
 import type { TextPart } from '../../../types';
 
 import EMOJI_REGEX from '../../../lib/twemojiRegex';
-import { RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE } from '../../../config';
+import {
+  RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE, IS_ELECTRON, PRODUCTION_URL,
+} from '../../../config';
 import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   fixNonStandardEmoji,
@@ -108,7 +110,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
     return emojis.reduce((emojiResult: TextPart[], emoji, i) => {
       const code = nativeToUnifiedExtendedWithCache(emoji);
       if (!code) return emojiResult;
-      const src = `./img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
+      const src = `${IS_ELECTRON ? PRODUCTION_URL : '.'}/img-apple-${size === 'big' ? '160' : '64'}/${code}.png`;
       const className = buildClassName(
         'emoji',
         size === 'small' && 'emoji-small',
@@ -132,7 +134,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
           `<img\
             draggable="false"\
             class="${className}"\
-            src="./img-apple-${size === 'big' ? '160' : '64'}/${code}.png"\
+            src={src}\
             alt="${emoji}"\
           />`,
         );

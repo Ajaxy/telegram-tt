@@ -9,7 +9,7 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 import type { ReducerAction } from '../../hooks/useReducer';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
 
-import { IS_MAC_OS, IS_PWA, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
+import { IS_MAC_OS, IS_APP, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
@@ -381,11 +381,11 @@ function LeftColumn({
   useHotkeys({
     'Mod+Shift+F': handleHotkeySearch,
     'Mod+Shift+S': handleHotkeySavedMessages,
-    ...(IS_PWA && {
+    ...(IS_APP && {
       'Mod+0': handleHotkeySavedMessages,
       'Mod+9': handleArchivedChats,
     }),
-    ...(IS_MAC_OS && IS_PWA && { 'Mod+,': handleHotkeySettings }),
+    ...(IS_MAC_OS && IS_APP && { 'Mod+,': handleHotkeySettings }),
   });
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import {
   IS_TEST,
+  IS_ELECTRON,
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_MOV_TYPE,
   CONTENT_TYPES_WITH_PREVIEW,
@@ -37,6 +38,8 @@ export function getPlatform() {
 export const IS_PRODUCTION_HOST = window.location.host === PRODUCTION_HOSTNAME;
 export const PLATFORM_ENV = getPlatform();
 export const IS_MAC_OS = PLATFORM_ENV === 'macOS';
+export const IS_WINDOWS = PLATFORM_ENV === 'Windows';
+export const IS_LINUX = PLATFORM_ENV === 'Linux';
 export const IS_IOS = PLATFORM_ENV === 'iOS';
 export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_MOBILE = IS_IOS || IS_ANDROID;
@@ -56,6 +59,8 @@ export const IS_PWA = (
   || (window.navigator as any).standalone
   || document.referrer.includes('android-app://')
 );
+
+export const IS_APP = IS_PWA || IS_ELECTRON;
 
 export const IS_TOUCH_ENV = window.matchMedia('(pointer: coarse)').matches;
 export const IS_VOICE_RECORDING_SUPPORTED = Boolean(

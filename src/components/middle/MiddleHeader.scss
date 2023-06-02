@@ -374,6 +374,20 @@
   @media (max-width: 600px) {
     @include mobile-header-styles();
   }
+
+  body.is-electron.is-macos & {
+    -webkit-app-region: drag;
+  }
+
+  body.is-electron.is-macos #Main:not(.left-column-open):not(.is-fullscreen) & {
+    @media (max-width: 925px) {
+      padding-left: 5rem;
+
+      .back-button {
+        margin-left: -0.5rem;
+      }
+    }
+  }
 }
 
 @keyframes fade-in {

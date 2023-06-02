@@ -8,6 +8,7 @@ import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
+import { IS_ELECTRON } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -117,7 +118,11 @@ const LeftMain: FC<OwnProps> = ({
   }, [closeForumPanel, onContentChange]);
 
   const handleUpdateClick = useCallback(() => {
-    window.location.reload();
+    if (IS_ELECTRON) {
+      window.electron?.installUpdate();
+    } else {
+      window.location.reload();
+    }
   }, []);
 
   const handleSelectNewChannel = useCallback(() => {

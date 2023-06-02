@@ -216,7 +216,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
         <div id="logo" />
         <h1>Telegram</h1>
         <p className="note">{lang('StartText')}</p>
-        <form action="" onSubmit={handleSubmit}>
+        <form className="form" action="" onSubmit={handleSubmit}>
           <CountryCodeInput
             id="sign-in-phone-code"
             value={country}

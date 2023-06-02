@@ -102,6 +102,10 @@
   .extra-spacing {
     position: relative;
     margin-left: 0.8125rem;
+
+    body.is-electron.is-macos #Main:not(.is-fullscreen) & {
+      margin-left: 0.5rem;
+    }
   }
 
   .emoji-status-effect {

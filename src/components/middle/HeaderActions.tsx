@@ -13,7 +13,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
 import { ManagementScreens } from '../../types';
 
-import { ARE_CALLS_SUPPORTED, IS_PWA } from '../../util/windowEnvironment';
+import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
@@ -174,7 +174,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   }
 
   const handleHotkeySearchClick = useCallback((e: KeyboardEvent) => {
-    if (!canSearch || !IS_PWA || e.shiftKey) {
+    if (!canSearch || !IS_APP || e.shiftKey) {
       return;
     }
 

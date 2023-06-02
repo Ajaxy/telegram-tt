@@ -16,6 +16,7 @@ import {
   CLIPBOARD_ITEM_SUPPORTED,
   copyHtmlToClipboard,
   copyImageToClipboard,
+  copyTextToClipboard,
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
@@ -28,6 +29,7 @@ type ICopyOptions = {
 
 export function getMessageCopyOptions(
   message: ApiMessage,
+  href?: string,
   afterEffect?: () => void,
   onCopyLink?: () => void,
   onCopyMessages?: (messageIds: number[]) => void,
@@ -55,7 +57,17 @@ export function getMessageCopyOptions(
     });
   }
 
-  if (text) {
+  if (href) {
+    options.push({
+      label: 'lng_context_copy_link',
+      icon: 'copy',
+      handler: () => {
+        copyTextToClipboard(href);
+
+        afterEffect?.();
+      },
+    });
+  } else if (text) {
     // Detect if the user has selection in the current message
     const hasSelection = Boolean((
       selection?.anchorNode?.parentNode

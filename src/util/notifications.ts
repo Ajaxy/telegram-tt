@@ -4,7 +4,9 @@ import type {
 } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
 import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
-import { APP_NAME, DEBUG, IS_TEST } from '../config';
+import {
+  APP_NAME, DEBUG, IS_ELECTRON, IS_TEST,
+} from '../config';
 import { getActions, getGlobal, setGlobal } from '../global';
 import {
   getChatAvatarHash,
@@ -44,7 +46,8 @@ function getDeviceToken(subscription: PushSubscription) {
 }
 
 function checkIfPushSupported() {
-  if (!IS_SERVICE_WORKER_SUPPORTED) return false;
+  if (!IS_SERVICE_WORKER_SUPPORTED || IS_ELECTRON) return false;
+
   if (!('showNotification' in ServiceWorkerRegistration.prototype)) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -70,6 +73,7 @@ function checkIfPushSupported() {
     }
     return false;
   }
+
   return true;
 }
 
@@ -446,7 +450,7 @@ export async function notifyAboutMessage({
   if (!checkIfShouldNotify(chat, message)) return;
   const areNotificationsSupported = checkIfNotificationsSupported();
   if (!hasWebNotifications || !areNotificationsSupported) {
-    if (!message.isSilent && !isReaction) {
+    if (!message.isSilent && !isReaction && !IS_ELECTRON) {
       // Only play sound if web notifications are disabled
       playNotifySoundDebounced(String(message.id) || chat.id);
     }
@@ -520,7 +524,7 @@ export async function notifyAboutMessage({
     // Play sound when notification is displayed
     notification.onshow = () => {
       // TODO Update when reaction badges are implemented
-      if (isReaction || message.isSilent) return;
+      if (isReaction || message.isSilent || IS_ELECTRON) return;
       playNotifySoundDebounced(String(message.id) || chat.id);
     };
   }

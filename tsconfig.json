@@ -26,7 +26,8 @@
     "tests",
     "plugins",
     "dev",
-    "webpack.config.js",
+    "webpack.config.ts",
+    "webpack-electron.config.ts",
     "babel.config.js",
   ]
 }

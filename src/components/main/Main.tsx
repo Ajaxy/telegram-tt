@@ -15,10 +15,11 @@ import type {
   ApiUser,
 } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
+import { ElectronEvent } from '../../types/electron';
 
 import '../../global/actions/all';
 import {
-  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
+  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, IS_ELECTRON,
 } from '../../config';
 import { IS_ANDROID } from '../../util/windowEnvironment';
 import {
@@ -52,6 +53,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useShowTransition from '../../hooks/useShowTransition';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
+import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import useAppLayout from '../../hooks/useAppLayout';
 import useTimeout from '../../hooks/useTimeout';
 import useFlag from '../../hooks/useFlag';
@@ -239,6 +241,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadTopReactions,
     loadRecentReactions,
     loadFeaturedEmojiStickers,
+    setIsAppUpdateAvailable,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -271,7 +274,27 @@ const Main: FC<OwnProps & StateProps> = ({
     }
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
 
-  useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
+  useInterval(checkAppVersion, (isMasterTab && !IS_ELECTRON) ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
+
+  useEffect(() => {
+    if (!IS_ELECTRON) {
+      return undefined;
+    }
+
+    const removeUpdateDownloadedListener = window.electron?.on(ElectronEvent.UPDATE_DOWNLOADED, () => {
+      setIsAppUpdateAvailable(true);
+    });
+
+    const removeUpdateErrorListener = window.electron?.on(ElectronEvent.UPDATE_ERROR, () => {
+      setIsAppUpdateAvailable(false);
+      removeUpdateDownloadedListener?.();
+    });
+
+    return () => {
+      removeUpdateErrorListener?.();
+      removeUpdateDownloadedListener?.();
+    };
+  }, []);
 
   // Initial API calls
   useEffect(() => {
@@ -427,6 +450,8 @@ const Main: FC<OwnProps & StateProps> = ({
   const willAnimateRightColumnRef = useRef(false);
   const [isNarrowMessageList, setIsNarrowMessageList] = useState(isRightColumnOpen);
 
+  const isFullscreen = useFullscreenStatus();
+
   // Handle opening right column
   useSyncEffect(([prevIsRightColumnOpen]) => {
     if (prevIsRightColumnOpen === undefined || isRightColumnOpen === prevIsRightColumnOpen) {
@@ -459,6 +484,7 @@ const Main: FC<OwnProps & StateProps> = ({
     willAnimateRightColumnRef.current && 'right-column-animating',
     isNarrowMessageList && 'narrow-message-list',
     shouldSkipHistoryAnimations && 'history-animation-disabled',
+    isFullscreen && 'is-fullscreen',
   );
 
   const handleBlur = useCallback(() => {

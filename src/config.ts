@@ -5,17 +5,20 @@ export const APP_VERSION = process.env.APP_VERSION!;
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
-
-export const DEBUG = process.env.APP_ENV !== 'production';
-export const DEBUG_MORE = false;
-export const STRICTERDOM_ENABLED = DEBUG;
+export const PRODUCTION_URL = 'https://web.telegram.org/a';
 
 export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
+export const IS_ELECTRON = process.env.IS_ELECTRON;
+
+export const DEBUG = process.env.APP_ENV !== 'production';
+export const DEBUG_MORE = false;
+export const STRICTERDOM_ENABLED = DEBUG && !IS_ELECTRON;
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
+export const ELECTRON_HOST_URL = 'https://telegram-a-host';
 
 export const DEBUG_ALERT_MSG = 'Shoot!\nSomething went wrong, please see the error details in Dev Tools Console.';
 export const DEBUG_GRAMJS = false;

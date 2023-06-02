@@ -1,6 +1,8 @@
 import { useLayoutEffect, useState, useEffect } from '../lib/teact/teact';
 import { IS_IOS } from '../util/windowEnvironment';
 
+import { ElectronEvent } from '../types/electron';
+
 type RefType = {
   current: HTMLVideoElement | null;
 };
@@ -79,11 +81,16 @@ export const useFullscreenStatus = () => {
       setIsFullscreen(checkIfFullscreen());
     };
 
+    const removeElectronListener = window.electron?.on(ElectronEvent.FULLSCREEN_CHANGE, setIsFullscreen);
+    window.electron?.isFullscreen().then(setIsFullscreen);
+
     document.addEventListener('fullscreenchange', listener, false);
     document.addEventListener('webkitfullscreenchange', listener, false);
     document.addEventListener('mozfullscreenchange', listener, false);
 
     return () => {
+      removeElectronListener?.();
+
       document.removeEventListener('fullscreenchange', listener, false);
       document.removeEventListener('webkitfullscreenchange', listener, false);
       document.removeEventListener('mozfullscreenchange', listener, false);

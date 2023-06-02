@@ -97,6 +97,14 @@
         padding: 0.5rem;
       }
     }
+
+    body.is-electron.is-macos & {
+      -webkit-app-region: drag;
+    }
+
+    body.is-electron.is-macos #Main:not(.is-fullscreen) & {
+      padding-left: 5rem;
+    }
   }
 
   & > .Transition,

@@ -5,7 +5,7 @@ import type { ApiChat, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
+import { IS_ELECTRON, SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   isChatArchived, getCanDeleteChat, isUserId, isChatChannel, isChatGroup,
 } from '../global/helpers';
@@ -54,7 +54,7 @@ const useChatContextActions = ({
     } = getActions();
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
-      title: 'Open in new tab',
+      title: IS_ELECTRON ? 'Open in new window' : 'Open in new tab',
       icon: 'open-in-new-tab',
       handler: () => {
         openChatInNewTab({ chatId: chat.id });

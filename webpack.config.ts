@@ -1,25 +1,29 @@
-const path = require('path');
-const fs = require('fs');
-const dotenv = require('dotenv');
+import path from 'path';
+import fs from 'fs';
+import dotenv from 'dotenv';
 
-const {
+import {
   DefinePlugin,
   EnvironmentPlugin,
   ProvidePlugin,
   ContextReplacementPlugin,
   NormalModuleReplacementPlugin,
-} = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { GitRevisionPlugin } = require('git-revision-webpack-plugin');
-const StatoscopeWebpackPlugin = require('@statoscope/webpack-plugin').default;
-const WebpackContextExtension = require('./dev/webpackContextExtension');
-const appVersion = require('./package.json').version;
+} from 'webpack';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
+import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+
+import type { Configuration, Compiler } from 'webpack';
+import 'webpack-dev-server';
+
+import { version as appVersion } from './package.json';
 
 const {
   HEAD,
   APP_ENV = 'production',
   APP_MOCKED_CLIENT = '',
+  IS_ELECTRON,
 } = process.env;
 
 dotenv.config();
@@ -33,7 +37,10 @@ const {
   APP_TITLE = DEFAULT_APP_TITLE,
 } = process.env;
 
-module.exports = (_env, { mode = 'production' }) => {
+export default function createConfig(
+  _: any,
+  { mode = 'production' }: { mode: 'none' | 'development' | 'production' },
+): Configuration {
   return {
     mode,
     entry: './src/index.tsx',
@@ -146,13 +153,13 @@ module.exports = (_env, { mode = 'production' }) => {
 
     plugins: [
       ...(APP_ENV === 'staging' ? [{
-        apply: (compiler) => {
+        apply: (compiler: Compiler) => {
           compiler.hooks.compile.tap('Before Compilation', async () => {
             try {
               const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
               fs.writeFileSync(path.resolve('./public/reference.json'), stats);
               isReferenceFetched = true;
-            } catch (err) {
+            } catch (err: any) {
               // eslint-disable-next-line no-console
               console.warn('Failed to fetch reference statoscope stats: ', err.message);
             }
@@ -187,6 +194,7 @@ module.exports = (_env, { mode = 'production' }) => {
         // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
         APP_VERSION: appVersion,
+        IS_ELECTRON: false,
         APP_TITLE,
         RELEASE_DATETIME: Date.now(),
         TELEGRAM_T_API_ID: undefined,
@@ -212,14 +220,14 @@ module.exports = (_env, { mode = 'production' }) => {
         saveStatsTo: path.resolve('./public/build-stats.json'),
         normalizeStats: true,
         open: 'file',
-        extensions: [new WebpackContextExtension()],
+        extensions: [new WebpackContextExtension()], // eslint-disable-line @typescript-eslint/no-use-before-define
         ...(APP_ENV === 'staging' && isReferenceFetched && {
           additionalStats: ['./public/reference.json'],
         }),
       }),
     ],
 
-    devtool: 'source-map',
+    devtool: APP_ENV === 'production' && IS_ELECTRON ? undefined : 'source-map',
 
     ...(APP_ENV !== 'production' && {
       optimization: {
@@ -227,11 +235,30 @@ module.exports = (_env, { mode = 'production' }) => {
       },
     }),
   };
-};
+}
 
 function getGitMetadata() {
   const gitRevisionPlugin = new GitRevisionPlugin();
   const branch = HEAD || gitRevisionPlugin.branch();
-  const commit = gitRevisionPlugin.commithash().substring(0, 7);
+  const commit = gitRevisionPlugin.commithash()?.substring(0, 7);
   return { branch, commit };
+}
+
+class WebpackContextExtension {
+  context: string;
+
+  constructor() {
+    this.context = '';
+  }
+
+  handleCompiler(compiler: Compiler) {
+    this.context = compiler.context;
+  }
+
+  getExtension() {
+    return {
+      descriptor: { name: 'custom-webpack-extension-context', version: '1.0.0' },
+      payload: { context: this.context },
+    };
+  }
 }

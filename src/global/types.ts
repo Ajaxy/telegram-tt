@@ -1593,6 +1593,7 @@ export interface ActionPayloads {
   openLimitReachedModal: { limit: ApiLimitTypeWithModal } & WithTabId;
   closeLimitReachedModal: WithTabId | undefined;
   checkAppVersion: undefined;
+  setIsAppUpdateAvailable: boolean;
   setGlobalSearchClosing: ({
     isClosing?: boolean;
   } & WithTabId) | undefined;

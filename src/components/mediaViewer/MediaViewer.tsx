@@ -41,6 +41,7 @@ import { exitPictureInPictureIfNeeded, usePictureInPictureSignal } from '../../h
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 import { useMediaProps } from './hooks/useMediaProps';
+import useElectronDrag from '../../hooks/useElectronDrag';
 import useAppLayout from '../../hooks/useAppLayout';
 import { useStateRef } from '../../hooks/useStateRef';
 
@@ -181,6 +182,10 @@ const MediaViewer: FC<StateProps> = ({
       document.body.classList.toggle('no-selection', isOpen);
     }
   }, [isMobile, isOpen]);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerRef = useRef<HTMLDivElement>(null);
+  useElectronDrag(headerRef);
 
   const forceUpdate = useForceUpdate();
   useEffect(() => {
@@ -325,7 +330,7 @@ const MediaViewer: FC<StateProps> = ({
       shouldAnimateFirstRender
       noCloseTransition={shouldSkipHistoryAnimations}
     >
-      <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined}>
+      <div className="media-viewer-head" dir={lang.isRtl ? 'rtl' : undefined} ref={headerRef}>
         {isMobile && (
           <Button
             className="media-viewer-close"
