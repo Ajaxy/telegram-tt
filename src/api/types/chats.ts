@@ -25,6 +25,7 @@ export interface ApiChat {
   unreadReactionsCount?: number;
   isVerified?: boolean;
   isMuted?: boolean;
+  muteUntil?: number;
   isSignaturesShown?: boolean;
   hasPrivateLink?: boolean;
   accessHash?: string;
@@ -221,8 +222,8 @@ export interface ApiTopic {
   unreadMentionsCount: number;
   unreadReactionsCount: number;
   fromId: string;
-
   isMuted?: boolean;
+  muteUntil?: number;
 }
 
 export interface ApiChatlistInviteNew {

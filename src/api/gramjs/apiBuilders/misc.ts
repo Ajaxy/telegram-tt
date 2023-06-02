@@ -136,6 +136,7 @@ export function buildApiNotifyException(
     isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
     ...(!hasSound && { isSilent: true }),
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
+    muteUntil,
   };
 }
 
@@ -154,6 +155,7 @@ export function buildApiNotifyExceptionTopic(
     isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
     ...(!hasSound && { isSilent: true }),
     ...(showPreviews !== undefined && { shouldShowPreviews: Boolean(showPreviews) }),
+    muteUntil,
   };
 }
 

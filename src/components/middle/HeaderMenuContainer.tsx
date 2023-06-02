@@ -36,6 +36,7 @@ import {
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
+import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
 
 import Portal from '../ui/Portal';
@@ -43,6 +44,7 @@ import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
 import DeleteChatModal from '../common/DeleteChatModal';
+import MuteChatModal from '../left/MuteChatModal.async';
 import ReportModal from '../common/ReportModal';
 
 import './HeaderMenuContainer.scss';
@@ -170,6 +172,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isMuteModalOpen, setIsMuteModalOpen] = useState(false);
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const { x, y } = anchor;
 
   useShowTransition(isOpen, onCloseAnimationEnd, undefined, false);
@@ -184,6 +188,11 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const closeReportModal = useCallback(() => {
     setIsReportModalOpen(false);
+    onClose();
+  }, [onClose]);
+
+  const closeMuteModal = useCallback(() => {
+    setIsMuteModalOpen(false);
     onClose();
   }, [onClose]);
 
@@ -215,10 +224,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     restartBot({ chatId });
   }, [chatId, restartBot]);
 
-  const handleToggleMuteClick = useCallback(() => {
-    updateChatMutedState({ chatId, isMuted: !isMuted });
+  const handleUnmuteClick = useCallback(() => {
+    updateChatMutedState({ chatId, isMuted: false });
     closeMenu();
-  }, [chatId, closeMenu, isMuted, updateChatMutedState]);
+  }, [chatId, closeMenu, updateChatMutedState]);
+
+  const handleMuteClick = useCallback(() => {
+    markRenderMuteModal();
+    setIsMuteModalOpen(true);
+    setIsMenuOpen(false);
+  }, []);
 
   const handleCreateTopicClick = useCallback(() => {
     openCreateTopicPanel({ chatId });
@@ -446,13 +461,22 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('VideoCall')}
             </MenuItem>
           )}
-          {canMute && (
+          {canMute && (isMuted ? (
             <MenuItem
-              icon={isMuted ? 'unmute' : 'mute'}
-              onClick={handleToggleMuteClick}
+              icon="unmute"
+              onClick={handleUnmuteClick}
             >
-              {lang(isMuted ? 'ChatsUnmute' : 'ChatsMute')}
+              {lang('ChatsUnmute')}
             </MenuItem>
+          )
+            : (
+              <MenuItem
+                icon="mute"
+                onClick={handleMuteClick}
+              >
+                {lang('ChatsMute')}...
+              </MenuItem>
+            )
           )}
           {(canEnterVoiceChat || canCreateVoiceChat) && (
             <MenuItem
@@ -523,6 +547,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             isOpen={isDeleteModalOpen}
             onClose={closeDeleteModal}
             chat={chat}
+          />
+        )}
+        {canMute && shouldRenderMuteModal && chat?.id && (
+          <MuteChatModal
+            isOpen={isMuteModalOpen}
+            onClose={closeMuteModal}
+            onCloseAnimationEnd={unmarkRenderMuteModal}
+            chatId={chat.id}
           />
         )}
         {canReportChat && chat?.id && (

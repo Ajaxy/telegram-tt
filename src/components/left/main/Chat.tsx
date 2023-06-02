@@ -54,6 +54,7 @@ import DeleteChatModal from '../../common/DeleteChatModal';
 import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
 import ChatFolderModal from '../ChatFolderModal.async';
+import MuteChatModal from '../MuteChatModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ChatBadge from './ChatBadge';
 import AvatarBadge from './AvatarBadge';
@@ -130,9 +131,11 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const { isMobile } = useAppLayout();
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
   const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
   const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
 
@@ -183,6 +186,11 @@ const Chat: FC<OwnProps & StateProps> = ({
     openDeleteModal();
   }, [markRenderDeleteModal, openDeleteModal]);
 
+  const handleMute = useCallback(() => {
+    markRenderMuteModal();
+    openMuteModal();
+  }, [markRenderMuteModal, openMuteModal]);
+
   const handleChatFolderChange = useCallback(() => {
     markRenderChatFolderModal();
     openChatFolderModal();
@@ -197,6 +205,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     chat,
     user,
     handleDelete,
+    handleMute,
     handleChatFolderChange,
     handleReport,
     folderId,
@@ -279,6 +288,14 @@ const Chat: FC<OwnProps & StateProps> = ({
           onClose={closeDeleteModal}
           onCloseAnimationEnd={unmarkRenderDeleteModal}
           chat={chat}
+        />
+      )}
+      {shouldRenderMuteModal && (
+        <MuteChatModal
+          isOpen={isMuteModalOpen}
+          onClose={closeMuteModal}
+          onCloseAnimationEnd={unmarkRenderMuteModal}
+          chatId={chatId}
         />
       )}
       {shouldRenderChatFolderModal && (

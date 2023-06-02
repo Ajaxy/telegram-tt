@@ -1624,7 +1624,8 @@ export interface ActionPayloads {
   };
   updateChatMutedState: {
     chatId: string;
-    isMuted: boolean;
+    isMuted?: boolean;
+    muteUntil?: number;
   };
 
   updateChat: {
@@ -2475,7 +2476,8 @@ export interface ActionPayloads {
   updateTopicMutedState: {
     chatId: string;
     topicId: number;
-    isMuted: boolean;
+    isMuted?: boolean;
+    muteUntil?: number;
   };
 
   openCreateTopicPanel: {

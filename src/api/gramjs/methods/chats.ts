@@ -40,7 +40,8 @@ import {
   buildApiChatSettings,
   buildApiChatReactions,
   buildApiTopic,
-  buildApiChatlistInvite, buildApiChatlistExportedInvite,
+  buildApiChatlistInvite,
+  buildApiChatlistExportedInvite,
 } from '../apiBuilders/chats';
 import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
 import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
@@ -58,12 +59,17 @@ import {
   generateRandomBigInt,
 } from '../gramjsBuilders';
 import {
-  addEntitiesWithPhotosToLocalDb, addMessageToLocalDb, addPhotoToLocalDb, isChatFolder,
+  addEntitiesWithPhotosToLocalDb,
+  addMessageToLocalDb,
+  addPhotoToLocalDb,
+  isChatFolder,
+
 } from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildStickerSet } from '../apiBuilders/symbols';
 import localDb from '../localDb';
+import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 
 type FullChatData = {
   fullInfo: ApiChatFullInfo;
@@ -160,6 +166,8 @@ export async function fetchChats({
     chat.isListed = true;
 
     chats.push(chat);
+
+    scheduleMutedChatUpdate(chat.id, chat.muteUntil, onUpdate);
 
     if (withPinned && dialog.pinned) {
       orderedPinnedIds.push(chat.id);
@@ -330,14 +338,18 @@ export async function requestChatUpdate({
     ? lastLocalMessage
     : lastRemoteMessage;
 
+  const chatUpdate = {
+    ...buildApiChatFromDialog(dialog, peerEntity),
+    ...(!noLastMessage && { lastMessage }),
+  };
+
   onUpdate({
     '@type': 'updateChat',
     id,
-    chat: {
-      ...buildApiChatFromDialog(dialog, peerEntity),
-      ...(!noLastMessage && { lastMessage }),
-    },
+    chat: chatUpdate,
   });
+
+  scheduleMutedChatUpdate(chatUpdate.id, chatUpdate.muteUntil, onUpdate);
 }
 
 export function saveDraft({
@@ -558,15 +570,18 @@ async function getFullChannelInfo(
 }
 
 export async function updateChatMutedState({
-  chat, isMuted,
+  chat, isMuted, muteUntil = 0,
 }: {
-  chat: ApiChat; isMuted: boolean;
+  chat: ApiChat; isMuted: boolean; muteUntil?: number;
 }) {
+  if (isMuted && !muteUntil) {
+    muteUntil = MAX_INT_32;
+  }
   await invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyPeer({
       peer: buildInputPeer(chat.id, chat.accessHash),
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : 0 }),
+    settings: new GramJs.InputPeerNotifySettings({ muteUntil }),
   }));
 
   onUpdate({
@@ -582,16 +597,19 @@ export async function updateChatMutedState({
 }
 
 export async function updateTopicMutedState({
-  chat, topicId, isMuted,
+  chat, topicId, isMuted, muteUntil = 0,
 }: {
-  chat: ApiChat; topicId: number; isMuted: boolean;
+  chat: ApiChat; topicId: number; isMuted: boolean; muteUntil?: number;
 }) {
+  if (isMuted && !muteUntil) {
+    muteUntil = MAX_INT_32;
+  }
   await invokeRequest(new GramJs.account.UpdateNotifySettings({
     peer: new GramJs.InputNotifyForumTopic({
       peer: buildInputPeer(chat.id, chat.accessHash),
       topMsgId: topicId,
     }),
-    settings: new GramJs.InputPeerNotifySettings({ muteUntil: isMuted ? MAX_INT_32 : 0 }),
+    settings: new GramJs.InputPeerNotifySettings({ muteUntil }),
   }));
 
   onUpdate({

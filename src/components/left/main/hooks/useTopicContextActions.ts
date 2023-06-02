@@ -10,13 +10,21 @@ import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment
 
 import useLang from '../../../../hooks/useLang';
 
-export default function useTopicContextActions(
-  topic: ApiTopic,
-  chat: ApiChat,
-  wasOpened?: boolean,
-  canDelete?: boolean,
-  handleDelete?: NoneToVoidFunction,
-) {
+export default function useTopicContextActions({
+  topic,
+  chat,
+  wasOpened,
+  canDelete,
+  handleDelete,
+  handleMute,
+}: {
+  topic: ApiTopic;
+  chat: ApiChat;
+  wasOpened?: boolean;
+  canDelete?: boolean;
+  handleDelete?: NoneToVoidFunction;
+  handleMute?: NoneToVoidFunction;
+}) {
   const lang = useLang();
 
   return useMemo(() => {
@@ -76,9 +84,9 @@ export default function useTopicContextActions(
         handler: () => updateTopicMutedState({ chatId, topicId, isMuted: false }),
       }
       : {
-        title: lang('ChatList.Mute'),
+        title: `${lang('ChatList.Mute')}...`,
         icon: 'mute',
-        handler: () => updateTopicMutedState({ chatId, topicId, isMuted: true }),
+        handler: handleMute,
       };
 
     const actionCloseTopic = canToggleClosed ? (isClosed
@@ -109,5 +117,5 @@ export default function useTopicContextActions(
       actionCloseTopic,
       actionDelete,
     ]) as MenuItemContextAction[];
-  }, [topic, chat, wasOpened, lang, canDelete, handleDelete]);
+  }, [topic, chat, wasOpened, lang, canDelete, handleDelete, handleMute]);
 }

@@ -349,28 +349,32 @@ addActionHandler('requestChatUpdate', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('updateChatMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, isMuted } = payload;
+  const { chatId, muteUntil = 0 } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
+
+  const isMuted = payload.isMuted ?? muteUntil > 0;
 
   global = updateChat(global, chatId, { isMuted });
   setGlobal(global);
-  void callApi('updateChatMutedState', { chat, isMuted });
+  void callApi('updateChatMutedState', { chat, isMuted, muteUntil });
 });
 
 addActionHandler('updateTopicMutedState', (global, actions, payload): ActionReturnType => {
-  const { chatId, isMuted, topicId } = payload;
+  const { chatId, topicId, muteUntil = 0 } = payload;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
+
+  const isMuted = payload.isMuted ?? muteUntil > 0;
 
   global = updateTopic(global, chatId, topicId, { isMuted });
   setGlobal(global);
   void callApi('updateTopicMutedState', {
-    chat, topicId, isMuted,
+    chat, topicId, isMuted, muteUntil,
   });
 });
 
