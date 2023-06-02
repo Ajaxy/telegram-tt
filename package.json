@@ -86,6 +86,7 @@
     "dotenv": "^16.0.3",
     "electron": "^22.0.0",
     "electron-builder": "^23.6.0",
+    "electron-builder-notarize": "^1.5.1",
     "electron-updater": "^5.3.0",
     "electron-window-state": "^5.0.3",
     "electronmon": "^2.0.2",

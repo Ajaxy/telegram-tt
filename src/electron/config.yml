@@ -1,6 +1,7 @@
 productName: "Telegram A"
 artifactName: "${productName}-${arch}-${version}.${ext}"
 appId: "org.telegram.TelegramA"
+afterSign: "electron-builder-notarize"
 extraMetadata:
   main: "./dist/electron.js"
 files:
