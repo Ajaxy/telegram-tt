@@ -1,7 +1,6 @@
 import type { ApiLimitType } from './global/types';
 
 export const APP_NAME = process.env.APP_NAME || 'Telegram Web A';
-export const APP_VERSION = process.env.APP_VERSION!;
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';

@@ -7,7 +7,7 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import type { ActionReturnType, GlobalState } from '../../types';
 
 import {
-  APP_VERSION, DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE, IS_ELECTRON,
+  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE, IS_ELECTRON,
 } from '../../../config';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import {

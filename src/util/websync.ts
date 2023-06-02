@@ -1,5 +1,5 @@
 import {
-  APP_VERSION, DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON,
+  DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON,
 } from '../config';
 import { getGlobal } from '../global';
 import { hasStoredSession } from './sessions';

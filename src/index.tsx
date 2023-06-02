@@ -13,7 +13,7 @@ import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
 import './global/init';
 
 import {
-  APP_VERSION, DEBUG, MULTITAB_LOCALSTORAGE_KEY, STRICTERDOM_ENABLED,
+  DEBUG, MULTITAB_LOCALSTORAGE_KEY, STRICTERDOM_ENABLED,
 } from './config';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
