@@ -141,9 +141,15 @@ function setupAutoUpdates(window: BrowserWindow) {
     });
   }
 
-  autoUpdater.on('error', (error: Error) => window.webContents.send(ElectronEvent.UPDATE_ERROR, error));
+  autoUpdater.on('error', (error: Error) => {
+    if (windows.has(window)) {
+      window.webContents.send(ElectronEvent.UPDATE_ERROR, error);
+    }
+  });
   autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
-    window.webContents.send(ElectronEvent.UPDATE_DOWNLOADED, info);
+    if (windows.has(window)) {
+      window.webContents.send(ElectronEvent.UPDATE_DOWNLOADED, info);
+    }
   });
 }
 
