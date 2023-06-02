@@ -1,4 +1,3 @@
-
 src/lib/rlottie/rlottie-wasm.js
 src/lib/video-preview/libav*
 src/lib/video-preview/polyfill/*
@@ -19,3 +18,5 @@ src/lib/secret-sauce/
 playwright.config.ts
 
 dist/*
+
+deploy/update_version.js

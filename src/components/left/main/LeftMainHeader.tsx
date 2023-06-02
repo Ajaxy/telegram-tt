@@ -11,7 +11,7 @@ import { LeftColumnContent, SettingsScreens } from '../../../types';
 import {
   ANIMATION_LEVEL_MAX,
   ANIMATION_LEVEL_MIN,
-  APP_NAME, APP_VERSION,
+  APP_NAME,
   ARCHIVED_FOLDER_ID,
   BETA_CHANGELOG_URL,
   DEBUG,

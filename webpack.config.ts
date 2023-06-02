@@ -193,7 +193,6 @@ export default function createConfig(
         APP_MOCKED_CLIENT,
         // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
-        APP_VERSION: appVersion,
         IS_ELECTRON: false,
         APP_TITLE,
         RELEASE_DATETIME: Date.now(),
@@ -203,6 +202,7 @@ export default function createConfig(
         TEST_SESSION: null,
       }),
       new DefinePlugin({
+        APP_VERSION: JSON.stringify(appVersion),
         APP_REVISION: DefinePlugin.runtimeValue(() => {
           const { branch, commit } = getGitMetadata();
           const shouldDisplayCommit = APP_ENV === 'staging' || !branch || branch === 'HEAD';

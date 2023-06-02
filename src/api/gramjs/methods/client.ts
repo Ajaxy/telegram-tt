@@ -15,7 +15,7 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, APP_VERSION, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_MOV_TYPE,
+  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_MOV_TYPE,
 } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
