@@ -20,6 +20,7 @@ const useChatContextActions = ({
   isMuted,
   canChangeFolder,
   handleDelete,
+  handleMute,
   handleChatFolderChange,
   handleReport,
 }: {
@@ -29,9 +30,10 @@ const useChatContextActions = ({
   isPinned?: boolean;
   isMuted?: boolean;
   canChangeFolder?: boolean;
-  handleDelete: () => void;
-  handleChatFolderChange: () => void;
-  handleReport?: () => void;
+  handleDelete?: NoneToVoidFunction;
+  handleMute?: NoneToVoidFunction;
+  handleChatFolderChange: NoneToVoidFunction;
+  handleReport?: NoneToVoidFunction;
 }, isInSearch = false) => {
   const lang = useLang();
 
@@ -73,8 +75,20 @@ const useChatContextActions = ({
       }
       : { title: lang('PinToTop'), icon: 'pin', handler: () => toggleChatPinned({ id: chat.id, folderId: folderId! }) };
 
+    const actionMute = isMuted
+      ? {
+        title: lang('ChatList.Unmute'),
+        icon: 'unmute',
+        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }),
+      }
+      : {
+        title: `${lang('ChatList.Mute')}...`,
+        icon: 'mute',
+        handler: handleMute,
+      };
+
     if (isInSearch) {
-      return compact([actionOpenInNewTab, actionPin, actionAddToFolder]);
+      return compact([actionOpenInNewTab, actionPin, actionAddToFolder, actionMute]);
     }
 
     const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)
@@ -83,18 +97,6 @@ const useChatContextActions = ({
     const actionMarkAsUnread = !(chat.unreadCount || chat.hasUnreadMark) && !chat.isForum
       ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
       : undefined;
-
-    const actionMute = isMuted
-      ? {
-        title: lang('ChatList.Unmute'),
-        icon: 'unmute',
-        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: false }),
-      }
-      : {
-        title: lang('ChatList.Mute'),
-        icon: 'mute',
-        handler: () => updateChatMutedState({ chatId: chat.id, isMuted: true }),
-      };
 
     const actionArchive = isChatArchived(chat)
       ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
@@ -131,7 +133,7 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleReport, folderId, isSelf, isServiceNotifications,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications,
   ]);
 };
 

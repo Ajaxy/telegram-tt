@@ -100,6 +100,7 @@ export function buildApiChatFromDialog(
     unreadMentionsCount,
     unreadReactionsCount,
     isMuted,
+    muteUntil,
     ...(unreadMark && { hasUnreadMark: true }),
     ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
@@ -547,8 +548,8 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     unreadMentionsCount,
     unreadReactionsCount,
     fromId: getApiChatIdFromMtpPeer(fromId),
-    // TODO[forums] `muteUntil` should not really be parsed here
-    isMuted: silent || (muteUntil !== undefined ? muteUntil > 0 : undefined),
+    isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
+    muteUntil,
   };
 }
 

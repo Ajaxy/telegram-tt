@@ -66,6 +66,7 @@ import {
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
 import { buildApiBotMenuButton } from './apiBuilders/bots';
+import { scheduleMutedTopicUpdate, scheduleMutedChatUpdate } from './scheduleUnmute';
 
 type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -635,19 +636,23 @@ export function updater(update: Update) {
     update instanceof GramJs.UpdateNotifySettings
     && update.peer instanceof GramJs.NotifyPeer
   ) {
+    const payload = buildApiNotifyException(update.notifySettings, update.peer.peer);
+    scheduleMutedChatUpdate(payload.chatId, payload.muteUntil, onUpdate);
     onUpdate({
       '@type': 'updateNotifyExceptions',
-      ...buildApiNotifyException(update.notifySettings, update.peer.peer),
+      ...payload,
     });
   } else if (
     update instanceof GramJs.UpdateNotifySettings
     && update.peer instanceof GramJs.NotifyForumTopic
   ) {
+    const payload = buildApiNotifyExceptionTopic(
+      update.notifySettings, update.peer.peer, update.peer.topMsgId,
+    );
+    scheduleMutedTopicUpdate(payload.chatId, payload.topicId, payload.muteUntil, onUpdate);
     onUpdate({
       '@type': 'updateTopicNotifyExceptions',
-      ...buildApiNotifyExceptionTopic(
-        update.notifySettings, update.peer.peer, update.peer.topMsgId,
-      ),
+      ...payload,
     });
   } else if (
     update instanceof GramJs.UpdateUserTyping

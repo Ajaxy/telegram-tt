@@ -36,6 +36,7 @@ import useLang from '../../../hooks/useLang';
 import ListItem from '../../ui/ListItem';
 import LastMessageMeta from '../../common/LastMessageMeta';
 import ChatBadge from './ChatBadge';
+import MuteChatModal from '../MuteChatModal.async';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import TopicIcon from '../../common/TopicIcon';
 
@@ -95,7 +96,9 @@ const Topic: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
 
   const {
     isPinned, isClosed,
@@ -110,6 +113,11 @@ const Topic: FC<OwnProps & StateProps> = ({
   const handleDelete = useCallback(() => {
     deleteTopic({ chatId: chat.id, topicId: topic.id });
   }, [chat.id, deleteTopic, topic.id]);
+
+  const handleMute = useCallback(() => {
+    markRenderMuteModal();
+    openMuteModal();
+  }, [markRenderMuteModal, openMuteModal]);
 
   const { renderSubtitle, ref } = useChatListEntry({
     chat,
@@ -138,7 +146,14 @@ const Topic: FC<OwnProps & StateProps> = ({
     }
   }, [openChat, chatId, topic.id, canScrollDown, focusLastMessage]);
 
-  const contextActions = useTopicContextActions(topic, chat, wasTopicOpened, canDelete, handleOpenDeleteModal);
+  const contextActions = useTopicContextActions({
+    topic,
+    chat,
+    wasOpened: wasTopicOpened,
+    canDelete,
+    handleDelete: handleOpenDeleteModal,
+    handleMute,
+  });
 
   return (
     <ListItem
@@ -188,7 +203,6 @@ const Topic: FC<OwnProps & StateProps> = ({
           />
         </div>
       </div>
-
       {shouldRenderDeleteModal && (
         <ConfirmDialog
           isOpen={isDeleteModalOpen}
@@ -198,6 +212,15 @@ const Topic: FC<OwnProps & StateProps> = ({
           confirmHandler={handleDelete}
           text={lang('lng_forum_topic_delete_sure')}
           confirmLabel={lang('Delete')}
+        />
+      )}
+      {shouldRenderMuteModal && (
+        <MuteChatModal
+          isOpen={isMuteModalOpen}
+          onClose={closeMuteModal}
+          onCloseAnimationEnd={unmarkRenderMuteModal}
+          chatId={chatId}
+          topicId={topic.id}
         />
       )}
     </ListItem>

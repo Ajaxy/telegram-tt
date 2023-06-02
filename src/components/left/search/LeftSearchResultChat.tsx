@@ -14,9 +14,9 @@ import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import GroupChatInfo from '../../common/GroupChatInfo';
-import DeleteChatModal from '../../common/DeleteChatModal';
 import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
+import MuteChatModal from '../MuteChatModal.async';
 
 type OwnProps = {
   chatId: string;
@@ -42,8 +42,20 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
   isMuted,
   canChangeFolder,
 }) => {
-  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
   const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
+  const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
+
+  const handleChatFolderChange = useCallback(() => {
+    markRenderChatFolderModal();
+    openChatFolderModal();
+  }, [markRenderChatFolderModal, openChatFolderModal]);
+
+  const handleMute = useCallback(() => {
+    markRenderMuteModal();
+    openMuteModal();
+  }, [markRenderMuteModal, openMuteModal]);
 
   const contextActions = useChatContextActions({
     chat,
@@ -51,8 +63,8 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
     isPinned,
     isMuted,
     canChangeFolder,
-    handleDelete: openDeleteModal,
-    handleChatFolderChange: openChatFolderModal,
+    handleMute,
+    handleChatFolderChange,
   }, true);
 
   const handleClick = useCallback(() => {
@@ -77,16 +89,22 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       ) : (
         <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
       )}
-      <DeleteChatModal
-        isOpen={isDeleteModalOpen}
-        onClose={closeDeleteModal}
-        chat={chat}
-      />
-      <ChatFolderModal
-        isOpen={isChatFolderModalOpen}
-        onClose={closeChatFolderModal}
-        chatId={chatId}
-      />
+      {shouldRenderMuteModal && (
+        <MuteChatModal
+          isOpen={isMuteModalOpen}
+          onClose={closeMuteModal}
+          onCloseAnimationEnd={unmarkRenderMuteModal}
+          chatId={chatId}
+        />
+      )}
+      {shouldRenderChatFolderModal && (
+        <ChatFolderModal
+          isOpen={isChatFolderModalOpen}
+          onClose={closeChatFolderModal}
+          onCloseAnimationEnd={unmarkRenderChatFolderModal}
+          chatId={chatId}
+        />
+      )}
     </ListItem>
   );
 };
