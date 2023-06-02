@@ -12,6 +12,8 @@ import './DropdownMenu.scss';
 type OwnProps = {
   className?: string;
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
+  transformOriginX?: number;
+  transformOriginY?: number;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   footer?: string;
@@ -28,6 +30,8 @@ const DropdownMenu: FC<OwnProps> = ({
   trigger,
   className,
   children,
+  transformOriginX,
+  transformOriginY,
   positionX = 'left',
   positionY = 'top',
   footer,
@@ -104,6 +108,8 @@ const DropdownMenu: FC<OwnProps> = ({
         containerRef={dropdownRef}
         isOpen={isOpen || Boolean(forceOpen)}
         className={className || ''}
+        transformOriginX={transformOriginX}
+        transformOriginY={transformOriginY}
         positionX={positionX}
         positionY={positionY}
         footer={footer}

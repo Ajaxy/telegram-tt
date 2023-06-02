@@ -32,7 +32,7 @@ import { AudioOrigin } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
 import {
   selectChat,
   selectChatMessage,
@@ -394,11 +394,12 @@ const Message: FC<OwnProps & StateProps> = ({
   const {
     isContextMenuOpen,
     contextMenuPosition,
+    contextMenuTarget,
     handleBeforeContextMenu,
     handleContextMenu: onContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref, IS_TOUCH_ENV && isInSelectMode, true, IS_ANDROID);
+  } = useContextMenuHandlers(ref, IS_TOUCH_ENV && isInSelectMode, !IS_ELECTRON, IS_ANDROID);
 
   useEffect(() => {
     if (isContextMenuOpen) {
@@ -1324,6 +1325,7 @@ const Message: FC<OwnProps & StateProps> = ({
         <ContextMenuContainer
           isOpen={isContextMenuOpen}
           anchor={contextMenuPosition}
+          targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
           message={message}
           album={album}
           chatUsername={chatUsername?.username}

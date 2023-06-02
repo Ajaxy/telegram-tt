@@ -25,6 +25,7 @@ const useContextMenuHandlers = (
 ) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
+  const [contextMenuTarget, setContextMenuTarget] = useState<HTMLElement | undefined>(undefined);
 
   const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
@@ -50,6 +51,7 @@ const useContextMenuHandlers = (
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setContextMenuTarget(e.target as HTMLElement);
   }, [isMenuDisabled, shouldDisableOnLink, contextMenuPosition]);
 
   const handleContextMenuClose = useCallback(() => {
@@ -151,6 +153,7 @@ const useContextMenuHandlers = (
   return {
     isContextMenuOpen,
     contextMenuPosition,
+    contextMenuTarget,
     handleBeforeContextMenu,
     handleContextMenu,
     handleContextMenuClose,

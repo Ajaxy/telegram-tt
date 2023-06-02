@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -28,6 +28,7 @@ import { getDayStartAt } from '../../util/dateFormat';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
+import useElectronDrag from '../../hooks/useElectronDrag';
 import useAppLayout from '../../hooks/useAppLayout';
 
 import SearchInput from '../ui/SearchInput';
@@ -515,8 +516,12 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     (shouldSkipTransition || shouldSkipHistoryAnimations) && 'no-transition',
   );
 
+  // eslint-disable-next-line no-null/no-null
+  const headerRef = useRef<HTMLDivElement>(null);
+  useElectronDrag(headerRef);
+
   return (
-    <div className="RightHeader">
+    <div className="RightHeader" ref={headerRef}>
       <Button
         className="close-button"
         round

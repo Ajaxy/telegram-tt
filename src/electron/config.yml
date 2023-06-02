@@ -1,0 +1,33 @@
+productName: "Telegram A"
+artifactName: "${productName}-${arch}-${version}.${ext}"
+appId: "org.telegram.TelegramA"
+extraMetadata:
+  main: "./dist/electron.js"
+files:
+  - "dist"
+  - "package.json"
+  - "!dist/**/build-stats.json"
+  - "!dist/**/statoscope-report.html"
+  - "!dist/**/reference.json"
+  - "!dist/img-apple-*"
+  - "!dist/libav-*"
+  - "!node_modules"
+directories:
+  buildResources: "./public"
+  output: "./dist-electron"
+publish:
+  provider: "github"
+  owner: "Ajaxy"
+  repo: "telegram-tt"
+win:
+  target: "nsis"
+  icon: "public/icon-electron-windows.ico"
+mac:
+  target:
+    target: "default"
+    arch: ["x64", "arm64"]
+  entitlements: "public/electron-entitlements.mac.plist"
+  icon: "public/icon-electron-macos.icns"
+linux:
+  category: "Community"
+  target: ["AppImage"]

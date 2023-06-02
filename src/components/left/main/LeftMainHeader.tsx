@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -18,14 +18,15 @@ import {
   FEEDBACK_URL,
   IS_BETA,
   IS_TEST,
+  IS_ELECTRON,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
+import { IS_APP } from '../../../util/windowEnvironment';
 import {
   INITIAL_PERFORMANCE_STATE_MAX,
   INITIAL_PERFORMANCE_STATE_MID,
   INITIAL_PERFORMANCE_STATE_MIN,
 } from '../../../global/initialState';
-import { IS_PWA } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { formatDateToString } from '../../../util/dateFormat';
 import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
@@ -40,6 +41,8 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import { getPromptInstall } from '../../../util/installPrompt';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
+import { useFullscreenStatus } from '../../../hooks/useFullscreen';
+import useElectronDrag from '../../../hooks/useElectronDrag';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useAppLayout from '../../../hooks/useAppLayout';
 
@@ -163,7 +166,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
-    ...(IS_PWA && { 'Mod+L': handleLockScreenHotkey }),
+    ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined);
 
   const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
@@ -266,11 +269,17 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid')
     : 'min';
 
+  const isFullscreen = useFullscreenStatus();
+
   // Disable dropdown menu RTL animation for resize
   const {
     shouldDisableDropdownMenuTransitionRef,
     handleDropdownMenuTransitionEnd,
   } = useLeftHeaderButtonRtlForumTransition(shouldHideSearch);
+
+  // eslint-disable-next-line no-null/no-null
+  const headerRef = useRef<HTMLDivElement>(null);
+  useElectronDrag(headerRef);
 
   const menuItems = useMemo(() => (
     <>
@@ -369,17 +378,19 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="LeftMainHeader">
-      <div id="LeftMainHeader" className="left-header">
+      <div id="LeftMainHeader" className="left-header" ref={headerRef}>
         {lang.isRtl && <div className="DropdownMenuFiller" />}
         <DropdownMenu
           trigger={MainButton}
           footer={`${APP_NAME} ${versionString}`}
           className={buildClassName(
+            'main-menu',
             lang.isRtl && 'rtl',
             shouldHideSearch && lang.isRtl && 'right-aligned',
             shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
           )}
           positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+          transformOriginX={IS_ELECTRON && !isFullscreen ? 90 : undefined}
           onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           {menuItems}

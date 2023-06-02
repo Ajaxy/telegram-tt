@@ -40,4 +40,27 @@
       margin-left: 0.25rem;
     }
   }
+
+  body.is-electron.is-macos & {
+    -webkit-app-region: drag;
+
+    .SearchInput {
+      -webkit-app-region: no-drag;
+    }
+  }
+
+  body.is-electron.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem 0.5rem 4.5rem;
+
+    .SearchInput {
+      margin-left: 0.5rem;
+      max-width: calc(100% - 2.75rem);
+    }
+
+    .Menu.main-menu .bubble {
+      --offset-y: 100%;
+      --offset-x: -4.125rem;
+    }
+  }
 }

@@ -217,7 +217,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       )}
       onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
     >
-      <div className="left-header">
+      <div id="TopicListHeader" className="left-header">
         <Button
           round
           size="smaller"

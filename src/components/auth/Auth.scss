@@ -59,6 +59,14 @@
       margin-bottom: 3rem;
     }
   }
+
+  body.is-electron #auth-phone-number-form & {
+    padding-top: 3rem;
+
+    .form {
+      min-height: 0;
+    }
+  }
 }
 
 #auth-registration-form,
@@ -68,10 +76,18 @@
 #auth-qr-form {
   height: 100%;
   overflow-y: auto;
+
+  body.is-electron.is-macos & {
+    -webkit-app-region: drag;
+
+    .input-group {
+      -webkit-app-region: no-drag;
+    }
+  }
 }
 
 #auth-phone-number-form {
-  form {
+  .form {
     min-height: 26.25rem;
   }
 
