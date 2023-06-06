@@ -134,7 +134,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
           `<img\
             draggable="false"\
             class="${className}"\
-            src={src}\
+            src="${src}"\
             alt="${emoji}"\
           />`,
         );
