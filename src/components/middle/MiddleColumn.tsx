@@ -659,7 +659,7 @@ export default memo(withGlobal<OwnProps>(
       messageLanguageModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
-    const { chats: { listIds }, leftColumnWidth, lastSyncTime } = global;
+    const { leftColumnWidth, lastSyncTime } = global;
 
     const state: StateProps = {
       theme,
@@ -682,7 +682,7 @@ export default memo(withGlobal<OwnProps>(
       lastSyncTime,
     };
 
-    if (!currentMessageList || !listIds.active) {
+    if (!currentMessageList) {
       return state;
     }
 
