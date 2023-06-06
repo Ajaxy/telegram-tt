@@ -62,8 +62,8 @@ addActionHandler('clickBotInlineButton', (global, actions, payload): ActionRetur
       actions.showDialog({
         data: {
           phoneNumber: user.phoneNumber,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
           userId: user.id,
         } as ApiContact,
         tabId,
