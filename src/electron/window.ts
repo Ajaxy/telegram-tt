@@ -118,7 +118,10 @@ export function createWindow(url?: string) {
 
   window.webContents.once('dom-ready', () => {
     window.show();
-    setupAutoUpdates(window);
+
+    if (process.env.APP_ENV === 'production') {
+      setupAutoUpdates(window);
+    }
   });
 
   windows.add(window);
