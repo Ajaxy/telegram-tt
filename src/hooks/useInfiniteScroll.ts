@@ -16,14 +16,14 @@ const useInfiniteScroll = <ListId extends string | number>(
   isDisabled = false,
   listSlice = DEFAULT_LIST_SLICE,
 ): [ListId[]?, GetMore?] => {
-  const lastParamsRef = useRef<{
+  const requestParamsRef = useRef<{
     direction?: LoadMoreDirection;
     offsetId?: ListId;
   }>();
 
   const viewportIdsRef = useRef<ListId[] | undefined>((() => {
     // Only run once to initialize
-    if (!listIds || lastParamsRef.current) {
+    if (!listIds || requestParamsRef.current) {
       return undefined;
     }
 
@@ -34,16 +34,22 @@ const useInfiniteScroll = <ListId extends string | number>(
   const forceUpdate = useForceUpdate();
 
   if (isDisabled) {
-    lastParamsRef.current = {};
+    requestParamsRef.current = {};
   }
 
   const prevListIds = usePrevious(listIds);
   const prevIsDisabled = usePrevious(isDisabled);
   if (listIds && !isDisabled && (listIds !== prevListIds || isDisabled !== prevIsDisabled)) {
-    const { offsetId = listIds[0], direction = LoadMoreDirection.Forwards } = lastParamsRef.current || {};
+    const viewportIds = viewportIdsRef.current;
+    const isOnTop = viewportIds && viewportIds[0] === listIds[0];
+    const currentMiddleId = !isOnTop && viewportIds ? viewportIds[Math.round(viewportIds.length / 2)] : undefined;
+    const defaultOffsetId = currentMiddleId && listIds.includes(currentMiddleId) ? currentMiddleId : listIds[0];
+    const { offsetId = defaultOffsetId, direction = LoadMoreDirection.Forwards } = requestParamsRef.current || {};
     const { newViewportIds } = getViewportSlice(listIds, direction, listSlice, offsetId);
 
-    if (!viewportIdsRef.current || !areSortedArraysEqual(viewportIdsRef.current, newViewportIds)) {
+    requestParamsRef.current = {};
+
+    if (!viewportIds || !areSortedArraysEqual(viewportIds, newViewportIds)) {
       viewportIdsRef.current = newViewportIds;
     }
   } else if (!listIds) {
@@ -68,10 +74,6 @@ const useInfiniteScroll = <ListId extends string | number>(
       return;
     }
 
-    if (!noScroll) {
-      lastParamsRef.current = { ...lastParamsRef.current, direction, offsetId };
-    }
-
     const {
       newViewportIds, areSomeLocal, areAllLocal,
     } = getViewportSlice(listIds, direction, listSlice, offsetId);
@@ -82,6 +84,10 @@ const useInfiniteScroll = <ListId extends string | number>(
     }
 
     if (!areAllLocal && loadMoreBackwards) {
+      if (!noScroll) {
+        requestParamsRef.current = { ...requestParamsRef.current, direction, offsetId };
+      }
+
       loadMoreBackwards({ offsetId });
     }
   }, [listIds, listSlice, loadMoreBackwards, forceUpdate]);
@@ -107,7 +113,7 @@ function getViewportSlice<ListId extends string | number>(
   let areAllLocal;
   switch (direction) {
     case LoadMoreDirection.Forwards:
-      areSomeLocal = indexForDirection > 0;
+      areSomeLocal = indexForDirection >= 0;
       areAllLocal = from >= 0;
       break;
     case LoadMoreDirection.Backwards:

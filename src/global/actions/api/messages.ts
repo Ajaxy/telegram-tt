@@ -1111,7 +1111,7 @@ function getViewportSlice(
   let areAllLocal;
   switch (direction) {
     case LoadMoreDirection.Backwards:
-      areSomeLocal = indexForDirection > 0;
+      areSomeLocal = indexForDirection >= 0;
       areAllLocal = from >= 0;
       break;
     case LoadMoreDirection.Forwards:
