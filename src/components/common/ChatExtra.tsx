@@ -90,6 +90,10 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
 
   useEffect(() => {
+    setAreNotificationsEnabled(!isMuted);
+  }, [isMuted]);
+
+  useEffect(() => {
     if (lastSyncTime && userId) {
       loadFullUser({ userId });
     }
