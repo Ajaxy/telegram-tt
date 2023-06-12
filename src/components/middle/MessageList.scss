@@ -1,16 +1,13 @@
-@import "../../styles/mixins";
-
 .MessageList {
   flex: 1;
   width: 100%;
   margin-bottom: 0.5rem;
 
-  overflow: scroll;
+  overflow-y: scroll;
   overflow-x: hidden;
-  overflow-y: auto;
-  @include overflow-y-overlay();
 
-  transition: transform var(--layer-transition);
+  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
+  transition: bottom 150ms ease-out, transform var(--layer-transition);
 
   body.no-page-transitions & {
     transition: none !important;
@@ -29,9 +26,6 @@
       -webkit-touch-callout: default;
     }
   }
-
-  /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
-  transition: bottom 150ms ease-out, transform var(--layer-transition);
 
   body.keyboard-visible & {
     position: relative;
@@ -379,10 +373,6 @@
     top: 0.625rem;
   }
 
-  &.is-animating {
-    overflow: hidden;
-  }
-
   &.is-animating .message-select-control {
     display: none !important;
   }
@@ -464,14 +454,11 @@
 
   .Transition_slide-from > &,
   .Transition_slide-to > & {
+    padding-inline-end: var(--scrollbar-width) !important;
+
+    scrollbar-width: none !important;
     &::-webkit-scrollbar {
       width: 0 !important;
-    }
-
-    /* Styles for Firefox */
-    @supports (scrollbar-width: none) {
-      padding-right: 0.6875rem !important;
-      scrollbar-width: none !important;
     }
   }
 }

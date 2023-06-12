@@ -123,6 +123,19 @@ export const IS_TRANSLATION_SUPPORTED = Boolean(Intl.DisplayNames);
 
 export const MESSAGE_LIST_SENSITIVE_AREA = 750;
 
+export const SCROLLBAR_WIDTH = (() => {
+  const el = document.createElement('div');
+  el.style.cssText = 'overflow:scroll; visibility:hidden; position:absolute;';
+  el.classList.add('custom-scroll');
+  document.body.appendChild(el);
+  const width = el.offsetWidth - el.clientWidth;
+  el.remove();
+
+  document.documentElement.style.setProperty('--scrollbar-width', `${width}px`);
+
+  return width;
+})();
+
 export const MAX_BUFFER_SIZE = (IS_MOBILE ? 512 : 2000) * 1024 ** 2; // 512 OR 2000 MB
 
 function isLastEmojiVersionSupported() {

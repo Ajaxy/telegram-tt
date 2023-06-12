@@ -6,7 +6,7 @@
 
   left: 0.5rem;
   width: 100%;
-  max-width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
+  max-width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
   height: var(--symbol-menu-height);
   padding: 0 !important;
 
@@ -14,10 +14,6 @@
     --color-background: var(--color-background-compact-menu);
 
     backdrop-filter: blur(10px);
-  }
-
-  @supports (overflow: overlay) {
-    width: var(--symbol-menu-width);
   }
 
   @media (max-width: 26rem) {

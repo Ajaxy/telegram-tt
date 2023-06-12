@@ -5,13 +5,8 @@
   }
 }
 
-@mixin overflow-y-overlay() {
-  @supports (overflow-y: overlay) {
-    overflow-y: overlay;
-
-    //Workaround for Android <= 9
-    overflow-x: hidden;
-  }
+@mixin adapt-padding-to-scrollbar($padding) {
+  padding-inline-end: calc($padding - var(--scrollbar-width));
 }
 
 @mixin reset-range() {

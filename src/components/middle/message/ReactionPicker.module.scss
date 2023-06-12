@@ -18,14 +18,10 @@
     backdrop-filter: blur(10px);
   }
 
-  width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
+  width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
   height: var(--symbol-menu-height);
   padding: 0 !important;
   transform-origin: 9rem 4.625rem !important;
-
-  @supports (overflow: overlay) {
-    width: var(--symbol-menu-width);
-  }
 
   &:global(.bubble) {
     transform: scale(0.8) !important;

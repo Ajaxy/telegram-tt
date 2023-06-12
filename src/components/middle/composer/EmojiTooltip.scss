@@ -2,10 +2,7 @@
   display: flex;
   padding: 0;
 
-  overflow-x: auto;
-  @supports (overflow-x: overlay) {
-    overflow-x: overlay;
-  }
+  overflow-x: scroll;
   overflow-y: hidden;
 
   .EmojiButton {

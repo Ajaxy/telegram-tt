@@ -1,5 +1,3 @@
-@import "./mixins";
-
 // Common styles for all media-type components across the app.
 .media-inner {
   position: relative;
@@ -97,9 +95,10 @@
   background: var(--color-background);
   height: 100%;
   padding: 0.5rem 0.4375rem 0.5rem 0.4375rem;
+  @include adapt-padding-to-scrollbar(0.4375rem);
 
-  overflow-y: auto;
-  @include overflow-y-overlay();
+  overflow-x: hidden;
+  overflow-y: scroll;
 
   &.forum-panel-open {
     .info {
