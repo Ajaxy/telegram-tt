@@ -1,8 +1,10 @@
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 
 import type { FC } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useShowTransition from '../../hooks/useShowTransition';
 
@@ -36,7 +38,7 @@ const MediaSpoiler: FC<OwnProps> = ({
   );
   const canvasRef = useCanvasBlur(thumbDataUri, !shouldRender, undefined, BLUR_RADIUS, width, height);
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!ref.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -44,7 +46,7 @@ const MediaSpoiler: FC<OwnProps> = ({
     const shiftX = x - (rect.width / 2);
     const shiftY = y - (rect.height / 2);
     ref.current.setAttribute('style', `--click-shift-x: ${shiftX}px; --click-shift-y: ${shiftY}px`);
-  }, []);
+  });
 
   if (!shouldRender) {
     return undefined;

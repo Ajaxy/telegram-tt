@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
@@ -23,6 +23,7 @@ import {
 } from '../../../util/map';
 import { getServerTime } from '../../../util/serverTime';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useForceUpdate from '../../../hooks/useForceUpdate';
@@ -115,7 +116,7 @@ const Location: FC<OwnProps> = ({
     openUrl({ url });
   };
 
-  const updateCountdown = useCallback((countdownEl: HTMLDivElement) => {
+  const updateCountdown = useLastCallback((countdownEl: HTMLDivElement) => {
     if (type !== 'geoLive') return;
     const radius = 12;
     const circumference = radius * 2 * Math.PI;
@@ -139,7 +140,7 @@ const Location: FC<OwnProps> = ({
       timerEl.textContent = text;
       svgEl.firstElementChild!.setAttribute('stroke-dashoffset', `-${strokeDashOffset}`);
     }
-  }, [type, message.date, location, lang]);
+  });
 
   useLayoutEffect(() => {
     if (countdownRef.current) {

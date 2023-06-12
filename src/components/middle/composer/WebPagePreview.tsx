@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -15,6 +13,8 @@ import { RE_LINK_TEMPLATE } from '../../../config';
 import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import parseMessageInput from '../../../util/parseMessageInput';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
@@ -97,9 +97,9 @@ const WebPagePreview: FC<OwnProps & StateProps> = ({
 
   const renderingWebPage = useCurrentOrPrev(webPagePreview, true);
 
-  const handleClearWebpagePreview = useCallback(() => {
+  const handleClearWebpagePreview = useLastCallback(() => {
     toggleMessageWebPage({ chatId, threadId, noWebPage: true });
-  }, [chatId, threadId, toggleMessageWebPage]);
+  });
 
   if (!shouldRender || !renderingWebPage) {
     return undefined;

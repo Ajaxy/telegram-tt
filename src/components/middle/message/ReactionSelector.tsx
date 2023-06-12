@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
 import type {
@@ -12,6 +10,8 @@ import { createClassNameBuilder } from '../../../util/buildClassName';
 import {
   isSameReaction, canSendReaction, getReactionUniqueKey, sortReactions,
 } from '../../../global/helpers';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 
 import ReactionSelectorReaction from './ReactionSelectorReaction';
@@ -83,13 +83,13 @@ const ReactionSelector: FC<OwnProps> = ({
     )));
   }, [currentReactions, reactionsToRender]);
 
-  const handleShowMoreClick = useCallback(() => {
+  const handleShowMoreClick = useLastCallback(() => {
     const bound = ref.current?.getBoundingClientRect() || { x: 0, y: 0 };
     onShowMore({
       x: bound.x,
       y: bound.y,
     });
-  }, [onShowMore]);
+  });
 
   if (!reactionsToRender.length) return undefined;
 

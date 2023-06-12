@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
@@ -13,6 +13,8 @@ import parseMessageInput from '../../../../util/parseMessageInput';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { hasMessageMedia } from '../../../../global/helpers';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { useDebouncedResolver } from '../../../../hooks/useAsyncResolvers';
@@ -118,7 +120,7 @@ const useEditing = (
     }
   }, [editedMessage, chatId, getHtml, threadId, getShouldResetNoWebPageDebounced]);
 
-  const restoreNewDraftAfterEditing = useCallback(() => {
+  const restoreNewDraftAfterEditing = useLastCallback(() => {
     if (!draft) return;
 
     // Run one frame after editing draft reset
@@ -133,14 +135,14 @@ const useEditing = (
         }
       });
     });
-  }, [draft, setHtml]);
+  });
 
-  const handleEditCancel = useCallback(() => {
+  const handleEditCancel = useLastCallback(() => {
     resetComposer();
     restoreNewDraftAfterEditing();
-  }, [resetComposer, restoreNewDraftAfterEditing]);
+  });
 
-  const handleEditComplete = useCallback(() => {
+  const handleEditComplete = useLastCallback(() => {
     const { text, entities } = parseMessageInput(getHtml());
 
     if (!editedMessage) {
@@ -159,9 +161,9 @@ const useEditing = (
 
     resetComposer();
     restoreNewDraftAfterEditing();
-  }, [editMessage, editedMessage, getHtml, openDeleteModal, resetComposer, restoreNewDraftAfterEditing]);
+  });
 
-  const handleBlur = useCallback(() => {
+  const handleBlur = useLastCallback(() => {
     if (!editedMessage) return;
     const edited = parseMessageInput(getHtml());
     const update = edited.text.length ? edited : undefined;
@@ -169,7 +171,7 @@ const useEditing = (
     setEditingDraft({
       chatId, threadId, type, text: update,
     });
-  }, [chatId, editedMessage, getHtml, setEditingDraft, threadId, type]);
+  });
 
   useBackgroundMode(handleBlur);
   useBeforeUnload(handleBlur);

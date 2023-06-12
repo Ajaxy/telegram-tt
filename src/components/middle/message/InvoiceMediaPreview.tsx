@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -9,6 +9,7 @@ import { formatCurrency } from '../../../util/formatCurrency';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 import useInterval from '../../../hooks/useInterval';
 
@@ -33,9 +34,9 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
 
   const { chatId, id } = message;
 
-  const refreshExtendedMedia = useCallback(() => {
+  const refreshExtendedMedia = useLastCallback(() => {
     loadExtendedMedia({ chatId, ids: [id] });
-  }, [chatId, id, loadExtendedMedia]);
+  });
 
   useInterval(refreshExtendedMedia, lastSyncTime ? POLLING_INTERVAL : undefined);
 
@@ -49,13 +50,13 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
     width, height, thumbnail, duration,
   } = extendedMedia!;
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     openInvoice({
       chatId,
       messageId: id,
       isExtendedMedia: true,
     });
-  }, [chatId, id, openInvoice]);
+  });
 
   return (
     <div

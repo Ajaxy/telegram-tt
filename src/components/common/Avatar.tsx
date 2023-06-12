@@ -1,6 +1,6 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
@@ -33,6 +33,7 @@ import { useFastClick } from '../../hooks/useFastClick';
 import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './Avatar.scss';
+import useLastCallback from '../../hooks/useLastCallback';
 
 const LOOP_COUNT = 3;
 
@@ -111,7 +112,7 @@ const Avatar: FC<OwnProps> = ({
     return onlineTransitionClassNames.split(' ').map((c) => (c === 'shown' ? 'online' : `online-${c}`)).join(' ');
   }, [onlineTransitionClassNames]);
 
-  const handleVideoEnded = useCallback((e) => {
+  const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
     if (!videoBlobUrl) return;
 
@@ -121,7 +122,7 @@ const Avatar: FC<OwnProps> = ({
     if (videoLoopCountRef.current >= LOOP_COUNT) {
       video.style.display = 'none';
     }
-  }, [loopIndefinitely, videoBlobUrl]);
+  });
 
   const lang = useLang();
 

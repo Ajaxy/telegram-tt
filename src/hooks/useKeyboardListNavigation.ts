@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import { useState, useCallback, useEffect } from '../lib/teact/teact';
+import { useState, useEffect } from '../lib/teact/teact';
+
+import useLastCallback from './useLastCallback';
 
 const useKeyboardListNavigation = (
   elementRef: RefObject<HTMLElement>,
@@ -20,7 +22,7 @@ const useKeyboardListNavigation = (
     }
   }, [elementRef, isOpen, noCaptureFocus]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<any>) => {
+  return useLastCallback((e: React.KeyboardEvent<any>) => {
     const element = elementRef.current;
 
     if (!element) {
@@ -56,9 +58,7 @@ const useKeyboardListNavigation = (
       setFocusedIndex(newIndex);
       item.focus();
     }
-  }, [elementRef, onSelectWithEnter, itemSelector, focusedIndex]);
-
-  return handleKeyDown;
+  });
 };
 
 export default useKeyboardListNavigation;

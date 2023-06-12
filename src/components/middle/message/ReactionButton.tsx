@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -11,6 +11,8 @@ import type { ActiveReaction } from '../../../global/types';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import { isSameReaction, isReactionChosen } from '../../../global/helpers';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -55,13 +57,13 @@ const ReactionButton: FC<{
       .filter(Boolean) as ApiUser[];
   }, [reaction.reaction, recentReactions, withRecentReactors]);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     toggleReaction({
       reaction: reaction.reaction,
       chatId: message.chatId,
       messageId: message.id,
     });
-  }, [message, reaction, toggleReaction]);
+  });
 
   return (
     <Button

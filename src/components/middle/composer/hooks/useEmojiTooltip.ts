@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import { useEffect, useState } from '../../../../lib/teact/teact';
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
@@ -19,6 +19,7 @@ import renderText from '../../../common/helpers/renderText';
 import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useFlag from '../../../../hooks/useFlag';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
@@ -94,7 +95,7 @@ export default function useEmojiTooltip(
     detectEmojiCodeThrottled, [detectEmojiCodeThrottled, getHtml], true,
   );
 
-  const updateFiltered = useCallback((emojis: Emoji[]) => {
+  const updateFiltered = useLastCallback((emojis: Emoji[]) => {
     setFilteredEmojis(emojis);
 
     if (emojis === MEMO_EMPTY_ARRAY) {
@@ -108,9 +109,9 @@ export default function useEmojiTooltip(
       'id',
     );
     setFilteredCustomEmojis(customEmojis);
-  }, []);
+  });
 
-  const insertEmoji = useCallback((emoji: string | ApiSticker, isForce = false) => {
+  const insertEmoji = useLastCallback((emoji: string | ApiSticker, isForce = false) => {
     const html = getHtml();
     if (!html) return;
 
@@ -130,7 +131,7 @@ export default function useEmojiTooltip(
     }
 
     updateFiltered(MEMO_EMPTY_ARRAY);
-  }, [getHtml, setHtml, inputId, updateFiltered]);
+  });
 
   useEffect(() => {
     const emojiCode = getEmojiCode();

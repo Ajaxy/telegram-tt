@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState, useLayoutEffect,
+  memo, useEffect, useRef, useState, useLayoutEffect,
 } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
@@ -16,6 +16,8 @@ import {
   selectCurrentMessageList,
 } from '../../global/selectors';
 import { getDayStartAt } from '../../util/dateFormat';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
 import SearchInput from '../ui/SearchInput';
@@ -123,33 +125,33 @@ const MobileSearchFooter: FC<StateProps> = ({
     searchInput.blur();
   }, [isHistoryCalendarOpen]);
 
-  const handleMessageSearchQueryChange = useCallback((newQuery: string) => {
+  const handleMessageSearchQueryChange = useLastCallback((newQuery: string) => {
     setLocalTextSearchQuery({ query: newQuery });
 
     if (newQuery.length) {
       runDebouncedForSearch(searchTextMessagesLocal);
     }
-  }, [searchTextMessagesLocal, setLocalTextSearchQuery]);
+  });
 
-  const handleUp = useCallback(() => {
+  const handleUp = useLastCallback(() => {
     if (chat && foundIds) {
       const newFocusIndex = focusedIndex + 1;
       focusMessage({ chatId: chat.id, messageId: foundIds[newFocusIndex], threadId });
       setFocusedIndex(newFocusIndex);
     }
-  }, [chat, foundIds, focusedIndex, threadId]);
+  });
 
-  const handleDown = useCallback(() => {
+  const handleDown = useLastCallback(() => {
     if (chat && foundIds) {
       const newFocusIndex = focusedIndex - 1;
       focusMessage({ chatId: chat.id, messageId: foundIds[newFocusIndex], threadId });
       setFocusedIndex(newFocusIndex);
     }
-  }, [chat, foundIds, focusedIndex, threadId]);
+  });
 
-  const handleCloseLocalTextSearch = useCallback(() => {
+  const handleCloseLocalTextSearch = useLastCallback(() => {
     closeLocalTextSearch();
-  }, [closeLocalTextSearch]);
+  });
 
   return (
     <div id="MobileSearch" className={isActive ? 'active' : ''}>

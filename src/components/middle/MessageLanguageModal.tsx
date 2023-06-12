@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -10,6 +10,7 @@ import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -47,16 +48,16 @@ const MessageLanguageModal: FC<OwnProps & StateProps> = ({
   const [search, setSearch] = useState('');
   const lang = useLang();
 
-  const handleSelect = useCallback((toLanguageCode: string) => {
+  const handleSelect = useLastCallback((toLanguageCode: string) => {
     if (!chatId || !messageId) return;
 
     requestMessageTranslation({ chatId, id: messageId, toLanguageCode });
     closeMessageLanguageModal();
-  }, [chatId, closeMessageLanguageModal, messageId, requestMessageTranslation]);
+  });
 
-  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearch = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-  }, []);
+  });
 
   const translateLanguages = useMemo(() => SUPPORTED_TRANSLATION_LANGUAGES.map((langCode: string) => {
     const translatedNames = new Intl.DisplayNames([currentLanguageCode], { type: 'language' });

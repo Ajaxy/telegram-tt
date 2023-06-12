@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, PhoneCallAction } from '../../../api/types';
@@ -8,6 +8,8 @@ import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
 import { formatTimeDuration, formatTime } from '../../../util/dateFormat';
 import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
 
@@ -31,9 +33,9 @@ const MessagePhoneCall: FC<OwnProps> = ({
   const isMissed = reason === 'missed';
   const isCancelled = reason === 'busy' && !isOutgoing;
 
-  const handleCall = useCallback(() => {
+  const handleCall = useLastCallback(() => {
     requestMasterAndRequestCall({ isVideo, userId: chatId });
-  }, [chatId, isVideo, requestMasterAndRequestCall]);
+  });
 
   const reasonText = useMemo(() => {
     if (isVideo) {

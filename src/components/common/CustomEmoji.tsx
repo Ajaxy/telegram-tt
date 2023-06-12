@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useRef, useState,
-} from '../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
@@ -11,6 +9,7 @@ import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useCustomEmoji from './hooks/useCustomEmoji';
 import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 
@@ -79,7 +78,7 @@ const CustomEmoji: FC<OwnProps> = ({
   const hasCustomColor = customEmoji?.shouldUseTextColor;
   const customColor = useDynamicColorListener(containerRef, !hasCustomColor);
 
-  const handleVideoEnded = useCallback((e) => {
+  const handleVideoEnded = useLastCallback((e) => {
     if (!loopLimit) return;
 
     loopCountRef.current += 1;
@@ -91,9 +90,9 @@ const CustomEmoji: FC<OwnProps> = ({
       // Loop manually
       safePlay(e.currentTarget);
     }
-  }, [loopLimit]);
+  });
 
-  const handleStickerLoop = useCallback(() => {
+  const handleStickerLoop = useLastCallback(() => {
     if (!loopLimit) return;
 
     loopCountRef.current += 1;
@@ -102,7 +101,7 @@ const CustomEmoji: FC<OwnProps> = ({
     if (loopCountRef.current >= loopLimit - 1) {
       setShouldLoop(false);
     }
-  }, [loopLimit]);
+  });
 
   const isHq = customEmoji?.stickerSetInfo && selectIsAlwaysHighPriorityEmoji(getGlobal(), customEmoji.stickerSetInfo);
 

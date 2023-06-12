@@ -1,5 +1,5 @@
 import React, {
-  useEffect, memo, useRef, useMemo, useCallback,
+  useEffect, memo, useRef, useMemo,
 } from '../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../global';
 
@@ -34,6 +34,7 @@ import {
   selectIsCurrentUserPremium,
 } from '../../global/selectors';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLang from '../../hooks/useLang';
@@ -276,13 +277,13 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     animateHorizontalScroll(header, newLeft);
   }, [areAddedLoaded, activeSetIndex]);
 
-  const handleEmojiSelect = useCallback((emoji: ApiSticker) => {
+  const handleEmojiSelect = useLastCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
-  }, [onCustomEmojiSelect]);
+  });
 
-  const handleReactionSelect = useCallback((reaction: ApiReaction) => {
+  const handleReactionSelect = useLastCallback((reaction: ApiReaction) => {
     onReactionSelect?.(reaction);
-  }, [onReactionSelect]);
+  });
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];

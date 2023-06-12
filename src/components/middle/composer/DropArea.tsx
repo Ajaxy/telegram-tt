@@ -1,13 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
 import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
 
 import Portal from '../../ui/Portal';
@@ -40,7 +40,7 @@ const DropArea: FC<OwnProps> = ({
 
   useEffect(() => (isOpen ? captureEscKeyListener(onHide) : undefined), [isOpen, onHide]);
 
-  const handleFilesDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+  const handleFilesDrop = useLastCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
     let files: File[] = [];
 
@@ -55,18 +55,18 @@ const DropArea: FC<OwnProps> = ({
 
     onHide();
     onFileSelect(files, withQuick ? false : undefined);
-  }, [onFileSelect, onHide, withQuick]);
+  });
 
-  const handleQuickFilesDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleQuickFilesDrop = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
     const { dataTransfer: dt } = e;
 
     if (dt.files && dt.files.length > 0) {
       onHide();
       onFileSelect(Array.from(dt.files), true);
     }
-  }, [onFileSelect, onHide]);
+  });
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     const { target: fromTarget, relatedTarget: toTarget } = e;
@@ -77,7 +77,7 @@ const DropArea: FC<OwnProps> = ({
         onHide();
       }, DROP_LEAVE_TIMEOUT_MS);
     }
-  }, [onHide]);
+  });
 
   const handleDragOver = () => {
     if (hideTimeoutRef.current) {

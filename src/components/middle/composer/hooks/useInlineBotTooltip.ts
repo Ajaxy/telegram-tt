@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { useEffect } from '../../../../lib/teact/teact';
 
 import type { InlineBotSettings } from '../../../../types';
 import type { Signal } from '../../../../util/signals';
@@ -6,6 +6,7 @@ import type { Signal } from '../../../../util/signals';
 import { getActions } from '../../../../global';
 import memoized from '../../../../util/memoized';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useFlag from '../../../../hooks/useFlag';
 import useDerivedState from '../../../../hooks/useDerivedState';
 import useSyncEffect from '../../../../hooks/useSyncEffect';
@@ -75,13 +76,13 @@ export default function useInlineBotTooltip(
     }
   }, [isOpen, resetAllInlineBots, username]);
 
-  const loadMore = useCallback(() => {
+  const loadMore = useLastCallback(() => {
     if (!usernameLowered) return;
 
     queryInlineBot({
       chatId, username: usernameLowered, query, offset,
     });
-  }, [chatId, offset, query, queryInlineBot, usernameLowered]);
+  });
 
   return {
     isOpen,

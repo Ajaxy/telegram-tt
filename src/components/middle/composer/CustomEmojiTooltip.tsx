@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -12,6 +10,7 @@ import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../globa
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
@@ -65,14 +64,14 @@ const CustomEmojiTooltip: FC<OwnProps & StateProps> = ({
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClose) : undefined), [isOpen, onClose]);
 
-  const handleCustomEmojiSelect = useCallback((ce: ApiSticker) => {
+  const handleCustomEmojiSelect = useLastCallback((ce: ApiSticker) => {
     if (!isOpen) return;
     onCustomEmojiSelect(ce);
     addRecentCustomEmoji({
       documentId: ce.id,
     });
     clearCustomEmojiForEmoji();
-  }, [addRecentCustomEmoji, clearCustomEmojiForEmoji, isOpen, onCustomEmojiSelect]);
+  });
 
   const className = buildClassName(
     styles.root,

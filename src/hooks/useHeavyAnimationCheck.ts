@@ -2,7 +2,7 @@ import { useEffect } from '../lib/teact/teact';
 
 import { createCallbackManager } from '../util/callbacks';
 
-import { useLastCallback } from './useLastCallback';
+import useLastCallback from './useLastCallback';
 
 // Make sure to end even if end callback was not called (which was some hardly-reproducible bug)
 const AUTO_END_TIMEOUT = 1000;

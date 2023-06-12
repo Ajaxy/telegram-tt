@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -18,6 +18,8 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -180,9 +182,9 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     });
   }, [displayedFolders, folderCountersById, lang, maxFolders, folderInvitesById, maxFolderInvites]);
 
-  const handleSwitchTab = useCallback((index: number) => {
+  const handleSwitchTab = useLastCallback((index: number) => {
     setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
-  }, [setActiveChatFolder]);
+  });
 
   // Prevent `activeTab` pointing at non-existing folder after update
   useEffect(() => {

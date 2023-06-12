@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -13,6 +13,7 @@ import renderText from '../../common/helpers/renderText';
 import trimText from '../../../util/trimText';
 import buildClassName from '../../../util/buildClassName';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useLang from '../../../hooks/useLang';
 
@@ -62,16 +63,16 @@ const WebPage: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const handleMediaClick = useCallback(() => {
+  const handleMediaClick = useLastCallback(() => {
     onMediaClick!();
-  }, [onMediaClick]);
+  });
 
-  const handleQuickButtonClick = useCallback(() => {
+  const handleQuickButtonClick = useLastCallback(() => {
     if (!webPage) return;
     openTelegramLink({
       url: webPage.url,
     });
-  }, [webPage]);
+  });
 
   if (!webPage) {
     return undefined;

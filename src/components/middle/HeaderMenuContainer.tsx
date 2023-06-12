@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -33,6 +33,8 @@ import {
   isUserRightBanned,
   selectIsChatMuted,
 } from '../../global/helpers';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
@@ -181,76 +183,76 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     (!isChatInfoShown && isForum) ? true : undefined, CLOSE_MENU_ANIMATION_DURATION,
   );
 
-  const handleReport = useCallback(() => {
+  const handleReport = useLastCallback(() => {
     setIsMenuOpen(false);
     setIsReportModalOpen(true);
-  }, []);
+  });
 
-  const closeReportModal = useCallback(() => {
+  const closeReportModal = useLastCallback(() => {
     setIsReportModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const closeMuteModal = useCallback(() => {
+  const closeMuteModal = useLastCallback(() => {
     setIsMuteModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
     setIsDeleteModalOpen(true);
-  }, []);
+  });
 
-  const closeMenu = useCallback(() => {
+  const closeMenu = useLastCallback(() => {
     setIsMenuOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const handleViewGroupInfo = useCallback(() => {
+  const handleViewGroupInfo = useLastCallback(() => {
     openChatWithInfo({ id: chatId, threadId });
     closeMenu();
-  }, [chatId, closeMenu, openChatWithInfo, threadId]);
+  });
 
-  const closeDeleteModal = useCallback(() => {
+  const closeDeleteModal = useLastCallback(() => {
     setIsDeleteModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const handleStartBot = useCallback(() => {
+  const handleStartBot = useLastCallback(() => {
     sendBotCommand({ command: '/start' });
-  }, [sendBotCommand]);
+  });
 
-  const handleRestartBot = useCallback(() => {
+  const handleRestartBot = useLastCallback(() => {
     restartBot({ chatId });
-  }, [chatId, restartBot]);
+  });
 
-  const handleUnmuteClick = useCallback(() => {
+  const handleUnmuteClick = useLastCallback(() => {
     updateChatMutedState({ chatId, isMuted: false });
     closeMenu();
-  }, [chatId, closeMenu, updateChatMutedState]);
+  });
 
-  const handleMuteClick = useCallback(() => {
+  const handleMuteClick = useLastCallback(() => {
     markRenderMuteModal();
     setIsMuteModalOpen(true);
     setIsMenuOpen(false);
-  }, []);
+  });
 
-  const handleCreateTopicClick = useCallback(() => {
+  const handleCreateTopicClick = useLastCallback(() => {
     openCreateTopicPanel({ chatId });
     closeMenu();
-  }, [openCreateTopicPanel, chatId, closeMenu]);
+  });
 
-  const handleEditTopicClick = useCallback(() => {
+  const handleEditTopicClick = useLastCallback(() => {
     openEditTopicPanel({ chatId, topicId: threadId });
     closeMenu();
-  }, [openEditTopicPanel, chatId, threadId, closeMenu]);
+  });
 
-  const handleViewAsTopicsClick = useCallback(() => {
+  const handleViewAsTopicsClick = useLastCallback(() => {
     openChat({ id: undefined });
     closeMenu();
-  }, [closeMenu, openChat]);
+  });
 
-  const handleEnterVoiceChatClick = useCallback(() => {
+  const handleEnterVoiceChatClick = useLastCallback(() => {
     if (canCreateVoiceChat) {
       // TODO Show popup to schedule
       createGroupCall({
@@ -262,57 +264,57 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
       });
     }
     closeMenu();
-  }, [closeMenu, canCreateVoiceChat, chatId, requestMasterAndJoinGroupCall, createGroupCall]);
+  });
 
-  const handleLinkedChatClick = useCallback(() => {
+  const handleLinkedChatClick = useLastCallback(() => {
     openLinkedChat({ id: chatId });
     closeMenu();
-  }, [chatId, closeMenu, openLinkedChat]);
+  });
 
-  const handleGiftPremiumClick = useCallback(() => {
+  const handleGiftPremiumClick = useLastCallback(() => {
     openGiftPremiumModal({ forUserId: chatId });
     closeMenu();
-  }, [openGiftPremiumModal, chatId, closeMenu]);
+  });
 
-  const handleAddContactClick = useCallback(() => {
+  const handleAddContactClick = useLastCallback(() => {
     openAddContactDialog({ userId: chatId });
     closeMenu();
-  }, [openAddContactDialog, chatId, closeMenu]);
+  });
 
-  const handleSubscribe = useCallback(() => {
+  const handleSubscribe = useLastCallback(() => {
     onSubscribeChannel();
     closeMenu();
-  }, [closeMenu, onSubscribeChannel]);
+  });
 
-  const handleVideoCall = useCallback(() => {
+  const handleVideoCall = useLastCallback(() => {
     requestMasterAndRequestCall({ userId: chatId, isVideo: true });
     closeMenu();
-  }, [chatId, closeMenu, requestMasterAndRequestCall]);
+  });
 
-  const handleCall = useCallback(() => {
+  const handleCall = useLastCallback(() => {
     requestMasterAndRequestCall({ userId: chatId });
     closeMenu();
-  }, [chatId, closeMenu, requestMasterAndRequestCall]);
+  });
 
-  const handleSearch = useCallback(() => {
+  const handleSearch = useLastCallback(() => {
     onSearchClick();
     closeMenu();
-  }, [closeMenu, onSearchClick]);
+  });
 
-  const handleStatisticsClick = useCallback(() => {
+  const handleStatisticsClick = useLastCallback(() => {
     toggleStatistics();
     closeMenu();
-  }, [closeMenu, toggleStatistics]);
+  });
 
-  const handleSelectMessages = useCallback(() => {
+  const handleSelectMessages = useLastCallback(() => {
     enterMessageSelectMode();
     closeMenu();
-  }, [closeMenu, enterMessageSelectMode]);
+  });
 
-  const handleOpenAsMessages = useCallback(() => {
+  const handleOpenAsMessages = useLastCallback(() => {
     onAsMessagesClick();
     closeMenu();
-  }, [closeMenu, onAsMessagesClick]);
+  });
 
   useEffect(() => {
     disableScrolling();

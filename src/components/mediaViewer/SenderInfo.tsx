@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
@@ -13,6 +13,8 @@ import {
   selectSender,
   selectUser,
 } from '../../global/selectors';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 
@@ -50,7 +52,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
 
   const { isMobile } = useAppLayout();
 
-  const handleFocusMessage = useCallback(() => {
+  const handleFocusMessage = useLastCallback(() => {
     closeMediaViewer();
 
     if (!chatId || !messageId) return;
@@ -63,7 +65,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
     } else {
       focusMessage({ chatId, messageId });
     }
-  }, [chatId, isMobile, focusMessage, toggleChatInfo, messageId, closeMediaViewer]);
+  });
 
   const lang = useLang();
 

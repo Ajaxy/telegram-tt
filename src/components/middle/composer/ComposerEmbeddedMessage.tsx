@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -26,6 +26,7 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
 import { isUserId, stripCustomEmoji } from '../../../global/helpers';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useLang from '../../../hooks/useLang';
@@ -101,7 +102,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     shouldRender, transitionClassNames,
   } = useShowTransition(canAnimate && isShown, undefined, !shouldAnimate, undefined, !shouldAnimate);
 
-  const clearEmbedded = useCallback(() => {
+  const clearEmbedded = useLastCallback(() => {
     if (replyingToId && !shouldForceShowEditing) {
       setReplyingToId({ messageId: undefined });
     } else if (editingId) {
@@ -110,35 +111,32 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
       exitForwardMode();
     }
     onClear?.();
-  }, [
-    replyingToId, shouldForceShowEditing, editingId, forwardedMessagesCount, onClear, setReplyingToId, setEditingId,
-    exitForwardMode,
-  ]);
+  });
 
   useEffect(() => (isShown ? captureEscKeyListener(clearEmbedded) : undefined), [isShown, clearEmbedded]);
 
-  const handleMessageClick = useCallback((): void => {
+  const handleMessageClick = useLastCallback((): void => {
     if (isForwarding) return;
     focusMessage({ chatId: message!.chatId, messageId: message!.id, noForumTopicPanel: true });
-  }, [focusMessage, isForwarding, message]);
+  });
 
-  const handleClearClick = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+  const handleClearClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
     e.stopPropagation();
     clearEmbedded();
-  }, [clearEmbedded]);
+  });
 
-  const handleChangeRecipientClick = useCallback(() => {
+  const handleChangeRecipientClick = useLastCallback(() => {
     changeForwardRecipient();
-  }, [changeForwardRecipient]);
+  });
 
   const {
     isContextMenuOpen, contextMenuPosition, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
-  const getTriggerElement = useCallback(() => ref.current, []);
-  const getRootElement = useCallback(() => ref.current!, []);
-  const getMenuElement = useCallback(() => ref.current!.querySelector('.forward-context-menu .bubble'), []);
+  const getTriggerElement = useLastCallback(() => ref.current);
+  const getRootElement = useLastCallback(() => ref.current!);
+  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.forward-context-menu .bubble'));
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,

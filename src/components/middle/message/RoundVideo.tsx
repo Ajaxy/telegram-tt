@@ -1,6 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -19,6 +18,8 @@ import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
 import safePlay from '../../../util/safePlay';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -136,7 +137,7 @@ const RoundVideo: FC<OwnProps> = ({
 
   const shouldPlay = Boolean(mediaData && isIntersecting);
 
-  const stopPlaying = useCallback(() => {
+  const stopPlaying = useLastCallback(() => {
     if (!playerRef.current) {
       return;
     }
@@ -148,14 +149,14 @@ const RoundVideo: FC<OwnProps> = ({
     requestMutation(() => {
       playingProgressRef.current!.innerHTML = '';
     });
-  }, [setProgress]);
+  });
 
-  const capturePlaying = useCallback(() => {
+  const capturePlaying = useLastCallback(() => {
     stopPrevious?.();
     stopPrevious = stopPlaying;
-  }, [stopPlaying]);
+  });
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (!mediaData) {
       setIsLoadAllowed((isAllowed) => !isAllowed);
 
@@ -185,13 +186,13 @@ const RoundVideo: FC<OwnProps> = ({
 
       setIsActivated(true);
     }
-  }, [capturePlaying, isActivated, isDownloading, mediaData, message]);
+  });
 
-  const handleTimeUpdate = useCallback((e: React.UIEvent<HTMLVideoElement>) => {
+  const handleTimeUpdate = useLastCallback((e: React.UIEvent<HTMLVideoElement>) => {
     const playerEl = e.currentTarget;
 
     setProgress(playerEl.currentTime / playerEl.duration);
-  }, [setProgress]);
+  });
 
   return (
     <div

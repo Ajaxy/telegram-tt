@@ -1,7 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
@@ -58,9 +60,9 @@ const SymbolMenuFooter: FC<OwnProps> = ({
     );
   }
 
-  const handleSearchOpen = useCallback(() => {
+  const handleSearchOpen = useLastCallback(() => {
     onSearchOpen(activeTab === SymbolMenuTabs.Stickers ? 'stickers' : 'gifs');
-  }, [activeTab, onSearchOpen]);
+  });
 
   function stopPropagation(event: any) {
     event.stopPropagation();

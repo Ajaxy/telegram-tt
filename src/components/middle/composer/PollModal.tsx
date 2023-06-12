@@ -1,7 +1,7 @@
 import type { ChangeEvent, RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 
@@ -9,6 +9,8 @@ import type { ApiNewPoll } from '../../../api/types';
 
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import parseMessageInput from '../../../util/parseMessageInput';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
@@ -54,11 +56,11 @@ const PollModal: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const focusInput = useCallback((ref: RefObject<HTMLInputElement>) => {
+  const focusInput = useLastCallback((ref: RefObject<HTMLInputElement>) => {
     if (isOpen && ref.current) {
       ref.current.focus();
     }
-  }, [isOpen]);
+  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(onClear) : undefined), [isOpen, onClear]);
   useEffect(() => {
@@ -84,7 +86,7 @@ const PollModal: FC<OwnProps> = ({
     }
   }, [solution]);
 
-  const addNewOption = useCallback((newOptions: string[] = []) => {
+  const addNewOption = useLastCallback((newOptions: string[] = []) => {
     setOptions([...newOptions, '']);
 
     requestNextMutation(() => {
@@ -96,9 +98,9 @@ const PollModal: FC<OwnProps> = ({
       list.classList.toggle('overflown', list.scrollHeight > MAX_LIST_HEIGHT);
       list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
     });
-  }, []);
+  });
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useLastCallback(() => {
     setHasErrors(false);
     if (!isOpen) {
       return;
@@ -155,20 +157,9 @@ const PollModal: FC<OwnProps> = ({
     }
 
     onSend(payload);
-  }, [
-    isOpen,
-    question,
-    options,
-    isQuizMode,
-    correctOption,
-    isAnonymous,
-    isMultipleAnswers,
-    onSend,
-    addNewOption,
-    solution,
-  ]);
+  });
 
-  const updateOption = useCallback((index: number, text: string) => {
+  const updateOption = useLastCallback((index: number, text: string) => {
     const newOptions = [...options];
     newOptions[index] = text;
     if (newOptions[newOptions.length - 1].trim().length && newOptions.length < MAX_OPTIONS_COUNT) {
@@ -176,9 +167,9 @@ const PollModal: FC<OwnProps> = ({
     } else {
       setOptions(newOptions);
     }
-  }, [options, addNewOption]);
+  });
 
-  const removeOption = useCallback((index: number) => {
+  const removeOption = useLastCallback((index: number) => {
     const newOptions = [...options];
     newOptions.splice(index, 1);
     setOptions(newOptions);
@@ -198,49 +189,49 @@ const PollModal: FC<OwnProps> = ({
 
       optionsListRef.current.classList.toggle('overflown', optionsListRef.current.scrollHeight > MAX_LIST_HEIGHT);
     });
-  }, [correctOption, options]);
+  });
 
-  const handleCorrectOptionChange = useCallback((newValue: string) => {
+  const handleCorrectOptionChange = useLastCallback((newValue: string) => {
     setCorrectOption(Number(newValue));
-  }, [setCorrectOption]);
+  });
 
-  const handleIsAnonymousChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleIsAnonymousChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsAnonymous(e.target.checked);
-  }, []);
+  });
 
-  const handleMultipleAnswersChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleMultipleAnswersChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsMultipleAnswers(e.target.checked);
-  }, []);
+  });
 
-  const handleQuizModeChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleQuizModeChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setIsQuizMode(e.target.checked);
-  }, []);
+  });
 
-  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyPress = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode === 13) {
       handleCreate();
     }
-  }, [handleCreate]);
+  });
 
-  const handleQuestionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleQuestionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
-  }, []);
+  });
 
-  const getQuestionError = useCallback(() => {
+  const getQuestionError = useLastCallback(() => {
     if (hasErrors && !question.trim().length) {
       return lang('lng_polls_choose_question');
     }
 
     return undefined;
-  }, [hasErrors, lang, question]);
+  });
 
-  const getOptionsError = useCallback((index: number) => {
+  const getOptionsError = useLastCallback((index: number) => {
     const optionsTrimmed = options.map((o) => o.trim()).filter((o) => o.length);
     if (hasErrors && optionsTrimmed.length < 2 && !options[index].trim().length) {
       return lang('lng_polls_choose_answers');
     }
     return undefined;
-  }, [hasErrors, lang, options]);
+  });
 
   function renderHeader() {
     return (

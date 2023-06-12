@@ -1,5 +1,5 @@
 import {
-  useCallback, useEffect, useLayoutEffect, useRef,
+  useEffect, useLayoutEffect, useRef,
 } from '../../../../lib/teact/teact';
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
@@ -19,12 +19,12 @@ import { REM } from '../../../common/helpers/mediaDimensions';
 import { hexToRgb } from '../../../../util/switchTheme';
 import useColorFilter from '../../../../hooks/stickers/useColorFilter';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useResizeObserver from '../../../../hooks/useResizeObserver';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
-import { useLastCallback } from '../../../../hooks/useLastCallback';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;
@@ -51,7 +51,7 @@ export default function useInputCustomEmojis(
   const colorFilter = useColorFilter(customColor, true);
   const playersById = useRef<Map<string, CustomEmojiPlayer>>(new Map());
 
-  const clearPlayers = useCallback((ids: string[]) => {
+  const clearPlayers = useLastCallback((ids: string[]) => {
     ids.forEach((id) => {
       const player = playersById.current.get(id);
       if (player) {
@@ -59,7 +59,7 @@ export default function useInputCustomEmojis(
         playersById.current.delete(id);
       }
     });
-  }, []);
+  });
 
   const synchronizeElements = useLastCallback(() => {
     if (!isReady || !inputRef.current || !sharedCanvasRef.current || !sharedCanvasHqRef.current) return;
@@ -160,13 +160,13 @@ export default function useInputCustomEmojis(
   );
   useResizeObserver(sharedCanvasRef, throttledSynchronizeElements);
 
-  const freezeAnimation = useCallback(() => {
+  const freezeAnimation = useLastCallback(() => {
     playersById.current.forEach((player) => {
       player.pause();
     });
-  }, []);
+  });
 
-  const unfreezeAnimation = useCallback(() => {
+  const unfreezeAnimation = useLastCallback(() => {
     if (!canPlayAnimatedEmojis) {
       return;
     }
@@ -174,11 +174,11 @@ export default function useInputCustomEmojis(
     playersById.current?.forEach((player) => {
       player.play();
     });
-  }, [canPlayAnimatedEmojis]);
+  });
 
-  const unfreezeAnimationOnRaf = useCallback(() => {
+  const unfreezeAnimationOnRaf = useLastCallback(() => {
     requestMeasure(unfreezeAnimation);
-  }, [unfreezeAnimation]);
+  });
 
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,

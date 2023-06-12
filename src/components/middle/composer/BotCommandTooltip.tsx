@@ -1,7 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  useCallback, useEffect, useRef, memo,
-} from '../../../lib/teact/teact';
+import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { Signal } from '../../../util/signals';
@@ -9,6 +7,8 @@ import type { ApiBotCommand } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -40,7 +40,7 @@ const BotCommandTooltip: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
-  const handleSendCommand = useCallback(({ botId, command }: ApiBotCommand) => {
+  const handleSendCommand = useLastCallback(({ botId, command }: ApiBotCommand) => {
     // No need for expensive global updates on users and chats, so we avoid them
     const usersById = getGlobal().users.byId;
     const bot = usersById[botId];
@@ -49,9 +49,9 @@ const BotCommandTooltip: FC<OwnProps> = ({
       command: `/${command}${withUsername && bot ? `@${bot.usernames![0].username}` : ''}`,
     });
     onClick();
-  }, [onClick, sendBotCommand, withUsername]);
+  });
 
-  const handleSelect = useCallback((botCommand: ApiBotCommand) => {
+  const handleSelect = useLastCallback((botCommand: ApiBotCommand) => {
     // We need an additional check because tooltip is updated with throttling
     if (!botCommand.command.startsWith(getHtml().slice(1))) {
       return false;
@@ -59,7 +59,7 @@ const BotCommandTooltip: FC<OwnProps> = ({
 
     handleSendCommand(botCommand);
     return true;
-  }, [getHtml, handleSendCommand]);
+  });
 
   const selectedCommandIndex = useKeyboardNavigation({
     isActive: isOpen,

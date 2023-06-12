@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type {
@@ -18,6 +18,8 @@ import { renderMessageText } from '../common/helpers/renderMessageText';
 import stopEvent from '../../util/stopEvent';
 import buildClassName from '../../util/buildClassName';
 import { useMediaProps } from './hooks/useMediaProps';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useAppLayout from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
 import useControlsSignal from './hooks/useControlsSignal';
@@ -102,9 +104,9 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   const isOpen = Boolean(avatarOwner || mediaId);
   const { isMobile } = useAppLayout();
 
-  const toggleControlsOnMove = useCallback(() => {
+  const toggleControlsOnMove = useLastCallback(() => {
     toggleControls(true);
-  }, [toggleControls]);
+  });
 
   if (avatarOwner || actionPhoto) {
     if (!isVideoAvatar) {

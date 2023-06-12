@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useRef, useState,
-} from '../../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -9,6 +7,8 @@ import type { ApiVideo, ApiSticker } from '../../../api/types';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_MODAL_CSS_SELECTOR } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 
@@ -35,7 +35,7 @@ type OwnProps = {
     isSilent?: boolean,
     shouldSchedule?: boolean,
     shouldPreserveInput?: boolean,
-    canUpdateStickerSetsOrder?: boolean
+    canUpdateStickerSetsOrder?: boolean,
   ) => void;
   onGifSelect?: (gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => void;
   onRemoveSymbol: VoidFunction;
@@ -91,7 +91,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
       : (isSymbolMenuOpen && 'is-loading'),
   );
 
-  const handleActivateSymbolMenu = useCallback(() => {
+  const handleActivateSymbolMenu = useLastCallback(() => {
     closeBotCommandMenu?.();
     closeSendAsMenu?.();
     openSymbolMenu();
@@ -99,9 +99,9 @@ const SymbolMenuButton: FC<OwnProps> = ({
     if (!triggerEl) return;
     const { x, y } = triggerEl.getBoundingClientRect();
     setContextMenuPosition({ x, y });
-  }, [closeBotCommandMenu, closeSendAsMenu, openSymbolMenu]);
+  });
 
-  const handleSearchOpen = useCallback((type: 'stickers' | 'gifs') => {
+  const handleSearchOpen = useLastCallback((type: 'stickers' | 'gifs') => {
     if (type === 'stickers') {
       setStickerSearchQuery({ query: '' });
       setGifSearchQuery({ query: undefined });
@@ -109,9 +109,9 @@ const SymbolMenuButton: FC<OwnProps> = ({
       setGifSearchQuery({ query: '' });
       setStickerSearchQuery({ query: undefined });
     }
-  }, [setStickerSearchQuery, setGifSearchQuery]);
+  });
 
-  const handleSymbolMenuOpen = useCallback(() => {
+  const handleSymbolMenuOpen = useLastCallback(() => {
     const messageInput = document.querySelector<HTMLDivElement>(
       isAttachmentModal ? EDITABLE_INPUT_MODAL_CSS_SELECTOR : EDITABLE_INPUT_CSS_SELECTOR,
     );
@@ -126,23 +126,12 @@ const SymbolMenuButton: FC<OwnProps> = ({
       closeBotCommandMenu?.();
       openSymbolMenu();
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
-  }, [isAttachmentModal, isMobile, openSymbolMenu, closeBotCommandMenu]);
+  });
 
-  const getTriggerElement = useCallback(() => triggerRef.current, []);
-
-  const getRootElement = useCallback(
-    () => triggerRef.current?.closest('.custom-scroll, .no-scrollbar'),
-    [],
-  );
-
-  const getMenuElement = useCallback(
-    () => document.querySelector('#portals .SymbolMenu .bubble'),
-    [],
-  );
-
-  const getLayout = useCallback(() => ({
-    withPortal: true,
-  }), []);
+  const getTriggerElement = useLastCallback(() => triggerRef.current);
+  const getRootElement = useLastCallback(() => triggerRef.current?.closest('.custom-scroll, .no-scrollbar'));
+  const getMenuElement = useLastCallback(() => document.querySelector('#portals .SymbolMenu .bubble'));
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,

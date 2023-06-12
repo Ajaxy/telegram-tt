@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useRef, useEffect, useState,
+  memo, useRef, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -19,6 +19,8 @@ import {
   isMessageDocumentVideo,
 } from '../../global/helpers';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../hooks/useMedia';
@@ -108,7 +110,7 @@ const Document: FC<OwnProps> = ({
     SUPPORTED_VIDEO_CONTENT_TYPES.has(document.mimeType) || SUPPORTED_IMAGE_CONTENT_TYPES.has(document.mimeType)
   );
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (isUploading) {
       if (onCancelUpload) {
         onCancelUpload();
@@ -131,13 +133,11 @@ const Document: FC<OwnProps> = ({
     } else {
       dispatch.downloadMessageMedia({ message });
     }
-  }, [
-    isUploading, isDownloading, isTransferring, withMediaViewer, onCancelUpload, dispatch, message, onMediaClick,
-  ]);
+  });
 
-  const handleDateClick = useCallback(() => {
+  const handleDateClick = useLastCallback(() => {
     onDateClick!(message.id, message.chatId);
-  }, [onDateClick, message.id, message.chatId]);
+  });
 
   return (
     <File

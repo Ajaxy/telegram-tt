@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment } from '../../../api/types';
@@ -8,6 +8,8 @@ import { getFileExtension } from '../../common/helpers/documentInfo';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
 import { REM } from '../../common/helpers/mediaDimensions';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import File from '../../common/File';
 import MediaSpoiler from '../../common/MediaSpoiler';
@@ -39,9 +41,9 @@ const AttachmentModalItem: FC<OwnProps> = ({
 }) => {
   const displayType = getDisplayType(attachment, shouldDisplayCompressed);
 
-  const handleSpoilerClick = useCallback(() => {
+  const handleSpoilerClick = useLastCallback(() => {
     onToggleSpoiler?.(index);
-  }, [index, onToggleSpoiler]);
+  });
 
   const content = useMemo(() => {
     switch (displayType) {

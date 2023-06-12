@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import { memo, useCallback, useEffect } from '../../lib/teact/teact';
+import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { GlobalState, TabState } from '../../global/types';
@@ -15,6 +15,7 @@ import {
 } from '../../global/helpers';
 import { compact } from '../../util/iteratees';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useRunDebounced from '../../hooks/useRunDebounced';
 
 type StateProps = {
@@ -34,7 +35,7 @@ const DownloadManager: FC<StateProps> = ({
 
   const runDebounced = useRunDebounced(GLOBAL_UPDATE_DEBOUNCE, true);
 
-  const handleMessageDownloaded = useCallback((message: ApiMessage) => {
+  const handleMessageDownloaded = useLastCallback((message: ApiMessage) => {
     downloadedMessages.add(message);
     runDebounced(() => {
       if (downloadedMessages.size) {
@@ -42,7 +43,7 @@ const DownloadManager: FC<StateProps> = ({
         downloadedMessages.clear();
       }
     });
-  }, [cancelMessagesMediaDownload, runDebounced]);
+  });
 
   useEffect(() => {
     // No need for expensive global updates on messages, so we avoid them

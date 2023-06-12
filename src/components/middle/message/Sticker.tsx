@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useCallback, useEffect, useRef } from '../../../lib/teact/teact';
+import React, { useEffect, useRef } from '../../../lib/teact/teact';
 
 import type { ApiMessage } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
@@ -11,6 +11,7 @@ import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
 import { getActions } from '../../../global';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMedia from '../../../hooks/useMedia';
 import useFlag from '../../../hooks/useFlag';
@@ -68,10 +69,10 @@ const Sticker: FC<OwnProps> = ({
   );
   const [isPlayingEffect, startPlayingEffect, stopPlayingEffect] = useFlag();
 
-  const handleEffectEnded = useCallback(() => {
+  const handleEffectEnded = useLastCallback(() => {
     stopPlayingEffect();
     onStopEffect?.();
-  }, [onStopEffect, stopPlayingEffect]);
+  });
 
   const previousShouldPlayEffect = usePrevious(shouldPlayEffect);
 
@@ -82,13 +83,13 @@ const Sticker: FC<OwnProps> = ({
     }
   }, [hasEffect, canPlay, onPlayEffect, shouldPlayEffect, previousShouldPlayEffect, startPlayingEffect, withEffect]);
 
-  const openModal = useCallback(() => {
+  const openModal = useLastCallback(() => {
     openStickerSet({
       stickerSetInfo: sticker.stickerSetInfo,
     });
-  }, [openStickerSet, sticker]);
+  });
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (hasEffect) {
       if (isPlayingEffect || !withEffect) {
         showNotification({
@@ -109,10 +110,7 @@ const Sticker: FC<OwnProps> = ({
       }
     }
     openModal();
-  }, [
-    hasEffect, isPlayingEffect, lang, onPlayEffect, openModal, showNotification, startPlayingEffect,
-    sticker.stickerSetInfo, withEffect,
-  ]);
+  });
 
   const isMemojiSticker = 'isMissing' in stickerSetInfo;
   const { width, height } = getStickerDimensions(sticker, isMobile);

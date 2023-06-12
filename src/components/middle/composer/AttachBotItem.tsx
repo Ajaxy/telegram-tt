@@ -1,12 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useState,
+  memo, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { IAnchorPosition, ISettings } from '../../../types';
 import type { ApiAttachBot } from '../../../api/types';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 
@@ -43,29 +44,29 @@ const AttachBotItem: FC<OwnProps> = ({
   const [isMenuOpen, openMenu, closeMenu] = useFlag();
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
-  const handleContextMenu = useCallback((e: React.UIEvent) => {
+  const handleContextMenu = useLastCallback((e: React.UIEvent) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     setMenuPosition({ x: rect.right, y: rect.bottom });
     onMenuOpened();
     openMenu();
-  }, [onMenuOpened, openMenu]);
+  });
 
-  const handleCloseMenu = useCallback(() => {
+  const handleCloseMenu = useLastCallback(() => {
     closeMenu();
     onMenuClosed();
-  }, [closeMenu, onMenuClosed]);
+  });
 
-  const handleCloseAnimationEnd = useCallback(() => {
+  const handleCloseAnimationEnd = useLastCallback(() => {
     setMenuPosition(undefined);
-  }, []);
+  });
 
-  const handleRemoveBot = useCallback(() => {
+  const handleRemoveBot = useLastCallback(() => {
     toggleAttachBot({
       botId: bot.id,
       isEnabled: false,
     });
-  }, [bot.id, toggleAttachBot]);
+  });
 
   return (
     <MenuItem

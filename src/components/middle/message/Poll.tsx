@@ -1,6 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useCallback,
   useEffect,
   useState,
   memo,
@@ -19,6 +18,8 @@ import { formatMediaDuration } from '../../../util/dateFormat';
 import type { LangFn } from '../../../hooks/useLang';
 import useLang from '../../../hooks/useLang';
 import { getServerTimeOffset } from '../../../util/serverTime';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import CheckboxGroup from '../../ui/CheckboxGroup';
 import RadioGroup from '../../ui/RadioGroup';
@@ -161,43 +162,35 @@ const Poll: FC<OwnProps & StateProps> = ({
     }, []) : [];
   }, [usersById, recentVoterIds]);
 
-  const handleRadioChange = useCallback(
-    (option: string) => {
-      setChosenOptions([option]);
-      setIsSubmitting(true);
-      setWasSubmitted(true);
-      onSendVote([option]);
-    }, [onSendVote],
-  );
+  const handleRadioChange = useLastCallback((option: string) => {
+    setChosenOptions([option]);
+    setIsSubmitting(true);
+    setWasSubmitted(true);
+    onSendVote([option]);
+  });
 
-  const handleCheckboxChange = useCallback(
-    (options: string[]) => {
-      setChosenOptions(options);
-    }, [],
-  );
+  const handleCheckboxChange = useLastCallback((options: string[]) => {
+    setChosenOptions(options);
+  });
 
-  const handleVoteClick = useCallback(
-    () => {
-      setIsSubmitting(true);
-      setWasSubmitted(true);
-      onSendVote(chosenOptions);
-    }, [onSendVote, chosenOptions],
-  );
+  const handleVoteClick = useLastCallback(() => {
+    setIsSubmitting(true);
+    setWasSubmitted(true);
+    onSendVote(chosenOptions);
+  });
 
-  const handleViewResultsClick = useCallback(
-    () => {
-      openPollResults({ chatId, messageId });
-    }, [chatId, messageId, openPollResults],
-  );
+  const handleViewResultsClick = useLastCallback(() => {
+    openPollResults({ chatId, messageId });
+  });
 
-  const handleSolutionShow = useCallback(() => {
+  const handleSolutionShow = useLastCallback(() => {
     setIsSolutionShown(true);
-  }, []);
+  });
 
-  const handleSolutionHide = useCallback(() => {
+  const handleSolutionHide = useLastCallback(() => {
     setIsSolutionShown(false);
     setWasSubmitted(false);
-  }, []);
+  });
 
   // Show the solution to quiz if the answer was incorrect
   useEffect(() => {

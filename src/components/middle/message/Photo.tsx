@@ -1,6 +1,4 @@
-import React, {
-  useCallback, useRef, useState,
-} from '../../../lib/teact/teact';
+import React, { useRef, useState } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -23,6 +21,7 @@ import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions, MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -129,7 +128,7 @@ const Photo: FC<OwnProps> = ({
     transitionClassNames: downloadButtonClassNames,
   } = useShowTransition(!fullMediaData && !isLoadAllowed);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (isUploading) {
       onCancelUpload?.(message);
       return;
@@ -146,7 +145,7 @@ const Photo: FC<OwnProps> = ({
     }
 
     onClick?.(message.id);
-  }, [fullMediaData, hideSpoiler, isSpoilerShown, isUploading, message, onCancelUpload, onClick]);
+  });
 
   const isOwn = isOwnMessage(message);
   useLayoutEffectWithPrevDeps(([prevShouldAffectAppendix]) => {

@@ -1,13 +1,12 @@
 import type { ChangeEvent } from 'react';
 
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  memo, useCallback, useMemo, useState,
-} from '../../lib/teact/teact';
+import React, { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 
 import Modal from '../ui/Modal';
@@ -44,7 +43,7 @@ const ReportModal: FC<OwnProps> = ({
   const [selectedReason, setSelectedReason] = useState<ApiReportReason>('spam');
   const [description, setDescription] = useState('');
 
-  const handleReport = useCallback(() => {
+  const handleReport = useLastCallback(() => {
     switch (subject) {
       case 'messages':
         reportMessages({ messageIds: messageIds!, reason: selectedReason, description });
@@ -60,27 +59,15 @@ const ReportModal: FC<OwnProps> = ({
         break;
     }
     onClose();
-  }, [
-    description,
-    exitMessageSelectMode,
-    messageIds,
-    photo,
-    onClose,
-    reportMessages,
-    selectedReason,
-    chatId,
-    reportProfilePhoto,
-    reportPeer,
-    subject,
-  ]);
+  });
 
-  const handleSelectReason = useCallback((value: string) => {
+  const handleSelectReason = useLastCallback((value: string) => {
     setSelectedReason(value as ApiReportReason);
-  }, []);
+  });
 
-  const handleDescriptionChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleDescriptionChange = useLastCallback((e: ChangeEvent<HTMLInputElement>) => {
     setDescription(e.target.value);
-  }, []);
+  });
 
   const lang = useLang();
 

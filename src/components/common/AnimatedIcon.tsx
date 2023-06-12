@@ -1,10 +1,10 @@
-import React, {
-  memo, useCallback, useState,
-} from '../../lib/teact/teact';
+import React, { memo, useState } from '../../lib/teact/teact';
 
 import type { OwnProps as AnimatedStickerProps } from './AnimatedSticker';
 
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
 
@@ -31,20 +31,20 @@ function AnimatedIcon(props: OwnProps) {
   const [isAnimationLoaded, markAnimationLoaded] = useFlag(false);
   const transitionClassNames = useMediaTransition(noTransition || isAnimationLoaded);
 
-  const handleLoad = useCallback(() => {
+  const handleLoad = useLastCallback(() => {
     markAnimationLoaded();
     onLoad?.();
-  }, [markAnimationLoaded, onLoad]);
+  });
 
   const [playKey, setPlayKey] = useState(String(Math.random()));
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (play === true) {
       setPlayKey(String(Math.random()));
     }
 
     onClick?.();
-  }, [onClick, play]);
+  });
 
   return (
     <AnimatedSticker

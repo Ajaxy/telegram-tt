@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useRef, useEffect, memo, useMemo,
+  useRef, useEffect, memo, useMemo,
 } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 
@@ -8,6 +8,8 @@ import type { FC } from '../../lib/teact/teact';
 import { isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 
@@ -99,7 +101,7 @@ const Picker: FC<OwnProps> = ({
     });
   }, [itemIds, lockedIdsSet]);
 
-  const handleItemClick = useCallback((id: string) => {
+  const handleItemClick = useLastCallback((id: string) => {
     if (lockedIdsSet.has(id)) {
       onDisabledClick?.(id);
       return;
@@ -113,12 +115,12 @@ const Picker: FC<OwnProps> = ({
     }
     onSelectedIdsChange?.(newSelectedIds);
     onFilterChange?.('');
-  }, [lockedIdsSet, selectedIds, onSelectedIdsChange, onFilterChange, onDisabledClick]);
+  });
 
-  const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;
     onFilterChange?.(value);
-  }, [onFilterChange]);
+  });
 
   const [viewportIds, getMore] = useInfiniteScroll(onLoadMore, sortedItemIds, Boolean(filterValue));
 

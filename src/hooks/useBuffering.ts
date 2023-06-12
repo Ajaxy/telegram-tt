@@ -1,8 +1,10 @@
 import type React from '../lib/teact/teact';
-import { useCallback, useMemo, useState } from '../lib/teact/teact';
+import { useMemo, useState } from '../lib/teact/teact';
 import { debounce } from '../util/schedulers';
 import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
 import { areDeepEqual } from '../util/areDeepEqual';
+
+import useLastCallback from './useLastCallback';
 
 type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => void;
 
@@ -25,7 +27,7 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
     return debounce(setIsBuffered, DEBOUNCE, false, true);
   }, []);
 
-  const handleBuffering = useCallback<BufferingEvent>((e) => {
+  const handleBuffering = useLastCallback<BufferingEvent>((e) => {
     if (e.type === 'timeupdate') {
       onTimeUpdate?.(e);
     }
@@ -45,7 +47,7 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
       setIsBufferedDebounced(media.readyState >= MIN_READY_STATE || media.currentTime > 0);
       setIsReady((current) => current || media.readyState > MIN_READY_STATE);
     }
-  }, [onTimeUpdate, setIsBufferedDebounced]);
+  });
 
   const bufferingHandlers = {
     onLoadedData: handleBuffering,

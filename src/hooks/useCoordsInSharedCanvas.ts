@@ -1,9 +1,10 @@
 import {
-  useCallback, useEffect, useMemo, useState,
+  useEffect, useMemo, useState,
 } from '../lib/teact/teact';
 
 import { round } from '../util/math';
 
+import useLastCallback from './useLastCallback';
 import useResizeObserver from './useResizeObserver';
 import useThrottledCallback from './useThrottledCallback';
 import useSharedIntersectionObserver from './useSharedIntersectionObserver';
@@ -17,7 +18,7 @@ export default function useCoordsInSharedCanvas(
   const [x, setX] = useState<number>();
   const [y, setY] = useState<number>();
 
-  const recalculate = useCallback(() => {
+  const recalculate = useLastCallback(() => {
     const container = containerRef.current;
     const canvas = sharedCanvasRef?.current;
     if (!container || !canvas) {
@@ -42,7 +43,7 @@ export default function useCoordsInSharedCanvas(
     // Factor coords are used to support rendering while being rescaled (e.g. message appearance animation)
     setX(round((targetBounds.left - canvasBounds.left) / canvasBounds.width, 4) || 0);
     setY(round((targetBounds.top - canvasBounds.top) / canvasBounds.height, 4) || 0);
-  }, [containerRef, sharedCanvasRef]);
+  });
 
   useEffect(recalculate, [recalculate]);
 

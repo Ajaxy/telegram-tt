@@ -1,11 +1,13 @@
 import type { RefObject } from 'react';
+import { useRef, useState } from '../../../lib/teact/teact';
 
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useSyncEffect from '../../../hooks/useSyncEffect';
-import { useCallback, useRef, useState } from '../../../lib/teact/teact';
 import { ANIMATION_END_DELAY } from '../../../config';
 import animateScroll from '../../../util/animateScroll';
 import { REM } from '../helpers/mediaDimensions';
+
+import useLastCallback from '../../../hooks/useLastCallback';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 const STICKER_INTERSECTION_THROTTLE = 200;
 const STICKER_INTERSECTION_MARGIN = 100;
@@ -85,7 +87,7 @@ export function useStickerPickerObservers(
     }
   }, [freezeForSet, freezeForShowingItems, isHidden, unfreezeForSet, unfreezeForShowingItems]);
 
-  const selectStickerSet = useCallback((index: number) => {
+  const selectStickerSet = useLastCallback((index: number) => {
     setActiveSetIndex((currentIndex) => {
       const stickerSetEl = document.getElementById(`${idPrefix}-${index}`)!;
       const isClose = Math.abs(currentIndex - index) === 1;
@@ -100,7 +102,7 @@ export function useStickerPickerObservers(
 
       return index;
     });
-  }, [containerRef, idPrefix]);
+  });
 
   return {
     activeSetIndex,

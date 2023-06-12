@@ -1,9 +1,11 @@
-import { useCallback, useEffect } from '../../../lib/teact/teact';
+import { useEffect } from '../../../lib/teact/teact';
 
 import { ProfileState } from '../../../types';
 
 import animateScroll from '../../../util/animateScroll';
 import { throttle } from '../../../util/schedulers';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 
 const TRANSITION_DURATION = 300;
@@ -67,7 +69,7 @@ export default function useProfileState(
     onProfileStateChange(profileState);
   }, [profileState, containerRef, onProfileStateChange]);
 
-  const determineProfileState = useCallback(() => {
+  const determineProfileState = useLastCallback(() => {
     const container = containerRef.current;
     if (!container) {
       return;
@@ -86,7 +88,7 @@ export default function useProfileState(
     }
 
     onProfileStateChange(state);
-  }, [containerRef, onProfileStateChange, tabType]);
+  });
 
   // Determine profile state when switching tabs
   useEffect(() => {
@@ -98,13 +100,13 @@ export default function useProfileState(
   }, [determineProfileState, tabType]);
 
   // Determine profile state when scrolling
-  const handleScroll = useCallback(() => {
+  const handleScroll = useLastCallback(() => {
     if (isScrollingProgrammatically) {
       return;
     }
 
     runThrottledForScroll(determineProfileState);
-  }, [determineProfileState]);
+  });
 
   return { handleScroll };
 }

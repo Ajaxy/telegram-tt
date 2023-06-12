@@ -1,15 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 
 import { selectChat } from '../../global/selectors';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
 import { getUserIdDividend } from '../../global/helpers';
+
+import useLastCallback from '../../hooks/useLastCallback';
+import useLang from '../../hooks/useLang';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
 import StickerButton from '../common/StickerButton';
 
@@ -61,13 +61,13 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     }
   }, [connectionState, markMessageListRead, lastUnreadMessageId]);
 
-  const handleStickerSelect = useCallback((selectedSticker: ApiSticker) => {
+  const handleStickerSelect = useLastCallback((selectedSticker: ApiSticker) => {
     selectedSticker = {
       ...selectedSticker,
       isPreloadedGlobally: true,
     };
     sendMessage({ sticker: selectedSticker });
-  }, [sendMessage]);
+  });
 
   return (
     <div className="ContactGreeting" ref={containerRef}>

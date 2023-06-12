@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { useEffect } from '../../../../lib/teact/teact';
 import twemojiRegex from '../../../../lib/twemojiRegex';
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
@@ -13,6 +13,7 @@ import { getHtmlBeforeSelection } from '../../../../util/selection';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useDerivedState from '../../../../hooks/useDerivedState';
 import useFlag from '../../../../hooks/useFlag';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
@@ -68,7 +69,7 @@ export default function useCustomEmojiTooltip(
     }
   }, [isEnabled, getLastEmoji, hasCustomEmojis, clearCustomEmojiForEmoji, loadCustomEmojiForEmoji]);
 
-  const insertCustomEmoji = useCallback((emoji: ApiSticker) => {
+  const insertCustomEmoji = useLastCallback((emoji: ApiSticker) => {
     const lastEmoji = getLastEmoji();
     if (!isEnabled || !lastEmoji) return;
 
@@ -89,7 +90,7 @@ export default function useCustomEmojiTooltip(
     requestNextMutation(() => {
       focusEditableElement(inputEl, true, true);
     });
-  }, [getLastEmoji, isEnabled, inputRef, setHtml]);
+  });
 
   useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 

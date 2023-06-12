@@ -1,11 +1,13 @@
-import React, { useCallback, useState } from '../lib/teact/teact';
+import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getDayStartAt } from '../util/dateFormat';
+import { getServerTimeOffset } from '../util/serverTime';
+
+import useLastCallback from './useLastCallback';
 import useLang from './useLang';
 
 import CalendarModal from '../components/common/CalendarModal.async';
-import { getServerTimeOffset } from '../util/serverTime';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 
@@ -17,26 +19,26 @@ const useSchedule = (
   const lang = useLang();
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
-  const handleMessageSchedule = useCallback((date: Date, isWhenOnline = false) => {
+  const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
     // Scheduled time can not be less than 10 seconds in future
     const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
       + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
     setOnScheduled(undefined);
-  }, [onScheduled]);
+  });
 
-  const handleMessageScheduleUntilOnline = useCallback(() => {
+  const handleMessageScheduleUntilOnline = useLastCallback(() => {
     handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
-  }, [handleMessageSchedule]);
+  });
 
-  const handleCloseCalendar = useCallback(() => {
+  const handleCloseCalendar = useLastCallback(() => {
     setOnScheduled(undefined);
     onCancel?.();
-  }, [onCancel]);
+  });
 
-  const requestCalendar = useCallback((whenScheduled: OnScheduledCallback) => {
+  const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
     setOnScheduled(() => whenScheduled);
-  }, []);
+  });
 
   const scheduledDefaultDate = openAt ? new Date(openAt * 1000) : new Date();
   scheduledDefaultDate.setSeconds(0);

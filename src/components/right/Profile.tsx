@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, useEffect, useMemo, useRef, useState, memo,
+  useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -39,6 +39,8 @@ import {
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useProfileViewportIds from './hooks/useProfileViewportIds';
 import useProfileState from './hooks/useProfileState';
@@ -205,14 +207,14 @@ const Profile: FC<OwnProps & StateProps> = ({
     throttleMs: INTERSECTION_THROTTLE,
   });
 
-  const handleTransitionStop = useCallback(() => {
+  const handleTransitionStop = useLastCallback(() => {
     releaseTransitionFix();
     resetCacheBuster();
-  }, [releaseTransitionFix, resetCacheBuster]);
+  });
 
-  const handleNewMemberDialogOpen = useCallback(() => {
+  const handleNewMemberDialogOpen = useLastCallback(() => {
     setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.InProgress });
-  }, [setNewChatMembersDialogState]);
+  });
 
   // Update search type when switching tabs or forum topics
   useEffect(() => {
@@ -227,30 +229,30 @@ const Profile: FC<OwnProps & StateProps> = ({
     }
   }, [loadProfilePhotos, profileId, lastSyncTime]);
 
-  const handleSelectMedia = useCallback((mediaId: number) => {
+  const handleSelectMedia = useLastCallback((mediaId: number) => {
     openMediaViewer({
       chatId: profileId,
       threadId: MAIN_THREAD_ID,
       mediaId,
       origin: MediaViewerOrigin.SharedMedia,
     });
-  }, [profileId, openMediaViewer]);
+  });
 
-  const handlePlayAudio = useCallback((messageId: number) => {
+  const handlePlayAudio = useLastCallback((messageId: number) => {
     openAudioPlayer({ chatId: profileId, messageId });
-  }, [profileId, openAudioPlayer]);
+  });
 
-  const handleMemberClick = useCallback((id: string) => {
+  const handleMemberClick = useLastCallback((id: string) => {
     openChat({ id });
-  }, [openChat]);
+  });
 
-  const handleMessageFocus = useCallback((messageId: number) => {
+  const handleMessageFocus = useLastCallback((messageId: number) => {
     focusMessage({ chatId: profileId, messageId });
-  }, [profileId, focusMessage]);
+  });
 
-  const handleDeleteMembersModalClose = useCallback(() => {
+  const handleDeleteMembersModalClose = useLastCallback(() => {
     setDeletingUserId(undefined);
-  }, []);
+  });
 
   useEffectWithPrevDeps(([prevHasMemberTabs]) => {
     if (activeTab === 0 || prevHasMemberTabs === hasMembersTab) {

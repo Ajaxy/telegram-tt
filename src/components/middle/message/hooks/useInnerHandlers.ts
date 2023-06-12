@@ -1,5 +1,4 @@
 import type React from '../../../../lib/teact/teact';
-import { useCallback } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { IAlbum } from '../../../../types';
@@ -9,6 +8,8 @@ import type {
 } from '../../../../api/types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import type { LangFn } from '../../../../hooks/useLang';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 export default function useInnerHandlers(
   lang: LangFn,
@@ -36,15 +37,15 @@ export default function useInnerHandlers(
     id: messageId, forwardInfo, replyToMessageId, replyToChatId, replyToTopMessageId, groupedId,
   } = message;
 
-  const handleAvatarClick = useCallback(() => {
+  const handleAvatarClick = useLastCallback(() => {
     if (!avatarPeer) {
       return;
     }
 
     openChat({ id: avatarPeer.id });
-  }, [avatarPeer, openChat]);
+  });
 
-  const handleSenderClick = useCallback(() => {
+  const handleSenderClick = useLastCallback(() => {
     if (!senderPeer) {
       showNotification({ message: lang('HidAccount') });
 
@@ -56,19 +57,17 @@ export default function useInnerHandlers(
     } else {
       openChat({ id: senderPeer.id });
     }
-  }, [
-    asForwarded, focusMessage, forwardInfo, lang, openChat, senderPeer, showNotification,
-  ]);
+  });
 
-  const handleViaBotClick = useCallback(() => {
+  const handleViaBotClick = useLastCallback(() => {
     if (!botSender) {
       return;
     }
 
     openChat({ id: botSender.id });
-  }, [botSender, openChat]);
+  });
 
-  const handleReplyClick = useCallback((): void => {
+  const handleReplyClick = useLastCallback((): void => {
     focusMessage({
       chatId: isChatWithRepliesBot && replyToChatId ? replyToChatId : chatId,
       threadId,
@@ -76,62 +75,62 @@ export default function useInnerHandlers(
       replyMessageId: isChatWithRepliesBot && replyToChatId ? undefined : messageId,
       noForumTopicPanel: true,
     });
-  }, [focusMessage, isChatWithRepliesBot, replyToChatId, chatId, threadId, replyToMessageId, messageId]);
+  });
 
-  const handleMediaClick = useCallback((): void => {
+  const handleMediaClick = useLastCallback((): void => {
     openMediaViewer({
       chatId,
       threadId,
       mediaId: messageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledInline : MediaViewerOrigin.Inline,
     });
-  }, [chatId, threadId, messageId, openMediaViewer, isScheduled]);
+  });
 
-  const handleAudioPlay = useCallback((): void => {
+  const handleAudioPlay = useLastCallback((): void => {
     openAudioPlayer({ chatId, messageId });
-  }, [chatId, messageId, openAudioPlayer]);
+  });
 
-  const handleAlbumMediaClick = useCallback((albumMessageId: number): void => {
+  const handleAlbumMediaClick = useLastCallback((albumMessageId: number): void => {
     openMediaViewer({
       chatId,
       threadId,
       mediaId: albumMessageId,
       origin: isScheduled ? MediaViewerOrigin.ScheduledAlbum : MediaViewerOrigin.Album,
     });
-  }, [chatId, threadId, openMediaViewer, isScheduled]);
+  });
 
-  const handleReadMedia = useCallback((): void => {
+  const handleReadMedia = useLastCallback((): void => {
     markMessagesRead({ messageIds: [messageId] });
-  }, [messageId, markMessagesRead]);
+  });
 
-  const handleCancelUpload = useCallback(() => {
+  const handleCancelUpload = useLastCallback(() => {
     cancelSendingMessage({ chatId, messageId });
-  }, [cancelSendingMessage, chatId, messageId]);
+  });
 
-  const handleVoteSend = useCallback((options: string[]) => {
+  const handleVoteSend = useLastCallback((options: string[]) => {
     sendPollVote({ chatId, messageId, options });
-  }, [chatId, messageId, sendPollVote]);
+  });
 
-  const handleGroupForward = useCallback(() => {
+  const handleGroupForward = useLastCallback(() => {
     openForwardMenu({ fromChatId: chatId, groupedId });
-  }, [openForwardMenu, chatId, groupedId]);
+  });
 
-  const handleForward = useCallback(() => {
+  const handleForward = useLastCallback(() => {
     if (album && album.messages) {
       const messageIds = album.messages.map(({ id }) => id);
       openForwardMenu({ fromChatId: chatId, messageIds });
     } else {
       openForwardMenu({ fromChatId: chatId, messageIds: [messageId] });
     }
-  }, [album, openForwardMenu, chatId, messageId]);
+  });
 
-  const handleFocus = useCallback(() => {
+  const handleFocus = useLastCallback(() => {
     focusMessage({
       chatId, threadId: MAIN_THREAD_ID, messageId,
     });
-  }, [focusMessage, chatId, messageId]);
+  });
 
-  const handleFocusForwarded = useCallback(() => {
+  const handleFocusForwarded = useLastCallback(() => {
     if (isInDocumentGroup) {
       focusMessage({
         chatId: forwardInfo!.fromChatId!, groupedId, groupedChatId: chatId, messageId: forwardInfo!.fromMessageId!,
@@ -150,38 +149,35 @@ export default function useInnerHandlers(
         chatId: forwardInfo!.fromChatId!, messageId: forwardInfo!.fromMessageId!,
       });
     }
-  }, [
-    isInDocumentGroup, isChatWithRepliesBot, replyToChatId, focusMessage, forwardInfo, groupedId, chatId,
-    focusMessageInComments, replyToTopMessageId,
-  ]);
+  });
 
-  const selectWithGroupedId = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const selectWithGroupedId = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     selectMessage(e, groupedId);
-  }, [selectMessage, groupedId]);
+  });
 
-  const handleTranslationClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleTranslationClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     openMessageLanguageModal({ chatId, id: messageId });
-  }, [chatId, messageId, openMessageLanguageModal]);
+  });
 
-  const handleOpenThread = useCallback(() => {
+  const handleOpenThread = useLastCallback(() => {
     openChat({
       id: message.chatId,
       threadId: message.id,
     });
-  }, [message.chatId, message.id, openChat]);
+  });
 
-  const handleTopicChipClick = useCallback(() => {
+  const handleTopicChipClick = useLastCallback(() => {
     if (!messageTopic) return;
     focusMessage({
       chatId: isChatWithRepliesBot && replyToChatId ? replyToChatId : chatId,
       threadId: messageTopic.id,
       messageId,
     });
-  }, [chatId, focusMessage, isChatWithRepliesBot, messageTopic, messageId, replyToChatId]);
+  });
 
   return {
     handleAvatarClick,

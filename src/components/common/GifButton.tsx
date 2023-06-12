@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import type { ApiVideo } from '../../api/types';
@@ -26,6 +26,7 @@ import MenuItem from '../ui/MenuItem';
 import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './GifButton.scss';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   gif: ApiVideo;
@@ -69,17 +70,9 @@ const GifButton: FC<OwnProps> = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
-  const getTriggerElement = useCallback(() => ref.current, []);
-
-  const getRootElement = useCallback(
-    () => ref.current!.closest('.custom-scroll, .no-scrollbar'),
-    [],
-  );
-
-  const getMenuElement = useCallback(
-    () => ref.current!.querySelector('.gif-context-menu .bubble'),
-    [],
-  );
+  const getTriggerElement = useLastCallback(() => ref.current);
+  const getRootElement = useLastCallback(() => ref.current!.closest('.custom-scroll, .no-scrollbar'));
+  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.gif-context-menu .bubble'));
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
@@ -90,42 +83,42 @@ const GifButton: FC<OwnProps> = ({
     getMenuElement,
   );
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (isContextMenuOpen || !onClick) return;
     onClick({
       ...gif,
       blobUrl: videoData,
     });
-  }, [isContextMenuOpen, onClick, gif, videoData]);
+  });
 
-  const handleUnsaveClick = useCallback((e: React.MouseEvent) => {
+  const handleUnsaveClick = useLastCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     onUnsaveClick!(gif);
-  }, [onUnsaveClick, gif]);
+  });
 
-  const handleContextDelete = useCallback(() => {
+  const handleContextDelete = useLastCallback(() => {
     onUnsaveClick?.(gif);
-  }, [gif, onUnsaveClick]);
+  });
 
-  const handleSendQuiet = useCallback(() => {
+  const handleSendQuiet = useLastCallback(() => {
     onClick!({
       ...gif,
       blobUrl: videoData,
     }, true);
-  }, [gif, onClick, videoData]);
+  });
 
-  const handleSendScheduled = useCallback(() => {
+  const handleSendScheduled = useLastCallback(() => {
     onClick!({
       ...gif,
       blobUrl: videoData,
     }, undefined, true);
-  }, [gif, onClick, videoData]);
+  });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
+  const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     preventMessageInputBlurWithBubbling(e);
     handleBeforeContextMenu(e);
-  }, [handleBeforeContextMenu]);
+  });
 
   useEffect(() => {
     if (isDisabled) handleContextMenuClose();

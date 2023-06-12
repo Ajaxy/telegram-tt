@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -43,6 +43,7 @@ import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -261,65 +262,65 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     return activeDownloads?.[message.isScheduled ? 'scheduledIds' : 'ids']?.includes(message.id);
   }, [activeDownloads, album, message]);
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useLastCallback(() => {
     setIsMenuOpen(false);
     setIsDeleteModalOpen(true);
-  }, []);
+  });
 
-  const handleReport = useCallback(() => {
+  const handleReport = useLastCallback(() => {
     setIsMenuOpen(false);
     setIsReportModalOpen(true);
-  }, []);
+  });
 
-  const closeMenu = useCallback(() => {
+  const closeMenu = useLastCallback(() => {
     setIsMenuOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const closeDeleteModal = useCallback(() => {
+  const closeDeleteModal = useLastCallback(() => {
     setIsDeleteModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const closeReportModal = useCallback(() => {
+  const closeReportModal = useLastCallback(() => {
     setIsReportModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const closePinModal = useCallback(() => {
+  const closePinModal = useLastCallback(() => {
     setIsPinModalOpen(false);
     onClose();
-  }, [onClose]);
+  });
 
-  const handleReply = useCallback(() => {
+  const handleReply = useLastCallback(() => {
     setReplyingToId({ messageId: message.id });
     closeMenu();
-  }, [setReplyingToId, message.id, closeMenu]);
+  });
 
-  const handleOpenThread = useCallback(() => {
+  const handleOpenThread = useLastCallback(() => {
     openChat({
       id: message.chatId,
       threadId: message.id,
     });
     closeMenu();
-  }, [closeMenu, message.chatId, message.id, openChat]);
+  });
 
-  const handleEdit = useCallback(() => {
+  const handleEdit = useLastCallback(() => {
     setEditingId({ messageId: message.id });
     closeMenu();
-  }, [setEditingId, message.id, closeMenu]);
+  });
 
-  const handlePin = useCallback(() => {
+  const handlePin = useLastCallback(() => {
     setIsMenuOpen(false);
     setIsPinModalOpen(true);
-  }, []);
+  });
 
-  const handleUnpin = useCallback(() => {
+  const handleUnpin = useLastCallback(() => {
     pinMessage({ messageId: message.id, isUnpin: true });
     closeMenu();
-  }, [pinMessage, message.id, closeMenu]);
+  });
 
-  const handleForward = useCallback(() => {
+  const handleForward = useLastCallback(() => {
     closeMenu();
     if (album?.messages) {
       const messageIds = album.messages.map(({ id }) => id);
@@ -327,29 +328,29 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     } else {
       openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
     }
-  }, [openForwardMenu, message, closeMenu, album]);
+  });
 
-  const handleFaveSticker = useCallback(() => {
+  const handleFaveSticker = useLastCallback(() => {
     closeMenu();
     faveSticker({ sticker: message.content.sticker! });
-  }, [closeMenu, message.content.sticker, faveSticker]);
+  });
 
-  const handleUnfaveSticker = useCallback(() => {
+  const handleUnfaveSticker = useLastCallback(() => {
     closeMenu();
     unfaveSticker({ sticker: message.content.sticker! });
-  }, [closeMenu, message.content.sticker, unfaveSticker]);
+  });
 
-  const handleCancelVote = useCallback(() => {
+  const handleCancelVote = useLastCallback(() => {
     closeMenu();
     cancelPollVote({ chatId: message.chatId, messageId: message.id });
-  }, [closeMenu, message, cancelPollVote]);
+  });
 
-  const handlePollClose = useCallback(() => {
+  const handlePollClose = useLastCallback(() => {
     closeMenu();
     closePoll({ chatId: message.chatId, messageId: message.id });
-  }, [closeMenu, message, closePoll]);
+  });
 
-  const handleSelectMessage = useCallback(() => {
+  const handleSelectMessage = useLastCallback(() => {
     const params = album?.messages
       ? {
         messageId: message.id,
@@ -360,53 +361,53 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 
     toggleMessageSelection(params);
     closeMenu();
-  }, [closeMenu, message.id, toggleMessageSelection, album]);
+  });
 
-  const handleScheduledMessageSend = useCallback(() => {
+  const handleScheduledMessageSend = useLastCallback(() => {
     sendScheduledMessages({ chatId: message.chatId, id: message.id });
     closeMenu();
-  }, [closeMenu, message.chatId, message.id, sendScheduledMessages]);
+  });
 
-  const handleRescheduleMessage = useCallback((scheduledAt: number) => {
+  const handleRescheduleMessage = useLastCallback((scheduledAt: number) => {
     rescheduleMessage({
       chatId: message.chatId,
       messageId: message.id,
       scheduledAt,
     });
     onClose();
-  }, [message.chatId, message.id, onClose, rescheduleMessage]);
+  });
 
-  const handleOpenCalendar = useCallback(() => {
+  const handleOpenCalendar = useLastCallback(() => {
     setIsMenuOpen(false);
     requestCalendar(handleRescheduleMessage);
-  }, [handleRescheduleMessage, requestCalendar]);
+  });
 
-  const handleOpenSeenByModal = useCallback(() => {
+  const handleOpenSeenByModal = useLastCallback(() => {
     closeMenu();
     openSeenByModal({ chatId: message.chatId, messageId: message.id });
-  }, [closeMenu, message.chatId, message.id, openSeenByModal]);
+  });
 
-  const handleOpenReactorListModal = useCallback(() => {
+  const handleOpenReactorListModal = useLastCallback(() => {
     closeMenu();
     openReactorListModal({ chatId: message.chatId, messageId: message.id });
-  }, [closeMenu, openReactorListModal, message.chatId, message.id]);
+  });
 
-  const handleCopyMessages = useCallback((messageIds: number[]) => {
+  const handleCopyMessages = useLastCallback((messageIds: number[]) => {
     copyMessagesByIds({ messageIds });
     closeMenu();
-  }, [closeMenu, copyMessagesByIds]);
+  });
 
-  const handleCopyLink = useCallback(() => {
+  const handleCopyLink = useLastCallback(() => {
     copyTextToClipboard(getChatMessageLink(message.chatId, chatUsername, threadId, message.id));
     closeMenu();
-  }, [chatUsername, closeMenu, message, threadId]);
+  });
 
-  const handleCopyNumber = useCallback(() => {
+  const handleCopyNumber = useLastCallback(() => {
     copyTextToClipboard(message.content.contact!.phoneNumber);
     closeMenu();
-  }, [closeMenu, message]);
+  });
 
-  const handleDownloadClick = useCallback(() => {
+  const handleDownloadClick = useLastCallback(() => {
     (album?.messages || [message]).forEach((msg) => {
       if (isDownloading) {
         cancelMessageMediaDownload({ message: msg });
@@ -415,48 +416,48 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       }
     });
     closeMenu();
-  }, [album, message, closeMenu, isDownloading, cancelMessageMediaDownload, downloadMessageMedia]);
+  });
 
-  const handleSaveGif = useCallback(() => {
+  const handleSaveGif = useLastCallback(() => {
     const video = getMessageVideo(message);
     saveGif({ gif: video! });
     closeMenu();
-  }, [closeMenu, message, saveGif]);
+  });
 
-  const handleToggleReaction = useCallback((reaction: ApiReaction) => {
+  const handleToggleReaction = useLastCallback((reaction: ApiReaction) => {
     toggleReaction({
       chatId: message.chatId, messageId: message.id, reaction, shouldAddToRecent: true,
     });
     closeMenu();
-  }, [closeMenu, message, toggleReaction]);
+  });
 
-  const handleReactionPickerOpen = useCallback((position: IAnchorPosition) => {
+  const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
     openReactionPicker({ chatId: message.chatId, messageId: message.id, position });
-  }, [message.chatId, message.id]);
+  });
 
-  const handleTranslate = useCallback(() => {
+  const handleTranslate = useLastCallback(() => {
     requestMessageTranslation({
       chatId: message.chatId,
       id: message.id,
     });
     closeMenu();
-  }, [closeMenu, message, requestMessageTranslation]);
+  });
 
-  const handleShowOriginal = useCallback(() => {
+  const handleShowOriginal = useLastCallback(() => {
     showOriginalMessage({
       chatId: message.chatId,
       id: message.id,
     });
     closeMenu();
-  }, [closeMenu, message, showOriginalMessage]);
+  });
 
-  const handleSelectLanguage = useCallback(() => {
+  const handleSelectLanguage = useLastCallback(() => {
     openMessageLanguageModal({
       chatId: message.chatId,
       id: message.id,
     });
     closeMenu();
-  }, [closeMenu, message.chatId, message.id, openMessageLanguageModal]);
+  });
 
   const reportMessageIds = useMemo(() => (album ? album.messages : [message]).map(({ id }) => id), [album, message]);
 

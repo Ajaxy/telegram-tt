@@ -1,10 +1,12 @@
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiBotCommand } from '../../../api/types';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useAppLayout from '../../../hooks/useAppLayout';
 
@@ -27,12 +29,12 @@ const BotCommandMenu: FC<OwnProps> = ({
 
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
 
-  const handleClick = useCallback((botCommand: ApiBotCommand) => {
+  const handleClick = useLastCallback((botCommand: ApiBotCommand) => {
     sendBotCommand({
       command: `/${botCommand.command}`,
     });
     onClose();
-  }, [onClose, sendBotCommand]);
+  });
 
   return (
     <Menu

@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -7,6 +7,8 @@ import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer'
 import type { GlobalState } from '../../global/types';
 
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
@@ -50,9 +52,9 @@ const ArchivedChats: FC<OwnProps> = ({
     onBack: onReset,
   });
 
-  const handleDisplayArchiveInChats = useCallback(() => {
+  const handleDisplayArchiveInChats = useLastCallback(() => {
     updateArchiveSettings({ isHidden: false });
-  }, [updateArchiveSettings]);
+  });
 
   const {
     shouldDisableDropdownMenuTransitionRef,

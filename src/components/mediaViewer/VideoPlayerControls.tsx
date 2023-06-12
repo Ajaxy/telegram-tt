@@ -1,11 +1,12 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useEffect, useMemo, useLayoutEffect,
+  memo, useEffect, useMemo, useLayoutEffect,
 } from '../../lib/teact/teact';
 
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { ApiDimensions } from '../../api/types';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
@@ -46,7 +47,7 @@ type OwnProps = {
   playbackRate: number;
   posterSize?: ApiDimensions;
   onChangeFullscreen: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  onPictureInPictureChange?: () => void ;
+  onPictureInPictureChange?: () => void;
   onVolumeClick: () => void;
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: (playbackRate: number) => void;
@@ -136,14 +137,14 @@ const VideoPlayerControls: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const handleSeek = useCallback((position: number) => {
+  const handleSeek = useLastCallback((position: number) => {
     setIsSeeking(false);
     onSeek(position);
-  }, [onSeek, setIsSeeking]);
+  });
 
-  const handleSeekStart = useCallback(() => {
+  const handleSeekStart = useLastCallback(() => {
     setIsSeeking(true);
-  }, [setIsSeeking]);
+  });
 
   const volumeIcon = useMemo(() => {
     if (volume === 0 || isMuted) return 'icon-muted';
@@ -265,4 +266,5 @@ function renderTime(currentTime: number, duration: number) {
     </div>
   );
 }
+
 export default memo(VideoPlayerControls);

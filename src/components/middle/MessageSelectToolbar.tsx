@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
+import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType } from '../../global/types';
@@ -16,6 +16,7 @@ import {
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import buildClassName from '../../util/buildClassName';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useFlag from '../../hooks/useFlag';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
@@ -73,9 +74,9 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
 
   useCopySelectedMessages(isActive);
 
-  const handleExitMessageSelectMode = useCallback(() => {
+  const handleExitMessageSelectMode = useLastCallback(() => {
     exitMessageSelectMode();
-  }, [exitMessageSelectMode]);
+  });
 
   useEffect(() => {
     return isActive && !isDeleteModalOpen && !isReportModalOpen && !isAnyModalOpen
@@ -90,18 +91,18 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
     canDeleteMessages,
   ]);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useLastCallback(() => {
     copySelectedMessages();
     showNotification({
       message: lang('Share.Link.Copied'),
     });
     exitMessageSelectMode();
-  }, [copySelectedMessages, exitMessageSelectMode, lang, showNotification]);
+  });
 
-  const handleDownload = useCallback(() => {
+  const handleDownload = useLastCallback(() => {
     downloadSelectedMessages();
     exitMessageSelectMode();
-  }, [downloadSelectedMessages, exitMessageSelectMode]);
+  });
 
   const prevSelectedMessagesCount = usePrevious(selectedMessagesCount || undefined, true);
   const renderingSelectedMessagesCount = isActive ? selectedMessagesCount : prevSelectedMessagesCount;

@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
@@ -21,6 +21,7 @@ import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
@@ -61,9 +62,9 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   const mediaBlobUrl = useMedia(getMessageMediaHash(message, 'micro'));
   const isRoundVideo = Boolean(getMessageRoundVideo(message));
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     focusMessage({ chatId, messageId: message.id, shouldReplaceHistory: true });
-  }, [chatId, focusMessage, message.id]);
+  });
 
   const lang = useLang();
 

@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import {
-  useCallback, useEffect, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
@@ -13,6 +11,7 @@ import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 import { debounce } from '../../../util/schedulers';
 import { isLocalMessageId } from '../../../global/helpers';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 import { useStateRef } from '../../../hooks/useStateRef';
@@ -148,7 +147,7 @@ export default function useScrollHooks(
     }
   }, [isReady, toggleScrollToolsRef]);
 
-  const freezeShortly = useCallback(() => {
+  const freezeShortly = useLastCallback(() => {
     freezeForFab();
     freezeForNotch();
 
@@ -156,7 +155,7 @@ export default function useScrollHooks(
       unfreezeForNotch();
       unfreezeForFab();
     }, TOOLS_FREEZE_TIMEOUT);
-  }, [freezeForFab, freezeForNotch, unfreezeForFab, unfreezeForNotch]);
+  });
 
   // Workaround for FAB and notch flickering with tall incoming message
   useSyncEffect(freezeShortly, [freezeShortly, messageIds]);

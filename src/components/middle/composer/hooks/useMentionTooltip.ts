@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import {
-  useCallback, useEffect, useState,
-} from '../../../../lib/teact/teact';
+import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
@@ -15,6 +13,7 @@ import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useFlag from '../../../../hooks/useFlag';
 import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
@@ -91,7 +90,7 @@ export default function useMentionTooltip(
     setFilteredUsers(Object.values(pickTruthy(usersById, filteredIds)));
   }, [currentUserId, groupChatMembers, topInlineBotIds, getUsernameTag, getWithInlineBots]);
 
-  const insertMention = useCallback((user: ApiUser, forceFocus = false) => {
+  const insertMention = useLastCallback((user: ApiUser, forceFocus = false) => {
     if (!user.usernames && !getUserFirstOrLastName(user)) {
       return;
     }
@@ -131,7 +130,7 @@ export default function useMentionTooltip(
     }
 
     setFilteredUsers(undefined);
-  }, [inputRef, setHtml]);
+  });
 
   useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 

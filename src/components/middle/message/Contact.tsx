@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useCallback } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
@@ -7,6 +7,8 @@ import type { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
 import { selectUser } from '../../../global/selectors';
 import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import buildClassName from '../../../util/buildClassName';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
 
@@ -36,9 +38,9 @@ const Contact: FC<OwnProps & StateProps> = ({
   } = contact;
   const isRegistered = userId !== UNREGISTERED_CONTACT_ID;
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     openChat({ id: userId });
-  }, [openChat, userId]);
+  });
 
   return (
     <div

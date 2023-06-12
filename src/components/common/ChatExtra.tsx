@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useState,
+  memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -34,6 +34,8 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import { debounce } from '../../util/schedulers';
 import stopEvent from '../../util/stopEvent';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 
 import ListItem from '../ui/ListItem';
@@ -123,7 +125,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       : getChatLink(chat) || chatInviteLink;
   }, [chat, isTopicInfo, activeChatUsernames, topicId, chatInviteLink]);
 
-  const handleNotificationChange = useCallback(() => {
+  const handleNotificationChange = useLastCallback(() => {
     setAreNotificationsEnabled((current) => {
       const newAreNotificationsEnabled = !current;
 
@@ -141,7 +143,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
       return newAreNotificationsEnabled;
     });
-  }, [chatId, isTopicInfo, topicId, updateChatMutedState, updateTopicMutedState]);
+  });
 
   if (!chat || chat.isRestricted || (isSelf && !forceShowSelf)) {
     return undefined;

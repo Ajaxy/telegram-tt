@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage } from '../../api/types';
@@ -15,6 +15,7 @@ import {
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
@@ -52,10 +53,10 @@ const Media: FC<OwnProps> = ({
   const hasSpoiler = getMessageIsSpoiler(message);
   const [isSpoilerShown, , hideSpoiler] = useFlag(hasSpoiler);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     hideSpoiler();
     onClick!(message.id, message.chatId);
-  }, [hideSpoiler, message, onClick]);
+  });
 
   return (
     <div

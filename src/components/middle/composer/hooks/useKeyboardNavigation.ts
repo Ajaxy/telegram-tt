@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useState } from '../../../../lib/teact/teact';
+import { useEffect, useState } from '../../../../lib/teact/teact';
+
 import captureKeyboardListeners from '../../../../util/captureKeyboardListeners';
 import cycleRestrict from '../../../../util/cycleRestrict';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 export function useKeyboardNavigation({
   isActive,
@@ -25,20 +28,20 @@ export function useKeyboardNavigation({
 }) {
   const [selectedItemIndex, setSelectedItemIndex] = useState(-1);
 
-  const getSelectedIndex = useCallback((newIndex: number) => {
+  const getSelectedIndex = useLastCallback((newIndex: number) => {
     if (!items) {
       return -1;
     }
 
     return cycleRestrict(items.length, newIndex);
-  }, [items]);
+  });
 
-  const handleArrowKey = useCallback((value: number, e: KeyboardEvent) => {
+  const handleArrowKey = useLastCallback((value: number, e: KeyboardEvent) => {
     e.preventDefault();
     setSelectedItemIndex((index) => (getSelectedIndex(index + value)));
-  }, [setSelectedItemIndex, getSelectedIndex]);
+  });
 
-  const handleItemSelect = useCallback((e: KeyboardEvent) => {
+  const handleItemSelect = useLastCallback((e: KeyboardEvent) => {
     // Prevent action on key combinations
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return false;
     if (items && items.length && selectedItemIndex > -1) {
@@ -53,7 +56,7 @@ export function useKeyboardNavigation({
     }
 
     return true;
-  }, [items, onSelect, selectedItemIndex]);
+  });
 
   const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;
   useEffect(() => {

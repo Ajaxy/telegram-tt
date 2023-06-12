@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useCallback } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 
 import type { GlobalState } from '../../../global/types';
 import type { ApiMessage } from '../../../api/types';
@@ -17,6 +17,8 @@ import {
   selectCanAutoPlayMedia,
   selectTheme,
 } from '../../../global/selectors';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Photo from './Photo';
 import Video from './Video';
@@ -60,9 +62,9 @@ const Album: FC<OwnProps & StateProps> = ({
 
   const mediaCount = album.messages.length;
 
-  const handleCancelUpload = useCallback((message: ApiMessage) => {
+  const handleCancelUpload = useLastCallback((message: ApiMessage) => {
     cancelSendingMessage({ chatId: message.chatId, messageId: message.id });
-  }, [cancelSendingMessage]);
+  });
 
   function renderAlbumMessage(message: ApiMessage, index: number) {
     const { photo, video } = getMessageContent(message);

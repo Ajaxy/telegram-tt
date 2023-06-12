@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import type {
@@ -54,6 +54,7 @@ import MediaViewerSlides from './MediaViewerSlides';
 import SenderInfo from './SenderInfo';
 
 import './MediaViewer.scss';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type StateProps = {
   chatId?: string;
@@ -230,10 +231,10 @@ const MediaViewer: FC<StateProps> = ({
     bestImageData, prevBestImageData, dimensions, isVideo, hasFooter,
   ]);
 
-  const handleClose = useCallback(() => closeMediaViewer(), [closeMediaViewer]);
+  const handleClose = useLastCallback(() => closeMediaViewer());
 
   const mediaIdRef = useStateRef(mediaId);
-  const handleFooterClick = useCallback(() => {
+  const handleFooterClick = useLastCallback(() => {
     handleClose();
 
     const currentMediaId = mediaIdRef.current;
@@ -248,16 +249,16 @@ const MediaViewer: FC<StateProps> = ({
     } else {
       focusMessage({ chatId, threadId, messageId: currentMediaId });
     }
-  }, [handleClose, mediaIdRef, chatId, isMobile, threadId]);
+  });
 
-  const handleForward = useCallback(() => {
+  const handleForward = useLastCallback(() => {
     openForwardMenu({
       fromChatId: chatId!,
       messageIds: [mediaId!],
     });
-  }, [openForwardMenu, chatId, mediaId]);
+  });
 
-  const selectMedia = useCallback((id?: number) => {
+  const selectMedia = useLastCallback((id?: number) => {
     openMediaViewer({
       chatId,
       threadId,
@@ -267,7 +268,7 @@ const MediaViewer: FC<StateProps> = ({
     }, {
       forceOnHeavyAnimation: true,
     });
-  }, [avatarOwner?.id, chatId, openMediaViewer, origin, threadId]);
+  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(() => {
     handleClose();
@@ -281,7 +282,7 @@ const MediaViewer: FC<StateProps> = ({
 
   const mediaIdsRef = useStateRef(mediaIds);
 
-  const getMediaId = useCallback((fromId?: number, direction?: number): number | undefined => {
+  const getMediaId = useLastCallback((fromId?: number, direction?: number): number | undefined => {
     if (fromId === undefined) return undefined;
     const mIds = mediaIdsRef.current;
     const index = mIds.indexOf(fromId);
@@ -289,9 +290,9 @@ const MediaViewer: FC<StateProps> = ({
       return mIds[index + direction];
     }
     return undefined;
-  }, [mediaIdsRef]);
+  });
 
-  const handleBeforeDelete = useCallback(() => {
+  const handleBeforeDelete = useLastCallback(() => {
     if (mediaIds.length <= 1) {
       handleClose();
       return;
@@ -300,7 +301,7 @@ const MediaViewer: FC<StateProps> = ({
     // Before deleting, select previous media or the first one
     index = index > 0 ? index - 1 : 0;
     selectMedia(mediaIds[index]);
-  }, [handleClose, mediaId, mediaIds, selectMedia]);
+  });
 
   const lang = useLang();
 

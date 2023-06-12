@@ -1,6 +1,5 @@
 import React, {
   memo,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -69,6 +68,7 @@ import resetScroll from '../../util/resetScroll';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import renderText from '../common/helpers/renderText';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useStickyDates from './hooks/useStickyDates';
@@ -321,7 +321,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   const { isScrolled, updateStickyDates } = useStickyDates();
 
-  const handleScroll = useCallback(() => {
+  const handleScroll = useLastCallback(() => {
     if (isScrollTopJustUpdatedRef.current) {
       isScrollTopJustUpdatedRef.current = false;
       return;
@@ -353,9 +353,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
         setScrollOffset({ chatId, threadId, scrollOffset: scrollOffsetRef.current });
       }
     });
-  }, [
-    updateStickyDates, hasTools, getForceNextPinnedInHeader, onPinnedIntersectionChange, type, chatId, threadId,
-  ]);
+  });
 
   const [getContainerHeight, prevContainerHeightRef] = useContainerHeight(containerRef, canPost && !isSelectModeActive);
 

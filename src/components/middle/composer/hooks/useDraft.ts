@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { useEffect } from '../../../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
@@ -12,6 +12,8 @@ import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../../../../util/parseMessageInput';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { useStateRef } from '../../../../hooks/useStateRef';
@@ -41,7 +43,7 @@ const useDraft = (
 
   const isEditing = Boolean(editedMessage);
 
-  const updateDraft = useCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
+  const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
     if (isEditing || !lastSyncTime) return;
 
     const html = getHtml();
@@ -60,7 +62,7 @@ const useDraft = (
         shouldForce,
       });
     }
-  }, [chatId, threadId, isEditing, lastSyncTime, getHtml, saveDraft, clearDraft]);
+  });
 
   const updateDraftRef = useStateRef(updateDraft);
   const runDebouncedForSaveDraft = useRunDebounced(DRAFT_DEBOUNCE, true, undefined, [chatId, threadId]);

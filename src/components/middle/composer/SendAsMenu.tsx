@@ -1,6 +1,4 @@
-import React, {
-  useCallback, useEffect, useRef, memo,
-} from '../../../lib/teact/teact';
+import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -9,8 +7,10 @@ import type { ApiSendAsPeerId } from '../../../api/types';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
-import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { isUserId } from '../../../global/helpers';
+
+import useLastCallback from '../../../hooks/useLastCallback';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 
@@ -56,10 +56,10 @@ const SendAsMenu: FC<OwnProps> = ({
     }
   }, [isOpen, markMouseInside]);
 
-  const handleUserSelect = useCallback((id: string) => {
+  const handleUserSelect = useLastCallback((id: string) => {
     onClose();
     saveDefaultSendAs({ chatId: chatId!, sendAsId: id });
-  }, [chatId, onClose, saveDefaultSendAs]);
+  });
 
   const selectedSendAsIndex = useKeyboardNavigation({
     isActive: isOpen,

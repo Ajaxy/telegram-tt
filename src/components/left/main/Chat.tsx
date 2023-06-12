@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
+import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -41,6 +41,7 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
@@ -158,7 +159,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     orderDiff,
   });
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (isForum) {
       if (isSelectedForum) {
         closeForumPanel(undefined, { forceOnHeavyAnimation: true });
@@ -174,32 +175,32 @@ const Chat: FC<OwnProps & StateProps> = ({
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
-  }, [isForum, chatId, isSelected, canScrollDown, isSelectedForum]);
+  });
 
-  const handleDragEnter = useCallback((e) => {
+  const handleDragEnter = useLastCallback((e) => {
     e.preventDefault();
     onDragEnter?.(chatId);
-  }, [chatId, onDragEnter]);
+  });
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useLastCallback(() => {
     markRenderDeleteModal();
     openDeleteModal();
-  }, [markRenderDeleteModal, openDeleteModal]);
+  });
 
-  const handleMute = useCallback(() => {
+  const handleMute = useLastCallback(() => {
     markRenderMuteModal();
     openMuteModal();
-  }, [markRenderMuteModal, openMuteModal]);
+  });
 
-  const handleChatFolderChange = useCallback(() => {
+  const handleChatFolderChange = useLastCallback(() => {
     markRenderChatFolderModal();
     openChatFolderModal();
-  }, [markRenderChatFolderModal, openChatFolderModal]);
+  });
 
-  const handleReport = useCallback(() => {
+  const handleReport = useLastCallback(() => {
     markRenderReportModal();
     openReportModal();
-  }, [markRenderReportModal, openReportModal]);
+  });
 
   const contextActions = useChatContextActions({
     chat,

@@ -1,11 +1,11 @@
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { createClassNameBuilder } from '../../../util/buildClassName';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 
 import './Spoiler.scss';
@@ -36,7 +36,7 @@ const Spoiler: FC<OwnProps> = ({
 
   const [isRevealed, reveal, conceal] = useFlag();
 
-  const getContentLength = useCallback(() => {
+  const getContentLength = useLastCallback(() => {
     if (!contentRef.current) {
       return 0;
     }
@@ -45,9 +45,9 @@ const Spoiler: FC<OwnProps> = ({
     const emojiCount = contentRef.current.querySelectorAll('.emoji').length;
     // Optimization: ignore alt, assume that viewing emoji takes same time as viewing 4 characters
     return textLength + emojiCount * 4;
-  }, []);
+  });
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -62,7 +62,7 @@ const Spoiler: FC<OwnProps> = ({
       actionsByMessageId.get(messageId!)?.forEach((actions) => actions.conceal());
       conceal();
     }, timeoutMs);
-  }, [conceal, messageId]);
+  });
 
   useEffect(() => {
     if (!messageId) {

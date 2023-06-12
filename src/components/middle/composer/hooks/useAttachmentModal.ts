@@ -1,4 +1,4 @@
-import { useCallback, useState } from '../../../../lib/teact/teact';
+import { useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiAttachment } from '../../../../api/types';
@@ -10,6 +10,8 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../../config';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 export default function useAttachmentModal({
   attachments,
@@ -37,11 +39,11 @@ export default function useAttachmentModal({
   const [shouldForceCompression, setShouldForceCompression] = useState<boolean>(false);
   const [shouldSuggestCompression, setShouldSuggestCompression] = useState<boolean | undefined>(undefined);
 
-  const handleClearAttachments = useCallback(() => {
+  const handleClearAttachments = useLastCallback(() => {
     setAttachments(MEMO_EMPTY_ARRAY);
-  }, [setAttachments]);
+  });
 
-  const handleSetAttachments = useCallback(
+  const handleSetAttachments = useLastCallback(
     (newValue: ApiAttachment[] | ((current: ApiAttachment[]) => ApiAttachment[])) => {
       const newAttachments = typeof newValue === 'function' ? newValue(attachments) : newValue;
       if (!newAttachments.length) {
@@ -75,25 +77,22 @@ export default function useAttachmentModal({
         setShouldForceAsFile(Boolean(shouldForce && canSendDocuments));
         setShouldForceCompression(!canSendDocuments);
       }
-    }, [
-      attachments, canSendAudios, canSendDocuments, canSendPhotos, canSendVideos, chatId, fileSizeLimit,
-      handleClearAttachments, openLimitReachedModal, setAttachments, showAllowedMessageTypesNotification,
-    ],
+    },
   );
 
-  const handleAppendFiles = useCallback(async (files: File[], isSpoiler?: boolean) => {
+  const handleAppendFiles = useLastCallback(async (files: File[], isSpoiler?: boolean) => {
     handleSetAttachments([
       ...attachments,
       ...await Promise.all(files.map((file) => (
         buildAttachment(file.name, file, { shouldSendAsSpoiler: isSpoiler || undefined })
       ))),
     ]);
-  }, [attachments, handleSetAttachments]);
+  });
 
-  const handleFileSelect = useCallback(async (files: File[], suggestCompression?: boolean) => {
+  const handleFileSelect = useLastCallback(async (files: File[], suggestCompression?: boolean) => {
     handleSetAttachments(await Promise.all(files.map((file) => buildAttachment(file.name, file))));
     setShouldSuggestCompression(suggestCompression);
-  }, [handleSetAttachments]);
+  });
 
   return {
     shouldSuggestCompression,

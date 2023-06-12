@@ -1,13 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  useCallback, useEffect, useRef, memo,
-} from '../../../lib/teact/teact';
+import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -34,7 +34,7 @@ const MentionTooltip: FC<OwnProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, undefined, undefined, false);
 
-  const handleUserSelect = useCallback((userId: string, forceFocus = false) => {
+  const handleUserSelect = useLastCallback((userId: string, forceFocus = false) => {
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
     const user = usersById[userId];
@@ -43,17 +43,17 @@ const MentionTooltip: FC<OwnProps> = ({
     }
 
     onInsertUserName(user, forceFocus);
-  }, [onInsertUserName]);
+  });
 
-  const handleClick = useCallback((e: React.MouseEvent, id: string) => {
+  const handleClick = useLastCallback((e: React.MouseEvent, id: string) => {
     e.preventDefault();
 
     handleUserSelect(id);
-  }, [handleUserSelect]);
+  });
 
-  const handleSelectMention = useCallback((member: ApiUser) => {
+  const handleSelectMention = useLastCallback((member: ApiUser) => {
     handleUserSelect(member.id, true);
-  }, [handleUserSelect]);
+  });
 
   const selectedMentionIndex = useKeyboardNavigation({
     isActive: isOpen,
