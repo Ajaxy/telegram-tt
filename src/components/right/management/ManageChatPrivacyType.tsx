@@ -68,6 +68,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
     updatePrivateLink,
     toggleIsProtected,
     openLimitReachedModal,
+    resetManagementError,
   } = getActions();
 
   const firstEditableUsername = useMemo(() => chat.usernames?.find(({ isEditable }) => isEditable), [chat.usernames]);
@@ -108,7 +109,13 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   const handleUsernameChange = useCallback((value: string) => {
     setEditableUsername(value);
     setIsProfileFieldsTouched(true);
-  }, []);
+
+    if (error) {
+      resetManagementError({
+        chatId: chat.id,
+      });
+    }
+  }, [chat.id, error]);
 
   const handleOptionChange = useCallback((value: string, e: ChangeEvent<HTMLInputElement>) => {
     const myChats = Object.values(getGlobal().chats.byId)

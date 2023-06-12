@@ -129,7 +129,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   const [isForumEnabled, setIsForumEnabled] = useState(chat.isForum);
   const imageHash = getChatAvatarHash(chat);
   const currentAvatarBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
-  const isPublicGroup = useMemo(() => hasLinkedChannel || isChatPublic(chat), [chat, hasLinkedChannel]);
+  const isPublicGroup = useMemo(() => isChatPublic(chat), [chat]);
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const isPreHistoryHiddenCheckboxRef = useRef<HTMLDivElement>(null);
@@ -442,7 +442,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
             <span className="subtitle">{formatInteger(chat.membersCount ?? 0)}</span>
           </ListItem>
 
-          {!isPublicGroup && Boolean(chatFullInfo) && (
+          {!isPublicGroup && !hasLinkedChannel && Boolean(chatFullInfo) && (
             <div className="ListItem narrow no-selection" ref={isPreHistoryHiddenCheckboxRef}>
               <Checkbox
                 checked={!chatFullInfo.isPreHistoryHidden}
