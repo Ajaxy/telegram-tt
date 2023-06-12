@@ -170,6 +170,15 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
             'Step 3 Invalid server nonce in encrypted answer',
         );
     }
+    if (serverDhInner.g !== 3 || serverDhInner.dhPrime.toString('hex') !== 'c71caeb9c6b1c9048e6c522f70f13'
+        + 'f73980d40238e3e21c14934d037563d930f48198a0aa7c14058229493d22530f4dbfa336f6e0ac925139543aed44cce7c3720fd5'
+        + '1f69458705ac68cd4fe6b6b13abdc9746512969328454f18faf8c595f642477fe96bb2a941d5bcd1d4ac8cc49880708fa9b378e3'
+        + 'c4f3a9060bee67cf9a4a4a695811051907e162753b56b0f6b410dba74d8a84b2a14b3144e0ef1284754fd17ed950d5965b4b9dd4'
+        + '6582db1178d169c6bc465b0d6ff9ca3928fef5b9ae4e418fc15e83ebea0f87fa9ff5eed70050ded2849f47bf959d956850ce9298'
+        + '51f0d8115f635b105ee2e4e15d04b2454bf6f4fadf034b10403119cd8e3b92fcc5b') {
+        throw new SecurityError('Step 3 invalid dhPrime or g');
+    }
+
     const dhPrime = Helpers.readBigIntFromBuffer(
         serverDhInner.dhPrime,
         false,
@@ -184,6 +193,26 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     );
     const gb = Helpers.modExp(bigInt(serverDhInner.g), b, dhPrime);
     const gab = Helpers.modExp(ga, b, dhPrime);
+
+    if (ga.lesserOrEquals(1)) {
+        throw new SecurityError('Step 3 failed ga > 1 check');
+    }
+
+    if (gb.lesserOrEquals(1)) {
+        throw new SecurityError('Step 3 failed gb > 1 check');
+    }
+
+    if (ga.greater(dhPrime.minus(1))) {
+        throw new SecurityError('Step 3 failed ga > dh_prime - 1 check');
+    }
+
+    const toCheckAgainst = bigInt(2).pow(2048 - 64);
+    if (!(ga.greaterOrEquals(toCheckAgainst) && ga.lesserOrEquals(dhPrime.minus(toCheckAgainst)))) {
+        throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < ga < 2^{2048-64} check');
+    }
+    if (!(gb.greaterOrEquals(toCheckAgainst) && gb.lesserOrEquals(dhPrime.minus(toCheckAgainst)))) {
+        throw new SecurityError('Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check');
+    }
 
     // Prepare client DH Inner Data
     const clientDhInner = new Api.ClientDHInnerData({
