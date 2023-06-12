@@ -235,14 +235,13 @@ addActionHandler('loadMessage', async (global, actions, payload): Promise<void> 
 });
 
 addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
-  const currentMessageList = selectCurrentMessageList(global, tabId);
+  const { messageList, tabId = getCurrentTabId() } = payload;
 
-  if (!currentMessageList) {
+  if (!messageList) {
     return undefined;
   }
 
-  const { chatId, threadId, type } = currentMessageList;
+  const { chatId, threadId, type } = messageList;
 
   payload = omit(payload, ['tabId']);
 
@@ -263,6 +262,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   const params = {
     ...payload,
     chat,
+    currentThreadId: messageList.threadId,
     replyingTo: replyingToId,
     replyingToTopId,
     noWebPage: selectNoWebPage(global, chatId, threadId),
@@ -280,7 +280,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
     sendMessage(global, {
       ...restParams,
       attachment: attachments ? attachments[0] : undefined,
-    }, tabId);
+    });
   } else if (isGrouped) {
     const {
       text, entities, attachments, ...commonParams
@@ -301,14 +301,14 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
           entities: isFirst ? entities : undefined,
           attachment: firstAttachment,
           groupedId: restAttachments.length > 0 ? groupedId : undefined,
-        }, tabId);
+        });
 
         restAttachments.forEach((attachment: ApiAttachment) => {
           sendMessage(global, {
             ...commonParams,
             attachment,
             groupedId,
-          }, tabId);
+          });
         });
       }
     });
@@ -323,14 +323,14 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
         text,
         entities,
         replyingTo,
-      }, tabId);
+      });
     }
 
     attachments?.forEach((attachment: ApiAttachment) => {
       sendMessage(global, {
         ...commonParams,
         attachment,
-      }, tabId);
+      });
     });
   }
 
@@ -338,14 +338,15 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
 });
 
 addActionHandler('editMessage', (global, actions, payload): ActionReturnType => {
-  const { text, entities, tabId = getCurrentTabId() } = payload;
+  const {
+    messageList, text, entities, tabId = getCurrentTabId(),
+  } = payload;
 
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
+  if (!messageList) {
     return;
   }
 
-  const { chatId, threadId, type: messageListType } = currentMessageList;
+  const { chatId, threadId, type: messageListType } = messageList;
   const chat = selectChat(global, chatId);
   const message = selectEditingMessage(global, chatId, threadId, messageListType);
   if (!chat || !message) {
@@ -760,7 +761,9 @@ addActionHandler('loadExtendedMedia', (global, actions, payload): ActionReturnTy
 });
 
 addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType => {
-  const { isSilent, scheduledAt, tabId = getCurrentTabId() } = payload;
+  const {
+    isSilent, scheduledAt, tabId = getCurrentTabId(),
+  } = payload;
 
   const {
     fromChatId, messageIds, toChatId, withMyScore, noAuthors, noCaptions, toThreadId,
@@ -806,6 +809,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
       void sendMessage(global, {
         chat: toChat,
         replyingToTopId: toThreadId,
+        currentThreadId: toThreadId || MAIN_THREAD_ID,
         text,
         entities,
         sticker,
@@ -813,7 +817,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         isSilent,
         scheduledAt,
         sendAs,
-      }, tabId);
+      });
     });
 
   global = getGlobal();
@@ -1140,10 +1144,10 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   isSilent?: boolean;
   scheduledAt?: number;
   sendAs?: ApiChat | ApiUser;
+  currentThreadId: number;
   replyingToTopId?: number;
   groupedId?: string;
-},
-...[tabId = getCurrentTabId()]: TabArgs<T>) {
+}) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
     if (!uploadProgressCallbacks.has(messageLocalId)) {
@@ -1171,18 +1175,16 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   }
 
   global = getGlobal();
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
+  if (params.currentThreadId === undefined) {
     return;
   }
-  const { threadId } = currentMessageList;
 
-  if (!params.replyingTo && threadId !== MAIN_THREAD_ID) {
-    params.replyingTo = selectThreadTopMessageId(global, params.chat.id, threadId)!;
+  if (!params.replyingTo && params.currentThreadId !== MAIN_THREAD_ID) {
+    params.replyingTo = selectThreadTopMessageId(global, params.chat.id, params.currentThreadId)!;
   }
 
-  if (params.replyingTo && !params.replyingToTopId && threadId !== MAIN_THREAD_ID) {
-    params.replyingToTopId = selectThreadTopMessageId(global, params.chat.id, threadId)!;
+  if (params.replyingTo && !params.replyingToTopId && params.currentThreadId !== MAIN_THREAD_ID) {
+    params.replyingToTopId = selectThreadTopMessageId(global, params.chat.id, params.currentThreadId)!;
   }
 
   await callApi('sendMessage', params, progressCallback);

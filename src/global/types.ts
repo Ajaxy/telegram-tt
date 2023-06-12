@@ -1185,6 +1185,7 @@ export interface ActionPayloads {
     contact?: Partial<ApiContact>;
     shouldUpdateStickerSetOrder?: boolean;
     shouldGroupMessages?: boolean;
+    messageList: MessageList;
   } & WithTabId;
   cancelSendingMessage: {
     chatId: string;
@@ -1216,6 +1217,7 @@ export interface ActionPayloads {
     };
   };
   editMessage: {
+    messageList: MessageList;
     text: string;
     entities?: ApiMessageEntity[];
   } & WithTabId;
@@ -2067,6 +2069,7 @@ export interface ActionPayloads {
   sendInlineBotResult: {
     id: string;
     queryId: string;
+    messageList: MessageList;
     isSilent?: boolean;
     scheduledAt?: number;
   } & WithTabId;

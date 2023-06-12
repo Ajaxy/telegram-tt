@@ -5,15 +5,18 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
+import type { MessageList } from '../../global/types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
   selectCurrentMessageList,
-  selectIsChatWithSelf, selectIsCurrentUserPremium,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
   selectShouldSchedule,
-  selectStickerSet, selectThreadInfo,
+  selectStickerSet,
+  selectThreadInfo,
 } from '../../global/selectors';
 import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
@@ -44,6 +47,7 @@ export type OwnProps = {
 };
 
 type StateProps = {
+  currentMessageList?: MessageList;
   canSendStickers?: boolean;
   stickerSet?: ApiStickerSet;
   canScheduleUntilOnline?: boolean;
@@ -66,6 +70,7 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   isCurrentUserPremium,
   shouldUpdateStickerSetOrder,
+  currentMessageList,
   onClose,
 }) => {
   const {
@@ -109,6 +114,9 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
   }, [isOpen, fromSticker, loadStickers, stickerSetShortName, renderingStickerSet]);
 
   const handleSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, isScheduleRequested?: boolean) => {
+    if (!currentMessageList) {
+      return;
+    }
     sticker = {
       ...sticker,
       isPreloadedGlobally: true,
@@ -117,19 +125,20 @@ const StickerSetModal: FC<OwnProps & StateProps> = ({
     if (shouldSchedule || isScheduleRequested) {
       requestCalendar((scheduledAt) => {
         sendMessage({
-          sticker, isSilent, scheduledAt,
+          messageList: currentMessageList, sticker, isSilent, scheduledAt,
         });
         onClose();
       });
     } else {
       sendMessage({
+        messageList: currentMessageList,
         sticker,
         isSilent,
         shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && isAdded,
       });
       onClose();
     }
-  }, [onClose, requestCalendar, sendMessage, shouldSchedule, isAdded, shouldUpdateStickerSetOrder]);
+  }, [currentMessageList, shouldSchedule, requestCalendar, onClose, shouldUpdateStickerSetOrder, isAdded]);
 
   const handleButtonClick = useCallback(() => {
     if (renderingStickerSet) {
@@ -270,6 +279,7 @@ export default memo(withGlobal<OwnProps>(
       stickerSet,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       shouldUpdateStickerSetOrder: global.settings.byKey.shouldUpdateStickerSetOrder,
+      currentMessageList,
     };
   },
 )(StickerSetModal));
