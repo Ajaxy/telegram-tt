@@ -11,13 +11,16 @@
 
   position: relative;
   height: calc(100% - 3rem);
-  overflow-y: auto;
-  padding: 0.5rem 0.25rem;
 
-  @include overflow-y-overlay();
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 0.5rem 0.25rem;
+  @include adapt-padding-to-scrollbar(0.25rem);
 
   &_customEmoji {
     padding: 0.5rem 0.75rem;
+    @include adapt-padding-to-scrollbar(0.75rem);
   }
 
   :global(.bubble) {

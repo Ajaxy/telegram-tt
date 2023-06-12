@@ -202,6 +202,8 @@ $color-message-reaction-own-hover: #b5e0a4;
   --symbol-menu-height: 22.375rem;
   --symbol-menu-footer-height: 3rem;
 
+  --scrollbar-width: 0;
+
   @media (min-width: 1276px) and (max-width: 1920px) {
     --right-column-width: 25vw;
   }

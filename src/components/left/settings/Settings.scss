@@ -1,5 +1,3 @@
-@import "../../../styles/mixins";
-
 #Settings {
   height: 100%;
 
@@ -34,11 +32,9 @@
 
 .settings-content {
   border-top: 1px solid var(--color-borders);
-  background-color: var(--color-background-secondary);
   height: calc(100% - var(--header-height));
 
-  overflow-y: auto;
-  @include overflow-y-overlay();
+  overflow-y: scroll;
 
   &.no-border, &.two-fa, &.local-passcode, &.password-form {
     border-top: none;
@@ -129,7 +125,7 @@
   background-color: var(--color-background);
   padding: 1.5rem 1.5rem 1rem;
   box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-  margin-bottom: 0.625rem;
+  border-bottom: 0.625rem solid var(--color-background-secondary);
 }
 
 .settings-item {

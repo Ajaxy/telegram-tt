@@ -1,5 +1,3 @@
-@import "../../../styles/mixins";
-
 .root, .item {
   display: flex;
   flex-direction: column;
@@ -16,5 +14,4 @@
 
 .languages {
   overflow-y: auto;
-  @include overflow-y-overlay();
 }

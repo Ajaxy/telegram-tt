@@ -96,7 +96,6 @@
     max-height: calc(100 * var(--vh) - 3.75rem);
 
     overflow-y: auto;
-    @include overflow-y-overlay();
   }
 
   .extra-spacing {

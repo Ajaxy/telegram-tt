@@ -1,5 +1,3 @@
-@import "../../styles/mixins";
-
 .Profile {
   height: 100%;
   display: flex;
@@ -7,7 +5,6 @@
 
   overflow-x: hidden;
   overflow-y: scroll;
-  @include overflow-y-overlay();
 
   > .profile-info > .ChatInfo {
     grid-area: chat_info;

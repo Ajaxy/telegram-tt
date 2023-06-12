@@ -141,7 +141,7 @@
     --offset-y: 4rem;
 
     border-radius: 1.25rem;
-    width: calc(var(--symbol-menu-width) + 0.25rem); // Reserve width for scrollbar
+    width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
     padding: 0;
     overflow: hidden;
 
@@ -155,10 +155,6 @@
     }
 
     transition-duration: 200ms !important;
-
-    @supports (overflow: overlay) {
-      width: var(--symbol-menu-width);
-    }
   }
 
   .StickerButton.custom-emoji, .sticker-set-cover {

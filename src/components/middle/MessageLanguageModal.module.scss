@@ -1,5 +1,3 @@
-@import "../../styles/mixins";
-
 .root {
   :global(.modal-content) {
     min-height: min(75vh, 32rem);
@@ -26,5 +24,4 @@
 
 .languages {
   overflow-y: auto;
-  @include overflow-y-overlay();
 }
