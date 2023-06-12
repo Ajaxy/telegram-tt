@@ -17,5 +17,6 @@ module.exports = {
   },
   globals: {
     APP_REVISION: "jest-test",
+    APP_VERSION: "0.0.1",
   },
 };
