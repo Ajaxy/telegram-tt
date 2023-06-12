@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback, useState } from '../../lib/teact/teact';
+import React, { memo, useState } from '../../lib/teact/teact';
 import { withGlobal, getActions } from '../../global';
 
 import type { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
@@ -9,6 +9,8 @@ import {
   getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup, isUserId,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
@@ -55,14 +57,14 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   } = settings || {};
   const isBasicGroup = chat && isChatBasicGroup(chat);
 
-  const handleAddContact = useCallback(() => {
+  const handleAddContact = useLastCallback(() => {
     openAddContactDialog({ userId: chatId });
     if (isAutoArchived) {
       toggleChatArchived({ id: chatId });
     }
-  }, [openAddContactDialog, isAutoArchived, toggleChatArchived, chatId]);
+  });
 
-  const handleConfirmBlock = useCallback(() => {
+  const handleConfirmBlock = useLastCallback(() => {
     closeBlockUserModal();
     blockContact({ contactId: chatId, accessHash: accessHash! });
     if (canReportSpam && shouldReportSpam) {
@@ -71,16 +73,13 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     if (shouldDeleteChat) {
       deleteChat({ chatId });
     }
-  }, [
-    accessHash, blockContact, closeBlockUserModal, deleteChat, reportSpam, canReportSpam, shouldDeleteChat,
-    shouldReportSpam, chatId,
-  ]);
+  });
 
-  const handleCloseReportPanel = useCallback(() => {
+  const handleCloseReportPanel = useLastCallback(() => {
     hideChatReportPanel({ chatId });
-  }, [chatId, hideChatReportPanel]);
+  });
 
-  const handleChatReportSpam = useCallback(() => {
+  const handleChatReportSpam = useLastCallback(() => {
     closeBlockUserModal();
     reportSpam({ chatId });
     if (isBasicGroup) {
@@ -89,9 +88,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     } else {
       leaveChannel({ chatId });
     }
-  }, [
-    chatId, closeBlockUserModal, currentUserId, deleteChatUser, deleteHistory, isBasicGroup, leaveChannel, reportSpam,
-  ]);
+  });
 
   if (!settings) {
     return undefined;

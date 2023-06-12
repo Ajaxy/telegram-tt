@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from '../../../lib/teact/teact';
+import React, { useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -20,6 +20,8 @@ import {
   isOwnMessage,
 } from '../../../global/helpers';
 import * as mediaLoader from '../../../util/mediaLoader';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 import useMedia from '../../../hooks/useMedia';
@@ -144,9 +146,9 @@ const Video: FC<OwnProps> = ({
   } = useShowTransition(Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner));
 
   const [playProgress, setPlayProgress] = useState<number>(0);
-  const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+  const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
-  }, []);
+  });
 
   const duration = videoRef.current?.duration || video.duration || 0;
 
@@ -156,7 +158,7 @@ const Video: FC<OwnProps> = ({
     width, height,
   } = dimensions || calculateVideoDimensions(video, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (isUploading) {
       onCancelUpload?.(message);
       return;
@@ -182,10 +184,7 @@ const Video: FC<OwnProps> = ({
     }
 
     onClick?.(message.id);
-  }, [
-    isUploading, isDownloading, fullMediaData, isPlayAllowed, isSpoilerShown, onClick, message, onCancelUpload,
-    hideSpoiler,
-  ]);
+  });
 
   const className = buildClassName(
     'media-inner dark',

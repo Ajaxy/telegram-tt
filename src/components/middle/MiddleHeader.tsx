@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef,
+  memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
@@ -44,6 +44,9 @@ import {
   selectThreadTopMessageId,
 } from '../../global/selectors';
 import cycleRestrict from '../../util/cycleRestrict';
+
+import useLastCallback from '../../hooks/useLastCallback';
+import { useFastClick } from '../../hooks/useFastClick';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useWindowSize from '../../hooks/useWindowSize';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -68,7 +71,6 @@ import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import ChatReportPanel from './ChatReportPanel';
 
 import './MiddleHeader.scss';
-import { useFastClick } from '../../hooks/useFastClick';
 
 const ANIMATION_DURATION = 350;
 const BACK_BUTTON_INACTIVE_TIME = 450;
@@ -184,11 +186,11 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     openChatWithInfo({ id: chatId, threadId });
   });
 
-  const handleUnpinMessage = useCallback((messageId: number) => {
+  const handleUnpinMessage = useLastCallback((messageId: number) => {
     pinMessage({ messageId, isUnpin: true });
-  }, [pinMessage]);
+  });
 
-  const handlePinnedMessageClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>): void => {
+  const handlePinnedMessageClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>): void => {
     const messageId = e.shiftKey && Array.isArray(pinnedMessageIds)
       ? pinnedMessageIds[cycleRestrict(pinnedMessageIds.length, pinnedMessageIds.indexOf(pinnedMessageId!) - 2)]
       : pinnedMessageId!;
@@ -198,19 +200,19 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         chatId, threadId, messageId, noForumTopicPanel: true,
       });
     }
-  }, [pinnedMessageIds, pinnedMessageId, onFocusPinnedMessage, chatId, threadId]);
+  });
 
-  const handleAllPinnedClick = useCallback(() => {
+  const handleAllPinnedClick = useLastCallback(() => {
     openChat({ id: chatId, threadId, type: 'pinned' });
-  }, [openChat, chatId, threadId]);
+  });
 
-  const setBackButtonActive = useCallback(() => {
+  const setBackButtonActive = useLastCallback(() => {
     setTimeout(() => {
       isBackButtonActive.current = true;
     }, BACK_BUTTON_INACTIVE_TIME);
-  }, []);
+  });
 
-  const handleBackClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleBackClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (!isBackButtonActive.current) return;
 
     // Workaround for missing UI when quickly clicking the Back button
@@ -241,10 +243,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
 
     openPreviousChat();
     setBackButtonActive();
-  }, [
-    isMobile, isSelectModeActive, messageListType, currentTransitionKey, setBackButtonActive, isTablet,
-    shouldShowCloseButton,
-  ]);
+  });
 
   const canToolsCollideWithChatInfo = (
     windowWidth >= MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN

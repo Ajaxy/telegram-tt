@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useMemo, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -14,6 +12,8 @@ import { isUserId } from '../../../global/helpers';
 import {
   selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectTabState,
 } from '../../../global/selectors';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 
@@ -62,13 +62,13 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     };
   }, [storedPosition, withCustomReactions]);
 
-  const getMenuElement = useCallback(() => menuRef.current, []);
-  const getLayout = useCallback(() => ({ withPortal: true, isDense: true }), []);
+  const getMenuElement = useLastCallback(() => menuRef.current);
+  const getLayout = useLastCallback(() => ({ withPortal: true, isDense: true }));
   const {
     positionX, positionY, transformOriginX, transformOriginY, style,
   } = useMenuPosition(renderingPosition, getTriggerElement, getRootElement, getMenuElement, getLayout);
 
-  const handleToggleCustomReaction = useCallback((sticker: ApiSticker) => {
+  const handleToggleCustomReaction = useLastCallback((sticker: ApiSticker) => {
     if (!renderedChatId || !renderedMessageId) {
       return;
     }
@@ -80,9 +80,9 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       chatId: renderedChatId, messageId: renderedMessageId, reaction, shouldAddToRecent: true,
     });
     closeReactionPicker();
-  }, [renderedChatId, renderedMessageId]);
+  });
 
-  const handleToggleReaction = useCallback((reaction: ApiReaction) => {
+  const handleToggleReaction = useLastCallback((reaction: ApiReaction) => {
     if (!renderedChatId || !renderedMessageId) {
       return;
     }
@@ -91,7 +91,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
       chatId: renderedChatId, messageId: renderedMessageId, reaction, shouldAddToRecent: true,
     });
     closeReactionPicker();
-  }, [renderedChatId, renderedMessageId]);
+  });
 
   const selectedReactionIds = useMemo(() => {
     return (message?.reactions?.results || []).reduce<string[]>((acc, { chosenOrder, reaction }) => {

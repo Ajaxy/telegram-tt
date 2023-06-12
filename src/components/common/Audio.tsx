@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -25,6 +25,8 @@ import buildClassName from '../../util/buildClassName';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
 import { makeTrackId } from '../../util/audioPlayer';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
 import type { BufferedRange } from '../../hooks/useBuffering';
@@ -128,14 +130,14 @@ const Audio: FC<OwnProps> = ({
     getMessageMediaFormat(message, 'download'),
   );
 
-  const handleForcePlay = useCallback(() => {
+  const handleForcePlay = useLastCallback(() => {
     setIsActivated(true);
     onPlay(message.id, message.chatId);
-  }, [message, onPlay]);
+  });
 
-  const handleTrackChange = useCallback(() => {
+  const handleTrackChange = useLastCallback(() => {
     setIsActivated(false);
-  }, []);
+  });
 
   const {
     isBuffered, bufferedRanges, bufferingHandlers, checkBuffering,
@@ -185,7 +187,7 @@ const Audio: FC<OwnProps> = ({
 
   const shouldRenderCross = shouldRenderSpinner && (isLoadingForPlaying || isUploading);
 
-  const handleButtonClick = useCallback(() => {
+  const handleButtonClick = useLastCallback(() => {
     if (isUploading) {
       onCancelUpload?.();
       return;
@@ -198,7 +200,7 @@ const Audio: FC<OwnProps> = ({
     getActions().setAudioPlayerOrigin({ origin });
     setIsActivated(!isActivated);
     playPause();
-  }, [isUploading, isPlaying, isActivated, playPause, onCancelUpload, onPlay, message.id, message.chatId, origin]);
+  });
 
   useEffect(() => {
     if (onReadMedia && isMediaUnread && (isPlaying || isDownloading)) {
@@ -206,15 +208,15 @@ const Audio: FC<OwnProps> = ({
     }
   }, [isPlaying, isMediaUnread, onReadMedia, isDownloading]);
 
-  const handleDownloadClick = useCallback(() => {
+  const handleDownloadClick = useLastCallback(() => {
     if (isDownloading) {
       cancelMessageMediaDownload({ message });
     } else {
       downloadMessageMedia({ message });
     }
-  }, [cancelMessageMediaDownload, downloadMessageMedia, isDownloading, message]);
+  });
 
-  const handleSeek = useCallback((e: MouseEvent | TouchEvent) => {
+  const handleSeek = useLastCallback((e: MouseEvent | TouchEvent) => {
     if (isSeeking.current && seekerRef.current) {
       const { width, left } = seekerRef.current.getBoundingClientRect();
       const clientX = e instanceof MouseEvent ? e.clientX : e.targetTouches[0].clientX;
@@ -222,25 +224,25 @@ const Audio: FC<OwnProps> = ({
       // Prevent track skipping while seeking near end
       setCurrentTime(Math.max(Math.min(duration * ((clientX - left) / width), duration - 0.1), 0.001));
     }
-  }, [duration, setCurrentTime]);
+  });
 
-  const handleStartSeek = useCallback((e: MouseEvent | TouchEvent) => {
+  const handleStartSeek = useLastCallback((e: MouseEvent | TouchEvent) => {
     if (e instanceof MouseEvent && e.button === 2) return;
     isSeeking.current = true;
     handleSeek(e);
-  }, [handleSeek]);
+  });
 
-  const handleStopSeek = useCallback(() => {
+  const handleStopSeek = useLastCallback(() => {
     isSeeking.current = false;
-  }, []);
+  });
 
-  const handleDateClick = useCallback(() => {
+  const handleDateClick = useLastCallback(() => {
     onDateClick!(message.id, message.chatId);
-  }, [onDateClick, message.id, message.chatId]);
+  });
 
-  const handleTranscribe = useCallback(() => {
+  const handleTranscribe = useLastCallback(() => {
     transcribeAudio({ chatId: message.chatId, messageId: message.id });
-  }, [message.chatId, message.id, transcribeAudio]);
+  });
 
   useEffect(() => {
     if (!seekerRef.current || !withSeekline) return undefined;

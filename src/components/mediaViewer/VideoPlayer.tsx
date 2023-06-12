@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -10,6 +10,8 @@ import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/windowEnvironmen
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
 import { clamp } from '../../util/math';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useBuffering from '../../hooks/useBuffering';
 import useFullscreen from '../../hooks/useFullscreen';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
@@ -83,16 +85,16 @@ const VideoPlayer: FC<OwnProps> = ({
   const duration = videoRef.current?.duration || 0;
   const isLooped = isGif || duration <= MAX_LOOP_DURATION;
 
-  const handleEnterFullscreen = useCallback(() => {
+  const handleEnterFullscreen = useLastCallback(() => {
     // Yandex browser doesn't support PIP when video is hidden
     if (IS_YA_BROWSER) return;
     setMediaViewerHidden({ isHidden: true });
-  }, [setMediaViewerHidden]);
+  });
 
-  const handleLeaveFullscreen = useCallback(() => {
+  const handleLeaveFullscreen = useLastCallback(() => {
     if (IS_YA_BROWSER) return;
     setMediaViewerHidden({ isHidden: false });
-  }, [setMediaViewerHidden]);
+  });
 
   const [
     isPictureInPictureSupported,
@@ -102,17 +104,17 @@ const VideoPlayer: FC<OwnProps> = ({
 
   const [, toggleControls, lockControls] = useControlsSignal();
 
-  const handleVideoMove = useCallback(() => {
+  const handleVideoMove = useLastCallback(() => {
     toggleControls(true);
-  }, [toggleControls]);
+  });
 
-  const handleVideoLeave = useCallback((e) => {
+  const handleVideoLeave = useLastCallback((e) => {
     const bounds = videoRef.current?.getBoundingClientRect();
     if (!bounds) return;
     if (e.clientX < bounds.left || e.clientX > bounds.right || e.clientY < bounds.top || e.clientY > bounds.bottom) {
       toggleControls(false);
     }
-  }, [toggleControls]);
+  });
 
   const {
     isReady, isBuffered, bufferedRanges, bufferingHandlers, bufferedProgress,
@@ -150,7 +152,7 @@ const VideoPlayer: FC<OwnProps> = ({
     videoRef.current!.playbackRate = playbackRate;
   }, [playbackRate]);
 
-  const togglePlayState = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent> | KeyboardEvent) => {
+  const togglePlayState = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent> | KeyboardEvent) => {
     e.stopPropagation();
     if (isPlaying) {
       videoRef.current!.pause();
@@ -159,9 +161,9 @@ const VideoPlayer: FC<OwnProps> = ({
       safePlay(videoRef.current!);
       setIsPlaying(true);
     }
-  }, [isPlaying]);
+  });
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLVideoElement, MouseEvent>) => {
     if (isClickDisabled) {
       return;
     }
@@ -170,12 +172,12 @@ const VideoPlayer: FC<OwnProps> = ({
     } else {
       togglePlayState(e);
     }
-  }, [onClose, shouldCloseOnClick, togglePlayState, isClickDisabled]);
+  });
 
   useVideoCleanup(videoRef, []);
   const [, setCurrentTime] = useCurrentTimeSignal();
 
-  const handleTimeUpdate = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+  const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     if (video.readyState >= MIN_READY_STATE) {
       setCurrentTime(video.currentTime);
@@ -184,40 +186,40 @@ const VideoPlayer: FC<OwnProps> = ({
       setCurrentTime(0);
       setIsPlaying(false);
     }
-  }, [isLooped, setCurrentTime]);
+  });
 
-  const handleEnded = useCallback(() => {
+  const handleEnded = useLastCallback(() => {
     if (isLooped) return;
     setCurrentTime(0);
     setIsPlaying(false);
     toggleControls(true);
-  }, [isLooped, setCurrentTime, toggleControls]);
+  });
 
-  const handleFullscreenChange = useCallback(() => {
+  const handleFullscreenChange = useLastCallback(() => {
     if (isFullscreen && exitFullscreen) {
       exitFullscreen();
     } else if (!isFullscreen && setFullscreen) {
       setFullscreen();
     }
-  }, [exitFullscreen, isFullscreen, setFullscreen]);
+  });
 
-  const handleSeek = useCallback((position: number) => {
+  const handleSeek = useLastCallback((position: number) => {
     videoRef.current!.currentTime = position;
-  }, []);
+  });
 
-  const handleVolumeChange = useCallback((newVolume: number) => {
+  const handleVolumeChange = useLastCallback((newVolume: number) => {
     setMediaViewerVolume({ volume: newVolume / 100 });
-  }, [setMediaViewerVolume]);
+  });
 
-  const handleVolumeMuted = useCallback(() => {
+  const handleVolumeMuted = useLastCallback(() => {
     // Browser requires explicit user interaction to keep video playing after unmuting
     videoRef.current!.muted = !videoRef.current!.muted;
     setMediaViewerMuted({ isMuted: !isMuted });
-  }, [isMuted, setMediaViewerMuted]);
+  });
 
-  const handlePlaybackRateChange = useCallback((newPlaybackRate: number) => {
+  const handlePlaybackRateChange = useLastCallback((newPlaybackRate: number) => {
     setMediaViewerPlaybackRate({ playbackRate: newPlaybackRate });
-  }, [setMediaViewerPlaybackRate]);
+  });
 
   useEffect(() => {
     if (!isMediaViewerOpen) return undefined;

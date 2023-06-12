@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiSponsoredMessage } from '../../../api/types';
@@ -8,6 +8,7 @@ import type { IAnchorPosition } from '../../../types';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 
@@ -39,25 +40,25 @@ const SponsoredMessageContextMenuContainer: FC<OwnProps & StateProps> = ({
   const [isMenuOpen, , closeMenu] = useFlag(true);
   const { transitionClassNames } = useShowTransition(isMenuOpen, onCloseAnimationEnd, undefined, false);
 
-  const handleAboutAdsOpen = useCallback(() => {
+  const handleAboutAdsOpen = useLastCallback(() => {
     onAboutAds();
     closeMenu();
-  }, [closeMenu, onAboutAds]);
+  });
 
-  const handleSponsoredHide = useCallback(() => {
+  const handleSponsoredHide = useLastCallback(() => {
     closeMenu();
     openPremiumModal();
     onClose();
-  }, [closeMenu, onClose, openPremiumModal]);
+  });
 
-  const handleSponsorInfo = useCallback(() => {
+  const handleSponsorInfo = useLastCallback(() => {
     closeMenu();
     showDialog({
       data: {
         message: [message.sponsorInfo, message.additionalInfo].join('\n'),
       },
     });
-  }, [message.additionalInfo, message.sponsorInfo]);
+  });
 
   if (!anchor) {
     return undefined;

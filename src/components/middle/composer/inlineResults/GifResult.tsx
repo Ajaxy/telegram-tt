@@ -1,9 +1,11 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiBotInlineMediaResult, ApiBotInlineResult, ApiVideo } from '../../../../api/types';
 
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 import GifButton from '../../../common/GifButton';
 
@@ -20,9 +22,9 @@ const GifResult: FC<OwnProps> = ({
 }) => {
   const { gif } = inlineResult;
 
-  const handleClick = useCallback((_gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
+  const handleClick = useLastCallback((_gif: ApiVideo, isSilent?: boolean, shouldSchedule?: boolean) => {
     onClick(inlineResult, isSilent, shouldSchedule);
-  }, [inlineResult, onClick]);
+  });
 
   if (!gif) {
     return undefined;

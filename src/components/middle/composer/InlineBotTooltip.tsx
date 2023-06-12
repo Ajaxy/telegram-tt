@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useEffect, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -15,6 +13,7 @@ import buildClassName from '../../../util/buildClassName';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { throttle } from '../../../util/schedulers';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import usePrevious from '../../../hooks/usePrevious';
@@ -43,7 +42,7 @@ export type OwnProps = {
   isSavedMessages?: boolean;
   canSendGifs?: boolean;
   onSelectResult: (
-    inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean
+    inlineResult: ApiBotInlineMediaResult | ApiBotInlineResult, isSilent?: boolean, shouldSchedule?: boolean,
   ) => void;
   loadMore: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
@@ -82,11 +81,11 @@ const InlineBotTooltip: FC<OwnProps> = ({
     isDisabled: !isOpen,
   });
 
-  const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
+  const handleLoadMore = useLastCallback(({ direction }: { direction: LoadMoreDirection }) => {
     if (direction === LoadMoreDirection.Backwards) {
       runThrottled(loadMore);
     }
-  }, [loadMore]);
+  });
 
   const selectedIndex = useKeyboardNavigation({
     isActive: isOpen,
@@ -101,12 +100,12 @@ const InlineBotTooltip: FC<OwnProps> = ({
     setTooltipItemVisible('.chat-item-clickable', selectedIndex, containerRef);
   }, [selectedIndex]);
 
-  const handleSendPm = useCallback(() => {
+  const handleSendPm = useLastCallback(() => {
     openChat({ id: botId });
     startBot({ botId: botId!, param: switchPm!.startParam });
-  }, [botId, openChat, startBot, switchPm]);
+  });
 
-  const handleOpenWebview = useCallback(() => {
+  const handleOpenWebview = useLastCallback(() => {
     const theme = extractCurrentThemeParams();
 
     requestSimpleWebView({
@@ -115,7 +114,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
       buttonText: switchWebview!.text,
       theme,
     });
-  }, [botId, switchWebview]);
+  });
 
   const prevInlineBotResults = usePrevious(
     inlineBotResults?.length

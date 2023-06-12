@@ -1,7 +1,7 @@
 import type { RefObject, ChangeEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, useRef, memo, useState, useCallback, useLayoutEffect,
+  useEffect, useRef, memo, useState, useLayoutEffect,
 } from '../../../lib/teact/teact';
 import { requestMutation, requestForcedReflow } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
@@ -23,6 +23,7 @@ import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
 import { isSelectionInsideInput } from './helpers/selection';
 import renderText from '../../common/helpers/renderText';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
@@ -167,7 +168,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   );
 
   const maxInputHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : (isMobile ? 256 : 416);
-  const updateInputHeight = useCallback((willSend = false) => {
+  const updateInputHeight = useLastCallback((willSend = false) => {
     requestForcedReflow(() => {
       const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
       const currentHeight = Number(scroller.style.height.replace('px', ''));
@@ -198,7 +199,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
         return exec;
       }
     });
-  }, [maxInputHeight]);
+  });
 
   useLayoutEffect(() => {
     if (!isAttachmentModalInput) return;
@@ -226,7 +227,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;
-  const focusInput = useCallback(() => {
+  const focusInput = useLastCallback(() => {
     if (!inputRef.current) {
       return;
     }
@@ -237,12 +238,12 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     }
 
     focusEditableElement(inputRef.current!);
-  }, []);
+  });
 
-  const handleCloseTextFormatter = useCallback(() => {
+  const handleCloseTextFormatter = useLastCallback(() => {
     closeTextFormatter();
     clearSelection();
-  }, [closeTextFormatter]);
+  });
 
   function checkSelection() {
     // Disable the formatter on iOS devices for now.

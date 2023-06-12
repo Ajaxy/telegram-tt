@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -23,6 +23,7 @@ import { getUserFullName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 import useLang from '../../../hooks/useLang';
@@ -214,14 +215,14 @@ const MessageContextMenu: FC<OwnProps> = ({
   const { isMobile, isDesktop } = useAppLayout();
   const seenByDatesCount = useMemo(() => (seenByDates ? Object.keys(seenByDates).length : 0), [seenByDates]);
 
-  const handleAfterCopy = useCallback(() => {
+  const handleAfterCopy = useLastCallback(() => {
     showNotification({
       message: lang('Share.Link.Copied'),
     });
     onClose();
-  }, [lang, onClose, showNotification]);
+  });
 
-  const handleOpenCustomEmojiSets = useCallback(() => {
+  const handleOpenCustomEmojiSets = useLastCallback(() => {
     if (!customEmojiSets) return;
     if (customEmojiSets.length === 1) {
       openStickerSet({
@@ -235,7 +236,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       });
     }
     onClose();
-  }, [customEmojiSets, onClose, openCustomEmojiSets, openStickerSet]);
+  });
 
   const copyOptions = isSponsoredMessage
     ? []
@@ -243,23 +244,17 @@ const MessageContextMenu: FC<OwnProps> = ({
       message, targetHref, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
     );
 
-  const getTriggerElement = useCallback(() => {
+  const getTriggerElement = useLastCallback(() => {
     return isSponsoredMessage
       ? document.querySelector('.Transition_slide-active > .MessageList .SponsoredMessage')
       : document.querySelector(`.Transition_slide-active > .MessageList div[data-message-id="${messageId}"]`);
-  }, [isSponsoredMessage, messageId]);
+  });
 
-  const getRootElement = useCallback(
-    () => document.querySelector('.Transition_slide-active > .MessageList'),
-    [],
-  );
+  const getRootElement = useLastCallback(() => document.querySelector('.Transition_slide-active > .MessageList'));
 
-  const getMenuElement = useCallback(
-    () => document.querySelector('.MessageContextMenu .bubble'),
-    [],
-  );
+  const getMenuElement = useLastCallback(() => document.querySelector('.MessageContextMenu .bubble'));
 
-  const getLayout = useCallback(() => {
+  const getLayout = useLastCallback(() => {
     const extraHeightAudioPlayer = (isMobile
       && (document.querySelector<HTMLElement>('.AudioPlayer-content'))?.offsetHeight) || 0;
     const pinnedElement = document.querySelector<HTMLElement>('.HeaderPinnedMessageWrapper');
@@ -275,7 +270,7 @@ const MessageContextMenu: FC<OwnProps> = ({
       shouldAvoidNegativePosition: !isDesktop,
       menuElMinWidth: withReactions && isMobile ? REACTION_SELECTOR_WIDTH_REM * REM : undefined,
     };
-  }, [isDesktop, isMobile, withReactions]);
+  });
 
   useEffect(() => {
     if (!isOpen) {
@@ -298,10 +293,10 @@ const MessageContextMenu: FC<OwnProps> = ({
     return enableScrolling;
   }, [withScroll]);
 
-  const handleOpenReactionPicker = useCallback((position: IAnchorPosition) => {
+  const handleOpenReactionPicker = useLastCallback((position: IAnchorPosition) => {
     onReactionPickerOpen!(position);
     hideItems();
-  }, [onReactionPickerOpen]);
+  });
 
   return (
     <Menu

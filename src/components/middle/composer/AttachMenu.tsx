@@ -1,5 +1,5 @@
 import React, {
-  memo, useMemo, useCallback, useEffect,
+  memo, useMemo, useEffect,
 } from '../../../lib/teact/teact';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -16,6 +16,7 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import { validateFiles } from '../../../util/files';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
@@ -75,38 +76,38 @@ const AttachMenu: FC<OwnProps> = ({
     }
   }, [isAttachMenuOpen, markMouseInside]);
 
-  const handleToggleAttachMenu = useCallback(() => {
+  const handleToggleAttachMenu = useLastCallback(() => {
     if (isAttachMenuOpen) {
       closeAttachMenu();
     } else {
       openAttachMenu();
     }
-  }, [isAttachMenuOpen, openAttachMenu, closeAttachMenu]);
+  });
 
-  const handleFileSelect = useCallback((e: Event, shouldSuggestCompression?: boolean) => {
+  const handleFileSelect = useLastCallback((e: Event, shouldSuggestCompression?: boolean) => {
     const { files } = e.target as HTMLInputElement;
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
       onFileSelect(validatedFiles, shouldSuggestCompression);
     }
-  }, [onFileSelect]);
+  });
 
-  const handleQuickSelect = useCallback(() => {
+  const handleQuickSelect = useLastCallback(() => {
     openSystemFilesDialog(
       Array.from(canSendVideoAndPhoto ? CONTENT_TYPES_WITH_PREVIEW : (
         canSendPhotos ? SUPPORTED_IMAGE_CONTENT_TYPES : SUPPORTED_VIDEO_CONTENT_TYPES
       )).join(','),
       (e) => handleFileSelect(e, true),
     );
-  }, [canSendPhotos, canSendVideoAndPhoto, handleFileSelect]);
+  });
 
-  const handleDocumentSelect = useCallback(() => {
+  const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog(!canSendDocuments && canSendAudios
       ? Array.from(SUPPORTED_AUDIO_CONTENT_TYPES).join(',') : (
         '*'
       ), (e) => handleFileSelect(e, false));
-  }, [canSendAudios, canSendDocuments, handleFileSelect]);
+  });
 
   const bots = useMemo(() => {
     return Object.values(attachBots).filter((bot) => {

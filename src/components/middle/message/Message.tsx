@@ -1,7 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -111,6 +110,7 @@ import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { isAnimatingScroll } from '../../../util/animateScroll';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
@@ -470,14 +470,14 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const hasSubheader = hasTopicChip || hasReply;
 
-  const selectMessage = useCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
+  const selectMessage = useLastCallback((e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => {
     toggleMessageSelection({
       messageId,
       groupedId,
       ...(e?.shiftKey && { withShift: true }),
       ...(isAlbum && { childMessageIds: album!.messages.map(({ id }) => id) }),
     });
-  }, [toggleMessageSelection, messageId, isAlbum, album]);
+  });
 
   const messageSender = canShowSender ? sender : undefined;
   const withVoiceTranscription = Boolean(!isTranscriptionHidden && (isTranscriptionError || transcribedText));
@@ -680,7 +680,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const shouldFocusOnResize = isLastInList;
 
-  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+  const handleResize = useLastCallback((entry: ResizeObserverEntry) => {
     const lastHeight = messageHeightRef.current;
 
     const newHeight = entry.contentRect.height;
@@ -701,7 +701,7 @@ const Message: FC<OwnProps & StateProps> = ({
     if (previousScrollBottom <= BOTTOM_FOCUS_SCROLL_THRESHOLD) {
       focusLastMessage();
     }
-  }, [focusLastMessage]);
+  });
 
   const throttledResize = useThrottledCallback(handleResize, [handleResize], THROTTLE_MS, false);
 

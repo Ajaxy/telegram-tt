@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
+import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../../hooks/useHeavyAnimationCheck';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../hooks/usePriorityPlaybackCheck';
@@ -11,25 +12,25 @@ export default function useVideoAutoPause(playerRef: { current: HTMLVideoElement
 
   const { play, pause } = usePlayPause(playerRef);
 
-  const unfreezePlaying = useCallback(() => {
+  const unfreezePlaying = useLastCallback(() => {
     if (canPlayRef.current && !isFrozen()) {
       play();
     }
-  }, [play]);
+  });
 
-  const unfreezePlayingOnRaf = useCallback(() => {
+  const unfreezePlayingOnRaf = useLastCallback(() => {
     requestMeasure(unfreezePlaying);
-  }, [unfreezePlaying]);
+  });
 
   useBackgroundMode(pause, unfreezePlayingOnRaf, !canPlay);
   useHeavyAnimationCheck(pause, unfreezePlaying, !canPlay);
   usePriorityPlaybackCheck(pause, unfreezePlaying, !canPlay);
 
-  const handlePlaying = useCallback(() => {
+  const handlePlaying = useLastCallback(() => {
     if (!canPlayRef.current || isFrozen()) {
       pause();
     }
-  }, [pause]);
+  });
 
   useEffect(() => {
     if (canPlay) {
@@ -48,7 +49,7 @@ function usePlayPause(mediaRef: React.RefObject<HTMLMediaElement>) {
   const shouldPauseRef = useRef(false);
   const isLoadingPlayRef = useRef(false);
 
-  const play = useCallback(() => {
+  const play = useLastCallback(() => {
     shouldPauseRef.current = false;
     if (mediaRef.current && !isLoadingPlayRef.current && document.body.contains(mediaRef.current)) {
       isLoadingPlayRef.current = true;
@@ -63,15 +64,15 @@ function usePlayPause(mediaRef: React.RefObject<HTMLMediaElement>) {
         console.warn(e);
       });
     }
-  }, [mediaRef]);
+  });
 
-  const pause = useCallback(() => {
+  const pause = useLastCallback(() => {
     if (isLoadingPlayRef.current) {
       shouldPauseRef.current = true;
     } else {
       mediaRef.current?.pause();
     }
-  }, [mediaRef]);
+  });
 
   return { play, pause };
 }

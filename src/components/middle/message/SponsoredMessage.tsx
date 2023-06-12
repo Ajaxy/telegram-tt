@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef,
+  memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -13,6 +13,8 @@ import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import renderText from '../../common/helpers/renderText';
 import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -84,7 +86,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     handleBeforeContextMenu(e);
   };
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     if (!message) return;
     if (message.chatInviteHash) {
       openChatByInvite({ hash: message.chatInviteHash });
@@ -100,7 +102,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         });
       }
     }
-  }, [focusMessage, message, openChat, openChatByInvite, startBot]);
+  });
 
   if (!message) {
     return undefined;

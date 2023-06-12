@@ -1,8 +1,6 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  useEffect, useCallback, memo, useMemo,
-} from '../../lib/teact/teact';
+import React, { useEffect, memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
@@ -34,6 +32,7 @@ import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
 import TopicIcon from './TopicIcon';
+import useLastCallback from '../../hooks/useLastCallback';
 
 const TOPIC_ICON_SIZE = 2.5 * REM;
 
@@ -105,16 +104,18 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, isMin, lastSyncTime, withFullInfo, loadFullChat, loadProfilePhotos, isSuperGroup, withMediaViewer]);
 
-  const handleAvatarViewerOpen = useCallback((e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
-    if (chat && hasMedia) {
-      e.stopPropagation();
-      openMediaViewer({
-        avatarOwnerId: chat.id,
-        mediaId: 0,
-        origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
-      });
-    }
-  }, [chat, avatarSize, openMediaViewer]);
+  const handleAvatarViewerOpen = useLastCallback(
+    (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => {
+      if (chat && hasMedia) {
+        e.stopPropagation();
+        openMediaViewer({
+          avatarOwnerId: chat.id,
+          mediaId: 0,
+          origin: avatarSize === 'jumbo' ? MediaViewerOrigin.ProfileAvatar : MediaViewerOrigin.MiddleHeaderAvatar,
+        });
+      }
+    },
+  );
 
   const lang = useLang();
   const mainUsername = useMemo(() => chat && withUsername && getMainUsername(chat), [chat, withUsername]);

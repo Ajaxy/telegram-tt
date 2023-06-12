@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState, useRef,
+  memo, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -25,6 +25,8 @@ import {
   getCanAddContact, getCanManageTopic, isChatAdmin, isChatChannel, isUserBot, isUserId,
 } from '../../global/helpers';
 import { getDayStartAt } from '../../util/dateFormat';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
@@ -166,49 +168,49 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   const [isDeleteDialogOpen, openDeleteDialog, closeDeleteDialog] = useFlag();
   const { isMobile } = useAppLayout();
 
-  const handleEditInviteClick = useCallback(() => {
+  const handleEditInviteClick = useLastCallback(() => {
     setEditingExportedInvite({ chatId: chatId!, invite: currentInviteInfo! });
     onScreenSelect(ManagementScreens.EditInvite);
-  }, [chatId, currentInviteInfo, onScreenSelect, setEditingExportedInvite]);
+  });
 
-  const handleDeleteInviteClick = useCallback(() => {
+  const handleDeleteInviteClick = useLastCallback(() => {
     deleteExportedChatInvite({ chatId: chatId!, link: currentInviteInfo!.link });
     onScreenSelect(ManagementScreens.Invites);
     closeDeleteDialog();
-  }, [chatId, closeDeleteDialog, currentInviteInfo, deleteExportedChatInvite, onScreenSelect]);
+  });
 
-  const handleMessageSearchQueryChange = useCallback((query: string) => {
+  const handleMessageSearchQueryChange = useLastCallback((query: string) => {
     setLocalTextSearchQuery({ query });
 
     if (query.length) {
       runDebouncedForSearch(searchTextMessagesLocal);
     }
-  }, [searchTextMessagesLocal, setLocalTextSearchQuery]);
+  });
 
-  const handleStickerSearchQueryChange = useCallback((query: string) => {
+  const handleStickerSearchQueryChange = useLastCallback((query: string) => {
     setStickerSearchQuery({ query });
-  }, [setStickerSearchQuery]);
+  });
 
-  const handleGifSearchQueryChange = useCallback((query: string) => {
+  const handleGifSearchQueryChange = useLastCallback((query: string) => {
     setGifSearchQuery({ query });
-  }, [setGifSearchQuery]);
+  });
 
-  const handleAddContact = useCallback(() => {
+  const handleAddContact = useLastCallback(() => {
     openAddContactDialog({ userId });
-  }, [openAddContactDialog, userId]);
+  });
 
-  const toggleEditTopic = useCallback(() => {
+  const toggleEditTopic = useLastCallback(() => {
     if (!chatId || !threadId) return;
     openEditTopicPanel({ chatId, topicId: threadId });
-  }, [chatId, openEditTopicPanel, threadId]);
+  });
 
-  const handleToggleManagement = useCallback(() => {
+  const handleToggleManagement = useLastCallback(() => {
     toggleManagement();
-  }, [toggleManagement]);
+  });
 
-  const handleToggleStatistics = useCallback(() => {
+  const handleToggleStatistics = useLastCallback(() => {
     toggleStatistics();
-  }, [toggleStatistics]);
+  });
 
   const [shouldSkipTransition, setShouldSkipTransition] = useState(!isColumnOpen);
 

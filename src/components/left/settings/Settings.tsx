@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
+import React, { memo, useState } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -7,6 +7,8 @@ import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/u
 
 import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 import { selectTabState } from '../../../global/selectors';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
 
 import Transition from '../../ui/Transition';
@@ -145,7 +147,7 @@ const Settings: FC<OwnProps> = ({
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
 
-  const handleReset = useCallback((forceReturnToChatList?: true | Event) => {
+  const handleReset = useLastCallback((forceReturnToChatList?: true | Event) => {
     const isFromSettings = selectTabState(getGlobal()).shareFolderScreen?.isFromSettings;
 
     if (currentScreen === SettingsScreens.FoldersShare) {
@@ -181,10 +183,7 @@ const Settings: FC<OwnProps> = ({
     }
 
     onReset();
-  }, [
-    foldersState.mode, foldersDispatch,
-    currentScreen, onReset, onScreenSelect,
-  ]);
+  });
 
   function renderCurrentSectionContent(isScreenActive: boolean, screen: SettingsScreens) {
     const privacyAllowScreens: Record<number, boolean> = {

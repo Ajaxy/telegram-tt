@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
@@ -21,6 +21,7 @@ import buildClassName from '../../util/buildClassName';
 import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
 import { getReactionUniqueKey } from '../../global/helpers';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 import useMediaTransition from '../../hooks/useMediaTransition';
@@ -140,7 +141,7 @@ const StickerSet: FC<OwnProps> = ({
   const isEmoji = stickerSet.isEmoji;
   const isPremiumSet = !isRecent && selectIsSetPremium(stickerSet);
 
-  const handleClearRecent = useCallback(() => {
+  const handleClearRecent = useLastCallback(() => {
     if (isReactionPicker) {
       clearRecentReactions();
     } else if (isEmoji) {
@@ -149,11 +150,9 @@ const StickerSet: FC<OwnProps> = ({
       clearRecentStickers();
     }
     closeConfirmModal();
-  }, [
-    clearRecentCustomEmoji, clearRecentReactions, clearRecentStickers, closeConfirmModal, isEmoji, isReactionPicker,
-  ]);
+  });
 
-  const handleAddClick = useCallback(() => {
+  const handleAddClick = useLastCallback(() => {
     if (isPremiumSet && !isCurrentUserPremium) {
       openPremiumModal({
         initialSection: 'animated_emoji',
@@ -163,9 +162,9 @@ const StickerSet: FC<OwnProps> = ({
         stickerSetId: stickerSet.id,
       });
     }
-  }, [isCurrentUserPremium, isPremiumSet, openPremiumModal, stickerSet, toggleStickerSet]);
+  });
 
-  const handleDefaultTopicIconClick = useCallback(() => {
+  const handleDefaultTopicIconClick = useLastCallback(() => {
     onStickerSelect?.({
       id: DEFAULT_TOPIC_ICON_STICKER_ID,
       isLottie: false,
@@ -174,9 +173,9 @@ const StickerSet: FC<OwnProps> = ({
         shortName: 'dummy',
       },
     } satisfies ApiSticker);
-  }, [onStickerSelect]);
+  });
 
-  const handleDefaultStatusIconClick = useCallback(() => {
+  const handleDefaultStatusIconClick = useLastCallback(() => {
     onStickerSelect?.({
       id: DEFAULT_STATUS_ICON_ID,
       isLottie: false,
@@ -185,23 +184,24 @@ const StickerSet: FC<OwnProps> = ({
         shortName: 'dummy',
       },
     } satisfies ApiSticker);
-  }, [onStickerSelect]);
+  });
 
   const itemSize = isEmoji ? EMOJI_SIZE_PICKER : STICKER_SIZE_PICKER;
   const margin = isEmoji ? emojiMarginPx : stickerMarginPx;
   const verticalMargin = isEmoji ? emojiVerticalMarginPx : stickerMarginPx;
 
-  const calculateItemsPerRow = useCallback((width: number) => {
+  const calculateItemsPerRow = useLastCallback((width: number) => {
     if (!width) {
       return getItemsPerRowFallback(windowWidth);
     }
 
     return Math.floor((width + margin) / (itemSize + margin));
-  }, [itemSize, margin, windowWidth]);
+  });
 
-  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+  const handleResize = useLastCallback((entry: ResizeObserverEntry) => {
     setItemsPerRow(calculateItemsPerRow(entry.contentRect.width));
-  }, [calculateItemsPerRow]);
+  });
+
   useResizeObserver(ref, handleResize);
 
   useEffect(() => {

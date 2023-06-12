@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -24,6 +24,7 @@ import AnimatedSticker from '../../common/AnimatedSticker';
 import CustomEmojiEffect from './CustomEmojiEffect';
 
 import styles from './ReactionAnimatedEmoji.module.scss';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 type OwnProps = {
   reaction: ApiReaction;
@@ -101,10 +102,10 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
     transitionClassNames: animationClassNames,
   } = useShowTransition(shouldPlay, undefined, true, 'slow');
 
-  const handleEnded = useCallback(() => {
+  const handleEnded = useLastCallback(() => {
     if (!activeReaction?.messageId) return;
     stopActiveReaction({ messageId: activeReaction.messageId, reaction });
-  }, [activeReaction?.messageId, reaction, stopActiveReaction]);
+  });
 
   const [isAnimationLoaded, markAnimationLoaded, unmarkAnimationLoaded] = useFlag();
   const shouldRenderStatic = !isCustom && (!shouldPlay || !isAnimationLoaded);

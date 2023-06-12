@@ -1,9 +1,11 @@
-import React, { useCallback, memo, useMemo } from '../../lib/teact/teact';
+import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
 import { formatDateAtTime } from '../../util/dateFormat';
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
@@ -47,17 +49,17 @@ function SeenByModal({
     return result;
   }, [renderingSeenByDates]);
 
-  const handleClick = useCallback((userId: string) => {
+  const handleClick = useLastCallback((userId: string) => {
     closeSeenByModal();
 
     setTimeout(() => {
       openChat({ id: userId });
     }, CLOSE_ANIMATION_DURATION);
-  }, [closeSeenByModal, openChat]);
+  });
 
-  const handleCloseSeenByModal = useCallback(() => {
+  const handleCloseSeenByModal = useLastCallback(() => {
     closeSeenByModal();
-  }, [closeSeenByModal]);
+  });
 
   return (
     <Modal

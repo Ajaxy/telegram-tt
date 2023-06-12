@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
@@ -30,6 +30,7 @@ import buildClassName from '../../../util/buildClassName';
 import { validateFiles } from '../../../util/files';
 import { removeAllSelections } from '../../../util/selection';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
 import useMentionTooltip from './hooks/useMentionTooltip';
 import useEmojiTooltip from './hooks/useEmojiTooltip';
@@ -253,7 +254,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     handleContextMenuHide,
   } = useContextMenuHandlers(mainButtonRef, !canShowCustomSendMenu || !isOpen);
 
-  const sendAttachments = useCallback((isSilent?: boolean, shouldSendScheduled?: boolean) => {
+  const sendAttachments = useLastCallback((isSilent?: boolean, shouldSendScheduled?: boolean) => {
     if (isOpen) {
       const send = (shouldSchedule || shouldSendScheduled) ? onSendScheduled
         : isSilent ? onSendSilent : onSend;
@@ -263,22 +264,19 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         shouldSendGrouped,
       });
     }
-  }, [
-    isOpen, shouldSchedule, onSendScheduled, onSendSilent, onSend, isSendingCompressed, shouldSendGrouped,
-    updateAttachmentSettings,
-  ]);
+  });
 
-  const handleSendSilent = useCallback(() => {
+  const handleSendSilent = useLastCallback(() => {
     sendAttachments(true);
-  }, [sendAttachments]);
+  });
 
-  const handleSendClick = useCallback(() => {
+  const handleSendClick = useLastCallback(() => {
     sendAttachments();
-  }, [sendAttachments]);
+  });
 
-  const handleScheduleClick = useCallback(() => {
+  const handleScheduleClick = useLastCallback(() => {
     sendAttachments(false, true);
-  }, [sendAttachments]);
+  });
 
   const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
     const { relatedTarget: toTarget, target: fromTarget } = e;
@@ -300,7 +298,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     unmarkHovered();
   };
 
-  const handleFilesDrop = useCallback(async (e: React.DragEvent<HTMLDivElement>) => {
+  const handleFilesDrop = useLastCallback(async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     unmarkHovered();
 
@@ -310,7 +308,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     if (files?.length) {
       onFileAppend(files, isEverySpoiler);
     }
-  }, [isEverySpoiler, onFileAppend, unmarkHovered]);
+  });
 
   function handleDragOver(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     e.preventDefault();
@@ -321,35 +319,35 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }
   }
 
-  const handleFileSelect = useCallback((e: Event) => {
+  const handleFileSelect = useLastCallback((e: Event) => {
     const { files } = e.target as HTMLInputElement;
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
       onFileAppend(validatedFiles, isEverySpoiler);
     }
-  }, [isEverySpoiler, onFileAppend]);
+  });
 
-  const handleDocumentSelect = useCallback(() => {
+  const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog('*', (e) => handleFileSelect(e));
-  }, [handleFileSelect]);
+  });
 
-  const handleDelete = useCallback((index: number) => {
+  const handleDelete = useLastCallback((index: number) => {
     onAttachmentsUpdate(attachments.filter((a, i) => i !== index));
-  }, [attachments, onAttachmentsUpdate]);
+  });
 
-  const handleEnableSpoilers = useCallback(() => {
+  const handleEnableSpoilers = useLastCallback(() => {
     onAttachmentsUpdate(attachments.map((a) => ({
       ...a,
       shouldSendAsSpoiler: a.mimeType !== GIF_MIME_TYPE ? true : undefined,
     })));
-  }, [attachments, onAttachmentsUpdate]);
+  });
 
-  const handleDisableSpoilers = useCallback(() => {
+  const handleDisableSpoilers = useLastCallback(() => {
     onAttachmentsUpdate(attachments.map((a) => ({ ...a, shouldSendAsSpoiler: undefined })));
-  }, [attachments, onAttachmentsUpdate]);
+  });
 
-  const handleToggleSpoiler = useCallback((index: number) => {
+  const handleToggleSpoiler = useLastCallback((index: number) => {
     onAttachmentsUpdate(attachments.map((attachment, i) => {
       if (i === index) {
         return {
@@ -360,7 +358,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
       return attachment;
     }));
-  }, [attachments, onAttachmentsUpdate]);
+  });
 
   useEffect(() => {
     const mainButton = mainButtonRef.current;

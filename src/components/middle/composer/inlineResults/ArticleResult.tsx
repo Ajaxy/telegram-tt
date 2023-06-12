@@ -1,7 +1,9 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiBotInlineResult } from '../../../../api/types';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 import BaseResult from './BaseResult';
 
@@ -16,9 +18,9 @@ const ArticleResult: FC<OwnProps> = ({ focus, inlineResult, onClick }) => {
     title, url, description, webThumbnail,
   } = inlineResult;
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     onClick(inlineResult);
-  }, [inlineResult, onClick]);
+  });
 
   return (
     <BaseResult

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from '../../lib/teact/teact';
+import React, { memo, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -9,6 +9,8 @@ import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
 
 import { getMessageMediaHash } from '../../global/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
@@ -38,7 +40,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
   const suggestedPhotoUrl = useMedia(getMessageMediaHash(message, 'full'));
   const isVideo = message.content.action!.photo?.isVideo;
 
-  const showAvatarNotification = useCallback(() => {
+  const showAvatarNotification = useLastCallback(() => {
     showNotification({
       title: lang('ApplyAvatarHintTitle'),
       message: lang('ApplyAvatarHint'),
@@ -50,19 +52,19 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
       },
       actionText: lang('Open'),
     });
-  }, [lang, showNotification]);
+  });
 
-  const handleSetSuggestedAvatar = useCallback((file: File) => {
+  const handleSetSuggestedAvatar = useLastCallback((file: File) => {
     setCropModalBlob(undefined);
     uploadProfilePhoto({ file });
     showAvatarNotification();
-  }, [showAvatarNotification, uploadProfilePhoto]);
+  });
 
-  const handleCloseCropModal = useCallback(() => {
+  const handleCloseCropModal = useLastCallback(() => {
     setCropModalBlob(undefined);
-  }, []);
+  });
 
-  const handleSetVideo = useCallback(async () => {
+  const handleSetVideo = useLastCallback(async () => {
     closeVideoModal();
     showAvatarNotification();
 
@@ -75,7 +77,7 @@ const ActionMessageSuggestedAvatar: FC<OwnProps> = ({
       isVideo: true,
       videoTs: photo.videoSizes?.find((l) => l.videoStartTs !== undefined)?.videoStartTs,
     });
-  }, [closeVideoModal, message.content.action, showAvatarNotification, uploadProfilePhoto]);
+  });
 
   const handleViewSuggestedAvatar = async () => {
     if (!isOutgoing && suggestedPhotoUrl) {

@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useCallback, useEffect, useRef } from '../../lib/teact/teact';
+import React, { useEffect, useRef } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
@@ -9,6 +9,8 @@ import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
 import { enableDirectTextInput, disableDirectTextInput } from '../../util/directInputManager';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
@@ -78,7 +80,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     return enableDirectTextInput;
   }, [isOpen]);
 
-  const handleEnter = useCallback((e: KeyboardEvent) => {
+  const handleEnter = useLastCallback((e: KeyboardEvent) => {
     if (!onEnter) {
       return false;
     }
@@ -86,7 +88,7 @@ const Modal: FC<OwnProps & StateProps> = ({
     e.preventDefault();
     onEnter();
     return true;
-  }, [onEnter]);
+  });
 
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: onClose, onEnter: handleEnter }) : undefined

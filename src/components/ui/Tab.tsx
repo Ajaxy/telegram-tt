@@ -2,7 +2,7 @@ import React, {
   useRef,
   memo,
   useEffect,
-  useLayoutEffect, useCallback,
+  useLayoutEffect,
 } from '../../lib/teact/teact';
 import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 
@@ -22,6 +22,7 @@ import MenuItem from './MenuItem';
 
 import MenuSeparator from './MenuSeparator';
 import './Tab.scss';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   className?: string;
@@ -125,25 +126,14 @@ const Tab: FC<OwnProps> = ({
     onClick?.(clickArg!);
   });
 
-  const getTriggerElement = useCallback(() => tabRef.current, []);
-
-  const getRootElement = useCallback(
-    () => (contextRootElementSelector
-      ? tabRef.current!.closest(contextRootElementSelector)
-      : document.body),
-    [contextRootElementSelector],
+  const getTriggerElement = useLastCallback(() => tabRef.current);
+  const getRootElement = useLastCallback(
+    () => (contextRootElementSelector ? tabRef.current!.closest(contextRootElementSelector) : document.body),
   );
-
-  const getMenuElement = useCallback(
-    () => document.querySelector('#portals')!
-      .querySelector('.Tab-context-menu .bubble'),
-    [],
+  const getMenuElement = useLastCallback(
+    () => document.querySelector('#portals')!.querySelector('.Tab-context-menu .bubble'),
   );
-
-  const getLayout = useCallback(
-    () => ({ withPortal: true }),
-    [],
-  );
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,

@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
 import type { MediaViewerOrigin } from '../../types';
@@ -13,6 +13,7 @@ import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 import useLang from '../../hooks/useLang';
 import useTimeout from '../../hooks/useTimeout';
@@ -134,13 +135,13 @@ const MediaViewerSlides: FC<OwnProps> = ({
   const shouldCloseOnVideo = Boolean(isGif && !IS_IOS);
   const clickXThreshold = IS_TOUCH_ENV ? 40 : windowWidth / 10;
 
-  const handleControlsVisibility = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleControlsVisibility = useLastCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!IS_TOUCH_ENV) return;
     const isFooter = windowHeight - e.pageY < CLICK_Y_THRESHOLD;
     if (!isFooter && e.pageX < clickXThreshold) return;
     if (!isFooter && e.pageX > windowWidth - clickXThreshold) return;
     setControlsVisible(!getControlsVisible());
-  }, [clickXThreshold, getControlsVisible, setControlsVisible, windowHeight, windowWidth]);
+  });
 
   useTimeout(() => setControlsVisible(true), ANIMATION_DURATION);
 

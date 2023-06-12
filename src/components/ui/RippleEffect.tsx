@@ -1,8 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  useCallback, useMemo, useState, memo,
-} from '../../lib/teact/teact';
+import React, { useMemo, useState, memo } from '../../lib/teact/teact';
 import { debounce } from '../../util/schedulers';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import './RippleEffect.scss';
 
@@ -23,7 +23,7 @@ const RippleEffect: FC = () => {
     }, ANIMATION_DURATION_MS, false);
   }, []);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (e.button !== 0) {
       return;
     }
@@ -42,7 +42,7 @@ const RippleEffect: FC = () => {
     ]);
 
     cleanUpDebounced();
-  }, [ripples, cleanUpDebounced]);
+  });
 
   return (
     <div className="ripple-container" onMouseDown={handleMouseDown}>

@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useRef, useCallback, useState, useMemo,
+  memo, useRef, useState, useMemo,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
@@ -10,6 +10,8 @@ import { REM } from './helpers/mediaDimensions';
 import { CHAT_HEIGHT_PX } from '../../config';
 import renderText from './helpers/renderText';
 import { getCanPostInChat, isUserId } from '../../global/helpers';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
@@ -76,9 +78,9 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   const activeKey = forumId ? TOPIC_LIST_SLIDE : CHAT_LIST_SLIDE;
   const viewportOffset = chatOrUserIds!.indexOf(viewportIds![0]);
 
-  const resetSearch = useCallback(() => {
+  const resetSearch = useLastCallback(() => {
     onSearchChange('');
-  }, [onSearchChange]);
+  });
   useInputFocusOnOpen(searchRef, isOpen && activeKey === CHAT_LIST_SLIDE, resetSearch);
   useInputFocusOnOpen(topicSearchRef, isOpen && activeKey === TOPIC_LIST_SLIDE);
 
@@ -106,18 +108,18 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     return [Object.keys(result).map(Number), result];
   }, [chatsById, forumId, topicSearch]);
 
-  const handleHeaderBackClick = useCallback(() => {
+  const handleHeaderBackClick = useLastCallback(() => {
     setForumId(undefined);
     setTopicSearch('');
-  }, []);
+  });
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     onSearchChange(e.currentTarget.value);
-  }, [onSearchChange]);
+  });
 
-  const handleTopicSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTopicSearchChange = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTopicSearch(e.currentTarget.value);
-  }, []);
+  });
 
   const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
     if (viewportIds && viewportIds.length > 0) {
@@ -138,7 +140,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     }
   }, '.ListItem-button', true);
 
-  const handleClick = useCallback((e: React.MouseEvent, chatId: string) => {
+  const handleClick = useLastCallback((e: React.MouseEvent, chatId: string) => {
     const chat = chatsById?.[chatId];
     if (chat?.isForum) {
       if (!chat.topics) loadTopics({ chatId });
@@ -147,11 +149,11 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     } else {
       onSelectChatOrUser(chatId);
     }
-  }, [chatsById, loadTopics, onSelectChatOrUser, resetSearch]);
+  });
 
-  const handleTopicClick = useCallback((e: React.MouseEvent, topicId: number) => {
+  const handleTopicClick = useLastCallback((e: React.MouseEvent, topicId: number) => {
     onSelectChatOrUser(forumId!, topicId);
-  }, [forumId, onSelectChatOrUser]);
+  });
 
   function renderTopicList() {
     return (

@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useMemo, useRef,
+  memo, useMemo, useRef,
 } from '../../lib/teact/teact';
 
 import type { FC } from '../../lib/teact/teact';
@@ -10,6 +10,7 @@ import { EMOJI_SIZE_PICKER } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { getDocumentMediaHash, isSameReaction } from '../../global/helpers';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useMedia from '../../hooks/useMedia';
@@ -54,9 +55,9 @@ const ReactionEmoji: FC<OwnProps> = ({
     availableReaction?.selectAnimation ? getDocumentMediaHash(availableReaction.selectAnimation) : undefined,
     !animationId,
   );
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     onClick(reaction);
-  }, [onClick, reaction]);
+  });
 
   const transitionClassNames = useMediaTransition(mediaData);
   const fullClassName = buildClassName(

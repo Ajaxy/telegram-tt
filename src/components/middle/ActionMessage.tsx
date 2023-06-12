@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -24,6 +24,8 @@ import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -149,7 +151,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [targetUserIds, usersById]);
 
-  const renderContent = useCallback(() => {
+  const renderContent = useLastCallback(() => {
     return renderActionMessageText(
       lang,
       message,
@@ -163,11 +165,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       observeIntersectionForLoading,
       observeIntersectionForPlaying,
     );
-  },
-  [
-    isEmbedded, lang, message, observeIntersectionForLoading, observeIntersectionForPlaying, senderChat,
-    senderUser, targetChatId, targetMessage, targetUsers, topic,
-  ]);
+  });
 
   const {
     isContextMenuOpen, contextMenuPosition,

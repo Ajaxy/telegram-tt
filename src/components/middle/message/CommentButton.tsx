@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type {
@@ -9,6 +9,8 @@ import type {
 import { isUserId } from '../../../global/helpers';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
@@ -32,9 +34,9 @@ const CommentButton: FC<OwnProps> = ({
     threadId, chatId, messagesCount, lastMessageId, lastReadInboxMessageId, recentReplierIds, originChannelId,
   } = threadInfo;
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     openComments({ id: chatId, threadId, originChannelId });
-  }, [openComments, chatId, threadId, originChannelId]);
+  });
 
   const recentRepliers = useMemo(() => {
     if (!recentReplierIds?.length) {

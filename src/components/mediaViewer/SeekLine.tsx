@@ -1,10 +1,11 @@
 import React, {
-  useRef, useState, useCallback, useEffect, memo, useMemo, useLayoutEffect,
+  useRef, useState, useEffect, memo, useMemo, useLayoutEffect,
 } from '../../lib/teact/teact';
 
 import type { BufferedRange } from '../../hooks/useBuffering';
 import type { ApiDimensions } from '../../api/types';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useSignal from '../../hooks/useSignal';
 import useCurrentTimeSignal from './hooks/currentTimeSignal';
 
@@ -65,11 +66,11 @@ const SeekLine: React.FC<OwnProps> = ({
     return getPreviewDimensions(posterSize?.width || 0, posterSize?.height || 0);
   }, [posterSize]);
 
-  const setPreview = useCallback((time: number) => {
+  const setPreview = useLastCallback((time: number) => {
     time = Math.floor(time);
     setPreviewTime(time);
     renderVideoPreview(time);
-  }, [setPreviewTime]);
+  });
 
   useEffect(() => {
     if (isPreviewDisabled || !url || !isReady) return undefined;

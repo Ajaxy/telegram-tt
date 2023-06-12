@@ -1,6 +1,6 @@
-import { useCallback } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useRunDebounced from '../../../hooks/useRunDebounced';
 import useFlag from '../../../hooks/useFlag';
 
@@ -15,7 +15,7 @@ export default function useStickyDates() {
 
   const runDebounced = useRunDebounced(DEBOUNCE, true);
 
-  const updateStickyDates = useCallback((container: HTMLDivElement, hasTools?: boolean) => {
+  const updateStickyDates = useLastCallback((container: HTMLDivElement, hasTools?: boolean) => {
     markIsScrolled();
 
     if (!document.body.classList.contains('is-scrolling-messages')) {
@@ -41,7 +41,7 @@ export default function useStickyDates() {
         document.body.classList.remove('is-scrolling-messages');
       });
     });
-  }, [markIsScrolled, runDebounced]);
+  });
 
   return {
     isScrolled,

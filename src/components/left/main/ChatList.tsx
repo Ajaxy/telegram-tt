@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useRef, useCallback,
+  memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
@@ -20,6 +20,7 @@ import { IS_MAC_OS, IS_APP } from '../../../util/windowEnvironment';
 import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import buildClassName from '../../../util/buildClassName';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -133,18 +134,18 @@ const ChatList: FC<OwnProps> = ({
     throttleMs: INTERSECTION_THROTTLE,
   });
 
-  const handleArchivedClick = useCallback(() => {
+  const handleArchivedClick = useLastCallback(() => {
     onLeftColumnContentChange(LeftColumnContent.Archived);
     closeForumPanel();
-  }, [closeForumPanel, onLeftColumnContentChange]);
+  });
 
-  const handleArchivedDragEnter = useCallback(() => {
+  const handleArchivedDragEnter = useLastCallback(() => {
     if (shouldIgnoreDragRef.current) {
       shouldIgnoreDragRef.current = false;
       return;
     }
     handleArchivedClick();
-  }, [handleArchivedClick]);
+  });
 
   const handleDragEnter = useDebouncedCallback((chatId: string) => {
     if (shouldIgnoreDragRef.current) {
@@ -154,13 +155,13 @@ const ChatList: FC<OwnProps> = ({
     openChat({ id: chatId, shouldReplaceHistory: true });
   }, [openChat], DRAG_ENTER_DEBOUNCE, true);
 
-  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = useLastCallback((e: React.DragEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     if (x < rect.width || y < rect.y) return;
     shouldIgnoreDragRef.current = true;
-  }, []);
+  });
 
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);

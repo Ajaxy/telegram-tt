@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
@@ -28,6 +28,7 @@ import { createLocationHash } from '../../../util/routing';
 import renderText from '../../common/helpers/renderText';
 import { getMessageAction } from '../../../global/helpers';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
 import useFlag from '../../../hooks/useFlag';
@@ -105,19 +106,19 @@ const Topic: FC<OwnProps & StateProps> = ({
   } = topic;
   const isMuted = topic.isMuted || (topic.isMuted === undefined && chat.isMuted);
 
-  const handleOpenDeleteModal = useCallback(() => {
+  const handleOpenDeleteModal = useLastCallback(() => {
     markRenderDeleteModal();
     openDeleteModal();
-  }, [markRenderDeleteModal, openDeleteModal]);
+  });
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useLastCallback(() => {
     deleteTopic({ chatId: chat.id, topicId: topic.id });
-  }, [chat.id, deleteTopic, topic.id]);
+  });
 
-  const handleMute = useCallback(() => {
+  const handleMute = useLastCallback(() => {
     markRenderMuteModal();
     openMuteModal();
-  }, [markRenderMuteModal, openMuteModal]);
+  });
 
   const { renderSubtitle, ref } = useChatListEntry({
     chat,
@@ -138,13 +139,13 @@ const Topic: FC<OwnProps & StateProps> = ({
     orderDiff,
   });
 
-  const handleOpenTopic = useCallback(() => {
+  const handleOpenTopic = useLastCallback(() => {
     openChat({ id: chatId, threadId: topic.id, shouldReplaceHistory: true });
 
     if (canScrollDown) {
       focusLastMessage();
     }
-  }, [openChat, chatId, topic.id, canScrollDown, focusLastMessage]);
+  });
 
   const contextActions = useTopicContextActions({
     topic,

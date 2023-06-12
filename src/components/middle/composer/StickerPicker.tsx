@@ -1,5 +1,5 @@
 import React, {
-  useEffect, memo, useRef, useMemo, useCallback,
+  useEffect, memo, useRef, useMemo,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -27,6 +27,7 @@ import {
   selectChat, selectChatFullInfo, selectIsChatWithSelf, selectIsCurrentUserPremium, selectShouldLoopStickers,
 } from '../../../global/selectors';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
@@ -229,27 +230,27 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     animateHorizontalScroll(header, newLeft);
   }, [areAddedLoaded, activeSetIndex]);
 
-  const handleStickerSelect = useCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
+  const handleStickerSelect = useLastCallback((sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean) => {
     onStickerSelect(sticker, isSilent, shouldSchedule, true);
     addRecentSticker({ sticker });
-  }, [addRecentSticker, onStickerSelect]);
+  });
 
-  const handleStickerUnfave = useCallback((sticker: ApiSticker) => {
+  const handleStickerUnfave = useLastCallback((sticker: ApiSticker) => {
     unfaveSticker({ sticker });
-  }, [unfaveSticker]);
+  });
 
-  const handleStickerFave = useCallback((sticker: ApiSticker) => {
+  const handleStickerFave = useLastCallback((sticker: ApiSticker) => {
     faveSticker({ sticker });
-  }, [faveSticker]);
+  });
 
-  const handleMouseMove = useCallback(() => {
+  const handleMouseMove = useLastCallback(() => {
     if (!canSendStickers) return;
     sendMessageAction({ type: 'chooseSticker' });
-  }, [canSendStickers, sendMessageAction]);
+  });
 
-  const handleRemoveRecentSticker = useCallback((sticker: ApiSticker) => {
+  const handleRemoveRecentSticker = useLastCallback((sticker: ApiSticker) => {
     removeRecentSticker({ sticker });
-  }, [removeRecentSticker]);
+  });
 
   function renderCover(stickerSet: StickerSetOrReactionsSetOrRecent, index: number) {
     const firstSticker = stickerSet.stickers?.[0];

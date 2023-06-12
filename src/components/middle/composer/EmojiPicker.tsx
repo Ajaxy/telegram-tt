@@ -1,5 +1,5 @@
 import React, {
-  useState, useEffect, memo, useRef, useMemo, useCallback,
+  useState, useEffect, memo, useRef, useMemo,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
@@ -20,6 +20,8 @@ import animateScroll from '../../../util/animateScroll';
 import { pick } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
@@ -167,16 +169,16 @@ const EmojiPicker: FC<OwnProps & StateProps> = ({
     }, OPEN_ANIMATION_DELAY);
   }, []);
 
-  const selectCategory = useCallback((index: number) => {
+  const selectCategory = useLastCallback((index: number) => {
     setActiveCategoryIndex(index);
     const categoryEl = containerRef.current!.closest<HTMLElement>('.SymbolMenu-main')!
       .querySelector(`#emoji-category-${index}`)! as HTMLElement;
     animateScroll(containerRef.current!, categoryEl, 'start', FOCUS_MARGIN, SMOOTH_SCROLL_DISTANCE);
-  }, []);
+  });
 
-  const handleEmojiSelect = useCallback((emoji: string, name: string) => {
+  const handleEmojiSelect = useLastCallback((emoji: string, name: string) => {
     onEmojiSelect(emoji, name);
-  }, [onEmojiSelect]);
+  });
 
   function renderCategoryButton(category: EmojiCategoryData, index: number) {
     const icon = ICONS_BY_CATEGORY[category.id];

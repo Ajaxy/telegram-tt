@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from '../../lib/teact/teact';
+import React, { useMemo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -33,6 +33,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 
 import './AudioPlayer.scss';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   message: ApiMessage;
@@ -124,39 +125,39 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(ref);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     focusMessage({ chatId: message.chatId, messageId: message.id });
-  }, [focusMessage, message.chatId, message.id]);
+  });
 
-  const handleClose = useCallback(() => {
+  const handleClose = useLastCallback(() => {
     if (isPlaying) {
       playPause();
     }
     closeAudioPlayer();
     clearMediaSession();
     stop();
-  }, [closeAudioPlayer, isPlaying, playPause, stop]);
+  });
 
-  const handleVolumeChange = useCallback((value: number) => {
+  const handleVolumeChange = useLastCallback((value: number) => {
     setAudioPlayerVolume({ volume: value / 100 });
 
     setVolume(value / 100);
-  }, [setAudioPlayerVolume, setVolume]);
+  });
 
-  const handleVolumeClick = useCallback(() => {
+  const handleVolumeClick = useLastCallback(() => {
     if (IS_TOUCH_ENV && !IS_IOS) return;
     toggleMuted();
     setAudioPlayerMuted({ isMuted: !isMuted });
-  }, [isMuted, setAudioPlayerMuted, toggleMuted]);
+  });
 
-  const updatePlaybackRate = useCallback((newRate: number, isActive = true) => {
+  const updatePlaybackRate = useLastCallback((newRate: number, isActive = true) => {
     const rate = PLAYBACK_RATES[newRate];
     const shouldBeActive = newRate !== REGULAR_PLAYBACK_RATE && isActive;
     setAudioPlayerPlaybackRate({ playbackRate: rate, isPlaybackRateActive: shouldBeActive });
     setPlaybackRate(shouldBeActive ? rate : REGULAR_PLAYBACK_RATE);
-  }, [setAudioPlayerPlaybackRate, setPlaybackRate]);
+  });
 
-  const handlePlaybackClick = useCallback(() => {
+  const handlePlaybackClick = useLastCallback(() => {
     handleContextMenuClose();
     const oldRate = Number(Object.entries(PLAYBACK_RATES).find(([, rate]) => rate === playbackRate)?.[0])
       || REGULAR_PLAYBACK_RATE;
@@ -166,9 +167,9 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
       newIsActive && oldRate === REGULAR_PLAYBACK_RATE ? DEFAULT_FAST_PLAYBACK_RATE : oldRate,
       newIsActive,
     );
-  }, [handleContextMenuClose, isPlaybackRateActive, playbackRate, updatePlaybackRate]);
+  });
 
-  const PlaybackRateButton = useCallback(() => {
+  const PlaybackRateButton = useLastCallback(() => {
     const displayRate = Object.entries(PLAYBACK_RATES).find(([, rate]) => rate === playbackRate)?.[0]
       || REGULAR_PLAYBACK_RATE;
     const text = `${playbackRate === REGULAR_PLAYBACK_RATE ? DEFAULT_FAST_PLAYBACK_RATE : displayRate}Х`;
@@ -201,10 +202,7 @@ const AudioPlayer: FC<OwnProps & StateProps> = ({
         </Button>
       </div>
     );
-  }, [
-    handleBeforeContextMenu, handleContextMenu, handleContextMenuClose, handlePlaybackClick, isContextMenuOpen,
-    isMobile, isPlaybackRateActive, playbackRate,
-  ]);
+  });
 
   const volumeIcon = useMemo(() => {
     if (volume === 0 || isMuted) return 'icon-muted';

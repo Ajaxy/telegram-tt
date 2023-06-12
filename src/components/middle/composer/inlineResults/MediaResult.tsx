@@ -1,11 +1,13 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
 import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiPhoto, ApiThumbnail, ApiWebDocument,
 } from '../../../../api/types';
 
 import buildClassName from '../../../../util/buildClassName';
+
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useMedia from '../../../../hooks/useMedia';
 import useMediaTransition from '../../../../hooks/useMediaTransition';
 
@@ -42,9 +44,9 @@ const MediaResult: FC<OwnProps> = ({
   const mediaBlobUrl = useMedia(photo && `photo${photo.id}?size=m`);
   const transitionClassNames = useMediaTransition(mediaBlobUrl);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     onClick(inlineResult);
-  }, [inlineResult, onClick]);
+  });
 
   if (isForGallery) {
     return (

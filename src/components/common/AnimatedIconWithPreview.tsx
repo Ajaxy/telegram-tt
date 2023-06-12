@@ -1,9 +1,11 @@
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import type { OwnProps as AnimatedIconProps } from './AnimatedIcon';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useFlag from '../../hooks/useFlag';
 
@@ -26,10 +28,10 @@ function AnimatedIconWithPreview(props: OwnProps) {
   const transitionClassNames = useMediaTransition(isPreviewLoaded);
   const [isAnimationReady, markAnimationReady] = useFlag(false);
 
-  const handlePreviewLoad = useCallback(() => {
+  const handlePreviewLoad = useLastCallback(() => {
     markPreviewLoaded();
     loadedPreviewUrls.add(previewUrl);
-  }, [markPreviewLoaded, previewUrl]);
+  });
 
   const { size } = props;
 

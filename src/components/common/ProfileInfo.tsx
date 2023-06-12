@@ -1,7 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  useEffect, useCallback, memo, useState,
-} from '../../lib/teact/teact';
+import React, { useEffect, memo, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
@@ -29,6 +27,7 @@ import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
@@ -40,6 +39,7 @@ import TopicIcon from './TopicIcon';
 import Avatar from './Avatar';
 
 import './ProfileInfo.scss';
+
 import styles from './ProfileInfo.module.scss';
 
 type OwnProps = {
@@ -130,35 +130,35 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
 
   usePhotosPreload(user || chat, photos, currentPhotoIndex);
 
-  const handleProfilePhotoClick = useCallback(() => {
+  const handleProfilePhotoClick = useLastCallback(() => {
     openMediaViewer({
       avatarOwnerId: userId || chatId,
       mediaId: currentPhotoIndex,
       origin: forceShowSelf ? MediaViewerOrigin.SettingsAvatar : MediaViewerOrigin.ProfileAvatar,
     });
-  }, [openMediaViewer, userId, chatId, currentPhotoIndex, forceShowSelf]);
+  });
 
-  const handleClickPremium = useCallback(() => {
+  const handleClickPremium = useLastCallback(() => {
     if (!user) return;
 
     openPremiumModal({ fromUserId: user.id });
-  }, [openPremiumModal, user]);
+  });
 
-  const selectPreviousMedia = useCallback(() => {
+  const selectPreviousMedia = useLastCallback(() => {
     if (isFirst) {
       return;
     }
     setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex - 1);
-  }, [currentPhotoIndex, isFirst]);
+  });
 
-  const selectNextMedia = useCallback(() => {
+  const selectNextMedia = useLastCallback(() => {
     if (isLast) {
       return;
     }
     setHasSlideAnimation(true);
     setCurrentPhotoIndex(currentPhotoIndex + 1);
-  }, [currentPhotoIndex, isLast]);
+  });
 
   function handleSelectFallbackPhoto() {
     if (!isFirst) return;

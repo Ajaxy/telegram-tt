@@ -1,11 +1,13 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
 
 import type { FC } from '../../lib/teact/teact';
-import React, { useRef, useCallback, useState } from '../../lib/teact/teact';
+import React, { useRef, useState } from '../../lib/teact/teact';
 
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Spinner from './Spinner';
 import RippleEffect from './RippleEffect';
@@ -125,7 +127,7 @@ const Button: FC<OwnProps> = ({
     withPremiumGradient && 'premium',
   );
 
-  const handleClick = useCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     if ((allowDisabledClick || !disabled) && onClick) {
       onClick(e);
     }
@@ -136,9 +138,9 @@ const Button: FC<OwnProps> = ({
     setTimeout(() => {
       setIsClicked(false);
     }, CLICKED_TIMEOUT);
-  }, [allowDisabledClick, disabled, onClick, shouldStopPropagation]);
+  });
 
-  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = useLastCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
     if (!noPreventDefault) e.preventDefault();
 
     if ((allowDisabledClick || !disabled) && onMouseDown) {
@@ -148,7 +150,7 @@ const Button: FC<OwnProps> = ({
     if (!IS_TOUCH_ENV && e.button === MouseButton.Main && !noFastClick) {
       handleClick(e);
     }
-  }, [allowDisabledClick, disabled, handleClick, noFastClick, noPreventDefault, onMouseDown]);
+  });
 
   if (href) {
     return (

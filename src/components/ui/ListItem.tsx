@@ -1,11 +1,12 @@
 import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useRef, useCallback } from '../../lib/teact/teact';
+import React, { useRef } from '../../lib/teact/teact';
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import useMenuPosition from '../../hooks/useMenuPosition';
 import useFlag from '../../hooks/useFlag';
@@ -108,23 +109,13 @@ const ListItem: FC<OwnProps> = ({
     handleContextMenuClose, handleContextMenuHide,
   } = useContextMenuHandlers(containerRef, !contextActions);
 
-  const getTriggerElement = useCallback(() => containerRef.current, []);
-
-  const getRootElement = useCallback(
-    () => containerRef.current!.closest('.custom-scroll'),
-    [],
-  );
-
-  const getMenuElement = useCallback(
-    () => (withPortalForMenu ? document.querySelector('#portals') : containerRef.current)!
-      .querySelector('.ListItem-context-menu .bubble'),
-    [withPortalForMenu],
-  );
-
-  const getLayout = useCallback(
-    () => ({ withPortal: withPortalForMenu }),
-    [withPortalForMenu],
-  );
+  const getTriggerElement = useLastCallback(() => containerRef.current);
+  const getRootElement = useLastCallback(() => containerRef.current!.closest('.custom-scroll'));
+  const getMenuElement = useLastCallback(() => {
+    return (withPortalForMenu ? document.querySelector('#portals') : containerRef.current)!
+      .querySelector('.ListItem-context-menu .bubble');
+  });
+  const getLayout = useLastCallback(() => ({ withPortal: withPortalForMenu }));
 
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
@@ -136,14 +127,14 @@ const ListItem: FC<OwnProps> = ({
     getLayout,
   );
 
-  const handleClickEvent = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleClickEvent = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     const hasModifierKey = e.ctrlKey || e.metaKey || e.shiftKey;
     if (!hasModifierKey && e.button === MouseButton.Main) {
       e.preventDefault();
     }
-  }, []);
+  });
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if ((disabled && !allowDisabledClick) || !onClick) {
       return;
     }
@@ -164,7 +155,7 @@ const ListItem: FC<OwnProps> = ({
       markIsTouched();
       requestMeasure(unmarkIsTouched);
     }
-  }, [allowDisabledClick, clickArg, disabled, markIsTouched, onClick, ripple, unmarkIsTouched, href]);
+  });
 
   const {
     handleClick: handleSecondaryIconClick,
@@ -181,7 +172,7 @@ const ListItem: FC<OwnProps> = ({
     }
   });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+  const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     if (inactive || IS_TOUCH_ENV) {
       return;
     }
@@ -195,7 +186,7 @@ const ListItem: FC<OwnProps> = ({
         handleClick(e);
       }
     }
-  }, [inactive, contextActions, onClick, handleBeforeContextMenu, handleContextMenu, handleClick]);
+  });
 
   const lang = useLang();
 

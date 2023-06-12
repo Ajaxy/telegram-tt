@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, memo, useRef, useCallback,
+  useEffect, memo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -11,6 +11,7 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { selectCurrentMessageList, selectIsChatWithSelf } from '../../../global/selectors';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
@@ -56,9 +57,9 @@ const GifPicker: FC<OwnProps & StateProps> = ({
     }
   }, [loadAndPlay, loadSavedGifs]);
 
-  const handleUnsaveClick = useCallback((gif: ApiVideo) => {
+  const handleUnsaveClick = useLastCallback((gif: ApiVideo) => {
     saveGif({ gif, shouldUnsave: true });
-  }, [saveGif]);
+  });
 
   const canRenderContents = useAsyncRendering([], SLIDE_TRANSITION_DURATION);
 

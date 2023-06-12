@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -40,6 +40,8 @@ import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import { getPromptInstall } from '../../../util/installPrompt';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+
+import useLastCallback from '../../../hooks/useLastCallback';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 import useElectronDrag from '../../../hooks/useElectronDrag';
@@ -152,7 +154,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
   );
 
-  const handleLockScreenHotkey = useCallback((e: KeyboardEvent) => {
+  const handleLockScreenHotkey = useLastCallback((e: KeyboardEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (hasPasscode) {
@@ -160,7 +162,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     } else {
       requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
     }
-  }, [hasPasscode]);
+  });
 
   useHotkeys(canSetPasscode ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
@@ -193,29 +195,29 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     );
   }, [hasMenu, isMobile, lang, onReset, shouldSkipTransition]);
 
-  const handleSearchFocus = useCallback(() => {
+  const handleSearchFocus = useLastCallback(() => {
     if (!searchQuery) {
       onSearchQuery('');
     }
-  }, [searchQuery, onSearchQuery]);
+  });
 
-  const toggleConnectionStatus = useCallback(() => {
+  const toggleConnectionStatus = useLastCallback(() => {
     setSettingOption({ isConnectionStatusMinimized: !isConnectionStatusMinimized });
-  }, [isConnectionStatusMinimized, setSettingOption]);
+  });
 
-  const handleSelectSaved = useCallback(() => {
+  const handleSelectSaved = useLastCallback(() => {
     openChat({ id: currentUserId, shouldReplaceHistory: true });
-  }, [currentUserId, openChat]);
+  });
 
-  const handleDarkModeToggle = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
+  const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
     const newTheme = theme === 'light' ? 'dark' : 'light';
 
     setSettingOption({ theme: newTheme });
     setSettingOption({ shouldUseSystemTheme: false });
-  }, [setSettingOption, theme]);
+  });
 
-  const handleAnimationLevelChange = useCallback((e: React.SyntheticEvent<HTMLElement>) => {
+  const handleAnimationLevelChange = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
 
     let newLevel = animationLevel + 1;
@@ -228,29 +230,29 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
     setSettingOption({ animationLevel: newLevel as AnimationLevel });
     updatePerformanceSettings(performanceSettings);
-  }, [animationLevel, setSettingOption]);
+  });
 
-  const handleChangelogClick = useCallback(() => {
+  const handleChangelogClick = useLastCallback(() => {
     window.open(BETA_CHANGELOG_URL, '_blank', 'noopener');
-  }, []);
+  });
 
-  const handleSwitchToWebK = useCallback(() => {
+  const handleSwitchToWebK = useLastCallback(() => {
     setPermanentWebVersion('K');
     clearWebsync();
     skipLockOnUnload();
-  }, [skipLockOnUnload]);
+  });
 
-  const handleOpenTipsChat = useCallback(() => {
+  const handleOpenTipsChat = useLastCallback(() => {
     openChatByUsername({ username: lang('Settings.TipsUsername') });
-  }, [lang, openChatByUsername]);
+  });
 
-  const handleBugReportClick = useCallback(() => {
+  const handleBugReportClick = useLastCallback(() => {
     openUrl({ url: FEEDBACK_URL });
-  }, [openUrl]);
+  });
 
-  const handleLockScreen = useCallback(() => {
+  const handleLockScreen = useLastCallback(() => {
     lockScreen();
-  }, [lockScreen]);
+  });
 
   const isSearchFocused = (
     Boolean(globalSearchChatId)

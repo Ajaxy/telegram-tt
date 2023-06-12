@@ -1,7 +1,9 @@
-import { useCallback, useRef } from '../lib/teact/teact';
+import { useRef } from '../lib/teact/teact';
 import { LoadMoreDirection } from '../types';
 
 import { areSortedArraysEqual } from '../util/iteratees';
+
+import useLastCallback from './useLastCallback';
 import useForceUpdate from './useForceUpdate';
 import usePrevious from './usePrevious';
 
@@ -56,7 +58,7 @@ const useInfiniteScroll = <ListId extends string | number>(
     viewportIdsRef.current = undefined;
   }
 
-  const getMore: GetMore = useCallback(({
+  const getMore: GetMore = useLastCallback(({
     direction,
     noScroll,
   }: { direction: LoadMoreDirection; noScroll?: boolean }) => {
@@ -90,7 +92,7 @@ const useInfiniteScroll = <ListId extends string | number>(
 
       loadMoreBackwards({ offsetId });
     }
-  }, [listIds, listSlice, loadMoreBackwards, forceUpdate]);
+  });
 
   return isDisabled ? [listIds] : [viewportIdsRef.current, getMore];
 };

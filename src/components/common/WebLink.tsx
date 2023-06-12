@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiMessage, ApiWebPage } from '../../api/types';
 import type { TextPart } from '../../types';
@@ -13,8 +13,10 @@ import buildClassName from '../../util/buildClassName';
 import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 import { formatPastTimeShort } from '../../util/dateFormat';
-import useLang from '../../hooks/useLang';
 import { renderMessageSummary } from './helpers/renderMessageText';
+
+import useLastCallback from '../../hooks/useLastCallback';
+import useLang from '../../hooks/useLang';
 
 import Media from './Media';
 import Link from '../ui/Link';
@@ -58,9 +60,9 @@ const WebLink: FC<OwnProps> = ({
     }
   }
 
-  const handleMessageClick = useCallback(() => {
+  const handleMessageClick = useLastCallback(() => {
     onMessageClick(message.id, message.chatId);
-  }, [onMessageClick, message.id, message.chatId]);
+  });
 
   if (!linkData) {
     return undefined;

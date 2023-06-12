@@ -1,9 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useRef, useCallback, memo } from '../../lib/teact/teact';
+import React, { useRef, memo } from '../../lib/teact/teact';
 
 import type { OwnProps as ButtonProps } from './Button';
 
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from './Button';
 
@@ -22,7 +24,7 @@ let isFirstTimeActivation = true;
 const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => {
   const isMouseInside = useRef(false);
 
-  const handleMouseEnter = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleMouseEnter = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     isMouseInside.current = true;
 
     // This is used to counter additional delay caused by asynchronous module loading
@@ -41,16 +43,16 @@ const ResponsiveHoverButton: FC<OwnProps> = ({ onActivate, ...buttonProps }) => 
         onActivate(e);
       }
     }, BUTTON_ACTIVATE_DELAY);
-  }, [onActivate]);
+  });
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useLastCallback(() => {
     isMouseInside.current = false;
-  }, []);
+  });
 
-  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     isMouseInside.current = true;
     onActivate(e);
-  }, [onActivate]);
+  });
 
   return (
     <Button

@@ -1,6 +1,4 @@
-import React, {
-  memo, useCallback, useRef,
-} from '../../../lib/teact/teact';
+import React, { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
 import type { FC } from '../../../lib/teact/teact';
@@ -10,6 +8,7 @@ import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
@@ -91,33 +90,33 @@ const EmojiTooltip: FC<OwnProps> = ({
     observe: observeIntersection,
   } = useIntersectionObserver({ rootRef: containerRef, throttleMs: INTERSECTION_THROTTLE, isDisabled: !isOpen });
 
-  const handleSelectEmoji = useCallback((emoji: Emoji) => {
+  const handleSelectEmoji = useLastCallback((emoji: Emoji) => {
     onEmojiSelect(emoji.native);
     addRecentEmoji({ emoji: emoji.id });
-  }, [addRecentEmoji, onEmojiSelect]);
+  });
 
-  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+  const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
     addRecentCustomEmoji({ documentId: emoji.id });
-  }, [addRecentCustomEmoji, onCustomEmojiSelect]);
+  });
 
-  const handleSelect = useCallback((emoji: Emoji | ApiSticker) => {
+  const handleSelect = useLastCallback((emoji: Emoji | ApiSticker) => {
     if ('native' in emoji) {
       handleSelectEmoji(emoji);
     } else {
       handleCustomEmojiSelect(emoji);
     }
-  }, [handleCustomEmojiSelect, handleSelectEmoji]);
+  });
 
-  const handleClick = useCallback((native: string, id: string) => {
+  const handleClick = useLastCallback((native: string, id: string) => {
     onEmojiSelect(native);
     addRecentEmoji({ emoji: id });
-  }, [addRecentEmoji, onEmojiSelect]);
+  });
 
-  const handleCustomEmojiClick = useCallback((emoji: ApiSticker) => {
+  const handleCustomEmojiClick = useLastCallback((emoji: ApiSticker) => {
     onCustomEmojiSelect(emoji);
     addRecentCustomEmoji({ documentId: emoji.id });
-  }, [addRecentCustomEmoji, onCustomEmojiSelect]);
+  });
 
   const selectedIndex = useKeyboardNavigation({
     isActive: isOpen,

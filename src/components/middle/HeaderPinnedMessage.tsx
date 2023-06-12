@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
@@ -13,6 +13,7 @@ import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
 import useFlag from '../../hooks/useFlag';
@@ -61,21 +62,21 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
   const [isUnpinDialogOpen, openUnpinDialog, closeUnpinDialog] = useFlag();
 
-  const handleUnpinMessage = useCallback(() => {
+  const handleUnpinMessage = useLastCallback(() => {
     closeUnpinDialog();
 
     if (onUnpinMessage) {
       onUnpinMessage(message.id);
     }
-  }, [closeUnpinDialog, onUnpinMessage, message.id]);
+  });
 
   const inlineButton = getMessageSingleInlineButton(message);
 
-  const handleInlineButtonClick = useCallback(() => {
+  const handleInlineButtonClick = useLastCallback(() => {
     if (inlineButton) {
       clickBotInlineButton({ messageId: message.id, button: inlineButton });
     }
-  }, [clickBotInlineButton, inlineButton, message.id]);
+  });
 
   const [noHoverColor, markNoHoverColor, unmarkNoHoverColor] = useFlag();
 

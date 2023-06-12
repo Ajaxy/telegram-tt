@@ -5,7 +5,7 @@ import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
 
 import React, {
-  useEffect, useRef, memo, useCallback, useState, useMemo,
+  useEffect, useRef, memo, useState, useMemo,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
@@ -13,6 +13,7 @@ import buildStyle from '../../util/buildStyle';
 import generateIdFor from '../../util/generateIdFor';
 import { hexToRgb } from '../../util/switchTheme';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
@@ -108,7 +109,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     };
   }, []);
 
-  const init = useCallback(() => {
+  const init = useLastCallback(() => {
     if (
       animationRef.current
       || isUnmountedRef.current
@@ -147,10 +148,7 @@ const AnimatedSticker: FC<OwnProps> = ({
 
     setAnimation(newAnimation);
     animationRef.current = newAnimation;
-  }, [
-    isLowPriority, noLoop, onEnded, onLoad, onLoop, quality,
-    renderId, sharedCanvas, sharedCanvasCoords, size, speed, tgsUrl, viewId,
-  ]);
+  });
 
   useEffect(() => {
     if (getRLottie()) {
@@ -158,7 +156,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     } else {
       ensureRLottie().then(init);
     }
-  }, [init]);
+  }, [init, tgsUrl, sharedCanvas, sharedCanvasCoords]);
 
   const throttledInit = useThrottledCallback(init, [init], THROTTLE_MS);
   useSharedIntersectionObserver(sharedCanvas, throttledInit);
@@ -175,7 +173,7 @@ const AnimatedSticker: FC<OwnProps> = ({
     };
   }, [viewId]);
 
-  const playAnimation = useCallback((shouldRestart = false) => {
+  const playAnimation = useLastCallback((shouldRestart = false) => {
     if (
       !animation
       || !(playRef.current || playSegmentRef.current)
@@ -189,17 +187,17 @@ const AnimatedSticker: FC<OwnProps> = ({
     } else {
       animation.play(shouldRestart, viewId);
     }
-  }, [animation, forceOnHeavyAnimation, playRef, playSegmentRef, viewId]);
+  });
 
-  const playAnimationOnRaf = useCallback(() => {
+  const playAnimationOnRaf = useLastCallback(() => {
     requestMeasure(playAnimation);
-  }, [playAnimation]);
+  });
 
-  const pauseAnimation = useCallback(() => {
+  const pauseAnimation = useLastCallback(() => {
     if (animation?.isPlaying()) {
       animation.pause(viewId);
     }
-  }, [animation, viewId]);
+  });
 
   useEffectWithPrevDeps(([prevNoLoop]) => {
     if (prevNoLoop !== undefined && noLoop !== prevNoLoop) {

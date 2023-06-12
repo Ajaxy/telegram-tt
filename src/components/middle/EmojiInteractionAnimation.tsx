@@ -1,19 +1,22 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef,
+  memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ActiveEmojiInteraction } from '../../global/types';
 
 import { IS_ANDROID } from '../../util/windowEnvironment';
-import useFlag from '../../hooks/useFlag';
-import useMedia from '../../hooks/useMedia';
-import buildClassName from '../../util/buildClassName';
+
 import {
   selectAnimatedEmojiEffect,
 } from '../../global/selectors';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+
+import useLastCallback from '../../hooks/useLastCallback';
+import useFlag from '../../hooks/useFlag';
+import useMedia from '../../hooks/useMedia';
+import buildClassName from '../../util/buildClassName';
 
 import AnimatedSticker from '../common/AnimatedSticker';
 
@@ -41,7 +44,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
   const [isPlaying, startPlaying] = useFlag(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  const stop = useCallback(() => {
+  const stop = useLastCallback(() => {
     startHiding();
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -49,13 +52,13 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
     setTimeout(() => {
       stopActiveEmojiInteraction({ id: activeEmojiInteraction.id });
     }, HIDE_ANIMATION_DURATION);
-  }, [activeEmojiInteraction.id, startHiding, stopActiveEmojiInteraction]);
+  });
 
-  const handleCancelAnimation = useCallback((e: UIEvent) => {
+  const handleCancelAnimation = useLastCallback((e: UIEvent) => {
     if (!(e.target as HTMLElement)?.closest('.AnimatedEmoji')) {
       stop();
     }
-  }, [stop]);
+  });
 
   useEffect(() => {
     document.addEventListener('touchstart', handleCancelAnimation);

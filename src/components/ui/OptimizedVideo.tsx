@@ -1,5 +1,6 @@
-import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 
+import useLastCallback from '../../hooks/useLastCallback';
 import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
@@ -30,12 +31,12 @@ function OptimizedVideo({
   useVideoCleanup(ref, []);
 
   const isReadyRef = useRef(false);
-  const handleReady = useCallback(() => {
+  const handleReady = useLastCallback(() => {
     if (!isReadyRef.current) {
       onReady?.();
       isReadyRef.current = true;
     }
-  }, [onReady]);
+  });
 
   // This is only needed for browsers not allowing autoplay
   const { isBuffered, bufferingHandlers } = useBuffering(true, onTimeUpdate);
@@ -48,11 +49,11 @@ function OptimizedVideo({
     handleReady();
   }, [isBuffered, handleReady]);
 
-  const handlePlaying = useCallback((e) => {
+  const handlePlaying = useLastCallback((e) => {
     handlePlayingForAutoPause();
     handlePlayingForBuffering(e);
     handleReady();
-  }, [handlePlayingForAutoPause, handlePlayingForBuffering, handleReady]);
+  });
 
   return (
     // eslint-disable-next-line react/jsx-props-no-spreading

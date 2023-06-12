@@ -1,10 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  memo,
-  useRef,
-  useCallback,
-  useState,
-} from '../../lib/teact/teact';
+import React, { memo, useRef, useState } from '../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
@@ -28,6 +23,8 @@ import {
   selectIsRightColumnShown,
   selectIsUserBlocked,
 } from '../../global/selectors';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import { useHotkeys } from '../../hooks/useHotkeys';
 
@@ -108,42 +105,42 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
 
-  const handleHeaderMenuOpen = useCallback(() => {
+  const handleHeaderMenuOpen = useLastCallback(() => {
     setIsMenuOpen(true);
     const rect = menuButtonRef.current!.getBoundingClientRect();
     setMenuPosition({ x: rect.right, y: rect.bottom });
-  }, []);
+  });
 
-  const handleHeaderMenuClose = useCallback(() => {
+  const handleHeaderMenuClose = useLastCallback(() => {
     setIsMenuOpen(false);
-  }, []);
+  });
 
-  const handleHeaderMenuHide = useCallback(() => {
+  const handleHeaderMenuHide = useLastCallback(() => {
     setMenuPosition(undefined);
-  }, []);
+  });
 
-  const handleSubscribeClick = useCallback(() => {
+  const handleSubscribeClick = useLastCallback(() => {
     joinChannel({ chatId });
     if (shouldSendJoinRequest) {
       showNotification({
         message: isChannel ? lang('RequestToJoinChannelSentDescription') : lang('RequestToJoinGroupSentDescription'),
       });
     }
-  }, [joinChannel, chatId, shouldSendJoinRequest, showNotification, isChannel, lang]);
+  });
 
-  const handleStartBot = useCallback(() => {
+  const handleStartBot = useLastCallback(() => {
     sendBotCommand({ command: '/start' });
-  }, [sendBotCommand]);
+  });
 
-  const handleRestartBot = useCallback(() => {
+  const handleRestartBot = useLastCallback(() => {
     restartBot({ chatId });
-  }, [chatId, restartBot]);
+  });
 
-  const handleJoinRequestsClick = useCallback(() => {
+  const handleJoinRequestsClick = useLastCallback(() => {
     requestNextManagementScreen({ screen: ManagementScreens.JoinRequests });
-  }, [requestNextManagementScreen]);
+  });
 
-  const handleSearchClick = useCallback(() => {
+  const handleSearchClick = useLastCallback(() => {
     if (withForumActions) {
       onTopicSearch?.();
       return;
@@ -163,24 +160,24 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     } else {
       setTimeout(setFocusInSearchInput, SEARCH_FOCUS_DELAY_MS);
     }
-  }, [isMobile, noAnimation, onTopicSearch, openLocalTextSearch, withForumActions]);
+  });
 
-  const handleAsMessagesClick = useCallback(() => {
+  const handleAsMessagesClick = useLastCallback(() => {
     openChat({ id: chatId, threadId: MAIN_THREAD_ID });
-  }, [chatId, openChat]);
+  });
 
   function handleRequestCall() {
     requestMasterAndRequestCall({ userId: chatId });
   }
 
-  const handleHotkeySearchClick = useCallback((e: KeyboardEvent) => {
+  const handleHotkeySearchClick = useLastCallback((e: KeyboardEvent) => {
     if (!canSearch || !IS_APP || e.shiftKey) {
       return;
     }
 
     e.preventDefault();
     handleSearchClick();
-  }, [canSearch, handleSearchClick]);
+  });
 
   useHotkeys({
     'Mod+F': handleHotkeySearchClick,

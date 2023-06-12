@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
@@ -12,6 +12,7 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { selectTabState, selectIsCurrentUserPremium, selectIsContextMenuTranslucent } from '../../../global/selectors';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
@@ -164,11 +165,11 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     setRecentEmojis([]);
   }, [isOpen, addRecentEmoji]);
 
-  const handleEmojiSelect = useCallback((emoji: string, name: string) => {
+  const handleEmojiSelect = useLastCallback((emoji: string, name: string) => {
     setRecentEmojis((emojis) => [...emojis, name]);
 
     onEmojiSelect(emoji);
-  }, [onEmojiSelect]);
+  });
 
   const recentCustomEmojisRef = useRef(recentCustomEmojis);
   recentCustomEmojisRef.current = recentCustomEmojis;
@@ -186,22 +187,22 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     setRecentEmojis([]);
   }, [isOpen, addRecentCustomEmoji]);
 
-  const handleCustomEmojiSelect = useCallback((emoji: ApiSticker) => {
+  const handleCustomEmojiSelect = useLastCallback((emoji: ApiSticker) => {
     setRecentCustomEmojis((ids) => [...ids, emoji.id]);
 
     onCustomEmojiSelect(emoji);
-  }, [onCustomEmojiSelect]);
+  });
 
-  const handleSearch = useCallback((type: 'stickers' | 'gifs') => {
+  const handleSearch = useLastCallback((type: 'stickers' | 'gifs') => {
     onClose();
     onSearchOpen(type);
-  }, [onClose, onSearchOpen]);
+  });
 
-  const handleStickerSelect = useCallback((
+  const handleStickerSelect = useLastCallback((
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, canUpdateStickerSetsOrder?: boolean,
   ) => {
     onStickerSelect?.(sticker, isSilent, shouldSchedule, true, canUpdateStickerSetsOrder);
-  }, [onStickerSelect]);
+  });
 
   const lang = useLang();
 

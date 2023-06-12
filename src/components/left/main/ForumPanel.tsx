@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
@@ -22,6 +22,7 @@ import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { createLocationHash } from '../../../util/routing';
 
+import useLastCallback from '../../../hooks/useLastCallback';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useOrderDiff from './hooks/useOrderDiff';
@@ -92,9 +93,9 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useLang();
 
-  const handleClose = useCallback(() => {
+  const handleClose = useLastCallback(() => {
     closeForumPanel();
-  }, [closeForumPanel]);
+  });
 
   useEffect(() => {
     if (!withInterfaceAnimations && !isOpen) {
@@ -102,10 +103,10 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
     }
   }, [withInterfaceAnimations, isOpen, onCloseAnimationEnd]);
 
-  const handleToggleChatInfo = useCallback(() => {
+  const handleToggleChatInfo = useLastCallback(() => {
     if (!chat) return;
     openChatWithInfo({ id: chat.id, shouldReplaceHistory: true });
-  }, [chat, openChatWithInfo]);
+  });
 
   const { observe } = useIntersectionObserver({
     rootRef: containerRef,

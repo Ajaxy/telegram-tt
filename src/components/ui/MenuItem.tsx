@@ -1,8 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 
 import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 
@@ -45,7 +47,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
 
   const lang = useLang();
   const { isTouchScreen } = useAppLayout();
-  const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || !onClick) {
       e.stopPropagation();
       e.preventDefault();
@@ -54,9 +56,9 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     }
 
     onClick(e, clickArg);
-  }, [clickArg, disabled, onClick]);
+  });
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode !== 13 && e.keyCode !== 32) {
       return;
     }
@@ -69,7 +71,7 @@ const MenuItem: FC<MenuItemProps> = (props) => {
     }
 
     onClick(e, clickArg);
-  }, [clickArg, disabled, onClick]);
+  });
 
   const fullClassName = buildClassName(
     'MenuItem',

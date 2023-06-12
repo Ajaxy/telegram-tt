@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useState, useEffect, useCallback } from '../lib/teact/teact';
+import { useState, useEffect } from '../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../lib/teact/teact-dom';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 
@@ -7,6 +7,7 @@ import type { IAnchorPosition } from '../types';
 import {
   IS_TOUCH_ENV, IS_PWA, IS_IOS,
 } from '../util/windowEnvironment';
+import useLastCallback from './useLastCallback';
 
 const LONG_TAP_DURATION_MS = 200;
 const IOS_PWA_CONTEXT_MENU_DELAY_MS = 100;
@@ -27,15 +28,15 @@ const useContextMenuHandlers = (
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
   const [contextMenuTarget, setContextMenuTarget] = useState<HTMLElement | undefined>(undefined);
 
-  const handleBeforeContextMenu = useCallback((e: React.MouseEvent) => {
+  const handleBeforeContextMenu = useLastCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
       requestMutation(() => {
         addExtraClass(e.target as HTMLElement, 'no-selection');
       });
     }
-  }, [isMenuDisabled]);
+  });
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+  const handleContextMenu = useLastCallback((e: React.MouseEvent) => {
     requestMutation(() => {
       removeExtraClass(e.target as HTMLElement, 'no-selection');
     });
@@ -52,15 +53,15 @@ const useContextMenuHandlers = (
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
     setContextMenuTarget(e.target as HTMLElement);
-  }, [isMenuDisabled, shouldDisableOnLink, contextMenuPosition]);
+  });
 
-  const handleContextMenuClose = useCallback(() => {
+  const handleContextMenuClose = useLastCallback(() => {
     setIsContextMenuOpen(false);
-  }, []);
+  });
 
-  const handleContextMenuHide = useCallback(() => {
+  const handleContextMenuHide = useLastCallback(() => {
     setContextMenuPosition(undefined);
-  }, []);
+  });
 
   // Support context menu on touch devices
   useEffect(() => {

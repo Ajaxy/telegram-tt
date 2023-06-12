@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import {
-  useEffect, useRef, useCallback, useState,
-} from '../lib/teact/teact';
+import { useEffect, useRef, useState } from '../lib/teact/teact';
 
 import type { Scheduler } from '../util/schedulers';
 
@@ -10,6 +8,7 @@ import {
 } from '../util/schedulers';
 import useEffectOnce from './useEffectOnce';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
+import useLastCallback from './useLastCallback';
 
 type TargetCallback = (entry: IntersectionObserverEntry) => void;
 type RootCallback = (entries: IntersectionObserverEntry[]) => void;
@@ -53,11 +52,11 @@ export function useIntersectionObserver({
 
   rootCallbackRef.current = rootCallback;
 
-  const freeze = useCallback(() => {
+  const freeze = useLastCallback(() => {
     freezeFlagsRef.current++;
-  }, []);
+  });
 
-  const unfreeze = useCallback(() => {
+  const unfreeze = useLastCallback(() => {
     if (!freezeFlagsRef.current) {
       return;
     }
@@ -68,7 +67,7 @@ export function useIntersectionObserver({
       onUnfreezeRef.current();
       onUnfreezeRef.current = undefined;
     }
-  }, []);
+  });
 
   useHeavyAnimationCheck(freeze, unfreeze);
 
@@ -145,7 +144,7 @@ export function useIntersectionObserver({
     controllerRef.current = { observer, callbacks };
   }
 
-  const observe = useCallback((target, targetCallback) => {
+  const observe = useLastCallback((target, targetCallback) => {
     if (!controllerRef.current) {
       initController();
     }
@@ -164,9 +163,7 @@ export function useIntersectionObserver({
 
       controller.observer.unobserve(target);
     };
-    // Arguments should never change
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-  }, [isDisabled]);
+  });
 
   return { observe, freeze, unfreeze };
 }

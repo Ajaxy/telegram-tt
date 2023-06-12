@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -17,6 +17,8 @@ import {
   selectCurrentMessageList, selectTabState,
   selectRightColumnContentKey,
 } from '../../global/selectors';
+
+import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -116,7 +118,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 
   const renderingContentKey = useCurrentOrPrev(contentKey, true, !isChatSelected) ?? -1;
 
-  const close = useCallback((shouldScrollUp = true) => {
+  const close = useLastCallback((shouldScrollUp = true) => {
     switch (contentKey) {
       case RightColumnContent.AddingMembers:
         setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed });
@@ -199,21 +201,16 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         closeEditTopicPanel();
         break;
     }
-  }, [
-    contentKey, isScrolledDown, toggleChatInfo, closePollResults, setNewChatMembersDialogState,
-    managementScreen, toggleManagement, closeLocalTextSearch, setStickerSearchQuery, setGifSearchQuery,
-    setEditingExportedInvite, chatId, setOpenedInviteInfo, toggleStatistics, toggleMessageStatistics,
-    closeCreateTopicPanel, closeEditTopicPanel,
-  ]);
+  });
 
-  const handleSelectChatMember = useCallback((memberId, isPromoted) => {
+  const handleSelectChatMember = useLastCallback((memberId, isPromoted) => {
     setSelectedChatMemberId(memberId);
     setIsPromotedByCurrentUser(isPromoted);
-  }, []);
+  });
 
-  const handleAppendingChatMembers = useCallback((memberIds: string[]) => {
+  const handleAppendingChatMembers = useLastCallback((memberIds: string[]) => {
     addChatMembers({ chatId: chatId!, memberIds });
-  }, [addChatMembers, chatId]);
+  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
 

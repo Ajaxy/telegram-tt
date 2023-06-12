@@ -1,6 +1,6 @@
 import type { RefObject, UIEvent } from 'react';
 import React, {
-  useCallback, useEffect, useLayoutEffect, useMemo, useRef,
+  useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { requestForcedReflow } from '../../lib/fasterdom/fasterdom';
 
@@ -11,6 +11,7 @@ import { debounce } from '../../util/schedulers';
 import resetScroll from '../../util/resetScroll';
 import { IS_ANDROID } from '../../util/windowEnvironment';
 import buildStyle from '../../util/buildStyle';
+import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -146,7 +147,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     });
   }, [items, itemSelector, noScrollRestore, noScrollRestoreOnTop, cacheBuster, withAbsolutePositioning]);
 
-  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+  const handleScroll = useLastCallback((e: UIEvent<HTMLDivElement>) => {
     if (loadMoreForwards && loadMoreBackwards) {
       const {
         isScrollTopJustUpdated, currentAnchor, currentAnchorTop,
@@ -226,7 +227,7 @@ const InfiniteScroll: FC<OwnProps> = ({
     if (onScroll) {
       onScroll(e);
     }
-  }, [loadMoreBackwards, loadMoreForwards, onScroll, sensitiveArea]);
+  });
 
   return (
     <div
