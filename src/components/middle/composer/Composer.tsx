@@ -6,7 +6,7 @@ import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fast
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  TabState, MessageListType, GlobalState, ApiDraft,
+  TabState, MessageListType, GlobalState, ApiDraft, MessageList,
 } from '../../../global/types';
 import type {
   ApiAttachment,
@@ -159,6 +159,7 @@ type StateProps =
     editingMessage?: ApiMessage;
     chat?: ApiChat;
     draft?: ApiDraft;
+    currentMessageList?: MessageList;
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
@@ -243,6 +244,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   editingMessage,
   chatId,
   threadId,
+  currentMessageList,
   messageListType,
   draft,
   chat,
@@ -740,7 +742,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isSilent?: boolean;
     scheduledAt?: number;
   }) => {
-    if (connectionState !== 'connectionStateReady') {
+    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
       return;
     }
 
@@ -752,6 +754,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (!checkSlowMode()) return;
 
     sendMessage({
+      messageList: currentMessageList,
       text,
       entities,
       scheduledAt,
@@ -787,7 +790,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSend = useLastCallback(async (isSilent = false, scheduledAt?: number) => {
-    if (connectionState !== 'connectionStateReady') {
+    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
       return;
     }
 
@@ -826,6 +829,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       if (!checkSlowMode()) return;
 
       sendMessage({
+        messageList: currentMessageList,
         text,
         entities,
         scheduledAt,
@@ -871,7 +875,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleMessageSchedule = useLastCallback((
-    args: ScheduledMessageArgs, scheduledAt: number,
+    args: ScheduledMessageArgs, scheduledAt: number, messageList: MessageList,
   ) => {
     if (args && 'queryId' in args) {
       const { id, queryId, isSilent } = args;
@@ -880,6 +884,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         queryId,
         scheduledAt,
         isSilent,
+        messageList,
       });
       return;
     }
@@ -894,18 +899,19 @@ const Composer: FC<OwnProps & StateProps> = ({
     } else {
       sendMessage({
         ...args,
+        messageList,
         scheduledAt,
       });
     }
   });
 
   useEffectWithPrevDeps(([prevContentToBeScheduled]) => {
-    if (contentToBeScheduled && contentToBeScheduled !== prevContentToBeScheduled) {
+    if (currentMessageList && contentToBeScheduled && contentToBeScheduled !== prevContentToBeScheduled) {
       requestCalendar((scheduledAt) => {
-        handleMessageSchedule(contentToBeScheduled, scheduledAt);
+        handleMessageSchedule(contentToBeScheduled, scheduledAt, currentMessageList);
       });
     }
-  }, [contentToBeScheduled, handleMessageSchedule, requestCalendar]);
+  }, [contentToBeScheduled, currentMessageList, handleMessageSchedule, requestCalendar]);
 
   useEffect(() => {
     if (requestedDraftText) {
@@ -940,17 +946,21 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleGifSelect = useLastCallback((gif: ApiVideo, isSilent?: boolean, isScheduleRequested?: boolean) => {
+    if (!currentMessageList) {
+      return;
+    }
+
     if (shouldSchedule || isScheduleRequested) {
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
-        handleMessageSchedule({ gif, isSilent }, scheduledAt);
+        handleMessageSchedule({ gif, isSilent }, scheduledAt, currentMessageList);
         requestMeasure(() => {
           resetComposer(true);
         });
       });
     } else {
-      sendMessage({ gif, isSilent });
+      sendMessage({ messageList: currentMessageList, gif, isSilent });
       requestMeasure(() => {
         resetComposer(true);
       });
@@ -964,6 +974,10 @@ const Composer: FC<OwnProps & StateProps> = ({
     shouldPreserveInput = false,
     canUpdateStickerSetsOrder?: boolean,
   ) => {
+    if (!currentMessageList) {
+      return;
+    }
+
     sticker = {
       ...sticker,
       isPreloadedGlobally: true,
@@ -973,13 +987,14 @@ const Composer: FC<OwnProps & StateProps> = ({
       forceShowSymbolMenu();
       requestCalendar((scheduledAt) => {
         cancelForceShowSymbolMenu();
-        handleMessageSchedule({ sticker, isSilent }, scheduledAt);
+        handleMessageSchedule({ sticker, isSilent }, scheduledAt, currentMessageList);
         requestMeasure(() => {
           resetComposer(shouldPreserveInput);
         });
       });
     } else {
       sendMessage({
+        messageList: currentMessageList,
         sticker,
         isSilent,
         shouldUpdateStickerSetOrder: shouldUpdateStickerSetOrder && canUpdateStickerSetsOrder,
@@ -993,7 +1008,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleInlineBotSelect = useLastCallback((
     inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult, isSilent?: boolean, isScheduleRequested?: boolean,
   ) => {
-    if (connectionState !== 'connectionStateReady') {
+    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
       return;
     }
 
@@ -1003,13 +1018,14 @@ const Composer: FC<OwnProps & StateProps> = ({
           id: inlineResult.id,
           queryId: inlineResult.queryId,
           isSilent,
-        }, scheduledAt);
+        }, scheduledAt, currentMessageList);
       });
     } else {
       sendInlineBotResult({
         id: inlineResult.id,
         queryId: inlineResult.queryId,
         isSilent,
+        messageList: currentMessageList,
       });
     }
 
@@ -1032,13 +1048,17 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handlePollSend = useLastCallback((poll: ApiNewPoll) => {
+    if (!currentMessageList) {
+      return;
+    }
+
     if (shouldSchedule) {
       requestCalendar((scheduledAt) => {
-        handleMessageSchedule({ poll }, scheduledAt);
+        handleMessageSchedule({ poll }, scheduledAt, currentMessageList);
       });
       closePollModal();
     } else {
-      sendMessage({ poll });
+      sendMessage({ messageList: currentMessageList, poll });
       closePollModal();
     }
   });
@@ -1046,7 +1066,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const sendSilent = useLastCallback((additionalArgs?: ScheduledMessageArgs) => {
     if (shouldSchedule) {
       requestCalendar((scheduledAt) => {
-        handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt);
+        handleMessageSchedule({ ...additionalArgs, isSilent: true }, scheduledAt, currentMessageList!);
       });
     } else if (additionalArgs && ('sendCompressed' in additionalArgs || 'sendGrouped' in additionalArgs)) {
       const { sendCompressed = false, sendGrouped = false } = additionalArgs;
@@ -1162,8 +1182,12 @@ const Composer: FC<OwnProps & StateProps> = ({
         if (activeVoiceRecording) {
           pauseRecordingVoice();
         }
+        if (!currentMessageList) {
+          return;
+        }
+
         requestCalendar((scheduledAt) => {
-          handleMessageSchedule({}, scheduledAt);
+          handleMessageSchedule({}, scheduledAt, currentMessageList!);
         });
         break;
       default:
@@ -1201,7 +1225,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleSendScheduled = useLastCallback(() => {
     requestCalendar((scheduledAt) => {
-      handleMessageSchedule({}, scheduledAt);
+      handleMessageSchedule({}, scheduledAt, currentMessageList!);
     });
   });
 
@@ -1210,12 +1234,12 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSendWhenOnline = useLastCallback(() => {
-    handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE);
+    handleMessageSchedule({}, SCHEDULED_WHEN_ONLINE, currentMessageList!);
   });
 
   const handleSendScheduledAttachments = useLastCallback((sendCompressed: boolean, sendGrouped: boolean) => {
     requestCalendar((scheduledAt) => {
-      handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt);
+      handleMessageSchedule({ sendCompressed, sendGrouped }, scheduledAt, currentMessageList!);
     });
   });
 
@@ -1656,6 +1680,7 @@ export default memo(withGlobal<OwnProps>(
       canSendVoiceByPrivacy,
       attachmentSettings: global.attachmentSettings,
       slowMode,
+      currentMessageList,
     };
   },
 )(Composer));

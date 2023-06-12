@@ -329,23 +329,20 @@ addActionHandler('switchBotInline', (global, actions, payload): ActionReturnType
 
 addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturnType => {
   const {
-    id, queryId, isSilent, scheduledAt,
+    id, queryId, isSilent, scheduledAt, messageList,
     tabId = getCurrentTabId(),
   } = payload;
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList || !id) {
+  if (!id) {
     return;
   }
 
-  const { chatId, threadId } = currentMessageList;
-
+  const { chatId, threadId } = messageList;
   const chat = selectChat(global, chatId)!;
-  const replyingTo = selectReplyingToId(global, chatId, threadId);
-  let replyingToTopId: number | undefined;
-
-  if (replyingTo && threadId !== MAIN_THREAD_ID) {
-    replyingToTopId = selectThreadTopMessageId(global, chatId, threadId)!;
-  }
+  const replyingToId = selectReplyingToId(global, chatId, threadId);
+  const replyingToMessage = replyingToId ? selectChatMessage(global, chatId, replyingToId) : undefined;
+  const replyingToTopId = (chat.isForum || threadId !== MAIN_THREAD_ID)
+    ? selectThreadTopMessageId(global, chatId, threadId)
+    : replyingToMessage?.replyToTopMessageId || replyingToMessage?.replyToMessageId;
 
   actions.setReplyingToId({ messageId: undefined, tabId });
   actions.clearWebPagePreview({ tabId });
@@ -354,7 +351,7 @@ addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturn
     chat,
     resultId: id,
     queryId,
-    replyingTo,
+    replyingTo: replyingToId || replyingToTopId,
     replyingToTopId,
     sendAs: selectSendAs(global, chatId),
     isSilent,

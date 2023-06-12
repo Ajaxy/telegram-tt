@@ -5,8 +5,9 @@ import { getActions, withGlobal } from '../../global';
 import type {
   ApiContact, ApiError, ApiInviteInfo, ApiPhoto,
 } from '../../api/types';
+import type { MessageList } from '../../global/types';
 
-import { selectTabState } from '../../global/selectors';
+import { selectCurrentMessageList, selectTabState } from '../../global/selectors';
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
@@ -18,10 +19,11 @@ import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
 
 type StateProps = {
+  currentMessageList?: MessageList;
   dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
 };
 
-const Dialogs: FC<StateProps> = ({ dialogs }) => {
+const Dialogs: FC<StateProps> = ({ dialogs, currentMessageList }) => {
   const {
     dismissDialog,
     acceptInviteConfirmation,
@@ -115,8 +117,13 @@ const Dialogs: FC<StateProps> = ({ dialogs }) => {
 
   const renderContactRequest = (contactRequest: ApiContact) => {
     const handleConfirm = () => {
+      if (!currentMessageList) {
+        return;
+      }
+
       sendMessage({
         contact: pick(contactRequest, ['firstName', 'lastName', 'phoneNumber']),
+        messageList: currentMessageList,
       });
       closeModal();
     };
@@ -194,6 +201,7 @@ export default memo(withGlobal(
   (global): StateProps => {
     return {
       dialogs: selectTabState(global).dialogs,
+      currentMessageList: selectCurrentMessageList(global),
     };
   },
 )(Dialogs));

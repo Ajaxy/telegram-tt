@@ -155,6 +155,7 @@ const useEditing = (
     }
 
     editMessage({
+      messageList: { chatId, threadId, type },
       text,
       entities,
     });

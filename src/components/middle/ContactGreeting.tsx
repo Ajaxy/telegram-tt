@@ -3,8 +3,9 @@ import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
+import type { MessageList } from '../../global/types';
 
-import { selectChat } from '../../global/selectors';
+import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 import { getUserIdDividend } from '../../global/helpers';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -23,6 +24,7 @@ type StateProps = {
   sticker?: ApiSticker;
   lastUnreadMessageId?: number;
   connectionState?: ApiUpdateConnectionStateType;
+  currentMessageList?: MessageList;
 };
 
 const INTERSECTION_DEBOUNCE_MS = 200;
@@ -31,6 +33,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
   sticker,
   connectionState,
   lastUnreadMessageId,
+  currentMessageList,
 }) => {
   const {
     loadGreetingStickers,
@@ -62,11 +65,15 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
   }, [connectionState, markMessageListRead, lastUnreadMessageId]);
 
   const handleStickerSelect = useLastCallback((selectedSticker: ApiSticker) => {
+    if (!currentMessageList) {
+      return;
+    }
+
     selectedSticker = {
       ...selectedSticker,
       isPreloadedGlobally: true,
     };
-    sendMessage({ sticker: selectedSticker });
+    sendMessage({ sticker: selectedSticker, messageList: currentMessageList });
   });
 
   return (
@@ -110,6 +117,7 @@ export default memo(withGlobal<OwnProps>(
         ? chat.lastMessage.id
         : undefined,
       connectionState: global.connectionState,
+      currentMessageList: selectCurrentMessageList(global),
     };
   },
 )(ContactGreeting));
