@@ -88,7 +88,17 @@ const UsernameInput: FC<OwnProps> = ({
   }, [asLink, currentUsername]);
 
   const handleUsernameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUsername = e.target.value.trim().replace(LINK_PREFIX_REGEX, '');
+    const value = e.target.value.trim();
+    // Prevent prefix editing
+    if (asLink && !value.match(LINK_PREFIX_REGEX)) {
+      if (!value.length) {
+        setUsername('');
+        onChange?.('');
+      }
+      return;
+    }
+    const newUsername = value.replace(LINK_PREFIX_REGEX, '');
+
     setUsername(newUsername);
 
     const isValid = isUsernameValid(newUsername);

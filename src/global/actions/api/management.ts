@@ -466,3 +466,9 @@ addActionHandler('uploadContactProfilePhoto', async (global, actions, payload): 
     });
   }
 });
+
+addActionHandler('resetManagementError', (global, actions, payload): ActionReturnType => {
+  const { chatId, tabId = getCurrentTabId() } = payload || {};
+
+  return updateManagement(global, chatId, { error: undefined }, tabId);
+});

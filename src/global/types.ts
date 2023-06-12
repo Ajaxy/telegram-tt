@@ -1532,6 +1532,7 @@ export interface ActionPayloads {
   checkPublicLink: { username: string } & WithTabId;
   updatePublicLink: { username: string } & WithTabId;
   updatePrivateLink: WithTabId | undefined;
+  resetManagementError: { chatId: string } & WithTabId;
 
   requestChatUpdate: { chatId: string };
   loadChatJoinRequests: {
