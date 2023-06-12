@@ -1,6 +1,7 @@
 import type { FastTextApi } from '../lib/fasttextweb/fasttext.worker';
 import type { Connector } from './PostMessageConnector';
 
+import { IS_TRANSLATION_SUPPORTED } from './windowEnvironment';
 import { createConnector } from './PostMessageConnector';
 import Deferred from './Deferred';
 
@@ -12,7 +13,9 @@ const DEFAULT_LABELS_COUNT = 5;
 let worker: Connector<FastTextApi> | undefined;
 const initializationDeferred = new Deferred();
 
-setTimeout(initWorker, WORKER_INIT_DELAY);
+if (IS_TRANSLATION_SUPPORTED) {
+  setTimeout(initWorker, WORKER_INIT_DELAY);
+}
 
 function initWorker() {
   if (!worker) {

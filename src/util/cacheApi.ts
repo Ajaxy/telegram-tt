@@ -6,6 +6,8 @@ const cacheApi = self.caches;
 let isSupported: boolean | undefined;
 
 export async function isCacheApiSupported() {
+  if (!cacheApi) return false;
+
   isSupported = isSupported ?? await cacheApi.has('test').then(() => true).catch(() => false);
   return isSupported;
 }
