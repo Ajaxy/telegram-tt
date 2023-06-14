@@ -175,7 +175,6 @@ export interface ApiAppConfig {
   seenByMaxChatMembers: number;
   seenByExpiresAt: number;
   autologinDomains: string[];
-  autologinToken: string;
   urlAuthDomains: string[];
   premiumInvoiceSlug: string;
   premiumBotUsername: string;
@@ -196,6 +195,7 @@ export interface ApiConfig {
   defaultReaction?: ApiReaction;
   gifSearchUsername?: string;
   maxGroupSize: number;
+  autologinToken?: string;
 }
 
 export interface GramJsEmojiInteraction {

@@ -1380,12 +1380,12 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
     return;
   }
 
-  const { appConfig } = global;
+  const { appConfig, config } = global;
   if (appConfig) {
     const parsedUrl = new URL(urlWithProtocol);
 
-    if (appConfig.autologinDomains.includes(parsedUrl.hostname)) {
-      parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, appConfig.autologinToken);
+    if (config?.autologinToken && appConfig.autologinDomains.includes(parsedUrl.hostname)) {
+      parsedUrl.searchParams.set(AUTOLOGIN_TOKEN_KEY, config.autologinToken);
       window.open(parsedUrl.href, '_blank', 'noopener');
       return;
     }
