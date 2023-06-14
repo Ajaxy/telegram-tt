@@ -121,11 +121,6 @@
     }
   }
 
-  @media (max-width: 600px) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
   .scroll-container {
     position: relative;
   }
@@ -150,8 +145,16 @@
     }
   }
 
+  @media (max-width: 600px) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   body.is-ios &,
   body.is-android & {
+    padding-left: 0;
+    padding-right: 0;
+
     .ListItem::after {
       opacity: 1;
       transition: opacity var(--layer-transition);

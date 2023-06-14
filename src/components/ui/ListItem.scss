@@ -14,6 +14,23 @@
       box-shadow: inset 0 -0.03125rem 0 0 var(--color-dividers);
     }
 
+    &.selected::after,
+    &:last-of-type::after {
+      display: none;
+    }
+
+    // Conceal above item divider
+    &.selected::before {
+      content: "";
+      position: absolute;
+      top: -0.0625rem;
+      left: 4.5rem;
+      right: 0;
+      height: 0.0625rem;
+      /* stylelint-disable-next-line plugin/whole-pixel */
+      box-shadow: inset 0 -0.03125rem 0 0 var(--color-background);
+    }
+
     &:last-of-type::after {
       display: none;
     }
@@ -48,8 +65,16 @@
     color: var(--color-text);
     border-radius: var(--border-radius-default);
     --ripple-color: rgba(0, 0, 0, 0.08);
-
     text-decoration: none;
+
+    body.is-ios &,
+    body.is-android & {
+      border-radius: 0 ;
+    }
+
+    @media (max-width: 600px) {
+      border-radius: 0 ;
+    }
 
     > .icon {
       font-size: 1.5rem;
