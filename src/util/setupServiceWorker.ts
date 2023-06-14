@@ -1,4 +1,4 @@
-import { DEBUG_MORE, IS_TEST } from '../config';
+import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
 import { getActions } from '../global';
 import { formatShareText } from './deeplink';
 import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './windowEnvironment';
@@ -11,8 +11,6 @@ type WorkerAction = {
 };
 
 const IGNORE_WORKER_PATH = '/k/';
-
-const TEMP_DEBUG = true;
 
 function handleWorkerMessage(e: MessageEvent) {
   const action: WorkerAction = e.data;
@@ -54,7 +52,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         const ourRegistrations = registrations.filter((r) => !r.scope.includes(IGNORE_WORKER_PATH));
         if (ourRegistrations.length) {
-          if (TEMP_DEBUG) {
+          if (DEBUG) {
             // eslint-disable-next-line no-console
             console.log('[SW] Hard reload detected, re-enabling Service Worker');
           }
@@ -64,30 +62,26 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
 
       await navigator.serviceWorker.register(new URL('../serviceWorker.ts', import.meta.url));
 
-      if (TEMP_DEBUG) {
+      if (DEBUG) {
         // eslint-disable-next-line no-console
         console.log('[SW] ServiceWorker registered');
       }
 
       await navigator.serviceWorker.ready;
 
-      // eslint-disable-next-line no-console
-      console.log('Service Worker', navigator.serviceWorker?.controller?.scriptURL);
+      // Wait for registration to be available
+      await navigator.serviceWorker.getRegistration();
 
       if (navigator.serviceWorker.controller) {
-        if (TEMP_DEBUG) {
+        if (DEBUG) {
           // eslint-disable-next-line no-console
           console.log('[SW] ServiceWorker ready');
         }
         subscribeToWorker();
       } else {
-        if (TEMP_DEBUG) {
+        if (DEBUG) {
           // eslint-disable-next-line no-console
           console.error('[SW] ServiceWorker not available');
-          // eslint-disable-next-line no-console
-          console.warn('Assigned registration', await navigator.serviceWorker.getRegistration());
-          // eslint-disable-next-line no-console
-          console.warn('Ready promise', navigator.serviceWorker?.ready);
         }
 
         if (!IS_IOS && !IS_ANDROID && !IS_TEST) {
@@ -95,7 +89,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         }
       }
     } catch (err) {
-      if (TEMP_DEBUG) {
+      if (DEBUG) {
         // eslint-disable-next-line no-console
         console.error('[SW] ServiceWorker registration failed: ', err);
       }
