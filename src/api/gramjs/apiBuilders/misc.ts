@@ -250,5 +250,6 @@ export function buildApiConfig(config: GramJs.Config): ApiConfig {
     gifSearchUsername: config.gifSearchUsername,
     defaultReaction,
     maxGroupSize: config.chatSizeMax,
+    autologinToken: config.autologinToken,
   };
 }

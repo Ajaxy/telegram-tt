@@ -50,9 +50,7 @@ function buildEmojiSounds(appConfig: GramJsAppConfig) {
       accessHash: BigInt(l.access_hash),
       dcId: 1,
       mimeType: 'audio/ogg',
-      fileReference: Buffer.from(atob(l.file_reference_base64
-        .replace(/-/g, '+')
-        .replace(/_/g, '/'))),
+      fileReference: Buffer.alloc(0),
       size: BigInt(0),
     } as GramJs.Document);
 
@@ -75,7 +73,6 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
     seenByMaxChatMembers: appConfig.chat_read_mark_size_threshold,
     seenByExpiresAt: appConfig.chat_read_mark_expire_period,
     autologinDomains: appConfig.autologin_domains || [],
-    autologinToken: appConfig.autologin_token || '',
     urlAuthDomains: appConfig.url_auth_domains || [],
     maxUniqueReactions: appConfig.reactions_uniq_max,
     premiumBotUsername: appConfig.premium_bot_username,
