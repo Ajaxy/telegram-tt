@@ -1,3 +1,4 @@
+import { DEBUG } from './config';
 import { respondForProgressive } from './serviceWorker/progressive';
 import { respondForDownload } from './serviceWorker/download';
 import { respondWithCache, clearAssetCache, respondWithCacheNetworkFirst } from './serviceWorker/assetCache';
@@ -16,10 +17,8 @@ const RE_NETWORK_FIRST_ASSETS = /\.(wasm|html)$/;
 const RE_CACHE_FIRST_ASSETS = /[\da-f]{20}.*\.(js|css|woff2?|svg|png|jpg|jpeg|tgs|json|wasm)$/;
 const ACTIVATE_TIMEOUT = 3000;
 
-const TEMP_DEBUG = true;
-
 self.addEventListener('install', (e) => {
-  if (TEMP_DEBUG) {
+  if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('ServiceWorker installed');
   }
@@ -29,7 +28,7 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  if (TEMP_DEBUG) {
+  if (DEBUG) {
     // eslint-disable-next-line no-console
     console.log('ServiceWorker activated');
   }
