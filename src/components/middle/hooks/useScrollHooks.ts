@@ -20,7 +20,7 @@ import { useDebouncedSignal } from '../../../hooks/useAsyncResolvers';
 
 const FAB_THRESHOLD = 50;
 const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect
-const CONTAINER_HEIGHT_DEBOUNCE = 100;
+const CONTAINER_HEIGHT_DEBOUNCE = 200;
 const TOOLS_FREEZE_TIMEOUT = 350; // Approximate message sending animation duration
 
 export default function useScrollHooks(
