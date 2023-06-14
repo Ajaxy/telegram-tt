@@ -8,7 +8,7 @@ import type { ISettings, TimeFormat } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import {
-  getSystemTheme, IS_IOS, IS_MAC_OS, IS_TOUCH_ENV,
+  getSystemTheme, IS_ANDROID, IS_IOS, IS_MAC_OS,
 } from '../../../util/windowEnvironment';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
@@ -19,6 +19,7 @@ import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import RadioGroup from '../../ui/RadioGroup';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 type OwnProps = {
   isActive?: boolean;
@@ -61,7 +62,10 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
 
-  const APPEARANCE_THEME_OPTIONS: IRadioOption[] = [{
+  const { isMobile } = useAppLayout();
+  const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
+
+  const appearanceThemeOptions: IRadioOption[] = [{
     label: lang('EmptyChat.Appearance.Light'),
     value: 'light',
   }, {
@@ -72,11 +76,11 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     value: 'auto',
   }];
 
-  const KEYBOARD_SEND_OPTIONS = !IS_TOUCH_ENV ? [
+  const keyboardSendOptions = !isMobileDevice ? [
     { value: 'enter', label: lang('lng_settings_send_enter'), subLabel: 'New line by Shift + Enter' },
     {
       value: 'ctrl-enter',
-      label: lang(IS_MAC_OS ? 'lng_settings_send_cmdenter' : 'lng_settings_send_ctrlenter'),
+      label: lang(IS_MAC_OS || IS_IOS ? 'lng_settings_send_cmdenter' : 'lng_settings_send_ctrlenter'),
       subLabel: 'New line by Enter',
     },
   ] : undefined;
@@ -143,7 +147,7 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         </h4>
         <RadioGroup
           name="theme"
-          options={APPEARANCE_THEME_OPTIONS}
+          options={appearanceThemeOptions}
           selected={shouldUseSystemTheme ? 'auto' : theme}
           onChange={handleAppearanceThemeChange}
         />
@@ -161,13 +165,13 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         />
       </div>
 
-      {KEYBOARD_SEND_OPTIONS && (
+      {keyboardSendOptions && (
         <div className="settings-item">
           <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{lang('VoiceOver.Keyboard')}</h4>
 
           <RadioGroup
             name="keyboard-send-settings"
-            options={KEYBOARD_SEND_OPTIONS}
+            options={keyboardSendOptions}
             onChange={handleMessageSendComboChange}
             selected={messageSendKeyCombo}
           />

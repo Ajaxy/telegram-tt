@@ -154,6 +154,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [selectedRange, setSelectedRange] = useState<Range>();
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
   const { isMobile } = useAppLayout();
+  const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
 
   useInputCustomEmojis(
     getHtml,
@@ -363,7 +364,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
 
     if (!isComposing && e.key === 'Enter' && !e.shiftKey) {
       if (
-        !(IS_IOS || IS_ANDROID)
+        !isMobileDevice
         && (
           (messageSendKeyCombo === 'enter' && !e.shiftKey)
           || (messageSendKeyCombo === 'ctrl-enter' && (e.ctrlKey || e.metaKey))
@@ -441,7 +442,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       !chatId
       || editableInputId !== EDITABLE_INPUT_ID
       || noFocusInterception
-      || (IS_TOUCH_ENV && isMobile)
+      || isMobileDevice
       || isSelectModeActive
     ) {
       return undefined;
@@ -488,7 +489,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     return () => {
       document.removeEventListener('keydown', handleDocumentKeyDown, true);
     };
-  }, [chatId, editableInputId, isMobile, isSelectModeActive, noFocusInterception]);
+  }, [chatId, editableInputId, isMobileDevice, isSelectModeActive, noFocusInterception]);
 
   useEffect(() => {
     const captureFirstTab = debounce((e: KeyboardEvent) => {
