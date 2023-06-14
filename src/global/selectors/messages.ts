@@ -755,16 +755,11 @@ export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: s
       return undefined;
     }
 
-    if (!chat.lastMessage) {
+    if (!chat.lastMessage || chat.unreadCount) {
       return chat.lastReadInboxMessageId;
     }
 
-    if (isMessageLocal(chat.lastMessage)) {
-      return chat.lastMessage.id;
-    }
-
-    // Some previously read messages may be deleted
-    return Math.min(chat.lastMessage.id, chat.lastReadInboxMessageId);
+    return chat.lastMessage.id;
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     if (!threadInfo) {
