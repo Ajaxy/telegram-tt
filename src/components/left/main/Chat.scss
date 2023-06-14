@@ -136,6 +136,13 @@
     }
   }
 
+  body.is-ios &,
+  body.is-android & {
+    .ListItem-button {
+      border-radius: 0 !important;
+    }
+  }
+
   @media (max-width: 600px) {
     .ListItem-button {
       border-radius: 0 !important;

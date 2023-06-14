@@ -50,6 +50,15 @@
       overflow-x: hidden;
       overflow-y: auto;
       padding: 0 0.5rem;
+
+      body.is-ios &,
+      body.is-android & {
+        padding: 0;
+      }
+
+      @media (max-width: 600px) {
+        padding: 0;
+      }
     }
   }
 
