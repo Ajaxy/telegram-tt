@@ -16,9 +16,9 @@
 
     transition: transform var(--layer-transition);
     padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-bottom: 0;
     padding-left: env(safe-area-inset-left);
-    transform: translate3d(0, calc(var(--symbol-menu-height) + env(safe-area-inset-bottom)), 0);
+    transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
 
     &.open:not(.in-attachment-modal) {
       transform: translate3d(0, 0, 0);
@@ -36,9 +36,15 @@
     // Target: Old Firefox (Waterfox Classic)
     @supports not (padding-right: env(safe-area-inset-right)) {
       padding-right: 0;
-      padding-bottom: 0;
       padding-left: 0;
       transform: translate3d(0, calc(var(--symbol-menu-height)), 0);
+    }
+
+    @media (max-width: 600px) {
+      @supports not (padding-right: env(safe-area-inset-right)) {
+        padding-bottom: env(safe-area-inset-bottom);
+        transform: translate3d(0, calc(var(--symbol-menu-height) + env(safe-area-inset-bottom)), 0);
+      }
     }
 
     body.no-page-transitions & {
@@ -52,11 +58,12 @@
 
   &-main {
     height: calc(var(--symbol-menu-height) - var(--symbol-menu-footer-height));
-    max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
+    max-height: calc(100vh - var(--symbol-menu-footer-height));
 
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom))) {
-      max-height: calc(100vh - var(--symbol-menu-footer-height));
+    @media (max-width: 600px) {
+      @supports (max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom))) {
+        max-height: calc(100vh - var(--symbol-menu-footer-height) - env(safe-area-inset-bottom));
+      }
     }
   }
 

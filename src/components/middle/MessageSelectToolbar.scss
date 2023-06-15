@@ -1,6 +1,6 @@
 .MessageSelectToolbar {
   position: absolute;
-  bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  bottom: 0.5rem;
   left: 0.5rem;
   right: 0.5rem;
   width: auto;
@@ -8,9 +8,10 @@
   justify-content: center;
   margin: 0;
 
-  // Target: Old Firefox (Waterfox Classic)
-  @supports not (bottom: calc(0.5rem + env(safe-area-inset-bottom))) {
-    bottom: 0.5rem;
+  @media (max-width: 600px) {
+    @supports (bottom: calc(0.5rem + env(safe-area-inset-bottom))) {
+      bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
   }
 
   .mask-image-disabled &::before {

@@ -29,11 +29,12 @@
 
   body.keyboard-visible & {
     position: relative;
-    bottom: calc(0px - env(safe-area-inset-bottom));
+    bottom: 0;
 
-    // Target: Old Firefox (Waterfox Classic)
-    @supports not (bottom: calc(0px - env(safe-area-inset-bottom))) {
-      bottom: 0;
+    @media (max-width: 600px) {
+      @supports (bottom: calc(0px - env(safe-area-inset-bottom))) {
+        bottom: calc(0px - env(safe-area-inset-bottom));
+      }
     }
 
     body.keyboard-visible.no-page-transitions & {
@@ -99,8 +100,10 @@
       .last-in-list {
         margin-bottom: 4.25rem;
 
-        body:not(.keyboard-visible) & {
-          margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+        @supports (margin-bottom: calc(4.25rem + env(safe-area-inset-bottom))) {
+          body:not(.keyboard-visible) & {
+            margin-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+          }
         }
       }
     }

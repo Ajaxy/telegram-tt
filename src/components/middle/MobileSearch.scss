@@ -37,8 +37,17 @@
   padding-right: max(0.5rem, env(safe-area-inset-right));
 
   body:not(.keyboard-visible) & {
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(3.5rem + env(safe-area-inset-bottom));
+    padding-bottom: 0;
+    height: 3.5rem;
+  }
+
+  @media (max-width: 600px) {
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+      body:not(.keyboard-visible) & {
+        padding-bottom: env(safe-area-inset-bottom);
+        height: calc(3.5rem + env(safe-area-inset-bottom));
+      }
+    }
   }
 
   // Target: Old Firefox (Waterfox Classic)

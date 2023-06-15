@@ -188,16 +188,17 @@
     }
 
     &:not(.no-composer) {
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: 0;
       top: 0;
 
-      body.keyboard-visible & {
-        top: env(safe-area-inset-bottom);
-      }
+      @media (max-width: 600px) {
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+          padding-bottom: env(safe-area-inset-bottom);
 
-      // Target: Old Firefox (Waterfox Classic)
-      @supports not (padding-bottom: env(safe-area-inset-bottom)) {
-        padding-bottom: 0;
+          body.keyboard-visible & {
+            top: env(safe-area-inset-bottom);
+          }
+        }
       }
     }
 
@@ -329,7 +330,6 @@
     padding-bottom: 0.75rem;
     margin-left: -0.5rem;
 
-    // Target: Old Firefox (Waterfox Classic)
     @supports (padding-bottom: calc(0.75rem + env(safe-area-inset-bottom))) {
       padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
     }
