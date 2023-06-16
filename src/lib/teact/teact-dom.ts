@@ -173,7 +173,13 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         if (isTag) {
           const $newAsTag = $new as VirtualElementTag;
 
-          $newAsTag.props.ref = $current.props.ref;
+          if ($current.props.ref?.current === currentTarget) {
+            $current.props.ref.current = undefined;
+          }
+
+          if ($newAsTag.props.ref) {
+            $newAsTag.props.ref.current = currentTarget;
+          }
 
           if (nextSibling || options.forceMoveToEnd) {
             insertBefore(parentEl, currentTarget, nextSibling);

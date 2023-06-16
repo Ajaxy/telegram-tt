@@ -16,6 +16,8 @@ import { addActiveTabChangeListener } from '../util/activeTabMonitor';
 import { hasStoredSession } from '../util/sessions';
 import buildClassName from '../util/buildClassName';
 import { parseInitialLocationHash } from '../util/routing';
+import { setupBeforeInstallPrompt } from '../util/installPrompt';
+
 import useFlag from '../hooks/useFlag';
 import usePrevious from '../hooks/usePrevious';
 import useAppLayout from '../hooks/useAppLayout';
@@ -26,10 +28,9 @@ import LockScreen from './main/LockScreen.async';
 import AppInactive from './main/AppInactive';
 import Transition from './ui/Transition';
 import UiLoader from './common/UiLoader';
-// import Test from './components/test/TestNoRedundancy';
+// import Test from './test/TestUpdateRef';
 
 import styles from './App.module.scss';
-import { setupBeforeInstallPrompt } from '../util/installPrompt';
 
 type StateProps = {
   authState: GlobalState['authState'];
