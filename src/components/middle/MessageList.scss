@@ -457,11 +457,10 @@
 
   .Transition_slide-from > &,
   .Transition_slide-to > & {
-    padding-inline-end: var(--scrollbar-width) !important;
+    scrollbar-color: transparent !important;
 
-    scrollbar-width: none !important;
-    &::-webkit-scrollbar {
-      width: 0 !important;
+    &::-webkit-scrollbar-thumb {
+      background-color: transparent !important;
     }
   }
 }
