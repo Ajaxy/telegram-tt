@@ -371,7 +371,7 @@ addActionHandler('animateUnreadReaction', (global, actions, payload): ActionRetu
 
   actions.markMessagesRead({ messageIds, tabId });
 
-  if (selectPerformanceSettingsValue(global, 'reactionEffects')) return undefined;
+  if (!selectPerformanceSettingsValue(global, 'reactionEffects')) return undefined;
 
   global = getGlobal();
 
