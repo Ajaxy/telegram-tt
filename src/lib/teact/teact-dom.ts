@@ -129,6 +129,10 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
       const node = createNode($newAsReal);
       $newAsReal.target = node;
       insertBefore(fragment || parentEl, node, nextSibling);
+
+      if (isTagElement($newAsReal)) {
+        setElementRef($newAsReal, node as HTMLElement);
+      }
     }
   } else if ($current && !$new) {
     remount(parentEl, $current, undefined);
@@ -149,6 +153,10 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         const node = createNode($newAsReal);
         $newAsReal.target = node;
         remount(parentEl, $current, node, nextSibling);
+
+        if (isTagElement($newAsReal)) {
+          setElementRef($newAsReal, node as HTMLElement);
+        }
       }
     } else {
       const isComponent = isCurrentComponent && isNewComponent;
@@ -173,13 +181,8 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         if (isTag) {
           const $newAsTag = $new as VirtualElementTag;
 
-          if ($current.props.ref?.current === currentTarget) {
-            $current.props.ref.current = undefined;
-          }
-
-          if ($newAsTag.props.ref) {
-            $newAsTag.props.ref.current = currentTarget;
-          }
+          setElementRef($current, undefined);
+          setElementRef($newAsTag, currentTarget as HTMLElement);
 
           if (nextSibling || options.forceMoveToEnd) {
             insertBefore(parentEl, currentTarget, nextSibling);
@@ -280,12 +283,6 @@ function createNode($element: VirtualElementReal): Node {
   const { tag, props, children = [] } = $element;
   const element = document.createElement(tag);
 
-  if (typeof props.ref === 'object') {
-    props.ref.current = element;
-  } else if (typeof props.ref === 'function') {
-    props.ref(element);
-  }
-
   processControlled(tag, props);
 
   Object.entries(props).forEach(([key, value]) => {
@@ -343,10 +340,7 @@ function unmountRealTree($element: VirtualElement) {
       if (target) {
         extraClasses.delete(target);
         removeAllDelegatedListeners(target);
-
-        if ($element.props.ref?.current === target) {
-          $element.props.ref.current = undefined;
-        }
+        setElementRef($element, undefined);
       }
     }
 
@@ -557,6 +551,16 @@ function renderFragment(
   insertBefore(parentEl, fragment, nextSibling);
 
   return newChildren;
+}
+
+function setElementRef($element: VirtualElementTag, htmlElement: HTMLElement | undefined) {
+  const { ref } = $element.props;
+
+  if (typeof ref === 'object') {
+    ref.current = htmlElement;
+  } else if (typeof ref === 'function') {
+    ref(htmlElement);
+  }
 }
 
 function processControlled(tag: string, props: AnyLiteral) {
