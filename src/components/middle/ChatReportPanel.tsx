@@ -90,7 +90,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
     }
   });
 
-  if (!settings) {
+  if (!settings || (!chat && !user)) {
     return undefined;
   }
 
