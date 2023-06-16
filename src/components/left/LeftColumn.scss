@@ -17,6 +17,9 @@
     margin-left: 1.375rem;
     margin-right: auto;
     user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .SearchInput {
