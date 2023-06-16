@@ -335,18 +335,12 @@ function unmountRealTree($element: VirtualElement) {
     unmountComponent($element.componentInstance);
   } else if (!isFragmentElement($element)) {
     if (isTagElement($element)) {
-      const { target } = $element;
-
-      if (target) {
-        extraClasses.delete(target);
-        removeAllDelegatedListeners(target);
-        setElementRef($element, undefined);
-      }
+      extraClasses.delete($element.target!);
+      removeAllDelegatedListeners($element.target!);
+      setElementRef($element, undefined);
     }
 
-    if ($element.target) {
-      $element.target = undefined; // Help GC
-    }
+    $element.target = undefined; // Help GC
 
     if (!isParentElement($element)) {
       return;
