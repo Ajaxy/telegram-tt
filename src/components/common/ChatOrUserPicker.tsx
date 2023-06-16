@@ -268,7 +268,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >
-      <Transition activeKey={activeKey} name="slideFade">
+      <Transition activeKey={activeKey} name="slideFade" slideClassName="ChatOrUserPicker_slide">
         {() => {
           return activeKey === TOPIC_LIST_SLIDE ? renderTopicList() : renderChatList();
         }}

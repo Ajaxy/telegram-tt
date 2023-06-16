@@ -8,6 +8,11 @@
     }
   }
 
+  &_slide {
+    display: flex;
+    flex-direction: column;
+  }
+
   .modal-header {
     display: flex;
     align-items: center;
