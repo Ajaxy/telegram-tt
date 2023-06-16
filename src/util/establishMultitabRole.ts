@@ -9,7 +9,7 @@ const { addCallback, runCallbacks } = createCallbackManager();
 const { addCallback: addCallbackTokenDied, runCallbacks: runCallbacksTokenDied } = createCallbackManager();
 const token = Number(Math.random().toString().substring(2));
 const collectedTokens = new Set([token]);
-const channel = IS_MULTITAB_SUPPORTED ? new BroadcastChannel(ESTABLISH_BROADCAST_CHANNEL_NAME) : undefined;
+let channel = IS_MULTITAB_SUPPORTED ? new BroadcastChannel(ESTABLISH_BROADCAST_CHANNEL_NAME) : undefined;
 
 let isEstablished = false;
 let masterToken: number | undefined;
@@ -155,6 +155,7 @@ export function signalTokenDead() {
   channel.removeEventListener('message', handleMessage);
   channel.postMessage({ tokenDied: token, currentPasscodeHash: getPasscodeHash() });
   channel.close();
+  channel = undefined;
 }
 
 export function signalPasscodeHash() {
