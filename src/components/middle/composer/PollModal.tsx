@@ -1,7 +1,7 @@
 import type { ChangeEvent, RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useLayoutEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 
@@ -18,6 +18,7 @@ import Modal from '../../ui/Modal';
 import InputText from '../../ui/InputText';
 import Checkbox from '../../ui/Checkbox';
 import RadioGroup from '../../ui/RadioGroup';
+import TextArea from '../../ui/TextArea';
 
 import './PollModal.scss';
 
@@ -42,8 +43,6 @@ const PollModal: FC<OwnProps> = ({
   const questionInputRef = useRef<HTMLInputElement>(null);
   // eslint-disable-next-line no-null/no-null
   const optionsListRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const solutionRef = useRef<HTMLDivElement>(null);
 
   const [question, setQuestion] = useState<string>('');
   const [options, setOptions] = useState<string[]>(['']);
@@ -55,6 +54,10 @@ const PollModal: FC<OwnProps> = ({
   const [hasErrors, setHasErrors] = useState<boolean>(false);
 
   const lang = useLang();
+
+  const handleSolutionChange = useLastCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
+    setSolution(e.target.value);
+  });
 
   const focusInput = useLastCallback((ref: RefObject<HTMLInputElement>) => {
     if (isOpen && ref.current) {
@@ -77,14 +80,6 @@ const PollModal: FC<OwnProps> = ({
   }, [isQuiz, isOpen]);
 
   useEffect(() => focusInput(questionInputRef), [focusInput, isOpen]);
-
-  useLayoutEffect(() => {
-    const solutionEl = solutionRef.current;
-
-    if (solutionEl && solution !== solutionEl.innerHTML) {
-      solutionEl.innerHTML = solution;
-    }
-  }, [solution]);
 
   const addNewOption = useLastCallback((newOptions: string[] = []) => {
     setOptions([...newOptions, '']);
@@ -349,12 +344,10 @@ const PollModal: FC<OwnProps> = ({
         {isQuizMode && (
           <>
             <h3 className="options-header">{lang('lng_polls_solution_title')}</h3>
-            <div
-              ref={solutionRef}
-              className="form-control"
-              contentEditable
-              dir="auto"
-              onChange={(e) => setSolution(e.currentTarget.innerHTML)}
+            <TextArea
+              value={solution}
+              onChange={handleSolutionChange}
+              noReplaceNewlines
             />
             <div className="note">{lang('CreatePoll.ExplanationInfo')}</div>
           </>
