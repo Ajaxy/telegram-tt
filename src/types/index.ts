@@ -97,7 +97,6 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   isConnectionStatusMinimized: boolean;
   shouldArchiveAndMuteNewNonContact?: boolean;
   canTranslate: boolean;
-  canTranslateChats: boolean;
   doNotTranslate: string[];
   canDisplayChatInTitle: boolean;
   shouldShowLoginCodeInChatList?: boolean;
