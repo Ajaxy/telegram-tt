@@ -191,16 +191,12 @@ class RLottie {
     }
   }
 
-  playSegment([startFrameIndex, stopFrameIndex]: [number, number], forceRestart = false, viewId?: string) {
+  playSegment([startFrameIndex, stopFrameIndex]: [number, number], viewId?: string) {
     if (viewId) {
       this.views.get(viewId)!.isPaused = false;
     }
-
-    const frameIndex = Math.round(this.approxFrameIndex);
+    this.approxFrameIndex = Math.floor(startFrameIndex / this.reduceFactor);
     this.stopFrameIndex = Math.floor(stopFrameIndex / this.reduceFactor);
-    if (frameIndex !== stopFrameIndex || forceRestart) {
-      this.approxFrameIndex = Math.floor(startFrameIndex / this.reduceFactor);
-    }
     this.direction = startFrameIndex < stopFrameIndex ? 1 : -1;
 
     this.doPlay();

@@ -1,15 +1,12 @@
 @import '../../../styles/mixins';
 
 .participant-menu {
+  position: absolute;
   --color-text: white;
   --color-background-compact-menu: #212121DD;
   --color-background-compact-menu-hover: #00000066;
 
-  position: absolute;
-  z-index: var(--z-modal-menu);
-
   .bubble {
-    backdrop-filter: none !important;
     background: none !important;
     border-radius: 0;
     padding: 0;
@@ -24,7 +21,6 @@
       background: var(--color-background);
       border-radius: var(--border-radius-default);
       margin-bottom: 0.5rem;
-      backdrop-filter: blur(10px);
     }
   }
 
@@ -48,7 +44,7 @@
       padding: 0.75rem 1rem;
 
       .AnimatedSticker {
-        margin-right: 1rem;
+        margin-right: 2rem;
       }
     }
 
@@ -90,7 +86,7 @@
       position: absolute;
       left: -1.5rem;
       top: 0;
-      width: calc(100% + 1.5rem);
+      width: calc(100% + 3rem);
       margin: 0;
       z-index: 0;
 
