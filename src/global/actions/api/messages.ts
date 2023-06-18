@@ -68,7 +68,7 @@ import {
   selectDraft,
   selectEditingId,
   selectEditingMessage,
-  selectEditingScheduledId,
+  selectEditingScheduledId, selectFirstMessageId,
   selectFirstUnreadId,
   selectFocusedMessageId,
   selectForwardsCanBeSentToChat,
@@ -1020,6 +1020,12 @@ async function loadViewportMessages<T extends GlobalState>(
   const allMessages = ([] as ApiMessage[]).concat(messages, localMessages);
   const byId = buildCollectionByKey(allMessages, 'id');
   const ids = Object.keys(byId).map(Number);
+  const threadFirstMessageId = selectFirstMessageId(global, chatId, threadId) || {};
+  if (threadId
+    && threadFirstMessageId !== threadId
+    && (!ids[0] || threadFirstMessageId === ids[0])) {
+    ids.unshift(threadId);
+  }
 
   global = addChatMessagesById(global, chatId, byId);
   global = isOutlying

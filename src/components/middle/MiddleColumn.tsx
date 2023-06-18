@@ -45,7 +45,7 @@ import {
   selectReplyingToId,
   selectTabState,
   selectTheme,
-  selectThreadInfo,
+  selectThreadInfo, selectThreadTopMessageId,
 } from '../../global/selectors';
 import {
   getCanPostInChat,
@@ -140,6 +140,7 @@ type StateProps = {
   shouldSendJoinRequest?: boolean;
   lastSyncTime?: number;
   pinnedIds?: number[];
+  topMessageId?: number;
 };
 
 function isImage(item: DataTransferItem) {
@@ -193,6 +194,7 @@ function MiddleColumn({
   shouldLoadFullChat,
   lastSyncTime,
   pinnedIds,
+  topMessageId,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -226,7 +228,7 @@ function MiddleColumn({
     getCurrentPinnedIndexes,
     getLoadingPinnedId,
     getForceNextPinnedInHeader,
-  } = usePinnedMessage(chatId, threadId, pinnedIds);
+  } = usePinnedMessage(chatId, threadId, pinnedIds, topMessageId);
 
   const isMobileSearchActive = isMobile && hasCurrentTextSearch;
   const closeAnimationDuration = isMobile ? LAYER_ANIMATION_DURATION_MS : undefined;
@@ -720,6 +722,9 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, audioChatId, audioMessageId)
       : undefined;
 
+    const isCommentThread = threadId !== MAIN_THREAD_ID && !chat?.isForum;
+    const topMessageId = isCommentThread ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
+
     return {
       ...state,
       chatId,
@@ -737,10 +742,7 @@ export default memo(withGlobal<OwnProps>(
       isPinnedMessageList,
       currentUserBannedRights: chat?.currentUserBannedRights,
       defaultBannedRights: chat?.defaultBannedRights,
-      hasPinned: (
-        (threadId !== MAIN_THREAD_ID && !chat?.isForum)
-        || Boolean(!isPinnedMessageList && pinnedIds?.length)
-      ),
+      hasPinned: isCommentThread || Boolean(!isPinnedMessageList && pinnedIds?.length),
       hasAudioPlayer: Boolean(audioMessage),
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
       pinnedMessagesCount: pinnedIds ? pinnedIds.length : 0,
@@ -753,6 +755,7 @@ export default memo(withGlobal<OwnProps>(
       shouldSendJoinRequest,
       shouldLoadFullChat,
       pinnedIds,
+      topMessageId,
     };
   },
 )(MiddleColumn));
