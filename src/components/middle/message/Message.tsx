@@ -1474,7 +1474,8 @@ export default memo(withGlobal<OwnProps>(
       shouldLoopStickers: selectShouldLoopStickers(global),
       repliesThreadInfo: actualRepliesThreadInfo,
       availableReactions: global.availableReactions,
-      defaultReaction: isMessageLocal(message) ? undefined : selectDefaultReaction(global, chatId),
+      defaultReaction: isMessageLocal(message) || messageListType === 'scheduled'
+        ? undefined : selectDefaultReaction(global, chatId),
       activeReactions: reactionMessage && activeReactions[reactionMessage.id],
       activeEmojiInteractions,
       hasUnreadReaction,
