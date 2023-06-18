@@ -288,7 +288,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId, type, isServiceNotificationsChat]);
 
   useInterval(() => {
-    if (!messageIds || !messagesById) {
+    if (!messageIds || !messagesById || type === 'scheduled') {
       return;
     }
     const ids = messageIds.filter((id) => messagesById[id]?.reactions);
@@ -299,7 +299,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, MESSAGE_REACTIONS_POLLING_INTERVAL);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID) {
+    if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID || type === 'scheduled') {
       return;
     }
     const ids = messageIds.filter((id) => messagesById[id]?.repliesThreadInfo?.isComments
