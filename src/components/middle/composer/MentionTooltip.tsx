@@ -98,7 +98,7 @@ const MentionTooltip: FC<OwnProps> = ({
       {renderedChatMembers?.map(({ id }, index) => (
         <ListItem
           key={id}
-          className="chat-item-clickable scroll-item"
+          className="chat-item-clickable scroll-item smaller-icon"
           onClick={handleClick}
           clickArg={id}
           focus={selectedMentionIndex === index}
