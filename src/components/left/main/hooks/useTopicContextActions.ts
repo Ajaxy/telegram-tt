@@ -53,8 +53,6 @@ export default function useTopicContextActions({
       },
     };
 
-    const newTabActionSeparator = actionOpenInNewTab && { isSeparator: true, key: 'newTabSeparator' };
-
     const actionUnreadMark = topic.unreadCount || !wasOpened
       ? {
         title: lang('MarkAsRead'),
@@ -110,7 +108,6 @@ export default function useTopicContextActions({
 
     return compact([
       actionOpenInNewTab,
-      newTabActionSeparator,
       actionPin,
       actionUnreadMark,
       actionMute,

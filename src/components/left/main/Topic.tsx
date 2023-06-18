@@ -168,6 +168,7 @@ const Topic: FC<OwnProps & StateProps> = ({
       style={style}
       href={IS_OPEN_IN_NEW_TAB_SUPPORTED ? `#${createLocationHash(chatId, 'thread', topic.id)}` : undefined}
       contextActions={contextActions}
+      withPortalForMenu
       ref={ref}
     >
       <div className="info">
