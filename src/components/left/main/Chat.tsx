@@ -342,7 +342,8 @@ export default memo(withGlobal<OwnProps>(
       type: messageListType,
     } = selectCurrentMessageList(global) || {};
     const isSelected = chatId === currentChatId && currentThreadId === MAIN_THREAD_ID;
-    const isSelectedForum = chatId === selectTabState(global).forumPanelChatId;
+    const isSelectedForum = (chat.isForum && chatId === currentChatId)
+      || chatId === selectTabState(global).forumPanelChatId;
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
