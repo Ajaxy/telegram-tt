@@ -39,6 +39,7 @@ import ReactionSelector from './ReactionSelector';
 import './MessageContextMenu.scss';
 
 type OwnProps = {
+  isReactionPickerOpen?: boolean;
   availableReactions?: ApiAvailableReaction[];
   topReactions?: ApiReaction[];
   isOpen: boolean;
@@ -122,6 +123,7 @@ const REACTION_SELECTOR_WIDTH_REM = 19.25;
 const ANIMATION_DURATION = 200;
 
 const MessageContextMenu: FC<OwnProps> = ({
+  isReactionPickerOpen,
   availableReactions,
   topReactions,
   isOpen,
@@ -221,6 +223,12 @@ const MessageContextMenu: FC<OwnProps> = ({
     });
     onClose();
   });
+
+  useEffect(() => {
+    if (isOpen && areItemsHidden && !isReactionPickerOpen) {
+      onClose();
+    }
+  }, [onClose, isOpen, isReactionPickerOpen, areItemsHidden]);
 
   const handleOpenCustomEmojiSets = useLastCallback(() => {
     if (!customEmojiSets) return;
@@ -329,6 +337,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           isCurrentUserPremium={isCurrentUserPremium}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
           onShowMore={handleOpenReactionPicker}
+          className={buildClassName(areItemsHidden && 'ReactionSelector-hidden')}
         />
       )}
 

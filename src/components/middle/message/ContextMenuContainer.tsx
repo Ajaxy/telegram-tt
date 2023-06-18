@@ -21,6 +21,7 @@ import {
   selectIsCurrentUserPremium,
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
+  selectIsReactionPickerOpen,
   selectMessageCustomEmojiSets,
   selectMessageTranslations,
   selectRequestedTranslationLanguage,
@@ -110,6 +111,7 @@ type StateProps = {
   maxUniqueReactions?: number;
   threadId?: number;
   canPlayAnimatedEmojis?: boolean;
+  isReactionPickerOpen?: boolean;
 };
 
 const ContextMenuContainer: FC<OwnProps & StateProps> = ({
@@ -163,6 +165,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   threadId,
   onClose,
   onCloseAnimationEnd,
+  isReactionPickerOpen,
 }) => {
   const {
     openChat,
@@ -473,6 +476,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   return (
     <div className={buildClassName('ContextMenuContainer', transitionClassNames)}>
       <MessageContextMenu
+        isReactionPickerOpen={isReactionPickerOpen}
         availableReactions={availableReactions}
         topReactions={topReactions}
         message={message}
@@ -681,6 +685,7 @@ export default memo(withGlobal<OwnProps>(
       canShowOriginal: hasTranslation,
       canSelectLanguage: hasTranslation,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
+      isReactionPickerOpen: selectIsReactionPickerOpen(global),
     };
   },
 )(ContextMenuContainer));
