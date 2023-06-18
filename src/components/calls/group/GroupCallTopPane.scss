@@ -39,6 +39,7 @@
   .info {
     display: flex;
     flex-direction: column;
+    line-height: 1.125rem;
 
     .title {
       font-size: 0.875rem;
@@ -58,15 +59,16 @@
 
     .Avatar {
       margin: 0 0 0 -0.75rem;
+      font-size: 0.75rem;
 
       &:first-child {
-        width: 2rem;
-        height: 2rem;
+        width: 2rem !important;
+        height: 2rem !important;
       }
 
       &:not(:first-child) {
-        width: 2.25rem;
-        height: 2.25rem;
+        width: 2.25rem !important;
+        height: 2.25rem !important;
         border: 0.125rem solid var(--color-background);
       }
     }

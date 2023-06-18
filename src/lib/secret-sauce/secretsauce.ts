@@ -380,7 +380,6 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
 
   const newEndpoints: string[] = [];
   updatedParticipants.forEach((participant) => {
-    console.log('handleUpdateGroupCallParticipants', participant);
     if (participant.isSelf) {
       if (participant.isMuted && !participant.canSelfUnmute) {
         // Muted by admin
@@ -482,7 +481,6 @@ export async function handleUpdateGroupCallParticipants(updatedParticipants: Gro
   }
 
   const sdp = buildSdp(conference as Conference);
-  console.log('build sdp!', sdp);
   await connection.setRemoteDescription({
     type: 'offer',
     sdp,
@@ -566,8 +564,6 @@ export async function handleUpdateGroupCallConnection(data: GroupCallConnectionD
     ...state,
     ...(!isPresentation ? { conference: newConference } : { screenshareConference: newConference }),
   };
-
-  console.warn('update remote description', newConference, buildSdp(newConference, true, isPresentation));
 
   try {
     await connection.setRemoteDescription({
@@ -683,7 +679,6 @@ function initializeConnection(
   if (!isPresentation) {
     connection.oniceconnectionstatechange = () => {
       const connectionState = connection.iceConnectionState;
-      console.log('ice', connectionState);
       if (connectionState === 'connected' || connectionState === 'completed') {
         updateConnectionState('connected');
       } else if (connectionState === 'checking' || connectionState === 'new') {
@@ -707,8 +702,6 @@ function initializeConnection(
       offerToReceiveAudio: !isPresentation,
     });
 
-    console.log('created offer!', offer);
-
     await connection.setLocalDescription(offer);
 
     if (!offer.sdp) {
@@ -716,7 +709,6 @@ function initializeConnection(
     }
 
     const sdp = parseSdp(offer);
-    console.log('parsed sdp', sdp);
     const audioSsrc: Ssrc | undefined = !isPresentation ? {
       userId: '',
       sourceGroups: [

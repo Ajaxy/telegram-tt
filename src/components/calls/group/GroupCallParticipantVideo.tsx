@@ -1,77 +1,314 @@
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
-import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback, useEffect, useMemo, useRef, useState,
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
+import type { VideoLayout, VideoParticipant } from './hooks/useGroupCallVideoLayout';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import type { ApiChat, ApiUser } from '../../../api/types';
 
-import { GROUP_CALL_THUMB_VIDEO_DISABLED } from '../../../config';
+import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
 import buildClassName from '../../../util/buildClassName';
 import { selectChat, selectUser } from '../../../global/selectors';
+import { animate } from '../../../util/animation';
+import { fastRaf } from '../../../util/schedulers';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+
 import useLang from '../../../hooks/useLang';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useMenuPosition from '../../../hooks/useMenuPosition';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useInterval from '../../../hooks/useInterval';
 
-import Avatar from '../../common/Avatar';
+import Button from '../../ui/Button';
+import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
+import FullNameTitle from '../../common/FullNameTitle';
+import GroupCallParticipantMenu from './GroupCallParticipantMenu';
 
-import './GroupCallParticipantVideo.scss';
+import styles from './GroupCallParticipantVideo.module.scss';
+
+const VIDEO_FALLBACK_UPDATE_INTERVAL = 1000;
 
 type OwnProps = {
+  layout: VideoLayout;
+  setPinned: (participant?: VideoParticipant) => void;
+  pinnedVideo: VideoParticipant | undefined;
+  canPin: boolean;
   participant: TypeGroupCallParticipant;
-  type: 'video' | 'presentation';
-  onClick?: (id: string, type: 'video' | 'presentation') => void;
-  isFullscreen?: boolean;
+  className?: string;
 };
 
 type StateProps = {
   user?: ApiUser;
   chat?: ApiChat;
-  currentUserId?: string;
-  isActive?: boolean;
 };
 
 const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
-  type,
-  onClick,
+  layout,
+  pinnedVideo,
+  setPinned,
+  canPin,
+  className,
+  participant,
   user,
   chat,
-  isActive,
-  isFullscreen,
 }) => {
   const lang = useLang();
 
-  const handleClick = useCallback(() => {
-    if (onClick) {
-      onClick(user?.id || chat!.id, type);
-    }
-  }, [chat, onClick, type, user?.id]);
+  // eslint-disable-next-line no-null/no-null
+  const thumbnailRef = useRef<HTMLCanvasElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const videoFallbackRef = useRef<HTMLCanvasElement>(null);
 
-  if (!user && !chat) return undefined;
+  const {
+    x, y, width, height, noAnimate, isRemoved,
+    type,
+  } = layout;
+  const {
+    isSelf, isMutedByMe, isMuted,
+  } = participant;
+  const isPinned = pinnedVideo?.id === participant.id && pinnedVideo?.type === type;
+  const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
+  const isRaiseHand = Boolean(participant.raiseHandRating);
+  const shouldFlipVideo = type === 'video' && participant.isSelf;
+
+  const status = useMemo(() => {
+    if (isSelf) {
+      return lang('ThisIsYou');
+    }
+
+    if (isMutedByMe) {
+      return lang('VoipGroupMutedForMe');
+    }
+
+    if (isRaiseHand) {
+      return lang('WantsToSpeak');
+    }
+
+    if (isMuted || !isSpeaking) {
+      return lang('Listening');
+    }
+
+    if (participant.volume && participant.volume !== GROUP_CALL_DEFAULT_VOLUME) {
+      return lang('SpeakingWithVolume',
+        (participant.volume / GROUP_CALL_VOLUME_MULTIPLIER).toString())
+        .replace('%%', '%');
+    }
+
+    return lang('Speaking');
+  }, [isSpeaking, participant.volume, lang, isSelf, isMutedByMe, isRaiseHand, isMuted]);
+
+  const prevLayoutRef = useRef<VideoLayout>();
+  if (!isRemoved) {
+    prevLayoutRef.current = layout;
+  }
+  const {
+    x: prevX, y: prevY, width: prevWidth, height: prevHeight,
+  } = prevLayoutRef.current || {};
+
+  const [currentX, currentY, currentWidth, currentHeight] = isRemoved
+    ? [prevX, prevY, prevWidth, prevHeight] : [x, y, width, height];
+
+  const [isHidden, setIsHidden] = useState(!noAnimate);
 
   const streams = getUserStreams(user?.id || chat!.id);
+  const actualStream = type === 'video' ? streams?.video : streams?.presentation;
+  const streamRef = useRef(actualStream);
+  if (actualStream?.active && actualStream?.getVideoTracks()[0].enabled) {
+    streamRef.current = actualStream;
+  }
+  const stream = streamRef.current;
+
+  const handleInactive = useLastCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    // eslint-disable-next-line no-null/no-null
+    video.srcObject = null;
+  });
+
+  useEffect(() => {
+    stream?.addEventListener('inactive', handleInactive);
+    return () => {
+      stream?.removeEventListener('inactive', handleInactive);
+    };
+  }, [handleInactive, stream]);
+
+  useEffect(() => {
+    setIsHidden(false);
+  }, []);
+
+  // When video stream is removed, the video element starts showing empty black screen.
+  // To avoid that, we hide the video element and show the fallback frame instead, which is constantly updated
+  // every VIDEO_FALLBACK_UPDATE_INTERVAL milliseconds.
+  useInterval(() => {
+    if (!stream?.active) return;
+    const video = videoRef.current!;
+    const canvas = videoFallbackRef.current!;
+
+    requestMutation(() => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height);
+    });
+  }, VIDEO_FALLBACK_UPDATE_INTERVAL);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    const thumbnail = thumbnailRef.current;
+    if (!video || !thumbnail || !stream) return undefined;
+
+    const ctx = thumbnail.getContext('2d', { alpha: false });
+    if (!ctx) return undefined;
+
+    let isDrawing = true;
+    requestMutation(() => {
+      if (!isDrawing) return;
+      thumbnail.width = 16;
+      thumbnail.height = 16;
+      ctx.filter = 'blur(2px)';
+
+      const draw = () => {
+        if (!isDrawing) return false;
+        if (!stream.active) {
+          return false;
+        }
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, thumbnail.width, thumbnail.height);
+        return true;
+      };
+
+      animate(draw, fastRaf);
+    });
+
+    return () => {
+      isDrawing = false;
+    };
+  }, [stream]);
+
+  // eslint-disable-next-line no-null/no-null
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const {
+    isContextMenuOpen,
+    contextMenuPosition,
+    handleContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(ref, isSelf);
+
+  const getTriggerElement = useCallback(() => ref.current, []);
+
+  const getRootElement = useCallback(
+    () => ref.current!.closest('.custom-scroll, .no-scrollbar'),
+    [],
+  );
+
+  const getMenuElement = useCallback(
+    () => menuRef.current!,
+    [],
+  );
+
+  const getLayout = useCallback(
+    () => ({ withPortal: true }),
+    [],
+  );
+
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  );
+
+  const handleClickPin = useCallback(() => {
+    setPinned(!isPinned ? {
+      id: user?.id || chat!.id,
+      type,
+    } : undefined);
+  }, [chat, isPinned, setPinned, type, user?.id]);
 
   return (
     <div
-      className={buildClassName('GroupCallParticipantVideo', isActive && 'active')}
-      onClick={handleClick}
+      className={buildClassName(
+        styles.wrapper,
+        (isHidden || isRemoved) && styles.hidden,
+        noAnimate && styles.noAnimate,
+        className,
+        isPinned && styles.pinned,
+      )}
+      style={`--x: ${currentX}px; --y: ${currentY}px; --width: ${currentWidth}px; --height: ${currentHeight}px;`}
+      ref={ref}
+      onContextMenu={handleContextMenu}
+      onDoubleClick={canPin ? handleClickPin : undefined}
     >
-      {isFullscreen && (
-        <button className="back-button">
-          <i className="icon icon-arrow-left" />
-          {lang('Back')}
-        </button>
-      )}
-      <Avatar user={user} chat={chat} className="thumbnail-avatar" />
-      {!GROUP_CALL_THUMB_VIDEO_DISABLED && (
-        <div className="thumbnail-wrapper">
-          <video className="thumbnail" muted autoPlay playsInline srcObject={streams?.[type]} />
+      <div
+        className={buildClassName(
+          styles.root,
+          isSpeaking && styles.speaking,
+        )}
+      >
+        {stream && (
+          <video
+            className={buildClassName(styles.video, shouldFlipVideo && styles.flipped)}
+            muted
+            autoPlay
+            playsInline
+            srcObject={stream}
+            ref={videoRef}
+          />
+        )}
+        <canvas
+          className={buildClassName(styles.videoFallback, shouldFlipVideo && styles.flipped)}
+          ref={videoFallbackRef}
+        />
+        <div className={styles.thumbnailWrapper}>
+          <canvas
+            className={buildClassName(styles.thumbnail, shouldFlipVideo && styles.flipped)}
+            ref={thumbnailRef}
+          />
         </div>
-      )}
-      <video className="video" muted autoPlay playsInline srcObject={streams?.[type]} />
-      <div className="info">
-        <i className="icon icon-microphone-alt" />
-        <span className="name">{user?.firstName || chat?.title}</span>
-        {type === 'presentation' && <i className="icon last-icon icon-active-sessions" />}
+        {canPin && (
+          <Button
+            round
+            size="smaller"
+            ripple
+            color="translucent"
+            className={styles.pinButton}
+            ariaLabel={lang(isPinned ? 'lng_group_call_context_unpin_camera' : 'lng_group_call_context_pin_camera')}
+            onClick={handleClickPin}
+          >
+            <i className={buildClassName('icon', isPinned ? 'icon-unpin' : 'icon-pin')} />
+          </Button>
+        )}
+        <div className={styles.bottomPanel}>
+          <div className={styles.info}>
+            <FullNameTitle peer={user || chat!} className={styles.name} />
+            <div className={styles.status}>{status}</div>
+          </div>
+          <OutlinedMicrophoneIcon participant={participant} className={styles.icon} noColor />
+        </div>
       </div>
+
+      <GroupCallParticipantMenu
+        participant={participant}
+        isDropdownOpen={isContextMenuOpen}
+        positionX={positionX}
+        positionY={positionY}
+        transformOriginX={transformOriginX}
+        transformOriginY={transformOriginY}
+        style={menuStyle}
+        onClose={handleContextMenuClose}
+        onCloseAnimationEnd={handleContextMenuHide}
+        menuRef={menuRef}
+      />
     </div>
   );
 };
@@ -79,10 +316,8 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { participant }): StateProps => {
     return {
-      currentUserId: global.currentUserId,
       user: participant.isUser ? selectUser(global, participant.id) : undefined,
       chat: !participant.isUser ? selectChat(global, participant.id) : undefined,
-      isActive: (participant.amplitude || 0) > THRESHOLD,
     };
   },
 )(GroupCallParticipantVideo));

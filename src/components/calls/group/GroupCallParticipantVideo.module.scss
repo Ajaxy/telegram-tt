@@ -1,0 +1,150 @@
+.wrapper {
+  position: absolute;
+  opacity: 1;
+  transform: translate(var(--x), var(--y)) scale(1);
+
+  width: var(--width);
+  height: var(--height);
+}
+
+.hidden {
+  opacity: 0;
+  transform: translate(var(--x), var(--y)) scale(0.6);
+}
+
+.noAnimate {
+  transition: none;
+}
+
+.root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  border-radius: 0.625rem;
+  user-select: none;
+
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: -0.125rem;
+    border-radius: 0.75rem;
+    background: var(--gradient-speaking);
+
+    transform: scale(0.96);
+    transition: 0.25s ease-in-out transform;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55.62%, rgba(0, 0, 0, 0.5) 86.46%);
+    z-index: 2;
+    border-radius: 0.625rem;
+  }
+
+  &.speaking::before {
+    transform: scale(1);
+  }
+}
+
+.video {
+  width: 100%;
+  display: block;
+  object-fit: contain;
+  border-radius: 0.625rem;
+  z-index: 2;
+}
+
+.videoFallback {
+  composes: video;
+  position: absolute;
+  height: 100%;
+  z-index: 1;
+}
+
+.thumbnailWrapper {
+  position: absolute;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: #000;
+}
+
+.thumbnail {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.flipped {
+  transform: rotateY(180deg);
+}
+
+.pinButton {
+  position: absolute;
+  inset-inline-end: 0.25rem;
+  inset-block-start: 0.25rem;
+  z-index: 3;
+  color: #FFFFFF !important;
+}
+
+.bottomPanel {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline: 0;
+  border-end-end-radius: 0.625rem;
+  border-end-start-radius: 0.625rem;
+
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 3;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 1rem;
+  min-width: 0;
+}
+
+.pinned .bottomPanel, .pinned::after {
+  opacity: 0;
+  transition: 0.25s ease-in-out opacity;
+}
+
+.pinned:hover .bottomPanel, .pinned:hover::after {
+  opacity: 1;
+}
+
+.name {
+  color: #FFFFFF;
+  font-weight: 500;
+  line-height: 1.125rem;
+
+  :global(.fullName) {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 1rem;
+  }
+}
+
+.status {
+  color: #FFFFFF;
+  opacity: 0.6;
+  line-height: 1.125rem;
+}
+
+.icon {
+  margin-left: auto;
+}

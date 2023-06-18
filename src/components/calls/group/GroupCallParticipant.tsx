@@ -1,24 +1,31 @@
 import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import { THRESHOLD } from '../../../lib/secret-sauce';
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback, useMemo, useRef,
+} from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
 
+import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 import { selectChat, selectUser } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
-import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 
 import Avatar from '../../common/Avatar';
 import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
+import ListItem from '../../ui/ListItem';
+import GroupCallParticipantMenu from './GroupCallParticipantMenu';
+import FullNameTitle from '../../common/FullNameTitle';
 
-import './GroupCallParticipant.scss';
+import styles from './GroupCallParticipant.module.scss';
 
 type OwnProps = {
   participant: TypeGroupCallParticipant;
-  openParticipantMenu: (anchor: HTMLDivElement, participant: TypeGroupCallParticipant) => void;
 };
 
 type StateProps = {
@@ -27,67 +34,132 @@ type StateProps = {
 };
 
 const GroupCallParticipant: FC<OwnProps & StateProps> = ({
-  openParticipantMenu,
   participant,
   user,
   chat,
 }) => {
   // eslint-disable-next-line no-null/no-null
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const menuRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
 
-  const { isSelf, isMutedByMe, isMuted } = participant;
+  const {
+    isSelf, isMutedByMe, isMuted, hasVideoStream, hasPresentationStream,
+  } = participant;
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
   const isRaiseHand = Boolean(participant.raiseHandRating);
 
-  const handleOnClick = () => {
-    if (isSelf) return;
-    openParticipantMenu(anchorRef.current!, participant);
-  };
+  const {
+    isContextMenuOpen,
+    contextMenuPosition,
+    handleContextMenu,
+    handleBeforeContextMenu,
+    handleContextMenuClose,
+    handleContextMenuHide,
+  } = useContextMenuHandlers(ref, isSelf);
+
+  const getTriggerElement = useCallback(() => ref.current, []);
+
+  const getRootElement = useCallback(
+    () => ref.current!.closest('.custom-scroll, .no-scrollbar'),
+    [],
+  );
+
+  const getMenuElement = useCallback(
+    () => menuRef.current!,
+    [],
+  );
+
+  const getLayout = useCallback(
+    () => ({ withPortal: true }),
+    [],
+  );
+
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  );
+
+  const hasCustomVolume = Boolean(
+    !isMuted && isSpeaking && participant.volume && participant.volume !== GROUP_CALL_DEFAULT_VOLUME,
+  );
 
   const [aboutText, aboutColor] = useMemo(() => {
-    if (isSelf) {
-      return [lang('ThisIsYou'), 'blue'];
-    }
     if (isMutedByMe) {
-      return [lang('VoipGroupMutedForMe'), 'red'];
+      return [lang('VoipGroupMutedForMe'), styles.subtitleRed];
     }
-    return isRaiseHand
-      ? [lang('WantsToSpeak'), 'blue']
-      : (!isMuted && isSpeaking ? [
-        participant.volume && participant.volume !== GROUP_CALL_DEFAULT_VOLUME
-          ? lang('SpeakingWithVolume',
-            (participant.volume / GROUP_CALL_VOLUME_MULTIPLIER).toString())
-            .replace('%%', '%') : lang('Speaking'),
-        'green',
-      ]
-        : (participant.about ? [participant.about, ''] : [lang('Listening'), 'blue']));
-  }, [isSpeaking, participant.volume, lang, isSelf, isMutedByMe, isRaiseHand, isMuted, participant.about]);
+
+    if (isRaiseHand) {
+      return [lang('WantsToSpeak'), styles.subtitleBlue];
+    }
+
+    if (hasCustomVolume) {
+      return [
+        lang('SpeakingWithVolume',
+          (participant.volume! / GROUP_CALL_VOLUME_MULTIPLIER).toString())
+          .replace('%%', '%'),
+        styles.subtitleGreen,
+      ];
+    }
+
+    if (!isMuted && isSpeaking) {
+      return [
+        lang('Speaking'),
+        styles.subtitleGreen,
+      ];
+    }
+
+    if (isSelf) {
+      return [lang('ThisIsYou'), styles.subtitleBlue];
+    }
+
+    return participant.about ? [participant.about, ''] : [lang('Listening'), styles.subtitleBlue];
+  }, [
+    isMutedByMe, isRaiseHand, isSelf, hasCustomVolume, isMuted, isSpeaking, participant.about, participant.volume, lang,
+  ]);
 
   if (!user && !chat) {
     return undefined;
   }
 
-  const name = user ? `${user.firstName || ''} ${user.lastName || ''}` : chat?.title;
-
   return (
-    <div
-      className={buildClassName(
-        'GroupCallParticipant',
-        participant.canSelfUnmute && 'can-self-unmute',
-      )}
-      onClick={handleOnClick}
-      ref={anchorRef}
+    <ListItem
+      leftElement={<Avatar user={user} chat={chat} className={styles.avatar} />}
+      rightElement={<OutlinedMicrophoneIcon participant={participant} className={styles.icon} />}
+      className={styles.root}
+      onClick={handleContextMenu}
+      onMouseDown={handleBeforeContextMenu}
+      onContextMenu={handleContextMenu}
+      multiline
+      ripple
+      ref={ref}
     >
-      <Avatar user={user} chat={chat} size="medium" />
-      <div className="info">
-        <span className="name">{name}</span>
-        <span className={buildClassName('about', aboutColor)}>{aboutText}</span>
-      </div>
-      <div className="microphone">
-        <OutlinedMicrophoneIcon participant={participant} />
-      </div>
-    </div>
+      <FullNameTitle peer={user || chat!} withEmojiStatus className={styles.title} />
+      <span className={buildClassName(styles.subtitle, 'subtitle', aboutColor)}>
+        {hasPresentationStream && <i className="icon icon-share-screen" aria-hidden />}
+        {hasVideoStream && <i className="icon icon-video" aria-hidden />}
+        {hasCustomVolume && <i className="icon icon-speaker" aria-hidden />}
+        <span className={styles.subtitleText}>{renderText(aboutText)}</span>
+      </span>
+      <GroupCallParticipantMenu
+        participant={participant}
+        isDropdownOpen={isContextMenuOpen}
+        positionX={positionX}
+        positionY={positionY}
+        transformOriginX={transformOriginX}
+        transformOriginY={transformOriginY}
+        style={menuStyle}
+        onClose={handleContextMenuClose}
+        onCloseAnimationEnd={handleContextMenuHide}
+        menuRef={menuRef}
+      />
+    </ListItem>
   );
 };
 
