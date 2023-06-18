@@ -29,9 +29,11 @@ const MessagePhoneCall: FC<OwnProps> = ({
   const { requestMasterAndRequestCall } = getActions();
 
   const lang = useLang();
-  const { isOutgoing, isVideo, reason } = phoneCall;
+  const {
+    isOutgoing, isVideo, reason, duration,
+  } = phoneCall;
   const isMissed = reason === 'missed';
-  const isCancelled = reason === 'busy' && !isOutgoing;
+  const isCancelled = reason === 'busy' || duration === undefined;
 
   const handleCall = useLastCallback(() => {
     requestMasterAndRequestCall({ isVideo, userId: chatId });
@@ -39,19 +41,19 @@ const MessagePhoneCall: FC<OwnProps> = ({
 
   const reasonText = useMemo(() => {
     if (isVideo) {
-      if (isCancelled) return 'CallMessageVideoIncomingDeclined';
       if (isMissed) return isOutgoing ? 'CallMessageVideoOutgoingMissed' : 'CallMessageVideoIncomingMissed';
+      if (isCancelled) return 'CallMessageVideoIncomingDeclined';
 
       return isOutgoing ? 'CallMessageVideoOutgoing' : 'CallMessageVideoIncoming';
     } else {
-      if (isCancelled) return 'CallMessageIncomingDeclined';
       if (isMissed) return isOutgoing ? 'CallMessageOutgoingMissed' : 'CallMessageIncomingMissed';
+      if (isCancelled) return 'CallMessageIncomingDeclined';
 
       return isOutgoing ? 'CallMessageOutgoing' : 'CallMessageIncoming';
     }
   }, [isCancelled, isMissed, isOutgoing, isVideo]);
 
-  const duration = useMemo(() => {
+  const formattedDuration = useMemo(() => {
     return phoneCall.duration ? formatTimeDuration(lang, phoneCall.duration) : undefined;
   }, [lang, phoneCall.duration]);
 
@@ -79,11 +81,12 @@ const MessagePhoneCall: FC<OwnProps> = ({
               'icon-arrow-right',
               styles.arrow,
               isMissed && styles.missed,
+              isCancelled && styles.canceled,
               !isOutgoing && styles.incoming,
             )}
           />
           <span className={styles.duration}>
-            {duration ? lang('CallMessageWithDuration', [timeFormatted, duration]) : timeFormatted}
+            {formattedDuration ? lang('CallMessageWithDuration', [timeFormatted, formattedDuration]) : timeFormatted}
           </span>
         </div>
       </div>
