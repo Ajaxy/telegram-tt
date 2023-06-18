@@ -32,7 +32,7 @@ import {
   selectChat,
   selectIsInSelectMode,
   selectIsChatWithSelf,
-  selectChatBot,
+  selectBot,
   selectIsChatBotNotStarted,
   selectScrollOffset,
   selectThreadTopMessageId,
@@ -715,7 +715,7 @@ export default memo(withGlobal<OwnProps>(
       && !messageIds && !chat.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
     );
 
-    const chatBot = selectChatBot(global, chatId)!;
+    const chatBot = selectBot(global, chatId)!;
     let isLoadingBotInfo = false;
     let botInfo;
     if (selectIsChatBotNotStarted(global, chatId)) {

@@ -72,17 +72,6 @@ export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: Ap
   }, 0);
 }
 
-export function selectChatBot<T extends GlobalState>(global: T, chatId: string) {
-  const chat = selectChat(global, chatId);
-  const userId = chat && getPrivateChatUserId(chat);
-  const user = userId && selectUser(global, userId);
-  if (!user || !isUserBot(user)) {
-    return undefined;
-  }
-
-  return user;
-}
-
 export function selectIsTrustedBot<T extends GlobalState>(global: T, botId: string) {
   const bot = selectUser(global, botId);
   return bot && (bot.isVerified || global.trustedBotIds.includes(botId));
@@ -111,7 +100,7 @@ export function selectChatType<T extends GlobalState>(global: T, chatId: string)
 
 export function selectIsChatBotNotStarted<T extends GlobalState>(global: T, chatId: string) {
   const chat = selectChat(global, chatId);
-  const bot = selectChatBot(global, chatId);
+  const bot = selectBot(global, chatId);
   if (!chat || !bot) {
     return false;
   }

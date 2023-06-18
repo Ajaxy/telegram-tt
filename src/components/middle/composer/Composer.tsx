@@ -42,7 +42,7 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
-  selectChatBot,
+  selectBot,
   selectChatFullInfo,
   selectChatMessage,
   selectChatType,
@@ -1581,7 +1581,7 @@ export default memo(withGlobal<OwnProps>(
     chatId, threadId, messageListType, isMobile,
   }): StateProps => {
     const chat = selectChat(global, chatId);
-    const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
+    const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
     const isChatWithBot = Boolean(chatBot);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isChatWithUser = isUserId(chatId);
