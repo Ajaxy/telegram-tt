@@ -201,7 +201,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
   if (isMobile) {
     const menuItems: MenuItemProps[] = [];
-    if (!message?.isForwardingAllowed && !isChatProtected) {
+    if (message?.isForwardingAllowed && !isChatProtected) {
       menuItems.push({
         icon: 'forward',
         onClick: onForward,
@@ -227,7 +227,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
 
     if (canReport) {
       menuItems.push({
-        icon: 'report',
+        icon: 'flag',
         onClick: onReport,
         children: lang('ReportPeer.Report'),
       });
@@ -246,6 +246,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
         icon: 'delete',
         onClick: openDeleteModal,
         children: lang('Delete'),
+        destructive: true,
       });
     }
 
@@ -260,7 +261,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
           positionX="right"
         >
           {menuItems.map(({
-            icon, onClick, href, download, children,
+            icon, onClick, href, download, children, destructive,
           }) => (
             <MenuItem
               key={icon}
@@ -268,6 +269,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
               href={href}
               download={download}
               onClick={onClick}
+              destructive={destructive}
             >
               {children}
             </MenuItem>
