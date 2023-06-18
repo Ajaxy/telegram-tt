@@ -123,9 +123,12 @@ class MTProtoState {
             body = await GZIPPacked.gzipIfSmaller(contentRelated, data);
         } else {
             // Invoke query expects a query with a getBytes func
-            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg(afterId, {
-                getBytes() {
-                    return data;
+            body = await GZIPPacked.gzipIfSmaller(contentRelated, new InvokeAfterMsg({
+                msgId: afterId,
+                query: {
+                    getBytes() {
+                        return data;
+                    },
                 },
             }).getBytes());
         }

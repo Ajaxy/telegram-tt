@@ -10,7 +10,9 @@ declare class TelegramClient {
 
     async start(authParams: UserAuthParams | BotAuthParams);
 
-    async invoke<R extends Api.AnyRequest>(request: R, dcId?: number): Promise<R['__response']>;
+    async invoke<R extends Api.AnyRequest>(
+        request: R, dcId?: number, abortSignal?: AbortSignal,
+    ): Promise<R['__response']>;
 
     async uploadFile(uploadParams: UploadFileParams): ReturnType<typeof uploadFile>;
 
@@ -19,6 +21,8 @@ declare class TelegramClient {
     async updateTwoFaSettings(Params: TwoFaParams): ReturnType<typeof updateTwoFaSettings>;
 
     async getTmpPassword(currentPassword: string, ttl?: number): Promise<TmpPasswordResult>;
+
+    setPingCallback(callback: () => Promise<void>);
 
     // Untyped methods.
     [prop: string]: any;

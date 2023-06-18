@@ -2,7 +2,12 @@
 let _level;
 
 class Logger {
-    static levels = ['error', 'warn', 'info', 'debug'];
+    static LEVEL_MAP = new Map([
+        ['error', new Set(['error'])],
+        ['warn', new Set(['error', 'warn'])],
+        ['info', new Set(['error', 'warn', 'info'])],
+        ['debug', new Set(['error', 'warn', 'info', 'debug'])],
+    ]);
 
     constructor(level) {
         if (!_level) {
@@ -45,18 +50,13 @@ class Logger {
      * @returns {boolean}
      */
     canSend(level) {
-        return (Logger.levels.indexOf(_level) >= Logger.levels.indexOf(level));
+        return Logger.LEVEL_MAP.get(_level).has(level);
     }
 
     /**
      * @param message {string}
      */
     warn(message) {
-        // todo remove later
-        if (_level === 'debug') {
-            // eslint-disable-next-line no-console
-            console.error(new Error().stack);
-        }
         this._log('warn', message, this.colors.warn);
     }
 
@@ -78,11 +78,6 @@ class Logger {
      * @param message {string}
      */
     error(message) {
-        // todo remove later
-        if (_level === 'debug') {
-            // eslint-disable-next-line no-console
-            console.error(new Error().stack);
-        }
         this._log('error', message, this.colors.error);
     }
 

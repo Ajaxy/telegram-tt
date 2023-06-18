@@ -26,6 +26,7 @@ const {
     updateTwoFaSettings,
     getTmpPassword,
 } = require('./2fa');
+const RequestState = require('../network/RequestState');
 
 const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
@@ -230,6 +231,10 @@ class TelegramClient {
         }
     }
 
+    setPingCallback(callback) {
+        this.pingCallback = callback;
+    }
+
     async _updateLoop() {
         let lastPongAt;
 
@@ -279,19 +284,16 @@ class TelegramClient {
                 if (this._sender.isReconnecting || this._isSwitchingDc) {
                     continue;
                 }
-
-                await this.disconnect();
-                await this.connect();
+                this._sender.reconnect();
             }
 
             // We need to send some content-related request at least hourly
             // for Telegram to keep delivering updates, otherwise they will
             // just stop even if we're connected. Do so every 30 minutes.
 
-            // TODO Call getDifference instead since it's more relevant
             if (new Date().getTime() - this._lastRequest > 30 * 60 * 1000) {
                 try {
-                    await this.invoke(new requests.updates.GetState());
+                    await this.pingCallback();
                 } catch (e) {
                     // we don't care about errors here
                 }
@@ -867,18 +869,22 @@ class TelegramClient {
      * @returns {Promise}
      */
 
-    async invoke(request, dcId) {
+    async invoke(request, dcId, abortSignal) {
         if (request.classType !== 'request') {
             throw new Error('You can only invoke MTProtoRequests');
         }
 
         const sender = dcId === undefined ? this._sender : await this.getSender(dcId);
         this._lastRequest = new Date().getTime();
+
+        const state = new RequestState(request, abortSignal);
+
         let attempt = 0;
         for (attempt = 0; attempt < this._requestRetries; attempt++) {
-            const promise = sender.sendWithInvokeSupport(request);
+            sender.addStateToQueue(state);
             try {
-                const result = await promise.promise;
+                const result = await state.promise;
+                state.finished.resolve();
                 return result;
             } catch (e) {
                 if (e instanceof errors.ServerError || e.message === 'RPC_CALL_FAIL'
@@ -890,6 +896,7 @@ class TelegramClient {
                         this._log.info(`Sleeping for ${e.seconds}s on flood wait`);
                         await sleep(e.seconds * 1000);
                     } else {
+                        state.finished.resolve();
                         throw e;
                     }
                 } else if (e instanceof errors.PhoneMigrateError || e instanceof errors.NetworkMigrateError
@@ -898,20 +905,26 @@ class TelegramClient {
                     const shouldRaise = e instanceof errors.PhoneMigrateError
                         || e instanceof errors.NetworkMigrateError;
                     if (shouldRaise && await checkAuthorization(this)) {
+                        state.finished.resolve();
                         throw e;
                     }
                     await this._switchDC(e.newDc);
                 } else if (e instanceof errors.MsgWaitError) {
-                    // we need to resend this after the old one was confirmed.
-                    await promise.isReady();
+                    // We need to resend this after the old one was confirmed.
+                    await state.isReady();
+
+                    state.after = undefined;
                 } else if (e.message === 'CONNECTION_NOT_INITED') {
                     await this.disconnect();
                     await sleep(2000);
                     await this.connect();
                 } else {
+                    state.finished.resolve();
                     throw e;
                 }
             }
+
+            state.resetPromise();
         }
         throw new Error(`Request was unsuccessful ${attempt} time(s)`);
     }
@@ -987,11 +1000,10 @@ class TelegramClient {
         // this._stateCache.update(update)
     }
 
-    _processUpdate(update, others, entities) {
+    _processUpdate(update, entities) {
         update._entities = entities || [];
         const args = {
             update,
-            others,
         };
         this._dispatchUpdate(args);
     }
@@ -1227,9 +1239,6 @@ class TelegramClient {
     */
     async _dispatchUpdate(args = {
         update: undefined,
-        others: undefined,
-        channelId: undefined,
-        ptsDate: undefined,
     }) {
         for (const [builder, callback] of this._eventBuilders) {
             const event = builder.build(args.update);
