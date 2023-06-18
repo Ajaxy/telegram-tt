@@ -23,7 +23,9 @@ type PinnedIntersectionChangedParams = {
 
 export type PinnedIntersectionChangedCallback = (params: PinnedIntersectionChangedParams) => void;
 
-export default function usePinnedMessage(chatId?: string, threadId?: number, pinnedIds?: number[]) {
+export default function usePinnedMessage(
+  chatId?: string, threadId?: number, pinnedIds?: number[], topMessageId?: number,
+) {
   const [getCurrentPinnedIndexes, setCurrentPinnedIndexes] = useSignal<Record<string, number>>({});
   const [getForceNextPinnedInHeader, setForceNextPinnedInHeader] = useSignal<boolean | undefined>();
   const viewportPinnedIdsRef = useRef<number[] | undefined>();
@@ -133,7 +135,10 @@ export default function usePinnedMessage(chatId?: string, threadId?: number, pin
     if (!chatId || !threadId || !key || getLoadingPinnedId()) return false;
 
     const global = getGlobal();
-    if (!pinnedIds?.length) return false;
+    if (!pinnedIds?.length) {
+      // Focusing on a post in comments
+      return topMessageId === messageId;
+    }
 
     const index = pinnedIds.indexOf(messageId);
     const newPinnedIndex = cycleRestrict(pinnedIds.length, index + 1);

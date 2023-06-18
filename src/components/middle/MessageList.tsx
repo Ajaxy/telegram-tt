@@ -36,7 +36,6 @@ import {
   selectIsChatBotNotStarted,
   selectScrollOffset,
   selectThreadTopMessageId,
-  selectFirstMessageId,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
   selectIsCurrentUserPremium,
@@ -127,7 +126,6 @@ type StateProps = {
   isLoadingBotInfo?: boolean;
   botInfo?: ApiBotInfo;
   threadTopMessageId?: number;
-  threadFirstMessageId?: number;
   hasLinkedChat?: boolean;
   lastSyncTime?: number;
   topic?: ApiTopic;
@@ -170,7 +168,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   firstUnreadId,
   isComments,
   isViewportNewest,
-  threadFirstMessageId,
   isRestricted,
   restrictionReason,
   focusingId,
@@ -259,23 +256,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useNativeCopySelectedMessages(copyMessagesByIds);
 
   const messageGroups = useMemo(() => {
-    if (!messageIds || !messagesById) {
+    if (!messageIds?.length || !messagesById) {
       return undefined;
     }
 
-    const viewportIds = (
-      threadTopMessageId
-      && threadFirstMessageId !== threadTopMessageId
-      && (!messageIds[0] || threadFirstMessageId === messageIds[0])
-    )
-      ? [threadTopMessageId, ...messageIds]
-      : messageIds;
-
-    if (!viewportIds.length) {
-      return undefined;
-    }
-
-    const listedMessages = viewportIds.map((id) => messagesById[id]).filter(Boolean);
+    const listedMessages = messageIds.map((id) => messagesById[id]).filter(Boolean);
 
     // Service notifications have local IDs which may be not in sync with real message history
     const orderRule: (keyof ApiMessage)[] = type === 'scheduled' || isServiceNotificationsChat
@@ -285,7 +270,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     return listedMessages.length
       ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current)
       : undefined;
-  }, [messageIds, messagesById, threadFirstMessageId, threadTopMessageId, type, isServiceNotificationsChat]);
+  }, [messageIds, messagesById, type, isServiceNotificationsChat]);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') {
@@ -746,7 +731,6 @@ export default memo(withGlobal<OwnProps>(
       isComments: Boolean(threadInfo?.originChannelId),
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
-      threadFirstMessageId: selectFirstMessageId(global, chatId, threadId),
       focusingId,
       isSelectModeActive: selectIsInSelectMode(global),
       isLoadingBotInfo,
