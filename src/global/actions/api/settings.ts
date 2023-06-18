@@ -273,7 +273,7 @@ addActionHandler('loadBlockedContacts', async (global): Promise<void> => {
     ...global,
     blocked: {
       ...global.blocked,
-      ids: [...(global.blocked.ids || []), ...result.blockedIds],
+      ids: result.blockedIds,
       totalCount: result.totalCount,
     },
   };

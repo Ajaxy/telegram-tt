@@ -19,6 +19,11 @@
     box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
     border-bottom: 0.625rem solid var(--color-background-secondary);
 
+    &:last-child {
+      border-bottom: none;
+      box-shadow: none;
+    }
+
     &.wide {
       padding: 1.5rem;
     }
