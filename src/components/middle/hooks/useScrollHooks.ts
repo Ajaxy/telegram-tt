@@ -83,7 +83,7 @@ export default function useScrollHooks(
   });
 
   const {
-    observe: observeIntersection,
+    observe: observeIntersectionForHistory,
   } = useIntersectionObserver({
     rootRef: containerRef,
     margin: MESSAGE_LIST_SENSITIVE_AREA,
@@ -98,24 +98,23 @@ export default function useScrollHooks(
       return;
     }
 
-    const triggerEntry = entries.find(({ isIntersecting }) => isIntersecting);
-    if (!triggerEntry) {
-      return;
-    }
+    entries.forEach(({ isIntersecting, target }) => {
+      if (!isIntersecting) return;
 
-    const { target } = triggerEntry;
+      if (target.className === 'backwards-trigger') {
+        loadMoreBackwards();
+      }
 
-    if (target.className === 'backwards-trigger') {
-      loadMoreBackwards();
-    } else if (target.className === 'forwards-trigger') {
-      loadMoreForwards();
-    }
+      if (target.className === 'forwards-trigger') {
+        loadMoreForwards();
+      }
+    });
   });
 
   const withHistoryTriggers = messageIds && messageIds.length > 1;
 
-  useOnIntersect(backwardsTriggerRef, withHistoryTriggers ? observeIntersection : undefined);
-  useOnIntersect(forwardsTriggerRef, withHistoryTriggers ? observeIntersection : undefined);
+  useOnIntersect(backwardsTriggerRef, withHistoryTriggers ? observeIntersectionForHistory : undefined);
+  useOnIntersect(forwardsTriggerRef, withHistoryTriggers ? observeIntersectionForHistory : undefined);
 
   const {
     observe: observeIntersectionForFab,
