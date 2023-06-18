@@ -170,9 +170,11 @@ export function useIntersectionObserver({
 export function useOnIntersect(
   targetRef: RefObject<HTMLDivElement>, observe?: ObserveFn, callback?: TargetCallback,
 ) {
+  const lastCallback = useLastCallback(callback);
+
   useEffect(() => {
-    return observe ? observe(targetRef.current!, callback) : undefined;
-  }, [callback, observe, targetRef]);
+    return observe ? observe(targetRef.current!, lastCallback) : undefined;
+  }, [lastCallback, observe, targetRef]);
 }
 
 export function useIsIntersecting(
