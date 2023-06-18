@@ -64,9 +64,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(mtpUser.verified && { isVerified: true }),
     ...((mtpUser.contact || mtpUser.mutualContact) && { isContact: true }),
     type: userType,
-    ...(firstName && { firstName }),
+    firstName,
+    lastName,
     ...(userType === 'userTypeBot' && { canBeInvitedToGroup: !mtpUser.botNochats }),
-    ...(lastName && { lastName }),
     ...(usernames && { usernames }),
     phoneNumber: mtpUser.phone || '',
     noStatus: !mtpUser.status,
@@ -120,7 +120,7 @@ export function buildApiUserEmojiStatus(mtpEmojiStatus: GramJs.TypeEmojiStatus):
 
 export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
   const userStatusesById: Record<string, ApiUserStatus> = {};
-  const users: ApiUser[] = [];
+  const usersById: Record<string, ApiUser> = {};
 
   mtpUsers.forEach((mtpUser) => {
     const user = buildApiUser(mtpUser);
@@ -128,14 +128,17 @@ export function buildApiUsersAndStatuses(mtpUsers: GramJs.TypeUser[]) {
       return;
     }
 
-    users.push(user);
+    const duplicateUser = usersById[user.id];
+    if (!duplicateUser || duplicateUser.isMin) {
+      usersById[user.id] = user;
+    }
 
     if ('status' in mtpUser) {
       userStatusesById[user.id] = buildApiUserStatus(mtpUser.status);
     }
   });
 
-  return { users, userStatusesById };
+  return { users: Object.values(usersById), userStatusesById };
 }
 
 export function buildApiPremiumGiftOption(option: GramJs.TypePremiumGiftOption): ApiPremiumGiftOption {

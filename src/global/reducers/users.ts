@@ -83,13 +83,11 @@ export function addUsers<T extends GlobalState>(global: T, newById: Record<strin
   let isUpdated = false;
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiUser>>((acc, id) => {
-    if (!byId[id] || (byId[id].isMin && !newById[id].isMin)) {
-      const updatedUser = getUpdatedUser(global, id, newById[id]);
-      if (updatedUser) {
-        acc[id] = updatedUser;
-        if (!isUpdated) {
-          isUpdated = true;
-        }
+    const updatedUser = getUpdatedUser(global, id, newById[id]);
+    if (updatedUser) {
+      acc[id] = updatedUser;
+      if (!isUpdated) {
+        isUpdated = true;
       }
     }
     return acc;
@@ -115,15 +113,8 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
   const user = byId[userId];
   const omitProps: (keyof ApiUser)[] = [];
 
-  const shouldIgnoreUndefinedFields = userUpdate.isMin && user && !user.isMin;
-  if (shouldIgnoreUndefinedFields) {
-    omitProps.push('isMin', 'accessHash');
-    Object.keys(userUpdate).forEach((key) => {
-      const prop = key as keyof ApiUser;
-      if (userUpdate[prop] === undefined) {
-        omitProps.push(prop);
-      }
-    });
+  if (userUpdate.isMin && user && !user.isMin) {
+    return undefined; // Do not apply updates from min constructor
   }
 
   if (areDeepEqual(user?.usernames, userUpdate.usernames)) {
@@ -133,7 +124,7 @@ function getUpdatedUser(global: GlobalState, userId: string, userUpdate: Partial
   const updatedUser = {
     ...user,
     ...omit(userUpdate, omitProps),
-  };
+  } as ApiUser;
 
   if (!updatedUser.id || !updatedUser.type) {
     return undefined;
