@@ -39,6 +39,10 @@
       left: 3.875rem;
     }
 
+    &.smaller-icon::after {
+      left: 3.25rem;
+    }
+
     &.no-icon::after {
       left: 0;
     }
