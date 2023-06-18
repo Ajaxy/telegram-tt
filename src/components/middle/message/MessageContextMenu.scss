@@ -73,3 +73,8 @@
     }
   }
 }
+
+.ReactionSelector-hidden {
+  opacity: 0;
+  transition: 300ms opacity;
+}
