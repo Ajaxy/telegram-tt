@@ -233,6 +233,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       <PrivateChatInfo
                         userId={userId}
                         noStatusOrTyping
+                        avatarSize="medium"
                         status={seenByUser ? formatDateAtTime(lang, seenByUser * 1000) : undefined}
                         statusIcon="icon-message-read"
                       />

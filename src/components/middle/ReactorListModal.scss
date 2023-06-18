@@ -23,6 +23,13 @@
 
   .Reactions {
     margin-bottom: 0.5rem;
+    padding: 0 1rem;
+    justify-content: space-between;
+
+    &::after {
+      content: '';
+      flex-grow: 1;
+    }
   }
 
   .icon-heart {
@@ -61,5 +68,7 @@
     color: var(--color-text-secondary);
     display: flex;
     align-items: center;
+    font-size: 0.875rem !important;
+    line-height: 1.25rem;
   }
 }
