@@ -14,7 +14,6 @@ import { isLocalMessageId } from '../../../global/helpers';
 import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useSyncEffect from '../../../hooks/useSyncEffect';
-import { useStateRef } from '../../../hooks/useStateRef';
 import { useSignalEffect } from '../../../hooks/useSignalEffect';
 import { useDebouncedSignal } from '../../../hooks/useAsyncResolvers';
 
@@ -52,10 +51,10 @@ export default function useScrollHooks(
   // eslint-disable-next-line no-null/no-null
   const fabTriggerRef = useRef<HTMLDivElement>(null);
 
-  function toggleScrollTools() {
+  const toggleScrollTools = useLastCallback(() => {
     if (!isReady) return;
 
-    if (!messageIds || !messageIds.length) {
+    if (!messageIds?.length) {
       onFabToggle(false);
       onNotchToggle(false);
       return;
@@ -81,7 +80,7 @@ export default function useScrollHooks(
 
     onFabToggle(isUnread ? !isAtBottom : !isNearBottom);
     onNotchToggle(!isAtBottom);
-  }
+  });
 
   const {
     observe: observeIntersection,
@@ -113,8 +112,10 @@ export default function useScrollHooks(
     }
   });
 
-  useOnIntersect(backwardsTriggerRef, observeIntersection);
-  useOnIntersect(forwardsTriggerRef, observeIntersection);
+  const withHistoryTriggers = messageIds && messageIds.length > 1;
+
+  useOnIntersect(backwardsTriggerRef, withHistoryTriggers ? observeIntersection : undefined);
+  useOnIntersect(forwardsTriggerRef, withHistoryTriggers ? observeIntersection : undefined);
 
   const {
     observe: observeIntersectionForFab,
@@ -140,12 +141,11 @@ export default function useScrollHooks(
 
   useOnIntersect(fabTriggerRef, observeIntersectionForNotch);
 
-  const toggleScrollToolsRef = useStateRef(toggleScrollTools);
   useEffect(() => {
     if (isReady) {
-      toggleScrollToolsRef.current!();
+      toggleScrollTools();
     }
-  }, [isReady, toggleScrollToolsRef]);
+  }, [isReady, toggleScrollTools]);
 
   const freezeShortly = useLastCallback(() => {
     freezeForFab();
@@ -164,5 +164,10 @@ export default function useScrollHooks(
   const getContainerHeightDebounced = useDebouncedSignal(getContainerHeight, CONTAINER_HEIGHT_DEBOUNCE);
   useSignalEffect(freezeShortly, [freezeShortly, getContainerHeightDebounced]);
 
-  return { backwardsTriggerRef, forwardsTriggerRef, fabTriggerRef };
+  return {
+    withHistoryTriggers,
+    backwardsTriggerRef,
+    forwardsTriggerRef,
+    fabTriggerRef,
+  };
 }

@@ -93,6 +93,7 @@ const MessageListContent: FC<OwnProps> = ({
   } = useMessageObservers(type, containerRef, memoFirstUnreadIdRef, onPinnedIntersectionChange, chatId);
 
   const {
+    withHistoryTriggers,
     backwardsTriggerRef,
     forwardsTriggerRef,
     fabTriggerRef,
@@ -273,16 +274,18 @@ const MessageListContent: FC<OwnProps> = ({
 
   return (
     <div className="messages-container" teactFastList>
-      <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />
+      {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
       {dateGroups.flat()}
       {!isCurrentUserPremium && isViewportNewest && (
         <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
       )}
-      <div
-        ref={forwardsTriggerRef}
-        key="forwards-trigger"
-        className="forwards-trigger"
-      />
+      {withHistoryTriggers && (
+        <div
+          ref={forwardsTriggerRef}
+          key="forwards-trigger"
+          className="forwards-trigger"
+        />
+      )}
       <div
         ref={fabTriggerRef}
         key="fab-trigger"
