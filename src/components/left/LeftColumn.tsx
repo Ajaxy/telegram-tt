@@ -347,9 +347,23 @@ function LeftColumn({
   });
 
   useEffect(
-    () => (content !== LeftColumnContent.ChatList || (isFirstChatFolderActive && !isChatOpen && !isForumPanelOpen)
-      ? captureEscKeyListener(() => handleReset())
-      : undefined),
+    () => {
+      const isArchived = content === LeftColumnContent.Archived;
+      const isChatList = content === LeftColumnContent.ChatList;
+      const noChatOrForumOpen = !isChatOpen && !isForumPanelOpen;
+      // We listen for escape key only in these cases:
+      // 1. When we are in archived chats and no chat or forum is open.
+      // 2. When we are in any other screen except chat list and archived chat list.
+      // 3. When we are in chat list and first chat folder is active and no chat or forum is open.
+      if ((isArchived && noChatOrForumOpen) || (!isChatList && !isArchived)
+        || (isFirstChatFolderActive && noChatOrForumOpen)) {
+        return captureEscKeyListener(() => {
+          handleReset();
+        });
+      } else {
+        return undefined;
+      }
+    },
     [isFirstChatFolderActive, content, handleReset, isChatOpen, isForumPanelOpen],
   );
 
