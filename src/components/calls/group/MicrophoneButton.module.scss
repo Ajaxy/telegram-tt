@@ -1,0 +1,52 @@
+.root {
+  position: relative;
+  background: var(--gradient-green);
+
+  &::before, &::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    display: block;
+    transition: 0.25s ease-in-out opacity, 0.25s ease-in-out transform;
+    opacity: 0;
+  }
+
+  &::before {
+    background: var(--gradient-blue);
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    background: var(--gradient-purple);
+    transform: rotate(-45deg);
+  }
+}
+
+.spinner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+
+  opacity: 0;
+  transition: 0.25s ease-in-out opacity;
+}
+
+.spinnerVisible {
+  opacity: 1;
+}
+
+.canUnmute::before {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+.mutedByAdmin::after {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+
+.icon {
+  z-index: 1;
+}
