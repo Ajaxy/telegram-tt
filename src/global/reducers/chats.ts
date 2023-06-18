@@ -141,13 +141,11 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
   let isUpdated = false;
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiChat>>((acc, id) => {
-    if (!byId[id] || (byId[id].isMin && !newById[id].isMin)) {
-      const updatedChat = getUpdatedChat(global, id, newById[id]);
-      if (updatedChat) {
-        acc[id] = updatedChat;
-        if (!isUpdated) {
-          isUpdated = true;
-        }
+    const updatedChat = getUpdatedChat(global, id, newById[id]);
+    if (updatedChat) {
+      acc[id] = updatedChat;
+      if (!isUpdated) {
+        isUpdated = true;
       }
     }
     return acc;
@@ -174,15 +172,8 @@ function getUpdatedChat<T extends GlobalState>(
   const chat = byId[chatId];
   const omitProps: (keyof ApiChat)[] = [];
 
-  const shouldIgnoreUndefinedFields = chatUpdate.isMin && chat && !chat.isMin;
-  if (shouldIgnoreUndefinedFields) {
-    omitProps.push('isMin', 'accessHash');
-    Object.keys(chatUpdate).forEach((key) => {
-      const prop = key as keyof ApiChat;
-      if (chatUpdate[prop] === undefined) {
-        omitProps.push(prop);
-      }
-    });
+  if (chatUpdate.isMin && chat && !chat.isMin) {
+    return undefined; // Do not apply updates from min constructor
   }
 
   if (!noOmitUnreadReactionCount) {
@@ -197,7 +188,7 @@ function getUpdatedChat<T extends GlobalState>(
     ...chat,
     ...omit(chatUpdate, omitProps),
     ...(photo && { photos: [photo, ...(chat.photos || [])] }),
-  };
+  } as ApiChat;
 
   if (!updatedChat.id || !updatedChat.type) {
     return undefined;
