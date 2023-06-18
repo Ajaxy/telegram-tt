@@ -1,4 +1,5 @@
 [
+    "invokeAfterMsg",
     "initConnection",
     "invokeWithLayer",
     "auth.sendCode",

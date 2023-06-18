@@ -18,6 +18,7 @@ const {
 } = require('../tl').constructors;
 const MessagePacker = require('../extensions/MessagePacker');
 const BinaryReader = require('../extensions/BinaryReader');
+const PendingState = require('../extensions/PendingState');
 const {
     UpdateConnectionState,
     UpdateServerTimeOffset,
@@ -36,7 +37,6 @@ const {
 } = require('../tl').constructors;
 const { SecurityError } = require('../errors/Common');
 const { InvalidBufferError } = require('../errors/Common');
-const { LogOut } = require('../tl').requests.auth;
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 
@@ -124,7 +124,7 @@ class MTProtoSender {
         /**
          * Sent states are remembered until a response is received.
          */
-        this._pending_state = {};
+        this._pending_state = new PendingState();
 
         /**
          * Responses must be acknowledged, and we can also batch these.
@@ -196,6 +196,7 @@ class MTProtoSender {
             }
         }
         this.isConnecting = false;
+
         return true;
     }
 
@@ -235,29 +236,17 @@ class MTProtoSender {
      Since the receiving part is "built in" the future, it's
      impossible to await receive a result that was never sent.
      * @param request
+     * @param abortSignal
      * @returns {RequestState}
      */
-    send(request) {
-        if (!this._user_connected) {
-            throw new Error('Cannot send requests while disconnected');
-        }
-        const state = new RequestState(request);
+    send(request, abortSignal) {
+        const state = new RequestState(request, abortSignal);
         this._send_queue.append(state);
         return state.promise;
     }
 
-    /**
-     * Same as send but returns the full state. usefull for invoke after logic
-     * @param request
-     * @return {RequestState}
-     */
-    sendWithInvokeSupport(request) {
-        if (!this._user_connected) {
-            throw new Error('Cannot send requests while disconnected');
-        }
-        const state = new RequestState(request, undefined, this._pending_state);
+    addStateToQueue(state) {
         this._send_queue.append(state);
-        return state;
     }
 
     /**
@@ -315,8 +304,6 @@ class MTProtoSender {
     }
 
     async _disconnect() {
-        this._send_queue.rejectAll();
-
         if (this._updateCallback) {
             this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
         }
@@ -340,7 +327,9 @@ class MTProtoSender {
      * @private
      */
     async _sendLoop() {
-        this._send_queue = new MessagePacker(this._state, this._log);
+        // Retry previous pending requests
+        this._send_queue.prepend(this._pending_state.values());
+        this._pending_state.clear();
 
         while (this._user_connected && !this.isReconnecting) {
             if (this._pending_ack.size) {
@@ -381,12 +370,12 @@ class MTProtoSender {
             for (const state of batch) {
                 if (!Array.isArray(state)) {
                     if (state.request.classType === 'request') {
-                        this._pending_state[state.msgId] = state;
+                        this._pending_state.set(state.msgId, state);
                     }
                 } else {
                     for (const s of state) {
                         if (s.request.classType === 'request') {
-                            this._pending_state[s.msgId] = s;
+                            this._pending_state.set(s.msgId, s);
                         }
                     }
                 }
@@ -506,27 +495,23 @@ class MTProtoSender {
      * @private
      */
     _popStates(msgId) {
-        let state = this._pending_state[msgId];
+        const state = this._pending_state.getAndDelete(msgId);
         if (state) {
-            this._pending_state[msgId].deferred.resolve();
-            delete this._pending_state[msgId];
             return [state];
         }
 
         const toPop = [];
 
-        for (state of Object.values(this._pending_state)) {
-            if (state.containerId && state.containerId.equals(msgId)) {
-                toPop.push(state.msgId);
+        for (const pendingState of this._pending_state.values()) {
+            if (pendingState.containerId?.equals(msgId)) {
+                toPop.push(pendingState.msgId);
             }
         }
 
         if (toPop.length) {
             const temp = [];
             for (const x of toPop) {
-                temp.push(this._pending_state[x]);
-                this._pending_state[x].deferred.resolve();
-                delete this._pending_state[x];
+                temp.push(this._pending_state.getAndDelete(x));
             }
             return temp;
         }
@@ -550,11 +535,7 @@ class MTProtoSender {
      */
     _handleRPCResult(message) {
         const result = message.obj;
-        const state = this._pending_state[result.reqMsgId];
-        if (state) {
-            state.deferred.resolve();
-            delete this._pending_state[result.reqMsgId];
-        }
+        const state = this._pending_state.getAndDelete(result.reqMsgId);
         this._log.debug(`Handling RPC result for message ${result.reqMsgId}`);
 
         if (!state) {
@@ -577,6 +558,7 @@ class MTProtoSender {
                 }
             }
         }
+
         if (result.error) {
             // eslint-disable-next-line new-cap
             const error = RPCMessageToError(result.error, state.request);
@@ -652,9 +634,7 @@ class MTProtoSender {
         }
 
         this._log.debug(`Handling pong for message ${pong.msgId}`);
-        const state = this._pending_state[pong.msgId];
-        this._pending_state[pong.msgId].deferred.resolve();
-        delete this._pending_state[pong.msgId];
+        const state = this._pending_state.getAndDelete(pong.msgId);
 
         // Todo Check result
         if (state) {
@@ -767,35 +747,9 @@ class MTProtoSender {
     }
 
     /**
-     * Handles a server acknowledge about our messages. Normally
-     * these can be ignored except in the case of ``auth.logOut``:
-     *
-     *     auth.logOut#5717da40 = Bool;
-     *
-     * Telegram doesn't seem to send its result so we need to confirm
-     * it manually. No other request is known to have this behaviour.
-
-     * Since the ID of sent messages consisting of a container is
-     * never returned (unless on a bad notification), this method
-     * also removes containers messages when any of their inner
-     * messages are acknowledged.
-
-     * @param message
-     * @returns {Promise<void>}
-     * @private
-     */
-    _handleAck(message) {
-        const ack = message.obj;
-        this._log.debug(`Handling acknowledge for ${ack.msgIds}`);
-        for (const msgId of ack.msgIds) {
-            const state = this._pending_state[msgId];
-            if (state && state.request instanceof LogOut) {
-                this._pending_state[msgId].deferred.resolve();
-                delete this._pending_state[msgId];
-                state.resolve(true);
-            }
-        }
-    }
+     * Handles a server acknowledge about our messages. Normally these can be ignored
+    */
+    _handleAck() { }
 
     /**
      * Handles future salt results, which don't come inside a
@@ -810,11 +764,9 @@ class MTProtoSender {
         // TODO save these salts and automatically adjust to the
         // correct one whenever the salt in use expires.
         this._log.debug(`Handling future salts for message ${message.msgId}`);
-        const state = this._pending_state[message.msgId];
+        const state = this._pending_state.getAndDelete(message.msgId);
 
         if (state) {
-            this._pending_state[message].deferred.resolve();
-            delete this._pending_state[message];
             state.resolve(message.obj);
         }
     }
@@ -828,8 +780,10 @@ class MTProtoSender {
      */
     _handleStateForgotten(message) {
         this._send_queue.append(
-            new RequestState(new MsgsStateInfo(message.msgId, String.fromCharCode(1)
-                .repeat(message.obj.msgIds))),
+            new RequestState(new MsgsStateInfo({
+                msgId: message.msgId,
+                query: String.fromCharCode(1).repeat(message.obj.msgIds),
+            })),
         );
     }
 
@@ -882,12 +836,7 @@ class MTProtoSender {
         await this.connect(newConnection, true);
 
         this.isReconnecting = false;
-        // uncomment this if you want to resend
-        // this._send_queue.extend(Object.values(this._pending_state))
-        for (const state of Object.values(this._pending_state)) {
-            state.deferred.resolve();
-        }
-        this._pending_state = {};
+
         if (this._autoReconnectCallback) {
             await this._autoReconnectCallback();
         }

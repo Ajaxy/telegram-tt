@@ -1113,6 +1113,7 @@ chatlists.chatlistInvite#1dcd839d flags:# title:string emoticon:flags.0?string p
 chatlists.chatlistUpdates#93bd878d missing_peers:Vector<Peer> chats:Vector<Chat> users:Vector<User> = chatlists.ChatlistUpdates;
 bots.botInfo#e8a775b0 name:string about:string description:string = bots.BotInfo;
 ---functions---
+invokeAfterMsg#cb9f372d {X:Type} msg_id:long query:!X = X;
 initConnection#c1cd5ea9 {X:Type} flags:# api_id:int device_model:string system_version:string app_version:string system_lang_code:string lang_pack:string lang_code:string proxy:flags.0?InputClientProxy params:flags.1?JSONValue query:!X = X;
 invokeWithLayer#da9b0d0d {X:Type} layer:int query:!X = X;
 auth.sendCode#a677244f phone_number:string api_id:int api_hash:string settings:CodeSettings = auth.SentCode;

@@ -15,7 +15,7 @@ function readBigIntFromBuffer(buffer, little = true, signed = false) {
         randBuffer = randBuffer.reverse();
     }
     let bigInt = BigInt(randBuffer.toString('hex'), 16);
-    if (signed && Math.floor(bigInt.toString('2').length / 8) >= bytesNumber) {
+    if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
         bigInt = bigInt.subtract(BigInt(2)
             .pow(BigInt(bytesNumber * 8)));
     }
@@ -48,7 +48,7 @@ function toSignedLittleBuffer(big, number = 8) {
  */
 function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
     bigInt = BigInt(bigInt);
-    const bitLength = bigInt.bitLength();
+    const bitLength = bigInt.bitLength().toJSNumber();
 
     const bytes = Math.ceil(bitLength / 8);
     if (bytesNumber < bytes) {
@@ -63,38 +63,20 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
         bigInt = bigInt.abs();
     }
 
-    const hex = bigInt.toString('16')
-        .padStart(bytesNumber * 2, '0');
-    let l = Buffer.from(hex, 'hex');
-    if (little) {
-        l = l.reverse();
-    }
+    const hex = bigInt.toString(16).padStart(bytesNumber * 2, '0');
+    let buffer = Buffer.from(hex, 'hex');
 
     if (signed && below) {
-        if (little) {
-            let reminder = false;
-            if (l[0] !== 0) {
-                l[0] -= 1;
-            }
-            for (let i = 0; i < l.length; i++) {
-                if (l[i] === 0) {
-                    reminder = true;
-                    continue;
-                }
-                if (reminder) {
-                    l[i] -= 1;
-                    reminder = false;
-                }
-                l[i] = 255 - l[i];
-            }
-        } else {
-            l[l.length - 1] = 256 - l[l.length - 1];
-            for (let i = 0; i < l.length - 1; i++) {
-                l[i] = 255 - l[i];
-            }
+        buffer[buffer.length - 1] = 256 - buffer[buffer.length - 1];
+        for (let i = 0; i < buffer.length - 1; i++) {
+            buffer[i] = 255 - buffer[i];
         }
     }
-    return l;
+    if (little) {
+        buffer = buffer.reverse();
+    }
+
+    return buffer;
 }
 
 /**
