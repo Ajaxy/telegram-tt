@@ -149,7 +149,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
         </h4>
 
         <ListItem narrow inactive icon={`device-${getSessionIcon(session)} icon-device`}>
-          <div className="multiline-menu-item" dir="auto">
+          <div className="multiline-menu-item full-size" dir="auto">
             <span className="title" dir="auto">{session.deviceModel}</span>
             <span className="subtitle black tight">
               {session.appName} {session.appVersion}, {session.platform} {session.systemVersion}
