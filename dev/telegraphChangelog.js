@@ -4,7 +4,6 @@ const { JSDOM } = require('jsdom');
 const { gitlogPromise } = require('gitlog');
 
 // CONSTANTS
-const SKIP_CHANGELOG_UPDATE = process.env.SKIP_CHANGELOG_UPDATE === 'true';
 const AUTH_TOKEN = process.env.TELEGRAPH_TOKEN;
 const version = require('../package.json').version;
 
@@ -34,7 +33,7 @@ function updateChangelog() {
   });
 }
 
-if (!SKIP_CHANGELOG_UPDATE) updateChangelog();
+updateChangelog();
 
 // UTIL
 
