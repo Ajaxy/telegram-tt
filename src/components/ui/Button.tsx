@@ -51,7 +51,6 @@ export type OwnProps = {
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
-  onMouseUp?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   onMouseEnter?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
   onMouseLeave?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
@@ -68,7 +67,6 @@ const Button: FC<OwnProps> = ({
   onClick,
   onContextMenu,
   onMouseDown,
-  onMouseUp,
   onMouseEnter,
   onMouseLeave,
   onFocus,
@@ -187,7 +185,6 @@ const Button: FC<OwnProps> = ({
       onClick={IS_TOUCH_ENV || noFastClick ? handleClick : undefined}
       onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}
-      onMouseUp={onMouseUp}
       onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}
       onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
       onTransitionEnd={onTransitionEnd}

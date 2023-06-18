@@ -11,13 +11,11 @@ import AnimatedIcon from '../../common/AnimatedIcon';
 type OwnProps = {
   participant: GroupCallParticipant;
   noColor?: boolean;
-  className?: string;
 };
 
 const OutlinedMicrophoneIcon: FC<OwnProps> = ({
   participant,
   noColor,
-  className,
 }) => {
   const { isMuted, isMutedByMe } = participant;
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
@@ -53,37 +51,21 @@ const OutlinedMicrophoneIcon: FC<OwnProps> = ({
     // eslint-disable-next-line
   }, [isMuted, shouldRaiseHand, isRaiseHand]);
 
-  const microphoneColor: string = useMemo(() => {
-    if (noColor) {
-      return '#ffffff';
-    }
-
-    if (isRaiseHand) {
-      return '#4da6e0';
-    }
-
-    if (shouldRaiseHand || isMutedByMe) {
-      return '#ff706f';
-    }
-
-    if (isSpeaking) {
-      return '#57bc6c';
-    }
-
-    return '#aaaaaa';
+  const microphoneColor: string | undefined = useMemo(() => {
+    return noColor ? '#ffffff' : (
+      isRaiseHand ? '#4da6e0'
+        : (shouldRaiseHand || isMutedByMe ? '#ff706f' : (
+          isSpeaking ? '#57bc6c' : '#848d94'
+        ))
+    );
   }, [noColor, isRaiseHand, shouldRaiseHand, isMutedByMe, isSpeaking]);
 
   return (
     <AnimatedIcon
       tgsUrl={LOCAL_TGS_URLS.VoiceOutlined}
-      play={playSegment.toString()}
       playSegment={playSegment}
       size={28}
       color={microphoneColor}
-      className={className}
-      forceOnHeavyAnimation
-      forceInBackground
-      nonInteractive
     />
   );
 };

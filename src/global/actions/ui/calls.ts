@@ -262,13 +262,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
     chatId, id, accessHash, inviteHash, tabId = getCurrentTabId(),
   } = payload;
 
-  if (!ARE_CALLS_SUPPORTED) {
-    actions.showNotification({
-      message: "Sorry, your browser doesn't support group calls",
-      tabId,
-    });
-    return;
-  }
+  if (!ARE_CALLS_SUPPORTED) return;
 
   if (global.phoneCall) {
     actions.toggleGroupCallPanel({ tabId });
