@@ -464,7 +464,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   <i className="icon icon-add-user" />
                 </Button>
               )}
-              {canManage && !isInsideTopic && (
+              {canManage && !isInsideTopic && !isBot && (
                 <Button
                   round
                   color="translucent"
