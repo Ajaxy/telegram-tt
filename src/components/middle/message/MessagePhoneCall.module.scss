@@ -4,7 +4,11 @@
 
 .button {
   margin-inline-end: 0.5rem;
-  color: var(--color-text) !important;
+  color: var(--color-accent) !important;
+
+  :global(.own) & {
+    color: var(--color-accent-own) !important;
+  }
 }
 
 .info {
@@ -26,26 +30,29 @@
 
   &.incoming {
     transform: rotateZ(135deg);
+  }
 
-    &.missed {
-      color: var(--color-error);
-    }
+  :global(.own) & {
+    color: var(--color-accent-own);
+  }
+
+  &.missed, &.canceled {
+    color: var(--color-error);
   }
 }
 
 .meta {
   display: flex;
   align-items: center;
-  position: relative;
-  left: -3px;
+  margin-left: -0.1875rem;
 }
 
 .duration {
   margin-inline-start: 0.25rem;
   font-size: 0.875rem;
-  color: var(--color-text-secondary)
-}
+  color: var(--color-text-secondary);
 
-:global(.own) .duration {
-  color: var(--color-message-meta-own);
+  :global(.own) & {
+    color: var(--color-message-meta-own);
+  }
 }

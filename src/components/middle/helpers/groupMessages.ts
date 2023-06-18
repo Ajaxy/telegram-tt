@@ -72,8 +72,8 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         nextMessage.id === firstUnreadId
         || message.senderId !== nextMessage.senderId
         || message.isOutgoing !== nextMessage.isOutgoing
-        || isActionMessage(message)
-        || isActionMessage(nextMessage)
+        || (isActionMessage(message) && !message.content.action?.phoneCall)
+        || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
         || (
           message.forwardInfo && nextMessage.forwardInfo
           && (
