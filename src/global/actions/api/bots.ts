@@ -12,7 +12,7 @@ import type { InlineBotSettings } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { callApi } from '../../../api/gramjs';
 import {
-  selectChat, selectChatBot, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState,
+  selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectBot,
   selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId, selectUserFullInfo,
 } from '../../selectors';
 import { addChats, addUsers, removeBlockedContact } from '../../reducers';
@@ -196,7 +196,7 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   const { chatId, tabId = getCurrentTabId() } = payload;
   const { currentUserId } = global;
   const chat = selectCurrentChat(global, tabId);
-  const bot = currentUserId && selectChatBot(global, chatId);
+  const bot = currentUserId && selectBot(global, chatId);
   if (!currentUserId || !chat || !bot) {
     return;
   }

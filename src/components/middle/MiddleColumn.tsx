@@ -32,7 +32,7 @@ import { DropAreaState } from './composer/DropArea';
 import {
   selectCanAnimateInterface,
   selectChat,
-  selectChatBot,
+  selectBot,
   selectChatFullInfo,
   selectChatMessage,
   selectCurrentMessageList,
@@ -691,7 +691,7 @@ export default memo(withGlobal<OwnProps>(
     const { chatId, threadId, type: messageListType } = currentMessageList;
     const isPrivate = isUserId(chatId);
     const chat = selectChat(global, chatId);
-    const bot = selectChatBot(global, chatId);
+    const bot = selectBot(global, chatId);
     const pinnedIds = selectPinnedIds(global, chatId, threadId);
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
 

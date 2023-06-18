@@ -13,9 +13,9 @@ import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
 import {
+  selectBot,
   selectCanAnimateInterface,
   selectChat,
-  selectChatBot,
   selectChatFullInfo,
   selectIsChatBotNotStarted,
   selectIsChatWithSelf,
@@ -325,7 +325,7 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const bot = selectChatBot(global, chatId);
+    const bot = selectBot(global, chatId);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;

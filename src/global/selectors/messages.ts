@@ -15,10 +15,14 @@ import {
   GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import {
-  selectChat, selectChatBot, selectChatFullInfo, selectIsChatWithSelf,
+  selectChat, selectChatFullInfo, selectIsChatWithSelf,
 } from './chats';
 import {
-  selectIsCurrentUserPremium, selectIsUserOrChatContact, selectUser, selectUserStatus,
+  selectBot,
+  selectIsCurrentUserPremium,
+  selectIsUserOrChatContact,
+  selectUser,
+  selectUserStatus,
 } from './users';
 import {
   getCanPostInChat,
@@ -532,6 +536,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isBasicGroup = isChatBasicGroup(chat);
   const isSuperGroup = isChatSuperGroup(chat);
   const isChannel = isChatChannel(chat);
+  const isBotChat = Boolean(selectBot(global, chat.id));
   const isLocal = isMessageLocal(message);
   const isServiceNotification = isServiceNotificationMessage(message);
   const isOwn = isOwnMessage(message);
@@ -588,7 +593,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const canReport = !isPrivate && !isOwn;
 
   const canDeleteForAll = canDelete && !chat.isForbidden && (
-    (isPrivate && !isChatWithSelf)
+    (isPrivate && !isChatWithSelf && !isBotChat)
     || (isBasicGroup && (
       isOwn || getHasAdminRight(chat, 'deleteMessages') || chat.isCreator
     ))
@@ -1224,7 +1229,7 @@ export function selectShouldSchedule<T extends GlobalState>(
 
 export function selectCanScheduleUntilOnline<T extends GlobalState>(global: T, id: string) {
   const isChatWithSelf = selectIsChatWithSelf(global, id);
-  const chatBot = id === REPLIES_USER_ID && selectChatBot(global, id);
+  const chatBot = id === REPLIES_USER_ID && selectBot(global, id);
   return Boolean(
     !isChatWithSelf && !chatBot && isUserId(id) && selectUserStatus(global, id)?.wasOnline,
   );

@@ -7,6 +7,7 @@ import type { IAlbum } from '../../types';
 
 import {
   selectAllowedMessageActions,
+  selectBot,
   selectChat,
   selectCurrentMessageList,
   selectUser,
@@ -123,8 +124,9 @@ export default memo(withGlobal<OwnProps>(
     const contactName = chat && isUserId(chat.id)
       ? getUserFirstOrLastName(selectUser(global, getPrivateChatUserId(chat)!))
       : undefined;
+    const isChatWithBot = Boolean(selectBot(global, message.chatId));
 
-    const willDeleteForCurrentUserOnly = chat && isChatBasicGroup(chat) && !canDeleteForAll;
+    const willDeleteForCurrentUserOnly = (chat && isChatBasicGroup(chat) && !canDeleteForAll) || isChatWithBot;
     const willDeleteForAll = chat && isChatSuperGroup(chat);
 
     return {

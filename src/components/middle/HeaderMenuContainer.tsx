@@ -12,7 +12,7 @@ import { REPLIES_USER_ID } from '../../config';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 import {
   selectChat,
-  selectChatBot,
+  selectBot,
   selectChatFullInfo,
   selectCurrentMessageList,
   selectIsPremiumPurchaseBlocked,
@@ -585,7 +585,7 @@ export default memo(withGlobal<OwnProps>(
     const canReportChat = isMainThread && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
     const { chatId: currentChatId, threadId: currentThreadId } = selectCurrentMessageList(global) || {};
 
-    const chatBot = chatId !== REPLIES_USER_ID ? selectChatBot(global, chatId) : undefined;
+    const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const canGiftPremium = Boolean(
