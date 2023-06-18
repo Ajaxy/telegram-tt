@@ -6,7 +6,6 @@ import type { Scheduler } from '../util/schedulers';
 import {
   throttle, debounce, throttleWith,
 } from '../util/schedulers';
-import useEffectOnce from './useEffectOnce';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
 import useLastCallback from './useLastCallback';
 
@@ -171,10 +170,9 @@ export function useIntersectionObserver({
 export function useOnIntersect(
   targetRef: RefObject<HTMLDivElement>, observe?: ObserveFn, callback?: TargetCallback,
 ) {
-  useEffectOnce(() => {
+  useEffect(() => {
     return observe ? observe(targetRef.current!, callback) : undefined;
-    // Arguments should never change
-  });
+  }, [callback, observe, targetRef]);
 }
 
 export function useIsIntersecting(
