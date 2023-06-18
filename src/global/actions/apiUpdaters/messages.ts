@@ -56,7 +56,7 @@ import {
   selectTabState,
 } from '../../selectors';
 import {
-  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions,
+  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions, isActionMessage,
 } from '../../helpers';
 import { onTickEnd } from '../../../util/schedulers';
 import { updateUnreadReactions } from '../../reducers/reactions';
@@ -810,7 +810,7 @@ function updateListedAndViewportIds<T extends GlobalState>(
       lastMessageId: message.id,
     });
 
-    if (!isMessageLocal(message)) {
+    if (!isMessageLocal(message) && !isActionMessage(message)) {
       global = updateThreadInfo(global, chatId, threadInfo.threadId, {
         messagesCount: (threadInfo.messagesCount || 0) + 1,
       });

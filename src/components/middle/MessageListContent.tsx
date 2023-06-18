@@ -223,7 +223,7 @@ const MessageListContent: FC<OwnProps> = ({
             threadId={threadId}
             messageListType={type}
             noComments={noComments}
-            noReplies={!noComments || threadId !== MAIN_THREAD_ID}
+            noReplies={!noComments || threadId !== MAIN_THREAD_ID || type === 'scheduled'}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isJustAdded={position.isLastInList && isNewMessage}
             isFirstInGroup={position.isFirstInGroup}
