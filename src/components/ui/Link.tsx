@@ -26,7 +26,7 @@ const Link: FC<OwnProps> = ({
   return (
     <a
       href="#"
-      className={buildClassName(styles.link, className, isPrimary && styles.isPrimary)}
+      className={buildClassName('Link', styles.link, className, isPrimary && styles.isPrimary)}
       dir={isRtl ? 'rtl' : 'auto'}
       onClick={onClick ? handleClick : undefined}
     >
