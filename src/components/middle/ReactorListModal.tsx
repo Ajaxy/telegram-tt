@@ -203,7 +203,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                       // eslint-disable-next-line react/jsx-no-bind
                       onClick={() => handleClick(userId)}
                     >
-                      <Avatar user={user} size="small" />
+                      <Avatar user={user} size="medium" />
                       <div className="info">
                         <FullNameTitle peer={user} withEmojiStatus />
                         <span className="status" dir="auto">
