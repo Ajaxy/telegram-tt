@@ -45,7 +45,8 @@ import {
   selectReplyingToId,
   selectTabState,
   selectTheme,
-  selectThreadInfo, selectThreadTopMessageId,
+  selectThreadInfo,
+  selectThreadTopMessageId,
 } from '../../global/selectors';
 import {
   getCanPostInChat,
