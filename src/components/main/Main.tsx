@@ -454,12 +454,12 @@ const Main: FC<OwnProps & StateProps> = ({
   const isFullscreen = useFullscreenStatus();
 
   // Handle opening right column
-  useSyncEffect(([prevIsRightColumnOpen]) => {
+  useSyncEffect(([prevIsMiddleColumnOpen, prevIsRightColumnOpen]) => {
     if (prevIsRightColumnOpen === undefined || isRightColumnOpen === prevIsRightColumnOpen) {
       return;
     }
 
-    if (noRightColumnAnimation) {
+    if (!prevIsMiddleColumnOpen || noRightColumnAnimation) {
       setIsNarrowMessageList(isRightColumnOpen);
       return;
     }
@@ -474,7 +474,7 @@ const Main: FC<OwnProps & StateProps> = ({
       forceUpdate();
       setIsNarrowMessageList(isRightColumnOpen);
     });
-  }, [isRightColumnOpen, noRightColumnAnimation, forceUpdate]);
+  }, [isMiddleColumnOpen, isRightColumnOpen, noRightColumnAnimation, forceUpdate]);
 
   const className = buildClassName(
     leftColumnTransition.hasShownClass && 'left-column-shown',
