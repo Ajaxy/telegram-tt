@@ -71,6 +71,7 @@
   margin-left: 0.25rem;
   margin-right: 0.25rem;
   display: inline;
+  position: relative;
 }
 
 .main-column {
@@ -108,9 +109,13 @@
   text-overflow: ellipsis;
 }
 
+.otherColumnIcon {
+  position: absolute;
+}
+
 .other-column-title {
   font-size: 0.9375rem;
-  margin-left: 0.25rem;
+  margin-left: 1.5rem;
 }
 
 .other-columns {

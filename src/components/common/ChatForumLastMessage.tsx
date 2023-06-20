@@ -135,6 +135,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
               >
                 <TopicIcon
                   topic={topic}
+                  className={styles.otherColumnIcon}
                   observeIntersection={observeIntersection}
                 />
                 <span className={styles.otherColumnTitle}>{renderText(topic.title)}</span>
