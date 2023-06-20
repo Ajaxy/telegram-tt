@@ -28,7 +28,7 @@
     "electron:build": "cross-env IS_ELECTRON=true npm run build:$ENV && electron-builder install-app-deps && electron-rebuild && ENV=$ENV npm run electron:webpack",
     "electron:package:staging": "ENV=staging npm run electron:build && npx rimraf dist-electron && electron-builder build --win --mac --linux --config src/electron/config.yml",
     "electron:package:production": "ENV=production npm run electron:build && npx rimraf dist-electron && electron-builder build --win --mac --linux --config src/electron/config.yml",
-    "electron:publish": "npm run electron:package:production -- -p always",
+    "deploy:electron": "source .env && npm run electron:package:production -- -p always && git checkout . && git clean -df",
     "postinstall": "(cd dev/eslint-multitab && npm i)"
   },
   "engines": {
