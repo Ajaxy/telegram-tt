@@ -1,19 +1,17 @@
 import type { GroupCallParticipant } from '../../../lib/secret-sauce';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
-
-import type { IAnchorPosition } from '../../../types';
 
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import buildClassName from '../../../util/buildClassName';
-import buildStyle from '../../../util/buildStyle';
 import useRunThrottled from '../../../hooks/useRunThrottled';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
 
 import Menu from '../../ui/Menu';
@@ -28,9 +26,15 @@ const SPEAKER_ICON_ENABLED_SEGMENT: [number, number] = [17, 34];
 
 type OwnProps = {
   participant?: GroupCallParticipant;
-  closeDropdown: VoidFunction;
+  onCloseAnimationEnd: VoidFunction;
+  onClose: VoidFunction;
   isDropdownOpen: boolean;
-  anchor?: IAnchorPosition;
+  positionX?: 'left' | 'right';
+  positionY?: 'top' | 'bottom';
+  transformOriginX?: number;
+  transformOriginY?: number;
+  style?: string;
+  menuRef?: React.RefObject<HTMLDivElement>;
 };
 
 type StateProps = {
@@ -48,10 +52,16 @@ const SPEAKER_ICON_SIZE = 24;
 
 const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
   participant,
-  closeDropdown,
+  onCloseAnimationEnd,
+  onClose,
   isDropdownOpen,
-  anchor,
   isAdmin,
+  positionY,
+  menuRef,
+  positionX,
+  style,
+  transformOriginY,
+  transformOriginX,
 }) => {
   const {
     toggleGroupCallMute,
@@ -75,6 +85,22 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     isMutedByMe ? VOLUME_ZERO : ((participant?.volume || GROUP_CALL_DEFAULT_VOLUME) / GROUP_CALL_VOLUME_MULTIPLIER),
   );
 
+  const [shouldPlay, setShouldPlay] = useState(false);
+
+  const isLocalVolumeZero = localVolume === VOLUME_ZERO;
+  const speakerIconPlaySegment = isLocalVolumeZero ? SPEAKER_ICON_DISABLED_SEGMENT : SPEAKER_ICON_ENABLED_SEGMENT;
+
+  useEffect(() => {
+    if (isDropdownOpen) return;
+    setShouldPlay(false);
+  }, [isDropdownOpen]);
+
+  const handleSetLocalVolume = useLastCallback((volume: number) => {
+    setLocalVolume(volume);
+    const isNewLocalVolumeZero = volume === VOLUME_ZERO;
+    setShouldPlay(isNewLocalVolumeZero !== isLocalVolumeZero);
+  });
+
   useEffect(() => {
     setLocalVolume(isMutedByMe
       ? VOLUME_ZERO
@@ -85,49 +111,49 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
 
   const runThrottled = useRunThrottled(VOLUME_CHANGE_THROTTLE);
 
-  const handleRemove = useCallback((e: React.SyntheticEvent<any>) => {
+  const handleRemove = useLastCallback((e: React.SyntheticEvent<any>) => {
     e.stopPropagation();
     openDeleteUserModal();
-    closeDropdown();
-  }, [openDeleteUserModal, closeDropdown]);
+    onClose();
+  });
 
-  const handleCancelRequestToSpeak = useCallback((e: React.SyntheticEvent<any>) => {
+  const handleCancelRequestToSpeak = useLastCallback((e: React.SyntheticEvent<any>) => {
     e.stopPropagation();
     requestToSpeak({
       value: false,
     });
-    closeDropdown();
-  }, [requestToSpeak, closeDropdown]);
+    onClose();
+  });
 
-  const handleMute = useCallback((e: React.SyntheticEvent<any>) => {
+  const handleMute = useLastCallback((e: React.SyntheticEvent<any>) => {
     e.stopPropagation();
-    closeDropdown();
+    onClose();
 
     if (!isAdmin) {
-      setLocalVolume(isMutedByMe ? GROUP_CALL_DEFAULT_VOLUME / GROUP_CALL_VOLUME_MULTIPLIER : VOLUME_ZERO);
+      handleSetLocalVolume(isMutedByMe ? GROUP_CALL_DEFAULT_VOLUME / GROUP_CALL_VOLUME_MULTIPLIER : VOLUME_ZERO);
+    } else if (shouldRaiseHand) {
+      handleSetLocalVolume((participant?.volume ?? GROUP_CALL_DEFAULT_VOLUME) / GROUP_CALL_VOLUME_MULTIPLIER);
     }
 
     toggleGroupCallMute({
       participantId: id!,
       value: isAdmin ? !shouldRaiseHand : !isMutedByMe,
     });
-  }, [closeDropdown, toggleGroupCallMute, id, isAdmin, shouldRaiseHand, isMutedByMe]);
+  });
 
-  const handleOpenProfile = useCallback((e: React.SyntheticEvent<any>) => {
+  const handleOpenProfile = useLastCallback((e: React.SyntheticEvent<any>) => {
     e.stopPropagation();
     toggleGroupCallPanel();
     openChat({
       id,
     });
-    closeDropdown();
-  }, [toggleGroupCallPanel, closeDropdown, openChat, id]);
-
-  const isLocalVolumeZero = localVolume === VOLUME_ZERO;
-  const speakerIconPlaySegment = isLocalVolumeZero ? SPEAKER_ICON_DISABLED_SEGMENT : SPEAKER_ICON_ENABLED_SEGMENT;
+    onClose();
+  });
 
   const handleChangeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
-    setLocalVolume(value);
+    handleSetLocalVolume(value);
+
     runThrottled(() => {
       if (value === VOLUME_ZERO) {
         toggleGroupCallMute({
@@ -147,11 +173,16 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
     <div>
       <Menu
         isOpen={isDropdownOpen}
-        positionX="right"
-        autoClose
-        style={buildStyle(anchor && `right: 1rem; top: ${anchor.y}px`)}
-        onClose={closeDropdown}
-        className="participant-menu"
+        positionX={positionX}
+        positionY={positionY}
+        transformOriginX={transformOriginX}
+        transformOriginY={transformOriginY}
+        style={style}
+        ref={menuRef}
+        withPortal
+        onClose={onClose}
+        onCloseAnimationEnd={onCloseAnimationEnd}
+        className="participant-menu with-menu-transitions"
       >
         {!isSelf && !shouldRaiseHand && (
           <div className="group">
@@ -173,6 +204,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
               <div className="info">
                 <AnimatedIcon
                   tgsUrl={LOCAL_TGS_URLS.Speaker}
+                  play={shouldPlay ? speakerIconPlaySegment.toString() : false}
                   playSegment={speakerIconPlaySegment}
                   size={SPEAKER_ICON_SIZE}
                 />

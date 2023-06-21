@@ -15,6 +15,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   ref?: RefObject<HTMLDivElement>;
+  style?: string;
   className?: string;
   items?: any[];
   itemSelector?: string;
@@ -41,6 +42,7 @@ const DEFAULT_SENSITIVE_AREA = 800;
 
 const InfiniteScroll: FC<OwnProps> = ({
   ref,
+  style,
   className,
   items,
   itemSelector = DEFAULT_LIST_SELECTOR,
@@ -238,6 +240,7 @@ const InfiniteScroll: FC<OwnProps> = ({
       onKeyDown={onKeyDown}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
+      style={style}
     >
       {beforeChildren}
       {withAbsolutePositioning && items?.length ? (

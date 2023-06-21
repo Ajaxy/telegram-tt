@@ -62,6 +62,7 @@ interface OwnProps {
   href?: string;
   onMouseDown?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onClick?: (e: React.MouseEvent<HTMLElement>, arg?: any) => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLElement>) => void;
   clickArg?: any;
   onSecondaryIconClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onDragEnter?: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -92,6 +93,7 @@ const ListItem: FC<OwnProps> = ({
   href,
   onMouseDown,
   onClick,
+  onContextMenu,
   clickArg,
   onSecondaryIconClick,
   onDragEnter,
@@ -225,7 +227,7 @@ const ListItem: FC<OwnProps> = ({
         tabIndex={!isStatic ? 0 : undefined}
         onClick={(!inactive && IS_TOUCH_ENV) ? handleClick : handleClickEvent}
         onMouseDown={handleMouseDown}
-        onContextMenu={(!inactive && contextActions) ? handleContextMenu : undefined}
+        onContextMenu={onContextMenu || ((!inactive && contextActions) ? handleContextMenu : undefined)}
       >
         {leftElement}
         {icon && (
