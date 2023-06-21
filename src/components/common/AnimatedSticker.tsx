@@ -39,6 +39,7 @@ export type OwnProps = {
   color?: string;
   isLowPriority?: boolean;
   forceOnHeavyAnimation?: boolean;
+  forceInBackground?: boolean;
   sharedCanvas?: HTMLCanvasElement;
   sharedCanvasCoords?: { x: number; y: number };
   onClick?: NoneToVoidFunction;
@@ -65,6 +66,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   isLowPriority,
   color,
   forceOnHeavyAnimation,
+  forceInBackground,
   sharedCanvas,
   sharedCanvasCoords,
   onClick,
@@ -87,7 +89,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   const shouldUseColorFilter = !sharedCanvas && color;
   const colorFilter = useColorFilter(shouldUseColorFilter ? color : undefined);
 
-  const playKey = play || playSegment;
+  const playKey = play || (play === false ? false : playSegment);
   const playRef = useStateRef(play);
   const playSegmentRef = useStateRef(playSegment);
 
@@ -177,13 +179,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     if (
       !animation
       || !(playRef.current || playSegmentRef.current)
-      || isFrozen(forceOnHeavyAnimation)
+      || isFrozen(forceOnHeavyAnimation, forceInBackground)
     ) {
       return;
     }
 
     if (playSegmentRef.current) {
-      animation.playSegment(playSegmentRef.current, viewId);
+      animation.playSegment(playSegmentRef.current, shouldRestart, viewId);
     } else {
       animation.play(shouldRestart, viewId);
     }
@@ -217,13 +219,13 @@ const AnimatedSticker: FC<OwnProps> = ({
     }
 
     if (playKey) {
-      if (!isFrozen(forceOnHeavyAnimation)) {
+      if (!isFrozen(forceOnHeavyAnimation, forceInBackground)) {
         playAnimation(noLoop);
       }
     } else {
       pauseAnimation();
     }
-  }, [animation, playKey, noLoop, playAnimation, pauseAnimation, forceOnHeavyAnimation]);
+  }, [animation, playKey, noLoop, playAnimation, pauseAnimation, forceOnHeavyAnimation, forceInBackground]);
 
   useEffect(() => {
     if (animation) {
@@ -241,7 +243,7 @@ const AnimatedSticker: FC<OwnProps> = ({
   // Pausing frame may not happen in background,
   // so we need to make sure it happens right after focusing,
   // then we can play again.
-  useBackgroundMode(pauseAnimation, playAnimationOnRaf, !playKey);
+  useBackgroundMode(pauseAnimation, playAnimationOnRaf, !playKey || forceInBackground);
 
   if (sharedCanvas) {
     return undefined;
@@ -264,6 +266,8 @@ const AnimatedSticker: FC<OwnProps> = ({
 
 export default memo(AnimatedSticker);
 
-function isFrozen(forceOnHeavyAnimation = false) {
-  return (!forceOnHeavyAnimation && isHeavyAnimating()) || isPriorityPlaybackActive() || isBackgroundModeActive();
+function isFrozen(forceOnHeavyAnimation = false, forceInBackground = false) {
+  return (!forceOnHeavyAnimation && isHeavyAnimating())
+    || isPriorityPlaybackActive()
+    || (!forceInBackground && isBackgroundModeActive());
 }

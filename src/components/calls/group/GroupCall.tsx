@@ -1,51 +1,43 @@
-import type {
-  GroupCallConnectionState, GroupCallParticipant as TypeGroupCallParticipant,
-} from '../../../lib/secret-sauce';
-import {
-  IS_SCREENSHARE_SUPPORTED, switchCameraInput, toggleSpeaker,
-} from '../../../lib/secret-sauce';
-import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import '../../../global/actions/calls';
 
-import type { IAnchorPosition } from '../../../types';
+import type {
+  GroupCallConnectionState, GroupCallParticipant as TypeGroupCallParticipant,
+} from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
+import type { VideoParticipant } from './hooks/useGroupCallVideoLayout';
 
-import {
-  IS_ANDROID,
-  IS_IOS,
-  IS_REQUEST_FULLSCREEN_SUPPORTED,
-} from '../../../util/windowEnvironment';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import { IS_SCREENSHARE_SUPPORTED } from '../../../lib/secret-sauce';
 import buildClassName from '../../../util/buildClassName';
 import {
+  selectCanInviteToActiveGroupCall,
   selectGroupCall,
   selectGroupCallParticipant,
   selectIsAdminInActiveGroupCall,
 } from '../../../global/selectors/calls';
-import { selectTabState } from '../../../global/selectors';
+import { selectChat, selectTabState } from '../../../global/selectors';
+import { compact } from '../../../util/iteratees';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
+import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Loading from '../../ui/Loading';
 import Button from '../../ui/Button';
-import DropdownMenu from '../../ui/DropdownMenu';
-import MenuItem from '../../ui/MenuItem';
 import Modal from '../../ui/Modal';
 import MicrophoneButton from './MicrophoneButton';
-import AnimatedIcon from '../../common/AnimatedIcon';
 import Checkbox from '../../ui/Checkbox';
-import GroupCallParticipantMenu from './GroupCallParticipantMenu';
 import GroupCallParticipantList from './GroupCallParticipantList';
-import GroupCallParticipantStreams from './GroupCallParticipantStreams';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import GroupCallParticipantVideo from './GroupCallParticipantVideo';
 
-import './GroupCall.scss';
+import styles from './GroupCall.module.scss';
 
-const CAMERA_FLIP_PLAY_SEGMENT: [number, number] = [0, 10];
-const PARTICIPANT_HEIGHT = 60;
+const INTERSECTION_THROTTLE = 200;
 
 export type OwnProps = {
   groupCallId: string;
@@ -57,21 +49,21 @@ type StateProps = {
   title?: string;
   meParticipant?: TypeGroupCallParticipant;
   participantsCount?: number;
-  isSpeakerEnabled?: boolean;
   isAdmin: boolean;
   participants: Record<string, TypeGroupCallParticipant>;
+  canInvite: boolean;
 };
 
 const GroupCall: FC<OwnProps & StateProps> = ({
   groupCallId,
   isCallPanelVisible,
   connectionState,
-  isSpeakerEnabled,
+  participantsCount,
   title,
   meParticipant,
   isAdmin,
   participants,
-
+  canInvite,
 }) => {
   const {
     toggleGroupCallVideo,
@@ -80,24 +72,60 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     toggleGroupCallPanel,
     connectToActiveGroupCall,
     playGroupCallSound,
+    createGroupCallInviteLink,
   } = getActions();
 
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isMobile, isLandscape } = useAppLayout();
+
+  // eslint-disable-next-line no-null/no-null
+  const primaryVideoContainerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const secondaryVideoContainerRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const panelScrollTriggerRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const [isLeaving, setIsLeaving] = useState(false);
+  const isOpen = !isCallPanelVisible && !isLeaving;
+
+  const { observe } = useIntersectionObserver({
+    rootRef: panelRef,
+    throttleMs: INTERSECTION_THROTTLE,
+    isDisabled: !isOpen,
+  });
+
+  const hasScrolled = !useIsIntersecting(panelScrollTriggerRef, isOpen ? observe : undefined);
+
+  const { isMobile, isLandscape } = useAppLayout();
+
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
   const [isSidebarOpen, openSidebar, closeSidebar] = useFlag(true);
-  const hasVideoParticipants = Object.values(participants).some(({ video, presentation }) => video || presentation);
-  const isLandscapeLayout = isFullscreen && (!isMobile || isLandscape) && hasVideoParticipants;
+  const isLandscapeLayout = Boolean(isFullscreen && isLandscape);
 
-  const [participantMenu, setParticipantMenu] = useState<{
-    participant: TypeGroupCallParticipant;
-    anchor: IAnchorPosition;
-  } | undefined>();
-  const [isParticipantMenuOpen, openParticipantMenu, closeParticipantMenu] = useFlag();
+  const firstPresentation = useMemo(() => {
+    return Object.values(participants).find(({ presentation }) => presentation);
+  }, [participants]);
+  const videoParticipants = useMemo(() => Object.values(participants)
+    .filter(({ video, presentation }) => video || presentation)
+    .flatMap(({ id, video, presentation }) => compact([
+      video ? {
+        id,
+        type: 'video' as const,
+      } : undefined,
+      presentation ? {
+        id,
+        type: 'screen' as const,
+      } : undefined,
+    ])),
+  [participants]);
+  const hasVideoParticipants = videoParticipants.length > 0;
+
+  const groupCallTitle = title || lang('VoipGroupVoiceChat');
+  const membersString = lang('Participants', participantsCount, 'i');
 
   const [isConfirmLeaveModalOpen, openConfirmLeaveModal, closeConfirmLeaveModal] = useFlag();
   const [isEndGroupCallModal, setIsEndGroupCallModal] = useState(false);
@@ -105,20 +133,10 @@ const GroupCall: FC<OwnProps & StateProps> = ({
 
   const hasVideo = meParticipant?.hasVideoStream;
   const hasPresentation = meParticipant?.hasPresentationStream;
+  const hasAudioStream = meParticipant?.hasAudioStream;
   const isConnecting = connectionState !== 'connected';
   const canSelfUnmute = meParticipant?.canSelfUnmute;
-  const shouldRaiseHand = !canSelfUnmute && meParticipant?.isMuted;
-  const handleOpenParticipantMenu = useCallback((anchor: HTMLDivElement, participant: TypeGroupCallParticipant) => {
-    const rect = anchor.getBoundingClientRect();
-    const container = containerRef.current!;
-
-    setParticipantMenu({
-      anchor: { x: rect.left, y: rect.top - container.offsetTop + PARTICIPANT_HEIGHT },
-      participant,
-    });
-
-    openParticipantMenu();
-  }, [openParticipantMenu]);
+  const canRequestToSpeak = !canSelfUnmute && !hasAudioStream;
 
   useEffect(() => {
     if (connectionState === 'connected') {
@@ -126,263 +144,360 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     } else if (connectionState === 'reconnecting') {
       playGroupCallSound({ sound: 'connecting' });
     }
-  }, [connectionState, playGroupCallSound]);
+  }, [connectionState]);
 
-  const handleCloseConfirmLeaveModal = useCallback(() => {
+  const handleCloseConfirmLeaveModal = useLastCallback(() => {
     closeConfirmLeaveModal();
     setIsEndGroupCallModal(false);
-  }, [closeConfirmLeaveModal]);
+  });
 
-  const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
-      <Button
-        round
-        size="smaller"
-        color="translucent"
-        className={isOpen ? 'active' : undefined}
-        onClick={onTrigger}
-        ariaLabel={lang('AccDescrMoreOptions')}
-      >
-        <i className="icon icon-more" />
-      </Button>
-    );
-  }, [lang]);
-
-  const handleToggleFullscreen = useCallback(() => {
+  const handleToggleFullscreen = useLastCallback(() => {
     if (!containerRef.current) return;
 
-    if (isFullscreen) {
-      document.exitFullscreen().then(closeFullscreen);
-    } else {
-      containerRef.current.requestFullscreen().then(openFullscreen);
-    }
-  }, [closeFullscreen, isFullscreen, openFullscreen]);
-
-  const handleToggleSidebar = useCallback(() => {
-    if (isSidebarOpen) {
-      closeSidebar();
-    } else {
-      openSidebar();
-    }
-  }, [closeSidebar, isSidebarOpen, openSidebar]);
-
-  const handleStreamsDoubleClick = useCallback(() => {
-    if (!IS_REQUEST_FULLSCREEN_SUPPORTED) return;
-
-    if (!isFullscreen) {
-      closeSidebar();
-      handleToggleFullscreen();
-    } else {
-      handleToggleFullscreen();
-    }
-  }, [closeSidebar, handleToggleFullscreen, isFullscreen]);
-
-  const toggleFullscreen = useCallback(() => {
     if (isFullscreen) {
       closeFullscreen();
     } else {
       openFullscreen();
     }
-  }, [closeFullscreen, isFullscreen, openFullscreen]);
+  });
 
-  const handleClose = useCallback(() => {
-    toggleGroupCallPanel();
-    if (isFullscreen) {
-      closeFullscreen();
-    }
-  }, [closeFullscreen, isFullscreen, toggleGroupCallPanel]);
-
-  useEffect(() => {
-    if (!IS_REQUEST_FULLSCREEN_SUPPORTED) return undefined;
-    const container = containerRef.current;
-    if (!container) return undefined;
-
-    container.addEventListener('fullscreenchange', toggleFullscreen);
-
-    return () => {
-      container.removeEventListener('fullscreenchange', toggleFullscreen);
-    };
-  }, [toggleFullscreen]);
-
-  const handleClickVideoOrSpeaker = () => {
-    if (shouldRaiseHand) {
-      toggleSpeaker();
+  const handleToggleSidebar = useLastCallback(() => {
+    if (isSidebarOpen) {
+      closeSidebar();
     } else {
-      toggleGroupCallVideo();
+      openSidebar();
     }
-  };
+  });
+
+  const handleInviteMember = useLastCallback(() => {
+    createGroupCallInviteLink();
+  });
+
+  const handleClickVideo = useLastCallback(() => {
+    toggleGroupCallVideo();
+  });
 
   useEffect(() => {
     connectToActiveGroupCall();
   }, [connectToActiveGroupCall, groupCallId]);
 
-  const endGroupCall = useCallback(() => {
-    setIsEndGroupCallModal(true);
-    setShouldEndGroupCall(true);
-    openConfirmLeaveModal();
-    if (isFullscreen) {
-      handleToggleFullscreen();
-    }
-  }, [handleToggleFullscreen, isFullscreen, openConfirmLeaveModal]);
-
-  const handleLeaveGroupCall = useCallback(() => {
+  const handleLeaveGroupCall = useLastCallback(() => {
     if (isAdmin && !isConfirmLeaveModalOpen) {
       openConfirmLeaveModal();
-      if (isFullscreen) {
-        handleToggleFullscreen();
-      }
       return;
     }
     playGroupCallSound({ sound: 'leave' });
     setIsLeaving(true);
     closeConfirmLeaveModal();
-  }, [
-    closeConfirmLeaveModal, handleToggleFullscreen, isAdmin, isConfirmLeaveModalOpen, isFullscreen,
-    openConfirmLeaveModal, playGroupCallSound,
-  ]);
+  });
 
-  const handleCloseAnimationEnd = useCallback(() => {
-    if (isLeaving) {
-      leaveGroupCall({
-        shouldDiscard: shouldEndGroupCall,
-      });
-    }
-  }, [isLeaving, leaveGroupCall, shouldEndGroupCall]);
+  const handleCloseAnimationEnd = useLastCallback(() => {
+    if (!isLeaving) return;
 
-  const handleToggleGroupCallPresentation = useCallback(() => {
+    leaveGroupCall({
+      shouldDiscard: shouldEndGroupCall,
+    });
+  });
+
+  const handleToggleGroupCallPresentation = useLastCallback(() => {
     toggleGroupCallPresentation();
-  }, [toggleGroupCallPresentation]);
+  });
+
+  const canPinVideo = videoParticipants.length > 1 && isLandscapeLayout;
+  const isLandscapeWithVideos = isLandscapeLayout && hasVideoParticipants;
+  const [pinnedVideo, setPinnedVideo] = useState<VideoParticipant | undefined>(undefined);
+  const {
+    videoLayout,
+    panelOffset,
+  } = useGroupCallVideoLayout({
+    primaryContainerRef: primaryVideoContainerRef,
+    secondaryContainerRef: secondaryVideoContainerRef,
+    videoParticipants,
+    isLandscapeLayout,
+    pinnedVideo,
+  });
+
+  const handleOpenFirstPresentation = useLastCallback(() => {
+    if (!firstPresentation) return;
+
+    setPinnedVideo({
+      id: firstPresentation.id,
+      type: 'screen',
+    });
+  });
+
+  useEffect(handleOpenFirstPresentation, [handleOpenFirstPresentation, Boolean(firstPresentation)]);
+
+  useEffect(() => {
+    if (!pinnedVideo) return;
+    if (!videoParticipants.some((l) => l.type === pinnedVideo.type && l.id === pinnedVideo.id)) {
+      setPinnedVideo(undefined);
+    }
+  }, [pinnedVideo, videoLayout, videoParticipants]);
 
   return (
     <Modal
-      isOpen={!isCallPanelVisible && !isLeaving}
+      isOpen={isOpen}
       onClose={toggleGroupCallPanel}
       className={buildClassName(
-        'GroupCall',
-        (isMobile && !isLandscape) && 'single-column',
-        isLandscapeLayout && 'landscape',
-        !isSidebarOpen && 'no-sidebar',
+        styles.root,
+        isFullscreen && styles.fullscreen,
+        isLandscapeLayout && styles.landscape,
+        !hasVideoParticipants && styles.noVideoParticipants,
+        !isLandscapeLayout && styles.portrait,
+        !isSidebarOpen && isLandscapeWithVideos && styles.noSidebar,
       )}
       dialogRef={containerRef}
       onCloseAnimationEnd={handleCloseAnimationEnd}
     >
-      <div className="header">
-        <h3>{title || lang('VoipGroupVoiceChat')}</h3>
-        {IS_REQUEST_FULLSCREEN_SUPPORTED && (
-          <Button
-            round
-            size="smaller"
-            color="translucent"
-            onClick={handleToggleFullscreen}
-            ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
-          >
-            <i className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')} />
-          </Button>
-        )}
-        {isLandscapeLayout && (
-          <Button
-            round
-            size="smaller"
-            color="translucent"
-            onClick={handleToggleSidebar}
-          >
-            <i className="icon icon-sidebar" />
-          </Button>
-        )}
-        {((IS_SCREENSHARE_SUPPORTED && !shouldRaiseHand) || isAdmin) && (
-          <DropdownMenu
-            positionX="right"
-            trigger={MainButton}
-          >
-            {IS_SCREENSHARE_SUPPORTED && !shouldRaiseHand && (
-              <MenuItem
-                icon="share-screen-outlined"
-                onClick={handleToggleGroupCallPresentation}
+      {isLandscapeWithVideos && (
+        <div className={styles.videos}>
+          <div className={styles.videosHeader}>
+            <Button
+              round
+              size="smaller"
+              color="translucent"
+              onClick={handleToggleFullscreen}
+              className={buildClassName(styles.headerButton, styles.firstButton)}
+              ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
+            >
+              <i
+                className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')}
+                aria-hidden
+              />
+            </Button>
+
+            <h3 className={buildClassName(styles.title, styles.bigger)}>
+              {title || lang('VoipGroupVoiceChat')}
+            </h3>
+
+            {isLandscapeWithVideos && !isSidebarOpen && (
+              <Button
+                round
+                size="smaller"
+                color="translucent"
+                className={buildClassName(styles.headerButton, styles.videosHeaderLastButton)}
+                onClick={handleToggleSidebar}
+                ariaLabel={lang('AccDescrExpandPanel')}
               >
-                {lang(hasPresentation ? 'VoipChatStopScreenCapture' : 'VoipChatStartScreenCapture')}
-              </MenuItem>
+                <i className="icon icon-sidebar" aria-hidden />
+              </Button>
             )}
-            {isAdmin && (
-              <MenuItem
-                icon="phone-discard-outline"
-                onClick={endGroupCall}
-                destructive
+          </div>
+
+          <div
+            className={styles.videosContent}
+            ref={primaryVideoContainerRef}
+          />
+        </div>
+      )}
+
+      <div className={styles.panelWrapper} ref={panelRef}>
+        <div className={buildClassName(styles.panel, 'custom-scroll')}>
+          <div className={styles.panelScrollTrigger} ref={panelScrollTriggerRef} />
+
+          <div className={buildClassName(styles.panelHeader, hasScrolled && styles.scrolled)}>
+            {!isLandscapeWithVideos && (
+              <Button
+                round
+                size="smaller"
+                color="translucent"
+                ripple={!isMobile}
+                className={buildClassName(
+                  styles.firstButton,
+                  styles.headerButton,
+                )}
+                onClick={handleToggleFullscreen}
+                ariaLabel={lang('AccSwitchToFullscreen')}
               >
-                {lang('VoipGroupLeaveAlertEndChat')}
-              </MenuItem>
+                <i className="icon icon-fullscreen" aria-hidden />
+              </Button>
             )}
-          </DropdownMenu>
-        )}
+
+            {isLandscapeWithVideos && (
+              <Button
+                round
+                size="smaller"
+                ripple={!isMobile}
+                className={buildClassName(
+                  styles.firstButton,
+                  styles.headerButton,
+                )}
+                color="translucent"
+                onClick={handleToggleSidebar}
+                ariaLabel={lang('AccDescrCollapsePanel')}
+              >
+                <i className="icon icon-sidebar" aria-hidden />
+              </Button>
+            )}
+
+            <div className={styles.panelHeaderText}>
+              <h3 className={buildClassName(styles.title, isLandscapeWithVideos && styles.bigger)}>
+                {isLandscapeWithVideos ? membersString : groupCallTitle}
+              </h3>
+              {!isLandscapeWithVideos && (
+                <span className={styles.subtitle}>
+                  {membersString}
+                </span>
+              )}
+            </div>
+
+            {!isLandscapeWithVideos && canInvite && (
+              <Button
+                round
+                size="smaller"
+                ripple={!isMobile}
+                className={buildClassName(
+                  styles.lastButton,
+                  styles.headerButton,
+                )}
+                color="translucent"
+                onClick={handleInviteMember}
+                ariaLabel={lang('VoipGroupInviteMember')}
+              >
+                <i className="icon icon-add-user" aria-hidden />
+              </Button>
+            )}
+          </div>
+
+          <div className={styles.participants}>
+            <div
+              className={styles.participantVideos}
+              ref={secondaryVideoContainerRef}
+              style={`height: ${panelOffset}px;`}
+            >
+              {videoLayout.map((layout) => {
+                const participant = participants[layout.participantId];
+                if (!layout.isRemounted || !participant) {
+                  return (
+                    <div
+                      teactOrderKey={layout.orderKey}
+                      key={`${layout.participantId}_${layout.type}`}
+                    />
+                  );
+                }
+
+                return (
+                  <GroupCallParticipantVideo
+                    teactOrderKey={layout.orderKey}
+                    key={`${layout.participantId}_${layout.type}`}
+                    layout={layout}
+                    canPin={canPinVideo}
+                    setPinned={setPinnedVideo}
+                    pinnedVideo={pinnedVideo}
+                    participant={participant}
+                  />
+                );
+              })}
+            </div>
+            <GroupCallParticipantList
+              panelOffset={panelOffset}
+              isLandscape={isLandscapeWithVideos}
+            />
+          </div>
+        </div>
+
+        <FloatingActionButton
+          key="add-participant"
+          isShown={isLandscapeWithVideos && canInvite}
+          onClick={handleInviteMember}
+          className={styles.addParticipantButton}
+          ariaLabel={lang('VoipGroupInviteMember')}
+        >
+          <i className="icon icon-add-user-filled" aria-hidden />
+        </FloatingActionButton>
+      </div>
+
+      {videoLayout.map((layout) => {
+        const participant = participants[layout.participantId];
+        if (layout.isRemounted || !participant) {
+          return (
+            <div
+              teactOrderKey={layout.orderKey}
+              key={`${layout.participantId}_${layout.type}`}
+            />
+          );
+        }
+        return (
+          <GroupCallParticipantVideo
+            teactOrderKey={layout.orderKey}
+            key={`${layout.participantId}_${layout.type}`}
+            layout={layout}
+            canPin={canPinVideo}
+            setPinned={setPinnedVideo}
+            pinnedVideo={pinnedVideo}
+            participant={participant}
+            className={styles.video}
+          />
+        );
+      })}
+
+      <div className={styles.actions}>
         <Button
           round
-          size="smaller"
-          color="translucent"
-          onClick={handleClose}
+          size="default"
+          ripple
+          className={buildClassName(
+            styles.actionButton,
+            !hasAudioStream && styles.muted,
+            canRequestToSpeak && styles.canRequestToSpeak,
+          )}
+          onClick={handleClickVideo}
+          ariaLabel={lang(hasVideo ? 'VoipStopVideo' : 'VoipStartVideo')}
+          disabled={isConnecting}
         >
-          <i className="icon icon-close" />
+          <i className={buildClassName('icon', !hasVideo ? 'icon-video-stop' : 'icon-video')} aria-hidden />
         </Button>
-      </div>
 
-      <div className="scrollable custom-scroll">
-        <GroupCallParticipantStreams onDoubleClick={handleStreamsDoubleClick} />
+        <Button
+          round
+          size="default"
+          ripple
+          className={buildClassName(
+            styles.actionButton,
+            !hasAudioStream && styles.muted,
+            canRequestToSpeak && styles.canRequestToSpeak,
+          )}
+          onClick={handleToggleGroupCallPresentation}
+          ariaLabel={lang(hasPresentation ? 'lng_group_call_screen_share_stop' : 'lng_group_call_tooltip_screen')}
+          disabled={isConnecting || !IS_SCREENSHARE_SUPPORTED}
+        >
+          <i
+            className={buildClassName('icon', !hasPresentation ? 'icon-share-screen-stop' : 'icon-share-screen')}
+            aria-hidden
+          />
+        </Button>
 
-        {(!isLandscapeLayout || isSidebarOpen)
-        && <GroupCallParticipantList openParticipantMenu={handleOpenParticipantMenu} />}
-      </div>
+        <MicrophoneButton className={styles.actionButton} />
 
-      <GroupCallParticipantMenu
-        participant={participantMenu?.participant}
-        anchor={participantMenu?.anchor}
-        isDropdownOpen={isParticipantMenuOpen}
-        closeDropdown={closeParticipantMenu}
-      />
+        <Button
+          round
+          size="default"
+          ripple
+          className={buildClassName(
+            styles.actionButton,
+            !hasAudioStream && styles.muted,
+            canRequestToSpeak && styles.canRequestToSpeak,
+          )}
+          ariaLabel={lang('lng_group_call_settings')}
+          disabled
+        >
+          <i className="icon icon-settings-filled" aria-hidden />
+        </Button>
 
-      <div className="buttons">
-        {isConnecting && <Loading />}
-
-        <div className="button-wrapper">
-          <div className="video-buttons">
-            {hasVideo && (IS_ANDROID || IS_IOS) && (
-              <button className="smaller-button" onClick={switchCameraInput}>
-                <AnimatedIcon
-                  tgsUrl={LOCAL_TGS_URLS.CameraFlip}
-                  playSegment={CAMERA_FLIP_PLAY_SEGMENT}
-                  size={24}
-                />
-              </button>
-            )}
-            <button
-              className={buildClassName(
-                'small-button',
-                shouldRaiseHand ? 'speaker' : 'camera',
-                (hasVideo || (shouldRaiseHand && isSpeakerEnabled)) && 'active',
-              )}
-              onClick={handleClickVideoOrSpeaker}
-            >
-              <i className={buildClassName(
-                'icon',
-                shouldRaiseHand ? 'icon-speaker' : (hasVideo ? 'icon-video-stop' : 'icon-video'),
-              )}
-              />
-            </button>
-          </div>
-
-          <div className="button-text">
-            {lang(shouldRaiseHand ? 'VoipSpeaker' : 'VoipCamera')}
-          </div>
-        </div>
-
-        <MicrophoneButton />
-
-        <div className="button-wrapper">
-          <button className="small-button leave" onClick={handleLeaveGroupCall}>
-            <i className="icon icon-phone-discard" />
-          </button>
-
-          <div className="button-text">
-            {lang('VoipGroupLeave')}
-          </div>
-        </div>
+        <Button
+          round
+          size="default"
+          ripple
+          className={buildClassName(
+            styles.actionButton,
+            styles.destructive,
+          )}
+          onClick={handleLeaveGroupCall}
+          ariaLabel={lang('lng_group_call_leave')}
+        >
+          <i className="icon icon-close" aria-hidden />
+        </Button>
       </div>
 
       <Modal
@@ -415,18 +530,20 @@ const GroupCall: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { groupCallId }): StateProps => {
     const {
-      connectionState, title, isSpeakerDisabled, participants, participantsCount,
+      connectionState, title, participants, participantsCount, chatId,
     } = selectGroupCall(global, groupCallId)! || {};
+
+    const chat = chatId ? selectChat(global, chatId) : undefined;
 
     return {
       connectionState,
-      title,
-      isSpeakerEnabled: !isSpeakerDisabled,
+      title: title || chat?.title,
       participantsCount,
       meParticipant: selectGroupCallParticipant(global, groupCallId, global.currentUserId!),
       isCallPanelVisible: Boolean(selectTabState(global).isCallPanelVisible),
       isAdmin: selectIsAdminInActiveGroupCall(global),
       participants,
+      canInvite: selectCanInviteToActiveGroupCall(global),
     };
   },
 )(GroupCall));

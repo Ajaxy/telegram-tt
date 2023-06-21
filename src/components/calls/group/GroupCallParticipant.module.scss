@@ -1,0 +1,55 @@
+.root {
+  :global {
+    .ListItem-button {
+      --color-chat-hover: rgba(255, 255, 255, 0.04);
+      padding: 0.5rem;
+    }
+
+    .multiline-item {
+      align-self: center;
+    }
+
+    .title {
+      display: flex !important;
+
+      .fullName {
+        font-weight: 500;
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.subtitle {
+  display: flex !important;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 1rem !important;
+}
+
+.subtitleText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  margin-left: auto;
+  margin-right: 0.25rem;
+}
+
+.subtitleBlue {
+  --color-text-secondary: #4da6e0;
+}
+
+.subtitleRed {
+  --color-text-secondary: #ff706f;
+}
+
+.subtitleGreen {
+  --color-text-secondary: #57bc6c;
+}
+
+.avatar {
+  margin-right: 0.5rem;
+}

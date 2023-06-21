@@ -1,17 +1,22 @@
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import useLang from '../../../hooks/useLang';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { FC } from '../../../lib/teact/teact';
+
+import buildClassName from '../../../util/buildClassName';
 import { selectActiveGroupCall } from '../../../global/selectors/calls';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import GroupCallParticipant from './GroupCallParticipant';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 
+import styles from './GroupCallParticipantList.module.scss';
+
 type OwnProps = {
-  openParticipantMenu: (anchor: HTMLDivElement, participant: TypeGroupCallParticipant) => void;
+  panelOffset: number;
+  isLandscape: boolean;
 };
 
 type StateProps = {
@@ -21,24 +26,22 @@ type StateProps = {
 };
 
 const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
+  panelOffset,
   participants,
   participantsCount,
-  openParticipantMenu,
+  isLandscape,
 }) => {
   const {
-    createGroupCallInviteLink,
     loadMoreGroupCallParticipants,
   } = getActions();
-
-  const lang = useLang();
 
   const participantsIds = useMemo(() => {
     return Object.keys(participants || {});
   }, [participants]);
 
-  const handleLoadMoreGroupCallParticipants = useCallback(() => {
+  const handleLoadMoreGroupCallParticipants = useLastCallback(() => {
     loadMoreGroupCallParticipants();
-  }, [loadMoreGroupCallParticipants]);
+  });
 
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMoreGroupCallParticipants,
@@ -46,37 +49,24 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
     participantsIds.length >= participantsCount,
   );
 
-  function handleCreateGroupCallInviteLink() {
-    createGroupCallInviteLink();
-  }
-
   return (
-    <div className="participants">
-      <div className="invite-btn" onClick={handleCreateGroupCallInviteLink}>
-        <div className="icon-wrapper">
-          <i className="icon icon-add-user" />
-        </div>
-        <div className="text">{lang('VoipGroupInviteMember')}</div>
-      </div>
-
-      <InfiniteScroll
-        items={viewportIds}
-        onLoadMore={getMore}
-      >
-        {viewportIds?.map(
-          (participantId) => (
-            participants![participantId] && (
-              <GroupCallParticipant
-                key={participantId}
-                openParticipantMenu={openParticipantMenu}
-                participant={participants![participantId]}
-              />
-            )
-          ),
-        )}
-      </InfiniteScroll>
-
-    </div>
+    <InfiniteScroll
+      items={viewportIds}
+      onLoadMore={getMore}
+      style={`transform: translateY(${panelOffset}px);`}
+      className={buildClassName(styles.root, !isLandscape && styles.portrait)}
+    >
+      {participants && viewportIds?.map(
+        (participantId) => (
+          participants[participantId] && (
+            <GroupCallParticipant
+              key={participantId}
+              participant={participants[participantId]}
+            />
+          )
+        ),
+      )}
+    </InfiniteScroll>
   );
 };
 
