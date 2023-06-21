@@ -229,11 +229,19 @@ export default function createConfig(
 
     devtool: APP_ENV === 'production' && IS_ELECTRON ? undefined : 'source-map',
 
-    ...(APP_ENV !== 'production' && {
-      optimization: {
-        chunkIds: 'named',
-      },
-    }),
+    optimization: {
+      ...(APP_ENV !== 'production' && { chunkIds: 'named' }),
+      ...(['production', 'staging'].includes(APP_ENV) && {
+        splitChunks: {
+          cacheGroups: {
+            default: {
+              chunks: 'all',
+              minSize: 1,
+            },
+          },
+        },
+      }),
+    },
   };
 }
 
