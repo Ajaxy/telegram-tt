@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[6063],{16063:(e,n,a)=>{function t(){const e=new Set;function n(n){e.delete(n)}return{runCallbacks:function(){for(var n=arguments.length,a=new Array(n),t=0;t<n;t++)a[t]=arguments[t];e.forEach((e=>{e(...a)}))},addCallback:function(a){return e.add(a),()=>{n(a)}},removeCallback:n,hasCallbacks:function(){return Boolean(e.size)}}}a.d(n,{_:()=>t})}}]);
-//# sourceMappingURL=6063.cfc7f840ac91def4c6a8.js.map

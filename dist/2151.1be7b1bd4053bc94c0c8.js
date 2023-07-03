@@ -1,2 +1,0 @@
-(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[2151],{32151:e=>{e.exports=function(e){return{name:"ERB",subLanguage:"xml",contains:[e.COMMENT("<%#","%>"),{begin:"<%[%=-]?",end:"[%-]?%>",subLanguage:"ruby",excludeBegin:!0,excludeEnd:!0}]}}}}]);
-//# sourceMappingURL=2151.1be7b1bd4053bc94c0c8.js.map

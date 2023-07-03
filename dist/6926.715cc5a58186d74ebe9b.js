@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[6926],{26926:(e,t,l)=>{function n(e){let t,l=arguments.length>1&&void 0!==arguments[1]&&arguments[1];do{t=String(Math.random()).replace("0.","id")}while(e[t]);return l&&(e[t]=!0),t}l.d(t,{Z:()=>n})}}]);
-//# sourceMappingURL=6926.715cc5a58186d74ebe9b.js.map

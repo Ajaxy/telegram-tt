@@ -1,2 +1,0 @@
-(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[9685],{69685:e=>{e.exports=function(e){function n(e){"undefined"!=typeof console&&(console.error||console.log)("[Script Loader]",e)}try{"undefined"!=typeof execScript&&"undefined"!=typeof attachEvent&&"undefined"==typeof addEventListener?execScript(e):"undefined"!=typeof eval?eval.call(null,e):n("EvalError: No eval function available")}catch(e){n(e)}}}}]);
-//# sourceMappingURL=9685.0f1461012be2a2dfcdb8.js.map

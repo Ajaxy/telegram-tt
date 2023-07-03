@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[9118],{69118:(e,t,s)=>{s.d(t,{wO:()=>u});const u=e=>new Promise((t=>{setTimeout((()=>t()),e)}))}}]);
-//# sourceMappingURL=9118.d584c8df7c536bcb2b6b.js.map
