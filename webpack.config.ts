@@ -2,19 +2,18 @@ import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
 
+import type { Compiler, Configuration } from 'webpack';
 import {
+  ContextReplacementPlugin,
   DefinePlugin,
   EnvironmentPlugin,
-  ProvidePlugin,
-  ContextReplacementPlugin,
   NormalModuleReplacementPlugin,
+  ProvidePlugin,
 } from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
-
-import type { Configuration, Compiler } from 'webpack';
 import 'webpack-dev-server';
 
 import { version as appVersion } from './package.json';
@@ -230,16 +229,16 @@ export default function createConfig(
     devtool: APP_ENV === 'production' && IS_ELECTRON ? undefined : 'source-map',
 
     optimization: {
-      ...(APP_ENV !== 'production' && { chunkIds: 'named' }),
-      ...(['production', 'staging'].includes(APP_ENV) && {
-        splitChunks: {
-          cacheGroups: {
-            default: {
-              chunks: 'all',
-              minSize: 1,
-            },
+      splitChunks: {
+        cacheGroups: {
+          sharedComponents: {
+            name: 'shared-components',
+            test: /[\\/]src[\\/]components[\\/]ui[\\/]/,
           },
         },
+      },
+      ...(APP_ENV === 'staging' && {
+        chunkIds: 'named',
       }),
     },
   };
