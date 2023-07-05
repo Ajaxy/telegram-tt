@@ -172,6 +172,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   margin: 0;
+  --custom-emoji-size: 1.125rem;
 
   :global(body.is-ios) & {
     font-size: 0.9375rem;
