@@ -1,26 +1,21 @@
 import * as langProvider from '../util/langProvider';
-import { useState } from '../lib/teact/teact';
+import useAsync from './useAsync';
 
 const useLangString = (
   langCode: string | undefined,
   key: string,
   shouldIgnoreSameValue = false,
 ): string | undefined => {
-  const [translation, setTranslation] = useState<string>();
+  const defaultValue = shouldIgnoreSameValue ? undefined : key;
+  const { result } = useAsync(() => {
+    if (langCode) {
+      return langProvider.getTranslationForLangString(langCode, key);
+    }
 
-  if (langCode) {
-    langProvider
-      .getTranslationForLangString(langCode, key)
-      .then((value) => {
-        // The string is not translated, maybe the language pack was not loaded due to network errors or a timeout
-        if (shouldIgnoreSameValue && value === key) {
-          return;
-        }
-        setTranslation(value);
-      });
-  }
+    return Promise.resolve();
+  }, [langCode, key], defaultValue);
 
-  return translation;
+  return result || defaultValue;
 };
 
 export default useLangString;

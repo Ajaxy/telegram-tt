@@ -148,13 +148,16 @@ export function getTranslationFn(): LangFn {
 }
 
 export async function getTranslationForLangString(langCode: string, key: string) {
-  let translateString: ApiLangString | undefined = await cacheApi.fetch(
+  let translateString: ApiLangString | undefined;
+  const cachedValue = await cacheApi.fetch(
     LANG_CACHE_NAME,
     `${DEFAULT_LANG_PACK}_${langCode}_${key}`,
     cacheApi.Type.Json,
   );
 
-  if (!translateString) {
+  if (cachedValue) {
+    translateString = cachedValue.value;
+  } else {
     translateString = await fetchRemoteString(DEFAULT_LANG_PACK, langCode, key);
   }
 
@@ -243,7 +246,11 @@ async function fetchRemoteString(
   });
 
   if (remote?.length) {
-    await cacheApi.save(LANG_CACHE_NAME, `${remoteLangPack}_${langCode}_${key}`, remote[0] || '');
+    const wrappedString = JSON.stringify({
+      value: remote[0],
+    });
+
+    await cacheApi.save(LANG_CACHE_NAME, `${remoteLangPack}_${langCode}_${key}`, wrappedString);
 
     return remote[0];
   }

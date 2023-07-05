@@ -71,7 +71,8 @@ const AuthPhoneNumber: FC<StateProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestedLanguage = getSuggestedLanguage();
 
-  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage', true);
+  const isConnected = connectionState === 'connectionStateReady';
+  const continueText = useLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
   const [country, setCountry] = useState<ApiCountryCode | undefined>();
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>();
   const [isTouched, setIsTouched] = useState(false);
@@ -88,16 +89,16 @@ const AuthPhoneNumber: FC<StateProps> = ({
   }, [country]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady' && !authNearestCountry) {
+    if (isConnected && !authNearestCountry) {
       loadNearestCountry();
     }
-  }, [connectionState, authNearestCountry, loadNearestCountry]);
+  }, [isConnected, authNearestCountry]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady') {
+    if (isConnected) {
       loadCountryList({ langCode: language });
     }
-  }, [connectionState, language, loadCountryList]);
+  }, [isConnected, language]);
 
   useEffect(() => {
     if (authNearestCountry && phoneCodeList && !country && !isTouched) {

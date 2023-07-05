@@ -60,7 +60,9 @@ const AuthCode: FC<StateProps> = ({
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
   const qrCodeRef = useRef<HTMLDivElement>(null);
-  const continueText = useLangString(suggestedLanguage, 'ContinueOnThisLanguage', true);
+
+  const isConnected = connectionState === 'connectionStateReady';
+  const continueText = useLangString(isConnected ? suggestedLanguage : undefined, 'ContinueOnThisLanguage', true);
   const [isLoading, markIsLoading, unmarkIsLoading] = useFlag();
   const [isQrMounted, markQrMounted, unmarkQrMounted] = useFlag();
 
@@ -97,7 +99,7 @@ const AuthCode: FC<StateProps> = ({
       };
     }
 
-    if (connectionState !== 'connectionStateReady') {
+    if (!isConnected) {
       return undefined;
     }
 
@@ -120,13 +122,13 @@ const AuthCode: FC<StateProps> = ({
     }, QR_CODE_MUTATION_DURATION);
 
     return undefined;
-  }, [connectionState, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
+  }, [isConnected, authQrCode, isQrMounted, markQrMounted, unmarkQrMounted, qrCode]);
 
   useEffect(() => {
-    if (connectionState === 'connectionStateReady') {
+    if (isConnected) {
       void setLanguage(DEFAULT_LANG_CODE);
     }
-  }, [connectionState]);
+  }, [isConnected]);
 
   const handleLangChange = useCallback(() => {
     markIsLoading();
