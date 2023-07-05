@@ -125,8 +125,8 @@ const EditTopic: FC<OwnProps & StateProps> = ({
         {!topic && <Loading />}
         {topic && (
           <>
-            <div className={buildClassName(styles.section, styles.top)}>
-              <span className={styles.heading}>{lang('CreateTopicTitle')}</span>
+            <div className={buildClassName(styles.section, styles.top, isGeneral && styles.general)}>
+              <span className={styles.heading}>{lang(isGeneral ? 'CreateGeneralTopicTitle' : 'CreateTopicTitle')}</span>
               <Transition
                 name="zoomFade"
                 activeKey={Number(dummyTopic.iconEmojiId) || 0}
