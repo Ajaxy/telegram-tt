@@ -303,10 +303,23 @@ function buildEmptyElement(): VirtualElementEmpty {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const DEBUG_components: AnyLiteral = { TOTAL: { componentName: 'TOTAL', renderCount: 0 } };
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
+const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console
   console.warn('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
+
+  // eslint-disable-next-line no-console
+  console.warn('MEMOS', orderBy(
+    Object
+      .values(DEBUG_memos)
+      .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
+      .map((state) => ({ ...state, hitRate: state.hitRate.toFixed(2) })),
+    'hitRate',
+    'asc',
+  ));
 });
 
 let instancesPendingUpdate = new Set<ComponentInstance>();
@@ -587,19 +600,13 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
         runUpdatePassOnRaf();
 
         if (DEBUG_MORE) {
-          if (componentInstance.name !== 'TeactNContainer') {
-            // eslint-disable-next-line no-console
-            console.log(
-              '[Teact.useState]',
-              componentInstance.name,
-              // `componentInstance.Component` may be set to `null` by GC helper
-              componentInstance.Component && (componentInstance.Component as FC_withDebug).DEBUG_contentComponentName
-                ? `> ${(componentInstance.Component as FC_withDebug).DEBUG_contentComponentName}`
-                : '',
-              `State update at cursor #${cursor}${debugKey ? ` (${debugKey})` : ''}, next value: `,
-              byCursor[cursor].nextValue,
-            );
-          }
+          // eslint-disable-next-line no-console
+          console.log(
+            '[Teact.useState]',
+            DEBUG_resolveComponentName(componentInstance.Component),
+            `State update at cursor #${cursor}${debugKey ? ` (${debugKey})` : ''}, next value: `,
+            byCursor[cursor].nextValue,
+          );
         }
       })(renderingInstance),
     };
@@ -764,19 +771,56 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { value } = byCursor[cursor] || {};
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  let DEBUG_state: typeof DEBUG_memos[string] | undefined;
+  if (DEBUG && debugKey) {
+    const instanceKey = `${debugKey}#${renderingInstance.id}`;
+
+    DEBUG_state = DEBUG_memos[instanceKey];
+    if (!DEBUG_state) {
+      DEBUG_state = {
+        key: instanceKey, calls: 0, misses: 0, hitRate: 0,
+      };
+      DEBUG_memos[instanceKey] = DEBUG_state;
+    }
+
+    DEBUG_state.calls++;
+    DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
+  }
+
   if (
     byCursor[cursor] === undefined
     || dependencies.length !== byCursor[cursor].dependencies.length
     || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
   ) {
     if (DEBUG && debugKey) {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`,
-        byCursor[cursor]
-          ? getUnequalProps(byCursor[cursor].dependencies, dependencies).join(', ')
-          : '[first render]',
-      );
+      if (DEBUG_state) {
+        DEBUG_state.misses++;
+        DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
+
+        if (
+          DEBUG_state.calls % 10 === 0
+          && DEBUG_state.calls >= DEBUG_MEMOS_CALLS_THRESHOLD
+          && DEBUG_state.hitRate < 0.5
+        ) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            // eslint-disable-next-line max-len
+            `[Teact] ${DEBUG_state.key}: Hit rate is ${DEBUG_state.hitRate.toFixed(2)} for ${DEBUG_state.calls} calls`,
+          );
+        }
+      }
+
+      // Ignore default `debugKey`
+      if (!debugKey.startsWith('memo#')) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`,
+          byCursor[cursor]
+            ? getUnequalProps(byCursor[cursor].dependencies, dependencies).join(', ')
+            : '[first render]',
+        );
+      }
     }
 
     value = resolver();
@@ -816,9 +860,26 @@ export function useRef<T>(initial?: T | null) {
 
 export function memo<T extends FC>(Component: T, debugKey?: string) {
   return function TeactMemoWrapper(props: Props) {
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-    return useMemo(() => createElement(Component, props), Object.values(props), debugKey);
+    return useMemo(
+      () => createElement(Component, props),
+      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+      Object.values(props),
+      debugKey ?? `memo#${DEBUG_resolveComponentName(Component)}`,
+    );
   } as T;
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export function DEBUG_resolveComponentName(Component: FC_withDebug) {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { name, DEBUG_contentComponentName } = Component;
+
+  // Shorthand
+  if (name === 'TeactNContainer') {
+    return `@${DEBUG_contentComponentName}`;
+  }
+
+  return name + (DEBUG_contentComponentName ? ` > ${DEBUG_contentComponentName}` : '');
 }
 
 export default {

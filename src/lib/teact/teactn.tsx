@@ -1,6 +1,6 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
 import type { FC, FC_withDebug, Props } from './teact';
-import React, { useEffect } from './teact';
+import React, { DEBUG_resolveComponentName, useEffect } from './teact';
 import { requestMeasure } from '../fasterdom/fasterdom';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
@@ -250,9 +250,7 @@ export function withGlobal<OwnProps extends AnyLiteral>(
   mapStateToProps: MapStateToProps<OwnProps> = () => ({}),
 ) {
   return (Component: FC) => {
-    return function TeactNContainer(props: OwnProps) {
-      (TeactNContainer as FC_withDebug).DEBUG_contentComponentName = Component.name;
-
+    function TeactNContainer(props: OwnProps) {
       const id = useUniqueId();
       const forceUpdate = useForceUpdate();
 
@@ -301,7 +299,11 @@ export function withGlobal<OwnProps extends AnyLiteral>(
 
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Component {...container.mappedProps} {...props} />;
-    };
+    }
+
+    (TeactNContainer as FC_withDebug).DEBUG_contentComponentName = DEBUG_resolveComponentName(Component);
+
+    return TeactNContainer;
   };
 }
 
