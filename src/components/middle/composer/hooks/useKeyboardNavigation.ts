@@ -44,6 +44,8 @@ export function useKeyboardNavigation({
   const handleItemSelect = useLastCallback((e: KeyboardEvent) => {
     // Prevent action on key combinations
     if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return false;
+    if (!isActive) return false;
+
     if (items && items.length && selectedItemIndex > -1) {
       const item = items[selectedItemIndex];
       if (item) {
