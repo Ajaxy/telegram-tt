@@ -8,6 +8,7 @@ import {
 } from '../../../util/windowEnvironment';
 import { setLanguage } from '../../../util/langProvider';
 import switchTheme from '../../../util/switchTheme';
+import { getSystemTheme, setSystemThemeChangeCallback } from '../../../util/systemTheme';
 import {
   selectTabState, selectNotifySettings, selectTheme, selectPerformanceSettings, selectCanAnimateInterface,
 } from '../../selectors';
@@ -21,10 +22,18 @@ import type { ActionReturnType, GlobalState } from '../../types';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
+import { replaceSettings } from '../../reducers';
 
 const HISTORY_ANIMATION_DURATION = 450;
 
-subscribeToSystemThemeChange();
+setSystemThemeChangeCallback((theme) => {
+  let global = getGlobal();
+
+  if (!global.settings.byKey.shouldUseSystemTheme) return;
+
+  global = replaceSettings(global, { theme });
+  setGlobal(global);
+});
 
 addActionHandler('switchMultitabRole', async (global, actions, payload): Promise<void> => {
   const { isMasterTab, tabId = getCurrentTabId() } = payload;
@@ -115,7 +124,11 @@ addCallback((global: GlobalState) => {
   }, tabState.id);
 
   const { messageTextSize, language } = global.settings.byKey;
-  const theme = selectTheme(global);
+
+  const globalTheme = selectTheme(global);
+  const systemTheme = getSystemTheme();
+  const theme = global.settings.byKey.shouldUseSystemTheme ? systemTheme : globalTheme;
+
   const performanceType = selectPerformanceSettings(global);
 
   void setLanguage(language, undefined, true);
@@ -150,7 +163,11 @@ addCallback((global: GlobalState) => {
     }
   });
 
-  switchTheme(theme, selectCanAnimateInterface(global));
+  const canAnimate = selectCanAnimateInterface(global);
+
+  switchTheme(theme, canAnimate);
+  // Make sure global has the latest theme. Will cause `switchTheme` on change
+  global = replaceSettings(global, { theme });
 
   startWebsync();
 
@@ -223,27 +240,3 @@ addActionHandler('disableHistoryAnimations', (global, actions, payload): ActionR
   }, tabId);
   setGlobal(global, { forceSyncOnIOs: true });
 });
-
-function subscribeToSystemThemeChange() {
-  function handleSystemThemeChange() {
-    const currentThemeMatch = document.documentElement.className.match(/theme-(\w+)/);
-    const currentTheme = currentThemeMatch ? currentThemeMatch[1] : 'light';
-    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
-    let global = getGlobal();
-    const nextTheme = selectTheme(global);
-
-    if (nextTheme !== currentTheme) {
-      switchTheme(nextTheme, selectCanAnimateInterface(global));
-      // Force-update component containers
-      global = { ...global };
-      setGlobal(global);
-    }
-  }
-
-  const mql = window.matchMedia('(prefers-color-scheme: dark)');
-  if (typeof mql.addEventListener === 'function') {
-    mql.addEventListener('change', handleSystemThemeChange);
-  } else if (typeof mql.addListener === 'function') {
-    mql.addListener(handleSystemThemeChange);
-  }
-}

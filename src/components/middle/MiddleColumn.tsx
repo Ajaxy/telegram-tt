@@ -18,8 +18,6 @@ import {
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   ANIMATION_END_DELAY,
-  DARK_THEME_BG_COLOR,
-  LIGHT_THEME_BG_COLOR,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
@@ -60,6 +58,7 @@ import {
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useCustomBackground from '../../hooks/useCustomBackground';
@@ -458,17 +457,16 @@ function MiddleColumn({
       id="MiddleColumn"
       className={className}
       onTransitionEnd={handleCssTransitionEnd}
-      style={`
-        --composer-hidden-scale: ${composerHiddenScale};
-        --toolbar-hidden-scale: ${toolbarHiddenScale};
-        --unpin-hidden-scale: ${unpinHiddenScale};
-        --toolbar-unpin-hidden-scale: ${toolbarForUnpinHiddenScale};
-        --composer-translate-x: ${composerTranslateX}px;
-        --toolbar-translate-x: ${toolbarTranslateX}px;
-        --pattern-color: ${patternColor};
-        --theme-background-color:
-          ${backgroundColor || (theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR)};
-      `}
+      style={buildStyle(
+        `--composer-hidden-scale: ${composerHiddenScale}`,
+        `--toolbar-hidden-scale: ${toolbarHiddenScale}`,
+        `--unpin-hidden-scale: ${unpinHiddenScale}`,
+        `--toolbar-unpin-hidden-scale: ${toolbarForUnpinHiddenScale},`,
+        `--composer-translate-x: ${composerTranslateX}px`,
+        `--toolbar-translate-x: ${toolbarTranslateX}px`,
+        `--pattern-color: ${patternColor}`,
+        backgroundColor && `--theme-background-color: ${backgroundColor}`,
+      )}
       onClick={(isTablet && isLeftColumnShown) ? handleTabletFocus : undefined}
     >
       {isDesktop && (

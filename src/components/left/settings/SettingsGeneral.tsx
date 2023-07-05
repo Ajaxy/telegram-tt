@@ -8,18 +8,19 @@ import type { ISettings, TimeFormat } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import {
-  getSystemTheme, IS_ANDROID, IS_IOS, IS_MAC_OS,
+  IS_ANDROID, IS_IOS, IS_MAC_OS,
 } from '../../../util/windowEnvironment';
+import { getSystemTheme } from '../../../util/systemTheme';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useAppLayout from '../../../hooks/useAppLayout';
 
 import ListItem from '../../ui/ListItem';
 import RangeSlider from '../../ui/RangeSlider';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import RadioGroup from '../../ui/RadioGroup';
-import useAppLayout from '../../../hooks/useAppLayout';
 
 type OwnProps = {
   isActive?: boolean;
