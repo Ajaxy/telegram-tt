@@ -16,7 +16,7 @@ export type FC_withDebug =
   FC
   & { DEBUG_contentComponentName?: string };
 
-export enum VirtualElementTypesEnum {
+export enum VirtualType {
   Empty,
   Text,
   Tag,
@@ -25,18 +25,18 @@ export enum VirtualElementTypesEnum {
 }
 
 interface VirtualElementEmpty {
-  type: VirtualElementTypesEnum.Empty;
+  type: VirtualType.Empty;
   target?: Node;
 }
 
 interface VirtualElementText {
-  type: VirtualElementTypesEnum.Text;
+  type: VirtualType.Text;
   target?: Node;
   value: string;
 }
 
 export interface VirtualElementTag {
-  type: VirtualElementTypesEnum.Tag;
+  type: VirtualType.Tag;
   target?: HTMLElement;
   tag: string;
   props: Props;
@@ -44,14 +44,14 @@ export interface VirtualElementTag {
 }
 
 export interface VirtualElementComponent {
-  type: VirtualElementTypesEnum.Component;
+  type: VirtualType.Component;
   componentInstance: ComponentInstance;
   props: Props;
   children: VirtualElementChildren;
 }
 
 export interface VirtualElementFragment {
-  type: VirtualElementTypesEnum.Fragment;
+  type: VirtualType.Fragment;
   children: VirtualElementChildren;
 }
 
@@ -71,8 +71,8 @@ interface ComponentInstance {
   props: Props;
   renderedValue?: any;
   mountState: MountState;
-  hooks: {
-    state: {
+  hooks?: {
+    state?: {
       cursor: number;
       byCursor: {
         value: any;
@@ -80,7 +80,7 @@ interface ComponentInstance {
         setter: StateHookSetter<any>;
       }[];
     };
-    effects: {
+    effects?: {
       cursor: number;
       byCursor: {
         dependencies?: readonly any[];
@@ -89,14 +89,14 @@ interface ComponentInstance {
         releaseSignals?: NoneToVoidFunction;
       }[];
     };
-    memos: {
+    memos?: {
       cursor: number;
       byCursor: {
         value: any;
         dependencies: any[];
       }[];
     };
-    refs: {
+    refs?: {
       cursor: number;
       byCursor: {
         current: any;
@@ -141,28 +141,12 @@ const DEBUG_SILENT_RENDERS_FOR = new Set(['TeactMemoWrapper', 'TeactNContainer',
 let lastComponentId = 0;
 let renderingInstance: ComponentInstance;
 
-export function isEmptyElement($element: VirtualElement): $element is VirtualElementEmpty {
-  return $element.type === VirtualElementTypesEnum.Empty;
-}
-
-export function isTextElement($element: VirtualElement): $element is VirtualElementText {
-  return $element.type === VirtualElementTypesEnum.Text;
-}
-
-export function isTagElement($element: VirtualElement): $element is VirtualElementTag {
-  return $element.type === VirtualElementTypesEnum.Tag;
-}
-
-export function isComponentElement($element: VirtualElement): $element is VirtualElementComponent {
-  return $element.type === VirtualElementTypesEnum.Component;
-}
-
-export function isFragmentElement($element: VirtualElement): $element is VirtualElementFragment {
-  return $element.type === VirtualElementTypesEnum.Fragment;
-}
-
 export function isParentElement($element: VirtualElement): $element is VirtualElementParent {
-  return isTagElement($element) || isComponentElement($element) || isFragmentElement($element);
+  return (
+    $element.type === VirtualType.Tag
+    || $element.type === VirtualType.Component
+    || $element.type === VirtualType.Fragment
+  );
 }
 
 function createElement(
@@ -181,7 +165,7 @@ function createElement(
 
 function buildFragmentElement(children: any[]): VirtualElementFragment {
   return {
-    type: VirtualElementTypesEnum.Fragment,
+    type: VirtualType.Fragment,
     children: buildChildren(children, true),
   };
 }
@@ -193,29 +177,11 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
 
   const componentInstance: ComponentInstance = {
     id: ++lastComponentId,
-    $element: {} as VirtualElementComponent,
+    $element: undefined as unknown as VirtualElementComponent,
     Component,
     name: Component.name,
     props,
     mountState: MountState.New,
-    hooks: {
-      state: {
-        cursor: 0,
-        byCursor: [],
-      },
-      effects: {
-        cursor: 0,
-        byCursor: [],
-      },
-      memos: {
-        cursor: 0,
-        byCursor: [],
-      },
-      refs: {
-        cursor: 0,
-        byCursor: [],
-      },
-    },
   };
 
   componentInstance.$element = buildComponentElement(componentInstance);
@@ -228,7 +194,7 @@ function buildComponentElement(
   children?: VirtualElementChildren,
 ): VirtualElementComponent {
   return {
-    type: VirtualElementTypesEnum.Component,
+    type: VirtualType.Component,
     componentInstance,
     props: componentInstance.props,
     children: children ? buildChildren(children, true) : [],
@@ -237,7 +203,7 @@ function buildComponentElement(
 
 function buildTagElement(tag: string, props: Props, children: any[]): VirtualElementTag {
   return {
-    type: VirtualElementTypesEnum.Tag,
+    type: VirtualType.Tag,
     tag,
     props,
     children: buildChildren(children),
@@ -287,12 +253,12 @@ function isEmptyPlaceholder(child: any) {
 
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
-    return { type: VirtualElementTypesEnum.Empty };
+    return { type: VirtualType.Empty };
   } else if (isParentElement(child)) {
     return child;
   } else {
     return {
-      type: VirtualElementTypesEnum.Text,
+      type: VirtualType.Text,
       value: String(child),
     };
   }
@@ -408,10 +374,20 @@ export function renderComponent(componentInstance: ComponentInstance) {
 
   safeExec(() => {
     renderingInstance = componentInstance;
-    componentInstance.hooks.state.cursor = 0;
-    componentInstance.hooks.effects.cursor = 0;
-    componentInstance.hooks.memos.cursor = 0;
-    componentInstance.hooks.refs.cursor = 0;
+    if (componentInstance.hooks) {
+      if (componentInstance.hooks.state) {
+        componentInstance.hooks.state.cursor = 0;
+      }
+      if (componentInstance.hooks.effects) {
+        componentInstance.hooks.effects.cursor = 0;
+      }
+      if (componentInstance.hooks.memos) {
+        componentInstance.hooks.memos.cursor = 0;
+      }
+      if (componentInstance.hooks.refs) {
+        componentInstance.hooks.refs.cursor = 0;
+      }
+    }
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
@@ -469,7 +445,12 @@ export function renderComponent(componentInstance: ComponentInstance) {
   componentInstance.renderedValue = newRenderedValue;
 
   const children = Array.isArray(newRenderedValue) ? newRenderedValue : [newRenderedValue];
-  componentInstance.$element = buildComponentElement(componentInstance, children);
+
+  if (componentInstance.mountState === MountState.New) {
+    componentInstance.$element.children = buildChildren(children, true);
+  } else {
+    componentInstance.$element = buildComponentElement(componentInstance, children);
+  }
 
   return componentInstance.$element;
 }
@@ -479,11 +460,11 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
     return true;
   } else if ($old.type !== $new.type) {
     return true;
-  } else if (isTextElement($old) && isTextElement($new)) {
+  } else if ($old.type === VirtualType.Text && $new.type === VirtualType.Text) {
     return $old.value !== $new.value;
-  } else if (isTagElement($old) && isTagElement($new)) {
+  } else if ($old.type === VirtualType.Tag && $new.type === VirtualType.Tag) {
     return ($old.tag !== $new.tag) || ($old.props.key !== $new.props.key);
-  } else if (isComponentElement($old) && isComponentElement($new)) {
+  } else if ($old.type === VirtualType.Component && $new.type === VirtualType.Component) {
     return (
       $old.componentInstance.Component !== $new.componentInstance.Component
     ) || (
@@ -507,14 +488,16 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
   idsToExcludeFromUpdate.add(componentInstance.id);
 
-  componentInstance.hooks.effects.byCursor.forEach((effect) => {
-    if (effect.cleanup) {
-      safeExec(effect.cleanup);
-    }
+  if (componentInstance.hooks?.effects) {
+    for (const effect of componentInstance.hooks.effects.byCursor) {
+      if (effect.cleanup) {
+        safeExec(effect.cleanup);
+      }
 
-    effect.cleanup = undefined;
-    effect.releaseSignals?.();
-  });
+      effect.cleanup = undefined;
+      effect.releaseSignals?.();
+    }
+  }
 
   componentInstance.mountState = MountState.Unmounted;
 
@@ -523,27 +506,39 @@ export function unmountComponent(componentInstance: ComponentInstance) {
 
 // We need to remove all references to DOM objects. We also clean all other references, just in case
 function helpGc(componentInstance: ComponentInstance) {
-  componentInstance.hooks.effects.byCursor.forEach((hook) => {
-    hook.schedule = undefined as any;
-    hook.cleanup = undefined as any;
-    hook.releaseSignals = undefined as any;
-    hook.dependencies = undefined;
-  });
+  const {
+    effects, state, memos, refs,
+  } = componentInstance.hooks || {};
 
-  componentInstance.hooks.state.byCursor.forEach((hook) => {
-    hook.value = undefined;
-    hook.nextValue = undefined;
-    hook.setter = undefined as any;
-  });
+  if (effects) {
+    for (const hook of effects.byCursor) {
+      hook.schedule = undefined as any;
+      hook.cleanup = undefined as any;
+      hook.releaseSignals = undefined as any;
+      hook.dependencies = undefined;
+    }
+  }
 
-  componentInstance.hooks.memos.byCursor.forEach((hook) => {
-    hook.value = undefined as any;
-    hook.dependencies = undefined as any;
-  });
+  if (state) {
+    for (const hook of state.byCursor) {
+      hook.value = undefined;
+      hook.nextValue = undefined;
+      hook.setter = undefined as any;
+    }
+  }
 
-  componentInstance.hooks.refs.byCursor.forEach((hook) => {
-    hook.current = undefined as any;
-  });
+  if (memos) {
+    for (const hook of memos.byCursor) {
+      hook.value = undefined as any;
+      hook.dependencies = undefined as any;
+    }
+  }
+
+  if (refs) {
+    for (const hook of refs.byCursor) {
+      hook.current = undefined as any;
+    }
+  }
 
   componentInstance.hooks = undefined as any;
   componentInstance.$element = undefined as any;
@@ -558,9 +553,11 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
     return;
   }
 
-  componentInstance.hooks.state.byCursor.forEach((hook) => {
-    hook.value = hook.nextValue;
-  });
+  if (componentInstance.hooks?.state) {
+    for (const hook of componentInstance.hooks.state.byCursor) {
+      hook.value = hook.nextValue;
+    }
+  }
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
@@ -580,6 +577,13 @@ function forceUpdateComponent(componentInstance: ComponentInstance) {
 export function useState<T>(): [T | undefined, StateHookSetter<T | undefined>];
 export function useState<T>(initial: T, debugKey?: string): [T, StateHookSetter<T>];
 export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter<T>] {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.state) {
+    renderingInstance.hooks.state = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.state;
   const componentInstance = renderingInstance;
 
@@ -632,6 +636,13 @@ function useEffectBase(
   dependencies?: readonly any[],
   debugKey?: string,
 ) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.effects) {
+    renderingInstance.hooks.effects = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.effects;
   const componentInstance = renderingInstance;
 
@@ -711,7 +722,7 @@ function useEffectBase(
 
   if (dependencies && byCursor[cursor]?.dependencies) {
     if (dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies![i])) {
-      if (debugKey) {
+      if (DEBUG && debugKey) {
         const causedBy = dependencies.reduce((res, newValue, i) => {
           const prevValue = byCursor[cursor].dependencies![i];
           if (newValue !== prevValue) {
@@ -759,7 +770,9 @@ function useEffectBase(
     }
 
     return () => {
-      cleanups.forEach((cleanup) => cleanup());
+      for (const cleanup of cleanups) {
+        cleanup();
+      }
     };
   }
 
@@ -784,6 +797,13 @@ export function useMemo<T extends any>(
   debugKey?: string,
   debugHitRateKey?: string,
 ): T {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.memos) {
+    renderingInstance.hooks.memos = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { value } = byCursor[cursor] || {};
 
@@ -861,6 +881,13 @@ export function useRef<T>(): { current: T | undefined }; // TT way (empty is `un
 export function useRef<T>(initial: null): { current: T | null }; // React way (empty is `null`)
 // eslint-disable-next-line no-null/no-null
 export function useRef<T>(initial?: T | null) {
+  if (!renderingInstance.hooks) {
+    renderingInstance.hooks = {};
+  }
+  if (!renderingInstance.hooks.refs) {
+    renderingInstance.hooks.refs = { cursor: 0, byCursor: [] };
+  }
+
   const { cursor, byCursor } = renderingInstance.hooks.refs;
   if (!byCursor[cursor]) {
     byCursor[cursor] = {
