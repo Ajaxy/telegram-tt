@@ -45,6 +45,7 @@ type StateProps = {
   currentUserId?: string;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
+  maxChatLists: number;
   maxFolderInvites: number;
   hasArchivedChats?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
@@ -64,6 +65,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   isForumPanelOpen,
   shouldSkipHistoryAnimations,
   maxFolders,
+  maxChatLists,
   shouldHideFolderTabs,
   folderInvitesById,
   maxFolderInvites,
@@ -134,16 +136,25 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
           title: lang('ChatList.ContextMenuShare'),
           icon: 'link',
           handler: () => {
+            const chatListCount = Object.values(chatFoldersById).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
+            if (chatListCount >= maxChatLists && !folder.isChatList) {
+              openLimitReachedModal({
+                limit: 'chatlistJoined',
+              });
+              return;
+            }
+
             // Greater amount can be after premium downgrade
             if (folderInvitesById[id]?.length >= maxFolderInvites) {
               openLimitReachedModal({
                 limit: 'chatlistInvites',
               });
-            } else {
-              openShareChatFolderModal({
-                folderId: id,
-              });
+              return;
             }
+
+            openShareChatFolderModal({
+              folderId: id,
+            });
           },
         });
       }
@@ -176,7 +187,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         contextActions: contextActions?.length ? contextActions : undefined,
       } satisfies TabWithProperties;
     });
-  }, [displayedFolders, folderCountersById, lang, maxFolders, folderInvitesById, maxFolderInvites]);
+  }, [
+    displayedFolders, maxFolders, folderCountersById, lang, chatFoldersById, maxChatLists, folderInvitesById,
+    maxFolderInvites,
+  ]);
 
   const handleSwitchTab = useLastCallback((index: number) => {
     setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
@@ -340,6 +354,7 @@ export default memo(withGlobal<OwnProps>(
       hasArchivedChats: Boolean(archived?.length),
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
+      maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       archiveSettings,
     };
   },
