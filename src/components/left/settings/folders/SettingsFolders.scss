@@ -15,6 +15,7 @@
   .ChatInfo {
     display: flex;
     align-items: center;
+    width: 100%;
 
     .Avatar {
       margin-left: -0.25rem;
@@ -36,6 +37,10 @@
         text-overflow: ellipsis;
         text-align: left;
       }
+    }
+
+    .info {
+      overflow: hidden;
     }
 
     .status {
