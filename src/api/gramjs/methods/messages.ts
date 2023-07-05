@@ -72,6 +72,7 @@ import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnl
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { updateChannelState } from '../updateManager';
+import { compact } from '../../../util/iteratees';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;
@@ -620,11 +621,18 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     }
   };
 
-  const file = await fetchFile(blobUrl, filename);
-  const inputFile = await uploadFile(file, patchedOnProgress);
+  const fetchAndUpload = async (url: string) => {
+    const file = await fetchFile(url, filename);
+    return uploadFile(file, patchedOnProgress);
+  };
 
-  const thumbFile = previewBlobUrl && await fetchFile(previewBlobUrl, filename);
-  const thumb = thumbFile ? await uploadFile(thumbFile) : undefined;
+  const isVideo = SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType);
+  const shouldUploadThumb = audio || isVideo || shouldSendAsFile;
+
+  const [inputFile, thumb] = await Promise.all(compact([
+    fetchAndUpload(blobUrl),
+    shouldUploadThumb && previewBlobUrl && fetchAndUpload(previewBlobUrl),
+  ]));
 
   const attributes: GramJs.TypeDocumentAttribute[] = [new GramJs.DocumentAttributeFilename({ fileName: filename })];
   if (!shouldSendAsFile) {
@@ -636,7 +644,7 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
         });
       }
 
-      if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
+      if (isVideo) {
         const { width, height, duration } = quick;
         if (duration !== undefined) {
           attributes.push(new GramJs.DocumentAttributeVideo({
