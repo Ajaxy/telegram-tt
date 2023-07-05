@@ -1,19 +1,22 @@
+const PROTOCOL_WHITELIST = new Set(['http:', 'https:', 'tg:', 'ton:', 'mailto:', 'tel:']);
+// HTTP was chosen by default as a fix for https://bugs.telegram.org/c/10712.
+// It is also the default protocol in the official TDesktop client.
+const FALLBACK_PREFIX = 'http://';
+
 export function ensureProtocol(url?: string) {
   if (!url) {
     return undefined;
   }
 
-  // HTTP was chosen by default as a fix for https://bugs.telegram.org/c/10712.
-  // It is also the default protocol in the official TDesktop client.
   try {
     const parsedUrl = new URL(url);
     // eslint-disable-next-line no-script-url
-    if (parsedUrl.protocol === 'javascript:') {
-      return `http://${url}`;
+    if (!PROTOCOL_WHITELIST.has(parsedUrl.protocol)) {
+      return `${FALLBACK_PREFIX}${url}`;
     }
 
     return url;
   } catch (err) {
-    return `http://${url}`;
+    return `${FALLBACK_PREFIX}${url}`;
   }
 }
