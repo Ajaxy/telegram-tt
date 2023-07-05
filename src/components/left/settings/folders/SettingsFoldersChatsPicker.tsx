@@ -209,7 +209,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
         />
       </div>
       <InfiniteScroll
-        className="picker-list custom-scroll"
+        className="picker-list custom-scroll fab-padding-bottom"
         itemSelector=".chat-item"
         items={viewportIds}
         onLoadMore={getMore}
