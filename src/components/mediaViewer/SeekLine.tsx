@@ -10,7 +10,7 @@ import useSignal from '../../hooks/useSignal';
 import useCurrentTimeSignal from './hooks/currentTimeSignal';
 
 import { captureEvents } from '../../util/captureEvents';
-import { IS_TOUCH_ENV, IS_VIDEO_PREVIEW_SUPPORTED } from '../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { clamp, round } from '../../util/math';
@@ -67,14 +67,13 @@ const SeekLine: React.FC<OwnProps> = ({
   }, [posterSize]);
 
   const setPreview = useLastCallback((time: number) => {
-    if (!IS_VIDEO_PREVIEW_SUPPORTED) return;
     time = Math.floor(time);
     setPreviewTime(time);
     renderVideoPreview(time);
   });
 
   useEffect(() => {
-    if (!IS_VIDEO_PREVIEW_SUPPORTED || isPreviewDisabled || !url || !isReady) return undefined;
+    if (isPreviewDisabled || !url || !isReady) return undefined;
     return createVideoPreviews(url, previewCanvasRef.current!);
   }, [url, isReady, isPreviewDisabled]);
 
