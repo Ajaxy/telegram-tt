@@ -36,6 +36,7 @@ type OwnProps = {
   withUsername?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
+  noEmojiStatus?: boolean;
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
@@ -62,6 +63,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   withUpdatingStatus,
   emojiStatusSize,
   noStatusOrTyping,
+  noEmojiStatus,
   noRtl,
   user,
   userStatus,
@@ -149,7 +151,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         <div className="info-name-title">
           <FullNameTitle
             peer={user!}
-            withEmojiStatus
+            withEmojiStatus={!noEmojiStatus}
             emojiStatusSize={emojiStatusSize}
             isSavedMessages={isSavedMessages}
           />
@@ -161,7 +163,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
     return (
       <FullNameTitle
         peer={user!}
-        withEmojiStatus
+        withEmojiStatus={!noEmojiStatus}
         emojiStatusSize={emojiStatusSize}
         isSavedMessages={isSavedMessages}
       />
