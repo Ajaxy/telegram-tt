@@ -293,7 +293,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       case RightColumnContent.Management:
         return (
           <Management
-            key={`management_${chatId!}`}
+            key={`management_${chatId!}_${managementScreen}`}
             chatId={chatId!}
             currentScreen={managementScreen}
             isPromotedByCurrentUser={isPromotedByCurrentUser}

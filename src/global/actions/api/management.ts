@@ -53,7 +53,7 @@ addActionHandler('checkPublicLink', async (global, actions, payload): Promise<vo
 });
 
 addActionHandler('updatePublicLink', async (global, actions, payload): Promise<void> => {
-  const { username, tabId = getCurrentTabId() } = payload;
+  const { username, shouldDisableUsernames, tabId = getCurrentTabId() } = payload;
 
   const { chatId } = selectCurrentMessageList(global, tabId) || {};
   if (!chatId) {
@@ -69,6 +69,9 @@ addActionHandler('updatePublicLink', async (global, actions, payload): Promise<v
   setGlobal(global);
 
   const result = await callApi('setChatUsername', { chat, username });
+  if (shouldDisableUsernames) {
+    await callApi('deactivateAllUsernames', { chat });
+  }
 
   global = getGlobal();
   global = updateManagementProgress(global, result ? ManagementProgress.Complete : ManagementProgress.Error, tabId);

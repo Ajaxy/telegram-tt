@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import { invokeRequest } from './client';
 import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import type {
-  ApiChat, ApiError, ApiUser, OnApiUpdate,
+  ApiChat, ApiError, ApiUser, ApiUsername, OnApiUpdate,
 } from '../../types';
 
 import { USERNAME_PURCHASE_ERROR } from '../../../config';
@@ -52,18 +52,40 @@ export async function setChatUsername(
     username,
   }));
 
-  const usernames = chat.usernames
-    ? chat.usernames
-      .map((u) => (u.isEditable ? { ...u, username } : u))
-      // User can remove username from chat when changing it type to private, so we need to filter out empty usernames
-      .filter((u) => u.username)
-    : [{ username, isEditable: true, isActive: true }];
+  let usernames: ApiUsername[] = username ? [{ username, isEditable: true, isActive: true }] : [];
+  if (chat.usernames) {
+    // User can remove username from chat when changing it type to private, so we need to filter out empty usernames
+    usernames = usernames.concat(chat.usernames.filter((u) => u.username && !u.isEditable));
+  }
 
   if (result) {
     onUpdate({
       '@type': 'updateChat',
       id: chat.id,
       chat: { usernames: usernames.length ? usernames : undefined },
+    });
+  }
+
+  return result;
+}
+
+export async function deactivateAllUsernames({ chat }: { chat: ApiChat }) {
+  const result = await invokeRequest(new GramJs.channels.DeactivateAllUsernames({
+    channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+  }));
+
+  if (result) {
+    const usernames = chat.usernames
+      ? chat.usernames
+        .map((u) => ({ ...u, isActive: false }))
+        // User can remove username from chat when changing it type to private, so we need to filter out empty usernames
+        .filter((u) => u.username)
+      : undefined;
+
+    onUpdate({
+      '@type': 'updateChat',
+      id: chat.id,
+      chat: { usernames },
     });
   }
 

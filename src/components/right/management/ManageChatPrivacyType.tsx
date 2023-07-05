@@ -150,7 +150,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   }, [isPublic, openUsernameLostDialog, privacyType, updatePublicLink, editableUsername]);
 
   const handleMakeChannelPrivateConfirm = useCallback(() => {
-    updatePublicLink({ username: '' });
+    updatePublicLink({ username: '', shouldDisableUsernames: true });
     closeUsernameLostDialog();
   }, [closeUsernameLostDialog, updatePublicLink]);
 
@@ -177,7 +177,7 @@ const ManageChatPrivacyType: FC<OwnProps & StateProps> = ({
   }];
 
   const isLoading = progress === ManagementProgress.InProgress;
-  const shouldRenderUsernamesManage = privacyType === 'public' && chat.usernames && chat.usernames.length > 1;
+  const shouldRenderUsernamesManage = privacyType === 'public' && chat.usernames && chat.usernames.length > 0;
 
   function renderPurchaseLink() {
     const purchaseInfoLink = `${TME_LINK_PREFIX}${PURCHASE_USERNAME}`;

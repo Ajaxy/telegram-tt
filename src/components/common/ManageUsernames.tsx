@@ -87,16 +87,20 @@ const ManageUsernames: FC<OwnProps> = ({
   }, []);
 
   const handleUsernameToggle = useCallback(() => {
+    if (!usernameForConfirm) {
+      return;
+    }
+
     if (chatId) {
       toggleChatUsername({
         chatId,
-        username: usernameForConfirm!.username,
-        isActive: !usernameForConfirm!.isActive,
+        username: usernameForConfirm.username,
+        isActive: !usernameForConfirm.isActive,
       });
     } else {
       toggleUsername({
-        username: usernameForConfirm!.username,
-        isActive: !usernameForConfirm!.isActive,
+        username: usernameForConfirm.username,
+        isActive: !usernameForConfirm.isActive,
       });
     }
     closeConfirmUsernameDialog();

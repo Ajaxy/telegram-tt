@@ -1356,6 +1356,7 @@ channels.toggleJoinToSend#e4cb9580 channel:InputChannel enabled:Bool = Updates;
 channels.toggleJoinRequest#4c2985b6 channel:InputChannel enabled:Bool = Updates;
 channels.reorderUsernames#b45ced1d channel:InputChannel order:Vector<string> = Bool;
 channels.toggleUsername#50f24105 channel:InputChannel username:string active:Bool = Bool;
+channels.deactivateAllUsernames#a245dd3 channel:InputChannel = Bool;
 channels.toggleForum#a4298b29 channel:InputChannel enabled:Bool = Updates;
 channels.createForumTopic#f40c0224 flags:# channel:InputChannel title:string icon_color:flags.0?int icon_emoji_id:flags.3?long random_id:long send_as:flags.2?InputPeer = Updates;
 channels.getForumTopics#de560d1 flags:# channel:InputChannel q:flags.0?string offset_date:int offset_id:int offset_topic:int limit:int = messages.ForumTopics;
