@@ -11,6 +11,7 @@ import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
+import buildClassName from '../../../util/buildClassName';
 
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
@@ -79,7 +80,8 @@ const AudioResults: FC<OwnProps & StateProps> = ({
 
   function renderList() {
     return foundMessages.map((message, index) => {
-      const shouldDrawDateDivider = index === 0
+      const isFirst = index === 0;
+      const shouldDrawDateDivider = isFirst
         || toYearMonth(message.date) !== toYearMonth(foundMessages[index - 1].date);
       return (
         <div
@@ -87,7 +89,14 @@ const AudioResults: FC<OwnProps & StateProps> = ({
           key={message.id}
         >
           {shouldDrawDateDivider && (
-            <p className="section-heading" dir={lang.isRtl ? 'rtl' : undefined}>
+            <p
+              className={buildClassName(
+                'section-heading',
+                isFirst && 'section-heading-first',
+                !isFirst && 'section-heading-with-border',
+              )}
+              dir={lang.isRtl ? 'rtl' : undefined}
+            >
               {formatMonthAndYear(lang, new Date(message.date * 1000))}
             </p>
           )}
