@@ -1,31 +1,29 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
-  ApiUser, ApiMessage, ApiChat, ApiSticker, ApiTopic,
+  ApiChat, ApiMessage, ApiSticker, ApiTopic, ApiUser,
 } from '../../api/types';
 import type { FocusDirection } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import type { MessageListType } from '../../global/types';
 
 import {
-  selectUser,
+  selectCanPlayAnimatedEmojis,
+  selectChat,
   selectChatMessage,
   selectIsMessageFocused,
-  selectChat,
-  selectTopicFromMessage,
   selectTabState,
-  selectCanPlayAnimatedEmojis,
+  selectTopicFromMessage,
+  selectUser,
 } from '../../global/selectors';
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-
-import useLastCallback from '../../hooks/useLastCallback';
 import useEnsureMessage from '../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -151,7 +149,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [targetUserIds, usersById]);
 
-  const renderContent = useLastCallback(() => {
+  const renderContent = useCallback(() => {
     return renderActionMessageText(
       lang,
       message,
@@ -165,7 +163,10 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
       observeIntersectionForLoading,
       observeIntersectionForPlaying,
     );
-  });
+  }, [
+    isEmbedded, lang, message, observeIntersectionForLoading, observeIntersectionForPlaying,
+    senderChat, senderUser, targetChatId, targetMessage, targetUsers, topic,
+  ]);
 
   const {
     isContextMenuOpen, contextMenuPosition,
