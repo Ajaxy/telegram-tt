@@ -29,7 +29,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 
-import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { IS_ANDROID } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
 import {
   selectAllowedMessageActions,
@@ -384,7 +384,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const [isTranscriptionHidden, setTranscriptionHidden] = useState(false);
   const [hasActiveStickerEffect, startStickerEffect, stopStickerEffect] = useFlag();
-  const { isMobile } = useAppLayout();
+  const { isMobile, isTouchScreen } = useAppLayout();
 
   useOnIntersect(bottomMarkerRef, observeIntersectionForBottom);
 
@@ -396,7 +396,7 @@ const Message: FC<OwnProps & StateProps> = ({
     handleContextMenu: onContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref, IS_TOUCH_ENV && isInSelectMode, !IS_ELECTRON, IS_ANDROID);
+  } = useContextMenuHandlers(ref, isTouchScreen && isInSelectMode, !IS_ELECTRON, IS_ANDROID);
 
   useEffect(() => {
     if (isContextMenuOpen) {
@@ -608,7 +608,7 @@ const Message: FC<OwnProps & StateProps> = ({
     && !noComments;
   const withCommentButton = repliesThreadInfo && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
-  const withQuickReactionButton = !IS_TOUCH_ENV && !phoneCall && !isInSelectMode && defaultReaction
+  const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast;
 
   const contentClassName = buildContentClassName(message, {
