@@ -188,7 +188,8 @@ const ManageUser: FC<OwnProps & StateProps> = ({
           <PrivateChatInfo
             userId={user.id}
             avatarSize="jumbo"
-            status="original name"
+            noStatusOrTyping
+            noEmojiStatus
             withFullInfo
           />
           <InputText
