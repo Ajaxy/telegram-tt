@@ -84,7 +84,7 @@
 
   .media:not(.text) &,
   .Message .custom-shape &,
-  .Message .invoice & {
+  .Message .invoice:not(.has-reactions) & {
     --color-accent-own: white;
     --color-accent: white;
     color: white !important;
@@ -101,7 +101,7 @@
   }
 
   .media:not(.text) &,
-  .Message .invoice & {
+  .Message .invoice:not(.has-reactions) & {
     background: rgba(0, 0, 0, 0.2);
   }
 
