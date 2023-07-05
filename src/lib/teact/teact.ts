@@ -397,7 +397,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
         DEBUG_components[componentName] = {
           componentName,
           renderCount: 0,
-          renderTimes: [],
+          avgRenderTime: 0,
         };
       }
 
@@ -420,7 +420,9 @@ export function renderComponent(componentInstance: ComponentInstance) {
         // eslint-disable-next-line no-console
         console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(duration)} ms`);
       }
-      DEBUG_components[componentName].renderTimes.push(duration);
+
+      const { renderCount, avgRenderTime } = DEBUG_components[componentName];
+      DEBUG_components[componentName].avgRenderTime = (avgRenderTime * renderCount + duration) / (renderCount + 1);
       DEBUG_components[componentName].renderCount++;
       DEBUG_components.TOTAL.renderCount++;
 

@@ -7,7 +7,7 @@ import type { TypedBroadcastChannel } from '../../../util/multitab';
 
 import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
-import generateIdFor from '../../../util/generateIdFor';
+import generateUniqueId from '../../../util/generateUniqueId';
 import { pause } from '../../../util/schedulers';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import Deferred from '../../../util/Deferred';
@@ -284,7 +284,7 @@ function makeRequestToMaster(message: {
   args: MethodArgs<keyof Methods>;
   withCallback?: boolean;
 }) {
-  const messageId = generateIdFor(requestStates);
+  const messageId = generateUniqueId();
   const payload = {
     messageId,
     ...message,
@@ -323,7 +323,7 @@ function makeRequestToMaster(message: {
 }
 
 function makeRequest(message: OriginRequest) {
-  const messageId = generateIdFor(requestStates);
+  const messageId = generateUniqueId();
   const payload: OriginRequest = {
     messageId,
     ...message,

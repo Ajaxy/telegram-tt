@@ -1,4 +1,4 @@
-import generateIdFor from './generateIdFor';
+import generateUniqueId from './generateUniqueId';
 
 export interface CancellableCallback {
   (
@@ -108,7 +108,7 @@ class ConnectorClass<T extends InputRequestTypes> {
   request(messageData: RequestTypes<T>) {
     const { requestStates, requestStatesByCallback } = this;
 
-    const messageId = generateIdFor(requestStates);
+    const messageId = generateUniqueId();
     const payload: CallMethodData = {
       type: 'callMethod',
       messageId,

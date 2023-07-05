@@ -122,13 +122,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const global = getGlobal();
-
     return displayedFolders.map((folder, i) => {
       const { id, title } = folder;
       const isBlocked = id !== ALL_FOLDER_ID && i > maxFolders - 1;
-      const canShareFolder = selectCanShareFolder(global, id);
-
+      const canShareFolder = selectCanShareFolder(getGlobal(), id);
       const contextActions = [];
 
       if (canShareFolder) {

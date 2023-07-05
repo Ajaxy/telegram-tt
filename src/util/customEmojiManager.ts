@@ -10,7 +10,7 @@ import { selectCanPlayAnimatedEmojis } from '../global/selectors';
 import { getStickerPreviewHash } from '../global/helpers';
 import * as mediaLoader from './mediaLoader';
 import { throttle } from './schedulers';
-import generateIdFor from './generateIdFor';
+import generateUniqueId from './generateUniqueId';
 import { IS_WEBM_SUPPORTED } from './windowEnvironment';
 import { createCallbackManager } from './callbacks';
 
@@ -20,7 +20,6 @@ import blankSrc from '../assets/blank.png';
 type CustomEmojiLoadCallback = (customEmojis: GlobalState['customEmojis']) => void;
 type CustomEmojiInputRenderCallback = (emojiId: string) => void;
 
-const ID_STORE = {};
 const DOM_PROCESS_THROTTLE = 500;
 
 const INPUT_WAITING_CUSTOM_EMOJI_IDS: Set<string> = new Set();
@@ -120,7 +119,7 @@ export function getInputCustomEmojiParams(customEmoji?: ApiSticker) {
   const isUsingSharedCanvas = customEmoji.isLottie || (customEmoji.isVideo && !shouldUseStaticFallback);
   if (isUsingSharedCanvas) {
     fetchAndProcess(`sticker${customEmoji.id}`);
-    return [false, blankSrc, generateIdFor(ID_STORE, true)];
+    return [false, blankSrc, generateUniqueId()];
   }
 
   const mediaData = getCustomEmojiMediaDataForInput(customEmoji.id, shouldUseStaticFallback);

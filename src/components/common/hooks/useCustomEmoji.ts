@@ -11,11 +11,10 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
 
 export default function useCustomEmoji(documentId?: string) {
-  const global = getGlobal();
   const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(
-    documentId ? global.customEmojis.byId[documentId] : undefined,
+    documentId ? getGlobal().customEmojis.byId[documentId] : undefined,
   );
-  const [canPlay, setCanPlay] = useState(selectCanPlayAnimatedEmojis(global));
+  const [canPlay, setCanPlay] = useState(selectCanPlayAnimatedEmojis(getGlobal()));
 
   useEnsureCustomEmoji(documentId);
 

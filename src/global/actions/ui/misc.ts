@@ -19,7 +19,7 @@ import {
   selectIsTrustedBot,
   selectTabState,
 } from '../../selectors';
-import generateIdFor from '../../../util/generateIdFor';
+import generateUniqueId from '../../../util/generateUniqueId';
 import { compact, unique } from '../../../util/iteratees';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
@@ -273,7 +273,7 @@ addActionHandler('reorderStickerSets', (global, actions, payload): ActionReturnT
 
 addActionHandler('showNotification', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId(), ...notification } = payload;
-  notification.localId = generateIdFor({});
+  notification.localId = generateUniqueId();
 
   const newNotifications = [...selectTabState(global, tabId).notifications];
   const existingNotificationIndex = newNotifications.findIndex((n) => n.message === notification.message);

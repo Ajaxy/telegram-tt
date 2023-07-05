@@ -1,10 +1,22 @@
 import usePrevious from './usePrevious';
+import { useRef } from '../lib/teact/teact';
+import useEffectOnce from './useEffectOnce';
 
-const useSyncEffect = <const T extends readonly any[]>(cb: (args: T | readonly []) => void, dependencies: T) => {
+export default function useSyncEffect<const T extends readonly any[]>(
+  effect: (args: T | readonly []) => NoneToVoidFunction | void,
+  dependencies: T,
+) {
   const prevDeps = usePrevious<T>(dependencies);
-  if (!prevDeps || dependencies.some((d, i) => d !== prevDeps[i])) {
-    cb(prevDeps || []);
-  }
-};
+  const cleanupRef = useRef<NoneToVoidFunction>();
 
-export default useSyncEffect;
+  if (!prevDeps || dependencies.some((d, i) => d !== prevDeps[i])) {
+    cleanupRef.current?.();
+    cleanupRef.current = effect(prevDeps || []) ?? undefined;
+  }
+
+  useEffectOnce(() => {
+    return () => {
+      cleanupRef.current?.();
+    };
+  });
+}

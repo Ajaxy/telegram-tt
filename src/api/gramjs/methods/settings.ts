@@ -5,9 +5,10 @@ import type {
   ApiAppConfig,
   ApiConfig,
   ApiError,
-  ApiLangString,
   ApiLanguage,
-  ApiNotifyException, ApiPhoto, ApiUser,
+  ApiNotifyException,
+  ApiPhoto,
+  ApiUser,
 } from '../../types';
 import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
 import type { LANG_PACKS } from '../../../config';
@@ -20,7 +21,7 @@ import {
   buildApiNotifyException,
   buildApiSession,
   buildApiWallpaper,
-  buildApiWebSession,
+  buildApiWebSession, buildLangPack, buildLangPackString,
   buildPrivacyRules,
 } from '../apiBuilders/misc';
 
@@ -426,12 +427,7 @@ export async function fetchLangPack({ sourceLangPacks, langCode }: {
     }));
   }));
 
-  const collections = results
-    .filter(Boolean)
-    .map((result) => {
-      return buildCollectionByKey(result.strings.map<ApiLangString>(omitVirtualClassFields), 'key');
-    });
-
+  const collections = results.filter(Boolean).map(buildLangPack);
   if (!collections.length) {
     return undefined;
   }
@@ -452,7 +448,7 @@ export async function fetchLangStrings({ langPack, langCode, keys }: {
     return undefined;
   }
 
-  return result.map(omitVirtualClassFields);
+  return result.map(buildLangPackString);
 }
 
 export async function fetchPrivacySettings(privacyKey: ApiPrivacyKey) {

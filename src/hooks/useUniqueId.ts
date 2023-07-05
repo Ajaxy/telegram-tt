@@ -1,17 +1,12 @@
 import { useRef } from '../lib/teact/teact';
-import generateIdFor from '../util/generateIdFor';
+import generateUniqueId from '../util/generateUniqueId';
 
-const store: Record<string, boolean> = {};
-
-const useUniqueId = () => {
+export default function useUniqueId() {
   const idRef = useRef<string>();
 
   if (!idRef.current) {
-    idRef.current = generateIdFor(store);
-    store[idRef.current] = true;
+    idRef.current = generateUniqueId();
   }
 
   return idRef.current;
-};
-
-export default useUniqueId;
+}

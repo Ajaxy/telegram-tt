@@ -5,7 +5,7 @@ import {
 } from '../../util/windowEnvironment';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
-import generateIdFor from '../../util/generateIdFor';
+import generateUniqueId from '../../util/generateUniqueId';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
 
 interface Params {
@@ -27,7 +27,6 @@ const LOW_PRIORITY_QUALITY = IS_ANDROID ? 0.5 : 0.75;
 const LOW_PRIORITY_QUALITY_SIZE_THRESHOLD = 24;
 const HIGH_PRIORITY_CACHE_MODULO = IS_SAFARI ? 2 : 4;
 const LOW_PRIORITY_CACHE_MODULO = 0;
-const ID_STORE = {};
 
 const workers = launchMediaWorkers().map(({ connector }) => connector);
 const instancesByRenderId = new Map<string, RLottie>();
@@ -92,7 +91,7 @@ class RLottie {
       , canvas,
       renderId,
       params,
-      viewId = generateIdFor(ID_STORE, true), ,
+      viewId = generateUniqueId(), ,
       onLoad,
     ] = args;
     let instance = instancesByRenderId.get(renderId);
@@ -113,7 +112,7 @@ class RLottie {
     private container: HTMLDivElement | HTMLCanvasElement,
     private renderId: string,
     private params: Params,
-    viewId: string = generateIdFor(ID_STORE, true),
+    viewId: string = generateUniqueId(),
     private customColor?: [number, number, number],
     private onLoad?: NoneToVoidFunction | undefined,
     private onEnded?: (isDestroyed?: boolean) => void,
