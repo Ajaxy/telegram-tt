@@ -54,6 +54,7 @@ import styles from './CustomEmojiPicker.module.scss';
 type OwnProps = {
   chatId?: string;
   className?: string;
+  pickerListClassName?: string;
   isHidden?: boolean;
   loadAndPlay: boolean;
   idPrefix?: string;
@@ -102,6 +103,7 @@ const STICKER_SET_IDS_WITH_COVER = new Set([
 
 const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
   className,
+  pickerListClassName,
   isHidden,
   loadAndPlay,
   addedCustomEmojiIds,
@@ -370,6 +372,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     pickerStyles.main_customEmoji,
     'no-selection',
     IS_TOUCH_ENV ? 'no-scrollbar' : 'custom-scroll',
+    pickerListClassName,
   );
 
   return (

@@ -157,6 +157,7 @@ const EditTopic: FC<OwnProps & StateProps> = ({
                   loadAndPlay={isActive}
                   onCustomEmojiSelect={handleCustomEmojiSelect}
                   className={styles.iconPicker}
+                  pickerListClassName="fab-padding-bottom"
                   withDefaultTopicIcons
                 />
               </div>
