@@ -71,8 +71,9 @@ const Avatar: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
-  const user = peer && isUserId(peer.id) ? peer as ApiUser : undefined;
-  const chat = peer && !isUserId(peer.id) ? peer as ApiChat : undefined;
+  const isPeerChat = peer && 'title' in peer;
+  const user = peer && !isPeerChat ? peer as ApiUser : undefined;
+  const chat = peer && isPeerChat ? peer as ApiChat : undefined;
   const isDeleted = user && isDeletedUser(user);
   const isReplies = peer && isChatWithRepliesBot(peer.id);
   const isForum = chat?.isForum;
