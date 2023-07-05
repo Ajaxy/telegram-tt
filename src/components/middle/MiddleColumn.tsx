@@ -53,6 +53,8 @@ import {
   isChatGroup,
   isChatSuperGroup,
   isUserId,
+  isUserRightBanned,
+  getHasAdminRight,
 } from '../../global/helpers';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -139,6 +141,7 @@ type StateProps = {
   shouldSendJoinRequest?: boolean;
   pinnedIds?: number[];
   topMessageId?: number;
+  canUnpin?: boolean;
 };
 
 function isImage(item: DataTransferItem) {
@@ -192,6 +195,7 @@ function MiddleColumn({
   shouldLoadFullChat,
   pinnedIds,
   topMessageId,
+  canUnpin,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -526,7 +530,7 @@ function MiddleColumn({
                     isMobile={isMobile}
                   />
                 )}
-                {isPinnedMessageList && (
+                {isPinnedMessageList && canUnpin && (
                   <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
                     <Button
                       size="tiny"
@@ -720,6 +724,13 @@ export default memo(withGlobal<OwnProps>(
     const isCommentThread = threadId !== MAIN_THREAD_ID && !chat?.isForum;
     const topMessageId = isCommentThread ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
 
+    const canUnpin = chat && (
+      isPrivate || (
+        chat?.isCreator || (!isChannel && !isUserRightBanned(chat, 'pinMessages'))
+          || getHasAdminRight(chat, 'pinMessages')
+      )
+    );
+
     return {
       ...state,
       chatId,
@@ -751,6 +762,7 @@ export default memo(withGlobal<OwnProps>(
       shouldLoadFullChat,
       pinnedIds,
       topMessageId,
+      canUnpin,
     };
   },
 )(MiddleColumn));
