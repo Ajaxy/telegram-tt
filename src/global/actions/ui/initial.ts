@@ -27,6 +27,7 @@ import { replaceSettings } from '../../reducers';
 const HISTORY_ANIMATION_DURATION = 450;
 
 setSystemThemeChangeCallback((theme) => {
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
 
   if (!global.settings.byKey.shouldUseSystemTheme) return;

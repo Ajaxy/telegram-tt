@@ -32,14 +32,18 @@
     font-size: 0.9375rem;
     color: var(--color-text-secondary);
 
-    &::before {
+    &-first {
+      padding-top: 0.75rem;
+    }
+
+    &-with-border::before {
       content: "";
       position: absolute;
-      width: 100%;
+      width: calc(100% + 1.25rem);
       height: 1px;
       background: var(--color-borders);
-      left: 0.625rem;
-      top: -1px;
+      left: 0;
+      top: 0;
     }
 
     &[dir="rtl"],
@@ -70,6 +74,10 @@
 
     &::before {
       display: none;
+    }
+
+    &.without-border {
+      box-shadow: none;
     }
   }
 
