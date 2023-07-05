@@ -313,7 +313,7 @@ document.addEventListener('dblclick', () => {
     Object
       .values(DEBUG_components)
       .map(({ avgRenderTime, ...state }) => {
-        return { ...state, ...(avgRenderTime && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
+        return { ...state, ...(avgRenderTime !== undefined && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
       }),
     'renders',
     'desc',
