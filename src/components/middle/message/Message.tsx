@@ -648,7 +648,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   let reactionsPosition!: ReactionsPosition;
   if (hasReactions) {
-    if (isCustomShape || ((photo || video) && !hasText)) {
+    if (isCustomShape || ((photo || video || (location && location.type === 'geo')) && !hasText)) {
       reactionsPosition = 'outside';
     } else if (asForwarded) {
       metaPosition = 'standalone';

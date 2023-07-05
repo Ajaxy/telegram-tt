@@ -126,7 +126,7 @@ export function buildContentClassName(
       classNames.push('has-solid-background');
     }
 
-    if (isLastInGroup && (photo || (location && !hasText) || !isMediaWithNoText)) {
+    if (isLastInGroup && (photo || !isMediaWithNoText || (location && asForwarded))) {
       classNames.push('has-appendix');
     }
   }

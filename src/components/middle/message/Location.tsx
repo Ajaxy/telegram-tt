@@ -8,15 +8,12 @@ import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
-import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import {
   getMessageLocation,
   buildStaticMapHash,
   isGeoLiveExpired,
-  isOwnMessage,
   isUserId,
 } from '../../../global/helpers';
-import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl, prepareMapUrl,
@@ -31,7 +28,6 @@ import useTimeout from '../../../hooks/useTimeout';
 import buildClassName from '../../../util/buildClassName';
 import usePrevious from '../../../hooks/usePrevious';
 import useInterval from '../../../hooks/useInterval';
-import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/Skeleton';
@@ -49,7 +45,7 @@ const DEFAULT_MAP_CONFIG = {
 };
 
 // eslint-disable-next-line max-len
-const SVG_PIN = { __html: '<svg version="1.1" class="round-pin" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve"><g><circle cx="32" cy="32" r="24.5"/><path d="M32,8c13.23,0,24,10.77,24,24S45.23,56,32,56S8,45.23,8,32S18.77,8,32,8 M32,7C18.19,7,7,18.19,7,32s11.19,25,25,25 s25-11.19,25-25S45.81,7,32,7L32,7z"/></g><g><polygon points="29.38,57.67 27.4,56.08 30.42,54.42 32,51.54 33.58,54.42 36.6,56.08 34.69,57.61 32,60.73"/><path d="M32,52.58l1.07,1.95l0.14,0.26l0.26,0.14l2.24,1.22l-1.33,1.06l-0.07,0.06l-0.06,0.07L32,59.96l-2.24-2.61l-0.06-0.07 l-0.07-0.06l-1.33-1.06l2.24-1.22l0.26-0.14l0.14-0.26L32,52.58 M32,50.5l-1.94,3.56L26.5,56l2.5,2l3,3.5l3-3.5l2.5-2l-3.56-1.94 L32,50.5L32,50.5z"/></g></svg>' };
+const SVG_PIN = { __html: '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="round-pin" style="enable-background:new 0 0 64 64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24.5"/><path d="M32 8c13.23 0 24 10.77 24 24S45.23 56 32 56 8 45.23 8 32 18.77 8 32 8m0-1C18.19 7 7 18.19 7 32s11.19 25 25 25 25-11.19 25-25S45.81 7 32 7z"/><path d="m29.38 57.67-1.98-1.59 3.02-1.66L32 51.54l1.58 2.88 3.02 1.66-1.91 1.53L32 60.73z"/><path d="m32 52.58 1.07 1.95.14.26.26.14 2.24 1.22-1.33 1.06-.07.06-.06.07L32 59.96l-2.24-2.61-.06-.07-.07-.06-1.33-1.06 2.24-1.22.26-.14.14-.26L32 52.58m0-2.08-1.94 3.56L26.5 56l2.5 2 3 3.5 3-3.5 2.5-2-3.56-1.94L32 50.5z"/></svg>' };
 
 type OwnProps = {
   message: ApiMessage;
@@ -62,9 +58,6 @@ type OwnProps = {
 const Location: FC<OwnProps> = ({
   message,
   peer,
-  isInSelectMode,
-  isSelected,
-  theme,
 }) => {
   const { openUrl } = getActions();
   // eslint-disable-next-line no-null/no-null
@@ -97,8 +90,6 @@ const Location: FC<OwnProps> = ({
   const isPeerUser = peer && isUserId(peer.id);
   const avatarUser = (peer && isPeerUser) ? peer as ApiUser : undefined;
   const avatarChat = (peer && !isPeerUser) ? peer as ApiChat : undefined;
-
-  const isOwn = isOwnMessage(message);
 
   const accuracyRadiusPx = useMemo(() => {
     if (type !== 'geoLive' || !point.accuracyRadius) {
@@ -145,26 +136,6 @@ const Location: FC<OwnProps> = ({
       updateCountdown(countdownRef.current);
     }
   }, [updateCountdown]);
-
-  useLayoutEffectWithPrevDeps(([prevShouldRenderText]) => {
-    if (shouldRenderText) {
-      if (!prevShouldRenderText) {
-        ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!.removeAttribute(CUSTOM_APPENDIX_ATTRIBUTE);
-      }
-      return;
-    }
-
-    if (mapBlobUrl) {
-      const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
-      getCustomAppendixBg(mapBlobUrl, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
-        requestMutation(() => {
-          contentEl.style.setProperty('--appendix-bg', appendixBg);
-          contentEl.classList.add('has-appendix-thumb');
-          contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
-        });
-      });
-    }
-  }, [shouldRenderText, isOwn, isInSelectMode, isSelected, theme, mapBlobUrl]);
 
   useEffect(() => {
     // Prevent map refetching for slight location changes
@@ -253,11 +224,13 @@ const Location: FC<OwnProps> = ({
     if (type === 'venue') {
       const color = getVenueColor(location.venueType);
       const iconSrc = getVenueIconUrl(location.venueType);
-      return (
-        <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN} style={`--pin-color: ${color}`}>
-          <img src={iconSrc} className="venue-icon" alt="" />
-        </div>
-      );
+      if (iconSrc) {
+        return (
+          <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN} style={`--pin-color: ${color}`}>
+            <img src={iconSrc} className="venue-icon" alt="" />
+          </div>
+        );
+      }
     }
 
     return (

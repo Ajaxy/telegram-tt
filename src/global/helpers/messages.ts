@@ -76,8 +76,8 @@ export function getMessageCustomShape(message: ApiMessage): boolean {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game || invoice
-    || location) {
+  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game
+    || invoice || location) {
     return false;
   }
 
