@@ -61,7 +61,7 @@ addActionHandler('resetLeftColumnWidth', (global): ActionReturnType => {
 });
 
 addActionHandler('toggleManagement', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { force, tabId = getCurrentTabId() } = payload || {};
   const { chatId } = selectCurrentMessageList(global, tabId) || {};
 
   if (!chatId) {
@@ -76,7 +76,7 @@ addActionHandler('toggleManagement', (global, actions, payload): ActionReturnTyp
         ...tabState.management.byChatId,
         [chatId]: {
           ...tabState.management.byChatId[chatId],
-          isActive: !(tabState.management.byChatId[chatId] || {}).isActive,
+          isActive: force !== undefined ? force : !(tabState.management.byChatId[chatId] || {}).isActive,
         },
       },
     },

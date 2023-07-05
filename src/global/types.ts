@@ -1526,7 +1526,9 @@ export interface ActionPayloads {
   hideChatReportPanel: {
     chatId: string;
   };
-  toggleManagement: WithTabId | undefined;
+  toggleManagement: ({
+    force?: boolean;
+  } & WithTabId) | undefined;
   requestNextManagementScreen: ({
     screen?: ManagementScreens;
   } & WithTabId) | undefined;

@@ -38,6 +38,10 @@
       transition: opacity 0.2s ease-in, transform 0.2s ease-in !important;
     }
 
+    &.close-fast {
+      transition-duration: 70ms !important;
+    }
+
     body.no-context-menu-animations & {
       transform: none !important;
       transition: opacity 0.15s !important;
