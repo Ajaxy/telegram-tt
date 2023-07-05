@@ -269,7 +269,7 @@ class MTProtoState {
             if (this.msgIds.length > 500) {
                 this.msgIds.shift();
             }
-            this.msgIds.push(remoteMsgId.toString());
+
             const remoteSequence = reader.readInt();
             const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
             const diff = body.length - containerLen;
@@ -282,10 +282,9 @@ class MTProtoState {
             // We could read msg_len bytes and use those in a new reader to read
             // the next TLObject without including the padding, but since the
             // reader isn't used for anything else after this, it's unnecessary.
-            const obj = reader.tgReadObject();
-
+            const obj = await reader.tgReadObject();
             // We only check for objects that telegram has returned to us (Updates) not ones we send.
-            if (obj?.constructor.name.startsWith('Update')) {
+            if (obj?.className?.startsWith('Update')) {
                 const now = Math.floor(Date.now() / 1000);
                 const msgLocalTime = this.getMsgIdTimeLocal(remoteMsgId);
 
@@ -294,6 +293,11 @@ class MTProtoState {
                     throw new SecurityError('The message time is incorrect.');
                 }
             }
+
+            if (obj && !('errorCode' in obj)) {
+                this.msgIds.push(remoteMsgId.toString());
+            }
+
             return new TLMessage(remoteMsgId, remoteSequence, obj);
         }
     }
