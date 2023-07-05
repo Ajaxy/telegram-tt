@@ -2322,7 +2322,7 @@ export async function loadFullChat<T extends GlobalState>(
     global = updateGroupCall(
       global,
       groupCall.id!,
-      omit(groupCall, ['connectionState']),
+      omit(groupCall, ['connectionState', 'isLoaded']),
       undefined,
       existingGroupCall ? undefined : groupCall.participantsCount,
     );

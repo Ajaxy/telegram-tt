@@ -284,7 +284,7 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
   const { groupCalls: { activeGroupCallId } } = global;
   let groupCall = id ? selectGroupCall(global, id) : selectChatGroupCall(global, chatId!);
 
-  if (groupCall?.id === activeGroupCallId) {
+  if (groupCall && groupCall.id === activeGroupCallId) {
     actions.toggleGroupCallPanel({ tabId });
     return;
   }
@@ -304,7 +304,15 @@ addActionHandler('joinGroupCall', async (global, actions, payload): Promise<void
     return;
   }
 
-  if (!groupCall && (!id || !accessHash)) {
+  if (!groupCall && (!id || !accessHash) && chatId) {
+    const chat = selectChat(global, chatId);
+
+    if (!chat) return;
+
+    await loadFullChat(global, actions, chat, tabId);
+    global = getGlobal();
+    groupCall = selectChatGroupCall(global, chatId);
+  } else if (!groupCall && id && accessHash) {
     groupCall = await fetchGroupCall(global, {
       id,
       accessHash,
@@ -461,6 +469,7 @@ export function checkNavigatorUserMediaPermissions<T extends GlobalState>(
             tabId,
           });
         } else {
+          stream.getTracks().forEach((track) => track.stop());
           checkMicrophonePermission(global, actions, tabId);
         }
       })
@@ -485,6 +494,8 @@ function checkMicrophonePermission<T extends GlobalState>(
           message: langProvider.translate('RequestAcces.Error.HaveNotAccess.Call'),
           tabId,
         });
+      } else {
+        stream.getTracks().forEach((track) => track.stop());
       }
     })
     .catch(() => {

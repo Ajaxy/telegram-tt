@@ -42,6 +42,7 @@ GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 const gramJsUpdateEventBuilder = { build: (update: object) => update };
 
 const CHAT_ABORT_CONTROLLERS = new Map<string, ChatAbortController>();
+const ABORT_CONTROLLERS = new Map<string, AbortController>();
 
 let onUpdate: OnApiUpdate;
 let client: TelegramClient;
@@ -211,6 +212,8 @@ type InvokeRequestParams = {
   shouldIgnoreErrors?: boolean;
   abortControllerChatId?: string;
   abortControllerThreadId?: number;
+  abortControllerGroup?: 'call';
+  shouldRetryOnTimeout?: boolean;
 };
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
@@ -229,6 +232,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 ) {
   const {
     shouldThrow, shouldIgnoreUpdates, dcId, shouldIgnoreErrors, abortControllerChatId, abortControllerThreadId,
+    shouldRetryOnTimeout, abortControllerGroup,
   } = params;
   const shouldReturnTrue = Boolean(params.shouldReturnTrue);
 
@@ -243,12 +247,21 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     abortSignal = abortControllerThreadId ? controller.getThreadSignal(abortControllerThreadId) : controller.signal;
   }
 
+  if (abortControllerGroup) {
+    let controller = ABORT_CONTROLLERS.get(abortControllerGroup);
+    if (!controller) {
+      controller = new AbortController();
+      ABORT_CONTROLLERS.set(abortControllerGroup, controller);
+    }
+    abortSignal = controller.signal;
+  }
+
   try {
     if (DEBUG) {
       log('INVOKE', request.className);
     }
 
-    const result = await client.invoke(request, dcId, abortSignal);
+    const result = await client.invoke(request, dcId, abortSignal, shouldRetryOnTimeout);
 
     if (DEBUG) {
       log('RESPONSE', request.className, result);
@@ -324,6 +337,11 @@ export function abortChatRequests(params: { chatId: string; threadId?: number })
   }
 
   controller?.abortThread(threadId, 'Thread change');
+}
+
+export function abortRequestGroup(group: string) {
+  ABORT_CONTROLLERS.get(group)?.abort();
+  ABORT_CONTROLLERS.delete(group);
 }
 
 export async function fetchCurrentUser() {

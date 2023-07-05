@@ -10,6 +10,8 @@ import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -83,24 +85,32 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
     };
   }, [groupCall?.id, groupCall?.isLoaded, isActive, subscribeToGroupCallUpdates]);
 
-  if (!groupCall) return undefined;
+  const {
+    shouldRender,
+    transitionClassNames,
+  } = useShowTransition(Boolean(groupCall && isActive));
+
+  const renderingParticipantCount = useCurrentOrPrev(groupCall?.participantsCount, true);
+  const renderingFetchedParticipants = useCurrentOrPrev(fetchedParticipants, true);
+
+  if (!shouldRender) return undefined;
 
   return (
     <div
       className={buildClassName(
         'GroupCallTopPane',
         hasPinnedOffset && 'has-pinned-offset',
-        !isActive && 'is-hidden',
         className,
+        transitionClassNames,
       )}
       onClick={handleJoinGroupCall}
     >
       <div className="info">
         <span className="title">{lang('VoipGroupVoiceChat')}</span>
-        <span className="participants">{lang('Participants', groupCall.participantsCount || 0, 'i')}</span>
+        <span className="participants">{lang('Participants', renderingParticipantCount ?? 0, 'i')}</span>
       </div>
       <div className="avatars">
-        {fetchedParticipants.map((peer) => (
+        {renderingFetchedParticipants?.map((peer) => (
           <Avatar
             key={peer.id}
             peer={peer}

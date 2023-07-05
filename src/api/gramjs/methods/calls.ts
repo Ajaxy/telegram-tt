@@ -176,7 +176,10 @@ export async function joinGroupCall({
       data: JSON.stringify(params),
     }),
     inviteHash,
-  }));
+  }), {
+    shouldRetryOnTimeout: true,
+    abortControllerGroup: 'call',
+  });
 
   if (!result) return undefined;
 

@@ -26,10 +26,6 @@
     box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
   }
 
-  &.is-hidden {
-    display: none;
-  }
-
   @media (max-width: 600px) {
     &.has-pinned-offset {
       top: calc(100% + 2.875rem);
