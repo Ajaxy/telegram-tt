@@ -1101,7 +1101,7 @@ const Message: FC<OwnProps & StateProps> = ({
         {invoice && !invoice.extendedMedia && (
           <Invoice
             message={message}
-            shouldAffectAppendix={hasCustomAppendix}
+            shouldAffectAppendix={hasCustomAppendix && !hasReactions}
             isInSelectMode={isInSelectMode}
             isSelected={isSelected}
             theme={theme}

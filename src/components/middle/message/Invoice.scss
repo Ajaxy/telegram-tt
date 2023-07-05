@@ -2,6 +2,7 @@
   .title {
     color: var(--accent-color);
     font-weight: 500;
+    margin-bottom: 0;
   }
 
   .description {
@@ -11,6 +12,10 @@
     &.has-image {
       .content-inner:not(.forwarded-message) & {
         margin: 0.5rem -0.5rem -0.375rem;
+      }
+
+      .message-content.has-reactions & {
+        margin-bottom: 0;
       }
 
       .invoice-image {
