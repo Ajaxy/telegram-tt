@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   useEffect,
+  useLayoutEffect,
   useState,
   memo,
   useMemo,
@@ -96,7 +97,7 @@ const Poll: FC<OwnProps & StateProps> = ({
     }
   }, [isSubmitting, poll.results.results, requestConfetti]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (closePeriod > 0) {
       setTimeout(() => setClosePeriod(closePeriod - 1), 1000);
     }
