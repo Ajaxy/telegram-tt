@@ -197,6 +197,10 @@ export function isMessageLocal(message: ApiMessage) {
   return isLocalMessageId(message.id);
 }
 
+export function isMessageFailed(message: ApiMessage) {
+  return message.sendingState === 'messageSendingStateFailed';
+}
+
 export function isLocalMessageId(id: number) {
   return !Number.isInteger(id);
 }

@@ -50,7 +50,7 @@ import {
   isUserRightBanned,
   canSendReaction,
   getAllowedAttachmentOptions,
-  isLocalMessageId,
+  isLocalMessageId, isMessageFailed,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -538,6 +538,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isChannel = isChatChannel(chat);
   const isBotChat = Boolean(selectBot(global, chat.id));
   const isLocal = isMessageLocal(message);
+  const isFailed = isMessageFailed(message);
   const isServiceNotification = isServiceNotificationMessage(message);
   const isOwn = isOwnMessage(message);
   const isAction = isActionMessage(message);
@@ -582,7 +583,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
     canPin = !canUnpin;
   }
 
-  const canDelete = !isLocal && !isServiceNotification && (
+  const canDelete = (!isLocal || isFailed) && !isServiceNotification && (
     isPrivate
     || isOwn
     || isBasicGroup
@@ -614,8 +615,8 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const canFaveSticker = !isAction && hasSticker && !hasFavoriteSticker;
   const canUnfaveSticker = !isAction && hasFavoriteSticker;
   const canCopy = !isAction;
-  const canCopyLink = !isAction && (isChannel || isSuperGroup);
-  const canSelect = !isAction;
+  const canCopyLink = !isLocal && !isAction && (isChannel || isSuperGroup);
+  const canSelect = !isLocal && !isAction;
 
   const canDownload = Boolean(content.webPage?.document || content.webPage?.video || content.webPage?.photo
     || content.audio || content.voice || content.photo || content.video || content.document || content.sticker);
