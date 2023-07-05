@@ -1439,7 +1439,7 @@ function buildUploadingMedia(
           photo: {
             id: LOCAL_MEDIA_UPLOADING_TEMP_ID,
             sizes: [],
-            thumbnail: { width, height, dataUri: blobUrl },
+            thumbnail: { width, height, dataUri: previewBlobUrl || blobUrl },
             blobUrl,
             isSpoiler: shouldSendAsSpoiler,
           },
