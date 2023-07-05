@@ -91,6 +91,7 @@ export function renderActionMessageText(
     ) : actionOriginChat ? (
       renderChatContent(lang, actionOriginChat, noLinks) || NBSP
     ) : 'User',
+    '',
   );
 
   unprocessed = processed.pop() as string;
@@ -157,6 +158,7 @@ export function renderActionMessageText(
     targetUsers
       ? targetUsers.map((user) => renderUserContent(user, noLinks)).filter(Boolean)
       : 'User',
+    '',
   );
 
   unprocessed = processed.pop() as string;
@@ -190,6 +192,7 @@ export function renderActionMessageText(
     targetChatId
       ? renderMigratedContent(targetChatId, noLinks)
       : 'another chat',
+    '',
   );
   processed.forEach((part) => {
     content.push(...renderText(part));
