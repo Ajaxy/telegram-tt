@@ -287,6 +287,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         });
       }
 
+      global = updateChat(global, chatId, {
+        lastReadInboxMessageId: message.id,
+      });
+
       setGlobal(global);
 
       break;
