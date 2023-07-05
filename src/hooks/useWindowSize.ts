@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from '../lib/teact/teact';
-import type { ApiDimensions } from '../api/types';
 
 import { throttle } from '../util/schedulers';
 import windowSize from '../util/windowSize';
@@ -7,12 +6,12 @@ import useDebouncedCallback from './useDebouncedCallback';
 
 const THROTTLE = 250;
 
-const useWindowSize = () => {
-  const [size, setSize] = useState<ApiDimensions>(windowSize.get());
+export default function useWindowSize() {
+  const { width: initialWidth, height: initialHeight } = windowSize.get();
+  const [width, setWidth] = useState(initialWidth);
+  const [height, setHeight] = useState(initialHeight);
   const [isResizing, setIsResizing] = useState(false);
   const setIsResizingDebounced = useDebouncedCallback(setIsResizing, [setIsResizing], THROTTLE, true);
-
-  const result = useMemo(() => ({ ...size, isResizing }), [isResizing, size]);
 
   useEffect(() => {
     const throttledSetIsResizing = throttle(() => {
@@ -20,7 +19,9 @@ const useWindowSize = () => {
     }, THROTTLE, true);
 
     const throttledSetSize = throttle(() => {
-      setSize(windowSize.get());
+      const { width: newWidth, height: newHeight } = windowSize.get();
+      setWidth(newWidth);
+      setHeight(newHeight);
       setIsResizingDebounced(false);
     }, THROTTLE, false);
 
@@ -36,7 +37,5 @@ const useWindowSize = () => {
     };
   }, [setIsResizingDebounced]);
 
-  return result;
-};
-
-export default useWindowSize;
+  return useMemo(() => ({ width, height, isResizing }), [height, isResizing, width]);
+}
