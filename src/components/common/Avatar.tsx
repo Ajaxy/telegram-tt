@@ -28,13 +28,15 @@ import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
 import { useFastClick } from '../../hooks/useFastClick';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 
 import './Avatar.scss';
-import useLastCallback from '../../hooks/useLastCallback';
 
 const LOOP_COUNT = 3;
+
+export type AvatarSize = 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'jumbo';
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
@@ -42,7 +44,7 @@ cn.icon = cn('icon');
 
 type OwnProps = {
   className?: string;
-  size?: 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'jumbo';
+  size?: AvatarSize;
   peer?: ApiChat | ApiUser;
   photo?: ApiPhoto;
   text?: string;

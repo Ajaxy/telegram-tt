@@ -11,6 +11,10 @@
   --hover-color: var(--color-reply-hover);
   --color-reaction: var(--color-message-reaction);
   --hover-color-reaction: var(--color-message-reaction-hover);
+  --text-color-reaction: var(--accent-color);
+  --color-reaction-chosen: var(--accent-color);
+  --hover-color-reaction-chosen: var(--color-message-reaction-chosen-hover);
+  --text-color-reaction-chosen: #FFFFFF;
   --active-color: var(--color-reply-active);
   --max-width: 29rem;
   --accent-color: var(--color-primary);
@@ -184,6 +188,10 @@
     --hover-color: var(--color-reply-own-hover);
     --color-reaction: var(--color-message-reaction-own);
     --hover-color-reaction: var(--color-message-reaction-hover-own);
+    --text-color-reaction: var(--accent-color);
+    --color-reaction-chosen: var(--accent-color);
+    --hover-color-reaction-chosen: var(--color-message-reaction-chosen-hover-own);
+    --text-color-reaction-chosen: var(--color-background);
     --active-color: var(--color-reply-own-active);
     --max-width: 30rem;
     --accent-color: var(--color-accent-own);
