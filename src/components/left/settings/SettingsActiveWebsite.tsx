@@ -75,7 +75,7 @@ const SettingsActiveWebsite: FC<OwnProps & StateProps> = ({
     >
       <Avatar
         className={styles.avatar}
-        user={renderingBot}
+        peer={renderingBot}
         size="large"
       />
       {renderingBot && <FullNameTitle className={styles.title} peer={renderingBot} />}

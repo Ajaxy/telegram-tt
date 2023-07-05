@@ -13,7 +13,6 @@ import {
   selectChat,
   selectCurrentTextSearch,
 } from '../../global/selectors';
-import { isChatChannel } from '../../global/helpers';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import { renderMessageSummary } from '../common/helpers/renderMessageText';
 import useLang from '../../hooks/useLang';
@@ -37,7 +36,6 @@ export type OwnProps = {
 };
 
 type StateProps = {
-  chat?: ApiChat;
   messagesById?: Record<number, ApiMessage>;
   query?: string;
   totalCount?: number;
@@ -48,7 +46,6 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   chatId,
   threadId,
   isActive,
-  chat,
   messagesById,
   query,
   totalCount,
@@ -96,26 +93,29 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         return undefined;
       }
 
-      const senderUser = message.senderId ? selectUser(getGlobal(), message.senderId) : undefined;
+      const global = getGlobal();
 
-      let senderChat;
-      if (chat && isChatChannel(chat)) {
-        senderChat = chat;
-      } else if (message.forwardInfo) {
+      let senderPeer = message.senderId
+        ? selectUser(global, message.senderId) || selectChat(global, message.senderId)
+        : undefined;
+
+      if (!senderPeer && message.forwardInfo) {
         const { isChannelPost, fromChatId } = message.forwardInfo;
-        senderChat = isChannelPost && fromChatId ? selectChat(getGlobal(), fromChatId) : undefined;
-      } else {
-        senderChat = message.senderId ? selectChat(getGlobal(), message.senderId) : undefined;
+        const originalSender = isChannelPost && fromChatId ? selectChat(global, fromChatId) : undefined;
+        if (originalSender) senderPeer = originalSender;
+      }
+
+      if (!senderPeer) {
+        return undefined;
       }
 
       return {
         message,
-        senderUser,
-        senderChat,
+        senderPeer: senderPeer!,
         onClick: () => focusMessage({ chatId, threadId, messageId: id }),
       };
     }).filter(Boolean);
-  }, [query, viewportIds, messagesById, chat, focusMessage, chatId, threadId]);
+  }, [query, viewportIds, messagesById, focusMessage, chatId, threadId]);
 
   const handleKeyDown = useKeyboardListNavigation(containerRef, true, (index) => {
     const foundResult = viewportResults?.[index === -1 ? 0 : index];
@@ -125,11 +125,10 @@ const RightSearch: FC<OwnProps & StateProps> = ({
   }, '.ListItem-button', true);
 
   const renderSearchResult = ({
-    message, senderUser, senderChat, onClick,
+    message, senderPeer, onClick,
   }: {
     message: ApiMessage;
-    senderUser?: ApiUser;
-    senderChat?: ApiChat;
+    senderPeer: ApiUser | ApiChat;
     onClick: NoneToVoidFunction;
   }) => {
     const text = renderMessageSummary(lang, message, undefined, query);
@@ -142,12 +141,11 @@ const RightSearch: FC<OwnProps & StateProps> = ({
         onClick={onClick}
       >
         <Avatar
-          chat={senderChat}
-          user={senderUser}
+          peer={senderPeer}
         />
         <div className="info">
           <div className="search-result-message-top">
-            <FullNameTitle peer={(senderUser || senderChat)!} withEmojiStatus />
+            <FullNameTitle peer={senderPeer} withEmojiStatus />
             <LastMessageMeta message={message} />
           </div>
           <div className="subtitle" dir="auto">
@@ -189,9 +187,8 @@ const RightSearch: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
-    const chat = selectChat(global, chatId);
-    const messagesById = chat && selectChatMessages(global, chat.id);
-    if (!chat || !messagesById) {
+    const messagesById = selectChatMessages(global, chatId);
+    if (!messagesById) {
       return {};
     }
 
@@ -199,7 +196,6 @@ export default memo(withGlobal<OwnProps>(
     const { totalCount, foundIds } = results || {};
 
     return {
-      chat,
       messagesById,
       query,
       totalCount,

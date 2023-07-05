@@ -49,7 +49,7 @@ const Contact: FC<OwnProps & StateProps> = ({
     >
       <Avatar
         size="large"
-        user={user}
+        peer={user}
         text={firstName || lastName}
       />
       <div className="contact-info">

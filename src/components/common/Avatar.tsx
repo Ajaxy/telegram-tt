@@ -1,11 +1,11 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React, {
-  memo, useMemo, useRef,
+  memo, useRef,
 } from '../../lib/teact/teact';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type {
-  ApiChat, ApiPhoto, ApiUser, ApiUserStatus,
+  ApiChat, ApiPhoto, ApiUser,
 } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../api/types';
@@ -19,7 +19,6 @@ import {
   isUserId,
   isChatWithRepliesBot,
   isDeletedUser,
-  isUserOnline,
 } from '../../global/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
@@ -44,10 +43,8 @@ cn.icon = cn('icon');
 type OwnProps = {
   className?: string;
   size?: 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'jumbo';
-  chat?: ApiChat;
-  user?: ApiUser;
+  peer?: ApiChat | ApiUser;
   photo?: ApiPhoto;
-  userStatus?: ApiUserStatus;
   text?: string;
   isSavedMessages?: boolean;
   withVideo?: boolean;
@@ -60,10 +57,8 @@ type OwnProps = {
 const Avatar: FC<OwnProps> = ({
   className,
   size = 'large',
-  chat,
-  user,
+  peer,
   photo,
-  userStatus,
   text,
   isSavedMessages,
   withVideo,
@@ -74,8 +69,10 @@ const Avatar: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
+  const user = peer && isUserId(peer.id) ? peer as ApiUser : undefined;
+  const chat = peer && !isUserId(peer.id) ? peer as ApiChat : undefined;
   const isDeleted = user && isDeletedUser(user);
-  const isReplies = user && isChatWithRepliesBot(user.id);
+  const isReplies = peer && isChatWithRepliesBot(peer.id);
   const isForum = chat?.isForum;
   let imageHash: string | undefined;
   let videoHash: string | undefined;
@@ -84,10 +81,8 @@ const Avatar: FC<OwnProps> = ({
 
   const shouldFetchBig = size === 'jumbo';
   if (!isSavedMessages && !isDeleted) {
-    if (user && !noPersonalPhoto) {
-      imageHash = getChatAvatarHash(user, shouldFetchBig ? 'big' : undefined);
-    } else if (chat) {
-      imageHash = getChatAvatarHash(chat, shouldFetchBig ? 'big' : undefined);
+    if ((user && !noPersonalPhoto) || chat) {
+      imageHash = getChatAvatarHash(peer!, shouldFetchBig ? 'big' : undefined);
     } else if (photo) {
       imageHash = `photo${photo.id}?size=m`;
       if (photo.isVideo && withVideo) {
@@ -103,12 +98,6 @@ const Avatar: FC<OwnProps> = ({
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
   const transitionClassNames = useMediaTransition(hasBlobUrl);
-
-  const isOnline = !isSavedMessages && user && userStatus && isUserOnline(user, userStatus);
-  const onlineTransitionClassNames = useMediaTransition(isOnline);
-  const onlineClassNamesPrefixed = useMemo(() => {
-    return onlineTransitionClassNames.split(' ').map((c) => (c === 'shown' ? 'online' : `online-${c}`)).join(' ');
-  }, [onlineTransitionClassNames]);
 
   const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
@@ -200,12 +189,11 @@ const Avatar: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
-    `color-bg-${getUserColorKey(user || chat)}`,
+    `color-bg-${getUserColorKey(peer)}`,
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
-    onlineClassNamesPrefixed,
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
@@ -218,13 +206,11 @@ const Avatar: FC<OwnProps> = ({
     }
   });
 
-  const senderId = (user || chat) && (user || chat)!.id;
-
   return (
     <div
       ref={ref}
       className={fullClassName}
-      data-test-sender-id={IS_TEST ? senderId : undefined}
+      data-test-sender-id={IS_TEST ? peer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
       onClick={handleClick}
       onMouseDown={handleMouseDown}

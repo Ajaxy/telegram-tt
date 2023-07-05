@@ -72,6 +72,8 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
     return undefined;
   }
 
+  const peer = privateChatUser || chat;
+
   return (
     <ListItem
       className="ChatMessage chat-item-clickable"
@@ -80,14 +82,13 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
       buttonRef={buttonRef}
     >
       <Avatar
-        chat={chat}
-        user={privateChatUser}
+        peer={peer}
         isSavedMessages={privateChatUser?.isSelf}
       />
       <div className="info">
         <div className="info-row">
           <FullNameTitle
-            peer={privateChatUser || chat}
+            peer={peer}
             withEmojiStatus
             isSavedMessages={chatId === privateChatUser?.id && privateChatUser?.isSelf}
           />

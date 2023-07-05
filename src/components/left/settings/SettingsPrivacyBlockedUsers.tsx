@@ -68,9 +68,9 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
 
   function renderContact(contactId: string, i: number, viewportOffset: number) {
     const isPrivate = isUserId(contactId);
-    const user = isPrivate ? usersByIds[contactId] : undefined;
-    const chat = !isPrivate ? chatsByIds[contactId] : undefined;
-    const userOrChat = user || chat;
+    const user = usersByIds[contactId];
+    const chat = chatsByIds[contactId];
+    const peer = user || chat;
 
     const className = buildClassName(
       'Chat chat-item-clickable blocked-list-item small-icon',
@@ -96,11 +96,10 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
       >
         <Avatar
           size="medium"
-          user={user}
-          chat={chat}
+          peer={peer}
         />
         <div className="contact-info" dir="auto">
-          {userOrChat && <FullNameTitle peer={userOrChat} />}
+          {peer && <FullNameTitle peer={peer} />}
           {user?.phoneNumber && (
             <div className="contact-phone" dir="auto">{formatPhoneNumberWithCode(phoneCodeList, user.phoneNumber)}</div>
           )}

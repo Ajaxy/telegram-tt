@@ -282,7 +282,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           ) : stickerSet.id === FAVORITE_SYMBOL_SET_ID ? (
             <i className="icon icon-favorite" />
           ) : stickerSet.id === CHAT_STICKER_SET_ID ? (
-            <Avatar chat={chat} size="small" />
+            <Avatar peer={chat} size="small" />
           ) : (
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}

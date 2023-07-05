@@ -7,7 +7,6 @@ import type { ApiSendAsPeerId } from '../../../api/types';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
-import { isUserId } from '../../../global/helpers';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
@@ -95,9 +94,9 @@ const SendAsMenu: FC<OwnProps> = ({
     >
       <div className="send-as-title" dir="auto">{lang('SendMessageAsTitle')}</div>
       {usersById && chatsById && sendAsPeerIds?.map(({ id, isPremium }, index) => {
-        const user = isUserId(id) ? usersById[id] : undefined;
-        const chat = !user ? chatsById[id] : undefined;
-        const userOrChat = user || chat;
+        const user = usersById[id];
+        const chat = chatsById[id];
+        const peer = user || chat;
 
         const handleClick = () => {
           if (!isPremium || isCurrentUserPremium) {
@@ -128,12 +127,11 @@ const SendAsMenu: FC<OwnProps> = ({
           >
             <Avatar
               size="small"
-              chat={chat}
-              user={user}
+              peer={peer}
               className={avatarClassName}
             />
             <div className="info">
-              {userOrChat && <FullNameTitle peer={userOrChat} noFake />}
+              {peer && <FullNameTitle peer={peer} noFake />}
               <span className="subtitle">{user
                 ? lang('VoipGroupPersonalAccount')
                 : lang('Subscribers', chat?.membersCount, 'i')}

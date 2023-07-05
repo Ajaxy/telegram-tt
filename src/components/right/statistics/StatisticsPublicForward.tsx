@@ -27,7 +27,7 @@ const StatisticsPublicForward: FC<OwnProps> = ({ data }) => {
 
   return (
     <div className="StatisticsPublicForward" onClick={handleClick}>
-      <Avatar size="medium" chat={data.chat} />
+      <Avatar size="medium" peer={data.chat} />
 
       <div className="StatisticsPublicForward__info">
         <div className="StatisticsPublicForward__title">

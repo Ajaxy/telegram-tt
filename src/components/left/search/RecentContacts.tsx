@@ -83,7 +83,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
                 onClick={() => handleClick(userId)}
                 dir={lang.isRtl ? 'rtl' : undefined}
               >
-                <Avatar user={usersById[userId]} />
+                <Avatar peer={usersById[userId]} />
                 <div className="top-peer-name">{renderText(getUserFirstOrLastName(usersById[userId]) || NBSP)}</div>
               </div>
             ))}

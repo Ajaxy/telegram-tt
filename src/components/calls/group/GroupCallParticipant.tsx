@@ -29,14 +29,12 @@ type OwnProps = {
 };
 
 type StateProps = {
-  user?: ApiUser;
-  chat?: ApiChat;
+  peer?: ApiUser | ApiChat;
 };
 
 const GroupCallParticipant: FC<OwnProps & StateProps> = ({
   participant,
-  user,
-  chat,
+  peer,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
@@ -124,13 +122,13 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
     isMutedByMe, isRaiseHand, isSelf, hasCustomVolume, isMuted, isSpeaking, participant.about, participant.volume, lang,
   ]);
 
-  if (!user && !chat) {
+  if (!peer) {
     return undefined;
   }
 
   return (
     <ListItem
-      leftElement={<Avatar user={user} chat={chat} className={styles.avatar} />}
+      leftElement={<Avatar peer={peer} className={styles.avatar} />}
       rightElement={<OutlinedMicrophoneIcon participant={participant} className={styles.icon} />}
       className={styles.root}
       onClick={handleContextMenu}
@@ -140,7 +138,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
       ripple
       ref={ref}
     >
-      <FullNameTitle peer={user || chat!} withEmojiStatus className={styles.title} />
+      <FullNameTitle peer={peer} withEmojiStatus className={styles.title} />
       <span className={buildClassName(styles.subtitle, 'subtitle', aboutColor)}>
         {hasPresentationStream && <i className="icon icon-share-screen" aria-hidden />}
         {hasVideoStream && <i className="icon icon-video" aria-hidden />}
@@ -166,8 +164,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { participant }): StateProps => {
     return {
-      user: participant.isUser ? selectUser(global, participant.id) : undefined,
-      chat: !participant.isUser ? selectChat(global, participant.id) : undefined,
+      peer: selectUser(global, participant.id) || selectChat(global, participant.id),
     };
   },
 )(GroupCallParticipant));

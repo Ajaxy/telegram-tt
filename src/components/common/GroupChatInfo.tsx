@@ -182,7 +182,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         <Avatar
           key={chat.id}
           size={avatarSize}
-          chat={chat}
+          peer={chat}
           onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
         />
       )}

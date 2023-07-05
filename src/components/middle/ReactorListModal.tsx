@@ -1,20 +1,17 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useMemo, useEffect, useState, useRef,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
-import {
-  selectChatMessage,
-  selectTabState,
-} from '../../global/selectors';
+import { selectChatMessage, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
-import { isSameReaction, getReactionUniqueKey } from '../../global/helpers';
+import { getReactionUniqueKey, isSameReaction } from '../../global/helpers';
 import { formatDateAtTime } from '../../util/dateFormat';
 
 import useLang from '../../hooks/useLang';
@@ -63,6 +60,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
 
   // No need for expensive global updates on users, so we avoid them
   const usersById = getGlobal().users.byId;
+  const chatsById = getGlobal().chats.byId;
 
   const lang = useLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
@@ -187,25 +185,26 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
             onLoadMore={getMore}
           >
             {viewportIds?.flatMap(
-              (userId) => {
-                const user = usersById[userId];
-                const userReactions = reactors?.reactions.filter((reactor) => reactor.userId === userId);
+              (peerId) => {
+                const peer = usersById[peerId] || chatsById[peerId];
+
+                const userReactions = reactors?.reactions.filter((reactor) => reactor.userId === peerId);
                 const items: React.ReactNode[] = [];
-                const seenByUser = seenByDates?.[userId];
+                const seenByUser = seenByDates?.[peerId];
 
                 userReactions?.forEach((r) => {
                   if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
 
                   items.push(
                     <ListItem
-                      key={`${userId}-${getReactionUniqueKey(r.reaction)}`}
+                      key={`${peerId}-${getReactionUniqueKey(r.reaction)}`}
                       className="chat-item-clickable reactors-list-item"
                       // eslint-disable-next-line react/jsx-no-bind
-                      onClick={() => handleClick(userId)}
+                      onClick={() => handleClick(peerId)}
                     >
-                      <Avatar user={user} size="medium" />
+                      <Avatar peer={peer} size="medium" />
                       <div className="info">
-                        <FullNameTitle peer={user} withEmojiStatus />
+                        <FullNameTitle peer={peer} withEmojiStatus />
                         <span className="status" dir="auto">
                           <i className="icon icon-heart-outline status-icon" />
                           {formatDateAtTime(lang, r.addedDate * 1000)}
@@ -225,13 +224,13 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                 if (!chosenTab && !userReactions?.length) {
                   items.push(
                     <ListItem
-                      key={`${userId}-seen-by`}
+                      key={`${peerId}-seen-by`}
                       className="chat-item-clickable scroll-item small-icon"
                       // eslint-disable-next-line react/jsx-no-bind
-                      onClick={() => handleClick(userId)}
+                      onClick={() => handleClick(peerId)}
                     >
                       <PrivateChatInfo
-                        userId={userId}
+                        userId={peerId}
                         noStatusOrTyping
                         avatarSize="medium"
                         status={seenByUser ? formatDateAtTime(lang, seenByUser * 1000) : undefined}

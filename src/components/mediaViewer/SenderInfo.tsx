@@ -77,11 +77,7 @@ const SenderInfo: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="SenderInfo" onClick={handleFocusMessage}>
-      {isUserId(sender.id) ? (
-        <Avatar key={sender.id} size="medium" user={sender as ApiUser} />
-      ) : (
-        <Avatar key={sender.id} size="medium" chat={sender as ApiChat} />
-      )}
+      <Avatar key={sender.id} size="medium" peer={sender} />
       <div className="meta">
         <div className="title" dir="auto">
           {senderTitle && renderText(senderTitle)}

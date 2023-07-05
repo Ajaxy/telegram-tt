@@ -175,7 +175,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
       <Avatar
         key={user.id}
         size={avatarSize}
-        user={user}
+        peer={user}
         isSavedMessages={isSavedMessages}
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
       />

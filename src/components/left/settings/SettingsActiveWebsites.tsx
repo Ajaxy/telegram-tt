@@ -110,7 +110,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => handleOpenSessionModal(session.hash)}
       >
-        <Avatar className={styles.avatar} user={bot} size="tiny" />
+        <Avatar className={styles.avatar} peer={bot} size="tiny" />
         <div className="multiline-menu-item full-size" dir="auto">
           <span className="date">{formatPastTimeShort(lang, session.dateActive * 1000)}</span>
           {bot && <FullNameTitle className={styles.title} peer={bot} />}

@@ -415,7 +415,7 @@ const MessageContextMenu: FC<OwnProps> = ({
               {seenByRecentUsers?.map((user) => (
                 <Avatar
                   size="micro"
-                  user={user}
+                  peer={user}
                 />
               ))}
             </div>

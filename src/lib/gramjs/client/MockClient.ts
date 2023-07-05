@@ -178,7 +178,7 @@ class TelegramClient {
                             return topic.id < offsetTopicId;
                         }
                         return true;
-                    }).filter((_, i) => i < limit),
+                    }).slice(0, limit),
                 users: [],
                 chats: [],
                 messages: [],
