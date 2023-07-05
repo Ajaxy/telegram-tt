@@ -12,7 +12,6 @@ import {
   getMessageLocation,
   buildStaticMapHash,
   isGeoLiveExpired,
-  isUserId,
 } from '../../../global/helpers';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
 import {
@@ -86,10 +85,6 @@ const Location: FC<OwnProps> = ({
   const mediaBlobUrl = useMedia(mediaHash);
   const prevMediaBlobUrl = usePrevious(mediaBlobUrl);
   const mapBlobUrl = mediaBlobUrl || prevMediaBlobUrl;
-
-  const isPeerUser = peer && isUserId(peer.id);
-  const avatarUser = (peer && isPeerUser) ? peer as ApiUser : undefined;
-  const avatarChat = (peer && !isPeerUser) ? peer as ApiChat : undefined;
 
   const accuracyRadiusPx = useMemo(() => {
     if (type !== 'geoLive' || !point.accuracyRadius) {
@@ -213,7 +208,7 @@ const Location: FC<OwnProps> = ({
     if (type === 'geoLive') {
       return (
         <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN}>
-          <Avatar chat={avatarChat} user={avatarUser} className="location-avatar" />
+          <Avatar peer={peer} className="location-avatar" />
           {location.heading !== undefined && (
             <div className="direction" style={`--direction: ${location.heading}deg`} />
           )}

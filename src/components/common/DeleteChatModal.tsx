@@ -123,7 +123,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       <div className="modal-header" dir={lang.isRtl ? 'rtl' : undefined}>
         <Avatar
           size="tiny"
-          chat={chat}
+          peer={chat}
           isSavedMessages={isChatWithSelf}
         />
         <h3 className="modal-title">{lang(renderTitle())}</h3>

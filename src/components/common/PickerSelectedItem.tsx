@@ -56,11 +56,10 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     );
 
     titleText = title;
-  } else if (chat || user) {
+  } else if (user || chat) {
     iconElement = (
       <Avatar
-        chat={chat}
-        user={user}
+        peer={user || chat}
         size="small"
         isSavedMessages={user?.isSelf}
       />

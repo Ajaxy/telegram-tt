@@ -125,7 +125,7 @@ const GiftPremiumModal: FC<OwnProps & StateProps> = ({
           <i className="icon icon-close" />
         </Button>
         <Avatar
-          user={renderedUser}
+          peer={renderedUser}
           size="jumbo"
           className={styles.avatar}
         />

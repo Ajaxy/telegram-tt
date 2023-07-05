@@ -222,6 +222,27 @@
         transition: opacity var(--layer-transition);
       }
     }
+
+    .avatar-online {
+      position: absolute;
+      bottom: 0.0625rem;
+      right: 0.0625rem;
+      width: 0.875rem;
+      height: 0.875rem;
+      border-radius: 50%;
+      border: 2px solid var(--color-background);
+      background-color: #0ac630;
+      flex-shrink: 0;
+
+      opacity: 0.5;
+      transform: scale(0);
+      transition: opacity 200ms, transform 200ms;
+
+      &.avatar-online-shown {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   }
 
   .info {

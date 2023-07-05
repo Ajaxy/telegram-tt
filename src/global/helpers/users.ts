@@ -171,6 +171,10 @@ export function isUserOnline(user: ApiUser, userStatus?: ApiUserStatus) {
     return false;
   }
 
+  if (user.isSelf) {
+    return false;
+  }
+
   return userStatus.type === 'userStatusOnline' && type !== 'userTypeBot';
 }
 

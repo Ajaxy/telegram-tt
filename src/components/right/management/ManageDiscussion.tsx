@@ -118,7 +118,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
       <div className="modal-header">
         <Avatar
           size="tiny"
-          chat={linkedChat}
+          peer={linkedChat}
         />
         <div className="modal-title">
           {lang(isChannel ? 'DiscussionUnlinkGroup' : 'DiscussionUnlinkChannel')}
@@ -136,7 +136,7 @@ const ManageDiscussion: FC<OwnProps & StateProps> = ({
       <div className="modal-header">
         <Avatar
           size="tiny"
-          chat={linkedGroup}
+          peer={linkedGroup}
         />
         <div className="modal-title">
           {lang('Channel.DiscussionGroup.LinkGroup')}

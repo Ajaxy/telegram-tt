@@ -226,7 +226,7 @@ const Poll: FC<OwnProps & StateProps> = ({
             <Avatar
               key={user.id}
               size="micro"
-              user={user}
+              peer={user}
             />
           ))}
         </div>

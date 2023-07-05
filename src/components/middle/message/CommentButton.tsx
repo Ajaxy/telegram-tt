@@ -3,7 +3,7 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiThreadInfo, ApiUser,
+  ApiThreadInfo,
 } from '../../../api/types';
 
 import { isUserId } from '../../../global/helpers';
@@ -57,14 +57,13 @@ const CommentButton: FC<OwnProps> = ({
 
   function renderRecentRepliers() {
     return (
-      recentRepliers && recentRepliers.length > 0 && (
+      Boolean(recentRepliers?.length) && (
         <div className="recent-repliers" dir={lang.isRtl ? 'rtl' : 'ltr'}>
-          {recentRepliers.map((user) => (
+          {recentRepliers!.map((peer) => (
             <Avatar
-              key={user.id}
+              key={peer.id}
               size="small"
-              user={isUserId(user.id) ? user as ApiUser : undefined}
-              chat={!isUserId(user.id) ? user as ApiChat : undefined}
+              peer={peer}
             />
           ))}
         </div>

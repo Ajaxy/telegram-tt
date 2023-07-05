@@ -122,7 +122,7 @@ const NewContactModal: FC<OwnProps & StateProps> = ({
         <div className="NewContactModal__profile" dir={lang.isRtl ? 'rtl' : undefined}>
           <Avatar
             size="jumbo"
-            user={renderingUser}
+            peer={renderingUser}
             text={`${firstName} ${lastName}`}
           />
           <div className="NewContactModal__profile-info">

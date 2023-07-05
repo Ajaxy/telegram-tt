@@ -230,7 +230,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
                   <Avatar
                     photo={notPersonalPhoto}
                     noPersonalPhoto
-                    user={user}
+                    peer={user}
                     size="mini"
                     className="personal-photo"
                   />

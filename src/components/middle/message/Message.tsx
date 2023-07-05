@@ -774,18 +774,14 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   function renderAvatar() {
-    const isAvatarPeerUser = avatarPeer && isUserId(avatarPeer.id);
-    const avatarUser = (avatarPeer && isAvatarPeerUser) ? avatarPeer as ApiUser : undefined;
-    const avatarChat = (avatarPeer && !isAvatarPeerUser) ? avatarPeer as ApiChat : undefined;
     const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
 
     return (
       <Avatar
         size={isMobile ? 'small-mobile' : 'small'}
-        user={avatarUser}
-        chat={avatarChat}
+        peer={avatarPeer}
         text={hiddenName}
-        onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
+        onClick={avatarPeer ? handleAvatarClick : undefined}
       />
     );
   }

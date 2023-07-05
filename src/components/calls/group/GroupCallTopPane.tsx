@@ -27,6 +27,8 @@ type StateProps = {
   isActive: boolean;
 };
 
+const PREVIEW_AVATARS_COUNT = 3;
+
 const GroupCallTopPane: FC<OwnProps & StateProps> = ({
   chatId,
   isActive,
@@ -58,19 +60,10 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
     const usersById = getGlobal().users.byId;
     const chatsById = getGlobal().chats.byId;
 
-    return Object.values(participants).filter((_, i) => i < 3).map(({ id, isUser }) => {
-      if (isUser) {
-        if (!usersById[id]) {
-          return undefined;
-        }
-        return { user: usersById[id] };
-      } else {
-        if (!chatsById[id]) {
-          return undefined;
-        }
-        return { chat: chatsById[id] };
-      }
-    }).filter(Boolean);
+    return Object.values(participants)
+      .slice(0, PREVIEW_AVATARS_COUNT)
+      .map(({ id }) => usersById[id] || chatsById[id])
+      .filter(Boolean);
   }, [participants]);
 
   useEffect(() => {
@@ -107,17 +100,12 @@ const GroupCallTopPane: FC<OwnProps & StateProps> = ({
         <span className="participants">{lang('Participants', groupCall.participantsCount || 0, 'i')}</span>
       </div>
       <div className="avatars">
-        {fetchedParticipants.map((p) => {
-          if (!p) return undefined;
-
-          return (
-            <Avatar
-              key={p.user ? p.user.id : p.chat.id}
-              chat={p.chat}
-              user={p.user}
-            />
-          );
-        })}
+        {fetchedParticipants.map((peer) => (
+          <Avatar
+            key={peer.id}
+            peer={peer}
+          />
+        ))}
       </div>
       <Button round className="join">
         {lang('VoipChatJoin')}

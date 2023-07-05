@@ -1383,8 +1383,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               className={buildClassName('send-as-button', shouldAnimateSendAsButtonRef.current && 'appear-animation')}
             >
               <Avatar
-                user={sendAsUser}
-                chat={sendAsChat}
+                peer={sendAsUser || sendAsChat}
                 size="tiny"
               />
             </Button>

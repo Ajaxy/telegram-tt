@@ -67,7 +67,7 @@ const JoinRequest: FC<OwnProps & StateProps> = ({
           <Avatar
             key={userId}
             size="medium"
-            user={user}
+            peer={user}
           />
           <div className={buildClassName('user-info')}>
             <div className={buildClassName('user-name')}>{fullName}</div>

@@ -84,7 +84,7 @@ const ReactionButton: FC<{
           {recentReactors.map((user) => (
             <Avatar
               key={user.id}
-              user={user}
+              peer={user}
               size="micro"
             />
           ))}

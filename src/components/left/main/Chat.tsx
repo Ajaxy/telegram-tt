@@ -21,6 +21,7 @@ import {
   getMessageAction,
   getPrivateChatUserId,
   isUserId,
+  isUserOnline,
   selectIsChatMuted,
 } from '../../../global/helpers';
 import {
@@ -49,6 +50,7 @@ import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
@@ -225,9 +227,14 @@ const Chat: FC<OwnProps & StateProps> = ({
     }
   }, [chat, chatId, isForum, isIntersecting]);
 
+  const isOnline = user && userStatus && isUserOnline(user, userStatus);
+  const { hasShownClass: isAvatarOnlineShown } = useShowTransition(isOnline);
+
   if (!chat) {
     return undefined;
   }
+
+  const peer = user || chat;
 
   const className = buildClassName(
     'Chat chat-item-clickable',
@@ -251,12 +258,11 @@ const Chat: FC<OwnProps & StateProps> = ({
     >
       <div className="status">
         <Avatar
-          chat={chat}
-          user={user}
-          userStatus={userStatus}
+          peer={peer}
           isSavedMessages={user?.isSelf}
         />
         <div className="avatar-badge-wrapper">
+          <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />
           <ChatBadge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={getIsForumPanelClosed} />
         </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
@@ -266,7 +272,7 @@ const Chat: FC<OwnProps & StateProps> = ({
       <div className="info">
         <div className="info-row">
           <FullNameTitle
-            peer={user || chat}
+            peer={peer}
             withEmojiStatus
             isSavedMessages={chatId === user?.id && user?.isSelf}
             observeIntersection={observeIntersection}

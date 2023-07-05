@@ -234,7 +234,7 @@ const PhoneCall: FC<StateProps> = ({
       dialogRef={containerRef}
     >
       <Avatar
-        user={user}
+        peer={user}
         size="jumbo"
         className={hasVideo || hasPresentation ? styles.blurred : ''}
       />
