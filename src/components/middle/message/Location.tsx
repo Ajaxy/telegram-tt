@@ -83,7 +83,7 @@ const Location: FC<OwnProps> = ({
 
   const mediaHash = buildStaticMapHash(point, width, height, zoom, scale);
   const mediaBlobUrl = useMedia(mediaHash);
-  const prevMediaBlobUrl = usePrevious(mediaBlobUrl);
+  const prevMediaBlobUrl = usePrevious(mediaBlobUrl, true);
   const mapBlobUrl = mediaBlobUrl || prevMediaBlobUrl;
 
   const accuracyRadiusPx = useMemo(() => {
