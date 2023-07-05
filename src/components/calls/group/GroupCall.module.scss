@@ -1,6 +1,7 @@
 .root {
   --group-call-panel-color: #212121;
   --group-call-panel-header-border-color: #3b3b3b;
+  --color-dividers: var(--group-call-panel-header-border-color);
   --group-call-background-color: #000000;
   --green-button-color: rgba(1, 200, 80, 0.3);
   --blue-button-color: rgb(60, 135, 247, 0.2);
@@ -148,6 +149,10 @@
   width: calc(100% - var(--default-width));
 }
 
+.mainVideoContainer {
+  position: absolute;
+}
+
 .videosHeader {
   display: flex;
   align-items: center;
@@ -160,7 +165,7 @@
 
 .videosContent {
   flex-grow: 1;
-  margin: 0.5rem 0.625rem;
+  margin: 0.1875rem 0.625rem 0.5rem;
 }
 
 .actions {
@@ -174,7 +179,6 @@
   gap: 1.25rem;
   z-index: 2;
 }
-
 
 .actionButton {
   width: 3.375rem !important;
@@ -242,11 +246,11 @@
       border-radius: 1.25rem;
       padding: 0.75rem;
       bottom: 2.5rem;
-      transition: var(--layer-transition) transform, 250ms ease-in-out opacity;
+      transition: 250ms ease-in-out opacity;
       opacity: 0;
     }
 
-    .videos:hover ~ .actions, .video:hover ~ .actions, .actions:hover {
+    .videos:hover ~ .actions, .mainVideoContainer:hover ~ .actions, .actions:hover {
       opacity: 1;
     }
   }

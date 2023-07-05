@@ -11,6 +11,8 @@ import {
   IS_NOISE_SUPPRESSION_SUPPORTED,
   THRESHOLD,
 } from './utils';
+import Deferred from "../../util/Deferred";
+import safePlay from "../../util/safePlay";
 
 export type StreamType = 'audio' | 'video' | 'presentation';
 const DEFAULT_MID = 3;
@@ -46,6 +48,9 @@ type GroupCallState = {
   audioContext?: AudioContext;
   mediaStream?: MediaStream;
   lastMid: number;
+  audioStream?: MediaStream;
+  audioSource?: MediaStreamAudioSourceNode;
+  audioAnalyser?: AnalyserNode;
 };
 
 let state: GroupCallState | undefined;
@@ -142,7 +147,11 @@ function updateGroupCallStreams(userId: string) {
   });
 }
 
-function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'user') {
+async function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'user') {
+  if(streamType === 'audio' && state?.audioStream) {
+    return state.audioStream;
+  }
+
   if (streamType === 'presentation') {
     return (navigator.mediaDevices as any).getDisplayMedia({
       audio: false,
@@ -150,7 +159,7 @@ function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'us
     });
   }
 
-  return navigator.mediaDevices.getUserMedia({
+  const media = await navigator.mediaDevices.getUserMedia({
     audio: streamType === 'audio' ? {
       // @ts-ignore
       ...(IS_ECHO_CANCELLATION_SUPPORTED && { echoCancellation: true }),
@@ -159,8 +168,22 @@ function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'us
     video: streamType === 'video' ? {
       facingMode: facing,
     } : false,
-
   });
+
+  if(state && streamType === 'audio'){
+    state.audioStream = media;
+  }
+
+  if(streamType === 'video') {
+    const vid = document.createElement('video');
+    vid.srcObject = media;
+
+    const deferred = new Deferred();
+    vid.oncanplay = () => deferred.resolve();
+    await deferred.promise;
+  }
+
+  return media;
 }
 
 export async function switchCameraInput() {
@@ -230,9 +253,9 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
       } else if (streamType === 'audio') {
         const { audioContext } = state;
         if (!audioContext) return;
-        const source = audioContext.createMediaStreamSource(newStream);
+        const source = state.audioSource || audioContext.createMediaStreamSource(newStream);
 
-        const analyser = audioContext.createAnalyser();
+        const analyser = state.audioAnalyser || audioContext.createAnalyser();
         analyser.minDecibels = -100;
         analyser.maxDecibels = -30;
         analyser.smoothingTimeConstant = 0.05;
@@ -242,6 +265,8 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
 
         state = {
           ...state,
+          audioSource: source,
+          audioAnalyser: analyser,
           participantFunctions: {
             ...state.participantFunctions,
             [state.myId]: {
@@ -256,7 +281,6 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
         };
       }
     } else if (!value && track.enabled) {
-      track.stop();
       const newStream = streamType === 'audio' ? state.silence : state.black;
       if (!newStream) return;
 
@@ -264,6 +288,14 @@ export async function toggleStream(streamType: StreamType, value: boolean | unde
       state.streams[state.myId][streamType] = newStream;
       if (streamType === 'video') {
         state.facingMode = undefined;
+      }
+
+      if(streamType !== 'audio') {
+        // We only want to stop video streams
+        track.stop();
+      } else {
+        state.audioSource?.disconnect();
+        state.audioAnalyser?.disconnect();
       }
     }
     updateGroupCallStreams(state.myId!);
@@ -292,6 +324,10 @@ export function leaveGroupCall() {
       });
     });
   }
+
+  state.audioStream?.getTracks().forEach((track) => {
+    track.stop();
+  });
   leavePresentation(true);
   state.dataChannel?.close();
   state.connection?.close();
@@ -679,6 +715,7 @@ function initializeConnection(
   if (!isPresentation) {
     connection.oniceconnectionstatechange = () => {
       const connectionState = connection.iceConnectionState;
+      console.log('iceconnectionstatechange', connectionState);
       if (connectionState === 'connected' || connectionState === 'completed') {
         updateConnectionState('connected');
       } else if (connectionState === 'checking' || connectionState === 'new') {
@@ -688,9 +725,14 @@ function initializeConnection(
       }
     };
   }
+  connection.onconnectionstatechange = () => {
+    console.log('connectionstatechange', connection.connectionState);
+  }
   connection.ontrack = handleTrack;
   connection.onnegotiationneeded = async () => {
     if (!state) return;
+
+    console.log('onnegotiationneeded');
 
     const { myId } = state;
 
@@ -701,8 +743,10 @@ function initializeConnection(
       offerToReceiveVideo: true,
       offerToReceiveAudio: !isPresentation,
     });
+    console.log('offer created');
 
     await connection.setLocalDescription(offer);
+    console.log('local desc set');
 
     if (!offer.sdp) {
       return;
@@ -827,7 +871,7 @@ export function joinGroupCall(
 
   const mediaStream = new MediaStream();
   audioElement.srcObject = mediaStream;
-  audioElement.play().catch((l) => console.warn(l));
+  safePlay(audioElement);
 
   state = {
     onUpdate,
@@ -844,6 +888,9 @@ export function joinGroupCall(
     mediaStream,
     lastMid: DEFAULT_MID,
   };
+
+  // Prepare microphone
+  getUserStream('audio');
 
   return new Promise((resolve) => {
     state = {

@@ -866,10 +866,12 @@ class TelegramClient {
      * Invokes a MTProtoRequest (sends and receives it) and returns its result
      * @param request
      * @param dcId Optional dcId to use when sending the request
+     * @param abortSignal Optional AbortSignal to cancel the request
+     * @param shouldRetryOnTimeout Whether to retry the request if it times out
      * @returns {Promise}
      */
 
-    async invoke(request, dcId, abortSignal) {
+    async invoke(request, dcId, abortSignal, shouldRetryOnTimeout = false) {
         if (request.classType !== 'request') {
             throw new Error('You can only invoke MTProtoRequests');
         }
@@ -918,6 +920,11 @@ class TelegramClient {
                     await this.disconnect();
                     await sleep(2000);
                     await this.connect();
+                } else if (e instanceof errors.TimedOutError) {
+                    if (!shouldRetryOnTimeout) {
+                        state.finished.resolve();
+                        throw e;
+                    }
                 } else {
                     state.finished.resolve();
                     throw e;

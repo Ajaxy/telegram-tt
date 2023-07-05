@@ -11,7 +11,7 @@ declare class TelegramClient {
     async start(authParams: UserAuthParams | BotAuthParams);
 
     async invoke<R extends Api.AnyRequest>(
-        request: R, dcId?: number, abortSignal?: AbortSignal,
+        request: R, dcId?: number, abortSignal?: AbortSignal, shouldRetryOnTimeout?: boolean,
     ): Promise<R['__response']>;
 
     async uploadFile(uploadParams: UploadFileParams): ReturnType<typeof uploadFile>;

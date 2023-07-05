@@ -174,11 +174,17 @@ export default function useGroupCallVideoLayout({
 
     const columns = calculateColumnsCount(videosCount);
     const rows = Math.ceil(videosCount / columns);
+    const totalGridSize = rows * columns;
+    const shouldFillLastRow = totalGridSize > videosCount;
     const width = (containerWidth - (columns - 1) * PADDING_HORIZONTAL) / columns;
     const height = (containerHeight - (rows - 1) * PADDING_VERTICAL) / rows;
 
+    const lastRowWidth = width * (videosCount % columns);
     for (let i = 0; i < videosCount; i++) {
-      const x = initialX + (i % columns) * (width + PADDING_HORIZONTAL);
+      const row = Math.floor(i / columns);
+      const shouldCenter = shouldFillLastRow && row === rows - 1;
+      const x = initialX + (i % columns) * (width + PADDING_HORIZONTAL)
+        + (shouldCenter ? (containerWidth - lastRowWidth) / 2 : 0);
       const y = initialY + Math.floor(i / columns) * (height + PADDING_VERTICAL);
       layout.push({
         x,

@@ -152,7 +152,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   });
 
   const handleToggleFullscreen = useLastCallback(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || isMobile) return;
 
     if (isFullscreen) {
       closeFullscreen();
@@ -167,6 +167,10 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     } else {
       openSidebar();
     }
+  });
+
+  const handleToggleGroupCallPanel = useLastCallback(() => {
+    toggleGroupCallPanel();
   });
 
   const handleInviteMember = useLastCallback(() => {
@@ -241,7 +245,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
       onClose={toggleGroupCallPanel}
       className={buildClassName(
         styles.root,
-        isFullscreen && styles.fullscreen,
+        (isFullscreen || isMobile) && styles.fullscreen,
         isLandscapeLayout && styles.landscape,
         !hasVideoParticipants && styles.noVideoParticipants,
         !isLandscapeLayout && styles.portrait,
@@ -253,19 +257,21 @@ const GroupCall: FC<OwnProps & StateProps> = ({
       {isLandscapeWithVideos && (
         <div className={styles.videos}>
           <div className={styles.videosHeader}>
-            <Button
-              round
-              size="smaller"
-              color="translucent"
-              onClick={handleToggleFullscreen}
-              className={buildClassName(styles.headerButton, styles.firstButton)}
-              ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
-            >
-              <i
-                className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')}
-                aria-hidden
-              />
-            </Button>
+            {!isMobile && (
+              <Button
+                round
+                size="smaller"
+                color="translucent"
+                onClick={handleToggleFullscreen}
+                className={buildClassName(styles.headerButton, styles.firstButton)}
+                ariaLabel={lang(isFullscreen ? 'AccExitFullscreen' : 'AccSwitchToFullscreen')}
+              >
+                <i
+                  className={buildClassName('icon', isFullscreen ? 'icon-smallscreen' : 'icon-fullscreen')}
+                  aria-hidden
+                />
+              </Button>
+            )}
 
             <h3 className={buildClassName(styles.title, styles.bigger)}>
               {title || lang('VoipGroupVoiceChat')}
@@ -297,7 +303,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
           <div className={styles.panelScrollTrigger} ref={panelScrollTriggerRef} />
 
           <div className={buildClassName(styles.panelHeader, hasScrolled && styles.scrolled)}>
-            {!isLandscapeWithVideos && (
+            {!isLandscapeWithVideos && !isMobile && (
               <Button
                 round
                 size="smaller"
@@ -311,6 +317,22 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                 ariaLabel={lang('AccSwitchToFullscreen')}
               >
                 <i className="icon icon-fullscreen" aria-hidden />
+              </Button>
+            )}
+
+            {isMobile && (
+              <Button
+                round
+                size="smaller"
+                color="translucent"
+                onClick={handleToggleGroupCallPanel}
+                className={buildClassName(styles.headerButton, styles.firstButton)}
+                ariaLabel={lang('Close')}
+              >
+                <i
+                  className={buildClassName('icon', 'icon-close')}
+                  aria-hidden
+                />
               </Button>
             )}
 
@@ -386,6 +408,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                     setPinned={setPinnedVideo}
                     pinnedVideo={pinnedVideo}
                     participant={participant}
+                    onStopSharing={handleToggleGroupCallPresentation}
                   />
                 );
               })}
@@ -408,29 +431,32 @@ const GroupCall: FC<OwnProps & StateProps> = ({
         </FloatingActionButton>
       </div>
 
-      {videoLayout.map((layout) => {
-        const participant = participants[layout.participantId];
-        if (layout.isRemounted || !participant) {
+      <div className={styles.mainVideoContainer}>
+        {videoLayout.map((layout) => {
+          const participant = participants[layout.participantId];
+          if (layout.isRemounted || !participant) {
+            return (
+              <div
+                teactOrderKey={layout.orderKey}
+                key={`${layout.participantId}_${layout.type}`}
+              />
+            );
+          }
           return (
-            <div
+            <GroupCallParticipantVideo
               teactOrderKey={layout.orderKey}
               key={`${layout.participantId}_${layout.type}`}
+              layout={layout}
+              canPin={canPinVideo}
+              setPinned={setPinnedVideo}
+              pinnedVideo={pinnedVideo}
+              participant={participant}
+              className={styles.video}
+              onStopSharing={handleToggleGroupCallPresentation}
             />
           );
-        }
-        return (
-          <GroupCallParticipantVideo
-            teactOrderKey={layout.orderKey}
-            key={`${layout.participantId}_${layout.type}`}
-            layout={layout}
-            canPin={canPinVideo}
-            setPinned={setPinnedVideo}
-            pinnedVideo={pinnedVideo}
-            participant={participant}
-            className={styles.video}
-          />
-        );
-      })}
+        })}
+      </div>
 
       <div className={styles.actions}>
         <Button

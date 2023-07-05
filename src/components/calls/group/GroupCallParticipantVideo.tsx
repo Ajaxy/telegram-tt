@@ -26,6 +26,7 @@ import Button from '../../ui/Button';
 import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
 import FullNameTitle from '../../common/FullNameTitle';
 import GroupCallParticipantMenu from './GroupCallParticipantMenu';
+import Skeleton from '../../ui/Skeleton';
 
 import styles from './GroupCallParticipantVideo.module.scss';
 
@@ -38,6 +39,7 @@ type OwnProps = {
   canPin: boolean;
   participant: TypeGroupCallParticipant;
   className?: string;
+  onStopSharing: VoidFunction;
 };
 
 type StateProps = {
@@ -54,6 +56,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   participant,
   user,
   chat,
+  onStopSharing,
 }) => {
   const lang = useLang();
 
@@ -75,6 +78,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
   const isRaiseHand = Boolean(participant.raiseHandRating);
   const shouldFlipVideo = type === 'video' && participant.isSelf;
+  const shouldHidePresentation = type === 'screen' && participant.isSelf;
 
   const status = useMemo(() => {
     if (isSelf) {
@@ -141,13 +145,20 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
     setIsHidden(false);
   }, []);
 
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleCanPlay = useLastCallback(() => {
+    setIsLoading(false);
+  });
+
   // When video stream is removed, the video element starts showing empty black screen.
   // To avoid that, we hide the video element and show the fallback frame instead, which is constantly updated
   // every VIDEO_FALLBACK_UPDATE_INTERVAL milliseconds.
   useInterval(() => {
     if (!stream?.active) return;
-    const video = videoRef.current!;
-    const canvas = videoFallbackRef.current!;
+    const video = videoRef.current;
+    const canvas = videoFallbackRef.current;
+    if (!video || !canvas) return;
 
     requestMutation(() => {
       canvas.width = video.videoWidth;
@@ -255,20 +266,38 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
           isSpeaking && styles.speaking,
         )}
       >
+        {isLoading && (
+          <Skeleton className={buildClassName(styles.video, styles.loader)} />
+        )}
         {stream && (
           <video
-            className={buildClassName(styles.video, shouldFlipVideo && styles.flipped)}
+            className={buildClassName(
+              styles.video, shouldFlipVideo && styles.flipped, shouldHidePresentation && styles.hidePresentation,
+            )}
             muted
             autoPlay
             playsInline
             srcObject={stream}
             ref={videoRef}
+            onCanPlay={handleCanPlay}
           />
         )}
-        <canvas
-          className={buildClassName(styles.videoFallback, shouldFlipVideo && styles.flipped)}
-          ref={videoFallbackRef}
-        />
+        {!shouldHidePresentation && (
+          <canvas
+            className={buildClassName(styles.videoFallback, shouldFlipVideo && styles.flipped)}
+            ref={videoFallbackRef}
+          />
+        )}
+
+        {shouldHidePresentation && (
+          <div className={styles.ownPresentation}>
+            <div className={styles.ownPresentationText}>{lang('VoiceChat.Sharing.Placeholder')}</div>
+            <Button className={styles.stopSharingButton} onClick={onStopSharing}>
+              {lang('VoiceChat.Sharing.Stop')}
+            </Button>
+          </div>
+        )}
+
         <div className={styles.thumbnailWrapper}>
           <canvas
             className={buildClassName(styles.thumbnail, shouldFlipVideo && styles.flipped)}
@@ -288,13 +317,15 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             <i className={buildClassName('icon', isPinned ? 'icon-unpin' : 'icon-pin')} />
           </Button>
         )}
-        <div className={styles.bottomPanel}>
-          <div className={styles.info}>
-            <FullNameTitle peer={user || chat!} className={styles.name} />
-            <div className={styles.status}>{status}</div>
+        {!shouldHidePresentation && (
+          <div className={styles.bottomPanel}>
+            <div className={styles.info}>
+              <FullNameTitle peer={user || chat!} className={styles.name} />
+              <div className={styles.status}>{status}</div>
+            </div>
+            <OutlinedMicrophoneIcon participant={participant} className={styles.icon} noColor />
           </div>
-          <OutlinedMicrophoneIcon participant={participant} className={styles.icon} noColor />
-        </div>
+        )}
       </div>
 
       <GroupCallParticipantMenu

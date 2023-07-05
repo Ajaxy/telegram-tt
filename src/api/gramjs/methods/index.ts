@@ -1,5 +1,5 @@
 export {
-  destroy, disconnect, downloadMedia, fetchCurrentUser, repairFileReference, abortChatRequests,
+  destroy, disconnect, downloadMedia, fetchCurrentUser, repairFileReference, abortChatRequests, abortRequestGroup,
 } from './client';
 
 export {

@@ -3,6 +3,7 @@ const {
     InvalidDCError,
     FloodError,
     BadRequestError,
+    TimedOutError,
 } = require('./RPCBaseErrors');
 
 class UserMigrateError extends InvalidDCError {
@@ -102,7 +103,7 @@ const rpcErrorRe = [
     [/USER_MIGRATE_(\d+)/, UserMigrateError],
     [/NETWORK_MIGRATE_(\d+)/, NetworkMigrateError],
     [/EMAIL_UNCONFIRMED_(\d+)/, EmailUnconfirmedError],
-
+    [/^Timeout$/, TimedOutError],
 ];
 module.exports = {
     rpcErrorRe,
