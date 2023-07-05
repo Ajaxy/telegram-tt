@@ -6,7 +6,7 @@ import type { PinnedIntersectionChangedCallback } from './usePinnedMessage';
 
 import { IS_ANDROID } from '../../../util/windowEnvironment';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useBackgroundMode from '../../../hooks/useBackgroundMode';
+import useBackgroundMode, { isBackgroundModeActive } from '../../../hooks/useBackgroundMode';
 import useAppLayout from '../../../hooks/useAppLayout';
 
 const INTERSECTION_THROTTLE_FOR_READING = 150;
@@ -33,7 +33,7 @@ export default function useMessageObservers(
     rootRef: containerRef,
     throttleMs: INTERSECTION_THROTTLE_FOR_READING,
   }, (entries) => {
-    if (type !== 'thread') {
+    if (type !== 'thread' || isBackgroundModeActive()) {
       return;
     }
 

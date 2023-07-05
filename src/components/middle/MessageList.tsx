@@ -50,6 +50,7 @@ import {
   isChatWithRepliesBot,
   isChatGroup,
   isLocalMessageId,
+  getMessageHtmlId,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
 import { debounce, onTickEnd } from '../../util/schedulers';
@@ -393,6 +394,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
     const container = containerRef.current!;
     listItemElementsRef.current = Array.from(container.querySelectorAll<HTMLDivElement>('.message-list-item'));
     const lastItemElement = listItemElementsRef.current[listItemElementsRef.current.length - 1];
+    const firstUnreadElement = memoFirstUnreadIdRef.current
+      ? container.querySelector<HTMLDivElement>(`#${getMessageHtmlId(memoFirstUnreadIdRef.current)}`)
+      : undefined;
 
     const hasLastMessageChanged = (
       messageIds && prevMessageIds && messageIds[messageIds.length - 1] !== prevMessageIds[prevMessageIds.length - 1]
@@ -437,14 +441,16 @@ const MessageList: FC<OwnProps & StateProps> = ({
       const isAtBottom = isViewportNewest && prevIsViewportNewest && bottomOffset <= BOTTOM_THRESHOLD;
       const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
-      // Animate incoming message
-      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing && !isBackgroundModeActive()) {
+      // Animate incoming message, but if app is in background mode, scroll to the first unread
+      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
         // Break out of `forceLayout`
         requestMeasure(() => {
+          const shouldScrollToBottom = !isBackgroundModeActive() || !firstUnreadElement;
+
           animateScroll(
             container,
-            lastItemElement!,
-            'end',
+            shouldScrollToBottom ? lastItemElement! : firstUnreadElement!,
+            shouldScrollToBottom ? 'end' : 'start',
             BOTTOM_FOCUS_MARGIN,
             undefined,
             undefined,
