@@ -7,7 +7,7 @@ import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { getPrivacyKey } from './helpers/privacy';
-import { selectUser, selectUserFullInfo } from '../../../global/selectors';
+import { selectUserFullInfo } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -26,7 +26,7 @@ type StateProps =
   Partial<ApiPrivacySettings> & {
     chatsById?: Record<string, ApiChat>;
     usersById?: Record<string, ApiUser>;
-    currentUser: ApiUser;
+    currentUserId: string;
     hasCurrentUserFullInfo?: boolean;
     currentUserFallbackPhoto?: ApiPhoto;
   };
@@ -42,7 +42,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   blockUserIds,
   blockChatIds,
   chatsById,
-  currentUser,
+  currentUserId,
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
 }) => {
@@ -227,7 +227,7 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
 
       {screen === SettingsScreens.PrivacyProfilePhoto && exceptionLists.shouldShowAllowed && (
         <SettingsPrivacyPublicProfilePhoto
-          currentUser={currentUser}
+          currentUserId={currentUserId}
           hasCurrentUserFullInfo={hasCurrentUserFullInfo}
           currentUserFallbackPhoto={currentUserFallbackPhoto}
         />
@@ -241,12 +241,12 @@ export default memo(withGlobal<OwnProps>(
     let privacySettings: ApiPrivacySettings | undefined;
 
     const {
+      currentUserId,
       chats: { byId: chatsById },
       settings: { privacy },
     } = global;
 
-    const currentUser = selectUser(global, global.currentUserId!)!;
-    const currentUserFullInfo = selectUserFullInfo(global, global.currentUserId!);
+    const currentUserFullInfo = selectUserFullInfo(global, currentUserId!);
 
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
@@ -284,7 +284,7 @@ export default memo(withGlobal<OwnProps>(
 
     if (!privacySettings) {
       return {
-        currentUser,
+        currentUserId: currentUserId!,
         hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
         currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
       };
@@ -293,7 +293,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       ...privacySettings,
       chatsById,
-      currentUser,
+      currentUserId: currentUserId!,
       hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
       currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
     };

@@ -3,9 +3,8 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
-import type { ApiUser } from '../../../api/types';
 
-import { selectIsPremiumPurchaseBlocked, selectUser } from '../../../global/selectors';
+import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
@@ -22,7 +21,7 @@ type OwnProps = {
 
 type StateProps = {
   sessionCount: number;
-  currentUser?: ApiUser;
+  currentUserId?: string;
   canBuyPremium?: boolean;
 };
 
@@ -30,7 +29,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   isActive,
   onScreenSelect,
   onReset,
-  currentUser,
+  currentUserId,
   sessionCount,
   canBuyPremium,
 }) => {
@@ -41,13 +40,12 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
-  const profileId = currentUser?.id;
 
   useEffect(() => {
-    if (profileId) {
-      loadProfilePhotos({ profileId });
+    if (currentUserId) {
+      loadProfilePhotos({ profileId: currentUserId });
     }
-  }, [profileId, loadProfilePhotos]);
+  }, [currentUserId, loadProfilePhotos]);
 
   useHistoryBack({
     isActive,
@@ -61,16 +59,16 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   return (
     <div className="settings-content custom-scroll">
       <div className="settings-main-menu">
-        {currentUser && (
+        {currentUserId && (
           <ProfileInfo
-            userId={currentUser.id}
+            userId={currentUserId}
             canPlayVideo={Boolean(isActive)}
             forceShowSelf
           />
         )}
-        {currentUser && (
+        {currentUserId && (
           <ChatExtra
-            chatOrUserId={currentUser.id}
+            chatOrUserId={currentUserId}
             forceShowSelf
           />
         )}
@@ -160,7 +158,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       sessionCount: global.activeSessions.orderedHashes.length,
-      currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
+      currentUserId,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
   },

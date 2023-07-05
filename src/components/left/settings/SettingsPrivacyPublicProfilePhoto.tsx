@@ -4,7 +4,7 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiPhoto } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -17,13 +17,13 @@ import ConfirmDialog from '../../ui/ConfirmDialog';
 import styles from './SettingsPrivacyPublicPhoto.module.scss';
 
 type OwnProps = {
-  currentUser: ApiUser;
+  currentUserId: string;
   hasCurrentUserFullInfo?: boolean;
   currentUserFallbackPhoto?: ApiPhoto;
 };
 
 const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
-  currentUser,
+  currentUserId,
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
 }) => {
@@ -40,9 +40,9 @@ const SettingsPrivacyPublicProfilePhoto: FC<OwnProps> = ({
 
   useEffect(() => {
     if (!hasCurrentUserFullInfo) {
-      loadFullUser({ userId: currentUser.id });
+      loadFullUser({ userId: currentUserId });
     }
-  }, [hasCurrentUserFullInfo, currentUser.id, loadFullUser]);
+  }, [hasCurrentUserFullInfo, currentUserId, loadFullUser]);
 
   const handleSelectFile = useCallback((file: File) => {
     uploadProfilePhoto({
