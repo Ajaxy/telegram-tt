@@ -100,7 +100,6 @@ import { buildContentClassName } from './helpers/buildContentClassName';
 import {
   getMinMediaWidth,
   calculateMediaDimensions,
-  MIN_MEDIA_WIDTH_WITH_COMMENTS,
   MIN_MEDIA_WIDTH_WITH_TEXT,
 } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
@@ -601,12 +600,11 @@ const Message: FC<OwnProps & StateProps> = ({
   // Used to display previous result while new one is loading
   const previousTranslatedText = usePrevious(translatedText, true);
 
-  const currentText = isTranslationPending ? (previousTranslatedText || text) : translatedText;
   const currentTranslatedText = translatedText || previousTranslatedText;
 
   const { phoneCall } = action || {};
 
-  const isMediaWidthWithCommentButton = (repliesThreadInfo || (hasLinkedChat && isChannel && isLocal))
+  const isMediaWithCommentButton = (repliesThreadInfo || (hasLinkedChat && isChannel && isLocal))
     && !isInDocumentGroupNotLast
     && messageListType === 'thread'
     && !noComments;
@@ -749,17 +747,17 @@ const Message: FC<OwnProps & StateProps> = ({
     }
 
     if (width) {
-      if (width < (isMediaWidthWithCommentButton ? MIN_MEDIA_WIDTH_WITH_COMMENTS : MIN_MEDIA_WIDTH_WITH_TEXT)) {
+      if (width < MIN_MEDIA_WIDTH_WITH_TEXT) {
         contentWidth = width;
       }
-      calculatedWidth = Math.max(getMinMediaWidth(Boolean(currentText), isMediaWidthWithCommentButton), width);
+      calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMediaWithCommentButton), width);
       if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
   } else if (albumLayout) {
     calculatedWidth = Math.max(
-      getMinMediaWidth(Boolean(currentText), isMediaWidthWithCommentButton), albumLayout.containerStyle.width,
+      getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
     );
     if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
       noMediaCorners = true;

@@ -9,17 +9,16 @@ import {
   getMessageWebPageVideo,
 } from '../../../../global/helpers';
 
-export const MIN_MEDIA_WIDTH_WITH_COMMENTS = 20 * REM;
-export const MIN_MEDIA_WIDTH_WITH_TEXT = 15 * REM;
-const MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS = 20 * REM;
-const MIN_MEDIA_WIDTH = 7 * REM;
-export const MIN_MEDIA_HEIGHT = 5 * REM;
 const SMALL_IMAGE_THRESHOLD = 12;
+const MIN_MESSAGE_LENGTH_FOR_BLUR = 40;
+export const MIN_MEDIA_WIDTH_WITH_TEXT = 20 * REM;
+const MIN_MEDIA_WIDTH = SMALL_IMAGE_THRESHOLD * REM;
+export const MIN_MEDIA_HEIGHT = 5 * REM;
 
-export function getMinMediaWidth(hasText?: boolean, hasCommentButton?: boolean) {
-  return hasText
-    ? (hasCommentButton ? MIN_MEDIA_WIDTH_WITH_TEXT_AND_COMMENTS : MIN_MEDIA_WIDTH_WITH_TEXT)
-    : (hasCommentButton ? MIN_MEDIA_WIDTH_WITH_COMMENTS : MIN_MEDIA_WIDTH);
+export function getMinMediaWidth(text?: string, hasCommentButton?: boolean) {
+  return (text?.length ?? 0) > MIN_MESSAGE_LENGTH_FOR_BLUR || hasCommentButton
+    ? MIN_MEDIA_WIDTH_WITH_TEXT
+    : MIN_MEDIA_WIDTH;
 }
 
 export function calculateMediaDimensions(
@@ -35,8 +34,8 @@ export function calculateMediaDimensions(
     ? calculateInlineImageDimensions(photo, isOwn, asForwarded, isWebPagePhoto, noAvatars, isMobile)
     : calculateVideoDimensions(video!, isOwn, asForwarded, isWebPageVideo, noAvatars, isMobile);
 
-  const hasText = Boolean(getMessageText(message));
-  const minMediaWidth = getMinMediaWidth(hasText);
+  const messageText = getMessageText(message);
+  const minMediaWidth = getMinMediaWidth(messageText);
 
   let stretchFactor = 1;
   if (width < minMediaWidth && minMediaWidth - width < SMALL_IMAGE_THRESHOLD) {
