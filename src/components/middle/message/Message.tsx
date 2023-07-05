@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import type {
@@ -800,7 +800,7 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
-  const renderQuickReactionButton = useLastCallback(() => {
+  const renderQuickReactionButton = useCallback(() => {
     if (!defaultReaction) return undefined;
 
     return (
@@ -817,7 +817,10 @@ const Message: FC<OwnProps & StateProps> = ({
         />
       </div>
     );
-  });
+  }, [
+    activeReactions, availableReactions, defaultReaction, handleSendQuickReaction, isQuickReactionVisible,
+    observeIntersectionForPlaying,
+  ]);
 
   function renderReactionsAndMeta() {
     const meta = (
