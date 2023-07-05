@@ -13,6 +13,8 @@ export type Signal<T = any> = ((() => T) & {
   subscribe: (cb: AnyToVoidFunction) => NoneToVoidFunction;
 });
 
+export type SignalSetter = (newValue: any) => void;
+
 export function isSignal(obj: any): obj is Signal {
   return typeof obj === 'function' && SIGNAL_MARK in obj;
 }

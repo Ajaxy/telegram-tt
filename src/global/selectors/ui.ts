@@ -73,8 +73,15 @@ export function selectIsForumPanelOpen<T extends GlobalState>(
   const tabState = selectTabState(global, tabId);
 
   return Boolean(tabState.forumPanelChatId) && (
-    tabState.globalSearch.query === undefined || tabState.globalSearch.isClosing
+    tabState.globalSearch.query === undefined || Boolean(tabState.globalSearch.isClosing)
   );
+}
+
+export function selectIsForumPanelClosed<T extends GlobalState>(
+  global: T,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  return !selectIsForumPanelOpen(global, tabId);
 }
 
 export function selectIsReactionPickerOpen<T extends GlobalState>(
