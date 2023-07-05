@@ -37,6 +37,7 @@ import {
   selectCanAnimateInterface,
   selectChatFolder,
 } from '../../global/selectors';
+import { getUserFullName } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
@@ -135,7 +136,7 @@ type StateProps = {
   attachBotToInstall?: ApiAttachBot;
   requestedAttachBotInChat?: TabState['requestedAttachBotInChat'];
   requestedDraft?: TabState['requestedDraft'];
-  currentUser?: ApiUser;
+  currentUserName?: string;
   urlAuth?: TabState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
   deleteFolderDialog?: ApiChatFolder;
@@ -191,7 +192,7 @@ const Main: FC<OwnProps & StateProps> = ({
   requestedAttachBotInChat,
   requestedDraft,
   webApp,
-  currentUser,
+  currentUserName,
   urlAuth,
   isPremiumModalOpen,
   isPaymentModalOpen,
@@ -516,7 +517,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
-      <UrlAuthModal urlAuth={urlAuth} currentUser={currentUser} />
+      <UrlAuthModal urlAuth={urlAuth} currentUserName={currentUserName} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
         isOpen={Boolean(openedStickerSetShortName)}
@@ -643,7 +644,7 @@ export default memo(withGlobal<OwnProps>(
       attachBotToInstall: requestedAttachBotInstall?.bot,
       requestedAttachBotInChat,
       webApp,
-      currentUser,
+      currentUserName: getUserFullName(currentUser),
       urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,

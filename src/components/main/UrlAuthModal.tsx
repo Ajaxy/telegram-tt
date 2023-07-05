@@ -4,7 +4,6 @@ import React, {
 import { getActions, getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiUser } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import { ensureProtocol } from '../../util/ensureProtocol';
@@ -21,11 +20,11 @@ import styles from './UrlAuthModal.module.scss';
 
 export type OwnProps = {
   urlAuth?: TabState['urlAuth'];
-  currentUser?: ApiUser;
+  currentUserName?: string;
 };
 
 const UrlAuthModal: FC<OwnProps> = ({
-  urlAuth, currentUser,
+  urlAuth, currentUserName,
 }) => {
   const { closeUrlAuthModal, acceptBotUrlAuth, acceptLinkUrlAuth } = getActions();
   const [isLoginChecked, setLoginChecked] = useState(true);
@@ -82,7 +81,7 @@ const UrlAuthModal: FC<OwnProps> = ({
           label={(
             <>
               {renderText(
-                lang('Conversation.OpenBotLinkLogin', [domain, getUserFullName(currentUser)]),
+                lang('Conversation.OpenBotLinkLogin', [domain, currentUserName]),
                 ['simple_markdown'],
               )}
             </>
