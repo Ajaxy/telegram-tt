@@ -128,7 +128,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
   }, [userId, loadFullUser, connectionState, forceShowSelf]);
 
-  usePhotosPreload(user || chat, photos, currentPhotoIndex);
+  usePhotosPreload(photos, currentPhotoIndex);
 
   const handleProfilePhotoClick = useLastCallback(() => {
     openMediaViewer({

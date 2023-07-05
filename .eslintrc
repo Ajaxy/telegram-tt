@@ -50,7 +50,8 @@
           "getActions": true,
           "useFlag": [false, true, true],
           "useForceUpdate": true,
-          "useReducer": [false, true]
+          "useReducer": [false, true],
+          "useLastCallback": true
         }
       }
     ],

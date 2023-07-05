@@ -12,7 +12,7 @@ const SELECTED_APPENDIX_COLORS = {
 };
 
 export default function getCustomAppendixBg(
-  src: string, isOwn: boolean, inSelectMode?: boolean, isSelected?: boolean, theme?: ISettings['theme'],
+  src: string, isOwn: boolean, isSelected?: boolean, theme?: ISettings['theme'],
 ) {
   if (isSelected) {
     return Promise.resolve(SELECTED_APPENDIX_COLORS[theme || 'light'][isOwn ? 'outgoing' : 'incoming']);

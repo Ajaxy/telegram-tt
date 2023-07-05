@@ -1,4 +1,4 @@
-import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiPhoto } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import { useEffect } from '../../../lib/teact/teact';
 import * as mediaLoader from '../../../util/mediaLoader';
@@ -6,7 +6,6 @@ import * as mediaLoader from '../../../util/mediaLoader';
 const PHOTOS_TO_PRELOAD = 4;
 
 export default function usePhotosPreload(
-  profile: ApiUser | ApiChat | undefined,
   photos: ApiPhoto[],
   currentIndex: number,
 ) {

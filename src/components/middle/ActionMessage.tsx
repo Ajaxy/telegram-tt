@@ -104,7 +104,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   useOnIntersect(ref, observeIntersectionForReading);
   useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
-  useFocusMessage(ref, message.id, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
+  useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
 
   useEffect(() => {
     if (!message.isPinned) return undefined;

@@ -12,7 +12,6 @@ const FOCUS_MARGIN = 20;
 
 export default function useFocusMessage(
   elementRef: { current: HTMLDivElement | null },
-  messageId: number,
   chatId: string,
   isFocused?: boolean,
   focusDirection?: FocusDirection,

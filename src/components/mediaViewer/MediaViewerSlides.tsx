@@ -83,9 +83,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
   selectMedia,
   isVideo,
   isGif,
-  isPhoto,
   isOpen,
-  hasFooter,
   withAnimation,
   isHidden,
   ...rest

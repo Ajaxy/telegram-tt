@@ -158,7 +158,7 @@ const Photo: FC<OwnProps> = ({
 
     const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
     if (fullMediaData) {
-      getCustomAppendixBg(fullMediaData, isOwn, isInSelectMode, isSelected, theme).then((appendixBg) => {
+      getCustomAppendixBg(fullMediaData, isOwn, isSelected, theme).then((appendixBg) => {
         requestMutation(() => {
           contentEl.style.setProperty('--appendix-bg', appendixBg);
           contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');

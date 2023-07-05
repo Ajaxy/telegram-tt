@@ -502,7 +502,6 @@ const Message: FC<OwnProps & StateProps> = ({
     selectMessage,
     ref,
     messageId,
-    isAlbum,
     Boolean(isInSelectMode),
     Boolean(canReply),
     Boolean(isProtected),
@@ -511,7 +510,6 @@ const Message: FC<OwnProps & StateProps> = ({
     chatId,
     isContextMenuShown,
     quickReactionRef,
-    isOwn,
     isInDocumentGroupNotLast,
   );
 
@@ -670,7 +668,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useFocusMessage(
-    ref, messageId, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded,
+    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded,
   );
 
   const signature = (isChannel && message.postAuthorTitle)

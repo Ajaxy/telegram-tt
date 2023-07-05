@@ -24,7 +24,6 @@ export default function useOuterHandlers(
   selectMessage: (e?: React.MouseEvent<HTMLDivElement, MouseEvent>, groupedId?: string) => void,
   containerRef: RefObject<HTMLDivElement>,
   messageId: number,
-  isAlbum: boolean,
   isInSelectMode: boolean,
   canReply: boolean,
   isProtected: boolean,
@@ -33,7 +32,6 @@ export default function useOuterHandlers(
   chatId: string,
   isContextMenuShown: boolean,
   quickReactionRef: RefObject<HTMLDivElement>,
-  isOwn: boolean,
   shouldHandleMouseLeave: boolean,
 ) {
   const { setReplyingToId, sendDefaultReaction } = getActions();
