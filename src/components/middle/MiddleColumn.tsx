@@ -1,7 +1,7 @@
 import React, {
   useEffect, useState, memo, useMemo,
 } from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatBannedRights } from '../../api/types';
@@ -304,6 +304,14 @@ function MiddleColumn({
 
       requestMutation(() => {
         document.body.classList.toggle('keyboard-visible', isFixNeeded);
+
+        requestMeasure(() => {
+          if (!isFixNeeded && visualViewport.offsetTop) {
+            requestMutation(() => {
+              window.scrollTo({ top: 0 });
+            });
+          }
+        });
       });
     };
 

@@ -7,16 +7,22 @@ type IDimensions = {
   height: number;
 };
 
+const WINDOW_ORIENTATION_CHANGE_THROTTLE_MS = 100;
 const WINDOW_RESIZE_THROTTLE_MS = 250;
 
-const initialHeight = window.innerHeight;
+let initialHeight = window.innerHeight;
 let currentWindowSize = updateSizes();
 
 const handleResize = throttle(() => {
   currentWindowSize = updateSizes();
 }, WINDOW_RESIZE_THROTTLE_MS, true);
 
-window.addEventListener('orientationchange', handleResize);
+const handleOrientationChange = throttle(() => {
+  initialHeight = window.innerHeight;
+  handleResize();
+}, WINDOW_ORIENTATION_CHANGE_THROTTLE_MS, false);
+
+window.addEventListener('orientationchange', handleOrientationChange);
 if (IS_IOS) {
   window.visualViewport!.addEventListener('resize', handleResize);
 } else {
