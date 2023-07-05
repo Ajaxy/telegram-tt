@@ -201,7 +201,6 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
           color="primary"
         >
           {lang('IncreaseLimit')}
-          <i className={buildClassName(styles.buttonIcon, 'icon', 'icon-double-badge')} />
         </Button>
       )}
       </div>

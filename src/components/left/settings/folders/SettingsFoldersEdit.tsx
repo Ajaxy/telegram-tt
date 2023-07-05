@@ -54,6 +54,8 @@ type StateProps = {
   invites?: ApiChatlistExportedInvite[];
   isRemoved?: boolean;
   maxInviteLinks: number;
+  maxChatLists: number;
+  chatListCount: number;
 };
 
 const SUBMIT_TIMEOUT = 500;
@@ -79,6 +81,8 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
   loadedArchivedChatIds,
   invites,
   maxInviteLinks,
+  maxChatLists,
+  chatListCount,
   onSaveFolder,
 }) => {
   const {
@@ -178,19 +182,28 @@ const SettingsFoldersEdit: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    if (chatListCount >= maxChatLists && !state.folder.isChatList) {
+      openLimitReachedModal({
+        limit: 'chatlistJoined',
+      });
+      return;
+    }
+
     if (invites.length < maxInviteLinks) {
       if (state.isTouched) {
         onSaveFolder(onShareFolder);
       } else {
         onShareFolder();
       }
-    } else {
-      openLimitReachedModal({
-        limit: 'chatlistInvites',
-      });
+      return;
     }
+
+    openLimitReachedModal({
+      limit: 'chatlistInvites',
+    });
   }, [
-    invites, state.folderId, state.isTouched, maxInviteLinks, isCreating, onSaveFolder, onShareFolder, lang,
+    invites, state.folderId, state.isTouched, chatListCount, maxInviteLinks, isCreating, onSaveFolder,
+    onShareFolder, lang, maxChatLists, state.folder.isChatList,
   ]);
 
   const handleEditInviteClick = useCallback((e: React.MouseEvent<HTMLElement>, url: string) => {
@@ -378,6 +391,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { state }): StateProps => {
     const { listIds } = global.chats;
     const { byId, invites } = global.chatFolders;
+    const chatListCount = Object.values(byId).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
 
     return {
       loadedActiveChatIds: listIds.active,
@@ -385,6 +399,8 @@ export default memo(withGlobal<OwnProps>(
       invites: state.folderId ? (invites[state.folderId] || MEMO_EMPTY_ARRAY) : undefined,
       isRemoved: state.folderId !== undefined && !byId[state.folderId],
       maxInviteLinks: selectCurrentLimit(global, 'chatlistInvites'),
+      maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
+      chatListCount,
     };
   },
 )(SettingsFoldersEdit));
