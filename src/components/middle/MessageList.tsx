@@ -10,7 +10,7 @@ import { requestForcedReflow, forceMeasure, requestMeasure } from '../../lib/fas
 import type { FC } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
-  ApiBotInfo, ApiMessage, ApiRestrictionReason, ApiTopic,
+  ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
 
 import { MAIN_THREAD_ID } from '../../api/types';
@@ -33,7 +33,6 @@ import {
   selectIsInSelectMode,
   selectIsChatWithSelf,
   selectBot,
-  selectIsChatBotNotStarted,
   selectScrollOffset,
   selectThreadTopMessageId,
   selectChatScheduledMessages,
@@ -42,7 +41,6 @@ import {
   selectLastScrollOffset,
   selectThreadInfo,
   selectTabState,
-  selectUserFullInfo,
   selectChatFullInfo,
   selectPerformanceSettingsValue,
 } from '../../global/selectors';
@@ -51,31 +49,23 @@ import {
   isUserId,
   isChatWithRepliesBot,
   isChatGroup,
-  getBotCoverMediaHash,
-  getDocumentMediaHash,
-  getVideoDimensions,
-  getPhotoFullDimensions,
   isLocalMessageId,
 } from '../../global/helpers';
 import { orderBy } from '../../util/iteratees';
-import { DPR } from '../../util/windowEnvironment';
 import { debounce, onTickEnd } from '../../util/schedulers';
 import buildClassName from '../../util/buildClassName';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import resetScroll from '../../util/resetScroll';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
-import renderText from '../common/helpers/renderText';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useStickyDates from './hooks/useStickyDates';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import useLang from '../../hooks/useLang';
 import useInterval from '../../hooks/useInterval';
 import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
-import useMedia from '../../hooks/useMedia';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useContainerHeight from './hooks/useContainerHeight';
@@ -85,8 +75,7 @@ import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
 import ContactGreeting from './ContactGreeting';
 import NoMessages from './NoMessages';
-import Skeleton from '../ui/Skeleton';
-import OptimizedVideo from '../ui/OptimizedVideo';
+import MessageListBotInfo from './MessageListBotInfo';
 
 import './MessageList.scss';
 
@@ -124,8 +113,6 @@ type StateProps = {
   focusingId?: number;
   isSelectModeActive?: boolean;
   lastMessage?: ApiMessage;
-  isLoadingBotInfo?: boolean;
-  botInfo?: ApiBotInfo;
   threadTopMessageId?: number;
   hasLinkedChat?: boolean;
   topic?: ApiTopic;
@@ -173,8 +160,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   focusingId,
   isSelectModeActive,
   lastMessage,
-  isLoadingBotInfo,
-  botInfo,
   threadTopMessageId,
   hasLinkedChat,
   withBottomShift,
@@ -209,15 +194,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const memoFocusingIdRef = useRef<number>();
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
-
-  const botInfoPhotoUrl = useMedia(botInfo?.photo ? getBotCoverMediaHash(botInfo.photo) : undefined);
-  const botInfoGifUrl = useMedia(botInfo?.gif ? getDocumentMediaHash(botInfo.gif) : undefined);
-  const botInfoDimensions = botInfo?.photo ? getPhotoFullDimensions(botInfo.photo) : botInfo?.gif
-    ? getVideoDimensions(botInfo.gif) : undefined;
-  const botInfoRealDimensions = botInfoDimensions && {
-    width: botInfoDimensions.width / DPR,
-    height: botInfoDimensions.height / DPR,
-  };
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -533,8 +509,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
   }, [isSelectModeActive]);
 
-  const lang = useLang();
-
   const isPrivate = Boolean(chatId && isUserId(chatId));
   const withUsers = Boolean((!isPrivate && !isChannelChat) || isChatWithSelf || isRepliesChat);
   const noAvatars = Boolean(!withUsers || isChannelChat);
@@ -554,8 +528,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isEmptyTopic = messageIds?.length === 1
     && messagesById?.[messageIds[0]]?.content.action?.type === 'topicCreate';
 
-  const isBotInfoEmpty = botInfo && !botInfo.description && !botInfo.gif && !botInfo.photo;
-
   const className = buildClassName(
     'MessageList custom-scroll',
     noAvatars && 'no-avatars',
@@ -567,6 +539,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
     isScrolled && 'scrolled',
     !isReady && 'is-animating',
   );
+
+  const hasMessages = (messageIds && messageGroups) || lastMessage;
 
   return (
     <div
@@ -581,50 +555,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
             {restrictionReason ? restrictionReason.text : `This is a private ${isChannelChat ? 'channel' : 'chat'}`}
           </span>
         </div>
-      ) : botInfo ? (
-        <div className="empty">
-          {isLoadingBotInfo && <span>{lang('Loading')}</span>}
-          {isBotInfoEmpty && !isLoadingBotInfo && <span>{lang('NoMessages')}</span>}
-          {botInfo && (
-            <div
-              className="bot-info"
-              style={botInfoRealDimensions && (
-                `width: ${botInfoRealDimensions.width}px`
-              )}
-            >
-              {botInfoPhotoUrl && (
-                <img
-                  src={botInfoPhotoUrl}
-                  width={botInfoRealDimensions?.width}
-                  height={botInfoRealDimensions?.height}
-                  alt="Bot info"
-                />
-              )}
-              {botInfoGifUrl && (
-                <OptimizedVideo
-                  canPlay
-                  src={botInfoGifUrl}
-                  loop
-                  disablePictureInPicture
-                  muted
-                  playsInline
-                />
-              )}
-              {botInfoDimensions && !botInfoPhotoUrl && !botInfoGifUrl && (
-                <Skeleton
-                  width={botInfoRealDimensions?.width}
-                  height={botInfoRealDimensions?.height}
-                />
-              )}
-              {botInfo.description && (
-                <div className="bot-info-description">
-                  <p className="bot-info-title">{lang('BotInfoTitle')}</p>
-                  {renderText(botInfo.description, ['br', 'emoji', 'links'])}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+      ) : isBot && !hasMessages ? (
+        <MessageListBotInfo chatId={chatId} />
       ) : shouldRenderGreeting ? (
         <ContactGreeting userId={chatId} />
       ) : messageIds && (!messageGroups || isGroupChatJustCreated || isEmptyTopic) ? (
@@ -635,7 +567,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           isChatWithSelf={isChatWithSelf}
           isGroupChatJustCreated={isGroupChatJustCreated}
         />
-      ) : ((messageIds && messageGroups) || lastMessage) ? (
+      ) : hasMessages ? (
         <MessageListContent
           isCurrentUserPremium={isCurrentUserPremium}
           chatId={chatId}
@@ -658,6 +590,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
           threadTopMessageId={threadTopMessageId}
           hasLinkedChat={hasLinkedChat}
           isSchedule={messageGroups ? type === 'scheduled' : false}
+          shouldRenderBotInfo={isBot}
           noAppearanceAnimation={!messageGroups || !shouldAnimateAppearanceRef.current}
           onFabToggle={onFabToggle}
           onNotchToggle={onNotchToggle}
@@ -699,17 +632,7 @@ export default memo(withGlobal<OwnProps>(
       && !messageIds && !chat.unreadCount && !focusingId && lastMessage && !lastMessage.groupedId
     );
 
-    const chatBot = selectBot(global, chatId)!;
-    let isLoadingBotInfo = false;
-    let botInfo;
-    if (selectIsChatBotNotStarted(global, chatId)) {
-      const chatBotFullInfo = selectUserFullInfo(global, chatBot.id);
-      if (chatBotFullInfo) {
-        botInfo = chatBotFullInfo.botInfo;
-      } else {
-        isLoadingBotInfo = true;
-      }
-    }
+    const chatBot = selectBot(global, chatId);
 
     const topic = chat.topics?.[threadId];
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
@@ -732,8 +655,6 @@ export default memo(withGlobal<OwnProps>(
       isViewportNewest: type !== 'thread' || selectIsViewportNewest(global, chatId, threadId),
       focusingId,
       isSelectModeActive: selectIsInSelectMode(global),
-      isLoadingBotInfo,
-      botInfo,
       threadTopMessageId,
       hasLinkedChat: chatFullInfo ? Boolean(chatFullInfo.linkedChatId) : undefined,
       topic,
