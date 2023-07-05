@@ -27,7 +27,7 @@
   }
 
   &__icon {
-    font-size: 1.25rem;
+    font-size: 1.25em;
   }
 
   &.size-micro {
@@ -99,10 +99,6 @@
   &.size-large {
     font-size: 1.3125rem;
 
-    .icon {
-      font-size: 1.625rem;
-    }
-
     .emoji {
       width: 1.3125rem;
       height: 1.3125rem;
@@ -113,10 +109,6 @@
     width: 7.5rem;
     height: 7.5rem;
     font-size: 3.5rem;
-
-    &__i {
-      font-size: 6rem;
-    }
 
     .emoji {
       width: 3.5rem;
