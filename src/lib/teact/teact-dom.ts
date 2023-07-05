@@ -46,6 +46,7 @@ const INDEX_KEY_PREFIX = '__indexKey#';
 
 const headsByElement = new WeakMap<Element, VirtualDomHead>();
 const extraClasses = new WeakMap<Element, Set<string>>();
+const extraStyles = new WeakMap<Element, Record<string, string>>();
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_virtualTreeSize = 1;
@@ -669,7 +670,7 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
       }
     }
   } else if (key === 'style') {
-    element.style.cssText = value;
+    updateStyle(element, value);
   } else if (key === 'dangerouslySetInnerHTML') {
     // eslint-disable-next-line no-underscore-dangle
     element.innerHTML = value.__html;
@@ -688,7 +689,7 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   } else if (key === 'value') {
     (element as HTMLInputElement).value = '';
   } else if (key === 'style') {
-    element.style.cssText = '';
+    updateStyle(element, '');
   } else if (key === 'dangerouslySetInnerHTML') {
     element.innerHTML = '';
   } else if (key.startsWith('on')) {
@@ -711,6 +712,15 @@ function updateClassName(element: HTMLElement, value: string) {
   }
 
   element.className = extraArray.join(' ');
+}
+
+function updateStyle(element: HTMLElement, value: string) {
+  element.style.cssText = value;
+
+  const extraObject = extraStyles.get(element);
+  if (extraObject) {
+    applyExtraStyles(element);
+  }
 }
 
 export function addExtraClass(element: Element, className: string, forceSingle = false) {
@@ -778,6 +788,28 @@ export function toggleExtraClass(element: Element, className: string, force?: bo
   } else {
     removeExtraClass(element, className);
   }
+}
+
+export function setExtraStyles(element: HTMLElement, styles: Partial<CSSStyleDeclaration> & AnyLiteral) {
+  extraStyles.set(element, styles);
+  applyExtraStyles(element);
+}
+
+function applyExtraStyles(element: HTMLElement) {
+  const standardStyles = Object.entries(extraStyles.get(element)!).reduce<Record<string, string>>(
+    (acc, [prop, value]) => {
+      if (prop.startsWith('--')) {
+        element.style.setProperty(prop, value);
+      } else {
+        acc[prop] = value;
+      }
+
+      return acc;
+    },
+    {},
+  );
+
+  Object.assign(element.style, standardStyles);
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
