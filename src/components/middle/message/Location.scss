@@ -110,8 +110,9 @@
     z-index: 5;
   }
 
+  .venue,
   .geo {
-    height: 2.5rem;
+    height: 3.25rem;
   }
 
   .geoLive,
@@ -148,9 +149,9 @@
   .location-info {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr auto;
     width: 100%;
-    padding: 0.3125rem 0.5rem 0.375rem;
+    padding: 0.3125rem 0.5rem 0.25rem;
 
     &-title {
       font-weight: 500;
@@ -159,7 +160,7 @@
 
     &-subtitle {
       color: var(--color-text-secondary);
-      line-height: 1;
+      line-height: 1.25;
       font-size: 0.875rem;
       grid-area: 2 / 1 / 2 / 2;
 
@@ -180,10 +181,13 @@
     color: var(--accent-color);
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    left: 0;
+    transform: translateY(-50%);
     font-size: 0.875rem;
     font-weight: 500;
+    line-height: 1;
+    width: 100%;
+    text-align: center;
   }
 
   .geo-countdown-progress {
