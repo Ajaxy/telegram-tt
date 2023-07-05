@@ -1,5 +1,5 @@
-import React, { memo } from '../../lib/teact/teact';
 import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import type { OwnProps } from './EditTopic';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const EditTopicAsync: FC<OwnProps> = (props) => {
   return EditTopic ? <EditTopic {...props} /> : <Loading />;
 };
 
-export default memo(EditTopicAsync);
+export default EditTopicAsync;

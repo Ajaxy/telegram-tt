@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
@@ -12,4 +12,4 @@ const GifSearchAsync: FC = () => {
   return GifSearch ? <GifSearch /> : <Loading />;
 };
 
-export default memo(GifSearchAsync);
+export default GifSearchAsync;

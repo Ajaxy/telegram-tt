@@ -1,93 +1,92 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
-
-import type { FC } from '../../../lib/teact/teact';
 import type {
-  ActiveEmojiInteraction, ActiveReaction, ChatTranslatedMessages, MessageListType,
+  ActiveEmojiInteraction,
+  ActiveReaction,
+  ChatTranslatedMessages,
+  MessageListType,
 } from '../../../global/types';
 import type {
+  ApiAvailableReaction,
+  ApiChat,
+  ApiChatMember,
   ApiMessage,
   ApiMessageOutgoingStatus,
-  ApiUser,
-  ApiChat,
-  ApiThreadInfo,
-  ApiAvailableReaction,
-  ApiChatMember,
-  ApiUsername,
-  ApiTopic,
   ApiReaction,
   ApiStickerSet,
+  ApiThreadInfo,
+  ApiTopic,
+  ApiUser,
+  ApiUsername,
 } from '../../../api/types';
-import type { FocusDirection, IAlbum, ISettings } from '../../../types';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
-import { AudioOrigin } from '../../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
+import type { FocusDirection, IAlbum, ISettings } from '../../../types';
+import { AudioOrigin } from '../../../types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
 import {
-  selectChat,
-  selectChatMessage,
-  selectUploadProgress,
-  selectIsChatWithSelf,
-  selectOutgoingStatus,
-  selectUser,
-  selectIsMessageFocused,
-  selectCurrentTextSearch,
-  selectIsInSelectMode,
-  selectIsMessageSelected,
-  selectIsDocumentGroupSelected,
-  selectSender,
-  selectForwardedSender,
-  selectThreadTopMessageId,
+  selectAllowedMessageActions,
+  selectAnimatedEmoji,
   selectCanAutoLoadMedia,
   selectCanAutoPlayMedia,
-  selectShouldLoopStickers,
-  selectTheme,
-  selectAllowedMessageActions,
-  selectIsDownloading,
-  selectThreadInfo,
-  selectMessageIdsByGroupId,
-  selectIsMessageProtected,
-  selectDefaultReaction,
-  selectReplySender,
-  selectAnimatedEmoji,
-  selectIsCurrentUserPremium,
-  selectIsChatProtected,
-  selectTopicFromMessage,
-  selectTabState,
-  selectChatTranslations,
-  selectRequestedTranslationLanguage,
+  selectChat,
   selectChatFullInfo,
+  selectChatMessage,
+  selectChatTranslations,
+  selectCurrentTextSearch,
+  selectDefaultReaction,
+  selectForwardedSender,
+  selectIsChatProtected,
+  selectIsChatWithSelf,
+  selectIsCurrentUserPremium,
+  selectIsDocumentGroupSelected,
+  selectIsDownloading,
+  selectIsInSelectMode,
+  selectIsMessageFocused,
+  selectIsMessageProtected,
+  selectIsMessageSelected,
+  selectMessageIdsByGroupId,
+  selectOutgoingStatus,
   selectPerformanceSettingsValue,
+  selectReplySender,
+  selectRequestedTranslationLanguage,
+  selectSender,
+  selectShouldLoopStickers,
+  selectTabState,
+  selectTheme,
+  selectThreadInfo,
+  selectThreadTopMessageId,
+  selectTopicFromMessage,
+  selectUploadProgress,
+  selectUser,
 } from '../../../global/selectors';
 import {
+  areReactionsEmpty,
   getMessageContent,
-  isOwnMessage,
-  isReplyMessage,
-  isAnonymousOwnMessage,
-  isMessageLocal,
-  isUserId,
-  isChatWithRepliesBot,
   getMessageCustomShape,
-  isChatChannel,
+  getMessageHtmlId,
+  getMessageLocation,
+  getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
   getSenderTitle,
   getUserColorKey,
-  areReactionsEmpty,
-  getMessageHtmlId,
-  isGeoLiveExpired,
-  getMessageSingleCustomEmoji,
   hasMessageText,
+  isAnonymousOwnMessage,
+  isChatChannel,
   isChatGroup,
-  getMessageLocation,
+  isChatWithRepliesBot,
+  isGeoLiveExpired,
+  isMessageLocal,
+  isOwnMessage,
+  isReplyMessage,
+  isUserId,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import {
@@ -98,8 +97,8 @@ import {
 } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
 import {
-  getMinMediaWidth,
   calculateMediaDimensions,
+  getMinMediaWidth,
   MIN_MEDIA_WIDTH_WITH_TEXT,
 } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
@@ -112,7 +111,6 @@ import { isAnimatingScroll } from '../../../util/animateScroll';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
@@ -802,7 +800,7 @@ const Message: FC<OwnProps & StateProps> = ({
     );
   }
 
-  function renderQuickReactionButton() {
+  const renderQuickReactionButton = useLastCallback(() => {
     if (!defaultReaction) return undefined;
 
     return (
@@ -819,7 +817,7 @@ const Message: FC<OwnProps & StateProps> = ({
         />
       </div>
     );
-  }
+  });
 
   function renderReactionsAndMeta() {
     const meta = (

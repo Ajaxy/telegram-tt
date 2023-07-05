@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './ChatlistModal';
@@ -14,4 +14,4 @@ const ChatlistModalAsync: FC<OwnProps> = (props) => {
   return ChatlistModal ? <ChatlistModal {...props} /> : undefined;
 };
 
-export default memo(ChatlistModalAsync);
+export default ChatlistModalAsync;

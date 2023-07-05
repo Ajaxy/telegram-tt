@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './BotTrustModal';
@@ -14,4 +14,4 @@ const BotTrustModalAsync: FC<OwnProps> = (props) => {
   return BotTrustModal ? <BotTrustModal {...props} /> : undefined;
 };
 
-export default memo(BotTrustModalAsync);
+export default BotTrustModalAsync;

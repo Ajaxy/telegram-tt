@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './AttachBotInstallModal';
@@ -14,4 +14,4 @@ const AttachBotInstallModalAsync: FC<OwnProps> = (props) => {
   return AttachBotInstallModal ? <AttachBotInstallModal {...props} /> : undefined;
 };
 
-export default memo(AttachBotInstallModalAsync);
+export default AttachBotInstallModalAsync;

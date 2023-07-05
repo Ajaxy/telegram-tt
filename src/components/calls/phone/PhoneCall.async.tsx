@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import useModuleLoader from '../../../hooks/useModuleLoader';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -14,4 +14,4 @@ const PhoneCallAsync: FC<OwnProps> = (props) => {
   return PhoneCall ? <PhoneCall /> : undefined;
 };
 
-export default memo(PhoneCallAsync);
+export default PhoneCallAsync;

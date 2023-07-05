@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './NewContactModal';
@@ -14,4 +14,4 @@ const NewContactModalAsync: FC<OwnProps> = (props) => {
   return NewContactModal ? <NewContactModal {...props} /> : undefined;
 };
 
-export default memo(NewContactModalAsync);
+export default NewContactModalAsync;

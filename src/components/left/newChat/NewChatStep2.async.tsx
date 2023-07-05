@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './NewChatStep2';
@@ -14,4 +14,4 @@ const NewChatStep2Async: FC<OwnProps> = (props) => {
   return NewChatStep2 ? <NewChatStep2 {...props} /> : <Loading />;
 };
 
-export default memo(NewChatStep2Async);
+export default NewChatStep2Async;

@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import type { OwnProps } from './UnpinAllMessagesModal';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const UnpinAllMessagesModalAsync: FC<OwnProps> = (props) => {
   return UnpinAllMessagesModal ? <UnpinAllMessagesModal {...props} /> : undefined;
 };
 
-export default memo(UnpinAllMessagesModalAsync);
+export default UnpinAllMessagesModalAsync;

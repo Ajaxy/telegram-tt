@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './DropArea';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,5 +13,5 @@ const DropAreaAsync: FC<OwnProps> = (props) => {
   return DropArea ? <DropArea {...props} /> : undefined;
 };
 
-export default memo(DropAreaAsync);
+export default DropAreaAsync;
 export { DropAreaState } from './DropArea';

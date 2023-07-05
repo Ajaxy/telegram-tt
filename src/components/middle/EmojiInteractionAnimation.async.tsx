@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import type { OwnProps } from './EmojiInteractionAnimation';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -15,4 +15,4 @@ const EmojiInteractionAnimationAsync: FC<OwnProps> = (props) => {
   return EmojiInteractionAnimation ? <EmojiInteractionAnimation {...props} /> : undefined;
 };
 
-export default memo(EmojiInteractionAnimationAsync);
+export default EmojiInteractionAnimationAsync;

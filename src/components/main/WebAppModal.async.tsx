@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './WebAppModal';
@@ -14,4 +14,4 @@ const WebAppModalAsync: FC<OwnProps> = (props) => {
   return WebAppModal ? <WebAppModal {...props} /> : undefined;
 };
 
-export default memo(WebAppModalAsync);
+export default WebAppModalAsync;

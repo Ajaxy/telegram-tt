@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './MentionTooltip';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const MentionTooltipAsync: FC<OwnProps> = (props) => {
   return MentionTooltip ? <MentionTooltip {...props} /> : undefined;
 };
 
-export default memo(MentionTooltipAsync);
+export default MentionTooltipAsync;
