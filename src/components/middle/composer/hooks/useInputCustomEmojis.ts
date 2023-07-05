@@ -238,7 +238,7 @@ async function createPlayer({
   }
 
   if (customEmoji.isVideo) {
-    const style = colorFilter ? `filter: ${colorFilter};` : undefined;
+    const style = customEmoji.shouldUseTextColor && colorFilter ? `filter: ${colorFilter};` : undefined;
     const absoluteVideo = new AbsoluteVideo(
       mediaUrl,
       absoluteContainerRef.current!,
