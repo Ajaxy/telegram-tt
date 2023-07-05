@@ -62,6 +62,13 @@ const EditTopic: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
+    if (!isActive) {
+      setTitle('');
+      setIconEmojiId(undefined);
+    }
+  }, [isActive]);
+
+  useEffect(() => {
     if (topic?.title || topic?.iconEmojiId) {
       setTitle(topic.title);
       setIconEmojiId(topic.iconEmojiId);
