@@ -1,6 +1,4 @@
-import React, {
-  memo, useMemo,
-} from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -10,7 +8,6 @@ import type { ApiSticker } from '../../api/types';
 import { IS_ANDROID, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 import * as mediaLoader from '../../util/mediaLoader';
 import buildClassName from '../../util/buildClassName';
-import generateIdFor from '../../util/generateIdFor';
 import { getStickerPreviewHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
@@ -22,6 +19,7 @@ import useFlag from '../../hooks/useFlag';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useColorFilter from '../../hooks/stickers/useColorFilter';
+import useUniqueId from '../../hooks/useUniqueId';
 
 import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
@@ -54,7 +52,6 @@ type OwnProps = {
 
 const SHARED_PREFIX = 'shared';
 const STICKER_SIZE = 24;
-const ID_STORE = {};
 
 const StickerView: FC<OwnProps> = ({
   containerRef,
@@ -127,7 +124,7 @@ const StickerView: FC<OwnProps> = ({
   // Preload preview for Message Input and local message
   useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview);
 
-  const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
+  const randomIdPrefix = useUniqueId();
   const renderId = [
     (withSharedAnimation ? SHARED_PREFIX : randomIdPrefix),
     id,

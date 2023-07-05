@@ -322,12 +322,13 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
         .sort((chat1, chat2) => getOrderDate(chat1)! - getOrderDate(chat2)!)[0]
       : undefined;
 
-    await loadChats(global,
+    await loadChats(
       listType,
       oldestChat?.id,
       oldestChat ? getOrderDate(oldestChat) : undefined,
       shouldReplace,
-      true);
+      true,
+    );
 
     if (shouldReplace) {
       onReplace?.();
@@ -352,10 +353,10 @@ addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType =>
   }
 });
 
-addActionHandler('loadTopChats', (global): ActionReturnType => {
+addActionHandler('loadTopChats', (): ActionReturnType => {
   runThrottledForLoadTopChats(() => {
-    loadChats(global, 'active');
-    loadChats(global, 'archived');
+    loadChats('active');
+    loadChats('archived');
   });
 });
 
@@ -2157,15 +2158,15 @@ addActionHandler('openDeleteChatFolderModal', async (global, actions, payload): 
   setGlobal(global);
 });
 
-async function loadChats<T extends GlobalState>(
-  global: T,
+async function loadChats(
   listType: 'active' | 'archived',
   offsetId?: string,
   offsetDate?: number,
   shouldReplace = false,
   isFullDraftSync?: boolean,
 ) {
-  global = getGlobal();
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
+  let global = getGlobal();
   let lastLocalServiceMessage = selectLastServiceNotification(global)?.message;
   const result = await callApi('fetchChats', {
     limit: CHAT_LIST_LOAD_SLICE,

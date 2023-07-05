@@ -1,4 +1,4 @@
-import generateIdFor from '../../util/generateIdFor';
+import generateUniqueId from '../../util/generateUniqueId';
 import { pause } from '../../util/schedulers';
 
 declare const self: WorkerGlobalScope;
@@ -15,7 +15,7 @@ const PART_TIMEOUT = 30000;
 const requestStates = new Map<string, RequestStates>();
 
 export function requestPart(params: RequestPartParams): Promise<ArrayBuffer | undefined> {
-  const messageId = generateIdFor(requestStates);
+  const messageId = generateUniqueId();
   const requestState = {} as RequestStates;
 
   let isResolved = false;

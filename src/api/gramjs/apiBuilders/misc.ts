@@ -1,17 +1,17 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiConfig,
-  ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+  ApiConfig, ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession, ApiLangString,
 } from '../../types';
 import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { buildApiDocument, buildApiReaction } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
-import { pick } from '../../../util/iteratees';
+import { omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { buildApiUser } from './users';
 import { addUserToLocalDb } from '../helpers';
+import { omitVirtualClassFields } from './helpers';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
   if (wallpaper instanceof GramJs.WallPaperNoFile) {
@@ -252,4 +252,19 @@ export function buildApiConfig(config: GramJs.Config): ApiConfig {
     maxGroupSize: config.chatSizeMax,
     autologinToken: config.autologinToken,
   };
+}
+
+export function buildLangPack(mtpLangPack: GramJs.LangPackDifference) {
+  return mtpLangPack.strings.reduce<Record<string, ApiLangString | undefined>>((acc, mtpString) => {
+    acc[mtpString.key] = buildLangPackString(mtpString);
+    return acc;
+  }, {});
+}
+
+export function buildLangPackString(mtpString: GramJs.TypeLangPackString) {
+  return mtpString instanceof GramJs.LangPackString
+    ? mtpString.value
+    : mtpString instanceof GramJs.LangPackStringPluralized
+      ? omit(omitVirtualClassFields(mtpString), ['key'])
+      : undefined;
 }

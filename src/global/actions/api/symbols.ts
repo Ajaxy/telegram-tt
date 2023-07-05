@@ -604,7 +604,6 @@ addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionRetu
   if (query) {
     void searchThrottled(async () => {
       const result = await callApi('searchStickers', { query });
-
       if (!result) {
         return;
       }
@@ -643,6 +642,7 @@ addActionHandler('setGifSearchQuery', (global, actions, payload): ActionReturnTy
 
   if (typeof query === 'string') {
     void searchThrottled(() => {
+      global = getGlobal();
       searchGifs(global, query, global.config?.gifSearchUsername, undefined, tabId);
     });
   }
@@ -654,6 +654,7 @@ addActionHandler('searchMoreGifs', (global, actions, payload): ActionReturnType 
 
   if (typeof query === 'string') {
     void searchThrottled(() => {
+      global = getGlobal();
       searchGifs(global, query, global.config?.gifSearchUsername, offset, tabId);
     });
   }

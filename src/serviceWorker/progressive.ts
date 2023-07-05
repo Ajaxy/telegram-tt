@@ -1,5 +1,5 @@
 import { pause } from '../util/schedulers';
-import generateIdFor from '../util/generateIdFor';
+import generateUniqueId from '../util/generateUniqueId';
 import {
   DEBUG,
   MEDIA_CACHE_MAX_BYTES,
@@ -149,7 +149,7 @@ export async function requestPart(
     return undefined;
   }
 
-  const messageId = generateIdFor(requestStates);
+  const messageId = generateUniqueId();
   const requestState = {} as RequestStates;
 
   let isResolved = false;

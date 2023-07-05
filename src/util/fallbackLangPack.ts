@@ -3,1754 +3,501 @@
 import type { ApiLangPack } from '../api/types';
 
 export default {
-  Search: {
-    key: 'Search',
-    value: 'Search',
-  },
-  SavedMessages: {
-    key: 'SavedMessages',
-    value: 'Saved Messages',
-  },
-  ArchivedChats: {
-    key: 'ArchivedChats',
-    value: 'Archived Chats',
-  },
-  Contacts: {
-    key: 'Contacts',
-    value: 'Contacts',
-  },
-  Settings: {
-    key: 'Settings',
-    value: 'Settings',
-  },
-  lng_menu_night_mode: {
-    key: 'lng_menu_night_mode',
-    value: 'Night Mode',
-  },
-  lng_settings_enable_night_theme: {
-    key: 'lng_settings_enable_night_theme',
-    value: 'Enable night mode',
-  },
-  'Appearance.Animations': {
-    key: 'Appearance.Animations',
-    value: 'ANIMATIONS',
-  },
-  TelegramFeatures: {
-    key: 'TelegramFeatures',
-    value: 'Telegram Features',
-  },
-  AccDescrOpenMenu2: {
-    key: 'AccDescrOpenMenu2',
-    value: 'Open menu',
-  },
-  NewMessageTitle: {
-    key: 'NewMessageTitle',
-    value: 'New Message',
-  },
-  NewChannel: {
-    key: 'NewChannel',
-    value: 'New Channel',
-  },
-  NewGroup: {
-    key: 'NewGroup',
-    value: 'New Group',
-  },
-  'Common.Close': {
-    key: 'Common.Close',
-    value: 'Close',
-  },
-  FilterAllChats: {
-    key: 'FilterAllChats',
-    value: 'All Chats',
-  },
-  MarkAsUnread: {
-    key: 'MarkAsUnread',
-    value: 'Mark as unread',
-  },
-  UnpinFromTop: {
-    key: 'UnpinFromTop',
-    value: 'Unpin from top',
-  },
-  'ChatList.Mute': {
-    key: 'ChatList.Mute',
-    value: 'Mute',
-  },
-  Archive: {
-    key: 'Archive',
-    value: 'Archive',
-  },
-  Delete: {
-    key: 'Delete',
-    value: 'Delete',
-  },
-  DeleteChat: {
-    key: 'DeleteChat',
-    value: 'Delete and exit',
-  },
-  FromYou: {
-    key: 'FromYou',
-    value: 'You',
-  },
-  formatDateSchedule: {
-    key: 'formatDateSchedule',
-    value: 'MMM d',
-  },
-  June: {
-    key: 'June',
-    value: 'June',
-  },
-  'Month.GenJune': {
-    key: 'Month.GenJune',
-    value: 'June',
-  },
-  'Month.ShortJune': {
-    key: 'Month.ShortJune',
-    value: 'Jun',
-  },
-  MarkAsRead: {
-    key: 'MarkAsRead',
-    value: 'Mark as read',
-  },
-  PinToTop: {
-    key: 'PinToTop',
-    value: 'Pin to top',
-  },
-  'ChatList.Unmute': {
-    key: 'ChatList.Unmute',
-    value: 'Unmute',
-  },
-  'Group.LeaveGroup': {
-    key: 'Group.LeaveGroup',
-    value: 'Leave Group',
-  },
-  LeaveChannel: {
-    key: 'LeaveChannel',
-    value: 'Leave Channel',
-  },
-  AttachPhoto: {
-    key: 'AttachPhoto',
-    value: 'Photo',
-  },
-  UnreadMessages: {
-    key: 'UnreadMessages',
-    value: 'Unread Messages',
-  },
-  'Weekday.Today': {
-    key: 'Weekday.Today',
-    value: 'Today',
-  },
-  Message: {
-    key: 'Message',
-    value: 'Message',
-  },
-  AccDescrVoiceMessage: {
-    key: 'AccDescrVoiceMessage',
-    value: 'Record voice message',
-  },
-  AccDescrPageDown: {
-    key: 'AccDescrPageDown',
-    value: 'Go to bottom',
-  },
-  chatDate: {
-    key: 'chatDate',
-    value: 'MMMM d',
-  },
-  January: {
-    key: 'January',
-    value: 'January',
-  },
-  'Month.GenJanuary': {
-    key: 'Month.GenJanuary',
-    value: 'January',
-  },
-  'Month.ShortJanuary': {
-    key: 'Month.ShortJanuary',
-    value: 'Jan',
-  },
-  February: {
-    key: 'February',
-    value: 'February',
-  },
-  'Month.GenFebruary': {
-    key: 'Month.GenFebruary',
-    value: 'February',
-  },
-  'Month.ShortFebruary': {
-    key: 'Month.ShortFebruary',
-    value: 'Feb',
-  },
-  March: {
-    key: 'March',
-    value: 'March',
-  },
-  'Month.GenMarch': {
-    key: 'Month.GenMarch',
-    value: 'March',
-  },
-  'Month.ShortMarch': {
-    key: 'Month.ShortMarch',
-    value: 'Mar',
-  },
-  April: {
-    key: 'April',
-    value: 'April',
-  },
-  'Month.GenApril': {
-    key: 'Month.GenApril',
-    value: 'April',
-  },
-  'Month.ShortApril': {
-    key: 'Month.ShortApril',
-    value: 'Apr',
-  },
-  May: {
-    key: 'May',
-    value: 'May',
-  },
-  'Month.GenMay': {
-    key: 'Month.GenMay',
-    value: 'May',
-  },
-  'Month.ShortMay': {
-    key: 'Month.ShortMay',
-    value: 'May',
-  },
-  'Weekday.Thursday': {
-    key: 'Weekday.Thursday',
-    value: 'Thursday',
-  },
-  EditedMessage: {
-    key: 'EditedMessage',
-    value: 'edited',
-  },
-  chatFullDate: {
-    key: 'chatFullDate',
-    value: 'MMMM d, yyyy',
-  },
-  September: {
-    key: 'September',
-    value: 'September',
-  },
-  'Month.GenSeptember': {
-    key: 'Month.GenSeptember',
-    value: 'September',
-  },
-  'Month.ShortSeptember': {
-    key: 'Month.ShortSeptember',
-    value: 'Sep',
-  },
-  November: {
-    key: 'November',
-    value: 'November',
-  },
-  'Month.GenNovember': {
-    key: 'Month.GenNovember',
-    value: 'November',
-  },
-  'Month.ShortNovember': {
-    key: 'Month.ShortNovember',
-    value: 'Nov',
-  },
-  December: {
-    key: 'December',
-    value: 'December',
-  },
-  'Month.GenDecember': {
-    key: 'Month.GenDecember',
-    value: 'December',
-  },
-  'Month.ShortDecember': {
-    key: 'Month.ShortDecember',
-    value: 'Dec',
-  },
-  SearchAllChatsShort: {
-    key: 'SearchAllChatsShort',
-    value: 'Chats',
-  },
-  SharedMediaTab2: {
-    key: 'SharedMediaTab2',
-    value: 'Media',
-  },
-  SharedLinksTab2: {
-    key: 'SharedLinksTab2',
-    value: 'Links',
-  },
-  SharedFilesTab2: {
-    key: 'SharedFilesTab2',
-    value: 'Files',
-  },
-  SharedMusicTab2: {
-    key: 'SharedMusicTab2',
-    value: 'Music',
-  },
-  SharedVoiceTab2: {
-    key: 'SharedVoiceTab2',
-    value: 'Voice',
-  },
+  Search: 'Search',
+  SavedMessages: 'Saved Messages',
+  ArchivedChats: 'Archived Chats',
+  Contacts: 'Contacts',
+  Settings: 'Settings',
+  lng_menu_night_mode: 'Night Mode',
+  lng_settings_enable_night_theme: 'Enable night mode',
+  'Appearance.Animations': 'ANIMATIONS',
+  TelegramFeatures: 'Telegram Features',
+  AccDescrOpenMenu2: 'Open menu',
+  NewMessageTitle: 'New Message',
+  NewChannel: 'New Channel',
+  NewGroup: 'New Group',
+  'Common.Close': 'Close',
+  FilterAllChats: 'All Chats',
+  MarkAsUnread: 'Mark as unread',
+  UnpinFromTop: 'Unpin from top',
+  'ChatList.Mute': 'Mute',
+  Archive: 'Archive',
+  Delete: 'Delete',
+  DeleteChat: 'Delete and exit',
+  FromYou: 'You',
+  formatDateSchedule: 'MMM d',
+  June: 'June',
+  'Month.GenJune': 'June',
+  'Month.ShortJune': 'Jun',
+  MarkAsRead: 'Mark as read',
+  PinToTop: 'Pin to top',
+  'ChatList.Unmute': 'Unmute',
+  'Group.LeaveGroup': 'Leave Group',
+  LeaveChannel: 'Leave Channel',
+  AttachPhoto: 'Photo',
+  UnreadMessages: 'Unread Messages',
+  'Weekday.Today': 'Today',
+  Message: 'Message',
+  AccDescrVoiceMessage: 'Record voice message',
+  AccDescrPageDown: 'Go to bottom',
+  chatDate: 'MMMM d',
+  January: 'January',
+  'Month.GenJanuary': 'January',
+  'Month.ShortJanuary': 'Jan',
+  February: 'February',
+  'Month.GenFebruary': 'February',
+  'Month.ShortFebruary': 'Feb',
+  March: 'March',
+  'Month.GenMarch': 'March',
+  'Month.ShortMarch': 'Mar',
+  April: 'April',
+  'Month.GenApril': 'April',
+  'Month.ShortApril': 'Apr',
+  May: 'May',
+  'Month.GenMay': 'May',
+  'Month.ShortMay': 'May',
+  'Weekday.Thursday': 'Thursday',
+  EditedMessage: 'edited',
+  chatFullDate: 'MMMM d, yyyy',
+  September: 'September',
+  'Month.GenSeptember': 'September',
+  'Month.ShortSeptember': 'Sep',
+  November: 'November',
+  'Month.GenNovember': 'November',
+  'Month.ShortNovember': 'Nov',
+  December: 'December',
+  'Month.GenDecember': 'December',
+  'Month.ShortDecember': 'Dec',
+  SearchAllChatsShort: 'Chats',
+  SharedMediaTab2: 'Media',
+  SharedLinksTab2: 'Links',
+  SharedFilesTab2: 'Files',
+  SharedMusicTab2: 'Music',
+  SharedVoiceTab2: 'Voice',
   'PreviewSender.SendPhoto': {
-    key: 'PreviewSender.SendPhoto',
     oneValue: 'Send Photo',
     otherValue: 'Send %d Photos',
   },
-  Send: {
-    key: 'Send',
-    value: 'Send',
-  },
+  Send: 'Send',
   'Preview.Dragging.AddItems': {
-    key: 'Preview.Dragging.AddItems',
     oneValue: 'Add Item',
     otherValue: 'Add Items',
   },
-  Caption: {
-    key: 'Caption',
-    value: 'Caption',
-  },
-  formatterMonthYear: {
-    key: 'formatterMonthYear',
-    value: 'MMMM yyyy',
-  },
-  'Weekday.ShortMonday': {
-    key: 'Weekday.ShortMonday',
-    value: 'Mon',
-  },
-  'Weekday.ShortSaturday': {
-    key: 'Weekday.ShortSaturday',
-    value: 'Sat',
-  },
-  'Weekday.ShortFriday': {
-    key: 'Weekday.ShortFriday',
-    value: 'Fri',
-  },
-  'Conversation.ScheduleMessage.SendOn': {
-    key: 'Conversation.ScheduleMessage.SendOn',
-    value: 'Send on %@ at %@',
-  },
-  'Weekday.ShortThursday': {
-    key: 'Weekday.ShortThursday',
-    value: 'Thu',
-  },
-  'Weekday.ShortWednesday': {
-    key: 'Weekday.ShortWednesday',
-    value: 'Wed',
-  },
-  'Weekday.ShortTuesday': {
-    key: 'Weekday.ShortTuesday',
-    value: 'Tue',
-  },
+  Caption: 'Caption',
+  formatterMonthYear: 'MMMM yyyy',
+  'Weekday.ShortMonday': 'Mon',
+  'Weekday.ShortSaturday': 'Sat',
+  'Weekday.ShortFriday': 'Fri',
+  'Conversation.ScheduleMessage.SendOn': 'Send on %@ at %@',
+  'Weekday.ShortThursday': 'Thu',
+  'Weekday.ShortWednesday': 'Wed',
+  'Weekday.ShortTuesday': 'Tue',
   'LastSeen.MinutesAgo': {
-    key: 'LastSeen.MinutesAgo',
     oneValue: 'last seen 1 minute ago',
     otherValue: 'last seen %@ minutes ago',
   },
-  'AttachmentMenu.PhotoOrVideo': {
-    key: 'AttachmentMenu.PhotoOrVideo',
-    value: 'Photo or Video',
-  },
-  AttachDocument: {
-    key: 'AttachDocument',
-    value: 'File',
-  },
-  SendWithoutSound: {
-    key: 'SendWithoutSound',
-    value: 'Send without sound',
-  },
-  ScheduleMessage: {
-    key: 'ScheduleMessage',
-    value: 'Schedule message',
-  },
-  'Chat.PanelUnpinAllMessages': {
-    key: 'Chat.PanelUnpinAllMessages',
-    value: 'Unpin All Messages',
-  },
+  'AttachmentMenu.PhotoOrVideo': 'Photo or Video',
+  AttachDocument: 'File',
+  SendWithoutSound: 'Send without sound',
+  ScheduleMessage: 'Schedule message',
+  'Chat.PanelUnpinAllMessages': 'Unpin All Messages',
   'Chat.UnpinAllMessagesConfirmation': {
-    key: 'Chat.UnpinAllMessagesConfirmation',
     oneValue: 'Do you want to unpin %d message in this chat?',
     otherValue: 'Do you want to unpin all %d messages in this chat?',
   },
-  DialogUnpin: {
-    key: 'DialogUnpin',
-    value: 'Unpin',
-  },
-  Cancel: {
-    key: 'Cancel',
-    value: 'Cancel',
-  },
-  AccDescrStickerSet: {
-    key: 'AccDescrStickerSet',
-    value: 'Sticker set',
-  },
-  Recent: {
-    key: 'Recent',
-    value: 'Recent',
-  },
-  DeleteChatUser: {
-    key: 'DeleteChatUser',
-    value: 'Delete chat',
-  },
-  'ChatList.DeleteChatConfirmation': {
-    key: 'ChatList.DeleteChatConfirmation',
-    value: 'Are you sure you want to delete the chat\nwith %@?',
-  },
-  'ChatList.DeleteForEveryone': {
-    key: 'ChatList.DeleteForEveryone',
-    value: 'Delete for me and %@',
-  },
-  'ChatList.DeleteForCurrentUser': {
-    key: 'ChatList.DeleteForCurrentUser',
-    value: 'Delete just for me',
-  },
+  DialogUnpin: 'Unpin',
+  Cancel: 'Cancel',
+  AccDescrStickerSet: 'Sticker set',
+  Recent: 'Recent',
+  DeleteChatUser: 'Delete chat',
+  'ChatList.DeleteChatConfirmation': 'Are you sure you want to delete the chat\nwith %@?',
+  'ChatList.DeleteForEveryone': 'Delete for me and %@',
+  'ChatList.DeleteForCurrentUser': 'Delete just for me',
   'LastSeen.HoursAgo': {
-    key: 'LastSeen.HoursAgo',
     oneValue: 'last seen 1 hour ago',
     otherValue: 'last seen %@ hours ago',
   },
-  ForwardedMessage: {
-    key: 'ForwardedMessage',
-    value: 'Forwarded message',
-  },
-  'Weekday.Yesterday': {
-    key: 'Weekday.Yesterday',
-    value: 'Yesterday',
-  },
-  AttachVideo: {
-    key: 'AttachVideo',
-    value: 'Video',
-  },
-  Lately: {
-    key: 'Lately',
-    value: 'last seen recently',
-  },
-  'Weekday.Tuesday': {
-    key: 'Weekday.Tuesday',
-    value: 'Tuesday',
-  },
-  'Weekday.Wednesday': {
-    key: 'Weekday.Wednesday',
-    value: 'Wednesday',
-  },
-  'Weekday.Friday': {
-    key: 'Weekday.Friday',
-    value: 'Friday',
-  },
-  'Weekday.Saturday': {
-    key: 'Weekday.Saturday',
-    value: 'Saturday',
-  },
-  SearchFriends: {
-    key: 'SearchFriends',
-    value: 'Search contacts',
-  },
-  Online: {
-    key: 'Online',
-    value: 'online',
-  },
-  'LastSeen.JustNow': {
-    key: 'LastSeen.JustNow',
-    value: 'last seen just now',
-  },
-  AccDescrGoBack: {
-    key: 'AccDescrGoBack',
-    value: 'Go back',
-  },
-  SETTINGS: {
-    key: 'SETTINGS',
-    value: 'Settings',
-  },
-  LogOutTitle: {
-    key: 'LogOutTitle',
-    value: 'Log Out',
-  },
-  lng_settings_information: {
-    key: 'lng_settings_information',
-    value: 'Edit profile',
-  },
-  Filters: {
-    key: 'Filters',
-    value: 'Folders',
-  },
-  'Telegram.GeneralSettingsViewController': {
-    key: 'Telegram.GeneralSettingsViewController',
-    value: 'General Settings',
-  },
-  Notifications: {
-    key: 'Notifications',
-    value: 'Notifications',
-  },
-  DataSettings: {
-    key: 'DataSettings',
-    value: 'Data and Storage',
-  },
-  PrivacySettings: {
-    key: 'PrivacySettings',
-    value: 'Privacy and Security',
-  },
-  Language: {
-    key: 'Language',
-    value: 'Language',
-  },
-  FirstName: {
-    key: 'FirstName',
-    value: 'First name (required)',
-  },
-  LastName: {
-    key: 'LastName',
-    value: 'Last name (optional)',
-  },
-  UserBio: {
-    key: 'UserBio',
-    value: 'Bio',
-  },
-  lng_settings_about_bio: {
-    key: 'lng_settings_about_bio',
-    value: 'Any details such as age, occupation or city.\nExample: 23 y.o. designer from San Francisco',
-  },
-  Username: {
-    key: 'Username',
-    value: 'Username',
-  },
-  UsernameHelp: {
-    key: 'UsernameHelp',
-    value: 'You can choose a username on **Telegram**. If you do, people will be able to find you by this username and contact you without needing your phone number.\n\nYou can use **a–z**, **0–9** and underscores. Minimum length is **5** characters.',
-  },
-  lng_username_link: {
-    key: 'lng_username_link',
-    value: 'This link opens a chat with you:',
-  },
-  lng_user_typing: {
-    key: 'lng_user_typing',
-    value: 'typing...',
-  },
-  lng_send_action_record_video: {
-    key: 'lng_send_action_record_video',
-    value: 'recording video...',
-  },
-  lng_send_action_upload_video: {
-    key: 'lng_send_action_record_video',
-    value: 'uploading video...',
-  },
-  lng_send_action_record_audio: {
-    key: 'lng_send_action_record_audio',
-    value: 'recording audio...',
-  },
-  lng_send_action_upload_audio: {
-    key: 'lng_send_action_upload_audio',
-    value: 'uploading audio...',
-  },
-  lng_send_action_upload_photo: {
-    key: 'lng_send_action_upload_photo',
-    value: 'uploading photo...',
-  },
-  lng_send_action_upload_file: {
-    key: 'lng_send_action_upload_file',
-    value: 'uploading file...',
-  },
-  CropImage: {
-    key: 'CropImage',
-    value: 'Crop image',
-  },
+  ForwardedMessage: 'Forwarded message',
+  'Weekday.Yesterday': 'Yesterday',
+  AttachVideo: 'Video',
+  Lately: 'last seen recently',
+  'Weekday.Tuesday': 'Tuesday',
+  'Weekday.Wednesday': 'Wednesday',
+  'Weekday.Friday': 'Friday',
+  'Weekday.Saturday': 'Saturday',
+  SearchFriends: 'Search contacts',
+  Online: 'online',
+  'LastSeen.JustNow': 'last seen just now',
+  AccDescrGoBack: 'Go back',
+  SETTINGS: 'Settings',
+  LogOutTitle: 'Log Out',
+  lng_settings_information: 'Edit profile',
+  Filters: 'Folders',
+  'Telegram.GeneralSettingsViewController': 'General Settings',
+  Notifications: 'Notifications',
+  DataSettings: 'Data and Storage',
+  PrivacySettings: 'Privacy and Security',
+  Language: 'Language',
+  FirstName: 'First name (required)',
+  LastName: 'Last name (optional)',
+  UserBio: 'Bio',
+  lng_settings_about_bio: 'Any details such as age, occupation or city.\nExample: 23 y.o. designer from San Francisco',
+  Username: 'Username',
+  UsernameHelp: 'You can choose a username on **Telegram**. If you do, people will be able to find you by this username and contact you without needing your phone number.\n\nYou can use **a–z**, **0–9** and underscores. Minimum length is **5** characters.',
+  lng_username_link: 'This link opens a chat with you:',
+  lng_user_typing: 'typing...',
+  lng_send_action_record_video: 'recording video...',
+  lng_send_action_upload_video: 'uploading video...',
+  lng_send_action_record_audio: 'recording audio...',
+  lng_send_action_upload_audio: 'uploading audio...',
+  lng_send_action_upload_photo: 'uploading photo...',
+  lng_send_action_upload_file: 'uploading file...',
+  CropImage: 'Crop image',
   Chats: {
-    key: 'Chats', oneValue: '%1$d chat', otherValue: '%1$d chats',
+    oneValue: '%1$d chat',
+    otherValue: '%1$d chats',
   },
-  FilterContacts: {
-    key: 'FilterContacts',
-    value: 'Contacts',
-  },
-  CreateNewFilterInfo: {
-    key: 'CreateNewFilterInfo',
-    value: 'Create folders for different groups of chats and quickly switch between them.',
-  },
-  CreateNewFilter: {
-    key: 'CreateNewFilter',
-    value: 'Create New Folder',
-  },
-  FilterNew: {
-    key: 'FilterNew',
-    value: 'New Folder',
-  },
-  FilterIncludeInfo: {
-    key: 'FilterIncludeInfo',
-    value: 'Choose chats and types of chats that will appear in this folder.',
-  },
-  FilterNameHint: {
-    key: 'FilterNameHint',
-    value: 'Folder name',
-  },
-  FilterInclude: {
-    key: 'FilterInclude',
-    value: 'Included Chats',
-  },
-  FilterAddChats: {
-    key: 'FilterAddChats',
-    value: 'Add Chats',
-  },
-  FilterExclude: {
-    key: 'FilterExclude',
-    value: 'Excluded Chats',
-  },
-  AutoDeleteConfirm: {
-    key: 'AutoDeleteConfirm',
-    value: 'Confirm',
-  },
-  FilterChatTypes: {
-    key: 'FilterChatTypes',
-    value: 'Chat types',
-  },
-  FilterNonContacts: {
-    key: 'FilterNonContacts',
-    value: 'Non Contacts',
-  },
-  FilterGroups: {
-    key: 'FilterGroups',
-    value: 'Groups',
-  },
-  FilterChannels: {
-    key: 'FilterChannels',
-    value: 'Channels',
-  },
-  FilterBots: {
-    key: 'FilterBots',
-    value: 'Bots',
-  },
-  FilterChats: {
-    key: 'FilterChats',
-    value: 'Chats',
-  },
-  AccDescrChannel: {
-    key: 'AccDescrChannel',
-    value: 'Channel',
-  },
-  AccDescrGroup: {
-    key: 'AccDescrGroup',
-    value: 'Group',
-  },
-  Bot: {
-    key: 'Bot',
-    value: 'bot',
-  },
-  ServiceNotifications: {
-    key: 'ServiceNotifications',
-    value: 'Service notifications',
-  },
-  'LastSeen.TodayAt': {
-    key: 'LastSeen.TodayAt',
-    value: 'last seen today at %@',
-  },
-  ALongTimeAgo: {
-    key: 'ALongTimeAgo',
-    value: 'last seen a long time ago',
-  },
-  formatterYearMax: {
-    key: 'formatterYearMax',
-    value: 'dd.MM.yyyy',
-  },
-  'LastSeen.AtDate': {
-    key: 'LastSeen.AtDate',
-    value: 'last seen %@',
-  },
-  'LastSeen.YesterdayAt': {
-    key: 'LastSeen.YesterdayAt',
-    value: 'last seen yesterday at %@',
-  },
-  FilterMuted: {
-    key: 'FilterMuted',
-    value: 'Muted',
-  },
-  FilterArchived: {
-    key: 'FilterArchived',
-    value: 'Archived',
-  },
-  FilterRead: {
-    key: 'FilterRead',
-    value: 'Read',
-  },
-  FilterEdit: {
-    key: 'FilterEdit',
-    value: 'Edit folder',
-  },
+  FilterContacts: 'Contacts',
+  CreateNewFilterInfo: 'Create folders for different groups of chats and quickly switch between them.',
+  CreateNewFilter: 'Create New Folder',
+  FilterNew: 'New Folder',
+  FilterIncludeInfo: 'Choose chats and types of chats that will appear in this folder.',
+  FilterNameHint: 'Folder name',
+  FilterInclude: 'Included Chats',
+  FilterAddChats: 'Add Chats',
+  FilterExclude: 'Excluded Chats',
+  AutoDeleteConfirm: 'Confirm',
+  FilterChatTypes: 'Chat types',
+  FilterNonContacts: 'Non Contacts',
+  FilterGroups: 'Groups',
+  FilterChannels: 'Channels',
+  FilterBots: 'Bots',
+  FilterChats: 'Chats',
+  AccDescrChannel: 'Channel',
+  AccDescrGroup: 'Group',
+  Bot: 'bot',
+  ServiceNotifications: 'Service notifications',
+  'LastSeen.TodayAt': 'last seen today at %@',
+  ALongTimeAgo: 'last seen a long time ago',
+  formatterYearMax: 'dd.MM.yyyy',
+  'LastSeen.AtDate': 'last seen %@',
+  'LastSeen.YesterdayAt': 'last seen yesterday at %@',
+  FilterMuted: 'Muted',
+  FilterArchived: 'Archived',
+  FilterRead: 'Read',
+  FilterEdit: 'Edit folder',
   Members: {
-    key: 'Members', oneValue: '%1$d member', otherValue: '%1$d members',
+    oneValue: '%1$d member',
+    otherValue: '%1$d members',
   },
-  General: {
-    key: 'General',
-    value: 'General',
-  },
-  lng_settings_send_enter: {
-    key: 'lng_settings_send_enter',
-    value: 'Send with Enter',
-  },
-  lng_settings_send_cmdenter: {
-    key: 'lng_settings_send_cmdenter',
-    value: 'Send with Cmd+Enter',
-  },
-  TextSize: {
-    key: 'TextSize',
-    value: 'Message Text Size',
-  },
-  ChatBackground: {
-    key: 'ChatBackground',
-    value: 'Chat Background',
-  },
-  'VoiceOver.Keyboard': {
-    key: 'VoiceOver.Keyboard',
-    value: 'Keyboard',
-  },
-  AutoDownloadMedia: {
-    key: 'AutoDownloadMedia',
-    value: 'Auto-Download Media',
-  },
-  AutodownloadPrivateChats: {
-    key: 'AutodownloadPrivateChats',
-    value: 'Private Chats',
-  },
-  AutodownloadGroupChats: {
-    key: 'AutodownloadGroupChats',
-    value: 'Group Chats',
-  },
-  AutoplayMedia: {
-    key: 'AutoplayMedia',
-    value: 'Auto-play media',
-  },
-  GifsTab2: {
-    key: 'GifsTab2',
-    value: 'GIFs',
-  },
-  'DataAndStorage.Autoplay.Videos': {
-    key: 'DataAndStorage.Autoplay.Videos',
-    value: 'Videos',
-  },
-  AccDescrStickers: {
-    key: 'AccDescrStickers',
-    value: 'Stickers',
-  },
-  SuggestStickers: {
-    key: 'SuggestStickers',
-    value: 'Suggest stickers by emoji',
-  },
-  LoopAnimatedStickers: {
-    key: 'LoopAnimatedStickers',
-    value: 'Loop Animated Stickers',
-  },
+  General: 'General',
+  lng_settings_send_enter: 'Send with Enter',
+  lng_settings_send_cmdenter: 'Send with Cmd+Enter',
+  TextSize: 'Message Text Size',
+  ChatBackground: 'Chat Background',
+  'VoiceOver.Keyboard': 'Keyboard',
+  AutoDownloadMedia: 'Auto-Download Media',
+  AutodownloadPrivateChats: 'Private Chats',
+  AutodownloadGroupChats: 'Group Chats',
+  AutoplayMedia: 'Auto-play media',
+  GifsTab2: 'GIFs',
+  'DataAndStorage.Autoplay.Videos': 'Videos',
+  AccDescrStickers: 'Stickers',
+  SuggestStickers: 'Suggest stickers by emoji',
+  LoopAnimatedStickers: 'Loop Animated Stickers',
   'StickerPack.StickerCount': {
-    key: 'StickerPack.StickerCount',
     oneValue: '1 sticker',
     otherValue: '%@ stickers',
   },
-  UploadImage: {
-    key: 'UploadImage',
-    value: 'Upload image',
-  },
-  SetColor: {
-    key: 'SetColor',
-    value: 'Set a color',
-  },
-  ThemeResetToDefaults: {
-    key: 'ThemeResetToDefaults',
-    value: 'Reset to default',
-  },
-  BackgroundBlurred: {
-    key: 'BackgroundBlurred',
-    value: 'Blurred',
-  },
-  NotificationsForPrivateChats: {
-    key: 'NotificationsForPrivateChats',
-    value: 'Notifications for private chats',
-  },
-  'UserInfo.NotificationsEnabled': {
-    key: 'UserInfo.NotificationsEnabled',
-    value: 'Enabled',
-  },
-  MessagePreview: {
-    key: 'MessagePreview',
-    value: 'Message Preview',
-  },
-  NotificationsForGroups: {
-    key: 'NotificationsForGroups',
-    value: 'Notifications for groups',
-  },
-  NotificationsForChannels: {
-    key: 'NotificationsForChannels',
-    value: 'Notifications for channels',
-  },
-  PhoneOther: {
-    key: 'PhoneOther',
-    value: 'Other',
-  },
-  ContactJoined: {
-    key: 'ContactJoined',
-    value: 'Contact joined Telegram',
-  },
-  'UserInfo.NotificationsDisabled': {
-    key: 'UserInfo.NotificationsDisabled',
-    value: 'Disabled',
-  },
-  BlockedUsers: {
-    key: 'BlockedUsers',
-    value: 'Blocked Users',
-  },
-  TwoStepVerification: {
-    key: 'TwoStepVerification',
-    value: 'Two-Step Verification',
-  },
-  PasswordOff: {
-    key: 'PasswordOff',
-    value: 'Off',
-  },
-  SessionsTitle: {
-    key: 'SessionsTitle',
-    value: 'Active Sessions',
-  },
-  PrivacyTitle: {
-    key: 'PrivacyTitle',
-    value: 'Privacy',
-  },
-  PrivacyPhoneTitle: {
-    key: 'PrivacyPhoneTitle',
-    value: 'Who can see my phone number?',
-  },
-  LastSeenTitle: {
-    key: 'LastSeenTitle',
-    value: 'Who can see your Last Seen time?',
-  },
-  PrivacyProfilePhotoTitle: {
-    key: 'PrivacyProfilePhotoTitle',
-    value: 'Who can see my profile photos & videos?',
-  },
-  PrivacyForwardsTitle: {
-    key: 'PrivacyForwardsTitle',
-    value: 'Who can add a link to my account when forwarding my messages?',
-  },
-  WhoCanAddMe: {
-    key: 'WhoCanAddMe',
-    value: 'Who can add me to group chats?',
-  },
-  lng_settings_sensitive_title: {
-    key: 'lng_settings_sensitive_title',
-    value: 'Sensitive content',
-  },
-  lng_settings_sensitive_disable_filtering: {
-    key: 'lng_settings_sensitive_disable_filtering',
-    value: 'Disable filtering',
-  },
-  lng_settings_sensitive_about: {
-    key: 'lng_settings_sensitive_about',
-    value: 'Display sensitive media in public channels on all your Telegram devices.',
-  },
-  P2PContacts: {
-    key: 'P2PContacts',
-    value: 'My Contacts',
-  },
-  P2PEverybody: {
-    key: 'P2PEverybody',
-    value: 'Everybody',
-  },
-  P2PNobody: {
-    key: 'P2PNobody',
-    value: 'Nobody',
-  },
+  UploadImage: 'Upload image',
+  SetColor: 'Set a color',
+  ThemeResetToDefaults: 'Reset to default',
+  BackgroundBlurred: 'Blurred',
+  NotificationsForPrivateChats: 'Notifications for private chats',
+  'UserInfo.NotificationsEnabled': 'Enabled',
+  MessagePreview: 'Message Preview',
+  NotificationsForGroups: 'Notifications for groups',
+  NotificationsForChannels: 'Notifications for channels',
+  PhoneOther: 'Other',
+  ContactJoined: 'Contact joined Telegram',
+  'UserInfo.NotificationsDisabled': 'Disabled',
+  BlockedUsers: 'Blocked Users',
+  TwoStepVerification: 'Two-Step Verification',
+  PasswordOff: 'Off',
+  SessionsTitle: 'Active Sessions',
+  PrivacyTitle: 'Privacy',
+  PrivacyPhoneTitle: 'Who can see my phone number?',
+  LastSeenTitle: 'Who can see your Last Seen time?',
+  PrivacyProfilePhotoTitle: 'Who can see my profile photos & videos?',
+  PrivacyForwardsTitle: 'Who can add a link to my account when forwarding my messages?',
+  WhoCanAddMe: 'Who can add me to group chats?',
+  lng_settings_sensitive_title: 'Sensitive content',
+  lng_settings_sensitive_disable_filtering: 'Disable filtering',
+  lng_settings_sensitive_about: 'Display sensitive media in public channels on all your Telegram devices.',
+  P2PContacts: 'My Contacts',
+  P2PEverybody: 'Everybody',
+  P2PNobody: 'Nobody',
   Users: {
-    key: 'Users', oneValue: '%1$d user', otherValue: '%1$d users',
+    oneValue: '%1$d user',
+    otherValue: '%1$d users',
   },
-  PasswordOn: {
-    key: 'PasswordOn',
-    value: 'On',
-  },
-  BlockedUsersInfo: {
-    key: 'BlockedUsersInfo',
-    value: 'Blocked users will not be able to contact you and will not see your Last Seen time.',
-  },
-  EnabledPasswordText: {
-    key: 'EnabledPasswordText',
-    value: 'You have enabled Two-Step verification.\nYou\'ll need the password you set up here to log in to your Telegram account.',
-  },
-  ChangePassword: {
-    key: 'ChangePassword',
-    value: 'Change Password',
-  },
-  TurnPasswordOff: {
-    key: 'TurnPasswordOff',
-    value: 'Turn Password Off',
-  },
-  SetRecoveryEmail: {
-    key: 'SetRecoveryEmail',
-    value: 'Set Recovery Email',
-  },
-  PleaseEnterCurrentPassword: {
-    key: 'PleaseEnterCurrentPassword',
-    value: 'Enter your password',
-  },
-  Next: {
-    key: 'Next',
-    value: 'Next',
-  },
-  'AuthSessions.CurrentSession': {
-    key: 'AuthSessions.CurrentSession',
-    value: 'CURRENT SESSION',
-  },
-  TerminateAllSessions: {
-    key: 'TerminateAllSessions',
-    value: 'Terminate All Other Sessions',
-  },
-  PrivacyPhone: {
-    key: 'PrivacyPhone',
-    value: 'Phone Number',
-  },
-  PrivacyExceptions: {
-    key: 'PrivacyExceptions',
-    value: 'Exceptions',
-  },
-  AlwaysShareWith: {
-    key: 'AlwaysShareWith',
-    value: 'Always Share With',
-  },
-  EditAdminAddUsers: {
-    key: 'EditAdminAddUsers',
-    value: 'Add Users',
-  },
-  NeverShareWith: {
-    key: 'NeverShareWith',
-    value: 'Never Share With',
-  },
-  AlwaysShareWithPlaceholder: {
-    key: 'AlwaysShareWithPlaceholder',
-    value: 'Always share with users...',
-  },
-  AlwaysShareWithTitle: {
-    key: 'AlwaysShareWithTitle',
-    value: 'Always Share',
-  },
-  NeverShareWithPlaceholder: {
-    key: 'NeverShareWithPlaceholder',
-    value: 'Never share with users...',
-  },
-  NeverShareWithTitle: {
-    key: 'NeverShareWithTitle',
-    value: 'Never Share',
-  },
-  'Privacy.ProfilePhoto': {
-    key: 'Privacy.ProfilePhoto',
-    value: 'Profile Photo',
-  },
-  FilterNoChatsToDisplay: {
-    key: 'FilterNoChatsToDisplay',
-    value: 'Folder is empty',
-  },
-  AttachSticker: {
-    key: 'AttachSticker',
-    value: 'Sticker',
-  },
-  'ChatList.Search.ShowMore': {
-    key: 'ChatList.Search.ShowMore',
-    value: 'Show more',
-  },
-  'DialogList.SearchSectionDialogs': {
-    key: 'DialogList.SearchSectionDialogs',
-    value: 'Chats and Contacts',
-  },
-  SearchMessages: {
-    key: 'SearchMessages',
-    value: 'Messages',
-  },
-  'Weekday.ShortSunday': {
-    key: 'Weekday.ShortSunday',
-    value: 'Sun',
-  },
-  'DialogList.SearchSectionGlobal': {
-    key: 'DialogList.SearchSectionGlobal',
-    value: 'Global Search',
-  },
+  PasswordOn: 'On',
+  BlockedUsersInfo: 'Blocked users will not be able to contact you and will not see your Last Seen time.',
+  EnabledPasswordText: 'You have enabled Two-Step verification.\nYou\'ll need the password you set up here to log in to your Telegram account.',
+  ChangePassword: 'Change Password',
+  TurnPasswordOff: 'Turn Password Off',
+  SetRecoveryEmail: 'Set Recovery Email',
+  PleaseEnterCurrentPassword: 'Enter your password',
+  Next: 'Next',
+  'AuthSessions.CurrentSession': 'CURRENT SESSION',
+  TerminateAllSessions: 'Terminate All Other Sessions',
+  PrivacyPhone: 'Phone Number',
+  PrivacyExceptions: 'Exceptions',
+  AlwaysShareWith: 'Always Share With',
+  EditAdminAddUsers: 'Add Users',
+  NeverShareWith: 'Never Share With',
+  AlwaysShareWithPlaceholder: 'Always share with users...',
+  AlwaysShareWithTitle: 'Always Share',
+  NeverShareWithPlaceholder: 'Never share with users...',
+  NeverShareWithTitle: 'Never Share',
+  'Privacy.ProfilePhoto': 'Profile Photo',
+  FilterNoChatsToDisplay: 'Folder is empty',
+  AttachSticker: 'Sticker',
+  'ChatList.Search.ShowMore': 'Show more',
+  'DialogList.SearchSectionDialogs': 'Chats and Contacts',
+  SearchMessages: 'Messages',
+  'Weekday.ShortSunday': 'Sun',
+  'DialogList.SearchSectionGlobal': 'Global Search',
   Subscribers: {
-    key: 'Subscribers', oneValue: '%1$d subscriber', otherValue: '%1$d subscribers',
+    oneValue: '%1$d subscriber',
+    otherValue: '%1$d subscribers',
   },
-  ChannelLeaveAlertWithName: {
-    key: 'ChannelLeaveAlertWithName',
-    value: 'Are you sure you want to leave **%1$s**?',
-  },
-  'ChatList.Search.ShowLess': {
-    key: 'ChatList.Search.ShowLess',
-    value: 'Show less',
-  },
-  ChannelDelete: {
-    key: 'ChannelDelete',
-    value: 'Delete Channel',
-  },
-  'ChatList.DeleteAndLeaveGroupConfirmation': {
-    key: 'ChatList.DeleteAndLeaveGroupConfirmation',
-    value: 'Are you sure you want to leave and delete %@?',
-  },
-  'Chat.Input.Delete': {
-    key: 'Chat.Input.Delete',
-    value: 'Delete and Leave',
-  },
-  formatDateScheduleYear: {
-    key: 'formatDateScheduleYear',
-    value: 'MMM d yyyy',
-  },
-  October: {
-    key: 'October',
-    value: 'October',
-  },
-  'Month.GenOctober': {
-    key: 'Month.GenOctober',
-    value: 'October',
-  },
-  'Month.ShortOctober': {
-    key: 'Month.ShortOctober',
-    value: 'Oct',
-  },
-  August: {
-    key: 'August',
-    value: 'August',
-  },
-  'Month.GenAugust': {
-    key: 'Month.GenAugust',
-    value: 'August',
-  },
-  'Month.ShortAugust': {
-    key: 'Month.ShortAugust',
-    value: 'Aug',
-  },
-  July: {
-    key: 'July',
-    value: 'July',
-  },
-  'Month.GenJuly': {
-    key: 'Month.GenJuly',
-    value: 'July',
-  },
-  'Month.ShortJuly': {
-    key: 'Month.ShortJuly',
-    value: 'Jul',
-  },
-  'ChatList.Search.NoResults': {
-    key: 'ChatList.Search.NoResults',
-    value: 'No Results',
-  },
-  'ChatList.Search.NoResultsDescription': {
-    key: 'ChatList.Search.NoResultsDescription',
-    value: 'There were no results.\nTry a new search.',
-  },
-  lng_in_dlg_album: {
-    key: 'lng_in_dlg_album',
-    value: 'Album',
-  },
-  ReportSelectMessages: {
-    key: 'ReportSelectMessages',
-    value: 'Select messages',
-  },
+  ChannelLeaveAlertWithName: 'Are you sure you want to leave **%1$s**?',
+  'ChatList.Search.ShowLess': 'Show less',
+  ChannelDelete: 'Delete Channel',
+  'ChatList.DeleteAndLeaveGroupConfirmation': 'Are you sure you want to leave and delete %@?',
+  'Chat.Input.Delete': 'Delete and Leave',
+  formatDateScheduleYear: 'MMM d yyyy',
+  October: 'October',
+  'Month.GenOctober': 'October',
+  'Month.ShortOctober': 'Oct',
+  August: 'August',
+  'Month.GenAugust': 'August',
+  'Month.ShortAugust': 'Aug',
+  July: 'July',
+  'Month.GenJuly': 'July',
+  'Month.ShortJuly': 'Jul',
+  'ChatList.Search.NoResults': 'No Results',
+  'ChatList.Search.NoResultsDescription': 'There were no results.\nTry a new search.',
+  lng_in_dlg_album: 'Album',
+  ReportSelectMessages: 'Select messages',
   'VoiceOver.Chat.MessagesSelected': {
-    key: 'VoiceOver.Chat.MessagesSelected',
     oneValue: '%@ message selected',
     otherValue: '%@ messages selected',
   },
-  'Conversation.DeleteManyMessages': {
-    key: 'Conversation.DeleteManyMessages',
-    value: 'Delete Messages',
-  },
-  AreYouSureDeleteFewMessages: {
-    key: 'AreYouSureDeleteFewMessages',
-    value: 'Are you sure you want to delete these messages?',
-  },
-  Reply: {
-    key: 'Reply',
-    value: 'Reply',
-  },
-  Copy: {
-    key: 'Copy',
-    value: 'Copy',
-  },
-  DialogPin: {
-    key: 'DialogPin',
-    value: 'Pin',
-  },
-  Forward: {
-    key: 'Forward',
-    value: 'Forward',
-  },
-  'Common.Select': {
-    key: 'Common.Select',
-    value: 'Select',
-  },
-  DeleteSingleMessagesTitle: {
-    key: 'DeleteSingleMessagesTitle',
-    value: 'Delete message',
-  },
-  AreYouSureDeleteSingleMessage: {
-    key: 'AreYouSureDeleteSingleMessage',
-    value: 'Are you sure you want to delete this message?',
-  },
-  PinMessageAlertTitle: {
-    key: 'PinMessageAlertTitle',
-    value: 'Pin message',
-  },
-  PinMessageAlertChat: {
-    key: 'PinMessageAlertChat',
-    value: 'Do you want to pin this message at the top of the chat?',
-  },
-  Close: {
-    key: 'Close',
-    value: 'Close',
-  },
-  ForwardTo: {
-    key: 'ForwardTo',
-    value: 'Forward to...',
-  },
-  SavedMessagesInfo: {
-    key: 'SavedMessagesInfo',
-    value: 'Forward here to save.',
-  },
-  SendMessage: {
-    key: 'SendMessage',
-    value: 'Send Message',
-  },
-  Poll: {
-    key: 'Poll',
-    value: 'Poll',
-  },
-  GroupMembers: {
-    key: 'GroupMembers',
-    value: 'Members',
-  },
-  Info: {
-    key: 'Info',
-    value: 'Info',
-  },
-  EditAdminGroupDeleteMessages: {
-    key: 'EditAdminGroupDeleteMessages',
-    value: 'Delete Messages',
-  },
-  Edit: {
-    key: 'Edit',
-    value: 'Edit',
-  },
-  'Common.Back': {
-    key: 'Common.Back',
-    value: 'Back',
-  },
-  SharedMedia: {
-    key: 'SharedMedia',
-    value: 'Shared Media',
-  },
-  lng_dlg_search_for_messages: {
-    key: 'lng_dlg_search_for_messages',
-    value: 'Search for messages',
-  },
-  JumpToDate: {
-    key: 'JumpToDate',
-    value: 'Jump to Date',
-  },
-  lng_search_no_results: {
-    key: 'lng_search_no_results',
-    value: 'No messages found',
-  },
+  'Conversation.DeleteManyMessages': 'Delete Messages',
+  AreYouSureDeleteFewMessages: 'Are you sure you want to delete these messages?',
+  Reply: 'Reply',
+  Copy: 'Copy',
+  DialogPin: 'Pin',
+  Forward: 'Forward',
+  'Common.Select': 'Select',
+  DeleteSingleMessagesTitle: 'Delete message',
+  AreYouSureDeleteSingleMessage: 'Are you sure you want to delete this message?',
+  PinMessageAlertTitle: 'Pin message',
+  PinMessageAlertChat: 'Do you want to pin this message at the top of the chat?',
+  Close: 'Close',
+  ForwardTo: 'Forward to...',
+  SavedMessagesInfo: 'Forward here to save.',
+  SendMessage: 'Send Message',
+  Poll: 'Poll',
+  GroupMembers: 'Members',
+  Info: 'Info',
+  EditAdminGroupDeleteMessages: 'Delete Messages',
+  Edit: 'Edit',
+  'Common.Back': 'Back',
+  SharedMedia: 'Shared Media',
+  lng_dlg_search_for_messages: 'Search for messages',
+  JumpToDate: 'Jump to Date',
+  lng_search_no_results: 'No messages found',
   'StickerPack.RemoveStickerCount': {
-    key: 'StickerPack.RemoveStickerCount',
     oneValue: 'Remove 1 Sticker',
     otherValue: 'Remove %@ Stickers',
   },
-  AccActionDownload: {
-    key: 'AccActionDownload',
-    value: 'Download',
-  },
-  AccActionPlay: {
-    key: 'AccActionPlay',
-    value: 'Play',
-  },
-  ZoomOut: {
-    key: 'ZoomOut',
-    value: 'Zoom out',
-  },
-  AccDescrPrevious: {
-    key: 'AccDescrPrevious',
-    value: 'Previous',
-  },
-  'TextFormat.AddLinkTitle': {
-    key: 'TextFormat.AddLinkTitle',
-    value: 'Add Link',
-  },
-  Save: {
-    key: 'Save',
-    value: 'Save',
-  },
-  Updating: {
-    key: 'Updating',
-    value: 'Updating...',
-  },
-  lng_context_forward_msg: {
-    key: 'lng_context_forward_msg',
-    value: 'Forward Message',
-  },
+  AccActionDownload: 'Download',
+  AccActionPlay: 'Play',
+  ZoomOut: 'Zoom out',
+  AccDescrPrevious: 'Previous',
+  'TextFormat.AddLinkTitle': 'Add Link',
+  Save: 'Save',
+  Updating: 'Updating...',
+  lng_context_forward_msg: 'Forward Message',
   Comments: {
-    key: 'Comments', oneValue: '%1$d Comment', otherValue: '%1$d Comments',
+    oneValue: '%1$d Comment',
+    otherValue: '%1$d Comments',
   },
-  ChannelSubscribers: {
-    key: 'ChannelSubscribers',
-    value: 'Subscribers',
-  },
-  LeaveAComment: {
-    key: 'LeaveAComment',
-    value: 'Leave a comment',
-  },
-  ChatsMute: {
-    key: 'ChatsMute',
-    value: 'Mute',
-  },
-  'GroupInfo.DeleteAndExit': {
-    key: 'GroupInfo.DeleteAndExit',
-    value: 'Delete and Exit',
-  },
-  ChatsUnmute: {
-    key: 'ChatsUnmute',
-    value: 'Unmute',
-  },
-  'Conversation.DeleteMessagesForEveryone': {
-    key: 'Conversation.DeleteMessagesForEveryone',
-    value: 'Delete for everyone',
-  },
-  lng_mediaview_profile_photo: {
-    key: 'lng_mediaview_profile_photo',
-    value: 'Profile Photo',
-  },
-  lng_media_file_empty_search: {
-    key: 'lng_media_file_empty_search',
-    value: 'No files found',
-  },
-  lng_media_song_empty_search: {
-    key: 'lng_media_song_empty_search',
-    value: 'No music files found',
-  },
-  EnterChannelName: {
-    key: 'EnterChannelName',
-    value: 'Channel name',
-  },
-  DescriptionPlaceholder: {
-    key: 'DescriptionPlaceholder',
-    value: 'Description',
-  },
-  ChannelType: {
-    key: 'ChannelType',
-    value: 'Channel Type',
-  },
-  TypePublic: {
-    key: 'TypePublic',
-    value: 'Public',
-  },
-  Discussion: {
-    key: 'Discussion',
-    value: 'Discussion',
-  },
-  DiscussionUnlink: {
-    key: 'DiscussionUnlink',
-    value: 'Unlink',
-  },
-  ChannelAdministrators: {
-    key: 'ChannelAdministrators',
-    value: 'Administrators',
-  },
-  ChannelSignMessages: {
-    key: 'ChannelSignMessages',
-    value: 'Sign Messages',
-  },
-  ChannelDeleteAlert: {
-    key: 'ChannelDeleteAlert',
-    value: 'Wait! Deleting this channel will remove all subscribers and all messages will be lost. Delete the channel anyway?',
-  },
-  ChannelTypeHeader: {
-    key: 'ChannelTypeHeader',
-    value: 'Channel type',
-  },
-  ChannelPrivate: {
-    key: 'ChannelPrivate',
-    value: 'Private Channel',
-  },
-  ChannelPrivateInfo: {
-    key: 'ChannelPrivateInfo',
-    value: 'Private channels can only be joined via an invite link.',
-  },
-  ChannelPublic: {
-    key: 'ChannelPublic',
-    value: 'Public Channel',
-  },
-  ChannelPublicInfo: {
-    key: 'ChannelPublicInfo',
-    value: 'Public channels can be found in search, anyone can join them.',
-  },
-  'Channel.Username.CreatePublicLinkHelp': {
-    key: 'Channel.Username.CreatePublicLinkHelp',
-    value: 'People can share this link with others and find your channel using Telegram search.',
-  },
-  SetUrlPlaceholder: {
-    key: 'SetUrlPlaceholder',
-    value: 'Link',
-  },
-  ChannelPrivateLinkHelp: {
-    key: 'ChannelPrivateLinkHelp',
-    value: 'People can join your channel by following this link. You can revoke the link any time.',
-  },
-  RevokeLink: {
-    key: 'RevokeLink',
-    value: 'Revoke Link',
-  },
-  RevokeAlert: {
-    key: 'RevokeAlert',
-    value: 'Are you sure you want to revoke this link? Once the link is revoked, no one will be able to join using it.',
-  },
-  RevokeButton: {
-    key: 'RevokeButton',
-    value: 'Revoke',
-  },
-  DiscussionUnlinkGroup: {
-    key: 'DiscussionUnlinkGroup',
-    value: 'Unlink Group',
-  },
-  DiscussionUnlinkChannelAlert: {
-    key: 'DiscussionUnlinkChannelAlert',
-    value: 'Are you sure you want to unlink **%1$s** from this channel?',
-  },
-  EventLog: {
-    key: 'EventLog',
-    value: 'Recent Actions',
-  },
-  EventLogInfoDetailChannel: {
-    key: 'EventLogInfoDetailChannel',
-    value: 'This is a list of all service actions taken by the channel\'s admins in the last 48 hours.',
-  },
-  ChannelCreator: {
-    key: 'ChannelCreator',
-    value: 'Owner',
-  },
-  EditAdminRights: {
-    key: 'EditAdminRights',
-    value: 'Edit admin rights',
-  },
-  EditAdminWhatCanDo: {
-    key: 'EditAdminWhatCanDo',
-    value: 'What can this admin do?',
-  },
-  EditAdminChangeChannelInfo: {
-    key: 'EditAdminChangeChannelInfo',
-    value: 'Change Channel Info',
-  },
-  EditAdminPostMessages: {
-    key: 'EditAdminPostMessages',
-    value: 'Post Messages',
-  },
-  EditAdminEditMessages: {
-    key: 'EditAdminEditMessages',
-    value: 'Edit Messages of Others',
-  },
-  EditAdminDeleteMessages: {
-    key: 'EditAdminDeleteMessages',
-    value: 'Delete Messages of Others',
-  },
-  EditAdminAddAdmins: {
-    key: 'EditAdminAddAdmins',
-    value: 'Add New Admins',
-  },
-  'Group.Info.AdminLog': {
-    key: 'Group.Info.AdminLog',
-    value: 'Recent Actions',
-  },
-  EventLogAllEvents: {
-    key: 'EventLogAllEvents',
-    value: 'All actions',
-  },
-  EventLogFilterNewAdmins: {
-    key: 'EventLogFilterNewAdmins',
-    value: 'Admin rights',
-  },
-  EventLogFilterNewMembers: {
-    key: 'EventLogFilterNewMembers',
-    value: 'New members',
-  },
-  EventLogFilterChannelInfo: {
-    key: 'EventLogFilterChannelInfo',
-    value: 'Channel info',
-  },
-  EventLogFilterDeletedMessages: {
-    key: 'EventLogFilterDeletedMessages',
-    value: 'Deleted messages',
-  },
-  EventLogFilterEditedMessages: {
-    key: 'EventLogFilterEditedMessages',
-    value: 'Edited messages',
-  },
-  EventLogFilterLeavingMembers: {
-    key: 'EventLogFilterLeavingMembers',
-    value: 'Leaving members',
-  },
-  'Channel.Management.Title': {
-    key: 'Channel.Management.Title',
-    value: 'Admins',
-  },
-  EventLogAllAdmins: {
-    key: 'EventLogAllAdmins',
-    value: 'All admins',
-  },
-  WithinAWeek: {
-    key: 'WithinAWeek',
-    value: 'last seen within a week',
-  },
-  WithinAMonth: {
-    key: 'WithinAMonth',
-    value: 'last seen within a month',
-  },
-  EventLogFilterPinnedMessages: {
-    key: 'EventLogFilterPinnedMessages',
-    value: 'Pinned messages',
-  },
-  UnpinMessageAlertTitle: {
-    key: 'UnpinMessageAlertTitle',
-    value: 'Unpin message',
-  },
-  PinnedMessage: {
-    key: 'PinnedMessage',
-    value: 'Pinned Message',
-  },
+  ChannelSubscribers: 'Subscribers',
+  LeaveAComment: 'Leave a comment',
+  ChatsMute: 'Mute',
+  'GroupInfo.DeleteAndExit': 'Delete and Exit',
+  ChatsUnmute: 'Unmute',
+  'Conversation.DeleteMessagesForEveryone': 'Delete for everyone',
+  lng_mediaview_profile_photo: 'Profile Photo',
+  lng_media_file_empty_search: 'No files found',
+  lng_media_song_empty_search: 'No music files found',
+  EnterChannelName: 'Channel name',
+  DescriptionPlaceholder: 'Description',
+  ChannelType: 'Channel Type',
+  TypePublic: 'Public',
+  Discussion: 'Discussion',
+  DiscussionUnlink: 'Unlink',
+  ChannelAdministrators: 'Administrators',
+  ChannelSignMessages: 'Sign Messages',
+  ChannelDeleteAlert: 'Wait! Deleting this channel will remove all subscribers and all messages will be lost. Delete the channel anyway?',
+  ChannelTypeHeader: 'Channel type',
+  ChannelPrivate: 'Private Channel',
+  ChannelPrivateInfo: 'Private channels can only be joined via an invite link.',
+  ChannelPublic: 'Public Channel',
+  ChannelPublicInfo: 'Public channels can be found in search, anyone can join them.',
+  'Channel.Username.CreatePublicLinkHelp': 'People can share this link with others and find your channel using Telegram search.',
+  SetUrlPlaceholder: 'Link',
+  ChannelPrivateLinkHelp: 'People can join your channel by following this link. You can revoke the link any time.',
+  RevokeLink: 'Revoke Link',
+  RevokeAlert: 'Are you sure you want to revoke this link? Once the link is revoked, no one will be able to join using it.',
+  RevokeButton: 'Revoke',
+  DiscussionUnlinkGroup: 'Unlink Group',
+  DiscussionUnlinkChannelAlert: 'Are you sure you want to unlink **%1$s** from this channel?',
+  EventLog: 'Recent Actions',
+  EventLogInfoDetailChannel: 'This is a list of all service actions taken by the channel\'s admins in the last 48 hours.',
+  ChannelCreator: 'Owner',
+  EditAdminRights: 'Edit admin rights',
+  EditAdminWhatCanDo: 'What can this admin do?',
+  EditAdminChangeChannelInfo: 'Change Channel Info',
+  EditAdminPostMessages: 'Post Messages',
+  EditAdminEditMessages: 'Edit Messages of Others',
+  EditAdminDeleteMessages: 'Delete Messages of Others',
+  EditAdminAddAdmins: 'Add New Admins',
+  'Group.Info.AdminLog': 'Recent Actions',
+  EventLogAllEvents: 'All actions',
+  EventLogFilterNewAdmins: 'Admin rights',
+  EventLogFilterNewMembers: 'New members',
+  EventLogFilterChannelInfo: 'Channel info',
+  EventLogFilterDeletedMessages: 'Deleted messages',
+  EventLogFilterEditedMessages: 'Edited messages',
+  EventLogFilterLeavingMembers: 'Leaving members',
+  'Channel.Management.Title': 'Admins',
+  EventLogAllAdmins: 'All admins',
+  WithinAWeek: 'last seen within a week',
+  WithinAMonth: 'last seen within a month',
+  EventLogFilterPinnedMessages: 'Pinned messages',
+  UnpinMessageAlertTitle: 'Unpin message',
+  PinnedMessage: 'Pinned Message',
   OnlineCount: {
-    key: 'OnlineCount', oneValue: '%1$d online', otherValue: '%1$d online',
+    oneValue: '%1$d online',
+    otherValue: '%1$d online',
   },
-  GroupName: {
-    key: 'GroupName',
-    value: 'Group name',
-  },
-  GroupType: {
-    key: 'GroupType',
-    value: 'Group Type',
-  },
-  LinkedChannel: {
-    key: 'LinkedChannel',
-    value: 'Linked Channel',
-  },
-  ChannelPermissions: {
-    key: 'ChannelPermissions',
-    value: 'Permissions',
-  },
-  ChatHistory: {
-    key: 'ChatHistory',
-    value: 'Chat history for new members',
-  },
-  DeleteMega: {
-    key: 'DeleteMega',
-    value: 'Delete Group',
-  },
-  AreYouSureDeleteThisChatWithGroup: {
-    key: 'AreYouSureDeleteThisChatWithGroup',
-    value: 'Are you sure you want to delete the chat **%1$s**?',
-  },
-  DeleteGroupForAll: {
-    key: 'DeleteGroupForAll',
-    value: 'Delete the group for all members',
-  },
-  GroupTypeHeader: {
-    key: 'GroupTypeHeader',
-    value: 'Group type',
-  },
-  MegaPrivate: {
-    key: 'MegaPrivate',
-    value: 'Private Group',
-  },
-  MegaPrivateInfo: {
-    key: 'MegaPrivateInfo',
-    value: 'Private groups can only be joined if you were invited or have an invite link.',
-  },
-  MegaPublic: {
-    key: 'MegaPublic',
-    value: 'Public Group',
-  },
-  MegaPublicInfo: {
-    key: 'MegaPublicInfo',
-    value: 'Public groups can be found in search, chat history is available to everyone and anyone can join.',
-  },
-  'Group.Username.CreatePublicLinkHelp': {
-    key: 'Group.Username.CreatePublicLinkHelp',
-    value: 'People can share this link with others and find your group using Telegram search.',
-  },
-  MegaPrivateLinkHelp: {
-    key: 'MegaPrivateLinkHelp',
-    value: 'People can join your group by following this link. You can revoke the link any time.',
-  },
-  DiscussionUnlinkChannel: {
-    key: 'DiscussionUnlinkChannel',
-    value: 'Unlink Channel',
-  },
-  DiscussionUnlinkGroupAlert: {
-    key: 'DiscussionUnlinkGroupAlert',
-    value: 'Are you sure you want to unlink **%1$s** from this group?',
-  },
-  ChannelPermissionsHeader: {
-    key: 'ChannelPermissionsHeader',
-    value: 'What can members of this group do?',
-  },
-  UserRestrictionsSend: {
-    key: 'UserRestrictionsSend',
-    value: 'Send Messages',
-  },
-  UserRestrictionsSendMedia: {
-    key: 'UserRestrictionsSendMedia',
-    value: 'Send Media',
-  },
-  UserRestrictionsSendStickers: {
-    key: 'UserRestrictionsSendStickers',
-    value: 'Send Stickers and GIFs',
-  },
-  UserRestrictionsSendPolls: {
-    key: 'UserRestrictionsSendPolls',
-    value: 'Send Polls',
-  },
-  UserRestrictionsEmbedLinks: {
-    key: 'UserRestrictionsEmbedLinks',
-    value: 'Embed Links',
-  },
-  UserRestrictionsInviteUsers: {
-    key: 'UserRestrictionsInviteUsers',
-    value: 'Add Users',
-  },
-  UserRestrictionsPinMessages: {
-    key: 'UserRestrictionsPinMessages',
-    value: 'Pin Messages',
-  },
-  UserRestrictionsChangeInfo: {
-    key: 'UserRestrictionsChangeInfo',
-    value: 'Change Chat Info',
-  },
-  ChannelBlockedUsers: {
-    key: 'ChannelBlockedUsers',
-    value: 'Removed users',
-  },
-  ChannelAddException: {
-    key: 'ChannelAddException',
-    value: 'Add Exception',
-  },
-  NoBlockedGroup2: {
-    key: 'NoBlockedGroup2',
-    value: 'Users removed from the group by the admins can\'t rejoin via invite links.',
-  },
-  EventLogInfoDetail: {
-    key: 'EventLogInfoDetail',
-    value: 'This is a list of notable actions by members and admins in the last 48 hours.',
-  },
-  EditAdminChangeGroupInfo: {
-    key: 'EditAdminChangeGroupInfo',
-    value: 'Change Group Info',
-  },
-  EditAdminBanUsers: {
-    key: 'EditAdminBanUsers',
-    value: 'Ban Users',
-  },
-  EditAdminPinMessages: {
-    key: 'EditAdminPinMessages',
-    value: 'Pin Messages',
-  },
-  EditAdminSendAnonymously: {
-    key: 'EditAdminSendAnonymously',
-    value: 'Remain Anonymous',
-  },
-  EditAdminRank: {
-    key: 'EditAdminRank',
-    value: 'Custom title',
-  },
-  RecentStickers: {
-    key: 'RecentStickers',
-    value: 'Recently Used',
-  },
-  Emoji1: {
-    key: 'Emoji1',
-    value: 'Smileys and people',
-  },
-  Emoji2: {
-    key: 'Emoji2',
-    value: 'Animals and nature',
-  },
-  Emoji3: {
-    key: 'Emoji3',
-    value: 'Food and drink',
-  },
-  Emoji4: {
-    key: 'Emoji4',
-    value: 'Activity',
-  },
-  Emoji5: {
-    key: 'Emoji5',
-    value: 'Travel and places',
-  },
-  Emoji6: {
-    key: 'Emoji6',
-    value: 'Objects',
-  },
-  Emoji7: {
-    key: 'Emoji7',
-    value: 'Symbols',
-  },
-  Emoji8: {
-    key: 'Emoji8',
-    value: 'Flags',
-  },
-  FavoriteStickers: {
-    key: 'FavoriteStickers',
-    value: 'Favorites',
-  },
-  SearchStickersHint: {
-    key: 'SearchStickersHint',
-    value: 'Search sticker sets',
-  },
+  GroupName: 'Group name',
+  GroupType: 'Group Type',
+  LinkedChannel: 'Linked Channel',
+  ChannelPermissions: 'Permissions',
+  ChatHistory: 'Chat history for new members',
+  DeleteMega: 'Delete Group',
+  AreYouSureDeleteThisChatWithGroup: 'Are you sure you want to delete the chat **%1$s**?',
+  DeleteGroupForAll: 'Delete the group for all members',
+  GroupTypeHeader: 'Group type',
+  MegaPrivate: 'Private Group',
+  MegaPrivateInfo: 'Private groups can only be joined if you were invited or have an invite link.',
+  MegaPublic: 'Public Group',
+  MegaPublicInfo: 'Public groups can be found in search, chat history is available to everyone and anyone can join.',
+  'Group.Username.CreatePublicLinkHelp': 'People can share this link with others and find your group using Telegram search.',
+  MegaPrivateLinkHelp: 'People can join your group by following this link. You can revoke the link any time.',
+  DiscussionUnlinkChannel: 'Unlink Channel',
+  DiscussionUnlinkGroupAlert: 'Are you sure you want to unlink **%1$s** from this group?',
+  ChannelPermissionsHeader: 'What can members of this group do?',
+  UserRestrictionsSend: 'Send Messages',
+  UserRestrictionsSendMedia: 'Send Media',
+  UserRestrictionsSendStickers: 'Send Stickers and GIFs',
+  UserRestrictionsSendPolls: 'Send Polls',
+  UserRestrictionsEmbedLinks: 'Embed Links',
+  UserRestrictionsInviteUsers: 'Add Users',
+  UserRestrictionsPinMessages: 'Pin Messages',
+  UserRestrictionsChangeInfo: 'Change Chat Info',
+  ChannelBlockedUsers: 'Removed users',
+  ChannelAddException: 'Add Exception',
+  NoBlockedGroup2: 'Users removed from the group by the admins can\'t rejoin via invite links.',
+  EventLogInfoDetail: 'This is a list of notable actions by members and admins in the last 48 hours.',
+  EditAdminChangeGroupInfo: 'Change Group Info',
+  EditAdminBanUsers: 'Ban Users',
+  EditAdminPinMessages: 'Pin Messages',
+  EditAdminSendAnonymously: 'Remain Anonymous',
+  EditAdminRank: 'Custom title',
+  RecentStickers: 'Recently Used',
+  Emoji1: 'Smileys and people',
+  Emoji2: 'Animals and nature',
+  Emoji3: 'Food and drink',
+  Emoji4: 'Activity',
+  Emoji5: 'Travel and places',
+  Emoji6: 'Objects',
+  Emoji7: 'Symbols',
+  Emoji8: 'Flags',
+  FavoriteStickers: 'Favorites',
+  SearchStickersHint: 'Search sticker sets',
   Stickers: {
-    key: 'Stickers', oneValue: '%1$d sticker', otherValue: '%1$d stickers',
+    oneValue: '%1$d sticker',
+    otherValue: '%1$d stickers',
   },
-  'Stickers.Install': {
-    key: 'Stickers.Install',
-    value: 'ADD',
-  },
+  'Stickers.Install': 'ADD',
   'StickerPack.AddStickerCount': {
-    key: 'StickerPack.AddStickerCount',
     oneValue: 'Add 1 Sticker',
     otherValue: 'Add %@ Stickers',
   },
-  SearchGifsTitle: {
-    key: 'SearchGifsTitle',
-    value: 'Search GIFs',
-  },
+  SearchGifsTitle: 'Search GIFs',
   'PreviewSender.SendFile': {
-    key: 'PreviewSender.SendFile', oneValue: 'Send File', otherValue: 'Send %d Files',
+    oneValue: 'Send File',
+    otherValue: 'Send %d Files',
   },
-  Phone: {
-    key: 'Phone',
-    value: 'Phone',
-  },
-  Reminders: {
-    key: 'Reminders',
-    value: 'Reminders',
-  },
-  MessageScheduledOn: {
-    key: 'MessageScheduledOn',
-    value: 'Scheduled for %1$s',
-  },
-  NewPoll: {
-    key: 'NewPoll',
-    value: 'New Poll',
-  },
-  Create: {
-    key: 'Create',
-    value: 'Create',
-  },
-  AskAQuestion: {
-    key: 'AskAQuestion',
-    value: 'Ask a Question',
-  },
-  PollOptions: {
-    key: 'PollOptions',
-    value: 'Poll options',
-  },
-  'CreatePoll.AddOption': {
-    key: 'CreatePoll.AddOption',
-    value: 'Add an Option',
-  },
-  PollAnonymous: {
-    key: 'PollAnonymous',
-    value: 'Anonymous Voting',
-  },
-  PollMultiple: {
-    key: 'PollMultiple',
-    value: 'Multiple Answers',
-  },
-  PollQuiz: {
-    key: 'PollQuiz',
-    value: 'Quiz Mode',
-  },
-  PaymentReceipt: {
-    key: 'PaymentReceipt',
-    value: 'Receipt',
-  },
-  NoMessages: {
-    key: 'NoMessages',
-    value: 'No messages here yet...',
-  },
+  Phone: 'Phone',
+  Reminders: 'Reminders',
+  MessageScheduledOn: 'Scheduled for %1$s',
+  NewPoll: 'New Poll',
+  Create: 'Create',
+  AskAQuestion: 'Ask a Question',
+  PollOptions: 'Poll options',
+  'CreatePoll.AddOption': 'Add an Option',
+  PollAnonymous: 'Anonymous Voting',
+  PollMultiple: 'Multiple Answers',
+  PollQuiz: 'Quiz Mode',
+  PaymentReceipt: 'Receipt',
+  NoMessages: 'No messages here yet...',
   PinnedMessagesCount: {
-    key: 'PinnedMessagesCount',
     oneValue: 'Pinned Message',
     otherValue: '%1$d Pinned Messages',
   },
   'Chat.Pinned.UnpinAll': {
-    key: 'Chat.Pinned.UnpinAll',
     oneValue: 'Unpin %d Message',
     otherValue: 'Unpin All %d Messages',
   },
   CommentsCount: {
-    key: 'CommentsCount', oneValue: '%1$d comment', otherValue: '%1$d comments',
+    oneValue: '%1$d comment',
+    otherValue: '%1$d comments',
   },
-  'Conversation.DefaultRestrictedMedia': {
-    key: 'Conversation.DefaultRestrictedMedia',
-    value: 'Posting media content isn\'t allowed in this group.',
-  },
-  DiscussionStarted: {
-    key: 'DiscussionStarted',
-    value: 'Discussion started',
-  },
-  DiscussChannel: {
-    key: 'DiscussChannel',
-    value: 'channel',
-  },
-  'SharedMedia.EmptyTitle': {
-    key: 'SharedMedia.EmptyTitle',
-    value: 'No media files yet',
-  },
-  QuizPoll: {
-    key: 'QuizPoll',
-    value: 'Quiz',
-  },
-  PollViewResults: {
-    key: 'PollViewResults',
-    value: 'VIEW RESULTS',
-  },
-  'Chat.Quiz.TotalVotesEmpty': {
-    key: 'Chat.Quiz.TotalVotesEmpty',
-    value: 'No answers yet',
-  },
-  lng_update_telegram: {
-    key: 'lng_update_telegram',
-    value: 'Update Telegram',
-  },
-  AutoDownloadPhotosTitle: {
-    key: 'AutoDownloadPhotosTitle',
-    value: 'Auto-download photos',
-  },
-  AutoDownloadVideosTitle: {
-    key: 'AutoDownloadVideosTitle',
-    value: 'Auto-download videos and GIFs',
-  },
-  AutoDownloadFilesTitle: {
-    key: 'AutoDownloadFilesTitle',
-    value: 'Auto-download files and music',
-  },
-  'ChannelVisibility.Forwarding.ChannelTitle': {
-    key: 'ChannelVisibility.Forwarding.ChannelTitle',
-    value: 'Forwarding From This Channel',
-  },
-  'ChannelVisibility.Forwarding.GroupTitle': {
-    key: 'ChannelVisibility.Forwarding.GroupTitle',
-    value: 'Forwarding From This Group',
-  },
-  'ChannelVisibility.Forwarding.ChannelInfo': {
-    key: 'ChannelVisibility.Forwarding.ChannelInfo',
-    value: 'Subscribers can forward messages from this channel and save media files.',
-  },
-  'ChannelVisibility.Forwarding.GroupInfo': {
-    key: 'ChannelVisibility.Forwarding.GroupInfo',
-    value: 'Members can forward messages from this group and save media files.',
-  },
-  'ChannelVisibility.Forwarding.Enabled': {
-    key: 'ChannelVisibility.Forwarding.Enabled',
-    value: 'Allow Forwarding',
-  },
-  'ChannelVisibility.Forwarding.Disabled': {
-    key: 'ChannelVisibility.Forwarding.Disabled',
-    value: 'Restrict Forwarding',
-  },
-  'Settings.TipsUsername': {
-    key: 'Settings.TipsUsername',
-    value: 'TelegramTips',
-  },
-  FoldersAllChatsDesc: {
-    key: 'FoldersAllChatsDesc',
-    value: 'All unarchived chats',
-  },
+  'Conversation.DefaultRestrictedMedia': 'Posting media content isn\'t allowed in this group.',
+  DiscussionStarted: 'Discussion started',
+  DiscussChannel: 'channel',
+  'SharedMedia.EmptyTitle': 'No media files yet',
+  QuizPoll: 'Quiz',
+  PollViewResults: 'VIEW RESULTS',
+  'Chat.Quiz.TotalVotesEmpty': 'No answers yet',
+  lng_update_telegram: 'Update Telegram',
+  AutoDownloadPhotosTitle: 'Auto-download photos',
+  AutoDownloadVideosTitle: 'Auto-download videos and GIFs',
+  AutoDownloadFilesTitle: 'Auto-download files and music',
+  'ChannelVisibility.Forwarding.ChannelTitle': 'Forwarding From This Channel',
+  'ChannelVisibility.Forwarding.GroupTitle': 'Forwarding From This Group',
+  'ChannelVisibility.Forwarding.ChannelInfo': 'Subscribers can forward messages from this channel and save media files.',
+  'ChannelVisibility.Forwarding.GroupInfo': 'Members can forward messages from this group and save media files.',
+  'ChannelVisibility.Forwarding.Enabled': 'Allow Forwarding',
+  'ChannelVisibility.Forwarding.Disabled': 'Restrict Forwarding',
+  'Settings.TipsUsername': 'TelegramTips',
+  FoldersAllChatsDesc: 'All unarchived chats',
 } as ApiLangPack;
