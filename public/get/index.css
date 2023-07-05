@@ -1,0 +1,137 @@
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 100vh;
+  margin: 0;
+
+  font-family: 'Arial', sans-serif;
+  color: #222222;
+
+  background-color: white;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  min-width: 200px;
+  max-width: 330px;
+  padding: 40px 40px 16px 40px;
+
+  text-align: center;
+
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+}
+
+.logo-container {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 90px;
+  height: 90px;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.telegram-logo {
+  background-image: url('./icon-electron-macos.png');
+}
+
+.apple-logo {
+  background-image: url('./apple-logo.svg');
+  background-size: auto 80%;
+}
+
+.container h1 {
+  margin-bottom: 10px;
+
+  font-size: 24px;
+}
+
+.select-model {
+  margin-top: 36px;
+  margin-bottom: 16px;
+
+  color: #444444;
+}
+
+.info {
+  margin-top: 28px;
+  margin-bottom: 36px;
+
+  line-height: 1.25rem;
+  color: #444444;
+}
+
+.download-container {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.download-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 36px;
+}
+
+.caption {
+  font-size: 14px;
+  color: #777;
+}
+
+.download-btn {
+  display: inline-block;
+
+  margin: 10px;
+  padding: 8px 20px;
+
+  font-size: 16px;
+  color: #FFF;
+  text-decoration: none;
+
+  background-color: #007BFF;
+  border-radius: 5px;
+
+  transition: background-color 150ms;
+}
+
+.download-btn:hover {
+  background-color: rgba(0, 123, 255, 0.9);
+}
+
+.download-btn.single {
+  display: block;
+
+  margin: 32px 0;
+}
+
+.footer {
+  font-size: small;
+  color: #A9A9A9;
+}
+
+.footer a {
+  display: inline-block;
+
+  color: #A9A9A9;
+}
+
+a:hover {
+  text-decoration: none;
+}
