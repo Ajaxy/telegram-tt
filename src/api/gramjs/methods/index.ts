@@ -49,7 +49,7 @@ export {
 } from './symbols';
 
 export {
-  checkChatUsername, setChatUsername, updatePrivateLink,
+  checkChatUsername, setChatUsername, updatePrivateLink, deactivateAllUsernames,
   fetchExportedChatInvites, editExportedChatInvite, exportChatInvite, deleteExportedChatInvite,
   deleteRevokedExportedChatInvites, fetchChatInviteImporters, hideChatJoinRequest, hideAllChatJoinRequests,
   hideChatReportPanel,

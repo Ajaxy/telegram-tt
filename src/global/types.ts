@@ -1532,7 +1532,7 @@ export interface ActionPayloads {
   } & WithTabId) | undefined;
   closeManagement: WithTabId | undefined;
   checkPublicLink: { username: string } & WithTabId;
-  updatePublicLink: { username: string } & WithTabId;
+  updatePublicLink: { username: string; shouldDisableUsernames?: boolean } & WithTabId;
   updatePrivateLink: WithTabId | undefined;
   resetManagementError: { chatId: string } & WithTabId;
 

@@ -273,6 +273,7 @@
     "messages.readMentions",
     "messages.getUnreadMentions",
     "help.getPremiumPromo",
+    "channels.deactivateAllUsernames",
     "channels.toggleForum",
     "channels.createForumTopic",
     "channels.getForumTopics",
