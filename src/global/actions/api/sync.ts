@@ -175,7 +175,7 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
         global = updateChats(global, buildCollectionByKey(result.chats, 'id'));
         global = updateUsers(global, buildCollectionByKey(result.users, 'id'));
         if (result.repliesThreadInfos.length) {
-          global = updateThreadInfos(global, currentChatId, result.repliesThreadInfos);
+          global = updateThreadInfos(global, result.repliesThreadInfos);
         }
 
         areMessagesLoaded = true;
