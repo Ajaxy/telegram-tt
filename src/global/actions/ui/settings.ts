@@ -20,15 +20,15 @@ addCallback((global: GlobalState) => {
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
   const { updatePageTitle } = getActions();
 
-  const settings = global.settings.byKey;
-  const prevSettings = prevGlobal?.settings.byKey;
-  const performance = global.settings.performance;
-  const prevPerformance = prevGlobal?.settings.performance;
+  const oldGlobal = prevGlobal;
   prevGlobal = global;
 
-  if (!prevSettings) {
-    return;
-  }
+  if (!oldGlobal) return;
+
+  const settings = global.settings.byKey;
+  const prevSettings = oldGlobal.settings.byKey;
+  const performance = global.settings.performance;
+  const prevPerformance = oldGlobal.settings.performance;
 
   if (performance !== prevPerformance) {
     requestMutation(() => {

@@ -16,6 +16,7 @@ type RGBAColor = {
 
 let isInitialized = false;
 
+const DECIMAL_PLACES = 3;
 const HEX_COLOR_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i;
 const DURATION_MS = 200;
 const ENABLE_ANIMATION_DELAY_MS = 500;
@@ -116,9 +117,9 @@ function applyColorAnimationStep(startIndex: number, endIndex: number, interpola
       ? Math.round(lerp(propertyColors[startIndex].a!, propertyColors[endIndex].a!, interpolationRatio))
       : undefined;
 
-    document.documentElement.style.setProperty(property, a !== undefined
-      ? `rgba(${r},${g},${b},${a / 255})`
-      : `rgb(${r},${g},${b})`);
+    const roundedA = a !== undefined ? Math.round((a / 255) * 10 ** DECIMAL_PLACES) / 10 ** DECIMAL_PLACES : undefined;
+
+    document.documentElement.style.setProperty(property, `rgb(${r},${g},${b}${roundedA ? `,${roundedA}` : ''})`);
 
     if (RGB_VARIABLES.has(property)) {
       document.documentElement.style.setProperty(`${property}-rgb`, `${r},${g},${b}`);

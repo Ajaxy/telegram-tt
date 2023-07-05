@@ -9,8 +9,6 @@ import {
 
 export * from './environmentWebp';
 
-export * from './environmentSystemTheme';
-
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
   const macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'];

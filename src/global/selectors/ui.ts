@@ -3,7 +3,6 @@ import type { PerformanceTypeKey } from '../../types';
 import type { ApiMessage } from '../../api/types';
 import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
-import { getSystemTheme } from '../../util/windowEnvironment';
 import {
   selectCurrentMessageList, selectIsCreateTopicPanelOpen, selectIsEditTopicPanelOpen, selectIsPollResultsOpen,
 } from './messages';
@@ -62,9 +61,9 @@ export function selectIsRightColumnShown<T extends GlobalState>(
 }
 
 export function selectTheme<T extends GlobalState>(global: T) {
-  const { theme, shouldUseSystemTheme } = global.settings.byKey;
+  const { theme } = global.settings.byKey;
 
-  return shouldUseSystemTheme ? getSystemTheme() : theme;
+  return theme;
 }
 
 export function selectIsForumPanelOpen<T extends GlobalState>(
