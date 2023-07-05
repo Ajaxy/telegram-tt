@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
@@ -18,6 +18,7 @@ import { isChatChannel, isUserBot } from '../../../../global/helpers';
 import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import InviteLink from '../../../common/InviteLink';
@@ -75,12 +76,12 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
     }
   }, [folderId, isActive, url]);
 
-  const handleRevoke = useCallback(() => {
+  const handleRevoke = useLastCallback(() => {
     if (!url || !folderId) return;
 
     deleteChatlistInvite({ folderId, url });
     onReset();
-  }, [folderId, onReset, url]);
+  });
 
   const itemIds = useMemo(() => {
     return (includedChatIds || []).concat(pinnedChatIds || []);
@@ -107,7 +108,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
     }
   }, [url, unlockedIds, peerIds]);
 
-  const handleClickDisabled = useCallback((id: string) => {
+  const handleClickDisabled = useLastCallback((id: string) => {
     const global = getGlobal();
     const user = selectUser(global, id);
     const chat = selectChat(global, id);
@@ -128,17 +129,17 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         message: lang('FolderLinkScreen.AlertTextUnavailablePublicGroup'),
       });
     }
-  }, [lang]);
+  });
 
-  const handleSelectedIdsChange = useCallback((ids: string[]) => {
+  const handleSelectedIdsChange = useLastCallback((ids: string[]) => {
     setSelectedIds(ids);
     setIsTouched(true);
-  }, []);
+  });
 
-  const handleSubmit = useCallback(() => {
-    if (!folderId || !url) return;
+  const handleSubmit = useLastCallback(() => {
+    if (!folderId || !url || !isTouched) return;
     editChatlistInvite({ folderId, peerIds: selectedIds, url });
-  }, [folderId, selectedIds, url]);
+  });
 
   const chatsCount = selectedIds.length;
   const isDisabled = !chatsCount || isLoading;
@@ -159,9 +160,9 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
       </div>
 
       <InviteLink
-        inviteLink={isLoading ? lang('Loading') : url!}
+        inviteLink={!url ? lang('Loading') : url}
         onRevoke={handleRevoke}
-        isDisabled={isDisabled}
+        isDisabled={!chatsCount || isTouched}
       />
 
       <div className="settings-item settings-item-chatlist">
