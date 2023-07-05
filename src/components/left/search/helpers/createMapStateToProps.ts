@@ -13,7 +13,6 @@ export type StateProps = {
   usersById: Record<string, ApiUser>;
   globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   foundIds?: string[];
-  lastSyncTime?: number;
   searchChatId?: string;
   activeDownloads: TabState['activeDownloads']['byChatId'];
   isChatProtected?: boolean;
@@ -49,7 +48,6 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       searchChatId: chatId,
       activeDownloads,
       isChatProtected: chatId ? selectChat(global, chatId)?.isProtected : undefined,
-      lastSyncTime: global.lastSyncTime,
     };
   };
 }

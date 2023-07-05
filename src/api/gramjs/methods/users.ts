@@ -18,7 +18,7 @@ import {
 import { buildApiUser, buildApiUserFullInfo, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
-import { addEntitiesWithPhotosToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
+import { addEntitiesToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import localDb from '../localDb';
 
@@ -47,7 +47,7 @@ export async function fetchFullUser({
   }
 
   updateLocalDb(result);
-  addUserToLocalDb(result.users[0], true);
+  addEntitiesToLocalDb(result.users);
 
   if (result.fullUser.profilePhoto instanceof GramJs.Photo) {
     localDb.photos[result.fullUser.profilePhoto.id.toString()] = result.fullUser.profilePhoto;
@@ -142,11 +142,7 @@ export async function fetchContactList() {
     return undefined;
   }
 
-  result.users.forEach((user) => {
-    if (user instanceof GramJs.User) {
-      addUserToLocalDb(user, true);
-    }
-  });
+  addEntitiesToLocalDb(result.users);
 
   const { users, userStatusesById } = buildApiUsersAndStatuses(result.users);
 
@@ -165,11 +161,7 @@ export async function fetchUsers({ users }: { users: ApiUser[] }) {
     return undefined;
   }
 
-  result.forEach((user) => {
-    if (user instanceof GramJs.User) {
-      addUserToLocalDb(user, true);
-    }
-  });
+  addEntitiesToLocalDb(result);
 
   return buildApiUsersAndStatuses(result);
 }
@@ -219,7 +211,9 @@ export function updateContact({
     lastName,
     phone: phoneNumber,
     ...(shouldSharePhoneNumber && { addPhonePrivacyException: shouldSharePhoneNumber }),
-  }), true);
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export async function deleteContact({
@@ -294,18 +288,22 @@ export function reportSpam(userOrChat: ApiUser | ApiChat) {
 
   return invokeRequest(new GramJs.messages.ReportSpam({
     peer: buildInputPeer(id, accessHash),
-  }), true);
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 export function updateEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
   return invokeRequest(new GramJs.account.UpdateEmojiStatus({
     emojiStatus: buildInputEmojiStatus(emojiStatus, expires),
-  }), true);
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {
   if ('chats' in result) {
-    addEntitiesWithPhotosToLocalDb(result.chats);
+    addEntitiesToLocalDb(result.chats);
   }
 
   if ('photos' in result) {
@@ -313,6 +311,6 @@ function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice
   }
 
   if ('users' in result) {
-    addEntitiesWithPhotosToLocalDb(result.users);
+    addEntitiesToLocalDb(result.users);
   }
 }

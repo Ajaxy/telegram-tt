@@ -589,8 +589,7 @@ export default memo(withGlobal<OwnProps>(
     const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
     const canGiftPremium = Boolean(
-      global.lastSyncTime
-      && userFullInfo?.premiumGifts?.length
+      userFullInfo?.premiumGifts?.length
       && !selectIsPremiumPurchaseBlocked(global),
     );
 

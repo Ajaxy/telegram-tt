@@ -22,7 +22,7 @@ import {
   buildBotSwitchWebview,
 } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addEntitiesWithPhotosToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
+import { addEntitiesToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiUrlAuthResult } from '../apiBuilders/misc';
@@ -104,7 +104,7 @@ export async function fetchInlineBotResults({
     return undefined;
   }
 
-  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesToLocalDb(result.users);
 
   return {
     isGallery: Boolean(result.gallery),
@@ -143,7 +143,7 @@ export async function sendInlineBotResult({
     ...(isSilent && { silent: true }),
     ...(replyingTo && { replyToMsgId: replyingTo }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-  }), true);
+  }));
 }
 
 export async function startBot({
@@ -159,7 +159,7 @@ export async function startBot({
     peer: buildInputPeer(bot.id, bot.accessHash),
     randomId,
     startParam,
-  }), true);
+  }));
 }
 
 export async function requestWebView({
@@ -313,7 +313,7 @@ export async function sendWebViewData({
     buttonText,
     data,
     randomId,
-  }), true);
+  }));
 }
 
 export async function loadAttachBots({
@@ -326,7 +326,7 @@ export async function loadAttachBots({
   }));
 
   if (result instanceof GramJs.AttachMenuBots) {
-    addEntitiesWithPhotosToLocalDb(result.users);
+    addEntitiesToLocalDb(result.users);
     return {
       hash: result.hash.toString(),
       bots: buildCollectionByKey(result.bots.map(buildApiAttachBot), 'id'),
@@ -346,7 +346,7 @@ export async function loadAttachBot({
   }));
 
   if (result instanceof GramJs.AttachMenuBotsBot) {
-    addEntitiesWithPhotosToLocalDb(result.users);
+    addEntitiesToLocalDb(result.users);
     return {
       bot: buildApiAttachBot(result.bot),
       users: result.users.map(buildApiUser).filter(Boolean),

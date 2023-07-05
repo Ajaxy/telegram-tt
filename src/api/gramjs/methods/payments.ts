@@ -14,7 +14,7 @@ import type {
 } from '../../types';
 import localDb from '../localDb';
 import {
-  addEntitiesWithPhotosToLocalDb,
+  addEntitiesToLocalDb,
   deserializeBytes,
   serializeBytes,
 } from '../helpers';
@@ -121,7 +121,7 @@ export async function getPaymentForm(inputInvoice: ApiRequestInputInvoice) {
     localDb.webDocuments[result.photo.url] = result.photo;
   }
 
-  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesToLocalDb(result.users);
 
   return {
     form: buildApiPaymentForm(result),
@@ -140,7 +140,7 @@ export async function getReceipt(chat: ApiChat, msgId: number) {
     return undefined;
   }
 
-  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesToLocalDb(result.users);
 
   return {
     receipt: buildApiReceipt(result),
@@ -152,7 +152,7 @@ export async function fetchPremiumPromo() {
   const result = await invokeRequest(new GramJs.help.GetPremiumPromo());
   if (!result) return undefined;
 
-  addEntitiesWithPhotosToLocalDb(result.users);
+  addEntitiesToLocalDb(result.users);
 
   const users = result.users.map(buildApiUser).filter(Boolean);
   result.videos.forEach((video) => {

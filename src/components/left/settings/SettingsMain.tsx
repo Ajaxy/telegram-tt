@@ -1,7 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
 import type { ApiUser } from '../../../api/types';
 
@@ -23,7 +23,6 @@ type OwnProps = {
 type StateProps = {
   sessionCount: number;
   currentUser?: ApiUser;
-  lastSyncTime?: number;
   canBuyPremium?: boolean;
 };
 
@@ -33,7 +32,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   onReset,
   currentUser,
   sessionCount,
-  lastSyncTime,
   canBuyPremium,
 }) => {
   const {
@@ -46,10 +44,10 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   const profileId = currentUser?.id;
 
   useEffect(() => {
-    if (profileId && lastSyncTime) {
+    if (profileId) {
       loadProfilePhotos({ profileId });
     }
-  }, [lastSyncTime, profileId, loadProfilePhotos]);
+  }, [profileId, loadProfilePhotos]);
 
   useHistoryBack({
     isActive,
@@ -57,10 +55,8 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (lastSyncTime) {
-      loadAuthorizations();
-    }
-  }, [lastSyncTime, loadAuthorizations]);
+    loadAuthorizations();
+  }, []);
 
   return (
     <div className="settings-content custom-scroll">
@@ -160,12 +156,11 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { currentUserId, lastSyncTime } = global;
+    const { currentUserId } = global;
 
     return {
       sessionCount: global.activeSessions.orderedHashes.length,
       currentUser: currentUserId ? selectUser(global, currentUserId) : undefined,
-      lastSyncTime,
       canBuyPremium: !selectIsPremiumPurchaseBlocked(global),
     };
   },

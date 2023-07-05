@@ -48,7 +48,6 @@ export type OwnProps = {
   forcedWidth?: number;
   dimensions?: IMediaDimensions;
   asForwarded?: boolean;
-  lastSyncTime?: number;
   isDownloading?: boolean;
   isProtected?: boolean;
   onClick?: (id: number) => void;
@@ -65,7 +64,6 @@ const Video: FC<OwnProps> = ({
   canAutoPlay,
   uploadProgress,
   forcedWidth,
-  lastSyncTime,
   dimensions,
   asForwarded,
   isDownloading,
@@ -95,13 +93,13 @@ const Video: FC<OwnProps> = ({
 
   const { isMobile } = useAppLayout();
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
-  const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading && lastSyncTime);
+  const shouldLoad = Boolean(isLoadAllowed && isIntersectingForLoading);
   const [isPlayAllowed, setIsPlayAllowed] = useState(Boolean(canAutoPlay && !isSpoilerShown));
 
   const fullMediaHash = getMessageMediaHash(message, 'inline');
   const [isFullMediaPreloaded] = useState(Boolean(fullMediaHash && mediaLoader.getFromMemory(fullMediaHash)));
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
-    fullMediaHash, !shouldLoad, getMessageMediaFormat(message, 'inline'), lastSyncTime,
+    fullMediaHash, !shouldLoad, getMessageMediaFormat(message, 'inline'),
   );
   const fullMediaData = localBlobUrl || mediaData;
   const [isPlayerReady, markPlayerReady] = useFlag();
@@ -112,8 +110,8 @@ const Video: FC<OwnProps> = ({
 
   const previewMediaHash = getMessageMediaHash(message, 'preview');
   const [isPreviewPreloaded] = useState(Boolean(previewMediaHash && mediaLoader.getFromMemory(previewMediaHash)));
-  const canLoadPreview = isIntersectingForLoading && lastSyncTime;
-  const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview, undefined, lastSyncTime);
+  const canLoadPreview = isIntersectingForLoading;
+  const previewBlobUrl = useMedia(previewMediaHash, !canLoadPreview);
   const previewClassNames = useMediaTransition((hasThumb || previewBlobUrl) && !isPlayerReady);
 
   const noThumb = !hasThumb || previewBlobUrl || isPlayerReady;
@@ -127,7 +125,6 @@ const Video: FC<OwnProps> = ({
     getMessageMediaHash(message, 'download'),
     !isDownloading,
     getMessageMediaFormat(message, 'download'),
-    lastSyncTime,
   );
 
   const { isUploading, isTransferring, transferProgress } = getMediaTransferState(

@@ -594,6 +594,7 @@ function buildInputPrivacyRules(global: GlobalState, {
 }
 
 addActionHandler('updateIsOnline', (global, actions, payload): ActionReturnType => {
+  if (global.connectionState !== 'connectionStateReady') return;
   callApi('updateIsOnline', payload);
 });
 

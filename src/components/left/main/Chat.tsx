@@ -88,7 +88,6 @@ type StateProps = {
   isSelectedForum?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
-  lastSyncTime?: number;
   lastMessageTopic?: ApiTopic;
   typingStatus?: ApiTypingStatus;
   withInterfaceAnimations?: boolean;
@@ -117,7 +116,6 @@ const Chat: FC<OwnProps & StateProps> = ({
   isSelectedForum,
   canScrollDown,
   canChangeFolder,
-  lastSyncTime,
   lastMessageTopic,
   typingStatus,
   onDragEnter,
@@ -219,10 +217,10 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   // Load the forum topics to display unread count badge
   useEffect(() => {
-    if (isIntersecting && lastSyncTime && isForum && chat && chat.listedTopicIds === undefined) {
+    if (isIntersecting && isForum && chat && chat.listedTopicIds === undefined) {
       loadTopics({ chatId });
     }
-  }, [chat, chatId, isForum, isIntersecting, lastSyncTime, loadTopics]);
+  }, [chat, chatId, isForum, isIntersecting]);
 
   if (!chat) {
     return undefined;
@@ -254,7 +252,6 @@ const Chat: FC<OwnProps & StateProps> = ({
           user={user}
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
-          lastSyncTime={lastSyncTime}
         />
         <AvatarBadge chatId={chatId} />
         {chat.isCallActive && chat.isCallNotEmpty && (
@@ -363,7 +360,6 @@ export default memo(withGlobal<OwnProps>(
       isSelectedForum,
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
-      lastSyncTime: global.lastSyncTime,
       ...(isOutgoing && chat.lastMessage && {
         lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage),
       }),

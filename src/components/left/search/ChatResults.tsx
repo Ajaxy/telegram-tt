@@ -1,9 +1,9 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
@@ -49,7 +49,6 @@ type StateProps = {
   globalMessagesByChatId?: Record<string, { byId: Record<number, ApiMessage> }>;
   chatsById: Record<string, ApiChat>;
   fetchingStatus?: { chats?: boolean; messages?: boolean };
-  lastSyncTime?: number;
 };
 
 const MIN_QUERY_LENGTH_FOR_GLOBAL_SEARCH = 4;
@@ -58,10 +57,21 @@ const LESS_LIST_ITEMS_AMOUNT = 5;
 const runThrottled = throttle((cb) => cb(), 500, false);
 
 const ChatResults: FC<OwnProps & StateProps> = ({
-  searchQuery, searchDate, dateSearchQuery, currentUserId,
-  localContactIds, localChatIds, localUserIds, globalChatIds, globalUserIds,
-  foundIds, globalMessagesByChatId, chatsById, fetchingStatus, lastSyncTime,
-  onReset, onSearchDateSelect,
+  searchQuery,
+  searchDate,
+  dateSearchQuery,
+  currentUserId,
+  localContactIds,
+  localChatIds,
+  localUserIds,
+  globalChatIds,
+  globalUserIds,
+  foundIds,
+  globalMessagesByChatId,
+  chatsById,
+  fetchingStatus,
+  onReset,
+  onSearchDateSelect,
 }) => {
   const {
     openChat, addRecentlyFoundChatId, searchMessagesGlobal, setGlobalSearchChatId,
@@ -77,7 +87,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   const [shouldShowMoreGlobal, setShouldShowMoreGlobal] = useState<boolean>(false);
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
+    if (direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
         searchMessagesGlobal({
           type: 'text',
@@ -85,7 +95,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       });
     }
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
-  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
+  }, [searchQuery]);
 
   const handleChatClick = useCallback(
     (id: string) => {
@@ -293,6 +303,9 @@ export default memo(withGlobal<OwnProps>(
     const { byId: chatsById } = global.chats;
 
     const { userIds: localContactIds } = global.contactList || {};
+    const {
+      currentUserId, messages,
+    } = global;
 
     if (!localContactIds) {
       return {
@@ -300,9 +313,6 @@ export default memo(withGlobal<OwnProps>(
       };
     }
 
-    const {
-      currentUserId, messages, lastSyncTime,
-    } = global;
     const {
       fetchingStatus, globalResults, localResults, resultsByType,
     } = selectTabState(global).globalSearch;
@@ -322,7 +332,6 @@ export default memo(withGlobal<OwnProps>(
       globalMessagesByChatId,
       chatsById,
       fetchingStatus,
-      lastSyncTime,
     };
   },
 )(ChatResults));

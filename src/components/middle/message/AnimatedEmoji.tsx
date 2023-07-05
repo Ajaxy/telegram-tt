@@ -25,7 +25,6 @@ type OwnProps = {
   withEffects?: boolean;
   isOwn?: boolean;
   observeIntersection?: ObserveFn;
-  lastSyncTime?: number;
   forceLoadPreview?: boolean;
   messageId?: number;
   chatId?: string;
@@ -43,7 +42,6 @@ const QUALITY = 1;
 const AnimatedEmoji: FC<OwnProps & StateProps> = ({
   isOwn,
   observeIntersection,
-  lastSyncTime,
   forceLoadPreview,
   messageId,
   chatId,
@@ -67,7 +65,6 @@ const AnimatedEmoji: FC<OwnProps & StateProps> = ({
       quality={QUALITY}
       noLoad={!isIntersecting}
       forcePreview={forceLoadPreview}
-      lastSyncTime={lastSyncTime}
       play={isIntersecting}
       forceOnHeavyAnimation
       ref={ref}

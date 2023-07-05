@@ -37,14 +37,13 @@ const useDraft = (
   getHtml: Signal<string>,
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
-  lastSyncTime?: number,
 ) => {
   const { saveDraft, clearDraft, loadCustomEmojis } = getActions();
 
   const isEditing = Boolean(editedMessage);
 
   const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
-    if (isEditing || !lastSyncTime) return;
+    if (isEditing) return;
 
     const html = getHtml();
 

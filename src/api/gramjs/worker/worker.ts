@@ -21,7 +21,15 @@ onmessage = async (message: OriginMessageEvent) => {
 
   switch (data.type) {
     case 'initApi': {
-      await initApi(onUpdate, data.args[0], data.args[1]);
+      const { messageId, args } = data;
+      await initApi(onUpdate, args[0], args[1]);
+      if (messageId) {
+        sendToOrigin({
+          type: 'methodResponse',
+          messageId,
+          response: true,
+        });
+      }
       break;
     }
     case 'callMethod': {

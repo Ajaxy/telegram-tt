@@ -1,9 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, useMemo, useRef, useState, memo,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type {
   ApiMessage,
   ApiChat,
@@ -98,7 +98,6 @@ type StateProps = {
   userStatusesById: Record<string, ApiUserStatus>;
   isRightColumnShown: boolean;
   isRestricted?: boolean;
-  lastSyncTime?: number;
   activeDownloadIds?: number[];
   isChatProtected?: boolean;
 };
@@ -138,7 +137,6 @@ const Profile: FC<OwnProps & StateProps> = ({
   chatsById,
   isRightColumnShown,
   isRestricted,
-  lastSyncTime,
   activeDownloadIds,
   isChatProtected,
 }) => {
@@ -190,7 +188,6 @@ const Profile: FC<OwnProps & StateProps> = ({
     chatsById,
     messagesById,
     foundIds,
-    lastSyncTime,
     topicId,
   );
   const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
@@ -224,10 +221,8 @@ const Profile: FC<OwnProps & StateProps> = ({
   const profileId = resolvedUserId || chatId;
 
   useEffect(() => {
-    if (lastSyncTime) {
-      loadProfilePhotos({ profileId });
-    }
-  }, [loadProfilePhotos, profileId, lastSyncTime]);
+    loadProfilePhotos({ profileId });
+  }, [profileId]);
 
   const handleSelectMedia = useLastCallback((mediaId: number) => {
     openMediaViewer({
@@ -398,7 +393,6 @@ const Profile: FC<OwnProps & StateProps> = ({
               message={messagesById[id]}
               origin={AudioOrigin.SharedMedia}
               date={messagesById[id].date}
-              lastSyncTime={lastSyncTime}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
@@ -415,7 +409,6 @@ const Profile: FC<OwnProps & StateProps> = ({
               senderTitle={getSenderName(lang, messagesById[id], chatsById, usersById)}
               origin={AudioOrigin.SharedMedia}
               date={messagesById[id].date}
-              lastSyncTime={lastSyncTime}
               className="scroll-item"
               onPlay={handlePlayAudio}
               onDateClick={handleMessageFocus}
@@ -565,7 +558,6 @@ export default memo(withGlobal<OwnProps>(
       currentUserId: global.currentUserId,
       isRightColumnShown: selectIsRightColumnShown(global, isMobile),
       isRestricted: chat?.isRestricted,
-      lastSyncTime: global.lastSyncTime,
       activeDownloadIds: activeDownloads?.ids,
       usersById,
       userStatusesById,

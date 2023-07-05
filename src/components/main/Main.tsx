@@ -1,4 +1,3 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, memo, useState, useRef, useLayoutEffect,
 } from '../../lib/teact/teact';
@@ -6,6 +5,7 @@ import { addExtraClass } from '../../lib/teact/teact-dom';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { LangCode } from '../../types';
 import type {
   ApiAttachBot,
@@ -45,7 +45,6 @@ import { Bundles, loadBundle } from '../../util/moduleLoader';
 import updateIcon from '../../util/updateIcon';
 
 import useLastCallback from '../../hooks/useLastCallback';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useSyncEffect from '../../hooks/useSyncEffect';
@@ -104,7 +103,6 @@ export interface OwnProps {
 type StateProps = {
   isMasterTab?: boolean;
   chat?: ApiChat;
-  lastSyncTime?: number;
   isLeftColumnOpen: boolean;
   isMiddleColumnOpen: boolean;
   isRightColumnOpen: boolean;
@@ -148,6 +146,7 @@ type StateProps = {
   chatlistModal?: TabState['chatlistModal'];
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
+  isSynced?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -158,7 +157,6 @@ const REACTION_PICKER_LOADING_DELAY_MS = 7000; // 7 sec
 let DEBUG_isLogged = false;
 
 const Main: FC<OwnProps & StateProps> = ({
-  lastSyncTime,
   isMobile,
   isLeftColumnOpen,
   isMiddleColumnOpen,
@@ -204,6 +202,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isMasterTab,
   chatlistModal,
   noRightColumnAnimation,
+  isSynced,
 }) => {
   const {
     initMain,
@@ -299,7 +298,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   // Initial API calls
   useEffect(() => {
-    if (lastSyncTime && isMasterTab) {
+    if (isMasterTab && isSynced) {
       updateIsOnline(true);
       loadConfig();
       loadAppConfig();
@@ -320,45 +319,40 @@ const Main: FC<OwnProps & StateProps> = ({
       loadRecentReactions();
       loadFeaturedEmojiStickers();
     }
-  }, [
-    lastSyncTime, loadAnimatedEmojis, loadEmojiKeywords, loadNotificationExceptions, loadNotificationSettings,
-    loadTopInlineBots, updateIsOnline, loadAvailableReactions, loadAppConfig, loadAttachBots, loadContactList,
-    loadPremiumGifts, checkAppVersion, loadConfig, loadGenericEmojiEffects, loadDefaultTopicIcons, loadTopReactions,
-    loadDefaultStatusIcons, loadRecentReactions, loadRecentEmojiStatuses, isCurrentUserPremium, isMasterTab, initMain,
-  ]);
+  }, [isMasterTab, isSynced]);
 
   // Initial Premium API calls
   useEffect(() => {
-    if (lastSyncTime && isMasterTab && isCurrentUserPremium) {
+    if (isMasterTab && isCurrentUserPremium) {
       loadDefaultStatusIcons();
       loadRecentEmojiStatuses();
     }
-  }, [isCurrentUserPremium, isMasterTab, lastSyncTime, loadDefaultStatusIcons, loadRecentEmojiStatuses]);
+  }, [isCurrentUserPremium, isMasterTab]);
 
   // Language-based API calls
   useEffect(() => {
-    if (lastSyncTime && isMasterTab) {
+    if (isMasterTab) {
       if (language !== BASE_EMOJI_KEYWORD_LANG) {
         loadEmojiKeywords({ language: language! });
       }
 
       loadCountryList({ langCode: language });
     }
-  }, [language, lastSyncTime, loadCountryList, loadEmojiKeywords, isMasterTab]);
+  }, [language, isMasterTab]);
 
   // Re-fetch cached saved emoji for `localDb`
-  useEffectWithPrevDeps(([prevLastSyncTime]) => {
-    if (!prevLastSyncTime && lastSyncTime && isMasterTab) {
+  useEffect(() => {
+    if (isMasterTab) {
       loadCustomEmojis({
         ids: Object.keys(getGlobal().customEmojis.byId),
         ignoreCache: true,
       });
     }
-  }, [lastSyncTime, isMasterTab, loadCustomEmojis]);
+  }, [isMasterTab]);
 
   // Sticker sets
   useEffect(() => {
-    if (lastSyncTime && isMasterTab) {
+    if (isMasterTab && isSynced) {
       if (!addedSetIds || !addedCustomEmojiIds) {
         loadStickerSets();
         loadFavoriteStickers();
@@ -368,45 +362,40 @@ const Main: FC<OwnProps & StateProps> = ({
         loadAddedStickers();
       }
     }
-  }, [
-    lastSyncTime, addedSetIds, loadStickerSets, loadFavoriteStickers, loadAddedStickers, addedCustomEmojiIds,
-    isMasterTab,
-  ]);
+  }, [addedSetIds, addedCustomEmojiIds, isMasterTab, isSynced]);
 
   // Check version when service chat is ready
   useEffect(() => {
-    if (lastSyncTime && isServiceChatReady && isMasterTab) {
+    if (isServiceChatReady && isMasterTab) {
       checkVersionNotification();
     }
-  }, [lastSyncTime, isServiceChatReady, checkVersionNotification, isMasterTab]);
+  }, [isServiceChatReady, isMasterTab]);
 
   // Ensure time format
   useEffect(() => {
-    if (lastSyncTime && !wasTimeFormatSetManually) {
+    if (!wasTimeFormatSetManually) {
       ensureTimeFormat();
     }
-  }, [lastSyncTime, wasTimeFormatSetManually, ensureTimeFormat]);
+  }, [wasTimeFormatSetManually]);
 
   // Parse deep link
   useEffect(() => {
     const parsedInitialLocationHash = parseInitialLocationHash();
-    if (lastSyncTime && parsedInitialLocationHash?.tgaddr) {
+    if (parsedInitialLocationHash?.tgaddr) {
       processDeepLink(decodeURIComponent(parsedInitialLocationHash.tgaddr));
     }
-  }, [lastSyncTime]);
+  }, []);
 
-  useEffectWithPrevDeps(([prevLastSyncTime]) => {
+  useEffect(() => {
     const parsedLocationHash = parseLocationHash();
     if (!parsedLocationHash) return;
 
-    if (!prevLastSyncTime && lastSyncTime) {
-      openChat({
-        id: parsedLocationHash.chatId,
-        threadId: parsedLocationHash.threadId,
-        type: parsedLocationHash.type,
-      });
-    }
-  }, [lastSyncTime, openChat]);
+    openChat({
+      id: parsedLocationHash.chatId,
+      threadId: parsedLocationHash.threadId,
+      type: parsedLocationHash.type,
+    });
+  }, []);
 
   // Restore Transition slide class after async rendering
   useLayoutEffect(() => {
@@ -579,7 +568,6 @@ export default memo(withGlobal<OwnProps>(
           language, wasTimeFormatSetManually,
         },
       },
-      lastSyncTime,
     } = global;
 
     const {
@@ -623,7 +611,6 @@ export default memo(withGlobal<OwnProps>(
     const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
 
     return {
-      lastSyncTime,
       isLeftColumnOpen: isLeftColumnShown,
       isMiddleColumnOpen: Boolean(chatId),
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
@@ -668,6 +655,7 @@ export default memo(withGlobal<OwnProps>(
       requestedDraft,
       chatlistModal,
       noRightColumnAnimation,
+      isSynced: global.isSynced,
     };
   },
 )(Main));

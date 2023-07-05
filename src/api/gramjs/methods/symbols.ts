@@ -164,7 +164,9 @@ export async function fetchStickers(
     stickerset: 'id' in stickerSetInfo
       ? buildInputStickerSet(stickerSetInfo.id, stickerSetInfo.accessHash)
       : buildInputStickerSetShortName(stickerSetInfo.shortName),
-  }), undefined, true);
+  }), {
+    shouldThrow: true,
+  });
 
   if (!(result instanceof GramJs.messages.StickerSet)) {
     return undefined;
@@ -314,7 +316,7 @@ export function saveGif({ gif, shouldUnsave }: { gif: ApiVideo; shouldUnsave?: b
     unsave: shouldUnsave,
   });
 
-  return invokeRequest(request, true);
+  return invokeRequest(request, { shouldReturnTrue: true });
 }
 
 export async function installStickerSet({ stickerSetId, accessHash }: { stickerSetId: string; accessHash: string }) {

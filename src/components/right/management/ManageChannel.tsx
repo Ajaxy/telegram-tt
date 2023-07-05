@@ -45,7 +45,6 @@ type StateProps = {
   canChangeInfo?: boolean;
   canInvite?: boolean;
   exportedInvites?: ApiExportedInvite[];
-  lastSyncTime?: number;
   availableReactions?: ApiAvailableReaction[];
 };
 
@@ -61,7 +60,6 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   canChangeInfo,
   canInvite,
   exportedInvites,
-  lastSyncTime,
   isActive,
   availableReactions,
   onScreenSelect,
@@ -98,12 +96,10 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (lastSyncTime) {
-      loadExportedChatInvites({ chatId });
-      loadExportedChatInvites({ chatId, isRevoked: true });
-      loadChatJoinRequests({ chatId });
-    }
-  }, [chatId, loadExportedChatInvites, lastSyncTime, loadChatJoinRequests]);
+    loadExportedChatInvites({ chatId });
+    loadExportedChatInvites({ chatId, isRevoked: true });
+    loadChatJoinRequests({ chatId });
+  }, [chatId]);
 
   useEffect(() => {
     if (progress === ManagementProgress.Complete) {
@@ -378,7 +374,6 @@ export default memo(withGlobal<OwnProps>(
       isSignaturesShown,
       canChangeInfo: getHasAdminRight(chat, 'changeInfo'),
       canInvite: getHasAdminRight(chat, 'inviteUsers'),
-      lastSyncTime: global.lastSyncTime,
       exportedInvites: invites,
       availableReactions: global.availableReactions,
     };

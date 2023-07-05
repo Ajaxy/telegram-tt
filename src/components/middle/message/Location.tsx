@@ -54,7 +54,6 @@ const SVG_PIN = { __html: '<svg version="1.1" class="round-pin" xmlns="http://ww
 type OwnProps = {
   message: ApiMessage;
   peer?: ApiUser | ApiChat;
-  lastSyncTime?: number;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   theme: ISettings['theme'];
@@ -63,7 +62,6 @@ type OwnProps = {
 const Location: FC<OwnProps> = ({
   message,
   peer,
-  lastSyncTime,
   isInSelectMode,
   isSelected,
   theme,
@@ -91,7 +89,7 @@ const Location: FC<OwnProps> = ({
     width, height, zoom, scale,
   } = DEFAULT_MAP_CONFIG;
 
-  const mediaHash = Boolean(lastSyncTime) && buildStaticMapHash(point, width, height, zoom, scale);
+  const mediaHash = buildStaticMapHash(point, width, height, zoom, scale);
   const mediaBlobUrl = useMedia(mediaHash);
   const prevMediaBlobUrl = usePrevious(mediaBlobUrl);
   const mapBlobUrl = mediaBlobUrl || prevMediaBlobUrl;

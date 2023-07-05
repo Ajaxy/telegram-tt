@@ -26,7 +26,7 @@ import * as methods from './methods';
 
 let onUpdate: OnApiUpdate;
 
-export async function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, initialLocalDb?: LocalDb) {
+export function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs, initialLocalDb?: LocalDb) {
   onUpdate = _onUpdate;
 
   initUpdater(handleUpdate);
@@ -43,7 +43,7 @@ export async function initApi(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArg
 
   if (initialLocalDb) updateFullLocalDb(initialLocalDb);
 
-  await initClient(handleUpdate, initialArgs);
+  initClient(handleUpdate, initialArgs);
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>): MethodResponse<T> {

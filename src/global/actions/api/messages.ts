@@ -573,6 +573,7 @@ addActionHandler('reportMessages', async (global, actions, payload): Promise<voi
 
 addActionHandler('sendMessageAction', async (global, actions, payload): Promise<void> => {
   const { action, chatId, threadId } = payload!;
+  if (global.connectionState !== 'connectionStateReady') return;
   if (chatId === global.currentUserId) return; // Message actions are disabled in Saved Messages
 
   const chat = selectChat(global, chatId)!;

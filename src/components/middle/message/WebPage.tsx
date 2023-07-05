@@ -34,7 +34,6 @@ type OwnProps = {
   canAutoPlay?: boolean;
   inPreview?: boolean;
   asForwarded?: boolean;
-  lastSyncTime?: number;
   isDownloading?: boolean;
   isProtected?: boolean;
   theme: ISettings['theme'];
@@ -50,7 +49,6 @@ const WebPage: FC<OwnProps> = ({
   canAutoPlay,
   inPreview,
   asForwarded,
-  lastSyncTime,
   isDownloading = false,
   isProtected,
   theme,
@@ -162,7 +160,6 @@ const WebPage: FC<OwnProps> = ({
             noAvatars={noAvatars}
             canAutoLoad={canAutoLoad}
             canAutoPlay={canAutoPlay}
-            lastSyncTime={lastSyncTime}
             asForwarded={asForwarded}
             isDownloading={isDownloading}
             isProtected={isProtected}

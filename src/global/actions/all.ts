@@ -1,18 +1,3 @@
-import './ui/initial';
-import './ui/chats';
-import './ui/messages';
-import './ui/globalSearch';
-import './ui/localSearch';
-import './ui/stickerSearch';
-import './ui/users';
-import './ui/settings';
-import './ui/misc';
-import './ui/payments';
-import './ui/calls';
-import './ui/mediaViewer';
-import './ui/passcode';
-import './ui/reactions';
-
 import './api/initial';
 import './api/chats';
 import './api/messages';
@@ -29,6 +14,21 @@ import './api/twoFaSettings';
 import './api/payments';
 import './api/reactions';
 import './api/statistics';
+
+import './ui/initial';
+import './ui/chats';
+import './ui/messages';
+import './ui/globalSearch';
+import './ui/localSearch';
+import './ui/stickerSearch';
+import './ui/users';
+import './ui/settings';
+import './ui/misc';
+import './ui/payments';
+import './ui/calls';
+import './ui/mediaViewer';
+import './ui/passcode';
+import './ui/reactions';
 
 import './apiUpdaters/initial';
 import './apiUpdaters/chats';

@@ -53,7 +53,6 @@ type OwnProps = {
   withVideo?: boolean;
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
-  lastSyncTime?: number;
   observeIntersection?: ObserveFn;
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>, hasMedia: boolean) => void;
 };
@@ -69,7 +68,6 @@ const Avatar: FC<OwnProps> = ({
   isSavedMessages,
   withVideo,
   loopIndefinitely,
-  lastSyncTime,
   noPersonalPhoto,
   onClick,
 }) => {
@@ -98,8 +96,8 @@ const Avatar: FC<OwnProps> = ({
     }
   }
 
-  const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl, lastSyncTime);
-  const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl, lastSyncTime);
+  const imgBlobUrl = useMedia(imageHash, false, ApiMediaFormat.BlobUrl);
+  const videoBlobUrl = useMedia(videoHash, !shouldLoadVideo, ApiMediaFormat.BlobUrl);
   const hasBlobUrl = Boolean(imgBlobUrl || videoBlobUrl);
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);

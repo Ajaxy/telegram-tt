@@ -44,7 +44,6 @@ type StateProps = {
   chat?: ApiChat;
   privateChatUser?: ApiUser;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
-  lastSyncTime?: number;
 };
 
 const ChatMessage: FC<OwnProps & StateProps> = ({
@@ -53,7 +52,6 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
   chatId,
   chat,
   privateChatUser,
-  lastSyncTime,
 }) => {
   const { focusMessage } = getActions();
 
@@ -85,7 +83,6 @@ const ChatMessage: FC<OwnProps & StateProps> = ({
         chat={chat}
         user={privateChatUser}
         isSavedMessages={privateChatUser?.isSelf}
-        lastSyncTime={lastSyncTime}
       />
       <div className="info">
         <div className="info-row">
@@ -147,7 +144,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      lastSyncTime: global.lastSyncTime,
       ...(privateChatUserId && { privateChatUser }),
     };
   },

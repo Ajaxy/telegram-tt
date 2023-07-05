@@ -23,7 +23,6 @@ export default function useProfileViewportIds(
   chatsById?: Record<string, ApiChat>,
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
-  lastSyncTime?: number,
   topicId?: number,
 ) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
@@ -49,31 +48,31 @@ export default function useProfileViewportIds(
   }, [chatsById, commonChatIds]);
 
   const [memberViewportIds, getMoreMembers, noProfileInfoForMembers] = useInfiniteScrollForLoadableItems(
-    resultType, loadMoreMembers, lastSyncTime, memberIds,
+    loadMoreMembers, memberIds,
   );
 
   const [mediaViewportIds, getMoreMedia, noProfileInfoForMedia] = useInfiniteScrollForSharedMedia(
-    'media', resultType, searchMessages, lastSyncTime, chatMessages, foundIds, topicId,
+    'media', resultType, searchMessages, chatMessages, foundIds, topicId,
   );
 
   const [documentViewportIds, getMoreDocuments, noProfileInfoForDocuments] = useInfiniteScrollForSharedMedia(
-    'documents', resultType, searchMessages, lastSyncTime, chatMessages, foundIds, topicId,
+    'documents', resultType, searchMessages, chatMessages, foundIds, topicId,
   );
 
   const [linkViewportIds, getMoreLinks, noProfileInfoForLinks] = useInfiniteScrollForSharedMedia(
-    'links', resultType, searchMessages, lastSyncTime, chatMessages, foundIds, topicId,
+    'links', resultType, searchMessages, chatMessages, foundIds, topicId,
   );
 
   const [audioViewportIds, getMoreAudio, noProfileInfoForAudio] = useInfiniteScrollForSharedMedia(
-    'audio', resultType, searchMessages, lastSyncTime, chatMessages, foundIds, topicId,
+    'audio', resultType, searchMessages, chatMessages, foundIds, topicId,
   );
 
   const [voiceViewportIds, getMoreVoices, noProfileInfoForVoices] = useInfiniteScrollForSharedMedia(
-    'voice', resultType, searchMessages, lastSyncTime, chatMessages, foundIds, topicId,
+    'voice', resultType, searchMessages, chatMessages, foundIds, topicId,
   );
 
   const [commonChatViewportIds, getMoreCommonChats, noProfileInfoForCommonChats] = useInfiniteScrollForLoadableItems(
-    resultType, loadCommonChats, lastSyncTime, chatIds,
+    loadCommonChats, chatIds,
   );
 
   let viewportIds: number[] | string[] | undefined;
@@ -122,13 +121,11 @@ export default function useProfileViewportIds(
 }
 
 function useInfiniteScrollForLoadableItems(
-  currentResultType?: ProfileTabType,
   handleLoadMore?: AnyToVoidFunction,
-  lastSyncTime?: number,
   itemIds?: string[],
 ) {
   const [viewportIds, getMore] = useInfiniteScroll(
-    lastSyncTime ? handleLoadMore : undefined,
+    handleLoadMore,
     itemIds,
     undefined,
     MEMBERS_SLICE,
@@ -143,7 +140,6 @@ function useInfiniteScrollForSharedMedia(
   forSharedMediaType: SharedMediaType,
   currentResultType?: ProfileTabType,
   handleLoadMore?: AnyToVoidFunction,
-  lastSyncTime?: number,
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
   topicId?: number,
@@ -165,7 +161,7 @@ function useInfiniteScrollForSharedMedia(
   }, [chatMessages, foundIds, currentResultType, forSharedMediaType]);
 
   const [viewportIds, getMore] = useInfiniteScroll(
-    lastSyncTime ? handleLoadMore : undefined,
+    handleLoadMore,
     messageIdsRef.current,
     undefined,
     forSharedMediaType === 'media' ? SHARED_MEDIA_SLICE : MESSAGE_SEARCH_SLICE,

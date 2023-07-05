@@ -43,7 +43,6 @@ type StateProps = {
   orderedFolderIds?: number[];
   activeChatFolder: number;
   currentUserId?: string;
-  lastSyncTime?: number;
   shouldSkipHistoryAnimations?: boolean;
   maxFolders: number;
   maxFolderInvites: number;
@@ -63,7 +62,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   activeChatFolder,
   currentUserId,
   isForumPanelOpen,
-  lastSyncTime,
   shouldSkipHistoryAnimations,
   maxFolders,
   shouldHideFolderTabs,
@@ -88,10 +86,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   useEffect(() => {
-    if (lastSyncTime) {
-      loadChatFolders();
-    }
-  }, [lastSyncTime, loadChatFolders]);
+    loadChatFolders();
+  }, []);
 
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
@@ -275,7 +271,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         folderId={isFolder ? activeFolder.id : undefined}
         isActive={isActive}
         isForumPanelOpen={isForumPanelOpen}
-        lastSyncTime={lastSyncTime}
         foldersDispatch={foldersDispatch}
         onSettingsScreenSelect={onSettingsScreenSelect}
         onLeftColumnContentChange={onLeftColumnContentChange}
@@ -331,7 +326,6 @@ export default memo(withGlobal<OwnProps>(
         },
       },
       currentUserId,
-      lastSyncTime,
       archiveSettings,
     } = global;
     const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
@@ -342,7 +336,6 @@ export default memo(withGlobal<OwnProps>(
       orderedFolderIds,
       activeChatFolder,
       currentUserId,
-      lastSyncTime,
       shouldSkipHistoryAnimations,
       hasArchivedChats: Boolean(archived?.length),
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),

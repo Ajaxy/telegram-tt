@@ -1,7 +1,7 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
@@ -9,6 +9,7 @@ import { selectTabState } from '../../../global/selectors';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+
 import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
 
@@ -33,7 +34,6 @@ type StateProps = {
   fetchingStatus?: { chats?: boolean; messages?: boolean };
   foundTopicIds?: number[];
   searchChatId?: string;
-  lastSyncTime?: number;
 };
 
 const runThrottled = throttle((cb) => cb(), 500, true);
@@ -45,7 +45,6 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   chatsById,
   fetchingStatus,
-  lastSyncTime,
   foundTopicIds,
   searchChatId,
   onSearchDateSelect,
@@ -57,7 +56,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
+    if (direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
         searchMessagesGlobal({
           type: 'text',
@@ -65,7 +64,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
       });
     }
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
-  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
+  }, [searchQuery]);
 
   const handleTopicClick = useCallback(
     (id: number) => {
@@ -167,7 +166,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { byId: chatsById } = global.chats;
-    const { currentUserId, messages: { byChatId: globalMessagesByChatId }, lastSyncTime } = global;
+    const { currentUserId, messages: { byChatId: globalMessagesByChatId } } = global;
     const {
       fetchingStatus, resultsByType, foundTopicIds, chatId: searchChatId,
     } = selectTabState(global).globalSearch;
@@ -181,7 +180,6 @@ export default memo(withGlobal<OwnProps>(
       chatsById,
       fetchingStatus,
       foundTopicIds,
-      lastSyncTime,
       searchChatId,
     };
   },

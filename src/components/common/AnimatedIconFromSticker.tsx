@@ -12,11 +12,11 @@ import AnimatedIconWithPreview from './AnimatedIconWithPreview';
 
 type OwnProps =
   Partial<AnimatedIconProps>
-  & { sticker?: ApiSticker; noLoad?: boolean; forcePreview?: boolean; lastSyncTime?: number };
+  & { sticker?: ApiSticker; noLoad?: boolean; forcePreview?: boolean };
 
 function AnimatedIconFromSticker(props: OwnProps) {
   const {
-    sticker, noLoad, forcePreview, lastSyncTime, ...otherProps
+    sticker, noLoad, forcePreview, ...otherProps
   } = props;
 
   const thumbDataUri = sticker?.thumbnail?.dataUri;
@@ -25,9 +25,8 @@ function AnimatedIconFromSticker(props: OwnProps) {
     sticker ? getStickerPreviewHash(sticker.id) : undefined,
     noLoad && !forcePreview,
     ApiMediaFormat.BlobUrl,
-    lastSyncTime,
   );
-  const tgsUrl = useMedia(localMediaHash, noLoad, undefined, lastSyncTime);
+  const tgsUrl = useMedia(localMediaHash, noLoad);
 
   return (
     <AnimatedIconWithPreview

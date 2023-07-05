@@ -83,25 +83,30 @@ export function addPhotoToLocalDb(photo: GramJs.TypePhoto) {
   }
 }
 
-function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel, noOverwrite = false) {
+export function addChatToLocalDb(chat: GramJs.Chat | GramJs.Channel) {
   const id = buildApiPeerId(chat.id, chat instanceof GramJs.Chat ? 'chat' : 'channel');
-  if (!noOverwrite || !localDb.chats[id]) {
-    localDb.chats[id] = chat;
-  }
+  const storedChat = localDb.chats[id];
+
+  const isStoredMin = storedChat && 'min' in storedChat && storedChat.min;
+  const isChatMin = 'min' in chat && chat.min;
+  if (storedChat && !isStoredMin && isChatMin) return;
+
+  localDb.chats[id] = chat;
 }
 
-export function addUserToLocalDb(user: GramJs.User, shouldOverwrite = false) {
+export function addUserToLocalDb(user: GramJs.User) {
   const id = buildApiPeerId(user.id, 'user');
-  if (shouldOverwrite || !localDb.users[id]) {
-    localDb.users[id] = user;
-  }
+  const storedUser = localDb.users[id];
+  if (storedUser && !storedUser.min && user.min) return;
+
+  localDb.users[id] = user;
 }
 
-export function addEntitiesWithPhotosToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
+export function addEntitiesToLocalDb(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
   entities.forEach((entity) => {
-    if (entity instanceof GramJs.User && entity.photo) {
+    if (entity instanceof GramJs.User) {
       addUserToLocalDb(entity);
-    } else if ((entity instanceof GramJs.Chat || entity instanceof GramJs.Channel) && entity.photo) {
+    } else if ((entity instanceof GramJs.Chat || entity instanceof GramJs.Channel)) {
       addChatToLocalDb(entity);
     }
   });
@@ -146,4 +151,11 @@ export function log(suffix: keyof typeof LOG_SUFFIX, ...data: any) {
     ...data,
   );
   /* eslint-enable max-len */
+}
+
+export function isResponseUpdate<T extends GramJs.AnyRequest>(result: T['__response']): result is GramJs.TypeUpdate {
+  return result instanceof GramJs.UpdatesTooLong || result instanceof GramJs.UpdateShortMessage
+    || result instanceof GramJs.UpdateShortChatMessage || result instanceof GramJs.UpdateShort
+    || result instanceof GramJs.UpdatesCombined || result instanceof GramJs.Updates
+    || result instanceof GramJs.UpdateShortSentMessage;
 }

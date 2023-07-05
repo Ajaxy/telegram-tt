@@ -54,7 +54,6 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   currentTopicId?: number;
-  lastSyncTime?: number;
   withInterfaceAnimations?: boolean;
 };
 
@@ -65,7 +64,6 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   currentTopicId,
   isOpen,
   isHidden,
-  lastSyncTime,
   onTopicSearch,
   onCloseAnimationEnd,
   onOpenAnimationStart,
@@ -85,10 +83,10 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   const { isMobile } = useAppLayout();
 
   useEffect(() => {
-    if (lastSyncTime && chat && !chat.topics) {
+    if (chat && !chat.topics) {
       loadTopics({ chatId: chat.id });
     }
-  }, [chat, lastSyncTime, loadTopics]);
+  }, [chat, loadTopics]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const lang = useLang();
@@ -126,7 +124,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds, chat?.id);
 
   const [viewportIds, getMore] = useInfiniteScroll(() => {
-    if (!chat || !lastSyncTime) return;
+    if (!chat) return;
     loadTopics({ chatId: chat.id });
   }, orderedIds, !chat?.topicsCount || orderedIds.length >= chat.topicsCount, TOPICS_SLICE);
 
@@ -294,7 +292,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       chat,
-      lastSyncTime: global.lastSyncTime,
       currentTopicId: chatId === currentChatId ? currentThreadId : undefined,
       withInterfaceAnimations: selectCanAnimateInterface(global),
     };

@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo,
   useEffect,
@@ -8,6 +7,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type {
   ActiveEmojiInteraction, ActiveReaction, ChatTranslatedMessages, MessageListType,
 } from '../../../global/types';
@@ -220,7 +220,6 @@ type StateProps = {
   isChannel?: boolean;
   isGroup?: boolean;
   canReply?: boolean;
-  lastSyncTime?: number;
   highlight?: string;
   animatedEmoji?: string;
   animatedCustomEmoji?: string;
@@ -256,6 +255,7 @@ type StateProps = {
   requestedTranslationLanguage?: string;
   withReactionEffects?: boolean;
   withStickerEffects?: boolean;
+  isConnected: boolean;
 };
 
 type MetaPosition =
@@ -330,7 +330,6 @@ const Message: FC<OwnProps & StateProps> = ({
   isChannel,
   isGroup,
   canReply,
-  lastSyncTime,
   highlight,
   animatedEmoji,
   animatedCustomEmoji,
@@ -364,6 +363,7 @@ const Message: FC<OwnProps & StateProps> = ({
   requestedTranslationLanguage,
   withReactionEffects,
   withStickerEffects,
+  isConnected,
   onPinnedIntersectionChange,
 }) => {
   const {
@@ -789,7 +789,6 @@ const Message: FC<OwnProps & StateProps> = ({
         user={avatarUser}
         chat={avatarChat}
         text={hiddenName}
-        lastSyncTime={lastSyncTime}
         onClick={(avatarUser || avatarChat) ? handleAvatarClick : undefined}
       />
     );
@@ -915,7 +914,6 @@ const Message: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersectionForLoading}
             observeIntersectionForPlaying={observeIntersectionForPlaying}
             shouldLoop={shouldLoopStickers}
-            lastSyncTime={lastSyncTime}
             shouldPlayEffect={(
               sticker.hasEffect && ((
                 memoFirstUnreadIdRef.current && messageId >= memoFirstUnreadIdRef.current
@@ -932,7 +930,6 @@ const Message: FC<OwnProps & StateProps> = ({
             withEffects={withStickerEffects && isUserId(chatId)}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
-            lastSyncTime={lastSyncTime}
             forceLoadPreview={isLocal}
             messageId={messageId}
             chatId={chatId}
@@ -945,7 +942,6 @@ const Message: FC<OwnProps & StateProps> = ({
             withEffects={withStickerEffects && isUserId(chatId)}
             isOwn={isOwn}
             observeIntersection={observeIntersectionForLoading}
-            lastSyncTime={lastSyncTime}
             forceLoadPreview={isLocal}
             messageId={messageId}
             chatId={chatId}
@@ -960,7 +956,6 @@ const Message: FC<OwnProps & StateProps> = ({
             isOwn={isOwn}
             isProtected={isProtected}
             hasCustomAppendix={hasCustomAppendix}
-            lastSyncTime={lastSyncTime}
             onMediaClick={handleAlbumMediaClick}
           />
         )}
@@ -993,7 +988,6 @@ const Message: FC<OwnProps & StateProps> = ({
             message={message}
             observeIntersection={observeIntersectionForLoading}
             canAutoLoad={canAutoLoadMedia}
-            lastSyncTime={lastSyncTime}
             isDownloading={isDownloading}
           />
         )}
@@ -1007,7 +1001,6 @@ const Message: FC<OwnProps & StateProps> = ({
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
             uploadProgress={uploadProgress}
-            lastSyncTime={lastSyncTime}
             isDownloading={isDownloading}
             isProtected={isProtected}
             asForwarded={asForwarded}
@@ -1021,7 +1014,6 @@ const Message: FC<OwnProps & StateProps> = ({
             message={message}
             origin={AudioOrigin.Inline}
             uploadProgress={uploadProgress}
-            lastSyncTime={lastSyncTime}
             isSelectable={isInDocumentGroup}
             isSelected={isSelected}
             noAvatars={noAvatars}
@@ -1062,13 +1054,12 @@ const Message: FC<OwnProps & StateProps> = ({
           <Game
             message={message}
             canAutoLoadMedia={canAutoLoadMedia}
-            lastSyncTime={lastSyncTime}
           />
         )}
         {invoice?.extendedMedia && (
           <InvoiceMediaPreview
             message={message}
-            lastSyncTime={lastSyncTime}
+            isConnected={isConnected}
           />
         )}
 
@@ -1108,7 +1099,6 @@ const Message: FC<OwnProps & StateProps> = ({
             canAutoLoad={canAutoLoadMedia}
             canAutoPlay={canAutoPlayMedia}
             asForwarded={asForwarded}
-            lastSyncTime={lastSyncTime}
             isDownloading={isDownloading}
             isProtected={isProtected}
             theme={theme}
@@ -1129,7 +1119,6 @@ const Message: FC<OwnProps & StateProps> = ({
         {location && (
           <Location
             message={message}
-            lastSyncTime={lastSyncTime}
             isInSelectMode={isInSelectMode}
             isSelected={isSelected}
             theme={theme}
@@ -1346,7 +1335,6 @@ export default memo(withGlobal<OwnProps>(
     const {
       focusedMessage, forwardMessages, activeReactions, activeEmojiInteractions,
     } = selectTabState(global);
-    const { lastSyncTime } = global;
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
@@ -1431,6 +1419,8 @@ export default memo(withGlobal<OwnProps>(
     const chatTranslations = selectChatTranslations(global, chatId);
     const requestedTranslationLanguage = selectRequestedTranslationLanguage(global, chatId, message.id);
 
+    const isConnected = global.connectionState === 'connectionStateReady';
+
     return {
       theme: selectTheme(global),
       chatUsernames,
@@ -1453,7 +1443,6 @@ export default memo(withGlobal<OwnProps>(
       isChannel,
       isGroup,
       canReply,
-      lastSyncTime,
       highlight,
       animatedEmoji,
       animatedCustomEmoji,
@@ -1492,6 +1481,7 @@ export default memo(withGlobal<OwnProps>(
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       withReactionEffects: selectPerformanceSettingsValue(global, 'reactionEffects'),
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
+      isConnected,
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

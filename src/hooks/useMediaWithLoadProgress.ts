@@ -17,7 +17,6 @@ export default function useMediaWithLoadProgress(
   mediaHash: string | undefined,
   noLoad = false,
   mediaFormat = ApiMediaFormat.BlobUrl,
-  cacheBuster?: number,
   delay?: number | false,
   isHtmlAllowed = false,
 ) {
@@ -66,8 +65,7 @@ export default function useMediaWithLoadProgress(
       }
     }
   }, [
-    noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, isStreaming, delay, handleProgress,
-    isHtmlAllowed, id,
+    noLoad, mediaHash, mediaData, mediaFormat, forceUpdate, isStreaming, delay, handleProgress, isHtmlAllowed, id,
   ]);
 
   useEffect(() => {
