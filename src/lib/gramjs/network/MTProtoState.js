@@ -284,6 +284,16 @@ class MTProtoState {
             // reader isn't used for anything else after this, it's unnecessary.
             const obj = reader.tgReadObject();
 
+            // We only check for objects that telegram has returned to us (Updates) not ones we send.
+            if (obj?.constructor.name.startsWith('Update')) {
+                const now = Math.floor(Date.now() / 1000);
+                const msgLocalTime = this.getMsgIdTimeLocal(remoteMsgId);
+
+                if (msgLocalTime && ((msgLocalTime - now) > 30 || (now - msgLocalTime) > 300)) {
+                    // 30 sec in the future or 300 sec in the past
+                    throw new SecurityError('The message time is incorrect.');
+                }
+            }
             return new TLMessage(remoteMsgId, remoteSequence, obj);
         }
     }
@@ -294,7 +304,7 @@ class MTProtoState {
      * @private
      */
     _getNewMsgId() {
-        const now = new Date().getTime() / 1000 + this.timeOffset;
+        const now = Date.now() / 1000 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
         let newMsgId = (BigInt(Math.floor(now))
             .shiftLeft(BigInt(32))).or(BigInt(nanoseconds)
@@ -307,6 +317,17 @@ class MTProtoState {
     }
 
     /**
+     * Returns the understood time by the message id (server time + local offset)
+     */
+    getMsgIdTimeLocal(msgId) {
+        if (this._lastMsgId.eq(0)) {
+            // this means it's the first message sent/received so don't check yet
+            return false;
+        }
+        return msgId.shiftRight(BigInt(32)).toJSNumber() - this.timeOffset;
+    }
+
+    /**
      * Updates the time offset to the correct
      * one given a known valid message ID.
      * @param correctMsgId {BigInteger}
@@ -314,7 +335,7 @@ class MTProtoState {
     updateTimeOffset(correctMsgId) {
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
-        const now = Math.floor(new Date().getTime() / 1000);
+        const now = Math.floor(Date.now() / 1000);
         const correct = correctMsgId.shiftRight(BigInt(32));
         this.timeOffset = correct - now;
 

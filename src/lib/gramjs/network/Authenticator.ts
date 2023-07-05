@@ -156,10 +156,14 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
     const ige = new IGE(key, iv);
     const plainTextAnswer = ige.decryptIge(serverDhParams.encryptedAnswer);
     const reader = new BinaryReader(plainTextAnswer);
-    reader.read(20); // hash sum
+    const hash = reader.read(20); // hash sum
     const serverDhInner = reader.tgReadObject();
     if (!(serverDhInner instanceof Api.ServerDHInnerData)) {
         throw new Error(`Step 3 answer was ${serverDhInner}`);
+    }
+    const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
+    if (!(hash.equals(sha1Answer))) {
+        throw new SecurityError('Step 3 Invalid hash answer');
     }
 
     if (serverDhInner.nonce.neq(resPQ.nonce)) {
@@ -185,7 +189,7 @@ export async function doAuthentication(sender: MTProtoPlainSender, log: any) {
         false,
     );
     const ga = Helpers.readBigIntFromBuffer(serverDhInner.gA, false, false);
-    const timeOffset = serverDhInner.serverTime - Math.floor(new Date().getTime() / 1000);
+    const timeOffset = serverDhInner.serverTime - Math.floor(Date.now() / 1000);
     const b = Helpers.readBigIntFromBuffer(
         Helpers.generateRandomBytes(256),
         false,

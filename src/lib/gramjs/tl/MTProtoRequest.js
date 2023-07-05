@@ -17,7 +17,7 @@ class MTProtoRequest {
 
     // these should not be overrode
     onSendSuccess() {
-        this.sendTime = new Date().getTime();
+        this.sendTime = Date.now();
         this.sent = true;
     }
 
@@ -26,7 +26,7 @@ class MTProtoRequest {
     }
 
     needResend() {
-        return this.dirty || (this.confirmed && !this.confirmReceived && new Date().getTime() - this.sendTime > 3000);
+        return this.dirty || (this.confirmed && !this.confirmReceived && Date.now() - this.sendTime > 3000);
     }
 
     // These should be overrode

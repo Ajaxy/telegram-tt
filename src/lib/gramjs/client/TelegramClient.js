@@ -291,7 +291,7 @@ class TelegramClient {
             // for Telegram to keep delivering updates, otherwise they will
             // just stop even if we're connected. Do so every 30 minutes.
 
-            if (new Date().getTime() - this._lastRequest > 30 * 60 * 1000) {
+            if (Date.now() - this._lastRequest > 30 * 60 * 1000) {
                 try {
                     await this.pingCallback();
                 } catch (e) {
@@ -877,7 +877,7 @@ class TelegramClient {
         }
 
         const sender = dcId === undefined ? this._sender : await this.getSender(dcId);
-        this._lastRequest = new Date().getTime();
+        this._lastRequest = Date.now();
 
         const state = new RequestState(request, abortSignal);
 
