@@ -801,7 +801,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
         if (
           DEBUG_state.calls % 10 === 0
           && DEBUG_state.calls >= DEBUG_MEMOS_CALLS_THRESHOLD
-          && DEBUG_state.hitRate < 0.5
+          && DEBUG_state.hitRate < 0.25
         ) {
           // eslint-disable-next-line no-console
           console.warn(

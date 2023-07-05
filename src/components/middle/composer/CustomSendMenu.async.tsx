@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './CustomSendMenu';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const CustomSendMenuAsync: FC<OwnProps> = (props) => {
   return CustomSend ? <CustomSend {...props} /> : undefined;
 };
 
-export default memo(CustomSendMenuAsync);
+export default CustomSendMenuAsync;

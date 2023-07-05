@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './HistoryCalendar';
@@ -14,4 +14,4 @@ const HistoryCalendarAsync: FC<OwnProps> = (props) => {
   return HistoryCalendar ? <HistoryCalendar {...props} /> : undefined;
 };
 
-export default memo(HistoryCalendarAsync);
+export default HistoryCalendarAsync;

@@ -1,6 +1,5 @@
-import React, { memo } from '../../lib/teact/teact';
-
 import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import type { OwnProps } from './MessageLanguageModal';
 
 import { Bundles } from '../../util/moduleLoader';
@@ -14,4 +13,4 @@ const MessageLanguageModalAsync: FC<OwnProps> = (props) => {
   return MessageLanguageModal ? <MessageLanguageModal {...props} /> : undefined;
 };
 
-export default memo(MessageLanguageModalAsync);
+export default MessageLanguageModalAsync;

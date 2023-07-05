@@ -28,6 +28,7 @@ import { ChatAnimationTypes } from './useChatAnimationType';
 import MessageSummary from '../../../common/MessageSummary';
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
 import TypingStatus from '../../../common/TypingStatus';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 const ANIMATION_DURATION = 200;
 
@@ -89,21 +90,7 @@ export default function useChatListEntry({
     return actionTargetUserIds.map((userId) => usersById[userId]).filter(Boolean);
   }, [actionTargetUserIds]);
 
-  function renderSubtitle() {
-    if (chat?.isForum && !isTopic) {
-      return (
-        <ChatForumLastMessage
-          chat={chat}
-          renderLastMessage={renderLastMessageOrTyping}
-          observeIntersection={observeIntersection}
-        />
-      );
-    }
-
-    return renderLastMessageOrTyping();
-  }
-
-  function renderLastMessageOrTyping() {
+  const renderLastMessageOrTyping = useLastCallback(() => {
     if (typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
@@ -161,6 +148,20 @@ export default function useChatListEntry({
         {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
+  });
+
+  function renderSubtitle() {
+    if (chat?.isForum && !isTopic) {
+      return (
+        <ChatForumLastMessage
+          chat={chat}
+          renderLastMessage={renderLastMessageOrTyping}
+          observeIntersection={observeIntersection}
+        />
+      );
+    }
+
+    return renderLastMessageOrTyping();
   }
 
   // Sets animation excess values when `orderDiff` changes and then resets excess values to animate

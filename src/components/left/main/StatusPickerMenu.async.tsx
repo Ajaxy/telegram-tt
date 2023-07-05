@@ -1,6 +1,5 @@
-import React, { memo } from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './StatusPickerMenu';
 
 import { Bundles } from '../../../util/moduleLoader';
@@ -15,4 +14,4 @@ const StatusPickerMenuAsync: FC<OwnProps> = (props) => {
   return StatusPickerMenu ? <StatusPickerMenu {...props} /> : undefined;
 };
 
-export default memo(StatusPickerMenuAsync);
+export default StatusPickerMenuAsync;

@@ -1,12 +1,6 @@
-import React, {
-  useRef,
-  memo,
-  useEffect,
-  useLayoutEffect,
-} from '../../lib/teact/teact';
-import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
-
 import type { FC } from '../../lib/teact/teact';
+import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 import type { MenuItemContextAction } from './ListItem';
 
 import { MouseButton } from '../../util/windowEnvironment';
@@ -16,13 +10,13 @@ import renderText from '../common/helpers/renderText';
 import useMenuPosition from '../../hooks/useMenuPosition';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Menu from './Menu';
 import MenuItem from './MenuItem';
-
 import MenuSeparator from './MenuSeparator';
+
 import './Tab.scss';
-import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   className?: string;
@@ -197,4 +191,4 @@ const Tab: FC<OwnProps> = ({
   );
 };
 
-export default memo(Tab);
+export default Tab;

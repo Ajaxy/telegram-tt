@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './EmojiTooltip';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const EmojiTooltipAsync: FC<OwnProps> = (props) => {
   return EmojiTooltip ? <EmojiTooltip {...props} /> : undefined;
 };
 
-export default memo(EmojiTooltipAsync);
+export default EmojiTooltipAsync;

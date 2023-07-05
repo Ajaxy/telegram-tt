@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 import type { OwnProps } from './MuteChatModal';
 
@@ -13,4 +13,4 @@ const MuteChatModalAsync: FC<OwnProps> = (props) => {
   return MuteChatModal ? <MuteChatModal {...props} /> : undefined;
 };
 
-export default memo(MuteChatModalAsync);
+export default MuteChatModalAsync;

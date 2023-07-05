@@ -1,7 +1,6 @@
-import React, { memo } from '../../lib/teact/teact';
-import { Bundles } from '../../util/moduleLoader';
-
 import type { FC } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
+import { Bundles } from '../../util/moduleLoader';
 import type { OwnProps } from './UrlAuthModal';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
@@ -14,4 +13,4 @@ const UrlAuthModalAsync: FC<OwnProps> = (props) => {
   return UrlAuthModal ? <UrlAuthModal {...props} /> : undefined;
 };
 
-export default memo(UrlAuthModalAsync);
+export default UrlAuthModalAsync;

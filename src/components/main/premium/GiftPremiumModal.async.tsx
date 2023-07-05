@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './GiftPremiumModal';
@@ -14,4 +14,4 @@ const GiftPremiumModalAsync: FC<OwnProps> = (props) => {
   return GiftPremiumModal ? <GiftPremiumModal {...props} /> : undefined;
 };
 
-export default memo(GiftPremiumModalAsync);
+export default GiftPremiumModalAsync;

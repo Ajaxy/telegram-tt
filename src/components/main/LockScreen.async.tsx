@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './LockScreen';
@@ -14,4 +14,4 @@ const LockScreenAsync: FC<OwnProps> = (props) => {
   return LockScreen ? <LockScreen {...props} /> : undefined;
 };
 
-export default memo(LockScreenAsync);
+export default LockScreenAsync;

@@ -1,6 +1,5 @@
-import React, { memo } from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './ReactionPicker';
 
 import { Bundles } from '../../../util/moduleLoader';
@@ -18,4 +17,4 @@ const ReactionPickerAsync: FC<OwnProps & LocalOwnProps> = (props) => {
   return ReactionPicker ? <ReactionPicker {...props} /> : undefined;
 };
 
-export default memo(ReactionPickerAsync);
+export default ReactionPickerAsync;

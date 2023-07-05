@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
@@ -11,4 +11,4 @@ const PollResultsAsync: FC = () => {
   return PollResults ? <PollResults /> : <Loading />;
 };
 
-export default memo(PollResultsAsync);
+export default PollResultsAsync;

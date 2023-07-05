@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './PremiumMainModal';
@@ -14,4 +14,4 @@ const PremiumMainModalAsync: FC<OwnProps> = (props) => {
   return PremiumMainModal ? <PremiumMainModal {...props} /> : undefined;
 };
 
-export default memo(PremiumMainModalAsync);
+export default PremiumMainModalAsync;

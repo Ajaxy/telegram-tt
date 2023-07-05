@@ -1,12 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  memo, useEffect, useState, useRef,
-} from '../../lib/teact/teact';
+import React, { useEffect, useRef, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiExportedInvite } from '../../api/types';
-import { ManagementScreens, ProfileState } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
+import { ManagementScreens, ProfileState } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { debounce } from '../../util/schedulers';
@@ -544,7 +542,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>(
+export default withGlobal<OwnProps>(
   (global, {
     chatId, isProfile, isManagement, threadId,
   }): StateProps => {
@@ -587,4 +585,4 @@ export default memo(withGlobal<OwnProps>(
       shouldSkipHistoryAnimations: tabState.shouldSkipHistoryAnimations,
     };
   },
-)(RightHeader));
+)(RightHeader);

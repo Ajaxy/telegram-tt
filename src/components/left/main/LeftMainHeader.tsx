@@ -17,8 +17,8 @@ import {
   DEBUG,
   FEEDBACK_URL,
   IS_BETA,
-  IS_TEST,
   IS_ELECTRON,
+  IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
 import { IS_APP } from '../../../util/windowEnvironment';
@@ -33,7 +33,10 @@ import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { clearWebsync } from '../../../util/websync';
 import {
   selectCanSetPasscode,
-  selectCurrentMessageList, selectIsCurrentUserPremium, selectTabState, selectTheme,
+  selectCurrentMessageList,
+  selectIsCurrentUserPremium,
+  selectTabState,
+  selectTheme,
 } from '../../../global/selectors';
 import useLang from '../../../hooks/useLang';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
@@ -93,6 +96,8 @@ type StateProps =
   & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'>
   & Pick<TabState, 'canInstall'>;
 
+const CLEAR_DATE_SEARCH_PARAM = { date: undefined };
+const CLEAR_CHAT_SEARCH_PARAM = { id: undefined };
 const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
@@ -140,8 +145,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const lang = useLang();
   const { isMobile } = useAppLayout();
   const hasMenu = content === LeftColumnContent.ChatList;
-  const clearedDateSearchParam = { date: undefined };
-  const clearedChatSearchParam = { id: undefined };
   const selectedSearchDate = useMemo(() => {
     return searchDate
       ? formatDateToString(new Date(searchDate * 1000))
@@ -378,6 +381,32 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions, archiveSettings,
   ]);
 
+  const searchContent = useMemo(() => {
+    return (
+      <>
+        {selectedSearchDate && (
+          <PickerSelectedItem
+            icon="calendar"
+            title={selectedSearchDate}
+            canClose
+            isMinimized={Boolean(globalSearchChatId)}
+            className="search-date"
+            onClick={setGlobalSearchDate}
+            clickArg={CLEAR_DATE_SEARCH_PARAM}
+          />
+        )}
+        {globalSearchChatId && (
+          <PickerSelectedItem
+            chatOrUserId={globalSearchChatId}
+            onClick={setGlobalSearchChatId}
+            canClose
+            clickArg={CLEAR_CHAT_SEARCH_PARAM}
+          />
+        )}
+      </>
+    );
+  }, [globalSearchChatId, selectedSearchDate]);
+
   return (
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header" ref={headerRef}>
@@ -417,25 +446,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           onFocus={handleSearchFocus}
           onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
         >
-          {selectedSearchDate && (
-            <PickerSelectedItem
-              icon="calendar"
-              title={selectedSearchDate}
-              canClose
-              isMinimized={Boolean(globalSearchChatId)}
-              className="search-date"
-              onClick={setGlobalSearchDate}
-              clickArg={clearedDateSearchParam}
-            />
-          )}
-          {globalSearchChatId && (
-            <PickerSelectedItem
-              chatOrUserId={globalSearchChatId}
-              onClick={setGlobalSearchChatId}
-              canClose
-              clickArg={clearedChatSearchParam}
-            />
-          )}
+          {searchContent}
         </SearchInput>
         {isCurrentUserPremium && <StatusButton />}
         {hasPasscode && (

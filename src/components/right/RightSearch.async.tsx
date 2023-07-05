@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import type { OwnProps } from './RightSearch';
 import { Bundles } from '../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const RightSearchAsync: FC<OwnProps> = (props) => {
   return RightSearch ? <RightSearch {...props} /> : <Loading />;
 };
 
-export default memo(RightSearchAsync);
+export default RightSearchAsync;

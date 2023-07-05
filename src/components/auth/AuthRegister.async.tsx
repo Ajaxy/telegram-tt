@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import useModuleLoader from '../../hooks/useModuleLoader';
@@ -11,4 +11,4 @@ const AuthRegisterAsync: FC = () => {
   return AuthRegister ? <AuthRegister /> : <Loading />;
 };
 
-export default memo(AuthRegisterAsync);
+export default AuthRegisterAsync;

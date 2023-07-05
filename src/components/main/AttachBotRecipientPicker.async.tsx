@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 import type { OwnProps } from './AttachBotRecipientPicker';
 
@@ -15,4 +15,4 @@ const AttachBotRecipientPickerAsync: FC<OwnProps> = (props) => {
   return AttachBotRecipientPicker ? <AttachBotRecipientPicker {...props} /> : undefined;
 };
 
-export default memo(AttachBotRecipientPickerAsync);
+export default AttachBotRecipientPickerAsync;

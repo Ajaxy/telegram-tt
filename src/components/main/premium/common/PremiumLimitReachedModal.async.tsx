@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo } from '../../../../lib/teact/teact';
+import React from '../../../../lib/teact/teact';
 import { Bundles } from '../../../../util/moduleLoader';
 
 import type { OwnProps } from './PremiumLimitReachedModal';
@@ -14,4 +14,4 @@ const PremiumLimitReachedModalAsync: FC<OwnProps> = (props) => {
   return PremiumLimitReachedModal ? <PremiumLimitReachedModal {...props} /> : undefined;
 };
 
-export default memo(PremiumLimitReachedModalAsync);
+export default PremiumLimitReachedModalAsync;

@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './StickerTooltip';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const StickerTooltipAsync: FC<OwnProps> = (props) => {
   return StickerTooltip ? <StickerTooltip {...props} /> : undefined;
 };
 
-export default memo(StickerTooltipAsync);
+export default StickerTooltipAsync;

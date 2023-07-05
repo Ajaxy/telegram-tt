@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 import type { OwnProps } from './BotCommandTooltip';
 import { Bundles } from '../../../util/moduleLoader';
 
@@ -13,4 +13,4 @@ const BotCommandTooltipAsync: FC<OwnProps> = (props) => {
   return BotCommandTooltip ? <BotCommandTooltip {...props} /> : undefined;
 };
 
-export default memo(BotCommandTooltipAsync);
+export default BotCommandTooltipAsync;

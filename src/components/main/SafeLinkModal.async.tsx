@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 
 import type { OwnProps } from './SafeLinkModal';
@@ -14,4 +14,4 @@ const SafeLinkModalAsync: FC<OwnProps> = (props) => {
   return SafeLinkModal ? <SafeLinkModal {...props} /> : undefined;
 };
 
-export default memo(SafeLinkModalAsync);
+export default SafeLinkModalAsync;

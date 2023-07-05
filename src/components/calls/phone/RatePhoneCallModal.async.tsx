@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 
 import type { OwnProps } from './RatePhoneCallModal';
 import { Bundles } from '../../../util/moduleLoader';
@@ -14,4 +14,4 @@ const RatePhoneCallModalAsync: FC<OwnProps> = (props) => {
   return RatePhoneCallModal ? <RatePhoneCallModal {...props} /> : undefined;
 };
 
-export default memo(RatePhoneCallModalAsync);
+export default RatePhoneCallModalAsync;

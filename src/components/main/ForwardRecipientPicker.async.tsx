@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React from '../../lib/teact/teact';
 import { Bundles } from '../../util/moduleLoader';
 import type { OwnProps } from './ForwardRecipientPicker';
 
@@ -13,4 +13,4 @@ const ForwardRecipientPickerAsync: FC<OwnProps> = (props) => {
   return ForwardRecipientPicker ? <ForwardRecipientPicker {...props} /> : undefined;
 };
 
-export default memo(ForwardRecipientPickerAsync);
+export default ForwardRecipientPickerAsync;
