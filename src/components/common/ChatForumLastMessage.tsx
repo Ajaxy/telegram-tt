@@ -46,8 +46,6 @@ const ChatForumLastMessage: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  const lastMessage = renderLastMessage();
-
   const [lastActiveTopic, ...otherTopics] = useMemo(() => {
     if (!chat.topics) {
       return [];
@@ -90,7 +88,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
       setOverwrittenWidth(undefined);
     }
     setIsReversedCorner(lastMessageWidth > mainColumnWidth);
-  }, [lastActiveTopic, lastMessage]);
+  }, [lastActiveTopic, renderLastMessage]);
 
   return (
     <div
@@ -153,7 +151,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
         onClick={handleOpenTopicClick}
         onMouseDown={handleOpenTopicMouseDown}
       >
-        {lastMessage}
+        {renderLastMessage()}
         {!overwrittenWidth && !isReversedCorner && (
           <div className={styles.afterWrapper}>
             <div className={styles.after} />

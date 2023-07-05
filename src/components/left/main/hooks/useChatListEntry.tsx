@@ -1,10 +1,13 @@
-import React, { useLayoutEffect, useMemo, useRef } from '../../../../lib/teact/teact';
+import React, {
+  useCallback, useLayoutEffect, useMemo, useRef,
+} from '../../../../lib/teact/teact';
 import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
 import type { LangFn } from '../../../../hooks/useLang';
+import useLang from '../../../../hooks/useLang';
 import type {
-  ApiChat, ApiTopic, ApiMessage, ApiTypingStatus, ApiUser,
+  ApiChat, ApiMessage, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../../../api/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import type { Thread } from '../../../../global/types';
@@ -14,13 +17,17 @@ import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEn
 import {
   getMessageIsSpoiler,
   getMessageMediaHash,
-  getMessageMediaThumbDataUri, getMessageRoundVideo,
-  getMessageSenderName, getMessageSticker, getMessageVideo, isActionMessage, isChatChannel,
+  getMessageMediaThumbDataUri,
+  getMessageRoundVideo,
+  getMessageSenderName,
+  getMessageSticker,
+  getMessageVideo,
+  isActionMessage,
+  isChatChannel,
 } from '../../../../global/helpers';
 import { renderActionMessageText } from '../../../common/helpers/renderActionMessageText';
 import renderText from '../../../common/helpers/renderText';
 import buildClassName from '../../../../util/buildClassName';
-import useLang from '../../../../hooks/useLang';
 import useEnsureMessage from '../../../../hooks/useEnsureMessage';
 import useMedia from '../../../../hooks/useMedia';
 import { ChatAnimationTypes } from './useChatAnimationType';
@@ -28,7 +35,6 @@ import { ChatAnimationTypes } from './useChatAnimationType';
 import MessageSummary from '../../../common/MessageSummary';
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
 import TypingStatus from '../../../common/TypingStatus';
-import useLastCallback from '../../../../hooks/useLastCallback';
 
 const ANIMATION_DURATION = 200;
 
@@ -90,7 +96,7 @@ export default function useChatListEntry({
     return actionTargetUserIds.map((userId) => usersById[userId]).filter(Boolean);
   }, [actionTargetUserIds]);
 
-  const renderLastMessageOrTyping = useLastCallback(() => {
+  const renderLastMessageOrTyping = useCallback(() => {
     if (typingStatus && lastMessage && typingStatus.timestamp > lastMessage.date * 1000) {
       return <TypingStatus typingStatus={typingStatus} />;
     }
@@ -148,7 +154,11 @@ export default function useChatListEntry({
         {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );
-  });
+  }, [
+    actionTargetChatId, actionTargetMessage, actionTargetUsers, chat, chatId, draft, isAction,
+    isRoundVideo, isTopic, lang, lastMessage, lastMessageSender, lastMessageTopic, mediaBlobUrl, mediaThumbnail,
+    observeIntersection, typingStatus,
+  ]);
 
   function renderSubtitle() {
     if (chat?.isForum && !isTopic) {
