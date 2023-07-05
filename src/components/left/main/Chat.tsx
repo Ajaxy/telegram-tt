@@ -29,6 +29,7 @@ import {
   selectChatMessage,
   selectCurrentMessageList,
   selectDraft,
+  selectIsForumPanelClosed,
   selectNotifyExceptions,
   selectNotifySettings,
   selectOutgoingStatus,
@@ -42,6 +43,7 @@ import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
 
 import useLastCallback from '../../../hooks/useLastCallback';
+import useSelectorSignal from '../../../hooks/useSelectorSignal';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
@@ -58,7 +60,6 @@ import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
 import ChatCallStatus from './ChatCallStatus';
 import ChatBadge from './ChatBadge';
-import AvatarBadge from './AvatarBadge';
 
 import './Chat.scss';
 
@@ -157,6 +158,8 @@ const Chat: FC<OwnProps & StateProps> = ({
     orderDiff,
   });
 
+  const getIsForumPanelClosed = useSelectorSignal(selectIsForumPanelClosed);
+
   const handleClick = useLastCallback(() => {
     if (isForum) {
       if (isSelectedForum) {
@@ -253,7 +256,9 @@ const Chat: FC<OwnProps & StateProps> = ({
           userStatus={userStatus}
           isSavedMessages={user?.isSelf}
         />
-        <AvatarBadge chatId={chatId} />
+        <div className="avatar-badge-wrapper">
+          <ChatBadge chat={chat} isMuted={isMuted} shouldShowOnlyMostImportant forceHidden={getIsForumPanelClosed} />
+        </div>
         {chat.isCallActive && chat.isCallNotEmpty && (
           <ChatCallStatus isMobile={isMobile} isSelected={isSelected} isActive={withInterfaceAnimations} />
         )}

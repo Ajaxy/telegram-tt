@@ -3,8 +3,12 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 import type { ApiChat, ApiTopic } from '../../../api/types';
 import type { FC } from '../../../lib/teact/teact';
 
+import type { Signal } from '../../../util/signals';
+import { isSignal } from '../../../util/signals';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
+
+import useDerivedState from '../../../hooks/useDerivedState';
 
 import ShowTransition from '../../ui/ShowTransition';
 import AnimatedCounter from '../../common/AnimatedCounter';
@@ -18,7 +22,7 @@ type OwnProps = {
   isPinned?: boolean;
   isMuted?: boolean;
   shouldShowOnlyMostImportant?: boolean;
-  forceHidden?: boolean;
+  forceHidden?: boolean | Signal<boolean>;
 };
 
 const ChatBadge: FC<OwnProps> = ({
@@ -51,7 +55,11 @@ const ChatBadge: FC<OwnProps> = ({
 
   const hasUnreadMark = topic ? false : chat.hasUnreadMark;
 
-  const isShown = !forceHidden && Boolean(
+  const resolvedForceHidden = useDerivedState(
+    () => (isSignal(forceHidden) ? forceHidden() : forceHidden),
+    [forceHidden],
+  );
+  const isShown = !resolvedForceHidden && Boolean(
     unreadCount || unreadMentionsCount || hasUnreadMark || isPinned || unreadReactionsCount
     || isTopicUnopened,
   );
