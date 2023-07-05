@@ -115,6 +115,7 @@
   }
 
   .is-forwarded &,
+  .document &,
   .audio &,
   .voice &,
   .poll &,
@@ -126,6 +127,7 @@
     margin: 0.375rem -0.5rem -0.375rem;
   }
 
+  .message-content.document &,
   .message-content.voice & {
     margin-bottom: -0.5rem;
   }
@@ -134,6 +136,7 @@
     margin-bottom: -0.8125rem;
   }
 
+  .message-content.document &,
   .message-content.audio &,
   .message-content.voice &,
   .message-content.poll &,
