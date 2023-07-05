@@ -2,12 +2,6 @@
   &:first-child {
     margin-top: 0.5rem;
   }
-  &:hover,
-  &.selected {
-    .Avatar.online::after {
-      border-color: var(--color-chat-hover);
-    }
-  }
 
   .ListItem-button {
     padding: 0.25rem 0.5rem;
