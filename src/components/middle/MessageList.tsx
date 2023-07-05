@@ -79,6 +79,7 @@ import useMedia from '../../hooks/useMedia';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useContainerHeight from './hooks/useContainerHeight';
+import { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 
 import Loading from '../ui/Loading';
 import MessageListContent from './MessageListContent';
@@ -463,7 +464,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
       const isAlreadyFocusing = messageIds && memoFocusingIdRef.current === messageIds[messageIds.length - 1];
 
       // Animate incoming message
-      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing) {
+      if (wasMessageAdded && isAtBottom && !isAlreadyFocusing && !isBackgroundModeActive()) {
         // Break out of `forceLayout`
         requestMeasure(() => {
           animateScroll(
