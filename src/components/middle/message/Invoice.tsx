@@ -65,7 +65,7 @@ const Invoice: FC<OwnProps> = ({
 
     if (photoUrl) {
       const contentEl = ref.current!.closest<HTMLDivElement>(MESSAGE_CONTENT_SELECTOR)!;
-      getCustomAppendixBg(photoUrl, false, isInSelectMode, isSelected, theme).then((appendixBg) => {
+      getCustomAppendixBg(photoUrl, false, isSelected, theme).then((appendixBg) => {
         contentEl.style.setProperty('--appendix-bg', appendixBg);
         contentEl.setAttribute(CUSTOM_APPENDIX_ATTRIBUTE, '');
       });

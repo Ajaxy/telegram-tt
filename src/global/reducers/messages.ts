@@ -493,7 +493,7 @@ export function updateThreadInfos<T extends GlobalState>(
   global: T, chatId: string, updates: Partial<ApiThreadInfo>[],
 ): T {
   updates.forEach((update) => {
-    global = updateThreadInfo(global, update.chatId!, update.threadId!, update);
+    global = updateThreadInfo(global, chatId, update.threadId!, update);
   });
 
   return global;
