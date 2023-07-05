@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
+import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
@@ -7,6 +7,7 @@ import { copyTextToClipboard } from '../../util/clipboard';
 import buildClassName from '../../util/buildClassName';
 import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -32,20 +33,21 @@ const InviteLink: FC<OwnProps> = ({
 
   const { isMobile } = useAppLayout();
 
-  const copyLink = useCallback((link: string) => {
+  const copyLink = useLastCallback((link: string) => {
     copyTextToClipboard(link);
     showNotification({
       message: lang('LinkCopied'),
     });
-  }, [lang]);
+  });
 
-  const handleCopyPrimaryClicked = useCallback(() => {
+  const handleCopyPrimaryClicked = useLastCallback(() => {
+    if (isDisabled) return;
     copyLink(inviteLink);
-  }, [copyLink, inviteLink]);
+  });
 
-  const handleShare = useCallback(() => {
+  const handleShare = useLastCallback(() => {
     openChatWithDraft({ text: inviteLink });
-  }, [inviteLink]);
+  });
 
   const PrimaryLinkMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -80,7 +82,7 @@ const InviteLink: FC<OwnProps> = ({
           trigger={PrimaryLinkMenuButton}
           positionX="right"
         >
-          <MenuItem icon="copy" onClick={handleCopyPrimaryClicked}>{lang('Copy')}</MenuItem>
+          <MenuItem icon="copy" onClick={handleCopyPrimaryClicked} disabled={isDisabled}>{lang('Copy')}</MenuItem>
           {onRevoke && (
             <MenuItem icon="delete" onClick={onRevoke} destructive>{lang('RevokeButton')}</MenuItem>
           )}
