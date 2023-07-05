@@ -1,7 +1,9 @@
 import type { RefObject } from 'react';
 import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
-import { addExtraClass, removeExtraClass, toggleExtraClass } from '../../lib/teact/teact-dom';
-import { requestMutation, requestForcedReflow } from '../../lib/fasterdom/fasterdom';
+import {
+  addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass,
+} from '../../lib/teact/teact-dom';
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 
 import { getGlobal } from '../../global';
 
@@ -146,8 +148,10 @@ function Transition({
         addExtraClass(activeChild, CLASSES.active);
 
         if (isSlideOptimized) {
-          activeChild.style.transition = 'none';
-          activeChild.style.transform = 'translate3d(0, 0, 0)';
+          setExtraStyles(activeChild, {
+            transition: 'none',
+            transform: 'translate3d(0, 0, 0)',
+          });
         }
       }
 
@@ -233,8 +237,8 @@ function Transition({
 
         if (shouldRestoreHeight) {
           if (activeElement) {
-            activeElement.style.height = 'auto';
-            container.style.height = `${clientHeight}px`;
+            setExtraStyles(activeElement, { height: 'auto' });
+            setExtraStyles(container, { height: `${clientHeight}px` });
           }
         }
 
@@ -290,9 +294,11 @@ function Transition({
     }
 
     requestMutation(() => {
-      activeElement.style.height = 'auto';
-      container.style.height = `${clientHeight}px`;
-      container.style.flexBasis = `${clientHeight}px`;
+      setExtraStyles(activeElement, { height: 'auto' });
+      setExtraStyles(container, {
+        height: `${clientHeight}px`,
+        flexBasis: `${clientHeight}px`,
+      });
     });
   }, [shouldRestoreHeight, children]);
 
@@ -347,15 +353,19 @@ function performSlideOptimized(
     toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
     if (fromSlide instanceof HTMLElement) {
-      fromSlide.style.transition = 'none';
-      fromSlide.style.transform = '';
       removeExtraClass(fromSlide, CLASSES.active);
+      setExtraStyles(fromSlide, {
+        transition: 'none',
+        transform: '',
+      });
     }
 
     if (toSlide instanceof HTMLElement) {
-      toSlide.style.transition = 'none';
-      toSlide.style.transform = 'translate3d(0, 0, 0)';
       addExtraClass(toSlide, CLASSES.active);
+      setExtraStyles(toSlide, {
+        transition: 'none',
+        transform: 'translate3d(0, 0, 0)',
+      });
     }
 
     cleanup();
@@ -375,13 +385,17 @@ function performSlideOptimized(
   toggleExtraClass(container, `Transition-${name}Backwards`, isBackwards);
 
   if (fromSlide instanceof HTMLElement) {
-    fromSlide.style.transition = 'none';
-    fromSlide.style.transform = 'translate3d(0, 0, 0)';
+    setExtraStyles(fromSlide, {
+      transition: 'none',
+      transform: 'translate3d(0, 0, 0)',
+    });
   }
 
   if (toSlide instanceof HTMLElement) {
-    toSlide.style.transition = 'none';
-    toSlide.style.transform = `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`;
+    setExtraStyles(toSlide, {
+      transition: 'none',
+      transform: `translate3d(${isBackwards ? '-' : ''}100%, 0, 0)`,
+    });
   }
 
   requestForcedReflow(() => {
@@ -391,15 +405,19 @@ function performSlideOptimized(
 
     return () => {
       if (fromSlide instanceof HTMLElement) {
-        fromSlide.style.transition = '';
-        fromSlide.style.transform = `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`;
         removeExtraClass(fromSlide, CLASSES.active);
+        setExtraStyles(fromSlide, {
+          transition: '',
+          transform: `translate3d(${isBackwards ? '' : '-'}100%, 0, 0)`,
+        });
       }
 
       if (toSlide instanceof HTMLElement) {
-        toSlide.style.transition = '';
-        toSlide.style.transform = 'translate3d(0, 0, 0)';
         addExtraClass(toSlide, CLASSES.active);
+        setExtraStyles(toSlide, {
+          transition: '',
+          transform: 'translate3d(0, 0, 0)',
+        });
       }
     };
   });
@@ -413,13 +431,15 @@ function performSlideOptimized(
       }
 
       if (fromSlide instanceof HTMLElement) {
-        fromSlide.style.transition = 'none';
-        fromSlide.style.transform = '';
+        setExtraStyles(fromSlide, {
+          transition: 'none',
+          transform: '',
+        });
       }
 
       if (shouldRestoreHeight && clientHeight && toSlide instanceof HTMLElement) {
-        toSlide.style.height = 'auto';
-        container.style.height = `${clientHeight}px`;
+        setExtraStyles(toSlide, { height: 'auto' });
+        setExtraStyles(container, { height: `${clientHeight}px` });
       }
 
       onStop?.();
