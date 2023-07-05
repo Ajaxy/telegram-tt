@@ -57,6 +57,12 @@ export interface VirtualElementFragment {
 
 export type StateHookSetter<T> = (newValue: ((current: T) => T) | T) => void;
 
+export enum MountState {
+  New,
+  Mounted,
+  Unmounted,
+}
+
 interface ComponentInstance {
   id: number;
   $element: VirtualElementComponent;
@@ -64,7 +70,7 @@ interface ComponentInstance {
   name: string;
   props: Props;
   renderedValue?: any;
-  isMounted: boolean;
+  mountState: MountState;
   hooks: {
     state: {
       cursor: number;
@@ -201,7 +207,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
       ...props,
       ...(parsedChildren && { children: parsedChildren }),
     },
-    isMounted: false,
+    mountState: MountState.New,
     hooks: {
       state: {
         cursor: 0,
@@ -438,7 +444,7 @@ export function renderComponent(componentInstance: ComponentInstance) {
     newRenderedValue = componentInstance.renderedValue;
   });
 
-  if (componentInstance.isMounted && newRenderedValue === componentInstance.renderedValue) {
+  if (componentInstance.mountState === MountState.Mounted && newRenderedValue === componentInstance.renderedValue) {
     return componentInstance.$element;
   }
 
@@ -472,12 +478,12 @@ export function hasElementChanged($old: VirtualElement, $new: VirtualElement) {
 
 export function mountComponent(componentInstance: ComponentInstance) {
   renderComponent(componentInstance);
-  componentInstance.isMounted = true;
+  componentInstance.mountState = MountState.Mounted;
   return componentInstance.$element;
 }
 
 export function unmountComponent(componentInstance: ComponentInstance) {
-  if (!componentInstance.isMounted) {
+  if (componentInstance.mountState !== MountState.Mounted) {
     return;
   }
 
@@ -492,7 +498,7 @@ export function unmountComponent(componentInstance: ComponentInstance) {
     effect.releaseSignals?.();
   });
 
-  componentInstance.isMounted = false;
+  componentInstance.mountState = MountState.Unmounted;
 
   helpGc(componentInstance);
 }
@@ -530,7 +536,7 @@ function helpGc(componentInstance: ComponentInstance) {
 }
 
 function prepareComponentForFrame(componentInstance: ComponentInstance) {
-  if (!componentInstance.isMounted) {
+  if (componentInstance.mountState !== MountState.Mounted) {
     return;
   }
 
@@ -540,7 +546,7 @@ function prepareComponentForFrame(componentInstance: ComponentInstance) {
 }
 
 function forceUpdateComponent(componentInstance: ComponentInstance) {
-  if (!componentInstance.isMounted || !componentInstance.onUpdate) {
+  if (componentInstance.mountState !== MountState.Mounted || !componentInstance.onUpdate) {
     return;
   }
 
@@ -563,6 +569,10 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
       value: initial,
       nextValue: initial,
       setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
+        if (componentInstance.mountState === MountState.Unmounted) {
+          return;
+        }
+
         if (typeof newValue === 'function') {
           newValue = (newValue as (current: T) => T)(byCursor[cursor].nextValue);
         }
@@ -644,7 +654,7 @@ function useEffectBase(
   });
 
   const runEffect = () => safeExec(() => {
-    if (!componentInstance.isMounted) {
+    if (componentInstance.mountState === MountState.Unmounted) {
       return;
     }
 

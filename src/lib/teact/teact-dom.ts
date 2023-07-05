@@ -1,24 +1,25 @@
 import type {
   VirtualElement,
-  VirtualElementComponent,
-  VirtualElementTag,
-  VirtualElementParent,
   VirtualElementChildren,
-  VirtualElementReal,
+  VirtualElementComponent,
   VirtualElementFragment,
+  VirtualElementParent,
+  VirtualElementReal,
+  VirtualElementTag,
 } from './teact';
 import {
+  captureImmediateEffects,
   hasElementChanged,
   isComponentElement,
-  isTagElement,
-  isParentElement,
-  isTextElement,
   isEmptyElement,
+  isFragmentElement,
+  isParentElement,
+  isTagElement,
+  isTextElement,
   mountComponent,
+  MountState,
   renderComponent,
   unmountComponent,
-  isFragmentElement,
-  captureImmediateEffects,
 } from './teact';
 import { DEBUG } from '../../config';
 import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
@@ -103,7 +104,11 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
   }
 
   // Parent element may have changed, so we need to update the listener closure.
-  if (!skipComponentUpdate && isNewComponent && ($new as VirtualElementComponent).componentInstance.isMounted) {
+  if (
+    !skipComponentUpdate
+    && isNewComponent
+    && ($new as VirtualElementComponent).componentInstance.mountState === MountState.Mounted
+  ) {
     setupComponentUpdateListener(parentEl, $new as VirtualElementComponent, $parent, index);
   }
 
@@ -211,7 +216,7 @@ function initComponent(
 ) {
   const { componentInstance } = $element;
 
-  if (!componentInstance.isMounted) {
+  if (componentInstance.mountState === MountState.New) {
     $element = mountComponent(componentInstance);
     setupComponentUpdateListener(parentEl, $element, $parent, index);
 
@@ -219,8 +224,6 @@ function initComponent(
     if (isComponentElement($firstChild)) {
       $element.children = [initComponent(parentEl, $firstChild, $element, 0)];
     }
-
-    componentInstance.isMounted = true;
   }
 
   return $element;
