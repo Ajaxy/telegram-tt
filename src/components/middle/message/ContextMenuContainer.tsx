@@ -611,7 +611,8 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = chat && isChatChannel(chat);
     const isLocal = isMessageLocal(message);
     const isServiceNotification = isServiceNotificationMessage(message);
-    const canShowSeenBy = Boolean(chat
+    const canShowSeenBy = Boolean(!isLocal
+      && chat
       && seenByMaxChatMembers
       && seenByExpiresAt
       && isChatGroup(chat)

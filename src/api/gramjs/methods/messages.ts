@@ -1319,22 +1319,34 @@ export async function forwardMessages({
 
   await lastSendMessagePromise;
 
-  const update = await invokeRequest(new GramJs.messages.ForwardMessages({
-    fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),
-    toPeer: buildInputPeer(toChat.id, toChat.accessHash),
-    randomId: randomIds,
-    id: messageIds,
-    withMyScore: withMyScore || undefined,
-    silent: isSilent || undefined,
-    dropAuthor: noAuthors || undefined,
-    dropMediaCaptions: noCaptions || undefined,
-    ...(toThreadId && { topMsgId: toThreadId }),
-    ...(scheduledAt && { scheduleDate: scheduledAt }),
-    ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
-  }), {
-    shouldIgnoreUpdates: true,
-  });
-  if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
+  try {
+    const update = await invokeRequest(new GramJs.messages.ForwardMessages({
+      fromPeer: buildInputPeer(fromChat.id, fromChat.accessHash),
+      toPeer: buildInputPeer(toChat.id, toChat.accessHash),
+      randomId: randomIds,
+      id: messageIds,
+      withMyScore: withMyScore || undefined,
+      silent: isSilent || undefined,
+      dropAuthor: noAuthors || undefined,
+      dropMediaCaptions: noCaptions || undefined,
+      ...(toThreadId && { topMsgId: toThreadId }),
+      ...(scheduledAt && { scheduleDate: scheduledAt }),
+      ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
+    }), {
+      shouldThrow: true,
+      shouldIgnoreUpdates: true,
+    });
+    if (update) handleMultipleLocalMessagesUpdate(localMessages, update);
+  } catch (error: any) {
+    Object.values(localMessages).forEach((localMessage) => {
+      onUpdate({
+        '@type': 'updateMessageSendFailed',
+        chatId: toChat.id,
+        localId: localMessage.id,
+        error: error.message,
+      });
+    });
+  }
 }
 
 export async function findFirstMessageIdAfterDate({

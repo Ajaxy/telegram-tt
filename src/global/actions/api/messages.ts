@@ -96,8 +96,8 @@ import {
 import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
 import {
   getMessageOriginalId,
-  getUserFullName,
-  isDeletedUser,
+  getUserFullName, isChatChannel,
+  isDeletedUser, isMessageLocal,
   isServiceNotificationMessage,
   isUserBot,
 } from '../../helpers';
@@ -105,6 +105,7 @@ import { translate } from '../../../util/langProvider';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { deleteMessages } from '../apiUpdaters/messages';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
@@ -484,8 +485,18 @@ addActionHandler('deleteMessages', (global, actions, payload): ActionReturnType 
   }
   const { chatId, threadId } = currentMessageList;
   const chat = selectChat(global, chatId)!;
+  const messageIdsToDelete = messageIds.filter((id) => {
+    const message = selectChatMessage(global, chatId, id);
+    return message && !isMessageLocal(message);
+  });
 
-  void callApi('deleteMessages', { chat, messageIds, shouldDeleteForAll });
+  // Only local messages
+  if (!messageIdsToDelete.length && messageIds.length) {
+    deleteMessages(global, isChatChannel(chat) ? chatId : undefined, messageIds, actions);
+    return;
+  }
+
+  void callApi('deleteMessages', { chat, messageIds: messageIdsToDelete, shouldDeleteForAll });
 
   const editingId = selectEditingId(global, chatId, threadId);
   if (editingId && messageIds.includes(editingId)) {

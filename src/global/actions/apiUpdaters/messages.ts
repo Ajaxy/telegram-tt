@@ -894,7 +894,7 @@ function findLastMessage<T extends GlobalState>(global: T, chatId: string) {
   return undefined;
 }
 
-function deleteMessages<T extends GlobalState>(
+export function deleteMessages<T extends GlobalState>(
   global: T, chatId: string | undefined, ids: number[], actions: RequiredGlobalActions,
 ) {
   // Channel update
