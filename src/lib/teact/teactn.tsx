@@ -5,7 +5,7 @@ import { requestMeasure } from '../fasterdom/fasterdom';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
 import { throttleWithTickEnd } from '../../util/schedulers';
-import arePropsShallowEqual, { getUnequalProps } from '../../util/arePropsShallowEqual';
+import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallowEqual';
 import { orderBy } from '../../util/iteratees';
 import { handleError } from '../../util/handleError';
 
@@ -198,12 +198,10 @@ function updateContainers() {
 
     if (Object.keys(newMappedProps).length && !arePropsShallowEqual(mappedProps!, newMappedProps)) {
       if (DEBUG_MORE) {
-        // eslint-disable-next-line no-console
-        console.log(
-          '[TeactN] Will update',
-          container.DEBUG_componentName,
-          'caused by',
-          getUnequalProps(mappedProps!, newMappedProps).join(', '),
+        logUnequalProps(
+          mappedProps!,
+          newMappedProps,
+          `[TeactN] Will update ${container.DEBUG_componentName} caused by:`,
         );
       }
 

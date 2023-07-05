@@ -4,7 +4,7 @@ import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 import { DEBUG, DEBUG_MORE } from '../../config';
 import { throttleWith } from '../../util/schedulers';
 import { orderBy } from '../../util/iteratees';
-import { getUnequalProps } from '../../util/arePropsShallowEqual';
+import { logUnequalProps } from '../../util/arePropsShallowEqual';
 import { incrementOverlayCounter } from '../../util/debugOverlay';
 import { isSignal } from '../../util/signals';
 import safeExec from '../../util/safeExec';
@@ -807,6 +807,16 @@ export function useMemo<T extends any>(
     || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
   ) {
     if (DEBUG) {
+      if (debugKey) {
+        const msg = `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`;
+        if (!byCursor[cursor]) {
+          // eslint-disable-next-line no-console
+          console.log(`${msg} [first render]`);
+        } else {
+          logUnequalProps(byCursor[cursor].dependencies, dependencies, msg, debugKey);
+        }
+      }
+
       if (DEBUG_state) {
         DEBUG_state.misses++;
         DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
@@ -822,16 +832,6 @@ export function useMemo<T extends any>(
             `[Teact] ${DEBUG_state.key}: Hit rate is ${DEBUG_state.hitRate.toFixed(2)} for ${DEBUG_state.calls} calls`,
           );
         }
-      }
-
-      if (debugKey) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`,
-          byCursor[cursor]
-            ? getUnequalProps(byCursor[cursor].dependencies, dependencies).join(', ')
-            : '[first render]',
-        );
       }
     }
 
@@ -877,7 +877,7 @@ export function memo<T extends FC_withDebug>(Component: T, debugKey?: string) {
       // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       Object.values(props),
       debugKey,
-      DEBUG_resolveComponentName(renderingInstance.Component),
+      DEBUG_MORE ? DEBUG_resolveComponentName(renderingInstance.Component) : undefined,
     );
   }
 

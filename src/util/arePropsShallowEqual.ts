@@ -25,20 +25,23 @@ export default function arePropsShallowEqual(currentProps: AnyLiteral, newProps:
   return true;
 }
 
-export function getUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral) {
+export function logUnequalProps(currentProps: AnyLiteral, newProps: AnyLiteral, msg: string, debugKey = '') {
   const currentKeys = Object.keys(currentProps);
   const currentKeysLength = currentKeys.length;
   const newKeysLength = Object.keys(newProps).length;
 
   if (currentKeysLength !== newKeysLength) {
-    return ['%LENGTH%'];
+    // eslint-disable-next-line no-console
+    console.log(`${msg} LENGTH`);
+    return;
   }
 
-  return currentKeys.reduce((res, prop) => {
+  // eslint-disable-next-line no-console
+  console.log(msg);
+  currentKeys.forEach((res, prop) => {
     if (currentProps[prop] !== newProps[prop]) {
-      res.push(`${prop}: ${currentProps[prop]} => ${newProps[prop]}`);
+      // eslint-disable-next-line no-console
+      console.log(debugKey, prop, ':', currentProps[prop], '=>', newProps[prop]);
     }
-
-    return res;
-  }, [] as string[]);
+  });
 }
