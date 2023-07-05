@@ -302,21 +302,29 @@ function buildEmptyElement(): VirtualElementEmpty {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-const DEBUG_components: AnyLiteral = { TOTAL: { componentName: 'TOTAL', renderCount: 0 } };
+const DEBUG_components: AnyLiteral = { TOTAL: { name: 'TOTAL', renders: 0 } };
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const DEBUG_memos: Record<string, { key: string; calls: number; misses: number; hitRate: number }> = {};
 const DEBUG_MEMOS_CALLS_THRESHOLD = 20;
 
 document.addEventListener('dblclick', () => {
   // eslint-disable-next-line no-console
-  console.warn('COMPONENTS', orderBy(Object.values(DEBUG_components), 'renderCount', 'desc'));
+  console.warn('COMPONENTS', orderBy(
+    Object
+      .values(DEBUG_components)
+      .map(({ avgRenderTime, ...state }) => {
+        return { ...state, ...(avgRenderTime && { avgRenderTime: Number(avgRenderTime.toFixed(2)) }) };
+      }),
+    'renders',
+    'desc',
+  ));
 
   // eslint-disable-next-line no-console
   console.warn('MEMOS', orderBy(
     Object
       .values(DEBUG_memos)
       .filter(({ calls }) => calls >= DEBUG_MEMOS_CALLS_THRESHOLD)
-      .map((state) => ({ ...state, hitRate: state.hitRate.toFixed(2) })),
+      .map((state) => ({ ...state, hitRate: Number(state.hitRate.toFixed(2)) })),
     'hitRate',
     'asc',
   ));
@@ -411,11 +419,11 @@ export function renderComponent(componentInstance: ComponentInstance) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     let DEBUG_startAt: number | undefined;
     if (DEBUG) {
-      const componentName = componentInstance.name;
+      const componentName = DEBUG_resolveComponentName(Component);
       if (!DEBUG_components[componentName]) {
         DEBUG_components[componentName] = {
-          componentName,
-          renderCount: 0,
+          name: componentName,
+          renders: 0,
           avgRenderTime: 0,
         };
       }
@@ -434,16 +442,16 @@ export function renderComponent(componentInstance: ComponentInstance) {
 
     if (DEBUG) {
       const duration = performance.now() - DEBUG_startAt!;
-      const componentName = componentInstance.name;
+      const componentName = DEBUG_resolveComponentName(Component);
       if (duration > DEBUG_RENDER_THRESHOLD) {
         // eslint-disable-next-line no-console
         console.warn(`[Teact] Slow component render: ${componentName}, ${Math.round(duration)} ms`);
       }
 
-      const { renderCount, avgRenderTime } = DEBUG_components[componentName];
-      DEBUG_components[componentName].avgRenderTime = (avgRenderTime * renderCount + duration) / (renderCount + 1);
-      DEBUG_components[componentName].renderCount++;
-      DEBUG_components.TOTAL.renderCount++;
+      const { renders, avgRenderTime } = DEBUG_components[componentName];
+      DEBUG_components[componentName].avgRenderTime = (avgRenderTime * renders + duration) / (renders + 1);
+      DEBUG_components[componentName].renders++;
+      DEBUG_components.TOTAL.renders++;
 
       if (DEBUG_MORE) {
         incrementOverlayCounter(`${componentName} renders`);
@@ -645,7 +653,7 @@ function useEffectBase(
 
     if (DEBUG) {
       const duration = performance.now() - DEBUG_startAt!;
-      const componentName = componentInstance.name;
+      const componentName = DEBUG_resolveComponentName(componentInstance.Component);
       if (duration > DEBUG_EFFECT_THRESHOLD) {
         // eslint-disable-next-line no-console
         console.warn(
@@ -678,7 +686,7 @@ function useEffectBase(
 
     if (DEBUG) {
       const duration = performance.now() - DEBUG_startAt!;
-      const componentName = componentInstance.name;
+      const componentName = DEBUG_resolveComponentName(componentInstance.Component);
       if (duration > DEBUG_EFFECT_THRESHOLD) {
         // eslint-disable-next-line no-console
         console.warn(`[Teact] Slow effect at cursor #${cursor}: ${componentName}, ${Math.round(duration)} ms`);
@@ -767,14 +775,19 @@ export function useLayoutEffect(effect: Effect, dependencies?: readonly any[], d
   return useEffectBase(true, effect, dependencies, debugKey);
 }
 
-export function useMemo<T extends any>(resolver: () => T, dependencies: any[], debugKey?: string): T {
+export function useMemo<T extends any>(
+  resolver: () => T,
+  dependencies: any[],
+  debugKey?: string,
+  debugHitRateKey?: string,
+): T {
   const { cursor, byCursor } = renderingInstance.hooks.memos;
   let { value } = byCursor[cursor] || {};
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   let DEBUG_state: typeof DEBUG_memos[string] | undefined;
-  if (DEBUG && debugKey) {
-    const instanceKey = `${debugKey}#${renderingInstance.id}`;
+  if (DEBUG && debugHitRateKey) {
+    const instanceKey = `${debugHitRateKey}#${renderingInstance.id}`;
 
     DEBUG_state = DEBUG_memos[instanceKey];
     if (!DEBUG_state) {
@@ -793,7 +806,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
     || dependencies.length !== byCursor[cursor].dependencies.length
     || dependencies.some((dependency, i) => dependency !== byCursor[cursor].dependencies[i])
   ) {
-    if (DEBUG && debugKey) {
+    if (DEBUG) {
       if (DEBUG_state) {
         DEBUG_state.misses++;
         DEBUG_state.hitRate = (DEBUG_state.calls - DEBUG_state.misses) / DEBUG_state.calls;
@@ -811,8 +824,7 @@ export function useMemo<T extends any>(resolver: () => T, dependencies: any[], d
         }
       }
 
-      // Ignore default `debugKey`
-      if (!debugKey.startsWith('memo#')) {
+      if (debugKey) {
         // eslint-disable-next-line no-console
         console.log(
           `[Teact.useMemo] ${renderingInstance.name} (${debugKey}): Update is caused by:`,
@@ -858,15 +870,20 @@ export function useRef<T>(initial?: T | null) {
   return byCursor[cursor];
 }
 
-export function memo<T extends FC>(Component: T, debugKey?: string) {
-  return function TeactMemoWrapper(props: Props) {
+export function memo<T extends FC_withDebug>(Component: T, debugKey?: string) {
+  function TeactMemoWrapper(props: Props) {
     return useMemo(
       () => createElement(Component, props),
       // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       Object.values(props),
-      debugKey ?? `memo#${DEBUG_resolveComponentName(Component)}`,
+      debugKey,
+      DEBUG_resolveComponentName(renderingInstance.Component),
     );
-  } as T;
+  }
+
+  TeactMemoWrapper.DEBUG_contentComponentName = DEBUG_resolveComponentName(Component);
+
+  return TeactMemoWrapper as T;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -874,12 +891,15 @@ export function DEBUG_resolveComponentName(Component: FC_withDebug) {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { name, DEBUG_contentComponentName } = Component;
 
-  // Shorthand
   if (name === 'TeactNContainer') {
-    return `@${DEBUG_contentComponentName}`;
+    return `container>${DEBUG_contentComponentName}`;
   }
 
-  return name + (DEBUG_contentComponentName ? ` > ${DEBUG_contentComponentName}` : '');
+  if (name === 'TeactMemoWrapper') {
+    return `memo>${DEBUG_contentComponentName}`;
+  }
+
+  return name + (DEBUG_contentComponentName ? `>${DEBUG_contentComponentName}` : '');
 }
 
 export default {
