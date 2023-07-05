@@ -23,6 +23,7 @@ export default function useAttachmentModal({
   canSendVideos,
   canSendPhotos,
   canSendDocuments,
+  insertNextText,
 }: {
   attachments: ApiAttachment[];
   fileSizeLimit: number;
@@ -33,6 +34,7 @@ export default function useAttachmentModal({
   canSendVideos?: boolean;
   canSendPhotos?: boolean;
   canSendDocuments?: boolean;
+  insertNextText: VoidFunction;
 }) {
   const { openLimitReachedModal, showAllowedMessageTypesNotification } = getActions();
   const [shouldForceAsFile, setShouldForceAsFile] = useState<boolean>(false);
@@ -41,6 +43,7 @@ export default function useAttachmentModal({
 
   const handleClearAttachments = useLastCallback(() => {
     setAttachments(MEMO_EMPTY_ARRAY);
+    insertNextText();
   });
 
   const handleSetAttachments = useLastCallback(

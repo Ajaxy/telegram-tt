@@ -370,6 +370,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
   const hasAttachments = Boolean(attachments.length);
+  const [nextText, setNextText] = useState<ApiFormattedText | undefined>(undefined);
 
   const {
     canSendStickers, canSendGifs, canAttachMedia, canAttachPolls, canAttachEmbedLinks,
@@ -377,6 +378,57 @@ const Composer: FC<OwnProps & StateProps> = ({
   } = useMemo(() => getAllowedAttachmentOptions(chat, isChatWithBot), [chat, isChatWithBot]);
 
   const isComposerBlocked = !canSendPlainText && !editingMessage;
+
+  const insertHtmlAndUpdateCursor = useLastCallback((newHtml: string, inputId: string = EDITABLE_INPUT_ID) => {
+    if (inputId === EDITABLE_INPUT_ID && isComposerBlocked) return;
+    const selection = window.getSelection()!;
+    let messageInput: HTMLDivElement;
+    if (inputId === EDITABLE_INPUT_ID) {
+      messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
+    } else {
+      messageInput = document.getElementById(inputId) as HTMLDivElement;
+    }
+
+    if (selection.rangeCount) {
+      const selectionRange = selection.getRangeAt(0);
+      if (isSelectionInsideInput(selectionRange, inputId)) {
+        insertHtmlInSelection(newHtml);
+        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
+    }
+
+    setHtml(`${getHtml()}${newHtml}`);
+
+    // If selection is outside of input, set cursor at the end of input
+    requestNextMutation(() => {
+      focusEditableElement(messageInput);
+    });
+  });
+
+  const insertTextAndUpdateCursor = useLastCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
+    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
+      .join('')
+      .replace(/\u200b+/g, '\u200b');
+    insertHtmlAndUpdateCursor(newHtml, inputId);
+  });
+
+  const insertFormattedTextAndUpdateCursor = useLastCallback((
+    text: ApiFormattedText, inputId: string = EDITABLE_INPUT_ID,
+  ) => {
+    const newHtml = getTextWithEntitiesAsHtml(text);
+    insertHtmlAndUpdateCursor(newHtml, inputId);
+  });
+
+  const insertCustomEmojiAndUpdateCursor = useLastCallback((emoji: ApiSticker, inputId: string = EDITABLE_INPUT_ID) => {
+    insertHtmlAndUpdateCursor(buildCustomEmojiHtml(emoji), inputId);
+  });
+
+  const insertNextText = useLastCallback(() => {
+    if (!nextText) return;
+    insertFormattedTextAndUpdateCursor(nextText, EDITABLE_INPUT_ID);
+    setNextText(undefined);
+  });
 
   const {
     shouldSuggestCompression,
@@ -397,6 +449,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     canSendVideos,
     canSendPhotos,
     canSendDocuments,
+    insertNextText,
   });
 
   const [isBotKeyboardOpen, openBotKeyboard, closeBotKeyboard] = useFlag();
@@ -522,44 +575,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     chatBotCommands,
   );
 
-  const insertHtmlAndUpdateCursor = useLastCallback((newHtml: string, inputId: string = EDITABLE_INPUT_ID) => {
-    if (inputId === EDITABLE_INPUT_ID && isComposerBlocked) return;
-    const selection = window.getSelection()!;
-    let messageInput: HTMLDivElement;
-    if (inputId === EDITABLE_INPUT_ID) {
-      messageInput = document.querySelector<HTMLDivElement>(EDITABLE_INPUT_CSS_SELECTOR)!;
-    } else {
-      messageInput = document.getElementById(inputId) as HTMLDivElement;
-    }
-
-    if (selection.rangeCount) {
-      const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange, inputId)) {
-        insertHtmlInSelection(newHtml);
-        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
-        return;
-      }
-    }
-
-    setHtml(`${getHtml()}${newHtml}`);
-
-    // If selection is outside of input, set cursor at the end of input
-    requestNextMutation(() => {
-      focusEditableElement(messageInput);
-    });
-  });
-
-  const insertFormattedTextAndUpdateCursor = useLastCallback((
-    text: ApiFormattedText, inputId: string = EDITABLE_INPUT_ID,
-  ) => {
-    const newHtml = getTextWithEntitiesAsHtml(text);
-    insertHtmlAndUpdateCursor(newHtml, inputId);
-  });
-
-  const insertCustomEmojiAndUpdateCursor = useLastCallback((emoji: ApiSticker, inputId: string = EDITABLE_INPUT_ID) => {
-    insertHtmlAndUpdateCursor(buildCustomEmojiHtml(emoji), inputId);
-  });
-
   useDraft(draft, chatId, threadId, getHtml, setHtml, editingMessage);
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
@@ -568,6 +583,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     setAttachments(MEMO_EMPTY_ARRAY);
+    setNextText(undefined);
 
     closeEmojiTooltip();
     closeCustomEmojiTooltip();
@@ -662,6 +678,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isForCurrentMessageList,
     insertFormattedTextAndUpdateCursor,
     handleSetAttachments,
+    setNextText,
     editingMessage,
     !isCurrentUserPremium && !isChatWithSelf,
     showCustomEmojiPremiumNotification,
@@ -1088,13 +1105,6 @@ const Composer: FC<OwnProps & StateProps> = ({
       closeSymbolMenu();
       openSendAsMenu();
     }, MOBILE_KEYBOARD_HIDE_DELAY_MS);
-  });
-
-  const insertTextAndUpdateCursor = useLastCallback((text: string, inputId: string = EDITABLE_INPUT_ID) => {
-    const newHtml = renderText(text, ['escape_html', 'emoji_html', 'br_html'])
-      .join('')
-      .replace(/\u200b+/g, '\u200b');
-    insertHtmlAndUpdateCursor(newHtml, inputId);
   });
 
   useEffect(() => {
