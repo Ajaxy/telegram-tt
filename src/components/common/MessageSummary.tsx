@@ -27,6 +27,7 @@ interface OwnProps {
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
   inChatList?: boolean;
+  emojiSize?: number;
 }
 
 function MessageSummary({
@@ -39,6 +40,7 @@ function MessageSummary({
   observeIntersectionForPlaying,
   withTranslucentThumbs = false,
   inChatList = false,
+  emojiSize,
 }: OwnProps) {
   const { text, entities } = extractMessageText(message, inChatList) || {};
   const hasSpoilers = entities?.some((e) => e.type === ApiMessageEntityTypes.Spoiler);
@@ -69,6 +71,7 @@ function MessageSummary({
         withTranslucentThumbs={withTranslucentThumbs}
         truncateLength={truncateLength}
         inChatList={inChatList}
+        emojiSize={emojiSize}
       />
     );
   }

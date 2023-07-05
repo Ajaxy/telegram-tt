@@ -4,7 +4,7 @@ import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
 
-import { getPictogramDimensions } from '../common/helpers/mediaDimensions';
+import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
 import {
   getMessageIsSpoiler,
   getMessageMediaHash, getMessageSingleInlineButton,
@@ -34,6 +34,8 @@ import Spinner from '../ui/Spinner';
 import styles from './HeaderPinnedMessage.module.scss';
 
 const SHOW_LOADER_DELAY = 450;
+const EMOJI_SIZE = 1.125 * REM;
+
 type OwnProps = {
   message: ApiMessage;
   index: number;
@@ -169,7 +171,12 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
           </div>
           <Transition activeKey={message.id} name="slideVerticalFade" className={styles.messageTextTransition}>
             <p dir="auto" className={styles.summary}>
-              <MessageSummary lang={lang} message={message} noEmoji={Boolean(mediaThumbnail)} />
+              <MessageSummary
+                lang={lang}
+                message={message}
+                noEmoji={Boolean(mediaThumbnail)}
+                emojiSize={EMOJI_SIZE}
+              />
             </p>
           </Transition>
         </div>
