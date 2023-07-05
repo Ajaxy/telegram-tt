@@ -50,7 +50,6 @@ type OwnProps = {
   uploadProgress?: number;
   origin: AudioOrigin;
   date?: number;
-  lastSyncTime?: number;
   noAvatars?: boolean;
   className?: string;
   isSelectable?: boolean;
@@ -84,7 +83,6 @@ const Audio: FC<OwnProps> = ({
   uploadProgress,
   origin,
   date,
-  lastSyncTime,
   noAvatars,
   className,
   isSelectable,
@@ -114,7 +112,7 @@ const Audio: FC<OwnProps> = ({
 
   const { isMobile } = useAppLayout();
   const [isActivated, setIsActivated] = useState(false);
-  const shouldLoad = (isActivated || PRELOAD) && lastSyncTime;
+  const shouldLoad = isActivated || PRELOAD;
   const coverHash = getMessageMediaHash(message, 'pictogram');
   const coverBlobUrl = useMedia(coverHash, false, ApiMediaFormat.BlobUrl);
 

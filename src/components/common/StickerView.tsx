@@ -48,7 +48,6 @@ type OwnProps = {
   withSharedAnimation?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   withTranslucentThumb?: boolean; // With shared canvas thumbs are opaque by default to provide better transition effect
-  cacheBuster?: number;
   onVideoEnded?: AnyToVoidFunction;
   onAnimatedStickerLoop?: AnyToVoidFunction;
 };
@@ -77,7 +76,6 @@ const StickerView: FC<OwnProps> = ({
   withSharedAnimation,
   withTranslucentThumb,
   sharedCanvasRef,
-  cacheBuster,
   onVideoEnded,
   onAnimatedStickerLoop,
 }) => {
@@ -102,9 +100,7 @@ const StickerView: FC<OwnProps> = ({
   const thumbDataUri = useThumbnail(sticker);
   // Use preview instead of thumb but only if it's already loaded or when playing an animation is disabled
   const previewMediaDataFromCache: string | undefined = mediaLoader.getFromMemory(previewMediaHash);
-  const previewMediaData = useMedia(
-    previewMediaHash, Boolean(previewMediaDataFromCache || !noPlay), undefined, cacheBuster,
-  );
+  const previewMediaData = useMedia(previewMediaHash, Boolean(previewMediaDataFromCache || !noPlay));
   const thumbData = customColor ? thumbDataUri : (previewMediaData || thumbDataUri);
 
   const shouldForcePreview = isUnsupportedVideo || (isStatic && isSmall);
@@ -113,7 +109,7 @@ const StickerView: FC<OwnProps> = ({
   // If preloaded preview is forced, it will render as thumb, so no need to load it again
   const shouldSkipFullMedia = Boolean(fullMediaHash === previewMediaHash && previewMediaData);
 
-  const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia, undefined, cacheBuster);
+  const fullMediaData = useMedia(fullMediaHash, !shouldLoad || shouldSkipFullMedia);
   // If Lottie data is loaded we will only render thumb if it's good enough (from preview)
   const [isPlayerReady, markPlayerReady] = useFlag(Boolean(isLottie && fullMediaData && !previewMediaData));
   // Delay mounting on Android until heavy animation ends
@@ -129,7 +125,7 @@ const StickerView: FC<OwnProps> = ({
   const coords = useCoordsInSharedCanvas(containerRef, sharedCanvasRef);
 
   // Preload preview for Message Input and local message
-  useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview, undefined, cacheBuster);
+  useMedia(previewMediaHash, !shouldLoad || !shouldPreloadPreview);
 
   const randomIdPrefix = useMemo(() => generateIdFor(ID_STORE, true), []);
   const renderId = [

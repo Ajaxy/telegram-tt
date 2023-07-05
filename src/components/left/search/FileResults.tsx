@@ -1,20 +1,21 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
+import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import type { StateProps } from './helpers/createMapStateToProps';
 import { createMapStateToProps } from './helpers/createMapStateToProps';
 import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
 import { getSenderName } from './helpers/getSenderName';
 import { throttle } from '../../../util/schedulers';
 import { getMessageDocument } from '../../../global/helpers';
+
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
@@ -41,7 +42,6 @@ const FileResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   foundIds,
   activeDownloads,
-  lastSyncTime,
 }) => {
   const {
     searchMessagesGlobal,
@@ -59,7 +59,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   });
 
   const handleLoadMore = useCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    if (lastSyncTime && direction === LoadMoreDirection.Backwards) {
+    if (direction === LoadMoreDirection.Backwards) {
       runThrottled(() => {
         searchMessagesGlobal({
           type: CURRENT_TYPE,
@@ -67,7 +67,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
       });
     }
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps -- `searchQuery` is required to prevent infinite message loading
-  }, [lastSyncTime, searchMessagesGlobal, searchQuery]);
+  }, [searchQuery]);
 
   const foundMessages = useMemo(() => {
     if (!foundIds || !globalMessagesByChatId) {

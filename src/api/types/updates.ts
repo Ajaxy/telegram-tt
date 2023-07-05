@@ -619,6 +619,10 @@ export type ApiRequestInitApi = {
   '@type': 'requestInitApi';
 };
 
+export type ApiRequestSync = {
+  '@type': 'requestSync';
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -645,7 +649,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
-  ApiUpdateRecentReactions | ApiRequestInitApi
+  ApiUpdateRecentReactions | ApiRequestInitApi | ApiRequestSync
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -3,8 +3,6 @@ import { addCustomEmojiInputRenderCallback } from '../util/customEmojiManager';
 
 import { throttle } from '../util/schedulers';
 
-import useLastSyncTime from './useLastSyncTime';
-
 let LOAD_QUEUE = new Set<string>();
 const RENDER_HISTORY = new Set<string>();
 const THROTTLE = 200;
@@ -44,7 +42,6 @@ function notifyCustomEmojiRender(emojiId: string) {
 addCustomEmojiInputRenderCallback(notifyCustomEmojiRender);
 
 export default function useEnsureCustomEmoji(id?: string) {
-  const lastSyncTime = useLastSyncTime();
   if (!id) return;
   notifyCustomEmojiRender(id);
 
@@ -53,7 +50,5 @@ export default function useEnsureCustomEmoji(id?: string) {
   }
 
   LOAD_QUEUE.add(id);
-  if (lastSyncTime) {
-    loadFromQueue();
-  }
+  loadFromQueue();
 }

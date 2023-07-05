@@ -1,12 +1,14 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage, ApiChat } from '../../api/types';
+
 import { selectChat, selectChatMessage, selectTabState } from '../../global/selectors';
 import { buildCollectionByKey } from '../../util/iteratees';
 import { getMessagePoll } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
 
@@ -23,7 +25,6 @@ type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   message?: ApiMessage;
-  lastSyncTime?: number;
 };
 
 const PollResults: FC<OwnProps & StateProps> = ({
@@ -31,9 +32,9 @@ const PollResults: FC<OwnProps & StateProps> = ({
   isActive,
   chat,
   message,
-  lastSyncTime,
 }) => {
   const lang = useLang();
+
   useHistoryBack({
     isActive,
     onBack: onClose,
@@ -54,7 +55,7 @@ const PollResults: FC<OwnProps & StateProps> = ({
     <div className="PollResults" dir={lang.isRtl ? 'rtl' : undefined}>
       <h3 className="poll-question" dir="auto">{renderText(summary.question, ['emoji', 'br'])}</h3>
       <div className="poll-results-list custom-scroll">
-        {Boolean(lastSyncTime) && summary.answers.map((answer) => (
+        {summary.answers.map((answer) => (
           <PollAnswerResults
             key={`${message.id}-${answer.option}`}
             chat={chat}
@@ -64,7 +65,6 @@ const PollResults: FC<OwnProps & StateProps> = ({
             totalVoters={results.totalVoters!}
           />
         ))}
-        {!lastSyncTime && <Loading />}
       </div>
     </div>
   );
@@ -75,7 +75,6 @@ export default memo(withGlobal(
     const {
       pollResults: { chatId, messageId },
     } = selectTabState(global);
-    const { lastSyncTime } = global;
 
     if (!chatId || !messageId) {
       return {};
@@ -87,7 +86,6 @@ export default memo(withGlobal(
     return {
       chat,
       message,
-      lastSyncTime,
     };
   },
 )(PollResults));

@@ -62,6 +62,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.initApi();
       break;
 
+    case 'requestSync':
+      actions.sync();
+      break;
+
     case 'error': {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const paymentShippingError = getShippingError(update.error);

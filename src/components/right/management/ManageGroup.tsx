@@ -56,7 +56,6 @@ type StateProps = {
   canInvite?: boolean;
   canEditForum?: boolean;
   exportedInvites?: ApiExportedInvite[];
-  lastSyncTime?: number;
   isChannelsPremiumLimitReached: boolean;
   availableReactions?: ApiAvailableReaction[];
 };
@@ -98,7 +97,6 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   canEditForum,
   isActive,
   exportedInvites,
-  lastSyncTime,
   isChannelsPremiumLimitReached,
   availableReactions,
   onScreenSelect,
@@ -140,12 +138,12 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
   });
 
   useEffect(() => {
-    if (lastSyncTime && canInvite) {
+    if (canInvite) {
       loadExportedChatInvites({ chatId });
       loadExportedChatInvites({ chatId, isRevoked: true });
       loadChatJoinRequests({ chatId });
     }
-  }, [chatId, loadExportedChatInvites, lastSyncTime, canInvite, loadChatJoinRequests]);
+  }, [chatId, canInvite]);
 
   // Resetting `isForum` switch on flood wait error
   useEffect(() => {
@@ -509,7 +507,6 @@ export default memo(withGlobal<OwnProps>(
       canBanUsers: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'banUsers'),
       canInvite: isBasicGroup ? chat.isCreator : getHasAdminRight(chat, 'inviteUsers'),
       exportedInvites: invites,
-      lastSyncTime: global.lastSyncTime,
       isChannelsPremiumLimitReached: limitReachedModal?.limit === 'channels',
       availableReactions: global.availableReactions,
       canEditForum,

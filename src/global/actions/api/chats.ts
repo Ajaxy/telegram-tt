@@ -129,8 +129,34 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
 
 addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   const {
-    id, threadId = MAIN_THREAD_ID, noRequestThreadInfoUpdate,
+    id, threadId = MAIN_THREAD_ID, noRequestThreadInfoUpdate, tabId = getCurrentTabId(),
   } = payload;
+
+  const currentMessageList = selectCurrentMessageList(global, tabId);
+  const currentChatId = currentMessageList?.chatId;
+  const currentThreadId = currentMessageList?.threadId;
+
+  if (currentChatId && (currentChatId !== id || currentThreadId !== threadId)) {
+    const [isChatOpened, isThreadOpened] = Object.values(global.byTabId)
+      .reduce(([accHasChatOpened, accHasThreadOpened], { id: otherTabId }) => {
+        if (otherTabId === tabId || (accHasChatOpened && accHasThreadOpened)) {
+          return [accHasChatOpened, accHasThreadOpened];
+        }
+
+        const otherMessageList = selectCurrentMessageList(global, otherTabId);
+        const isSameChat = otherMessageList?.chatId === currentChatId;
+        const isSameThread = isSameChat && otherMessageList?.threadId === currentThreadId;
+
+        return [accHasChatOpened || isSameChat, accHasThreadOpened || isSameThread];
+      }, [currentChatId === id, false]);
+
+    const shouldAbortChatRequests = !isChatOpened || !isThreadOpened;
+
+    if (shouldAbortChatRequests) {
+      callApi('abortChatRequests', { chatId: currentChatId, threadId: isChatOpened ? currentThreadId : undefined });
+    }
+  }
+
   if (!id) {
     return;
   }

@@ -70,8 +70,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
       global = getGlobal();
       global = {
         ...global,
-        lastSyncTime: Date.now(),
         isSyncing: false,
+        isSynced: true,
       };
       setGlobal(global);
 
@@ -244,9 +244,9 @@ function loadTopMessages(chat: ApiChat, threadId: number, lastReadInboxId?: numb
 let previousGlobal: GlobalState | undefined;
 // RAF can be unreliable when device goes into sleep mode, so sync logic is handled outside any component
 addCallback((global: GlobalState) => {
-  const { connectionState, authState } = global;
+  const { connectionState, authState, isSynced } = global;
   const { isMasterTab } = selectTabState(global);
-  if (!isMasterTab || (previousGlobal?.connectionState === connectionState
+  if (!isMasterTab || isSynced || (previousGlobal?.connectionState === connectionState
     && previousGlobal?.authState === authState)) {
     previousGlobal = global;
     return;

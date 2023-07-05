@@ -32,7 +32,6 @@ type OwnProps = {
   observeIntersection: ObserveFn;
   observeIntersectionForPlaying: ObserveFn;
   shouldLoop?: boolean;
-  lastSyncTime?: number;
   shouldPlayEffect?: boolean;
   withEffect?: boolean;
   onPlayEffect?: VoidFunction;
@@ -40,7 +39,7 @@ type OwnProps = {
 };
 
 const Sticker: FC<OwnProps> = ({
-  message, observeIntersection, observeIntersectionForPlaying, shouldLoop, lastSyncTime,
+  message, observeIntersection, observeIntersectionForPlaying, shouldLoop,
   shouldPlayEffect, withEffect, onPlayEffect, onStopEffect,
 }) => {
   const { showNotification, openStickerSet } = getActions();
@@ -65,7 +64,6 @@ const Sticker: FC<OwnProps> = ({
     mediaHashEffect,
     !canLoad || !hasEffect,
     ApiMediaFormat.BlobUrl,
-    lastSyncTime,
   );
   const [isPlayingEffect, startPlayingEffect, stopPlayingEffect] = useFlag();
 
@@ -137,7 +135,6 @@ const Sticker: FC<OwnProps> = ({
         noLoad={!canLoad}
         noPlay={!canPlay}
         withSharedAnimation
-        cacheBuster={lastSyncTime}
       />
       {hasEffect && withEffect && canLoad && isPlayingEffect && (
         <AnimatedSticker

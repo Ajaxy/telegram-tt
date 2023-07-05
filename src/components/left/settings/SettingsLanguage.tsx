@@ -26,9 +26,7 @@ type OwnProps = {
   onScreenSelect: (screen: SettingsScreens) => void;
 };
 
-type StateProps = {
-  lastSyncTime?: number;
-} & Pick<ISettings, 'languages' | 'language' | 'canTranslate' | 'doNotTranslate'>;
+type StateProps = Pick<ISettings, 'languages' | 'language' | 'canTranslate' | 'doNotTranslate'>;
 
 const SettingsLanguage: FC<OwnProps & StateProps> = ({
   isActive,
@@ -36,7 +34,6 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   language,
   canTranslate,
   doNotTranslate,
-  lastSyncTime,
   onScreenSelect,
   onReset,
 }) => {
@@ -52,10 +49,10 @@ const SettingsLanguage: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   useEffect(() => {
-    if (lastSyncTime && !languages?.length) {
+    if (!languages?.length) {
       loadLanguages();
     }
-  }, [languages, lastSyncTime, loadLanguages]);
+  }, [languages]);
 
   const handleChange = useCallback((langCode: string) => {
     setSelectedLanguage(langCode);
@@ -161,7 +158,6 @@ export default memo(withGlobal<OwnProps>(
     } = global.settings.byKey;
 
     return {
-      lastSyncTime: global.lastSyncTime,
       languages,
       language,
       canTranslate,

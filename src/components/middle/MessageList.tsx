@@ -128,7 +128,6 @@ type StateProps = {
   botInfo?: ApiBotInfo;
   threadTopMessageId?: number;
   hasLinkedChat?: boolean;
-  lastSyncTime?: number;
   topic?: ApiTopic;
   noMessageSendingAnimation?: boolean;
   isServiceNotificationsChat?: boolean;
@@ -178,7 +177,6 @@ const MessageList: FC<OwnProps & StateProps> = ({
   botInfo,
   threadTopMessageId,
   hasLinkedChat,
-  lastSyncTime,
   withBottomShift,
   withDefaultBg,
   topic,
@@ -238,10 +236,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
-    if (!isCurrentUserPremium && isChannelChat && isReady && lastSyncTime) {
+    if (!isCurrentUserPremium && isChannelChat && isReady) {
       loadSponsoredMessages({ chatId });
     }
-  }, [isCurrentUserPremium, chatId, isReady, isChannelChat, lastSyncTime, loadSponsoredMessages]);
+  }, [isCurrentUserPremium, chatId, isReady, isChannelChat]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -738,7 +736,6 @@ export default memo(withGlobal<OwnProps>(
       botInfo,
       threadTopMessageId,
       hasLinkedChat: chatFullInfo ? Boolean(chatFullInfo.linkedChatId) : undefined,
-      lastSyncTime: global.lastSyncTime,
       topic,
       noMessageSendingAnimation: !selectPerformanceSettingsValue(global, 'messageSendingAnimations'),
       isServiceNotificationsChat: chatId === SERVICE_NOTIFICATIONS_USER_ID,

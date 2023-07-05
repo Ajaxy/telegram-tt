@@ -988,16 +988,12 @@ class TelegramClient {
             for (const x of [...update.users, ...update.chats]) {
                 entities.push(x);
             }
-            for (const u of update.updates) {
-                this._processUpdate(u, update.updates, entities);
-            }
+            this._processUpdate(update, entities);
         } else if (update instanceof constructors.UpdateShort) {
             this._processUpdate(update.update, undefined);
         } else {
             this._processUpdate(update, undefined);
         }
-        // TODO add caching
-        // this._stateCache.update(update)
     }
 
     _processUpdate(update, entities) {

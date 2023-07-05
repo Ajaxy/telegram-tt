@@ -19,14 +19,14 @@ import styles from './InvoiceMediaPreview.module.scss';
 
 type OwnProps = {
   message: ApiMessage;
-  lastSyncTime?: number;
+  isConnected: boolean;
 };
 
 const POLLING_INTERVAL = 30000;
 
 const InvoiceMediaPreview: FC<OwnProps> = ({
   message,
-  lastSyncTime,
+  isConnected,
 }) => {
   const { openInvoice, loadExtendedMedia } = getActions();
   const lang = useLang();
@@ -38,7 +38,7 @@ const InvoiceMediaPreview: FC<OwnProps> = ({
     loadExtendedMedia({ chatId, ids: [id] });
   });
 
-  useInterval(refreshExtendedMedia, lastSyncTime ? POLLING_INTERVAL : undefined);
+  useInterval(refreshExtendedMedia, isConnected ? POLLING_INTERVAL : undefined);
 
   const {
     amount,

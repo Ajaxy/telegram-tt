@@ -1,10 +1,9 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { GlobalState } from '../../global/types';
+import type { FC } from '../../lib/teact/teact';
 import type {
   ApiChat, ApiCountryCode, ApiUser, ApiUsername,
 } from '../../api/types';
@@ -56,13 +55,11 @@ type StateProps =
     topicId?: number;
     description?: string;
     chatInviteLink?: string;
-  }
-  & Pick<GlobalState, 'lastSyncTime'>;
+  };
 
 const runDebounced = debounce((cb) => cb(), 500, false);
 
 const ChatExtra: FC<OwnProps & StateProps> = ({
-  lastSyncTime,
   user,
   chat,
   forceShowSelf,
@@ -96,10 +93,9 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   }, [isMuted]);
 
   useEffect(() => {
-    if (lastSyncTime && userId) {
-      loadFullUser({ userId });
-    }
-  }, [loadFullUser, userId, lastSyncTime]);
+    if (!userId) return;
+    loadFullUser({ userId });
+  }, [userId]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
 
@@ -264,7 +260,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatOrUserId }): StateProps => {
-    const { lastSyncTime, countryList: { phoneCodes: phoneCodeList } } = global;
+    const { countryList: { phoneCodes: phoneCodeList } } = global;
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
@@ -284,7 +280,6 @@ export default memo(withGlobal<OwnProps>(
     );
 
     return {
-      lastSyncTime,
       phoneCodeList,
       chat,
       user,

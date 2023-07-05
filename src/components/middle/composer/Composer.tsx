@@ -1,10 +1,10 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
 import type {
   TabState, MessageListType, GlobalState, ApiDraft, MessageList,
 } from '../../../global/types';
@@ -179,7 +179,6 @@ type StateProps =
     groupChatMembers?: ApiChatMember[];
     currentUserId?: string;
     recentEmojis: string[];
-    lastSyncTime?: number;
     contentToBeScheduled?: TabState['contentToBeScheduled'];
     shouldSuggestStickers?: boolean;
     shouldSuggestCustomEmoji?: boolean;
@@ -207,8 +206,7 @@ type StateProps =
     attachmentSettings: GlobalState['attachmentSettings'];
     slowMode?: ApiChatFullInfo['slowMode'];
     shouldUpdateStickerSetOrder?: boolean;
-  }
-  & Pick<GlobalState, 'connectionState'>;
+  };
 
 enum MainButtonState {
   Send = 'send',
@@ -251,7 +249,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   isForCurrentMessageList,
   isCurrentUserPremium,
   canSendVoiceByPrivacy,
-  connectionState,
   isChatWithBot,
   isChatWithSelf,
   isChannel,
@@ -269,7 +266,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   topInlineBotIds,
   currentUserId,
   captionLimit,
-  lastSyncTime,
   contentToBeScheduled,
   shouldSuggestStickers,
   shouldSuggestCustomEmoji,
@@ -349,16 +345,16 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (chatId && lastSyncTime && isReady) {
+    if (chatId && isReady) {
       loadScheduledHistory({ chatId });
     }
-  }, [isReady, chatId, loadScheduledHistory, lastSyncTime, threadId]);
+  }, [isReady, chatId, loadScheduledHistory, threadId]);
 
   useEffect(() => {
-    if (chatId && chat && lastSyncTime && !sendAsPeerIds && isReady && isChatSuperGroup(chat)) {
+    if (chatId && chat && !sendAsPeerIds && isReady && isChatSuperGroup(chat)) {
       loadSendAs({ chatId });
     }
-  }, [chat, chatId, isReady, lastSyncTime, loadSendAs, sendAsPeerIds]);
+  }, [chat, chatId, isReady, loadSendAs, sendAsPeerIds]);
 
   const shouldAnimateSendAsButtonRef = useRef(false);
   useSyncEffect(([prevChatId, prevSendAsPeerIds]) => {
@@ -509,7 +505,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     help: inlineBotHelp,
     loadMore: loadMoreForInlineBot,
   } = useInlineBotTooltip(
-    Boolean(isReady && isForCurrentMessageList && !hasAttachments && lastSyncTime),
+    Boolean(isReady && isForCurrentMessageList && !hasAttachments),
     chatId,
     getHtml,
     inlineBots,
@@ -564,7 +560,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     insertHtmlAndUpdateCursor(buildCustomEmojiHtml(emoji), inputId);
   });
 
-  useDraft(draft, chatId, threadId, getHtml, setHtml, editingMessage, lastSyncTime);
+  useDraft(draft, chatId, threadId, getHtml, setHtml, editingMessage);
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
     if (!shouldPreserveInput) {
@@ -742,7 +738,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     isSilent?: boolean;
     scheduledAt?: number;
   }) => {
-    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
+    if (!currentMessageList) {
       return;
     }
 
@@ -790,7 +786,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSend = useLastCallback(async (isSilent = false, scheduledAt?: number) => {
-    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
+    if (!currentMessageList) {
       return;
     }
 
@@ -1008,7 +1004,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   const handleInlineBotSelect = useLastCallback((
     inlineResult: ApiBotInlineResult | ApiBotInlineMediaResult, isSilent?: boolean, isScheduleRequested?: boolean,
   ) => {
-    if (connectionState !== 'connectionStateReady' || !currentMessageList) {
+    if (!currentMessageList) {
       return;
     }
 
@@ -1627,7 +1623,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
-      connectionState: global.connectionState,
       replyingToId,
       draft: selectDraft(global, chatId, threadId),
       chat,
@@ -1652,7 +1647,6 @@ export default memo(withGlobal<OwnProps>(
       groupChatMembers: chatFullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
-      lastSyncTime: global.lastSyncTime,
       contentToBeScheduled: tabState.contentToBeScheduled,
       shouldSuggestStickers,
       shouldSuggestCustomEmoji,

@@ -24,7 +24,6 @@ type OwnProps = {
   customEmojiId: string;
   withEffects?: boolean;
   isOwn?: boolean;
-  lastSyncTime?: number;
   forceLoadPreview?: boolean;
   messageId?: number;
   chatId?: string;

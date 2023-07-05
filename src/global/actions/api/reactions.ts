@@ -84,6 +84,7 @@ addActionHandler('sendEmojiInteraction', (global, actions, payload): ActionRetur
   const {
     messageId, chatId, emoji, interactions,
   } = payload!;
+  if (global.connectionState !== 'connectionStateReady') return;
 
   const chat = selectChat(global, chatId);
 
@@ -296,7 +297,9 @@ addActionHandler('sendWatchingEmojiInteraction', (global, actions, payload): Act
     return undefined;
   }
 
-  callApi('sendWatchingEmojiInteraction', { chat, emoticon });
+  if (global.connectionState === 'connectionStateReady') {
+    callApi('sendWatchingEmojiInteraction', { chat, emoticon });
+  }
 
   return updateTabState(global, {
     activeEmojiInteractions: tabState.activeEmojiInteractions.map((activeEmojiInteraction) => {

@@ -42,7 +42,7 @@ import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
 import {
   addMessageToLocalDb,
-  addEntitiesWithPhotosToLocalDb,
+  addEntitiesToLocalDb,
   addPhotoToLocalDb,
   resolveMessageApiChatId,
   serializeBytes,
@@ -68,7 +68,7 @@ import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols
 import { buildApiBotMenuButton } from './apiBuilders/bots';
 import { scheduleMutedTopicUpdate, scheduleMutedChatUpdate } from './scheduleUnmute';
 
-type Update = (
+export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
 ) | typeof connection.UpdateConnectionState;
 
@@ -82,7 +82,7 @@ export function init(_onUpdate: OnApiUpdate) {
 
 const sentMessageIds = new Set();
 
-function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
+export function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat)[]) {
   entities
     .filter((e) => e instanceof GramJs.User)
     .map(buildApiUser)
@@ -115,6 +115,12 @@ function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.TypeChat
         chat,
       });
     });
+}
+
+export function requestSync() {
+  onUpdate({
+    '@type': 'requestSync',
+  });
 }
 
 export function updater(update: Update) {
@@ -160,7 +166,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -930,7 +936,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -948,7 +954,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -961,7 +967,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -975,7 +981,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -1013,7 +1019,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
 
@@ -1027,7 +1033,7 @@ export function updater(update: Update) {
     // eslint-disable-next-line no-underscore-dangle
     const entities = update._entities;
     if (entities) {
-      addEntitiesWithPhotosToLocalDb(entities);
+      addEntitiesToLocalDb(entities);
       dispatchUserAndChatUpdates(entities);
     }
     onUpdate({ '@type': 'updateConfig' });

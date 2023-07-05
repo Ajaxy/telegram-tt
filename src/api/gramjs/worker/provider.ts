@@ -10,6 +10,7 @@ import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
 import generateIdFor from '../../../util/generateIdFor';
 import { pause } from '../../../util/schedulers';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
+import Deferred from '../../../util/Deferred';
 
 type RequestStates = {
   messageId: string;
@@ -32,6 +33,9 @@ const savedLocalDb: LocalDb = {
   stickerSets: {},
   photos: {},
   webDocuments: {},
+
+  commonBoxState: {},
+  channelPtsById: {},
 };
 
 // TODO Re-use `util/WorkerConnector.ts`
@@ -56,6 +60,10 @@ export function initApiOnMasterTab(initialArgs: ApiInitialArgs) {
 }
 
 let updateCallback: OnApiUpdate;
+
+let localApiRequestsQueue: { fnName: any; args: any; deferred: Deferred<any> }[] = [];
+let apiRequestsQueue: { fnName: any; args: any; deferred: Deferred<any> }[] = [];
+let isInited = false;
 
 export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   updateCallback = onUpdate;
@@ -82,6 +90,22 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
   return makeRequest({
     type: 'initApi',
     args: [initialArgs, savedLocalDb],
+  }).then(() => {
+    isInited = true;
+
+    apiRequestsQueue.forEach((request) => {
+      callApi(request.fnName, ...request.args)
+        .then(request.deferred.resolve)
+        .catch(request.deferred.reject);
+    });
+    apiRequestsQueue = [];
+
+    localApiRequestsQueue.forEach((request) => {
+      callApiLocal(request.fnName, ...request.args)
+        .then(request.deferred.resolve)
+        .catch(request.deferred.reject);
+    });
+    localApiRequestsQueue = [];
   });
 }
 
@@ -108,13 +132,11 @@ export function callApiOnMasterTab(payload: any) {
  * Mostly needed to disconnect worker when re-electing master
  */
 export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
-  if (!worker) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('API is not initialized');
-    }
+  if (!isInited) {
+    const deferred = new Deferred();
+    localApiRequestsQueue.push({ fnName, args, deferred });
 
-    return undefined;
+    return deferred.promise as MethodResponse<T>;
   }
 
   const promise = makeRequest({
@@ -150,13 +172,11 @@ export function callApiLocal<T extends keyof Methods>(fnName: T, ...args: Method
 }
 
 export function callApi<T extends keyof Methods>(fnName: T, ...args: MethodArgs<T>) {
-  if (!worker && isMasterTab) {
-    if (DEBUG) {
-      // eslint-disable-next-line no-console
-      console.warn('API is not initialized');
-    }
+  if (!isInited && isMasterTab) {
+    const deferred = new Deferred();
+    apiRequestsQueue.push({ fnName, args, deferred });
 
-    return undefined;
+    return deferred.promise as MethodResponse<T>;
   }
 
   const promise = isMasterTab ? makeRequest({
@@ -236,7 +256,8 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
   });
 }
 
-export function handleMethodResponse(data: { messageId: string;
+export function handleMethodResponse(data: {
+  messageId: string;
   response?: ThenArg<MethodResponse<keyof Methods>>;
   error?: { message: string };
 }) {
@@ -250,7 +271,8 @@ export function handleMethodResponse(data: { messageId: string;
   }
 }
 
-export function handleMethodCallback(data: { messageId: string;
+export function handleMethodCallback(data: {
+  messageId: string;
   callbackArgs: any[];
 }) {
   requestStates.get(data.messageId)?.callback?.(...data.callbackArgs);

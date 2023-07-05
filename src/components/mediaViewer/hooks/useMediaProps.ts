@@ -33,7 +33,6 @@ type UseMediaProps = {
   message?: ApiMessage;
   avatarOwner?: ApiChat | ApiUser;
   origin?: MediaViewerOrigin;
-  lastSyncTime?: number;
   delay: number | false;
 };
 
@@ -88,7 +87,6 @@ export const useMediaProps = ({
     && getMessageMediaHash(message, 'pictogram'),
     undefined,
     ApiMediaFormat.BlobUrl,
-    undefined,
     delay,
   );
   const previewMediaHash = getMediaHash();
@@ -96,7 +94,6 @@ export const useMediaProps = ({
     previewMediaHash,
     undefined,
     ApiMediaFormat.BlobUrl,
-    undefined,
     delay,
   );
   const {
@@ -106,7 +103,6 @@ export const useMediaProps = ({
     getMediaHash(true),
     undefined,
     message && getMessageMediaFormat(message, 'full'),
-    undefined,
     delay,
   );
 

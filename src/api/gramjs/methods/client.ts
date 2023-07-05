@@ -5,7 +5,6 @@ import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 
 import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
-
 import type {
   ApiInitialArgs,
   ApiMediaFormat,
@@ -21,13 +20,18 @@ import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
   onAuthError, onAuthReady, onCurrentUserUpdate, onRequestQrCode, onWebAuthTokenFailed,
 } from './auth';
-import { updater } from '../updater';
 import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import downloadMediaWithClient, { parseMediaUrl } from './media';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
-import { addMessageToLocalDb, log } from '../helpers';
+import {
+  addMessageToLocalDb, addUserToLocalDb, isResponseUpdate, log,
+} from '../helpers';
+import { ChatAbortController } from '../ChatAbortController';
+import {
+  updateChannelState, getDifference, init as initUpdatesManager, processUpdate, reset as resetUpdatesManager,
+} from '../updateManager';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
@@ -36,6 +40,8 @@ const APP_CODE_NAME = 'Z';
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
 const gramJsUpdateEventBuilder = { build: (update: object) => update };
+
+const CHAT_ABORT_CONTROLLERS = new Map<string, ChatAbortController>();
 
 let onUpdate: OnApiUpdate;
 let client: TelegramClient;
@@ -81,7 +87,6 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   );
 
   client.addEventHandler(handleGramJsUpdate, gramJsUpdateEventBuilder);
-  client.addEventHandler(updater, gramJsUpdateEventBuilder);
 
   try {
     if (DEBUG) {
@@ -94,6 +99,7 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     }
 
     try {
+      client.setPingCallback(getDifference);
       await client.start({
         phoneNumber: onRequestPhoneNumber,
         phoneCode: onRequestCode,
@@ -131,6 +137,8 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
     onSessionUpdate(session.getSessionData());
     onUpdate({ '@type': 'updateApiReady' });
 
+    initUpdatesManager(invokeRequest);
+
     void fetchCurrentUser();
   } catch (err) {
     if (DEBUG) {
@@ -150,7 +158,10 @@ export async function destroy(noLogOut = false, noClearLocalDb = false) {
     await invokeRequest(new GramJs.auth.LogOut());
   }
 
-  if (!noClearLocalDb) clearLocalDb();
+  if (!noClearLocalDb) {
+    clearLocalDb();
+    resetUpdatesManager();
+  }
 
   await client.destroy();
 }
@@ -170,54 +181,66 @@ function onSessionUpdate(sessionData: ApiSessionData) {
   });
 }
 
-function handleGramJsUpdate(update: any) {
+type UpdateConfig = GramJs.UpdateConfig & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] };
+
+export function handleGramJsUpdate(update: any) {
+  processUpdate(update);
+
   if (update instanceof connection.UpdateConnectionState) {
     isConnected = update.state === connection.UpdateConnectionState.connected;
   } else if (update instanceof GramJs.UpdatesTooLong) {
     void handleTerminatedSession();
-  } else if (update instanceof GramJs.UpdateConfig) {
-    // eslint-disable-next-line no-underscore-dangle
-    const currentUser = (update as GramJs.UpdateConfig & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] })
-      ._entities
-      ?.find((entity) => entity instanceof GramJs.User && buildApiPeerId(entity.id, 'user') === currentUserId);
-    if (!(currentUser instanceof GramJs.User)) return;
+  } else {
+    const updates = 'updates' in update ? update.updates : [update];
+    updates.forEach((nestedUpdate: any) => {
+      if (!(nestedUpdate instanceof GramJs.UpdateConfig)) return;
+      // eslint-disable-next-line no-underscore-dangle
+      const currentUser = (nestedUpdate as UpdateConfig)._entities
+        ?.find((entity) => entity instanceof GramJs.User && buildApiPeerId(entity.id, 'user') === currentUserId);
+      if (!(currentUser instanceof GramJs.User)) return;
 
-    setIsPremium({ isPremium: Boolean(currentUser.premium) });
+      setIsPremium({ isPremium: Boolean(currentUser.premium) });
+    });
   }
 }
 
-export async function invokeRequest<T extends GramJs.AnyRequest>(
-  request: T,
-  shouldReturnTrue: true,
-  shouldThrow?: boolean,
-  shouldIgnoreUpdates?: undefined,
-  dcId?: number,
-  shouldIgnoreErrors?: boolean,
-): Promise<true | undefined>;
+type InvokeRequestParams = {
+  shouldThrow?: boolean;
+  shouldIgnoreUpdates?: boolean;
+  dcId?: number;
+  shouldIgnoreErrors?: boolean;
+  abortControllerChatId?: string;
+  abortControllerThreadId?: number;
+};
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
-  shouldReturnTrue?: boolean,
-  shouldThrow?: boolean,
-  shouldIgnoreUpdates?: boolean,
-  dcId?: number,
-  shouldIgnoreErrors?: boolean,
+  params?: InvokeRequestParams & { shouldReturnTrue?: false },
 ): Promise<T['__response'] | undefined>;
 
 export async function invokeRequest<T extends GramJs.AnyRequest>(
   request: T,
-  shouldReturnTrue = false,
-  shouldThrow = false,
-  shouldIgnoreUpdates = false,
-  dcId?: number,
-  shouldIgnoreErrors = false,
+  params?: InvokeRequestParams & { shouldReturnTrue: true },
+): Promise<true | undefined>;
+
+export async function invokeRequest<T extends GramJs.AnyRequest>(
+  request: T,
+  params: InvokeRequestParams & { shouldReturnTrue?: boolean } = {},
 ) {
-  if (!isConnected) {
-    if (DEBUG) {
-      log('INVOKE ERROR', request.className, 'Client is not connected');
+  const {
+    shouldThrow, shouldIgnoreUpdates, dcId, shouldIgnoreErrors, abortControllerChatId, abortControllerThreadId,
+  } = params;
+  const shouldReturnTrue = Boolean(params.shouldReturnTrue);
+
+  let abortSignal: AbortSignal | undefined;
+  if (abortControllerChatId) {
+    let controller = CHAT_ABORT_CONTROLLERS.get(abortControllerChatId);
+    if (!controller) {
+      controller = new ChatAbortController();
+      CHAT_ABORT_CONTROLLERS.set(abortControllerChatId, controller);
     }
 
-    return undefined;
+    abortSignal = abortControllerThreadId ? controller.getThreadSignal(abortControllerThreadId) : controller.signal;
   }
 
   try {
@@ -225,14 +248,14 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       log('INVOKE', request.className);
     }
 
-    const result = await client.invoke(request, dcId);
+    const result = await client.invoke(request, dcId, abortSignal);
 
     if (DEBUG) {
       log('RESPONSE', request.className, result);
     }
 
-    if (!shouldIgnoreUpdates) {
-      handleUpdates(result);
+    if (!shouldIgnoreUpdates && isResponseUpdate(result)) {
+      processUpdate(result);
     }
 
     return shouldReturnTrue ? result && true : result;
@@ -253,36 +276,6 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     dispatchErrorUpdate(err, request);
 
     return undefined;
-  }
-}
-
-export function handleUpdates(result: {}) {
-  let manyUpdates;
-  let singleUpdate;
-
-  if (result instanceof GramJs.UpdatesCombined || result instanceof GramJs.Updates) {
-    manyUpdates = result;
-  } else if (typeof result === 'object' && 'updates' in result && (
-    result.updates instanceof GramJs.Updates || result.updates instanceof GramJs.UpdatesCombined
-  )) {
-    manyUpdates = result.updates;
-  } else if (
-    result instanceof GramJs.UpdateShortMessage
-    || result instanceof GramJs.UpdateShortChatMessage
-    || result instanceof GramJs.UpdateShort
-    || result instanceof GramJs.UpdateShortSentMessage
-  ) {
-    singleUpdate = result;
-  }
-
-  if (manyUpdates) {
-    injectUpdateEntities(manyUpdates);
-
-    manyUpdates.updates.forEach((update) => {
-      updater(update);
-    });
-  } else if (singleUpdate) {
-    updater(singleUpdate);
   }
 }
 
@@ -321,6 +314,18 @@ export function getTmpPassword(currentPassword: string, ttl?: number) {
   return client.getTmpPassword(currentPassword, ttl);
 }
 
+export function abortChatRequests(params: { chatId: string; threadId?: number }) {
+  const { chatId, threadId } = params;
+  const controller = CHAT_ABORT_CONTROLLERS.get(chatId);
+  if (!threadId) {
+    controller?.abort('Chat change');
+    CHAT_ABORT_CONTROLLERS.delete(chatId);
+    return;
+  }
+
+  controller?.abortThread(threadId, 'Thread change');
+}
+
 export async function fetchCurrentUser() {
   const userFull = await invokeRequest(new GramJs.users.GetFullUser({
     id: new GramJs.InputUserSelf(),
@@ -335,7 +340,7 @@ export async function fetchCurrentUser() {
   if (user.photo instanceof GramJs.Photo) {
     localDb.photos[user.photo.id.toString()] = user.photo;
   }
-  localDb.users[buildApiPeerId(user.id, 'user')] = user;
+  addUserToLocalDb(user);
   const currentUserFullInfo = buildApiUserFullInfo(userFull);
   const currentUser = buildApiUser(user)!;
 
@@ -365,22 +370,13 @@ export function dispatchErrorUpdate<T extends GramJs.AnyRequest>(err: Error, req
   });
 }
 
-function injectUpdateEntities(result: GramJs.Updates | GramJs.UpdatesCombined) {
-  const entities = [...result.users, ...result.chats];
-
-  result.updates.forEach((update) => {
-    if (entities) {
-      // eslint-disable-next-line no-underscore-dangle
-      (update as any)._entities = entities;
-    }
-  });
-}
-
 async function handleTerminatedSession() {
   try {
     await invokeRequest(new GramJs.users.GetFullUser({
       id: new GramJs.InputUserSelf(),
-    }), undefined, true);
+    }), {
+      shouldThrow: true,
+    });
   } catch (err: any) {
     if (err.message === 'AUTH_KEY_UNREGISTERED' || err.message === 'SESSION_REVOKED') {
       onUpdate({
@@ -428,6 +424,10 @@ export async function repairFileReference({
     );
 
     if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
+
+    if (peer && 'pts' in result) {
+      updateChannelState(peer.channelId.toString(), result.pts);
+    }
 
     const message = result.messages[0];
     if (message instanceof GramJs.MessageEmpty) return false;

@@ -14,29 +14,14 @@ class Logger {
             _level = level || 'debug';
         }
 
-        this.isBrowser = typeof process === 'undefined'
-            || process.type === 'renderer'
-            || process.browser === true
-            || process.__nwjs;
-        if (!this.isBrowser) {
-            this.colors = {
-                start: '\x1b[2m',
-                warn: '\x1b[35m',
-                info: '\x1b[33m',
-                debug: '\x1b[36m',
-                error: '\x1b[31m',
-                end: '\x1b[0m',
-            };
-        } else {
-            this.colors = {
-                start: '%c',
-                warn: 'color : #ff00ff',
-                info: 'color : #ffff00',
-                debug: 'color : #00ffff',
-                error: 'color : #ff0000',
-                end: '',
-            };
-        }
+        this.colors = {
+            start: '%c',
+            warn: 'color : #ff00ff',
+            info: 'color : #ffff00',
+            debug: 'color : #00ffff',
+            error: 'color : #ff0000',
+            end: '',
+        };
         this.messageFormat = '[%t] [%l] - [%m]';
     }
 
@@ -97,13 +82,8 @@ class Logger {
             return;
         }
         if (this.canSend(level)) {
-            if (!this.isBrowser) {
-                // eslint-disable-next-line no-console
-                console.log(color + this.format(message, level) + this.colors.end);
-            } else {
-                // eslint-disable-next-line no-console
-                console.log(this.colors.start + this.format(message, level), color);
-            }
+            // eslint-disable-next-line no-console
+            console.log(this.colors.start + this.format(message, level), color);
         }
     }
 }

@@ -589,7 +589,7 @@ export type GlobalState = {
   currentUserId?: string;
   isSyncing?: boolean;
   isUpdateAvailable?: boolean;
-  lastSyncTime?: number;
+  isSynced?: boolean;
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;

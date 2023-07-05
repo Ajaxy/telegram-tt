@@ -68,7 +68,6 @@ export type OwnProps = {
 type StateProps = {
   isLeftColumnShown: boolean;
   isCurrentUserPremium?: boolean;
-  lastSyncTime?: number;
   isBackgroundTranslucent?: boolean;
 };
 
@@ -82,7 +81,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   canSendGifs,
   isLeftColumnShown,
   isCurrentUserPremium,
-  lastSyncTime,
   onLoad,
   onClose,
   onEmojiSelect,
@@ -112,6 +110,8 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose, undefined, isMobile);
   const { shouldRender, transitionClassNames } = useShowTransition(isOpen, onClose, false, false);
 
+  const lang = useLang();
+
   if (!isActivated && isOpen) {
     isActivated = true;
   }
@@ -127,10 +127,10 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   }, [canSendPlainText]);
 
   useEffect(() => {
-    if (lastSyncTime && isCurrentUserPremium) {
+    if (isCurrentUserPremium) {
       loadPremiumSetStickers();
     }
-  }, [isCurrentUserPremium, lastSyncTime, loadPremiumSetStickers]);
+  }, [isCurrentUserPremium, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
     if (!isMobile || !isOpen || isAttachmentModal) {
@@ -203,8 +203,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   ) => {
     onStickerSelect?.(sticker, isSilent, shouldSchedule, true, canUpdateStickerSetsOrder);
   });
-
-  const lang = useLang();
 
   function renderContent(isActive: boolean, isFrom: boolean) {
     switch (activeTab) {
@@ -350,7 +348,6 @@ export default memo(withGlobal<OwnProps>(
     return {
       isLeftColumnShown: selectTabState(global).isLeftColumnShown,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
-      lastSyncTime: global.lastSyncTime,
       isBackgroundTranslucent: selectIsContextMenuTranslucent(global),
     };
   },

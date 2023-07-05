@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import React, {
   useEffect, useState, memo, useMemo,
 } from '../../lib/teact/teact';
@@ -93,7 +92,7 @@ import './MiddleColumn.scss';
 import styles from './MiddleColumn.module.scss';
 
 interface OwnProps {
-  leftColumnRef: RefObject<HTMLDivElement>;
+  leftColumnRef: React.RefObject<HTMLDivElement>;
   isMobile?: boolean;
 }
 
@@ -138,7 +137,6 @@ type StateProps = {
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
-  lastSyncTime?: number;
   pinnedIds?: number[];
   topMessageId?: number;
 };
@@ -192,7 +190,6 @@ function MiddleColumn({
   shouldJoinToSend,
   shouldSendJoinRequest,
   shouldLoadFullChat,
-  lastSyncTime,
   pinnedIds,
   topMessageId,
 }: OwnProps & StateProps) {
@@ -320,10 +317,10 @@ function MiddleColumn({
   }, [chatId, isPrivate, loadUser]);
 
   useEffect(() => {
-    if (!areChatSettingsLoaded && lastSyncTime) {
+    if (!areChatSettingsLoaded) {
       loadChatSettings({ chatId: chatId! });
     }
-  }, [chatId, isPrivate, areChatSettingsLoaded, lastSyncTime, loadChatSettings]);
+  }, [chatId, isPrivate, areChatSettingsLoaded]);
 
   useEffect(() => {
     if (chatId && shouldLoadFullChat && isReady) {
@@ -662,7 +659,7 @@ export default memo(withGlobal<OwnProps>(
       messageLanguageModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
-    const { leftColumnWidth, lastSyncTime } = global;
+    const { leftColumnWidth } = global;
 
     const state: StateProps = {
       theme,
@@ -682,7 +679,6 @@ export default memo(withGlobal<OwnProps>(
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,
       leftColumnWidth,
-      lastSyncTime,
     };
 
     if (!currentMessageList) {
@@ -711,7 +707,7 @@ export default memo(withGlobal<OwnProps>(
     const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
     const canStartBot = !canRestartBot && isBotNotStarted;
     const shouldLoadFullChat = Boolean(
-      chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id) && lastSyncTime,
+      chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id),
     );
     const replyingToId = selectReplyingToId(global, chatId, threadId);
     const shouldBlockSendInForum = chat?.isForum

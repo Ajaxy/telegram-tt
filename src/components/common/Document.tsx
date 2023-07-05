@@ -93,7 +93,7 @@ const Document: FC<OwnProps> = ({
 
   const documentHash = getMessageMediaHash(message, 'download');
   const { loadProgress: downloadProgress, mediaData } = useMediaWithLoadProgress(
-    documentHash, !shouldDownload, getMessageMediaFormat(message, 'download'), undefined, undefined, true,
+    documentHash, !shouldDownload, getMessageMediaFormat(message, 'download'), undefined, true,
   );
   const isLoaded = Boolean(mediaData);
 

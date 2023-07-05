@@ -86,10 +86,6 @@ async function download(
     entityType, entityId, sizeType, params, mediaMatchType,
   } = parsed;
 
-  if (!isConnected) {
-    return Promise.reject(new Error('ERROR: Client is not connected'));
-  }
-
   if (entityType === 'staticMap') {
     const accessHash = entityId;
     const parsedParams = new URLSearchParams(params);

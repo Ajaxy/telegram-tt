@@ -32,7 +32,6 @@ type OwnProps = {
   album: IAlbum;
   observeIntersection: ObserveFn;
   hasCustomAppendix?: boolean;
-  lastSyncTime?: number;
   isOwn: boolean;
   isProtected?: boolean;
   albumLayout: IAlbumLayout;
@@ -49,7 +48,6 @@ const Album: FC<OwnProps & StateProps> = ({
   album,
   observeIntersection,
   hasCustomAppendix,
-  lastSyncTime,
   isOwn,
   isProtected,
   albumLayout,
@@ -107,7 +105,6 @@ const Album: FC<OwnProps & StateProps> = ({
           canAutoLoad={canAutoLoad}
           canAutoPlay={canAutoPlay}
           uploadProgress={uploadProgress}
-          lastSyncTime={lastSyncTime}
           dimensions={dimensions}
           isProtected={isProtected}
           onClick={onMediaClick}

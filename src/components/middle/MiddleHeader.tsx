@@ -1,10 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
 import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { GlobalState, MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
 import type {
@@ -101,7 +101,6 @@ type StateProps = {
   messagesCount?: number;
   isComments?: boolean;
   isChatWithSelf?: boolean;
-  lastSyncTime?: number;
   hasButtonInHeader?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -128,7 +127,6 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   messagesCount,
   isComments,
   isChatWithSelf,
-  lastSyncTime,
   hasButtonInHeader,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -166,10 +164,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isForum = chat?.isForum;
 
   useEffect(() => {
-    if (lastSyncTime && isReady && (threadId === MAIN_THREAD_ID || isForum)) {
+    if (isReady && (threadId === MAIN_THREAD_ID || isForum)) {
       loadPinnedMessages({ chatId, threadId });
     }
-  }, [chatId, loadPinnedMessages, lastSyncTime, threadId, isReady, isForum]);
+  }, [chatId, threadId, isReady, isForum]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
@@ -484,7 +482,6 @@ export default memo(withGlobal<OwnProps>(
     const {
       isLeftColumnShown, shouldSkipHistoryAnimations, audioPlayer, messageLists,
     } = selectTabState(global);
-    const { lastSyncTime } = global;
     const chat = selectChat(global, chatId);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -523,7 +520,6 @@ export default memo(withGlobal<OwnProps>(
       chat,
       messagesCount,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
-      lastSyncTime,
       shouldSkipHistoryAnimations,
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       connectionState: global.connectionState,

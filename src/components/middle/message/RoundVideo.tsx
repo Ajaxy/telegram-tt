@@ -39,7 +39,6 @@ type OwnProps = {
   message: ApiMessage;
   observeIntersection: ObserveFn;
   canAutoLoad?: boolean;
-  lastSyncTime?: number;
   isDownloading?: boolean;
 };
 
@@ -51,7 +50,6 @@ const RoundVideo: FC<OwnProps> = ({
   message,
   observeIntersection,
   canAutoLoad,
-  lastSyncTime,
   isDownloading,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -66,19 +64,17 @@ const RoundVideo: FC<OwnProps> = ({
   const isIntersecting = useIsIntersecting(ref, observeIntersection);
 
   const [isLoadAllowed, setIsLoadAllowed] = useState(canAutoLoad);
-  const shouldLoad = Boolean(isLoadAllowed && isIntersecting && lastSyncTime);
+  const shouldLoad = Boolean(isLoadAllowed && isIntersecting);
   const { mediaData, loadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'inline'),
     !shouldLoad,
     getMessageMediaFormat(message, 'inline'),
-    lastSyncTime,
   );
 
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'download'),
     !isDownloading,
     ApiMediaFormat.BlobUrl,
-    lastSyncTime,
   );
 
   const [isPlayerReady, markPlayerReady] = useFlag();

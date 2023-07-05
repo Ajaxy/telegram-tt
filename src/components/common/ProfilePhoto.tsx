@@ -33,7 +33,6 @@ type OwnProps = {
   user?: ApiUser;
   isSavedMessages?: boolean;
   photo?: ApiPhoto;
-  lastSyncTime?: number;
   canPlayVideo: boolean;
   onClick: NoneToVoidFunction;
 };
@@ -44,7 +43,6 @@ const ProfilePhoto: FC<OwnProps> = ({
   photo,
   isSavedMessages,
   canPlayVideo,
-  lastSyncTime,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -60,13 +58,13 @@ const ProfilePhoto: FC<OwnProps> = ({
   const { isVideo } = photo || {};
 
   const avatarHash = canHaveMedia && getChatAvatarHash(userOrChat, 'normal');
-  const avatarBlobUrl = useMedia(avatarHash, undefined, undefined, lastSyncTime);
+  const avatarBlobUrl = useMedia(avatarHash);
 
   const photoHash = canHaveMedia && photo && !isVideo && `photo${photo.id}?size=c`;
-  const photoBlobUrl = useMedia(photoHash, undefined, undefined, lastSyncTime);
+  const photoBlobUrl = useMedia(photoHash);
 
   const videoHash = canHaveMedia && photo && isVideo && getVideoAvatarMediaHash(photo);
-  const videoBlobUrl = useMedia(videoHash, undefined, undefined, lastSyncTime);
+  const videoBlobUrl = useMedia(videoHash);
 
   const fullMediaData = videoBlobUrl || photoBlobUrl;
   const [isVideoReady, markVideoReady] = useFlag();

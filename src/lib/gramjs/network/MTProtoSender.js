@@ -749,7 +749,7 @@ class MTProtoSender {
     /**
      * Handles a server acknowledge about our messages. Normally these can be ignored
     */
-    _handleAck() { }
+    _handleAck() {}
 
     /**
      * Handles future salt results, which don't come inside a

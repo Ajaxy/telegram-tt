@@ -9,7 +9,6 @@ const useMedia = (
   mediaHash: string | false | undefined,
   noLoad = false,
   mediaFormat = ApiMediaFormat.BlobUrl,
-  cacheBuster?: number,
   delay?: number | false,
 ) => {
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
@@ -28,7 +27,7 @@ const useMedia = (
         }
       });
     }
-  }, [noLoad, mediaHash, mediaData, mediaFormat, cacheBuster, forceUpdate, delay]);
+  }, [noLoad, mediaHash, mediaData, mediaFormat, forceUpdate, delay]);
 
   return mediaData;
 };
