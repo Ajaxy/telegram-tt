@@ -1,0 +1,60 @@
+.root {
+  display: flex;
+  --spacing: calc(var(--size) * 0.4);
+  --spacing-gap: calc(var(--size) * 0.04);
+  --size: 0px;
+
+  --half-size: calc(var(--size) / 2);
+}
+
+.size-micro {
+  --size: 1rem;
+}
+
+.size-mini {
+  --size: 1.5rem;
+}
+
+.size-tiny {
+  --size: 2rem;
+}
+
+.size-small {
+  --size: 2.125rem;
+}
+
+.size-small-mobile {
+  --size: 2.5rem;
+}
+
+.size-medium {
+  --size: 2.75rem;
+}
+
+.size-large {
+  --size: 3.375rem;
+}
+
+.size-jumbo {
+  --size: 7.5rem;
+}
+
+.avatar {
+  --radius: calc(var(--half-size) + var(--spacing-gap));
+
+  margin-inline-start: calc(var(--spacing-gap) - var(--spacing));
+  mask: radial-gradient(circle var(--radius) at var(--offset) 50%, transparent 99%, #fff 100%);
+
+  &:first-child {
+    margin-inline-start: 0;
+    mask: none;
+  }
+}
+
+.root[dir="ltr"] .avatar {
+  --offset: calc(0% - var(--half-size) + var(--spacing));
+}
+
+.root[dir="rtl"] .avatar {
+  --offset: calc(100% + var(--half-size) - var(--spacing));
+}

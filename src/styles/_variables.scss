@@ -63,6 +63,8 @@ $color-message-reaction: #ebf3fd;
 $color-message-reaction-hover: #c5def9;
 $color-message-reaction-own: #cef0ba;
 $color-message-reaction-own-hover: #b5e0a4;
+$color-message-reaction-chosen-hover: #1a82ea;
+$color-message-reaction-chosen-hover-own: #3f9d4b;
 
 :root {
   --color-background: #{$color-white};
@@ -138,6 +140,8 @@ $color-message-reaction-own-hover: #b5e0a4;
   --color-message-reaction-hover: $color-message-reaction-hover;
   --color-message-reaction-own: $color-message-reaction-own;
   --color-message-reaction-hover-own: $color-message-reaction-own-hover;
+  --color-message-reaction-chosen-hover: $color-message-reaction-chosen-hover;
+  --color-message-reaction-chosen-hover-own: $color-message-reaction-chosen-hover-own;
 
   --color-reply-hover: #{blend-normal(rgba($color-text-secondary, 0.08), $color-white)};
   --color-reply-active: #{blend-normal(rgba($color-text-secondary, 0.16), $color-white)};

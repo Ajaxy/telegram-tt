@@ -15,7 +15,7 @@ import { isSameReaction, isReactionChosen } from '../../../global/helpers';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
-import Avatar from '../../common/Avatar';
+import AvatarList from '../../common/AvatarList';
 import ReactionAnimatedEmoji from './ReactionAnimatedEmoji';
 import AnimatedCounter from '../../common/AnimatedCounter';
 
@@ -80,15 +80,7 @@ const ReactionButton: FC<{
         withEffects={withEffects}
       />
       {recentReactors?.length ? (
-        <div className="avatars">
-          {recentReactors.map((user) => (
-            <Avatar
-              key={user.id}
-              peer={user}
-              size="micro"
-            />
-          ))}
-        </div>
+        <AvatarList size="mini" peers={recentReactors} />
       ) : <AnimatedCounter text={formatIntegerCompact(reaction.count)} className="counter" />}
     </Button>
   );
