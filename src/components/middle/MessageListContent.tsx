@@ -26,6 +26,7 @@ import usePrevious from '../../hooks/usePrevious';
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
 import ActionMessage from './ActionMessage';
+import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {
   isCurrentUserPremium?: boolean;
@@ -49,6 +50,7 @@ interface OwnProps {
   threadTopMessageId: number | undefined;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
+  shouldRenderBotInfo?: boolean;
   noAppearanceAnimation: boolean;
   onFabToggle: AnyToVoidFunction;
   onNotchToggle: AnyToVoidFunction;
@@ -79,6 +81,7 @@ const MessageListContent: FC<OwnProps> = ({
   threadTopMessageId,
   hasLinkedChat,
   isSchedule,
+  shouldRenderBotInfo,
   noAppearanceAnimation,
   onFabToggle,
   onNotchToggle,
@@ -275,6 +278,7 @@ const MessageListContent: FC<OwnProps> = ({
   return (
     <div className="messages-container" teactFastList>
       {withHistoryTriggers && <div ref={backwardsTriggerRef} key="backwards-trigger" className="backwards-trigger" />}
+      {shouldRenderBotInfo && <MessageListBotInfo isInMessageList key={`bot_info_${chatId}`} chatId={chatId} />}
       {dateGroups.flat()}
       {!isCurrentUserPremium && isViewportNewest && (
         <SponsoredMessage key={chatId} chatId={chatId} containerRef={containerRef} />
