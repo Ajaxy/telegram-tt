@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram A for Mac</title>
+    <script src="./index.js"></script>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+<div class="container">
+    <div class="logo-container">
+        <div class="logo telegram-logo"></div>
+        <div class="logo apple-logo"></div>
+    </div>
+    <h1>Telegram A for your Mac</h1>
+    <div class="select-model">Select your device model</div>
+    <div class="download-container">
+        <div class="download-block">
+            <a href="javascript:download('mac-arm');" class="download-btn">Newer Mac</a>
+            <div class="caption">M1 and later</div>
+        </div>
+        <div class="download-block">
+            <a href="javascript:download('mac-x64');" class="download-btn">Older Mac</a>
+            <div class="caption">2019 and earlier</div>
+        </div>
+    </div>
+    <div class="footer">
+        <span class="version"></span>
+        <a href="javascript:redirectToFullList();" class="other-platforms">Other platforms</a>
+    </div>
+</div>
+</body>
+</html>
