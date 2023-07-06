@@ -2,8 +2,7 @@ import type { RequiredGlobalActions } from '../../index';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
 import type {
-  ApiChat,
-  ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo,
+  ApiChat, ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo,
 } from '../../../api/types';
 import type {
   ActiveEmojiInteraction, ActionReturnType, GlobalState, RequiredGlobalState,
@@ -397,9 +396,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       const messagesById = selectChatMessages(global, chatId);
 
       if (messagesById && !isUserId(chatId)) {
+        const tabId = getCurrentTabId();
         global = deleteChatMessages(global, chatId, Object.keys(messagesById).map(Number));
         setGlobal(global);
-        actions.loadFullChat({ chatId, force: true, tabId: getCurrentTabId() });
+        actions.loadFullChat({ chatId, force: true, tabId });
+        actions.loadViewportMessages({ chatId, threadId: MAIN_THREAD_ID, tabId });
       }
 
       break;
