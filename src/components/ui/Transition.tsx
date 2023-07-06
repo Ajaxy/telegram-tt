@@ -126,7 +126,6 @@ function Transition({
     const keys = Object.keys(rendersRef.current).map(Number);
     const prevActiveIndex = renderCount ? prevActiveKey : keys.indexOf(prevActiveKey);
     const activeIndex = renderCount ? activeKey : keys.indexOf(activeKey);
-    const nextIndex = nextKey ? (renderCount ? nextKey : keys.indexOf(nextKey)) : -1;
 
     const childNodes = Array.from(container.childNodes);
     if (!childNodes.length) {
@@ -143,21 +142,22 @@ function Transition({
     });
 
     if (!activeKeyChanged) {
-      const activeChild = childNodes[activeIndex];
-      if (activeChild instanceof HTMLElement) {
-        addExtraClass(activeChild, CLASSES.active);
+      if (childElements.length === 1 || (nextKey !== undefined && childElements.length === 2)) {
+        const firstChild = childNodes[activeIndex] as HTMLElement;
+
+        addExtraClass(firstChild, CLASSES.active);
 
         if (isSlideOptimized) {
-          setExtraStyles(activeChild, {
+          setExtraStyles(firstChild, {
             transition: 'none',
             transform: 'translate3d(0, 0, 0)',
           });
         }
-      }
 
-      const nextChild = nextIndex !== -1 && nextIndex !== activeIndex && childNodes[nextIndex] as HTMLElement;
-      if (nextChild instanceof HTMLElement) {
-        addExtraClass(nextChild, CLASSES.inactive);
+        if (childElements.length === 2) {
+          const nextChild = childElements[0] === firstChild ? childElements[1] : childElements[0];
+          addExtraClass(nextChild, CLASSES.inactive);
+        }
       }
 
       return;
