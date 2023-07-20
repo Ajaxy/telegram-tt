@@ -178,7 +178,7 @@ export function createImageBitmap(
     for (let i = 0; i < frame.data.length; i++) {
       const plane = frame.data[i];
       for (let y = 0; y < plane.length; y++) {
-        const row = plane[y];
+        const row = plane[y].subarray(0, image.codedWidth * 4);
         frameData.data.set(row, idx);
         idx += row.length;
       }
