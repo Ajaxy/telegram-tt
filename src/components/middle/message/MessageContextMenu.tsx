@@ -33,8 +33,8 @@ import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/Skeleton';
-import Avatar from '../../common/Avatar';
 import ReactionSelector from './ReactionSelector';
+import AvatarList from '../../common/AvatarList';
 
 import './MessageContextMenu.scss';
 
@@ -389,36 +389,30 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
           <MenuItem
-            className="MessageContextMenu--seen-by"
             icon={canShowReactionsCount ? 'heart-outline' : 'group'}
             onClick={canShowReactionsCount ? onShowReactors : onShowSeenBy}
             disabled={!canShowReactionsCount && !seenByDatesCount}
           >
-            <span className="MessageContextMenu--seen-by-label">
-              {canShowReactionsCount && message.reactors?.count ? (
-                canShowSeenBy && seenByDatesCount
-                  ? lang(
-                    'Chat.OutgoingContextMixedReactionCount',
-                    [message.reactors.count, seenByDatesCount],
-                  )
-                  : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
-              ) : (
-                seenByDatesCount === 1 && seenByRecentUsers
-                  ? renderText(getUserFullName(seenByRecentUsers[0])!)
-                  : (seenByDatesCount
-                    ? lang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
-                    : lang('Conversation.ContextMenuNoViews')
-                  )
-              )}
+            <span className="MessageContextMenu--seen-by-label-wrapper">
+              <span className="MessageContextMenu--seen-by-label" dir={lang.isRtl ? 'rtl' : undefined}>
+                {canShowReactionsCount && message.reactors?.count ? (
+                  canShowSeenBy && seenByDatesCount
+                    ? lang(
+                      'Chat.OutgoingContextMixedReactionCount',
+                      [message.reactors.count, seenByDatesCount],
+                    )
+                    : lang('Chat.ContextReactionCount', message.reactors.count, 'i')
+                ) : (
+                  seenByDatesCount === 1 && seenByRecentUsers
+                    ? renderText(getUserFullName(seenByRecentUsers[0] as ApiUser)!) : (
+                      seenByDatesCount
+                        ? lang('Conversation.ContextMenuSeen', seenByDatesCount, 'i')
+                        : lang('Conversation.ContextMenuNoViews')
+                    )
+                )}
+              </span>
             </span>
-            <div className="avatars">
-              {seenByRecentUsers?.map((user) => (
-                <Avatar
-                  size="micro"
-                  peer={user}
-                />
-              ))}
-            </div>
+            <AvatarList className="avatars" size="micro" peers={seenByRecentUsers} />
           </MenuItem>
         )}
         {canDelete && <MenuItem destructive icon="delete" onClick={onDelete}>{lang('Delete')}</MenuItem>}

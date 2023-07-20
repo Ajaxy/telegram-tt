@@ -14,17 +14,19 @@ import styles from './AvatarList.module.scss';
 type OwnProps = {
   size: AvatarSize;
   peers?: (ApiUser | ApiChat)[];
+  className?: string;
 };
 
 const AvatarList: FC<OwnProps> = ({
   peers,
   size,
+  className,
 }) => {
   const lang = useLang();
 
   return (
     <div
-      className={buildClassName(styles.root, styles[`size-${size}`])}
+      className={buildClassName(className, styles.root, styles[`size-${size}`])}
       dir={lang.isRtl ? 'rtl' : 'ltr'}
     >
       {peers?.map((peer) => <Avatar size={size} peer={peer} className={styles.avatar} />)}
