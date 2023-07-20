@@ -12,7 +12,7 @@ import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
 import useDerivedState from '../../hooks/useDerivedState';
 import useSignal from '../../hooks/useSignal';
-import useCurrentTimeSignal from './hooks/currentTimeSignal';
+import useCurrentTimeSignal from './hooks/useCurrentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 
 import buildClassName from '../../util/buildClassName';
@@ -162,9 +162,11 @@ const VideoPlayerControls: FC<OwnProps> = ({
         url={url}
         duration={duration}
         isReady={isReady}
+        isPlaying={isPlaying}
         isPreviewDisabled={isPreviewDisabled}
         posterSize={posterSize}
         bufferedRanges={bufferedRanges}
+        playbackRate={playbackRate}
         onSeek={handleSeek}
         onSeekStart={handleSeekStart}
         isActive={isVisible}
