@@ -129,9 +129,12 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
     } else {
-      const canSetTextContent = (
-        !fragment && !nextSibling && $newAsReal.type === VirtualType.Text && $parent.children.length === 1
-      );
+      const canSetTextContent = !fragment
+        && !nextSibling
+        && $newAsReal.type === VirtualType.Text
+        && $parent.children.length === 1
+        && !parentEl.firstChild;
+
       if (canSetTextContent) {
         parentEl.textContent = $newAsReal.value;
         $newAsReal.target = parentEl.firstChild!;
