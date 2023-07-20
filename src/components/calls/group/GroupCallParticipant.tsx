@@ -8,10 +8,12 @@ import { withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
 
-import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
 import { selectChat, selectUser } from '../../../global/selectors';
+import formatGroupCallVolume from './helpers/formatGroupCallVolume';
+
 import useLang from '../../../hooks/useLang';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useMenuPosition from '../../../hooks/useMenuPosition';
@@ -99,8 +101,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
 
     if (hasCustomVolume) {
       return [
-        lang('SpeakingWithVolume',
-          (participant.volume! / GROUP_CALL_VOLUME_MULTIPLIER).toString())
+        lang('SpeakingWithVolume', formatGroupCallVolume(participant))
           .replace('%%', '%'),
         styles.subtitleGreen,
       ];
@@ -118,9 +119,7 @@ const GroupCallParticipant: FC<OwnProps & StateProps> = ({
     }
 
     return participant.about ? [participant.about, ''] : [lang('Listening'), styles.subtitleBlue];
-  }, [
-    isMutedByMe, isRaiseHand, isSelf, hasCustomVolume, isMuted, isSpeaking, participant.about, participant.volume, lang,
-  ]);
+  }, [isMutedByMe, isRaiseHand, hasCustomVolume, isMuted, isSpeaking, isSelf, participant, lang]);
 
   if (!peer) {
     return undefined;

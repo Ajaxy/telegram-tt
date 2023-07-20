@@ -35,8 +35,8 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
     loadMoreGroupCallParticipants,
   } = getActions();
 
-  const participantsIds = useMemo(() => {
-    return Object.keys(participants || {});
+  const orderedParticipantIds = useMemo(() => {
+    return Object.values(participants || {}).sort(compareParticipants).map((participant) => participant.id);
   }, [participants]);
 
   const handleLoadMoreGroupCallParticipants = useLastCallback(() => {
@@ -45,8 +45,8 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
 
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMoreGroupCallParticipants,
-    participantsIds,
-    participantsIds.length >= participantsCount,
+    orderedParticipantIds,
+    orderedParticipantIds.length >= participantsCount,
   );
 
   return (
@@ -61,6 +61,7 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
           participants[participantId] && (
             <GroupCallParticipant
               key={participantId}
+              teactOrderKey={orderedParticipantIds.indexOf(participantId)}
               participant={participants[participantId]}
             />
           )
@@ -69,6 +70,17 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
     </InfiniteScroll>
   );
 };
+
+function compareFields<T>(a: T, b: T) {
+  return Number(b) - Number(a);
+}
+
+function compareParticipants(a: TypeGroupCallParticipant, b: TypeGroupCallParticipant) {
+  return compareFields(!a.isMuted, !b.isMuted)
+        || compareFields(a.presentation, b.presentation)
+        || compareFields(a.video, b.video)
+        || compareFields(a.raiseHandRating, b.raiseHandRating);
+}
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {

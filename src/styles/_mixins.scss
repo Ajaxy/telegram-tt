@@ -9,6 +9,11 @@
   padding-inline-end: calc($padding - var(--scrollbar-width));
 }
 
+@mixin adapt-margin-to-scrollbar($margin) {
+  margin-inline-end: calc($margin - var(--scrollbar-width));
+}
+
+
 @mixin reset-range() {
   input[type="range"] {
     -webkit-appearance: none;

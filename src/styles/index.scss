@@ -107,6 +107,10 @@ body.cursor-ew-resize {
   height: 0;
 }
 
+#middle-column-portals {
+  top: calc(0rem - var(--call-header-height, 0rem));
+}
+
 .hidden {
   visibility: hidden;
 }
@@ -188,11 +192,11 @@ body:not(.is-ios) {
 
 .emoji-small {
   background: no-repeat;
-  background-size: 1.25rem;
+  background-size: var(--emoji-size);
   color: transparent;
   display: inline-block;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: var(--emoji-size);
+  height: var(--emoji-size);
   margin-inline-end: 1px;
   overflow: hidden;
   flex-shrink: 0;
