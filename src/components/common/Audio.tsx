@@ -291,6 +291,7 @@ const Audio: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'Audio',
     className,
+    origin === AudioOrigin.Inline && 'inline',
     isOwn && origin === AudioOrigin.Inline && 'own',
     (origin === AudioOrigin.Search || origin === AudioOrigin.SharedMedia) && 'bigger',
     isSelected && 'audio-is-selected',

@@ -3,6 +3,18 @@
   align-items: flex-start;
   position: relative;
 
+  &.inline {
+    margin-top: calc(0.5rem - 0.3125rem);
+
+    .message-content.no-text & {
+      margin-bottom: calc(0.8125rem - 0.375rem);
+
+      &[dir=rtl] {
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+
   .media-loading {
     position: absolute;
     pointer-events: none;
@@ -404,12 +416,5 @@
       left: auto;
       right: 2rem;
     }
-  }
-}
-
-.has-replies .Audio {
-  margin-bottom: 1rem;
-  [dir="rtl"] {
-    margin-bottom: 1.625rem;
   }
 }

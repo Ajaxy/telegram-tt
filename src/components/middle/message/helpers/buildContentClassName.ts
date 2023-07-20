@@ -48,6 +48,8 @@ export function buildContentClassName(
     }
   } else if (hasText) {
     classNames.push('text');
+  } else {
+    classNames.push('no-text');
   }
 
   if (hasActionButton) {
