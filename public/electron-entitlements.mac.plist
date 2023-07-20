@@ -11,7 +11,7 @@
     <key>com.apple.security.device.audio-input</key>
     <true/>
     <key>com.apple.security.device.print</key>
-    <true />
+    <true/>
     <key>com.apple.security.personal-information.location</key>
     <true/>
   </dict>
