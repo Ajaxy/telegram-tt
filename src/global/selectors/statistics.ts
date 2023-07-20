@@ -24,14 +24,3 @@ export function selectIsStatisticsShown<T extends GlobalState>(
 
   return currentChatId ? selectChatFullInfo(global, currentChatId)?.canViewStatistics : undefined;
 }
-
-export function selectIsMessageStatisticsShown<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  if (!selectTabState(global, tabId).isStatisticsShown) {
-    return false;
-  }
-
-  return Boolean(selectTabState(global, tabId).statistics.currentMessageId);
-}

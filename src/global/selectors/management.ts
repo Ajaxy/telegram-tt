@@ -27,7 +27,7 @@ export function selectCurrentManagement<T extends GlobalState>(
   }
 
   const currentManagement = selectTabState(global, tabId).management.byChatId[chatId];
-  if (!currentManagement || !currentManagement.isActive) {
+  if (!currentManagement?.isActive) {
     return undefined;
   }
 
