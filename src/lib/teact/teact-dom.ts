@@ -129,10 +129,11 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 
       mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
     } else {
-      const canSetText = $parent.children.length === 1 && $newAsReal.type === VirtualType.Text;
-
-      if (canSetText) {
-        parentEl.textContent = 'value' in $newAsReal ? $newAsReal.value : '';
+      const canSetTextContent = (
+        !fragment && !nextSibling && $newAsReal.type === VirtualType.Text && $parent.children.length === 1
+      );
+      if (canSetTextContent) {
+        parentEl.textContent = $newAsReal.value;
         $newAsReal.target = parentEl.firstChild!;
       } else {
         const node = createNode($newAsReal);
@@ -160,27 +161,12 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         remount(parentEl, $current, undefined);
         mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
       } else {
-        const canSetText = $parent.children.length === 1
-          && $newAsReal.type === VirtualType.Text
-          && ($current.type === VirtualType.Text || $current.type === VirtualType.Empty)
-          && (!parentEl.firstChild || parentEl.firstChild === $current.target);
+        const node = createNode($newAsReal);
+        $newAsReal.target = node;
+        remount(parentEl, $current, node, nextSibling);
 
-        if (canSetText) {
-          const value = 'value' in $newAsReal ? $newAsReal.value : '';
-          if (parentEl.firstChild) {
-            parentEl.firstChild.nodeValue = value;
-          } else {
-            parentEl.textContent = value;
-          }
-          $newAsReal.target = parentEl.firstChild!;
-        } else {
-          const node = createNode($newAsReal);
-          $newAsReal.target = node;
-          remount(parentEl, $current, node, nextSibling);
-
-          if ($newAsReal.type === VirtualType.Tag) {
-            setElementRef($newAsReal, node as HTMLElement);
-          }
+        if ($newAsReal.type === VirtualType.Tag) {
+          setElementRef($newAsReal, node as HTMLElement);
         }
       }
     } else {
