@@ -106,10 +106,12 @@ import { ensureProtocol } from '../../../util/ensureProtocol';
 import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { deleteMessages } from '../apiUpdaters/messages';
+import Deferred from '../../../util/Deferred';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';
 
 const uploadProgressCallbacks = new Map<number, ApiOnProgress>();
+let lastSendMessageDeferred = Deferred.resolved();
 
 const runDebouncedForMarkRead = debounce((cb) => cb(), 500, false);
 
@@ -798,19 +800,22 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
 
   const realMessages = messages.filter((m) => !isServiceNotificationMessage(m));
   if (realMessages.length) {
-    void callApi('forwardMessages', {
-      fromChat,
-      toChat,
-      toThreadId,
-      messages: realMessages,
-      isSilent,
-      scheduledAt,
-      sendAs,
-      withMyScore,
-      noAuthors,
-      noCaptions,
-      isCurrentUserPremium,
-    });
+    (async () => {
+      await lastSendMessageDeferred.promise;
+      await callApi('forwardMessages', {
+        fromChat,
+        toChat,
+        toThreadId,
+        messages: realMessages,
+        isSilent,
+        scheduledAt,
+        sendAs,
+        withMyScore,
+        noAuthors,
+        noCaptions,
+        isCurrentUserPremium,
+      });
+    })();
   }
 
   messages
@@ -1168,6 +1173,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   replyingToTopId?: number;
   groupedId?: string;
 }) {
+  lastSendMessageDeferred = new Deferred();
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
     if (!uploadProgressCallbacks.has(messageLocalId)) {
@@ -1212,6 +1218,8 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   if (progressCallback && localId) {
     uploadProgressCallbacks.delete(localId);
   }
+
+  lastSendMessageDeferred.resolve();
 }
 
 addActionHandler('loadPinnedMessages', async (global, actions, payload): Promise<void> => {

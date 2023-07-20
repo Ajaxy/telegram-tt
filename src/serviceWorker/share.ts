@@ -9,8 +9,6 @@ type ShareData = {
   files?: File[];
 };
 
-const RESOLVED_DEFERRED = new Deferred<void>();
-RESOLVED_DEFERRED.resolve();
 const READY_CLIENT_DEFERREDS = new Map<string, Deferred<void>>();
 
 export async function respondForShare(e: FetchEvent) {
@@ -38,7 +36,7 @@ export function handleClientMessage(e: ExtendableMessageEvent) {
     if (deferred) {
       deferred.resolve();
     } else {
-      READY_CLIENT_DEFERREDS.set(id, RESOLVED_DEFERRED);
+      READY_CLIENT_DEFERREDS.set(id, Deferred.resolved());
     }
   }
 }
