@@ -31,6 +31,7 @@ import {
   selectCurrentMessageList,
   selectDraft,
   selectIsForumPanelClosed,
+  selectIsForumPanelOpen,
   selectNotifyExceptions,
   selectNotifySettings,
   selectOutgoingStatus,
@@ -89,6 +90,7 @@ type StateProps = {
   draft?: ApiFormattedText;
   isSelected?: boolean;
   isSelectedForum?: boolean;
+  isForumPanelOpen?: boolean;
   canScrollDown?: boolean;
   canChangeFolder?: boolean;
   lastMessageTopic?: ApiTopic;
@@ -117,6 +119,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   withInterfaceAnimations,
   isSelected,
   isSelectedForum,
+  isForumPanelOpen,
   canScrollDown,
   canChangeFolder,
   lastMessageTopic,
@@ -164,7 +167,7 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const handleClick = useLastCallback(() => {
     if (isForum) {
-      if (isSelectedForum) {
+      if (isForumPanelOpen) {
         closeForumPanel(undefined, { forceOnHeavyAnimation: true });
       } else {
         openForumPanel({ chatId }, { forceOnHeavyAnimation: true });
@@ -369,6 +372,7 @@ export default memo(withGlobal<OwnProps>(
       draft: selectDraft(global, chatId, MAIN_THREAD_ID),
       isSelected,
       isSelectedForum,
+      isForumPanelOpen: selectIsForumPanelOpen(global),
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
       ...(isOutgoing && chat.lastMessage && {
