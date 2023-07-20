@@ -147,6 +147,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     getMenuElement,
   );
 
+  useEffect(() => {
+    if (!shouldRender) handleContextMenuClose();
+  }, [handleContextMenuClose, shouldRender]);
+
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
 
   const leftIcon = useMemo(() => {
