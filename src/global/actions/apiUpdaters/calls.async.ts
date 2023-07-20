@@ -169,7 +169,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           })();
         }
         void joinPhoneCall(
-          connections, actions.sendSignalingData, isOutgoing, Boolean(call?.isVideo), actions.apiUpdate,
+          connections,
+          actions.sendSignalingData,
+          isOutgoing,
+          Boolean(call?.isVideo),
+          Boolean(call.isP2pAllowed),
+          actions.apiUpdate,
         );
       }
 
