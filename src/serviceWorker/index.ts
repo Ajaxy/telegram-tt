@@ -1,15 +1,15 @@
-import { DEBUG } from './config';
-import { respondForProgressive } from './serviceWorker/progressive';
-import { respondForDownload } from './serviceWorker/download';
-import { respondWithCache, clearAssetCache, respondWithCacheNetworkFirst } from './serviceWorker/assetCache';
+import { DEBUG, ELECTRON_HOST_URL, IS_ELECTRON } from '../config';
+import { respondForProgressive } from './progressive';
+import { respondForDownload } from './download';
+import { respondWithCache, clearAssetCache, respondWithCacheNetworkFirst } from './assetCache';
 import {
   handlePush,
   handleNotificationClick,
   handleClientMessage as handleNotificationMessage,
-} from './serviceWorker/pushNotification';
-import { respondForShare, handleClientMessage as handleShareMessage } from './serviceWorker/share';
+} from './pushNotification';
+import { respondForShare, handleClientMessage as handleShareMessage } from './share';
 
-import { pause } from './util/schedulers';
+import { pause } from '../util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -48,28 +48,35 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e: FetchEvent) => {
   const { url } = e.request;
+  const scope = IS_ELECTRON ? ELECTRON_HOST_URL : self.registration.scope;
+  if (!url.startsWith(scope)) {
+    return false;
+  }
 
-  if (url.includes('/progressive/')) {
+  const { pathname, protocol } = new URL(url);
+  const { pathname: scopePathname } = new URL(scope);
+
+  if (pathname.startsWith('/progressive/')) {
     e.respondWith(respondForProgressive(e));
     return true;
   }
 
-  if (url.includes('/download/')) {
+  if (pathname.startsWith('/download/')) {
     e.respondWith(respondForDownload(e));
     return true;
   }
 
-  if (url.includes('/share/')) {
+  if (pathname.startsWith('/share/')) {
     e.respondWith(respondForShare(e));
   }
 
-  if (url.startsWith('http')) {
-    if (new URL(url).pathname === '/' || url.match(RE_NETWORK_FIRST_ASSETS)) {
+  if (protocol === 'http:' || protocol === 'https:') {
+    if (pathname === scopePathname || pathname.match(RE_NETWORK_FIRST_ASSETS)) {
       e.respondWith(respondWithCacheNetworkFirst(e));
       return true;
     }
 
-    if (url.match(RE_CACHE_FIRST_ASSETS)) {
+    if (pathname.match(RE_CACHE_FIRST_ASSETS)) {
       e.respondWith(respondWithCache(e));
       return true;
     }

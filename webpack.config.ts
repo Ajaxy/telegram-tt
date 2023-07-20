@@ -27,14 +27,29 @@ const {
 
 dotenv.config();
 
-const STATOSCOPE_REFERENCE_URL = 'https://tga.dev/build-stats.json';
-let isReferenceFetched = false;
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
 const {
   BASE_URL = 'https://web.telegram.org/a/',
+  ELECTRON_HOST_URL = 'https://telegram-a-host',
   APP_TITLE = DEFAULT_APP_TITLE,
 } = process.env;
+
+const CSP = `
+  default-src 'self';
+  connect-src 'self' wss://*.web.telegram.org blob: http: https:;
+  script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/ ${IS_ELECTRON ? BASE_URL : ''};
+  media-src 'self' blob: data: ${IS_ELECTRON ? [BASE_URL, ELECTRON_HOST_URL].join(' ') : ''};
+  object-src 'none';
+  frame-src http: https:;
+  base-uri 'none';
+  form-action 'none';`
+  .replace(/\s+/g, ' ').trim();
+
+const STATOSCOPE_REFERENCE_URL = 'https://tga.dev/build-stats.json';
+let isReferenceFetched = false;
 
 export default function createConfig(
   _: any,
@@ -75,6 +90,9 @@ export default function createConfig(
       ],
       devMiddleware: {
         stats: 'minimal',
+      },
+      headers: {
+        'Content-Security-Policy': CSP,
       },
     },
 
@@ -180,6 +198,7 @@ export default function createConfig(
         mainIcon: APP_ENV === 'production' ? 'icon-192x192' : 'icon-dev-192x192',
         manifest: APP_ENV === 'production' ? 'site.webmanifest' : 'site_dev.webmanifest',
         baseUrl: BASE_URL,
+        csp: CSP,
         template: 'src/index.html',
       }),
       new MiniCssExtractPlugin({
@@ -199,7 +218,9 @@ export default function createConfig(
         TELEGRAM_T_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
+        ELECTRON_HOST_URL,
       }),
+      // Updates each dev re-build to provide current git branch or commit hash
       new DefinePlugin({
         APP_VERSION: JSON.stringify(appVersion),
         APP_REVISION: DefinePlugin.runtimeValue(() => {

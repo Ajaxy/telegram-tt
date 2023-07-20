@@ -7,7 +7,7 @@ import { hasStoredSession } from './sessions';
 const WEBSYNC_URLS = [
   't.me',
   'telegram.me',
-].map((domain) => `//${domain}/_websync_?`);
+].map((domain) => `https://${domain}/_websync_?`);
 const WEBSYNC_VERSION = `${APP_VERSION} Z`;
 const WEBSYNC_KEY = 'tgme_sync';
 const WEBSYNC_TIMEOUT = 86400;

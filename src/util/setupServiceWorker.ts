@@ -60,7 +60,7 @@ if (IS_SERVICE_WORKER_SUPPORTED) {
         }
       }
 
-      await navigator.serviceWorker.register(new URL('../serviceWorker.ts', import.meta.url));
+      await navigator.serviceWorker.register(new URL('../serviceWorker', import.meta.url));
 
       if (DEBUG) {
         // eslint-disable-next-line no-console
