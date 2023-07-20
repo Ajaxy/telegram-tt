@@ -84,13 +84,6 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     worker = new Worker(new URL('./worker.ts', import.meta.url));
     subscribeToWorker(onUpdate);
 
-    if (requestStates.size > 0) {
-      requestStates.forEach((value) => {
-        // eslint-disable-next-line no-console
-        console.error('Hanging request', value.DEBUG_payload);
-      });
-    }
-
     if (initialArgs.platform === 'iOS') {
       setupIosHealthCheck();
     }

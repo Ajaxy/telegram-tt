@@ -122,6 +122,7 @@ export async function uploadFile(
                                 bytes: Buffer.from(partBytes),
                             }),
                     );
+                    client.releaseExportedSender(sender);
                     isDone2 = true;
                 } catch (err) {
                     logWithSenderIndex(`❗️️️Upload part failed ${err?.toString()} j=${jMemo}`);
@@ -133,6 +134,7 @@ export async function uploadFile(
                         continue;
                     }
                     foremans[senderIndex].releaseWorker();
+                    client.releaseExportedSender(sender);
 
                     throw err;
                 }
