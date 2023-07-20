@@ -1,5 +1,6 @@
-import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
+
+import type { FC } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -27,8 +28,11 @@ const Skeleton: FC<OwnProps> = ({
 }) => {
   const classNames = buildClassName('Skeleton', variant, animation, className, inline && 'inline');
   const aspectRatio = (width && height) ? `aspect-ratio: ${width}/${height}` : undefined;
-  const style = forceAspectRatio ? aspectRatio
-    : buildStyle(Boolean(width) && `width: ${width}px`, Boolean(height) && `height: ${height}px`);
+  const style = buildStyle(
+    forceAspectRatio && aspectRatio,
+    Boolean(width) && `width: ${width}px`,
+    !forceAspectRatio && Boolean(height) && `height: ${height}px`,
+  );
   return (
     <div className={classNames} style={style}>{inline && '\u00A0'}</div>
   );
