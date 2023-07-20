@@ -9,6 +9,7 @@ import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
+import buildStyle from '../../../util/buildStyle';
 
 import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
@@ -72,6 +73,14 @@ const Invoice: FC<OwnProps> = ({
     }
   }, [shouldAffectAppendix, photoUrl, isInSelectMode, isSelected, theme]);
 
+  const width = forcedWidth || photo?.dimensions?.width;
+
+  const style = buildStyle(
+    photo?.dimensions && `width: ${width}px`,
+    photo?.dimensions && `aspect-ratio: ${photo.dimensions.width} / ${photo.dimensions.height}`,
+    Boolean(!photo?.dimensions && forcedWidth) && `width: ${forcedWidth}px`,
+  );
+
   return (
     <div
       ref={ref}
@@ -92,13 +101,13 @@ const Invoice: FC<OwnProps> = ({
                 className="invoice-image"
                 src={photoUrl}
                 alt=""
-                style={forcedWidth ? `width: ${forcedWidth}px` : undefined}
+                style={style}
                 crossOrigin="anonymous"
               />
             )}
             {!photoUrl && photo && (
               <Skeleton
-                width={forcedWidth || photo.dimensions?.width}
+                width={width}
                 height={photo.dimensions?.height}
                 forceAspectRatio
               />
