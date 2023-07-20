@@ -56,17 +56,17 @@ self.addEventListener('fetch', (e: FetchEvent) => {
   const { pathname, protocol } = new URL(url);
   const { pathname: scopePathname } = new URL(scope);
 
-  if (pathname.startsWith('/progressive/')) {
+  if (pathname.includes('/progressive/')) {
     e.respondWith(respondForProgressive(e));
     return true;
   }
 
-  if (pathname.startsWith('/download/')) {
+  if (pathname.includes('/download/')) {
     e.respondWith(respondForDownload(e));
     return true;
   }
 
-  if (pathname.startsWith('/share/')) {
+  if (pathname.includes('/share/')) {
     e.respondWith(respondForShare(e));
   }
 
