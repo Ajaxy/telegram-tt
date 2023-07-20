@@ -21,7 +21,7 @@ import {
   IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
-import { IS_APP } from '../../../util/windowEnvironment';
+import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 import {
   INITIAL_PERFORMANCE_STATE_MAX,
   INITIAL_PERFORMANCE_STATE_MID,
@@ -421,7 +421,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
           )}
           positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-          transformOriginX={IS_ELECTRON && !isFullscreen ? 90 : undefined}
+          transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
           onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
           {menuItems}

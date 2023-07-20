@@ -3,6 +3,8 @@ import { getActions } from '../../../global';
 
 import type { ActiveEmojiInteraction } from '../../../global/types';
 
+import { IS_ELECTRON } from '../../../config';
+
 import safePlay from '../../../util/safePlay';
 import buildStyle from '../../../util/buildStyle';
 import { REM } from '../helpers/mediaDimensions';
@@ -37,7 +39,7 @@ export default function useAnimatedEmoji(
   const soundMediaData = useMedia(soundId ? `document${soundId}` : undefined, !soundId);
 
   const size = preferredSize || SIZE;
-  const style = buildStyle(`width: ${size}px`, `height: ${size}px`, emoji && 'cursor: pointer');
+  const style = buildStyle(`width: ${size}px`, `height: ${size}px`, emoji && !IS_ELECTRON && 'cursor: pointer');
 
   const interactions = useRef<number[] | undefined>(undefined);
   const startedInteractions = useRef<number | undefined>(undefined);

@@ -694,7 +694,7 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
     }
   }
 
-  setPageTitleInstant(PAGE_TITLE);
+  setPageTitleInstant(IS_ELECTRON ? '' : PAGE_TITLE);
 });
 
 let prevIsScreenLocked: boolean | undefined;

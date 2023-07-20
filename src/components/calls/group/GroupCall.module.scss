@@ -81,6 +81,10 @@
   &.scrolled {
     border-bottom-color: var(--group-call-panel-header-border-color);
   }
+
+  :global(body.is-electron) .root.fullscreen:not(.landscape) & {
+    padding-left: 5rem;
+  }
 }
 
 .headerButton {

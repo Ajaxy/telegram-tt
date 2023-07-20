@@ -71,6 +71,10 @@ body.is-ios {
   --border-radius-messages-small: 0.5rem;
 }
 
+body.is-electron {
+  --custom-cursor: default;
+}
+
 body.cursor-grabbing {
   --custom-cursor: grabbing;
   cursor: grabbing !important;

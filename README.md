@@ -43,7 +43,7 @@ Electron allows building a native application that can be installed on Windows, 
 
 #### NPM scripts
 
-- `npm run electron:dev`
+- `npm run dev:electron`
 
 Run Electron in development mode, concurrently starts 3 processes with watch for changes: main (main Electron process), renderer (FE code) and Webpack for Electron (compiles main Electron process from TypeScript).
 
@@ -55,15 +55,15 @@ The main process code for Electron, which includes preload functionality, is wri
 
 Prepare renderer (FE code) build, compile Electron main process code, install and build native dependencies, is used before packaging or publishing.
 
-- `npm run electron:package:staging`
+- `npm run electron:staging`
 
 Create packages for macOS, Windows and Linux in `dist-electron` folders with `APP_ENV` as `staging` (allows to open DevTools, includes sourcemaps and does not minify built JavaScript code), can be used for manual distribution and testing packaged application.
 
-- `npm run electron:package:production`
+- `npm run electron:production`
 
 Create packages for macOS, Windows and Linux in `dist-electron` folders with `APP_ENV` as `production` (disabled DevTools, minified built JavaScript code), can be used for manual distribution and testing packaged application.
 
-- `npm run electron:publish`
+- `npm run deploy:electron`
 
 Create packages for macOS, Windows and Linux in `dist-electron` folder and publish release to GitHub, which allows supporting autoupdates. See [GitHub release workflow](#github-release) for more info.
 
@@ -80,7 +80,7 @@ More info in the [official documentation](https://www.electronjs.org/docs/latest
 
 #### Notarize on MacOS
 
-Application notarization is done with [electron-builder-notarize](https://github.com/karaggeorge/electron-builder-notarize) module, which requires `APPLE_ID` and `APPLE_ID_PASSWORD` environment variables to be passed.
+Application notarization is done automatically in [electron-builder](https://github.com/electron-userland/electron-builder/) module, which requires `APPLE_ID` and `APPLE_APP_SPECIFIC_PASSWORD` environment variables to be passed.
 
 How to obtain app-specific password:
 

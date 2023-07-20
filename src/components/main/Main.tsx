@@ -282,11 +282,11 @@ const Main: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    const removeUpdateDownloadedListener = window.electron?.on(ElectronEvent.UPDATE_DOWNLOADED, () => {
+    const removeUpdateDownloadedListener = window.electron!.on(ElectronEvent.UPDATE_DOWNLOADED, () => {
       setIsAppUpdateAvailable(true);
     });
 
-    const removeUpdateErrorListener = window.electron?.on(ElectronEvent.UPDATE_ERROR, () => {
+    const removeUpdateErrorListener = window.electron!.on(ElectronEvent.UPDATE_ERROR, () => {
       setIsAppUpdateAvailable(false);
       removeUpdateDownloadedListener?.();
     });
@@ -501,7 +501,7 @@ const Main: FC<OwnProps & StateProps> = ({
   });
 
   // Online status and browser tab indicators
-  useBackgroundMode(handleBlur, handleFocus);
+  useBackgroundMode(handleBlur, handleFocus, !!IS_ELECTRON);
   useBeforeUnload(handleBlur);
   usePreventPinchZoomGesture(isMediaViewerOpen);
 

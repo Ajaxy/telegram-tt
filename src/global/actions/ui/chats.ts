@@ -82,6 +82,7 @@ addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnTyp
   const { chatId, threadId = MAIN_THREAD_ID } = payload;
 
   const hashUrl = createMessageHashUrl(chatId, 'thread', threadId);
+
   if (IS_ELECTRON) {
     window.electron!.openNewWindow(hashUrl);
   } else {

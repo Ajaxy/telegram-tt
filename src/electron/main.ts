@@ -1,10 +1,19 @@
 import 'v8-compile-cache';
 
 import { app, nativeImage } from 'electron';
+import contextMenu from 'electron-context-menu';
 import path from 'path';
 
 import { createWindow, setupCloseHandlers, setupElectronActionHandlers } from './window';
 import { IS_MAC_OS, IS_WINDOWS } from './utils';
+
+contextMenu({
+  showLearnSpelling: false,
+  showLookUpSelection: false,
+  showSearchWithGoogle: false,
+  showCopyImage: false,
+  showSelectAll: true,
+});
 
 app.on('ready', () => {
   if (IS_MAC_OS) {

@@ -8,6 +8,8 @@ import React, {
   useEffect, useRef, memo, useState,
 } from '../../lib/teact/teact';
 
+import { IS_ELECTRON } from '../../config';
+
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateUniqueId from '../../util/generateUniqueId';
@@ -255,7 +257,7 @@ const AnimatedSticker: FC<OwnProps> = ({
       className={buildClassName('AnimatedSticker', className)}
       style={buildStyle(
         size !== undefined && `width: ${size}px; height: ${size}px;`,
-        onClick && 'cursor: pointer',
+        onClick && !IS_ELECTRON && 'cursor: pointer',
         colorFilter,
         style,
       )}

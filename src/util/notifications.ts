@@ -346,9 +346,9 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
     !isScreenLocked
     && selectShouldShowMessagePreview(chat, selectNotifySettings(global), selectNotifyExceptions(global))
   ) {
-    if (isActionMessage(message)) {
-      const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
+    const isChat = chat && (isChatChannel(chat) || message.senderId === message.chatId);
 
+    if (isActionMessage(message)) {
       body = renderActionMessageText(
         translate,
         message,

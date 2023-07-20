@@ -31,6 +31,12 @@
       height: 10rem;
       margin-bottom: 2.5rem;
     }
+
+    body.is-electron & {
+      width: 6rem;
+      height: 6rem;
+      margin-bottom: 1.75rem;
+    }
   }
 
   #logo {
