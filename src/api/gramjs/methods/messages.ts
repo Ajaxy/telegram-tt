@@ -1241,20 +1241,22 @@ export async function loadPollOptionResults({
   }
 
   updateLocalDb({
-    chats: [] as GramJs.TypeChat[],
+    chats: result.chats,
     users: result.users,
     messages: [] as GramJs.Message[],
   } as GramJs.messages.Messages);
 
   const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const votes = result.votes.map((vote) => ({
-    userId: vote.userId,
+    peerId: getApiChatIdFromMtpPeer(vote.peer),
     date: vote.date,
   }));
 
   return {
     count: result.count,
     votes,
+    chats,
     users,
     nextOffset: result.nextOffset,
     shouldResetVoters,

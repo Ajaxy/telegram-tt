@@ -438,7 +438,7 @@ export interface ApiMessage {
   reactors?: {
     nextOffset?: string;
     count: number;
-    reactions: ApiUserReaction[];
+    reactions: ApiPeerReaction[];
   };
   reactions?: ApiReactions;
 }
@@ -446,12 +446,13 @@ export interface ApiMessage {
 export interface ApiReactions {
   canSeeList?: boolean;
   results: ApiReactionCount[];
-  recentReactions?: ApiUserReaction[];
+  recentReactions?: ApiPeerReaction[];
 }
 
-export interface ApiUserReaction {
-  userId: string;
+export interface ApiPeerReaction {
+  peerId: string;
   reaction: ApiReaction;
+  isOwn?: boolean;
   isBig?: boolean;
   isUnread?: boolean;
   addedDate: number;

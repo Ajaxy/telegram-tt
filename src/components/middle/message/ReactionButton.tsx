@@ -4,7 +4,7 @@ import { getActions, getGlobal } from '../../../global';
 import type { FC } from '../../../lib/teact/teact';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
-  ApiAvailableReaction, ApiMessage, ApiReactionCount, ApiStickerSet, ApiUser,
+  ApiAvailableReaction, ApiChat, ApiMessage, ApiReactionCount, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { ActiveReaction } from '../../../global/types';
 
@@ -48,13 +48,14 @@ const ReactionButton: FC<{
       return undefined;
     }
 
-    // No need for expensive global updates on users, so we avoid them
+    // No need for expensive global updates on chats or users, so we avoid them
+    const chatsById = getGlobal().chats.byId;
     const usersById = getGlobal().users.byId;
 
     return recentReactions
       .filter((recentReaction) => isSameReaction(recentReaction.reaction, reaction.reaction))
-      .map((recentReaction) => usersById[recentReaction.userId])
-      .filter(Boolean) as ApiUser[];
+      .map((recentReaction) => usersById[recentReaction.peerId] || chatsById[recentReaction.peerId])
+      .filter(Boolean) as (ApiChat | ApiUser)[];
   }, [reaction.reaction, recentReactions, withRecentReactors]);
 
   const handleClick = useLastCallback(() => {

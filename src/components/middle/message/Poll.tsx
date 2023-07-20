@@ -1,4 +1,3 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   useEffect,
   useLayoutEffect,
@@ -7,16 +6,17 @@ import React, {
   useMemo,
   useRef,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
+import type { FC } from '../../../lib/teact/teact';
+import type { LangFn } from '../../../hooks/useLang';
 import type {
-  ApiMessage, ApiPoll, ApiUser, ApiPollAnswer,
+  ApiMessage, ApiPoll, ApiPollAnswer, ApiChat, ApiUser,
 } from '../../../api/types';
 
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { formatMediaDuration } from '../../../util/dateFormat';
-import type { LangFn } from '../../../hooks/useLang';
 import useLang from '../../../hooks/useLang';
 import { getServerTime } from '../../../util/serverTime';
 
@@ -39,7 +39,6 @@ type OwnProps = {
 
 type StateProps = {
   recentVoterIds?: number[];
-  usersById: Record<string, ApiUser>;
 };
 
 const SOLUTION_CONTAINER_ID = '#middle-column-portals';
@@ -53,7 +52,6 @@ const Poll: FC<OwnProps & StateProps> = ({
   message,
   poll,
   recentVoterIds,
-  usersById,
   onSendVote,
 }) => {
   const { loadMessage, openPollResults, requestConfetti } = getActions();
@@ -136,15 +134,21 @@ const Poll: FC<OwnProps & StateProps> = ({
   }, [canVote, chatId, loadMessage, messageId, summary.closePeriod, summary.closed, summary.quiz]);
 
   const recentVoters = useMemo(() => {
-    return recentVoterIds ? recentVoterIds.reduce((result: ApiUser[], id) => {
+    // No need for expensive global updates on chats or users, so we avoid them
+    const chatsById = getGlobal().chats.byId;
+    const usersById = getGlobal().users.byId;
+    return recentVoterIds ? recentVoterIds.reduce((result: (ApiChat | ApiUser)[], id) => {
+      const chat = chatsById[id];
       const user = usersById[id];
       if (user) {
         result.push(user);
+      } else if (chat) {
+        result.push(chat);
       }
 
       return result;
     }, []) : [];
-  }, [usersById, recentVoterIds]);
+  }, [recentVoterIds]);
 
   const handleRadioChange = useLastCallback((option: string) => {
     setChosenOptions([option]);
@@ -206,11 +210,11 @@ const Poll: FC<OwnProps & StateProps> = ({
     return (
       recentVoters.length > 0 && (
         <div className="poll-recent-voters">
-          {recentVoters.map((user) => (
+          {recentVoters.map((peer) => (
             <Avatar
-              key={user.id}
+              key={peer.id}
               size="micro"
-              peer={user}
+              peer={peer}
             />
           ))}
         </div>

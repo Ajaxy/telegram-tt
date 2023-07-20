@@ -24,7 +24,7 @@ import type {
   ApiGroupCall,
   ApiReactions,
   ApiReactionCount,
-  ApiUserReaction,
+  ApiPeerReaction,
   ApiAvailableReaction,
   ApiSponsoredMessage,
   ApiUser,
@@ -277,20 +277,21 @@ function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCou
   };
 }
 
-export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiUserReaction | undefined {
+export function buildMessagePeerReaction(userReaction: GramJs.MessagePeerReaction): ApiPeerReaction | undefined {
   const {
-    peerId, reaction, big, unread, date,
+    peerId, reaction, big, unread, date, my,
   } = userReaction;
 
   const apiReaction = buildApiReaction(reaction);
   if (!apiReaction) return undefined;
 
   return {
-    userId: getApiChatIdFromMtpPeer(peerId),
+    peerId: getApiChatIdFromMtpPeer(peerId),
     reaction: apiReaction,
     addedDate: date,
     isUnread: unread,
     isBig: big,
+    isOwn: my,
   };
 }
 
@@ -833,7 +834,7 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
   const {
     results: rawResults, totalVoters, recentVoters, solution, solutionEntities: entities, min,
   } = pollResults;
-  const results = rawResults && rawResults.map(({
+  const results = rawResults?.map(({
     option, chosen, correct, voters,
   }) => ({
     isChosen: chosen,
@@ -845,7 +846,7 @@ export function buildPollResults(pollResults: GramJs.PollResults): ApiPoll['resu
   return {
     isMin: min,
     totalVoters,
-    recentVoterIds: recentVoters?.map((id) => buildApiPeerId(id, 'user')),
+    recentVoterIds: recentVoters?.map((peer) => getApiChatIdFromMtpPeer(peer)),
     results,
     solution,
     ...(entities && { solutionEntities: entities.map(buildApiMessageEntity) }),

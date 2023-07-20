@@ -745,6 +745,7 @@ addActionHandler('loadPollOptionResults', async (global, actions, payload): Prom
   global = getGlobal();
 
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
   const tabState = selectTabState(global, tabId);
   const { pollResults } = tabState;
@@ -756,8 +757,8 @@ addActionHandler('loadPollOptionResults', async (global, actions, payload): Prom
       voters: {
         ...voters,
         [option]: unique([
-          ...(!shouldResetVoters && voters && voters[option] ? voters[option] : []),
-          ...(result && result.users.map((user) => user.id)),
+          ...(!shouldResetVoters && voters?.[option] ? voters[option] : []),
+          ...result.votes.map((vote) => vote.peerId),
         ]),
       },
       offsets: {

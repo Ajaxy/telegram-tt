@@ -542,6 +542,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const isFailed = isMessageFailed(message);
   const isServiceNotification = isServiceNotificationMessage(message);
   const isOwn = isOwnMessage(message);
+  const isForwarded = isForwardedMessage(message);
   const isAction = isActionMessage(message);
   const { content } = message;
   const messageTopic = selectTopicFromMessage(global, message);
@@ -557,7 +558,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
       content.sticker || content.contact || content.poll || content.action || content.audio
       || (content.video?.isRound) || content.location || content.invoice
     )
-    && !isForwardedMessage(message)
+    && !isForwarded
     && !message.viaBotId
     && !chat.isForbidden
   );
@@ -601,10 +602,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
     ))
   );
 
-  const canEdit = !isLocal && !isAction && isMessageEditable && (
-    isOwn
-    || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')))
-  );
+  const hasMessageEditRight = isOwn || (isChannel && (chat.isCreator || getHasAdminRight(chat, 'editMessages')));
+
+  const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
 
   const isChatProtected = selectIsChatProtected(global, message.chatId);
   const canForward = (
@@ -626,7 +626,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
 
   const poll = content.poll;
   const canRevote = !poll?.summary.closed && !poll?.summary.quiz && poll?.results.results?.some((r) => r.isChosen);
-  const canClosePoll = isOwn && poll && !poll.summary.closed;
+  const canClosePoll = hasMessageEditRight && poll && !poll.summary.closed && !isForwarded;
 
   const noOptions = [
     canReply,

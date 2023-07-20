@@ -14,7 +14,7 @@ export function getMessageRecentReaction(message: Partial<ApiMessage>) {
 export function checkIfHasUnreadReactions(global: GlobalState, reactions: ApiReactions) {
   const { currentUserId } = global;
   return reactions?.recentReactions?.some(
-    ({ isUnread, userId }) => isUnread && userId !== currentUserId,
+    ({ isUnread, isOwn, peerId }) => isUnread && !isOwn && currentUserId !== peerId,
   );
 }
 

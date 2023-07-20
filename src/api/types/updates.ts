@@ -269,7 +269,7 @@ export type ApiUpdateMessagePoll = {
 export type ApiUpdateMessagePollVote = {
   '@type': 'updateMessagePollVote';
   pollId: string;
-  userId: string;
+  peerId: string;
   options: string[];
 };
 

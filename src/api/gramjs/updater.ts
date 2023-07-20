@@ -492,7 +492,7 @@ export function updater(update: Update) {
     onUpdate({
       '@type': 'updateMessagePollVote',
       pollId: String(update.pollId),
-      userId: buildApiPeerId(update.userId, 'user'),
+      peerId: getApiChatIdFromMtpPeer(update.peer),
       options: update.options.map(serializeBytes),
     });
   } else if (update instanceof GramJs.UpdateChannelMessageViews) {

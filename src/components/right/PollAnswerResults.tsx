@@ -11,6 +11,7 @@ import type {
   ApiPollResult,
 } from '../../api/types';
 import { selectTabState } from '../../global/selectors';
+import { isUserId } from '../../global/helpers';
 import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
 
@@ -18,6 +19,7 @@ import ShowMoreButton from '../ui/ShowMoreButton';
 import Loading from '../ui/Loading';
 import ListItem from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
+import GroupChatInfo from '../common/GroupChatInfo';
 
 import './PollAnswerResults.scss';
 
@@ -108,12 +110,20 @@ const PollAnswerResults: FC<OwnProps & StateProps> = ({
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleMemberClick(id)}
             >
-              <PrivateChatInfo
-                avatarSize="tiny"
-                userId={id}
-                forceShowSelf
-                noStatusOrTyping
-              />
+              {isUserId(id) ? (
+                <PrivateChatInfo
+                  avatarSize="tiny"
+                  userId={id}
+                  forceShowSelf
+                  noStatusOrTyping
+                />
+              ) : (
+                <GroupChatInfo
+                  avatarSize="tiny"
+                  chatId={id}
+                  noStatusOrTyping
+                />
+              )}
             </ListItem>
           ))
           : <Loading />}

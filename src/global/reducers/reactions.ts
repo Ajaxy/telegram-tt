@@ -10,7 +10,7 @@ import windowSize from '../../util/windowSize';
 import { updateChat } from './chats';
 import { isSameReaction, isReactionChosen } from '../helpers';
 import { updateChatMessage } from './messages';
-import { selectTabState } from '../selectors';
+import { selectSendAs, selectTabState } from '../selectors';
 import { getIsMobile } from '../../hooks/useAppLayout';
 
 function getLeftColumnWidth(windowWidth: number) {
@@ -42,6 +42,7 @@ export function addMessageReaction<T extends GlobalState>(
   global: T, message: ApiMessage, userReactions: ApiReaction[],
 ): T {
   const currentReactions = message.reactions || { results: [] };
+  const currentSendAs = selectSendAs(global, message.chatId);
 
   // Update UI without waiting for server response
   const results = currentReactions.results.map((current) => (
@@ -72,15 +73,16 @@ export function addMessageReaction<T extends GlobalState>(
   let { recentReactions = [] } = currentReactions;
 
   if (recentReactions.length) {
-    recentReactions = recentReactions.filter(({ userId }) => userId !== global.currentUserId);
+    recentReactions = recentReactions.filter(({ isOwn, peerId }) => !isOwn && peerId !== global.currentUserId);
   }
 
   userReactions.forEach((reaction) => {
     const { currentUserId } = global;
     recentReactions.unshift({
-      userId: currentUserId!,
+      peerId: currentSendAs?.id || currentUserId!,
       reaction,
       addedDate: Math.floor(Date.now() / 1000),
+      isOwn: true,
     });
   });
 

@@ -1,17 +1,20 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, useMemo, useEffect, useState, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
-import { selectChatMessage, selectTabState } from '../../global/selectors';
+import {
+  selectChatMessage,
+  selectTabState,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatIntegerCompact } from '../../util/textFormat';
 import { unique } from '../../util/iteratees';
-import { getReactionUniqueKey, isSameReaction } from '../../global/helpers';
+import { isSameReaction, getReactionUniqueKey } from '../../global/helpers';
 import { formatDateAtTime } from '../../util/dateFormat';
 
 import useLang from '../../hooks/useLang';
@@ -58,9 +61,9 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
     openChat,
   } = getActions();
 
-  // No need for expensive global updates on users, so we avoid them
-  const usersById = getGlobal().users.byId;
+  // No need for expensive global updates on chats or users, so we avoid them
   const chatsById = getGlobal().chats.byId;
+  const usersById = getGlobal().users.byId;
 
   const lang = useLang();
   const [isClosing, startClosing, stopClosing] = useFlag(false);
@@ -113,20 +116,20 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
     return uniqueReactions;
   }, [reactors]);
 
-  const userIds = useMemo(() => {
+  const peerIds = useMemo(() => {
     if (chosenTab) {
       return reactors?.reactions
         .filter(({ reaction }) => isSameReaction(reaction, chosenTab))
-        .map(({ userId }) => userId);
+        .map(({ peerId }) => peerId);
     }
 
     const seenByUserIds = Object.keys(seenByDates || {});
 
-    return unique(reactors?.reactions.map(({ userId }) => userId).concat(seenByUserIds || []) || []);
+    return unique(reactors?.reactions.map(({ peerId }) => peerId).concat(seenByUserIds || []) || []);
   }, [chosenTab, reactors, seenByDates]);
 
   const [viewportIds, getMore] = useInfiniteScroll(
-    handleLoadMore, userIds, reactors && reactors.nextOffset === undefined,
+    handleLoadMore, peerIds, reactors && reactors.nextOffset === undefined,
   );
 
   useEffect(() => {
@@ -188,11 +191,11 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
               (peerId) => {
                 const peer = usersById[peerId] || chatsById[peerId];
 
-                const userReactions = reactors?.reactions.filter((reactor) => reactor.userId === peerId);
+                const peerReactions = reactors?.reactions.filter((reactor) => reactor.peerId === peerId);
                 const items: React.ReactNode[] = [];
                 const seenByUser = seenByDates?.[peerId];
 
-                userReactions?.forEach((r) => {
+                peerReactions?.forEach((r) => {
                   if (chosenTab && !isSameReaction(r.reaction, chosenTab)) return;
 
                   items.push(
@@ -221,7 +224,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                   );
                 });
 
-                if (!chosenTab && !userReactions?.length) {
+                if (!chosenTab && !peerReactions?.length) {
                   items.push(
                     <ListItem
                       key={`${peerId}-seen-by`}
