@@ -28,7 +28,7 @@ import LockScreen from './main/LockScreen.async';
 import AppInactive from './main/AppInactive';
 import Transition from './ui/Transition';
 import UiLoader from './common/UiLoader';
-// import Test from './test/TestUpdateRef';
+// import Test from './test/TestSvg';
 
 import styles from './App.module.scss';
 

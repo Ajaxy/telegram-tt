@@ -32,6 +32,8 @@ interface SelectionState {
   isCaretAtEnd: boolean;
 }
 
+type DOMElement = HTMLElement | SVGElement;
+
 const FILTERED_ATTRIBUTES = new Set(['key', 'ref', 'teactFastList', 'teactOrderKey']);
 const HTML_ATTRIBUTES = new Set(['dir', 'role', 'form']);
 const CONTROLLABLE_TAGS = ['INPUT', 'TEXTAREA', 'SELECT'];
@@ -71,7 +73,7 @@ function render($element: VirtualElement | undefined, parentEl: HTMLElement) {
 }
 
 function renderWithVirtual<T extends VirtualElement | undefined>(
-  parentEl: HTMLElement,
+  parentEl: DOMElement,
   $current: VirtualElement | undefined,
   $new: T,
   $parent: VirtualElementParent | VirtualDomHead,
@@ -81,17 +83,22 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
     nextSibling?: ChildNode;
     forceMoveToEnd?: boolean;
     fragment?: DocumentFragment;
+    isSvg?: true;
   } = {},
 ): T {
   const { skipComponentUpdate, fragment } = options;
-  let { nextSibling } = options;
+  let { nextSibling, isSvg } = options;
 
-  const isCurrentComponent = $current && $current.type === VirtualType.Component;
-  const isNewComponent = $new && $new.type === VirtualType.Component;
+  const isCurrentComponent = $current?.type === VirtualType.Component;
+  const isNewComponent = $new?.type === VirtualType.Component;
   const $newAsReal = $new as VirtualElementReal;
 
-  const isCurrentFragment = $current && !isCurrentComponent && $current.type === VirtualType.Fragment;
-  const isNewFragment = $new && !isNewComponent && $new.type === VirtualType.Fragment;
+  const isCurrentFragment = !isCurrentComponent && $current?.type === VirtualType.Fragment;
+  const isNewFragment = !isNewComponent && $new?.type === VirtualType.Fragment;
+
+  if ($new?.type === VirtualType.Tag && $new.tag === 'svg') {
+    isSvg = true;
+  }
 
   if (
     !skipComponentUpdate
@@ -127,7 +134,9 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         $new = initComponent(parentEl, $new as VirtualElementComponent, $parent, index) as unknown as typeof $new;
       }
 
-      mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
+      mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, {
+        nextSibling, fragment, isSvg,
+      });
     } else {
       const canSetTextContent = !fragment
         && !nextSibling
@@ -139,12 +148,12 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         parentEl.textContent = $newAsReal.value;
         $newAsReal.target = parentEl.firstChild!;
       } else {
-        const node = createNode($newAsReal);
+        const node = createNode($newAsReal, isSvg);
         $newAsReal.target = node;
         insertBefore(fragment || parentEl, node, nextSibling);
 
         if ($newAsReal.type === VirtualType.Tag) {
-          setElementRef($newAsReal, node as HTMLElement);
+          setElementRef($newAsReal, node as DOMElement);
         }
       }
     }
@@ -162,14 +171,16 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
         }
 
         remount(parentEl, $current, undefined);
-        mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, { nextSibling, fragment });
+        mountChildren(parentEl, $new as VirtualElementComponent | VirtualElementFragment, {
+          nextSibling, fragment, isSvg,
+        });
       } else {
-        const node = createNode($newAsReal);
+        const node = createNode($newAsReal, isSvg);
         $newAsReal.target = node;
         remount(parentEl, $current, node, nextSibling);
 
         if ($newAsReal.type === VirtualType.Tag) {
-          setElementRef($newAsReal, node as HTMLElement);
+          setElementRef($newAsReal, node as DOMElement);
         }
       }
     } else {
@@ -196,14 +207,14 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
           const $newAsTag = $new as VirtualElementTag;
 
           setElementRef($current, undefined);
-          setElementRef($newAsTag, currentTarget as HTMLElement);
+          setElementRef($newAsTag, currentTarget as DOMElement);
 
           if (nextSibling || options.forceMoveToEnd) {
             insertBefore(parentEl, currentTarget, nextSibling);
           }
 
-          updateAttributes($current, $newAsTag, currentTarget as HTMLElement);
-          renderChildren($current, $newAsTag, currentTarget as HTMLElement);
+          updateAttributes($current, $newAsTag, currentTarget as DOMElement, isSvg);
+          renderChildren($current, $newAsTag, currentTarget as DOMElement, undefined, undefined, isSvg);
         }
       }
     }
@@ -213,7 +224,7 @@ function renderWithVirtual<T extends VirtualElement | undefined>(
 }
 
 function initComponent(
-  parentEl: HTMLElement,
+  parentEl: DOMElement,
   $element: VirtualElementComponent,
   $parent: VirtualElementParent | VirtualDomHead,
   index: number,
@@ -235,7 +246,7 @@ function updateComponent($current: VirtualElementComponent, $new: VirtualElement
 }
 
 function setupComponentUpdateListener(
-  parentEl: HTMLElement,
+  parentEl: DOMElement,
   $element: VirtualElementComponent,
   $parent: VirtualElementParent | VirtualDomHead,
   index: number,
@@ -255,11 +266,12 @@ function setupComponentUpdateListener(
 }
 
 function mountChildren(
-  parentEl: HTMLElement,
+  parentEl: DOMElement,
   $element: VirtualElementComponent | VirtualElementFragment,
   options: {
     nextSibling?: ChildNode;
     fragment?: DocumentFragment;
+    isSvg?: true;
   },
 ) {
   const { children } = $element;
@@ -272,13 +284,13 @@ function mountChildren(
   }
 }
 
-function unmountChildren(parentEl: HTMLElement, $element: VirtualElementComponent | VirtualElementFragment) {
+function unmountChildren(parentEl: DOMElement, $element: VirtualElementComponent | VirtualElementFragment) {
   for (const $child of $element.children) {
     renderWithVirtual(parentEl, $child, undefined, $element, -1);
   }
 }
 
-function createNode($element: VirtualElementReal): Node {
+function createNode($element: VirtualElementReal, isSvg?: true): Node {
   if ($element.type === VirtualType.Empty) {
     return document.createTextNode('');
   }
@@ -288,7 +300,7 @@ function createNode($element: VirtualElementReal): Node {
   }
 
   const { tag, props, children } = $element;
-  const element = document.createElement(tag);
+  const element = isSvg ? document.createElementNS('http://www.w3.org/2000/svg', tag) : document.createElement(tag);
 
   processControlled(tag, props);
 
@@ -297,7 +309,7 @@ function createNode($element: VirtualElementReal): Node {
     if (!props.hasOwnProperty(key)) continue;
 
     if (props[key] !== undefined) {
-      setAttribute(element, key, props[key]);
+      setAttribute(element, key, props[key], isSvg);
     }
   }
 
@@ -305,7 +317,7 @@ function createNode($element: VirtualElementReal): Node {
 
   for (let i = 0, l = children.length; i < l; i++) {
     const $child = children[i];
-    const $renderedChild = renderWithVirtual(element, undefined, $child, $element, i);
+    const $renderedChild = renderWithVirtual(element, undefined, $child, $element, i, { isSvg });
     if ($renderedChild !== $child) {
       children[i] = $renderedChild;
     }
@@ -315,7 +327,7 @@ function createNode($element: VirtualElementReal): Node {
 }
 
 function remount(
-  parentEl: HTMLElement,
+  parentEl: DOMElement,
   $current: VirtualElement,
   node: Node | undefined,
   componentNextSibling?: ChildNode,
@@ -366,7 +378,7 @@ function unmountRealTree($element: VirtualElement) {
   }
 }
 
-function insertBefore(parentEl: HTMLElement | DocumentFragment, node: Node, nextSibling?: ChildNode) {
+function insertBefore(parentEl: DOMElement | DocumentFragment, node: Node, nextSibling?: ChildNode) {
   if (nextSibling) {
     parentEl.insertBefore(node, nextSibling);
   } else {
@@ -386,9 +398,10 @@ function getNextSibling($current: VirtualElement): ChildNode | undefined {
 function renderChildren(
   $current: VirtualElementParent,
   $new: VirtualElementParent,
-  currentEl: HTMLElement,
+  currentEl: DOMElement,
   nextSibling?: ChildNode,
   forceMoveToEnd = false,
+  isSvg?: true,
 ) {
   if (DEBUG) {
     DEBUG_checkKeyUniqueness($new.children);
@@ -419,7 +432,7 @@ function renderChildren(
       newChildren[i],
       $new,
       i,
-      i >= currentChildrenLength ? { fragment } : { nextSibling, forceMoveToEnd },
+      i >= currentChildrenLength ? { fragment, isSvg } : { nextSibling, forceMoveToEnd, isSvg },
     );
 
     if ($renderedChild && $renderedChild !== newChildren[i]) {
@@ -434,7 +447,7 @@ function renderChildren(
 
 // This function allows to prepend/append a bunch of new DOM nodes to the top/bottom of preserved ones.
 // It also allows to selectively move particular preserved nodes within their DOM list.
-function renderFastListChildren($current: VirtualElementParent, $new: VirtualElementParent, currentEl: HTMLElement) {
+function renderFastListChildren($current: VirtualElementParent, $new: VirtualElementParent, currentEl: DOMElement) {
   const currentChildren = $current.children;
   const newChildren = $new.children;
 
@@ -549,7 +562,7 @@ function renderFastListChildren($current: VirtualElementParent, $new: VirtualEle
 }
 
 function renderFragment(
-  fragmentIndex: number, fragmentSize: number, parentEl: HTMLElement, $parent: VirtualElementParent,
+  fragmentIndex: number, fragmentSize: number, parentEl: DOMElement, $parent: VirtualElementParent,
 ) {
   const nextSibling = parentEl.childNodes[fragmentIndex];
 
@@ -576,13 +589,13 @@ function renderFragment(
   insertBefore(parentEl, fragment, nextSibling);
 }
 
-function setElementRef($element: VirtualElementTag, htmlElement: HTMLElement | undefined) {
+function setElementRef($element: VirtualElementTag, DOMElement: DOMElement | undefined) {
   const { ref } = $element.props;
 
   if (typeof ref === 'object') {
-    ref.current = htmlElement;
+    ref.current = DOMElement;
   } else if (typeof ref === 'function') {
-    ref(htmlElement);
+    ref(DOMElement);
   }
 }
 
@@ -629,7 +642,7 @@ function processControlled(tag: string, props: AnyLiteral) {
   };
 }
 
-function processUncontrolledOnMount(element: HTMLElement, props: AnyLiteral) {
+function processUncontrolledOnMount(element: DOMElement, props: AnyLiteral) {
   if (!CONTROLLABLE_TAGS.includes(element.tagName)) {
     return;
   }
@@ -643,7 +656,7 @@ function processUncontrolledOnMount(element: HTMLElement, props: AnyLiteral) {
   }
 }
 
-function updateAttributes($current: VirtualElementTag, $new: VirtualElementTag, element: HTMLElement) {
+function updateAttributes($current: VirtualElementTag, $new: VirtualElementTag, element: DOMElement, isSvg?: true) {
   processControlled(element.tagName, $new.props);
 
   const currentEntries = Object.entries($current.props);
@@ -667,14 +680,14 @@ function updateAttributes($current: VirtualElementTag, $new: VirtualElementTag, 
     const currentValue = $current.props[key];
 
     if (newValue !== undefined && newValue !== currentValue) {
-      setAttribute(element, key, newValue);
+      setAttribute(element, key, newValue, isSvg);
     }
   }
 }
 
-function setAttribute(element: HTMLElement, key: string, value: any) {
+function setAttribute(element: DOMElement, key: string, value: any, isSvg?: true) {
   if (key === 'className') {
-    updateClassName(element, value);
+    updateClassName(element, value, isSvg);
   } else if (key === 'value') {
     const inputEl = element as HTMLInputElement;
 
@@ -701,14 +714,14 @@ function setAttribute(element: HTMLElement, key: string, value: any) {
     element.innerHTML = value.__html;
   } else if (key.startsWith('on')) {
     addEventListener(element, key, value, key.endsWith('Capture'));
-  } else if (key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
+  } else if (isSvg || key.startsWith('data-') || key.startsWith('aria-') || HTML_ATTRIBUTES.has(key)) {
     element.setAttribute(key, value);
   } else if (!FILTERED_ATTRIBUTES.has(key)) {
     (element as any)[MAPPED_ATTRIBUTES[key] || key] = value;
   }
 }
 
-function removeAttribute(element: HTMLElement, key: string, value: any) {
+function removeAttribute(element: DOMElement, key: string, value: any) {
   if (key === 'className') {
     updateClassName(element, '');
   } else if (key === 'value') {
@@ -724,10 +737,16 @@ function removeAttribute(element: HTMLElement, key: string, value: any) {
   }
 }
 
-function updateClassName(element: HTMLElement, value: string) {
+function updateClassName(element: DOMElement, value: string, isSvg?: true) {
+  if (isSvg) {
+    element.setAttribute('class', value);
+    return;
+  }
+
+  const htmlElement = element as HTMLElement;
   const extra = extraClasses.get(element);
   if (!extra) {
-    element.className = value;
+    htmlElement.className = value;
     return;
   }
 
@@ -736,10 +755,10 @@ function updateClassName(element: HTMLElement, value: string) {
     extraArray.push(value);
   }
 
-  element.className = extraArray.join(' ');
+  htmlElement.className = extraArray.join(' ');
 }
 
-function updateStyle(element: HTMLElement, value: string) {
+function updateStyle(element: DOMElement, value: string) {
   element.style.cssText = value;
 
   const extraObject = extraStyles.get(element);
@@ -748,7 +767,7 @@ function updateStyle(element: HTMLElement, value: string) {
   }
 }
 
-export function addExtraClass(element: Element, className: string, forceSingle = false) {
+export function addExtraClass(element: DOMElement, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (classNames.length > 1) {
@@ -770,7 +789,7 @@ export function addExtraClass(element: Element, className: string, forceSingle =
   }
 }
 
-export function removeExtraClass(element: Element, className: string, forceSingle = false) {
+export function removeExtraClass(element: DOMElement, className: string, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (classNames.length > 1) {
@@ -794,7 +813,7 @@ export function removeExtraClass(element: Element, className: string, forceSingl
   }
 }
 
-export function toggleExtraClass(element: Element, className: string, force?: boolean, forceSingle = false) {
+export function toggleExtraClass(element: DOMElement, className: string, force?: boolean, forceSingle = false) {
   if (!forceSingle) {
     const classNames = className.split(' ');
     if (classNames.length > 1) {
@@ -815,12 +834,12 @@ export function toggleExtraClass(element: Element, className: string, force?: bo
   }
 }
 
-export function setExtraStyles(element: HTMLElement, styles: Partial<CSSStyleDeclaration> & AnyLiteral) {
+export function setExtraStyles(element: DOMElement, styles: Partial<CSSStyleDeclaration> & AnyLiteral) {
   extraStyles.set(element, styles);
   applyExtraStyles(element);
 }
 
-function applyExtraStyles(element: HTMLElement) {
+function applyExtraStyles(element: DOMElement) {
   const standardStyles = Object.entries(extraStyles.get(element)!).reduce<Record<string, string>>(
     (acc, [prop, value]) => {
       if (prop.startsWith('--')) {
