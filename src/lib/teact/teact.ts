@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react';
-import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
-import { throttleWith } from '../../util/schedulers';
-import { orderBy } from '../../util/iteratees';
 import { logUnequalProps } from '../../util/arePropsShallowEqual';
 import { incrementOverlayCounter } from '../../util/debugOverlay';
-import { isSignal } from '../../util/signals';
+import { orderBy } from '../../util/iteratees';
 import safeExec from '../../util/safeExec';
+import { throttleWith } from '../../util/schedulers';
+import { isSignal } from '../../util/signals';
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 export type Props = AnyLiteral;
 export type FC<P extends Props = any> = (props: P) => any;
@@ -170,8 +170,6 @@ function createElement(
   props: Props,
   ...children: any[]
 ): VirtualElementParent | VirtualElementChildren {
-  children = children.flat();
-
   if (source === Fragment) {
     return buildFragmentElement(children);
   } else if (typeof source === 'function') {
@@ -184,18 +182,13 @@ function createElement(
 function buildFragmentElement(children: any[]): VirtualElementFragment {
   return {
     type: VirtualElementTypesEnum.Fragment,
-    children: dropEmptyTail(children, true).map(buildChildElement),
+    children: buildChildren(children, true),
   };
 }
 
 function createComponentInstance(Component: FC, props: Props, children: any[]): VirtualElementComponent {
-  let parsedChildren: any | any[] | undefined;
-  if (children.length === 0) {
-    parsedChildren = undefined;
-  } else if (children.length === 1) {
-    [parsedChildren] = children;
-  } else {
-    parsedChildren = children;
+  if (children?.length) {
+    props.children = children.length === 1 ? children[0] : children;
   }
 
   const componentInstance: ComponentInstance = {
@@ -203,10 +196,7 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
     $element: {} as VirtualElementComponent,
     Component,
     name: Component.name,
-    props: {
-      ...props,
-      ...(parsedChildren && { children: parsedChildren }),
-    },
+    props,
     mountState: MountState.New,
     hooks: {
       state: {
@@ -235,13 +225,13 @@ function createComponentInstance(Component: FC, props: Props, children: any[]): 
 
 function buildComponentElement(
   componentInstance: ComponentInstance,
-  children: VirtualElementChildren = [],
+  children?: VirtualElementChildren,
 ): VirtualElementComponent {
   return {
     type: VirtualElementTypesEnum.Component,
     componentInstance,
     props: componentInstance.props,
-    children: dropEmptyTail(children, true).map(buildChildElement),
+    children: children ? buildChildren(children, true) : [],
   };
 }
 
@@ -250,8 +240,24 @@ function buildTagElement(tag: string, props: Props, children: any[]): VirtualEle
     type: VirtualElementTypesEnum.Tag,
     tag,
     props,
-    children: dropEmptyTail(children).map(buildChildElement),
+    children: buildChildren(children),
   };
+}
+
+function buildChildren(children: any[], noEmpty = false): VirtualElement[] {
+  const cleanChildren = dropEmptyTail(children, noEmpty);
+  const newChildren = [];
+
+  for (let i = 0, l = cleanChildren.length; i < l; i++) {
+    const child = cleanChildren[i];
+    if (Array.isArray(child)) {
+      newChildren.push(...buildChildren(child, noEmpty));
+    } else {
+      newChildren.push(buildChildElement(child));
+    }
+  }
+
+  return newChildren;
 }
 
 // We only need placeholders in the middle of collection (to ensure other elements order).
@@ -276,29 +282,20 @@ function dropEmptyTail(children: any[], noEmpty = false) {
 }
 
 function isEmptyPlaceholder(child: any) {
-  // eslint-disable-next-line no-null/no-null
-  return child === false || child === null || child === undefined;
+  return !child && child !== 0;
 }
 
 function buildChildElement(child: any): VirtualElement {
   if (isEmptyPlaceholder(child)) {
-    return buildEmptyElement();
+    return { type: VirtualElementTypesEnum.Empty };
   } else if (isParentElement(child)) {
     return child;
   } else {
-    return buildTextElement(child);
+    return {
+      type: VirtualElementTypesEnum.Text,
+      value: String(child),
+    };
   }
-}
-
-function buildTextElement(value: any): VirtualElementText {
-  return {
-    type: VirtualElementTypesEnum.Text,
-    value: String(value),
-  };
-}
-
-function buildEmptyElement(): VirtualElementEmpty {
-  return { type: VirtualElementTypesEnum.Empty };
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -584,12 +581,13 @@ export function useState<T>(): [T | undefined, StateHookSetter<T | undefined>];
 export function useState<T>(initial: T, debugKey?: string): [T, StateHookSetter<T>];
 export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter<T>] {
   const { cursor, byCursor } = renderingInstance.hooks.state;
+  const componentInstance = renderingInstance;
 
   if (byCursor[cursor] === undefined) {
     byCursor[cursor] = {
       value: initial,
       nextValue: initial,
-      setter: ((componentInstance) => (newValue: ((current: T) => T) | T) => {
+      setter: (newValue: ((current: T) => T) | T) => {
         if (componentInstance.mountState === MountState.Unmounted) {
           return;
         }
@@ -616,7 +614,7 @@ export function useState<T>(initial?: T, debugKey?: string): [T, StateHookSetter
             byCursor[cursor].nextValue,
           );
         }
-      })(renderingInstance),
+      },
     };
   }
 
