@@ -11,12 +11,14 @@ import generateUniqueId from '../../../util/generateUniqueId';
 import { pause } from '../../../util/schedulers';
 import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import Deferred from '../../../util/Deferred';
+import { logDebugMessage } from '../../../util/debugConsole';
 
 type RequestStates = {
   messageId: string;
   resolve: Function;
   reject: Function;
   callback?: AnyToVoidFunction;
+  DEBUG_payload?: any;
 };
 
 const HEALTH_CHECK_TIMEOUT = 150;
@@ -82,6 +84,13 @@ export function initApi(onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
     worker = new Worker(new URL('./worker.ts', import.meta.url));
     subscribeToWorker(onUpdate);
 
+    if (requestStates.size > 0) {
+      requestStates.forEach((value) => {
+        // eslint-disable-next-line no-console
+        console.error('Hanging request', value.DEBUG_payload);
+      });
+    }
+
     if (initialArgs.platform === 'iOS') {
       setupIosHealthCheck();
     }
@@ -124,6 +133,13 @@ export function callApiOnMasterTab(payload: any) {
     type: 'callApi',
     token: getCurrentTabId(),
     ...payload,
+  });
+}
+
+export function setShouldEnableDebugLog(value: boolean) {
+  return makeRequest({
+    type: 'toggleDebugMode',
+    isEnabled: value,
   });
 }
 
@@ -244,6 +260,7 @@ export function cancelApiProgressMaster(messageId: string) {
 
 function subscribeToWorker(onUpdate: OnApiUpdate) {
   worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
+    if (!data) return;
     if (data.type === 'update') {
       onUpdate(data.update);
     } else if (data.type === 'methodResponse') {
@@ -252,6 +269,10 @@ function subscribeToWorker(onUpdate: OnApiUpdate) {
       handleMethodCallback(data);
     } else if (data.type === 'unhandledError') {
       throw new Error(data.error?.message);
+    } else if (data.type === 'sendBeacon') {
+      navigator.sendBeacon(data.url, data.data);
+    } else if (data.type === 'debugLog') {
+      logDebugMessage(data.level, ...data.args);
     }
   });
 }
@@ -344,6 +365,8 @@ function makeRequest(message: OriginRequest) {
     requestStatesByCallback.set(callback, requestState);
   }
 
+  requestState.DEBUG_payload = payload;
+
   requestStates.set(messageId, requestState);
 
   promise
@@ -388,7 +411,7 @@ async function ensureWorkerPing() {
     if (Date.now() - startedAt >= HEALTH_CHECK_MIN_DELAY) {
       worker?.terminate();
       worker = undefined;
-      updateCallback({ '@type': 'requestInitApi' });
+      updateCallback({ '@type': 'requestReconnectApi' });
     }
   } finally {
     isResolved = true;

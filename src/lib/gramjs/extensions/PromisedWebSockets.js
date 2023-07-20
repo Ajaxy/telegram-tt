@@ -3,6 +3,8 @@ const { Mutex } = require('async-mutex');
 const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
+const CONNECTION_TIMEOUT = 10000;
+const MAX_TIMEOUT = 30000;
 
 class PromisedWebSockets {
     constructor(disconnectedCallback) {
@@ -16,6 +18,7 @@ class PromisedWebSockets {
         this.client = undefined;
         this.closed = true;
         this.disconnectedCallback = disconnectedCallback;
+        this.timeout = CONNECTION_TIMEOUT;
     }
 
     async readExactly(number) {
@@ -80,14 +83,20 @@ class PromisedWebSockets {
         this.website = this.getWebSocketLink(ip, port, testServers, isPremium);
         this.client = new WebSocket(this.website, 'binary');
         return new Promise((resolve, reject) => {
+            let hasResolved = false;
+            let timeout;
             this.client.onopen = () => {
                 this.receive();
                 resolve(this);
+                hasResolved = true;
+                if (timeout) clearTimeout(timeout);
             };
             this.client.onerror = (error) => {
                 // eslint-disable-next-line no-console
                 console.error('WebSocket error', error);
                 reject(error);
+                hasResolved = true;
+                if (timeout) clearTimeout(timeout);
             };
             this.client.onclose = (event) => {
                 const { code, reason, wasClean } = event;
@@ -101,7 +110,25 @@ class PromisedWebSockets {
                 if (this.disconnectedCallback) {
                     this.disconnectedCallback();
                 }
+                hasResolved = true;
+                if (timeout) clearTimeout(timeout);
             };
+
+            timeout = setTimeout(() => {
+                if (hasResolved) return;
+
+                reject(new Error('WebSocket connection timeout'));
+                this.resolveRead(false);
+                this.closed = true;
+                if (this.disconnectedCallback) {
+                    this.disconnectedCallback();
+                }
+                this.client.close();
+                this.timeout *= 2;
+                this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
+                timeout = undefined;
+            }, this.timeout);
+
             // CONTEST
             // Seems to not be working, at least in a web worker
             // eslint-disable-next-line no-restricted-globals

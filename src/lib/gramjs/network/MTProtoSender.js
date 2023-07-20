@@ -34,11 +34,17 @@ const {
     MsgsStateReq,
     MsgResendReq,
     MsgsAllInfo,
+    HttpWait,
 } = require('../tl').constructors;
 const { SecurityError } = require('../errors/Common');
 const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
+const { sendToOrigin } = require('../../../api/gramjs/worker/worker');
+
+const LONGPOLL_MAX_WAIT = 3000;
+const LONGPOLL_MAX_DELAY = 500;
+const LONGPOLL_WAIT_AFTER = 150;
 
 /**
  * MTProto Mobile Protocol sender
@@ -57,7 +63,11 @@ class MTProtoSender {
     static DEFAULT_OPTIONS = {
         logger: undefined,
         retries: Infinity,
+        retriesToFallback: 1,
         delay: 2000,
+        retryMainConnectionDelay: 10000,
+        shouldForceHttpTransport: false,
+        shouldAllowHttpTransport: false,
         autoReconnect: true,
         connectTimeout: undefined,
         authKeyCallback: undefined,
@@ -65,6 +75,8 @@ class MTProtoSender {
         autoReconnectCallback: undefined,
         isMainSender: undefined,
         onConnectionBreak: undefined,
+        isExported: undefined,
+        getShouldDebugExportedSenders: undefined,
     };
 
     /**
@@ -74,17 +86,26 @@ class MTProtoSender {
     constructor(authKey, opts) {
         const args = { ...MTProtoSender.DEFAULT_OPTIONS, ...opts };
         this._connection = undefined;
+        this._fallbackConnection = undefined;
+        this._shouldForceHttpTransport = args.shouldForceHttpTransport;
+        this._shouldAllowHttpTransport = args.shouldAllowHttpTransport;
         this._log = args.logger;
         this._dcId = args.dcId;
+        this._senderIndex = args.senderIndex;
         this._retries = args.retries;
+        this._retriesToFallback = args.retriesToFallback;
         this._delay = args.delay;
+        this._retryMainConnectionDelay = args.retryMainConnectionDelay;
         this._autoReconnect = args.autoReconnect;
         this._connectTimeout = args.connectTimeout;
         this._authKeyCallback = args.authKeyCallback;
         this._updateCallback = args.updateCallback;
         this._autoReconnectCallback = args.autoReconnectCallback;
         this._isMainSender = args.isMainSender;
+        this._isExported = args.isExported;
         this._onConnectionBreak = args.onConnectionBreak;
+        this._isFallback = false;
+        this._getShouldDebugExportedSenders = args.getShouldDebugExportedSenders;
 
         /**
          * whether we disconnected ourself or telegram did it.
@@ -107,6 +128,7 @@ class MTProtoSender {
          * We need to join the loops upon disconnection
          */
         this._send_loop_handle = undefined;
+        this._long_poll_loop_handle = undefined;
         this._recv_loop_handle = undefined;
 
         /**
@@ -120,6 +142,7 @@ class MTProtoSender {
          * Note that here we're also storing their ``_RequestState``.
          */
         this._send_queue = new MessagePacker(this._state, this._log);
+        this._send_queue_long_poll = new MessagePacker(this._state, this._log);
 
         /**
          * Sent states are remembered until a response is received.
@@ -162,13 +185,34 @@ class MTProtoSender {
 
     // Public API
 
+    logWithIndexCallback(level) {
+        return (...args) => {
+            if (!this._getShouldDebugExportedSenders
+                || !this._getShouldDebugExportedSenders()) return;
+            // eslint-disable-next-line no-console
+            console[level](`[${this._isExported ? `idx=${this._senderIndex} ` : 'M '}dcId=${this._dcId}]`, ...args);
+        };
+    }
+
+    logWithIndex = {
+        debug: this.logWithIndexCallback('debug'),
+        log: this.logWithIndexCallback('log'),
+        warn: this.logWithIndexCallback('warn'),
+        error: this.logWithIndexCallback('error'),
+    };
+
+    getConnection() {
+        return this._isFallback ? this._fallbackConnection : this._connection;
+    }
+
     /**
      * Connects to the specified given connection using the given auth key.
      * @param connection
      * @param [force]
+     * @param fallbackConnection
      * @returns {Promise<boolean>}
      */
-    async connect(connection, force) {
+    async connect(connection, force, fallbackConnection) {
         this.userDisconnected = false;
 
         if (this._user_connected && !force) {
@@ -176,11 +220,20 @@ class MTProtoSender {
             return false;
         }
         this.isConnecting = true;
+        this._isFallback = this._shouldForceHttpTransport && this._shouldAllowHttpTransport;
         this._connection = connection;
+        this._fallbackConnection = fallbackConnection;
 
-        for (let attempt = 0; attempt < this._retries; attempt++) {
+        for (let attempt = 0; attempt < this._retries + this._retriesToFallback; attempt++) {
             try {
-                await this._connect();
+                if (attempt >= this._retriesToFallback && this._shouldAllowHttpTransport) {
+                    this._isFallback = true;
+                    this.logWithIndex.warn('Using fallback connection');
+                    this._log.warn('Using fallback connection');
+                }
+                this.logWithIndex.warn('Connecting...');
+                await this._connect(this.getConnection());
+                this.logWithIndex.warn('Connected!');
                 if (this._updateCallback) {
                     this._updateCallback(new UpdateConnectionState(UpdateConnectionState.connected));
                 }
@@ -189,7 +242,7 @@ class MTProtoSender {
                 if (this._updateCallback && attempt === 0) {
                     this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
                 }
-                this._log.error(`WebSocket connection failed attempt: ${attempt + 1}`);
+                this._log.error(`${this._isFallback ? 'HTTP' : 'WebSocket'} connection failed attempt: ${attempt + 1}`);
                 // eslint-disable-next-line no-console
                 console.error(err);
                 await Helpers.sleep(this._delay);
@@ -197,7 +250,39 @@ class MTProtoSender {
         }
         this.isConnecting = false;
 
+        if (this._isFallback && !this._shouldForceHttpTransport) {
+            void this.tryReconnectToMain();
+        }
+
         return true;
+    }
+
+    async tryReconnectToMain() {
+        if (!this.isConnecting && this._isFallback && !this._isReconnectingToMain && !this.isReconnecting
+            && !this._shouldForceHttpTransport && !this._isExported) {
+            this._log.debug('Trying to reconnect to main connection');
+            this._isReconnectingToMain = true;
+            try {
+                await this._connection.connect();
+                this._log.info('Reconnected to main connection');
+                this.logWithIndex.warn('Reconnected to main connection');
+                this.isReconnecting = true;
+                await this._disconnect(this._fallbackConnection);
+                await this.connect(this._connection, true, this._fallbackConnection);
+                this.isReconnecting = false;
+                this._isReconnectingToMain = false;
+            } catch (e) {
+                this.isReconnecting = false;
+                this._isReconnectingToMain = false;
+                this._log.error(
+                    `Failed to reconnect to main connection, retrying in ${this._retryMainConnectionDelay}ms`,
+                );
+                await Helpers.sleep(this._retryMainConnectionDelay);
+                void this.tryReconnectToMain();
+            }
+        } else {
+            await Helpers.sleep(this._retryMainConnectionDelay);
+        }
     }
 
     isConnected() {
@@ -210,7 +295,8 @@ class MTProtoSender {
      */
     async disconnect() {
         this.userDisconnected = true;
-        await this._disconnect();
+        this.logWithIndex.warn('Disconnecting...');
+        await this._disconnect(this.getConnection());
     }
 
     /**
@@ -237,16 +323,33 @@ class MTProtoSender {
      impossible to await receive a result that was never sent.
      * @param request
      * @param abortSignal
+     * @param isLongPoll
      * @returns {RequestState}
      */
-    send(request, abortSignal) {
+    send(request, abortSignal, isLongPoll = false) {
         const state = new RequestState(request, abortSignal);
-        this._send_queue.append(state);
+        if (!isLongPoll) {
+            this.logWithIndex.debug(`Send ${request.className}`);
+            this._send_queue.append(state);
+        } else {
+            this._send_queue_long_poll.append(state);
+        }
         return state.promise;
     }
 
     addStateToQueue(state) {
         this._send_queue.append(state);
+    }
+
+    async sendBeacon(request) {
+        if (!this._user_connected) {
+            throw new Error('Cannot send requests while disconnected');
+        }
+        const state = new RequestState(request, undefined);
+        const data = await this._send_queue.getBeacon(state);
+        const encryptedData = await this._state.encryptMessageData(data);
+
+        sendToOrigin({ type: 'sendBeacon', data: encryptedData, url: this._fallbackConnection.socket.website });
     }
 
     /**
@@ -256,13 +359,15 @@ class MTProtoSender {
      * @returns {Promise<void>}
      * @private
      */
-    async _connect() {
-        this._log.info('Connecting to {0}...'.replace('{0}', this._connection));
-        await this._connection.connect();
-        this._log.debug('Connection success!');
-        // process.exit(0)
+    async _connect(connection) {
+        if (!connection.isConnected()) {
+            this._log.info('Connecting to {0}...'.replace('{0}', connection));
+            await connection.connect();
+            this._log.debug('Connection success!');
+        }
+
         if (!this.authKey.getKey()) {
-            const plain = new MtProtoPlainSender(this._connection, this._log);
+            const plain = new MtProtoPlainSender(connection, this._log);
             this._log.debug('New auth_key attempt ...');
             const res = await doAuthentication(plain, this._log);
             this._log.debug('Generated new auth_key successfully');
@@ -290,33 +395,80 @@ class MTProtoSender {
         this._user_connected = true;
         this.isReconnecting = false;
 
-        this._log.debug('Starting send loop');
-        this._send_loop_handle = this._sendLoop();
+        if (!this._send_loop_handle) {
+            this._log.debug('Starting send loop');
+            this._send_loop_handle = this._sendLoop();
+        }
 
-        this._log.debug('Starting receive loop');
-        this._recv_loop_handle = this._recvLoop();
+        if (!this._recv_loop_handle) {
+            this._log.debug('Starting receive loop');
+            this._recv_loop_handle = this._recvLoop();
+        }
+
+        if (!this._long_poll_loop_handle && connection.shouldLongPoll) {
+            this._log.debug('Starting long-poll loop');
+            this._long_poll_loop_handle = this._longPollLoop();
+        }
 
         // _disconnected only completes after manual disconnection
         // or errors after which the sender cannot continue such
         // as failing to reconnect or any unexpected error.
 
-        this._log.info('Connection to %s complete!'.replace('%s', this._connection.toString()));
+        this._log.info('Connection to %s complete!'.replace('%s', connection.toString()));
     }
 
-    async _disconnect() {
+    async _disconnect(connection) {
         if (this._updateCallback) {
             this._updateCallback(new UpdateConnectionState(UpdateConnectionState.disconnected));
         }
 
-        if (this._connection === undefined) {
+        if (connection === undefined) {
             this._log.info('Not disconnecting (already have no connection)');
             return;
         }
 
-        this._log.info('Disconnecting from %s...'.replace('%s', this._connection.toString()));
+        this._log.info('Disconnecting from %s...'.replace('%s', connection.toString()));
         this._user_connected = false;
         this._log.debug('Closing current connection...');
-        await this._connection.disconnect();
+        this.logWithIndex.warn('Disconnecting');
+        await connection.disconnect();
+    }
+
+    async _longPollLoop() {
+        while (this._user_connected && !this.isReconnecting && this._isFallback
+            && this.getConnection().shouldLongPoll) {
+            await this._send_queue_long_poll.wait();
+
+            const res = await this._send_queue_long_poll.get();
+
+            if (this.isReconnecting || !this._isFallback) {
+                this._long_poll_loop_handle = undefined;
+                return;
+            }
+
+            if (!res) {
+                continue;
+            }
+            let { data } = res;
+            const { batch } = res;
+            this._log.debug(`Encrypting ${batch.length} message(s) in ${data.length} bytes for sending`);
+
+            data = await this._state.encryptMessageData(data);
+
+            try {
+                await this._fallbackConnection.send(data);
+            } catch (e) {
+                this._log.error(e);
+                this._log.info('Connection closed while sending data');
+                this._long_poll_loop_handle = undefined;
+                return;
+            }
+
+            this.isSendingLongPoll = false;
+            this.checkLongPoll();
+        }
+
+        this._long_poll_loop_handle = undefined;
     }
 
     /**
@@ -332,22 +484,46 @@ class MTProtoSender {
         this._pending_state.clear();
 
         while (this._user_connected && !this.isReconnecting) {
-            if (this._pending_ack.size) {
-                const ack = new RequestState(new MsgsAck({ msgIds: Array(...this._pending_ack) }));
-                this._send_queue.append(ack);
-                this._last_acks.push(ack);
-                if (this._last_acks.length >= 10) {
-                    this._last_acks.shift();
+            const appendAcks = () => {
+                if (this._pending_ack.size) {
+                    const ack = new RequestState(new MsgsAck({ msgIds: Array(...this._pending_ack) }));
+                    this._send_queue.append(ack);
+                    this._last_acks.push(ack);
+                    if (this._last_acks.length >= 10) {
+                        this._last_acks.shift();
+                    }
+                    this._pending_ack.clear();
                 }
-                this._pending_ack.clear();
-            }
-            this._log.debug(`Waiting for messages to send...${this.isReconnecting}`);
+            };
+
+            appendAcks();
+
+            this.logWithIndex.debug(`Waiting for messages to send... ${this.isReconnecting}`);
+            this._log.debug(`Waiting for messages to send... ${this.isReconnecting}`);
             // TODO Wait for the connection send queue to be empty?
             // This means that while it's not empty we can wait for
             // more messages to be added to the send queue.
+            await this._send_queue.wait();
+
+            if (this._isFallback) {
+                // We don't long-poll on main loop, instead we have a separate loop for that
+                this.send(new HttpWait({
+                    maxDelay: 0,
+                    waitAfter: 0,
+                    maxWait: 0,
+                }));
+            }
+
+            // If we've had new ACKs appended while waiting for messages to send, add them to queue
+            appendAcks();
+
             const res = await this._send_queue.get();
 
+            this.logWithIndex.debug(`Got ${res?.batch.length} message(s) to send`);
+
             if (this.isReconnecting) {
+                this.logWithIndex.debug('Reconnecting :(');
+                this._send_loop_handle = undefined;
                 return;
             }
 
@@ -357,14 +533,17 @@ class MTProtoSender {
             let { data } = res;
             const { batch } = res;
             this._log.debug(`Encrypting ${batch.length} message(s) in ${data.length} bytes for sending`);
+            this.logWithIndex.debug('Sending', batch.map((m) => m.request.className));
 
             data = await this._state.encryptMessageData(data);
 
             try {
-                await this._connection.send(data);
+                await this.getConnection().send(data);
             } catch (e) {
+                this.logWithIndex.debug(`Connection closed while sending data ${e}`);
                 this._log.error(e);
                 this._log.info('Connection closed while sending data');
+                this._send_loop_handle = undefined;
                 return;
             }
             for (const state of batch) {
@@ -372,16 +551,25 @@ class MTProtoSender {
                     if (state.request.classType === 'request') {
                         this._pending_state.set(state.msgId, state);
                     }
+                    if (state.request.className === 'HttpWait') {
+                        state.resolve();
+                    }
                 } else {
                     for (const s of state) {
                         if (s.request.classType === 'request') {
                             this._pending_state.set(s.msgId, s);
                         }
+                        if (s.request.className === 'HttpWait') {
+                            state.resolve();
+                        }
                     }
                 }
             }
+            this.logWithIndex.debug('Encrypted messages put in a queue to be sent');
             this._log.debug('Encrypted messages put in a queue to be sent');
         }
+
+        this._send_loop_handle = undefined;
     }
 
     async _recvLoop() {
@@ -389,10 +577,10 @@ class MTProtoSender {
         let message;
 
         while (this._user_connected && !this.isReconnecting) {
-            // this._log.debug('Receiving items from the network...');
             this._log.debug('Receiving items from the network...');
+            this.logWithIndex.debug('Receiving items from the network...');
             try {
-                body = await this._connection.recv();
+                body = await this.getConnection().recv();
             } catch (e) {
                 // this._log.info('Connection closed while receiving data');
                 /** when the server disconnects us we want to reconnect */
@@ -401,11 +589,14 @@ class MTProtoSender {
                     this._log.warn('Connection closed while receiving data');
                     this.reconnect();
                 }
+                this._recv_loop_handle = undefined;
                 return;
             }
+
             try {
                 message = await this._state.decryptMessageData(body);
             } catch (e) {
+                this.logWithIndex.debug(`Error while receiving items from the network ${e.toString()}`);
                 if (e instanceof TypeNotFoundError) {
                     // Received object which we don't know how to deserialize
                     this._log.info(`Type ${e.invalidConstructorId} not found, remaining data ${e.remaining}`);
@@ -426,11 +617,13 @@ class MTProtoSender {
                         this._log.warn(`Invalid buffer ${e.code} for dc ${this._dcId}`);
                         this.reconnect();
                     }
+                    this._recv_loop_handle = undefined;
                     return;
                 } else {
                     this._log.error('Unhandled error while receiving data');
                     this._log.error(e);
                     this.reconnect();
+                    this._recv_loop_handle = undefined;
                     return;
                 }
             }
@@ -448,7 +641,22 @@ class MTProtoSender {
                     this._log.error(e);
                 }
             }
+
+            void this.checkLongPoll();
         }
+
+        this._recv_loop_handle = undefined;
+    }
+
+    checkLongPoll() {
+        if (this.isSendingLongPoll || !this._isFallback) return;
+
+        this.isSendingLongPoll = true;
+        this.send(new HttpWait({
+            maxDelay: LONGPOLL_MAX_DELAY,
+            waitAfter: LONGPOLL_WAIT_AFTER,
+            maxWait: LONGPOLL_MAX_WAIT,
+        }), undefined, true);
     }
 
     _handleBadAuthKey(shouldSkipForMain) {
@@ -476,7 +684,14 @@ class MTProtoSender {
      * @private
      */
     async _processMessage(message) {
+        if (message.obj.className === 'MsgsAck') return;
+        this.logWithIndex.debug(`Process message ${message.obj.className}`);
+
         this._pending_ack.add(message.msgId);
+
+        if (this.getConnection().shouldLongPoll) {
+            this._send_queue.setReady(true);
+        }
         // eslint-disable-next-line require-atomic-updates
         message.obj = await message.obj;
         let handler = this._handlers[message.obj.CONSTRUCTOR_ID];
@@ -549,14 +764,18 @@ class MTProtoSender {
                     throw new TypeNotFoundError('Not an upload.File');
                 }
             } catch (e) {
-                this._log.error(e);
                 if (e instanceof TypeNotFoundError) {
                     this._log.info(`Received response without parent request: ${result.body}`);
                     return;
-                } else {
-                    throw e;
+                } else if (this._isFallback) {
+                    // If we're using HTTP transport, there might be a chance that the response comes through
+                    // multiple times if didn't send acknowledgment in time, so we should just ignore it
+                    return;
                 }
+
+                throw e;
             }
+            return;
         }
 
         if (result.error) {
@@ -569,6 +788,7 @@ class MTProtoSender {
             try {
                 const reader = new BinaryReader(result.body);
                 const read = state.request.readResult(reader);
+                this.logWithIndex.debug('Handling RPC result', read);
                 state.resolve(read);
             } catch (err) {
                 state.reject(err);
@@ -808,6 +1028,7 @@ class MTProtoSender {
             // in case of internal server issues.
             Helpers.sleep(1000)
                 .then(() => {
+                    this.logWithIndex.log('Reconnecting...');
                     this._log.info('Started reconnecting');
                     this._reconnect();
                 });
@@ -817,7 +1038,8 @@ class MTProtoSender {
     async _reconnect() {
         this._log.debug('Closing current connection...');
         try {
-            await this._disconnect();
+            this.logWithIndex.warn('[Reconnect] Closing current connection...');
+            await this._disconnect(this.getConnection());
         } catch (err) {
             this._log.warn(err);
         }
@@ -833,9 +1055,18 @@ class MTProtoSender {
             this._connection._log,
             this._connection._testServers,
         );
-        await this.connect(newConnection, true);
+        const newFallbackConnection = new this._fallbackConnection.constructor(
+            this._connection._ip,
+            this._connection._port,
+            this._connection._dcId,
+            this._connection._log,
+            this._connection._testServers,
+        );
+        await this.connect(newConnection, true, newFallbackConnection);
 
         this.isReconnecting = false;
+        this._send_queue.prepend(this._pending_state.values());
+        this._pending_state.clear();
 
         if (this._autoReconnectCallback) {
             await this._autoReconnectCallback();

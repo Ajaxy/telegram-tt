@@ -2302,6 +2302,7 @@ export interface ActionPayloads {
     shouldDiscard?: boolean;
     shouldRemove?: boolean;
     rejoin?: ActionPayloads['joinGroupCall'];
+    isPageUnload?: boolean;
   } & WithTabId) | undefined;
 
   toggleGroupCallVideo: undefined;
@@ -2335,7 +2336,7 @@ export interface ActionPayloads {
     isVideo?: boolean;
   } & WithTabId;
   sendSignalingData: P2pMessage;
-  hangUp: WithTabId | undefined;
+  hangUp: ({ isPageUnload?: boolean } & WithTabId) | undefined;
   acceptCall: undefined;
   setCallRating: {
     rating: number;
@@ -2361,6 +2362,8 @@ export interface ActionPayloads {
   skipLockOnUnload: undefined;
 
   // Settings
+  updateShouldDebugExportedSenders: undefined;
+  updateShouldEnableDebugLog: undefined;
   loadConfig: undefined;
   loadAppConfig: {
     hash: number;

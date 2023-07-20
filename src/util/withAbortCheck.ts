@@ -4,8 +4,8 @@ export class AbortError extends Error {
   }
 }
 
-export default async function withAbortCheck<T>(abortSignal: AbortSignal, cb: Promise<T>): Promise<T> {
-  const result = await cb;
+export default async function withAbortCheck<T>(abortSignal: AbortSignal, promise: Promise<T>): Promise<T> {
+  const result = await promise;
 
   if (abortSignal?.aborted) {
     throw new AbortError();

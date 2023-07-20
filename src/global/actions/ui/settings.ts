@@ -1,6 +1,8 @@
 import { addCallback } from '../../../lib/teact/teactn';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { addActionHandler, getActions } from '../../index';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 
 import { SettingsScreens } from '../../../types';
 import type { ActionReturnType, GlobalState } from '../../types';
@@ -13,12 +15,14 @@ import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import { selectCanAnimateInterface, selectChatFolder } from '../../selectors';
+import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
+import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 
 let prevGlobal: GlobalState | undefined;
 
 addCallback((global: GlobalState) => {
   // eslint-disable-next-line eslint-multitab-tt/no-getactions-in-actions
-  const { updatePageTitle } = getActions();
+  const { updatePageTitle, updateShouldDebugExportedSenders, updateShouldEnableDebugLog } = getActions();
 
   const oldGlobal = prevGlobal;
   prevGlobal = global;
@@ -62,6 +66,53 @@ addCallback((global: GlobalState) => {
   if (settings.canDisplayChatInTitle !== prevSettings.canDisplayChatInTitle) {
     updatePageTitle();
   }
+
+  if (settings.shouldForceHttpTransport !== prevSettings.shouldForceHttpTransport) {
+    callApi('setForceHttpTransport', Boolean(settings.shouldForceHttpTransport));
+  }
+
+  if (settings.shouldAllowHttpTransport !== prevSettings.shouldAllowHttpTransport) {
+    callApi('setAllowHttpTransport', Boolean(settings.shouldAllowHttpTransport));
+    if (!settings.shouldAllowHttpTransport && settings.shouldForceHttpTransport) {
+      global = getGlobal();
+      global = {
+        ...global,
+        settings: {
+          ...global.settings,
+          byKey: {
+            ...global.settings.byKey,
+            shouldForceHttpTransport: false,
+          },
+        },
+      };
+      setGlobal(global);
+    }
+  }
+
+  if (settings.shouldDebugExportedSenders !== prevSettings.shouldDebugExportedSenders) {
+    updateShouldDebugExportedSenders();
+  }
+
+  if (settings.shouldCollectDebugLogs !== prevSettings.shouldCollectDebugLogs) {
+    updateShouldEnableDebugLog();
+  }
+});
+
+addActionHandler('updateShouldEnableDebugLog', (global): ActionReturnType => {
+  const { settings } = global;
+
+  if (settings.byKey.shouldCollectDebugLogs) {
+    setShouldEnableDebugLog(true);
+    initDebugConsole();
+  } else {
+    setShouldEnableDebugLog(false);
+    disableDebugConsole();
+  }
+});
+
+addActionHandler('updateShouldDebugExportedSenders', (global): ActionReturnType => {
+  const { settings } = global;
+  callApi('setShouldDebugExportedSenders', Boolean(settings.byKey.shouldDebugExportedSenders));
 });
 
 addActionHandler('setSettingOption', (global, actions, payload): ActionReturnType => {

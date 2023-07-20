@@ -1,18 +1,46 @@
+/* eslint-disable no-console */
+
 import type { ApiOnProgress, ApiUpdate } from '../../types';
 import type { OriginMessageEvent, WorkerMessageData } from './types';
 
 import { DEBUG } from '../../../config';
 import { initApi, callApi, cancelApiProgress } from '../provider';
 import { log } from '../helpers';
+import type { DebugLevel } from '../../../util/debugConsole';
+import { DEBUG_LEVELS } from '../../../util/debugConsole';
 
 declare const self: WorkerGlobalScope;
+
+const ORIGINAL_FUNCTIONS = DEBUG_LEVELS.reduce((acc, level) => {
+  acc[level] = console[level];
+  return acc;
+}, {} as Record<DebugLevel, (...args: any[]) => void>);
+
+function enableDebugLog() {
+  DEBUG_LEVELS.forEach((level) => {
+    console[level] = (...args: any[]) => {
+      postMessage({
+        type: 'debugLog',
+        level,
+        args: JSON.parse(JSON.stringify(args, (key, value) => (typeof value === 'bigint'
+          ? value.toString()
+          : value))),
+      });
+    };
+  });
+}
+
+function disableDebugLog() {
+  DEBUG_LEVELS.forEach((level) => {
+    console[level] = ORIGINAL_FUNCTIONS[level];
+  });
+}
 
 handleErrors();
 
 const callbackState = new Map<string, ApiOnProgress>();
 
 if (DEBUG) {
-  // eslint-disable-next-line no-console
   console.log('>>> FINISH LOAD WORKER');
 }
 
@@ -70,7 +98,6 @@ onmessage = async (message: OriginMessageEvent) => {
         }
       } catch (error: any) {
         if (DEBUG) {
-          // eslint-disable-next-line no-console
           console.error(error);
         }
 
@@ -105,18 +132,23 @@ onmessage = async (message: OriginMessageEvent) => {
 
       break;
     }
+    case 'toggleDebugMode': {
+      if (data.isEnabled) {
+        enableDebugLog();
+      } else {
+        disableDebugLog();
+      }
+    }
   }
 };
 
 function handleErrors() {
   self.onerror = (e) => {
-    // eslint-disable-next-line no-console
     console.error(e);
     sendToOrigin({ type: 'unhandledError', error: { message: e.error.message || 'Uncaught exception in worker' } });
   };
 
   self.addEventListener('unhandledrejection', (e) => {
-    // eslint-disable-next-line no-console
     console.error(e);
     sendToOrigin({ type: 'unhandledError', error: { message: e.reason.message || 'Uncaught rejection in worker' } });
   });
@@ -133,7 +165,7 @@ function onUpdate(update: ApiUpdate) {
   }
 }
 
-function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
+export function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
   if (arrayBuffer) {
     postMessage(data, [arrayBuffer]);
   } else {

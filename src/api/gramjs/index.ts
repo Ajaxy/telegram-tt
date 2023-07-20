@@ -5,4 +5,5 @@ export {
   handleMethodResponse,
   updateFullLocalDb,
   updateLocalDb,
+  setShouldEnableDebugLog,
 } from './worker/provider';

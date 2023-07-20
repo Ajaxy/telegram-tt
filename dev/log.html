@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Logs Viewer</title>
+</head>
+<body>
+  <input type="file" id="log" accept="application/json">
+  <script>
+    document.querySelector("#log").addEventListener('change', (e) => {
+      const { files } = e.target;
+      const file = files[0];
+      const json = new FileReader();
+      json.onload = (e) => {
+        const { result } = e.target;
+        const logs = JSON.parse(result);
+        logs.forEach((log) => {
+          const { level, args, date, } = log;
+          const dateStr = "[" + new Date(date).toLocaleTimeString("en-GB") + "] ";
+          if(args[0] && typeof args[0] === 'string' && args[0].startsWith("%")) {
+            args[0] = dateStr + args[0];
+          } else {
+            args.unshift(dateStr);
+          }
+          console[level](...args);
+        });
+      };
+      json.readAsText(file);
+    })
+  </script>
+</body>
+</html>

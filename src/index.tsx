@@ -54,6 +54,9 @@ async function init() {
   getActions().initShared();
   getActions().init();
 
+  getActions().updateShouldEnableDebugLog();
+  getActions().updateShouldDebugExportedSenders();
+
   if (IS_MULTITAB_SUPPORTED) {
     establishMultitabRole();
     subscribeToMasterChange((isMasterTab) => {
@@ -90,3 +93,9 @@ async function init() {
     });
   }
 }
+
+onBeforeUnload(() => {
+  const actions = getActions();
+  actions.leaveGroupCall?.({ isPageUnload: true });
+  actions.hangUp?.({ isPageUnload: true });
+});

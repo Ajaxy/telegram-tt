@@ -32,7 +32,7 @@ const HANG_UP_UI_DELAY = 500;
 addActionHandler('leaveGroupCall', async (global, actions, payload): Promise<void> => {
   const {
     isFromLibrary, shouldDiscard, shouldRemove, rejoin,
-    tabId = getCurrentTabId(),
+    isPageUnload, tabId = getCurrentTabId(),
   } = payload || {};
 
   const groupCall = selectActiveGroupCall(global);
@@ -51,7 +51,7 @@ addActionHandler('leaveGroupCall', async (global, actions, payload): Promise<voi
   setGlobal(global);
 
   await callApi('leaveGroupCall', {
-    call: groupCall,
+    call: groupCall, isPageUnload,
   });
   await callApi('abortRequestGroup', 'call');
 
@@ -331,7 +331,7 @@ addActionHandler('setCallRating', (global, actions, payload): ActionReturnType =
 });
 
 addActionHandler('hangUp', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { isPageUnload, tabId = getCurrentTabId() } = payload || {};
   const { phoneCall } = global;
 
   if (!phoneCall) return undefined;
@@ -354,7 +354,7 @@ addActionHandler('hangUp', (global, actions, payload): ActionReturnType => {
 
   callApi('destroyPhoneCallState');
   stopPhoneCall();
-  callApi('discardCall', { call: phoneCall });
+  callApi('discardCall', { call: phoneCall, isPageUnload });
 
   if (phoneCall.state === 'requesting') {
     global = {

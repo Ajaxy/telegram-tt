@@ -59,7 +59,8 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   const {
     userAgent, platform, sessionData, isTest, isMovSupported, isWebmSupported, maxBufferSize, webAuthToken, dcId,
-    mockScenario,
+    mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
+    shouldDebugExportedSenders,
   } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
@@ -82,6 +83,9 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
       appVersion: `${APP_VERSION} ${APP_CODE_NAME}`,
       useWSS: true,
       additionalDcsDisabled: IS_TEST,
+      shouldDebugExportedSenders,
+      shouldForceHttpTransport,
+      shouldAllowHttpTransport,
       testServers: isTest,
       dcId,
     } as any,
@@ -292,6 +296,17 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   }
 }
 
+export function invokeRequestBeacon<T extends GramJs.AnyRequest>(
+  request: T,
+  dcId?: number,
+) {
+  if (DEBUG) {
+    log('BEACON', request.className);
+  }
+
+  client.invokeBeacon(request, dcId);
+}
+
 export async function downloadMedia(
   args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean },
   onProgress?: ApiOnProgress,
@@ -454,4 +469,16 @@ export async function repairFileReference({
   }
 
   return false;
+}
+
+export function setForceHttpTransport(forceHttpTransport: boolean) {
+  client.setForceHttpTransport(forceHttpTransport);
+}
+
+export function setAllowHttpTransport(allowHttpTransport: boolean) {
+  client.setAllowHttpTransport(allowHttpTransport);
+}
+
+export function setShouldDebugExportedSenders(value: boolean) {
+  client.setShouldDebugExportedSenders(value);
 }

@@ -206,6 +206,7 @@ type StateProps =
     attachmentSettings: GlobalState['attachmentSettings'];
     slowMode?: ApiChatFullInfo['slowMode'];
     shouldUpdateStickerSetOrder?: boolean;
+    shouldCollectDebugLogs?: boolean;
   };
 
 enum MainButtonState {
@@ -290,6 +291,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   theme,
   slowMode,
   shouldUpdateStickerSetOrder,
+  shouldCollectDebugLogs,
 }) => {
   const {
     sendMessage,
@@ -1492,6 +1494,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             isScheduled={shouldSchedule}
             attachBots={attachBots}
             peerType={attachMenuPeerType}
+            shouldCollectDebugLogs={shouldCollectDebugLogs}
             theme={theme}
           />
           {Boolean(botKeyboardMessageId) && (
@@ -1684,6 +1687,7 @@ export default memo(withGlobal<OwnProps>(
       attachmentSettings: global.attachmentSettings,
       slowMode,
       currentMessageList,
+      shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
     };
   },
 )(Composer));

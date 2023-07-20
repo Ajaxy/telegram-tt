@@ -219,7 +219,7 @@ addActionHandler('createGroupCallInviteLink', async (global, actions, payload): 
 });
 
 addActionHandler('joinVoiceChatByLink', async (global, actions, payload): Promise<void> => {
-  const { username, inviteHash, tabId = getCurrentTabId() } = payload!;
+  const { username, inviteHash, tabId = getCurrentTabId() } = payload;
 
   const chat = await fetchChatByUsername(global, username);
 
