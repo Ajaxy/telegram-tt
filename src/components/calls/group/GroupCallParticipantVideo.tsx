@@ -8,13 +8,16 @@ import type { VideoLayout, VideoParticipant } from './hooks/useGroupCallVideoLay
 import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import type { ApiChat, ApiUser } from '../../../api/types';
 
-import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
+import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
 import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
 import buildClassName from '../../../util/buildClassName';
 import { selectChat, selectUser } from '../../../global/selectors';
 import { animate } from '../../../util/animation';
 import { fastRaf } from '../../../util/schedulers';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import formatGroupCallVolume from './helpers/formatGroupCallVolume';
+import fastBlur from '../../../lib/fastBlur';
 
 import useLang from '../../../hooks/useLang';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
@@ -30,6 +33,8 @@ import Skeleton from '../../ui/Skeleton';
 
 import styles from './GroupCallParticipantVideo.module.scss';
 
+const BLUR_RADIUS = 2;
+const BLUR_ITERATIONS = 2;
 const VIDEO_FALLBACK_UPDATE_INTERVAL = 1000;
 
 type OwnProps = {
@@ -39,7 +44,6 @@ type OwnProps = {
   canPin: boolean;
   participant: TypeGroupCallParticipant;
   className?: string;
-  onStopSharing: VoidFunction;
 };
 
 type StateProps = {
@@ -56,7 +60,6 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   participant,
   user,
   chat,
-  onStopSharing,
 }) => {
   const lang = useLang();
 
@@ -78,7 +81,6 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   const isSpeaking = (participant.amplitude || 0) > THRESHOLD;
   const isRaiseHand = Boolean(participant.raiseHandRating);
   const shouldFlipVideo = type === 'video' && participant.isSelf;
-  const shouldHidePresentation = type === 'screen' && participant.isSelf;
 
   const status = useMemo(() => {
     if (isSelf) {
@@ -98,13 +100,12 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
     }
 
     if (participant.volume && participant.volume !== GROUP_CALL_DEFAULT_VOLUME) {
-      return lang('SpeakingWithVolume',
-        (participant.volume / GROUP_CALL_VOLUME_MULTIPLIER).toString())
+      return lang('SpeakingWithVolume', formatGroupCallVolume(participant))
         .replace('%%', '%');
     }
 
     return lang('Speaking');
-  }, [isSpeaking, participant.volume, lang, isSelf, isMutedByMe, isRaiseHand, isMuted]);
+  }, [isSelf, isMutedByMe, isRaiseHand, isMuted, isSpeaking, participant, lang]);
 
   const prevLayoutRef = useRef<VideoLayout>();
   if (!isRemoved) {
@@ -156,9 +157,8 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
   // every VIDEO_FALLBACK_UPDATE_INTERVAL milliseconds.
   useInterval(() => {
     if (!stream?.active) return;
-    const video = videoRef.current;
-    const canvas = videoFallbackRef.current;
-    if (!video || !canvas) return;
+    const video = videoRef.current!;
+    const canvas = videoFallbackRef.current!;
 
     requestMutation(() => {
       canvas.width = video.videoWidth;
@@ -188,6 +188,9 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
           return false;
         }
         ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, thumbnail.width, thumbnail.height);
+        if (!IS_CANVAS_FILTER_SUPPORTED) {
+          fastBlur(ctx, 0, 0, thumbnail.width, thumbnail.height, BLUR_RADIUS, BLUR_ITERATIONS);
+        }
         return true;
       };
 
@@ -271,9 +274,7 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
         )}
         {stream && (
           <video
-            className={buildClassName(
-              styles.video, shouldFlipVideo && styles.flipped, shouldHidePresentation && styles.hidePresentation,
-            )}
+            className={buildClassName(styles.video, shouldFlipVideo && styles.flipped)}
             muted
             autoPlay
             playsInline
@@ -282,22 +283,10 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             onCanPlay={handleCanPlay}
           />
         )}
-        {!shouldHidePresentation && (
-          <canvas
-            className={buildClassName(styles.videoFallback, shouldFlipVideo && styles.flipped)}
-            ref={videoFallbackRef}
-          />
-        )}
-
-        {shouldHidePresentation && (
-          <div className={styles.ownPresentation}>
-            <div className={styles.ownPresentationText}>{lang('VoiceChat.Sharing.Placeholder')}</div>
-            <Button className={styles.stopSharingButton} onClick={onStopSharing}>
-              {lang('VoiceChat.Sharing.Stop')}
-            </Button>
-          </div>
-        )}
-
+        <canvas
+          className={buildClassName(styles.videoFallback, shouldFlipVideo && styles.flipped)}
+          ref={videoFallbackRef}
+        />
         <div className={styles.thumbnailWrapper}>
           <canvas
             className={buildClassName(styles.thumbnail, shouldFlipVideo && styles.flipped)}
@@ -317,15 +306,13 @@ const GroupCallParticipantVideo: FC<OwnProps & StateProps> = ({
             <i className={buildClassName('icon', isPinned ? 'icon-unpin' : 'icon-pin')} />
           </Button>
         )}
-        {!shouldHidePresentation && (
-          <div className={styles.bottomPanel}>
-            <div className={styles.info}>
-              <FullNameTitle peer={user || chat!} className={styles.name} />
-              <div className={styles.status}>{status}</div>
-            </div>
-            <OutlinedMicrophoneIcon participant={participant} className={styles.icon} noColor />
+        <div className={styles.bottomPanel}>
+          <div className={styles.info}>
+            <FullNameTitle peer={user || chat!} className={styles.name} />
+            <div className={styles.status}>{status}</div>
           </div>
-        )}
+          <OutlinedMicrophoneIcon participant={participant} className={styles.icon} noColor />
+        </div>
       </div>
 
       <GroupCallParticipantMenu

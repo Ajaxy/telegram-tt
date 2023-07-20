@@ -226,7 +226,7 @@ const GroupCallParticipantMenu: FC<OwnProps & StateProps> = ({
           {!isSelf && (
             // TODO cross mic
             <MenuItem
-              icon={isMuted ? (isAdmin ? 'allow-speak' : 'microphone-alt') : 'microphone-alt'}
+              icon={isMuted ? (isAdmin && shouldRaiseHand ? 'allow-speak' : 'microphone-alt') : 'microphone-alt'}
               onClick={handleMute}
             >
               {isAdmin

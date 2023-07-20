@@ -22,8 +22,8 @@
   --call-header-height: 2rem;
 
   #LeftColumn, #MiddleColumn, #RightColumn-wrapper {
-    height: calc(100% - 2rem);
-    margin-top: 2rem;
+    height: calc(100% - var(--call-header-height));
+    margin-top: var(--call-header-height);
   }
 }
 

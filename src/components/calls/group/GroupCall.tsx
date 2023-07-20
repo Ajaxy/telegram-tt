@@ -207,7 +207,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     toggleGroupCallPresentation();
   });
 
-  const canPinVideo = videoParticipants.length > 1 && isLandscapeLayout;
+  const canPinVideo = videoParticipants.length > 1 && !isMobile;
   const isLandscapeWithVideos = isLandscapeLayout && hasVideoParticipants;
   const [pinnedVideo, setPinnedVideo] = useState<VideoParticipant | undefined>(undefined);
   const {
@@ -219,6 +219,13 @@ const GroupCall: FC<OwnProps & StateProps> = ({
     videoParticipants,
     isLandscapeLayout,
     pinnedVideo,
+  });
+
+  const handleSetPinnedVideo = useLastCallback((video: VideoParticipant | undefined) => {
+    setPinnedVideo(video);
+    if (video && !isFullscreen) {
+      openFullscreen();
+    }
   });
 
   const handleOpenFirstPresentation = useLastCallback(() => {
@@ -405,10 +412,9 @@ const GroupCall: FC<OwnProps & StateProps> = ({
                     key={`${layout.participantId}_${layout.type}`}
                     layout={layout}
                     canPin={canPinVideo}
-                    setPinned={setPinnedVideo}
+                    setPinned={handleSetPinnedVideo}
                     pinnedVideo={pinnedVideo}
                     participant={participant}
-                    onStopSharing={handleToggleGroupCallPresentation}
                   />
                 );
               })}
@@ -448,11 +454,10 @@ const GroupCall: FC<OwnProps & StateProps> = ({
               key={`${layout.participantId}_${layout.type}`}
               layout={layout}
               canPin={canPinVideo}
-              setPinned={setPinnedVideo}
+              setPinned={handleSetPinnedVideo}
               pinnedVideo={pinnedVideo}
               participant={participant}
               className={styles.video}
-              onStopSharing={handleToggleGroupCallPresentation}
             />
           );
         })}
