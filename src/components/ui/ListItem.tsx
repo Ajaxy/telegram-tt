@@ -195,7 +195,7 @@ const ListItem: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     'ListItem',
     className,
-    !isStatic && 'no-selection',
+    isStatic && 'text-selection',
     ripple && 'has-ripple',
     narrow && 'narrow',
     disabled && 'disabled',

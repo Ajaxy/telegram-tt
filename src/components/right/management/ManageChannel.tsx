@@ -294,7 +294,7 @@ const ManageChannel: FC<OwnProps & StateProps> = ({
               {chatReactionsDescription}
             </span>
           </ListItem>
-          <div className="ListItem no-selection narrow">
+          <div className="ListItem narrow">
             <Checkbox
               checked={isSignaturesShown}
               label={lang('ChannelSignMessages')}

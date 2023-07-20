@@ -142,7 +142,7 @@ const ManageReactions: FC<OwnProps & StateProps> = ({
               {lang('AvailableReactions')}
             </h3>
             {availableActiveReactions?.map(({ reaction, title }) => (
-              <div className="ListItem no-selection">
+              <div className="ListItem">
                 <Checkbox
                   name={reaction.emoticon}
                   checked={localEnabledReactions?.allowed.some((r) => isSameReaction(reaction, r))}

@@ -143,7 +143,7 @@ const Menu: FC<OwnProps> = ({
     <div
       id={id}
       className={buildClassName(
-        'Menu no-selection',
+        'Menu',
         !noCompact && !isTouchScreen && 'compact',
         !IS_BACKDROP_BLUR_SUPPORTED && 'no-blur',
         className,

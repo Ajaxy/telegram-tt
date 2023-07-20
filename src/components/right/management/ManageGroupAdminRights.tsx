@@ -215,7 +215,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
 
           <h3 className="section-heading mt-4" dir="auto">{lang('EditAdminWhatCanDo')}</h3>
 
-          <div className="ListItem no-selection">
+          <div className="ListItem">
             <Checkbox
               name="changeInfo"
               checked={Boolean(permissions.changeInfo)}
@@ -226,7 +226,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           </div>
           {isChannel && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="postMessages"
                 checked={Boolean(permissions.postMessages)}
@@ -238,7 +238,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             </div>
           )}
           {isChannel && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="editMessages"
                 checked={Boolean(permissions.editMessages)}
@@ -249,7 +249,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               />
             </div>
           )}
-          <div className="ListItem no-selection">
+          <div className="ListItem">
             <Checkbox
               name="deleteMessages"
               checked={Boolean(permissions.deleteMessages)}
@@ -260,7 +260,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           </div>
           {!isChannel && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="banUsers"
                 checked={Boolean(permissions.banUsers)}
@@ -271,7 +271,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               />
             </div>
           )}
-          <div className="ListItem no-selection">
+          <div className="ListItem">
             <Checkbox
               name="inviteUsers"
               checked={Boolean(permissions.inviteUsers)}
@@ -282,7 +282,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           </div>
           {!isChannel && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="pinMessages"
                 checked={Boolean(permissions.pinMessages)}
@@ -293,7 +293,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               />
             </div>
           )}
-          <div className="ListItem no-selection">
+          <div className="ListItem">
             <Checkbox
               name="addAdmins"
               checked={Boolean(permissions.addAdmins)}
@@ -303,7 +303,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
-          <div className="ListItem no-selection">
+          <div className="ListItem">
             <Checkbox
               name="manageCall"
               checked={Boolean(permissions.manageCall)}
@@ -314,7 +314,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             />
           </div>
           {isForum && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="manageTopics"
                 checked={Boolean(permissions.manageTopics)}
@@ -326,7 +326,7 @@ const ManageGroupAdminRights: FC<OwnProps & StateProps> = ({
             </div>
           )}
           {!isChannel && (
-            <div className="ListItem no-selection">
+            <div className="ListItem">
               <Checkbox
                 name="anonymous"
                 checked={Boolean(permissions.anonymous)}

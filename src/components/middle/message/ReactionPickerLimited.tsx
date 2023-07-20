@@ -82,7 +82,7 @@ const ReactionPickerLimited: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={styles.root} style={`height: ${pickerHeight}px`}>
-      <div className={buildClassName(styles.wrapper, 'no-selection', isTouchScreen ? 'no-scrollbar' : 'custom-scroll')}>
+      <div className={buildClassName(styles.wrapper, isTouchScreen ? 'no-scrollbar' : 'custom-scroll')}>
         <div className="symbol-set-container shared-canvas-container">
           <canvas ref={sharedCanvasRef} className="shared-canvas" />
           <canvas ref={sharedCanvasHqRef} className="shared-canvas" />

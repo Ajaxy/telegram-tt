@@ -23,11 +23,6 @@
       margin-bottom: 0;
     }
 
-    .inactive.no-selection {
-      user-select: auto;
-      -webkit-user-select: auto !important;
-    }
-
     [dir="rtl"] {
       .Switcher {
         margin-left: 0;
