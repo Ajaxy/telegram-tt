@@ -234,11 +234,6 @@ function initComponent(
   if (componentInstance.mountState === MountState.New) {
     $element = mountComponent(componentInstance);
     setupComponentUpdateListener(parentEl, $element, $parent, index);
-
-    const $firstChild = $element.children[0];
-    if ($firstChild.type === VirtualType.Component) {
-      $element.children[0] = initComponent(parentEl, $firstChild, $element, 0);
-    }
   }
 
   return $element;
