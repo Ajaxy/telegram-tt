@@ -2,24 +2,22 @@ import {
   app, BrowserWindow, ipcMain, shell, systemPreferences,
 } from 'electron';
 import type { HandlerDetails } from 'electron';
-import type { UpdateInfo } from 'electron-updater';
-import { autoUpdater } from 'electron-updater';
-import windowStateKeeper from 'electron-window-state';
 import path from 'path';
 
 import { ElectronAction, ElectronEvent } from '../types/electron';
-import { IS_MAC_OS } from './utils';
+import type { TrafficLightPosition } from '../types/electron';
+import setupAutoUpdates from './autoUpdates';
+import {
+  forceQuit, getAppTitle, IS_MAC_OS, TRAFFIC_LIGHT_POSITION, windows,
+} from './utils';
+import windowStateKeeper from './windowState';
 
-let forceQuit = false;
-let interval: NodeJS.Timer;
-
-const windows = new Set<BrowserWindow>();
-const CHECK_UPDATE_INTERVAL = 10 * 60 * 1000;
+const ALLOWED_DEVICE_ORIGINS = ['http://localhost:1234', 'file://'];
 
 export function createWindow(url?: string) {
   const windowState = windowStateKeeper({
     defaultWidth: 1088,
-    defaultHeight: IS_MAC_OS ? 700 : 750,
+    defaultHeight: 700,
   });
 
   let x;
@@ -55,14 +53,14 @@ export function createWindow(url?: string) {
     minWidth: 360,
     width,
     height,
-    title: 'Telegram A',
+    title: getAppTitle(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       devTools: process.env.APP_ENV !== 'production',
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
-      trafficLightPosition: { x: 10, y: 20 },
+      trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
     }),
   });
 
@@ -77,6 +75,10 @@ export function createWindow(url?: string) {
     return { action: 'deny' };
   });
 
+  window.webContents.session.setDevicePermissionHandler(({ deviceType, origin }) => {
+    return deviceType === 'hid' && ALLOWED_DEVICE_ORIGINS.includes(origin);
+  });
+
   window.on('enter-full-screen', () => {
     window.webContents.send(ElectronEvent.FULLSCREEN_CHANGE, true);
   });
@@ -87,14 +89,15 @@ export function createWindow(url?: string) {
 
   window.on('close', (event) => {
     if (IS_MAC_OS) {
-      if (forceQuit) {
+      if (forceQuit.isEnabled) {
         app.exit(0);
-        forceQuit = false;
+        forceQuit.disable();
       } else {
         const hasExtraWindows = BrowserWindow.getAllWindows().length > 1;
 
         if (hasExtraWindows) {
           windows.delete(window);
+          windowState.unmanage();
         } else {
           event.preventDefault();
           window.hide();
@@ -106,11 +109,13 @@ export function createWindow(url?: string) {
   if (url) {
     window.loadURL(url);
   } else if (app.isPackaged) {
-    window.loadURL(`file://${__dirname}/index.html`);
+    window.loadURL(`file://${__dirname}/index.html${windowState.urlHash}`);
   } else {
-    window.loadURL('http://localhost:1234');
+    window.loadURL(`http://localhost:1234${windowState.urlHash}`);
     window.webContents.openDevTools();
   }
+
+  windowState.clearLastUrlHash();
 
   if (!IS_MAC_OS) {
     window.removeMenu();
@@ -120,45 +125,21 @@ export function createWindow(url?: string) {
     window.show();
 
     if (process.env.APP_ENV === 'production') {
-      setupAutoUpdates(window);
+      setupAutoUpdates(window, windowState);
     }
   });
 
   windows.add(window);
 }
 
-function setupAutoUpdates(window: BrowserWindow) {
-  if (!interval) {
-    autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
-    autoUpdater.checkForUpdates();
-
-    interval = setInterval(() => autoUpdater.checkForUpdates(), CHECK_UPDATE_INTERVAL);
-
-    ipcMain.handle(ElectronAction.INSTALL_UPDATE, () => {
-      if (IS_MAC_OS) {
-        forceQuit = true;
-      }
-
-      return autoUpdater.quitAndInstall();
-    });
-  }
-
-  autoUpdater.on('error', (error: Error) => {
-    if (windows.has(window)) {
-      window.webContents.send(ElectronEvent.UPDATE_ERROR, error);
-    }
-  });
-  autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
-    if (windows.has(window)) {
-      window.webContents.send(ElectronEvent.UPDATE_DOWNLOADED, info);
-    }
-  });
-}
-
 export function setupElectronActionHandlers() {
-  ipcMain.handle(ElectronAction.OPEN_NEW_WINDOW, (_, newWindowUrl: string) => {
-    createWindow(newWindowUrl);
+  ipcMain.handle(ElectronAction.OPEN_NEW_WINDOW, (_, url: string) => {
+    createWindow(url);
+  });
+
+  ipcMain.handle(ElectronAction.SET_WINDOW_TITLE, (_, newTitle?: string) => {
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    currentWindow?.setTitle(getAppTitle(newTitle));
   });
 
   ipcMain.handle(ElectronAction.GET_IS_FULLSCREEN, () => {
@@ -180,6 +161,15 @@ export function setupElectronActionHandlers() {
       }
     }
   });
+
+  ipcMain.handle(ElectronAction.SET_TRAFFIC_LIGHT_POSITION, (_, position: TrafficLightPosition) => {
+    if (!IS_MAC_OS) {
+      return;
+    }
+
+    const currentWindow = BrowserWindow.getFocusedWindow();
+    currentWindow?.setTrafficLightPosition(TRAFFIC_LIGHT_POSITION[position]);
+  });
 }
 
 export function setupCloseHandlers() {
@@ -190,9 +180,9 @@ export function setupCloseHandlers() {
   });
 
   app.on('before-quit', (event) => {
-    if (IS_MAC_OS && !forceQuit) {
+    if (IS_MAC_OS && !forceQuit.isEnabled) {
       event.preventDefault();
-      forceQuit = true;
+      forceQuit.enable();
       app.quit();
     }
   });
@@ -203,7 +193,7 @@ export function setupCloseHandlers() {
     if (!hasActiveWindow) {
       createWindow();
     } else if (IS_MAC_OS) {
-      forceQuit = false;
+      forceQuit.disable();
 
       const currentWindow = Array.from(windows).pop();
       currentWindow?.show();

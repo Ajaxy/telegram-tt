@@ -5,7 +5,11 @@
   top: 1rem;
   height: 1rem;
   touch-action: none;
-  cursor: pointer;
+  cursor: var(--custom-cursor, pointer);
+
+  :global(body.is-electron) & {
+    cursor: auto;
+  }
 }
 
 .preview {
