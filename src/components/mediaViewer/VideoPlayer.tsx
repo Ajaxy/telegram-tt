@@ -18,8 +18,9 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useAppLayout from '../../hooks/useAppLayout';
-import useCurrentTimeSignal from './hooks/currentTimeSignal';
+import useCurrentTimeSignal from './hooks/useCurrentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
+import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';
@@ -176,10 +177,12 @@ const VideoPlayer: FC<OwnProps> = ({
 
   useVideoCleanup(videoRef, []);
   const [, setCurrentTime] = useCurrentTimeSignal();
+  const [, setIsVideoWaiting] = useVideoWaitingSignal();
 
   const handleTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     if (video.readyState >= MIN_READY_STATE) {
+      setIsVideoWaiting(false);
       setCurrentTime(video.currentTime);
     }
     if (!isLooped && video.currentTime === video.duration) {
@@ -292,6 +295,7 @@ const VideoPlayer: FC<OwnProps> = ({
           muted={isGif || isMuted}
           id="media-viewer-video"
           style={videoStyle}
+          onWaiting={() => setIsVideoWaiting(true)}
           onPlay={() => setIsPlaying(true)}
           onEnded={handleEnded}
           onClick={!isMobile && !isFullscreen ? handleClick : undefined}
