@@ -263,6 +263,7 @@ async function downloadFile2(
                             }
                         }),
                     ]);
+                    client.releaseExportedSender(sender);
 
                     isDone2 = true;
                     if (progressCallback) {
@@ -299,6 +300,7 @@ async function downloadFile2(
                     if (deferred) deferred.resolve();
 
                     hasEnded = true;
+                    client.releaseExportedSender(sender);
                     throw err;
                 }
             }
