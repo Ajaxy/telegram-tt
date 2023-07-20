@@ -42,6 +42,7 @@ import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
 import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
 import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
 import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
+import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 
 import styles from './PremiumMainModal.module.scss';
 
@@ -60,6 +61,7 @@ const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   advanced_chat_management: PremiumChats,
   animated_userpics: PremiumVideo,
   emoji_status: PremiumStatus,
+  translations: PremiumTranslate,
 };
 
 export type OwnProps = {
@@ -275,6 +277,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                       : lang(PREMIUM_FEATURE_DESCRIPTIONS[section])}
                     icon={PREMIUM_FEATURE_COLOR_ICONS[section]}
                     index={index}
+                    count={filteredSections.length}
                     onClick={handleOpen(section)}
                   />
                 );

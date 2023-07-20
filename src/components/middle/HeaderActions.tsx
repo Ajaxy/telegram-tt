@@ -1,8 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useMemo, useRef, useState,
+} from '../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
+import type { FC } from '../../lib/teact/teact';
 import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
@@ -15,6 +17,7 @@ import {
 import {
   selectBot,
   selectCanAnimateInterface,
+  selectCanTranslateChat,
   selectChat,
   selectChatFullInfo,
   selectIsChatBotNotStarted,
@@ -22,6 +25,10 @@ import {
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
+  selectLanguageCode,
+  selectRequestedChatTranslationLanguage,
+  selectTranslationLanguage,
+  selectUserFullInfo,
 } from '../../global/selectors';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -30,6 +37,9 @@ import { useHotkeys } from '../../hooks/useHotkeys';
 
 import Button from '../ui/Button';
 import HeaderMenuContainer from './HeaderMenuContainer.async';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
+import MenuSeparator from '../ui/MenuSeparator';
 
 interface OwnProps {
   chatId: string;
@@ -59,6 +69,12 @@ interface StateProps {
   shouldJoinToSend?: boolean;
   shouldSendJoinRequest?: boolean;
   noAnimation?: boolean;
+  canTranslate?: boolean;
+  isTranslating?: boolean;
+  translationLanguage: string;
+  language: string;
+  detectedChatLanguage?: string;
+  doNotTranslate: string[];
 }
 
 // Chrome breaks layout when focusing input during transition
@@ -87,6 +103,12 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   shouldJoinToSend,
   shouldSendJoinRequest,
   noAnimation,
+  canTranslate,
+  isTranslating,
+  translationLanguage,
+  language,
+  detectedChatLanguage,
+  doNotTranslate,
   onTopicSearch,
 }) => {
   const {
@@ -98,6 +120,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     requestNextManagementScreen,
     showNotification,
     openChat,
+    requestChatTranslation,
+    togglePeerTranslations,
+    openChatLanguageModal,
+    setSettingOption,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -134,6 +160,15 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   const handleRestartBot = useLastCallback(() => {
     restartBot({ chatId });
+  });
+
+  const handleTranslateClick = useLastCallback(() => {
+    if (isTranslating) {
+      requestChatTranslation({ chatId, toLanguageCode: undefined });
+      return;
+    }
+
+    requestChatTranslation({ chatId, toLanguageCode: translationLanguage });
   });
 
   const handleJoinRequestsClick = useLastCallback(() => {
@@ -179,12 +214,91 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     handleSearchClick();
   });
 
+  const getTextWithLanguage = useLastCallback((langKey: string, langCode: string) => {
+    const simplified = langCode.split('-')[0];
+    const translationKey = `TranslateLanguage${simplified.toUpperCase()}`;
+    const name = lang(translationKey);
+    if (name !== translationKey) {
+      return lang(langKey, name);
+    }
+
+    const translatedNames = new Intl.DisplayNames([language], { type: 'language' });
+    const translatedName = translatedNames.of(langCode)!;
+    return lang(`${langKey}Other`, translatedName);
+  });
+
+  const buttonText = useMemo(() => {
+    if (isTranslating) return lang('ShowOriginalButton');
+
+    return getTextWithLanguage('TranslateToButton', translationLanguage);
+  }, [translationLanguage, getTextWithLanguage, isTranslating, lang]);
+
+  const doNotTranslateText = useMemo(() => {
+    if (!detectedChatLanguage) return undefined;
+
+    return getTextWithLanguage('DoNotTranslateLanguage', detectedChatLanguage);
+  }, [getTextWithLanguage, detectedChatLanguage]);
+
+  const handleHide = useLastCallback(() => {
+    togglePeerTranslations({ chatId, isEnabled: false });
+    requestChatTranslation({ chatId, toLanguageCode: undefined });
+  });
+
+  const handleChangeLanguage = useLastCallback(() => {
+    openChatLanguageModal({ chatId });
+  });
+
+  const handleDoNotTranslate = useLastCallback(() => {
+    if (!detectedChatLanguage) return;
+
+    setSettingOption({
+      doNotTranslate: [...doNotTranslate, detectedChatLanguage],
+    });
+    requestChatTranslation({ chatId, toLanguageCode: undefined });
+
+    showNotification({ message: getTextWithLanguage('AddedToDoNotTranslate', detectedChatLanguage) });
+  });
+
   useHotkeys({
     'Mod+F': handleHotkeySearchClick,
   });
 
+  const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
+    return ({ onTrigger, isOpen }) => (
+      <Button
+        round
+        ripple={isRightColumnShown}
+        color="translucent"
+        size="smaller"
+        className={isOpen ? 'active' : ''}
+        onClick={onTrigger}
+        ariaLabel={lang('TranslateMessage')}
+      >
+        <i className="icon icon-language" aria-hidden />
+      </Button>
+    );
+  }, [isRightColumnShown, lang]);
+
   return (
     <div className="HeaderActions">
+      {canTranslate && (
+        <DropdownMenu
+          className="stickers-more-menu with-menu-transitions"
+          trigger={MoreMenuButton}
+          positionX="right"
+        >
+          <MenuItem icon="language" onClick={handleTranslateClick}>
+            {buttonText}
+          </MenuItem>
+          <MenuItem icon="replace" onClick={handleChangeLanguage}>
+            {lang('Chat.Translate.Menu.To')}
+          </MenuItem>
+          <MenuSeparator />
+          {detectedChatLanguage
+            && <MenuItem icon="hand-stop" onClick={handleDoNotTranslate}>{doNotTranslateText}</MenuItem>}
+          <MenuItem icon="close-circle" onClick={handleHide}>{lang('Hide')}</MenuItem>
+        </DropdownMenu>
+      )}
       {!isMobile && (
         <>
           {canExpandActions && !shouldSendJoinRequest && (canSubscribe || shouldJoinToSend) && (
@@ -234,9 +348,9 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               color="translucent"
               size="smaller"
               onClick={handleSearchClick}
-              ariaLabel="Search in this chat"
+              ariaLabel={lang('Conversation.SearchPlaceholder')}
             >
-              <i className="icon icon-search" />
+              <i className="icon icon-search" aria-hidden />
             </Button>
           )}
           {canCall && (
@@ -248,7 +362,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               onClick={handleRequestCall}
               ariaLabel="Call"
             >
-              <i className="icon icon-phone" />
+              <i className="icon icon-phone" aria-hidden />
             </Button>
           )}
         </>
@@ -263,7 +377,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           onClick={handleJoinRequestsClick}
           ariaLabel={isChannel ? lang('SubscribeRequests') : lang('MemberRequests')}
         >
-          <i className="icon icon-user" />
+          <i className="icon icon-user" aria-hidden />
           <div className="badge">{pendingJoinRequests}</div>
         </Button>
       )}
@@ -278,7 +392,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
         ariaLabel="More actions"
         onClick={handleHeaderMenuOpen}
       >
-        <i className="icon icon-more" />
+        <i className="icon icon-more" aria-hidden />
       </Button>
       {menuPosition && (
         <HeaderMenuContainer
@@ -318,15 +432,23 @@ export default memo(withGlobal<OwnProps>(
   }): StateProps => {
     const chat = selectChat(global, chatId);
     const isChannel = Boolean(chat && isChatChannel(chat));
+    const language = selectLanguageCode(global);
+    const translationLanguage = selectTranslationLanguage(global);
+    const { doNotTranslate } = global.settings.byKey;
 
     if (!chat || chat.isRestricted || selectIsInSelectMode(global)) {
       return {
         noMenu: true,
+        language,
+        translationLanguage,
+        doNotTranslate,
       };
     }
 
     const bot = selectBot(global, chatId);
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
+    const userFullInfo = isUserId(chatId) ? selectUserFullInfo(global, chatId) : undefined;
+    const fullInfo = chatFullInfo || userFullInfo;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
     const isDiscussionThread = messageListType === 'thread' && threadId !== MAIN_THREAD_ID;
@@ -350,6 +472,9 @@ export default memo(withGlobal<OwnProps>(
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
     const noAnimation = !selectCanAnimateInterface(global);
 
+    const isTranslating = Boolean(selectRequestedChatTranslationLanguage(global, chatId));
+    const canTranslate = selectCanTranslateChat(global, chatId) && !fullInfo?.isTranslationDisabled;
+
     return {
       noMenu: false,
       isChannel,
@@ -368,6 +493,12 @@ export default memo(withGlobal<OwnProps>(
       shouldJoinToSend,
       shouldSendJoinRequest,
       noAnimation,
+      canTranslate,
+      isTranslating,
+      translationLanguage,
+      language,
+      doNotTranslate,
+      detectedChatLanguage: chat.detectedLanguage,
     };
   },
 )(HeaderActions));

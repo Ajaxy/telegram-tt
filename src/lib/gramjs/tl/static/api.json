@@ -166,6 +166,7 @@
     "messages.getExtendedMedia",
     "messages.getBotApp",
     "messages.requestAppWebView",
+    "messages.togglePeerTranslations",
     "updates.getState",
     "updates.getDifference",
     "updates.getChannelDifference",

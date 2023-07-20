@@ -564,9 +564,9 @@ export type TabState = {
   requestedTranslations: {
     byChatId: Record<string, ChatRequestedTranslations>;
   };
-  messageLanguageModal?: {
+  chatLanguageModal?: {
     chatId: string;
-    messageId: number;
+    messageId?: number;
     activeLanguage?: string;
   };
 
@@ -1445,11 +1445,11 @@ export interface ActionPayloads {
   disableContextMenuHint: undefined;
   focusNextReply: WithTabId | undefined;
 
-  openMessageLanguageModal: {
+  openChatLanguageModal: {
     chatId: string;
-    id: number;
+    messageId?: number;
   } & WithTabId;
-  closeMessageLanguageModal: WithTabId | undefined;
+  closeChatLanguageModal: WithTabId | undefined;
 
   // poll result
   openPollResults: {
@@ -1640,6 +1640,10 @@ export interface ActionPayloads {
     about: string;
     photo?: File;
   } & WithTabId;
+  updateChatDetectedLanguage: {
+    chatId: string;
+    detectedLanguage?: string;
+  };
   toggleSignatures: {
     chatId: string;
     isEnabled: boolean;
@@ -1734,6 +1738,16 @@ export interface ActionPayloads {
     url: string;
   } & WithTabId;
 
+  requestChatTranslation: {
+    chatId: string;
+    toLanguageCode?: string;
+  } & WithTabId;
+
+  togglePeerTranslations: {
+    chatId: string;
+    isEnabled: boolean;
+  };
+
   // Messages
   setEditingDraft: {
     text?: ApiFormattedText;
@@ -1799,6 +1813,11 @@ export interface ActionPayloads {
     id: number;
   } & WithTabId;
 
+  markMessagesTranslationPending: {
+    chatId: string;
+    messageIds: number[];
+    toLanguageCode?: string;
+  };
   translateMessages: {
     chatId: string;
     messageIds: number[];

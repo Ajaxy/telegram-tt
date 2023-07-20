@@ -42,8 +42,9 @@ import {
   selectSender,
   selectChatScheduledMessages,
   selectTabState,
-  selectRequestedTranslationLanguage,
+  selectRequestedMessageTranslationLanguage,
   selectPinnedIds,
+  selectRequestedChatTranslationLanguage,
 } from '../../selectors';
 import { compact, findLast } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
@@ -771,21 +772,23 @@ addActionHandler('closeSeenByModal', (global, actions, payload): ActionReturnTyp
   }, tabId);
 });
 
-addActionHandler('openMessageLanguageModal', (global, actions, payload): ActionReturnType => {
-  const { chatId, id, tabId = getCurrentTabId() } = payload;
+addActionHandler('openChatLanguageModal', (global, actions, payload): ActionReturnType => {
+  const { chatId, messageId, tabId = getCurrentTabId() } = payload;
 
-  const activeLanguage = selectRequestedTranslationLanguage(global, chatId, id, tabId);
+  const activeLanguage = messageId
+    ? selectRequestedMessageTranslationLanguage(global, chatId, messageId, tabId)
+    : selectRequestedChatTranslationLanguage(global, chatId, tabId);
 
   return updateTabState(global, {
-    messageLanguageModal: { chatId, messageId: id, activeLanguage },
+    chatLanguageModal: { chatId, messageId, activeLanguage },
   }, tabId);
 });
 
-addActionHandler('closeMessageLanguageModal', (global, actions, payload): ActionReturnType => {
+addActionHandler('closeChatLanguageModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
 
   return updateTabState(global, {
-    messageLanguageModal: undefined,
+    chatLanguageModal: undefined,
   }, tabId);
 });
 

@@ -76,6 +76,9 @@ export interface ApiChat {
 
   unreadReactions?: number[];
   unreadMentions?: number[];
+
+  // Locally determined field
+  detectedLanguage?: string;
 }
 
 export interface ApiTypingStatus {
@@ -114,6 +117,7 @@ export interface ApiChatFullInfo {
   stickerSet?: ApiStickerSet;
   profilePhoto?: ApiPhoto;
   areParticipantsHidden?: boolean;
+  isTranslationDisabled?: true;
 }
 
 export interface ApiChatMember {

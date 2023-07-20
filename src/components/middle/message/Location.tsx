@@ -70,7 +70,7 @@ const Location: FC<OwnProps> = ({
   const { type, geo } = location;
 
   const serverTime = getServerTime();
-  const isExpired = isGeoLiveExpired(message, serverTime);
+  const isExpired = isGeoLiveExpired(message);
   const secondsBeforeEnd = (type === 'geoLive' && !isExpired) ? message.date + location.period - serverTime
     : undefined;
 

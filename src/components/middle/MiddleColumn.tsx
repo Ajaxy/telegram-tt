@@ -87,7 +87,7 @@ import SeenByModal from '../common/SeenByModal.async';
 import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import ReactorListModal from './ReactorListModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
-import MessageLanguageModal from './MessageLanguageModal.async';
+import ChatLanguageModal from './ChatLanguageModal.async';
 
 import './MiddleColumn.scss';
 
@@ -126,7 +126,7 @@ type StateProps = {
   isSeenByModalOpen: boolean;
   isReactorListModalOpen: boolean;
   isGiftPremiumModalOpen?: boolean;
-  isMessageLanguageModalOpen?: boolean;
+  isChatLanguageModalOpen?: boolean;
   withInterfaceAnimations?: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
@@ -180,7 +180,7 @@ function MiddleColumn({
   isSeenByModalOpen,
   isReactorListModalOpen,
   isGiftPremiumModalOpen,
-  isMessageLanguageModalOpen,
+  isChatLanguageModalOpen,
   withInterfaceAnimations,
   shouldSkipHistoryAnimations,
   currentTransitionKey,
@@ -622,7 +622,7 @@ function MiddleColumn({
                 />
                 <SeenByModal isOpen={isSeenByModalOpen} />
                 <ReactorListModal isOpen={isReactorListModalOpen} />
-                {IS_TRANSLATION_SUPPORTED && <MessageLanguageModal isOpen={isMessageLanguageModalOpen} />}
+                {IS_TRANSLATION_SUPPORTED && <ChatLanguageModal isOpen={isChatLanguageModalOpen} />}
               </div>
             </Transition>
 
@@ -668,7 +668,7 @@ export default memo(withGlobal<OwnProps>(
     const {
       messageLists, isLeftColumnShown, activeEmojiInteractions,
       seenByModal, giftPremiumModal, reactorModal, audioPlayer, shouldSkipHistoryAnimations,
-      messageLanguageModal,
+      chatLanguageModal,
     } = selectTabState(global);
     const currentMessageList = selectCurrentMessageList(global);
     const { leftColumnWidth } = global;
@@ -686,7 +686,7 @@ export default memo(withGlobal<OwnProps>(
       isSeenByModalOpen: Boolean(seenByModal),
       isReactorListModalOpen: Boolean(reactorModal),
       isGiftPremiumModalOpen: giftPremiumModal?.isOpen,
-      isMessageLanguageModalOpen: Boolean(messageLanguageModal),
+      isChatLanguageModalOpen: Boolean(chatLanguageModal),
       withInterfaceAnimations: selectCanAnimateInterface(global),
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       activeEmojiInteractions,

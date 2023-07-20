@@ -15,7 +15,7 @@ import {
   GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import {
-  selectChat, selectChatFullInfo, selectIsChatWithSelf,
+  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectRequestedChatTranslationLanguage,
 } from './chats';
 import {
   selectBot,
@@ -50,7 +50,7 @@ import {
   isUserRightBanned,
   canSendReaction,
   getAllowedAttachmentOptions,
-  isLocalMessageId, isMessageFailed,
+  isLocalMessageId, isMessageFailed, isMessageTranslatable,
 } from '../helpers';
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
@@ -58,6 +58,7 @@ import { getServerTime } from '../../util/serverTime';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 
 const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 
@@ -1271,10 +1272,11 @@ export function selectMessageTranslations<T extends GlobalState>(
   return selectChatTranslations(global, chatId)?.byLangCode[toLanguageCode] || {};
 }
 
-export function selectRequestedTranslationLanguage<T extends GlobalState>(
-  global: T, chatId: string, messageId: number, tabId = getCurrentTabId(),
+export function selectRequestedMessageTranslationLanguage<T extends GlobalState>(
+  global: T, chatId: string, messageId: number, ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): string | undefined {
-  return selectTabState(global, tabId).requestedTranslations.byChatId[chatId]?.manualMessages?.[messageId];
+  const requestedInChat = selectTabState(global, tabId).requestedTranslations.byChatId[chatId];
+  return requestedInChat?.toLanguage || requestedInChat?.manualMessages?.[messageId];
 }
 
 export function selectForwardsCanBeSentToChat<T extends GlobalState>(
@@ -1314,4 +1316,20 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
       || (isGif && !canSendGifs)
       || (isPlainText && !canSendPlainText);
   });
+}
+
+export function selectCanTranslateMessage<T extends GlobalState>(
+  global: T, message: ApiMessage, detectedLanguage?: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { canTranslate: isTranslationEnabled, doNotTranslate } = global.settings.byKey;
+
+  const canTranslateLanguage = !detectedLanguage || !doNotTranslate.includes(detectedLanguage);
+
+  const isTranslatable = isMessageTranslatable(message);
+
+  // Separate translations are disabled when chat translation enabled
+  const chatRequestedLanguage = selectRequestedChatTranslationLanguage(global, message.chatId, tabId);
+
+  return IS_TRANSLATION_SUPPORTED && isTranslationEnabled && canTranslateLanguage && isTranslatable
+    && !chatRequestedLanguage;
 }

@@ -6,6 +6,7 @@
 .item {
   overflow: hidden;
   min-height: 25rem;
+  padding-bottom: 0 !important;
 }
 
 .checkbox {
@@ -14,4 +15,5 @@
 
 .languages {
   overflow-y: auto;
+  margin-bottom: 0 !important;
 }

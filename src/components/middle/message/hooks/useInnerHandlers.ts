@@ -26,11 +26,12 @@ export default function useInnerHandlers(
   senderPeer?: ApiUser | ApiChat,
   botSender?: ApiUser,
   messageTopic?: ApiTopic,
+  isTranslatingChat?: boolean,
 ) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
-    openMessageLanguageModal,
+    openChatLanguageModal,
   } = getActions();
 
   const {
@@ -160,7 +161,7 @@ export default function useInnerHandlers(
   const handleTranslationClick = useLastCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
-    openMessageLanguageModal({ chatId, id: messageId });
+    openChatLanguageModal({ chatId, messageId: !isTranslatingChat ? messageId : undefined });
   });
 
   const handleOpenThread = useLastCallback(() => {

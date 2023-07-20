@@ -221,6 +221,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       isConnectionStatusMinimized: true,
       shouldArchiveAndMuteNewNonContact: false,
       canTranslate: false,
+      canTranslateChats: true,
       doNotTranslate: [],
       canDisplayChatInTitle: true,
       shouldAllowHttpTransport: true,

@@ -35,7 +35,7 @@ import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
 
-import { IS_ANDROID } from '../../../util/windowEnvironment';
+import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
 import {
   selectAllowedMessageActions,
@@ -62,8 +62,10 @@ import {
   selectOutgoingStatus,
   selectPerformanceSettingsValue,
   selectReplySender,
-  selectRequestedTranslationLanguage,
+  selectRequestedChatTranslationLanguage,
+  selectRequestedMessageTranslationLanguage,
   selectSender,
+  selectShouldDetectChatLanguage,
   selectShouldLoopStickers,
   selectTabState,
   selectTheme,
@@ -90,6 +92,7 @@ import {
   isChatWithRepliesBot,
   isGeoLiveExpired,
   isMessageLocal,
+  isMessageTranslatable,
   isOwnMessage,
   isReplyMessage,
   isUserId,
@@ -105,7 +108,6 @@ import { buildContentClassName } from './helpers/buildContentClassName';
 import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
-import { getServerTime } from '../../../util/serverTime';
 import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
 import { isAnimatingScroll } from '../../../util/animateScroll';
@@ -127,6 +129,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useTextLanguage from '../../../hooks/useTextLanguage';
 import useAuthorWidth from '../hooks/useAuthorWidth';
 import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
+import useDetectChatLanguage from './hooks/useDetectChatLanguage';
 
 import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
@@ -251,7 +254,9 @@ type StateProps = {
   hasTopicChip?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   areTranslationsEnabled?: boolean;
+  shouldDetectChatLanguage?: boolean;
   requestedTranslationLanguage?: string;
+  requestedChatTranslationLanguage?: string;
   withReactionEffects?: boolean;
   withStickerEffects?: boolean;
   isConnected: boolean;
@@ -362,7 +367,9 @@ const Message: FC<OwnProps & StateProps> = ({
   hasTopicChip,
   chatTranslations,
   areTranslationsEnabled,
+  shouldDetectChatLanguage,
   requestedTranslationLanguage,
+  requestedChatTranslationLanguage,
   withReactionEffects,
   withStickerEffects,
   isConnected,
@@ -552,6 +559,7 @@ const Message: FC<OwnProps & StateProps> = ({
     senderPeer,
     botSender,
     messageTopic,
+    Boolean(requestedChatTranslationLanguage),
   );
 
   useEffect(() => {
@@ -597,13 +605,16 @@ const Message: FC<OwnProps & StateProps> = ({
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
 
+  useDetectChatLanguage(message, !shouldDetectChatLanguage);
+
   const detectedLanguage = useTextLanguage(areTranslationsEnabled ? text?.text : undefined);
 
+  const shouldTranslate = isMessageTranslatable(message, !requestedChatTranslationLanguage);
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
-    chatTranslations, chatId, messageId, requestedTranslationLanguage,
+    chatTranslations, chatId, shouldTranslate ? messageId : undefined, requestedTranslationLanguage,
   );
   // Used to display previous result while new one is loading
-  const previousTranslatedText = usePrevious(translatedText, true);
+  const previousTranslatedText = usePrevious(translatedText, Boolean(shouldTranslate));
 
   const currentTranslatedText = translatedText || previousTranslatedText;
 
@@ -628,7 +639,7 @@ const Message: FC<OwnProps & StateProps> = ({
     hasComments: repliesThreadInfo && repliesThreadInfo.messagesCount > 0,
     hasActionButton: canForward || canFocus,
     hasReactions,
-    isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message, getServerTime()),
+    isGeoLiveActive: location?.type === 'geoLive' && !isGeoLiveExpired(message),
     withVoiceTranscription,
   });
 
@@ -925,6 +936,8 @@ const Message: FC<OwnProps & StateProps> = ({
                 noUserColors={isOwn || isChannel}
                 isProtected={isProtected}
                 sender={replyMessageSender}
+                chatTranslations={chatTranslations}
+                requestedChatTranslationLanguage={requestedChatTranslationLanguage}
                 observeIntersectionForLoading={observeIntersectionForLoading}
                 observeIntersectionForPlaying={observeIntersectionForPlaying}
                 onClick={handleReplyClick}
@@ -1441,7 +1454,12 @@ export default memo(withGlobal<OwnProps>(
 
     const isLocation = Boolean(getMessageLocation(message));
     const chatTranslations = selectChatTranslations(global, chatId);
-    const requestedTranslationLanguage = selectRequestedTranslationLanguage(global, chatId, message.id);
+
+    const requestedTranslationLanguage = selectRequestedMessageTranslationLanguage(global, chatId, message.id);
+    const requestedChatTranslationLanguage = selectRequestedChatTranslationLanguage(global, chatId);
+
+    const areTranslationsEnabled = IS_TRANSLATION_SUPPORTED && global.settings.byKey.canTranslate
+      && !requestedChatTranslationLanguage; // Stop separate language detection if chat translation is requested
 
     const isConnected = global.connectionState === 'connectionStateReady';
 
@@ -1500,8 +1518,10 @@ export default memo(withGlobal<OwnProps>(
       genericEffects: global.genericEmojiEffects,
       hasTopicChip,
       chatTranslations,
-      areTranslationsEnabled: global.settings.byKey.canTranslate,
+      areTranslationsEnabled,
+      shouldDetectChatLanguage: selectShouldDetectChatLanguage(global, chatId),
       requestedTranslationLanguage,
+      requestedChatTranslationLanguage,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
       withReactionEffects: selectPerformanceSettingsValue(global, 'reactionEffects'),
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
