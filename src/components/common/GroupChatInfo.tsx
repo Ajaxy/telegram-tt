@@ -39,7 +39,7 @@ type OwnProps = {
   threadId?: number;
   className?: string;
   typingStatus?: ApiTypingStatus;
-  avatarSize?: 'small' | 'medium' | 'large' | 'jumbo';
+  avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   status?: string;
   withDots?: boolean;
   withMediaViewer?: boolean;
@@ -49,6 +49,7 @@ type OwnProps = {
   withChatType?: boolean;
   noRtl?: boolean;
   noAvatar?: boolean;
+  noStatusOrTyping?: boolean;
   onClick?: VoidFunction;
 };
 
@@ -81,6 +82,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   areMessagesLoaded,
   topic,
   messagesCount,
+  noStatusOrTyping,
   onClick,
 }) => {
   const {
@@ -197,7 +199,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
         {topic
           ? <h3 dir="auto" className="fullName">{renderText(topic.title)}</h3>
           : <FullNameTitle peer={chat} />}
-        {renderStatusOrTyping()}
+        {!noStatusOrTyping && renderStatusOrTyping()}
       </div>
     </div>
   );

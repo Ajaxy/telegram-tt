@@ -10,6 +10,7 @@ import { buildApiAvailableReaction, buildApiReaction, buildMessagePeerReaction }
 import { invokeRequest } from './client';
 import localDb from '../localDb';
 import { addEntitiesToLocalDb } from '../helpers';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
 
 export function sendWatchingEmojiInteraction({
   chat,
@@ -134,11 +135,13 @@ export async function fetchMessageReactionsList({
   }
 
   addEntitiesToLocalDb(result.users);
+  addEntitiesToLocalDb(result.chats);
 
   const { nextOffset, reactions, count } = result;
 
   return {
     users: result.users.map(buildApiUser).filter(Boolean),
+    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
     nextOffset,
     reactions: reactions.map(buildMessagePeerReaction).filter(Boolean),
     count,

@@ -17,6 +17,7 @@
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
     "check": "tsc && stylelint \"**/*.{css,scss}\" && eslint . --ext .ts,.tsx,.js --ignore-pattern src/lib/gramjs",
     "check:fix": "npm run check -- --fix",
+    "tl:rehash": "node ./dev/tlHash.js",
     "gramjs:tl": "node ./src/lib/gramjs/tl/generateModules.js",
     "gramjs:lint": "eslint src/lib/gramjs --ext .ts,.tsx,.js",
     "gramjs:lint:fix": "npm run gramjs:lint -- --fix",

@@ -236,12 +236,14 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     }
   }, [hasFullInfo, isOpen, isPrivate, loadFullChat, message.chatId]);
 
-  const seenByRecentUsers = useMemo(() => {
+  const seenByRecentPeers = useMemo(() => {
+    // No need for expensive global updates on chats or users, so we avoid them
+    const chatsById = getGlobal().chats.byId;
+    const usersById = getGlobal().users.byId;
     if (message.reactions?.recentReactions?.length) {
-      // No need for expensive global updates on users, so we avoid them
-      const usersById = getGlobal().users.byId;
-
-      const uniqueReactors = new Set(message.reactions?.recentReactions?.map(({ userId }) => usersById[userId]));
+      const uniqueReactors = new Set(message.reactions?.recentReactions?.map(
+        ({ peerId }) => usersById[peerId] || chatsById[peerId],
+      ));
 
       return Array.from(uniqueReactors).filter(Boolean).slice(0, 3);
     }
@@ -250,9 +252,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    // No need for expensive global updates on users, so we avoid them
-    const usersById = getGlobal().users.byId;
-    return Object.keys(message.seenByDates).slice(0, 3).map((id) => usersById[id]).filter(Boolean);
+    return Object.keys(message.seenByDates).slice(0, 3).map((id) => usersById[id] || chatsById[id]).filter(Boolean);
   }, [message.reactions?.recentReactions, message.seenByDates]);
 
   const isDownloading = useMemo(() => {
@@ -517,7 +517,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         hasCustomEmoji={hasCustomEmoji}
         customEmojiSets={customEmojiSets}
         isDownloading={isDownloading}
-        seenByRecentUsers={seenByRecentUsers}
+        seenByRecentPeers={seenByRecentPeers}
         noReplies={noReplies}
         onOpenThread={handleOpenThread}
         onReply={handleReply}

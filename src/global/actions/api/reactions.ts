@@ -262,9 +262,8 @@ addActionHandler('loadReactors', async (global, actions, payload): Promise<void>
 
   global = getGlobal();
 
-  if (result.users?.length) {
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  }
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
 
   global = updateChatMessage(global, chatId, messageId, {
     reactors: result,
