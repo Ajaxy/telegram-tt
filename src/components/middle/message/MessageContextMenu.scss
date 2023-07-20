@@ -46,31 +46,24 @@
     touch-action: none;
   }
 
-  &--seen-by {
-    width: 14rem !important;
+  &--seen-by-label-wrapper {
+    position: relative;
+    flex-grow: 1;
   }
 
   &--seen-by-label {
-    max-width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    right: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: initial;
   }
 
   .avatars {
-    display: flex;
-    align-self: center;
-    margin-inline-start: auto;
     padding-inline-start: 1rem;
-
-    .Avatar {
-      border: 0.0625rem solid var(--color-background);
-      margin-right: 0;
-      box-sizing: content-box;
-
-      &:not(:first-child) {
-        margin-left: -0.1875rem;
-      }
-    }
   }
 }
 
