@@ -37,7 +37,7 @@ interface VirtualElementText {
 
 export interface VirtualElementTag {
   type: VirtualType.Tag;
-  target?: HTMLElement;
+  target?: HTMLElement | SVGElement;
   tag: string;
   props: Props;
   children: VirtualElementChildren;

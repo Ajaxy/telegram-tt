@@ -1,15 +1,15 @@
 import { DEBUG } from '../../config';
 
 type Handler = (e: Event) => void;
-type DelegationRegistry = Map<HTMLElement, Handler>;
+type DelegationRegistry = Map<Element, Handler>;
 
 const NON_BUBBLEABLE_EVENTS = new Set(['scroll', 'mouseenter', 'mouseleave', 'load']);
 
 const documentEventCounters: Record<string, number> = {};
 const delegationRegistryByEventType: Record<string, DelegationRegistry> = {};
-const delegatedEventTypesByElement = new Map<HTMLElement, Set<string>>();
+const delegatedEventTypesByElement = new Map<Element, Set<string>>();
 
-export function addEventListener(element: HTMLElement, propName: string, handler: Handler, asCapture = false) {
+export function addEventListener(element: Element, propName: string, handler: Handler, asCapture = false) {
   const eventType = resolveEventType(propName, element);
   if (canUseEventDelegation(eventType, element, asCapture)) {
     addDelegatedListener(eventType, element, handler);
@@ -18,7 +18,7 @@ export function addEventListener(element: HTMLElement, propName: string, handler
   }
 }
 
-export function removeEventListener(element: HTMLElement, propName: string, handler: Handler, asCapture = false) {
+export function removeEventListener(element: Element, propName: string, handler: Handler, asCapture = false) {
   const eventType = resolveEventType(propName, element);
   if (canUseEventDelegation(eventType, element, asCapture)) {
     removeDelegatedListener(eventType, element);
@@ -27,7 +27,7 @@ export function removeEventListener(element: HTMLElement, propName: string, hand
   }
 }
 
-function resolveEventType(propName: string, element: HTMLElement) {
+function resolveEventType(propName: string, element: Element) {
   const eventType = propName
     .replace(/^on/, '')
     .replace(/Capture$/, '').toLowerCase();
@@ -54,7 +54,7 @@ function resolveEventType(propName: string, element: HTMLElement) {
   return eventType;
 }
 
-function canUseEventDelegation(realEventType: string, element: HTMLElement, asCapture: boolean) {
+function canUseEventDelegation(realEventType: string, element: Element, asCapture: boolean) {
   return (
     !asCapture
     && !NON_BUBBLEABLE_EVENTS.has(realEventType)
@@ -63,7 +63,7 @@ function canUseEventDelegation(realEventType: string, element: HTMLElement, asCa
   );
 }
 
-function addDelegatedListener(eventType: string, element: HTMLElement, handler: Handler) {
+function addDelegatedListener(eventType: string, element: Element, handler: Handler) {
   if (!documentEventCounters[eventType]) {
     documentEventCounters[eventType] = 0;
     document.addEventListener(eventType, handleEvent);
@@ -74,7 +74,7 @@ function addDelegatedListener(eventType: string, element: HTMLElement, handler: 
   documentEventCounters[eventType]++;
 }
 
-function removeDelegatedListener(eventType: string, element: HTMLElement) {
+function removeDelegatedListener(eventType: string, element: Element) {
   documentEventCounters[eventType]--;
   if (!documentEventCounters[eventType]) {
     // Synchronous deletion on 0 will cause perf degradation in the case of 1 element
@@ -86,7 +86,7 @@ function removeDelegatedListener(eventType: string, element: HTMLElement) {
   delegatedEventTypesByElement.get(element)!.delete(eventType);
 }
 
-export function removeAllDelegatedListeners(element: HTMLElement) {
+export function removeAllDelegatedListeners(element: Element) {
   const eventTypes = delegatedEventTypesByElement.get(element);
   if (!eventTypes) {
     return;
@@ -101,7 +101,7 @@ function handleEvent(realEvent: Event) {
 
   if (events) {
     let furtherCallsPrevented = false;
-    let current: HTMLElement = realEvent.target as HTMLElement;
+    let current: Element = realEvent.target as Element;
 
     const stopPropagation = () => {
       furtherCallsPrevented = true;
@@ -138,7 +138,7 @@ function handleEvent(realEvent: Event) {
         }
       }
 
-      current = current.parentNode as HTMLElement;
+      current = current.parentNode as Element;
     }
   }
 }
@@ -151,7 +151,7 @@ function resolveDelegationRegistry(eventType: string) {
   return delegationRegistryByEventType[eventType];
 }
 
-function resolveDelegatedEventTypes(element: HTMLElement) {
+function resolveDelegatedEventTypes(element: Element) {
   const existing = delegatedEventTypesByElement.get(element);
   if (existing) {
     return existing;
