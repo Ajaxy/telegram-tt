@@ -642,7 +642,7 @@ const Message: FC<OwnProps & StateProps> = ({
     metaPosition = 'none';
   } else if (isInDocumentGroupNotLast) {
     metaPosition = 'none';
-  } else if (hasText && !webPage && !hasAnimatedEmoji) {
+  } else if (hasText && !webPage && !emojiSize) {
     metaPosition = 'in-text';
   } else {
     metaPosition = 'standalone';
