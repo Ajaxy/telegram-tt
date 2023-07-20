@@ -39,6 +39,27 @@ export function p2pPayloadTypeToConference(p: P2PPayloadType): PayloadType {
   };
 }
 
+export function isRelayAddress(candidate: string) {
+  const parts = candidate.split(' ');
+  return parts.some((part) => part === 'relay');
+}
+
+export function removeRelatedAddress(candidate: string) {
+  const parts = candidate.split(' ');
+
+  const raddrIndex = parts.indexOf('raddr');
+  if (raddrIndex !== -1) {
+    parts.splice(raddrIndex, 2);
+  }
+
+  const rportIndex = parts.indexOf('rport');
+  if (rportIndex !== -1) {
+    parts.splice(rportIndex, 2);
+  }
+
+  return parts.join(' ');
+}
+
 export const THRESHOLD = 0.1;
 
 export const IS_SCREENSHARE_SUPPORTED = 'getDisplayMedia' in (navigator?.mediaDevices || {});

@@ -45,6 +45,7 @@ export interface ApiPhoneCall {
   adminId?: string;
   participantId?: string;
   isVideo?: boolean;
+  isP2pAllowed?: boolean;
   date?: number;
   startDate?: number;
   receiveDate?: number;

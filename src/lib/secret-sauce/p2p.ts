@@ -5,8 +5,8 @@ import type { MediaContent, MediaStateMessage, P2pMessage } from './p2pMessage';
 import {
   fromTelegramSource,
   IS_ECHO_CANCELLATION_SUPPORTED,
-  IS_NOISE_SUPPRESSION_SUPPORTED,
-  p2pPayloadTypeToConference,
+  IS_NOISE_SUPPRESSION_SUPPORTED, isRelayAddress,
+  p2pPayloadTypeToConference, removeRelatedAddress,
 } from './utils';
 import buildSdp, { Conference } from './buildSdp';
 import { getUserStreams, StreamType } from './secretsauce';
@@ -174,6 +174,7 @@ export async function joinPhoneCall(
   emitSignalingData: (data: P2pMessage) => void,
   isOutgoing: boolean,
   shouldStartVideo: boolean,
+  isP2p: boolean,
   onUpdate: (...args: any[]) => void,
 ) {
   const conn = new RTCPeerConnection({
@@ -200,10 +201,17 @@ export async function joinPhoneCall(
   conn.onicecandidate = (e) => {
     if (!e.candidate) return;
 
+    const { candidate } = e.candidate;
+    if(!isP2p && !isRelayAddress(candidate)) {
+      return;
+    }
+
+    const candidateWithoutRelatedAddress = !isP2p ? removeRelatedAddress(candidate) : candidate;
+
     emitSignalingData({
       '@type': 'Candidates',
       candidates: [{
-        sdpString: e.candidate.candidate,
+        sdpString: candidateWithoutRelatedAddress,
       }],
     });
   };

@@ -140,7 +140,7 @@ export function buildPhoneCall(call: GramJs.TypePhoneCall): ApiPhoneCall {
       gAOrB: Array.from(gAOrB),
       keyFingerprint: keyFingerprint.toString(),
       startDate,
-      p2pAllowed,
+      isP2pAllowed: Boolean(p2pAllowed),
       connections: connections.map(buildApiCallConnection).filter(Boolean) as ApiPhoneCallConnection[],
     };
   }
