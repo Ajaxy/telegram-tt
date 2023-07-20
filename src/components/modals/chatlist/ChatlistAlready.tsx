@@ -98,7 +98,7 @@ const ChatlistAlready: FC<OwnProps> = ({ invite, folder }) => {
           {!selectedPeerIds.length && lang('OK')}
           {Boolean(selectedPeerIds.length) && (
             <>
-              {lang('FolderLinkButtonJoinPlural')}
+              {lang('FolderLinkButtonJoinPlural', selectedPeerIds.length, 'i')}
               <Badge className={styles.buttonBadge} text={badgeText} isAlternateColor />
             </>
           )}
