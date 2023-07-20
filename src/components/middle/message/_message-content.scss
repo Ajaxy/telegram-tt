@@ -417,16 +417,24 @@
   }
 
   &.document {
-    padding: 0.5rem !important;
-
     .File {
+      margin-top: calc(0.5rem - 0.3125rem);
+
+      .message-content.no-text & {
+        margin-bottom: calc(0.5rem - 0.375rem);
+      }
+
       .theme-dark & {
         --color-primary: var(--color-selection-highlight);
       }
     }
+  }
 
-    .File + .text-content {
-      margin-top: 0.3125rem;
+  &.voice,
+  &.audio,
+  &.document {
+    .text-content {
+      margin-top: 0.25rem;
     }
   }
 
@@ -439,30 +447,11 @@
     }
   }
 
-  &.voice {
-    padding: 0.5rem !important;
-
-    .Voice + .text-content {
-      margin-top: 0.5rem;
-    }
-  }
-
   &.audio {
     min-width: 20rem;
-    padding: 0.5rem 0.5rem 0.8125rem !important;
 
     @media (max-width: 600px) {
       min-width: 17rem;
-    }
-
-    .Audio + .text-content {
-      margin-top: 0.25rem;
-    }
-
-    &:not(.has-replies) {
-      .Audio + .text-content {
-        margin-bottom: -0.4375rem;
-      }
     }
   }
 
