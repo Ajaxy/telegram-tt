@@ -100,6 +100,10 @@ export interface ISettings extends NotifySettings, Record<string, any> {
   doNotTranslate: string[];
   canDisplayChatInTitle: boolean;
   shouldShowLoginCodeInChatList?: boolean;
+  shouldForceHttpTransport?: boolean;
+  shouldAllowHttpTransport?: boolean;
+  shouldCollectDebugLogs?: boolean;
+  shouldDebugExportedSenders?: boolean;
 }
 
 export interface ApiPrivacySettings {

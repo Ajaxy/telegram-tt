@@ -148,7 +148,7 @@ function updateGroupCallStreams(userId: string) {
 }
 
 async function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum = 'user') {
-  if(streamType === 'audio' && state?.audioStream) {
+  if (streamType === 'audio' && state?.audioStream) {
     return state.audioStream;
   }
 
@@ -162,19 +162,19 @@ async function getUserStream(streamType: StreamType, facing: VideoFacingModeEnum
   const media = await navigator.mediaDevices.getUserMedia({
     audio: streamType === 'audio' ? {
       // @ts-ignore
-      ...(IS_ECHO_CANCELLATION_SUPPORTED && { echoCancellation: true }),
-      ...(IS_NOISE_SUPPRESSION_SUPPORTED && { noiseSuppression: true }),
+      ...(IS_ECHO_CANCELLATION_SUPPORTED && {echoCancellation: true}),
+      ...(IS_NOISE_SUPPRESSION_SUPPORTED && {noiseSuppression: true}),
     } : false,
     video: streamType === 'video' ? {
       facingMode: facing,
     } : false,
   });
 
-  if(state && streamType === 'audio'){
+  if (state && streamType === 'audio') {
     state.audioStream = media;
   }
 
-  if(streamType === 'video') {
+  if (streamType === 'video') {
     const vid = document.createElement('video');
     vid.srcObject = media;
 

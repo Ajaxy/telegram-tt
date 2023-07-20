@@ -9,7 +9,7 @@
     .message-content.no-text & {
       margin-bottom: calc(0.8125rem - 0.375rem);
 
-      &[dir=rtl] {
+      &[dir="rtl"] {
         margin-bottom: 1.5rem;
       }
     }

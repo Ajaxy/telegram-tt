@@ -1,4 +1,5 @@
 const PromisedWebSockets = require('../../extensions/PromisedWebSockets');
+const HttpStream = require('../../extensions/HttpStream').default;
 const AsyncQueue = require('../../extensions/AsyncQueue');
 
 /**
@@ -31,7 +32,12 @@ class Connection {
         this._recvArray = new AsyncQueue();
         // this.socket = new PromiseSocket(new Socket())
 
+        this.shouldLongPoll = false;
         this.socket = new PromisedWebSockets(this.disconnectCallback.bind(this));
+    }
+
+    isConnected() {
+        return this._connected;
     }
 
     async disconnectCallback() {
@@ -178,8 +184,36 @@ class PacketCodec {
     }
 }
 
+class HttpConnection extends Connection {
+    constructor(ip, port, dcId, loggers, testServers, isPremium) {
+        super(ip, port, dcId, loggers, testServers, isPremium);
+        this.shouldLongPoll = true;
+        this.socket = new HttpStream(this.disconnectCallback.bind(this));
+    }
+
+    send(data) {
+        return this.socket.write(data);
+    }
+
+    recv() {
+        return this.socket.read();
+    }
+
+    async _connect() {
+        this._log.debug('Connecting');
+        await this.socket.connect(this._port, this._ip, this._testServers, this._isPremium);
+        this._log.debug('Finished connecting');
+    }
+
+    async connect() {
+        await this._connect();
+        this._connected = true;
+    }
+}
+
 module.exports = {
     Connection,
     PacketCodec,
     ObfuscatedConnection,
+    HttpConnection,
 };

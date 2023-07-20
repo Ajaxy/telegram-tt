@@ -615,8 +615,8 @@ export type ApiUpdateMessageTranslations = {
   toLanguageCode: string;
 };
 
-export type ApiRequestInitApi = {
-  '@type': 'requestInitApi';
+export type ApiRequestReconnectApi = {
+  '@type': 'requestReconnectApi';
 };
 
 export type ApiRequestSync = {
@@ -649,7 +649,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
-  ApiUpdateRecentReactions | ApiRequestInitApi | ApiRequestSync
+  ApiUpdateRecentReactions | ApiRequestReconnectApi | ApiRequestSync
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

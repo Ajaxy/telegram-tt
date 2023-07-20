@@ -13,6 +13,9 @@ export interface ApiInitialArgs {
   webAuthToken?: string;
   dcId?: number;
   mockScenario?: string;
+  shouldAllowHttpTransport?: boolean;
+  shouldForceHttpTransport?: boolean;
+  shouldDebugExportedSenders?: boolean;
 }
 
 export interface ApiOnProgress {

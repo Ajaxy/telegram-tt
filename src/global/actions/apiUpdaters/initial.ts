@@ -58,7 +58,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       onUpdateCurrentUser(global, update);
       break;
 
-    case 'requestInitApi':
+    case 'requestReconnectApi':
+      global = getGlobal();
+      global = { ...global, isSynced: false };
+      setGlobal(global);
+
+      onUpdateConnectionState(global, actions, {
+        '@type': 'updateConnectionState',
+        connectionState: 'connectionStateConnecting',
+      });
       actions.initApi();
       break;
 

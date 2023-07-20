@@ -5,7 +5,7 @@ import type {
 } from '../../types';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { invokeRequest } from './client';
+import { invokeRequest, invokeRequestBeacon } from './client';
 import {
   buildInputGroupCall, buildInputPeer, buildInputPhoneCall, generateRandomInt,
 } from '../gramjsBuilders';
@@ -151,13 +151,20 @@ export async function fetchGroupCallParticipants({
 }
 
 export function leaveGroupCall({
-  call,
+  call, isPageUnload,
 }: {
-  call: ApiGroupCall;
+  call: ApiGroupCall; isPageUnload?: boolean;
 }) {
-  return invokeRequest(new GramJs.phone.LeaveGroupCall({
+  const request = new GramJs.phone.LeaveGroupCall({
     call: buildInputGroupCall(call),
-  }), {
+  });
+
+  if (isPageUnload) {
+    invokeRequestBeacon(request);
+    return;
+  }
+
+  invokeRequest(request, {
     shouldReturnTrue: true,
   });
 }
@@ -270,14 +277,21 @@ export async function getDhConfig() {
 }
 
 export function discardCall({
-  call, isBusy,
+  call, isBusy, isPageUnload,
 }: {
-  call: ApiPhoneCall; isBusy?: boolean;
+  call: ApiPhoneCall; isBusy?: boolean; isPageUnload?: boolean;
 }) {
-  return invokeRequest(new GramJs.phone.DiscardCall({
+  const request = new GramJs.phone.DiscardCall({
     peer: buildInputPhoneCall(call),
     reason: isBusy ? new GramJs.PhoneCallDiscardReasonBusy() : new GramJs.PhoneCallDiscardReasonHangup(),
-  }), {
+  });
+
+  if (isPageUnload) {
+    invokeRequestBeacon(request);
+    return;
+  }
+
+  invokeRequest(request, {
     shouldReturnTrue: true,
   });
 }

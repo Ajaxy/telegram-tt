@@ -107,8 +107,8 @@ export function updateChannelState(channelId: string, pts: number) {
 }
 
 function applyUpdate(updateObject: SeqUpdate | PtsUpdate) {
-  if ('seq' in updateObject) {
-    if (updateObject.seq) localDb.commonBoxState.seq = updateObject.seq;
+  if ('seq' in updateObject && updateObject.seq) {
+    localDb.commonBoxState.seq = updateObject.seq;
     localDb.commonBoxState.date = updateObject.date;
   }
 
@@ -165,7 +165,9 @@ function popSeqQueue() {
   const localSeq = localDb.commonBoxState.seq;
   const seqStart = 'seqStart' in update ? update.seqStart : update.seq;
 
-  if (seqStart === 0 || seqStart === localSeq + 1) {
+  if (seqStart === 0) {
+    applyUpdate(update);
+  } else if (seqStart === localSeq + 1) {
     clearTimeout(seqTimeout);
     seqTimeout = undefined;
 

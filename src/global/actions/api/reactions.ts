@@ -277,7 +277,7 @@ addActionHandler('loadMessageReactions', (global, actions, payload): ActionRetur
 
   const chat = selectChat(global, chatId);
 
-  if (!chat) {
+  if (!chat || global.connectionState !== 'connectionStateReady') {
     return;
   }
 

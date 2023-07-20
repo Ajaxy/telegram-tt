@@ -223,6 +223,7 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
       canTranslate: false,
       doNotTranslate: [],
       canDisplayChatInTitle: true,
+      shouldAllowHttpTransport: true,
     },
     themes: {
       light: {

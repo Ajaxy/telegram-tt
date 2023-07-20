@@ -15,6 +15,7 @@ const {
     ConnectionTCPObfuscated,
     MTProtoSender,
     UpdateConnectionState,
+    HttpConnection,
 } = require('../network');
 const {
     authFlow,
@@ -27,21 +28,13 @@ const {
     getTmpPassword,
 } = require('./2fa');
 const RequestState = require('../network/RequestState');
-const withAbortCheck = require('../../../util/withAbortCheck').default;
-const { AbortError } = require('../../../util/withAbortCheck');
-
-class ConnectTimeoutError extends Error {
-    constructor() {
-        super('Connection Timeout');
-    }
-}
+const Deferred = require('../../../util/Deferred').default;
 
 const DEFAULT_DC_ID = 2;
 const WEBDOCUMENT_DC_ID = 4;
 const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
 const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 const WEBDOCUMENT_REQUEST_PART_SIZE = 131072; // 128kb
-const EXPORTED_SENDER_CONNECT_TIMEOUT = 8000; // 8 sec
 
 const PING_INTERVAL = 3000; // 3 sec
 const PING_TIMEOUT = 5000; // 5 sec
@@ -63,12 +56,15 @@ const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
 class TelegramClient {
     static DEFAULT_OPTIONS = {
         connection: ConnectionTCPObfuscated,
+        fallbackConnection: HttpConnection,
         useIPV6: false,
         proxy: undefined,
         timeout: 10,
         requestRetries: 5,
         connectionRetries: Infinity,
+        connectionRetriesToFallback: 1,
         retryDelay: 1000,
+        retryMainConnectionDelay: 10000,
         autoReconnect: true,
         sequentialUpdates: false,
         floodSleepLimit: 60,
@@ -82,6 +78,9 @@ class TelegramClient {
         additionalDcsDisabled: false,
         testServers: false,
         dcId: DEFAULT_DC_ID,
+        shouldAllowHttpTransport: false,
+        shouldForceHttpTransport: false,
+        shouldDebugExportedSenders: false,
     };
 
     /**
@@ -100,6 +99,9 @@ class TelegramClient {
         this.apiHash = apiHash;
         this.defaultDcId = args.dcId || DEFAULT_DC_ID;
         this._useIPV6 = args.useIPV6;
+        this._shouldForceHttpTransport = args.shouldForceHttpTransport;
+        this._shouldAllowHttpTransport = args.shouldAllowHttpTransport;
+        this._shouldDebugExportedSenders = args.shouldDebugExportedSenders;
         // this._entityCache = new Set()
         if (typeof args.baseLogger === 'string') {
             this._log = new Logger();
@@ -128,7 +130,9 @@ class TelegramClient {
 
         this._requestRetries = args.requestRetries;
         this._connectionRetries = args.connectionRetries;
+        this._connectionRetriesToFallback = args.connectionRetriesToFallback;
         this._retryDelay = args.retryDelay || 0;
+        this._retryMainConnectionDelay = args.retryMainConnectionDelay || 0;
         if (args.proxy) {
             this._log.warn('proxies are not supported');
         }
@@ -137,6 +141,7 @@ class TelegramClient {
         this._autoReconnect = args.autoReconnect;
 
         this._connection = args.connection;
+        this._fallbackConnection = args.fallbackConnection;
         // TODO add proxy support
 
         this._floodWaitedRequests = {};
@@ -165,13 +170,13 @@ class TelegramClient {
         this._config = undefined;
         this.phoneCodeHashes = [];
         this._exportedSenderPromises = {};
-        this._exportedSenderAbortControllers = {};
         this._waitingForAuthKey = {};
         this._exportedSenderReleaseTimeouts = {};
         this._additionalDcsDisabled = args.additionalDcsDisabled;
         this._loopStarted = false;
         this._isSwitchingDc = false;
         this._destroyed = false;
+        this._connectedDeferred = new Deferred();
     }
 
     // region Connecting
@@ -191,11 +196,16 @@ class TelegramClient {
                 logger: this._log,
                 dcId: this.session.dcId,
                 retries: this._connectionRetries,
+                retriesToFallback: this._connectionRetriesToFallback,
+                shouldForceHttpTransport: this._shouldForceHttpTransport,
+                shouldAllowHttpTransport: this._shouldAllowHttpTransport,
                 delay: this._retryDelay,
+                retryMainConnectionDelay: this._retryMainConnectionDelay,
                 autoReconnect: this._autoReconnect,
                 connectTimeout: this._timeout,
                 authKeyCallback: this._authKeyCallback.bind(this),
                 updateCallback: this._handleUpdate.bind(this),
+                getShouldDebugExportedSenders: this.getShouldDebugExportedSenders.bind(this),
                 isMainSender: true,
             });
         }
@@ -208,8 +218,11 @@ class TelegramClient {
         const connection = new this._connection(
             this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
         );
+        const fallbackConnection = new this._fallbackConnection(
+            this.session.serverAddress, this.session.port, this.session.dcId, this._log, this._args.testServers,
+        );
 
-        const newConnection = await this._sender.connect(connection);
+        const newConnection = await this._sender.connect(connection, undefined, fallbackConnection);
         if (!newConnection) {
             // we're already connected so no need to reset auth key.
             if (!this._loopStarted) {
@@ -228,6 +241,7 @@ class TelegramClient {
             this._updateLoop();
             this._loopStarted = true;
         }
+        this._connectedDeferred.resolve();
         this._isSwitchingDc = false;
     }
 
@@ -243,6 +257,28 @@ class TelegramClient {
 
     setPingCallback(callback) {
         this.pingCallback = callback;
+    }
+
+    async setForceHttpTransport(forceHttpTransport) {
+        this._shouldForceHttpTransport = forceHttpTransport;
+        await this.disconnect();
+        this._sender = undefined;
+        await this.connect();
+    }
+
+    async setAllowHttpTransport(allowHttpTransport) {
+        this._shouldAllowHttpTransport = allowHttpTransport;
+        await this.disconnect();
+        this._sender = undefined;
+        await this.connect();
+    }
+
+    setShouldDebugExportedSenders(shouldDebugExportedSenders) {
+        this._shouldDebugExportedSenders = shouldDebugExportedSenders;
+    }
+
+    getShouldDebugExportedSenders() {
+        return this._shouldDebugExportedSenders;
     }
 
     async _updateLoop() {
@@ -337,8 +373,13 @@ class TelegramClient {
                 }).flat(),
         );
 
+        Object.values(this._exportedSenderReleaseTimeouts).forEach((timeouts) => {
+            Object.values(timeouts).forEach((releaseTimeout) => {
+                clearTimeout(releaseTimeout);
+            });
+        });
+
         this._exportedSenderPromises = {};
-        this._exportedSenderAbortControllers = {};
         this._waitingForAuthKey = {};
     }
 
@@ -369,6 +410,7 @@ class TelegramClient {
         this.session.setAuthKey(undefined);
         this._isSwitchingDc = true;
         await this.disconnect();
+        this._sender = undefined;
         return this.connect();
     }
 
@@ -383,9 +425,10 @@ class TelegramClient {
         if (this.session.dcId !== dcId) {
             this.session.setAuthKey(undefined, dcId);
         }
+        // eslint-disable-next-line no-console
+        if (this._shouldDebugExportedSenders) console.log(`🧹 Cleanup idx=${index} dcId=${dcId}`);
         const sender = await this._exportedSenderPromises[dcId][index];
         delete this._exportedSenderPromises[dcId][index];
-        delete this._exportedSenderAbortControllers[dcId][index];
         await sender.disconnect();
     }
 
@@ -400,7 +443,6 @@ class TelegramClient {
         }
 
         this._exportedSenderPromises[dcId] = {};
-        this._exportedSenderAbortControllers[dcId] = {};
 
         await Promise.all(promises.map(async (promise) => {
             const sender = await promise;
@@ -408,7 +450,7 @@ class TelegramClient {
         }));
     }
 
-    async _connectSender(sender, dcId, index, isPremium = false, abortSignal) {
+    async _connectSender(sender, dcId, index, isPremium = false) {
         // if we don't already have an auth key we want to use normal DCs not -1
         let hasAuthKey = Boolean(sender.authKey.getKey());
         let firstConnectResolver;
@@ -432,7 +474,7 @@ class TelegramClient {
         // eslint-disable-next-line no-constant-condition
         while (true) {
             try {
-                await withAbortCheck(abortSignal, sender.connect(new this._connection(
+                await sender.connect(new this._connection(
                     dc.ipAddress,
                     dc.port,
                     dcId,
@@ -440,20 +482,24 @@ class TelegramClient {
                     this._args.testServers,
                     // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
                     hasAuthKey ? isPremium : false,
-                )));
+                ), undefined, new this._fallbackConnection(
+                    dc.ipAddress,
+                    dc.port,
+                    dcId,
+                    this._log,
+                    this._args.testServers,
+                    hasAuthKey ? isPremium : false,
+                ));
 
                 if (this.session.dcId !== dcId && !sender._authenticated) {
                     this._log.info(`Exporting authorization for data center ${dc.ipAddress}`);
-                    const auth = await withAbortCheck(
-                        abortSignal,
-                        this.invoke(new requests.auth.ExportAuthorization({ dcId })),
-                    );
+                    const auth = await this.invoke(new requests.auth.ExportAuthorization({ dcId }));
 
                     const req = this._initWith(new requests.auth.ImportAuthorization({
                         id: auth.id,
                         bytes: auth.bytes,
                     }));
-                    await withAbortCheck(abortSignal, sender.send(req));
+                    await sender.send(req);
                     sender._authenticated = true;
                 }
 
@@ -465,13 +511,16 @@ class TelegramClient {
                     delete this._waitingForAuthKey[dcId];
                 }
 
+                if (this._shouldDebugExportedSenders) {
+                    // eslint-disable-next-line no-console
+                    console.warn(`✅ Connected to exported sender idx=${index} dc=${dcId}`);
+                }
+
                 return sender;
             } catch (err) {
-                if (err instanceof AbortError) {
-                    delete this._exportedSenderPromises[dcId][index];
-                    delete this._exportedSenderAbortControllers[dcId][index];
-                    sender.disconnect();
-                    return undefined;
+                if (this._shouldDebugExportedSenders) {
+                    // eslint-disable-next-line no-console
+                    console.error(`☠️ ERROR! idx=${index} dcId=${dcId} ${err.message}`);
                 }
                 // eslint-disable-next-line no-console
                 console.error(err);
@@ -482,54 +531,32 @@ class TelegramClient {
         }
     }
 
-    getConnectedExportedSenderIndex(dcId, i) {
-        const index = Object.keys(this._exportedSenderReleaseTimeouts[dcId] || {})[0];
-        const firstIndex = Number(index ?? 0);
-        return {
-            newIndex: firstIndex === i ? i + 1 : firstIndex,
-            noConnectedExportedSenders: index === undefined,
-        };
-    }
-
     async _borrowExportedSender(dcId, shouldReconnect, existingSender, index, isPremium) {
         if (this._additionalDcsDisabled) {
             return undefined;
         }
 
-        let i = index || 0;
+        const i = index || 0;
 
         if (!this._exportedSenderPromises[dcId]) this._exportedSenderPromises[dcId] = {};
-        if (!this._exportedSenderAbortControllers[dcId]) this._exportedSenderAbortControllers[dcId] = {};
-
-        if (this._exportedSenderAbortControllers[dcId][i]?.signal.aborted) {
-            const { newIndex } = this.getConnectedExportedSenderIndex(dcId, i);
-            i = newIndex;
-        }
 
         if (!this._exportedSenderPromises[dcId][i] || shouldReconnect) {
-            this._exportedSenderAbortControllers[dcId][i]?.abort();
-            this._exportedSenderAbortControllers[dcId][i] = new AbortController();
+            if (this._shouldDebugExportedSenders) {
+                // eslint-disable-next-line no-console
+                console.warn(`🕒 Connecting to exported sender idx=${i} dc=${dcId}`
+                    + ` ${shouldReconnect ? '(reconnect)' : ''}`);
+            }
             this._exportedSenderPromises[dcId][i] = this._connectSender(
                 existingSender || this._createExportedSender(dcId, i),
                 dcId,
                 index,
                 isPremium,
-                this._exportedSenderAbortControllers[dcId][i].signal,
             );
         }
 
         let sender;
         try {
-            sender = await Promise.race([
-                this._exportedSenderPromises[dcId][i],
-                Helpers.sleep(EXPORTED_SENDER_CONNECT_TIMEOUT).then(() => {
-                    return Promise.reject(new ConnectTimeoutError());
-                }),
-            ]);
-
-            if (!sender) {
-                throw new ConnectTimeoutError();
-            }
+            sender = await this._exportedSenderPromises[dcId][i];
 
             if (!sender.isConnected()) {
                 if (sender.isConnecting) {
@@ -540,11 +567,6 @@ class TelegramClient {
                 }
             }
         } catch (err) {
-            if (err instanceof ConnectTimeoutError) {
-                this._exportedSenderAbortControllers[dcId][i]?.abort();
-                const { newIndex, noConnectedExportedSenders } = this.getConnectedExportedSenderIndex(dcId, i);
-                return this._borrowExportedSender(dcId, noConnectedExportedSenders, undefined, newIndex, isPremium);
-            }
             // eslint-disable-next-line no-console
             console.error(err);
 
@@ -558,8 +580,11 @@ class TelegramClient {
         }
 
         this._exportedSenderReleaseTimeouts[dcId][i] = setTimeout(() => {
-            this._exportedSenderReleaseTimeouts[dcId][i] = undefined;
+            // eslint-disable-next-line no-console
+            if (this._shouldDebugExportedSenders) console.log(`🚪 Release idx=${i} dcId=${dcId}`);
             sender.disconnect();
+            this._exportedSenderReleaseTimeouts[dcId][i] = undefined;
+            this._exportedSenderPromises[dcId][i] = undefined;
         }, EXPORTED_SENDER_RELEASE_TIMEOUT);
 
         return sender;
@@ -569,12 +594,19 @@ class TelegramClient {
         return new MTProtoSender(this.session.getAuthKey(dcId), {
             logger: this._log,
             dcId,
+            senderIndex: index,
             retries: this._connectionRetries,
+            retriesToFallback: this._connectionRetriesToFallback,
             delay: this._retryDelay,
+            retryMainConnectionDelay: this._retryMainConnectionDelay,
+            shouldForceHttpTransport: this._shouldForceHttpTransport,
+            shouldAllowHttpTransport: this._shouldAllowHttpTransport,
             autoReconnect: this._autoReconnect,
             connectTimeout: this._timeout,
             authKeyCallback: this._authKeyCallback.bind(this),
             isMainSender: dcId === this.session.dcId,
+            isExported: true,
+            getShouldDebugExportedSenders: this.getShouldDebugExportedSenders.bind(this),
             onConnectionBreak: () => this._cleanupExportedSender(dcId, index),
         });
     }
@@ -602,7 +634,7 @@ class TelegramClient {
      * @returns {Promise<Buffer>}
      */
     downloadFile(inputLocation, args = {}) {
-        return downloadFile(this, inputLocation, args);
+        return downloadFile(this, inputLocation, args, this._shouldDebugExportedSenders);
     }
 
     downloadMedia(messageOrMedia, args) {
@@ -933,8 +965,10 @@ class TelegramClient {
             throw new Error('You can only invoke MTProtoRequests');
         }
 
-        const sender = dcId === undefined ? this._sender : await this.getSender(dcId);
+        let sender = dcId === undefined ? this._sender : await this.getSender(dcId);
         this._lastRequest = Date.now();
+
+        await this._connectedDeferred.promise;
 
         const state = new RequestState(request, abortSignal);
 
@@ -968,6 +1002,7 @@ class TelegramClient {
                         throw e;
                     }
                     await this._switchDC(e.newDc);
+                    sender = dcId === undefined ? this._sender : await this.getSender(dcId);
                 } else if (e instanceof errors.MsgWaitError) {
                     // We need to resend this after the old one was confirmed.
                     await state.isReady();
@@ -991,6 +1026,16 @@ class TelegramClient {
             state.resetPromise();
         }
         throw new Error(`Request was unsuccessful ${attempt} time(s)`);
+    }
+
+    async invokeBeacon(request, dcId) {
+        if (request.classType !== 'request') {
+            throw new Error('You can only invoke MTProtoRequests');
+        }
+
+        const sender = dcId === undefined ? this._sender : await this.getSender(dcId);
+
+        sender.sendBeacon(request);
     }
 
     setIsPremium(isPremium) {
@@ -1026,7 +1071,7 @@ class TelegramClient {
     }
 
     uploadFile(fileParams) {
-        return uploadFile(this, fileParams);
+        return uploadFile(this, fileParams, this._shouldDebugExportedSenders);
     }
 
     updateTwoFaSettings(params) {

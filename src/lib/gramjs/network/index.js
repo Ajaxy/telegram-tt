@@ -6,6 +6,7 @@ const {
     ConnectionTCPFull,
     ConnectionTCPAbridged,
     ConnectionTCPObfuscated,
+    HttpConnection,
 } = require('./connection');
 
 const {
@@ -15,6 +16,7 @@ const {
 
 module.exports = {
     Connection,
+    HttpConnection,
     ConnectionTCPFull,
     ConnectionTCPAbridged,
     ConnectionTCPObfuscated,
