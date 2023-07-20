@@ -1,5 +1,5 @@
+import React, { memo } from '../../lib/teact/teact';
 import type { FC } from '../../lib/teact/teact';
-import React, { useRef, memo, useLayoutEffect } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -31,36 +31,7 @@ const ProgressSpinner: FC<{
   const circleRadius = radius - STROKE_WIDTH * 2;
   const borderRadius = radius - 1;
   const circumference = circleRadius * 2 * Math.PI;
-  // eslint-disable-next-line no-null/no-null
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const container = containerRef.current!;
-    const svg = container.firstElementChild;
-    const strokeDashOffset = circumference - Math.min(Math.max(MIN_PROGRESS, progress), MAX_PROGRESS) * circumference;
-
-    if (!svg) {
-      container.innerHTML = `<svg
-        viewBox="0 0 ${borderRadius * 2} ${borderRadius * 2}"
-        height="${borderRadius * 2}"
-        width="${borderRadius * 2}"
-      >
-        <circle
-          stroke="white"
-          fill="transparent"
-          stroke-width=${STROKE_WIDTH}
-          stroke-dasharray="${circumference} ${circumference}"}
-          stroke-dashoffset="${strokeDashOffset}"
-          stroke-linecap="round"
-          r=${circleRadius}
-          cx=${borderRadius}
-          cy=${borderRadius}
-        />
-      </svg>`;
-    } else {
-      (svg.firstElementChild as SVGElement).setAttribute('stroke-dashoffset', strokeDashOffset.toString());
-    }
-  }, [containerRef, circumference, borderRadius, circleRadius, progress]);
+  const strokeDashOffset = circumference - Math.min(Math.max(MIN_PROGRESS, progress), MAX_PROGRESS) * circumference;
 
   const className = buildClassName(
     `ProgressSpinner size-${size}`,
@@ -71,10 +42,27 @@ const ProgressSpinner: FC<{
 
   return (
     <div
-      ref={containerRef}
       className={className}
       onClick={onClick}
-    />
+    >
+      <svg
+        viewBox={`0 0 ${borderRadius * 2} ${borderRadius * 2}`}
+        height={borderRadius * 2}
+        width={borderRadius * 2}
+      >
+        <circle
+          stroke="white"
+          fill="transparent"
+          stroke-width={STROKE_WIDTH}
+          stroke-dasharray={`${circumference} ${circumference}`}
+          stroke-dashoffset={strokeDashOffset}
+          stroke-linecap="round"
+          r={circleRadius}
+          cx={borderRadius}
+          cy={borderRadius}
+        />
+      </svg>
+    </div>
   );
 };
 

@@ -30,7 +30,8 @@
       "error",
       {
         "code": 120,
-        "ignoreComments": true
+        "ignoreComments": true,
+        "ignorePattern": "\\sd=\".+\"" // Ignore lines with "d" attribute
       }
     ],
     "array-bracket-newline": [

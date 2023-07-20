@@ -3,7 +3,6 @@ import React, {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -275,10 +274,6 @@ type QuickReactionPosition =
   | 'in-meta';
 
 const NBSP = '\u00A0';
-// eslint-disable-next-line max-len
-const APPENDIX_OWN = { __html: '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#EEFFDE" class="corner"/></g></svg>' };
-// eslint-disable-next-line max-len
-const APPENDIX_NOT_OWN = { __html: '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#000" filter="url(#a)"/><path d="M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z" fill="#FFF" class="corner"/></g></svg>' };
 const APPEARANCE_DELAY = 10;
 const NO_MEDIA_CORNERS_THRESHOLD = 18;
 const QUICK_REACTION_SIZE = 1.75 * REM;
@@ -286,9 +281,6 @@ const EXTRA_SPACE_FOR_REACTIONS = 2.25 * REM;
 const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
 const THROTTLE_MS = 300;
 const RESIZE_ANIMATION_DURATION = 400;
-
-let appendixOwnCloned: SVGElement;
-let appendixNotOwnCloned: SVGElement;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
@@ -389,8 +381,6 @@ const Message: FC<OwnProps & StateProps> = ({
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const quickReactionRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
-  const appendixRef = useRef<HTMLDivElement>(null);
 
   const messageHeightRef = useRef(0);
 
@@ -725,30 +715,6 @@ const Message: FC<OwnProps & StateProps> = ({
       animateUnreadReaction({ messageIds: [messageId] });
     }
   }, [hasUnreadReaction, messageId, animateUnreadReaction]);
-
-  useLayoutEffect(() => {
-    if (!withAppendix) return;
-
-    const appendixEl = appendixRef.current!;
-    const cloned = isOwn ? appendixOwnCloned : appendixNotOwnCloned;
-    // eslint-disable-next-line no-underscore-dangle
-    const html = isOwn ? APPENDIX_OWN.__html : APPENDIX_NOT_OWN.__html;
-    let nextCloned: SVGElement;
-
-    if (cloned) {
-      nextCloned = cloned.cloneNode(true) as SVGElement;
-      appendixEl.appendChild(cloned);
-    } else {
-      appendixEl.innerHTML = html;
-      nextCloned = appendixEl.firstChild!.cloneNode(true) as SVGElement;
-    }
-
-    if (isOwn) {
-      appendixOwnCloned = nextCloned;
-    } else {
-      appendixNotOwnCloned = nextCloned;
-    }
-  }, [isOwn, withAppendix]);
 
   let style = '';
   let calculatedWidth;
@@ -1325,9 +1291,7 @@ const Message: FC<OwnProps & StateProps> = ({
             </Button>
           ) : undefined}
           {withCommentButton && <CommentButton threadInfo={repliesThreadInfo!} disabled={noComments} />}
-          {withAppendix && (
-            <div ref={appendixRef} className="svg-appendix" />
-          )}
+          {withAppendix && <MessageAppendix isOwn={isOwn} />}
           {withQuickReactionButton && quickReactionPosition === 'in-content' && renderQuickReactionButton()}
         </div>
         {message.inlineButtons && (
@@ -1366,6 +1330,30 @@ const Message: FC<OwnProps & StateProps> = ({
     </div>
   );
 };
+
+function MessageAppendix({ isOwn } : { isOwn: boolean }) {
+  const path = isOwn
+    ? 'M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z'
+    : 'M3 17h6V0c-.193 2.84-.876 5.767-2.05 8.782-.904 2.325-2.446 4.485-4.625 6.48A1 1 0 003 17z';
+  return (
+    <svg width="9" height="20" className="svg-appendix">
+      <defs>
+        <filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="messageAppendix">
+          <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
+          <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
+          <feColorMatrix
+            values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
+            in="shadowBlurOuter1"
+          />
+        </filter>
+      </defs>
+      <g fill="none" fill-rule="evenodd">
+        <path d={path} fill="#000" filter="url(#messageAppendix)" />
+        <path d={path} fill={isOwn ? '#EEFFDE' : 'FFF'} className="corner" />
+      </g>
+    </svg>
+  );
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {

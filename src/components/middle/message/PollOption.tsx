@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useState, useEffect, useRef, useLayoutEffect,
+  useState, useEffect,
 } from '../../../lib/teact/teact';
 
 import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';
@@ -32,8 +32,6 @@ const PollOption: FC<OwnProps> = ({
   const showIcon = (correctResults.length > 0 && correctAnswer) || (result?.isChosen);
   const answerPercent = result ? getPercentage(result.votersCount, totalVoters || 0) : 0;
   const [finalPercent, setFinalPercent] = useState(shouldAnimate ? 0 : answerPercent);
-  // eslint-disable-next-line no-null/no-null
-  const lineRef = useRef<HTMLDivElement>(null);
   const lineWidth = result ? getPercentage(result.votersCount, maxVotersCount || 0) : 0;
   const isAnimationDoesNotStart = finalPercent !== answerPercent;
 
@@ -42,24 +40,6 @@ const PollOption: FC<OwnProps> = ({
       setFinalPercent(answerPercent);
     }
   }, [shouldAnimate, answerPercent]);
-
-  useLayoutEffect(() => {
-    const lineEl = lineRef.current;
-
-    if (lineEl && shouldAnimate) {
-      const svgEl = lineEl.firstElementChild;
-
-      const style = isAnimationDoesNotStart ? '' : 'stroke-dasharray: 100% 200%; stroke-dashoffset: -44';
-      if (!svgEl) {
-        lineEl.innerHTML = `
-          <svg class="poll-line" xmlns="http://www.w3.org/2000/svg" style="${style}">
-            <path d="M4.47 5.33v13.6a9 9 0 009 9h13"/>
-          </svg>`;
-      } else {
-        svgEl.setAttribute('style', style);
-      }
-    }
-  }, [isAnimationDoesNotStart, shouldAnimate]);
 
   if (!voteResults || !result) {
     return undefined;
@@ -87,7 +67,14 @@ const PollOption: FC<OwnProps> = ({
           {renderText(answer.text)}
         </div>
         <div className={buildClassName('poll-option-answer', showIcon && !correctAnswer && 'wrong')}>
-          <div className="poll-option-corner" ref={lineRef} />
+          {shouldAnimate && (
+            <svg
+              className="poll-line"
+              style={!isAnimationDoesNotStart ? 'stroke-dasharray: 100% 200%; stroke-dashoffset: -44' : ''}
+            >
+              <path d="M4.47 5.33v13.6a9 9 0 009 9h13" />
+            </svg>
+          )}
           <div
             className="poll-option-line"
             style={lineStyle}

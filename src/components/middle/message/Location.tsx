@@ -35,6 +35,8 @@ import './Location.scss';
 
 import mapPin from '../../../assets/map-pin.svg';
 
+const TIMER_RADIUS = 12;
+const TIMER_CIRCUMFERENCE = TIMER_RADIUS * 2 * Math.PI;
 const MOVE_THRESHOLD = 0.0001; // ~11m
 const DEFAULT_MAP_CONFIG = {
   width: 400,
@@ -42,9 +44,6 @@ const DEFAULT_MAP_CONFIG = {
   zoom: 16,
   scale: 2,
 };
-
-// eslint-disable-next-line max-len
-const SVG_PIN = { __html: '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" class="round-pin" style="enable-background:new 0 0 64 64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24.5"/><path d="M32 8c13.23 0 24 10.77 24 24S45.23 56 32 56 8 45.23 8 32 18.77 8 32 8m0-1C18.19 7 7 18.19 7 32s11.19 25 25 25 25-11.19 25-25S45.81 7 32 7z"/><path d="m29.38 57.67-1.98-1.59 3.02-1.66L32 51.54l1.58 2.88 3.02 1.66-1.91 1.53L32 60.73z"/><path d="m32 52.58 1.07 1.95.14.26.26.14 2.24 1.22-1.33 1.06-.07.06-.06.07L32 59.96l-2.24-2.61-.06-.07-.07-.06-1.33-1.06 2.24-1.22.26-.14.14-.26L32 52.58m0-2.08-1.94 3.56L26.5 56l2.5 2 3 3.5 3-3.5 2.5-2-3.56-1.94L32 50.5z"/></svg>' };
 
 type OwnProps = {
   message: ApiMessage;
@@ -102,28 +101,14 @@ const Location: FC<OwnProps> = ({
 
   const updateCountdown = useLastCallback((countdownEl: HTMLDivElement) => {
     if (type !== 'geoLive') return;
-    const radius = 12;
-    const circumference = radius * 2 * Math.PI;
-    const svgEl = countdownEl.lastElementChild;
-    const timerEl = countdownEl.firstElementChild as SVGElement;
+    const svgEl = countdownEl.lastElementChild!;
+    const timerEl = countdownEl.firstElementChild!;
 
     const timeLeft = message.date + location.period - getServerTime();
-    const strokeDashOffset = (1 - timeLeft / location.period) * circumference;
+    const strokeDashOffset = (1 - timeLeft / location.period) * TIMER_CIRCUMFERENCE;
     const text = formatCountdownShort(lang, timeLeft * 1000);
-
-    if (!svgEl || !timerEl) {
-      countdownEl.innerHTML = `
-        <span class="geo-countdown-text">${text}</span>
-        <svg width="32px" height="32px">
-          <circle cx="16" cy="16" r="${radius}" class="geo-countdown-progress" transform="rotate(-90, 16, 16)"
-            stroke-dasharray="${circumference} ${circumference}"
-            stroke-dashoffset="-${strokeDashOffset}"
-          />
-        </svg>`;
-    } else {
-      timerEl.textContent = text;
-      svgEl.firstElementChild!.setAttribute('stroke-dashoffset', `-${strokeDashOffset}`);
-    }
+    timerEl.textContent = text;
+    svgEl.firstElementChild!.setAttribute('stroke-dashoffset', `-${strokeDashOffset}`);
   });
 
   useLayoutEffect(() => {
@@ -180,7 +165,22 @@ const Location: FC<OwnProps> = ({
           <div className="location-info-subtitle">
             {formatLastUpdated(lang, serverTime, message.editDate)}
           </div>
-          {!isExpired && <div className="geo-countdown" ref={countdownRef} />}
+          {!isExpired && (
+            <div className="geo-countdown" ref={countdownRef}>
+              <span className="geo-countdown-text" />
+              <svg width="32px" height="32px">
+                <circle
+                  cx="16"
+                  cy="16"
+                  r={TIMER_RADIUS}
+                  className="geo-countdown-progress"
+                  transform="rotate(-90, 16, 16)"
+                  stroke-dasharray={TIMER_CIRCUMFERENCE}
+                  stroke-dashoffset="0"
+                />
+              </svg>
+            </div>
+          )}
         </div>
       );
     }
@@ -207,7 +207,8 @@ const Location: FC<OwnProps> = ({
     );
     if (type === 'geoLive') {
       return (
-        <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN}>
+        <div className={pinClassName}>
+          <PinSvg />
           <Avatar peer={peer} className="location-avatar" />
           {location.heading !== undefined && (
             <div className="direction" style={`--direction: ${location.heading}deg`} />
@@ -221,7 +222,8 @@ const Location: FC<OwnProps> = ({
       const iconSrc = getVenueIconUrl(location.venueType);
       if (iconSrc) {
         return (
-          <div className={pinClassName} dangerouslySetInnerHTML={SVG_PIN} style={`--pin-color: ${color}`}>
+          <div className={pinClassName} style={`--pin-color: ${color}`}>
+            <PinSvg />
             <img src={iconSrc} className="venue-icon" alt="" />
           </div>
         );
@@ -263,5 +265,16 @@ const Location: FC<OwnProps> = ({
     </div>
   );
 };
+
+function PinSvg() {
+  return (
+    <svg className="round-pin" style="enable-background:new 0 0 64 64" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="24.5" />
+      <path d="M32 8c13.23 0 24 10.77 24 24S45.23 56 32 56 8 45.23 8 32 18.77 8 32 8m0-1C18.19 7 7 18.19 7 32s11.19 25 25 25 25-11.19 25-25S45.81 7 32 7z" />
+      <path d="m29.38 57.67-1.98-1.59 3.02-1.66L32 51.54l1.58 2.88 3.02 1.66-1.91 1.53L32 60.73z" />
+      <path d="m32 52.58 1.07 1.95.14.26.26.14 2.24 1.22-1.33 1.06-.07.06-.06.07L32 59.96l-2.24-2.61-.06-.07-.07-.06-1.33-1.06 2.24-1.22.26-.14.14-.26L32 52.58m0-2.08-1.94 3.56L26.5 56l2.5 2 3 3.5 3-3.5 2.5-2-3.56-1.94L32 50.5z" />
+    </svg>
+  );
+}
 
 export default memo(Location);
