@@ -1,4 +1,11 @@
 const closeError = new Error('HttpStream was closed');
+const REQUEST_TIMEOUT = 10000;
+
+AbortSignal.timeout ??= function timeout(ms) {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), ms);
+    return ctrl.signal;
+};
 
 class HttpStream {
     private url: string | undefined;
@@ -54,6 +61,7 @@ class HttpStream {
             method: 'POST',
             body: Buffer.from([]),
             mode: 'cors',
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT),
         });
 
         this.isClosed = false;
@@ -69,13 +77,13 @@ class HttpStream {
             method: 'POST',
             body: data,
             mode: 'cors',
+            signal: AbortSignal.timeout(REQUEST_TIMEOUT),
         }).then(async (response) => {
             if (this.isClosed) {
                 this.handleDisconnect();
                 return;
             }
             if (response.status !== 200) {
-                this.handleDisconnect();
                 throw closeError;
             }
 
@@ -83,6 +91,9 @@ class HttpStream {
 
             this.stream = this.stream.concat(Buffer.from(arrayBuffer));
             if (this.resolveRead && !this.isClosed) this.resolveRead();
+        }).catch((err) => {
+            this.handleDisconnect();
+            throw err;
         });
     }
 
