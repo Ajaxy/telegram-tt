@@ -29,6 +29,8 @@ const asCacheApiType = {
 
 const PROGRESSIVE_URL_PREFIX = `${IS_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
 const URL_DOWNLOAD_PREFIX = './download/';
+const RETRY_MEDIA_AFTER = 2000;
+const MAX_MEDIA_RETRIES = 3;
 
 const memoryCache = new Map<string, ApiPreparedMedia>();
 const fetchPromises = new Map<string, Promise<ApiPreparedMedia | undefined>>();
@@ -127,8 +129,8 @@ function getDownloadUrl(url: string) {
 }
 
 async function fetchFromCacheOrRemote(
-  url: string, mediaFormat: ApiMediaFormat, isHtmlAllowed: boolean,
-) {
+  url: string, mediaFormat: ApiMediaFormat, isHtmlAllowed: boolean, retryNumber = 0,
+): Promise<string> {
   if (!MEDIA_CACHE_DISABLED) {
     const cacheName = url.startsWith('avatar') ? MEDIA_CACHE_NAME_AVATARS : MEDIA_CACHE_NAME;
     const cached = await cacheApi.fetch(cacheName, url, asCacheApiType[mediaFormat]!, isHtmlAllowed);
@@ -183,7 +185,15 @@ async function fetchFromCacheOrRemote(
 
   const remote = await callApi('downloadMedia', { url, mediaFormat, isHtmlAllowed }, onProgress);
   if (!remote) {
-    throw new Error(`Failed to fetch media ${url}`);
+    if (retryNumber >= MAX_MEDIA_RETRIES) {
+      throw new Error(`Failed to fetch media ${url}`);
+    }
+    await new Promise((resolve) => {
+      setTimeout(resolve, RETRY_MEDIA_AFTER);
+    });
+    // eslint-disable-next-line no-console
+    if (DEBUG) console.debug(`Retrying to fetch media ${url}`);
+    return fetchFromCacheOrRemote(url, mediaFormat, isHtmlAllowed, retryNumber + 1);
   }
 
   let { mimeType } = remote;
