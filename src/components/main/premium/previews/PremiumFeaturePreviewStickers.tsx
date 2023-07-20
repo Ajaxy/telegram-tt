@@ -100,6 +100,7 @@ const AnimatedCircleSticker: FC<{
     </>
   );
 };
+
 const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
   stickers, isActive,
 }) => {
@@ -132,7 +133,7 @@ const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
       className={styles.root}
       ref={containerRef}
     >
-      {renderedStickers?.map((l, i) => {
+      {Boolean(size) && renderedStickers?.map((l, i) => {
         return (
           <AnimatedCircleSticker
             size={size}
