@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
@@ -229,8 +229,6 @@ const SELECT_MODE_TRANSITION_MS = 200;
 const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
-// eslint-disable-next-line max-len
-const APPENDIX = '<svg width="9" height="20" xmlns="http://www.w3.org/2000/svg"><defs><filter x="-50%" y="-14.7%" width="200%" height="141.2%" filterUnits="objectBoundingBox" id="a"><feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1"/><feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1"/><feColorMatrix values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0" in="shadowBlurOuter1"/></filter></defs><g fill="none" fill-rule="evenodd"><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#a)"/><path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" class="corner"/></g></svg>';
 
 const Composer: FC<OwnProps & StateProps> = ({
   isOnActiveTab,
@@ -315,8 +313,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
-  const appendixRef = useRef<HTMLDivElement>(null);
-  // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
 
   const [getHtml, setHtml] = useSignal('');
@@ -363,12 +359,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     // We only animate send-as button if `sendAsPeerIds` was missing when opening the chat
     shouldAnimateSendAsButtonRef.current = Boolean(chatId === prevChatId && sendAsPeerIds && !prevSendAsPeerIds);
   }, [chatId, sendAsPeerIds]);
-
-  useLayoutEffect(() => {
-    if (!appendixRef.current) return;
-
-    appendixRef.current.innerHTML = APPENDIX;
-  }, []);
 
   const [attachments, setAttachments] = useState<ApiAttachment[]>([]);
   const hasAttachments = Boolean(attachments.length);
@@ -1339,7 +1329,29 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClose={closeBotCommandTooltip}
       />
       <div id="message-compose">
-        <div className="svg-appendix" ref={appendixRef} />
+        <svg className="svg-appendix" width="9" height="20">
+          <defs>
+            <filter
+              x="-50%"
+              y="-14.7%"
+              width="200%"
+              height="141.2%"
+              filterUnits="objectBoundingBox"
+              id="composerAppendix"
+            >
+              <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
+              <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
+              <feColorMatrix
+                values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
+                in="shadowBlurOuter1"
+              />
+            </filter>
+          </defs>
+          <g fill="none" fill-rule="evenodd">
+            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#composerAppendix)" />
+            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" className="corner" />
+          </g>
+        </svg>
 
         <InlineBotTooltip
           isOpen={isInlineBotTooltipOpen}
