@@ -205,7 +205,7 @@ const ManageUser: FC<OwnProps & StateProps> = ({
             onChange={handleLastNameChange}
             value={lastName}
           />
-          <div className="ListItem no-selection narrow">
+          <div className="ListItem narrow">
             <Checkbox
               checked={isNotificationsEnabled}
               label={lang('Notifications')}

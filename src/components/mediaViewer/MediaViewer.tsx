@@ -26,7 +26,6 @@ import {
 } from '../../global/selectors';
 import { stopCurrentAudio } from '../../util/audioPlayer';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { MEDIA_VIEWER_MEDIA_QUERY } from '../common/helpers/mediaDimensions';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
@@ -177,10 +176,6 @@ const MediaViewer: FC<StateProps> = ({
   useEffect(() => {
     if (isMobile) {
       document.body.classList.toggle('is-media-viewer-open', isOpen);
-    }
-    // Disable user selection if media viewer is open, to prevent accidental text selection
-    if (IS_TOUCH_ENV) {
-      document.body.classList.toggle('no-selection', isOpen);
     }
   }, [isMobile, isOpen]);
 

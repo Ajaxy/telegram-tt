@@ -211,7 +211,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       noFastList
     >
       {dateSearchQuery && (
-        <div className="chat-selection no-selection no-scrollbar">
+        <div className="chat-selection no-scrollbar">
           <DateSuggest
             searchDate={dateSearchQuery}
             onSelect={onSearchDateSelect}
@@ -226,7 +226,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
       )}
       {Boolean(localResults.length) && (
         <div
-          className="chat-selection no-selection no-scrollbar"
+          className="chat-selection no-scrollbar"
           dir={lang.isRtl ? 'rtl' : undefined}
           ref={chatSelectionRef}
         >

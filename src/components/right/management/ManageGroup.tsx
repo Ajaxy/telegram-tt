@@ -441,7 +441,7 @@ const ManageGroup: FC<OwnProps & StateProps> = ({
           </ListItem>
 
           {!isPublicGroup && !hasLinkedChannel && Boolean(chatFullInfo) && (
-            <div className="ListItem narrow no-selection" ref={isPreHistoryHiddenCheckboxRef}>
+            <div className="ListItem narrow" ref={isPreHistoryHiddenCheckboxRef}>
               <Checkbox
                 checked={!chatFullInfo.isPreHistoryHidden}
                 label={lang('ChatHistory')}

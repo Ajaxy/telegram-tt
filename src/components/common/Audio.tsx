@@ -597,7 +597,7 @@ function renderSeekline(
 ) {
   return (
     <div
-      className="seekline no-selection"
+      className="seekline"
       ref={seekerRef as React.Ref<HTMLDivElement>}
     >
       {bufferedRanges.map(({ start, end }) => (

@@ -186,7 +186,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
         <div className="section without-bottom-shadow">
           <h3 className="section-heading" dir="auto">{lang('ChannelPermissionsHeader')}</h3>
 
-          <div className="ListItem no-selection with-checkbox">
+          <div className="ListItem with-checkbox">
             <Checkbox
               name="sendPlain"
               checked={!permissions.sendPlain}
@@ -195,7 +195,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               onChange={handlePermissionChange}
             />
           </div>
-          <div className="ListItem no-selection with-checkbox">
+          <div className="ListItem with-checkbox">
             <Checkbox
               name="sendMedia"
               checked={!permissions.sendMedia}
@@ -213,7 +213,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 isMediaDropdownOpen && 'DropdownList--open',
               )}
             >
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendPhotos"
                   checked={!permissions.sendPhotos}
@@ -223,7 +223,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendVideos"
                   checked={!permissions.sendVideos}
@@ -233,7 +233,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendStickers"
                   checked={!permissions.sendStickers && !permissions.sendGifs}
@@ -243,7 +243,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendAudios"
                   checked={!permissions.sendAudios}
@@ -253,7 +253,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendDocs"
                   checked={!permissions.sendDocs}
@@ -263,7 +263,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendVoices"
                   checked={!permissions.sendVoices}
@@ -273,7 +273,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendRoundvideos"
                   checked={!permissions.sendRoundvideos}
@@ -283,7 +283,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="embedLinks"
                   checked={!permissions.embedLinks}
@@ -293,7 +293,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
                 />
               </div>
 
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="sendPolls"
                   checked={!permissions.sendPolls}
@@ -306,7 +306,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
           </div>
 
           <div className={buildClassName('part', isMediaDropdownOpen && 'shifted')}>
-            <div className="ListItem no-selection with-checkbox">
+            <div className="ListItem with-checkbox">
               <Checkbox
                 name="inviteUsers"
                 checked={!permissions.inviteUsers}
@@ -316,7 +316,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               />
             </div>
             <div
-              className="ListItem no-selection with-checkbox"
+              className="ListItem with-checkbox"
               onClick={shouldDisablePermissionForPublicGroup ? handleDisabledClick : undefined}
             >
               <Checkbox
@@ -329,7 +329,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               />
             </div>
             <div
-              className="ListItem no-selection with-checkbox"
+              className="ListItem with-checkbox"
               onClick={shouldDisablePermissionForPublicGroup ? handleDisabledClick : undefined}
             >
               <Checkbox
@@ -342,7 +342,7 @@ const ManageGroupPermissions: FC<OwnProps & StateProps> = ({
               />
             </div>
             {isForum && (
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name="manageTopics"
                   checked={!permissions.manageTopics}

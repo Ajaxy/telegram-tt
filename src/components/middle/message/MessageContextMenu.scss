@@ -1,6 +1,7 @@
 .MessageContextMenu {
   position: absolute;
   font-size: 1rem;
+  user-select: none;
 
   &_items {
     overflow: auto;

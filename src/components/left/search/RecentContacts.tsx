@@ -76,7 +76,7 @@ const RecentContacts: FC<OwnProps & StateProps> = ({
     <div className="RecentContacts custom-scroll">
       {topUserIds && (
         <div className="top-peers-section" dir={lang.isRtl ? 'rtl' : undefined}>
-          <div ref={topUsersRef} className="top-peers no-selection">
+          <div ref={topUsersRef} className="top-peers">
             {topUserIds.map((userId) => (
               <div
                 key={userId}

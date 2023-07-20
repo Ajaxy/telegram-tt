@@ -31,14 +31,14 @@ const useContextMenuHandlers = (
   const handleBeforeContextMenu = useLastCallback((e: React.MouseEvent) => {
     if (!isMenuDisabled && e.button === 2) {
       requestMutation(() => {
-        addExtraClass(e.target as HTMLElement, 'no-selection');
+        removeExtraClass(e.target as HTMLElement, 'text-selection');
       });
     }
   });
 
   const handleContextMenu = useLastCallback((e: React.MouseEvent) => {
     requestMutation(() => {
-      removeExtraClass(e.target as HTMLElement, 'no-selection');
+      addExtraClass(e.target as HTMLElement, 'text-selection');
     });
 
     if (isMenuDisabled || (shouldDisableOnLink && (e.target as HTMLElement).matches('a[href]'))) {

@@ -121,7 +121,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
         noFastList
       >
         {dateSearchQuery && (
-          <div className="chat-selection no-selection no-scrollbar">
+          <div className="chat-selection no-scrollbar">
             <DateSuggest
               searchDate={dateSearchQuery}
               onSelect={onSearchDateSelect}

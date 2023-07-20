@@ -181,7 +181,7 @@ function SettingsPerformance({
               key={sectionName}
               className="settings-dropdown-section"
             >
-              <div className="ListItem no-selection with-checkbox">
+              <div className="ListItem with-checkbox">
                 <Checkbox
                   name={sectionName}
                   value={index.toString()}
