@@ -1,6 +1,12 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import type {
@@ -96,11 +102,7 @@ import {
   ROUND_VIDEO_DIMENSIONS_PX,
 } from '../../common/helpers/mediaDimensions';
 import { buildContentClassName } from './helpers/buildContentClassName';
-import {
-  calculateMediaDimensions,
-  getMinMediaWidth,
-  MIN_MEDIA_WIDTH_WITH_TEXT,
-} from './helpers/mediaDimensions';
+import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
 import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
 import { getServerTime } from '../../../util/serverTime';
@@ -280,6 +282,9 @@ const BOTTOM_FOCUS_SCROLL_THRESHOLD = 5;
 const THROTTLE_MS = 300;
 const RESIZE_ANIMATION_DURATION = 400;
 
+let appendixOwnCloned: SVGElement;
+let appendixNotOwnCloned: SVGElement;
+
 const Message: FC<OwnProps & StateProps> = ({
   message,
   chatUsernames,
@@ -377,6 +382,8 @@ const Message: FC<OwnProps & StateProps> = ({
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const quickReactionRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const appendixRef = useRef<HTMLDivElement>(null);
 
   const messageHeightRef = useRef(0);
 
@@ -707,6 +714,30 @@ const Message: FC<OwnProps & StateProps> = ({
       animateUnreadReaction({ messageIds: [messageId] });
     }
   }, [hasUnreadReaction, messageId, animateUnreadReaction]);
+
+  useLayoutEffect(() => {
+    if (!withAppendix) return;
+
+    const appendixEl = appendixRef.current!;
+    const cloned = isOwn ? appendixOwnCloned : appendixNotOwnCloned;
+    // eslint-disable-next-line no-underscore-dangle
+    const html = isOwn ? APPENDIX_OWN.__html : APPENDIX_NOT_OWN.__html;
+    let nextCloned: SVGElement;
+
+    if (cloned) {
+      nextCloned = cloned.cloneNode(true) as SVGElement;
+      appendixEl.appendChild(cloned);
+    } else {
+      appendixEl.innerHTML = html;
+      nextCloned = appendixEl.firstChild!.cloneNode(true) as SVGElement;
+    }
+
+    if (isOwn) {
+      appendixOwnCloned = nextCloned;
+    } else {
+      appendixNotOwnCloned = nextCloned;
+    }
+  }, [isOwn, withAppendix]);
 
   let style = '';
   let calculatedWidth;
@@ -1282,7 +1313,7 @@ const Message: FC<OwnProps & StateProps> = ({
           ) : undefined}
           {withCommentButton && <CommentButton threadInfo={repliesThreadInfo!} disabled={noComments} />}
           {withAppendix && (
-            <div className="svg-appendix" dangerouslySetInnerHTML={isOwn ? APPENDIX_OWN : APPENDIX_NOT_OWN} />
+            <div ref={appendixRef} className="svg-appendix" />
           )}
           {withQuickReactionButton && quickReactionPosition === 'in-content' && renderQuickReactionButton()}
         </div>
