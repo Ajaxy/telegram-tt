@@ -75,12 +75,13 @@ function destroy() {
 
 async function loadLibAV() {
   if (isLoaded) return;
-  // @ts-ignore
-  await import('script-loader!./libav-3.10.5.1.2-webcodecs');
+
+  importScripts(new URL('./libav-3.10.5.1.2-webcodecs.js', import.meta.url));
   await LibAVWebCodecs.load({
     polyfill: true,
     libavOptions: { noworker: true, nosimd: true },
   });
+
   isLoaded = true;
 }
 

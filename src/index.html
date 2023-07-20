@@ -12,7 +12,7 @@
   <meta name="description"
     content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
   <meta name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
+        content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-title" content="<%= htmlWebpackPlugin.options.appTitle %>">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,12 +23,14 @@
   <meta name="theme-color" content="#ffffff">
   <meta name="google" content="notranslate">
 
+  <meta http-equiv="Content-Security-Policy" content="<%= htmlWebpackPlugin.options.csp %>">
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="<%= htmlWebpackPlugin.options.baseUrl %>">
   <meta property="og:title" content="<%= htmlWebpackPlugin.options.appTitle %>">
   <meta property="og:description"
-    content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
+        content="Telegram is a cloud-based mobile and desktop messaging app with a focus on security and speed.">
   <meta property="og:image" content="./<%= htmlWebpackPlugin.options.mainIcon %>.png">
 
   <!-- Twitter -->
@@ -48,17 +50,8 @@
   <link rel="alternate icon" href="./favicon.ico" type="image/x-icon">
   <link rel="manifest" id="the-manifest-placeholder" href="./<%= htmlWebpackPlugin.options.manifest %>">
 
-  <script>
-    const { pathname, hostname, href } = window.location;
-
-    if (pathname.startsWith('/z')) {
-      window.location.href = href.replace('/z', '/a');
-    }
-
-    if ((hostname === 'weba.telegram.org' || hostname === 'webz.telegram.org') && !localStorage.getItem('tt-global-state')) {
-      window.location.href = 'https://web.telegram.org/a';
-    }
-  </script>
+  <script src="./compatTest.js"></script>
+  <script src="./redirect.js"></script>
 </head>
 
 <body id="root">
@@ -68,33 +61,6 @@
     <p>Please, enable JavaScript to open the app.</p>
   </noscript>
   <div id="portals"></div>
-  <script>
-    function compatTest() {
-      var hasPromise = typeof Promise !== 'undefined';
-      var hasWebSockets = typeof WebSocket !== 'undefined';
-      var hasWebCrypto = window.crypto && typeof window.crypto.subtle !== 'undefined';
-      var hasObjectFromEntries = typeof Object.fromEntries !== 'undefined';
-
-      var isCompatible = hasPromise && hasWebSockets && hasWebCrypto && hasObjectFromEntries;
-
-      if (isCompatible || (window.localStorage && window.localStorage.getItem('tt-ignore-compat'))) {
-        window.isCompatTestPassed = true;
-        return;
-      }
-
-      if (window.console && console.warn) {
-        console.warn('Compatibility test report:');
-        console.warn('Promise', hasPromise);
-        console.warn('WebSocket', hasWebSockets);
-        console.warn('WebCrypto', hasWebCrypto);
-        console.warn('Object.fromEntries', hasObjectFromEntries);
-      }
-
-      document.body.innerHTML = '<iframe src="./unsupported.html" width="100%" height="100%">';
-    }
-
-    compatTest();
-  </script>
 </body>
 
 </html>
