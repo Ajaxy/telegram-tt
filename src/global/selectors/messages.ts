@@ -846,30 +846,6 @@ export function selectFirstUnreadId<T extends GlobalState>(
   return undefined;
 }
 
-export function selectIsPollResultsOpen<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  const { pollResults } = selectTabState(global, tabId);
-  return Boolean(pollResults.messageId);
-}
-
-export function selectIsCreateTopicPanelOpen<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  const { createTopicPanel } = selectTabState(global, tabId);
-  return Boolean(createTopicPanel);
-}
-
-export function selectIsEditTopicPanelOpen<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  const { editTopicPanel } = selectTabState(global, tabId);
-  return Boolean(editTopicPanel);
-}
-
 export function selectIsForwardModalOpen<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
