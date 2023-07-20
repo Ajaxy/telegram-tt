@@ -12,12 +12,15 @@ import {
   getHasAdminRight,
   isChatSuperGroup,
 } from '../helpers';
-import { selectBot, selectUser } from './users';
+import {
+  selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
+} from './users';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
 import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
@@ -61,7 +64,7 @@ export function selectChatOnlineCount<T extends GlobalState>(global: T, chat: Ap
 
   return fullInfo.members.reduce((onlineCount, { userId }) => {
     if (
-      userId !== global.currentUserId
+      !selectIsChatWithSelf(global, userId)
       && global.users.byId[userId]
       && isUserOnline(global.users.byId[userId], global.users.statusesById[userId])
     ) {
@@ -262,4 +265,44 @@ export function selectCanShareFolder<T extends GlobalState>(global: T, folderId:
     && folder.includedChatIds.concat(folder.pinnedChatIds || []).some((chatId) => {
       return selectCanInviteToChat(global, chatId);
     });
+}
+
+export function selectShouldDetectChatLanguage<T extends GlobalState>(
+  global: T, chatId: string,
+) {
+  const chat = selectChat(global, chatId);
+  const fullInfo = isUserId(chatId) ? selectUserFullInfo(global, chatId) : selectChatFullInfo(global, chatId);
+  if (!chat || !fullInfo) return false;
+  const { canTranslateChats } = global.settings.byKey;
+
+  const isPremium = selectIsCurrentUserPremium(global);
+  const isSavedMessages = selectIsChatWithSelf(global, chatId);
+
+  return IS_TRANSLATION_SUPPORTED && canTranslateChats && isPremium && !isSavedMessages;
+}
+
+export function selectCanTranslateChat<T extends GlobalState>(
+  global: T, chatId: string, ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat) return false;
+
+  const requestedTranslation = selectRequestedChatTranslationLanguage(global, chatId, tabId);
+  if (requestedTranslation) return true; // Prevent translation dropping on reevaluation
+
+  const isLanguageDetectable = selectShouldDetectChatLanguage(global, chatId);
+  const detectedLanguage = chat.detectedLanguage;
+
+  const { doNotTranslate } = global.settings.byKey;
+
+  return Boolean(isLanguageDetectable && detectedLanguage && !doNotTranslate.includes(detectedLanguage));
+}
+
+export function selectRequestedChatTranslationLanguage<T extends GlobalState>(
+  global: T, chatId: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
+  const { requestedTranslations } = selectTabState(global, tabId);
+
+  return requestedTranslations.byChatId[chatId]?.toLanguage;
 }

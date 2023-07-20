@@ -42,6 +42,7 @@ export interface ApiUserFullInfo {
   personalPhoto?: ApiPhoto;
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
+  isTranslationDisabled?: true;
 }
 
 export type ApiFakeType = 'fake' | 'scam';

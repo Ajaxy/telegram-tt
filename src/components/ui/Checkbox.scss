@@ -8,7 +8,7 @@
   cursor: var(--custom-cursor, pointer);
 
   &.disabled {
-    pointer-events: none;
+    cursor: var(--custom-cursor, default);
     opacity: 0.5;
   }
 

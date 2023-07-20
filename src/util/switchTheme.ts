@@ -108,14 +108,24 @@ export function hexToRgb(hex: string): RGBAColor {
   };
 }
 
+export function lerpRgb(start: RGBAColor, end: RGBAColor, interpolationRatio: number): RGBAColor {
+  const r = Math.round(lerp(start.r, end.r, interpolationRatio));
+  const g = Math.round(lerp(start.g, end.g, interpolationRatio));
+  const b = Math.round(lerp(start.b, end.b, interpolationRatio));
+  const a = start.a !== undefined
+    ? Math.round(lerp(start.a!, end.a!, interpolationRatio))
+    : undefined;
+
+  return {
+    r, g, b, a,
+  };
+}
+
 function applyColorAnimationStep(startIndex: number, endIndex: number, interpolationRatio: number = 1) {
   colors.forEach(({ property, colors: propertyColors }) => {
-    const r = Math.round(lerp(propertyColors[startIndex].r, propertyColors[endIndex].r, interpolationRatio));
-    const g = Math.round(lerp(propertyColors[startIndex].g, propertyColors[endIndex].g, interpolationRatio));
-    const b = Math.round(lerp(propertyColors[startIndex].b, propertyColors[endIndex].b, interpolationRatio));
-    const a = propertyColors[startIndex].a !== undefined
-      ? Math.round(lerp(propertyColors[startIndex].a!, propertyColors[endIndex].a!, interpolationRatio))
-      : undefined;
+    const {
+      r, g, b, a,
+    } = lerpRgb(propertyColors[startIndex], propertyColors[endIndex], interpolationRatio);
 
     const roundedA = a !== undefined ? Math.round((a / 255) * 10 ** DECIMAL_PLACES) / 10 ** DECIMAL_PLACES : undefined;
 

@@ -54,6 +54,10 @@ const Checkbox: FC<OwnProps> = ({
   const labelRef = useRef<HTMLLabelElement>(null);
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    if (disabled) {
+      return;
+    }
+
     if (onChange) {
       onChange(event);
     }
@@ -61,7 +65,7 @@ const Checkbox: FC<OwnProps> = ({
     if (onCheck) {
       onCheck(event.currentTarget.checked);
     }
-  }, [onChange, onCheck]);
+  }, [disabled, onChange, onCheck]);
 
   function handleClick(event: React.MouseEvent) {
     if (event.target !== labelRef.current) {

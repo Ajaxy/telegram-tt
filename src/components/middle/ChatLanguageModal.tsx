@@ -5,7 +5,12 @@ import { getActions, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 
-import { selectLanguageCode, selectRequestedTranslationLanguage, selectTabState } from '../../global/selectors';
+import {
+  selectLanguageCode,
+  selectRequestedChatTranslationLanguage,
+  selectRequestedMessageTranslationLanguage,
+  selectTabState,
+} from '../../global/selectors';
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
@@ -17,7 +22,7 @@ import Modal from '../ui/Modal';
 import ListItem from '../ui/ListItem';
 import InputText from '../ui/InputText';
 
-import styles from './MessageLanguageModal.module.scss';
+import styles from './ChatLanguageModal.module.scss';
 
 type LanguageItem = {
   langCode: string;
@@ -36,23 +41,34 @@ type StateProps = {
   currentLanguageCode: string;
 };
 
-const MessageLanguageModal: FC<OwnProps & StateProps> = ({
+const ChatLanguageModal: FC<OwnProps & StateProps> = ({
   isOpen,
   chatId,
   messageId,
   activeTranslationLanguage,
   currentLanguageCode,
 }) => {
-  const { requestMessageTranslation, closeMessageLanguageModal } = getActions();
+  const {
+    requestMessageTranslation,
+    closeChatLanguageModal,
+    setSettingOption,
+    requestChatTranslation,
+  } = getActions();
 
   const [search, setSearch] = useState('');
   const lang = useLang();
 
-  const handleSelect = useLastCallback((toLanguageCode: string) => {
-    if (!chatId || !messageId) return;
+  const handleSelect = useLastCallback((langCode: string) => {
+    if (!chatId) return;
 
-    requestMessageTranslation({ chatId, id: messageId, toLanguageCode });
-    closeMessageLanguageModal();
+    if (messageId) {
+      requestMessageTranslation({ chatId, id: messageId, toLanguageCode: langCode });
+    } else {
+      setSettingOption({ translationLanguage: langCode });
+      requestChatTranslation({ chatId, toLanguageCode: langCode });
+    }
+
+    closeChatLanguageModal();
   });
 
   const handleSearch = useLastCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +112,7 @@ const MessageLanguageModal: FC<OwnProps & StateProps> = ({
       isOpen={isOpen}
       hasCloseButton
       title={lang('Language')}
-      onClose={closeMessageLanguageModal}
+      onClose={closeChatLanguageModal}
     >
       <InputText
         key="search"
@@ -109,7 +125,7 @@ const MessageLanguageModal: FC<OwnProps & StateProps> = ({
         {filteredDisplayedLanguages.map(({ langCode, originalName, translatedName }) => (
           <ListItem
             key={langCode}
-            className={styles.listItem}
+            className={buildClassName(styles.listItem, 'no-icon')}
             secondaryIcon={activeTranslationLanguage === langCode ? 'check' : undefined}
             disabled={activeTranslationLanguage === langCode}
             multiline
@@ -132,11 +148,14 @@ const MessageLanguageModal: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const { chatId, messageId } = selectTabState(global).messageLanguageModal || {};
+    const { chatId, messageId } = selectTabState(global).chatLanguageModal || {};
 
     const currentLanguageCode = selectLanguageCode(global);
-    const activeTranslationLanguage = chatId && messageId
-      ? selectRequestedTranslationLanguage(global, chatId, messageId) : undefined;
+    const activeTranslationLanguage = chatId
+      ? messageId
+        ? selectRequestedMessageTranslationLanguage(global, chatId, messageId)
+        : selectRequestedChatTranslationLanguage(global, chatId)
+      : undefined;
 
     return {
       chatId,
@@ -145,4 +164,4 @@ export default memo(withGlobal<OwnProps>(
       currentLanguageCode,
     };
   },
-)(MessageLanguageModal));
+)(ChatLanguageModal));

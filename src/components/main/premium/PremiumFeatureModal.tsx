@@ -35,6 +35,7 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   advanced_chat_management: 'PremiumPreviewAdvancedChatManagement',
   animated_userpics: 'PremiumPreviewAnimatedProfiles',
   emoji_status: 'PremiumPreviewEmojiStatus',
+  translations: 'PremiumPreviewTranslations',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
@@ -50,6 +51,7 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   advanced_chat_management: 'PremiumPreviewAdvancedChatManagementDescription',
   animated_userpics: 'PremiumPreviewAnimatedProfilesDescription',
   emoji_status: 'PremiumPreviewEmojiStatusDescription',
+  translations: 'PremiumPreviewTranslationsDescription',
 };
 
 export const PREMIUM_FEATURE_SECTIONS = [
@@ -65,15 +67,18 @@ export const PREMIUM_FEATURE_SECTIONS = [
   'profile_badge',
   'animated_userpics',
   'emoji_status',
+  'translations',
 ];
 
 const PREMIUM_BOTTOM_VIDEOS: string[] = [
   'faster_download',
   'voice_to_text',
   'advanced_chat_management',
+  'infinite_reactions',
   'profile_badge',
   'animated_userpics',
   'emoji_status',
+  'translations',
 ];
 
 type ApiLimitTypeWithoutUpload = Exclude<ApiLimitType, 'uploadMaxFileparts' | 'chatlistInvites' | 'chatlistJoined'>;

@@ -4,14 +4,16 @@ import { detectLanguage } from '../util/languageDetection';
 
 import useSyncEffect from './useSyncEffect';
 
-export default function useTextLanguage(text?: string) {
-  const [language, setLanguage] = useState<string>();
+export default function useTextLanguage(text?: string, isDisabled?: boolean) {
+  const [language, setLanguage] = useState<string | undefined>();
 
   useSyncEffect(() => {
-    if (text) {
+    if (text && !isDisabled) {
       detectLanguage(text).then(setLanguage);
+    } else {
+      setLanguage(undefined);
     }
-  }, [text]);
+  }, [isDisabled, text]);
 
   return language;
 }

@@ -16,7 +16,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
-      fallbackPhoto, personalPhoto,
+      fallbackPhoto, personalPhoto, translationsDisabled,
     },
     users,
   } = mtpUserFull;
@@ -29,6 +29,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     pinnedMessageId: pinnedMsgId,
     isBlocked: Boolean(blocked),
     noVoiceMessages: voiceMessagesForbidden,
+    isTranslationDisabled: translationsDisabled,
     ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
     ...(fallbackPhoto instanceof GramJs.Photo && { fallbackPhoto: buildApiPhoto(fallbackPhoto) }),
     ...(personalPhoto instanceof GramJs.Photo && { personalPhoto: buildApiPhoto(personalPhoto) }),

@@ -1,9 +1,11 @@
-import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
+import type { FC } from '../../lib/teact/teact';
 import type {
   ApiUser, ApiMessage, ApiChat,
 } from '../../api/types';
+import type { ChatTranslatedMessages } from '../../global/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   getMessageMediaHash,
@@ -12,21 +14,24 @@ import {
   getMessageRoundVideo,
   getUserColorKey,
   getMessageIsSpoiler,
+  isMessageTranslatable,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
 
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
 import useLang from '../../hooks/useLang';
 import { useFastClick } from '../../hooks/useFastClick';
+import useMessageTranslation from '../middle/message/hooks/useMessageTranslation';
+import useShowTransition from '../../hooks/useShowTransition';
 
 import ActionMessage from '../middle/ActionMessage';
 import MessageSummary from './MessageSummary';
 import MediaSpoiler from './MediaSpoiler';
+import Skeleton from '../ui/Skeleton';
 
 import './EmbeddedMessage.scss';
 
@@ -39,6 +44,8 @@ type OwnProps = {
   noUserColors?: boolean;
   isProtected?: boolean;
   hasContextMenu?: boolean;
+  chatTranslations?: ChatTranslatedMessages;
+  requestedChatTranslationLanguage?: string;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick: NoneToVoidFunction;
@@ -55,6 +62,8 @@ const EmbeddedMessage: FC<OwnProps> = ({
   isProtected,
   noUserColors,
   hasContextMenu,
+  chatTranslations,
+  requestedChatTranslationLanguage,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
@@ -67,6 +76,16 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const mediaThumbnail = useThumbnail(message);
   const isRoundVideo = Boolean(message && getMessageRoundVideo(message));
   const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
+
+  const shouldTranslate = message && isMessageTranslatable(message);
+  const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
+    chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined, requestedChatTranslationLanguage,
+  );
+
+  const {
+    shouldRender: shouldRenderLoader,
+    transitionClassNames,
+  } = useShowTransition(isTranslationPending || (!message && !customText));
 
   const lang = useLang();
 
@@ -85,6 +104,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       onClick={message && handleClick}
       onMouseDown={message && handleMouseDown}
     >
+      {shouldRenderLoader && <Skeleton className={buildClassName('embed-loading', transitionClassNames)} />}
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       <div className="message-text">
         <p dir="auto">
@@ -102,6 +122,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
               lang={lang}
               message={message}
               noEmoji={Boolean(mediaThumbnail)}
+              translatedText={translatedText}
               observeIntersectionForLoading={observeIntersectionForLoading}
               observeIntersectionForPlaying={observeIntersectionForPlaying}
             />

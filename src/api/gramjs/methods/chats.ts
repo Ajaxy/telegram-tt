@@ -412,6 +412,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
     recentRequesters,
     requestsPending,
     chatPhoto,
+    translationsDisabled,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -437,6 +438,7 @@ async function getFullChatInfo(chatId: string): Promise<FullChatData | undefined
       enabledReactions: buildApiChatReactions(availableReactions),
       requestsPending,
       recentRequesterIds: recentRequesters?.map((userId) => buildApiPeerId(userId, 'user')),
+      isTranslationDisabled: translationsDisabled,
     },
     users,
     userStatusesById,
@@ -490,6 +492,7 @@ async function getFullChannelInfo(
     stickerset,
     chatPhoto,
     participantsHidden,
+    translationsDisabled,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -563,6 +566,7 @@ async function getFullChannelInfo(
       statisticsDcId: statsDc,
       stickerSet: stickerset ? buildStickerSet(stickerset) : undefined,
       areParticipantsHidden: participantsHidden,
+      isTranslationDisabled: translationsDisabled,
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
     userStatusesById: statusesById,
@@ -1810,4 +1814,16 @@ export async function fetchChatlistInvites({
     users: result.users.map(buildApiUser).filter(Boolean),
     chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
   };
+}
+
+export function togglePeerTranslations({
+  chat, isEnabled,
+}: {
+  chat: ApiChat;
+  isEnabled: boolean;
+}) {
+  return invokeRequest(new GramJs.messages.TogglePeerTranslations({
+    disabled: isEnabled ? undefined : true,
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
 }

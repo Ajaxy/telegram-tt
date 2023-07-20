@@ -44,6 +44,7 @@ import {
   removeOutlyingList,
   removeRequestedMessageTranslation,
   replaceScheduledMessages,
+  replaceSettings,
   replaceThreadParam,
   safeReplacePinnedIds,
   safeReplaceViewportIds,
@@ -63,6 +64,7 @@ import {
 import {
   selectChat,
   selectChatMessage,
+  selectTranslationLanguage,
   selectCurrentChat,
   selectCurrentMessageList,
   selectDraft,
@@ -1493,10 +1495,13 @@ addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionRet
 
 addActionHandler('requestMessageTranslation', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, id, toLanguageCode = selectLanguageCode(global), tabId = getCurrentTabId(),
+    chatId, id, toLanguageCode = selectTranslationLanguage(global), tabId = getCurrentTabId(),
   } = payload;
 
   global = updateRequestedMessageTranslation(global, chatId, id, toLanguageCode, tabId);
+  global = replaceSettings(global, {
+    translationLanguage: toLanguageCode,
+  });
 
   return global;
 });
@@ -1511,6 +1516,20 @@ addActionHandler('showOriginalMessage', (global, actions, payload): ActionReturn
   return global;
 });
 
+addActionHandler('markMessagesTranslationPending', (global, actions, payload): ActionReturnType => {
+  const {
+    chatId, messageIds, toLanguageCode = selectLanguageCode(global),
+  } = payload;
+
+  messageIds.forEach((id) => {
+    global = updateMessageTranslation(global, chatId, id, toLanguageCode, {
+      isPending: true,
+    });
+  });
+
+  return global;
+});
+
 addActionHandler('translateMessages', (global, actions, payload): ActionReturnType => {
   const {
     chatId, messageIds, toLanguageCode = selectLanguageCode(global),
@@ -1519,11 +1538,7 @@ addActionHandler('translateMessages', (global, actions, payload): ActionReturnTy
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
 
-  messageIds.forEach((id) => {
-    global = updateMessageTranslation(global, chatId, id, toLanguageCode, {
-      isPending: true,
-    });
-  });
+  actions.markMessagesTranslationPending({ chatId, messageIds, toLanguageCode });
 
   callApi('translateText', {
     chat,

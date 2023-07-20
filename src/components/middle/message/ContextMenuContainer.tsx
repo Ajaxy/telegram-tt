@@ -22,10 +22,12 @@ import {
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
+  selectCanTranslateMessage,
   selectMessageCustomEmojiSets,
   selectMessageTranslations,
-  selectRequestedTranslationLanguage,
+  selectRequestedMessageTranslationLanguage,
   selectStickerSet,
+  selectRequestedChatTranslationLanguage,
 } from '../../../global/selectors';
 import {
   isActionMessage,
@@ -37,10 +39,8 @@ import {
   isMessageLocal,
   getMessageVideo,
   getChatMessageLink,
-  isServiceNotificationMessage,
 } from '../../../global/helpers';
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
@@ -193,7 +193,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     toggleReaction,
     requestMessageTranslation,
     showOriginalMessage,
-    openMessageLanguageModal,
+    openChatLanguageModal,
     openReactionPicker,
   } = getActions();
 
@@ -455,9 +455,9 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSelectLanguage = useLastCallback(() => {
-    openMessageLanguageModal({
+    openChatLanguageModal({
       chatId: message.chatId,
-      id: message.id,
+      messageId: message.id,
     });
     closeMenu();
   });
@@ -610,7 +610,6 @@ export default memo(withGlobal<OwnProps>(
     const isScheduled = messageListType === 'scheduled';
     const isChannel = chat && isChatChannel(chat);
     const isLocal = isMessageLocal(message);
-    const isServiceNotification = isServiceNotificationMessage(message);
     const canShowSeenBy = Boolean(!isLocal
       && chat
       && seenByMaxChatMembers
@@ -634,17 +633,12 @@ export default memo(withGlobal<OwnProps>(
     const customEmojiSets = customEmojiSetsNotFiltered?.every<ApiStickerSet>(Boolean)
       ? customEmojiSetsNotFiltered : undefined;
 
-    const translationRequestLanguage = selectRequestedTranslationLanguage(global, message.chatId, message.id);
+    const translationRequestLanguage = selectRequestedMessageTranslationLanguage(global, message.chatId, message.id);
     const hasTranslation = translationRequestLanguage
       ? Boolean(selectMessageTranslations(global, message.chatId, translationRequestLanguage)[message.id]?.text)
       : undefined;
-
-    const { canTranslate: isTranslationEnabled, doNotTranslate } = global.settings.byKey;
-
-    const canTranslateLanguage = !detectedLanguage || !doNotTranslate.includes(detectedLanguage);
-    const canTranslate = IS_TRANSLATION_SUPPORTED && isTranslationEnabled && message.content.text
-      && canTranslateLanguage && !isLocal && !isServiceNotification && !isScheduled && !isAction && !hasTranslation
-      && !message.emojiOnlyCount;
+    const canTranslate = !hasTranslation && selectCanTranslateMessage(global, message, detectedLanguage);
+    const isChatTranslated = selectRequestedChatTranslationLanguage(global, message.chatId);
 
     return {
       availableReactions: global.availableReactions,
@@ -683,8 +677,8 @@ export default memo(withGlobal<OwnProps>(
       canScheduleUntilOnline: selectCanScheduleUntilOnline(global, message.chatId),
       threadId,
       canTranslate,
-      canShowOriginal: hasTranslation,
-      canSelectLanguage: hasTranslation,
+      canShowOriginal: hasTranslation && !isChatTranslated,
+      canSelectLanguage: hasTranslation && !isChatTranslated,
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
     };

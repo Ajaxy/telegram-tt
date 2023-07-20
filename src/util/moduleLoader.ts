@@ -64,7 +64,9 @@ export async function loadModule<B extends Bundles>(bundleName: B) {
   await loadBundle(bundleName);
 }
 
-export function getModuleFromMemory<B extends Bundles, M extends BundleModules<B>>(bundleName: B, moduleName: M) {
+export function getModuleFromMemory<B extends Bundles, M extends BundleModules<B>>(
+  bundleName: B, moduleName: M,
+): ImportedBundles[B][M] | undefined {
   const bundle = MEMORY_CACHE[bundleName] as ImportedBundles[B];
 
   if (!bundle) {
