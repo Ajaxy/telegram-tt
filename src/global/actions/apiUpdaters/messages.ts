@@ -10,7 +10,7 @@ import type {
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { pickTruthy, unique } from '../../../util/iteratees';
+import { omit, pickTruthy, unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
 import { notifyAboutMessage } from '../../../util/notifications';
 import {
@@ -264,6 +264,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         ...message,
         previousLocalId: localId,
       });
+
+      global = {
+        ...global,
+        fileUploads: {
+          byMessageLocalId: omit(global.fileUploads.byMessageLocalId, [localId.toString()]),
+        },
+      };
 
       const newMessage = selectChatMessage(global, chatId, message.id)!;
       global = updateChatLastMessage(global, chatId, newMessage);
