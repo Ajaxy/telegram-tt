@@ -5,6 +5,7 @@ export default function deleteLastCharacterOutsideSelection(html: string) {
   tempInput.style.left = '-10000px';
   tempInput.style.top = '-10000px';
   tempInput.innerHTML = html;
+  tempInput.className = 'allow-selection'; // Patch for Safari
   document.body.appendChild(tempInput);
   let element = tempInput.lastChild!;
 

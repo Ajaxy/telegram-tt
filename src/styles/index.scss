@@ -25,6 +25,7 @@ body {
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  user-select: none;
 
   --font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Apple Color Emoji", "Segoe UI", Oxygen, Ubuntu, Cantarell,
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
@@ -115,8 +116,8 @@ body.cursor-ew-resize {
   visibility: hidden;
 }
 
-.text-selection {
-  user-select: text !important;
+.allow-selection {
+  user-select: text;
 }
 
 .clearfix::after {
@@ -167,8 +168,6 @@ body.cursor-ew-resize {
 }
 
 body:not(.is-ios) {
-  user-select: none; // On iOS, disallowing user selection breaks focus in text input fields
-
   .custom-scroll {
     &::-webkit-scrollbar {
       width: 0.375rem;
