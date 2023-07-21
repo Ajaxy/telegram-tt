@@ -521,7 +521,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const isTouched = useDerivedState(() => Boolean(isActive && getHtml()), [isActive, getHtml]);
 
   const className = buildClassName(
-    'form-control',
+    'form-control allow-selection',
     isTouched && 'touched',
     shouldSuppressFocus && 'focus-disabled',
   );

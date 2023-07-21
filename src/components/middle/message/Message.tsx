@@ -563,7 +563,7 @@ const Message: FC<OwnProps & StateProps> = ({
   }, [focusLastMessage, isLastInList, transcribedText, withVoiceTranscription]);
 
   const containerClassName = buildClassName(
-    'Message message-list-item text-selection',
+    'Message message-list-item allow-selection',
     isFirstInGroup && 'first-in-group',
     isProtected && 'is-protected',
     isLastInGroup && 'last-in-group',
