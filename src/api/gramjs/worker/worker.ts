@@ -4,7 +4,7 @@ import type { ApiOnProgress, ApiUpdate } from '../../types';
 import type { OriginMessageEvent, WorkerMessageData } from './types';
 
 import { DEBUG } from '../../../config';
-import { callApi, cancelApiProgress, initApi } from '../provider';
+import { callApi, cancelApiProgress, initApi } from '../methods/init';
 import { log } from '../helpers';
 import type { DebugLevel } from '../../../util/debugConsole';
 import { DEBUG_LEVELS } from '../../../util/debugConsole';

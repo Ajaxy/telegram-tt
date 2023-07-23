@@ -40,8 +40,6 @@ const savedLocalDb: LocalDb = {
   channelPtsById: {},
 };
 
-// TODO Re-use `util/WorkerConnector.ts`
-
 let isMasterTab = true;
 subscribeToMasterChange((isMasterTabNew) => {
   isMasterTab = isMasterTabNew;
