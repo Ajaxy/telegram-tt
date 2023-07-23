@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
 import type React from '../../../../lib/teact/teact';
+import type { Signal } from '../../../../util/signals';
+
 import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
@@ -33,6 +35,7 @@ export default function useOuterHandlers(
   isContextMenuShown: boolean,
   quickReactionRef: RefObject<HTMLDivElement>,
   shouldHandleMouseLeave: boolean,
+  getIsMessageListReady: Signal<boolean>,
 ) {
   const { setReplyingToId, sendDefaultReaction } = getActions();
 
@@ -142,7 +145,7 @@ export default function useOuterHandlers(
   }
 
   useEffect(() => {
-    if (!IS_TOUCH_ENV || isInSelectMode || !canReply || isContextMenuShown) {
+    if (!IS_TOUCH_ENV || isInSelectMode || !canReply || isContextMenuShown || !getIsMessageListReady()) {
       return undefined;
     }
 
@@ -176,6 +179,7 @@ export default function useOuterHandlers(
     });
   }, [
     containerRef, isInSelectMode, messageId, setReplyingToId, markSwiped, unmarkSwiped, canReply, isContextMenuShown,
+    getIsMessageListReady,
   ]);
 
   function handleMouseLeave(e: React.MouseEvent<HTMLDivElement>) {

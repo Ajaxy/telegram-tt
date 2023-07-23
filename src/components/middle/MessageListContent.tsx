@@ -22,6 +22,7 @@ import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
 import useScrollHooks from './hooks/useScrollHooks';
 import useMessageObservers from './hooks/useMessageObservers';
 import usePrevious from '../../hooks/usePrevious';
+import useDerivedSignal from '../../hooks/useDerivedSignal';
 
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
@@ -88,6 +89,8 @@ const MessageListContent: FC<OwnProps> = ({
   onPinnedIntersectionChange,
 }) => {
   const { openHistoryCalendar } = getActions();
+
+  const getIsReady = useDerivedSignal(isReady);
 
   const {
     observeIntersectionForReading,
@@ -237,6 +240,7 @@ const MessageListContent: FC<OwnProps> = ({
             isLastInList={position.isLastInList}
             memoFirstUnreadIdRef={memoFirstUnreadIdRef}
             onPinnedIntersectionChange={onPinnedIntersectionChange}
+            getIsMessageListReady={getIsReady}
           />,
           message.id === threadTopMessageId && (
             <div className="local-action-message" key="discussion-started">

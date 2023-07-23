@@ -1,4 +1,5 @@
 import type { RefObject } from 'react';
+import type { Signal } from '../util/signals';
 import { useState, useEffect } from '../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../lib/teact/teact-dom';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
@@ -23,6 +24,7 @@ const useContextMenuHandlers = (
   isMenuDisabled?: boolean,
   shouldDisableOnLink?: boolean,
   shouldDisableOnLongTap?: boolean,
+  getIsReady?: Signal<boolean>,
 ) => {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState<IAnchorPosition | undefined>(undefined);
@@ -65,7 +67,7 @@ const useContextMenuHandlers = (
 
   // Support context menu on touch devices
   useEffect(() => {
-    if (isMenuDisabled || !IS_TOUCH_ENV || shouldDisableOnLongTap) {
+    if (isMenuDisabled || !IS_TOUCH_ENV || shouldDisableOnLongTap || (getIsReady && !getIsReady())) {
       return undefined;
     }
 
@@ -149,7 +151,9 @@ const useContextMenuHandlers = (
       element.removeEventListener('touchend', clearLongPressTimer, true);
       element.removeEventListener('touchmove', clearLongPressTimer);
     };
-  }, [contextMenuPosition, isMenuDisabled, shouldDisableOnLongTap, elementRef, shouldDisableOnLink]);
+  }, [
+    contextMenuPosition, isMenuDisabled, shouldDisableOnLongTap, elementRef, shouldDisableOnLink, getIsReady,
+  ]);
 
   return {
     isContextMenuOpen,

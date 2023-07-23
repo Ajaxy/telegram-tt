@@ -1,11 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 import type {
@@ -33,6 +28,7 @@ import { AudioOrigin } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
 import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
+import type { Signal } from '../../../util/signals';
 
 import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
@@ -191,6 +187,7 @@ type OwnProps =
     isJustAdded: boolean;
     memoFirstUnreadIdRef: { current: number | undefined };
     onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
+    getIsMessageListReady: Signal<boolean>;
   }
   & MessagePositionProperties;
 
@@ -366,6 +363,7 @@ const Message: FC<OwnProps & StateProps> = ({
   withStickerEffects,
   isConnected,
   onPinnedIntersectionChange,
+  getIsMessageListReady,
 }) => {
   const {
     toggleMessageSelection,
@@ -400,7 +398,13 @@ const Message: FC<OwnProps & StateProps> = ({
     handleContextMenu: onContextMenu,
     handleContextMenuClose,
     handleContextMenuHide,
-  } = useContextMenuHandlers(ref, isTouchScreen && isInSelectMode, !IS_ELECTRON, IS_ANDROID);
+  } = useContextMenuHandlers(
+    ref,
+    isTouchScreen && isInSelectMode,
+    !IS_ELECTRON,
+    IS_ANDROID,
+    getIsMessageListReady,
+  );
 
   useEffect(() => {
     if (isContextMenuOpen) {
@@ -512,6 +516,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isContextMenuShown,
     quickReactionRef,
     isInDocumentGroupNotLast,
+    getIsMessageListReady,
   );
 
   const {
@@ -716,11 +721,6 @@ const Message: FC<OwnProps & StateProps> = ({
     }
   }, [hasUnreadReaction, messageId, animateUnreadReaction]);
 
-  let style = '';
-  let calculatedWidth;
-  let reactionsMaxWidth;
-  let contentWidth: number | undefined;
-  let noMediaCorners = false;
   const albumLayout = useMemo(() => {
     return isAlbum
       ? calculateAlbumLayout(isOwn, Boolean(asForwarded), Boolean(noAvatars), album!, isMobile)
@@ -728,56 +728,76 @@ const Message: FC<OwnProps & StateProps> = ({
   }, [isAlbum, isOwn, asForwarded, noAvatars, album, isMobile]);
 
   const extraPadding = asForwarded ? 28 : 0;
-  if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
-    let width: number | undefined;
-    if (photo) {
-      width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
-    } else if (video) {
-      if (video.isRound) {
-        width = ROUND_VIDEO_DIMENSIONS_PX;
-      } else {
-        width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
-      }
-    } else if (invoice?.extendedMedia && (
-      invoice.extendedMedia.width && invoice.extendedMedia.height
-    )) {
-      const { width: previewWidth, height: previewHeight } = invoice.extendedMedia;
-      width = calculateDimensionsForMessageMedia({
-        width: previewWidth,
-        height: previewHeight,
-        fromOwnMessage: isOwn,
-        asForwarded,
-        noAvatars,
-        isMobile,
-      }).width;
-    }
 
-    if (width) {
-      if (width < MIN_MEDIA_WIDTH_WITH_TEXT) {
-        contentWidth = width;
+  const sizeCalculations = useMemo(() => {
+    let calculatedWidth;
+    let contentWidth: number | undefined;
+    let noMediaCorners = false;
+    let style = '';
+    let reactionsMaxWidth;
+
+    if (!isAlbum && (photo || video || invoice?.extendedMedia)) {
+      let width: number | undefined;
+      if (photo) {
+        width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
+      } else if (video) {
+        if (video.isRound) {
+          width = ROUND_VIDEO_DIMENSIONS_PX;
+        } else {
+          width = calculateMediaDimensions(message, asForwarded, noAvatars, isMobile).width;
+        }
+      } else if (invoice?.extendedMedia && (
+        invoice.extendedMedia.width && invoice.extendedMedia.height
+      )) {
+        const { width: previewWidth, height: previewHeight } = invoice.extendedMedia;
+        width = calculateDimensionsForMessageMedia({
+          width: previewWidth,
+          height: previewHeight,
+          fromOwnMessage: isOwn,
+          asForwarded,
+          noAvatars,
+          isMobile,
+        }).width;
       }
-      calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMediaWithCommentButton), width);
-      if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
+
+      if (width) {
+        if (width < MIN_MEDIA_WIDTH_WITH_TEXT) {
+          contentWidth = width;
+        }
+        calculatedWidth = Math.max(getMinMediaWidth(text?.text, isMediaWithCommentButton), width);
+        if (invoice?.extendedMedia && calculatedWidth - width > NO_MEDIA_CORNERS_THRESHOLD) {
+          noMediaCorners = true;
+        }
+      }
+    } else if (albumLayout) {
+      calculatedWidth = Math.max(
+        getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
+      );
+      if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
         noMediaCorners = true;
       }
     }
-  } else if (albumLayout) {
-    calculatedWidth = Math.max(
-      getMinMediaWidth(text?.text, isMediaWithCommentButton), albumLayout.containerStyle.width,
-    );
-    if (calculatedWidth - albumLayout.containerStyle.width > NO_MEDIA_CORNERS_THRESHOLD) {
-      noMediaCorners = true;
-    }
-  }
 
-  if (calculatedWidth) {
-    style = `width: ${calculatedWidth + extraPadding}px`;
-    reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
-  } else if (sticker && !hasSubheader) {
-    const { width } = getStickerDimensions(sticker, isMobile);
-    style = `width: ${width + extraPadding}px`;
-    reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
-  }
+    if (calculatedWidth) {
+      style = `width: ${calculatedWidth + extraPadding}px`;
+      reactionsMaxWidth = calculatedWidth + EXTRA_SPACE_FOR_REACTIONS;
+    } else if (sticker && !hasSubheader) {
+      const { width } = getStickerDimensions(sticker, isMobile);
+      style = `width: ${width + extraPadding}px`;
+      reactionsMaxWidth = width + EXTRA_SPACE_FOR_REACTIONS;
+    }
+
+    return {
+      contentWidth, noMediaCorners, style, reactionsMaxWidth,
+    };
+  }, [
+    albumLayout, asForwarded, extraPadding, hasSubheader, invoice?.extendedMedia, isAlbum, isMediaWithCommentButton,
+    isMobile, isOwn, message, noAvatars, photo, sticker, text?.text, video,
+  ]);
+
+  const {
+    contentWidth, noMediaCorners, style, reactionsMaxWidth,
+  } = sizeCalculations;
 
   function renderAvatar() {
     const hiddenName = (!avatarPeer && forwardInfo) ? forwardInfo.hiddenUserName : undefined;
