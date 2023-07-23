@@ -18,6 +18,7 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
+import usePrevious from '../../hooks/usePrevious';
 
 import ShippingInfo from './ShippingInfo';
 import Shipping from './Shipping';
@@ -125,7 +126,8 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isTosAccepted, setIsTosAccepted] = useState(false);
   const [twoFaPassword, setTwoFaPassword] = useState('');
-
+  const prevStep = usePrevious(step, true);
+  const prevRequestId = usePrevious(requestId);
   const canRenderFooter = step !== PaymentStep.ConfirmPayment;
 
   const setStep = useCallback((nextStep) => {
@@ -151,7 +153,20 @@ const PaymentModal: FC<OwnProps & StateProps & GlobalStateProps> = ({
     if (step !== undefined || error) {
       setIsLoading(false);
     }
-  }, [step, error]);
+  }, [step, error, requestId]);
+
+  // When payment verification occurs and the `step` does not change, the card details must be requested
+  useEffect(() => {
+    if (
+      step === PaymentStep.Checkout
+      && step === prevStep
+      && requestId !== prevRequestId
+      && !paymentState.savedCredentialId
+      && !paymentState.cardNumber
+    ) {
+      setStep(PaymentStep.PaymentInfo);
+    }
+  }, [paymentState.cardNumber, paymentState.savedCredentialId, prevRequestId, prevStep, requestId, setStep, step]);
 
   useEffect(() => {
     if (error?.field) {
