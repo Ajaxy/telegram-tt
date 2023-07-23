@@ -600,9 +600,12 @@ const Message: FC<OwnProps & StateProps> = ({
     text, photo, video, audio, voice, document, sticker, contact, poll, webPage, invoice, location, action, game,
   } = getMessageContent(message);
 
-  useDetectChatLanguage(message, !shouldDetectChatLanguage);
-
-  const detectedLanguage = useTextLanguage(areTranslationsEnabled ? text?.text : undefined);
+  const detectedLanguage = useTextLanguage(
+    text?.text,
+    !(areTranslationsEnabled || shouldDetectChatLanguage),
+    getIsMessageListReady,
+  );
+  useDetectChatLanguage(message, detectedLanguage, !shouldDetectChatLanguage, getIsMessageListReady);
 
   const shouldTranslate = isMessageTranslatable(message, !requestedChatTranslationLanguage);
   const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
