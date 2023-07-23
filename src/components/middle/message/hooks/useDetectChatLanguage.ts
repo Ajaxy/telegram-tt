@@ -1,9 +1,10 @@
 import type { ApiMessage } from '../../../../api/types';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../../config';
+import type { Signal } from '../../../../util/signals';
+
 import { getActions } from '../../../../global';
-import useTextLanguage from '../../../../hooks/useTextLanguage';
 import LimitedMap from '../../../../util/primitives/LimitedMap';
 import { throttle } from '../../../../util/schedulers';
+import { useEffect } from '../../../../lib/teact/teact';
 
 // https://github.com/DrKLO/Telegram/blob/dfd74f809e97d1ecad9672fc7388cb0223a95dfc/TMessagesProj/src/main/java/org/telegram/messenger/TranslateController.java#L35
 const MIN_MESSAGES_CHECKED = 8;
@@ -21,15 +22,15 @@ type MessageMetadata = {
 
 const CHAT_STATS = new Map<string, LimitedMap<number, MessageMetadata>>();
 
-export default function useDetectChatLanguage(message: ApiMessage, isDisabled?: boolean) {
-  const canProcess = !isDisabled && message.chatId !== SERVICE_NOTIFICATIONS_USER_ID;
+export default function useDetectChatLanguage(
+  message: ApiMessage, detectedLanguage?: string, isDisabled?: boolean, getIsReady?: Signal<boolean>,
+) {
+  useEffect(() => {
+    if (isDisabled || (getIsReady && !getIsReady())) return;
 
-  const isTranslatable = Boolean(message.content.text?.text.length);
-  const detectedLanguage = useTextLanguage(message.content.text?.text, !canProcess);
-
-  if (!canProcess) return;
-
-  processMessageMetadata(message.chatId, message.id, isTranslatable, detectedLanguage);
+    const isTranslatable = Boolean(message.content.text?.text.length);
+    processMessageMetadata(message.chatId, message.id, isTranslatable, detectedLanguage);
+  }, [message, detectedLanguage, isDisabled, getIsReady]);
 }
 
 const throttledMakeChatDecision = throttle(makeChatDecision, THROTTLE_DELAY);
