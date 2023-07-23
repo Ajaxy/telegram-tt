@@ -1,7 +1,7 @@
 import type { Api } from '../../../lib/gramjs';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
-import type { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import type { WorkerMessageEvent, OriginRequest, ThenArg } from './types';
+import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
+import type { OriginRequest, ThenArg, WorkerMessageEvent } from './types';
 import type { LocalDb } from '../localDb';
 import type { TypedBroadcastChannel } from '../../../util/multitab';
 
@@ -254,8 +254,22 @@ export function cancelApiProgressMaster(messageId: string) {
 function subscribeToWorker(onUpdate: OnApiUpdate) {
   worker?.addEventListener('message', ({ data }: WorkerMessageEvent) => {
     if (!data) return;
-    if (data.type === 'update') {
-      onUpdate(data.update);
+    if (data.type === 'updates') {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      let DEBUG_startAt: number | undefined;
+      if (DEBUG) {
+        DEBUG_startAt = performance.now();
+      }
+
+      data.updates.forEach(onUpdate);
+
+      if (DEBUG) {
+        const duration = performance.now() - DEBUG_startAt!;
+        if (duration > 5) {
+          // eslint-disable-next-line no-console
+          console.warn(`[API] Slow updates processing: ${data.updates.length} updates in ${duration} ms`);
+        }
+      }
     } else if (data.type === 'methodResponse') {
       handleMethodResponse(data);
     } else if (data.type === 'methodCallback') {

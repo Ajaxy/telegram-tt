@@ -6,8 +6,8 @@ import type { DebugLevel } from '../../../util/debugConsole';
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;
 
 export type WorkerMessageData = {
-  type: 'update';
-  update: ApiUpdate;
+  type: 'updates';
+  updates: ApiUpdate[];
 } | {
   type: 'methodResponse';
   messageId: string;

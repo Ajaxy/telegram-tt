@@ -4,10 +4,11 @@ import type { ApiOnProgress, ApiUpdate } from '../../types';
 import type { OriginMessageEvent, WorkerMessageData } from './types';
 
 import { DEBUG } from '../../../config';
-import { initApi, callApi, cancelApiProgress } from '../provider';
+import { callApi, cancelApiProgress, initApi } from '../provider';
 import { log } from '../helpers';
 import type { DebugLevel } from '../../../util/debugConsole';
 import { DEBUG_LEVELS } from '../../../util/debugConsole';
+import { throttleWithTickEnd } from '../../../util/schedulers';
 
 declare const self: WorkerGlobalScope;
 
@@ -154,15 +155,25 @@ function handleErrors() {
   });
 }
 
-function onUpdate(update: ApiUpdate) {
-  sendToOrigin({
-    type: 'update',
-    update,
-  });
+let pendingUpdates: ApiUpdate[] = [];
 
+const sendUpdatesOnTickEnd = throttleWithTickEnd(() => {
+  const currentUpdates = pendingUpdates;
+  pendingUpdates = [];
+
+  sendToOrigin({
+    type: 'updates',
+    updates: currentUpdates,
+  });
+});
+
+function onUpdate(update: ApiUpdate) {
   if (DEBUG && update['@type'] !== 'updateUserStatus' && update['@type'] !== 'updateServerTimeOffset') {
     log('UPDATE', update['@type'], update);
   }
+
+  pendingUpdates.push(update);
+  sendUpdatesOnTickEnd();
 }
 
 export function sendToOrigin(data: WorkerMessageData, arrayBuffer?: ArrayBuffer) {
