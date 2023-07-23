@@ -1,4 +1,4 @@
-import type { TabState, GlobalState, TabArgs } from '../types';
+import type { GlobalState, TabArgs, TabState } from '../types';
 import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from '../../api/types';
 
 import { omit, pick } from '../../util/iteratees';
@@ -83,6 +83,11 @@ export function addUsers<T extends GlobalState>(global: T, newById: Record<strin
   let isUpdated = false;
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiUser>>((acc, id) => {
+    const existingUser = byId[id];
+    if (existingUser && !existingUser.isMin) {
+      return acc;
+    }
+
     const updatedUser = getUpdatedUser(global, id, newById[id]);
     if (updatedUser) {
       acc[id] = updatedUser;
@@ -90,6 +95,7 @@ export function addUsers<T extends GlobalState>(global: T, newById: Record<strin
         isUpdated = true;
       }
     }
+
     return acc;
   }, {});
 

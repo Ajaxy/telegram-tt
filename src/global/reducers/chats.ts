@@ -141,6 +141,11 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
   let isUpdated = false;
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiChat>>((acc, id) => {
+    const existingChat = byId[id];
+    if (existingChat && !existingChat.isMin) {
+      return acc;
+    }
+
     const updatedChat = getUpdatedChat(global, id, newById[id]);
     if (updatedChat) {
       acc[id] = updatedChat;
@@ -148,6 +153,7 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
         isUpdated = true;
       }
     }
+
     return acc;
   }, {});
 
