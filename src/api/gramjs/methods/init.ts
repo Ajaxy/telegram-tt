@@ -3,26 +3,26 @@ import type {
   ApiInitialArgs,
   ApiUpdate,
   ApiOnProgress,
-} from '../types';
-import type { Methods, MethodArgs, MethodResponse } from './methods/types';
-import type { LocalDb } from './localDb';
+} from '../../types';
+import type { Methods, MethodArgs, MethodResponse } from './types';
+import type { LocalDb } from '../localDb';
 
-import { API_THROTTLE_RESET_UPDATES, API_UPDATE_THROTTLE } from '../../config';
-import { throttle, throttleWithTickEnd } from '../../util/schedulers';
-import { updateFullLocalDb } from './localDb';
-import { init as initUpdater } from './updater';
-import { init as initAuth } from './methods/auth';
-import { init as initChats } from './methods/chats';
-import { init as initMessages } from './methods/messages';
-import { init as initUsers } from './methods/users';
-import { init as initClient } from './methods/client';
-import { init as initStickers } from './methods/symbols';
-import { init as initManagement } from './methods/management';
-import { init as initTwoFaSettings } from './methods/twoFaSettings';
-import { init as initBots } from './methods/bots';
-import { init as initCalls } from './methods/calls';
-import { init as initPayments } from './methods/payments';
-import * as methods from './methods';
+import { API_THROTTLE_RESET_UPDATES, API_UPDATE_THROTTLE } from '../../../config';
+import { throttle, throttleWithTickEnd } from '../../../util/schedulers';
+import { updateFullLocalDb } from '../localDb';
+import { init as initUpdater } from '../updater';
+import { init as initAuth } from './auth';
+import { init as initChats } from './chats';
+import { init as initMessages } from './messages';
+import { init as initUsers } from './users';
+import { init as initClient } from './client';
+import { init as initStickers } from './symbols';
+import { init as initManagement } from './management';
+import { init as initTwoFaSettings } from './twoFaSettings';
+import { init as initBots } from './bots';
+import { init as initCalls } from './calls';
+import { init as initPayments } from './payments';
+import * as methods from './index';
 
 let onUpdate: OnApiUpdate;
 
