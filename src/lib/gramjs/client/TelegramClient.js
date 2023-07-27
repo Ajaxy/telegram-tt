@@ -394,6 +394,7 @@ class TelegramClient {
 
         try {
             await this.disconnect();
+            this._sender.destroy();
         } catch (err) {
             // Do nothing
         }
