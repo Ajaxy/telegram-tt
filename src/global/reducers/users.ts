@@ -84,11 +84,13 @@ export function addUsers<T extends GlobalState>(global: T, newById: Record<strin
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiUser>>((acc, id) => {
     const existingUser = byId[id];
-    if (existingUser && !existingUser.isMin) {
+    const newUser = newById[id];
+
+    if (existingUser && !existingUser.isMin && (newUser.isMin || existingUser.accessHash === newUser.accessHash)) {
       return acc;
     }
 
-    const updatedUser = getUpdatedUser(global, id, newById[id]);
+    const updatedUser = getUpdatedUser(global, id, newUser);
     if (updatedUser) {
       acc[id] = updatedUser;
       if (!isUpdated) {
