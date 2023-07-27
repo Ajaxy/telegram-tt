@@ -30,8 +30,14 @@ import {
 } from '../helpers';
 import { ChatAbortController } from '../ChatAbortController';
 import {
-  updateChannelState, getDifference, init as initUpdatesManager, processUpdate, reset as resetUpdatesManager,
+  updateChannelState,
+  getDifference,
+  init as initUpdatesManager,
+  processUpdate,
+  reset as resetUpdatesManager,
+  scheduleGetChannelDifference,
 } from '../updateManager';
+import { pause } from '../../../util/schedulers';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
@@ -158,9 +164,13 @@ export function setIsPremium({ isPremium }: { isPremium: boolean }) {
   client.setIsPremium(isPremium);
 }
 
+const LOG_OUT_TIMEOUT = 2500;
 export async function destroy(noLogOut = false, noClearLocalDb = false) {
-  if (!noLogOut) {
-    await invokeRequest(new GramJs.auth.LogOut());
+  if (!noLogOut && client.isConnected()) {
+    await Promise.race([
+      invokeRequest(new GramJs.auth.LogOut()),
+      pause(LOG_OUT_TIMEOUT),
+    ]);
   }
 
   if (!noClearLocalDb) {
@@ -481,4 +491,8 @@ export function setAllowHttpTransport(allowHttpTransport: boolean) {
 
 export function setShouldDebugExportedSenders(value: boolean) {
   client.setShouldDebugExportedSenders(value);
+}
+
+export function requestChannelDifference(channelId: string) {
+  scheduleGetChannelDifference(channelId);
 }

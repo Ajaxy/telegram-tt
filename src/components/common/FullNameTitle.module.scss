@@ -3,8 +3,12 @@
   align-items: center;
   gap: 0.25rem;
 
-  > h3 {
+  .fullName {
     margin-bottom: 0;
+
+    &.canCopy {
+      pointer-events: all;
+    }
   }
 
   :global(.custom-emoji) {

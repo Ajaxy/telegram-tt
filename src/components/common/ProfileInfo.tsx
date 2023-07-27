@@ -336,6 +336,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             isSavedMessages={isSavedMessages}
             onEmojiStatusClick={handleClickPremium}
             noLoopLimit
+            canCopyTitle
           />
         )}
         {!isSavedMessages && renderStatus()}

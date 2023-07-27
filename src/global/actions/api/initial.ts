@@ -179,6 +179,12 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
   }
 });
 
+addActionHandler('requestChannelDifference', (global, actions, payload): ActionReturnType => {
+  const { chatId } = payload;
+
+  void callApi('requestChannelDifference', chatId);
+});
+
 addActionHandler('reset', (global, actions): ActionReturnType => {
   clearStoredSession();
   clearEncryptedSession();

@@ -93,7 +93,7 @@ type StateProps =
     hasPasscode?: boolean;
     canSetPasscode?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'archiveSettings'>
+  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'isFetchingDifference' | 'archiveSettings'>
   & Pick<TabState, 'canInstall'>;
 
 const CLEAR_DATE_SEARCH_PARAM = { date: undefined };
@@ -121,6 +121,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   animationLevel,
   connectionState,
   isSyncing,
+  isFetchingDifference,
   isMessageListOpen,
   isConnectionStatusMinimized,
   areChatsLoaded,
@@ -154,7 +155,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
-    lang, connectionState, isSyncing, isMessageListOpen, isConnectionStatusMinimized, !areChatsLoaded,
+    lang,
+    connectionState,
+    isSyncing || isFetchingDifference,
+    isMessageListOpen,
+    isConnectionStatusMinimized,
+    !areChatsLoaded,
   );
 
   const handleLockScreenHotkey = useLastCallback((e: KeyboardEvent) => {
@@ -485,7 +491,7 @@ export default memo(withGlobal<OwnProps>(
       query: searchQuery, fetchingStatus, chatId, date,
     } = tabState.globalSearch;
     const {
-      currentUserId, connectionState, isSyncing, archiveSettings,
+      currentUserId, connectionState, isSyncing, archiveSettings, isFetchingDifference,
     } = global;
     const { isConnectionStatusMinimized, animationLevel } = global.settings.byKey;
 
@@ -499,6 +505,7 @@ export default memo(withGlobal<OwnProps>(
       animationLevel,
       connectionState,
       isSyncing,
+      isFetchingDifference,
       isMessageListOpen: Boolean(selectCurrentMessageList(global)),
       isConnectionStatusMinimized,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),

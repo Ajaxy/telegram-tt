@@ -590,6 +590,7 @@ export type GlobalState = {
   isSyncing?: boolean;
   isUpdateAvailable?: boolean;
   isSynced?: boolean;
+  isFetchingDifference?: boolean;
   leftColumnWidth?: number;
   lastIsChatInfoShown?: boolean;
   initialUnreadNotifications?: number;
@@ -1592,6 +1593,9 @@ export interface ActionPayloads {
 
   // Initial
   signOut: { forceInitApi?: boolean } | undefined;
+  requestChannelDifference: {
+    chatId: string;
+  };
 
   // Misc
   setInstallPrompt: { canInstall: boolean } & WithTabId;

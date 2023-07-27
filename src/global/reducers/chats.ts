@@ -1,6 +1,6 @@
 import type { GlobalState } from '../types';
 import type {
-  ApiChat, ApiChatMember, ApiTopic, ApiPhoto, ApiChatFullInfo,
+  ApiChat, ApiChatFullInfo, ApiChatMember, ApiPhoto, ApiTopic,
 } from '../../api/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
@@ -142,11 +142,13 @@ export function addChats<T extends GlobalState>(global: T, newById: Record<strin
 
   const addedById = Object.keys(newById).reduce<Record<string, ApiChat>>((acc, id) => {
     const existingChat = byId[id];
-    if (existingChat && !existingChat.isMin) {
+    const newChat = newById[id];
+
+    if (existingChat && !existingChat.isMin && (newChat.isMin || existingChat.accessHash === newChat.accessHash)) {
       return acc;
     }
 
-    const updatedChat = getUpdatedChat(global, id, newById[id]);
+    const updatedChat = getUpdatedChat(global, id, newChat);
     if (updatedChat) {
       acc[id] = updatedChat;
       if (!isUpdated) {

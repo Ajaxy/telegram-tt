@@ -105,7 +105,9 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
-  isSyncing?: GlobalState['isSyncing'];
+  isSyncing?: boolean;
+  isSynced?: boolean;
+  isFetchingDifference?: boolean;
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -132,6 +134,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   currentTransitionKey,
   connectionState,
   isSyncing,
+  isSynced,
+  isFetchingDifference,
   getCurrentPinnedIndexes,
   getLoadingPinnedId,
   onFocusPinnedMessage,
@@ -164,10 +168,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const isForum = chat?.isForum;
 
   useEffect(() => {
-    if (isReady && (threadId === MAIN_THREAD_ID || isForum)) {
+    if (isSynced && isReady && (threadId === MAIN_THREAD_ID || isForum)) {
       loadPinnedMessages({ chatId, threadId });
     }
-  }, [chatId, threadId, isReady, isForum]);
+  }, [chatId, threadId, isSynced, isReady, isForum]);
 
   useEnsureMessage(chatId, pinnedMessageId, pinnedMessage);
 
@@ -319,7 +323,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }
   }, [shouldUseStackedToolsClass, canRevealTools, canToolsCollideWithChatInfo, isRightColumnShown]);
 
-  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing, true);
+  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing || isFetchingDifference, true);
 
   function renderInfo() {
     if (messageListType === 'thread') {
@@ -524,6 +528,8 @@ export default memo(withGlobal<OwnProps>(
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
+      isSynced: global.isSynced,
+      isFetchingDifference: global.isFetchingDifference,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
     };
 

@@ -18,7 +18,7 @@ type ConnectionStatusPosition =
 export default function useConnectionStatus(
   lang: LangFn,
   connectionState: GlobalState['connectionState'],
-  isSyncing: GlobalState['isSyncing'],
+  isSyncing: boolean | undefined,
   hasMiddleHeader: boolean,
   isMinimized?: boolean,
   isDisabled?: boolean,

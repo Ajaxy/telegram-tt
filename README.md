@@ -119,7 +119,6 @@ Publish configuration in `src/electron/config.yml` config file allows to set Git
 * [qr-code-styling](https://github.com/kozakdenys/qr-code-styling) ([MIT License](https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE))
 * [croppie](https://github.com/Foliotek/Croppie) ([MIT License](https://github.com/Foliotek/Croppie/blob/master/LICENSE))
 * [mp4box](https://github.com/gpac/mp4box.js) ([BSD-3-Clause license](https://github.com/gpac/mp4box.js/blob/master/LICENSE))
-* [libav.js](https://github.com/Yahweasel/libav.js/) (Various Licenses)
 * [music-metadata-browser](https://github.com/Borewit/music-metadata-browser) ([MIT License](https://github.com/Borewit/music-metadata-browser/blob/master/LICENSE.txt))
 * [lowlight](https://github.com/wooorm/lowlight) ([MIT License](https://github.com/wooorm/lowlight/blob/main/license))
 * [idb-keyval](https://github.com/jakearchibald/idb-keyval) ([Apache License 2.0](https://github.com/jakearchibald/idb-keyval/blob/main/LICENCE))

@@ -95,7 +95,10 @@ export async function createPosterForVideo(url: string): Promise<string | undefi
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d')!;
         ctx.drawImage(video, 0, 0);
-        resolve(canvas.toDataURL('image/jpeg'));
+
+        canvas.toBlob((blob) => {
+          resolve(blob ? URL.createObjectURL(blob) : undefined);
+        });
       };
       video.onerror = reject;
       video.currentTime = Math.min(video.duration, 1);
