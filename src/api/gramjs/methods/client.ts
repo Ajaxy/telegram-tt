@@ -30,7 +30,12 @@ import {
 } from '../helpers';
 import { ChatAbortController } from '../ChatAbortController';
 import {
-  updateChannelState, getDifference, init as initUpdatesManager, processUpdate, reset as resetUpdatesManager,
+  updateChannelState,
+  getDifference,
+  init as initUpdatesManager,
+  processUpdate,
+  reset as resetUpdatesManager,
+  scheduleGetChannelDifference,
 } from '../updateManager';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
@@ -481,4 +486,8 @@ export function setAllowHttpTransport(allowHttpTransport: boolean) {
 
 export function setShouldDebugExportedSenders(value: boolean) {
   client.setShouldDebugExportedSenders(value);
+}
+
+export function requestChannelDifference(channelId: string) {
+  scheduleGetChannelDifference(channelId);
 }

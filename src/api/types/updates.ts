@@ -615,6 +615,11 @@ export type ApiUpdateMessageTranslations = {
   toLanguageCode: string;
 };
 
+export type ApiUpdateFetchingDifference = {
+  '@type': 'updateFetchingDifference';
+  isFetching: boolean;
+};
+
 export type ApiRequestReconnectApi = {
   '@type': 'requestReconnectApi';
 };
@@ -649,7 +654,7 @@ export type ApiUpdate = (
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
-  ApiUpdateRecentReactions | ApiRequestReconnectApi | ApiRequestSync
+  ApiUpdateRecentReactions | ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

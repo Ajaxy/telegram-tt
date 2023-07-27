@@ -6,7 +6,7 @@ import { UpdateConnectionState, UpdateServerTimeOffset } from '../../lib/gramjs/
 import { DEBUG } from '../../config';
 import localDb from './localDb';
 import SortedQueue from '../../util/SortedQueue';
-import { dispatchUserAndChatUpdates, requestSync, updater } from './updater';
+import { dispatchUserAndChatUpdates, sendUpdate, updater } from './updater';
 import { addEntitiesToLocalDb } from './helpers';
 import { buildInputEntity } from './gramjsBuilders';
 import { buildApiPeerId } from './apiBuilders/peers';
@@ -17,8 +17,8 @@ export type State = {
   pts: number;
   qts: number;
 };
-type SeqUpdate = GramJs.Updates | GramJs.UpdatesCombined;
-type PtsUpdate = GramJs.TypeUpdate & { pts: number };
+type SeqUpdate = (GramJs.Updates | GramJs.UpdatesCombined) & { _isFromDifference?: true };
+type PtsUpdate = GramJs.TypeUpdate & { pts: number } & { _isFromDifference?: true };
 
 const COMMON_BOX_QUEUE_ID = '0';
 const CHANNEL_DIFFERENCE_LIMIT = 1000;
@@ -49,7 +49,7 @@ export function applyState(state: State) {
   localDb.commonBoxState.qts = state.qts;
 }
 
-export function processUpdate(update: Update) {
+export function processUpdate(update: Update, isFromDifference?: boolean) {
   if (update instanceof UpdateConnectionState) {
     if (update.state === UpdateConnectionState.connected && isInited) {
       scheduleGetDifference();
@@ -70,6 +70,11 @@ export function processUpdate(update: Update) {
   }
 
   if (update instanceof GramJs.Updates || update instanceof GramJs.UpdatesCombined) {
+    if (isFromDifference) {
+      // eslint-disable-next-line no-underscore-dangle
+      (update as SeqUpdate)._isFromDifference = true;
+    }
+
     saveSeqUpdate(update);
     return;
   }
@@ -78,6 +83,10 @@ export function processUpdate(update: Update) {
     if (update instanceof GramJs.UpdateChannelTooLong) {
       getChannelDifference(getUpdateChannelId(update));
       return;
+    }
+    if (isFromDifference) {
+      // eslint-disable-next-line no-underscore-dangle
+      (update as PtsUpdate)._isFromDifference = true;
     }
     savePtsUpdate(update);
     return;
@@ -165,7 +174,8 @@ function popSeqQueue() {
   const localSeq = localDb.commonBoxState.seq;
   const seqStart = 'seqStart' in update ? update.seqStart : update.seq;
 
-  if (seqStart === 0) {
+  // eslint-disable-next-line no-underscore-dangle
+  if (seqStart === 0 || (update._isFromDifference && seqStart >= localSeq + 1)) {
     applyUpdate(update);
   } else if (seqStart === localSeq + 1) {
     clearTimeout(seqTimeout);
@@ -198,7 +208,10 @@ function popPtsQueue(channelId: string) {
     return;
   }
 
-  if (pts === localPts + ptsCount) {
+  // eslint-disable-next-line no-underscore-dangle
+  if (update._isFromDifference && pts >= localPts + ptsCount) {
+    applyUpdate(update);
+  } else if (pts === localPts + ptsCount) {
     clearTimeout(PTS_TIMEOUTS.get(channelId));
     PTS_TIMEOUTS.delete(channelId);
 
@@ -216,7 +229,7 @@ function popPtsQueue(channelId: string) {
   popPtsQueue(channelId);
 }
 
-function scheduleGetChannelDifference(channelId: string) {
+export function scheduleGetChannelDifference(channelId: string) {
   if (PTS_TIMEOUTS.has(channelId)) return;
 
   const timeout = setTimeout(async () => {
@@ -258,6 +271,11 @@ export async function getDifference() {
     return;
   }
 
+  sendUpdate({
+    '@type': 'updateFetchingDifference',
+    isFetching: true,
+  });
+
   const response = await invoke(new GramJs.updates.GetDifference({
     pts: localDb.commonBoxState.pts,
     date: localDb.commonBoxState.date,
@@ -275,6 +293,10 @@ export async function getDifference() {
   if (response instanceof GramJs.updates.DifferenceEmpty) {
     localDb.commonBoxState.seq = response.seq;
     localDb.commonBoxState.date = response.date;
+    sendUpdate({
+      '@type': 'updateFetchingDifference',
+      isFetching: false,
+    });
     return;
   }
 
@@ -285,7 +307,13 @@ export async function getDifference() {
 
   if (response instanceof GramJs.updates.DifferenceSlice) {
     getDifference();
+    return;
   }
+
+  sendUpdate({
+    '@type': 'updateFetchingDifference',
+    isFetching: false,
+  });
 }
 
 async function getChannelDifference(channelId: string) {
@@ -336,7 +364,9 @@ async function getChannelDifference(channelId: string) {
 function forceSync() {
   reset();
 
-  requestSync();
+  sendUpdate({
+    '@type': 'requestSync',
+  });
 
   loadRemoteState();
 }
@@ -389,7 +419,7 @@ function processDifference(
   dispatchUserAndChatUpdates(difference.chats);
 
   difference.otherUpdates.forEach((update) => {
-    processUpdate(update);
+    processUpdate(update, true);
   });
 }
 

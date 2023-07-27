@@ -105,7 +105,8 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
   currentTransitionKey: number;
   connectionState?: GlobalState['connectionState'];
-  isSyncing?: GlobalState['isSyncing'];
+  isSyncing?: boolean;
+  isFetchingDifference?: boolean;
 };
 
 const MiddleHeader: FC<OwnProps & StateProps> = ({
@@ -132,6 +133,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   currentTransitionKey,
   connectionState,
   isSyncing,
+  isFetchingDifference,
   getCurrentPinnedIndexes,
   getLoadingPinnedId,
   onFocusPinnedMessage,
@@ -319,7 +321,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     }
   }, [shouldUseStackedToolsClass, canRevealTools, canToolsCollideWithChatInfo, isRightColumnShown]);
 
-  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing, true);
+  const { connectionStatusText } = useConnectionStatus(lang, connectionState, isSyncing || isFetchingDifference, true);
 
   function renderInfo() {
     if (messageListType === 'thread') {
@@ -524,6 +526,7 @@ export default memo(withGlobal<OwnProps>(
       currentTransitionKey: Math.max(0, messageLists.length - 1),
       connectionState: global.connectionState,
       isSyncing: global.isSyncing,
+      isFetchingDifference: global.isFetchingDifference,
       hasButtonInHeader: canStartBot || canRestartBot || canSubscribe || shouldSendJoinRequest,
     };
 
