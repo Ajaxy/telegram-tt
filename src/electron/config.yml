@@ -19,7 +19,7 @@ publish:
   provider: "github"
   owner: "Ajaxy"
   repo: "telegram-tt"
-  releaseType: "release"
+  releaseType: "draft"
 win:
   target: "nsis"
   icon: "public/icon-electron-windows.ico"
