@@ -618,16 +618,16 @@ async function uploadMedia(localMessage: ApiMessage, attachment: ApiAttachment, 
     }
   };
 
-  const fetchAndUpload = async (url: string) => {
+  const fetchAndUpload = async (url: string, progressCallback?: (progress: number) => void) => {
     const file = await fetchFile(url, filename);
-    return uploadFile(file, patchedOnProgress);
+    return uploadFile(file, progressCallback);
   };
 
   const isVideo = SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType);
   const shouldUploadThumb = audio || isVideo || shouldSendAsFile;
 
   const [inputFile, thumb] = await Promise.all(compact([
-    fetchAndUpload(blobUrl),
+    fetchAndUpload(blobUrl, patchedOnProgress),
     shouldUploadThumb && previewBlobUrl && fetchAndUpload(previewBlobUrl),
   ]));
 
