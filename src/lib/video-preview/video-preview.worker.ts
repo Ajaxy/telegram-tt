@@ -1,13 +1,10 @@
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import type { CancellableCallback } from '../../util/PostMessageConnector';
 import { MP4Demuxer } from './MP4Demuxer';
-import * as LibAVWebCodecs from './polyfill';
 
 let decoder: any;
 let demuxer: any;
 let onDestroy: VoidFunction | undefined;
-
-let isLoaded = false;
 
 async function init(
   url: string,
@@ -18,7 +15,11 @@ async function init(
 ) {
   const hasWebCodecs = 'VideoDecoder' in globalThis;
   if (!hasWebCodecs) {
-    await loadLibAV();
+    // eslint-disable-next-line no-console
+    console.log('[Video Preview] WebCodecs not supported');
+    return new Promise<void>((resolve) => {
+      onDestroy = resolve;
+    });
   }
 
   const decodedFrames = new Set<number>();
@@ -71,18 +72,6 @@ function destroy() {
   decoder = undefined;
   demuxer = undefined;
   onDestroy?.();
-}
-
-async function loadLibAV() {
-  if (isLoaded) return;
-
-  importScripts(new URL('./libav-3.10.5.1.2-webcodecs.js', import.meta.url));
-  await LibAVWebCodecs.load({
-    polyfill: true,
-    libavOptions: { noworker: true, nosimd: true },
-  });
-
-  isLoaded = true;
 }
 
 const api = {
