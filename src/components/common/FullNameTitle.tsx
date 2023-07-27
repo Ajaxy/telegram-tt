@@ -4,12 +4,16 @@ import type { ApiChat, ApiUser } from '../../api/types';
 import type { FC } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
+import { getActions } from '../../global';
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
 import renderText from './helpers/renderText';
 import { getChatTitle, getUserFullName, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { copyTextToClipboard } from '../../util/clipboard';
+import stopEvent from '../../util/stopEvent';
 
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import VerifiedIcon from './VerifiedIcon';
 import FakeIcon from './FakeIcon';
@@ -27,6 +31,7 @@ type OwnProps = {
   emojiStatusSize?: number;
   isSavedMessages?: boolean;
   noLoopLimit?: boolean;
+  canCopyTitle?: boolean;
   onEmojiStatusClick?: NoneToVoidFunction;
   observeIntersection?: ObserveFn;
 };
@@ -40,14 +45,26 @@ const FullNameTitle: FC<OwnProps> = ({
   emojiStatusSize,
   isSavedMessages,
   noLoopLimit,
+  canCopyTitle,
   onEmojiStatusClick,
   observeIntersection,
 }) => {
   const lang = useLang();
+  const { showNotification } = getActions();
   const isUser = isUserId(peer.id);
   const title = isUser ? getUserFullName(peer as ApiUser) : getChatTitle(lang, peer as ApiChat);
   const emojiStatus = isUser && (peer as ApiUser).emojiStatus;
   const isPremium = isUser && (peer as ApiUser).isPremium;
+
+  const handleTitleClick = useLastCallback((e) => {
+    if (!title || !canCopyTitle) {
+      return;
+    }
+
+    stopEvent(e);
+    copyTextToClipboard(title);
+    showNotification({ message: `${isUser ? 'User' : 'Chat'} name was copied` });
+  });
 
   if (isSavedMessages) {
     return (
@@ -59,7 +76,14 @@ const FullNameTitle: FC<OwnProps> = ({
 
   return (
     <div className={buildClassName('title', styles.root, className)}>
-      <h3 dir="auto" className="fullName">{renderText(title || '')}</h3>
+      <h3
+        dir="auto"
+        role="button"
+        className={buildClassName('fullName', styles.fullName, canCopyTitle && styles.canCopy)}
+        onClick={handleTitleClick}
+      >
+        {renderText(title || '')}
+      </h3>
       {!noVerified && peer.isVerified && <VerifiedIcon />}
       {!noFake && peer.fakeType && <FakeIcon fakeType={peer.fakeType} />}
       {withEmojiStatus && emojiStatus && (
