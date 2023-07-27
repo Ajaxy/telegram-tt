@@ -23,6 +23,8 @@ import { clearWebTokenAuth } from '../../../util/routing';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { updateTabState } from '../../reducers/tabs';
 import { setServerTimeOffset } from '../../../util/serverTime';
+import { isChatChannel, isChatSuperGroup } from '../../helpers';
+import { unique } from '../../../util/iteratees';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -59,7 +61,6 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
 
     case 'requestReconnectApi':
-      global = getGlobal();
       global = { ...global, isSynced: false };
       setGlobal(global);
 
@@ -72,6 +73,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'requestSync':
       actions.sync();
+      break;
+
+    case 'updateFetchingDifference':
+      global = { ...global, isFetchingDifference: update.isFetching };
+      setGlobal(global);
       break;
 
     case 'error': {
@@ -215,6 +221,19 @@ function onUpdateConnectionState<T extends GlobalState>(
     connectionState,
   };
   setGlobal(global);
+
+  const channelStackIds = Object.values(global.byTabId)
+    .flatMap((tab) => tab.messageLists)
+    .map((messageList) => messageList.chatId)
+    .filter((chatId) => {
+      const chat = global.chats.byId[chatId];
+      return isChatChannel(chat) || isChatSuperGroup(chat);
+    });
+  if (connectionState === 'connectionStateReady' && channelStackIds.length) {
+    unique(channelStackIds).forEach((chatId) => {
+      actions.requestChannelDifference({ chatId });
+    });
+  }
 
   if (connectionState === 'connectionStateBroken') {
     actions.signOut({ forceInitApi: true });

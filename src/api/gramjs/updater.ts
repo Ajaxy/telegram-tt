@@ -1,7 +1,7 @@
 import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
 import type {
-  ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdateConnectionStateType, OnApiUpdate,
+  ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdate, ApiUpdateConnectionStateType, OnApiUpdate,
 } from '../types';
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
@@ -117,10 +117,8 @@ export function dispatchUserAndChatUpdates(entities: (GramJs.TypeUser | GramJs.T
     });
 }
 
-export function requestSync() {
-  onUpdate({
-    '@type': 'requestSync',
-  });
+export function sendUpdate(update: ApiUpdate) {
+  onUpdate(update);
 }
 
 export function updater(update: Update) {
