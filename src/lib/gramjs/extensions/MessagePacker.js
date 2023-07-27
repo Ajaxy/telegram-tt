@@ -22,6 +22,11 @@ class MessagePacker {
         return this._queue;
     }
 
+    clear() {
+        this._queue = [];
+        this.append(undefined);
+    }
+
     append(state, setReady = true, atStart = false) {
         // We need to check if there is already a `USE_INVOKE_AFTER_WITH` request
         if (state && USE_INVOKE_AFTER_WITH.has(state.request.className)) {
@@ -116,7 +121,7 @@ class MessagePacker {
 
     async get() {
         if (!this._queue[this._queue.length - 1]) {
-            this._queue = [];
+            this._queue = this._queue.filter(Boolean);
             return undefined;
         }
         let data;
