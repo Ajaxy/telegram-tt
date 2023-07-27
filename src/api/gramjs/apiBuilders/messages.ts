@@ -62,12 +62,13 @@ import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../h
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildApiCallDiscardReason } from './calls';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
-import { getServerTimeOffset } from '../../../util/serverTime';
+import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 
 const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
 
 const LOCAL_MEDIA_UPLOADING_TEMP_ID = 'temp';
 const INPUT_WAVEFORM_LENGTH = 63;
+const MIN_SCHEDULED_PERIOD = 10;
 
 let localMessageCounter = 0;
 function getNextLocalMessageId(lastMessageId = 0) {
@@ -176,7 +177,7 @@ export function buildApiMessageWithChatId(
   if (action) {
     content.action = action;
   }
-  const isScheduled = mtpMessage.date > (Math.round(Date.now() / 1000) + getServerTimeOffset());
+  const isScheduled = mtpMessage.date > getServerTime() + MIN_SCHEDULED_PERIOD;
 
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
