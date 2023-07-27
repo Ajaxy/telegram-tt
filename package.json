@@ -27,8 +27,8 @@
     "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json",
     "electron:webpack": "cross-env APP_ENV=$ENV webpack --config ./webpack-electron.config.ts",
     "electron:build": "cross-env IS_ELECTRON=true npm run build:$ENV && electron-builder install-app-deps && electron-rebuild && ENV=$ENV npm run electron:webpack",
-    "electron:staging": "ENV=staging CSC_IDENTITY_AUTO_DISCOVERY=false npm run electron:package",
-    "electron:production": "ENV=production npm run electron:package",
+    "electron:staging": "ENV=staging npm run electron:package -- -p never",
+    "electron:production": "ENV=production npm run electron:package --",
     "electron:package": "npm run electron:build && npx rimraf dist-electron && electron-builder build --win --mac --linux --config src/electron/config.yml",
     "prepare": "husky install",
     "postinstall": "(cd dev/eslint-multitab && npm i)"
