@@ -8,3 +8,5 @@ tests/
 *.iml
 dev/perf/screenshot*
 .DS_store
+.github/workflows/*
+!.github/workflows/electron-release.yml
