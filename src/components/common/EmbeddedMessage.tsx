@@ -26,12 +26,10 @@ import useThumbnail from '../../hooks/useThumbnail';
 import useLang from '../../hooks/useLang';
 import { useFastClick } from '../../hooks/useFastClick';
 import useMessageTranslation from '../middle/message/hooks/useMessageTranslation';
-import useShowTransition from '../../hooks/useShowTransition';
 
 import ActionMessage from '../middle/ActionMessage';
 import MessageSummary from './MessageSummary';
 import MediaSpoiler from './MediaSpoiler';
-import Skeleton from '../ui/Skeleton';
 
 import './EmbeddedMessage.scss';
 
@@ -78,14 +76,9 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const isSpoiler = Boolean(message && getMessageIsSpoiler(message));
 
   const shouldTranslate = message && isMessageTranslatable(message);
-  const { isPending: isTranslationPending, translatedText } = useMessageTranslation(
+  const { translatedText } = useMessageTranslation(
     chatTranslations, message?.chatId, shouldTranslate ? message?.id : undefined, requestedChatTranslationLanguage,
   );
-
-  const {
-    shouldRender: shouldRenderLoader,
-    transitionClassNames,
-  } = useShowTransition(isTranslationPending || (!message && !customText));
 
   const lang = useLang();
 
@@ -104,7 +97,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
       onClick={message && handleClick}
       onMouseDown={message && handleMouseDown}
     >
-      {shouldRenderLoader && <Skeleton className={buildClassName('embed-loading', transitionClassNames)} />}
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
       <div className="message-text">
         <p dir="auto">
