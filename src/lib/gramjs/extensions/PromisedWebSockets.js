@@ -3,7 +3,7 @@ const { Mutex } = require('async-mutex');
 const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
-const CONNECTION_TIMEOUT = 10000;
+const CONNECTION_TIMEOUT = 3000;
 const MAX_TIMEOUT = 30000;
 
 class PromisedWebSockets {
