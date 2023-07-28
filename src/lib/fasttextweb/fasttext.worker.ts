@@ -1,3 +1,4 @@
+import { DEBUG } from '../../config';
 import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import fasttextInitializer from './fasttext-wasm';
 import fasttextWasmPath from './fasttext-wasm.wasm';
@@ -22,8 +23,10 @@ const fastTextPromise = fasttextInitializer({
   },
 }).then((fastText: FastTextMethods) => {
   fastTextInstance = fastText;
-  // eslint-disable-next-line no-console
-  console.log('[FASTTEXT] Worker ready');
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[FASTTEXT] Worker ready');
+  }
 });
 
 function parseLabel(label: string) {
