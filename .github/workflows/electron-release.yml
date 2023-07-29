@@ -50,8 +50,8 @@ jobs:
 
       - name: Build and release
         env:
-          TELEGRAM_T_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_T_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
+          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -134,6 +134,7 @@ jobs:
         env:
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           FILE_PATH: ${{ steps.download-artifact.outputs.download-path }}
+        shell: cmd
         run: smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%\%FILE_NAME%"
 
       - uses: actions/upload-artifact@v3

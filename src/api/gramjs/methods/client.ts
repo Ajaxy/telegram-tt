@@ -81,8 +81,8 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
 
   client = new TelegramClient(
     session,
-    process.env.TELEGRAM_T_API_ID,
-    process.env.TELEGRAM_T_API_HASH,
+    process.env.TELEGRAM_API_ID,
+    process.env.TELEGRAM_API_HASH,
     {
       deviceModel: navigator.userAgent || userAgent || DEFAULT_USER_AGENT,
       systemVersion: platform || DEFAULT_PLATFORM,
