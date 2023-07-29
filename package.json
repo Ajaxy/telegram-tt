@@ -11,7 +11,7 @@
     "build:staging": "cross-env APP_ENV=staging webpack --mode development && ./deploy/copy_to_dist.sh",
     "build:production": "npm i && webpack && ./deploy/copy_to_dist.sh",
     "deploy:production": "npm run update_version && npm run build:production && git add -A && git commit -a -m '[Build]' --no-verify && git push",
-    "deploy:electron": "npm run electron:production -- -p always && git checkout . && git clean -df",
+    "deploy:electron": "npm run electron:production -- -p always",
     "postversion": "rm -rf .patch-version && npm run update_version",
     "update_version": "node ./deploy/update_version.js",
     "telegraph:update_changelog": "node ./dev/telegraphChangelog.js",
