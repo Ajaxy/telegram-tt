@@ -214,8 +214,8 @@ export default function createConfig(
         IS_ELECTRON: false,
         APP_TITLE,
         RELEASE_DATETIME: Date.now(),
-        TELEGRAM_T_API_ID: undefined,
-        TELEGRAM_T_API_HASH: undefined,
+        TELEGRAM_API_ID: undefined,
+        TELEGRAM_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
         ELECTRON_HOST_URL,
