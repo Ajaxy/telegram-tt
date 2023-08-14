@@ -67,7 +67,7 @@ class HttpStream {
         this.isClosed = false;
     }
 
-    async write(data: Buffer) {
+    write(data: Buffer) {
         if (this.isClosed || !this.url) {
             this.handleDisconnect();
             throw closeError;

@@ -49,7 +49,7 @@ export async function authFlow(
     client._log.info('Signed in successfully as', utils.getDisplayName(me));
 }
 
-export async function signInUserWithPreferredMethod(
+export function signInUserWithPreferredMethod(
     client: TelegramClient, apiCredentials: ApiCredentials, authParams: UserAuthParams,
 ): Promise<Api.TypeUser> {
     const { initialMethod = DEFAULT_INITIAL_METHOD } = authParams;
