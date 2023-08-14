@@ -6,7 +6,7 @@ let decoder: any;
 let demuxer: any;
 let onDestroy: VoidFunction | undefined;
 
-async function init(
+function init(
   url: string,
   maxFrames: number,
   workerIndex: number,
