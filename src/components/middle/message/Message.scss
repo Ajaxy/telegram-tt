@@ -254,6 +254,88 @@
     }
   }
 
+  &.is-story-mention {
+    --background-color: var(--pattern-color);
+
+    .message-content-wrapper {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .action-message-story-mention {
+      background-color: var(--background-color);
+      color: white;
+      font-size: calc(var(--message-text-size, 1rem) - 0.0625rem);
+      padding: 0.75rem 0.5rem;
+      border-radius: var(--border-radius-messages);
+      word-break: break-word;
+      text-align: center;
+      user-select: none;
+      position: relative;
+      z-index: 0;
+      display: inline-flex;
+      flex-direction: column;
+      max-width: 9.625rem;
+      align-items: center;
+
+      body.is-ios &,
+      body.is-macos & {
+        font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
+        line-height: calc(var(--message-text-size, 1rem) + 0.5rem);
+      }
+
+      &.with-preview {
+        padding: 1.25rem 0.5rem 0.75rem;
+        cursor: var(--custom-cursor, pointer);
+      }
+
+      &.with-preview::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 1rem;
+        transform: translateX(-50%);
+        width: 6rem;
+        height: 6rem;
+        border-radius: 50%;
+
+        padding: 0.0625rem;
+        /* stylelint-disable-next-line plugin/whole-pixel */
+        box-shadow: 0 0 0 0.03125rem rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.3);
+        mask: linear-gradient(to bottom, #fff 0%, #fff 100%) content-box, linear-gradient(to bottom, #fff 0%, #fff 100%);
+        mask-composite: exclude;
+      }
+
+      &.is-unread::before {
+        padding: 0.125rem;
+        background: linear-gradient(215.87deg, var(--color-message-story-mention-from) -1.61%, var(--color-message-story-mention-to) 97.44%);
+        box-shadow: none;
+      }
+    }
+
+    .story-media-wrapper {
+      width: 5.5rem;
+      height: 5.5rem;
+      margin: 0 auto 1rem;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .story-media {
+      object-fit: cover;
+      width: 100%;
+      height: auto;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .story-title {
+      line-height: 1.35;
+    }
+  }
+
   &.has-views {
     --meta-safe-area-extra-width: 4rem;
   }

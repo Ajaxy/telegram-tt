@@ -1009,9 +1009,11 @@ async function sendBotCommand(
 ) {
   await callApi('sendMessage', {
     chat,
-    replyingToTopId: threadId,
+    replyingTo: replyingTo ? {
+      replyingTo,
+      replyingToTopId: threadId,
+    } : undefined,
     text: command,
-    replyingTo,
     sendAs,
   });
 }

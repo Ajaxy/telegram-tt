@@ -153,6 +153,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
       : Object.values(pickTruthy(customEmojisById!, recentCustomEmojiIds!));
   }, [customEmojisById, isStatusPicker, recentCustomEmojiIds, recentStatusEmojis]);
 
+  const prefix = `${idPrefix}-custom-emoji`;
   const {
     activeSetIndex,
     observeIntersectionForSet,
@@ -160,7 +161,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
     observeIntersectionForShowingItems,
     observeIntersectionForCovers,
     selectStickerSet,
-  } = useStickerPickerObservers(containerRef, headerRef, idPrefix, isHidden);
+  } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
   const lang = useLang();
 
@@ -401,7 +402,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               stickerSet={stickerSet}
               loadAndPlay={Boolean(canAnimate && loadAndPlay)}
               index={i}
-              idPrefix={idPrefix}
+              idPrefix={prefix}
               observeIntersection={observeIntersectionForSet}
               observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
               observeIntersectionForShowingItems={observeIntersectionForShowingItems}

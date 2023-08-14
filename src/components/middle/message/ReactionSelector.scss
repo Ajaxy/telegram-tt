@@ -28,7 +28,7 @@
 
     body:not(.no-menu-blur) & {
       background: var(--color-background-compact-menu);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(25px);
     }
 
     body.is-safari & {

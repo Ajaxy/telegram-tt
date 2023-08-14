@@ -8,7 +8,9 @@ export interface ApiUser {
   isSelf?: true;
   isVerified?: true;
   isPremium?: boolean;
+  isCloseFriend?: boolean;
   isContact?: true;
+  isSupport?: true;
   type: ApiUserType;
   firstName?: string;
   lastName?: string;
@@ -29,6 +31,10 @@ export interface ApiUser {
   fakeType?: ApiFakeType;
   isAttachBot?: boolean;
   emojiStatus?: ApiEmojiStatus;
+  areStoriesHidden?: boolean;
+  hasStories?: boolean;
+  hasUnreadStories?: boolean;
+  maxStoryId?: number;
 }
 
 export interface ApiUserFullInfo {
@@ -43,6 +49,7 @@ export interface ApiUserFullInfo {
   noVoiceMessages?: boolean;
   premiumGifts?: ApiPremiumGiftOption[];
   isTranslationDisabled?: true;
+  hasPinnedStories?: boolean;
 }
 
 export type ApiFakeType = 'fake' | 'scam';

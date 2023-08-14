@@ -13,7 +13,7 @@
   :global(body:not(.no-menu-blur)) & {
     --color-background: var(--color-background-compact-menu);
 
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(25px);
   }
 
   @media (max-width: 26rem) {

@@ -10,4 +10,5 @@ export * from './twoFaSettings';
 export * from './passcode';
 export * from './payments';
 export * from './statistics';
+export * from './stories';
 export * from './translations';

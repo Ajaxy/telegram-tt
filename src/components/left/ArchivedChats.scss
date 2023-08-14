@@ -2,8 +2,13 @@
   height: 100%;
   overflow: hidden;
 
-  .chat-list {
-    height: calc(100% - var(--header-height));
+  .left-header {
+    position: relative;
+    z-index: var(--z-left-header);
+  }
+
+  .left-header-shadow {
+    box-shadow: 0 2px 2px var(--color-light-shadow);
   }
 
   .DropdownMenuFiller {
@@ -31,5 +36,30 @@
 
   .archived-chats-more-menu {
     margin-left: auto !important;
+  }
+
+  .story-toggler-wrapper {
+    flex-grow: 1;
+    position: relative;
+  }
+
+  .chat-list-wrapper {
+    --story-ribbon-height: 5.5rem;
+    height: calc(100% - var(--header-height));
+    position: relative;
+
+    &.shown {
+      transform: translateY(calc(var(--story-ribbon-height) * -1));
+      height: calc(100% - var(--header-height) + var(--story-ribbon-height));
+      transition: none;
+    }
+
+    &.open, &.closing {
+      transition: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    &.open {
+      transform: translateY(0);
+    }
   }
 }

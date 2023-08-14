@@ -341,16 +341,20 @@ export enum NewChatMembersProgress {
   Loading,
 }
 
-export type ProfileTabType = 'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice';
+export type ProfileTabType = (
+  'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'stories' | 'storiesArchive'
+);
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
 export type ApiPrivacyKey = 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
 'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P';
-export type PrivacyVisibility = 'everybody' | 'contacts' | 'nonContacts' | 'nobody';
+export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'selectedContacts' | 'nonContacts' |
+'nobody';
 
 export enum ProfileState {
   Profile,
   SharedMedia,
   MemberList,
+  StoryList,
 }
 
 export enum PaymentStep {

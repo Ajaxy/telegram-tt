@@ -166,6 +166,9 @@ function Transition({
     currentKeyRef.current = activeKey;
 
     if (isSlideOptimized) {
+      if (!childNodes[activeIndex]) {
+        return;
+      }
       performSlideOptimized(
         shouldDisableAnimation,
         name,

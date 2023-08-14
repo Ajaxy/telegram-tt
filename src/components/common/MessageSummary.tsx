@@ -66,7 +66,7 @@ function MessageSummary({
   function renderMessageText() {
     return (
       <MessageText
-        message={message}
+        messageOrStory={message}
         translatedText={translatedText}
         highlight={highlight}
         isSimple

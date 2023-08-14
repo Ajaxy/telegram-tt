@@ -4,8 +4,16 @@ import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
 import {
-  addBlockedContact, removeBlockedContact, setConfirmPaymentUrl, setPaymentStep,
+  addBlockedContact,
+  addStoriesForUser,
+  removeBlockedContact,
+  removeUserStory,
+  setConfirmPaymentUrl,
+  setPaymentStep,
+  updateLastReadStoryForUser,
+  updateUsersWithStories,
 } from '../../reducers';
+import { selectUserStories } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -99,6 +107,22 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
           actions.closeWebApp({ tabId: tabState.id });
         }
       });
+      break;
+
+    case 'updateStory':
+      global = addStoriesForUser(global, update.userId, { [update.story.id]: update.story });
+      global = updateUsersWithStories(global, { [update.userId]: selectUserStories(global, update.userId)! });
+      setGlobal(global);
+      break;
+
+    case 'deleteStory':
+      global = removeUserStory(global, update.userId, update.storyId);
+      setGlobal(global);
+      break;
+
+    case 'updateReadStories':
+      global = updateLastReadStoryForUser(global, update.userId, update.lastReadId);
+      setGlobal(global);
       break;
   }
 

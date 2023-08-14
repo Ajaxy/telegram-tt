@@ -302,7 +302,7 @@ const MessageContextMenu: FC<OwnProps> = ({
     return enableScrolling;
   }, [withScroll]);
 
-  const handleOpenReactionPicker = useLastCallback((position: IAnchorPosition) => {
+  const handleOpenMessageReactionPicker = useLastCallback((position: IAnchorPosition) => {
     onReactionPickerOpen!(position);
     hideItems();
   });
@@ -337,7 +337,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           canBuyPremium={canBuyPremium}
           isCurrentUserPremium={isCurrentUserPremium}
           canPlayAnimatedEmojis={canPlayAnimatedEmojis}
-          onShowMore={handleOpenReactionPicker}
+          onShowMore={handleOpenMessageReactionPicker}
           className={buildClassName(areItemsHidden && 'ReactionSelector-hidden')}
         />
       )}

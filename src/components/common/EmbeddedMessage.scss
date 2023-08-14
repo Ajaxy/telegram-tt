@@ -69,6 +69,12 @@
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   }
 
+  .icon {
+    font-size: 1.25rem;
+    line-height: 0.9375rem;
+    vertical-align: -0.1875rem;
+  }
+
   .message-text {
     overflow: hidden;
     margin-inline-start: 0.5rem;
@@ -112,6 +118,10 @@
       & > img {
         border-radius: 0;
       }
+    }
+
+    &.with-message-color {
+      color: var(--accent-color);
     }
   }
 

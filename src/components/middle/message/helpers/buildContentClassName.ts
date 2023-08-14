@@ -32,11 +32,11 @@ export function buildContentClassName(
   } = {},
 ) {
   const {
-    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice,
+    text, photo, video, audio, voice, document, poll, webPage, contact, location, invoice, storyData,
   } = getMessageContent(message);
 
   const classNames = [MESSAGE_CONTENT_CLASS_NAME];
-  const isMedia = photo || video || location || invoice?.extendedMedia;
+  const isMedia = storyData || photo || video || location || invoice?.extendedMedia;
   const hasText = text || location?.type === 'venue' || isGeoLiveActive;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
@@ -91,6 +91,10 @@ export function buildContentClassName(
 
   if (invoice && !invoice.extendedMedia) {
     classNames.push('invoice');
+  }
+
+  if (storyData) {
+    classNames.push('story');
   }
 
   if (asForwarded) {

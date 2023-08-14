@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef,
+  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -10,7 +10,7 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 import type { GlobalState } from '../../../global/types';
 import type { TabWithProperties } from '../../ui/TabList';
 
-import { ALL_FOLDER_ID } from '../../../config';
+import { ALL_FOLDER_ID, ANIMATION_END_DELAY } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
@@ -28,6 +28,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import Transition from '../../ui/Transition';
 import TabList from '../../ui/TabList';
 import ChatList from './ChatList';
+import StoryRibbon from '../../story/StoryRibbon';
 
 type OwnProps = {
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -48,11 +49,14 @@ type StateProps = {
   maxChatLists: number;
   maxFolderInvites: number;
   hasArchivedChats?: boolean;
+  hasArchivedStories?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
+  isStoryRibbonShown?: boolean;
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
 const FIRST_FOLDER_INDEX = 0;
+const STORY_RIBBON_APPEARANCE_DURATION_MS = 200 + ANIMATION_END_DELAY;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   foldersDispatch,
@@ -70,7 +74,9 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   folderInvitesById,
   maxFolderInvites,
   hasArchivedChats,
+  hasArchivedStories,
   archiveSettings,
+  isStoryRibbonShown,
 }) => {
   const {
     loadChatFolders,
@@ -86,10 +92,33 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const transitionRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
+  const [isStoryRibbonAnimated, setIsStoryRibbonAnimated] = useState(false);
 
   useEffect(() => {
     loadChatFolders();
   }, []);
+
+  useLayoutEffect(() => {
+    let timeoutId: number;
+
+    if (isStoryRibbonShown) {
+      timeoutId = window.setTimeout(() => {
+        setIsStoryRibbonAnimated(true);
+      }, STORY_RIBBON_APPEARANCE_DURATION_MS);
+    } else {
+      setIsStoryRibbonAnimated(false);
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isStoryRibbonShown]);
+
+  const {
+    shouldRender: shouldRenderStoryRibbon,
+    transitionClassNames: storyRibbonClassNames,
+    isClosing: isStoryRibbonClosing,
+  } = useShowTransition(isStoryRibbonShown, undefined, undefined, '');
 
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
@@ -285,7 +314,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         foldersDispatch={foldersDispatch}
         onSettingsScreenSelect={onSettingsScreenSelect}
         onLeftColumnContentChange={onLeftColumnContentChange}
-        canDisplayArchive={hasArchivedChats && !archiveSettings.isHidden}
+        canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
         archiveSettings={archiveSettings}
       />
     );
@@ -298,8 +327,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         'ChatFolders',
         shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
+        shouldRenderStoryRibbon && !isStoryRibbonAnimated && 'withStoryRibbon',
+        storyRibbonClassNames,
       )}
     >
+      {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
         <TabList
           contextRootElementSelector="#LeftColumn"
@@ -336,10 +368,16 @@ export default memo(withGlobal<OwnProps>(
           archived,
         },
       },
+      stories: {
+        orderedUserIds: {
+          archived: archivedStories,
+        },
+      },
       currentUserId,
       archiveSettings,
     } = global;
     const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
+    const { storyViewer: { isRibbonShown: isStoryRibbonShown } } = selectTabState(global);
 
     return {
       chatFoldersById,
@@ -349,10 +387,12 @@ export default memo(withGlobal<OwnProps>(
       currentUserId,
       shouldSkipHistoryAnimations,
       hasArchivedChats: Boolean(archived?.length),
+      hasArchivedStories: Boolean(archivedStories?.length),
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       archiveSettings,
+      isStoryRibbonShown,
     };
   },
 )(ChatFolders));

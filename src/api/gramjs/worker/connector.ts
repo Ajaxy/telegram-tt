@@ -35,7 +35,6 @@ const savedLocalDb: LocalDb = {
   stickerSets: {},
   photos: {},
   webDocuments: {},
-
   commonBoxState: {},
   channelPtsById: {},
 };

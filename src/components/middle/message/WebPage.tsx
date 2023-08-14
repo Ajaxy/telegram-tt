@@ -2,7 +2,7 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiMessage } from '../../../api/types';
+import type { ApiMessage, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ISettings } from '../../../types';
 
@@ -16,15 +16,18 @@ import buildClassName from '../../../util/buildClassName';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useLang from '../../../hooks/useLang';
+import useEnsureStory from '../../../hooks/useEnsureStory';
 
 import SafeLink from '../../common/SafeLink';
 import Photo from './Photo';
 import Video from './Video';
 import Button from '../../ui/Button';
+import BaseStory from './BaseStory';
 
 import './WebPage.scss';
 
 const MAX_TEXT_LENGTH = 170; // symbols
+const WEBPAGE_STORY_TYPE = 'telegram_story';
 
 type OwnProps = {
   message: ApiMessage;
@@ -36,7 +39,9 @@ type OwnProps = {
   asForwarded?: boolean;
   isDownloading?: boolean;
   isProtected?: boolean;
+  isConnected?: boolean;
   theme: ISettings['theme'];
+  story?: ApiTypeStory;
   onMediaClick?: () => void;
   onCancelMediaTransfer?: () => void;
 };
@@ -51,6 +56,8 @@ const WebPage: FC<OwnProps> = ({
   asForwarded,
   isDownloading = false,
   isProtected,
+  isConnected,
+  story,
   theme,
   onMediaClick,
   onCancelMediaTransfer,
@@ -72,6 +79,10 @@ const WebPage: FC<OwnProps> = ({
     });
   });
 
+  const { story: storyData } = webPage || {};
+
+  useEnsureStory(storyData?.userId, storyData?.id, story);
+
   if (!webPage) {
     return undefined;
   }
@@ -86,7 +97,9 @@ const WebPage: FC<OwnProps> = ({
     video,
     type,
   } = webPage;
-  const quickButtonLangKey = !inPreview ? getWebpageButtonText(type) : undefined;
+  const isStory = type === WEBPAGE_STORY_TYPE;
+  const isExpiredStory = story && 'isDeleted' in story;
+  const quickButtonLangKey = !inPreview && !isExpiredStory ? getWebpageButtonText(type) : undefined;
   const truncatedDescription = trimText(description, MAX_TEXT_LENGTH);
   const isArticle = Boolean(truncatedDescription || title || siteName);
   let isSquarePhoto = false;
@@ -125,7 +138,10 @@ const WebPage: FC<OwnProps> = ({
       data-initial={(siteName || displayUrl)[0]}
       dir="auto"
     >
-      <div className="WebPage--content">
+      <div className={buildClassName('WebPage--content', isStory && 'is-story')}>
+        {isStory && (
+          <BaseStory story={story} isProtected={isProtected} isConnected={isConnected} isPreview />
+        )}
         {photo && !video && (
           <Photo
             message={message}

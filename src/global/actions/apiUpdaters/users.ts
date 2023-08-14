@@ -3,10 +3,10 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import type { ApiUserStatus } from '../../../api/types';
 
 import {
-  deleteContact, replaceUserStatuses, updateUser, updateUserFullInfo,
+  deleteContact, replaceUserStatuses, toggleUserStoriesHidden, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { throttle } from '../../../util/schedulers';
-import { selectIsCurrentUserPremium, selectUserFullInfo } from '../../selectors';
+import { selectIsCurrentUserPremium, selectUser, selectUserFullInfo } from '../../selectors';
 import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
 const STATUS_UPDATE_THROTTLE = 3000;
@@ -55,9 +55,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       });
 
+      const currentUser = selectUser(global, update.id);
+
       global = updateUser(global, update.id, update.user);
       if (update.fullInfo) {
         global = updateUserFullInfo(global, update.id, update.fullInfo);
+      }
+
+      if (currentUser?.areStoriesHidden !== update.user.areStoriesHidden) {
+        global = toggleUserStoriesHidden(global, update.id, update.user.areStoriesHidden || false);
       }
 
       return global;

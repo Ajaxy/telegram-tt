@@ -24,6 +24,7 @@ import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 export type OwnProps = {
   isOpen: boolean;
   searchPlaceholder: string;
+  className?: string;
   filter?: ApiChatType[];
   loadMore?: NoneToVoidFunction;
   onSelectRecipient: (peerId: string, threadId?: number) => void;
@@ -49,6 +50,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   pinnedIds,
   contactIds,
   filter = API_CHAT_TYPES,
+  className,
   searchPlaceholder,
   loadMore,
   onSelectRecipient,
@@ -93,6 +95,7 @@ const RecipientPicker: FC<OwnProps & StateProps> = ({
   return (
     <ChatOrUserPicker
       isOpen={isOpen}
+      className={className}
       chatOrUserIds={renderingIds}
       chatsById={chatsById}
       searchPlaceholder={searchPlaceholder}

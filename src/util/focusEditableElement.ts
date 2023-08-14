@@ -1,4 +1,5 @@
 import { IS_TOUCH_ENV } from './windowEnvironment';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 export default function focusEditableElement(element: HTMLElement, force?: boolean, forcePlaceCaretAtEnd?: boolean) {
   if (!force && element === document.activeElement) {
@@ -10,7 +11,7 @@ export default function focusEditableElement(element: HTMLElement, force?: boole
   const lastChild = element.lastChild || element;
 
   if (!IS_TOUCH_ENV && !forcePlaceCaretAtEnd && (!lastChild || !lastChild.nodeValue)) {
-    element.focus();
+    requestMeasure(() => element.focus());
     return;
   }
 

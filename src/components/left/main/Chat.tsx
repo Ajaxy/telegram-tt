@@ -259,10 +259,13 @@ const Chat: FC<OwnProps & StateProps> = ({
       onDragEnter={handleDragEnter}
       withPortalForMenu
     >
-      <div className="status">
+      <div className={buildClassName('status', 'status-clickable')}>
         <Avatar
           peer={peer}
           isSavedMessages={user?.isSelf}
+          withStory={user && !user?.isSelf}
+          withStoryGap={isAvatarOnlineShown}
+          storyViewerMode="single-user"
         />
         <div className="avatar-badge-wrapper">
           <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />

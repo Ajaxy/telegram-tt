@@ -85,7 +85,7 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       buttonRef={buttonRef}
     >
       {isUserId(chatId) ? (
-        <PrivateChatInfo userId={chatId} withUsername={withUsername} avatarSize="large" />
+        <PrivateChatInfo userId={chatId} withUsername={withUsername} withStory avatarSize="large" />
       ) : (
         <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
       )}

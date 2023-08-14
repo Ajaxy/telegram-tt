@@ -2,6 +2,7 @@ import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
 import type {
   ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdate, ApiUpdateConnectionStateType, OnApiUpdate,
+  ApiStory, ApiStorySkipped,
 } from '../types';
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
@@ -18,6 +19,8 @@ import {
   buildMessageDraft,
   buildMessageReactions,
   buildApiMessageExtendedMediaPreview,
+  buildApiStory,
+  buildPrivacyRules,
 } from './apiBuilders/messages';
 import {
   buildChatMember,
@@ -49,12 +52,12 @@ import {
   log,
   swapLocalInvoiceMedia,
   isChatFolder,
+  addStoryToLocalDb,
 } from './helpers';
 import {
   buildApiNotifyException,
   buildApiNotifyExceptionTopic,
   buildPrivacyKey,
-  buildPrivacyRules,
 } from './apiBuilders/misc';
 import { buildApiPhoto, buildApiUsernames } from './apiBuilders/common';
 import {
@@ -300,7 +303,9 @@ export function updater(update: Update) {
           });
         }
       } else if (action instanceof GramJs.MessageActionTopicEdit) {
-        const { replyTo } = update.message;
+        const replyTo = update.message.replyTo instanceof GramJs.MessageReplyHeader
+          ? update.message.replyTo
+          : undefined;
         const {
           replyToMsgId, replyToTopId, forumTopic: isTopicReply,
         } = replyTo || {};
@@ -1050,6 +1055,37 @@ export function updater(update: Update) {
     });
   } else if (update instanceof GramJs.UpdateRecentEmojiStatuses) {
     onUpdate({ '@type': 'updateRecentEmojiStatuses' });
+  } else if (update instanceof GramJs.UpdateStory) {
+    // eslint-disable-next-line no-underscore-dangle
+    const entities = update._entities;
+    if (entities) {
+      addEntitiesToLocalDb(entities);
+      dispatchUserAndChatUpdates(entities);
+    }
+
+    const { story } = update;
+    const userId = buildApiPeerId(update.userId, 'user');
+    addStoryToLocalDb(story, userId);
+
+    if (story instanceof GramJs.StoryItemDeleted) {
+      onUpdate({
+        '@type': 'deleteStory',
+        userId,
+        storyId: story.id,
+      });
+    } else {
+      onUpdate({
+        '@type': 'updateStory',
+        userId,
+        story: buildApiStory(userId, story) as ApiStory | ApiStorySkipped,
+      });
+    }
+  } else if (update instanceof GramJs.UpdateReadStories) {
+    onUpdate({
+      '@type': 'updateReadStories',
+      userId: buildApiPeerId(update.userId, 'user'),
+      lastReadId: update.maxId,
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

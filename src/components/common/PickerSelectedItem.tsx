@@ -20,15 +20,16 @@ type OwnProps = {
   title?: string;
   isMinimized?: boolean;
   canClose?: boolean;
-  onClick: (arg: any) => void;
+  forceShowSelf?: boolean;
   clickArg: any;
   className?: string;
+  onClick: (arg: any) => void;
 };
 
 type StateProps = {
   chat?: ApiChat;
   user?: ApiUser;
-  currentUserId?: string;
+  isSavedMessages?: boolean;
 };
 
 const PickerSelectedItem: FC<OwnProps & StateProps> = ({
@@ -40,7 +41,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   chat,
   user,
   className,
-  currentUserId,
+  isSavedMessages,
   onClick,
 }) => {
   const lang = useLang();
@@ -61,13 +62,13 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
       <Avatar
         peer={user || chat}
         size="small"
-        isSavedMessages={user?.isSelf}
+        isSavedMessages={isSavedMessages}
       />
     );
 
-    const name = !chat || (user && !user.isSelf)
+    const name = !chat || (user && !isSavedMessages)
       ? getUserFirstOrLastName(user)
-      : getChatTitle(lang, chat, chat.id === currentUserId);
+      : getChatTitle(lang, chat, isSavedMessages);
 
     titleText = name ? renderText(name) : undefined;
   }
@@ -103,18 +104,19 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatOrUserId }): StateProps => {
+  (global, { chatOrUserId, forceShowSelf }): StateProps => {
     if (!chatOrUserId) {
       return {};
     }
 
     const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
     const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const isSavedMessages = !forceShowSelf && user && user.isSelf;
 
     return {
       chat,
       user,
-      currentUserId: global.currentUserId,
+      isSavedMessages,
     };
   },
 )(PickerSelectedItem));

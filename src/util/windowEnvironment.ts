@@ -39,6 +39,9 @@ export const IS_ANDROID = PLATFORM_ENV === 'Android';
 export const IS_MOBILE = IS_IOS || IS_ANDROID;
 export const IS_SAFARI = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
+export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
+  || navigator.userAgent.toLowerCase().includes('iceweasel')
+  || navigator.userAgent.toLowerCase().includes('icecat');
 
 export enum MouseButton {
   Main = 0,
@@ -73,7 +76,7 @@ export const IS_CANVAS_FILTER_SUPPORTED = (
   !IS_TEST && 'filter' in (document.createElement('canvas').getContext('2d') || {})
 );
 export const IS_REQUEST_FULLSCREEN_SUPPORTED = 'requestFullscreen' in document.createElement('div');
-export const ARE_CALLS_SUPPORTED = !navigator.userAgent.includes('Firefox');
+export const ARE_CALLS_SUPPORTED = !IS_FIREFOX;
 export const LAYERS_ANIMATION_NAME = IS_ANDROID ? 'slideFade' : IS_IOS ? 'slideLayers' : 'pushSlide';
 
 const TEST_VIDEO = document.createElement('video');

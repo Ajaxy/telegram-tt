@@ -33,6 +33,7 @@ import type {
 } from './calls';
 import type { ApiBotMenuButton } from './bots';
 import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
+import type { ApiStory, ApiStorySkipped } from './stories';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -624,6 +625,24 @@ export type ApiRequestReconnectApi = {
   '@type': 'requestReconnectApi';
 };
 
+export type ApiUpdateStory = {
+  '@type': 'updateStory';
+  userId: string;
+  story: ApiStory | ApiStorySkipped;
+};
+
+export type ApiUpdateDeleteStory = {
+  '@type': 'deleteStory';
+  userId: string;
+  storyId: number;
+};
+
+export type ApiUpdateReadStories = {
+  '@type': 'updateReadStories';
+  userId: string;
+  lastReadId: number;
+};
+
 export type ApiRequestSync = {
   '@type': 'requestSync';
 };
@@ -654,7 +673,8 @@ export type ApiUpdate = (
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
-  ApiUpdateRecentReactions | ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference
+  ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory |
+  ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

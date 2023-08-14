@@ -40,11 +40,13 @@ export type OwnProps = {
   canSendDocuments: boolean;
   canSendAudios: boolean;
   isScheduled?: boolean;
-  attachBots: GlobalState['attachMenu']['bots'];
+  attachBots?: GlobalState['attachMenu']['bots'];
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
   onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
-  onPollCreate: () => void;
+  onPollCreate: NoneToVoidFunction;
+  onMenuOpen: NoneToVoidFunction;
+  onMenuClose: NoneToVoidFunction;
   theme: ISettings['theme'];
 };
 
@@ -62,6 +64,8 @@ const AttachMenu: FC<OwnProps> = ({
   peerType,
   isScheduled,
   onFileSelect,
+  onMenuOpen,
+  onMenuClose,
   onPollCreate,
   theme,
   shouldCollectDebugLogs,
@@ -73,11 +77,21 @@ const AttachMenu: FC<OwnProps> = ({
   const canSendVideoOrPhoto = canSendPhotos || canSendVideos;
 
   const [isAttachmentBotMenuOpen, markAttachmentBotMenuOpen, unmarkAttachmentBotMenuOpen] = useFlag();
+  const isMenuOpen = isAttachMenuOpen || isAttachmentBotMenuOpen;
+
   useEffect(() => {
     if (isAttachMenuOpen) {
       markMouseInside();
     }
   }, [isAttachMenuOpen, markMouseInside]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      onMenuOpen();
+    } else {
+      onMenuClose();
+    }
+  }, [isMenuOpen, onMenuClose, onMenuOpen]);
 
   const handleToggleAttachMenu = useLastCallback(() => {
     if (isAttachMenuOpen) {
@@ -118,13 +132,15 @@ const AttachMenu: FC<OwnProps> = ({
   });
 
   const bots = useMemo(() => {
-    return Object.values(attachBots).filter((bot) => {
-      if (!peerType) return false;
-      if (peerType === 'bots' && bot.id === chatId && bot.peerTypes.includes('self')) {
-        return true;
-      }
-      return bot.peerTypes.includes(peerType);
-    });
+    return attachBots
+      ? Object.values(attachBots).filter((bot) => {
+        if (!peerType) return false;
+        if (peerType === 'bots' && bot.id === chatId && bot.peerTypes.includes('self')) {
+          return true;
+        }
+        return bot.peerTypes.includes(peerType);
+      })
+      : undefined;
   }, [attachBots, chatId, peerType]);
 
   const lang = useLang();
@@ -149,7 +165,7 @@ const AttachMenu: FC<OwnProps> = ({
       </ResponsiveHoverButton>
       <Menu
         id="attach-menu-controls"
-        isOpen={isAttachMenuOpen || isAttachmentBotMenuOpen}
+        isOpen={isMenuOpen}
         autoClose
         positionX="right"
         positionY="bottom"
@@ -193,7 +209,7 @@ const AttachMenu: FC<OwnProps> = ({
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
 
-        {canAttachMedia && !isScheduled && bots.map((bot) => (
+        {canAttachMedia && !isScheduled && bots?.map((bot) => (
           <AttachBotItem
             bot={bot}
             chatId={chatId}

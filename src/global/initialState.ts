@@ -108,6 +108,16 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     sponsoredByChatId: {},
   },
 
+  stories: {
+    byUserId: {},
+    orderedUserIds: {
+      archived: [],
+      active: [],
+    },
+    hasNext: true,
+    hasNextInArchive: true,
+  },
+
   groupCalls: {
     byId: {},
   },
@@ -292,6 +302,11 @@ export const INITIAL_TAB_STATE: TabState = {
 
   management: {
     byChatId: {},
+  },
+
+  storyViewer: {
+    isMuted: true,
+    isRibbonShown: false,
   },
 
   mediaViewer: {

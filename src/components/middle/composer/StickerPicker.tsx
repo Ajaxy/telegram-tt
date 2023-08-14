@@ -53,6 +53,8 @@ type OwnProps = {
   isTranslucent?: boolean;
   loadAndPlay: boolean;
   canSendStickers?: boolean;
+  noContextMenus?: boolean;
+  idPrefix: string;
   onStickerSelect: (
     sticker: ApiSticker, isSilent?: boolean, shouldSchedule?: boolean, canUpdateStickerSetsOrder?: boolean,
   ) => void;
@@ -90,6 +92,8 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
   canAnimate,
   isSavedMessages,
   isCurrentUserPremium,
+  noContextMenus,
+  idPrefix,
   onStickerSelect,
 }) => {
   const {
@@ -114,6 +118,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
 
   const sendMessageAction = useSendMessageAction(chat!.id, threadId);
 
+  const prefix = `${idPrefix}-sticker-set`;
   const {
     activeSetIndex,
     observeIntersectionForSet,
@@ -121,7 +126,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
     observeIntersectionForShowingItems,
     observeIntersectionForCovers,
     selectStickerSet,
-  } = useStickerPickerObservers(containerRef, headerRef, 'sticker-set', isHidden);
+  } = useStickerPickerObservers(containerRef, headerRef, prefix, isHidden);
 
   const lang = useLang();
 
@@ -355,7 +360,9 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             key={stickerSet.id}
             stickerSet={stickerSet}
             loadAndPlay={Boolean(canAnimate && loadAndPlay)}
+            noContextMenus={noContextMenus}
             index={i}
+            idPrefix={prefix}
             observeIntersection={observeIntersectionForSet}
             observeIntersectionForPlayingItems={observeIntersectionForPlayingItems}
             observeIntersectionForShowingItems={observeIntersectionForShowingItems}

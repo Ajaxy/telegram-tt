@@ -27,12 +27,14 @@ import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 import useOrderDiff from './hooks/useOrderDiff';
+import useUserStoriesPolling from '../../../hooks/polling/useUserStoriesPolling';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import Chat from './Chat';
 import EmptyFolder from './EmptyFolder';
 import Archive from './Archive';
+import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
@@ -41,6 +43,8 @@ type OwnProps = {
   canDisplayArchive?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
+  isStoryRibbonShown?: boolean;
+  className?: string;
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
   onLeftColumnContentChange: (content: LeftColumnContent) => void;
@@ -61,18 +65,25 @@ const ChatList: FC<OwnProps> = ({
   onSettingsScreenSelect,
   onLeftColumnContentChange,
 }) => {
-  const { openChat, openNextChat, closeForumPanel } = getActions();
+  const {
+    openChat,
+    openNextChat,
+    closeForumPanel,
+    toggleStoryRibbon,
+  } = getActions();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldIgnoreDragRef = useRef(false);
 
+  const isArchived = folderType === 'archived';
   const resolvedFolderId = (
-    folderType === 'all' ? ALL_FOLDER_ID : folderType === 'archived' ? ARCHIVED_FOLDER_ID : folderId!
+    folderType === 'all' ? ALL_FOLDER_ID : isArchived ? ARCHIVED_FOLDER_ID : folderId!
   );
 
   const shouldDisplayArchive = folderType === 'all' && canDisplayArchive;
 
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
+  useUserStoriesPolling(orderedIds);
 
   const chatsHeight = (orderedIds?.length || 0) * CHAT_HEIGHT_PX;
   const archiveHeight = shouldDisplayArchive
@@ -162,6 +173,16 @@ const ChatList: FC<OwnProps> = ({
     shouldIgnoreDragRef.current = true;
   });
 
+  const handleShowStoryRibbon = useLastCallback(() => {
+    toggleStoryRibbon({ isShown: true, isArchived });
+  });
+
+  const handleHideStoryRibbon = useLastCallback(() => {
+    toggleStoryRibbon({ isShown: false, isArchived });
+  });
+
+  const renderedOverflowTrigger = useTopOverscroll(containerRef, handleShowStoryRibbon, handleHideStoryRibbon);
+
   function renderChats() {
     const viewportOffset = orderedIds!.indexOf(viewportIds![0]);
 
@@ -196,6 +217,7 @@ const ChatList: FC<OwnProps> = ({
       itemSelector=".ListItem:not(.chat-item-archive)"
       preloadBackwards={CHAT_LIST_SLICE}
       withAbsolutePositioning
+      beforeChildren={renderedOverflowTrigger}
       maxHeight={chatsHeight + archiveHeight}
       onLoadMore={getMore}
       onDragLeave={handleDragLeave}

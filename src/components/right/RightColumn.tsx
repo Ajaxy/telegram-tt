@@ -1,9 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
-import React, {
-  memo, useEffect, useState,
-} from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ProfileTabType } from '../../types';
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
 } from '../../types';
@@ -12,10 +11,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  selectAreActiveChatsLoaded,
-  selectChat,
-  selectCurrentMessageList, selectTabState,
-  selectRightColumnContentKey,
+  selectAreActiveChatsLoaded, selectChat, selectCurrentMessageList, selectRightColumnContentKey, selectTabState,
 } from '../../global/selectors';
 
 import useLastCallback from '../../hooks/useLastCallback';
@@ -52,6 +48,7 @@ type StateProps = {
   isChatSelected: boolean;
   shouldSkipHistoryAnimations?: boolean;
   nextManagementScreen?: ManagementScreens;
+  nextProfileTab?: ProfileTabType;
 };
 
 const ANIMATION_DURATION = 450 + ANIMATION_END_DELAY;
@@ -74,6 +71,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   isChatSelected,
   shouldSkipHistoryAnimations,
   nextManagementScreen,
+  nextProfileTab,
 }) => {
   const {
     toggleChatInfo,
@@ -89,6 +87,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     toggleMessageStatistics,
     setOpenedInviteInfo,
     requestNextManagementScreen,
+    resetNextProfileTab,
     closeCreateTopicPanel,
     closeEditTopicPanel,
   } = getActions();
@@ -225,7 +224,13 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       setManagementScreen(nextManagementScreen);
       requestNextManagementScreen(undefined);
     }
-  }, [nextManagementScreen, requestNextManagementScreen]);
+  }, [nextManagementScreen]);
+
+  useEffect(() => {
+    if (!nextProfileTab) return;
+
+    resetNextProfileTab();
+  }, [nextProfileTab]);
 
   // Close Right Column when it transforms into overlayed state on screen resize
   useEffect(() => {
@@ -374,7 +379,7 @@ export default memo(withGlobal<OwnProps>(
   (global, { isMobile }): StateProps => {
     const { chatId, threadId } = selectCurrentMessageList(global) || {};
     const areActiveChatsLoaded = selectAreActiveChatsLoaded(global);
-    const { management, shouldSkipHistoryAnimations } = selectTabState(global);
+    const { management, shouldSkipHistoryAnimations, nextProfileTab } = selectTabState(global);
     const nextManagementScreen = chatId ? management.byChatId[chatId]?.nextScreen : undefined;
     const isForum = chatId ? selectChat(global, chatId)?.isForum : undefined;
     const isInsideTopic = isForum && Boolean(threadId && threadId !== MAIN_THREAD_ID);
@@ -387,6 +392,7 @@ export default memo(withGlobal<OwnProps>(
       isChatSelected: Boolean(chatId && areActiveChatsLoaded),
       shouldSkipHistoryAnimations,
       nextManagementScreen,
+      nextProfileTab,
     };
   },
 )(RightColumn));

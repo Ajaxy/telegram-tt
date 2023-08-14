@@ -37,6 +37,7 @@ type OwnProps = {
   isSearchable?: boolean;
   isRoundCheckbox?: boolean;
   lockedIds?: string[];
+  forceShowSelf?: boolean;
   onSelectedIdsChange?: (ids: string[]) => void;
   onFilterChange?: (value: string) => void;
   onDisabledClick?: (id: string) => void;
@@ -61,6 +62,7 @@ const Picker: FC<OwnProps> = ({
   isSearchable,
   isRoundCheckbox,
   lockedIds,
+  forceShowSelf,
   onSelectedIdsChange,
   onFilterChange,
   onDisabledClick,
@@ -134,6 +136,7 @@ const Picker: FC<OwnProps> = ({
             <PickerSelectedItem
               chatOrUserId={id}
               isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
+              forceShowSelf={forceShowSelf}
               onClick={handleItemClick}
               clickArg={id}
             />
@@ -189,7 +192,7 @@ const Picker: FC<OwnProps> = ({
               >
                 {!isRoundCheckbox ? renderCheckbox() : undefined}
                 {isUserId(id) ? (
-                  <PrivateChatInfo userId={id} />
+                  <PrivateChatInfo forceShowSelf={forceShowSelf} userId={id} />
                 ) : (
                   <GroupChatInfo chatId={id} />
                 )}

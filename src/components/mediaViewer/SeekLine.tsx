@@ -8,8 +8,8 @@ import type { ApiDimensions } from '../../api/types';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useSignal from '../../hooks/useSignal';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
-import useCurrentTimeSignal from './hooks/useCurrentTimeSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import { captureEvents } from '../../util/captureEvents';

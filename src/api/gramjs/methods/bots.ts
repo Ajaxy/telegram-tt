@@ -10,7 +10,12 @@ import localDb from '../localDb';
 import { WEB_APP_PLATFORM } from '../../../config';
 import { invokeRequest } from './client';
 import {
-  buildInputBotApp, buildInputEntity, buildInputPeer, buildInputThemeParams, generateRandomBigInt,
+  buildInputBotApp,
+  buildInputEntity,
+  buildInputPeer,
+  buildInputReplyToMessage,
+  buildInputThemeParams,
+  generateRandomBigInt,
 } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
 import {
@@ -189,13 +194,12 @@ export async function requestWebView({
     silent: isSilent || undefined,
     peer: buildInputPeer(peer.id, peer.accessHash),
     bot: buildInputPeer(bot.id, bot.accessHash),
-    replyToMsgId: replyToMessageId,
     url,
     startParam,
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     fromBotMenu: isFromBotMenu || undefined,
     platform: WEB_APP_PLATFORM,
-    ...(threadId && { topMsgId: threadId }),
+    ...(replyToMessageId && { replyTo: buildInputReplyToMessage(replyToMessageId, threadId) }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 
@@ -294,8 +298,7 @@ export function prolongWebView({
     peer: buildInputPeer(peer.id, peer.accessHash),
     bot: buildInputPeer(bot.id, bot.accessHash),
     queryId: BigInt(queryId),
-    replyToMsgId: replyToMessageId,
-    ...(threadId && { topMsgId: threadId }),
+    ...(replyToMessageId && { replyTo: buildInputReplyToMessage(replyToMessageId, threadId) }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 }

@@ -48,7 +48,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v19';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v20';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -83,6 +83,7 @@ export const PROFILE_SENSITIVE_AREA = 500;
 export const TOPIC_LIST_SENSITIVE_AREA = 600;
 export const COMMON_CHATS_LIMIT = 100;
 export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
+export const STORY_LIST_LIMIT = 100;
 
 // As in Telegram for Android
 // https://github.com/DrKLO/Telegram/blob/51e9947527/TMessagesProj/src/main/java/org/telegram/messenger/MediaDataController.java#L7799
@@ -114,6 +115,8 @@ export const ANIMATION_LEVEL_DEFAULT = ANIMATION_LEVEL_MAX;
 export const DEFAULT_MESSAGE_TEXT_SIZE_PX = 16;
 export const IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 17;
 export const MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX = 15;
+
+export const PREVIEW_AVATAR_COUNT = 3;
 
 export const DRAFT_DEBOUNCE = 10000; // 10s
 export const SEND_MESSAGE_ACTION_INTERVAL = 3000; // 3s
@@ -282,6 +285,8 @@ export const DEFAULT_LANG_PACK = 'android';
 export const LANG_PACKS = ['android', 'ios', 'tdesktop', 'macos'] as const;
 export const FEEDBACK_URL = 'https://bugs.telegram.org/?tag_ids=41&sort=time';
 export const GENERAL_TOPIC_ID = 1;
+export const STORY_EXPIRE_PERIOD = 86400; // 1 day
+export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

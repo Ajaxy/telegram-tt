@@ -40,7 +40,7 @@ import {
   getMessageVideo,
   getChatMessageLink,
 } from '../../../global/helpers';
-import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
@@ -194,7 +194,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     requestMessageTranslation,
     showOriginalMessage,
     openChatLanguageModal,
-    openReactionPicker,
+    openMessageReactionPicker,
   } = getActions();
 
   const lang = useLang();
@@ -245,14 +245,16 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         ({ peerId }) => usersById[peerId] || chatsById[peerId],
       ));
 
-      return Array.from(uniqueReactors).filter(Boolean).slice(0, 3);
+      return Array.from(uniqueReactors).filter(Boolean).slice(0, PREVIEW_AVATAR_COUNT);
     }
 
     if (!message.seenByDates) {
       return undefined;
     }
 
-    return Object.keys(message.seenByDates).slice(0, 3).map((id) => usersById[id] || chatsById[id]).filter(Boolean);
+    return Object.keys(message.seenByDates).slice(0, PREVIEW_AVATAR_COUNT)
+      .map((id) => usersById[id] || chatsById[id])
+      .filter(Boolean);
   }, [message.reactions?.recentReactions, message.seenByDates]);
 
   const isDownloading = useMemo(() => {
@@ -435,7 +437,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
-    openReactionPicker({ chatId: message.chatId, messageId: message.id, position });
+    openMessageReactionPicker({ chatId: message.chatId, messageId: message.id, position });
   });
 
   const handleTranslate = useLastCallback(() => {

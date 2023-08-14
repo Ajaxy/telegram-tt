@@ -48,7 +48,7 @@ export default function useStickerTooltip(
   const hasStickers = Boolean(stickers?.length);
 
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isEnabled || !isActive) return;
 
     const singleEmoji = getSingleEmoji();
     if (singleEmoji) {
@@ -58,7 +58,7 @@ export default function useStickerTooltip(
     } else {
       clearStickersForEmoji();
     }
-  }, [isEnabled, getSingleEmoji, hasStickers, loadStickersForEmoji, clearStickersForEmoji]);
+  }, [isEnabled, isActive, getSingleEmoji, hasStickers, loadStickersForEmoji, clearStickersForEmoji]);
 
   useEffect(unmarkManuallyClosed, [unmarkManuallyClosed, getHtml]);
 

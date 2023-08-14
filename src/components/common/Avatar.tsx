@@ -1,12 +1,9 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import React, {
-  memo, useRef,
-} from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
+import { getActions } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import type {
-  ApiChat, ApiPhoto, ApiUser,
-} from '../../api/types';
+import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -27,10 +24,11 @@ import renderText from './helpers/renderText';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useLang from '../../hooks/useLang';
-import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
+import { useFastClick } from '../../hooks/useFastClick';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
+import AvatarStoryCircle from './AvatarStoryCircle';
 
 import './Avatar.scss';
 
@@ -50,6 +48,10 @@ type OwnProps = {
   text?: string;
   isSavedMessages?: boolean;
   withVideo?: boolean;
+  withStory?: boolean;
+  withStoryGap?: boolean;
+  withStorySolid?: boolean;
+  storyViewerMode?: 'full' | 'single-user' | 'disabled';
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
   observeIntersection?: ObserveFn;
@@ -64,10 +66,16 @@ const Avatar: FC<OwnProps> = ({
   text,
   isSavedMessages,
   withVideo,
+  withStory,
+  withStoryGap,
+  withStorySolid,
+  storyViewerMode = 'single-user',
   loopIndefinitely,
   noPersonalPhoto,
   onClick,
 }) => {
+  const { openStoryViewer } = getActions();
+
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const videoLoopCountRef = useRef(0);
@@ -163,6 +171,7 @@ const Avatar: FC<OwnProps> = ({
           className={buildClassName(cn.media, 'avatar-media', transitionClassNames, videoBlobUrl && 'poster')}
           alt={author}
           decoding="async"
+          draggable={false}
         />
         {shouldPlayVideo && (
           <OptimizedVideo
@@ -174,6 +183,7 @@ const Avatar: FC<OwnProps> = ({
             autoPlay
             disablePictureInPicture
             playsInline
+            draggable={false}
             onEnded={handleVideoEnded}
           />
         )}
@@ -197,6 +207,9 @@ const Avatar: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
+    withStory && user?.hasStories && 'with-story-circle',
+    withStorySolid && user?.hasStories && 'with-story-solid',
+    withStorySolid && user?.hasUnreadStories && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
@@ -204,6 +217,13 @@ const Avatar: FC<OwnProps> = ({
   const hasMedia = Boolean(isSavedMessages || imgBlobUrl);
 
   const { handleClick, handleMouseDown } = useFastClick((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (withStory && storyViewerMode !== 'disabled' && user?.hasStories) {
+      e.stopPropagation();
+
+      openStoryViewer({ userId: user.id, isSingleUser: storyViewerMode === 'single-user' });
+      return;
+    }
+
     if (onClick) {
       onClick(e, hasMedia);
     }
@@ -218,7 +238,12 @@ const Avatar: FC<OwnProps> = ({
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
-      {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
+      <div className="inner">
+        {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
+      </div>
+      {withStory && user?.hasStories && (
+        <AvatarStoryCircle userId={user.id} size={size} withExtraGap={withStoryGap} />
+      )}
     </div>
   );
 };

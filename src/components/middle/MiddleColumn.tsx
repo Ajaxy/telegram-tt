@@ -21,6 +21,8 @@ import {
   GENERAL_TOPIC_ID,
   TMP_CHAT_ID,
   MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
+  EDITABLE_INPUT_ID,
+  EDITABLE_INPUT_CSS_SELECTOR,
 } from '../../config';
 import {
   IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
@@ -78,7 +80,6 @@ import Transition from '../ui/Transition';
 import MiddleHeader from './MiddleHeader';
 import MessageList from './MessageList';
 import FloatingActionButtons from './FloatingActionButtons';
-import Composer from './composer/Composer';
 import Button from '../ui/Button';
 import MobileSearch from './MobileSearch.async';
 import MessageSelectToolbar from './MessageSelectToolbar.async';
@@ -88,6 +89,7 @@ import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
 import ReactorListModal from './ReactorListModal.async';
 import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
 import ChatLanguageModal from './ChatLanguageModal.async';
+import Composer from '../common/Composer';
 
 import './MiddleColumn.scss';
 
@@ -529,6 +531,7 @@ function MiddleColumn({
               <div className={footerClassName}>
                 {renderingCanPost && (
                   <Composer
+                    type="messageList"
                     chatId={renderingChatId!}
                     threadId={renderingThreadId!}
                     messageListType={renderingMessageListType!}
@@ -536,6 +539,9 @@ function MiddleColumn({
                     onDropHide={handleHideDropArea}
                     isReady={isReady}
                     isMobile={isMobile}
+                    editableInputId={EDITABLE_INPUT_ID}
+                    editableInputCssSelector={EDITABLE_INPUT_CSS_SELECTOR}
+                    inputId="message-input-text"
                   />
                 )}
                 {isPinnedMessageList && canUnpin && (

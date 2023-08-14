@@ -36,6 +36,7 @@ import {
   selectPerformanceSettingsValue,
   selectCanAnimateInterface,
   selectChatFolder,
+  selectIsStoryViewerOpen,
 } from '../../global/selectors';
 import { getUserFullName } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
@@ -57,7 +58,6 @@ import useInterval from '../../hooks/useInterval';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import useAppLayout from '../../hooks/useAppLayout';
 import useTimeout from '../../hooks/useTimeout';
-import useFlag from '../../hooks/useFlag';
 
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
@@ -94,6 +94,7 @@ import DraftRecipientPicker from './DraftRecipientPicker.async';
 import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
+import StoryViewer from '../story/StoryViewer.async';
 
 import './Main.scss';
 
@@ -108,6 +109,7 @@ type StateProps = {
   isMiddleColumnOpen: boolean;
   isRightColumnOpen: boolean;
   isMediaViewerOpen: boolean;
+  isStoryViewerOpen: boolean;
   isForwardModalOpen: boolean;
   hasNotifications: boolean;
   hasDialogs: boolean;
@@ -152,7 +154,6 @@ type StateProps = {
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
 const CALL_BUNDLE_LOADING_DELAY_MS = 5000; // 5 sec
-const REACTION_PICKER_LOADING_DELAY_MS = 7000; // 7 sec
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_isLogged = false;
@@ -163,6 +164,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isMiddleColumnOpen,
   isRightColumnOpen,
   isMediaViewerOpen,
+  isStoryViewerOpen,
   isForwardModalOpen,
   hasNotifications,
   hasDialogs,
@@ -255,9 +257,6 @@ const Main: FC<OwnProps & StateProps> = ({
   useTimeout(() => {
     void loadBundle(Bundles.Calls);
   }, CALL_BUNDLE_LOADING_DELAY_MS);
-
-  const [shouldLoadReactionPicker, markShouldLoadReactionPicker] = useFlag(false);
-  useTimeout(markShouldLoadReactionPicker, REACTION_PICKER_LOADING_DELAY_MS);
 
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
@@ -503,7 +502,7 @@ const Main: FC<OwnProps & StateProps> = ({
   // Online status and browser tab indicators
   useBackgroundMode(handleBlur, handleFocus, !!IS_ELECTRON);
   useBeforeUnload(handleBlur);
-  usePreventPinchZoomGesture(isMediaViewerOpen);
+  usePreventPinchZoomGesture(isMediaViewerOpen || isStoryViewerOpen);
 
   return (
     <div ref={containerRef} id="Main" className={className}>
@@ -511,6 +510,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
+      <StoryViewer isOpen={isStoryViewerOpen} />
       <ForwardRecipientPicker isOpen={isForwardModalOpen} />
       <DraftRecipientPicker requestedDraft={requestedDraft} />
       <Notifications isOpen={hasNotifications} />
@@ -556,7 +556,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <PaymentModal isOpen={isPaymentModalOpen} onClose={closePaymentModal} />
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
-      <ReactionPicker isOpen={isReactionPickerOpen} shouldLoad={shouldLoadReactionPicker} />
+      <ReactionPicker isOpen={isReactionPickerOpen} />
     </div>
   );
 };
@@ -616,6 +616,7 @@ export default memo(withGlobal<OwnProps>(
       isMiddleColumnOpen: Boolean(chatId),
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
       isMediaViewerOpen: selectIsMediaViewerOpen(global),
+      isStoryViewerOpen: selectIsStoryViewerOpen(global),
       isForwardModalOpen: selectIsForwardModalOpen(global),
       isReactionPickerOpen: selectIsReactionPickerOpen(global),
       hasNotifications: Boolean(notifications.length),

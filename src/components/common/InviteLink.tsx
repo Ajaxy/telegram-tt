@@ -58,12 +58,12 @@ const InviteLink: FC<OwnProps> = ({
         color="translucent"
         className={isOpen ? 'active' : ''}
         onClick={onTrigger}
-        ariaLabel="Actions"
+        ariaLabel={lang('AccDescrOpenMenu2')}
       >
         <i className="icon icon-more" />
       </Button>
     );
-  }, [isMobile]);
+  }, [isMobile, lang]);
 
   return (
     <div className="settings-item">

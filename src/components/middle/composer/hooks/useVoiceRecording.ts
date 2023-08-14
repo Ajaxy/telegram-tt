@@ -31,7 +31,8 @@ const useVoiceRecording = () => {
         if (recordButtonRef.current) {
           if (startRecordTimeRef.current && Date.now() % 4 === 0) {
             requestMutation(() => {
-              recordButtonRef.current!.style.boxShadow = `0 0 0 ${(tickVolume || 0) * 50}px rgba(0,0,0,.15)`;
+              if (!recordButtonRef.current) return;
+              recordButtonRef.current.style.boxShadow = `0 0 0 ${(tickVolume || 0) * 50}px rgba(0,0,0,.15)`;
             });
           }
           setCurrentRecordTime(Date.now());
@@ -78,7 +79,7 @@ const useVoiceRecording = () => {
 
     requestMutation(() => {
       if (recordButtonRef.current) {
-        recordButtonRef.current!.style.boxShadow = 'none';
+        recordButtonRef.current.style.boxShadow = 'none';
       }
     });
 

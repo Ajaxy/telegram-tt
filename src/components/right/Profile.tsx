@@ -1,5 +1,5 @@
 import React, {
-  useEffect, useMemo, useRef, useState, memo,
+  useEffect, useMemo, useRef, useState, memo, useCallback,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -10,6 +10,7 @@ import type {
   ApiChatMember,
   ApiUser,
   ApiUserStatus,
+  ApiTypeStory,
 } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 import type {
@@ -34,8 +35,10 @@ import {
   selectChatMessages,
   selectCurrentMediaSearch,
   selectIsRightColumnShown,
+  selectTabState,
   selectTheme,
   selectUser,
+  selectUserStories,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { getSenderName } from '../left/search/helpers/getSenderName';
@@ -49,6 +52,7 @@ import useAsyncRendering from './hooks/useAsyncRendering';
 import useLang from '../../hooks/useLang';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useUserStoriesPolling from '../../hooks/polling/useUserStoriesPolling';
 
 import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
@@ -61,6 +65,7 @@ import Document from '../common/Document';
 import Audio from '../common/Audio';
 import ChatExtra from '../common/ChatExtra';
 import Media from '../common/Media';
+import MediaStory from '../story/MediaStory';
 import WebLink from '../common/WebLink';
 import NothingFound from '../common/NothingFound';
 import FloatingActionButton from '../ui/FloatingActionButton';
@@ -86,6 +91,7 @@ type StateProps = {
   foundIds?: number[];
   mediaSearchType?: SharedMediaType;
   hasCommonChatsTab?: boolean;
+  hasStoriesTab?: boolean;
   hasMembersTab?: boolean;
   areMembersHidden?: boolean;
   canAddMembers?: boolean;
@@ -93,6 +99,9 @@ type StateProps = {
   members?: ApiChatMember[];
   adminMembersById?: Record<string, ApiChatMember>;
   commonChatIds?: string[];
+  storyIds?: number[];
+  archiveStoryIds?: number[];
+  storyByIds?: Record<number, ApiTypeStory>;
   chatsById: Record<string, ApiChat>;
   usersById: Record<string, ApiUser>;
   userStatusesById: Record<string, ApiUserStatus>;
@@ -100,6 +109,7 @@ type StateProps = {
   isRestricted?: boolean;
   activeDownloadIds?: number[];
   isChatProtected?: boolean;
+  nextProfileTab?: ProfileTabType;
 };
 
 const TABS = [
@@ -123,8 +133,12 @@ const Profile: FC<OwnProps & StateProps> = ({
   currentUserId,
   messagesById,
   foundIds,
+  storyIds,
+  archiveStoryIds,
+  storyByIds,
   mediaSearchType,
   hasCommonChatsTab,
+  hasStoriesTab,
   hasMembersTab,
   areMembersHidden,
   canAddMembers,
@@ -139,6 +153,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   isRestricted,
   activeDownloadIds,
   isChatProtected,
+  nextProfileTab,
 }) => {
   const {
     setLocalMediaSearchType,
@@ -151,6 +166,8 @@ const Profile: FC<OwnProps & StateProps> = ({
     focusMessage,
     loadProfilePhotos,
     setNewChatMembersDialogState,
+    loadUserPinnedStories,
+    loadStoriesArchive,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -158,10 +175,11 @@ const Profile: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const transitionRef = useRef<HTMLDivElement>(null);
   const lang = useLang();
-  const [activeTab, setActiveTab] = useState(0);
   const [deletingUserId, setDeletingUserId] = useState<string | undefined>();
 
   const tabs = useMemo(() => ([
+    ...(hasStoriesTab ? [{ type: 'stories', title: 'ProfileStories' }] : []),
+    ...(hasStoriesTab && currentUserId === chatId ? [{ type: 'storiesArchive', title: 'ProfileStoriesArchive' }] : []),
     ...(hasMembersTab ? [{
       type: 'members', title: isChannel ? 'ChannelSubscribers' : 'GroupMembers',
     }] : []),
@@ -170,15 +188,42 @@ const Profile: FC<OwnProps & StateProps> = ({
     // in forum topics. Return it when it's fixed on the server side.
     ...(!topicId ? [{ type: 'voice', title: 'SharedVoiceTab2' }] : []),
     ...(hasCommonChatsTab ? [{ type: 'commonChats', title: 'SharedGroupsTab2' }] : []),
-  ]), [hasCommonChatsTab, hasMembersTab, isChannel, topicId]);
+  ]), [chatId, currentUserId, hasCommonChatsTab, hasMembersTab, hasStoriesTab, isChannel, topicId]);
+
+  const initialTab = useMemo(() => {
+    if (!nextProfileTab) {
+      return 0;
+    }
+
+    const index = tabs.findIndex(({ type }) => type === nextProfileTab);
+    return index === -1 ? 0 : index;
+  }, [nextProfileTab, tabs]);
+
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  useEffect(() => {
+    if (!nextProfileTab) return;
+    const index = tabs.findIndex(({ type }) => type === nextProfileTab);
+
+    if (index === -1) return;
+    setActiveTab(index);
+  }, [nextProfileTab, tabs]);
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
+  const handleLoadUserStories = useCallback(({ offsetId }: { offsetId: number }) => {
+    loadUserPinnedStories({ userId: chatId, offsetId });
+  }, [chatId]);
+  const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
+    loadStoriesArchive({ offsetId });
+  }, []);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     loadMoreMembers,
     loadCommonChats,
     searchMediaMessagesLocal,
+    handleLoadUserStories,
+    handleLoadStoriesArchive,
     tabType,
     mediaSearchType,
     members,
@@ -189,9 +234,15 @@ const Profile: FC<OwnProps & StateProps> = ({
     messagesById,
     foundIds,
     topicId,
+    storyIds,
+    archiveStoryIds,
   );
-  const isFirstTab = resultType === 'members' || (!hasMembersTab && resultType === 'media');
+  const isFirstTab = (hasStoriesTab && resultType === 'stories')
+    || resultType === 'members'
+    || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
+
+  useUserStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
   const { handleScroll } = useProfileState(containerRef, resultType, profileState, onProfileStateChange);
 
@@ -250,7 +301,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   });
 
   useEffectWithPrevDeps(([prevHasMemberTabs]) => {
-    if (activeTab === 0 || prevHasMemberTabs === hasMembersTab) {
+    if (prevHasMemberTabs === undefined || activeTab === 0 || prevHasMemberTabs === hasMembersTab) {
       return;
     }
 
@@ -335,6 +386,12 @@ const Profile: FC<OwnProps & StateProps> = ({
         case 'voice':
           text = lang('lng_media_audio_empty');
           break;
+        case 'stories':
+          text = lang('StoryList.SavedEmptyState.Title');
+          break;
+        case 'storiesArchive':
+          text = lang('StoryList.ArchivedEmptyState.Title');
+          break;
         default:
           text = lang('SharedMedia.EmptyTitle');
       }
@@ -360,6 +417,15 @@ const Profile: FC<OwnProps & StateProps> = ({
               isProtected={isChatProtected || messagesById[id].isProtected}
               observeIntersection={observeIntersectionForMedia}
               onClick={handleSelectMedia}
+            />
+          ))
+        ) : (resultType === 'stories' || resultType === 'storiesArchive') ? (
+          (viewportIds as number[])!.map((id) => storyByIds?.[id] && (
+            <MediaStory
+              key={`${resultType}_${id}`}
+              story={storyByIds[id]}
+              isProtected={isChatProtected}
+              isArchive={resultType === 'storiesArchive'}
             />
           ))
         ) : resultType === 'documents' ? (
@@ -421,12 +487,12 @@ const Profile: FC<OwnProps & StateProps> = ({
             <ListItem
               key={id}
               teactOrderKey={i}
-              className="chat-item-clickable scroll-item small-icon"
+              className="chat-item-clickable contact-list-item scroll-item small-icon"
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => handleMemberClick(id)}
               contextActions={getMemberContextAction(id)}
             >
-              <PrivateChatInfo userId={id} adminMember={adminMembersById?.[id]} forceShowSelf />
+              <PrivateChatInfo userId={id} adminMember={adminMembersById?.[id]} forceShowSelf withStory />
             </ListItem>
           ))
         ) : resultType === 'commonChats' ? (
@@ -535,12 +601,21 @@ export default memo(withGlobal<OwnProps>(
     const activeDownloads = selectActiveDownloads(global, chatId);
 
     let hasCommonChatsTab;
+    let hasStoriesTab;
     let resolvedUserId;
     let user;
+    let storyIds;
+    let archiveStoryIds;
+    let storyByIds;
     if (isUserId(chatId)) {
       resolvedUserId = chatId;
       user = selectUser(global, resolvedUserId);
       hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
+      hasStoriesTab = user?.isSelf || (user?.hasStories && !user.areStoriesHidden);
+      const userStories = hasStoriesTab ? selectUserStories(global, user!.id) : undefined;
+      storyIds = userStories?.pinnedIds;
+      storyByIds = userStories?.byId;
+      archiveStoryIds = userStories?.archiveIds;
     }
 
     return {
@@ -551,6 +626,7 @@ export default memo(withGlobal<OwnProps>(
       foundIds,
       mediaSearchType,
       hasCommonChatsTab,
+      hasStoriesTab,
       hasMembersTab,
       areMembersHidden,
       canAddMembers,
@@ -562,7 +638,11 @@ export default memo(withGlobal<OwnProps>(
       usersById,
       userStatusesById,
       chatsById,
+      storyIds,
+      archiveStoryIds,
+      storyByIds,
       isChatProtected: chat?.isProtected,
+      nextProfileTab: selectTabState(global).nextProfileTab,
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };

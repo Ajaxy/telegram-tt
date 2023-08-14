@@ -31,10 +31,12 @@
   background: var(--color-background);
   position: relative;
   z-index: var(--z-middle-header);
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  padding-left: max(1.4375rem, env(safe-area-inset-left));
   padding-right: max(0.8125rem, env(safe-area-inset-right));
+  flex-shrink: 0;
+  height: 3.5rem;
 
   @media (max-width: 600px) {
     position: relative;
@@ -214,6 +216,8 @@
     cursor: var(--custom-cursor, pointer);
     display: flex;
     align-items: center;
+    // Space for unread story circle
+    padding: 0.0625rem 0 0.0625rem 0.0625rem;
 
     @media (max-width: 600px) {
       user-select: none;
@@ -265,6 +269,11 @@
 
     .custom-emoji {
       color: var(--color-primary);
+    }
+
+    .story-circle {
+      max-width: 2.625rem !important;
+      max-height: 2.625rem !important;
     }
   }
 

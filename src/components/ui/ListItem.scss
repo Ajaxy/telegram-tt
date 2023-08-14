@@ -217,6 +217,16 @@
       padding: 0.5625rem;
     }
 
+    &.contact-list-item {
+      .ListItem-button {
+        padding: 0.5rem;
+      }
+
+      .ChatInfo {
+        padding: 0.0625rem;
+      }
+    }
+
     .Avatar {
       margin-right: 0.5rem;
     }
@@ -251,10 +261,15 @@
     .typing-status {
       font-size: 1rem;
       margin: 0;
-      overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
       text-align: initial;
+    }
+
+    h3,
+    .last-message,
+    .typing-status {
+      overflow: hidden;
     }
 
     .title {

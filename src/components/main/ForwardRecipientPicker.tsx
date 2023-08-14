@@ -2,13 +2,15 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
-import { selectTabState } from '../../global/selectors';
+import { selectChat, selectTabState, selectUser } from '../../global/selectors';
+import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
 import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
 
 import RecipientPicker from '../common/RecipientPicker';
+import usePrevious from '../../hooks/usePrevious';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -17,22 +19,26 @@ export type OwnProps = {
 interface StateProps {
   currentUserId?: string;
   isManyMessages?: boolean;
+  isStory?: boolean;
 }
 
 const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   isOpen,
   currentUserId,
   isManyMessages,
+  isStory,
 }) => {
   const {
     setForwardChatOrTopic,
     exitForwardMode,
     forwardToSavedMessages,
+    forwardStory,
     showNotification,
   } = getActions();
 
   const lang = useLang();
 
+  const renderingIsStory = usePrevious(isStory, true);
   const [isShown, markIsShown, unmarkIsShown] = useFlag();
   useEffect(() => {
     if (isOpen) {
@@ -41,17 +47,43 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   }, [isOpen, markIsShown]);
 
   const handleSelectRecipient = useCallback((recipientId: string, threadId?: number) => {
-    if (recipientId === currentUserId) {
-      forwardToSavedMessages();
-      showNotification({
-        message: lang(isManyMessages
+    const isSelf = recipientId === currentUserId;
+    if (isStory) {
+      forwardStory({ toChatId: recipientId });
+      const global = getGlobal();
+      if (isUserId(recipientId)) {
+        showNotification({
+          message: isSelf
+            ? lang('Conversation.StoryForwardTooltip.SavedMessages.One')
+            : lang(
+              'StorySharedTo',
+              getUserFirstOrLastName(selectUser(global, recipientId)),
+            ),
+        });
+      } else {
+        const chat = selectChat(global, recipientId);
+        if (!chat) return;
+
+        showNotification({
+          message: lang('StorySharedTo', getChatTitle(lang, chat)),
+        });
+      }
+      return;
+    }
+
+    if (isSelf) {
+      const message = lang(
+        isManyMessages
           ? 'Conversation.ForwardTooltip.SavedMessages.Many'
-          : 'Conversation.ForwardTooltip.SavedMessages.One'),
-      });
+          : 'Conversation.ForwardTooltip.SavedMessages.One',
+      );
+
+      forwardToSavedMessages();
+      showNotification({ message });
     } else {
       setForwardChatOrTopic({ chatId: recipientId, topicId: threadId });
     }
-  }, [currentUserId, forwardToSavedMessages, isManyMessages, lang, setForwardChatOrTopic, showNotification]);
+  }, [currentUserId, isManyMessages, isStory, lang]);
 
   const handleClose = useCallback(() => {
     exitForwardMode();
@@ -64,6 +96,7 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
   return (
     <RecipientPicker
       isOpen={isOpen}
+      className={renderingIsStory ? 'component-theme-dark' : undefined}
       searchPlaceholder={lang('ForwardTo')}
       onSelectRecipient={handleSelectRecipient}
       onClose={handleClose}
@@ -73,8 +106,10 @@ const ForwardRecipientPicker: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>((global): StateProps => {
+  const { messageIds, storyId } = selectTabState(global).forwardMessages;
   return {
     currentUserId: global.currentUserId,
-    isManyMessages: (selectTabState(global).forwardMessages.messageIds?.length || 0) > 1,
+    isManyMessages: (messageIds?.length || 0) > 1,
+    isStory: Boolean(storyId),
   };
 })(ForwardRecipientPicker));

@@ -482,7 +482,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
 addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType => {
   const {
-    fromChatId, messageIds, groupedId, withMyScore, tabId = getCurrentTabId(),
+    fromChatId, messageIds, storyId, groupedId, withMyScore, tabId = getCurrentTabId(),
   } = payload;
   let groupedMessageIds;
   if (groupedId) {
@@ -492,6 +492,7 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
     forwardMessages: {
       fromChatId,
       messageIds: groupedMessageIds || messageIds,
+      storyId,
       isModalShown: true,
       withMyScore,
     },

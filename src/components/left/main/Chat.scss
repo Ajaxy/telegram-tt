@@ -2,6 +2,11 @@
   --background-color: var(--color-background);
   --thumbs-background: var(--background-color);
 
+  --z-forum-indicator: 2;
+  --z-badge: 4;
+  --z-ripple: 6;
+  --z-status: 8; // Avatar stories require a higher z-index than the ripple to work
+
   body.is-ios &,
   body.is-macos & {
     --color-text-meta: var(--color-text-meta-apple);
@@ -168,7 +173,7 @@
       }
 
       background: var(--color-primary);
-      z-index: 1;
+      z-index: var(--z-forum-indicator);
 
       border-start-end-radius: var(--border-radius-default);
       border-end-end-radius: var(--border-radius-default);
@@ -191,7 +196,7 @@
   }
 
   .ripple-container {
-    z-index: 2;
+    z-index: var(--z-ripple);
   }
 
   .status {
@@ -199,15 +204,15 @@
     align-self: stretch;
     display: flex;
     align-items: center;
-    z-index: 1;
-    background: var(--background-color);
+    z-index: var(--z-status);
+    background-color: var(--background-color);
   }
 
   .avatar-badge-wrapper {
     position: absolute;
     bottom: 0;
     right: 0.5rem;
-    z-index: 2;
+    z-index: var(--z-badge);
 
     --outline-color: var(--color-background);
 
@@ -312,8 +317,14 @@
         }
       }
 
-      .colon {
-        margin-inline-end: 0.25rem;
+      .colon, .forward {
+        margin-inline-end: 0.1875rem;
+      }
+
+      .forward {
+        font-size: 0.875rem;
+        display: inline-block;
+        transform: translateY(1px);
       }
 
       .media-preview-spoiler {

@@ -17,6 +17,9 @@ import type {
   ApiContact,
   ApiPoll,
   ApiFormattedText,
+  ApiTypeReplyTo,
+  ApiStory,
+  ApiStorySkipped,
 } from '../../types';
 import {
   MAIN_THREAD_ID,
@@ -57,6 +60,8 @@ import {
   buildInputPollFromExisting,
   buildInputTextWithEntities,
   buildMessageFromUpdate,
+  buildInputStory,
+  buildInputReplyTo,
 } from '../gramjsBuilders';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
 import { fetchFile } from '../../../util/files';
@@ -233,9 +238,9 @@ export function sendMessage(
     text,
     entities,
     replyingTo,
-    replyingToTopId,
     attachment,
     sticker,
+    story,
     gif,
     poll,
     contact,
@@ -250,10 +255,10 @@ export function sendMessage(
     lastMessageId?: number;
     text?: string;
     entities?: ApiMessageEntity[];
-    replyingTo?: number;
-    replyingToTopId?: number;
+    replyingTo?: ApiTypeReplyTo;
     attachment?: ApiAttachment;
     sticker?: ApiSticker;
+    story?: ApiStory | ApiStorySkipped;
     gif?: ApiVideo;
     poll?: ApiNewPoll;
     contact?: ApiContact;
@@ -271,7 +276,6 @@ export function sendMessage(
     text,
     entities,
     replyingTo,
-    replyingToTopId,
     attachment,
     sticker,
     gif,
@@ -280,6 +284,7 @@ export function sendMessage(
     groupedId,
     scheduledAt,
     sendAs,
+    story,
   );
 
   onUpdate({
@@ -310,7 +315,6 @@ export function sendMessage(
       text,
       entities,
       replyingTo,
-      replyingToTopId,
       attachment: attachment!,
       groupedId,
       isSilent,
@@ -339,6 +343,8 @@ export function sendMessage(
       media = buildInputMediaDocument(gif);
     } else if (poll) {
       media = buildInputPoll(poll, randomId);
+    } else if (story) {
+      media = buildInputStory(story);
     } else if (contact) {
       media = new GramJs.InputMediaContact({
         phoneNumber: contact.phoneNumber,
@@ -349,6 +355,7 @@ export function sendMessage(
     }
 
     const RequestClass = media ? GramJs.messages.SendMedia : GramJs.messages.SendMessage;
+    const replyTo = replyingTo ? buildInputReplyTo(replyingTo) : undefined;
 
     try {
       const update = await invokeRequest(new RequestClass({
@@ -359,8 +366,7 @@ export function sendMessage(
         randomId,
         ...(isSilent && { silent: isSilent }),
         ...(scheduledAt && { scheduleDate: scheduledAt }),
-        ...(replyingTo && { replyToMsgId: replyingTo }),
-        ...(replyingToTopId && { topMsgId: replyingToTopId }),
+        ...(replyTo && { replyTo }),
         ...(media && { media }),
         ...(noWebPage && { noWebpage: noWebPage }),
         ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
@@ -396,7 +402,6 @@ function sendGroupedMedia(
     text,
     entities,
     replyingTo,
-    replyingToTopId,
     attachment,
     groupedId,
     isSilent,
@@ -406,8 +411,7 @@ function sendGroupedMedia(
     chat: ApiChat;
     text?: string;
     entities?: ApiMessageEntity[];
-    replyingTo?: number;
-    replyingToTopId?: number;
+    replyingTo?: ApiTypeReplyTo;
     attachment: ApiAttachment;
     groupedId: string;
     isSilent?: boolean;
@@ -479,13 +483,13 @@ function sendGroupedMedia(
 
     const { singleMediaByIndex, localMessages } = groupedUploads[groupedId];
     delete groupedUploads[groupedId];
+    const replyTo = replyingTo ? buildInputReplyTo(replyingTo) : undefined;
 
     const update = await invokeRequest(new GramJs.messages.SendMultiMedia({
       clearDraft: true,
       peer: buildInputPeer(chat.id, chat.accessHash),
       multiMedia: Object.values(singleMediaByIndex), // Object keys are usually ordered
-      replyToMsgId: replyingTo,
-      ...(replyingToTopId && { topMsgId: replyingToTopId }),
+      ...(replyingTo && { replyTo }),
       ...(isSilent && { silent: isSilent }),
       ...(scheduledAt && { scheduleDate: scheduledAt }),
       ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),

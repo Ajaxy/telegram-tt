@@ -20,6 +20,11 @@
       background: var(--accent-color);
       border-radius: 0.125rem;
     }
+
+    &.is-story {
+      display: flex;
+      flex-direction: column-reverse;
+    }
   }
 
   &--quick-button {

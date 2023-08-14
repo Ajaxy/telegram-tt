@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiStory, ApiUser,
 } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
@@ -52,33 +52,35 @@ export function getMessageTranscription(message: ApiMessage) {
   return transcriptionId && global.transcriptions[transcriptionId]?.text;
 }
 
-export function hasMessageText(message: ApiMessage) {
+export function hasMessageText(message: ApiMessage | ApiStory) {
   const {
     text, sticker, photo, video, audio, voice, document, poll, webPage, contact, invoice, location,
-    game, action,
+    game, action, storyData,
   } = message.content;
 
   return Boolean(text) || !(
     sticker || photo || video || audio || voice || document || contact || poll || webPage || invoice || location
-    || game || action?.phoneCall
+    || game || action?.phoneCall || storyData
   );
 }
 
-export function getMessageText(message: ApiMessage) {
+export function getMessageText(message: ApiMessage | ApiStory) {
   return hasMessageText(message) ? message.content.text?.text || CONTENT_NOT_SUPPORTED : undefined;
 }
 
 export function getMessageCustomShape(message: ApiMessage): boolean {
   const {
-    text, sticker, photo, video, audio, voice, document, poll, webPage, contact, action, game, invoice, location,
+    text, sticker, photo, video, audio, voice,
+    document, poll, webPage, contact, action,
+    game, invoice, location, storyData,
   } = message.content;
 
   if (sticker || (video?.isRound)) {
     return true;
   }
 
-  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game
-    || invoice || location) {
+  if (!text || photo || video || audio || voice || document || poll || webPage || contact || action || game || invoice
+    || location || storyData) {
     return false;
   }
 
@@ -167,7 +169,7 @@ export function isReplyMessage(message: ApiMessage) {
 }
 
 export function isForwardedMessage(message: ApiMessage) {
-  return Boolean(message.forwardInfo);
+  return Boolean(message.forwardInfo || message.content.storyData);
 }
 
 export function isActionMessage(message: ApiMessage) {
@@ -311,14 +313,14 @@ export function mergeIdRanges(ranges: number[][], idsUpdate: number[]): number[]
   return newOutlyingLists;
 }
 
-export function extractMessageText(message: ApiMessage, inChatList = false) {
+export function extractMessageText(message: ApiMessage | ApiStory, inChatList = false) {
   const contentText = message.content.text;
   if (!contentText) return undefined;
 
   const { text } = contentText;
   let { entities } = contentText;
 
-  if (text && inChatList && message.chatId === SERVICE_NOTIFICATIONS_USER_ID
+  if (text && inChatList && 'chatId' in message && message.chatId === SERVICE_NOTIFICATIONS_USER_ID
     // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
     && !getGlobal().settings.byKey.shouldShowLoginCodeInChatList) {
     const authCode = text.match(/^\D*([\d-]{5,7})\D/)?.[1];

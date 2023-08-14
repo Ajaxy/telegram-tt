@@ -14,6 +14,8 @@ import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 import {
   GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
+import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
   selectChat, selectChatFullInfo, selectIsChatWithSelf, selectRequestedChatTranslationLanguage,
 } from './chats';
@@ -55,10 +57,9 @@ import {
 import { findLast } from '../../util/iteratees';
 import { selectIsStickerFavorite } from './symbols';
 import { getServerTime } from '../../util/serverTime';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
+import { selectUserStory } from './stories';
 
 const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 
@@ -442,6 +443,11 @@ export function selectReplySender<T extends GlobalState>(global: T, message: Api
 export function selectForwardedSender<T extends GlobalState>(
   global: T, message: ApiMessage,
 ): ApiUser | ApiChat | undefined {
+  const isStoryForward = Boolean(message.content.storyData);
+  if (isStoryForward) {
+    return selectUser(global, message.content.storyData!.userId);
+  }
+
   const { forwardInfo } = message;
   if (!forwardInfo) {
     return undefined;
@@ -606,9 +612,18 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
 
   const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
 
+  const story = content.storyData
+    ? selectUserStory(global, content.storyData.userId, content.storyData.id)
+    : (content.webPage?.story
+      ? selectUserStory(global, content.webPage.story.userId, content.webPage.story.id)
+      : undefined
+    );
+
   const isChatProtected = selectIsChatProtected(global, message.chatId);
+  const isStoryForwardForbidden = story && ('isDeleted' in story || ('noForwards' in story && story.noForwards));
   const canForward = (
-    !isLocal && !isAction && !isChatProtected && (message.isForwardingAllowed || isServiceNotification)
+    !isLocal && !isAction && !isChatProtected && !isStoryForwardForbidden
+    && (message.isForwardingAllowed || isServiceNotification)
   );
 
   const hasSticker = Boolean(message.content.sticker);
@@ -1284,16 +1299,20 @@ export function selectForwardsCanBeSentToChat<T extends GlobalState>(
   toChatId: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const { messageIds, fromChatId } = selectTabState(global, tabId).forwardMessages;
+  const { messageIds, storyId, fromChatId } = selectTabState(global, tabId).forwardMessages;
   const chat = selectChat(global, toChatId);
-  if (!messageIds || !chat) return false;
+  if ((!messageIds && !storyId) || !chat) return false;
+
+  if (storyId) {
+    return true;
+  }
 
   const chatMessages = selectChatMessages(global, fromChatId!);
   const {
     canSendVoices, canSendRoundVideos, canSendStickers, canSendDocuments, canSendAudios, canSendVideos,
     canSendPhotos, canSendGifs, canSendPlainText,
   } = getAllowedAttachmentOptions(chat);
-  return !messageIds.some((messageId) => {
+  return !messageIds!.some((messageId) => {
     const message = chatMessages[messageId];
     const isVoice = message.content.voice;
     const isRoundVideo = message.content.video?.isRound;

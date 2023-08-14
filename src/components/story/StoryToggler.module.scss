@@ -1,0 +1,35 @@
+.root {
+  position: absolute;
+  top: 50%;
+  right: 0.125rem;
+  transform: translateY(-50%);
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  outline: none !important;
+  cursor: var(--custom-cursor, pointer);
+  display: flex;
+  flex-direction: row-reverse;
+
+  &[dir="rtl"] {
+    right: auto;
+    left: 0.125rem;
+  }
+}
+
+.avatar {
+  border: 0.125rem solid var(--color-background);
+
+  &::before {
+    z-index: -2;
+  }
+
+  &:global(.has-unread-story)::before {
+    z-index: -1;
+  }
+}
+
+.avatar + .avatar {
+  margin-inline-end: -1.125rem;
+}

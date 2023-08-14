@@ -31,6 +31,8 @@ type OwnProps = {
   children: React.ReactNode;
   onLoadMore?: ({ direction }: { direction: LoadMoreDirection; noScroll?: boolean }) => void;
   onScroll?: (e: UIEvent<HTMLDivElement>) => void;
+  onWheel?: (e: React.WheelEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onKeyDown?: (e: React.KeyboardEvent<any>) => void;
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragLeave?: (e: React.DragEvent<HTMLDivElement>) => void;
@@ -60,6 +62,8 @@ const InfiniteScroll: FC<OwnProps> = ({
   children,
   onLoadMore,
   onScroll,
+  onWheel,
+  onClick,
   onKeyDown,
   onDragOver,
   onDragLeave,
@@ -236,10 +240,12 @@ const InfiniteScroll: FC<OwnProps> = ({
       ref={containerRef}
       className={className}
       onScroll={handleScroll}
+      onWheel={onWheel}
       teactFastList={!noFastList && !withAbsolutePositioning}
       onKeyDown={onKeyDown}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
+      onClick={onClick}
       style={style}
     >
       {beforeChildren}

@@ -53,6 +53,26 @@ export function forceMeasure(cb: () => any) {
   return result;
 }
 
+const forcedMutationAllowedFor = new Set<Node>();
+
+export function forceMutation(cb: () => any, nodes: Node | Node[]) {
+  if (phase !== 'measure') {
+    throw new Error('The current phase is \'mutate\'');
+  }
+
+  if (isStrict) {
+    if (Array.isArray(nodes)) {
+      nodes.forEach((node) => {
+        forcedMutationAllowedFor.add(node);
+      });
+    } else {
+      forcedMutationAllowedFor.add(nodes);
+    }
+  }
+
+  return cb();
+}
+
 export function setHandler(handler?: ErrorHandler) {
   onError = handler || DEFAULT_ERROR_HANDLER;
 }
@@ -133,6 +153,10 @@ function setupMutationObserver() {
           return;
         }
 
+        if (forcedMutationAllowedFor.has(target)) {
+          return;
+        }
+
         if (type === 'childList' && target instanceof HTMLElement && target.contentEditable) {
           return;
         }
@@ -145,6 +169,8 @@ function setupMutationObserver() {
         onError(new Error(`Unexpected mutation detected: \`${type === 'attributes' ? attributeName : type}\``));
       });
     }
+
+    forcedMutationAllowedFor.clear();
   });
 
   observer.observe(document.body, {

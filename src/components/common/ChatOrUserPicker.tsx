@@ -10,6 +10,7 @@ import { REM } from './helpers/mediaDimensions';
 import { CHAT_HEIGHT_PX } from '../../config';
 import renderText from './helpers/renderText';
 import { getCanPostInChat, isUserId } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
@@ -37,6 +38,7 @@ export type OwnProps = {
   isOpen: boolean;
   searchPlaceholder: string;
   search: string;
+  className?: string;
   loadMore?: NoneToVoidFunction;
   onSearchChange: (search: string) => void;
   onSelectChatOrUser: (chatOrUserId: string, threadId?: number) => void;
@@ -55,6 +57,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   chatsById,
   search,
   searchPlaceholder,
+  className,
   loadMore,
   onSearchChange,
   onSelectChatOrUser,
@@ -264,7 +267,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   return (
     <Modal
       isOpen={isOpen}
-      className="ChatOrUserPicker"
+      className={buildClassName('ChatOrUserPicker', className)}
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
     >

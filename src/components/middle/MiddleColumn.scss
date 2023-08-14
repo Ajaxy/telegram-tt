@@ -35,7 +35,7 @@
   }
 
   .Composer {
-    #message-compose {
+    .composer-wrapper {
       transform: scaleX(1) translateX(0);
       transition: transform var(--select-transition), border-bottom-right-radius var(--select-transition);
 
@@ -83,7 +83,7 @@
         height: 0;
       }
 
-      #message-compose {
+      .composer-wrapper {
         transform: scaleX(var(--composer-hidden-scale, 1)) translateX(var(--composer-translate-x, 0));
         border-bottom-right-radius: var(--border-radius-messages);
 

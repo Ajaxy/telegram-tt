@@ -15,7 +15,7 @@
   :global(body:not(.no-menu-blur)) & {
     --color-background: var(--color-background-compact-menu);
 
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(25px);
   }
 
   width: calc(var(--symbol-menu-width) + var(--scrollbar-width));
@@ -46,6 +46,25 @@
 
     &:global(.bubble.open) {
       transform: scale(1) translateX(-50%) !important;
+    }
+  }
+}
+
+.storyMenu {
+  --color-background-compact-menu: rgba(0, 0, 0, 0.3);
+  --color-text-secondary: #fff;
+  --color-text-secondary-rgb: 255, 255, 255;
+  --color-default-shadow: rgba(0, 0, 0, 0.3);
+
+  :global(.StickerButton.custom-emoji), :global(.sticker-set-cover) {
+    color: #fff;
+  }
+
+  transform-origin: 70% 100% !important;
+
+  @media (max-width: 440px) {
+    &:global(.bubble) {
+      transform-origin: 30% 100% !important;
     }
   }
 }

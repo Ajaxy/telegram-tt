@@ -151,6 +151,7 @@ export default function useChatListEntry({
             <span className="colon">:</span>
           </>
         )}
+        {lastMessage.forwardInfo && (<i className="icon icon-share-filled forward" />)}
         {renderSummary(lang, lastMessage, observeIntersection, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
       </p>
     );

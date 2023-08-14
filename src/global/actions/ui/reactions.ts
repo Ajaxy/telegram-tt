@@ -27,7 +27,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   }, tabId);
 });
 
-addActionHandler('openReactionPicker', (global, actions, payload): ActionReturnType => {
+addActionHandler('openMessageReactionPicker', (global, actions, payload): ActionReturnType => {
   const {
     chatId,
     messageId,
@@ -44,6 +44,23 @@ addActionHandler('openReactionPicker', (global, actions, payload): ActionReturnT
   }, tabId);
 });
 
+addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionReturnType => {
+  const {
+    storyUserId,
+    storyId,
+    position,
+    tabId = getCurrentTabId(),
+  } = payload!;
+
+  return updateTabState(global, {
+    reactionPicker: {
+      storyUserId,
+      storyId,
+      position,
+    },
+  }, tabId);
+});
+
 addActionHandler('closeReactionPicker', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
@@ -53,6 +70,8 @@ addActionHandler('closeReactionPicker', (global, actions, payload): ActionReturn
       ...tabState.reactionPicker,
       messageId: undefined,
       position: undefined,
+      storyId: undefined,
+      storyUserId: undefined,
     },
   }, tabId);
 });

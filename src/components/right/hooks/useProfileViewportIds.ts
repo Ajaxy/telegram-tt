@@ -14,6 +14,8 @@ export default function useProfileViewportIds(
   loadMoreMembers: AnyToVoidFunction,
   loadCommonChats: AnyToVoidFunction,
   searchMessages: AnyToVoidFunction,
+  loadStories: AnyToVoidFunction,
+  loadStoriesArchive: AnyToVoidFunction,
   tabType: ProfileTabType,
   mediaSearchType?: SharedMediaType,
   groupChatMembers?: ApiChatMember[],
@@ -24,6 +26,8 @@ export default function useProfileViewportIds(
   chatMessages?: Record<number, ApiMessage>,
   foundIds?: number[],
   topicId?: number,
+  storyIds?: number[],
+  archiveStoryIds?: number[],
 ) {
   const resultType = tabType === 'members' || !mediaSearchType ? tabType : mediaSearchType;
 
@@ -75,6 +79,18 @@ export default function useProfileViewportIds(
     loadCommonChats, chatIds,
   );
 
+  const [storyViewportIds, getMoreStories, noProfileInfoForStories] = useInfiniteScrollForLoadableItems(
+    loadStories, storyIds,
+  );
+
+  const [
+    archiveStoryViewportIds,
+    getMoreStoriesArchive,
+    noProfileInfoForStoriesArchive,
+  ] = useInfiniteScrollForLoadableItems(
+    loadStoriesArchive, archiveStoryIds,
+  );
+
   let viewportIds: number[] | string[] | undefined;
   let getMore: AnyToVoidFunction | undefined;
   let noProfileInfo = false;
@@ -115,14 +131,24 @@ export default function useProfileViewportIds(
       getMore = getMoreVoices;
       noProfileInfo = noProfileInfoForVoices;
       break;
+    case 'stories':
+      viewportIds = storyViewportIds;
+      getMore = getMoreStories;
+      noProfileInfo = noProfileInfoForStories;
+      break;
+    case 'storiesArchive':
+      viewportIds = archiveStoryViewportIds;
+      getMore = getMoreStoriesArchive;
+      noProfileInfo = noProfileInfoForStoriesArchive;
+      break;
   }
 
   return [resultType, viewportIds, getMore, noProfileInfo] as const;
 }
 
-function useInfiniteScrollForLoadableItems(
+function useInfiniteScrollForLoadableItems<ListId extends string | number>(
   handleLoadMore?: AnyToVoidFunction,
-  itemIds?: string[],
+  itemIds?: ListId[],
 ) {
   const [viewportIds, getMore] = useInfiniteScroll(
     handleLoadMore,

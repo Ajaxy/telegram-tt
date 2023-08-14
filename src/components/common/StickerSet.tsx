@@ -41,7 +41,7 @@ type OwnProps = {
   stickerSet: StickerSetOrReactionsSetOrRecent;
   loadAndPlay: boolean;
   index: number;
-  idPrefix?: string;
+  idPrefix: string;
   isNearActive: boolean;
   favoriteStickers?: ApiSticker[];
   isSavedMessages?: boolean;
@@ -53,6 +53,7 @@ type OwnProps = {
   withDefaultTopicIcon?: boolean;
   withDefaultStatusIcon?: boolean;
   isTranslucent?: boolean;
+  noContextMenus?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlayingItems: ObserveFn;
   observeIntersectionForShowingItems: ObserveFn;
@@ -90,6 +91,7 @@ const StickerSet: FC<OwnProps> = ({
   selectedReactionIds,
   withDefaultStatusIcon,
   isTranslucent,
+  noContextMenus,
   observeIntersection,
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
@@ -243,7 +245,7 @@ const StickerSet: FC<OwnProps> = ({
     <div
       ref={ref}
       key={stickerSet.id}
-      id={`${idPrefix || 'sticker-set'}-${index}`}
+      id={`${idPrefix}-${index}`}
       className={
         buildClassName('symbol-set', isLocked && 'symbol-set-locked')
       }
@@ -343,6 +345,7 @@ const StickerSet: FC<OwnProps> = ({
                 isSavedMessages={isSavedMessages}
                 isStatusPicker={isStatusPicker}
                 canViewSet
+                noContextMenu={noContextMenus}
                 isCurrentUserPremium={isCurrentUserPremium}
                 sharedCanvasRef={canvasRef}
                 withTranslucentThumb={isTranslucent}

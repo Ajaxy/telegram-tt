@@ -194,7 +194,11 @@ export interface IAllowedAttachmentOptions {
   canSendDocuments: boolean;
 }
 
-export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = false): IAllowedAttachmentOptions {
+export function getAllowedAttachmentOptions(
+  chat?: ApiChat,
+  isChatWithBot = false,
+  isStoryReply = false,
+): IAllowedAttachmentOptions {
   if (!chat) {
     return {
       canAttachMedia: false,
@@ -215,18 +219,20 @@ export function getAllowedAttachmentOptions(chat?: ApiChat, isChatWithBot = fals
   const isAdmin = isChatAdmin(chat);
 
   return {
-    canAttachMedia: isAdmin || !isUserRightBanned(chat, 'sendMedia'),
-    canAttachPolls: (isAdmin || !isUserRightBanned(chat, 'sendPolls')) && (!isUserId(chat.id) || isChatWithBot),
-    canSendStickers: isAdmin || !isUserRightBanned(chat, 'sendStickers'),
-    canSendGifs: isAdmin || !isUserRightBanned(chat, 'sendGifs'),
-    canAttachEmbedLinks: isAdmin || !isUserRightBanned(chat, 'embedLinks'),
-    canSendPhotos: isAdmin || !isUserRightBanned(chat, 'sendPhotos'),
-    canSendVideos: isAdmin || !isUserRightBanned(chat, 'sendVideos'),
-    canSendRoundVideos: isAdmin || !isUserRightBanned(chat, 'sendRoundvideos'),
-    canSendAudios: isAdmin || !isUserRightBanned(chat, 'sendAudios'),
-    canSendVoices: isAdmin || !isUserRightBanned(chat, 'sendVoices'),
-    canSendPlainText: isAdmin || !isUserRightBanned(chat, 'sendPlain'),
-    canSendDocuments: isAdmin || !isUserRightBanned(chat, 'sendDocs'),
+    canAttachMedia: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendMedia'),
+    canAttachPolls: !isStoryReply
+      && (isAdmin || !isUserRightBanned(chat, 'sendPolls'))
+      && (!isUserId(chat.id) || isChatWithBot),
+    canSendStickers: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendStickers'),
+    canSendGifs: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendGifs'),
+    canAttachEmbedLinks: !isStoryReply && (isAdmin || !isUserRightBanned(chat, 'embedLinks')),
+    canSendPhotos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPhotos'),
+    canSendVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVideos'),
+    canSendRoundVideos: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendRoundvideos'),
+    canSendAudios: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendAudios'),
+    canSendVoices: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendVoices'),
+    canSendPlainText: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendPlain'),
+    canSendDocuments: isAdmin || isStoryReply || !isUserRightBanned(chat, 'sendDocs'),
   };
 }
 

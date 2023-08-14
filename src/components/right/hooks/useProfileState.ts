@@ -27,7 +27,11 @@ export default function useProfileState(
       const container = containerRef.current!;
       const tabsEl = container.querySelector<HTMLDivElement>('.TabList')!;
       if (container.scrollTop < tabsEl.offsetTop) {
-        onProfileStateChange(tabType === 'members' ? ProfileState.MemberList : ProfileState.SharedMedia);
+        onProfileStateChange(
+          tabType === 'members'
+            ? ProfileState.MemberList
+            : (tabType === 'stories' ? ProfileState.StoryList : ProfileState.SharedMedia),
+        );
         isScrollingProgrammatically = true;
         animateScroll(container, tabsEl, 'start', undefined, undefined, undefined, TRANSITION_DURATION);
         setTimeout(() => {
@@ -84,7 +88,7 @@ export default function useProfileState(
     if (container.scrollTop >= tabListEl.offsetTop) {
       state = tabType === 'members'
         ? ProfileState.MemberList
-        : ProfileState.SharedMedia;
+        : (tabType === 'stories' ? ProfileState.StoryList : ProfileState.SharedMedia);
     }
 
     onProfileStateChange(state);

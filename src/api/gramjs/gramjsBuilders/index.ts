@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { ApiPrivacyKey } from '../../../types';
+import type { ApiPrivacyKey, PrivacyVisibility } from '../../../types';
 
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 import type {
@@ -24,6 +24,10 @@ import type {
   ApiReaction,
   ApiFormattedText,
   ApiBotApp,
+  ApiStory,
+  ApiStorySkipped,
+  ApiUser,
+  ApiTypeReplyTo,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -279,6 +283,14 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
     pinnedPeers,
     includePeers,
     excludePeers,
+  });
+}
+
+export function buildInputStory(story: ApiStory | ApiStorySkipped) {
+  const user = localDb.users[story.userId];
+  return new GramJs.InputMediaStory({
+    userId: new GramJs.InputUser({ userId: BigInt(user!.id), accessHash: user!.accessHash! }),
+    id: story.id,
   });
 }
 
@@ -624,4 +636,83 @@ export function buildInputBotApp(app: ApiBotApp) {
     id: BigInt(app.id),
     accessHash: BigInt(app.accessHash),
   });
+}
+
+export function buildInputReplyToMessage(replyToMsgId: number, topMsgId?: number) {
+  return new GramJs.InputReplyToMessage({
+    replyToMsgId,
+    topMsgId,
+  });
+}
+
+export function buildInputReplyToStory(userId: string, storyId: number) {
+  return new GramJs.InputReplyToStory({
+    userId: buildInputPeerFromLocalDb(userId)!,
+    storyId,
+  });
+}
+
+export function buildInputReplyTo(replyingTo: ApiTypeReplyTo) {
+  return 'replyingTo' in replyingTo
+    ? buildInputReplyToMessage(replyingTo.replyingTo, replyingTo.replyingToTopId)
+    : buildInputReplyToStory(replyingTo.userId, replyingTo.storyId);
+}
+
+export function buildInputPrivacyRules(
+  visibility: PrivacyVisibility,
+  allowedUserList?: ApiUser[],
+  deniedUserList?: ApiUser[],
+) {
+  const rules: GramJs.TypeInputPrivacyRule[] = [];
+
+  switch (visibility) {
+    case 'everybody':
+      rules.push(new GramJs.InputPrivacyValueAllowAll());
+      break;
+
+    case 'contacts': {
+      rules.push(new GramJs.InputPrivacyValueAllowContacts());
+
+      const users = deniedUserList?.reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
+        acc.push(new GramJs.InputPeerUser({
+          userId: buildMtpPeerId(id, 'user'),
+          accessHash: BigInt(accessHash!),
+        }));
+        return acc;
+      }, []);
+
+      if (users?.length) {
+        rules.push(new GramJs.InputPrivacyValueDisallowUsers({ users }));
+      }
+      break;
+    }
+
+    case 'closeFriends':
+      rules.push(new GramJs.InputPrivacyValueAllowCloseFriends());
+      break;
+
+    case 'nonContacts':
+      rules.push(new GramJs.InputPrivacyValueDisallowContacts());
+      break;
+
+    case 'selectedContacts': {
+      const users = (allowedUserList || []).reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
+        acc.push(new GramJs.InputPeerUser({
+          userId: buildMtpPeerId(id, 'user'),
+          accessHash: BigInt(accessHash!),
+        }));
+
+        return acc;
+      }, []);
+
+      rules.push(new GramJs.InputPrivacyValueAllowUsers({ users }));
+      break;
+    }
+
+    case 'nobody':
+      rules.push(new GramJs.InputPrivacyValueDisallowAll());
+      break;
+  }
+
+  return rules;
 }

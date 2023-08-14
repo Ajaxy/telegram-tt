@@ -122,6 +122,33 @@ export function formatLastUpdated(lang: LangFn, currentTime: number, lastUpdated
   }
 }
 
+export function formatRelativeTime(lang: LangFn, currentTime: number, lastUpdated = currentTime) {
+  const seconds = currentTime - lastUpdated;
+
+  if (seconds < 60) {
+    return lang('Time.JustNow');
+  }
+
+  // within an hour
+  if (seconds < 60 * 60) {
+    return lang('Time.MinutesAgo', Math.floor(seconds / 60));
+  }
+
+  const lastUpdatedDate = new Date(lastUpdated * 1000);
+  const today = getDayStart(new Date());
+  if (lastUpdatedDate >= today) {
+    return lang('Time.TodayAt', formatTime(lang, lastUpdatedDate));
+  }
+
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+  if (lastUpdatedDate > yesterday) {
+    return lang('Time.YesterdayAt', formatTime(lang, lastUpdatedDate));
+  }
+
+  return lang('Time.AtDate', formatFullDate(lang, lastUpdatedDate));
+}
+
 type DurationType = 'Seconds' | 'Minutes' | 'Hours' | 'Days' | 'Weeks';
 
 export function formatTimeDuration(lang: LangFn, duration: number, showLast = 2) {

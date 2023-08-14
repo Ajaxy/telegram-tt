@@ -1,5 +1,5 @@
 import {
-  sessions, Api as GramJs, connection,
+  sessions, Api as GramJs,
 } from '../../../lib/gramjs';
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
 
@@ -26,7 +26,8 @@ import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import {
-  addMessageToLocalDb, addUserToLocalDb, isResponseUpdate, log,
+  addEntitiesToLocalDb,
+  addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
 } from '../helpers';
 import { ChatAbortController } from '../ChatAbortController';
 import {
@@ -52,7 +53,6 @@ const ABORT_CONTROLLERS = new Map<string, AbortController>();
 
 let onUpdate: OnApiUpdate;
 let client: TelegramClient;
-let isConnected = false;
 let currentUserId: string | undefined;
 
 export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) {
@@ -197,9 +197,7 @@ type UpdateConfig = GramJs.UpdateConfig & { _entities?: (GramJs.TypeUser | GramJ
 export function handleGramJsUpdate(update: any) {
   processUpdate(update);
 
-  if (update instanceof connection.UpdateConnectionState) {
-    isConnected = update.state === connection.UpdateConnectionState.connected;
-  } else if (update instanceof GramJs.UpdatesTooLong) {
+  if (update instanceof GramJs.UpdatesTooLong) {
     void handleTerminatedSession();
   } else {
     const updates = 'updates' in update ? update.updates : [update];
@@ -314,16 +312,18 @@ export function invokeRequestBeacon<T extends GramJs.AnyRequest>(
 }
 
 export async function downloadMedia(
-  args: { url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean },
+  args: {
+    url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean;
+  },
   onProgress?: ApiOnProgress,
 ) {
   try {
-    return (await downloadMediaWithClient(args, client, isConnected, onProgress));
+    return (await downloadMediaWithClient(args, client, onProgress));
   } catch (err: any) {
     if (err.message.startsWith('FILE_REFERENCE')) {
       const isFileReferenceRepaired = await repairFileReference({ url: args.url });
       if (isFileReferenceRepaired) {
-        return downloadMediaWithClient(args, client, isConnected, onProgress);
+        return downloadMediaWithClient(args, client, onProgress);
       }
 
       if (DEBUG) {
@@ -439,8 +439,21 @@ export async function repairFileReference({
     entityType, entityId, mediaMatchType,
   } = parsed;
 
-  if (mediaMatchType === 'file') {
-    return false;
+  if (mediaMatchType === 'document' || mediaMatchType === 'photo') {
+    const entity = mediaMatchType === 'document' ? localDb.documents[entityId] : localDb.photos[entityId];
+    if (!entity.storyData) return false;
+    const user = localDb.users[entity.storyData.userId];
+    if (!user?.accessHash) return false;
+
+    const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
+      userId: new GramJs.InputUser({ userId: user.id, accessHash: user.accessHash }),
+      id: [entity.storyData.id],
+    }));
+    if (!result) return false;
+
+    addEntitiesToLocalDb(result.users);
+    result.stories.forEach((story) => addStoryToLocalDb(story, entity.storyData!.userId));
+    return true;
   }
 
   if (entityType === 'msg') {
@@ -470,6 +483,8 @@ export async function repairFileReference({
 
     const message = result.messages[0];
     if (message instanceof GramJs.MessageEmpty) return false;
+    addEntitiesToLocalDb(result.users);
+    addEntitiesToLocalDb(result.chats);
     addMessageToLocalDb(message);
     return true;
   }

@@ -1,5 +1,6 @@
 import { Api as GramJs } from '../../lib/gramjs';
 import localDb from './localDb';
+import type { StoryRepairInfo } from './localDb';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 
 const LOG_BACKGROUND = '#111111DD';
@@ -75,6 +76,36 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
 
   if (mockMessage instanceof GramJs.MessageService && 'photo' in mockMessage.action) {
     addPhotoToLocalDb(mockMessage.action.photo);
+  }
+}
+
+export function addStoryToLocalDb(story: GramJs.TypeStoryItem, userId: string) {
+  if (!(story instanceof GramJs.StoryItem)) {
+    return;
+  }
+
+  const storyData = {
+    id: story.id,
+    userId,
+  };
+
+  if (story.media instanceof GramJs.MessageMediaPhoto) {
+    const photo = story.media.photo as GramJs.Photo & StoryRepairInfo;
+    photo.storyData = storyData;
+    addPhotoToLocalDb(photo);
+  }
+  if (story.media instanceof GramJs.MessageMediaDocument) {
+    if (story.media.document instanceof GramJs.Document) {
+      const doc = story.media.document as GramJs.Document & StoryRepairInfo;
+      doc.storyData = storyData;
+      localDb.documents[String(story.media.document.id)] = doc;
+    }
+
+    if (story.media.altDocument instanceof GramJs.Document) {
+      const doc = story.media.altDocument as GramJs.Document & StoryRepairInfo;
+      doc.storyData = storyData;
+      localDb.documents[String(story.media.altDocument.id)] = doc;
+    }
   }
 }
 
