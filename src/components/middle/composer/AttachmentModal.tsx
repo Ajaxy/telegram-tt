@@ -64,11 +64,13 @@ export type OwnProps = {
   getHtml: Signal<string>;
   canShowCustomSendMenu?: boolean;
   isReady: boolean;
+  isForMessage?: boolean;
   shouldSchedule?: boolean;
   shouldSuggestCompression?: boolean;
   shouldForceCompression?: boolean;
   shouldForceAsFile?: boolean;
   isForCurrentMessageList?: boolean;
+  forceDarkTheme?: boolean;
   onCaptionUpdate: (html: string) => void;
   onSend: (sendCompressed: boolean, sendGrouped: boolean) => void;
   onFileAppend: (files: File[], isSpoiler?: boolean) => void;
@@ -112,6 +114,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   recentEmojis,
   baseEmojiKeywords,
   emojiKeywords,
+  isForMessage,
   shouldSchedule,
   shouldSuggestCustomEmoji,
   customEmojiForEmoji,
@@ -120,6 +123,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   shouldForceCompression,
   shouldForceAsFile,
   isForCurrentMessageList,
+  forceDarkTheme,
   onAttachmentsUpdate,
   onCaptionUpdate,
   onSend,
@@ -194,7 +198,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     insertEmoji,
     closeEmojiTooltip,
   } = useEmojiTooltip(
-    Boolean(isReady && isForCurrentMessageList && renderingIsOpen),
+    Boolean(isReady && (isForCurrentMessageList || !isForMessage) && renderingIsOpen),
     getHtml,
     onCaptionUpdate,
     EDITABLE_INPUT_MODAL_ID,
@@ -208,7 +212,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     insertCustomEmoji,
     closeCustomEmojiTooltip,
   } = useCustomEmojiTooltip(
-    Boolean(isReady && isForCurrentMessageList && renderingIsOpen && shouldSuggestCustomEmoji),
+    Boolean(isReady && (isForCurrentMessageList || !isForMessage) && renderingIsOpen && shouldSuggestCustomEmoji),
     getHtml,
     onCaptionUpdate,
     getSelectionRange,
@@ -256,7 +260,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
 
   const sendAttachments = useLastCallback((isSilent?: boolean, shouldSendScheduled?: boolean) => {
     if (isOpen) {
-      const send = (shouldSchedule || shouldSendScheduled) ? onSendScheduled
+      const send = ((shouldSchedule || shouldSendScheduled) && isForMessage) ? onSendScheduled
         : isSilent ? onSendSilent : onSend;
       send(isSendingCompressed, shouldSendGrouped);
       updateAttachmentSettings({
@@ -508,6 +512,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         !areAttachmentsNotScrolled && styles.headerBorder,
         isMobile && styles.mobile,
         isSymbolMenuOpen && styles.symbolMenuOpen,
+        forceDarkTheme && 'component-theme-dark',
       )}
       noBackdropClose
     >
@@ -586,6 +591,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               isAttachmentModal
               canSendPlainText
               className="attachment-modal-symbol-menu with-menu-transitions"
+              idPrefix="attachment"
             />
             <MessageInput
               ref={inputRef}
@@ -593,6 +599,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               chatId={chatId}
               threadId={threadId}
               isAttachmentModalInput
+              customEmojiPrefix="attachment"
               isReady={isReady}
               isActive={isOpen}
               getHtml={getHtml}
@@ -618,6 +625,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               {canShowCustomSendMenu && (
                 <CustomSendMenu
                   isOpen={isCustomSendMenuOpen}
+                  canSchedule={isForMessage}
                   onSendSilent={!isChatWithSelf ? handleSendSilent : undefined}
                   onSendSchedule={handleScheduleClick}
                   onClose={handleContextMenuClose}

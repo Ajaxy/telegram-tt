@@ -62,6 +62,7 @@ import type {
   ApiChatFullInfo,
   ApiChatlistInvite,
   ApiChatlistExportedInvite,
+  ApiUserStories,
 } from '../api/types';
 import type {
   ApiInvoiceContainer,
@@ -92,6 +93,7 @@ import type {
   SharedMediaType,
   ShippingOption,
   ThemeKey,
+  ProfileTabType,
 } from '../types';
 import type { P2pMessage } from '../lib/secret-sauce';
 import type { ApiCredentials } from '../components/payment/PaymentModal';
@@ -118,6 +120,11 @@ export interface ActiveEmojiInteraction {
   animatedEffect?: string;
   isReversed?: boolean;
 }
+
+export type IDimensions = {
+  width: number;
+  height: number;
+};
 
 export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';
 
@@ -209,6 +216,7 @@ export type TabState = {
     resultIds?: string[];
   };
 
+  nextProfileTab?: ProfileTabType;
   nextSettingsScreen?: SettingsScreens;
   nextFoldersAction?: ReducerAction<FoldersActions>;
   shareFolderScreen?: {
@@ -264,6 +272,8 @@ export type TabState = {
   reactionPicker?: {
     chatId?: string;
     messageId?: number;
+    storyUserId?: string;
+    storyId?: number;
     position?: IAnchorPosition;
   };
 
@@ -336,6 +346,23 @@ export type TabState = {
     byChatId: Record<string, ManagementState>;
   };
 
+  storyViewer: {
+    isRibbonShown?: boolean;
+    isArchivedRibbonShown?: boolean;
+    userId?: string;
+    storyId?: number;
+    isMuted: boolean;
+    isSingleUser?: boolean;
+    isSingleStory?: boolean;
+    isPrivate?: boolean;
+    isArchive?: boolean;
+    storyIdSeenBy?: number;
+    // Last viewed story id in current view session.
+    // Used for better switch animation between users.
+    lastViewedByUserIds?: Record<string, number>;
+    isPrivacyModalOpen?: boolean;
+  };
+
   mediaViewer: {
     chatId?: string;
     threadId?: number;
@@ -366,6 +393,7 @@ export type TabState = {
     isModalShown?: boolean;
     fromChatId?: string;
     messageIds?: number[];
+    storyId?: number;
     toChatId?: string;
     toThreadId?: number;
     withMyScore?: boolean;
@@ -702,6 +730,21 @@ export type GlobalState = {
     sponsoredByChatId: Record<string, ApiSponsoredMessage>;
   };
 
+  stories: {
+    byUserId: Record<string, ApiUserStories>;
+    hasNext?: boolean;
+    stateHash?: string;
+    hasNextInArchive?: boolean;
+    archiveStateHash?: string;
+    orderedUserIds: {
+      active: string[];
+      archived: string[];
+    };
+    seenByDates?: Record<string, {
+      byId: Record<number, Record<string, number>>;
+    }>;
+  };
+
   groupCalls: {
     byId: Record<string, ApiGroupCall>;
     activeGroupCallId?: string;
@@ -1035,6 +1078,9 @@ export interface ActionPayloads {
     message: ApiMessage;
     version?: string;
   };
+  saveCloseFriends: {
+    userIds: string[];
+  };
 
   // message search
   openLocalTextSearch: WithTabId | undefined;
@@ -1081,7 +1127,7 @@ export interface ActionPayloads {
     onReplace?: VoidFunction;
     shouldReplace?: boolean;
   };
-  openChatWithInfo: ActionPayloads['openChat'] & WithTabId;
+  openChatWithInfo: ActionPayloads['openChat'] & { profileTab?: ProfileTabType } & WithTabId;
   openLinkedChat: { id: string } & WithTabId;
   loadMoreMembers: WithTabId | undefined;
   setActiveChatFolder: {
@@ -1186,7 +1232,8 @@ export interface ActionPayloads {
     contact?: Partial<ApiContact>;
     shouldUpdateStickerSetOrder?: boolean;
     shouldGroupMessages?: boolean;
-    messageList: MessageList;
+    messageList?: MessageList;
+    isReaction?: true; // Reaction to the story are sent in the form of a message
   } & WithTabId;
   cancelSendingMessage: {
     chatId: string;
@@ -1632,6 +1679,9 @@ export interface ActionPayloads {
   loadChatSettings: {
     chatId: string;
   };
+  fetchChat: {
+    chatId: string;
+  };
   updateChatMutedState: {
     chatId: string;
     isMuted?: boolean;
@@ -1703,6 +1753,7 @@ export interface ActionPayloads {
     chatId: string;
     isEnabled: boolean;
   };
+  resetNextProfileTab: WithTabId | undefined;
 
   openForumPanel: {
     chatId: string;
@@ -1864,12 +1915,105 @@ export interface ActionPayloads {
     reaction: ApiReaction;
   } & WithTabId;
 
-  openReactionPicker: {
+  openMessageReactionPicker: {
     chatId: string;
     messageId: number;
     position: IAnchorPosition;
   } & WithTabId;
+  openStoryReactionPicker: {
+    storyUserId: string;
+    storyId: number;
+    position: IAnchorPosition;
+  } & WithTabId;
   closeReactionPicker: WithTabId | undefined;
+
+  // Stories
+  loadAllStories: undefined;
+  loadAllHiddenStories: undefined;
+  loadUserStories: {
+    userId: string;
+  };
+  loadUserPinnedStories: {
+    userId: string;
+    offsetId?: number;
+  } & WithTabId;
+  loadStoriesArchive: {
+    offsetId?: number;
+  } & WithTabId;
+  loadUserSkippedStories: {
+    userId: string;
+  } & WithTabId;
+  loadUserStoriesByIds: {
+    userId: string;
+    storyIds: number[];
+  } & WithTabId;
+  viewStory: {
+    userId: string;
+    storyId: number;
+  } & WithTabId;
+  deleteStory: {
+    storyId: number;
+  } & WithTabId;
+  toggleStoryPinned: {
+    storyId: number;
+    isPinned?: boolean;
+  } & WithTabId;
+  toggleStoryRibbon: {
+    isShown: boolean;
+    isArchived?: boolean;
+  } & WithTabId;
+  openStoryViewer: {
+    userId: string;
+    storyId?: number;
+    isSingleUser?: boolean;
+    isSingleStory?: boolean;
+    isPrivate?: boolean;
+    isArchive?: boolean;
+  } & WithTabId;
+  openStoryViewerByUsername: {
+    username: string;
+    storyId: number;
+  } & WithTabId;
+  openPreviousStory: WithTabId | undefined;
+  openNextStory: WithTabId | undefined;
+  setStoryViewerMuted: {
+    isMuted: boolean;
+  } & WithTabId;
+  closeStoryViewer: WithTabId | undefined;
+  loadStorySeenBy: {
+    storyId: number;
+    offsetId?: number;
+  } & WithTabId;
+  openStorySeenBy: {
+    storyId: number;
+  } & WithTabId;
+  closeStorySeenBy: WithTabId | undefined;
+  copyStoryLink: {
+    userId: string;
+    storyId: number;
+  } & WithTabId;
+  reportStory: {
+    userId: string;
+    storyId: number;
+    reason: ApiReportReason;
+    description: string;
+  } & WithTabId;
+  toggleAllStoriesHidden: {
+    isHidden: boolean;
+  };
+  openStoryPrivacyEditor: WithTabId | undefined;
+  closeStoryPrivacyEditor: WithTabId | undefined;
+  editStoryPrivacy: {
+    storyId: number;
+    privacy: ApiPrivacySettings;
+  };
+  toggleStoriesHidden: {
+    userId : string;
+    isHidden: boolean;
+  };
+  loadStoriesMaxIds: {
+    userIds: string[];
+  };
 
   // Media Viewer & Audio Player
   openMediaViewer: {
@@ -1985,6 +2129,7 @@ export interface ActionPayloads {
   openForwardMenu: {
     fromChatId: string;
     messageIds?: number[];
+    storyId?: number;
     groupedId?: string;
     withMyScore?: boolean;
   } & WithTabId;
@@ -2006,6 +2151,9 @@ export interface ActionPayloads {
   exitForwardMode: WithTabId | undefined;
   changeForwardRecipient: WithTabId | undefined;
   forwardToSavedMessages: WithTabId | undefined;
+  forwardStory: {
+    toChatId: string;
+  } & WithTabId;
 
   // GIFs
   loadSavedGifs: undefined;
@@ -2298,7 +2446,7 @@ export interface ActionPayloads {
     className?: string;
     duration?: number;
     actionText?: string;
-    action?: CallbackAction;
+    action?: CallbackAction | CallbackAction[];
   } & WithTabId;
   showAllowedMessageTypesNotification: {
     chatId: string;

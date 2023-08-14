@@ -117,6 +117,10 @@
 
   .ListItem.search-result {
     .ChatInfo {
+      // Fix for overflow hidden and stories indicator
+      padding: 0.0625rem;
+      margin: -0.0625rem;
+
       .handle {
         unicode-bidi: plaintext;
         color: var(--color-primary);

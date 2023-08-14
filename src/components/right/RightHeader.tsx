@@ -65,6 +65,7 @@ type StateProps = {
   canViewStatistics?: boolean;
   isChannel?: boolean;
   userId?: string;
+  isSelf?: boolean;
   messageSearchQuery?: string;
   stickerSearchQuery?: string;
   gifSearchQuery?: string;
@@ -83,6 +84,7 @@ enum HeaderContent {
   Profile,
   MemberList,
   SharedMedia,
+  StoryList,
   Search,
   Statistics,
   MessageStatistics,
@@ -134,6 +136,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   managementScreen,
   canAddContact,
   userId,
+  isSelf,
   canManage,
   isChannel,
   onClose,
@@ -226,6 +229,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       HeaderContent.SharedMedia
     ) : profileState === ProfileState.MemberList ? (
       HeaderContent.MemberList
+    ) : profileState === ProfileState.StoryList ? (
+      HeaderContent.StoryList
     ) : -1 // Never reached
   ) : isSearch ? (
     HeaderContent.Search
@@ -439,6 +444,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
       case HeaderContent.MemberList:
       case HeaderContent.ManageGroupMembers:
         return <h3>{lang('GroupMembers')}</h3>;
+      case HeaderContent.StoryList:
+        return <h3>{lang(isSelf ? 'Settings.MyStories' : 'PeerInfo.PaneStories')}</h3>;
       case HeaderContent.ManageReactions:
         return <h3>{lang('Reactions')}</h3>;
       case HeaderContent.CreateTopic:
@@ -459,7 +466,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
                   ariaLabel={lang('AddContact')}
                   onClick={handleAddContact}
                 >
-                  <i className="icon icon-add-user" />
+                  <i className="icon icon-add-user" aria-hidden />
                 </Button>
               )}
               {canManage && !isInsideTopic && (
@@ -505,6 +512,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     isMobile
     || contentKey === HeaderContent.SharedMedia
     || contentKey === HeaderContent.MemberList
+    || contentKey === HeaderContent.StoryList
     || contentKey === HeaderContent.AddingMembers
     || contentKey === HeaderContent.MessageStatistics
     || isManagement
@@ -577,6 +585,7 @@ export default withGlobal<OwnProps>(
       isInsideTopic,
       canEditTopic,
       userId: user?.id,
+      isSelf: user?.isSelf,
       messageSearchQuery,
       stickerSearchQuery,
       gifSearchQuery,

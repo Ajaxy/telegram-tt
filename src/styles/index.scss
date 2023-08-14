@@ -310,3 +310,68 @@ body:not(.is-ios) {
     opacity: 0;
   }
 }
+
+.component-theme-dark {
+  --color-background: rgb(33, 33, 33);
+  --color-background-compact-menu: rgb(33, 33, 33, 0.867);
+  --color-background-compact-menu-reactions: rgb(33, 33, 33, 0.867);
+  --color-background-compact-menu-hover: rgb(0, 0, 0, 0.4);
+  --color-background-secondary: rgb(15, 15, 15);
+  --color-background-secondary-accent: rgb(16, 15, 16);
+  --color-background-own: rgb(118, 106, 200);
+  --color-background-own-apple: rgb(118, 106, 200);
+  --color-background-selected: rgb(44, 44, 44);
+  --color-background-own-selected: rgb(101, 73, 212);
+  --color-chat-hover: rgb(44, 44, 44);
+  --color-chat-active: rgb(118, 106, 200);
+  --color-chat-active-greyed: rgb(146, 136, 211);
+  --color-item-active: rgb(41, 41, 41);
+  --color-text: rgb(255, 255, 255);
+  --color-text-secondary: rgb(170, 170, 170);
+  --color-text-secondary-rgb: 170, 170, 170;
+  --color-icon-secondary: rgb(170, 170, 170);
+  --color-text-secondary-apple: rgb(170, 170, 170);
+  --color-borders: rgb(48, 48, 48);
+  --color-borders-input: rgb(91, 91, 90);
+  --color-dividers: rgb(59, 59, 61);
+  --color-dividers-android: rgb(15, 15, 15);
+  --color-links: rgb(135, 116, 225);
+  --color-gray: rgb(113, 117, 121);
+  --color-pinned: rgb(112, 117, 121);
+  --color-default-shadow: rgb(16, 16, 16, 0.612);
+  --color-light-shadow: rgb(0, 0, 0, 0.251);
+  --color-green: rgb(135, 116, 225);
+  --color-text-meta-colored: rgb(131, 120, 219);
+  --color-reply-hover: rgb(39, 39, 39);
+  --color-reply-active: rgb(46, 47, 47);
+  --color-reply-own-hover: rgb(135, 117, 218);
+  --color-reply-own-hover-apple: rgb(135, 117, 218);
+  --color-reply-own-active: rgb(145, 125, 234);
+  --color-reply-own-active-apple: rgb(145, 125, 234);
+  --color-accent-own: rgb(255, 255, 255);
+  --color-message-meta-own: rgb(255, 255, 255, 0.533);
+  --color-own-links: rgb(255, 255, 255);
+  --color-code: rgb(135, 116, 225);
+  --color-code-own: rgb(255, 255, 255);
+  --color-code-bg: rgb(0, 0, 0, 0.502);
+  --color-code-own-bg: rgb(0, 0, 0, 0.314);
+  --color-composer-button: rgb(170, 170, 170, 0.8);
+  --color-message-reaction: rgb(43, 42, 53);
+  --color-message-reaction-hover: rgb(52, 49, 71);
+  --color-message-reaction-own: rgb(103, 92, 175);
+  --color-message-reaction-hover-own: rgb(91, 82, 155);
+  --color-message-reaction-chosen-hover: rgb(120, 100, 221);
+  --color-message-reaction-chosen-hover-own: rgb(245, 245, 245);
+  --color-voice-transcribe-button: rgb(42, 42, 60);
+  --color-voice-transcribe-button-own: rgb(131, 115, 211);
+  --color-topic-blue: rgb(111, 249, 240);
+  --color-topic-yellow: rgb(255, 214, 126);
+  --color-topic-violet: rgb(203, 134, 219);
+  --color-topic-green: rgb(142, 238, 152);
+  --color-topic-rose: rgb(255, 147, 178);
+  --color-topic-red: rgb(251, 111, 95);
+  --color-topic-grey: rgb(153, 153, 153);
+  --color-forum-unread-topic-hover: rgb(54, 54, 54);
+  --color-forum-hover-unread-topic-hover: rgb(63, 63, 63);
+  --color-chat-username: rgb(233, 238, 244);
+}

@@ -63,5 +63,6 @@
   "--color-topic-grey": ["#6C6C6C", "#999999"],
   "--color-forum-unread-topic-hover": ["#e9e9e9", "#363636"],
   "--color-forum-hover-unread-topic-hover": ["#e2e2e2", "#3f3f3f"],
-  "--color-chat-username": ["#3C7EB0", "#E9EEF4"]
+  "--color-chat-username": ["#3C7EB0", "#E9EEF4"],
+  "--color-borders-read-story": ["#C4C9CC", "#737373"]
 }

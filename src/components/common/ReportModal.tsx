@@ -6,6 +6,7 @@ import { getActions } from '../../global';
 
 import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
+import buildClassName from '../../util/buildClassName';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 
@@ -16,10 +17,12 @@ import InputText from '../ui/InputText';
 
 export type OwnProps = {
   isOpen: boolean;
-  subject?: 'peer' | 'messages' | 'media';
+  subject?: 'peer' | 'messages' | 'media' | 'story';
   chatId?: string;
+  userId?: string;
   photo?: ApiPhoto;
   messageIds?: number[];
+  storyId?: number;
   onClose: () => void;
   onCloseAnimationEnd?: () => void;
 };
@@ -28,8 +31,10 @@ const ReportModal: FC<OwnProps> = ({
   isOpen,
   subject = 'messages',
   chatId,
+  userId,
   photo,
   messageIds,
+  storyId,
   onClose,
   onCloseAnimationEnd,
 }) => {
@@ -37,6 +42,7 @@ const ReportModal: FC<OwnProps> = ({
     reportMessages,
     reportPeer,
     reportProfilePhoto,
+    reportStory,
     exitMessageSelectMode,
   } = getActions();
 
@@ -57,6 +63,10 @@ const ReportModal: FC<OwnProps> = ({
           chatId, photo, reason: selectedReason, description,
         });
         break;
+      case 'story':
+        reportStory({
+          userId: userId!, storyId: storyId!, reason: selectedReason, description,
+        });
     }
     onClose();
   });
@@ -86,6 +96,7 @@ const ReportModal: FC<OwnProps> = ({
     (subject === 'messages' && !messageIds)
     || (subject === 'peer' && !chatId)
     || (subject === 'media' && (!chatId || !photo))
+    || (subject === 'story' && (!storyId || !userId))
   ) {
     return undefined;
   }
@@ -100,7 +111,7 @@ const ReportModal: FC<OwnProps> = ({
       onClose={onClose}
       onEnter={isOpen ? handleReport : undefined}
       onCloseAnimationEnd={onCloseAnimationEnd}
-      className="narrow"
+      className={buildClassName('narrow', subject === 'story' && 'component-theme-dark')}
       title={title}
     >
       <RadioGroup

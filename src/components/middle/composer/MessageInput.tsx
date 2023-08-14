@@ -47,6 +47,8 @@ type OwnProps = {
   chatId: string;
   threadId: number;
   isAttachmentModalInput?: boolean;
+  isStoryInput?: boolean;
+  customEmojiPrefix: string;
   editableInputId?: string;
   isReady: boolean;
   isActive: boolean;
@@ -63,6 +65,8 @@ type OwnProps = {
   onSend: () => void;
   onScroll?: (event: React.UIEvent<HTMLElement>) => void;
   captionLimit?: number;
+  onFocus?: NoneToVoidFunction;
+  onBlur?: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -73,6 +77,7 @@ type StateProps = {
 };
 
 const MAX_ATTACHMENT_MODAL_INPUT_HEIGHT = 160;
+const MAX_STORY_MODAL_INPUT_HEIGHT = 128;
 const TAB_INDEX_PRIORITY_TIMEOUT = 2000;
 // Heuristics allowing the user to make a triple click
 const SELECTION_RECALCULATE_DELAY_MS = 260;
@@ -102,6 +107,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   chatId,
   captionLimit,
   isAttachmentModalInput,
+  isStoryInput,
+  customEmojiPrefix,
   editableInputId,
   isReady,
   isActive,
@@ -121,6 +128,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onSuppressedFocus,
   onSend,
   onScroll,
+  onFocus,
+  onBlur,
 }) => {
   const {
     editLastMessage,
@@ -162,13 +171,15 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     sharedCanvasRef,
     sharedCanvasHqRef,
     absoluteContainerRef,
-    isAttachmentModalInput ? 'attachment' : 'composer',
+    customEmojiPrefix,
     canPlayAnimatedEmojis,
     isReady,
     isActive,
   );
 
-  const maxInputHeight = isAttachmentModalInput ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT : (isMobile ? 256 : 416);
+  const maxInputHeight = isAttachmentModalInput
+    ? MAX_ATTACHMENT_MODAL_INPUT_HEIGHT
+    : isStoryInput ? MAX_STORY_MODAL_INPUT_HEIGHT : (isMobile ? 256 : 416);
   const updateInputHeight = useLastCallback((willSend = false) => {
     requestForcedReflow(() => {
       const scroller = inputRef.current!.closest<HTMLDivElement>(`.${SCROLLER_CLASS}`)!;
@@ -351,7 +362,6 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     const { isComposing } = e;
 
     const html = getHtml();
-
     if (!isComposing && !html && (e.metaKey || e.ctrlKey)) {
       const targetIndexDelta = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : undefined;
       if (targetIndexDelta) {
@@ -549,6 +559,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             onContextMenu={IS_ANDROID ? handleAndroidContextMenu : undefined}
             onTouchCancel={IS_ANDROID ? processSelectionWithTimeout : undefined}
             aria-label={placeholder}
+            onFocus={onFocus}
+            onBlur={onBlur}
           />
           {!forcedPlaceholder && (
             <span

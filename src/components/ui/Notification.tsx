@@ -26,7 +26,7 @@ type OwnProps = {
   message: TextPart[];
   duration?: number;
   onDismiss: () => void;
-  action?: CallbackAction;
+  action?: CallbackAction | CallbackAction[];
   actionText?: string;
   className?: string;
 };
@@ -53,8 +53,13 @@ const Notification: FC<OwnProps> = ({
 
   const handleClick = useCallback(() => {
     if (action) {
-      // @ts-ignore
-      actions[action.action](action.payload);
+      if (Array.isArray(action)) {
+        // @ts-ignore
+        action.forEach((cb) => actions[cb.action](cb.payload));
+      } else {
+        // @ts-ignore
+        actions[action.action](action.payload);
+      }
     }
     closeAndDismiss();
   }, [action, actions, closeAndDismiss]);

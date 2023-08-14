@@ -2,7 +2,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 
-import type { ApiChat } from '../../../api/types';
+import { MAIN_THREAD_ID, type ApiChat } from '../../../api/types';
 
 import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { callApi } from '../../../api/gramjs';
@@ -11,6 +11,7 @@ import {
   selectCurrentMediaSearch,
   selectCurrentMessageList,
   selectChat,
+  selectThreadInfo,
 } from '../../selectors';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {

@@ -301,6 +301,14 @@ export function updateEmojiStatus(emojiStatus: ApiSticker, expires?: number) {
   });
 }
 
+export function saveCloseFriends(userIds: string[]) {
+  const id = userIds.map((userId) => buildMtpPeerId(userId, 'user'));
+
+  return invokeRequest(new GramJs.contacts.EditCloseFriends({ id }), {
+    shouldReturnTrue: true,
+  });
+}
+
 function updateLocalDb(result: (GramJs.photos.Photos | GramJs.photos.PhotosSlice | GramJs.messages.Chats)) {
   if ('chats' in result) {
     addEntitiesToLocalDb(result.chats);

@@ -15,6 +15,7 @@ type OwnProps = {
   onSearchOpen: (type: 'stickers' | 'gifs') => void;
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
+  canSearch?: boolean;
 };
 
 export enum SymbolMenuTabs {
@@ -40,7 +41,7 @@ const SYMBOL_MENU_TAB_ICONS = {
 
 const SymbolMenuFooter: FC<OwnProps> = ({
   activeTab, onSwitchTab, onRemoveSymbol, onSearchOpen, isAttachmentModal,
-  canSendPlainText,
+  canSendPlainText, canSearch,
 }) => {
   const lang = useLang();
 
@@ -70,7 +71,7 @@ const SymbolMenuFooter: FC<OwnProps> = ({
 
   return (
     <div className="SymbolMenu-footer" onClick={stopPropagation} dir={lang.isRtl ? 'rtl' : undefined}>
-      {activeTab !== SymbolMenuTabs.Emoji && activeTab !== SymbolMenuTabs.CustomEmoji && (
+      {activeTab !== SymbolMenuTabs.Emoji && activeTab !== SymbolMenuTabs.CustomEmoji && canSearch && (
         <Button
           className="symbol-search-button"
           ariaLabel={activeTab === SymbolMenuTabs.Stickers ? 'Search Stickers' : 'Search GIFs'}

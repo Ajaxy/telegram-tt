@@ -17,6 +17,7 @@ export type OwnProps = {
   isOpen: boolean;
   isOpenToBottom?: boolean;
   isSavedMessages?: boolean;
+  canSchedule?: boolean;
   canScheduleUntilOnline?: boolean;
   onSendSilent?: NoneToVoidFunction;
   onSendSchedule?: NoneToVoidFunction;
@@ -29,6 +30,7 @@ const CustomSendMenu: FC<OwnProps> = ({
   isOpen,
   isOpenToBottom = false,
   isSavedMessages,
+  canSchedule,
   canScheduleUntilOnline,
   onSendSilent,
   onSendSchedule,
@@ -62,12 +64,12 @@ const CustomSendMenu: FC<OwnProps> = ({
       noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
       {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{lang('SendWithoutSound')}</MenuItem>}
-      {onSendSchedule && (
+      {canSchedule && onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
           {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
         </MenuItem>
       )}
-      {onSendSchedule && displayScheduleUntilOnline && (
+      {canSchedule && onSendSchedule && displayScheduleUntilOnline && (
         <MenuItem icon="user-online" onClick={onSendWhenOnline}>
           {lang('SendWhenOnline')}
         </MenuItem>

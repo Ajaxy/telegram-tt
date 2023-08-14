@@ -71,12 +71,11 @@ const ContactList: FC<OwnProps & StateProps> = ({
         viewportIds.map((id) => (
           <ListItem
             key={id}
-            className="chat-item-clickable"
+            className="chat-item-clickable contact-list-item"
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleClick(id)}
-            ripple={!isMobile}
           >
-            <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" />
+            <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" withStory ripple={!isMobile} />
           </ListItem>
         ))
       ) : viewportIds && !viewportIds.length ? (

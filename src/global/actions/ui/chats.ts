@@ -97,11 +97,12 @@ addActionHandler('openPreviousChat', (global, actions, payload): ActionReturnTyp
 });
 
 addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload;
+  const { profileTab, tabId = getCurrentTabId() } = payload;
 
   global = updateTabState(global, {
     ...selectTabState(global, tabId),
     isChatInfoShown: true,
+    nextProfileTab: profileTab,
   }, tabId);
   global = { ...global, lastIsChatInfoShown: true };
   setGlobal(global);

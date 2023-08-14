@@ -16,7 +16,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     fullUser: {
       about, commonChatsCount, pinnedMsgId, botInfo, blocked,
       profilePhoto, voiceMessagesForbidden, premiumGifts,
-      fallbackPhoto, personalPhoto, translationsDisabled,
+      fallbackPhoto, personalPhoto, translationsDisabled, storiesPinnedAvailable,
     },
     users,
   } = mtpUserFull;
@@ -29,6 +29,7 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     pinnedMessageId: pinnedMsgId,
     isBlocked: Boolean(blocked),
     noVoiceMessages: voiceMessagesForbidden,
+    hasPinnedStories: Boolean(storiesPinnedAvailable),
     isTranslationDisabled: translationsDisabled,
     ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
     ...(fallbackPhoto instanceof GramJs.Photo && { fallbackPhoto: buildApiPhoto(fallbackPhoto) }),
@@ -44,7 +45,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
   }
 
   const {
-    id, firstName, lastName, fake, scam,
+    id, firstName, lastName, fake, scam, support, closeFriend, storiesUnavailable, storiesMaxId,
   } = mtpUser;
   const hasVideoAvatar = mtpUser.photo instanceof GramJs.UserProfilePhoto
     ? Boolean(mtpUser.photo.hasVideo)
@@ -63,6 +64,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(mtpUser.self && { isSelf: true }),
     isPremium: Boolean(mtpUser.premium),
     ...(mtpUser.verified && { isVerified: true }),
+    ...(closeFriend && { isCloseFriend: true }),
+    ...(support && { isSupport: true }),
     ...((mtpUser.contact || mtpUser.mutualContact) && { isContact: true }),
     type: userType,
     firstName,
@@ -75,6 +78,9 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     ...(avatarHash && { avatarHash }),
     emojiStatus,
     hasVideoAvatar,
+    areStoriesHidden: Boolean(mtpUser.storiesHidden),
+    maxStoryId: storiesMaxId,
+    hasStories: Boolean(storiesMaxId) && !storiesUnavailable,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
     ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
   };

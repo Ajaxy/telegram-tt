@@ -52,6 +52,7 @@ type StateProps = {
   noCaptions?: boolean;
   forwardsHaveCaptions?: boolean;
   isCurrentUserPremium?: boolean;
+  isContextMenuDisabled?: boolean;
 };
 
 type OwnProps = {
@@ -73,6 +74,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   forwardsHaveCaptions,
   shouldForceShowEditing,
   isCurrentUserPremium,
+  isContextMenuDisabled,
   onClear,
 }) => {
   const {
@@ -201,7 +203,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           customText={customText}
           title={editingId ? lang('EditMessage') : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
-          hasContextMenu={isForwarding}
+          hasContextMenu={isForwarding && !isContextMenuDisabled}
         />
         <Button
           className="embedded-cancel"
@@ -213,7 +215,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
         >
           <i className="icon icon-close" />
         </Button>
-        {isForwarding && (
+        {isForwarding && !isContextMenuDisabled && (
           <Menu
             isOpen={isContextMenuOpen}
             transformOriginX={transformOriginX}
@@ -338,6 +340,9 @@ export default memo(withGlobal<OwnProps>(
       forward?.content.text && Object.keys(forward.content).length > 1
     ));
 
+    const isContextMenuDisabled = isForwarding && forwardMessageIds!.length === 1
+      && Boolean(message?.content.storyData);
+
     return {
       replyingToId,
       editingId,
@@ -349,6 +354,7 @@ export default memo(withGlobal<OwnProps>(
       noCaptions,
       forwardsHaveCaptions,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
+      isContextMenuDisabled,
     };
   },
 )(ComposerEmbeddedMessage));

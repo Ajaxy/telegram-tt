@@ -51,7 +51,7 @@
       transition: none;
     }
 
-    &.left-column-open {
+    &.left-column-open.in-middle-column {
       transform: translate3d(100vw, 0, 0) !important;
     }
   }
@@ -154,7 +154,7 @@
 
     body:not(.no-menu-blur) & {
       background: var(--color-background-compact-menu);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(25px);
     }
 
     &:not(.open) {
@@ -224,6 +224,7 @@
 
     &-external {
       color: var(--color-text);
+      text-align: start;
     }
   }
 

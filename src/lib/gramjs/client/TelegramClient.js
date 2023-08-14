@@ -659,14 +659,14 @@ class TelegramClient {
         return downloadFile(this, inputLocation, args, this._shouldDebugExportedSenders);
     }
 
-    downloadMedia(messageOrMedia, args) {
+    downloadMedia(entityOrMedia, args) {
         let media;
-        if (messageOrMedia instanceof constructors.Message) {
-            media = messageOrMedia.media;
-        } else if (messageOrMedia instanceof constructors.MessageService) {
-            media = messageOrMedia.action.photo;
+        if (entityOrMedia instanceof constructors.Message || entityOrMedia instanceof constructors.StoryItem) {
+            media = entityOrMedia.media;
+        } else if (entityOrMedia instanceof constructors.MessageService) {
+            media = entityOrMedia.action.photo;
         } else {
-            media = messageOrMedia;
+            media = entityOrMedia;
         }
 
         if (typeof media === 'string') {

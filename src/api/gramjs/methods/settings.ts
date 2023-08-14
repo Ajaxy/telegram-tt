@@ -22,9 +22,8 @@ import {
   buildApiSession,
   buildApiWallpaper,
   buildApiWebSession, buildLangPack, buildLangPackString,
-  buildPrivacyRules,
 } from '../apiBuilders/misc';
-
+import { buildPrivacyRules } from '../apiBuilders/messages';
 import { buildApiPhoto } from '../apiBuilders/common';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
@@ -620,7 +619,7 @@ export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonCo
 }) {
   const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({
     settings: new GramJs.GlobalPrivacySettings({
-      archiveAndMuteNewNoncontactPeers: shouldArchiveAndMuteNewNonContact,
+      ...(shouldArchiveAndMuteNewNonContact && { archiveAndMuteNewNoncontactPeers: true }),
     }),
   }));
 

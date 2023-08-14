@@ -1,0 +1,43 @@
+.root {
+  --progress-duration: 6s;
+  flex: 1 1 auto;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 0.125rem;
+  margin: 0 0.125rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.viewed {
+  background-color: var(--color-white);
+}
+
+.active {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-white);
+  border-radius: 0.125rem;
+  transform-origin: 0 50%;
+  transform: translateX(-100%);
+  animation: progress var(--progress-duration) linear forwards;
+}
+
+.paused .inner {
+  animation-play-state: paused;
+}
+
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

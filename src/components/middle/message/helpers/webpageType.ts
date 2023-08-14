@@ -24,6 +24,8 @@ export function getWebpageButtonText(type?: string) {
       return 'lng_view_button_bot_app';
     case 'telegram_chatlist':
       return 'ViewChatList';
+    case 'telegram_story':
+      return 'ViewStory';
     default:
       return undefined;
   }

@@ -206,6 +206,7 @@ addActionHandler('updateContact', async (global, actions, payload): Promise<void
 
   if (result) {
     actions.loadChatSettings({ chatId: userId });
+    actions.loadUserStories({ userId });
 
     global = getGlobal();
     global = updateUser(
@@ -361,4 +362,29 @@ addActionHandler('setEmojiStatus', (global, actions, payload): ActionReturnType 
   const { emojiStatus, expires } = payload!;
 
   void callApi('updateEmojiStatus', emojiStatus, expires);
+});
+
+addActionHandler('saveCloseFriends', async (global, actions, payload): Promise<void> => {
+  const { userIds } = payload!;
+
+  const result = await callApi('saveCloseFriends', userIds);
+  if (!result) {
+    return;
+  }
+
+  global = getGlobal();
+  global.contactList?.userIds.forEach((userId) => {
+    const { isCloseFriend } = global.users.byId[userId] || {};
+    if (isCloseFriend && !userIds.includes(userId)) {
+      global = updateUser(global, userId, {
+        isCloseFriend: undefined,
+      });
+    }
+  });
+  userIds.forEach((userId) => {
+    global = updateUser(global, userId, {
+      isCloseFriend: true,
+    });
+  });
+  setGlobal(global);
 });

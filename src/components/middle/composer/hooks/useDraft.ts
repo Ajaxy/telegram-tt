@@ -37,13 +37,14 @@ const useDraft = (
   getHtml: Signal<string>,
   setHtml: (html: string) => void,
   editedMessage: ApiMessage | undefined,
+  isDisabled: boolean | undefined,
 ) => {
   const { saveDraft, clearDraft, loadCustomEmojis } = getActions();
 
   const isEditing = Boolean(editedMessage);
 
   const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
-    if (isEditing) return;
+    if (isDisabled || isEditing) return;
 
     const html = getHtml();
 
@@ -68,6 +69,10 @@ const useDraft = (
 
   // Restore draft on chat change
   useEffectWithPrevDeps(([prevChatId, prevThreadId, prevDraft]) => {
+    if (isDisabled) {
+      return;
+    }
+
     if (chatId === prevChatId && threadId === prevThreadId) {
       if (!draft && prevDraft) {
         setHtml('');
@@ -97,10 +102,14 @@ const useDraft = (
         }
       });
     }
-  }, [chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis]);
+  }, [chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis, isDisabled]);
 
   // Save draft on chat change
   useEffect(() => {
+    if (isDisabled) {
+      return undefined;
+    }
+
     return () => {
       // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       if (!isEditing) {
@@ -110,12 +119,12 @@ const useDraft = (
 
       freeze();
     };
-  }, [chatId, threadId, isEditing, updateDraftRef]);
+  }, [chatId, threadId, isEditing, updateDraftRef, isDisabled]);
 
   const chatIdRef = useStateRef(chatId);
   const threadIdRef = useStateRef(threadId);
   useEffect(() => {
-    if (isFrozen) {
+    if (isDisabled || isFrozen) {
       return;
     }
 
@@ -133,7 +142,7 @@ const useDraft = (
         updateDraftRef.current();
       }
     });
-  }, [chatIdRef, getHtml, runDebouncedForSaveDraft, threadIdRef, updateDraftRef]);
+  }, [chatIdRef, getHtml, isDisabled, runDebouncedForSaveDraft, threadIdRef, updateDraftRef]);
 
   function forceUpdateDraft() {
     updateDraft(undefined, true);

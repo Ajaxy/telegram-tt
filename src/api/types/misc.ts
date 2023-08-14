@@ -109,7 +109,7 @@ export type ApiNotification = {
   title?: string;
   message: string;
   actionText?: string;
-  action?: CallbackAction;
+  action?: CallbackAction | CallbackAction[];
   className?: string;
   duration?: number;
 };
@@ -191,6 +191,10 @@ export interface ApiAppConfig {
   hiddenMembersMinCount: number;
   limits: Record<ApiLimitType, readonly [number, number]>;
   canDisplayAutoarchiveSetting: boolean;
+  areStoriesHidden?: boolean;
+  storyExpirePeriod: number;
+  storyViewersExpirePeriod: number;
+  storyChangelogUserId: string;
 }
 
 export interface ApiConfig {

@@ -9,3 +9,4 @@ export * from './bots';
 export * from './misc';
 export * from './calls';
 export * from './statistics';
+export * from './stories';

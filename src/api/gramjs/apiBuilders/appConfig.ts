@@ -5,7 +5,12 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiAppConfig } from '../../types';
 import type { ApiLimitType } from '../../../global/types';
 import { buildJson } from './misc';
-import { DEFAULT_LIMITS } from '../../../config';
+import {
+  DEFAULT_LIMITS,
+  SERVICE_NOTIFICATIONS_USER_ID,
+  STORY_EXPIRE_PERIOD,
+  STORY_VIEWERS_EXPIRE_PERIOD,
+} from '../../../config';
 
 type LimitType = 'default' | 'premium';
 type Limit = 'upload_max_fileparts' | 'stickers_faved_limit' | 'saved_gifs_limit' | 'dialog_filters_chats_limit' |
@@ -39,6 +44,11 @@ export interface GramJsAppConfig extends LimitsConfig {
   autoarchive_setting_available: boolean;
   // Forums
   topics_pinned_limit: number;
+  // Stories
+  stories_all_hidden?: boolean;
+  story_expire_period: number;
+  story_viewers_expire_period: number;
+  stories_changelog_user_id?: number;
 }
 
 function buildEmojiSounds(appConfig: GramJsAppConfig) {
@@ -100,5 +110,9 @@ export function buildAppConfig(json: GramJs.TypeJSONValue, hash: number): ApiApp
       chatlistJoined: getLimit(appConfig, 'chatlist_joined_limit', 'chatlistJoined'),
     },
     hash,
+    areStoriesHidden: appConfig.stories_all_hidden,
+    storyExpirePeriod: appConfig.story_expire_period ?? STORY_EXPIRE_PERIOD,
+    storyViewersExpirePeriod: appConfig.story_viewers_expire_period ?? STORY_VIEWERS_EXPIRE_PERIOD,
+    storyChangelogUserId: appConfig.stories_changelog_user_id?.toString() ?? SERVICE_NOTIFICATIONS_USER_ID,
   };
 }

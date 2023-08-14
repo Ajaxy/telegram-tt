@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type {
   ApiConfig, ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession, ApiLangString,
 } from '../../types';
-import type { ApiPrivacySettings, ApiPrivacyKey, PrivacyVisibility } from '../../../types';
+import type { ApiPrivacyKey } from '../../../types';
 
 import { buildApiDocument, buildApiReaction } from './messages';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -79,47 +79,6 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
   }
 
   return undefined;
-}
-
-export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
-  let visibility: PrivacyVisibility | undefined;
-  let allowUserIds: string[] | undefined;
-  let allowChatIds: string[] | undefined;
-  let blockUserIds: string[] | undefined;
-  let blockChatIds: string[] | undefined;
-
-  rules.forEach((rule) => {
-    if (rule instanceof GramJs.PrivacyValueAllowAll) {
-      visibility = visibility || 'everybody';
-    } else if (rule instanceof GramJs.PrivacyValueAllowContacts) {
-      visibility = visibility || 'contacts';
-    } else if (rule instanceof GramJs.PrivacyValueDisallowContacts) {
-      visibility = visibility || 'nonContacts';
-    } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
-      visibility = visibility || 'nobody';
-    } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
-      allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
-    } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
-      blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
-    } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
-      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
-    } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
-      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
-    }
-  });
-
-  if (!visibility) {
-    // disallow by default.
-    visibility = 'nobody';
-  }
-
-  return {
-    visibility,
-    allowUserIds: allowUserIds || [],
-    allowChatIds: allowChatIds || [],
-    blockUserIds: blockUserIds || [],
-    blockChatIds: blockChatIds || [],
-  };
 }
 
 export function buildApiNotifyException(

@@ -1,4 +1,5 @@
 export { default as MediaViewer } from '../components/mediaViewer/MediaViewer';
+export { default as StoryViewer } from '../components/story/StoryViewer';
 
 export { default as ForwardRecipientPicker } from '../components/main/ForwardRecipientPicker';
 export { default as DraftRecipientPicker } from '../components/main/DraftRecipientPicker';

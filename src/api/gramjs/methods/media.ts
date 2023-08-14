@@ -27,12 +27,11 @@ export default async function downloadMedia(
     url: string; mediaFormat: ApiMediaFormat; start?: number; end?: number; isHtmlAllowed?: boolean;
   },
   client: TelegramClient,
-  isConnected: boolean,
   onProgress?: ApiOnProgress,
 ) {
   const {
     data, mimeType, fullSize,
-  } = await download(url, client, isConnected, onProgress, start, end, mediaFormat, isHtmlAllowed) || {};
+  } = await download(url, client, onProgress, start, end, mediaFormat, isHtmlAllowed) || {};
 
   if (!data) {
     return undefined;
@@ -71,7 +70,6 @@ export type EntityType = (
 async function download(
   url: string,
   client: TelegramClient,
-  isConnected: boolean,
   onProgress?: ApiOnProgress,
   start?: number,
   end?: number,
@@ -218,14 +216,17 @@ function getMessageMediaMimeType(message: GramJs.Message, sizeType?: string) {
     return 'image/png';
   }
 
-  if (message.media instanceof GramJs.MessageMediaDocument && message.media.document instanceof GramJs.Document) {
-    if (sizeType) {
-      return message.media.document!.attributes.some((a) => a instanceof GramJs.DocumentAttributeSticker)
-        ? 'image/webp'
-        : 'image/jpeg';
-    }
+  if (message.media instanceof GramJs.MessageMediaDocument) {
+    const document = message.media.document;
+    if (document instanceof GramJs.Document) {
+      if (sizeType) {
+        return document.attributes.some((a) => a instanceof GramJs.DocumentAttributeSticker)
+          ? 'image/webp'
+          : 'image/jpeg';
+      }
 
-    return message.media.document!.mimeType;
+      return document.mimeType;
+    }
   }
 
   if (message.media instanceof GramJs.MessageMediaWebPage

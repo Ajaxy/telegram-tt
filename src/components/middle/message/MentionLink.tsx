@@ -26,12 +26,14 @@ const MentionLink: FC<OwnProps & StateProps> = ({
   const {
     openChat,
     openChatByUsername,
+    closeStoryViewer,
   } = getActions();
 
   const handleClick = () => {
     if (userOrChat) {
       openChat({ id: userOrChat.id });
     } else if (username) {
+      closeStoryViewer();
       openChatByUsername({ username: username.substring(1) });
     }
   };

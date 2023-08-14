@@ -61,6 +61,7 @@ import ShowTransition from '../../ui/ShowTransition';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import StatusButton from './StatusButton';
 import Toggle from '../../ui/Toggle';
+import StoryToggler from '../../story/StoryToggler';
 
 import './LeftMainHeader.scss';
 
@@ -132,6 +133,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openChat,
+    openChatWithInfo,
     setGlobalSearchDate,
     setSettingOption,
     setGlobalSearchChatId,
@@ -171,6 +173,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     } else {
       requestNextSettingsScreen({ screen: SettingsScreens.PasscodeDisabled });
     }
+  });
+
+  const handleOpenMyStories = useLastCallback(() => {
+    openChatWithInfo({ id: currentUserId, shouldReplaceHistory: true, profileTab: 'stories' });
   });
 
   useHotkeys(canSetPasscode ? {
@@ -318,6 +324,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         {lang('Contacts')}
       </MenuItem>
       <MenuItem
+        icon="play-story"
+        onClick={handleOpenMyStories}
+      >
+        {lang('Settings.MyStories')}
+      </MenuItem>
+      <MenuItem
         icon="settings"
         onClick={onSelectSettings}
       >
@@ -453,6 +465,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
         >
           {searchContent}
+          <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} />
         </SearchInput>
         {isCurrentUserPremium && <StatusButton />}
         {hasPasscode && (

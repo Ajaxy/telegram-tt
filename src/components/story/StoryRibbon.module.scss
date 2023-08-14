@@ -1,0 +1,76 @@
+.root {
+  display: flex;
+  justify-content: space-between;
+  column-gap: 0.875rem;
+  padding: 0.25rem 0.5rem 0.5rem 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  max-height: 5.5rem;
+  position: relative;
+  z-index: var(--z-story-ribbon);
+
+  transition: opacity 0.2s ease-in-out;
+
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.closing {
+  opacity: 0;
+}
+
+.user {
+  flex: 0 0 3.75rem;
+  width: 3.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 0.75rem;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: var(--custom-cursor, pointer);
+  color: var(--color-text-secondary);
+  margin-inline: auto;
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.name {
+  margin-top: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  unicode-bidi: plaintext;
+  max-width: 110%;
+
+  &_hasUnreadStory {
+    color: var(--color-text);
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.contextMenu {
+  position: absolute;
+
+  :global(.bubble) {
+    --offset-y: 0;
+
+    width: auto;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

@@ -39,6 +39,8 @@ export type OwnProps = {
   isOpen: boolean;
   canSendStickers?: boolean;
   canSendGifs?: boolean;
+  isMessageComposer?: boolean;
+  idPrefix: string;
   onLoad: () => void;
   onClose: () => void;
   onEmojiSelect: (emoji: string) => void;
@@ -79,27 +81,29 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   isOpen,
   canSendStickers,
   canSendGifs,
+  isMessageComposer,
   isLeftColumnShown,
   isCurrentUserPremium,
-  onLoad,
-  onClose,
-  onEmojiSelect,
+  idPrefix,
   isAttachmentModal,
   canSendPlainText,
-  onCustomEmojiSelect,
-  onStickerSelect,
   className,
-  onGifSelect,
-  onRemoveSymbol,
-  onSearchOpen,
-  addRecentEmoji,
-  addRecentCustomEmoji,
   positionX,
   positionY,
   transformOriginX,
   transformOriginY,
   style,
   isBackgroundTranslucent,
+  onLoad,
+  onClose,
+  onEmojiSelect,
+  onCustomEmojiSelect,
+  onStickerSelect,
+  onGifSelect,
+  onRemoveSymbol,
+  onSearchOpen,
+  addRecentEmoji,
+  addRecentCustomEmoji,
 }) => {
   const { loadPremiumSetStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
@@ -218,6 +222,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
           <CustomEmojiPicker
             className="picker-tab"
             isHidden={!isOpen || !isActive}
+            idPrefix={idPrefix}
             loadAndPlay={isOpen && (isActive || isFrom)}
             chatId={chatId}
             isTranslucent={!isMobile && isBackgroundTranslucent}
@@ -230,7 +235,9 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
             className="picker-tab"
             isHidden={!isOpen || !isActive}
             loadAndPlay={canSendStickers ? isOpen && (isActive || isFrom) : false}
+            idPrefix={idPrefix}
             canSendStickers={canSendStickers}
+            noContextMenus={!isMessageComposer}
             chatId={chatId}
             threadId={threadId}
             isTranslucent={!isMobile && isBackgroundTranslucent}
@@ -285,6 +292,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
         activeTab={activeTab}
         onSwitchTab={setActiveTab}
         onRemoveSymbol={onRemoveSymbol}
+        canSearch={isMessageComposer}
         onSearchOpen={handleSearch}
         isAttachmentModal={isAttachmentModal}
         canSendPlainText={canSendPlainText}
@@ -302,6 +310,7 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
       transitionClassNames,
       isLeftColumnShown && 'left-column-open',
       isAttachmentModal && 'in-attachment-modal',
+      isMessageComposer && 'in-middle-column',
     );
 
     if (isAttachmentModal) {

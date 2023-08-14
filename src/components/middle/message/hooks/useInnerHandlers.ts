@@ -1,13 +1,13 @@
 import type React from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { IAlbum } from '../../../../types';
-import { MediaViewerOrigin } from '../../../../types';
-import type {
-  ApiChat, ApiTopic, ApiMessage, ApiUser,
-} from '../../../../api/types';
-import { MAIN_THREAD_ID } from '../../../../api/types';
 import type { LangFn } from '../../../../hooks/useLang';
+import type { IAlbum } from '../../../../types';
+import type {
+  ApiChat, ApiTopic, ApiMessage, ApiUser, ApiStory,
+} from '../../../../api/types';
+import { MediaViewerOrigin } from '../../../../types';
+import { MAIN_THREAD_ID } from '../../../../api/types';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 
@@ -27,11 +27,12 @@ export default function useInnerHandlers(
   botSender?: ApiUser,
   messageTopic?: ApiTopic,
   isTranslatingChat?: boolean,
+  story?: ApiStory,
 ) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
-    markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu, focusMessageInComments,
-    openChatLanguageModal,
+    markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu,
+    openChatLanguageModal, openStoryViewer, focusMessageInComments,
   } = getActions();
 
   const {
@@ -180,6 +181,15 @@ export default function useInnerHandlers(
     });
   });
 
+  const handleStoryClick = useLastCallback(() => {
+    if (!story) return;
+    openStoryViewer({
+      userId: story.userId,
+      storyId: story.id,
+      isSingleStory: true,
+    });
+  });
+
   return {
     handleAvatarClick,
     handleSenderClick,
@@ -200,5 +210,6 @@ export default function useInnerHandlers(
     handleFocusForwarded,
     handleDocumentGroupSelectAll: selectWithGroupedId,
     handleTopicChipClick,
+    handleStoryClick,
   };
 }

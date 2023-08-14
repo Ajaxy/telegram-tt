@@ -23,6 +23,7 @@ import Avatar from './Avatar';
 import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
+import RippleEffect from '../ui/RippleEffect';
 
 type OwnProps = {
   userId: string;
@@ -31,9 +32,11 @@ type OwnProps = {
   forceShowSelf?: boolean;
   status?: string;
   statusIcon?: string;
+  ripple?: boolean;
   withDots?: boolean;
   withMediaViewer?: boolean;
   withUsername?: boolean;
+  withStory?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
   noEmojiStatus?: boolean;
@@ -59,6 +62,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   withDots,
   withMediaViewer,
   withUsername,
+  withStory,
   withFullInfo,
   withUpdatingStatus,
   emojiStatusSize,
@@ -70,6 +74,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   isSavedMessages,
   areMessagesLoaded,
   adminMember,
+  ripple,
 }) => {
   const {
     loadFullUser,
@@ -177,12 +182,15 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         size={avatarSize}
         peer={user}
         isSavedMessages={isSavedMessages}
+        withStory={withStory}
+        storyViewerMode="single-user"
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
       />
       <div className="info">
         {renderNameTitle()}
         {(status || (!isSavedMessages && !noStatusOrTyping)) && renderStatusOrTyping()}
       </div>
+      {ripple && <RippleEffect />}
     </div>
   );
 };

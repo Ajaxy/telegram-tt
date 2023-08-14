@@ -182,6 +182,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   } else if (isChatSummaryOnly(chat) && !chat.isMin) {
     actions.requestChatUpdate({ chatId: id });
   }
+  actions.closeStoryViewer({ tabId });
 
   if (threadId !== MAIN_THREAD_ID && !noRequestThreadInfoUpdate) {
     actions.requestThreadInfoUpdate({ chatId: id, threadId });
@@ -961,6 +962,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     processAttachBotParameters,
     checkChatlistInvite,
     openChatByUsername: openChatByUsernameAction,
+    openStoryViewerByUsername,
   } = actions;
 
   if (url.match(RE_TG_LINK)) {
@@ -988,6 +990,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
 
   const startAttach = params.hasOwnProperty('startattach') && !params.startattach ? true : params.startattach;
   const choose = parseChooseParameter(params.choose);
+  const storyId = part2 === 's' && (Number(part3) || undefined);
 
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
     openChatByPhoneNumber({
@@ -996,6 +999,16 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       attach: params.attach,
       tabId,
     });
+    return;
+  }
+
+  if (storyId) {
+    openStoryViewerByUsername({
+      username: part1,
+      storyId,
+      tabId,
+    });
+
     return;
   }
 
@@ -1104,7 +1117,7 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
 
   const chat = selectCurrentChat(global, tabId);
   const webAppName = originalParts?.[1];
-  const isWebApp = webAppName && !Number(webAppName);
+  const isWebApp = webAppName && !Number(webAppName) && !originalParts?.[2];
 
   if (!commentId) {
     if (!startAttach && messageId && !startParam && chat?.usernames?.some((c) => c.username === username)) {
@@ -1591,6 +1604,24 @@ addActionHandler('setChatEnabledReactions', async (global, actions, payload): Pr
   void loadFullChat(global, actions, chat, tabId);
 });
 
+addActionHandler('fetchChat', async (global, actions, payload): Promise<void> => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+
+  if (chat) {
+    return;
+  }
+
+  if (chatId === global.currentUserId) {
+    void callApi('fetchChat', { type: 'self' });
+  } else {
+    const user = selectUser(global, chatId);
+    if (user) {
+      void callApi('fetchChat', { type: 'user', user });
+    }
+  }
+});
+
 addActionHandler('loadChatSettings', async (global, actions, payload): Promise<void> => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
@@ -1627,6 +1658,8 @@ addActionHandler('toggleJoinRequest', async (global, actions, payload): Promise<
 
 addActionHandler('openForumPanel', (global, actions, payload): ActionReturnType => {
   const { chatId, tabId = getCurrentTabId() } = payload;
+  actions.toggleStoryRibbon({ isShown: false, tabId });
+  actions.toggleStoryRibbon({ isShown: false, isArchived: true, tabId });
   return updateTabState(global, {
     forumPanelChatId: chatId,
   }, tabId);

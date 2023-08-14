@@ -7,6 +7,7 @@ interface Layout {
   marginSides?: number;
   extraMarginTop?: number;
   menuElMinWidth?: number;
+  deltaX?: number;
   shouldAvoidNegativePosition?: boolean;
   withPortal?: boolean;
   isDense?: boolean; //  Allows you to place the menu as close to the edges of the area as possible
@@ -52,13 +53,13 @@ export default function useMenuPosition(
       marginSides = 0,
       extraMarginTop = 0,
       menuElMinWidth = 0,
+      deltaX = 0,
       shouldAvoidNegativePosition = false,
       withPortal = false,
       isDense = false,
     } = getLayout?.() || {};
 
     const marginTop = menuEl ? parseInt(getComputedStyle(menuEl).marginTop, 10) + extraMarginTop : undefined;
-
     const { offsetWidth: menuElWidth, offsetHeight: menuElHeight } = menuEl || { offsetWidth: 0, offsetHeight: 0 };
     const menuRect = menuEl ? {
       width: Math.max(menuElWidth, menuElMinWidth),
@@ -93,6 +94,7 @@ export default function useMenuPosition(
         x += marginSides;
       }
     }
+    x += deltaX;
 
     if (isDense || (y + menuRect.height < rootRect.height + rootRect.top)) {
       verticalPosition = 'top';

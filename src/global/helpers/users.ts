@@ -73,6 +73,10 @@ export function getUserStatus(
     return lang('ServiceNotifications').toLowerCase();
   }
 
+  if (user.isSupport) {
+    return lang('SupportStatus');
+  }
+
   if (user.type && user.type === 'userTypeBot') {
     return lang('Bot');
   }
@@ -188,7 +192,7 @@ export function isUserBot(user: ApiUser) {
 }
 
 export function getCanAddContact(user: ApiUser) {
-  return !user.isContact && !isUserBot(user);
+  return !user.isSelf && !user.isContact && !isUserBot(user);
 }
 
 export function sortUserIds(

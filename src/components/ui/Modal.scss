@@ -1,6 +1,7 @@
 .Modal {
   position: relative;
   z-index: var(--z-modal);
+  color: var(--color-text);
 
   &.confirm {
     z-index: var(--z-modal-confirm);

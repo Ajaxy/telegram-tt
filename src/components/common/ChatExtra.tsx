@@ -75,6 +75,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     showNotification,
     updateChatMutedState,
     updateTopicMutedState,
+    loadUserStories,
   } = getActions();
 
   const {
@@ -95,6 +96,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!userId) return;
     loadFullUser({ userId });
+    loadUserStories({ userId });
   }, [userId]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);

@@ -18,6 +18,8 @@ import type { ActionReturnType, GlobalState } from './types';
 import { isLocalMessageId } from './helpers';
 import { isCacheApiSupported } from '../util/cacheApi';
 
+import './intervals';
+
 initCache();
 
 addActionHandler('initShared', (prevGlobal, actions, payload): ActionReturnType => {

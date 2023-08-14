@@ -31,7 +31,9 @@ import {
 } from '../util/iteratees';
 import {
   selectChat,
-  selectCurrentMessageList, selectThreadOriginChat,
+  selectChatMessages,
+  selectCurrentMessageList,
+  selectThreadOriginChat,
   selectVisibleUsers,
 } from './selectors';
 import { hasStoredSession } from '../util/sessions';
@@ -461,9 +463,15 @@ function reduceUsers<T extends GlobalState>(global: T): GlobalState['users'] {
   const visibleUserIds = unique(compact(Object.values(global.byTabId)
     .flatMap(({ id: tabId }) => selectVisibleUsers(global, tabId)?.map((u) => u.id) || [])));
 
+  const chatStoriesUserIds = currentChatIds
+    .flatMap((chatId) => Object.values(selectChatMessages(global, chatId) || {}))
+    .map((message) => message.content.storyData?.userId || message.content.webPage?.story?.userId)
+    .filter(Boolean);
+
   const idsToSave = unique([
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
+    ...chatStoriesUserIds,
     ...visibleUserIds || [],
     ...global.topPeers.userIds || [],
     ...getOrderedIds(ALL_FOLDER_ID)?.filter(isUserId) || [],

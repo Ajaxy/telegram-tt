@@ -1,6 +1,7 @@
 import type { ApiWebDocument } from './bots';
 import type { ApiGroupCall, PhoneCallAction } from './calls';
 import type { ApiChat } from './chats';
+import type { ApiMessageStoryData, ApiWebPageStoryData } from './stories';
 
 export interface ApiDimensions {
   width: number;
@@ -95,6 +96,7 @@ export interface ApiVideo {
   blobUrl?: string;
   previewBlobUrl?: string;
   size: number;
+  noSound?: boolean;
 }
 
 export interface ApiAudio {
@@ -293,6 +295,19 @@ export interface ApiWebPage {
   duration?: number;
   document?: ApiDocument;
   video?: ApiVideo;
+  story?: ApiWebPageStoryData;
+}
+
+export type ApiTypeReplyTo = ApiMessageReplyTo | ApiStoryReplyTo;
+
+export interface ApiMessageReplyTo {
+  replyingTo: number;
+  replyingToTopId?: number;
+}
+
+export interface ApiStoryReplyTo {
+  userId: string;
+  storyId: number;
 }
 
 export interface ApiMessageForwardInfo {
@@ -383,6 +398,7 @@ export interface ApiMessage {
     text?: ApiFormattedText;
     photo?: ApiPhoto;
     video?: ApiVideo;
+    altVideo?: ApiVideo;
     document?: ApiDocument;
     sticker?: ApiSticker;
     contact?: ApiContact;
@@ -394,6 +410,7 @@ export interface ApiMessage {
     invoice?: ApiInvoice;
     location?: ApiLocation;
     game?: ApiGame;
+    storyData?: ApiMessageStoryData;
   };
   date: number;
   isOutgoing: boolean;
@@ -402,6 +419,8 @@ export interface ApiMessage {
   replyToMessageId?: number;
   replyToTopMessageId?: number;
   isTopicReply?: true;
+  replyToStoryUserId?: string;
+  replyToStoryId?: number;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
   forwardInfo?: ApiMessageForwardInfo;
   isDeleting?: boolean;

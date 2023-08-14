@@ -1,0 +1,53 @@
+.root {
+  display: block !important;
+  width: 12rem;
+  height: 0;
+  // Aspect-ratio trick https://css-tricks.com/aspect-ratio-boxes/ (192:344)
+  padding-bottom: 179%;
+  overflow: hidden;
+  position: relative;
+  cursor: var(--custom-cursor, pointer);
+}
+
+.preview {
+  // Aspect ratio 12:11, preview in webpage
+  padding-bottom: 91.67%;
+
+  .linkPreview {
+    border-radius: 0 !important;
+  }
+}
+
+.media {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.linkPreview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+}
+
+.nonInteractive {
+  cursor: default;
+
+  :global(.message-content.story) &:global(.media-inner) {
+    margin-bottom: 2rem !important;
+  }
+}
+
+.expired {
+  height: auto;
+  padding-bottom: 0;
+  color: var(--accent-color);
+}
+
+.expiredIcon {
+  font-size: 1.25rem;
+  line-height: 0.9375rem;
+  vertical-align: -0.1875rem;
+}

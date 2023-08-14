@@ -18,7 +18,7 @@ import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useAppLayout from '../../hooks/useAppLayout';
-import useCurrentTimeSignal from './hooks/useCurrentTimeSignal';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';

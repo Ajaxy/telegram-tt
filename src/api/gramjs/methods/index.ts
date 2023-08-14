@@ -39,6 +39,7 @@ export {
 export {
   fetchFullUser, fetchNearestCountry, fetchTopUsers, fetchContactList, fetchUsers,
   updateContact, importContact, deleteContact, fetchProfilePhotos, fetchCommonChats, reportSpam, updateEmojiStatus,
+  saveCloseFriends,
 } from './users';
 
 export {
@@ -107,3 +108,9 @@ export {
 export {
   broadcastLocalDbUpdateFull,
 } from '../localDb';
+
+export {
+  fetchAllStories, fetchUserStories, fetchUserPinnedStories, fetchUserStoriesByIds, viewStory, markStoryRead,
+  deleteStory, toggleStoryPinned, fetchStorySeenBy, fetchStoryLink, fetchStoriesArchive, reportStory, editStoryPrivacy,
+  toggleStoriesHidden, fetchStoriesMaxIds,
+} from './stories';

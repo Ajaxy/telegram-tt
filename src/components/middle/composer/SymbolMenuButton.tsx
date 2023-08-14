@@ -27,6 +27,8 @@ type OwnProps = {
   isSymbolMenuOpen?: boolean;
   canSendGifs?: boolean;
   canSendStickers?: boolean;
+  isMessageComposer?: boolean;
+  idPrefix: string;
   openSymbolMenu: VoidFunction;
   closeSymbolMenu: VoidFunction;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
@@ -46,6 +48,7 @@ type OwnProps = {
   isAttachmentModal?: boolean;
   canSendPlainText?: boolean;
   className?: string;
+  inputCssSelector?: string;
 };
 
 const SymbolMenuButton: FC<OwnProps> = ({
@@ -54,21 +57,24 @@ const SymbolMenuButton: FC<OwnProps> = ({
   isMobile,
   canSendGifs,
   canSendStickers,
+  isMessageComposer,
   isReady,
   isSymbolMenuOpen,
+  idPrefix,
+  isAttachmentModal,
+  canSendPlainText,
+  isSymbolMenuForced,
+  className,
+  inputCssSelector = EDITABLE_INPUT_CSS_SELECTOR,
   openSymbolMenu,
   closeSymbolMenu,
   onCustomEmojiSelect,
   onStickerSelect,
   onGifSelect,
-  isAttachmentModal,
-  canSendPlainText,
   onRemoveSymbol,
   onEmojiSelect,
   closeBotCommandMenu,
   closeSendAsMenu,
-  isSymbolMenuForced,
-  className,
 }) => {
   const {
     setStickerSearchQuery,
@@ -113,7 +119,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
 
   const handleSymbolMenuOpen = useLastCallback(() => {
     const messageInput = document.querySelector<HTMLDivElement>(
-      isAttachmentModal ? EDITABLE_INPUT_MODAL_CSS_SELECTOR : EDITABLE_INPUT_CSS_SELECTOR,
+      isAttachmentModal ? EDITABLE_INPUT_MODAL_CSS_SELECTOR : inputCssSelector,
     );
 
     if (!isMobile || messageInput !== document.activeElement) {
@@ -176,6 +182,8 @@ const SymbolMenuButton: FC<OwnProps> = ({
         isOpen={isSymbolMenuOpen || Boolean(isSymbolMenuForced)}
         canSendGifs={canSendGifs}
         canSendStickers={canSendStickers}
+        isMessageComposer={isMessageComposer}
+        idPrefix={idPrefix}
         onLoad={onSymbolMenuLoadingComplete}
         onClose={closeSymbolMenu}
         onEmojiSelect={onEmojiSelect}

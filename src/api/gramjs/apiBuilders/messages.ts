@@ -36,10 +36,17 @@ import type {
   ApiMessageExtendedMediaPreview,
   ApiReaction,
   ApiReactionEmoji,
+  ApiTypeReplyTo,
+  ApiStory,
+  ApiStorySkipped,
+  ApiWebPageStoryData,
+  ApiMessageStoryData,
+  ApiTypeStory,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
 } from '../../types';
+import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
 
 import {
   DELETED_COMMENTS_CHANNEL_ID,
@@ -50,14 +57,19 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
   VIDEO_WEBM_TYPE,
 } from '../../../config';
-import { pick } from '../../../util/iteratees';
+import { buildCollectionByCallback, pick } from '../../../util/iteratees';
 import { buildStickerFromDocument } from './symbols';
 import {
   buildApiPhoto, buildApiPhotoSize, buildApiThumbnailFromPath, buildApiThumbnailFromStripped,
 } from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
-import { addPhotoToLocalDb, resolveMessageApiChatId, serializeBytes } from '../helpers';
+import {
+  addPhotoToLocalDb,
+  addStoryToLocalDb,
+  resolveMessageApiChatId,
+  serializeBytes,
+} from '../helpers';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildApiCallDiscardReason } from './calls';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
@@ -181,9 +193,23 @@ export function buildApiMessageWithChatId(
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
 
-  const {
-    replyToMsgId, replyToTopId, forumTopic, replyToPeerId,
-  } = mtpMessage.replyTo || {};
+  let replyToMsgId: number | undefined;
+  let replyToTopId: number | undefined;
+  let replyToStoryUserId: string | undefined;
+  let replyToStoryId: number | undefined;
+  let forumTopic: boolean | undefined;
+  let replyToPeerId: GramJs.TypePeer | undefined;
+  if (mtpMessage.replyTo instanceof GramJs.MessageReplyHeader) {
+    replyToMsgId = mtpMessage.replyTo.replyToMsgId;
+    replyToTopId = mtpMessage.replyTo.replyToTopId;
+    forumTopic = mtpMessage.replyTo.forumTopic;
+    replyToPeerId = mtpMessage.replyTo.replyToPeerId;
+  }
+  if (mtpMessage.replyTo instanceof GramJs.MessageReplyStoryHeader) {
+    replyToStoryUserId = buildApiPeerId(mtpMessage.replyTo.userId, 'user');
+    replyToStoryId = mtpMessage.replyTo.storyId;
+  }
+
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
@@ -219,6 +245,7 @@ export function buildApiMessageWithChatId(
     ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
     ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
     ...(forwardInfo && { forwardInfo }),
+    ...(replyToStoryUserId && { replyToStoryUserId, replyToStoryId }),
     ...(isEdited && { isEdited }),
     ...(mtpMessage.editDate && { editDate: mtpMessage.editDate }),
     ...(isMediaUnread && { isMediaUnread }),
@@ -399,7 +426,8 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
   if (photo) return { photo };
 
   const video = buildVideo(media);
-  if (video) return { video };
+  const altVideo = buildAltVideo(media);
+  if (video) return { video, altVideo };
 
   const audio = buildAudio(media);
   if (audio) return { audio };
@@ -427,6 +455,9 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMes
 
   const game = buildGameFromMedia(media);
   if (game) return { game };
+
+  const storyData = buildMessageStoryData(media);
+  if (storyData) return { storyData };
 
   return undefined;
 }
@@ -499,6 +530,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     h: height,
     supportsStreaming = false,
     roundMessage: isRound = false,
+    nosound,
   } = videoAttr;
 
   return {
@@ -514,6 +546,7 @@ export function buildVideoFromDocument(document: GramJs.Document, isSpoiler?: bo
     thumbnail: buildApiThumbnailFromStripped(thumbs),
     size: size.toJSNumber(),
     isSpoiler,
+    ...(nosound && { noSound: true }),
   };
 }
 
@@ -527,6 +560,18 @@ function buildVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
   }
 
   return buildVideoFromDocument(media.document, media.spoiler);
+}
+
+function buildAltVideo(media: GramJs.TypeMessageMedia): ApiVideo | undefined {
+  if (
+    !(media instanceof GramJs.MessageMediaDocument)
+    || !(media.altDocument instanceof GramJs.Document)
+    || !media.altDocument.mimeType.startsWith('video')
+  ) {
+    return undefined;
+  }
+
+  return buildVideoFromDocument(media.altDocument, media.spoiler);
 }
 
 function buildAudio(media: GramJs.TypeMessageMedia): ApiAudio | undefined {
@@ -856,11 +901,27 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     return undefined;
   }
 
-  const { id, photo, document } = media.webpage;
+  const {
+    id, photo, document, attributes,
+  } = media.webpage;
 
   let video;
   if (document instanceof GramJs.Document && document.mimeType.startsWith('video/')) {
     video = buildVideoFromDocument(document);
+  }
+  let story: ApiWebPageStoryData | undefined;
+  const attributeStory = attributes
+    ?.find((a: any): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
+  if (attributeStory) {
+    const userId = buildApiPeerId(attributeStory.userId, 'user');
+    story = {
+      id: attributeStory.id,
+      userId,
+    };
+
+    if (attributeStory.story instanceof GramJs.StoryItem) {
+      addStoryToLocalDb(attributeStory.story, userId);
+    }
   }
 
   return {
@@ -877,7 +938,18 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
     photo: photo instanceof GramJs.Photo ? buildApiPhoto(photo) : undefined,
     document: !video && document ? buildApiDocument(document) : undefined,
     video,
+    story,
   };
+}
+
+function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessageStoryData | undefined {
+  if (!(media instanceof GramJs.MessageMediaStory)) {
+    return undefined;
+  }
+
+  const userId = buildApiPeerId(media.userId, 'user');
+
+  return { id: media.id, userId, ...(media.viaMention && { isMention: true }) };
 }
 
 function buildAction(
@@ -1284,8 +1356,7 @@ export function buildLocalMessage(
   chat: ApiChat,
   text?: string,
   entities?: ApiMessageEntity[],
-  replyingTo?: number,
-  replyingToTopId?: number,
+  replyingTo?: ApiTypeReplyTo,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
@@ -1294,11 +1365,26 @@ export function buildLocalMessage(
   groupedId?: string,
   scheduledAt?: number,
   sendAs?: ApiChat | ApiUser,
+  story?: ApiStory | ApiStorySkipped,
 ): ApiMessage {
   const localId = getNextLocalMessageId(chat.lastMessage?.id);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
   const isForum = chat.isForum;
+
+  let replyToMessageId: number | undefined;
+  let replyingToTopId: number | undefined;
+  let replyToStoryUserId: string | undefined;
+  let replyToStoryId: number | undefined;
+  if (replyingTo) {
+    if ('replyingTo' in replyingTo) {
+      replyToMessageId = replyingTo.replyingTo;
+      replyingToTopId = replyingTo.replyingToTopId;
+    } else {
+      replyToStoryUserId = replyingTo.userId;
+      replyToStoryId = replyingTo.storyId;
+    }
+  }
 
   const message = {
     id: localId,
@@ -1315,13 +1401,15 @@ export function buildLocalMessage(
       ...(gif && { video: gif }),
       ...(poll && buildNewPoll(poll, localId)),
       ...(contact && { contact }),
+      ...(story && { storyData: story }),
     },
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
-    ...(replyingTo && { replyToMessageId: replyingTo }),
+    ...(replyToMessageId && { replyToMessageId }),
     ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
-    ...((replyingTo || replyingToTopId) && isForum && { isTopicReply: true }),
+    ...((replyToMessageId || replyingToTopId) && isForum && { isTopicReply: true }),
+    ...(replyToStoryUserId && { replyToStoryUserId, replyToStoryId }),
     ...(groupedId && {
       groupedId,
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
@@ -1625,5 +1713,113 @@ export function buildApiFormattedText(textWithEntities: GramJs.TextWithEntities)
   return {
     text,
     entities: entities.map(buildApiMessageEntity),
+  };
+}
+
+export function buildApiUsersStories(userStories: GramJs.UserStories) {
+  const userId = buildApiPeerId(userStories.userId, 'user');
+
+  return buildCollectionByCallback(userStories.stories, (story) => [story.id, buildApiStory(userId, story)]);
+}
+
+export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
+  if (story instanceof GramJs.StoryItemDeleted) {
+    return {
+      id: story.id,
+      userId,
+      isDeleted: true,
+    };
+  }
+
+  if (story instanceof GramJs.StoryItemSkipped) {
+    const {
+      id, date, expireDate, closeFriends,
+    } = story;
+
+    return {
+      id,
+      userId,
+      ...(closeFriends && { isForCloseFriends: true }),
+      date,
+      expireDate,
+    };
+  }
+
+  const {
+    edited, pinned, expireDate, id, date, caption,
+    entities, media, privacy, views,
+    public: isPublic, noforwards, closeFriends, contacts, selectedContacts,
+  } = story;
+
+  const content: ApiMessage['content'] = {
+    ...buildMessageMediaContent(media),
+  };
+
+  if (caption) {
+    content.text = buildMessageTextContent(caption, entities);
+  }
+
+  return {
+    id,
+    userId,
+    date,
+    expireDate,
+    content,
+    ...(isPublic && { isPublic }),
+    ...(edited && { isEdited: true }),
+    ...(pinned && { isPinned: true }),
+    ...(contacts && { isForContacts: true }),
+    ...(selectedContacts && { isForSelectedContacts: true }),
+    ...(closeFriends && { isForCloseFriends: true }),
+    ...(noforwards && { noForwards: true }),
+    ...(views?.viewsCount && { viewsCount: views.viewsCount }),
+    ...(views?.recentViewers && {
+      recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
+    }),
+    ...(privacy && { visibility: buildPrivacyRules(privacy) }),
+  };
+}
+
+export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
+  let visibility: PrivacyVisibility | undefined;
+  let allowUserIds: string[] | undefined;
+  let allowChatIds: string[] | undefined;
+  let blockUserIds: string[] | undefined;
+  let blockChatIds: string[] | undefined;
+
+  rules.forEach((rule) => {
+    if (rule instanceof GramJs.PrivacyValueAllowAll) {
+      visibility ||= 'everybody';
+    } else if (rule instanceof GramJs.PrivacyValueAllowContacts) {
+      visibility ||= 'contacts';
+    } else if (rule instanceof GramJs.PrivacyValueAllowCloseFriends) {
+      visibility ||= 'closeFriends';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowContacts) {
+      visibility ||= 'nonContacts';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
+      visibility ||= 'nobody';
+    } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
+      visibility ||= 'selectedContacts';
+      allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
+    } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
+      blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
+    } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
+      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+    } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
+      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+    }
+  });
+
+  if (!visibility) {
+    // Disallow by default
+    visibility = 'nobody';
+  }
+
+  return {
+    visibility,
+    allowUserIds: allowUserIds || [],
+    allowChatIds: allowChatIds || [],
+    blockUserIds: blockUserIds || [],
+    blockChatIds: blockChatIds || [],
   };
 }

@@ -66,6 +66,7 @@ const useShowTransition = (
     transitionClassNames,
     hasShownClass: shouldRender,
     hasOpenClass: shouldHaveOpenClassName,
+    isClosing,
   };
 };
 

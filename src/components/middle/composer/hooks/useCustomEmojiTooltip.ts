@@ -55,7 +55,7 @@ export default function useCustomEmojiTooltip(
   const hasCustomEmojis = Boolean(customEmojis?.length);
 
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isEnabled || !isActive) return;
 
     const lastEmoji = getLastEmoji();
     if (lastEmoji) {
@@ -67,7 +67,7 @@ export default function useCustomEmojiTooltip(
     } else {
       clearCustomEmojiForEmoji();
     }
-  }, [isEnabled, getLastEmoji, hasCustomEmojis, clearCustomEmojiForEmoji, loadCustomEmojiForEmoji]);
+  }, [isEnabled, isActive, getLastEmoji, hasCustomEmojis, clearCustomEmojiForEmoji, loadCustomEmojiForEmoji]);
 
   const insertCustomEmoji = useLastCallback((emoji: ApiSticker) => {
     const lastEmoji = getLastEmoji();

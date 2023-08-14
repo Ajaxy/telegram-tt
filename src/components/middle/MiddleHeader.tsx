@@ -367,6 +367,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withDots={Boolean(connectionStatusText)}
               withFullInfo
               withMediaViewer
+              withStory={!isChatWithSelf}
               withUpdatingStatus
               emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl

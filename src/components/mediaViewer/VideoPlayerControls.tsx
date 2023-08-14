@@ -12,7 +12,7 @@ import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
 import useDerivedState from '../../hooks/useDerivedState';
 import useSignal from '../../hooks/useSignal';
-import useCurrentTimeSignal from './hooks/useCurrentTimeSignal';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 
 import buildClassName from '../../util/buildClassName';

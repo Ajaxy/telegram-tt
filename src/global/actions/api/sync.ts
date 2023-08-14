@@ -59,7 +59,9 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
     releaseStatusTimeout = undefined;
   }, RELEASE_STATUS_TIMEOUT);
 
-  const { loadAllChats, preloadTopChatMessages } = actions;
+  const {
+    loadAllChats, preloadTopChatMessages, loadAllStories, loadAllHiddenStories,
+  } = actions;
 
   loadAllChats({
     listType: 'active',
@@ -84,6 +86,8 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
       loadAllChats({ listType: 'archived', shouldReplace: true });
       void callApi('fetchCurrentUser');
       preloadTopChatMessages();
+      loadAllStories();
+      loadAllHiddenStories();
     },
   });
 });

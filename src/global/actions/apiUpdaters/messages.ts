@@ -95,7 +95,8 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const isLocal = isMessageLocal(message as ApiMessage);
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
-          if (isLocal && message.isOutgoing && !(message.content?.action)) {
+          if (isLocal && message.isOutgoing && !(message.content?.action) && !message.replyToStoryId
+            && !message.content?.storyData) {
             const currentMessageList = selectCurrentMessageList(global, tabId);
             if (currentMessageList) {
               // We do not use `actions.focusLastMessage` as it may be set with a delay (see below)

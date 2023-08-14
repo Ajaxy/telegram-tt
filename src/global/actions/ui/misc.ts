@@ -141,6 +141,17 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   }, tabId);
 });
 
+addActionHandler('resetNextProfileTab', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  const { chatId } = selectCurrentMessageList(global, tabId) || {};
+
+  if (!chatId) {
+    return undefined;
+  }
+
+  return updateTabState(global, { nextProfileTab: undefined }, tabId);
+});
+
 addActionHandler('toggleStatistics', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);

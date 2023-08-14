@@ -31,10 +31,8 @@
     caret-color: var(--color-primary);
     background-color: var(--color-background);
 
-    input {
-      & + .icon {
-        color: var(--color-primary);
-      }
+    .search-icon {
+      color: var(--color-primary);
     }
   }
 
@@ -53,18 +51,26 @@
     }
   }
 
-  > .icon {
+  .icon-container {
     position: absolute;
-    top: 0.5rem;
-    left: 0.75rem;
-    font-size: 1.375rem;
+    top: 0;
+    left: 0;
     pointer-events: none;
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    font-size: 1.375rem;
+    line-height: 1;
   }
 
   .Loading {
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0.1875rem;
     height: 2.5rem;
     width: 2.5rem;
 
@@ -84,11 +90,7 @@
     input {
       height: 2.5rem;
       border-radius: 1.25rem;
-      padding-left: calc(2.625rem - var(--border-width));
-    }
-
-    .icon {
-      top: 0.5rem;
+      padding-left: calc(2.75rem - var(--border-width));
     }
   }
 
@@ -97,14 +99,14 @@
       direction: rtl;
     }
 
-    > .icon {
+    .search-icon {
       left: auto;
       right: 0.75rem;
     }
 
     .Loading {
-      left: 0.5rem;
-      right: auto;
+      right: 0.1875rem;
+      left: auto;
     }
 
     .Button {

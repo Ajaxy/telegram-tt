@@ -123,6 +123,7 @@ type StateProps = {
 
 const MESSAGE_REACTIONS_POLLING_INTERVAL = 15 * 1000;
 const MESSAGE_COMMENTS_POLLING_INTERVAL = 15 * 1000;
+const MESSAGE_STORY_POLLING_INTERVAL = 5 * 60 * 1000;
 const BOTTOM_THRESHOLD = 50;
 const UNREAD_DIVIDER_TOP = 10;
 const UNREAD_DIVIDER_TOP_WITH_TOOLS = 60;
@@ -173,7 +174,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews,
+    loadMessageViews, loadUserStoriesByIds,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -258,6 +259,28 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     loadMessageReactions({ chatId, ids });
   }, MESSAGE_REACTIONS_POLLING_INTERVAL);
+
+  useInterval(() => {
+    if (!messageIds || !messagesById || type === 'scheduled') {
+      return;
+    }
+    const storyDataList = messageIds.map((id) => messagesById[id]?.content.storyData).filter(Boolean);
+
+    if (!storyDataList.length) return;
+
+    const storiesByUserIds = storyDataList.reduce((acc, storyData) => {
+      const { userId, id } = storyData!;
+      if (!acc[userId]) {
+        acc[userId] = [];
+      }
+      acc[userId].push(id);
+      return acc;
+    }, {} as Record<string, number[]>);
+
+    Object.entries(storiesByUserIds).forEach(([userId, storyIds]) => {
+      loadUserStoriesByIds({ userId, storyIds });
+    });
+  }, MESSAGE_STORY_POLLING_INTERVAL);
 
   useInterval(() => {
     if (!messageIds || !messagesById || threadId !== MAIN_THREAD_ID || type === 'scheduled') {

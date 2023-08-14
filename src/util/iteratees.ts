@@ -16,6 +16,18 @@ export function buildCollectionByKey<T extends AnyLiteral>(collection: T[], key:
   }, {});
 }
 
+export function buildCollectionByCallback<T extends AnyLiteral, K extends number | string, R extends unknown>(
+  collection: T[],
+  callback: (member: T) => [K, R],
+) {
+  return collection.reduce((byKey: Record<K, R>, member: T) => {
+    const [key, value] = callback(member);
+    byKey[key] = value;
+
+    return byKey;
+  }, {} as Record<K, R>);
+}
+
 export function mapValues<R extends any, M extends any>(
   byKey: CollectionByKey<M>,
   callback: (member: M, key: string, index: number, originalByKey: CollectionByKey<M>) => R,

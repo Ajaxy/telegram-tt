@@ -90,6 +90,11 @@
   }
 }
 
+.overscroll-trigger {
+  display: none;
+  height: 1px;
+}
+
 // Used by ChatList and ContactList components
 .chat-list {
   background: var(--color-background);
