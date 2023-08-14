@@ -1998,9 +1998,6 @@ export interface ActionPayloads {
     reason: ApiReportReason;
     description: string;
   } & WithTabId;
-  toggleAllStoriesHidden: {
-    isHidden: boolean;
-  };
   openStoryPrivacyEditor: WithTabId | undefined;
   closeStoryPrivacyEditor: WithTabId | undefined;
   editStoryPrivacy: {
