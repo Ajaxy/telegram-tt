@@ -30,6 +30,7 @@ type ICopyOptions = {
 export function getMessageCopyOptions(
   message: ApiMessage,
   href?: string,
+  canCopy?: boolean,
   afterEffect?: () => void,
   onCopyLink?: () => void,
   onCopyMessages?: (messageIds: number[]) => void,
@@ -41,7 +42,8 @@ export function getMessageCopyOptions(
     || (!getMessageWebPageVideo(message) ? getMessageWebPagePhoto(message) : undefined);
   const contact = getMessageContact(message);
   const mediaHash = getMessageMediaHash(message, 'inline');
-  const canImageBeCopied = photo && (mediaHash || hasMessageLocalBlobUrl(message)) && CLIPBOARD_ITEM_SUPPORTED;
+  const canImageBeCopied = canCopy && photo && (mediaHash || hasMessageLocalBlobUrl(message))
+    && CLIPBOARD_ITEM_SUPPORTED;
   const selection = window.getSelection();
 
   if (canImageBeCopied) {
@@ -57,7 +59,7 @@ export function getMessageCopyOptions(
     });
   }
 
-  if (href) {
+  if (canCopy && href) {
     options.push({
       label: 'lng_context_copy_link',
       icon: 'copy',
@@ -67,7 +69,7 @@ export function getMessageCopyOptions(
         afterEffect?.();
       },
     });
-  } else if (text) {
+  } else if (canCopy && text) {
     // Detect if the user has selection in the current message
     const hasSelection = Boolean((
       selection?.anchorNode?.parentNode
