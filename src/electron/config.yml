@@ -11,6 +11,7 @@ files:
   - "!dist/**/statoscope-report.html"
   - "!dist/**/reference.json"
   - "!dist/img-apple-*"
+  - "!dist/get"
   - "!node_modules"
 directories:
   buildResources: "./public"
