@@ -655,12 +655,19 @@
     border-radius: 0.75rem;
     line-height: 1.125rem;
     user-select: none;
+    display: flex;
+    align-items: center;
   }
 
   .message-media-duration .icon-muted {
     vertical-align: -0.1875rem;
     margin-left: 0.375rem;
     font-size: 1.0625rem;
+  }
+
+  .message-media-duration .playback-failed {
+    margin-inline-start: 0.125rem;
+    font-size: 0.875rem;
   }
 }
 

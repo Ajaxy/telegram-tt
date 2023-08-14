@@ -80,30 +80,34 @@ export function preloadVideo(url: string): Promise<HTMLVideoElement> {
 }
 
 export async function createPosterForVideo(url: string): Promise<string | undefined> {
-  const video = await preloadVideo(url);
+  try {
+    const video = await preloadVideo(url);
 
-  return Promise.race([
-    pause(2000) as Promise<undefined>,
-    new Promise<string | undefined>((resolve, reject) => {
-      video.onseeked = () => {
-        if (!video.videoWidth || !video.videoHeight) {
-          resolve(undefined);
-        }
+    return await Promise.race([
+      pause(2000) as Promise<undefined>,
+      new Promise<string | undefined>((resolve, reject) => {
+        video.onseeked = () => {
+          if (!video.videoWidth || !video.videoHeight) {
+            resolve(undefined);
+          }
 
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(video, 0, 0);
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(video, 0, 0);
 
-        canvas.toBlob((blob) => {
-          resolve(blob ? URL.createObjectURL(blob) : undefined);
-        });
-      };
-      video.onerror = reject;
-      video.currentTime = Math.min(video.duration, 1);
-    }),
-  ]);
+          canvas.toBlob((blob) => {
+            resolve(blob ? URL.createObjectURL(blob) : undefined);
+          });
+        };
+        video.onerror = reject;
+        video.currentTime = Math.min(video.duration, 1);
+      }),
+    ]);
+  } catch (e) {
+    return undefined;
+  }
 }
 
 export async function fetchBlob(blobUrl: string) {

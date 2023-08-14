@@ -7,7 +7,6 @@ export interface ApiInitialArgs {
   platform?: string;
   sessionData?: ApiSessionData;
   isTest?: boolean;
-  isMovSupported?: boolean;
   isWebmSupported?: boolean;
   maxBufferSize?: number;
   webAuthToken?: string;
@@ -112,6 +111,7 @@ export type ApiNotification = {
   actionText?: string;
   action?: CallbackAction;
   className?: string;
+  duration?: number;
 };
 
 export type ApiError = {

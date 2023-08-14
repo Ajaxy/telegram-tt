@@ -16,7 +16,7 @@ import {
   LOCK_SCREEN_ANIMATION_DURATION_MS,
 } from '../../../config';
 import {
-  IS_MOV_SUPPORTED, IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
+  IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
 } from '../../../util/windowEnvironment';
 import { unsubscribe } from '../../../util/notifications';
 import * as cacheApi from '../../../util/cacheApi';
@@ -50,7 +50,6 @@ addActionHandler('initApi', async (global, actions): Promise<void> => {
     platform: PLATFORM_ENV,
     sessionData: loadStoredSession(),
     isTest: window.location.search.includes('test') || initialLocationHash?.tgWebAuthTest === '1',
-    isMovSupported: IS_MOV_SUPPORTED,
     isWebmSupported: IS_WEBM_SUPPORTED,
     maxBufferSize: MAX_BUFFER_SIZE,
     webAuthToken: initialLocationHash?.tgWebAuthToken,

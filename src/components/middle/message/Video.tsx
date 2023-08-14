@@ -31,6 +31,7 @@ import useMediaTransition from '../../../hooks/useMediaTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 import useFlag from '../../../hooks/useFlag';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
@@ -121,6 +122,7 @@ const Video: FC<OwnProps> = ({
 
   const isInline = fullMediaData && wasIntersectedRef.current;
 
+  const isUnsupported = useUnsupportedMedia(videoRef, true, !isInline);
   const { loadProgress: downloadProgress } = useMediaWithLoadProgress(
     getMessageMediaHash(message, 'download'),
     !isDownloading,
@@ -137,7 +139,7 @@ const Video: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderSpinner,
     transitionClassNames: spinnerClassNames,
-  } = useShowTransition(isTransferring, undefined, wasLoadDisabled);
+  } = useShowTransition(isTransferring && !isUnsupported, undefined, wasLoadDisabled);
   const {
     transitionClassNames: playButtonClassNames,
   } = useShowTransition(Boolean((isLoadAllowed || fullMediaData) && !isPlayAllowed && !shouldRenderSpinner));
@@ -147,7 +149,7 @@ const Video: FC<OwnProps> = ({
     setPlayProgress(Math.max(0, e.currentTarget.currentTime - 1));
   });
 
-  const duration = videoRef.current?.duration || video.duration || 0;
+  const duration = (Number.isFinite(videoRef.current?.duration) ? videoRef.current?.duration : video.duration) || 0;
 
   const isOwn = isOwnMessage(message);
   const isWebPageVideo = Boolean(getMessageWebPageVideo(message));
@@ -206,7 +208,7 @@ const Video: FC<OwnProps> = ({
           ref={videoRef}
           src={fullMediaData}
           className={buildClassName('full-media', withBlurredBackground && 'with-blurred-bg')}
-          canPlay={isPlayAllowed && isIntersectingForPlaying}
+          canPlay={isPlayAllowed && isIntersectingForPlaying && !isUnsupported}
           muted
           loop
           playsInline
@@ -247,13 +249,14 @@ const Video: FC<OwnProps> = ({
       {!isLoadAllowed && !fullMediaData && (
         <i className="icon icon-download" />
       )}
-      {isTransferring ? (
+      {isTransferring && (!isUnsupported || isDownloading) ? (
         <span className="message-transfer-progress">
           {(isUploading || isDownloading) ? `${Math.round(transferProgress * 100)}%` : '...'}
         </span>
       ) : (
         <div className="message-media-duration">
           {video.isGif ? 'GIF' : formatMediaDuration(Math.max(duration - playProgress, 0))}
+          {isUnsupported && <i className="icon icon-message-failed playback-failed" />}
         </div>
       )}
     </div>
