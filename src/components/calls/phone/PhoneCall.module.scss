@@ -57,6 +57,10 @@
   :global(.Button) {
     color: #fff;
   }
+
+  :global(body.is-electron) .root.single-column & {
+    padding-left: 5rem;
+  }
 }
 
 .close-button {
