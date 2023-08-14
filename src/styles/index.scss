@@ -120,6 +120,11 @@ body.cursor-ew-resize {
   user-select: text;
 }
 
+.no-selection {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
 .clearfix::after {
   content: "";
   clear: both;

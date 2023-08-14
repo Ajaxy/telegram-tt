@@ -250,7 +250,13 @@ const MessageContextMenu: FC<OwnProps> = ({
   const copyOptions = isSponsoredMessage
     ? []
     : getMessageCopyOptions(
-      message, targetHref, handleAfterCopy, canCopyLink ? onCopyLink : undefined, onCopyMessages, onCopyNumber,
+      message,
+      targetHref,
+      canCopy,
+      handleAfterCopy,
+      canCopyLink ? onCopyLink : undefined,
+      onCopyMessages,
+      onCopyNumber,
     );
 
   const getTriggerElement = useLastCallback(() => {
@@ -372,7 +378,7 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canSelectLanguage && (
           <MenuItem icon="web" onClick={onSelectLanguage}>{lang('lng_settings_change_lang')}</MenuItem>
         )}
-        {canCopy && copyOptions.map((option) => (
+        {copyOptions.map((option) => (
           <MenuItem key={option.label} icon={option.icon} onClick={option.handler}>{lang(option.label)}</MenuItem>
         ))}
         {canPin && <MenuItem icon="pin" onClick={onPin}>{lang('DialogPin')}</MenuItem>}
