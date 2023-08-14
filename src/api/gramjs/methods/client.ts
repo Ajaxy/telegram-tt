@@ -14,7 +14,7 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, SUPPORTED_VIDEO_CONTENT_TYPES, VIDEO_MOV_TYPE,
+  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST,
 } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
@@ -64,16 +64,12 @@ export async function init(_onUpdate: OnApiUpdate, initialArgs: ApiInitialArgs) 
   onUpdate = _onUpdate;
 
   const {
-    userAgent, platform, sessionData, isTest, isMovSupported, isWebmSupported, maxBufferSize, webAuthToken, dcId,
+    userAgent, platform, sessionData, isTest, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders,
   } = initialArgs;
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 
-  // eslint-disable-next-line no-restricted-globals
-  (self as any).isMovSupported = isMovSupported;
-  // Hacky way to update this set inside GramJS worker
-  if (isMovSupported) SUPPORTED_VIDEO_CONTENT_TYPES.add(VIDEO_MOV_TYPE);
   // eslint-disable-next-line no-restricted-globals
   (self as any).isWebmSupported = isWebmSupported;
   // eslint-disable-next-line no-restricted-globals

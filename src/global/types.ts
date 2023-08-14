@@ -2296,6 +2296,7 @@ export interface ActionPayloads {
     title?: string;
     message: string;
     className?: string;
+    duration?: number;
     actionText?: string;
     action?: CallbackAction;
   } & WithTabId;

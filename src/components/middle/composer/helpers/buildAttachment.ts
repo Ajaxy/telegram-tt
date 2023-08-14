@@ -63,11 +63,14 @@ export default async function buildAttachment(
       previewBlobUrl = blobUrl;
     }
   } else if (SUPPORTED_VIDEO_CONTENT_TYPES.has(mimeType)) {
-    const { videoWidth: width, videoHeight: height, duration } = await preloadVideo(blobUrl);
-    shouldSendAsFile = !validateAspectRatio(width, height);
-
-    if (!shouldSendAsFile) {
-      quick = { width, height, duration };
+    try {
+      const { videoWidth: width, videoHeight: height, duration } = await preloadVideo(blobUrl);
+      shouldSendAsFile = !validateAspectRatio(width, height);
+      if (!shouldSendAsFile) {
+        quick = { width: width!, height: height!, duration: duration! };
+      }
+    } catch (err) {
+      shouldSendAsFile = true;
     }
 
     previewBlobUrl = await createPosterForVideo(blobUrl);

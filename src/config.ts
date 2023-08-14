@@ -199,7 +199,6 @@ export const BASE_EMOJI_KEYWORD_LANG = 'en';
 export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
-export const VIDEO_MOV_TYPE = 'video/quicktime';
 export const VIDEO_WEBM_TYPE = 'video/webm';
 
 export const GIF_MIME_TYPE = 'image/gif';
@@ -209,7 +208,7 @@ export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
 ]);
 
 export const SUPPORTED_VIDEO_CONTENT_TYPES = new Set([
-  'video/mp4', // video/quicktime added dynamically in environment.ts
+  'video/mp4', 'video/quicktime',
 ]);
 
 export const SUPPORTED_AUDIO_CONTENT_TYPES = new Set([
