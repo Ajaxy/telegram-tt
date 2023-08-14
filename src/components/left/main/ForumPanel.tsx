@@ -243,7 +243,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
               threadId={MAIN_THREAD_ID}
               messageListType="thread"
               canExpandActions={false}
-              withForumActions
+              isForForum
               isMobile={isMobile}
               onTopicSearch={onTopicSearch}
             />
