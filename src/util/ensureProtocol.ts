@@ -1,7 +1,5 @@
 const PROTOCOL_WHITELIST = new Set(['http:', 'https:', 'tg:', 'ton:', 'mailto:', 'tel:']);
-// HTTP was chosen by default as a fix for https://bugs.telegram.org/c/10712.
-// It is also the default protocol in the official TDesktop client.
-const FALLBACK_PREFIX = 'http://';
+const FALLBACK_PREFIX = 'https://';
 
 export function ensureProtocol(url?: string) {
   if (!url) {
