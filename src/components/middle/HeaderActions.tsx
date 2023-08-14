@@ -46,7 +46,7 @@ interface OwnProps {
   threadId: number;
   messageListType: MessageListType;
   canExpandActions: boolean;
-  withForumActions?: boolean;
+  isForForum?: boolean;
   isMobile?: boolean;
   onTopicSearch?: NoneToVoidFunction;
 }
@@ -98,7 +98,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   canCreateVoiceChat,
   pendingJoinRequests,
   isRightColumnShown,
-  withForumActions,
+  isForForum,
   canExpandActions,
   shouldJoinToSend,
   shouldSendJoinRequest,
@@ -176,7 +176,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   });
 
   const handleSearchClick = useLastCallback(() => {
-    if (withForumActions) {
+    if (isForForum) {
       onTopicSearch?.();
       return;
     }
@@ -281,7 +281,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   return (
     <div className="HeaderActions">
-      {canTranslate && (
+      {!isForForum && canTranslate && (
         <DropdownMenu
           className="stickers-more-menu with-menu-transitions"
           trigger={MoreMenuButton}
@@ -367,7 +367,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           )}
         </>
       )}
-      {!withForumActions && Boolean(pendingJoinRequests) && (
+      {!isForForum && Boolean(pendingJoinRequests) && (
         <Button
           round
           className="badge-button"
@@ -414,7 +414,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           canCreateVoiceChat={canCreateVoiceChat}
           pendingJoinRequests={pendingJoinRequests}
           onJoinRequestsClick={handleJoinRequestsClick}
-          withForumActions={withForumActions}
+          withForumActions={isForForum}
           onSubscribeChannel={handleSubscribeClick}
           onSearchClick={handleSearchClick}
           onAsMessagesClick={handleAsMessagesClick}
