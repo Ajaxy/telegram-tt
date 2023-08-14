@@ -1,6 +1,48 @@
-## 1.61.0 (2023-04-26)
+## 10.0.0 (2023-08-14)
 
-**Telegram Web A was updated to version 1.61**
+**Introducing Telegram Web A v10.0!**
+
+Today marks a special occasion. Telegram is celebrating its 10th anniversary! In honor of this milestone, and to highlight our web version's long-awaited parity with the native apps, we've leaped from version 1.x straight to 10.0. Big day!
+
+🌟 **Stories on Telegram**
+Introducing [Telegram Stories](https://t.me/durov/216) - share moments of your life, beyond just text.
+
+💻 **Desktop Version**
+An experimental standalone version is now available for enthusiasts and early adopters on all desktop platforms: **[web.telegram.org/a/get](https://web.telegram.org/a/get)**.
+
+🚀 **Massive Connection Improvements**
+Web A is now more optimized – ensuring speedy and seamless conversations. Less loading, more chatting.
+
+🎙️ **Redesigned Group Calls**
+Group calls have been overhauled to bring exceptional clarity, connectivity, and functionality.
+
+🌍 **Real-Time Translation**
+Premium users can tap to translate entire chats, dynamically updating as they scroll.
+
+⏱️ **Custom Mute Durations**
+Notifications from any chat can be temporarily muted for a specific period – like hours, days, or weeks.
+
+🔖 **Read Time in Groups**
+You can see at what time other members read your message in the 'Seen By' section.
+
+😄 **Emoji v15 Support**
+Web A now supports the latest from Emoji v15, so you can express yourself fully.
+
+🎨 **Dynamic Sticker Packs**
+Dynamic order for your sticker packs can be toggled on or off – whichever you prefer.
+
+🚀 **Performance Upgrades**
+We've implemented multiple memory and performance optimizations for a smoother, faster, more efficient Telegram experience.
+
+🔧 **Fixes & Improvements**
+We've patched several problems, including issues with sending messages while uploading files, freezes while scrolling, and messages incorrectly marking as read with Web A in the background. See if you can spot the host of UI refinements we added as well.😉
+
+📱 **More for iPad Users**
+iPad users, we heard you! Web A now has improved iPad support.
+
+Thank you for being with us. Here's to the next decade together! 🎉🥳
+
+## 1.61.0 (2023-04-26)
 
 ### 🤩 **What’s New**
 * Shareable Chat Folders – Your chat folders can now be shared with friends or colleagues – adding the folder and **joining all its chats** in one tap.
@@ -14,7 +56,6 @@
 
 ### 😍 **What’s Better**
 * As usual, we've added a pack of optimizations and performance improvements. If you ever run into an issue with the app, be sure to [report it](https://bugs.telegram.org/?tag_ids=41&sort=time) on the Bugs and Suggestions Platform.
-
 
 ## 1.60.0 (2023-03-03)
 
@@ -40,7 +81,6 @@
 * Fixed auto-closing context menu on iOS PWA.
 * Fixed changing group and channel admin rights.
 * Various layout and performance improvements.
-
 
 ## 1.59.0 (2023-01-30)
 

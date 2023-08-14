@@ -1,25 +1,43 @@
-**Telegram Web A was updated to version 1.61**
+**Introducing Telegram Web A v10.0!**
 
-[🤩](customEmoji:5373026167722876724) **What’s New**
+Today marks a special occasion. Telegram is celebrating its 10th anniversary! In honor of this milestone, and to highlight our web version's long-awaited parity with the native apps, we've leaped from version 1.x straight to 10.0. Big day!
 
-• Shareable Chat Folders – Your chat folders can now be shared with friends or colleagues – adding the folder and **joining all its chats** in one tap.
+🌟 **Stories on Telegram**
+Introducing [Telegram Stories](https://t.me/durov/216) - share moments of your life, beyond just text.
 
-• Power Saving Mode – You can **extend battery life** and **improve performance** by turning on Power Saving Mode or individually disabling autoplay, animations and effects in __Settings > Animations and Performance__.
+💻 **Desktop Version**
+An experimental standalone version is now available for enthusiasts and early adopters on all desktop platforms: **[web.telegram.org/a/get](https://web.telegram.org/a/get)**.
 
-• Better Bots – Telegram bots can completely replace any website. These bots can now be launched **in any chat** – try typing [@DurgerKingBot](https://t.me/DurgerKingBot) (followed by a space) in any chat, or posting [this link](https://t.me/DurgerKingBot/menu).
+🚀 **Massive Connection Improvements**
+Web A is now more optimized – ensuring speedy and seamless conversations. Less loading, more chatting.
 
-• Enhanced Design – Enjoy transparent layers with **beautiful blur effects** when selecting emoji, stickers, reactions and statuses. Sending messages also has a satisfying **new animation**.
+🎙️ **Redesigned Group Calls**
+Group calls have been overhauled to bring exceptional clarity, connectivity, and functionality.
 
-• Infinite Reactions – Telegram Premium users can pick reactions from an infinite selection of custom emoji. They can also use **up to 3 reactions** on any message to combine multiple emotions. [👍](customEmoji:5469770542288478598)[🔥](customEmoji:5420315771991497307)[❤️](customEmoji:5449505950283078474)
+🌍 **Real-Time Translation**
+Premium users can tap to translate entire chats, dynamically updating as they scroll.
 
-• Preview in Media Viewer – Scrubbing through videos now shows a **thumbnail preview** to easily find specific scenes.
+⏱️ **Custom Mute Durations**
+Notifications from any chat can be temporarily muted for a specific period – like hours, days, or weeks.
 
-• Group Chat Improvements – Create groups with **only yourself** or restrict anyone from adding you directly to groups (via __Settings > Privacy and Security > Group and Channels > Nobody__).
+🔖 **Read Time in Groups**
+You can see at what time other members read your message in the 'Seen By' section.
 
-• Send When Online – By right-clicking the Send button, you can schedule a message to be sent when the recipient comes online.
+😄 **Emoji v15 Support**
+Web A now supports the latest from Emoji v15, so you can express yourself fully.
 
-[😍](customEmoji:5372886001465170842) **What’s Better**
+🎨 **Dynamic Sticker Packs**
+Dynamic order for your sticker packs can be toggled on or off – whichever you prefer.
 
-• As usual, we've added a pack of optimizations and performance improvements. If you ever run into an issue with the app, be sure to [report it](https://bugs.telegram.org/?tag_ids=41&sort=time) on the Bugs and Suggestions Platform.
+🚀 **Performance Upgrades**
+We've implemented multiple memory and performance optimizations for a smoother, faster, more efficient Telegram experience.
+
+🔧 **Fixes & Improvements**
+We've patched several problems, including issues with sending messages while uploading files, freezes while scrolling, and messages incorrectly marking as read with Web A in the background. See if you can spot the host of UI refinements we added as well.😉
+
+📱 **More for iPad Users**
+iPad users, we heard you! Web A now has improved iPad support.
+
+Thank you for being with us. Here's to the next decade together! 🎉🥳
 
 🦄 **We also welcome** you to join our official channels in **[English](https://t.me/webachannel)** and **[Russian](https://t.me/webachannelru)** — where we post app updates and share our experiences building one of the world’s most feature-rich web applications.
