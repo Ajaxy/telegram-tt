@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from '../../lib/teact/teact';
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
 
+import { IS_IOS, IS_SAFARI } from '../../util/windowEnvironment';
 import { stopScrollInertia } from '../../util/resetScroll';
 
 import useLastCallback from '../useLastCallback';
@@ -8,6 +9,7 @@ import useDebouncedCallback from '../useDebouncedCallback';
 
 const MOUSE_WHEEL_DEBOUNCE = 250;
 const TRIGGER_HEIGHT = 1;
+const INERTIA_THRESHOLD = 100;
 
 export default function useTopOverscroll(
   containerRef: React.RefObject<HTMLDivElement>,
@@ -17,10 +19,12 @@ export default function useTopOverscroll(
   // eslint-disable-next-line no-null/no-null
   const overscrollTriggerRef = useRef<HTMLDivElement>(null);
 
-  const isTriggerJustEnabled = useRef<boolean>(false);
-  const lastScrollTopRef = useRef<number>(0);
-  const isTriggerEnabledRef = useRef<boolean>(false);
-  const lastIsOnTopRef = useRef<boolean>(true);
+  const isTriggerJustEnabled = useRef(false);
+  const lastScrollTopRef = useRef(0);
+  const isTriggerEnabledRef = useRef(false);
+  const lastIsOnTopRef = useRef(true);
+  const lastScrollAtRef = useRef(0);
+  const isReturningOverscrollRef = useRef(false);
 
   const enableOverscrollTrigger = useLastCallback((noScrollInertiaStop = false) => {
     if (isTriggerEnabledRef.current) return;
@@ -29,7 +33,7 @@ export default function useTopOverscroll(
     overscrollTriggerRef.current.style.display = 'block';
     containerRef.current.scrollTop = TRIGGER_HEIGHT;
 
-    if (!noScrollInertiaStop) {
+    if (!IS_SAFARI && !noScrollInertiaStop) {
       stopScrollInertia(containerRef.current);
     }
 
@@ -49,7 +53,7 @@ export default function useTopOverscroll(
   });
 
   const handleScroll = useLastCallback(() => {
-    if (!containerRef.current || !overscrollTriggerRef.current) return;
+    if (!containerRef.current) return;
 
     if (isTriggerJustEnabled.current) {
       isTriggerJustEnabled.current = false;
@@ -61,22 +65,31 @@ export default function useTopOverscroll(
     const isMovingDown = newScrollTop > lastScrollTopRef.current;
     const isMovingUp = newScrollTop < lastScrollTopRef.current;
     const isOnTop = newScrollTop === 0;
+    const lastEventDelay = Date.now() - lastScrollAtRef.current;
 
-    if (isMovingUp && isOnTop && !isTriggerEnabledRef.current) {
-      forceMutation(enableOverscrollTrigger, [containerRef.current, overscrollTriggerRef.current]);
-      return;
+    if (overscrollTriggerRef.current) {
+      if (isOnTop && !isTriggerEnabledRef.current) {
+        forceMutation(enableOverscrollTrigger, [containerRef.current, overscrollTriggerRef.current]);
+        return;
+      }
+
+      forceMutation(disableOverscrollTrigger, overscrollTriggerRef.current);
     }
 
-    forceMutation(disableOverscrollTrigger, overscrollTriggerRef.current);
-
-    if (isMovingUp && lastIsOnTopRef.current) {
+    if (
+      isMovingUp && (
+        (lastIsOnTopRef.current && lastEventDelay > INERTIA_THRESHOLD)
+        || (newScrollTop < 0 && isReturningOverscrollRef.current) // Overscroll repeated by the user
+      )) {
       onOverscroll?.();
-    } else if (isMovingDown) {
+    } else if (isMovingDown && newScrollTop > 0) {
       onReset?.();
     }
 
     lastScrollTopRef.current = newScrollTop;
     lastIsOnTopRef.current = isOnTop;
+    lastScrollAtRef.current = Date.now();
+    isReturningOverscrollRef.current = isMovingDown && newScrollTop < 0;
   });
 
   // Handle non-scrollable container
@@ -113,7 +126,7 @@ export default function useTopOverscroll(
     };
   }, [containerRef, handleWheel]);
 
-  return (
+  return !IS_IOS ? (
     <div ref={overscrollTriggerRef} className="overscroll-trigger" key="overscroll-trigger" />
-  );
+  ) : undefined;
 }
