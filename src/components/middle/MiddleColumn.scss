@@ -347,5 +347,5 @@
   bottom: 0;
   width: 0.25rem;
   z-index: var(--z-resize-handle);
-  cursor: var(--custom-cursor, ew-resize);
+  cursor: ew-resize;
 }

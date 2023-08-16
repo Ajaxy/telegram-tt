@@ -29,7 +29,7 @@
   opacity: 0;
   transition: opacity 150ms;
 
-  cursor: var(--custom-cursor, grab) !important;
+  cursor: grab !important;
   transform: translateY(-50%);
 
   .container:hover & {
@@ -38,7 +38,7 @@
 
   .isDragging & {
     opacity: 1;
-    cursor: var(--custom-cursor, grabbing) !important;
+    cursor: grabbing !important;
   }
 
   @media (pointer: coarse) {
