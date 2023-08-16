@@ -103,7 +103,7 @@
         --color-text-meta: var(--color-white);
         --color-text-secondary: var(--color-white);
         --color-error: var(--color-white);
-        --color-pinned: var(--color-white);
+        --color-list-icon: var(--color-white);
         --color-chat-username: var(--color-white);
       }
 
@@ -262,10 +262,9 @@
     }
 
     .icon-muted {
-      font-size: 1.25rem;
-      margin-top: -0.0625rem;
+      font-size: 1.125rem;
       margin-left: 0.25rem;
-      color: #c6c8ca;
+      color: var(--color-list-icon);
 
       body.is-ios & {
         margin-top: 0;
@@ -322,8 +321,9 @@
       }
 
       .forward {
-        font-size: 0.875rem;
         display: inline-block;
+        color: var(--color-list-icon);
+        font-size: 0.875rem;
         transform: translateY(1px);
       }
 
