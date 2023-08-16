@@ -732,10 +732,6 @@
     background: var(--pattern-color);
   }
 
-  .text-content {
-    margin-bottom: 1rem;
-  }
-
   .media-inner {
     line-height: 1;
     font-size: 1rem;
@@ -780,9 +776,9 @@
     }
 
     .text-content {
+      text-align: center;
       word-break: normal;
       line-height: var(--emoji-only-size);
-      font-size: var(--emoji-only-size);
 
       .emoji {
         width: var(--emoji-only-size);
@@ -800,14 +796,20 @@
 
   @for $i from 1 through 7 {
     &.emoji-only-#{$i} {
-      $size: min(7.5 - ($i * 0.75), 5.625) + rem;
+      $size: null;
+      @if $i == 1 {
+        $size: 7rem;
+      } @else {
+        $size: min(7.5 - ($i * 0.75), 5.625) + rem;
+      }
 
       --emoji-only-size: #{$size};
-    }
-  }
 
-  &.emoji-only-1 {
-    --emoji-only-size: 7rem;
+      .text-content {
+        width: #{calc($size * $i)};
+        font-size: calc($size * 0.9);
+      }
+    }
   }
 
   .Message:not(.own) & {
