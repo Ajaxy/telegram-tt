@@ -74,14 +74,6 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         || message.isOutgoing !== nextMessage.isOutgoing
         || (isActionMessage(message) && !message.content.action?.phoneCall)
         || (isActionMessage(nextMessage) && !nextMessage.content.action?.phoneCall)
-        || (
-          message.forwardInfo && nextMessage.forwardInfo
-          && (
-            message.forwardInfo.senderUserId !== nextMessage.forwardInfo.senderUserId
-            || message.forwardInfo.fromChatId !== nextMessage.forwardInfo.fromChatId
-            || message.forwardInfo.hiddenUserName !== nextMessage.forwardInfo.hiddenUserName
-          )
-        )
         || message.inlineButtons
         || nextMessage.inlineButtons
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
