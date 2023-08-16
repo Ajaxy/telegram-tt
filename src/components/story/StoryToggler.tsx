@@ -54,7 +54,8 @@ function StoryToggler({
   }, [orderedUserIds]);
   useStoryPreloader(preloadUserIds);
 
-  const { shouldRender, transitionClassNames } = useShowTransition(canShow && isShown);
+  // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
+  const { shouldRender, transitionClassNames } = useShowTransition(canShow && isShown, undefined, undefined, 'slow');
 
   if (!shouldRender) {
     return undefined;

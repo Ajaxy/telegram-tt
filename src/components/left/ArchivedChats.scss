@@ -44,22 +44,11 @@
   }
 
   .chat-list-wrapper {
-    --story-ribbon-height: 5.5rem;
-    height: calc(100% - var(--header-height));
     position: relative;
+    height: calc(100% - var(--header-height));
 
-    &.shown {
-      transform: translateY(calc(var(--story-ribbon-height) * -1));
-      height: calc(100% - var(--header-height) + var(--story-ribbon-height));
-      transition: none;
-    }
-
-    &.open, &.closing {
-      transition: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    &.open {
-      transform: translateY(0);
+    &.with-story-ribbon {
+      --extra-height: var(--header-height);
     }
   }
 }

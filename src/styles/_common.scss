@@ -216,3 +216,18 @@
 .fab-padding-bottom {
   padding-bottom: 5rem !important;
 }
+
+.with-story-ribbon {
+  --story-ribbon-height: 5.5rem;
+
+  height: calc(100% - var(--extra-height, 0px) + var(--story-ribbon-height)) !important;
+  transform: translateY(calc(var(--story-ribbon-height) * -1));
+
+  &.open, &.closing {
+    transition: transform 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  &.open {
+    transform: translateY(0);
+  }
+}
