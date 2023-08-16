@@ -23,6 +23,7 @@ import {
   MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
   EDITABLE_INPUT_ID,
   EDITABLE_INPUT_CSS_SELECTOR,
+  IS_ELECTRON,
 } from '../../config';
 import {
   IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
@@ -413,6 +414,7 @@ function MiddleColumn({
     backgroundColor && styles.customBgColor,
     customBackground && isBackgroundBlurred && styles.blurred,
     isRightColumnShown && styles.withRightColumn,
+    IS_ELECTRON && !(renderingChatId && renderingThreadId) && styles.draggable,
   );
 
   const messagingDisabledClassName = buildClassName(
