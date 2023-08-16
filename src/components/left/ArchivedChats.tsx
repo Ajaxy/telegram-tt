@@ -1,7 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-
-import type { FC } from '../../lib/teact/teact';
 import type { LeftColumnContent, SettingsScreens } from '../../types';
 import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
 import type { GlobalState } from '../../global/types';
@@ -117,7 +116,13 @@ const ArchivedChats: FC<OwnProps> = ({
           </DropdownMenu>
         )}
       </div>
-      <div className={buildClassName('chat-list-wrapper', storyRibbonClassNames)}>
+      <div
+        className={buildClassName(
+          'chat-list-wrapper',
+          shouldRenderStoryRibbon && 'with-story-ribbon',
+          storyRibbonClassNames,
+        )}
+      >
         {shouldRenderStoryRibbon && (
           <StoryRibbon isArchived className="left-header-shadow" isClosing={isStoryRibbonClosing} />
         )}

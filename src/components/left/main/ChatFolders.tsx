@@ -1,16 +1,17 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
+  memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../api/types';
-import type { SettingsScreens, LeftColumnContent } from '../../../types';
+import type { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { GlobalState } from '../../../global/types';
 import type { TabWithProperties } from '../../ui/TabList';
+import TabList from '../../ui/TabList';
 
-import { ALL_FOLDER_ID, ANIMATION_END_DELAY } from '../../../config';
+import { ALL_FOLDER_ID } from '../../../config';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
@@ -26,9 +27,8 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 import Transition from '../../ui/Transition';
-import TabList from '../../ui/TabList';
-import ChatList from './ChatList';
 import StoryRibbon from '../../story/StoryRibbon';
+import ChatList from './ChatList';
 
 type OwnProps = {
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -56,7 +56,6 @@ type StateProps = {
 
 const SAVED_MESSAGES_HOTKEY = '0';
 const FIRST_FOLDER_INDEX = 0;
-const STORY_RIBBON_APPEARANCE_DURATION_MS = 200 + ANIMATION_END_DELAY;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   foldersDispatch,
@@ -92,27 +91,10 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const transitionRef = useRef<HTMLDivElement>(null);
 
   const lang = useLang();
-  const [isStoryRibbonAnimated, setIsStoryRibbonAnimated] = useState(false);
 
   useEffect(() => {
     loadChatFolders();
   }, []);
-
-  useLayoutEffect(() => {
-    let timeoutId: number;
-
-    if (isStoryRibbonShown) {
-      timeoutId = window.setTimeout(() => {
-        setIsStoryRibbonAnimated(true);
-      }, STORY_RIBBON_APPEARANCE_DURATION_MS);
-    } else {
-      setIsStoryRibbonAnimated(false);
-    }
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [isStoryRibbonShown]);
 
   const {
     shouldRender: shouldRenderStoryRibbon,
@@ -327,7 +309,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         'ChatFolders',
         shouldRenderFolders && shouldHideFolderTabs && 'ChatFolders--tabs-hidden',
-        shouldRenderStoryRibbon && !isStoryRibbonAnimated && 'withStoryRibbon',
+        shouldRenderStoryRibbon && 'with-story-ribbon',
         storyRibbonClassNames,
       )}
     >

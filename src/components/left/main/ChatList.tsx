@@ -43,7 +43,6 @@ type OwnProps = {
   canDisplayArchive?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
-  isStoryRibbonShown?: boolean;
   className?: string;
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
