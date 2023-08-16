@@ -17,9 +17,9 @@ import type {
   ApiMessageOutgoingStatus,
   ApiReaction,
   ApiStickerSet,
-  ApiTypeStory,
   ApiThreadInfo,
   ApiTopic,
+  ApiTypeStory,
   ApiUser,
   ApiUsername,
 } from '../../../api/types';
@@ -57,7 +57,6 @@ import {
   selectMessageIdsByGroupId,
   selectOutgoingStatus,
   selectPerformanceSettingsValue,
-  selectUserStory,
   selectReplySender,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -71,6 +70,7 @@ import {
   selectTopicFromMessage,
   selectUploadProgress,
   selectUser,
+  selectUserStory,
 } from '../../../global/selectors';
 import {
   areReactionsEmpty,
@@ -936,7 +936,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <div className={className} onDoubleClick={handleContentDoubleClick} dir="auto">
-        {renderSenderName()}
+        {!asForwarded && renderSenderName()}
         {hasSubheader && (
           <div className="message-subheader">
             {hasTopicChip && (
@@ -1229,13 +1229,20 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <div className="message-title" dir="ltr">
-        {senderTitle ? (
+        {(senderTitle || asForwarded) ? (
           <span
-            className={buildClassName('message-title-name interactive', senderColor)}
+            className={buildClassName(
+              'message-title-name',
+              forwardInfo?.hiddenUserName ? 'sender-hidden' : 'interactive',
+              senderColor,
+            )}
             onClick={handleSenderClick}
             dir="ltr"
           >
-            {renderText(senderTitle)}
+            {asForwarded && (
+              <i className={`icon ${forwardInfo?.hiddenUserName ? 'icon-forward' : 'icon-share-filled'}`} />
+            )}
+            {senderTitle ? renderText(senderTitle) : (asForwarded ? NBSP : undefined)}
             {!asForwarded && senderEmojiStatus && (
               <CustomEmoji
                 documentId={senderEmojiStatus.documentId}
@@ -1331,10 +1338,10 @@ const Message: FC<OwnProps & StateProps> = ({
           dir="auto"
         >
           {asForwarded && !isInDocumentGroupNotFirst && (
-            <div className="message-title">
-              {lang(storyData ? 'ForwardedStory' : 'ForwardedMessage')}
+            <>
+              {renderSenderName()}
               {forwardAuthor && <span className="admin-title" dir="auto">{forwardAuthor}</span>}
-            </div>
+            </>
           )}
           {renderContent()}
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && !isStoryMention && renderReactionsAndMeta()}
