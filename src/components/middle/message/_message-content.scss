@@ -276,6 +276,10 @@
       }
     }
 
+    .sender-hidden {
+      font-weight: normal;
+    }
+
     @for $i from 1 through 8 {
       & > .color-#{$i} {
         color: var(--color-user-#{$i});

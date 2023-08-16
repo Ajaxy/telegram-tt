@@ -674,8 +674,11 @@
       --border-top-right-radius: 0;
     }
 
-    &.is-forwarded .content-inner .message-title {
-      margin-bottom: 0.25rem;
+    &.is-forwarded {
+      .message-title .icon {
+        font-size: 0.75rem;
+        margin-right: 0.1875rem;
+      }
     }
   }
 
