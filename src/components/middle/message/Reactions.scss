@@ -34,6 +34,8 @@
     overflow: visible;
     line-height: 1.75rem;
 
+    transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
+
     .ReactionStaticEmoji {
       width: 1.25rem;
     }
@@ -79,6 +81,12 @@
 
     &:hover {
       --reaction-background: var(--reaction-background-hover) !important;
+
+      backdrop-filter: var(--reaction-background-hover-filter);
+
+      @supports not (backdrop-filter: var(--reaction-background-hover-filter)) {
+        filter: var(--reaction-background-hover-filter);
+      }
     }
 
     &:first-of-type {
@@ -111,8 +119,9 @@
   }
 
   .theme-light &.is-outside .Button {
-    --reaction-background: rgb(0, 0, 0, 0.15);
-    --reaction-background-hover: rgba(0, 0, 0, 0.2);
+    --reaction-background: var(--pattern-color);
+    --reaction-background-hover: var(--pattern-color);
+    --reaction-background-hover-filter: brightness(115%);
     --reaction-text-color: white;
 
     &.chosen {
