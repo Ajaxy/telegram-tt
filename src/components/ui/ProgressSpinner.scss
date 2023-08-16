@@ -50,14 +50,8 @@
     width: 3.25rem;
     height: 3.25rem;
 
-    svg {
-      width: 3rem;
-      height: 3rem;
+    &_canvas {
       margin: 0.125rem;
-    }
-
-    circle {
-      stroke-width: 3px;
     }
   }
 
@@ -65,23 +59,8 @@
     background-color: transparent !important;
   }
 
-  svg {
+  &_canvas {
     display: block;
-    transform: rotate(-90deg);
-    transform-origin: 50% 50%;
-    animation: 4s linear 0s infinite ProgressSpinnerAnimation;
-  }
-
-  circle {
-    transition: stroke-dashoffset 0.5s;
-  }
-}
-
-@keyframes ProgressSpinnerAnimation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+    background-color: transparent !important;
   }
 }
