@@ -10,9 +10,8 @@ import { getUserIdDividend } from '../../global/helpers';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 
-import StickerButton from '../common/StickerButton';
+import StickerView from '../common/StickerView';
 
 import './ContactGreeting.scss';
 
@@ -27,8 +26,6 @@ type StateProps = {
   currentMessageList?: MessageList;
 };
 
-const INTERSECTION_DEBOUNCE_MS = 200;
-
 const ContactGreeting: FC<OwnProps & StateProps> = ({
   sticker,
   connectionState,
@@ -42,14 +39,10 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
   } = getActions();
 
   const lang = useLang();
+
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
-  const {
-    observe: observeIntersection,
-  } = useIntersectionObserver({
-    rootRef: containerRef,
-    debounceMs: INTERSECTION_DEBOUNCE_MS,
-  });
+
   useEffect(() => {
     if (sticker || connectionState !== 'connectionStateReady') {
       return;
@@ -64,35 +57,32 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
     }
   }, [connectionState, markMessageListRead, lastUnreadMessageId]);
 
-  const handleStickerSelect = useLastCallback((selectedSticker: ApiSticker) => {
+  const handleStickerSelect = useLastCallback(() => {
     if (!currentMessageList) {
       return;
     }
 
-    selectedSticker = {
-      ...selectedSticker,
-      isPreloadedGlobally: true,
-    };
-    sendMessage({ sticker: selectedSticker, messageList: currentMessageList });
+    sendMessage({
+      sticker: {
+        ...sticker!,
+        isPreloadedGlobally: true,
+      },
+      messageList: currentMessageList,
+    });
   });
 
   return (
-    <div className="ContactGreeting" ref={containerRef}>
+    <div className="ContactGreeting">
       <div className="wrapper">
         <p className="title" dir="auto">{lang('Conversation.EmptyPlaceholder')}</p>
         <p className="description" dir="auto">{lang('Conversation.GreetingText')}</p>
 
-        <div className="sticker">
+        <div ref={containerRef} className="sticker" onClick={handleStickerSelect}>
           {sticker && (
-            <StickerButton
+            <StickerView
+              containerRef={containerRef}
               sticker={sticker}
-              onClick={handleStickerSelect}
-              clickArg={sticker}
-              observeIntersection={observeIntersection}
               size={160}
-              className="large"
-              noContextMenu
-              isCurrentUserPremium
             />
           )}
         </div>
