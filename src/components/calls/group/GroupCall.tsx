@@ -26,6 +26,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 
 import Button from '../../ui/Button';
 import Modal from '../../ui/Modal';
@@ -105,6 +106,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
   const [isFullscreen, openFullscreen, closeFullscreen] = useFlag();
   const [isSidebarOpen, openSidebar, closeSidebar] = useFlag(true);
   const isLandscapeLayout = Boolean(isFullscreen && isLandscape);
+  const isAppFullscreen = useFullscreenStatus();
 
   const firstPresentation = useMemo(() => {
     return Object.values(participants).find(({ presentation }) => presentation);
@@ -253,6 +255,7 @@ const GroupCall: FC<OwnProps & StateProps> = ({
       className={buildClassName(
         styles.root,
         (isFullscreen || isMobile) && styles.fullscreen,
+        isAppFullscreen && styles.appFullscreen,
         isLandscapeLayout && styles.landscape,
         !hasVideoParticipants && styles.noVideoParticipants,
         !isLandscapeLayout && styles.portrait,
