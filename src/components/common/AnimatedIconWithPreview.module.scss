@@ -2,6 +2,10 @@
   position: relative;
 
   display: block !important;
+
+  :global(.AnimatedSticker.not-shown) {
+    display: block;
+  }
 }
 
 .preview {
@@ -10,4 +14,8 @@
   top: 0;
   width: 100%;
   height: 100%;
+
+  &:global(.closing) {
+    transition-delay: 150ms;
+  }
 }
