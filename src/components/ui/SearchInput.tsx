@@ -134,7 +134,7 @@ const SearchInput: FC<OwnProps> = ({
         onKeyDown={handleKeyDown}
       />
       <Transition
-        name="zoomFade"
+        name="fade"
         shouldCleanup
         activeKey={Number(isLoading)}
         className="icon-container"

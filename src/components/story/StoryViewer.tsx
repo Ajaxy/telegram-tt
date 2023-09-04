@@ -10,6 +10,7 @@ import { disableDirectTextInput, enableDirectTextInput } from '../../util/direct
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 
 import ShowTransition from '../ui/ShowTransition';
 import Button from '../ui/Button';
@@ -57,8 +58,10 @@ function StoryViewer({
     }
 
     disableDirectTextInput();
+    const stopPriorityPlayback = dispatchPriorityPlaybackEvent();
 
     return () => {
+      stopPriorityPlayback();
       enableDirectTextInput();
     };
   }, [isOpen]);

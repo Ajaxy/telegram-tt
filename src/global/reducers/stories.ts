@@ -356,7 +356,10 @@ function updateOrderedStoriesUserIds<T extends GlobalState>(global: T, updateUse
   }, { active: [], archived: [] });
 
   function sort(userId: string) {
-    return currentUserId === userId ? Infinity : byUserId[userId].lastUpdatedAt;
+    const PREMIUM_PRIORITY = 1e12;
+    const isPremium = selectUser(global, userId)?.isPremium;
+    const lastUpdated = byUserId[userId].lastUpdatedAt || 0;
+    return currentUserId === userId ? Infinity : (lastUpdated + (isPremium ? PREMIUM_PRIORITY : 0));
   }
 
   newOrderedUserIds.archived = orderBy(

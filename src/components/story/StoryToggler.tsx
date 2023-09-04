@@ -42,6 +42,10 @@ function StoryToggler({
   const lang = useLang();
 
   const users = useMemo(() => {
+    if (orderedUserIds.length === 1) {
+      return [usersById[orderedUserIds[0]]];
+    }
+
     return orderedUserIds
       .map((id) => usersById[id])
       .filter((user) => user && user.id !== currentUserId)
