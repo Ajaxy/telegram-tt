@@ -8,15 +8,15 @@ import type { ApiUserStories } from '../../api/types';
 import { IS_FIREFOX, IS_SAFARI } from '../../util/windowEnvironment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { selectIsStoryViewerOpen, selectTabState, selectUser } from '../../global/selectors';
-import { calculateOffsetX, calculateSlideSizes } from './helpers/dimensions';
+import { calculateOffsetX } from './helpers/dimensions';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
-import useWindowSize from '../../hooks/useWindowSize';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useSignal from '../../hooks/useSignal';
+import { useSlideSizes } from './hooks/useSlideSizes';
 
 import Story from './Story';
 import StoryPreview from './StoryPreview';
@@ -59,10 +59,8 @@ function StorySlides({
   const renderingIsPrivate = useCurrentOrPrev(isPrivate, true);
   const renderingIsSingleUser = useCurrentOrPrev(isSingleUser, true);
   const renderingIsSingleStory = useCurrentOrPrev(isSingleStory, true);
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
-  const slideSizes = useMemo(() => {
-    return calculateSlideSizes(windowWidth, windowHeight);
-  }, [windowWidth, windowHeight]);
+  const slideSizes = useSlideSizes();
+
   const rendersRef = useRef<Record<string, { current: HTMLDivElement | null }>>({});
   const [getIsAnimating, setIsAnimating] = useSignal(false);
 

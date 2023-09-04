@@ -19,11 +19,8 @@
     transform: scale(0);
   }
 
-  :global(.opacity-transition) {
-    transition: opacity 350ms;
-    @media (max-width: 600px) {
-      transition: none;
-    }
+  &:global(.opacity-transition) {
+    transition: opacity 200ms;
   }
 
   :global(.text-entity-link) {
@@ -33,18 +30,6 @@
 
     &:hover {
       text-decoration: none !important;
-    }
-  }
-
-  @media (max-width: 600px) {
-    transition: transform var(--layer-transition);
-
-    :global(body.enable-symbol-menu-transforms) & {
-      transform: translate3d(0, 0, 0);
-    }
-
-    :global(body.is-symbol-menu-open) & {
-      transform: translate3d(0, calc(-1 * (var(--symbol-menu-height))), 0);
     }
   }
 }
@@ -63,6 +48,7 @@
 
 .backdrop {
   background-color: rgba(0, 0, 0, 0.9);
+  z-index: 0;
 }
 
 .backdropNonInteractive {
@@ -78,10 +64,10 @@
   position: absolute;
   right: 1rem;
   top: 1rem;
-  z-index: 2;
+  z-index: 3;
 
   @media (max-width: 600px) {
-    top: 1.125rem;
+    top: 1.25rem;
   }
 }
 
@@ -94,6 +80,7 @@
   overflow: hidden;
   transform: translateX(-50%);
   max-width: calc(73.5rem * var(--story-viewer-scale));
+  z-index: 2;
 
   @media (max-width: 600px) {
     max-width: 100%;
@@ -101,7 +88,7 @@
 }
 
 .slideAnimation {
-  transition: transform 350ms ease-in-out;
+  transition: transform 350ms ease-in-out !important;
 }
 
 .slideAnimationToActive {
@@ -145,8 +132,7 @@
       calc(var(--slide-x, -50%) - var(--slide-translate-x, 0px)),
       calc(-50% - var(--slide-translate-y, 0px)),
       0
-    )
-    scale(var(--slide-translate-scale, 1));
+  ) scale(var(--slide-translate-scale, 1));
   transform-origin: 0 50%;
 
   border-radius: var(--border-radius-default-small);
@@ -173,6 +159,7 @@
 
 .slidePreview {
   overflow: hidden;
+  transition: opacity 200ms ease-in-out;
 
   &::before {
     pointer-events: none;
@@ -187,7 +174,12 @@
   }
 
   &.slideAnimationToActive::before {
-    transition: opacity 350ms ease-in-out;
+    transition: opacity 350ms ease-in-out !important;
+    opacity: 0;
+  }
+
+  .root:global(.not-open) &,
+  :global(body.ghost-animating) & {
     opacity: 0;
   }
 }
@@ -224,7 +216,7 @@
 
   @media (min-width: 600.001px) {
     &.slideAnimationFromActive::before {
-      transition: opacity 350ms ease-in-out;
+      transition: opacity 350ms ease-in-out !important;
       opacity: 1;
     }
   }
@@ -253,6 +245,10 @@
     height: calc(100% - 4rem) !important;
     border-radius: 0;
   }
+
+  :global(body.ghost-animating) & {
+    display: none;
+  }
 }
 
 .media {
@@ -271,6 +267,10 @@
     height: 100%;
     border-radius: 0;
     object-fit: contain;
+  }
+
+  :global(body.ghost-animating) .activeSlide & {
+    display: none;
   }
 }
 
@@ -317,7 +317,8 @@
   }
 }
 
-.storyHeader {
+// Shared styles for the header that are also used in ghost animation
+@mixin story-header {
   position: absolute;
   width: 100%;
   content: "";
@@ -328,6 +329,14 @@
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
   z-index: 1;
   border-radius: var(--border-radius-default-small) var(--border-radius-default-small) 0 0;
+}
+
+.storyHeader {
+  @include story-header;
+
+  :global(body.ghost-animating) & {
+    background: none;
+  }
 }
 
 .storyIndicators {
@@ -459,7 +468,7 @@
 
 .caption {
   position: absolute;
-  bottom: 3.5rem;
+  bottom: calc(3.5rem - 1px);
   left: 0;
   width: 100%;
   display: flex;
@@ -689,4 +698,36 @@
   color: var(--color-text-secondary);
   text-align: center;
   margin-block: auto;
+}
+
+.ghost {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  transition: transform 200ms ease;
+  border-radius: var(--border-radius-default-small);
+
+  &:before {
+    @include story-header;
+  }
+}
+
+.ghost2 {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  border-radius: 50%;
+  opacity: 0;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.ghostImage {
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  object-fit: cover;
+  @media (max-width: 600px) {
+    object-fit: contain;
+  }
 }

@@ -1,8 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { StoryViewerOrigin } from '../../../types';
+import type { ChatAnimationTypes } from './hooks';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat,
   ApiFormattedText,
@@ -13,7 +16,6 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../../api/types';
-import type { ChatAnimationTypes } from './hooks';
 
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
@@ -49,7 +51,6 @@ import useSelectorSignal from '../../../hooks/useSelectorSignal';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
 import useChatListEntry from './hooks/useChatListEntry';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useAppLayout from '../../../hooks/useAppLayout';
 import useShowTransition from '../../../hooks/useShowTransition';
 
@@ -265,6 +266,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           isSavedMessages={user?.isSelf}
           withStory={user && !user?.isSelf}
           withStoryGap={isAvatarOnlineShown}
+          storyViewerOrigin={StoryViewerOrigin.ChatList}
           storyViewerMode="single-user"
         />
         <div className="avatar-badge-wrapper">

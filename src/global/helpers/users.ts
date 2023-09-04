@@ -280,3 +280,7 @@ export function getUserColorKey(peer: ApiUser | ApiChat | undefined) {
 export function getMainUsername(userOrChat: ApiUser | ApiChat) {
   return userOrChat.usernames?.find((u) => u.isActive)?.username;
 }
+
+export function getUserStoryHtmlId(userId: string) {
+  return `user-story${userId}`;
+}

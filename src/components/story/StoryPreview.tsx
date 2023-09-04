@@ -2,6 +2,7 @@ import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiTypeStory, ApiUser, ApiUserStories } from '../../api/types';
+import type { StoryViewerOrigin } from '../../types';
 
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
@@ -19,10 +20,11 @@ interface OwnProps {
 
 interface StateProps {
   lastViewedId?: number;
+  origin?: StoryViewerOrigin;
 }
 
 function StoryPreview({
-  user, userStories, lastViewedId,
+  user, userStories, lastViewedId, origin,
 }: OwnProps & StateProps) {
   const { openStoryViewer, loadUserSkippedStories } = getActions();
 
@@ -61,7 +63,7 @@ function StoryPreview({
   return (
     <div
       className={styles.slideInner}
-      onClick={() => { openStoryViewer({ userId: story.userId, storyId: story.id }); }}
+      onClick={() => { openStoryViewer({ userId: story.userId, storyId: story.id, origin }); }}
     >
       {thumbUrl && (
         <img src={thumbUrl} alt="" className={styles.media} draggable={false} />
@@ -83,10 +85,12 @@ export default memo(withGlobal<OwnProps>((global, { user }): StateProps => {
   const {
     storyViewer: {
       lastViewedByUserIds,
+      origin,
     },
   } = selectTabState(global);
 
   return {
     lastViewedId: user?.id ? lastViewedByUserIds?.[user.id] : undefined,
+    origin,
   };
 })(StoryPreview));
