@@ -31,9 +31,9 @@ export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUse
     noVoiceMessages: voiceMessagesForbidden,
     hasPinnedStories: Boolean(storiesPinnedAvailable),
     isTranslationDisabled: translationsDisabled,
-    ...(profilePhoto instanceof GramJs.Photo && { profilePhoto: buildApiPhoto(profilePhoto) }),
-    ...(fallbackPhoto instanceof GramJs.Photo && { fallbackPhoto: buildApiPhoto(fallbackPhoto) }),
-    ...(personalPhoto instanceof GramJs.Photo && { personalPhoto: buildApiPhoto(personalPhoto) }),
+    profilePhoto: profilePhoto instanceof GramJs.Photo ? buildApiPhoto(profilePhoto) : undefined,
+    fallbackPhoto: fallbackPhoto instanceof GramJs.Photo ? buildApiPhoto(fallbackPhoto) : undefined,
+    personalPhoto: personalPhoto instanceof GramJs.Photo ? buildApiPhoto(personalPhoto) : undefined,
     ...(premiumGifts && { premiumGifts: premiumGifts.map((gift) => buildApiPremiumGiftOption(gift)) }),
     ...(botInfo && { botInfo: buildApiBotInfo(botInfo, userId) }),
   };

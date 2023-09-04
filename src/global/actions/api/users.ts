@@ -26,6 +26,7 @@ import {
   updateUsers,
   updateUserSearch,
   updateUserSearchFetchingStatus,
+  updateUserFullInfo,
 } from '../../reducers';
 import { getServerTime } from '../../../util/serverTime';
 import * as langProvider from '../../../util/langProvider';
@@ -36,7 +37,7 @@ const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runThrottledForSearch = throttle((cb) => cb(), 500, false);
 
 addActionHandler('loadFullUser', async (global, actions, payload): Promise<void> => {
-  const { userId } = payload!;
+  const { userId, withPhotos } = payload!;
   const user = selectUser(global, userId);
   if (!user) {
     return;
@@ -53,8 +54,15 @@ addActionHandler('loadFullUser', async (global, actions, payload): Promise<void>
   const hasChangedProfilePhoto = fullInfo?.profilePhoto?.id !== newFullInfo?.profilePhoto?.id;
   const hasChangedFallbackPhoto = fullInfo?.fallbackPhoto?.id !== newFullInfo?.fallbackPhoto?.id;
   const hasChangedPersonalPhoto = fullInfo?.personalPhoto?.id !== newFullInfo?.personalPhoto?.id;
-  if ((hasChangedAvatarHash || hasChangedProfilePhoto || hasChangedFallbackPhoto || hasChangedPersonalPhoto)
-    && user.photos?.length) {
+  const hasChangedPhoto = hasChangedAvatarHash
+    || hasChangedProfilePhoto
+    || hasChangedFallbackPhoto
+    || hasChangedPersonalPhoto;
+
+  global = updateUser(global, userId, result.user);
+  global = updateUserFullInfo(global, userId, result.fullInfo);
+  setGlobal(global);
+  if (withPhotos || (user.photos?.length && hasChangedPhoto)) {
     actions.loadProfilePhotos({ profileId: userId });
   }
 });
@@ -271,11 +279,13 @@ addActionHandler('loadProfilePhotos', async (global, actions, payload): Promise<
 
   const userOrChat = user || chat;
   const { photos, users } = result;
-  photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
+
   const fallbackPhoto = fullInfo?.fallbackPhoto;
   const personalPhoto = fullInfo?.personalPhoto;
   if (fallbackPhoto) photos.push(fallbackPhoto);
   if (personalPhoto) photos.unshift(personalPhoto);
+
+  photos.sort((a) => (a.id === userOrChat?.avatarHash ? -1 : 1));
 
   global = addUsers(global, buildCollectionByKey(users, 'id'));
 

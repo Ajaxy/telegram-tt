@@ -41,6 +41,7 @@ import Avatar from './Avatar';
 import './ProfileInfo.scss';
 
 import styles from './ProfileInfo.module.scss';
+import { useStateRef } from '../../hooks/useStateRef';
 
 type OwnProps = {
   userId: string;
@@ -98,10 +99,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
   const photos = user?.photos || chat?.photos || MEMO_EMPTY_ARRAY;
   const prevMediaId = usePrevious(mediaId);
   const prevAvatarOwnerId = usePrevious(avatarOwnerId);
+  const mediaIdRef = useStateRef(mediaId);
   const [hasSlideAnimation, setHasSlideAnimation] = useState(true);
-  const slideAnimation = hasSlideAnimation
-    ? (lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized')
-    : 'none';
+  // slideOptimized doesn't work well when animation is dynamically disabled
+  const slideAnimation = hasSlideAnimation ? (lang.isRtl ? 'slideRtl' : 'slide') : 'none';
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const isFirst = isSavedMessages || photos.length <= 1 || currentPhotoIndex === 0;
@@ -115,9 +116,16 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     }
   }, [mediaId, prevMediaId, prevAvatarOwnerId]);
 
+  // Reset the current avatar photo to the one selected in Media Viewer if photos have changed
+  useEffect(() => {
+    setHasSlideAnimation(false);
+    setCurrentPhotoIndex(mediaIdRef.current || 0);
+  }, [mediaIdRef, photos]);
+
   // Deleting the last profile photo may result in an error
   useEffect(() => {
     if (currentPhotoIndex > photos.length) {
+      setHasSlideAnimation(false);
       setCurrentPhotoIndex(Math.max(0, photos.length - 1));
     }
   }, [currentPhotoIndex, photos.length]);

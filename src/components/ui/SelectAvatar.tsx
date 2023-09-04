@@ -1,4 +1,4 @@
-import type { ChangeEvent, RefObject } from 'react';
+import type { RefObject } from 'react';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 
 import type { FC } from '../../lib/teact/teact';
@@ -6,6 +6,7 @@ import type { FC } from '../../lib/teact/teact';
 import CropModal from './CropModal';
 
 import styles from './SelectAvatar.module.scss';
+import { openSystemFilesDialog } from '../../util/systemFilesDialog';
 
 type OwnProps = {
   onChange: (file: File) => void;
@@ -18,17 +19,6 @@ const SelectAvatar: FC<OwnProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | undefined>();
 
-  function handleSelectFile(event: ChangeEvent<HTMLInputElement>) {
-    const target = event.target as HTMLInputElement;
-
-    if (!target?.files?.[0]) {
-      return;
-    }
-
-    setSelectedFile(target.files[0]);
-    target.value = '';
-  }
-
   const handleAvatarCrop = useCallback((croppedImg: File) => {
     setSelectedFile(undefined);
     onChange(croppedImg);
@@ -38,15 +28,19 @@ const SelectAvatar: FC<OwnProps> = ({
     setSelectedFile(undefined);
   }, []);
 
+  const handleClick = useCallback(() => {
+    openSystemFilesDialog('image/png, image/jpeg', ((event) => {
+      const target = event.target as HTMLInputElement;
+      if (!target?.files?.[0]) {
+        return;
+      }
+      setSelectedFile(target.files[0]);
+    }), true);
+  }, []);
+
   return (
     <>
-      <input
-        type="file"
-        onChange={handleSelectFile}
-        accept="image/png, image/jpeg"
-        ref={inputRef}
-        className={styles.input}
-      />
+      <input ref={inputRef} className={styles.input} onClick={handleClick} />
       <CropModal file={selectedFile} onClose={handleModalClose} onChange={handleAvatarCrop} />
     </>
   );

@@ -307,7 +307,7 @@ const MediaViewer: FC<StateProps> = ({
         chatId={avatarOwner.id}
         isAvatar
         isFallbackAvatar={isUserId(avatarOwner.id)
-          && (avatarOwner as ApiUser).photos?.[mediaId!].id === avatarOwnerFallbackPhoto?.id}
+          && (avatarOwner as ApiUser).photos?.[mediaId!]?.id === avatarOwnerFallbackPhoto?.id}
       />
     ) : (
       <SenderInfo

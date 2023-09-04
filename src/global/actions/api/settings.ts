@@ -17,7 +17,9 @@ import { subscribe, unsubscribe, requestPermission } from '../../../util/notific
 import { setTimeFormat } from '../../../util/langProvider';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
-import { selectChat, selectUser, selectTabState } from '../../selectors';
+import {
+  selectChat, selectUser, selectTabState, selectUserFullInfo,
+} from '../../selectors';
 import {
   addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
   addNotifyExceptions, updateChat, updateUserFullInfo,
@@ -50,7 +52,6 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
       global = getGlobal();
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
       setGlobal(global);
-      actions.loadProfilePhotos({ profileId: currentUserId });
     }
   }
 
@@ -97,6 +98,10 @@ addActionHandler('updateProfile', async (global, actions, payload): Promise<void
     },
   }, tabId);
   setGlobal(global);
+
+  if (photo) {
+    actions.loadFullUser({ userId: currentUserId, withPhotos: true });
+  }
 });
 
 addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise<void> => {
@@ -108,6 +113,7 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
 
   global = updateUser(global, currentUserId, { avatarHash: undefined });
   global = updateUserFullInfo(global, currentUserId, { profilePhoto: undefined });
+
   setGlobal(global);
 
   const result = await callApi('updateProfilePhoto', photo, isFallback);
@@ -117,28 +123,40 @@ addActionHandler('updateProfilePhoto', async (global, actions, payload): Promise
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(users, 'id'));
   setGlobal(global);
-
-  actions.loadFullUser({ userId: currentUserId });
-  actions.loadProfilePhotos({ profileId: currentUserId });
+  actions.loadFullUser({ userId: currentUserId, withPhotos: true });
 });
 
 addActionHandler('deleteProfilePhoto', async (global, actions, payload): Promise<void> => {
   const { photo } = payload;
   const { currentUserId } = global;
   if (!currentUserId) return;
-  const currentUser = selectChat(global, currentUserId);
+  const currentUser = selectUser(global, currentUserId);
   if (!currentUser) return;
-  if (currentUser.avatarHash === photo.id) {
+
+  const fullInfo = selectUserFullInfo(global, currentUserId);
+
+  if (currentUser.avatarHash === photo.id || fullInfo?.profilePhoto?.id === photo.id) {
     global = updateUser(global, currentUserId, { avatarHash: undefined });
     global = updateUserFullInfo(global, currentUserId, { profilePhoto: undefined });
-    setGlobal(global);
   }
 
-  const result = await callApi('deleteProfilePhotos', [photo]);
-  if (!result) return;
+  if (fullInfo?.fallbackPhoto?.id === photo.id) {
+    global = updateUserFullInfo(global, currentUserId, { fallbackPhoto: undefined });
+  }
 
-  actions.loadFullUser({ userId: currentUserId });
-  actions.loadProfilePhotos({ profileId: currentUserId });
+  if (fullInfo?.personalPhoto?.id === photo.id) {
+    global = updateUserFullInfo(global, currentUserId, { personalPhoto: undefined });
+  }
+
+  const { photos = [] } = currentUser;
+
+  const newPhotos = photos.filter((p) => p.id !== photo.id);
+  global = updateUser(global, currentUserId, { photos: newPhotos });
+
+  setGlobal(global);
+
+  await callApi('deleteProfilePhotos', [photo]);
+  actions.loadFullUser({ userId: currentUserId, withPhotos: true });
 });
 
 addActionHandler('checkUsername', async (global, actions, payload): Promise<void> => {
