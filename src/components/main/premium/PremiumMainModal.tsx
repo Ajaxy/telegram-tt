@@ -4,7 +4,9 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiPremiumPromo, ApiUser } from '../../../api/types';
+import type {
+  ApiPremiumPromo, ApiSticker, ApiStickerSet, ApiUser,
+} from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
 import PremiumFeatureModal, {
@@ -15,19 +17,24 @@ import PremiumFeatureModal, {
 import { TME_LINK_PREFIX } from '../../../config';
 import { formatCurrency } from '../../../util/formatCurrency';
 import buildClassName from '../../../util/buildClassName';
-import { selectTabState, selectIsCurrentUserPremium, selectUser } from '../../../global/selectors';
+import {
+  selectTabState, selectIsCurrentUserPremium, selectUser, selectStickerSet,
+} from '../../../global/selectors';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { selectPremiumLimit } from '../../../global/selectors/limits';
 import renderText from '../../common/helpers/renderText';
 import { getUserFullName } from '../../../global/helpers';
+import { REM } from '../../common/helpers/mediaDimensions';
 
 import useLang from '../../../hooks/useLang';
 import useSyncEffect from '../../../hooks/useSyncEffect';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
 import PremiumFeatureItem from './PremiumFeatureItem';
 import Transition from '../../ui/Transition';
+import CustomEmoji from '../../common/CustomEmoji';
 
 import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
 import PremiumLimits from '../../../assets/premium/PremiumLimits.svg';
@@ -47,6 +54,7 @@ import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 import styles from './PremiumMainModal.module.scss';
 
 const LIMIT_ACCOUNTS = 4;
+const STATUS_EMOJI_SIZE = 8 * REM;
 
 const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
   double_limits: PremiumLimits,
@@ -73,6 +81,8 @@ type StateProps = {
   promo?: ApiPremiumPromo;
   isClosing?: boolean;
   fromUser?: ApiUser;
+  fromUserStatusEmoji?: ApiSticker;
+  fromUserStatusSet?: ApiStickerSet;
   toUser?: ApiUser;
   initialSection?: string;
   isPremium?: boolean;
@@ -93,6 +103,8 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   isOpen,
   currentUserId,
   fromUser,
+  fromUserStatusEmoji,
+  fromUserStatusSet,
   promo,
   initialSection,
   isPremium,
@@ -113,7 +125,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const dialogRef = useRef<HTMLDivElement>(null);
   const {
-    closePremiumModal, openInvoice, requestConfetti, openTelegramLink,
+    closePremiumModal, openInvoice, requestConfetti, openTelegramLink, loadStickers, openStickerSet,
   } = getActions();
 
   const lang = useLang();
@@ -148,9 +160,9 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     }
   }
 
-  function handleClick() {
+  const handleClick = useLastCallback(() => {
     handleClickWithStartParam();
-  }
+  });
 
   const showConfetti = useCallback(() => {
     const dialog = dialogRef.current;
@@ -185,7 +197,39 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
     return premiumPromoOrder.filter((section) => PREMIUM_FEATURE_SECTIONS.includes(section));
   }, [premiumPromoOrder]);
 
-  if (!promo) return undefined;
+  useEffect(() => {
+    if (!fromUserStatusEmoji || fromUserStatusSet) return;
+    loadStickers({
+      stickerSetInfo: fromUserStatusEmoji.stickerSetInfo,
+    });
+  }, [loadStickers, fromUserStatusEmoji, fromUserStatusSet]);
+
+  const handleOpenStatusSet = useLastCallback(() => {
+    if (!fromUserStatusSet) return;
+
+    openStickerSet({
+      stickerSetInfo: fromUserStatusSet,
+    });
+  });
+
+  const stickerSetTitle = useMemo(() => {
+    if (!fromUserStatusSet || !fromUser) return undefined;
+
+    const template = lang('lng_premium_emoji_status_title').replace('{user}', getUserFullName(fromUser)!);
+    const [first, second] = template.split('{link}');
+
+    const emoji = fromUserStatusSet.thumbCustomEmojiId ? (
+      <CustomEmoji className={styles.stickerSetLinkIcon} documentId={fromUserStatusSet.thumbCustomEmojiId} />
+    ) : undefined;
+    const link = (
+      <span className={styles.stickerSetLink} onClick={handleOpenStatusSet}>
+        {emoji}{renderText(fromUserStatusSet.title)}
+      </span>
+    );
+    return [renderText(first), link, renderText(second)];
+  }, [fromUser, fromUserStatusSet, lang]);
+
+  if (!promo || (fromUserStatusEmoji && !fromUserStatusSet)) return undefined;
 
   // TODO Support all subscription options
   const month = promo.options.find((option) => option.months === 1)!;
@@ -207,6 +251,10 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
       return fromUser?.id === currentUserId
         ? lang('TelegramPremiumUserGiftedPremiumOutboundDialogSubtitle', getUserFullName(toUser))
         : lang('TelegramPremiumUserGiftedPremiumDialogSubtitle');
+    }
+
+    if (fromUserStatusSet) {
+      return lang('TelegramPremiumUserStatusDialogSubtitle');
     }
 
     return fromUser
@@ -252,9 +300,19 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             >
               <i className="icon icon-close" />
             </Button>
-            <img className={styles.logo} src={PremiumLogo} alt="" />
-            <h2 className={styles.headerText}>
-              {renderText(getHeaderText(), ['simple_markdown', 'emoji'])}
+            {fromUserStatusEmoji ? (
+              <CustomEmoji
+                className={styles.statusEmoji}
+                onClick={handleOpenStatusSet}
+                documentId={fromUserStatusEmoji.id}
+                isBig
+                size={STATUS_EMOJI_SIZE}
+              />
+            ) : (
+              <img className={styles.logo} src={PremiumLogo} alt="" />
+            )}
+            <h2 className={buildClassName(styles.headerText, fromUserStatusSet && styles.stickerSetText)}>
+              {fromUserStatusSet ? stickerSetTitle : renderText(getHeaderText(), ['simple_markdown', 'emoji'])}
             </h2>
             <div className={styles.description}>
               {renderText(getHeaderDescription(), ['simple_markdown', 'emoji'])}
@@ -297,7 +355,6 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             </div>
             {!isPremium && (
               <div className={styles.footer}>
-                {/* eslint-disable-next-line react/jsx-no-bind */}
                 <Button className={styles.button} isShiny withPremiumGradient onClick={handleClick}>
                   {lang('SubscribeToPremium', formatCurrency(Number(month.amount), month.currency, lang.code))}
                 </Button>
@@ -324,6 +381,13 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     premiumModal,
   } = selectTabState(global);
+
+  const fromUser = premiumModal?.fromUserId ? selectUser(global, premiumModal.fromUserId) : undefined;
+  const fromUserStatusEmoji = fromUser?.emojiStatus ? global.customEmojis.byId[fromUser.emojiStatus.documentId]
+    : undefined;
+  const fromUserStatusSet = fromUserStatusEmoji ? selectStickerSet(global, fromUserStatusEmoji.stickerSetInfo)
+    : undefined;
+
   return {
     currentUserId: global.currentUserId,
     promo: premiumModal?.promo,
@@ -331,7 +395,9 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
     isSuccess: premiumModal?.isSuccess,
     isGift: premiumModal?.isGift,
     monthsAmount: premiumModal?.monthsAmount,
-    fromUser: premiumModal?.fromUserId ? selectUser(global, premiumModal.fromUserId) : undefined,
+    fromUser,
+    fromUserStatusEmoji,
+    fromUserStatusSet,
     toUser: premiumModal?.toUserId ? selectUser(global, premiumModal.toUserId) : undefined,
     initialSection: premiumModal?.initialSection,
     isPremium: selectIsCurrentUserPremium(global),

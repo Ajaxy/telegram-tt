@@ -44,7 +44,7 @@
   .custom-emoji {
     --custom-emoji-size: 1.5rem;
 
-    color: var(--color-white);
+    color: var(--color-white) !important;
     pointer-events: auto;
     cursor: var(--custom-cursor, pointer);
   }

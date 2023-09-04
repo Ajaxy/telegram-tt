@@ -138,10 +138,10 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
     });
   });
 
-  const handleClickPremium = useLastCallback(() => {
-    if (!user) return;
+  const handleStatusClick = useLastCallback(() => {
+    if (!userId) return;
 
-    openPremiumModal({ fromUserId: user.id });
+    openPremiumModal({ fromUserId: userId });
   });
 
   const selectPreviousMedia = useLastCallback(() => {
@@ -334,7 +334,7 @@ const ProfileInfo: FC<OwnProps & StateProps> = ({
             withEmojiStatus
             emojiStatusSize={EMOJI_STATUS_SIZE}
             isSavedMessages={isSavedMessages}
-            onEmojiStatusClick={handleClickPremium}
+            onEmojiStatusClick={handleStatusClick}
             noLoopLimit
             canCopyTitle
           />
