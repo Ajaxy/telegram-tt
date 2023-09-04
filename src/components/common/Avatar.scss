@@ -118,6 +118,17 @@
     }
   }
 
+  &.size-giant {
+    width: 5rem;
+    height: 5rem;
+    font-size: 2.5rem;
+
+    .emoji {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
   &.size-jumbo {
     width: 7.5rem;
     height: 7.5rem;

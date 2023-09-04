@@ -41,6 +41,7 @@ type OwnProps<T> = {
   isCurrentUserPremium?: boolean;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   withTranslucentThumb?: boolean;
+  forcePlayback?: boolean;
   observeIntersection: ObserveFn;
   observeIntersectionForShowing?: ObserveFn;
   noShowPremium?: boolean;
@@ -79,6 +80,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
   noShowPremium,
   sharedCanvasRef,
   withTranslucentThumb,
+  forcePlayback,
   onClick,
   clickArg,
   onFaveClick,
@@ -301,6 +303,7 @@ const StickerButton = <T extends number | ApiSticker | ApiBotInlineMediaResult |
           sharedCanvasRef={sharedCanvasRef}
           withTranslucentThumb={withTranslucentThumb}
           customColor={customColor}
+          forceAlways={forcePlayback}
         />
       )}
       {!noShowPremium && isLocked && (

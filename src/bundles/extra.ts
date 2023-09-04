@@ -7,6 +7,7 @@ export { default as AttachBotRecipientPicker } from '../components/main/AttachBo
 export { default as Dialogs } from '../components/main/Dialogs';
 export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
+export { default as MapModal } from '../components/modals/mapModal/MapModal';
 export { default as UrlAuthModal } from '../components/main/UrlAuthModal';
 export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';

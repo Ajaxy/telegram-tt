@@ -23,7 +23,7 @@ import {
 } from './peers';
 import { omitVirtualClassFields } from './helpers';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
-import { buildApiReaction } from './messages';
+import { buildApiReaction } from './reactions';
 import { buildApiUsernames } from './common';
 
 type PeerEntityApiChatFields = Omit<ApiChat, (

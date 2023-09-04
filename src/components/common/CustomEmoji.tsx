@@ -36,6 +36,7 @@ type OwnProps = {
   withTranslucentThumb?: boolean;
   shouldPreloadPreview?: boolean;
   forceOnHeavyAnimation?: boolean;
+  forceAlways?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
@@ -58,6 +59,7 @@ const CustomEmoji: FC<OwnProps> = ({
   sharedCanvasHqRef,
   withTranslucentThumb,
   shouldPreloadPreview,
+  forceAlways,
   forceOnHeavyAnimation,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -137,6 +139,7 @@ const CustomEmoji: FC<OwnProps> = ({
           loopLimit={loopLimit}
           shouldPreloadPreview={shouldPreloadPreview || noPlay || !canPlay}
           forceOnHeavyAnimation={forceOnHeavyAnimation}
+          forceAlways={forceAlways}
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withSharedAnimation={withSharedAnimation}

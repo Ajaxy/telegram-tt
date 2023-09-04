@@ -29,6 +29,7 @@ type OwnProps = {
   canSendStickers?: boolean;
   isMessageComposer?: boolean;
   idPrefix: string;
+  forceDarkTheme?: boolean;
   openSymbolMenu: VoidFunction;
   closeSymbolMenu: VoidFunction;
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
@@ -65,6 +66,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
   canSendPlainText,
   isSymbolMenuForced,
   className,
+  forceDarkTheme,
   inputCssSelector = EDITABLE_INPUT_CSS_SELECTOR,
   openSymbolMenu,
   closeSymbolMenu,
@@ -196,7 +198,7 @@ const SymbolMenuButton: FC<OwnProps> = ({
         addRecentCustomEmoji={addRecentCustomEmoji}
         isAttachmentModal={isAttachmentModal}
         canSendPlainText={canSendPlainText}
-        className={className}
+        className={buildClassName(className, forceDarkTheme && 'component-theme-dark')}
         positionX={isAttachmentModal ? positionX : undefined}
         positionY={isAttachmentModal ? positionY : undefined}
         transformOriginX={isAttachmentModal ? transformOriginX : undefined}

@@ -66,7 +66,7 @@ const AnimatedEmoji: FC<OwnProps & StateProps> = ({
       noLoad={!isIntersecting}
       forcePreview={forceLoadPreview}
       play={isIntersecting}
-      forceOnHeavyAnimation
+      forceAlways
       ref={ref}
       className={buildClassName('AnimatedEmoji media-inner', sticker?.id === LIKE_STICKER_ID && 'like-sticker-thumb')}
       style={style}

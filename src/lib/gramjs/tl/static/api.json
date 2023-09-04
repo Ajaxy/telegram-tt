@@ -308,5 +308,7 @@
     "stories.incrementStoryViews",
     "stories.getStoryViewsList",
     "stories.exportStoryLink",
-    "stories.report"
+    "stories.report",
+    "stories.activateStealthMode",
+    "stories.sendReaction"
 ]

@@ -4,20 +4,24 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
-import type { ApiStory, ApiTypeStory, ApiUser } from '../../api/types';
+import type {
+  ApiStealthMode, ApiStory, ApiTypeStory, ApiUser,
+} from '../../api/types';
 import type { IDimensions } from '../../global/types';
 import type { Signal } from '../../util/signals';
-
 import { MAIN_THREAD_ID } from '../../api/types';
+
+import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
+import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
 import { getUserFirstOrLastName } from '../../global/helpers';
-import { formatRelativeTime } from '../../util/dateFormat';
 import { getServerTime } from '../../util/serverTime';
 import {
   selectChat, selectTabState, selectUserStory, selectUserStories, selectIsCurrentUserPremium,
 } from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import download from '../../util/download';
 
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
@@ -33,7 +37,7 @@ import useLongPress from '../../hooks/useLongPress';
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import { useStoryProps } from './hooks/useStoryProps';
+import useStoryProps from './hooks/useStoryProps';
 
 import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
@@ -42,9 +46,10 @@ import StoryProgress from './StoryProgress';
 import Composer from '../common/Composer';
 import MenuItem from '../ui/MenuItem';
 import DropdownMenu from '../ui/DropdownMenu';
-import Skeleton from '../ui/Skeleton';
+import Skeleton from '../ui/placeholder/Skeleton';
 import StoryCaption from './StoryCaption';
 import AvatarList from '../common/AvatarList';
+import MediaAreaOverlay from './MediaAreaOverlay';
 
 import styles from './StoryViewer.module.scss';
 
@@ -77,6 +82,7 @@ interface StateProps {
   isChatExist?: boolean;
   areChatSettingsLoaded?: boolean;
   isCurrentUserPremium?: boolean;
+  stealthMode: ApiStealthMode;
 }
 
 const VIDEO_MIN_READY_STATE = 4;
@@ -84,6 +90,8 @@ const SPACEBAR_CODE = 32;
 
 const PRIMARY_VIDEO_MIME = 'video/mp4; codecs=hvc1.1.6.L63.00';
 const SECONDARY_VIDEO_MIME = 'video/mp4; codecs=avc1.64001E';
+
+const STEALTH_MODE_NOTIFICATION_DURATION = 4000;
 
 function Story({
   isSelf,
@@ -104,6 +112,7 @@ function Story({
   areChatSettingsLoaded,
   getIsAnimating,
   isCurrentUserPremium,
+  stealthMode,
   onDelete,
   onClose,
   onReport,
@@ -115,7 +124,7 @@ function Story({
     openNextStory,
     loadUserSkippedStories,
     openForwardMenu,
-    openStorySeenBy,
+    openStoryViewModal,
     copyStoryLink,
     toggleStoryPinned,
     openChat,
@@ -123,7 +132,8 @@ function Story({
     openStoryPrivacyEditor,
     loadChatSettings,
     fetchChat,
-    loadStorySeenBy,
+    loadStoryViews,
+    toggleStealthModal,
   } = getActions();
   const serverTime = getServerTime();
 
@@ -137,6 +147,7 @@ function Story({
   const [isCaptionExpanded, expandCaption, foldCaption] = useFlag(false);
   const [isPausedBySpacebar, setIsPausedBySpacebar] = useState(false);
   const [isPausedByLongPress, markIsPausedByLongPress, unmarkIsPausedByLongPress] = useFlag(false);
+  const [isDropdownMenuOpen, markDropdownMenuOpen, unmarkDropdownMenuOpen] = useFlag(false);
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
   const {
@@ -151,9 +162,14 @@ function Story({
     altMediaData,
     hasFullData,
     hasThumb,
-  } = useStoryProps(story);
+    mediaAreas,
+    canDownload,
+    downloadMediaData,
+  } = useStoryProps(story, isCurrentUserPremium, isDropdownMenuOpen);
 
   const isLoadedStory = story && 'content' in story;
+
+  const isChangelog = userId === storyChangelogUserId;
 
   const canPinToProfile = useCurrentOrPrev(
     isSelf && isLoadedStory ? !story.isPinned : undefined,
@@ -164,12 +180,12 @@ function Story({
     true,
   );
   const areViewsExpired = Boolean(
-    isSelf && !isCurrentUserPremium && isLoadedStory && (story!.date + viewersExpirePeriod) < getServerTime(),
+    isSelf && isLoadedStory && (story!.date + viewersExpirePeriod) < getServerTime(),
   );
   const canCopyLink = Boolean(
     isLoadedStory
     && story.isPublic
-    && userId !== storyChangelogUserId
+    && !isChangelog
     && user?.usernames?.length,
   );
 
@@ -177,17 +193,24 @@ function Story({
     isLoadedStory
     && story.isPublic
     && !story.noForwards
-    && userId !== storyChangelogUserId
+    && !isChangelog
     && !isCaptionExpanded,
+  );
+  const canShareOwn = Boolean(
+    isSelf
+    && isLoadedStory
+    && story.isPublic
+    && !story.noForwards,
   );
 
   const canPlayStory = Boolean(
     hasFullData && !shouldForcePause && isAppFocused && !isComposerHasFocus && !isCaptionExpanded
     && !isPausedBySpacebar && !isPausedByLongPress,
   );
+
   const {
     shouldRender: shouldRenderSkeleton, transitionClassNames: skeletonTransitionClassNames,
-  } = useShowTransition((isVideo && !hasFullData) || (!isVideo && !previewBlobUrl));
+  } = useShowTransition(!hasFullData);
 
   const {
     transitionClassNames: mediaTransitionClassNames,
@@ -199,7 +222,7 @@ function Story({
   const {
     shouldRender: shouldRenderComposer,
     transitionClassNames: composerAppearanceAnimationClassNames,
-  } = useShowTransition(!isSelf);
+  } = useShowTransition(!isSelf && !isChangelog);
 
   const {
     shouldRender: shouldRenderCaptionBackdrop,
@@ -255,6 +278,16 @@ function Story({
     unmarkIsPausedByLongPress();
   });
 
+  const handleDropdownMenuOpen = useLastCallback(() => {
+    markDropdownMenuOpen();
+    handlePauseStory();
+  });
+
+  const handleDropdownMenuClose = useLastCallback(() => {
+    unmarkDropdownMenuOpen();
+    handlePlayStory();
+  });
+
   const {
     onMouseDown: handleLongPressMouseDown,
     onMouseUp: handleLongPressMouseUp,
@@ -279,7 +312,7 @@ function Story({
     if (!isSelf || isDeletedStory || areViewsExpired) return;
 
     // Refresh recent viewers list each time
-    loadStorySeenBy({ storyId });
+    loadStoryViews({ storyId, isPreload: true });
   }, [isDeletedStory, areViewsExpired, isSelf, storyId]);
 
   useEffect(() => {
@@ -394,8 +427,8 @@ function Story({
     handlePauseStory();
   });
 
-  const handleOpenStorySeenBy = useLastCallback(() => {
-    openStorySeenBy({ storyId });
+  const handleOpenStoryViewModal = useLastCallback(() => {
+    openStoryViewModal({ storyId });
   });
 
   const handleInfoPrivacyEdit = useLastCallback(() => {
@@ -437,6 +470,25 @@ function Story({
     setStoryViewerMuted({ isMuted: !isMuted });
   });
 
+  const handleOpenStealthModal = useLastCallback(() => {
+    if (stealthMode.activeUntil && getServerTime() < stealthMode.activeUntil) {
+      const diff = stealthMode.activeUntil - getServerTime();
+      showNotification({
+        title: lang('StealthModeOn'),
+        message: lang('Story.ToastStealthModeActiveText', formatMediaDuration(diff)),
+        duration: STEALTH_MODE_NOTIFICATION_DURATION,
+      });
+      return;
+    }
+
+    toggleStealthModal({ isOpen: true });
+  });
+
+  const handleDownload = useLastCallback(() => {
+    if (!downloadMediaData) return;
+    download(downloadMediaData, `story-${userId}-${storyId}.${isVideo ? 'mp4' : 'jpg'}`);
+  });
+
   useEffect(() => {
     if (!isDeletedStory) return;
 
@@ -457,7 +509,7 @@ function Story({
           onClick={onTrigger}
           ariaLabel={lang('AccDescrOpenMenu2')}
         >
-          <i className="icon icon-more" aria-hidden />
+          <i className={buildClassName('icon icon-more', styles.topIcon)} aria-hidden />
         </Button>
       );
     };
@@ -571,6 +623,7 @@ function Story({
                 className={buildClassName(
                   'icon',
                   isMuted || noSound ? 'icon-speaker-muted-story' : 'icon-speaker-story',
+                  styles.topIcon,
                 )}
                 aria-hidden
               />
@@ -580,8 +633,8 @@ function Story({
             className={buildClassName(styles.button, styles.buttonMenu)}
             trigger={MenuButton}
             positionX="right"
-            onOpen={handlePauseStory}
-            onClose={handlePlayStory}
+            onOpen={handleDropdownMenuOpen}
+            onClose={handleDropdownMenuClose}
           >
             {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>}
             {canPinToProfile && (
@@ -590,8 +643,14 @@ function Story({
             {canUnpinFromProfile && (
               <MenuItem icon="delete" onClick={handleUnpinClick}>{lang('ArchiveStory')}</MenuItem>
             )}
+            {canDownload && (
+              <MenuItem icon="download" disabled={!downloadMediaData} onClick={handleDownload}>
+                {lang('lng_media_download')}
+              </MenuItem>
+            )}
+            <MenuItem icon="eye-closed-outline" onClick={handleOpenStealthModal}>{lang('StealthMode')}</MenuItem>
+            {!isSelf && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('lng_report_story')}</MenuItem>}
             {isSelf && <MenuItem icon="delete" destructive onClick={handleDeleteStoryClick}>{lang('Delete')}</MenuItem>}
-            {!isSelf && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('Report')}</MenuItem>}
           </DropdownMenu>
         </div>
       </div>
@@ -608,7 +667,7 @@ function Story({
   }, [story]);
 
   function renderRecentViewers() {
-    const { viewsCount } = story as ApiStory;
+    const { viewsCount, reactionsCount } = story as ApiStory;
 
     if (!viewsCount) {
       return (
@@ -625,16 +684,23 @@ function Story({
           styles.recentViewersInteractive,
           appearanceAnimationClassNames,
         )}
-        onClick={handleOpenStorySeenBy}
+        onClick={handleOpenStoryViewModal}
       >
         {!areViewsExpired && Boolean(recentViewers?.length) && (
           <AvatarList
             size="small"
             peers={recentViewers}
+            className={styles.recentViewersAvatars}
           />
         )}
 
-        <span className={styles.recentViewersCount}>{lang('Views', viewsCount, 'i')}</span>
+        <span>{lang('Views', viewsCount, 'i')}</span>
+        {Boolean(reactionsCount) && (
+          <span className={styles.reactionCount}>
+            <i className={buildClassName(styles.reactionCountHeart, 'icon icon-heart')} />
+            {reactionsCount}
+          </span>
+        )}
       </div>
     );
   }
@@ -662,11 +728,7 @@ function Story({
           <img src={previewBlobUrl} alt="" className={buildClassName(styles.media, previewTransitionClassNames)} />
         )}
         {shouldRenderSkeleton && (
-          <Skeleton
-            width={dimensions.width}
-            height={dimensions.height}
-            className={buildClassName(skeletonTransitionClassNames, styles.skeleton)}
-          />
+          <Skeleton className={buildClassName(skeletonTransitionClassNames, styles.fullSize)} />
         )}
         {!isVideo && fullMediaData && (
           <img
@@ -713,9 +775,22 @@ function Story({
             />
           </>
         )}
+        <MediaAreaOverlay mediaAreas={mediaAreas} mediaDimensions={dimensions} />
       </div>
 
       {isSelf && renderRecentViewers()}
+      {canShareOwn && (
+        <Button
+          className={styles.ownForward}
+          color="translucent"
+          size="smaller"
+          round
+          onClick={handleForwardClick}
+          ariaLabel={lang('Forward')}
+        >
+          <i className="icon icon-forward" aria-hidden />
+        </Button>
+      )}
       {shouldRenderCaptionBackdrop && (
         <div
           tabIndex={0}
@@ -725,12 +800,14 @@ function Story({
           aria-label={lang('Close')}
         />
       )}
+      {hasText && <div className={styles.captionGradient} />}
       {hasText && (
         <StoryCaption
           key={`caption-${storyId}-${userId}`}
           story={story as ApiStory}
           isExpanded={isCaptionExpanded}
           onExpand={expandCaption}
+          onFold={foldCaption}
           className={appearanceAnimationClassNames}
         />
       )}
@@ -743,8 +820,8 @@ function Story({
           isReady={!isSelf}
           messageListType="thread"
           isMobile={getIsMobile()}
-          editableInputCssSelector="#editable-story-input-text"
-          editableInputId="editable-story-input-text"
+          editableInputCssSelector={EDITABLE_STORY_INPUT_CSS_SELECTOR}
+          editableInputId={EDITABLE_STORY_INPUT_ID}
           inputId="story-input-text"
           className={buildClassName(styles.composer, composerAppearanceAnimationClassNames)}
           inputPlaceholder={lang('ReplyPrivately')}
@@ -765,16 +842,23 @@ export default memo(withGlobal<OwnProps>((global, {
   const chat = selectChat(global, userId);
   const tabState = selectTabState(global);
   const {
-    storyViewer: { isMuted, storyIdSeenBy, isPrivacyModalOpen },
+    storyViewer: {
+      isMuted,
+      viewModal,
+      isPrivacyModalOpen,
+      isStealthModalOpen,
+    },
     forwardMessages: { storyId: forwardedStoryId },
     premiumModal,
+    safeLinkModalUrl,
+    mapModal,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
   const { orderedIds, pinnedIds, archiveIds } = selectUserStories(global, userId) || {};
   const story = selectUserStory(global, userId, storyId);
   const shouldForcePause = Boolean(
-    storyIdSeenBy || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
-    || isPremiumModalOpen || isDeleteModalOpen,
+    viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
+    || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
   );
 
   return {
@@ -789,5 +873,6 @@ export default memo(withGlobal<OwnProps>((global, {
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
     isChatExist: Boolean(chat),
     areChatSettingsLoaded: Boolean(chat?.settings),
+    stealthMode: global.stories.stealthMode,
   };
 })(Story));

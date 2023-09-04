@@ -25,6 +25,7 @@ interface OwnProps {
   withTranslucentThumbs?: boolean;
   shouldRenderAsHtml?: boolean;
   inChatList?: boolean;
+  forcePlayback?: boolean;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -43,6 +44,7 @@ function MessageText({
   withTranslucentThumbs,
   shouldRenderAsHtml,
   inChatList,
+  forcePlayback,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,6 +96,7 @@ function MessageText({
           sharedCanvasRef,
           sharedCanvasHqRef,
           cacheBuster: textCacheBusterRef.current.toString(),
+          forcePlayback,
         }),
       ].flat().filter(Boolean)}
     </>

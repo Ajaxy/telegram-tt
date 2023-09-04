@@ -1,4 +1,4 @@
-import type { ApiMessage } from './messages';
+import type { ApiGeoPoint, ApiMessage, ApiReaction } from './messages';
 import type { ApiPrivacySettings } from '../../types';
 
 export interface ApiStory {
@@ -16,8 +16,11 @@ export interface ApiStory {
   isPublic?: boolean;
   noForwards?: boolean;
   viewsCount?: number;
+  reactionsCount?: number;
   recentViewerIds?: string[];
   visibility?: ApiPrivacySettings;
+  sentReaction?: ApiReaction;
+  mediaAreas?: ApiMediaArea[];
 }
 
 export interface ApiStorySkipped {
@@ -57,3 +60,39 @@ export type ApiWebPageStoryData = {
   id: number;
   userId: string;
 };
+
+export type ApiStoryView = {
+  userId: string;
+  date: number;
+  reaction?: ApiReaction;
+  isUserBlocked?: true;
+  areStoriesBlocked?: true;
+};
+
+export type ApiStealthMode = {
+  activeUntil?: number;
+  cooldownUntil?: number;
+};
+
+export type ApiMediaAreaCoordinates = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+};
+
+export type ApiMediaAreaVenue = {
+  type: 'venue';
+  coordinates: ApiMediaAreaCoordinates;
+  geo: ApiGeoPoint;
+  title: string;
+};
+
+export type ApiMediaAreaGeoPoint = {
+  type: 'geoPoint';
+  coordinates: ApiMediaAreaCoordinates;
+  geo: ApiGeoPoint;
+};
+
+export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint;

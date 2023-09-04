@@ -322,6 +322,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
             <StickerSetCover
               stickerSet={stickerSet as ApiStickerSet}
               noPlay={!canAnimate || !loadAndPlay}
+              forcePlayback
               observeIntersection={observeIntersectionForCovers}
               sharedCanvasRef={withSharedCanvas ? (isHq ? sharedCanvasHqRef : sharedCanvasRef) : undefined}
             />
@@ -345,6 +346,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
         withTranslucentThumb={isTranslucent}
         onClick={selectStickerSet}
         clickArg={index}
+        forcePlayback
       />
     );
   }
@@ -422,6 +424,7 @@ const CustomEmojiPicker: FC<OwnProps & StateProps> = ({
               onContextMenuOpen={onContextMenuOpen}
               onContextMenuClose={onContextMenuClose}
               onContextMenuClick={onContextMenuClick}
+              forcePlayback
             />
           );
         })}

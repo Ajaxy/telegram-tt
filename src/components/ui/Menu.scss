@@ -109,4 +109,8 @@
     margin: 0.125rem 1rem;
     width: calc(100% - 2rem);
   }
+
+  &.in-portal {
+    z-index: var(--z-portal-menu);
+  }
 }

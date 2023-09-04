@@ -592,6 +592,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               canSendPlainText
               className="attachment-modal-symbol-menu with-menu-transitions"
               idPrefix="attachment"
+              forceDarkTheme={forceDarkTheme}
             />
             <MessageInput
               ref={inputRef}

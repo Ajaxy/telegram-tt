@@ -39,13 +39,13 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   blockedIds,
   phoneCodeList,
 }) => {
-  const { unblockContact } = getActions();
+  const { unblockUser } = getActions();
 
   const lang = useLang();
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
-  const handleUnblockClick = useCallback((contactId: string) => {
-    unblockContact({ contactId });
-  }, [unblockContact]);
+  const handleUnblockClick = useCallback((userId: string) => {
+    unblockUser({ userId });
+  }, [unblockUser]);
 
   useHistoryBack({
     isActive,
@@ -53,13 +53,13 @@ const SettingsPrivacyBlockedUsers: FC<OwnProps & StateProps> = ({
   });
 
   const blockedUsernamesById = useMemo(() => {
-    return blockedIds.reduce((acc, contactId) => {
-      const isPrivate = isUserId(contactId);
-      const user = isPrivate ? usersByIds[contactId] : undefined;
+    return blockedIds.reduce((acc, userId) => {
+      const isPrivate = isUserId(userId);
+      const user = isPrivate ? usersByIds[userId] : undefined;
       const mainUsername = user && !user.phoneNumber && getMainUsername(user);
 
       if (mainUsername) {
-        acc[contactId] = mainUsername;
+        acc[userId] = mainUsername;
       }
 
       return acc;

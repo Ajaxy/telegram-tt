@@ -52,7 +52,7 @@
   margin-bottom: 7.5rem;
 }
 
-.limits {
+.limits, .stories {
   background: var(--color-background);
 }
 
@@ -61,6 +61,10 @@
   padding: 1rem;
   margin-top: 3.6875rem;
   height: calc(var(--vh) * 55 + 41px);
+}
+
+.stories {
+  height: calc(var(--vh) * 55 + 100px);
 }
 
 .header {
@@ -139,5 +143,9 @@
 
   .limits-content {
     height: calc(var(--vh) * 100 - 193px);
+  }
+
+  .stories {
+    height: calc(var(--vh) * 100 - 135px);
   }
 }

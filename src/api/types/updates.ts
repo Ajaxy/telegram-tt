@@ -18,6 +18,7 @@ import type {
   ApiMessageExtendedMediaPreview,
   ApiPhoto,
   ApiPoll,
+  ApiReaction,
   ApiReactions,
   ApiStickerSet,
   ApiThreadInfo,
@@ -33,7 +34,7 @@ import type {
 } from './calls';
 import type { ApiBotMenuButton } from './bots';
 import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
-import type { ApiStory, ApiStorySkipped } from './stories';
+import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';
@@ -462,7 +463,8 @@ export type ApiUpdateTwoFaStateWaitCode = {
 export type ApiUpdatePeerBlocked = {
   '@type': 'updatePeerBlocked';
   id: string;
-  isBlocked: boolean;
+  isBlocked?: boolean;
+  isBlockedFromStories?: boolean;
 };
 
 export type ApiUpdatePaymentVerificationNeeded = {
@@ -643,6 +645,18 @@ export type ApiUpdateReadStories = {
   lastReadId: number;
 };
 
+export type ApiUpdateSentStoryReaction = {
+  '@type': 'updateSentStoryReaction';
+  userId: string;
+  storyId: number;
+  reaction?: ApiReaction;
+};
+
+export type ApiUpdateStealthMode = {
+  '@type': 'updateStealthMode';
+  stealthMode: ApiStealthMode;
+};
+
 export type ApiRequestSync = {
   '@type': 'requestSync';
 };
@@ -673,8 +687,9 @@ export type ApiUpdate = (
   ApiUpdatePhoneCallConnectionState | ApiUpdateBotMenuButton | ApiUpdateTranscribedAudio | ApiUpdateUserEmojiStatus |
   ApiUpdateMessageExtendedMedia | ApiUpdateConfig | ApiUpdateTopicNotifyExceptions | ApiUpdatePinnedTopic |
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
-  ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory |
-  ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages
+  ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
+  ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
+  ApiUpdateStealthMode
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

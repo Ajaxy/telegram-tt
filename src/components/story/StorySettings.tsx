@@ -38,7 +38,7 @@ interface StateProps {
   currentUserId: string;
 }
 
-type PrivacyAction = 'blockUserIds' | 'closeFriends' | 'allowUserIds';
+type PrivacyAction = 'blockUserIds' | 'closeFriends' | 'blockContactUserIds' | 'allowUserIds';
 
 interface PrivacyOption {
   name: string;
@@ -53,13 +53,13 @@ const OPTIONS: PrivacyOption[] = [{
   value: 'everybody',
   color: ['#50ABFF', '#007AFF'],
   icon: 'channel-filled',
-  actions: undefined,
+  actions: 'blockUserIds',
 }, {
   name: 'StoryPrivacyOptionContacts',
   value: 'contacts',
   color: ['#C36EFF', '#8B60FA'],
   icon: 'user-filled',
-  actions: 'blockUserIds',
+  actions: 'blockContactUserIds',
 }, {
   name: 'StoryPrivacyOptionCloseFriends',
   value: 'closeFriends',
@@ -82,7 +82,13 @@ enum Screens {
 }
 
 function StorySettings({
-  isOpen, story, visibility, contactListIds, usersById, currentUserId, onClose,
+  isOpen,
+  story,
+  visibility,
+  contactListIds,
+  usersById,
+  currentUserId,
+  onClose,
 }: OwnProps & StateProps) {
   const { editStoryPrivacy, toggleStoryPinned } = getActions();
 
@@ -91,6 +97,7 @@ function StorySettings({
   const [privacy, setPrivacy] = useState<ApiPrivacySettings | undefined>(visibility);
   const [isPinned, setIsPinned] = useState(story?.isPinned);
   const [activeKey, setActiveKey] = useState<Screens>(Screens.privacy);
+  const [editingBlockingCategory, setEditingBlockingCategory] = useState<PrivacyVisibility>('everybody');
   const isBackButton = activeKey !== Screens.privacy;
 
   const closeFriendIds = useMemo(() => {
@@ -107,6 +114,11 @@ function StorySettings({
     return undefined;
   }, [activeKey, currentUserId, privacy?.allowUserIds]);
 
+  const selectedBlockedIds = useMemo(() => {
+    if (editingBlockingCategory !== privacy?.visibility) return [];
+    return privacy?.blockUserIds || [];
+  }, [editingBlockingCategory, privacy?.blockUserIds, privacy?.visibility]);
+
   const handleAllowUserIdsChange = useLastCallback((newIds: string[]) => {
     setPrivacy({
       ...privacy!,
@@ -118,6 +130,7 @@ function StorySettings({
     setPrivacy({
       ...privacy!,
       blockUserIds: newIds,
+      visibility: editingBlockingCategory,
     });
   });
 
@@ -160,6 +173,12 @@ function StorySettings({
         break;
       case 'blockUserIds':
         setActiveKey(Screens.denyList);
+        setEditingBlockingCategory('everybody');
+        break;
+      case 'blockContactUserIds':
+        setActiveKey(Screens.denyList);
+        setEditingBlockingCategory('contacts');
+        break;
     }
   }
 
@@ -193,13 +212,14 @@ function StorySettings({
       return lang('StoryPrivacyOptionPeople', closeFriendIds.length, 'i');
     }
 
-    if (action === 'blockUserIds') {
-      if (!privacy?.blockUserIds || privacy.blockUserIds.length === 0) {
+    if ((action === 'blockUserIds' && privacy?.visibility === 'everybody')
+      || (action === 'blockContactUserIds' && privacy?.visibility === 'contacts')) {
+      if (!privacy?.blockUserIds?.length) {
         return lang('StoryPrivacyOptionContactsDetail');
       }
 
       if (privacy.blockUserIds.length === 1) {
-        return lang('StoryPrivacyOptionExcludePerson', getUserFullName(usersById[closeFriendIds[0]]));
+        return lang('StoryPrivacyOptionExcludePerson', getUserFullName(usersById[privacy.blockUserIds[0]]));
       }
 
       return lang('StoryPrivacyOptionExcludePeople', privacy.blockUserIds.length, 'i');
@@ -254,7 +274,7 @@ function StorySettings({
             contactListIds={contactListIds}
             currentUserId={currentUserId}
             usersById={usersById}
-            selectedIds={privacy?.blockUserIds}
+            selectedIds={selectedBlockedIds}
             onSelect={handleDenyUserIdsChange}
           />
         );
@@ -309,7 +329,7 @@ function StorySettings({
                       tabIndex={0}
                       role="button"
                       className={styles.action}
-                      aria-label={lang('Change List')}
+                      aria-label={lang('Edit')}
                       onClick={(e) => { handleActionClick(e, option.actions!); }}
                     >
                       <span className={styles.actionInner}>{renderActionName(option.actions)}</span>

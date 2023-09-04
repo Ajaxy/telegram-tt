@@ -1,4 +1,11 @@
-const PROVIDER = 'https://maps.google.com/maps';
+import type { ApiGeoPoint } from '../api/types';
+
+const PROVIDERS = {
+  google: 'https://maps.google.com/maps',
+  bing: 'https://bing.com/maps/default.aspx',
+  osm: 'https://www.openstreetmap.org',
+  apple: 'https://maps.apple.com',
+};
 
 // https://github.com/TelegramMessenger/Telegram-iOS/blob/2a32c871882c4e1b1ccdecd34fccd301723b30d9/submodules/LocationResources/Sources/VenueIconResources.swift#L82
 const VENUE_COLORS = new Map(Object.entries({
@@ -27,8 +34,20 @@ const RANDOM_COLORS = [
   '#e56cd5', '#f89440', '#9986ff', '#44b3f5', '#6dc139', '#ff5d5a', '#f87aad', '#6e82b3', '#f5ba21',
 ];
 
-export function prepareMapUrl(lat: number, long: number, zoom: number) {
-  return `${PROVIDER}/place/${lat}+${long}/@${lat},${long},${zoom}z`;
+export function prepareMapUrl(provider: keyof typeof PROVIDERS, point: Omit<ApiGeoPoint, 'accessHash'>, zoom = 15) {
+  const { lat, long } = point;
+  const providerUrl = PROVIDERS[provider];
+  switch (provider) {
+    case 'google':
+      return `${providerUrl}/place/${lat}+${long}/@${lat},${long},${zoom}z`;
+    case 'bing':
+      return `${providerUrl}?cp=${lat}~${long}&lvl=${zoom}&sp=point.${lat}_${long}`;
+    case 'apple':
+      return `${providerUrl}?q=${lat},${long}`;
+    case 'osm':
+    default:
+      return `${providerUrl}/?mlat=${lat}&mlon=${long}&zoom=${zoom}`;
+  }
 }
 
 export function getMetersPerPixel(lat: number, zoom: number) {

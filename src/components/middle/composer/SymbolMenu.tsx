@@ -2,7 +2,7 @@ import React, {
   memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getActions, withGlobal } from '../../../global';
+import { withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
@@ -10,7 +10,7 @@ import type { GlobalActions } from '../../../global';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
-import { selectTabState, selectIsCurrentUserPremium, selectIsContextMenuTranslucent } from '../../../global/selectors';
+import { selectTabState, selectIsContextMenuTranslucent } from '../../../global/selectors';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -69,7 +69,6 @@ export type OwnProps = {
 
 type StateProps = {
   isLeftColumnShown: boolean;
-  isCurrentUserPremium?: boolean;
   isBackgroundTranslucent?: boolean;
 };
 
@@ -83,7 +82,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   canSendGifs,
   isMessageComposer,
   isLeftColumnShown,
-  isCurrentUserPremium,
   idPrefix,
   isAttachmentModal,
   canSendPlainText,
@@ -105,7 +103,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
   addRecentEmoji,
   addRecentCustomEmoji,
 }) => {
-  const { loadPremiumSetStickers } = getActions();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [recentEmojis, setRecentEmojis] = useState<string[]>([]);
   const [recentCustomEmojis, setRecentCustomEmojis] = useState<string[]>([]);
@@ -129,12 +126,6 @@ const SymbolMenu: FC<OwnProps & StateProps> = ({
     if (canSendPlainText) return;
     setActiveTab(STICKERS_TAB_INDEX);
   }, [canSendPlainText]);
-
-  useEffect(() => {
-    if (isCurrentUserPremium) {
-      loadPremiumSetStickers();
-    }
-  }, [isCurrentUserPremium, loadPremiumSetStickers]);
 
   useLayoutEffect(() => {
     if (!isMobile || !isOpen || isAttachmentModal) {
@@ -356,7 +347,6 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     return {
       isLeftColumnShown: selectTabState(global).isLeftColumnShown,
-      isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isBackgroundTranslucent: selectIsContextMenuTranslucent(global),
     };
   },

@@ -63,7 +63,7 @@ import {
   selectChatFolder, selectSupportChat, selectChatByUsername,
   selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
   selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState, selectThreadOriginChat, selectThread, selectChatFullInfo,
+  selectTabState, selectThreadOriginChat, selectThread, selectChatFullInfo, selectStickerSet,
 } from '../../selectors';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { debounce, pause, throttle } from '../../../util/schedulers';
@@ -1624,7 +1624,7 @@ addActionHandler('setChatEnabledReactions', async (global, actions, payload): Pr
   void loadFullChat(global, actions, chat, tabId);
 });
 
-addActionHandler('fetchChat', async (global, actions, payload): Promise<void> => {
+addActionHandler('fetchChat', (global, actions, payload): ActionReturnType => {
   const { chatId } = payload;
   const chat = selectChat(global, chatId);
 
@@ -2423,7 +2423,8 @@ export async function loadFullChat<T extends GlobalState>(
   setGlobal(global);
 
   const stickerSet = fullInfo.stickerSet;
-  if (stickerSet) {
+  const localSet = stickerSet && selectStickerSet(global, stickerSet);
+  if (stickerSet && !localSet) {
     actions.loadStickers({
       stickerSetInfo: {
         id: stickerSet.id,

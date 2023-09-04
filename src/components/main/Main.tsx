@@ -11,6 +11,7 @@ import type {
   ApiAttachBot,
   ApiChat,
   ApiChatFolder,
+  ApiGeoPoint,
   ApiMessage,
   ApiUser,
 } from '../../api/types';
@@ -95,6 +96,7 @@ import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import StoryViewer from '../story/StoryViewer.async';
+import MapModal from '../modals/mapModal/MapModal.async';
 
 import './Main.scss';
 
@@ -115,6 +117,8 @@ type StateProps = {
   hasDialogs: boolean;
   audioMessage?: ApiMessage;
   safeLinkModalUrl?: string;
+  mapModalGeoPoint?: ApiGeoPoint;
+  mapModalZoom?: number;
   isHistoryCalendarOpen: boolean;
   shouldSkipHistoryAnimations?: boolean;
   openedStickerSetShortName?: string;
@@ -171,6 +175,8 @@ const Main: FC<OwnProps & StateProps> = ({
   audioMessage,
   activeGroupCallId,
   safeLinkModalUrl,
+  mapModalGeoPoint,
+  mapModalZoom,
   isHistoryCalendarOpen,
   shouldSkipHistoryAnimations,
   limitReached,
@@ -245,6 +251,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadRecentReactions,
     loadFeaturedEmojiStickers,
     setIsAppUpdateAvailable,
+    loadPremiumSetStickers,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -326,6 +333,7 @@ const Main: FC<OwnProps & StateProps> = ({
     if (isMasterTab && isCurrentUserPremium) {
       loadDefaultStatusIcons();
       loadRecentEmojiStatuses();
+      loadPremiumSetStickers();
     }
   }, [isCurrentUserPremium, isMasterTab]);
 
@@ -517,6 +525,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <Dialogs isOpen={hasDialogs} />
       {audioMessage && <AudioPlayer key={audioMessage.id} message={audioMessage} noUi />}
       <SafeLinkModal url={safeLinkModalUrl} />
+      <MapModal geoPoint={mapModalGeoPoint} zoom={mapModalZoom} />
       <UrlAuthModal urlAuth={urlAuth} currentUserName={currentUserName} />
       <HistoryCalendar isOpen={isHistoryCalendarOpen} />
       <StickerSetModal
@@ -579,6 +588,7 @@ export default memo(withGlobal<OwnProps>(
       urlAuth,
       webApp,
       safeLinkModalUrl,
+      mapModal,
       openedStickerSetShortName,
       openedCustomEmojiSetIds,
       shouldSkipHistoryAnimations,
@@ -623,6 +633,8 @@ export default memo(withGlobal<OwnProps>(
       hasDialogs: Boolean(dialogs.length),
       audioMessage,
       safeLinkModalUrl,
+      mapModalGeoPoint: mapModal?.point,
+      mapModalZoom: mapModal?.zoom,
       isHistoryCalendarOpen: Boolean(historyCalendarSelectedAt),
       shouldSkipHistoryAnimations,
       openedStickerSetShortName,

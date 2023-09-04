@@ -151,8 +151,7 @@ const MicrophoneButton: FC<OwnProps & StateProps> = ({
         play={playSegment.toString()}
         playSegment={playSegment}
         className={styles.icon}
-        forceOnHeavyAnimation
-        forceInBackground
+        forceAlways
       />
       <Spinner className={buildClassName(styles.spinner, isConnecting && styles.spinnerVisible)} color="white" />
     </Button>

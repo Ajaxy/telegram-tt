@@ -15,7 +15,7 @@ import {
   selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectBot,
   selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId, selectUserFullInfo,
 } from '../../selectors';
-import { addChats, addUsers, removeBlockedContact } from '../../reducers';
+import { addChats, addUsers, removeBlockedUser } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { debounce } from '../../../util/schedulers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
@@ -201,13 +201,13 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
     return;
   }
 
-  const result = await callApi('unblockContact', bot.id, bot.accessHash);
+  const result = await callApi('unblockUser', { user: bot });
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = removeBlockedContact(global, bot.id);
+  global = removeBlockedUser(global, bot.id);
   setGlobal(global);
   void sendBotCommand(chat, MAIN_THREAD_ID, '/start', undefined, selectSendAs(global, chatId));
 });
@@ -408,7 +408,7 @@ addActionHandler('startBot', async (global, actions, payload): Promise<void> => 
   }
 
   if (fullInfo?.isBlocked) {
-    await callApi('unblockContact', bot.id, bot.accessHash);
+    await callApi('unblockUser', { user: bot });
   }
 
   await callApi('startBot', {

@@ -23,8 +23,7 @@ import {
   buildApiWallpaper,
   buildApiWebSession, buildLangPack, buildLangPackString,
 } from '../apiBuilders/misc';
-import { buildPrivacyRules } from '../apiBuilders/messages';
-import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiPhoto, buildPrivacyRules } from '../apiBuilders/common';
 import { buildApiUser } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
@@ -224,8 +223,13 @@ export async function uploadWallpaper(file: File) {
   return { wallpaper };
 }
 
-export async function fetchBlockedContacts() {
+export async function fetchBlockedUsers({
+  isOnlyStories,
+}: {
+  isOnlyStories?: true;
+}) {
   const result = await invokeRequest(new GramJs.contacts.GetBlocked({
+    myStoriesFrom: isOnlyStories,
     limit: BLOCKED_LIST_LIMIT,
   }));
   if (!result) {
@@ -242,15 +246,29 @@ export async function fetchBlockedContacts() {
   };
 }
 
-export function blockContact(chatOrUserId: string, accessHash?: string) {
+export function blockUser({
+  user,
+  isOnlyStories,
+} : {
+  user: ApiUser;
+  isOnlyStories?: true;
+}) {
   return invokeRequest(new GramJs.contacts.Block({
-    id: buildInputPeer(chatOrUserId, accessHash),
+    id: buildInputPeer(user.id, user.accessHash),
+    myStoriesFrom: isOnlyStories,
   }));
 }
 
-export function unblockContact(chatOrUserId: string, accessHash?: string) {
+export function unblockUser({
+  user,
+  isOnlyStories,
+} : {
+  user: ApiUser;
+  isOnlyStories?: true;
+}) {
   return invokeRequest(new GramJs.contacts.Unblock({
-    id: buildInputPeer(chatOrUserId, accessHash),
+    id: buildInputPeer(user.id, user.accessHash),
+    myStoriesFrom: isOnlyStories,
   }));
 }
 

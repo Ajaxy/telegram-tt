@@ -85,7 +85,7 @@ export function updateNotifySettings<T extends GlobalState>(
   }
 }
 
-export function addBlockedContact<T extends GlobalState>(global: T, contactId: string): T {
+export function addBlockedUser<T extends GlobalState>(global: T, contactId: string): T {
   global = updateUserBlockedState(global, contactId, true);
 
   return {
@@ -98,7 +98,7 @@ export function addBlockedContact<T extends GlobalState>(global: T, contactId: s
   };
 }
 
-export function removeBlockedContact<T extends GlobalState>(global: T, contactId: string): T {
+export function removeBlockedUser<T extends GlobalState>(global: T, contactId: string): T {
   global = updateUserBlockedState(global, contactId, false);
 
   return {

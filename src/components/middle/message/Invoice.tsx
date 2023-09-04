@@ -16,7 +16,7 @@ import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import Skeleton from '../../ui/Skeleton';
+import Skeleton from '../../ui/placeholder/Skeleton';
 
 import './Invoice.scss';
 

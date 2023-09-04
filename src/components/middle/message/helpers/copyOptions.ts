@@ -88,7 +88,7 @@ export function getMessageCopyOptions(
           document.execCommand('copy');
         } else {
           const clipboardText = renderMessageText(
-            message, undefined, undefined, undefined, undefined, undefined, true,
+            { message, shouldRenderAsHtml: true },
           );
           if (clipboardText) copyHtmlToClipboard(clipboardText.join(''), getMessageTextWithSpoilers(message)!);
         }

@@ -27,6 +27,7 @@ export const processDeepLink = (url: string) => {
     processAttachBotParameters,
     openChatWithDraft,
     checkChatlistInvite,
+    openStoryViewerByUsername,
   } = getActions();
 
   // Safari thinks the path in tg://path links is hostname for some reason
@@ -37,7 +38,7 @@ export const processDeepLink = (url: string) => {
     case 'resolve': {
       const {
         domain, phone, post, comment, voicechat, livestream, start, startattach, attach, thread, topic,
-        appname, startapp,
+        appname, startapp, story,
       } = params;
 
       const startAttach = params.hasOwnProperty('startattach') && !startattach ? true : startattach;
@@ -64,6 +65,8 @@ export const processDeepLink = (url: string) => {
           });
         } else if (phone) {
           openChatByPhoneNumber({ phoneNumber: phone, startAttach, attach });
+        } else if (story) {
+          openStoryViewerByUsername({ username: domain, storyId: Number(story) });
         } else {
           openChatByUsername({
             username: domain,

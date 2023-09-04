@@ -38,12 +38,12 @@ import {
   buildApiMessage,
   buildLocalForwardedMessage,
   buildLocalMessage,
-  buildWebPage,
   buildApiSponsoredMessage,
-  buildApiFormattedText,
-  buildMessageTextContent,
-  buildMessageMediaContent,
 } from '../apiBuilders/messages';
+import {
+  buildMessageMediaContent, buildMessageTextContent, buildWebPage,
+} from '../apiBuilders/messageContent';
+import { buildApiFormattedText } from '../apiBuilders/common';
 import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity,

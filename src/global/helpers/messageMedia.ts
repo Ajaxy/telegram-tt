@@ -312,7 +312,7 @@ export function getGamePreviewVideoHash(game: ApiGame) {
   return undefined;
 }
 
-function getVideoOrAudioBaseHash(media: ApiAudio | ApiVideo | ApiDocument, base: string) {
+export function getVideoOrAudioBaseHash(media: ApiAudio | ApiVideo | ApiDocument, base: string) {
   if (IS_PROGRESSIVE_SUPPORTED && IS_SAFARI) {
     return `${base}?fileSize=${media.size}&mimeType=${media.mimeType}`;
   }

@@ -29,6 +29,7 @@ type OwnProps = {
   observeIntersection?: ObserveFn;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  forcePlayback?: boolean;
   onClick: (reaction: ApiReaction) => void;
 };
 
@@ -40,6 +41,7 @@ const ReactionEmoji: FC<OwnProps> = ({
   observeIntersection,
   sharedCanvasRef,
   sharedCanvasHqRef,
+  forcePlayback,
   onClick,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -84,6 +86,7 @@ const ReactionEmoji: FC<OwnProps> = ({
           sharedCanvasRef={sharedCanvasRef}
           sharedCanvasHqRef={sharedCanvasHqRef}
           withTranslucentThumb
+          forceAlways={forcePlayback}
         />
       ) : (
         <AnimatedIconWithPreview

@@ -1,6 +1,8 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 
+import type { ActionReturnType } from '../../types';
+
 import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
 import {
   addStories,
@@ -10,18 +12,21 @@ import {
   toggleUserStoriesHidden,
   updateLastReadStoryForUser,
   updateLastViewedStoryForUser,
-  updateStorySeenBy,
+  updateStealthMode,
+  updateStoryViews,
+  updateStoryViewsLoading,
   updateUser,
   updateUserPinnedStory,
   updateUserStory,
   updateUsersWithStories,
 } from '../../reducers';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { selectUser, selectUserStories, selectUserStory } from '../../selectors';
+import {
+  selectUser, selectUserStories, selectUserStory,
+} from '../../selectors';
 import { getServerTime } from '../../../util/serverTime';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { translate } from '../../../util/langProvider';
-import type { ActionReturnType } from '../../types';
 
 const INFINITE_LOOP_MARKER = 100;
 
@@ -60,6 +65,7 @@ addActionHandler('loadAllStories', async (global): Promise<void> => {
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
       global = addStories(global, result.userStories);
       global = updateUsersWithStories(global, result.userStories);
+      global = updateStealthMode(global, result.stealthMode);
       global.stories.hasNext = result.hasMore;
     }
 
@@ -103,6 +109,7 @@ addActionHandler('loadAllHiddenStories', async (global): Promise<void> => {
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
       global = addStories(global, result.userStories);
       global = updateUsersWithStories(global, result.userStories);
+      global = updateStealthMode(global, result.stealthMode);
       global.stories.hasNextInArchive = result.hasMore;
     }
 
@@ -199,14 +206,14 @@ addActionHandler('toggleStoryPinned', async (global, actions, payload): Promise<
 
   const story = selectUserStory(global, global.currentUserId!, storyId);
   const currentIsPinned = story && 'content' in story ? story.isPinned : undefined;
-  global = updateUserStory(global, global.currentUserId!, { id: storyId, isPinned });
+  global = updateUserStory(global, global.currentUserId!, storyId, { isPinned });
   global = updateUserPinnedStory(global, global.currentUserId!, storyId, isPinned);
   setGlobal(global);
 
   const result = await callApi('toggleStoryPinned', { storyId, isPinned });
   if (!result) {
     global = getGlobal();
-    global = updateUserStory(global, global.currentUserId!, { id: storyId, isPinned: currentIsPinned });
+    global = updateUserStory(global, global.currentUserId!, storyId, { isPinned: currentIsPinned });
     global = updateUserPinnedStory(global, global.currentUserId!, storyId, currentIsPinned);
     setGlobal(global);
   }
@@ -284,25 +291,54 @@ addActionHandler('loadUserStoriesByIds', async (global, actions, payload): Promi
   setGlobal(global);
 });
 
-addActionHandler('loadStorySeenBy', async (global, actions, payload): Promise<void> => {
-  const { storyId, offsetId } = payload;
+addActionHandler('loadStoryViews', async (global, actions, payload): Promise<void> => {
+  const {
+    storyId,
+    tabId = getCurrentTabId(),
+  } = payload;
+  const isPreload = 'isPreload' in payload;
+  const {
+    offset, areReactionsFirst, areJustContacts, query, limit,
+  } = isPreload ? {
+    offset: undefined,
+    areReactionsFirst: undefined,
+    areJustContacts: undefined,
+    query: undefined,
+    limit: PREVIEW_AVATAR_COUNT,
+  } : payload;
 
-  const result = await callApi('fetchStorySeenBy', { storyId, offsetId });
+  if (!isPreload) {
+    global = updateStoryViewsLoading(global, true, tabId);
+    setGlobal(global);
+  }
+
+  const result = await callApi('fetchStoryViewList', {
+    storyId,
+    offset,
+    areReactionsFirst,
+    areJustContacts,
+    limit,
+    query,
+  });
   if (!result) {
+    global = getGlobal();
+    global = updateStoryViewsLoading(global, false, tabId);
+    setGlobal(global);
     return;
   }
 
+  const viewsById = buildCollectionByKey(result.views, 'userId');
+
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = updateStorySeenBy(global, global.currentUserId!, storyId, result.seenByDates);
+  if (!isPreload) global = updateStoryViews(global, storyId, viewsById, result.nextOffset, tabId);
 
-  const viewerIds = Object.keys(result.seenByDates);
-  if (!offsetId && viewerIds.length) {
-    const recentViewerIds = viewerIds.slice(-PREVIEW_AVATAR_COUNT).reverse();
-    global = updateUserStory(global, global.currentUserId!, {
-      id: storyId,
+  if (isPreload && result.views?.length) {
+    const recentViewerIds = result.views.map((view) => view.userId);
+    global = updateUserStory(global, global.currentUserId!, storyId, {
       recentViewerIds,
-      viewsCount: result.count,
+      viewsCount: result.viewsCount,
+      reactionsCount: result.reactionsCount,
     });
   }
   setGlobal(global);
@@ -389,4 +425,39 @@ addActionHandler('loadStoriesMaxIds', async (global, actions, payload): Promise<
   setGlobal(global);
 
   userIdsToLoad?.forEach((userId) => actions.loadUserStories({ userId }));
+});
+
+addActionHandler('sendStoryReaction', async (global, actions, payload): Promise<void> => {
+  const {
+    userId, storyId, reaction, shouldAddToRecent,
+  } = payload;
+  const user = selectUser(global, userId);
+  if (!user) return;
+
+  const story = selectUserStory(global, userId, storyId);
+  if (!story || !('content' in story)) return;
+
+  const previousReaction = story.sentReaction;
+  global = updateUserStory(global, userId, storyId, {
+    sentReaction: reaction,
+  });
+  setGlobal(global);
+
+  const result = await callApi('sendStoryReaction', {
+    user, storyId, reaction, shouldAddToRecent,
+  });
+
+  global = getGlobal();
+  if (!result) {
+    global = updateUserStory(global, userId, storyId, {
+      sentReaction: previousReaction,
+    });
+  }
+  setGlobal(global);
+});
+
+addActionHandler('activateStealthMode', (global, actions, payload): ActionReturnType => {
+  const { isForPast = true, isForFuture = true } = payload || {};
+
+  callApi('activateStealthMode', { isForPast: isForPast || true, isForFuture: isForFuture || true });
 });

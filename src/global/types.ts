@@ -63,6 +63,9 @@ import type {
   ApiChatlistInvite,
   ApiChatlistExportedInvite,
   ApiUserStories,
+  ApiStoryView,
+  ApiStealthMode,
+  ApiGeoPoint,
 } from '../api/types';
 import type {
   ApiInvoiceContainer,
@@ -276,6 +279,7 @@ export type TabState = {
     storyUserId?: string;
     storyId?: number;
     position?: IAnchorPosition;
+    sendAsMessage?: boolean;
   };
 
   inlineBots: {
@@ -357,11 +361,17 @@ export type TabState = {
     isSingleStory?: boolean;
     isPrivate?: boolean;
     isArchive?: boolean;
-    storyIdSeenBy?: number;
     // Last viewed story id in current view session.
     // Used for better switch animation between users.
     lastViewedByUserIds?: Record<string, number>;
     isPrivacyModalOpen?: boolean;
+    isStealthModalOpen?: boolean;
+    viewModal?: {
+      storyId: number;
+      viewsById?: Record<string, ApiStoryView>;
+      nextOffset?: string;
+      isLoading?: boolean;
+    };
     origin?: StoryViewerOrigin;
   };
 
@@ -465,6 +475,10 @@ export type TabState = {
   dialogs: (ApiError | ApiInviteInfo | ApiContact)[];
 
   safeLinkModalUrl?: string;
+  mapModal?: {
+    point: ApiGeoPoint;
+    zoom?: number;
+  };
   historyCalendarSelectedAt?: number;
   openedStickerSetShortName?: string;
   openedCustomEmojiSetIds?: string[];
@@ -742,9 +756,7 @@ export type GlobalState = {
       active: string[];
       archived: string[];
     };
-    seenByDates?: Record<string, {
-      byId: Record<number, Record<string, number>>;
-    }>;
+    stealthMode: ApiStealthMode;
   };
 
   groupCalls: {
@@ -1018,13 +1030,16 @@ export interface ActionPayloads {
     currentPassword: string;
     onSuccess: VoidFunction;
   };
-  loadBlockedContacts: undefined;
-  blockContact: {
-    contactId: string;
-    accessHash: string;
+  loadBlockedUsers: {
+    isOnlyStories?: boolean;
+  } | undefined;
+  blockUser: {
+    userId: string;
+    isOnlyStories?: boolean;
   };
-  unblockContact: {
-    contactId: string;
+  unblockUser: {
+    userId: string;
+    isOnlyStories?: boolean;
   };
 
   loadNotificationSettings: undefined;
@@ -1927,6 +1942,7 @@ export interface ActionPayloads {
     storyUserId: string;
     storyId: number;
     position: IAnchorPosition;
+    sendAsMessage?: boolean;
   } & WithTabId;
   closeReactionPicker: WithTabId | undefined;
 
@@ -1985,14 +2001,29 @@ export interface ActionPayloads {
     isMuted: boolean;
   } & WithTabId;
   closeStoryViewer: WithTabId | undefined;
-  loadStorySeenBy: {
+  loadStoryViews: ({
     storyId: number;
-    offsetId?: number;
+    isPreload: true;
+  } | {
+    storyId: number;
+    offset?: string;
+    query?: string;
+    limit?: number;
+    areJustContacts?: true;
+    areReactionsFirst?: true;
+  }) & WithTabId;
+  clearStoryViews: {
+    isLoading?: boolean;
   } & WithTabId;
-  openStorySeenBy: {
+  updateStoryView: {
+    userId: string;
+    isUserBlocked?: boolean;
+    areStoriesBlocked?: boolean;
+  } & WithTabId;
+  openStoryViewModal: {
     storyId: number;
   } & WithTabId;
-  closeStorySeenBy: WithTabId | undefined;
+  closeStoryViewModal: WithTabId | undefined;
   copyStoryLink: {
     userId: string;
     storyId: number;
@@ -2016,6 +2047,19 @@ export interface ActionPayloads {
   loadStoriesMaxIds: {
     userIds: string[];
   };
+  sendStoryReaction: {
+    userId: string;
+    storyId: number;
+    reaction?: ApiReaction;
+    shouldAddToRecent?: boolean;
+  };
+  toggleStealthModal: {
+    isOpen: boolean;
+  } & WithTabId;
+  activateStealthMode: {
+    isForPast?: boolean;
+    isForFuture?: boolean;
+  } | undefined;
 
   // Media Viewer & Audio Player
   openMediaViewer: {
@@ -2437,6 +2481,11 @@ export interface ActionPayloads {
     url: string;
     shouldSkipModal?: boolean;
   } & WithTabId;
+  openMapModal: {
+    geoPoint: ApiGeoPoint;
+    zoom?: number;
+  } & WithTabId;
+  closeMapModal: WithTabId | undefined;
   toggleSafeLinkModal: {
     url?: string;
   } & WithTabId;

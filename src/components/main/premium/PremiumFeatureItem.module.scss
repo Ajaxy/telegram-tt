@@ -18,7 +18,6 @@
   color: var(--color-text-secondary);
   white-space: pre-wrap;
   line-height: 1.25rem;
-  min-height: 2.5rem;
 }
 
 .icon {
@@ -28,4 +27,12 @@
   border-radius: 0.625rem;
   background: var(--item-color, #000);
   margin-left: 1rem;
+}
+
+.font-icon {
+  font-size: 2rem !important;
+  align-self: center;
+  margin-right: 0 !important;
+  margin-left: 1rem;
+  color: var(--item-color, #000) !important;
 }

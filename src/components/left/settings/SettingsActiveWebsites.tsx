@@ -117,7 +117,7 @@ const SettingsActiveWebsites: FC<OwnProps & StateProps> = ({
           <span className={buildClassName('subtitle', 'black', 'tight', styles.platform)}>
             {session.domain}, {session.browser}, {session.platform}
           </span>
-          <span className="subtitle">{session.ip} {session.region}</span>
+          <span className={buildClassName('subtitle', styles.subtitle)}>{session.ip} {session.region}</span>
         </div>
       </ListItem>
     );

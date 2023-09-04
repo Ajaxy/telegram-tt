@@ -58,7 +58,7 @@ export {
 } from './management';
 
 export {
-  updateProfile, checkUsername, updateUsername, fetchBlockedContacts, blockContact, unblockContact,
+  updateProfile, checkUsername, updateUsername, fetchBlockedUsers, blockUser, unblockUser,
   updateProfilePhoto, uploadProfilePhoto, deleteProfilePhotos, fetchWallpapers, uploadWallpaper,
   fetchAuthorizations, terminateAuthorization, terminateAllAuthorizations,
   fetchWebAuthorizations, terminateWebAuthorization, terminateAllWebAuthorizations,
@@ -109,8 +109,4 @@ export {
   broadcastLocalDbUpdateFull,
 } from '../localDb';
 
-export {
-  fetchAllStories, fetchUserStories, fetchUserPinnedStories, fetchUserStoriesByIds, viewStory, markStoryRead,
-  deleteStory, toggleStoryPinned, fetchStorySeenBy, fetchStoryLink, fetchStoriesArchive, reportStory, editStoryPrivacy,
-  toggleStoriesHidden, fetchStoriesMaxIds,
-} from './stories';
+export * from './stories';

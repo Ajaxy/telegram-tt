@@ -57,6 +57,7 @@ const LIMIT_ACCOUNTS = 4;
 const STATUS_EMOJI_SIZE = 8 * REM;
 
 const PREMIUM_FEATURE_COLOR_ICONS: Record<string, string> = {
+  stories: PremiumStatus,
   double_limits: PremiumLimits,
   infinite_reactions: PremiumReactions,
   premium_stickers: PremiumStickers,

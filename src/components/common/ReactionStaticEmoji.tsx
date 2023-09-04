@@ -21,6 +21,7 @@ type OwnProps = {
   availableReactions?: ApiAvailableReaction[];
   className?: string;
   size?: number;
+  withIconHeart?: boolean;
   observeIntersection?: ObserveFn;
 };
 
@@ -29,6 +30,7 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   availableReactions,
   className,
   size,
+  withIconHeart,
   observeIntersection,
 }) => {
   const isCustom = 'documentId' in reaction;
@@ -39,6 +41,9 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
   const mediaData = useMedia(`document${staticIconId}`, !staticIconId, ApiMediaFormat.BlobUrl);
 
   const transitionClassNames = useMediaTransition(mediaData);
+
+  const shouldApplySizeFix = 'emoticon' in reaction && reaction.emoticon === '🦄';
+  const shouldReplaceWithHeartIcon = withIconHeart && 'emoticon' in reaction && reaction.emoticon === '❤';
 
   if (isCustom) {
     return (
@@ -51,9 +56,20 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
     );
   }
 
+  if (shouldReplaceWithHeartIcon) {
+    return (
+      <i className="ReactionStaticEmoji icon icon-heart" style={`font-size: ${size}px; width: ${size}px`} />
+    );
+  }
+
   return (
     <img
-      className={buildClassName('ReactionStaticEmoji', transitionClassNames, className)}
+      className={buildClassName(
+        'ReactionStaticEmoji',
+        shouldApplySizeFix && 'with-unicorn-fix',
+        transitionClassNames,
+        className,
+      )}
       style={size ? `width: ${size}px; height: ${size}px` : undefined}
       src={mediaData || blankUrl}
       alt={availableReaction?.title}

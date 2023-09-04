@@ -2,6 +2,7 @@ import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { callApi } from '../../../api/gramjs';
 
 import type { ActionReturnType } from '../../types';
+import type { ApiStoryView } from '../../../api/types';
 
 import { updateTabState } from '../../reducers/tabs';
 import {
@@ -16,7 +17,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { fetchChatByUsername } from '../api/chats';
 import { addStoriesForUser, addUsers } from '../../reducers';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
@@ -52,8 +53,8 @@ addActionHandler('openStoryViewer', async (global, actions, payload): Promise<vo
       isPrivate,
       isArchive,
       isSingleStory,
+      viewModal: undefined,
       origin,
-      storyIdSeenBy: undefined,
     },
   }, tabId);
   setGlobal(global);
@@ -96,18 +97,6 @@ addActionHandler('closeStoryViewer', (global, actions, payload): ActionReturnTyp
       lastViewedByUserIds: undefined,
     },
   }, tabId);
-
-  // @optimization Reset `seenByDates` when all viewers are closed
-  const hasViewerOpen = Object.keys(global.byTabId).find((id) => selectTabState(global, Number(id)).storyViewer.userId);
-  if (!hasViewerOpen) {
-    global = {
-      ...global,
-      stories: {
-        ...global.stories,
-        seenByDates: undefined,
-      },
-    };
-  }
 
   return global;
 });
@@ -256,27 +245,28 @@ addActionHandler('openNextStory', (global, actions, payload): ActionReturnType =
   }, tabId);
 });
 
-addActionHandler('openStorySeenBy', (global, actions, payload): ActionReturnType => {
+addActionHandler('openStoryViewModal', (global, actions, payload): ActionReturnType => {
   const { storyId, tabId = getCurrentTabId() } = payload;
   const tabState = selectTabState(global, tabId);
 
   return updateTabState(global, {
     storyViewer: {
       ...tabState.storyViewer,
-      storyIdSeenBy: storyId,
+      viewModal: {
+        storyId,
+        nextOffset: '',
+        isLoading: true,
+      },
     },
   }, tabId);
 });
 
-addActionHandler('closeStorySeenBy', (global, actions, payload): ActionReturnType => {
+addActionHandler('closeStoryViewModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
 
   return updateTabState(global, {
-    storyViewer: {
-      ...tabState.storyViewer,
-      storyIdSeenBy: undefined,
-    },
+    storyViewer: omit(tabState.storyViewer, ['viewModal']),
   }, tabId);
 });
 
@@ -351,6 +341,68 @@ addActionHandler('closeStoryPrivacyEditor', (global, actions, payload): ActionRe
     storyViewer: {
       ...tabState.storyViewer,
       isPrivacyModalOpen: false,
+    },
+  }, tabId);
+});
+
+addActionHandler('toggleStealthModal', (global, actions, payload): ActionReturnType => {
+  const { isOpen, tabId = getCurrentTabId() } = payload || {};
+  const tabState = selectTabState(global, tabId);
+
+  return updateTabState(global, {
+    storyViewer: {
+      ...tabState.storyViewer,
+      isStealthModalOpen: isOpen,
+    },
+  }, tabId);
+});
+
+addActionHandler('clearStoryViews', (global, actions, payload): ActionReturnType => {
+  const { isLoading, tabId = getCurrentTabId() } = payload || {};
+
+  const tabState = selectTabState(global, tabId);
+
+  if (!tabState.storyViewer.viewModal) return global;
+
+  return updateTabState(global, {
+    storyViewer: {
+      ...tabState.storyViewer,
+      viewModal: {
+        ...tabState.storyViewer.viewModal,
+        viewsById: {},
+        isLoading,
+        nextOffset: '',
+      },
+    },
+  }, tabId);
+});
+
+addActionHandler('updateStoryView', (global, actions, payload): ActionReturnType => {
+  const {
+    userId, isUserBlocked, areStoriesBlocked, tabId = getCurrentTabId(),
+  } = payload;
+
+  const tabState = selectTabState(global, tabId);
+  const { viewModal } = tabState.storyViewer;
+
+  if (!viewModal?.viewsById?.[userId]) return global;
+
+  const updatedViewsById: Record<string, ApiStoryView> = {
+    ...viewModal.viewsById,
+    [userId]: {
+      ...viewModal.viewsById[userId],
+      isUserBlocked: isUserBlocked || undefined,
+      areStoriesBlocked: areStoriesBlocked || undefined,
+    },
+  };
+
+  return updateTabState(global, {
+    storyViewer: {
+      ...tabState.storyViewer,
+      viewModal: {
+        ...viewModal,
+        viewsById: updatedViewsById,
+      },
     },
   }, tabId);
 });

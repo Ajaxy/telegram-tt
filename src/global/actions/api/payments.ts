@@ -386,6 +386,8 @@ addActionHandler('openPremiumModal', async (global, actions, payload): Promise<v
     },
   }, tabId);
   setGlobal(global);
+
+  actions.closeReactionPicker({ tabId });
 });
 
 addActionHandler('openGiftPremiumModal', async (global, actions, payload): Promise<void> => {

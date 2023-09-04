@@ -6,7 +6,7 @@ import type { ApiChat, ApiReaction } from '../../types';
 import { REACTION_LIST_LIMIT, RECENT_REACTIONS_LIMIT, TOP_REACTIONS_LIMIT } from '../../../config';
 import { buildInputPeer, buildInputReaction } from '../gramjsBuilders';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildApiAvailableReaction, buildApiReaction, buildMessagePeerReaction } from '../apiBuilders/messages';
+import { buildApiAvailableReaction, buildApiReaction, buildMessagePeerReaction } from '../apiBuilders/reactions';
 import { invokeRequest } from './client';
 import localDb from '../localDb';
 import { addEntitiesToLocalDb } from '../helpers';

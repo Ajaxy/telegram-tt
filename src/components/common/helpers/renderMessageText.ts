@@ -14,15 +14,25 @@ import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
 import trimText from '../../../util/trimText';
 
-export function renderMessageText(
-  message: ApiMessage,
-  highlight?: string,
-  emojiSize?: number,
-  isSimple?: boolean,
-  truncateLength?: number,
-  isProtected?: boolean,
-  shouldRenderAsHtml?: boolean,
-) {
+export function renderMessageText({
+  message,
+  highlight,
+  emojiSize,
+  isSimple,
+  truncateLength,
+  isProtected,
+  forcePlayback,
+  shouldRenderAsHtml,
+} : {
+  message: ApiMessage;
+  highlight?: string;
+  emojiSize?: number;
+  isSimple?: boolean;
+  truncateLength?: number;
+  isProtected?: boolean;
+  forcePlayback?: boolean;
+  shouldRenderAsHtml?: boolean;
+}) {
   const { text, entities } = message.content.text || {};
 
   if (!text) {
@@ -39,6 +49,7 @@ export function renderMessageText(
     messageId: message.id,
     isSimple,
     isProtected,
+    forcePlayback,
   });
 }
 
@@ -67,7 +78,9 @@ export function renderMessageSummary(
   const emoji = !noEmoji && getMessageSummaryEmoji(message);
   const emojiWithSpace = emoji ? `${emoji} ` : '';
 
-  const text = renderMessageText(message, highlight, undefined, true, truncateLength);
+  const text = renderMessageText({
+    message, highlight, isSimple: true, truncateLength,
+  });
   const description = getMessageSummaryDescription(lang, message, text);
 
   return [

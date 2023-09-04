@@ -63,7 +63,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
     deleteHistory,
     deleteChannel,
     deleteChatUser,
-    blockContact,
+    blockUser,
   } = getActions();
 
   const lang = useLang();
@@ -77,10 +77,10 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
 
   const handleDeleteAndStop = useCallback(() => {
     deleteHistory({ chatId: chat.id, shouldDeleteForAll: true });
-    blockContact({ contactId: chat.id, accessHash: chat.accessHash! });
+    blockUser({ userId: chat.id });
 
     onClose();
-  }, [deleteHistory, chat.id, chat.accessHash, blockContact, onClose]);
+  }, [chat.id, onClose]);
 
   const handleDeleteChat = useCallback(() => {
     if (isPrivateChat) {

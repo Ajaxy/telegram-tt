@@ -81,8 +81,7 @@ const OutlinedMicrophoneIcon: FC<OwnProps> = ({
       size={28}
       color={microphoneColor}
       className={className}
-      forceOnHeavyAnimation
-      forceInBackground
+      forceAlways
       nonInteractive
     />
   );

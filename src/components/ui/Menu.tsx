@@ -1,6 +1,6 @@
-import type { RefObject } from 'react';
-import type { FC } from '../../lib/teact/teact';
-import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
+import React, {
+  type FC, memo, useEffect, useRef,
+} from '../../lib/teact/teact';
 
 import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -8,6 +8,8 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
+
 import useShowTransition from '../../hooks/useShowTransition';
 import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
@@ -20,8 +22,8 @@ import Portal from './Portal';
 import './Menu.scss';
 
 type OwnProps = {
-  ref?: RefObject<HTMLDivElement>;
-  containerRef?: RefObject<HTMLElement>;
+  ref?: React.RefObject<HTMLDivElement>;
+  containerRef?: React.RefObject<HTMLElement>;
   isOpen: boolean;
   shouldCloseFast?: boolean;
   id?: string;
@@ -146,6 +148,7 @@ const Menu: FC<OwnProps> = ({
         'Menu',
         !noCompact && !isTouchScreen && 'compact',
         !IS_BACKDROP_BLUR_SUPPORTED && 'no-blur',
+        withPortal && 'in-portal',
         className,
       )}
       style={style}
@@ -186,4 +189,4 @@ const Menu: FC<OwnProps> = ({
   return menu;
 };
 
-export default memo(Menu);
+export default memo(freezeWhenClosed(Menu));

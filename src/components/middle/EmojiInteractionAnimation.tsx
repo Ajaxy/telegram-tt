@@ -108,7 +108,7 @@ const EmojiInteractionAnimation: FC<OwnProps & StateProps> = ({
         tgsUrl={effectTgsUrl}
         play
         quality={IS_ANDROID ? 0.5 : undefined}
-        forceOnHeavyAnimation
+        forceAlways
         noLoop
         onLoad={startPlaying}
       />

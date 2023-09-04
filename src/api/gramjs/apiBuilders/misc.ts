@@ -5,7 +5,8 @@ import type {
 } from '../../types';
 import type { ApiPrivacyKey } from '../../../types';
 
-import { buildApiDocument, buildApiReaction } from './messages';
+import { buildApiReaction } from './reactions';
+import { buildApiDocument } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';

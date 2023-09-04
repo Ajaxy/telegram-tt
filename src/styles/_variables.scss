@@ -198,6 +198,8 @@ $color-message-story-mention-to: #74bcff;
   --color-deleted-account: #9eaab5;
   --color-archive: #9eaab5;
 
+  --color-heart: #ff3c32;
+
   --vh: 1vh;
 
   --border-radius-default: 0.75rem;
@@ -234,6 +236,7 @@ $color-message-story-mention-to: #74bcff;
   }
 
   --z-modal-confirm: 10000;
+  --z-portal-menu: 10000;
   --z-symbol-menu-modal: 5000;
   --z-lock-screen: 3000;
   --z-ui-loader-mask: 2000;
