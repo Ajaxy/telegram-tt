@@ -294,7 +294,7 @@ function StorySlides({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, ownProps, detachWhenChanged): StateProps => {
+export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     storyViewer: {
       userId: currentUserId, storyId: currentStoryId, isSingleUser, isSingleStory, isPrivate, isArchive,
@@ -302,9 +302,6 @@ export default memo(withGlobal<OwnProps>((global, ownProps, detachWhenChanged): 
   } = selectTabState(global);
   const { byUserId, orderedUserIds: { archived, active } } = global.stories;
   const user = currentUserId ? selectUser(global, currentUserId) : undefined;
-
-  const isOpen = selectIsStoryViewerOpen(global);
-  detachWhenChanged(isOpen);
 
   return {
     byUserId,
@@ -316,4 +313,4 @@ export default memo(withGlobal<OwnProps>((global, ownProps, detachWhenChanged): 
     isPrivate,
     isArchive,
   };
-})(StorySlides));
+}, (global) => selectIsStoryViewerOpen(global))(StorySlides));

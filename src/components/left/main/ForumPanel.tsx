@@ -280,9 +280,7 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, ownProps, detachWhenChanged): StateProps => {
-    detachWhenChanged(selectIsForumPanelOpen(global));
-
+  (global): StateProps => {
     const chatId = selectTabState(global).forumPanelChatId;
     const chat = chatId ? selectChat(global, chatId) : undefined;
     const {
@@ -296,4 +294,5 @@ export default memo(withGlobal<OwnProps>(
       withInterfaceAnimations: selectCanAnimateInterface(global),
     };
   },
+  (global) => selectIsForumPanelOpen(global),
 )(ForumPanel));
