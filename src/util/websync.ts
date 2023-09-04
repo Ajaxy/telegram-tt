@@ -1,5 +1,5 @@
 import {
-  DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON,
+  DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON, APP_CODE_NAME,
 } from '../config';
 import { getGlobal } from '../global';
 import { hasStoredSession } from './sessions';
@@ -8,7 +8,7 @@ const WEBSYNC_URLS = [
   't.me',
   'telegram.me',
 ].map((domain) => `https://${domain}/_websync_?`);
-const WEBSYNC_VERSION = `${APP_VERSION} Z`;
+const WEBSYNC_VERSION = `${APP_VERSION} ${APP_CODE_NAME}`;
 const WEBSYNC_KEY = 'tgme_sync';
 const WEBSYNC_TIMEOUT = 86400;
 

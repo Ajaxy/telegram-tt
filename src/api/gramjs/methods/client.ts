@@ -14,7 +14,7 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST,
+  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, APP_CODE_NAME,
 } from '../../../config';
 import {
   onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
@@ -42,7 +42,6 @@ import { pause } from '../../../util/schedulers';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
-const APP_CODE_NAME = 'Z';
 
 GramJsLogger.setLevel(DEBUG_GRAMJS ? 'debug' : 'warn');
 
