@@ -1,18 +1,21 @@
-import BigInt from 'big-integer';
 import { invokeRequest } from './client';
 import type {
-  ApiUser, ApiUserStories, ApiReportReason, ApiTypeStory,
+  ApiUser, ApiUserStories, ApiReportReason, ApiTypeStory, ApiReaction, ApiStealthMode,
 } from '../../types';
 import type { PrivacyVisibility } from '../../../types';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { addEntitiesToLocalDb, addStoryToLocalDb } from '../helpers';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildApiStory, buildApiUsersStories } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import {
+  buildApiStoryView, buildApiStory, buildApiUsersStories, buildApiStealthMode,
+} from '../apiBuilders/stories';
+import {
+  buildInputEntity,
   buildInputPeer,
   buildInputPeerFromLocalDb,
   buildInputPrivacyRules,
+  buildInputReaction,
   buildInputReportReason,
 } from '../gramjsBuilders';
 import { STORY_LIST_LIMIT } from '../../../config';
@@ -28,8 +31,14 @@ export async function fetchAllStories({
   isHidden?: boolean;
 }): Promise<
   undefined
-  | { state: string }
-  | { users: ApiUser[]; userStories: Record<string, ApiUserStories>; hasMore?: true; state: string }> {
+  | { state: string; stealthMode: ApiStealthMode }
+  | {
+    users: ApiUser[];
+    userStories: Record<string, ApiUserStories>;
+    hasMore?: true;
+    state: string;
+    stealthMode: ApiStealthMode;
+  }> {
   const params: ConstructorParameters<typeof GramJs.stories.GetAllStories>[0] = isFirstRequest
     ? (isHidden ? { hidden: true } : {})
     : { state: stateHash, next: true, ...(isHidden && { hidden: true }) };
@@ -42,6 +51,7 @@ export async function fetchAllStories({
   if (result instanceof GramJs.stories.AllStoriesNotModified) {
     return {
       state: result.state,
+      stealthMode: buildApiStealthMode(result.stealthMode),
     };
   }
 
@@ -95,6 +105,7 @@ export async function fetchAllStories({
     userStories: allUserStories,
     hasMore: result.hasMore,
     state: result.state,
+    stealthMode: buildApiStealthMode(result.stealthMode),
   };
 }
 
@@ -215,19 +226,28 @@ export function toggleStoryPinned({ storyId, isPinned }: { storyId: number; isPi
   return invokeRequest(new GramJs.stories.TogglePinned({ id: [storyId], pinned: isPinned }));
 }
 
-export async function fetchStorySeenBy({
-  storyId, limit = STORY_LIST_LIMIT, offsetDate = 0, offsetId = 0,
+export async function fetchStoryViewList({
+  storyId,
+  areJustContacts,
+  query,
+  areReactionsFirst,
+  limit = STORY_LIST_LIMIT,
+  offset = '',
 }: {
   storyId: number;
+  areJustContacts?: true;
+  areReactionsFirst?: true;
+  query?: string;
   limit?: number;
-  offsetDate?: number;
-  offsetId?: number;
+  offset?: string;
 }) {
   const result = await invokeRequest(new GramJs.stories.GetStoryViewsList({
     id: storyId,
+    justContacts: areJustContacts,
+    q: query,
+    reactionsFirst: areReactionsFirst,
     limit,
-    offsetDate,
-    offsetId: BigInt(offsetId),
+    offset,
   }));
 
   if (!result) {
@@ -236,13 +256,15 @@ export async function fetchStorySeenBy({
 
   addEntitiesToLocalDb(result.users);
   const users = result.users.map(buildApiUser).filter(Boolean);
-  const seenByDates = result.views.reduce<Record<string, number>>((acc, view) => {
-    acc[buildApiPeerId(view.userId, 'user')] = view.date;
+  const views = result.views.map(buildApiStoryView);
 
-    return acc;
-  }, {});
-
-  return { users, seenByDates, count: result.count };
+  return {
+    users,
+    views,
+    nextOffset: result.nextOffset,
+    reactionsCount: result.reactionsCount,
+    viewsCount: result.count,
+  };
 }
 
 export async function fetchStoryLink({ userId, storyId }: { userId: string; storyId: number }) {
@@ -340,4 +362,37 @@ async function fetchCommonStoriesRequest({ method, userId }: {
     users,
     stories,
   };
+}
+
+export function sendStoryReaction({
+  user, storyId, reaction, shouldAddToRecent,
+}: {
+  user: ApiUser;
+  storyId: number;
+  reaction?: ApiReaction;
+  shouldAddToRecent?: boolean;
+}) {
+  return invokeRequest(new GramJs.stories.SendReaction({
+    reaction: reaction ? buildInputReaction(reaction) : new GramJs.ReactionEmpty(),
+    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    storyId,
+    ...(shouldAddToRecent && { addToRecent: true }),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export function activateStealthMode({
+  isForPast,
+  isForFuture,
+}: {
+  isForPast?: true;
+  isForFuture?: true;
+}) {
+  return invokeRequest(new GramJs.stories.ActivateStealthMode({
+    past: isForPast,
+    future: isForFuture,
+  }), {
+    shouldReturnTrue: true,
+  });
 }

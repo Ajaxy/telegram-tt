@@ -38,6 +38,7 @@ type OwnProps = {
   loopLimit?: number;
   shouldLoop?: boolean;
   shouldPreloadPreview?: boolean;
+  forceAlways?: boolean;
   forceOnHeavyAnimation?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -65,6 +66,7 @@ const StickerView: FC<OwnProps> = ({
   loopLimit,
   shouldLoop = false,
   shouldPreloadPreview,
+  forceAlways,
   forceOnHeavyAnimation,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -161,7 +163,8 @@ const StickerView: FC<OwnProps> = ({
           tgsUrl={fullMediaData}
           play={shouldPlay}
           noLoop={!shouldLoop}
-          forceOnHeavyAnimation={forceOnHeavyAnimation}
+          forceOnHeavyAnimation={forceAlways || forceOnHeavyAnimation}
+          forceAlways={forceAlways}
           isLowPriority={isSmall && !selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSetInfo)}
           sharedCanvas={sharedCanvasRef?.current || undefined}
           sharedCanvasCoords={coords}
@@ -178,6 +181,7 @@ const StickerView: FC<OwnProps> = ({
           playsInline
           muted
           loop={!loopLimit}
+          isPriority={forceAlways}
           disablePictureInPicture
           onReady={markPlayerReady}
           onEnded={onVideoEnded}

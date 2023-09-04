@@ -14,26 +14,26 @@ import {
 } from '../../global/selectors';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
-
+import { animateOpening, animateClosing } from './helpers/ghostAnimation';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
+import buildClassName from '../../util/buildClassName';
 import { ANIMATION_END_DELAY } from '../../config';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
-import useHistoryBack from '../../hooks/useHistoryBack';
 import usePrevious from '../../hooks/usePrevious';
-import { useStoryProps } from './hooks/useStoryProps';
-import { useSlideSizes } from './hooks/useSlideSizes';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import { animateOpening, animateClosing } from './helpers/ghostAnimation';
-import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
+import useStoryProps from './hooks/useStoryProps';
+import useSlideSizes from './hooks/useSlideSizes';
 
 import ShowTransition from '../ui/ShowTransition';
 import Button from '../ui/Button';
 import StorySlides from './StorySlides';
 import StoryDeleteConfirmModal from './StoryDeleteConfirmModal';
-import StoryViewers from './StoryViewers';
+import StoryViewModal from './StoryViewModal';
 import ReportModal from '../common/ReportModal';
 import StorySettings from './StorySettings';
+import StealthModeModal from './StealthModeModal';
 
 import styles from './StoryViewer.module.scss';
 
@@ -92,8 +92,8 @@ function StoryViewer({
     const stopPriorityPlayback = dispatchPriorityPlaybackEvent();
 
     return () => {
-      stopPriorityPlayback();
       enableDirectTextInput();
+      stopPriorityPlayback();
     };
   }, [isOpen]);
 
@@ -110,12 +110,6 @@ function StoryViewer({
     closeDeleteModal();
     setIdStoryForDelete(undefined);
   }, []);
-
-  useHistoryBack({
-    isActive: isOpen,
-    onBack: handleClose,
-    shouldBeReplaced: true,
-  });
 
   useEffect(() => (isOpen ? captureEscKeyListener(() => {
     handleClose();
@@ -161,10 +155,11 @@ function StoryViewer({
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >
-        <i className="icon icon-close" aria-hidden />
+        <i className={buildClassName('icon icon-close', styles.topIcon)} aria-hidden />
       </Button>
 
       <StorySlides
+        isOpen={isOpen}
         isReportModalOpen={isReportModalOpen}
         isDeleteModalOpen={isDeleteModalOpen}
         onReport={openReportModal}
@@ -177,7 +172,8 @@ function StoryViewer({
         storyId={idStoryForDelete}
         onClose={handleCloseDeleteModal}
       />
-      <StoryViewers />
+      <StoryViewModal />
+      <StealthModeModal />
       <StorySettings isOpen={isPrivacyModalOpen} onClose={closeStoryPrivacyEditor} />
       <ReportModal
         isOpen={isReportModalOpen}

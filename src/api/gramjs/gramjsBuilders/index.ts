@@ -667,11 +667,14 @@ export function buildInputPrivacyRules(
 
   switch (visibility) {
     case 'everybody':
-      rules.push(new GramJs.InputPrivacyValueAllowAll());
-      break;
-
     case 'contacts': {
-      rules.push(new GramJs.InputPrivacyValueAllowContacts());
+      if (visibility === 'contacts') {
+        rules.push(new GramJs.InputPrivacyValueAllowContacts());
+      }
+
+      if (visibility === 'everybody') {
+        rules.push(new GramJs.InputPrivacyValueAllowAll());
+      }
 
       const users = deniedUserList?.reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
         acc.push(new GramJs.InputPeerUser({

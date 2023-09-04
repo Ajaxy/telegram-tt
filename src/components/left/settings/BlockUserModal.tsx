@@ -37,7 +37,7 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     setUserSearchQuery,
-    blockContact,
+    blockUser,
   } = getActions();
 
   const lang = useLang();
@@ -65,13 +65,9 @@ const BlockUserModal: FC<OwnProps & StateProps> = ({
   }, [blockedIds, contactIds, currentUserId, search, localContactIds, usersById]);
 
   const handleRemoveUser = useCallback((userId: string) => {
-    const { id: contactId, accessHash } = usersById[userId] || {};
-    if (!contactId || !accessHash) {
-      return;
-    }
-    blockContact({ contactId, accessHash });
+    blockUser({ userId });
     onClose();
-  }, [blockContact, onClose, usersById]);
+  }, [onClose]);
 
   return (
     <ChatOrUserPicker

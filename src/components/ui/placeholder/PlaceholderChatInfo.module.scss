@@ -1,0 +1,50 @@
+.root {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.title {
+  width: 75%;
+  height: 1rem;
+  border-radius: 0.5rem;
+}
+
+.subtitle {
+  width: 50%;
+  height: 0.875rem;
+  border-radius: 0.5rem;
+}
+
+.animated {
+  background: linear-gradient(
+      90deg,
+      var(--color-skeleton-background),
+      var(--color-skeleton-foreground),
+      var(--color-skeleton-background)
+    );
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+  animation: slide 3s infinite linear;
+}
+
+@keyframes slide {
+  to {
+    background-position: 100vw 0;
+  }
+}

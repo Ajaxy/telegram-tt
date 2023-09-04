@@ -49,6 +49,7 @@ addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionRe
     storyUserId,
     storyId,
     position,
+    sendAsMessage,
     tabId = getCurrentTabId(),
   } = payload!;
 
@@ -56,6 +57,7 @@ addActionHandler('openStoryReactionPicker', (global, actions, payload): ActionRe
     reactionPicker: {
       storyUserId,
       storyId,
+      sendAsMessage,
       position,
     },
   }, tabId);

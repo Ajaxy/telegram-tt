@@ -16,7 +16,8 @@ import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useSignal from '../../hooks/useSignal';
-import { useSlideSizes } from './hooks/useSlideSizes';
+import useSlideSizes from './hooks/useSlideSizes';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Story from './Story';
 import StoryPreview from './StoryPreview';
@@ -24,6 +25,7 @@ import StoryPreview from './StoryPreview';
 import styles from './StoryViewer.module.scss';
 
 interface OwnProps {
+  isOpen?: boolean;
   isReportModalOpen?: boolean;
   isDeleteModalOpen?: boolean;
   onDelete: (storyId: number) => void;
@@ -49,8 +51,20 @@ const ANIMATION_TO_ACTIVE_SCALE = '3';
 const ANIMATION_FROM_ACTIVE_SCALE = `${FROM_ACTIVE_SCALE_VALUE}`;
 
 function StorySlides({
-  userIds, currentUserId, currentStoryId, isSingleUser, isSingleStory, isPrivate, isArchive, byUserId,
-  isReportModalOpen, isDeleteModalOpen, onDelete, onClose, onReport,
+  userIds,
+  currentUserId,
+  currentStoryId,
+  isOpen,
+  isSingleUser,
+  isSingleStory,
+  isPrivate,
+  isArchive,
+  byUserId,
+  isReportModalOpen,
+  isDeleteModalOpen,
+  onDelete,
+  onClose,
+  onReport,
 }: OwnProps & StateProps) {
   const [renderingUserId, setRenderingUserId] = useState(currentUserId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
@@ -63,6 +77,12 @@ function StorySlides({
 
   const rendersRef = useRef<Record<string, { current: HTMLDivElement | null }>>({});
   const [getIsAnimating, setIsAnimating] = useSignal(false);
+
+  useHistoryBack({
+    isActive: isOpen,
+    onBack: onClose,
+    shouldBeReplaced: true,
+  });
 
   function setRef(ref: HTMLDivElement | null, userId: string) {
     if (!ref) {

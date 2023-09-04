@@ -37,7 +37,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openAddContactDialog,
-    blockContact,
+    blockUser,
     reportSpam,
     deleteChat,
     leaveChannel,
@@ -51,7 +51,6 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
   const [isBlockUserModalOpen, openBlockUserModal, closeBlockUserModal] = useFlag();
   const [shouldReportSpam, setShouldReportSpam] = useState<boolean>(true);
   const [shouldDeleteChat, setShouldDeleteChat] = useState<boolean>(true);
-  const { accessHash } = chat || {};
   const {
     isAutoArchived, canReportSpam, canAddContact, canBlockContact,
   } = settings || {};
@@ -66,7 +65,7 @@ const ChatReportPanel: FC<OwnProps & StateProps> = ({
 
   const handleConfirmBlock = useLastCallback(() => {
     closeBlockUserModal();
-    blockContact({ contactId: chatId, accessHash: accessHash! });
+    blockUser({ userId: chatId });
     if (canReportSpam && shouldReportSpam) {
       reportSpam({ chatId });
     }

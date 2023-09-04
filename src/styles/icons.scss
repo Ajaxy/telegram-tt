@@ -31,6 +31,33 @@
   display: block;
 }
 
+.icon-eye-outline:before {
+  content: "\e9cf";
+}
+.icon-eye-closed-outline:before {
+  content: "\e9d3";
+}
+.icon-story-caption:before {
+  content: "\e9d4";
+}
+.icon-story-priority:before {
+  content: "\e9ce";
+}
+.icon-stealth-past:before {
+  content: "\e9d0";
+}
+.icon-stealth-future:before {
+  content: "\e9d1";
+}
+.icon-timer:before {
+  content: "\e9d2";
+}
+.icon-arrow-down-circle:before {
+  content: "\e9d5";
+}
+.icon-story-reply:before {
+  content: "\e9d6";
+}
 .icon-loop:before {
   content: "\e98c";
 }

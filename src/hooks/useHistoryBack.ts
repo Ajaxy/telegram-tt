@@ -272,11 +272,6 @@ export default function useHistoryBack({
       },
     };
 
-    // Delete forward navigation in the virtual history. Not really needed, just looks better when debugging `logState`
-    for (let i = indexRef.current + 1; i < historyState.length; i++) {
-      delete historyState[i];
-    }
-
     deferHistoryOperation({
       type: shouldReplace ? 'replaceState' : 'pushState',
       data: {

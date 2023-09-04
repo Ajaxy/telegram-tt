@@ -32,6 +32,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import useDerivedState from '../../../hooks/useDerivedState';
 
 import TextFormatter from './TextFormatter';
+import TextTimer from '../../ui/TextTimer';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome
@@ -54,6 +55,8 @@ type OwnProps = {
   isActive: boolean;
   getHtml: Signal<string>;
   placeholder: string;
+  timedPlaceholderLangKey?: string;
+  timedPlaceholderDate?: number;
   forcedPlaceholder?: string;
   noFocusInterception?: boolean;
   canAutoFocus: boolean;
@@ -114,6 +117,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   isActive,
   getHtml,
   placeholder,
+  timedPlaceholderLangKey,
+  timedPlaceholderDate,
   forcedPlaceholder,
   canSendPlainText,
   canAutoFocus,
@@ -164,6 +169,16 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   const [isTextFormatterDisabled, setIsTextFormatterDisabled] = useState<boolean>(false);
   const { isMobile } = useAppLayout();
   const isMobileDevice = isMobile && (IS_IOS || IS_ANDROID);
+
+  const [shouldDisplayTimer, setShouldDisplayTimer] = useState(false);
+
+  useEffect(() => {
+    setShouldDisplayTimer(Boolean(timedPlaceholderLangKey && timedPlaceholderDate));
+  }, [timedPlaceholderDate, timedPlaceholderLangKey]);
+
+  const handleTimerEnd = useLastCallback(() => {
+    setShouldDisplayTimer(false);
+  });
 
   useInputCustomEmojis(
     getHtml,
@@ -572,7 +587,9 @@ const MessageInput: FC<OwnProps & StateProps> = ({
             >
               {!isAttachmentModalInput && !canSendPlainText
                 && <i className="icon icon-lock-badge placeholder-icon" />}
-              {placeholder}
+              {shouldDisplayTimer ? (
+                <TextTimer langKey={timedPlaceholderLangKey!} endsAt={timedPlaceholderDate!} onEnd={handleTimerEnd} />
+              ) : placeholder}
             </span>
           )}
           <canvas ref={sharedCanvasRef} className="shared-canvas" />

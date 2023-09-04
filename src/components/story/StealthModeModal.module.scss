@@ -1,0 +1,53 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+}
+
+.stealthIcon {
+  width: 5rem;
+  height: 5rem;
+  font-size: 3rem;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+}
+
+.title {
+  margin-top: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.description {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.listItem {
+  align-self: stretch;
+}
+
+.icon {
+  color: var(--color-primary) !important;
+  margin-right: 1rem !important;
+}
+
+.button {
+  margin-top: 1rem;
+}
+
+.subtitle {
+  line-height: 1.25rem !important;
+}

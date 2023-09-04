@@ -36,7 +36,7 @@ import './Avatar.scss';
 
 const LOOP_COUNT = 3;
 
-export type AvatarSize = 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'jumbo';
+export type AvatarSize = 'micro' | 'tiny' | 'mini' | 'small' | 'small-mobile' | 'medium' | 'large' | 'giant' | 'jumbo';
 
 const cn = createClassNameBuilder('Avatar');
 cn.media = cn('media');
@@ -51,6 +51,7 @@ type OwnProps = {
   isSavedMessages?: boolean;
   withVideo?: boolean;
   withStory?: boolean;
+  forPremiumPromo?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
@@ -70,6 +71,7 @@ const Avatar: FC<OwnProps> = ({
   isSavedMessages,
   withVideo,
   withStory,
+  forPremiumPromo,
   withStoryGap,
   withStorySolid,
   storyViewerOrigin,
@@ -211,7 +213,7 @@ const Avatar: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
-    withStory && user?.hasStories && 'with-story-circle',
+    ((withStory && user?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && user?.hasStories && 'with-story-solid',
     withStorySolid && user?.hasUnreadStories && 'has-unread-story',
     onClick && 'interactive',

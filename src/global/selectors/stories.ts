@@ -33,12 +33,6 @@ export function selectUserStory<T extends GlobalState>(
   return selectUserStories(global, userId)?.byId[storyId];
 }
 
-export function selectStorySeenBy<T extends GlobalState>(
-  global: T, userId: string, storyId: number,
-) {
-  return global.stories.seenByDates?.[userId]?.byId[storyId];
-}
-
 export function selectUserFirstUnreadStoryId<T extends GlobalState>(
   global: T, userId: string,
 ) {

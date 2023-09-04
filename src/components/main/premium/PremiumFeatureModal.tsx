@@ -19,6 +19,7 @@ import PremiumLimitPreview from './common/PremiumLimitPreview';
 import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
 import SliderDots from '../../common/SliderDots';
 import PremiumFeaturePreviewStickers from './previews/PremiumFeaturePreviewStickers';
+import PremiumFeaturePreviewStories from './previews/PremiumFeaturePreviewStories';
 
 import styles from './PremiumFeatureModal.module.scss';
 
@@ -36,6 +37,7 @@ export const PREMIUM_FEATURE_TITLES: Record<string, string> = {
   animated_userpics: 'PremiumPreviewAnimatedProfiles',
   emoji_status: 'PremiumPreviewEmojiStatus',
   translations: 'PremiumPreviewTranslations',
+  stories: 'PremiumPreviewStories',
 };
 
 export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
@@ -52,9 +54,11 @@ export const PREMIUM_FEATURE_DESCRIPTIONS: Record<string, string> = {
   animated_userpics: 'PremiumPreviewAnimatedProfilesDescription',
   emoji_status: 'PremiumPreviewEmojiStatusDescription',
   translations: 'PremiumPreviewTranslationsDescription',
+  stories: 'PremiumPreviewStoriesDescription',
 };
 
 export const PREMIUM_FEATURE_SECTIONS = [
+  'stories',
   'double_limits',
   'more_upload',
   'faster_download',
@@ -263,6 +267,14 @@ const PremiumFeatureModal: FC<OwnProps> = ({
                 <div className={styles.description}>
                   {renderText(lang(PREMIUM_FEATURE_DESCRIPTIONS.premium_stickers), ['br'])}
                 </div>
+              </div>
+            );
+          }
+
+          if (section === 'stories') {
+            return (
+              <div className={buildClassName(styles.slide, styles.stories)}>
+                <PremiumFeaturePreviewStories />
               </div>
             );
           }

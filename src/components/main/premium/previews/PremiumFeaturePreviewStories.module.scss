@@ -1,0 +1,43 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  padding-top: 1.5rem;
+  height: 100%;
+}
+
+.header {
+  align-self: center;
+  position: relative;
+}
+
+.circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  align-self: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.features {
+  min-height: 5rem;
+  overflow-y: scroll;
+  border-top: 0.0625rem solid transparent;
+  transition: 0.2s ease-in-out border-color;
+}
+
+.mobile {
+  padding: 1rem 1rem 1rem 2rem;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.scrolled {
+  border-color: var(--color-borders);
+}

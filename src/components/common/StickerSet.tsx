@@ -54,6 +54,7 @@ type OwnProps = {
   withDefaultStatusIcon?: boolean;
   isTranslucent?: boolean;
   noContextMenus?: boolean;
+  forcePlayback?: boolean;
   observeIntersection?: ObserveFn;
   observeIntersectionForPlayingItems: ObserveFn;
   observeIntersectionForShowingItems: ObserveFn;
@@ -92,6 +93,7 @@ const StickerSet: FC<OwnProps> = ({
   withDefaultStatusIcon,
   isTranslucent,
   noContextMenus,
+  forcePlayback,
   observeIntersection,
   observeIntersectionForPlayingItems,
   observeIntersectionForShowingItems,
@@ -222,8 +224,7 @@ const StickerSet: FC<OwnProps> = ({
     }
   }, [shouldRender, loadStickers, stickerSet]);
 
-  const isLocked = !isSavedMessages && !isRecent && isEmoji && !isCurrentUserPremium
-    && stickerSet.stickers?.some(({ isFree }) => !isFree);
+  const isLocked = !isSavedMessages && !isCurrentUserPremium && isPremiumSet;
 
   const isInstalled = stickerSet.installedDate && !stickerSet.isArchived;
   const canCut = !isInstalled && stickerSet.id !== RECENT_SYMBOL_SET_ID && stickerSet.id !== POPULAR_SYMBOL_SET_ID;
@@ -239,7 +240,16 @@ const StickerSet: FC<OwnProps> = ({
   const favoriteStickerIdsSet = useMemo(() => (
     favoriteStickers ? new Set(favoriteStickers.map(({ id }) => id)) : undefined
   ), [favoriteStickers]);
-  const withAddSetButton = !shouldHideHeader && !isRecent && isEmoji && !isInstalled && !isPopular;
+  const withAddSetButton = !shouldHideHeader && !isRecent && isEmoji && !isPopular
+    && (!isInstalled || (!isCurrentUserPremium && !isSavedMessages));
+  const addSetButtonText = useMemo(() => {
+    if (isLocked) {
+      if (isInstalled) return lang('lng_emoji_premium_restore');
+      return lang('Unlock');
+    }
+
+    return lang('Add');
+  }, [isLocked, lang, isInstalled]);
 
   return (
     <div
@@ -256,7 +266,9 @@ const StickerSet: FC<OwnProps> = ({
             {isLocked && <i className="symbol-set-locked-icon icon icon-lock-badge" />}
             {stickerSet.title}
             {withAddSetButton && Boolean(stickerSet.stickers) && (
-              <span className="symbol-set-amount">{lang('Stickers', stickerSet.stickers.length, 'i')}</span>
+              <span className="symbol-set-amount">
+                {lang(isEmoji ? 'EmojiCount' : 'Stickers', stickerSet.stickers.length, 'i')}
+              </span>
             )}
           </p>
           {isRecent && (
@@ -271,7 +283,7 @@ const StickerSet: FC<OwnProps> = ({
               size="tiny"
               fluid
             >
-              {isPremiumSet && isLocked ? lang('Unlock') : lang('Add')}
+              {addSetButtonText}
             </Button>
           )}
         </div>
@@ -321,6 +333,7 @@ const StickerSet: FC<OwnProps> = ({
               onClick={onReactionSelect!}
               sharedCanvasRef={sharedCanvasRef}
               sharedCanvasHqRef={sharedCanvasHqRef}
+              forcePlayback={forcePlayback}
             />
           );
         })}
@@ -358,6 +371,7 @@ const StickerSet: FC<OwnProps> = ({
                 onContextMenuOpen={onContextMenuOpen}
                 onContextMenuClose={onContextMenuClose}
                 onContextMenuClick={onContextMenuClick}
+                forcePlayback={forcePlayback}
               />
             );
           })}

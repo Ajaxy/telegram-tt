@@ -1,12 +1,24 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
-
 import type {
-  ApiPhoto, ApiPhotoSize, ApiThumbnail, ApiVideoSize, ApiUsername,
+  ApiPhoto,
+  ApiPhotoSize,
+  ApiThumbnail,
+  ApiVideoSize,
+  ApiUsername,
+  ApiFormattedText,
+  ApiMessageEntity,
+  ApiMessageEntityDefault,
 } from '../../types';
+import {
+  ApiMessageEntityTypes,
+} from '../../types';
+import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
+
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
 import { compact } from '../../../util/iteratees';
+import { buildApiPeerId } from './peers';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };
 
@@ -131,4 +143,105 @@ export function buildApiUsernames(mtpPeer: GramJs.User | GramJs.Channel | GramJs
   }
 
   return usernames;
+}
+
+export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
+  let visibility: PrivacyVisibility | undefined;
+  let allowUserIds: string[] | undefined;
+  let allowChatIds: string[] | undefined;
+  let blockUserIds: string[] | undefined;
+  let blockChatIds: string[] | undefined;
+
+  rules.forEach((rule) => {
+    if (rule instanceof GramJs.PrivacyValueAllowAll) {
+      visibility ||= 'everybody';
+    } else if (rule instanceof GramJs.PrivacyValueAllowContacts) {
+      visibility ||= 'contacts';
+    } else if (rule instanceof GramJs.PrivacyValueAllowCloseFriends) {
+      visibility ||= 'closeFriends';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowContacts) {
+      visibility ||= 'nonContacts';
+    } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
+      visibility ||= 'nobody';
+    } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
+      visibility ||= 'selectedContacts';
+      allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
+    } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
+      blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
+    } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
+      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+    } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
+      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+    }
+  });
+
+  if (!visibility) {
+    // Disallow by default
+    visibility = 'nobody';
+  }
+
+  return {
+    visibility,
+    allowUserIds: allowUserIds || [],
+    allowChatIds: allowChatIds || [],
+    blockUserIds: blockUserIds || [],
+    blockChatIds: blockChatIds || [],
+  };
+}
+
+export function buildApiFormattedText(textWithEntities: GramJs.TextWithEntities): ApiFormattedText {
+  const { text, entities } = textWithEntities;
+
+  return {
+    text,
+    entities: entities.map(buildApiMessageEntity),
+  };
+}
+
+export function buildApiMessageEntity(entity: GramJs.TypeMessageEntity): ApiMessageEntity {
+  const {
+    className: type, offset, length,
+  } = entity;
+
+  if (entity instanceof GramJs.MessageEntityMentionName) {
+    return {
+      type: ApiMessageEntityTypes.MentionName,
+      offset,
+      length,
+      userId: buildApiPeerId(entity.userId, 'user'),
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityTextUrl) {
+    return {
+      type: ApiMessageEntityTypes.TextUrl,
+      offset,
+      length,
+      url: entity.url,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityPre) {
+    return {
+      type: ApiMessageEntityTypes.Pre,
+      offset,
+      length,
+      language: entity.language,
+    };
+  }
+
+  if (entity instanceof GramJs.MessageEntityCustomEmoji) {
+    return {
+      type: ApiMessageEntityTypes.CustomEmoji,
+      offset,
+      length,
+      documentId: entity.documentId.toString(),
+    };
+  }
+
+  return {
+    type: type as `${ApiMessageEntityDefault['type']}`,
+    offset,
+    length,
+  };
 }

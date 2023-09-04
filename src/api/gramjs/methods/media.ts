@@ -20,6 +20,8 @@ const MEDIA_ENTITY_TYPES = new Set([
   'msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document', 'videoAvatar',
 ]);
 
+const JPEG_SIZE_TYPES = new Set(['s', 'm', 'x', 'y', 'w', 'a', 'b', 'c', 'd']);
+
 export default async function downloadMedia(
   {
     url, mediaFormat, start, end, isHtmlAllowed,
@@ -178,7 +180,11 @@ async function download(
       mimeType = (entity as GramJs.TypeWebDocument).mimeType;
       fullSize = (entity as GramJs.TypeWebDocument).size;
     } else {
-      mimeType = (entity as GramJs.Document).mimeType;
+      if (JPEG_SIZE_TYPES.has(sizeType || '')) {
+        mimeType = 'image/jpeg';
+      } else {
+        mimeType = (entity as GramJs.Document).mimeType;
+      }
       fullSize = (entity as GramJs.Document).size.toJSNumber();
     }
 

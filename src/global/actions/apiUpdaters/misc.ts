@@ -4,24 +4,28 @@ import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
 import {
-  addBlockedContact,
+  addBlockedUser,
   addStoriesForUser,
-  removeBlockedContact,
+  removeBlockedUser,
   removeUserStory,
   setConfirmPaymentUrl,
   setPaymentStep,
   updateLastReadStoryForUser,
+  updateStealthMode,
+  updateUserStory,
   updateUsersWithStories,
 } from '../../reducers';
-import { selectUserStories } from '../../selectors';
+import { selectUserStories, selectUserStory } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'updatePeerBlocked':
       if (update.isBlocked) {
-        return addBlockedContact(global, update.id);
+        return addBlockedUser(global, update.id);
+      } else if (update.isBlockedFromStories) {
+        return global; // Unsupported
       } else {
-        return removeBlockedContact(global, update.id);
+        return removeBlockedUser(global, update.id);
       }
 
     case 'updateResetContactList':
@@ -122,6 +126,20 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'updateReadStories':
       global = updateLastReadStoryForUser(global, update.userId, update.lastReadId);
+      setGlobal(global);
+      break;
+
+    case 'updateSentStoryReaction': {
+      const { userId, storyId, reaction } = update;
+      const story = selectUserStory(global, userId, storyId);
+      if (!story) return global;
+      global = updateUserStory(global, userId, storyId, { sentReaction: reaction });
+      setGlobal(global);
+      break;
+    }
+
+    case 'updateStealthMode':
+      global = updateStealthMode(global, update.stealthMode);
       setGlobal(global);
       break;
   }

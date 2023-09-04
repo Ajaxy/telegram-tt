@@ -10,7 +10,7 @@ import {
 } from '../apiBuilders/symbols';
 import { buildApiUserEmojiStatus } from '../apiBuilders/users';
 import { buildInputStickerSet, buildInputDocument, buildInputStickerSetShortName } from '../gramjsBuilders';
-import { buildVideoFromDocument } from '../apiBuilders/messages';
+import { buildVideoFromDocument } from '../apiBuilders/messageContent';
 import { DEFAULT_GIF_SEARCH_BOT_USERNAME, RECENT_STATUS_LIMIT, RECENT_STICKERS_LIMIT } from '../../../config';
 
 import localDb from '../localDb';

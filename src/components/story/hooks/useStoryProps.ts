@@ -3,7 +3,9 @@ import { hasMessageText, getStoryMediaHash } from '../../../global/helpers';
 import useMedia from '../../../hooks/useMedia';
 import { ApiMediaFormat } from '../../../api/types';
 
-export const useStoryProps = (story?: ApiTypeStory) => {
+export default function useStoryProps(
+  story?: ApiTypeStory, isCurrentUserPremium = false, isDropdownMenuOpen = false,
+) {
   const isLoadedStory = story && 'content' in story;
   const isDeletedStory = story && 'isDeleted' in story;
   const hasText = isLoadedStory ? hasMessageText(story) : false;
@@ -30,6 +32,11 @@ export const useStoryProps = (story?: ApiTypeStory) => {
   const hasFullData = Boolean(fullMediaData || altMediaData);
   const bestImageData = isVideo ? previewBlobUrl : fullMediaData || previewBlobUrl;
   const hasThumb = !previewBlobUrl && !hasFullData;
+  const mediaAreas = isLoadedStory ? story.mediaAreas : undefined;
+
+  const canDownload = isCurrentUserPremium && isLoadedStory && !story.noForwards;
+  const downloadHash = isLoadedStory ? getStoryMediaHash(story, 'download') : undefined;
+  const downloadMediaData = useMedia(downloadHash, !canDownload && !isDropdownMenuOpen);
 
   return {
     isLoadedStory,
@@ -47,5 +54,8 @@ export const useStoryProps = (story?: ApiTypeStory) => {
     hasFullData,
     bestImageData,
     hasThumb,
+    mediaAreas,
+    canDownload,
+    downloadMediaData,
   };
-};
+}

@@ -212,7 +212,7 @@ export interface ApiPaymentCredentials {
   title: string;
 }
 
-interface ApiGeoPoint {
+export interface ApiGeoPoint {
   long: number;
   lat: number;
   accessHash: string;

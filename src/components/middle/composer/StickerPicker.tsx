@@ -294,6 +294,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
               noPlay={!canAnimate || !loadAndPlay}
               observeIntersection={observeIntersectionForCovers}
               sharedCanvasRef={withSharedCanvas ? sharedCanvasRef : undefined}
+              forcePlayback
             />
           )}
         </Button>
@@ -314,6 +315,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
           withTranslucentThumb={isTranslucent}
           onClick={selectStickerSet}
           clickArg={index}
+          forcePlayback
         />
       );
     }
@@ -375,6 +377,7 @@ const StickerPicker: FC<OwnProps & StateProps> = ({
             onStickerUnfave={handleStickerUnfave}
             onStickerFave={handleStickerFave}
             onStickerRemoveRecent={handleRemoveRecentSticker}
+            forcePlayback
           />
         ))}
       </div>

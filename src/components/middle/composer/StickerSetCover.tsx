@@ -29,6 +29,7 @@ type OwnProps = {
   stickerSet: ApiStickerSet;
   size?: number;
   noPlay?: boolean;
+  forcePlayback?: boolean;
   observeIntersection: ObserveFn;
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
 };
@@ -37,6 +38,7 @@ const StickerSetCover: FC<OwnProps> = ({
   stickerSet,
   size = STICKER_SIZE_PICKER_HEADER,
   noPlay,
+  forcePlayback,
   observeIntersection,
   sharedCanvasRef,
 }) => {
@@ -90,6 +92,7 @@ const StickerSetCover: FC<OwnProps> = ({
             isLowPriority={!selectIsAlwaysHighPriorityEmoji(getGlobal(), stickerSet)}
             sharedCanvas={sharedCanvasRef?.current || undefined}
             sharedCanvasCoords={coords}
+            forceAlways={forcePlayback}
           />
         ) : (isVideo && !shouldFallbackToStatic) ? (
           <OptimizedVideo
@@ -97,6 +100,7 @@ const StickerSetCover: FC<OwnProps> = ({
             src={mediaData}
             canPlay={shouldPlay}
             style={colorFilter}
+            isPriority={forcePlayback}
             loop
             disablePictureInPicture
           />

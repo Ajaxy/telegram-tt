@@ -147,7 +147,7 @@ const MediaViewerContent: FC<OwnProps & StateProps> = (props) => {
   if (!message) return undefined;
   const textParts = message.content.action?.type === 'suggestProfilePhoto'
     ? lang('Conversation.SuggestedPhotoTitle')
-    : renderMessageText(message);
+    : renderMessageText({ message, forcePlayback: true });
 
   const hasFooter = Boolean(textParts);
   const posterSize = message && calculateMediaViewerDimensions(dimensions!, hasFooter, isVideo);

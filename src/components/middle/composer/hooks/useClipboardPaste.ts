@@ -5,7 +5,9 @@ import type { ApiAttachment, ApiFormattedText, ApiMessage } from '../../../../ap
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import buildAttachment from '../helpers/buildAttachment';
-import { DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID } from '../../../../config';
+import {
+  DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
+} from '../../../../config';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 import parseMessageInput, { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
 import cleanDocsHtml from '../../../../lib/cleanDocsHtml';
@@ -86,7 +88,7 @@ const useClipboardPaste = (
       }
 
       const input = document.activeElement;
-      if (input && ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID].includes(input.id)) {
+      if (input && ![EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID].includes(input.id)) {
         return;
       }
 

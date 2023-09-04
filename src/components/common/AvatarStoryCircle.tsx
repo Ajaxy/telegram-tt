@@ -34,11 +34,13 @@ const SIZES: Record<AvatarSize, number> = {
   'small-mobile': 2.625 * DPR * REM,
   medium: 2.875 * DPR * REM,
   large: 3.5 * DPR * REM,
+  giant: 5.125 * DPR * REM,
   jumbo: 7.625 * DPR * REM,
 };
 
 const BLUE = ['#34C578', '#3CA3F3'];
 const GREEN = ['#C9EB38', '#09C167'];
+const PURPLE = ['#A667FF', '#55A5FF'];
 const GRAY = '#C4C9CC';
 const DARK_GRAY = '#737373';
 const STROKE_WIDTH = 0.125 * DPR * REM;
@@ -119,7 +121,7 @@ export default memo(withGlobal<OwnProps>((global, { userId }): StateProps => {
   };
 })(AvatarStoryCircle));
 
-function drawGradientCircle({
+export function drawGradientCircle({
   canvas,
   size,
   color,
@@ -142,6 +144,8 @@ function drawGradientCircle({
     segmentsCount = SEGMENTS_MAX;
   }
 
+  const strokeModifier = Math.max(Math.max(size - SIZES.large, 0) / DPR / REM / 1.5, 1);
+
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     return;
@@ -150,7 +154,7 @@ function drawGradientCircle({
   canvas.width = size;
   canvas.height = size;
   const centerCoordinate = size / 2;
-  const radius = (size - STROKE_WIDTH) / 2;
+  const radius = (size - STROKE_WIDTH * strokeModifier) / 2;
   const segmentAngle = (2 * Math.PI) / segmentsCount;
   const gapSize = (GAP_PERCENT / 100) * (2 * Math.PI);
   const gradient = ctx.createLinearGradient(
@@ -160,7 +164,7 @@ function drawGradientCircle({
     Math.ceil(size * Math.sin(Math.PI / 2)),
   );
 
-  const colorStops = color === 'green' ? GREEN : BLUE;
+  const colorStops = color === 'purple' ? PURPLE : color === 'green' ? GREEN : BLUE;
   colorStops.forEach((colorStop, index) => {
     gradient.addColorStop(index / (colorStops.length - 1), colorStop);
   });
@@ -174,7 +178,7 @@ function drawGradientCircle({
     let endAngle = startAngle + segmentAngle - (segmentsCount > 1 ? gapSize : 0);
 
     ctx.strokeStyle = isRead ? readSegmentColor : gradient;
-    ctx.lineWidth = isRead ? STROKE_WIDTH_READ : STROKE_WIDTH;
+    ctx.lineWidth = (isRead ? STROKE_WIDTH_READ : STROKE_WIDTH) * strokeModifier;
 
     if (withExtraGap) {
       if (startAngle >= EXTRA_GAP_START && endAngle <= EXTRA_GAP_END) { // Segment is inside extra gap

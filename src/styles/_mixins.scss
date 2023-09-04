@@ -13,6 +13,17 @@
   margin-inline-end: calc($margin - var(--scrollbar-width));
 }
 
+@mixin gradient-border-top($width, $cutout: 0px) {
+  mask-image: linear-gradient(transparent $cutout, black $width);
+}
+
+@mixin gradient-border-bottom($width, $cutout: 0px) {
+  mask-image: linear-gradient(to top, transparent $cutout, black $width);
+}
+
+@mixin gradient-border-top-bottom($top, $bottom) {
+  mask-image: linear-gradient(transparent 0%, black $top, black calc(100% - $bottom), transparent 100%);
+}
 
 @mixin reset-range() {
   input[type="range"] {

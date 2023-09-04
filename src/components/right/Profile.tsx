@@ -38,6 +38,7 @@ import {
   selectTabState,
   selectTheme,
   selectUser,
+  selectUserFullInfo,
   selectUserStories,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
@@ -610,8 +611,9 @@ export default memo(withGlobal<OwnProps>(
     if (isUserId(chatId)) {
       resolvedUserId = chatId;
       user = selectUser(global, resolvedUserId);
+      const userFullInfo = selectUserFullInfo(global, chatId);
       hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
-      hasStoriesTab = user?.isSelf || (user?.hasStories && !user.areStoriesHidden);
+      hasStoriesTab = user && (user.isSelf || (!user.areStoriesHidden && userFullInfo?.hasPinnedStories));
       const userStories = hasStoriesTab ? selectUserStories(global, user!.id) : undefined;
       storyIds = userStories?.pinnedIds;
       storyByIds = userStories?.byId;

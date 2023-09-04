@@ -5,7 +5,8 @@ import type {
   ApiPaymentForm, ApiReceipt, ApiLabeledPrice, ApiPaymentCredentials,
 } from '../../types';
 
-import { buildApiDocument, buildApiMessageEntity, buildApiWebDocument } from './messages';
+import { buildApiDocument, buildApiWebDocument } from './messageContent';
+import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {

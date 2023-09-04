@@ -3,6 +3,7 @@ import React, { memo } from '../../../lib/teact/teact';
 
 import renderText from '../../common/helpers/renderText';
 import { hexToRgb, lerpRgb } from '../../../util/switchTheme';
+import buildClassName from '../../../util/buildClassName';
 
 import ListItem from '../../ui/ListItem';
 
@@ -10,11 +11,12 @@ import styles from './PremiumFeatureItem.module.scss';
 
 type OwnProps = {
   icon: string;
+  isFontIcon?: boolean;
   title: string;
   text: string;
-  onClick: VoidFunction;
   index: number;
   count: number;
+  onClick?: VoidFunction;
 };
 
 const COLORS = [
@@ -24,6 +26,7 @@ const COLORS = [
 
 const PremiumFeatureItem: FC<OwnProps> = ({
   icon,
+  isFontIcon,
   title,
   text,
   index,
@@ -33,11 +36,19 @@ const PremiumFeatureItem: FC<OwnProps> = ({
   const newIndex = (index / count) * COLORS.length;
   const colorA = COLORS[Math.floor(newIndex)];
   const colorB = COLORS[Math.ceil(newIndex)] ?? colorA;
-  const { r, g, b } = lerpRgb(colorA, colorB, 1);
+  const { r, g, b } = lerpRgb(colorA, colorB, 0.5);
 
   return (
-    <ListItem buttonClassName={styles.root} onClick={onClick}>
-      <img src={icon} className={styles.icon} alt="" style={`--item-color: rgb(${r},${g},${b})`} />
+    <ListItem buttonClassName={styles.root} onClick={onClick} inactive={!onClick}>
+      {isFontIcon ? (
+        <i
+          className={buildClassName(styles.fontIcon, `icon icon-${icon}`)}
+          aria-hidden
+          style={`--item-color: rgb(${r},${g},${b})`}
+        />
+      ) : (
+        <img src={icon} className={styles.icon} alt="" style={`--item-color: rgb(${r},${g},${b})`} />
+      )}
       <div className={styles.text}>
         <div className={styles.title}>{renderText(title, ['br'])}</div>
         <div className={styles.description}>{text}</div>

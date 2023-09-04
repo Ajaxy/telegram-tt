@@ -24,6 +24,7 @@ import type {
   ApiMessageEntity,
   ApiNewPoll,
   ApiReaction,
+  ApiStealthMode,
   ApiSticker,
   ApiUser,
   ApiVideo,
@@ -68,6 +69,7 @@ import {
   selectTheme,
   selectUser,
   selectUserFullInfo,
+  selectUserStory,
 } from '../../global/selectors';
 import {
   getAllowedAttachmentOptions,
@@ -146,6 +148,7 @@ import StickerTooltip from '../middle/composer/StickerTooltip.async';
 import EmojiTooltip from '../middle/composer/EmojiTooltip.async';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
 import ReactionSelector from '../middle/message/ReactionSelector';
+import ReactionStaticEmoji from './ReactionStaticEmoji';
 
 import './Composer.scss';
 
@@ -230,6 +233,8 @@ type StateProps =
     canPlayAnimatedEmojis?: boolean;
     canBuyPremium?: boolean;
     shouldCollectDebugLogs?: boolean;
+    sentStoryReaction?: ApiReaction;
+    stealthMode?: ApiStealthMode;
   };
 
 enum MainButtonState {
@@ -253,6 +258,10 @@ const SELECT_MODE_TRANSITION_MS = 200;
 const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
+
+const HEART_REACTION: ApiReaction = {
+  emoticon: '❤',
+};
 
 const Composer: FC<OwnProps & StateProps> = ({
   type,
@@ -328,6 +337,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   canBuyPremium,
   canPlayAnimatedEmojis,
   shouldCollectDebugLogs,
+  sentStoryReaction,
+  stealthMode,
   onForward,
 }) => {
   const {
@@ -349,12 +360,16 @@ const Composer: FC<OwnProps & StateProps> = ({
     showAllowedMessageTypesNotification,
     openStoryReactionPicker,
     closeReactionPicker,
+    sendStoryReaction,
   } = getActions();
 
   const lang = useLang();
 
   // eslint-disable-next-line no-null/no-null
   const inputRef = useRef<HTMLDivElement>(null);
+
+  // eslint-disable-next-line no-null/no-null
+  const storyReactionRef = useRef<HTMLButtonElement>(null);
 
   const [getHtml, setHtml] = useSignal('');
   const [isMounted, setIsMounted] = useState(false);
@@ -373,6 +388,9 @@ const Composer: FC<OwnProps & StateProps> = ({
   const sendMessageAction = useSendMessageAction(chatId, threadId);
   const [isInputHasFocus, markInputHasFocus, unmarkInputHasFocus] = useFlag();
   const [isAttachMenuOpen, onAttachMenuOpen, onAttachMenuClose] = useFlag();
+
+  const isSentStoryReactionHeart = sentStoryReaction && 'emoticon' in sentStoryReaction
+    ? sentStoryReaction.emoticon === HEART_REACTION.emoticon : false;
 
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
@@ -398,10 +416,10 @@ const Composer: FC<OwnProps & StateProps> = ({
   }, [chatId]);
 
   useEffect(() => {
-    if (chatId && isReady) {
+    if (chatId && isReady && !isInStoryViewer) {
       loadScheduledHistory({ chatId });
     }
-  }, [isReady, chatId, threadId]);
+  }, [isReady, chatId, threadId, isInStoryViewer]);
 
   useEffect(() => {
     if (chatId && chat && !sendAsPeerIds && isReady && isChatSuperGroup(chat)) {
@@ -521,22 +539,25 @@ const Composer: FC<OwnProps & StateProps> = ({
     startRecordTimeRef,
   } = useVoiceRecording();
 
+  const shouldSendRecordingStatus = isForCurrentMessageList && !isInStoryViewer;
   useInterval(() => {
     sendMessageAction({ type: 'recordAudio' });
-  }, activeVoiceRecording && SEND_MESSAGE_ACTION_INTERVAL);
+  }, shouldSendRecordingStatus ? activeVoiceRecording && SEND_MESSAGE_ACTION_INTERVAL : undefined);
 
   useEffect(() => {
+    if (!isForCurrentMessageList || isInStoryViewer) return;
     if (!activeVoiceRecording) {
       sendMessageAction({ type: 'cancel' });
     }
-  }, [activeVoiceRecording, sendMessageAction]);
+  }, [activeVoiceRecording, isForCurrentMessageList, isInStoryViewer, sendMessageAction]);
 
   const isEditingRef = useStateRef(Boolean(editingMessage));
   useEffect(() => {
+    if (!isForCurrentMessageList || isInStoryViewer) return;
     if (getHtml() && !isEditingRef.current) {
       sendMessageAction({ type: 'typing' });
     }
-  }, [getHtml, isEditingRef, sendMessageAction]);
+  }, [getHtml, isEditingRef, isForCurrentMessageList, isInStoryViewer, sendMessageAction]);
 
   const isAdmin = chat && isChatAdmin(chat);
 
@@ -736,8 +757,28 @@ const Composer: FC<OwnProps & StateProps> = ({
     handleContextMenuHide,
   } = useContextMenuHandlers(mainButtonRef, !(mainButtonState === MainButtonState.Send && canShowCustomSendMenu));
 
+  const {
+    contextMenuPosition: storyReactionPickerPosition,
+    handleContextMenu: handleStoryPickerContextMenu,
+    handleBeforeContextMenu: handleBeforeStoryPickerContextMenu,
+    handleContextMenuHide: handleStoryPickerContextMenuHide,
+  } = useContextMenuHandlers(storyReactionRef, !isInStoryViewer);
+
+  useEffect(() => {
+    if (isReactionPickerOpen) return;
+
+    if (storyReactionPickerPosition) {
+      openStoryReactionPicker({
+        storyUserId: chatId,
+        storyId: storyId!,
+        position: storyReactionPickerPosition,
+      });
+      handleStoryPickerContextMenuHide();
+    }
+  }, [chatId, handleStoryPickerContextMenuHide, isReactionPickerOpen, storyId, storyReactionPickerPosition]);
+
   useClipboardPaste(
-    isForCurrentMessageList,
+    isForCurrentMessageList || isInStoryViewer,
     insertFormattedTextAndUpdateCursor,
     handleSetAttachments,
     setNextText,
@@ -1226,6 +1267,18 @@ const Composer: FC<OwnProps & StateProps> = ({
     return withBotMenuButton && !getHtml() && !activeVoiceRecording;
   }, [withBotMenuButton, getHtml, activeVoiceRecording]);
 
+  const [timedPlaceholderLangKey, timedPlaceholderDate] = useMemo(() => {
+    if (slowMode?.nextSendDate) {
+      return ['SlowModeWait', slowMode.nextSendDate];
+    }
+
+    if (stealthMode?.activeUntil && isInStoryViewer) {
+      return ['StealthModeActiveHint', stealthMode.activeUntil];
+    }
+
+    return [];
+  }, [isInStoryViewer, slowMode?.nextSendDate, stealthMode?.activeUntil]);
+
   const isComposerHasFocus = isBotKeyboardOpen || isSymbolMenuOpen || isEmojiTooltipOpen || isSendAsMenuOpen
     || isMentionTooltipOpen || isInlineBotTooltipOpen || isDeleteModalOpen || isBotCommandMenuOpen || isAttachMenuOpen
     || isStickerTooltipOpen || isBotCommandTooltipOpen || isCustomEmojiTooltipOpen || isBotMenuButtonOpen
@@ -1348,7 +1401,17 @@ const Composer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
-    openStoryReactionPicker({ storyUserId: chatId, storyId: storyId!, position });
+    openStoryReactionPicker({
+      storyUserId: chatId,
+      storyId: storyId!,
+      position,
+      sendAsMessage: true,
+    });
+  });
+
+  const handleLikeStory = useLastCallback(() => {
+    const reaction = sentStoryReaction ? undefined : HEART_REACTION;
+    sendStoryReaction({ userId: chatId, storyId: storyId!, reaction });
   });
 
   const handleSendScheduled = useLastCallback(() => {
@@ -1586,6 +1649,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               canSendPlainText={!isComposerBlocked}
               inputCssSelector={editableInputCssSelector}
               idPrefix={type}
+              forceDarkTheme={isInStoryViewer}
             />
           )}
           <MessageInput
@@ -1607,6 +1671,8 @@ const Composer: FC<OwnProps & StateProps> = ({
                   ? (botKeyboardPlaceholder || inputPlaceholder || lang('Message'))
                   : lang('Chat.PlaceholderTextNotAllowed'))
             }
+            timedPlaceholderDate={timedPlaceholderDate}
+            timedPlaceholderLangKey={timedPlaceholderLangKey}
             forcedPlaceholder={inlineBotHelp}
             canAutoFocus={isReady && isForCurrentMessageList && !hasAttachments && isInMessageList}
             noFocusInterception={hasAttachments}
@@ -1618,6 +1684,33 @@ const Composer: FC<OwnProps & StateProps> = ({
             onFocus={markInputHasFocus}
             onBlur={unmarkInputHasFocus}
           />
+          {isInStoryViewer && !activeVoiceRecording && (
+            <Button
+              round
+              className="story-reaction-button"
+              color="translucent"
+              onClick={handleLikeStory}
+              onContextMenu={handleStoryPickerContextMenu}
+              onMouseDown={handleBeforeStoryPickerContextMenu}
+              ariaLabel={lang('AccDescrLike')}
+              ref={storyReactionRef}
+            >
+              {sentStoryReaction && !isSentStoryReactionHeart && (
+                <ReactionStaticEmoji
+                  reaction={sentStoryReaction}
+                  availableReactions={availableReactions}
+                />
+              )}
+              <i
+                className={buildClassName(
+                  'icon',
+                  !sentStoryReaction && 'icon-heart-outline',
+                  isSentStoryReactionHeart && 'icon-heart story-reaction-heart',
+                )}
+                aria-hidden
+              />
+            </Button>
+          )}
           {isInMessageList && (
             <>
               {isInlineBotLoading && Boolean(inlineBotId) && (
@@ -1730,7 +1823,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       <Button
         ref={mainButtonRef}
         round
-        color={isInMessageList ? 'secondary' : undefined}
+        color="secondary"
         className={buildClassName(
           mainButtonState,
           'main-button',
@@ -1772,7 +1865,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, {
-    chatId, threadId, messageListType, isMobile, type,
+    chatId, threadId, storyId, messageListType, isMobile, type,
   }): StateProps => {
     const chat = selectChat(global, chatId);
     const chatBot = chatId !== REPLIES_USER_ID ? selectBot(global, chatId) : undefined;
@@ -1802,10 +1895,15 @@ export default memo(withGlobal<OwnProps>(
     const sendAsChat = !sendAsUser && sendAsId ? selectChat(global, sendAsId) : undefined;
     const requestedDraftText = selectRequestedDraftText(global, chatId);
     const requestedDraftFiles = selectRequestedDraftFiles(global, chatId);
+
+    const tabState = selectTabState(global);
+    const isStoryViewerOpen = Boolean(tabState.storyViewer.storyId);
+
     const currentMessageList = selectCurrentMessageList(global);
     const isForCurrentMessageList = chatId === currentMessageList?.chatId
       && threadId === currentMessageList?.threadId
-      && messageListType === currentMessageList?.type;
+      && messageListType === currentMessageList?.type
+      && !isStoryViewerOpen;
     const user = selectUser(global, chatId);
     const canSendVoiceByPrivacy = (user && !selectUserFullInfo(global, user.id)?.noVoiceMessages) ?? true;
     const slowMode = chatFullInfo?.slowMode;
@@ -1817,7 +1915,8 @@ export default memo(withGlobal<OwnProps>(
 
     const replyingToId = selectReplyingToId(global, chatId, threadId);
 
-    const tabState = selectTabState(global);
+    const story = storyId && selectUserStory(global, chatId, storyId);
+    const sentStoryReaction = story && 'sentReaction' in story ? story.sentReaction : undefined;
 
     return {
       availableReactions: type === 'story' ? global.availableReactions : undefined,
@@ -1880,6 +1979,8 @@ export default memo(withGlobal<OwnProps>(
       canBuyPremium: !isCurrentUserPremium && !selectIsPremiumPurchaseBlocked(global),
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
       shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
+      sentStoryReaction,
+      stealthMode: global.stories.stealthMode,
     };
   },
 )(Composer));

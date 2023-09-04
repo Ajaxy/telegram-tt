@@ -427,6 +427,14 @@
         right: 0.5rem;
       }
     }
+
+    &.story-reaction-button {
+      --custom-emoji-size: 1.5rem;
+    }
+
+    .story-reaction-heart {
+      color: var(--color-heart);
+    }
   }
 
   > .input-group {
@@ -716,6 +724,11 @@
     bottom: 1.0625rem;
     left: 0.875rem;
   }
+}
+
+#story-input-text .placeholder-text {
+  bottom: 0.875rem;
+  left: 0.875rem;
 }
 
 .composer-tooltip {

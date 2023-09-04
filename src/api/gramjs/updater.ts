@@ -5,23 +5,33 @@ import type {
   ApiStory, ApiStorySkipped,
 } from '../types';
 
+import localDb from './localDb';
 import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
 import { omit, pick } from '../../util/iteratees';
 import { getServerTimeOffset, setServerTimeOffset } from '../../util/serverTime';
 import {
+  addMessageToLocalDb,
+  addEntitiesToLocalDb,
+  addPhotoToLocalDb,
+  resolveMessageApiChatId,
+  serializeBytes,
+  log,
+  swapLocalInvoiceMedia,
+  isChatFolder,
+  addStoryToLocalDb,
+} from './helpers';
+import { scheduleMutedTopicUpdate, scheduleMutedChatUpdate } from './scheduleUnmute';
+import {
   buildApiMessage,
   buildApiMessageFromShort,
   buildApiMessageFromShortChat,
-  buildMessageMediaContent,
-  buildPoll,
-  buildPollResults,
   buildApiMessageFromNotification,
   buildMessageDraft,
-  buildMessageReactions,
-  buildApiMessageExtendedMediaPreview,
-  buildApiStory,
-  buildPrivacyRules,
 } from './apiBuilders/messages';
+import {
+  buildApiReaction,
+  buildMessageReactions,
+} from './apiBuilders/reactions';
 import {
   buildChatMember,
   buildChatMembers,
@@ -36,30 +46,20 @@ import {
   buildApiUserEmojiStatus,
   buildApiUserStatus,
 } from './apiBuilders/users';
-import {
-  buildMessageFromUpdate,
-  isMessageWithMedia,
-  buildChatPhotoForLocalDb,
-} from './gramjsBuilders';
-import localDb from './localDb';
 import { omitVirtualClassFields } from './apiBuilders/helpers';
-import {
-  addMessageToLocalDb,
-  addEntitiesToLocalDb,
-  addPhotoToLocalDb,
-  resolveMessageApiChatId,
-  serializeBytes,
-  log,
-  swapLocalInvoiceMedia,
-  isChatFolder,
-  addStoryToLocalDb,
-} from './helpers';
 import {
   buildApiNotifyException,
   buildApiNotifyExceptionTopic,
   buildPrivacyKey,
 } from './apiBuilders/misc';
-import { buildApiPhoto, buildApiUsernames } from './apiBuilders/common';
+import {
+  buildApiMessageExtendedMediaPreview,
+  buildMessageMediaContent,
+  buildPoll,
+  buildPollResults,
+} from './apiBuilders/messageContent';
+import { buildApiStealthMode, buildApiStory } from './apiBuilders/stories';
+import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from './apiBuilders/common';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
@@ -69,7 +69,11 @@ import {
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
 import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
 import { buildApiBotMenuButton } from './apiBuilders/bots';
-import { scheduleMutedTopicUpdate, scheduleMutedChatUpdate } from './scheduleUnmute';
+import {
+  buildMessageFromUpdate,
+  isMessageWithMedia,
+  buildChatPhotoForLocalDb,
+} from './gramjsBuilders';
 
 export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }
@@ -879,6 +883,7 @@ export function updater(update: Update) {
       '@type': 'updatePeerBlocked',
       id: getApiChatIdFromMtpPeer(update.peerId),
       isBlocked: update.blocked,
+      isBlockedFromStories: update.blockedMyStoriesFrom,
     });
   } else if (update instanceof GramJs.UpdatePrivacy) {
     const key = buildPrivacyKey(update.key);
@@ -1085,6 +1090,18 @@ export function updater(update: Update) {
       '@type': 'updateReadStories',
       userId: buildApiPeerId(update.userId, 'user'),
       lastReadId: update.maxId,
+    });
+  } else if (update instanceof GramJs.UpdateSentStoryReaction) {
+    onUpdate({
+      '@type': 'updateSentStoryReaction',
+      userId: buildApiPeerId(update.userId, 'user'),
+      storyId: update.storyId,
+      reaction: buildApiReaction(update.reaction),
+    });
+  } else if (update instanceof GramJs.UpdateStoriesStealthMode) {
+    onUpdate({
+      '@type': 'updateStealthMode',
+      stealthMode: buildApiStealthMode(update.stealthMode),
     });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;

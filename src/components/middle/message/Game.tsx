@@ -8,7 +8,7 @@ import { getGamePreviewPhotoHash, getGamePreviewVideoHash, getMessageText } from
 
 import useMedia from '../../../hooks/useMedia';
 
-import Skeleton from '../../ui/Skeleton';
+import Skeleton from '../../ui/placeholder/Skeleton';
 
 import './Game.scss';
 

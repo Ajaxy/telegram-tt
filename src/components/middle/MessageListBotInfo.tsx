@@ -19,7 +19,7 @@ import useMedia from '../../hooks/useMedia';
 import useLang from '../../hooks/useLang';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
-import Skeleton from '../ui/Skeleton';
+import Skeleton from '../ui/placeholder/Skeleton';
 
 import styles from './MessageListBotInfo.module.scss';
 

@@ -502,4 +502,6 @@ export default {
   FoldersAllChatsDesc: 'All unarchived chats',
   'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **desktop app** instead.',
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Telegram Web. Try opening it with our **mobile app** instead.',
+  SlowModeWait: 'Slow Mode — %d',
+  OpenMapWith: 'Open map with...',
 } as ApiLangPack;

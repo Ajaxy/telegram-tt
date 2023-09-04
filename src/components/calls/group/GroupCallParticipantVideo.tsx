@@ -29,7 +29,7 @@ import Button from '../../ui/Button';
 import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
 import FullNameTitle from '../../common/FullNameTitle';
 import GroupCallParticipantMenu from './GroupCallParticipantMenu';
-import Skeleton from '../../ui/Skeleton';
+import Skeleton from '../../ui/placeholder/Skeleton';
 
 import styles from './GroupCallParticipantVideo.module.scss';
 

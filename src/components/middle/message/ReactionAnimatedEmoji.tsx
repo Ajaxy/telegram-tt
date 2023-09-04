@@ -135,7 +135,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
             tgsUrl={mediaDataEffect}
             play={isIntersecting}
             noLoop
-            forceOnHeavyAnimation
+            forceAlways
             onEnded={handleEnded}
           />
           {isCustom ? (
@@ -148,7 +148,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
               tgsUrl={mediaDataCenterIcon}
               play={isIntersecting}
               noLoop
-              forceOnHeavyAnimation
+              forceAlways
               onLoad={markAnimationLoaded}
               onEnded={unmarkAnimationLoaded}
             />

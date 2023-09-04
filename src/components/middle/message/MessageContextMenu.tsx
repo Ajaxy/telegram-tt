@@ -33,7 +33,7 @@ import useAppLayout from '../../../hooks/useAppLayout';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
-import Skeleton from '../../ui/Skeleton';
+import Skeleton from '../../ui/placeholder/Skeleton';
 import ReactionSelector from './ReactionSelector';
 import AvatarList from '../../common/AvatarList';
 

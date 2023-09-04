@@ -16,7 +16,7 @@ import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 
 import Checkbox from '../ui/Checkbox';
-import Skeleton from '../ui/Skeleton';
+import Skeleton from '../ui/placeholder/Skeleton';
 import SafeLink from '../common/SafeLink';
 import ListItem from '../ui/ListItem';
 

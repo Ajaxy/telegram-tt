@@ -42,6 +42,7 @@ export function renderTextWithEntities({
   sharedCanvasRef,
   sharedCanvasHqRef,
   cacheBuster,
+  forcePlayback,
 }: {
   text: string;
   entities?: ApiMessageEntity[];
@@ -57,8 +58,9 @@ export function renderTextWithEntities({
   sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
+  forcePlayback?: boolean;
 }) {
-  if (!entities || !entities.length) {
+  if (!entities?.length) {
     return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
   }
 
@@ -131,7 +133,7 @@ export function renderTextWithEntities({
     // Render the entity itself
     const newEntity = shouldRenderAsHtml
       ? processEntityAsHtml(entity, entityContent, nestedEntityContent)
-      : processEntity(
+      : processEntity({
         entity,
         entityContent,
         nestedEntityContent,
@@ -146,7 +148,8 @@ export function renderTextWithEntities({
         sharedCanvasRef,
         sharedCanvasHqRef,
         cacheBuster,
-      );
+        forcePlayback,
+      });
 
     if (Array.isArray(newEntity)) {
       renderResult.push(...newEntity);
@@ -312,22 +315,39 @@ function organizeEntity(
   };
 }
 
-function processEntity(
-  entity: ApiMessageEntity,
-  entityContent: TextPart,
-  nestedEntityContent: TextPart[],
-  highlight?: string,
-  messageId?: number,
-  isSimple?: boolean,
-  isProtected?: boolean,
-  observeIntersectionForLoading?: ObserveFn,
-  observeIntersectionForPlaying?: ObserveFn,
-  withTranslucentThumbs?: boolean,
-  emojiSize?: number,
-  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>,
-  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>,
-  cacheBuster?: string,
-) {
+function processEntity({
+  entity,
+  entityContent,
+  nestedEntityContent,
+  highlight,
+  messageId,
+  isSimple,
+  isProtected,
+  observeIntersectionForLoading,
+  observeIntersectionForPlaying,
+  withTranslucentThumbs,
+  emojiSize,
+  sharedCanvasRef,
+  sharedCanvasHqRef,
+  cacheBuster,
+  forcePlayback,
+} : {
+  entity: ApiMessageEntity;
+  entityContent: TextPart;
+  nestedEntityContent: TextPart[];
+  highlight?: string;
+  messageId?: number;
+  isSimple?: boolean;
+  isProtected?: boolean;
+  observeIntersectionForLoading?: ObserveFn;
+  observeIntersectionForPlaying?: ObserveFn;
+  withTranslucentThumbs?: boolean;
+  emojiSize?: number;
+  sharedCanvasRef?: React.RefObject<HTMLCanvasElement>;
+  sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
+  cacheBuster?: string;
+  forcePlayback?: boolean;
+}) {
   const entityText = typeof entityContent === 'string' && entityContent;
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
 
@@ -360,6 +380,7 @@ function processEntity(
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}
+          forceAlways={forcePlayback}
         />
       );
     }
@@ -485,6 +506,7 @@ function processEntity(
           observeIntersectionForLoading={observeIntersectionForLoading}
           observeIntersectionForPlaying={observeIntersectionForPlaying}
           withTranslucentThumb={withTranslucentThumbs}
+          forceAlways={forcePlayback}
         />
       );
     default:

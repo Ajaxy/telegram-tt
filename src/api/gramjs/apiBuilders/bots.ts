@@ -16,7 +16,7 @@ import type {
 
 import { pick } from '../../../util/iteratees';
 import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
-import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messages';
+import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
 import { buildStickerFromDocument } from './symbols';
 import localDb from '../localDb';
 import { buildApiPeerId } from './peers';

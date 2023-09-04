@@ -64,6 +64,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           noLoop
           size={REACTION_SIZE}
           onEnded={unmarkIsFirstPlay}
+          forceAlways
         />
       )}
       {!isFirstPlay && !noAppearAnimation && (
@@ -75,6 +76,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           size={REACTION_SIZE}
           onLoad={markAnimationLoaded}
           onEnded={deactivate}
+          forceAlways
         />
       )}
     </div>

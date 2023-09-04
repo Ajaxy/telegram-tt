@@ -41,6 +41,7 @@ interface StateProps {
   isCurrentUserPremium?: boolean;
   position?: IAnchorPosition;
   isTranslucent?: boolean;
+  sendAsMessage?: boolean;
 }
 
 const FULL_PICKER_SHIFT_DELTA = { x: -23, y: -64 };
@@ -55,9 +56,10 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   isTranslucent,
   isCurrentUserPremium,
   withCustomReactions,
+  sendAsMessage,
 }) => {
   const {
-    toggleReaction, closeReactionPicker, sendMessage, showNotification,
+    toggleReaction, closeReactionPicker, sendMessage, showNotification, sendStoryReaction,
   } = getActions();
 
   const lang = useLang();
@@ -121,33 +123,42 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     closeReactionPicker();
   });
 
-  const handleStoryReactionSelect = useLastCallback((reaction: ApiReaction | ApiSticker) => {
+  const handleStoryReactionSelect = useLastCallback((item: ApiReaction | ApiSticker) => {
+    const reaction = 'id' in item ? { documentId: item.id } : item;
+
+    const sticker = 'documentId' in item
+      ? getGlobal().customEmojis.byId[item.documentId] : 'emoticon' in item ? undefined : item;
+
+    if (sticker && !sticker.isFree && !isCurrentUserPremium) {
+      showNotification({
+        message: lang('UnlockPremiumEmojiHint'),
+        action: {
+          action: 'openPremiumModal',
+          payload: { initialSection: 'animated_emoji' },
+        },
+        actionText: lang('PremiumMore'),
+      });
+
+      closeReactionPicker();
+
+      return;
+    }
+
+    if (!sendAsMessage) {
+      sendStoryReaction({
+        userId: renderedStoryUserId!, storyId: renderedStoryId!, reaction, shouldAddToRecent: true,
+      });
+      closeReactionPicker();
+      return;
+    }
+
     let text: string | undefined;
     let entities: ApiMessageEntity[] | undefined;
 
-    if ('emoticon' in reaction) {
-      text = reaction.emoticon;
+    if ('emoticon' in item) {
+      text = item.emoticon;
     } else {
-      const sticker = 'documentId' in reaction ? getGlobal().customEmojis.byId[reaction.documentId] : reaction;
-      if (!sticker) {
-        return;
-      }
-
-      if (!sticker.isFree && !isCurrentUserPremium) {
-        showNotification({
-          message: lang('UnlockPremiumEmojiHint'),
-          action: {
-            action: 'openPremiumModal',
-            payload: { initialSection: 'animated_emoji' },
-          },
-          actionText: lang('PremiumMore'),
-        });
-
-        closeReactionPicker();
-
-        return;
-      }
-      const customEmojiMessage = parseMessageInput(buildCustomEmojiHtml(sticker));
+      const customEmojiMessage = parseMessageInput(buildCustomEmojiHtml(sticker!));
       text = customEmojiMessage.text;
       entities = customEmojiMessage.entities;
     }
@@ -212,7 +223,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const state = selectTabState(global);
   const {
-    chatId, messageId, storyUserId, storyId, position,
+    chatId, messageId, storyUserId, storyId, position, sendAsMessage,
   } = state.reactionPicker || {};
   const story = storyUserId && storyId
     ? selectUserStory(global, storyUserId, storyId) as ApiStory | ApiStorySkipped
@@ -234,6 +245,7 @@ export default memo(withGlobal<OwnProps>((global): StateProps => {
       : areCustomReactionsAllowed || isPrivateChat,
     isTranslucent: selectIsContextMenuTranslucent(global),
     isCurrentUserPremium: selectIsCurrentUserPremium(global),
+    sendAsMessage,
   };
 })(ReactionPicker));
 

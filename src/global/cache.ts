@@ -194,6 +194,10 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
   if (!cached.stories) {
     cached.stories = initialState.stories;
   }
+
+  if (!cached.stories.stealthMode) {
+    cached.stories.stealthMode = initialState.stories.stealthMode;
+  }
 }
 
 function updateCache() {

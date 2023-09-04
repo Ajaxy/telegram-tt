@@ -21,7 +21,7 @@ import {
   selectChat, selectUser, selectTabState, selectUserFullInfo,
 } from '../../selectors';
 import {
-  addUsers, addBlockedContact, updateChats, updateUser, removeBlockedContact, replaceSettings, updateNotifySettings,
+  addUsers, addBlockedUser, updateChats, updateUser, removeBlockedUser, replaceSettings, updateNotifySettings,
   addNotifyExceptions, updateChat, updateUserFullInfo,
 } from '../../reducers';
 import { isUserId } from '../../helpers';
@@ -272,11 +272,9 @@ addActionHandler('uploadWallpaper', async (global, actions, payload): Promise<vo
   setGlobal(global);
 });
 
-addActionHandler('loadBlockedContacts', async (global): Promise<void> => {
-  const result = await callApi('fetchBlockedContacts');
-  if (!result) {
-    return;
-  }
+addActionHandler('loadBlockedUsers', async (global): Promise<void> => {
+  const result = await callApi('fetchBlockedUsers', {});
+  if (!result) return;
 
   global = getGlobal();
 
@@ -290,7 +288,6 @@ addActionHandler('loadBlockedContacts', async (global): Promise<void> => {
   global = {
     ...global,
     blocked: {
-      ...global.blocked,
       ids: result.blockedIds,
       totalCount: result.totalCount,
     },
@@ -299,40 +296,37 @@ addActionHandler('loadBlockedContacts', async (global): Promise<void> => {
   setGlobal(global);
 });
 
-addActionHandler('blockContact', async (global, actions, payload): Promise<void> => {
-  const { contactId, accessHash } = payload!;
+addActionHandler('blockUser', async (global, actions, payload): Promise<void> => {
+  const { userId, isOnlyStories } = payload;
 
-  const result = await callApi('blockContact', contactId, accessHash);
-  if (!result) {
-    return;
-  }
+  const user = selectUser(global, userId);
+  if (!user) return;
+
+  const result = await callApi('blockUser', {
+    user,
+    isOnlyStories: isOnlyStories || undefined,
+  });
+  if (!result) return;
 
   global = getGlobal();
-  global = addBlockedContact(global, contactId);
+  global = addBlockedUser(global, userId);
   setGlobal(global);
 });
 
-addActionHandler('unblockContact', async (global, actions, payload): Promise<void> => {
-  const { contactId } = payload!;
-  let accessHash: string | undefined;
-  const isPrivate = isUserId(contactId);
+addActionHandler('unblockUser', async (global, actions, payload): Promise<void> => {
+  const { userId, isOnlyStories } = payload;
 
-  if (isPrivate) {
-    const user = selectUser(global, contactId);
-    if (!user) {
-      return;
-    }
+  const user = selectUser(global, userId);
+  if (!user) return;
 
-    accessHash = user.accessHash;
-  }
-
-  const result = await callApi('unblockContact', contactId, accessHash);
-  if (!result) {
-    return;
-  }
+  const result = await callApi('unblockUser', {
+    user,
+    isOnlyStories: isOnlyStories || undefined,
+  });
+  if (!result) return;
 
   global = getGlobal();
-  global = removeBlockedContact(global, contactId);
+  global = removeBlockedUser(global, userId);
   setGlobal(global);
 });
 

@@ -81,10 +81,13 @@ const EmbeddedStory: FC<OwnProps> = ({
       onMouseDown={handleMouseDown}
     >
       {pictogramUrl && renderPictogram(pictogramUrl, isProtected)}
-      <div className={buildClassName('message-text', isExpiredStory && 'with-message-color')}>
+      <div className="message-text with-message-color">
         <p dir="auto">
           {isExpiredStory && (
             <i className="icon icon-story-expired" aria-hidden />
+          )}
+          {isFullStory && (
+            <i className="icon icon-story-reply" aria-hidden />
           )}
           {lang(title)}
         </p>

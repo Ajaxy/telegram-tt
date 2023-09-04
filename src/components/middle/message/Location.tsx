@@ -15,7 +15,7 @@ import {
 } from '../../../global/helpers';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
 import {
-  getMetersPerPixel, getVenueColor, getVenueIconUrl, prepareMapUrl,
+  getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
 import { getServerTime } from '../../../util/serverTime';
 
@@ -29,7 +29,7 @@ import usePrevious from '../../../hooks/usePrevious';
 import useInterval from '../../../hooks/useInterval';
 
 import Avatar from '../../common/Avatar';
-import Skeleton from '../../ui/Skeleton';
+import Skeleton from '../../ui/placeholder/Skeleton';
 
 import './Location.scss';
 
@@ -57,7 +57,7 @@ const Location: FC<OwnProps> = ({
   message,
   peer,
 }) => {
-  const { openUrl } = getActions();
+  const { openMapModal } = getActions();
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
@@ -95,8 +95,7 @@ const Location: FC<OwnProps> = ({
   }, [type, point, zoom]);
 
   const handleClick = () => {
-    const url = prepareMapUrl(point.lat, point.long, zoom);
-    openUrl({ url });
+    openMapModal({ geoPoint: point, zoom });
   };
 
   const updateCountdown = useLastCallback((countdownEl: HTMLDivElement) => {
@@ -194,6 +193,7 @@ const Location: FC<OwnProps> = ({
         className="full-media map"
         src={mapBlobUrl}
         alt="Location on a map"
+        draggable={false}
         style={`width: ${DEFAULT_MAP_CONFIG.width}px; height: ${DEFAULT_MAP_CONFIG.height}px;`}
       />
     );
@@ -224,14 +224,14 @@ const Location: FC<OwnProps> = ({
         return (
           <div className={pinClassName} style={`--pin-color: ${color}`}>
             <PinSvg />
-            <img src={iconSrc} className="venue-icon" alt="" />
+            <img src={iconSrc} draggable={false} className="venue-icon" alt="" />
           </div>
         );
       }
     }
 
     return (
-      <img className={pinClassName} src={mapPin} alt="" />
+      <img className={pinClassName} draggable={false} src={mapPin} alt="" />
     );
   }
 

@@ -1,6 +1,6 @@
 import type { GlobalState, TabArgs } from '../types';
 import type {
-  ApiUserStories, ApiStory, ApiStorySkipped, ApiStoryDeleted, ApiTypeStory,
+  ApiUserStories, ApiStory, ApiStorySkipped, ApiStoryDeleted, ApiTypeStory, ApiStoryView, ApiStealthMode,
 } from '../../api/types';
 import { orderBy, unique } from '../../util/iteratees';
 import { updateUser } from './users';
@@ -190,32 +190,54 @@ export function updateUsersWithStories<T extends GlobalState>(
   return global;
 }
 
-export function updateStorySeenBy<T extends GlobalState>(
+export function updateStoryViews<T extends GlobalState>(
   global: T,
-  userId: string,
   storyId: number,
-  seenByDates: Record<string, number>,
+  viewsById: Record<string, ApiStoryView>,
+  nextOffset?: string,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const currentSeenBy = global.stories.seenByDates?.[userId]?.byId[storyId] || {};
-  return {
-    ...global,
-    stories: {
-      ...global.stories,
-      seenByDates: {
-        ...global.stories.seenByDates,
-        [userId]: {
-          ...global.stories.seenByDates?.[userId],
-          byId: {
-            ...global.stories.seenByDates?.[userId]?.byId,
-            [storyId]: {
-              ...currentSeenBy,
-              ...seenByDates,
-            },
-          },
-        },
+  const tabState = selectTabState(global, tabId);
+  const { viewModal } = tabState.storyViewer;
+  const newViewsById = viewModal?.storyId === storyId ? {
+    ...viewModal.viewsById,
+    ...viewsById,
+  } : viewsById;
+
+  global = updateStoryViewsLoading(global, false, tabId);
+
+  return updateTabState(global, {
+    storyViewer: {
+      ...tabState.storyViewer,
+      viewModal: {
+        ...viewModal,
+        storyId,
+        viewsById: newViewsById,
+        nextOffset,
+        isLoading: false,
       },
     },
-  };
+  }, tabId);
+}
+
+export function updateStoryViewsLoading<T extends GlobalState>(
+  global: T,
+  isLoading: boolean,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  const tabState = selectTabState(global, tabId);
+  const { viewModal } = tabState.storyViewer;
+  if (!viewModal) return global;
+
+  return updateTabState(global, {
+    storyViewer: {
+      ...tabState.storyViewer,
+      viewModal: {
+        ...viewModal,
+        isLoading,
+      },
+    },
+  }, tabId);
 }
 
 export function removeUserStory<T extends GlobalState>(
@@ -239,10 +261,11 @@ export function removeUserStory<T extends GlobalState>(
     [storyId]: { id: storyId, userId, isDeleted: true } as ApiStoryDeleted,
   };
   const lastUpdatedAt = lastStoryId ? (newById[lastStoryId] as ApiStory | undefined)?.date : undefined;
+  const hasStories = Boolean(newOrderedIds.length);
 
   global = updateUser(global, userId, {
-    hasStories: newOrderedIds.length > 0,
-    hasUnreadStories: Boolean(lastReadId && lastStoryId && lastReadId < lastStoryId),
+    hasStories,
+    hasUnreadStories: Boolean(hasStories && lastReadId && lastStoryId && lastReadId < lastStoryId),
   });
   global = updateStoriesForUser(global, userId, {
     byId: newById,
@@ -258,7 +281,7 @@ export function removeUserStory<T extends GlobalState>(
     }
   });
 
-  if (newOrderedIds.length === 0) {
+  if (!hasStories) {
     global = {
       ...global,
       stories: {
@@ -277,7 +300,8 @@ export function removeUserStory<T extends GlobalState>(
 export function updateUserStory<T extends GlobalState>(
   global: T,
   userId: string,
-  story: Partial<ApiStory>,
+  storyId: number,
+  storyUpdate: Partial<ApiStory>,
 ): T {
   const userStories = selectUserStories(global, userId) || {
     byId: {}, orderedIds: [], pinnedIds: [], archiveIds: [],
@@ -293,9 +317,9 @@ export function updateUserStory<T extends GlobalState>(
           ...userStories,
           byId: {
             ...userStories.byId,
-            [story.id!]: {
-              ...userStories.byId[story.id!],
-              ...story,
+            [storyId]: {
+              ...userStories.byId[storyId],
+              ...storyUpdate,
             },
           },
         },
@@ -346,6 +370,8 @@ function updateOrderedStoriesUserIds<T extends GlobalState>(global: T, updateUse
 
   const allUserIds = orderedUserIds.active.concat(orderedUserIds.archived).concat(updateUserIds);
   const newOrderedUserIds = allUserIds.reduce<{ active: string[]; archived: string[] }>((acc, userId) => {
+    if (!byUserId[userId]?.orderedIds?.length) return acc;
+
     if (selectUser(global, userId)?.areStoriesHidden) {
       acc.archived.push(userId);
     } else {
@@ -356,10 +382,15 @@ function updateOrderedStoriesUserIds<T extends GlobalState>(global: T, updateUse
   }, { active: [], archived: [] });
 
   function sort(userId: string) {
-    const PREMIUM_PRIORITY = 1e12;
+    const UNREAD_PRIORITY = 1e12;
+    const PREMIUM_PRIORITY = 1e6;
     const isPremium = selectUser(global, userId)?.isPremium;
-    const lastUpdated = byUserId[userId].lastUpdatedAt || 0;
-    return currentUserId === userId ? Infinity : (lastUpdated + (isPremium ? PREMIUM_PRIORITY : 0));
+    const { lastUpdatedAt = 0, orderedIds, lastReadId = 0 } = byUserId[userId] || {};
+    const hasUnread = lastReadId < orderedIds?.[orderedIds.length - 1];
+
+    const priority = (hasUnread ? UNREAD_PRIORITY : 0) + (isPremium ? PREMIUM_PRIORITY : 0);
+
+    return currentUserId === userId ? Infinity : (lastUpdatedAt + priority);
   }
 
   newOrderedUserIds.archived = orderBy(
@@ -406,6 +437,19 @@ function updateUserLastUpdatedAt<T extends GlobalState>(global: T, userId: strin
           lastUpdatedAt,
         },
       },
+    },
+  };
+}
+
+export function updateStealthMode<T extends GlobalState>(
+  global: T,
+  stealthMode: ApiStealthMode,
+): T {
+  return {
+    ...global,
+    stories: {
+      ...global.stories,
+      stealthMode,
     },
   };
 }

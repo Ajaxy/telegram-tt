@@ -207,7 +207,7 @@ const MediaViewer: FC<StateProps> = ({
   const prevMediaId = usePrevious(mediaId);
   const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
   const prevBestImageData = usePrevious(bestImageData);
-  const textParts = message ? renderMessageText(message) : undefined;
+  const textParts = message ? renderMessageText({ message, forcePlayback: true }) : undefined;
   const hasFooter = Boolean(textParts);
   const shouldAnimateOpening = prevIsHidden && prevMediaId !== mediaId;
 
