@@ -1,7 +1,12 @@
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { selectStorySeenBy, selectTabState, selectUserStory } from '../../global/selectors';
+import {
+  selectIsCurrentUserPremium,
+  selectStorySeenBy,
+  selectTabState,
+  selectUserStory,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { formatDateAtTime } from '../../util/dateFormat';
 import { getServerTime } from '../../util/serverTime';
@@ -26,6 +31,7 @@ interface StateProps {
   viewsCount?: number;
   seenByDates?: Record<string, number>;
   viewersExpirePeriod: number;
+  isCurrentUserPremium?: boolean;
 }
 const CLOSE_ANIMATION_DURATION = 100;
 
@@ -35,6 +41,7 @@ function StoryViewers({
   viewsCount,
   viewersExpirePeriod,
   seenByDates,
+  isCurrentUserPremium,
 }: StateProps) {
   const {
     loadStorySeenBy, openChat, closeStorySeenBy, closeStoryViewer,
@@ -43,7 +50,7 @@ function StoryViewers({
   const lang = useLang();
 
   const isOpen = Boolean(storyId);
-  const isExpired = Boolean(storyDate) && (storyDate + viewersExpirePeriod) < getServerTime();
+  const isExpired = !isCurrentUserPremium && Boolean(storyDate) && (storyDate + viewersExpirePeriod) < getServerTime();
   const renderingSeenByDates = useCurrentOrPrev(seenByDates, true);
   const renderingIsExpired = usePrevious(isExpired) || isExpired;
   const renderingViewsCount = useCurrentOrPrev(viewsCount, true);
@@ -58,7 +65,7 @@ function StoryViewers({
 
     return result;
   }, [renderingIsExpired, renderingSeenByDates]);
-  const isLoading = !renderingIsExpired && (!memberIds || memberIds.length === 0);
+  const isLoading = !isCurrentUserPremium && !renderingIsExpired && (!memberIds || memberIds.length === 0);
 
   useEffect(() => {
     if (!storyId || seenByDates || renderingIsExpired) {
@@ -97,6 +104,11 @@ function StoryViewers({
         {renderingIsExpired && (
           <div className={styles.expiredText}>
             {renderText(lang('ExpiredViewsStub'), ['simple_markdown', 'emoji'])}
+          </div>
+        )}
+        {isCurrentUserPremium && Boolean(!memberIds?.length) && (
+          <div className={styles.expiredText}>
+            {lang('ServerErrorViewers')}
           </div>
         )}
         {memberIds?.map((userId) => (
@@ -142,5 +154,6 @@ export default memo(withGlobal((global) => {
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
     storyDate,
     viewsCount,
+    isCurrentUserPremium: selectIsCurrentUserPremium(global),
   };
 })(StoryViewers));

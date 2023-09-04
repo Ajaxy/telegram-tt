@@ -646,17 +646,6 @@
   }
 }
 
-.recentViewer {
-  z-index: 3;
-}
-.recentViewer + .recentViewer {
-  margin-left: -0.5rem;
-  z-index: 2;
-}
-.recentViewer + .recentViewer + .recentViewer {
-  z-index: 1;
-}
-
 .recentViewersCount {
   margin-inline-start: 0.5rem;
 }

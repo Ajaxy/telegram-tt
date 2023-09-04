@@ -16,7 +16,7 @@ import {
 } from '../../global/helpers';
 import { formatRelativeTime } from '../../util/dateFormat';
 import { getServerTime } from '../../util/serverTime';
-import { selectChat, selectTabState } from '../../global/selectors';
+import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
@@ -44,6 +44,7 @@ import MenuItem from '../ui/MenuItem';
 import DropdownMenu from '../ui/DropdownMenu';
 import Skeleton from '../ui/Skeleton';
 import StoryCaption from './StoryCaption';
+import AvatarList from '../common/AvatarList';
 
 import styles from './StoryViewer.module.scss';
 
@@ -75,13 +76,14 @@ interface StateProps {
   viewersExpirePeriod: number;
   isChatExist?: boolean;
   areChatSettingsLoaded?: boolean;
+  isCurrentUserPremium?: boolean;
 }
 
 const VIDEO_MIN_READY_STATE = 4;
 const SPACEBAR_CODE = 32;
 
-const PRIMARY_VIDEO_MIME = 'video/mp4; codecs="hvc1"';
-const SECONDARY_VIDEO_MIME = 'video/mp4; codecs="avc1.64001E"';
+const PRIMARY_VIDEO_MIME = 'video/mp4; codecs=hvc1.1.6.L63.00';
+const SECONDARY_VIDEO_MIME = 'video/mp4; codecs=avc1.64001E';
 
 function Story({
   isSelf,
@@ -101,6 +103,7 @@ function Story({
   isChatExist,
   areChatSettingsLoaded,
   getIsAnimating,
+  isCurrentUserPremium,
   onDelete,
   onClose,
   onReport,
@@ -148,7 +151,13 @@ function Story({
     true,
   );
   const areViewsExpired = Boolean(
-    isSelf && isLoadedStory && (story!.date + viewersExpirePeriod) < getServerTime(),
+    isSelf && !isCurrentUserPremium && isLoadedStory && (story!.date + viewersExpirePeriod) < getServerTime(),
+  );
+  const canCopyLink = Boolean(
+    isLoadedStory
+    && story.isPublic
+    && userId !== storyChangelogUserId
+    && user?.usernames?.length,
   );
   const canShare = Boolean(
     isLoadedStory
@@ -275,11 +284,10 @@ function Story({
 
   useEffect(() => {
     if (!isSelf || isDeletedStory || areViewsExpired) return;
-    if (story && 'recentViewerIds' in story && story.recentViewerIds?.length) return;
 
-    // Refresh recent viewers list on new stories each view
+    // Refresh recent viewers list each time
     loadStorySeenBy({ storyId });
-  }, [isDeletedStory, areViewsExpired, isSelf, story, storyId]);
+  }, [isDeletedStory, areViewsExpired, isSelf, storyId]);
 
   useEffect(() => {
     if (
@@ -582,7 +590,7 @@ function Story({
             onOpen={handlePauseStory}
             onClose={handlePlayStory}
           >
-            <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>
+            {canCopyLink && <MenuItem icon="copy" onClick={handleCopyStoryLink}>{lang('CopyLink')}</MenuItem>}
             {canPinToProfile && (
               <MenuItem icon="save-story" onClick={handlePinClick}>{lang('StorySave')}</MenuItem>
             )}
@@ -597,11 +605,17 @@ function Story({
     );
   }
 
-  function renderRecentViewers() {
-    // No need for expensive global updates on chats and users, so we avoid them
+  const recentViewers = useMemo(() => {
     const { users: { byId: usersById } } = getGlobal();
 
-    const { recentViewerIds, viewsCount } = story as ApiStory;
+    const recentViewerIds = story && 'recentViewerIds' in story ? story.recentViewerIds : undefined;
+    if (!recentViewerIds) return undefined;
+
+    return recentViewerIds.map((id) => usersById[id]).filter(Boolean);
+  }, [story]);
+
+  function renderRecentViewers() {
+    const { viewsCount } = story as ApiStory;
 
     if (!viewsCount) {
       return (
@@ -620,14 +634,12 @@ function Story({
         )}
         onClick={handleOpenStorySeenBy}
       >
-        {!areViewsExpired && recentViewerIds?.map((viewerId) => (
-          <Avatar
-            key={`viewer-${viewerId}`}
+        {!areViewsExpired && Boolean(recentViewers?.length) && (
+          <AvatarList
             size="small"
-            peer={usersById[viewerId]}
-            className={styles.recentViewer}
+            peers={recentViewers}
           />
-        ))}
+        )}
 
         <span className={styles.recentViewersCount}>{lang('Views', viewsCount, 'i')}</span>
       </div>
@@ -780,6 +792,7 @@ export default memo(withGlobal<OwnProps>((global, {
     orderedIds: isArchivedStories ? archiveIds : (isPrivateStories ? pinnedIds : orderedIds),
     isMuted,
     isSelf: currentUserId === userId,
+    isCurrentUserPremium: selectIsCurrentUserPremium(global),
     shouldForcePause,
     storyChangelogUserId: appConfig!.storyChangelogUserId,
     viewersExpirePeriod: appConfig!.storyExpirePeriod + appConfig!.storyViewersExpirePeriod,
