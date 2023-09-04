@@ -44,6 +44,7 @@ type OwnProps = {
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
   adminMember?: ApiChatMember;
+  onEmojiStatusClick?: NoneToVoidFunction;
 };
 
 type StateProps =
@@ -75,6 +76,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   areMessagesLoaded,
   adminMember,
   ripple,
+  onEmojiStatusClick,
 }) => {
   const {
     loadFullUser,
@@ -159,6 +161,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
             withEmojiStatus={!noEmojiStatus}
             emojiStatusSize={emojiStatusSize}
             isSavedMessages={isSavedMessages}
+            onEmojiStatusClick={onEmojiStatusClick}
           />
           {customTitle && <span className="custom-title">{customTitle}</span>}
         </div>
@@ -171,6 +174,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         withEmojiStatus={!noEmojiStatus}
         emojiStatusSize={emojiStatusSize}
         isSavedMessages={isSavedMessages}
+        onEmojiStatusClick={onEmojiStatusClick}
       />
     );
   }

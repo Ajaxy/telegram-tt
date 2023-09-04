@@ -1,3 +1,5 @@
+@import '../../../styles/mixins';
+
 .root {
   --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
   --premium-feature-background: linear-gradient(65.85deg, #6C93FF -0.24%, #976FFF 53.99%, #DF69D1 110.53%);
@@ -30,12 +32,14 @@
 }
 
 .main {
-  padding: 1rem;
+  padding: 1rem 0.5rem;
   height: 100%;
-  overflow: auto;
+  overflow: scroll;
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @include adapt-padding-to-scrollbar(0.5rem);
 }
 
 .logo {
@@ -45,14 +49,23 @@
   min-height: 6.25rem;
 }
 
+.status-emoji {
+  --custom-emoji-size: 8rem;
+
+  margin: 1rem;
+  cursor: var(--custom-cursor, pointer);
+}
+
 .header-text {
   font-size: 1.5rem;
   font-weight: 500;
   text-align: center;
+  margin-inline: 0.5rem;
 }
 
 .description {
   text-align: center;
+  margin-inline: 0.5rem;
   margin-bottom: 2rem;
 }
 
@@ -119,6 +132,25 @@
   padding: 1rem;
 }
 
+.stickerSetText {
+  font-size: 1.25rem;
+}
+
+.stickerSetLink {
+  --custom-emoji-size: 1.5rem;
+
+  color: var(--color-links);
+  cursor: var(--custom-cursor, pointer);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.stickerSetLinkIcon {
+  vertical-align: middle;
+  margin-inline-end: 0.25rem;
+}
 
 @media (max-width: 600px) {
   .root :global(.modal-dialog) {

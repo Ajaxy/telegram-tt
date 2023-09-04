@@ -149,6 +149,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     loadPinnedMessages,
     toggleLeftColumn,
     exitMessageSelectMode,
+    openPremiumModal,
   } = getActions();
 
   const lang = useLang();
@@ -184,7 +185,12 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   const componentRef = useRef<HTMLDivElement>(null);
   const shouldAnimateTools = useRef<boolean>(true);
 
-  const { handleClick: handleHeaderClick, handleMouseDown: handleHeaderMouseDown } = useFastClick(() => {
+  const {
+    handleClick: handleHeaderClick,
+    handleMouseDown: handleHeaderMouseDown,
+  } = useFastClick((e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
+    if (e.type === 'mousedown' && (e.target as Element).closest('.title > .custom-emoji')) return;
+
     openChatWithInfo({ id: chatId, threadId });
   });
 
@@ -212,6 +218,10 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     setTimeout(() => {
       isBackButtonActive.current = true;
     }, BACK_BUTTON_INACTIVE_TIME);
+  });
+
+  const handleStatusClick = useLastCallback(() => {
+    openPremiumModal({ fromUserId: chatId });
   });
 
   const handleBackClick = useLastCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -371,6 +381,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withUpdatingStatus
               emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
+              onEmojiStatusClick={handleStatusClick}
             />
           ) : (
             <GroupChatInfo

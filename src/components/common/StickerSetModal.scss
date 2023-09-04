@@ -11,7 +11,7 @@
   }
 
   .modal-header {
-    padding: 0.5rem 1rem;
+    padding: 0.5rem;
 
     &.with-top-border {
       /* stylelint-disable-next-line plugin/whole-pixel */
@@ -24,13 +24,13 @@
 
     text-align: center;
     padding: 0 !important;
+  }
 
-    &.custom-emoji {
-      --emoji-size: 2.25rem;
+  &.custom-emoji .modal-content {
+    --emoji-size: 2.25rem;
 
-      .stickers {
-        padding: 0 0.5rem;
-      }
+    .stickers {
+      padding: 0 0.5rem;
     }
   }
 
