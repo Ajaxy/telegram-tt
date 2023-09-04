@@ -37,7 +37,7 @@ import StorySettings from './StorySettings';
 
 import styles from './StoryViewer.module.scss';
 
-const ANIMATION_DURATION = 350;
+const ANIMATION_DURATION = 250;
 
 interface StateProps {
   isOpen: boolean;
