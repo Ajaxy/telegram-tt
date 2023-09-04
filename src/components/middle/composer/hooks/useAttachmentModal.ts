@@ -79,6 +79,7 @@ export default function useAttachmentModal({
 
         setShouldForceAsFile(Boolean(shouldForce && canSendDocuments));
         setShouldForceCompression(!canSendDocuments);
+        setShouldSuggestCompression(undefined);
       }
     },
   );

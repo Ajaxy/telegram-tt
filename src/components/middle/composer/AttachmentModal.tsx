@@ -264,7 +264,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
         : isSilent ? onSendSilent : onSend;
       send(isSendingCompressed, shouldSendGrouped);
       updateAttachmentSettings({
-        shouldCompress: isSendingCompressed,
+        shouldCompress: shouldSuggestCompression === undefined ? isSendingCompressed : undefined,
         shouldSendGrouped,
       });
     }
