@@ -436,12 +436,12 @@ const Composer: FC<OwnProps & StateProps> = ({
     if (inInputId === editableInputId) {
       messageInput = document.querySelector<HTMLDivElement>(editableInputCssSelector)!;
     } else {
-      messageInput = document.getElementById(editableInputId) as HTMLDivElement;
+      messageInput = document.getElementById(inInputId) as HTMLDivElement;
     }
 
     if (selection.rangeCount) {
       const selectionRange = selection.getRangeAt(0);
-      if (isSelectionInsideInput(selectionRange, editableInputId)) {
+      if (isSelectionInsideInput(selectionRange, inInputId)) {
         insertHtmlInSelection(newHtml);
         messageInput.dispatchEvent(new Event('input', { bubbles: true }));
         return;
