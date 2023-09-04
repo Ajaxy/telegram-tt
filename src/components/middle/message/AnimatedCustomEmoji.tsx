@@ -69,7 +69,7 @@ const AnimatedCustomEmoji: FC<OwnProps & StateProps> = ({
       isBig
       noPlay={noPlay}
       withSharedAnimation
-      forceOnHeavyAnimation
+      forceOnHeavyAnimation={Boolean(effect && activeEmojiInteractions?.length)}
       observeIntersectionForLoading={observeIntersection}
       onClick={handleClick}
     />

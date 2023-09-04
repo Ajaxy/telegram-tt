@@ -73,7 +73,7 @@ type StateProps = {
   shouldSkipHistoryAnimations?: boolean;
 };
 
-const ANIMATION_DURATION = 350;
+const ANIMATION_DURATION = 250;
 
 const MediaViewer: FC<StateProps> = ({
   chatId,
