@@ -1,4 +1,12 @@
-name: Electron release
+# Terms:
+# "build" - Compile web project using webpack.
+# "package" - Produce a distributive package for a specific platform as a workflow artifact.
+# "publish" - Send a package to corresponding store and GitHub release page.
+# "release" - build + package + publish
+#
+# Jobs in this workflow will skip the "publish" step when `PUBLISH_REPO` is not set.
+
+name: Package and publish
 
 on:
   workflow_dispatch:
@@ -9,7 +17,8 @@ env:
   APP_NAME: Telegram A
 
 jobs:
-  release:
+  electron-release:
+    name: Build, package and publish Electron
     runs-on: macOS-latest
     steps:
       - name: Checkout
@@ -33,7 +42,7 @@ jobs:
         if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Import MacOS Signing Certificate
+      - name: Import MacOS signing certificate
         env:
           APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
@@ -48,19 +57,21 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions $KEY_CHAIN
           security find-identity -v -p codesigning $KEY_CHAIN
 
-      - name: Build and release
+      - name: Build, package and publish
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
           TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
+
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           PUBLISH_REPO: ${{ vars.PUBLISH_REPO }}
         run: |
           if [ -z "$PUBLISH_REPO" ]; then
-            npm run electron:staging
+            npm run electron:package:staging
           else
-            npm run deploy:electron
+            npm run electron:release:production
           fi
 
       - uses: actions/upload-artifact@v3
@@ -83,8 +94,9 @@ jobs:
           name: ${{ env.APP_NAME }}-x64.exe
           path: dist-electron/${{ env.APP_NAME }}-x64.exe
 
-  windowsSigning:
-    needs: release
+  electron-sign-for-windows:
+    name: Sign and re-publish Windows package
+    needs: electron-release
     runs-on: windows-latest
     if: vars.PUBLISH_REPO != ''
     env:
@@ -94,7 +106,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Certificate
+      - name: Setup certificate
         shell: bash
         run: echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
 
@@ -130,7 +142,7 @@ jobs:
         with:
           name: ${{ env.FILE_NAME }}
 
-      - name: Signing package
+      - name: Sign package
         env:
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           FILE_PATH: ${{ steps.download-artifact.outputs.download-path }}
