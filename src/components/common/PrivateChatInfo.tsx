@@ -5,13 +5,10 @@ import type { FC } from '../../lib/teact/teact';
 import type {
   ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember,
 } from '../../api/types';
+import type { StoryViewerOrigin } from '../../types';
 import { MediaViewerOrigin } from '../../types';
 
-import {
-  selectChatMessages,
-  selectUser,
-  selectUserStatus,
-} from '../../global/selectors';
+import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -39,6 +36,7 @@ type OwnProps = {
   withStory?: boolean;
   withFullInfo?: boolean;
   withUpdatingStatus?: boolean;
+  storyViewerOrigin?: StoryViewerOrigin;
   noEmojiStatus?: boolean;
   emojiStatusSize?: number;
   noStatusOrTyping?: boolean;
@@ -77,6 +75,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   adminMember,
   ripple,
   onEmojiStatusClick,
+  storyViewerOrigin,
 }) => {
   const {
     loadFullUser,
@@ -187,6 +186,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         peer={user}
         isSavedMessages={isSavedMessages}
         withStory={withStory}
+        storyViewerOrigin={storyViewerOrigin}
         storyViewerMode="single-user"
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
       />

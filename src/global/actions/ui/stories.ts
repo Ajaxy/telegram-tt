@@ -21,7 +21,7 @@ import * as langProvider from '../../../util/langProvider';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
   const {
-    userId, storyId, isSingleUser, isSingleStory, isPrivate, isArchive, tabId = getCurrentTabId(),
+    userId, storyId, isSingleUser, isSingleStory, isPrivate, isArchive, origin, tabId = getCurrentTabId(),
   } = payload;
 
   const user = selectUser(global, userId);
@@ -52,6 +52,7 @@ addActionHandler('openStoryViewer', async (global, actions, payload): Promise<vo
       isPrivate,
       isArchive,
       isSingleStory,
+      origin,
       storyIdSeenBy: undefined,
     },
   }, tabId);
@@ -60,7 +61,7 @@ addActionHandler('openStoryViewer', async (global, actions, payload): Promise<vo
 
 addActionHandler('openStoryViewerByUsername', async (global, actions, payload): Promise<void> => {
   const {
-    username, storyId, tabId = getCurrentTabId(),
+    username, storyId, origin, tabId = getCurrentTabId(),
   } = payload;
 
   const chat = await fetchChatByUsername(global, username);
@@ -74,6 +75,7 @@ addActionHandler('openStoryViewerByUsername', async (global, actions, payload): 
     storyId,
     isSingleUser: true,
     isSingleStory: true,
+    origin,
     tabId,
   });
 });

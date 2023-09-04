@@ -3,13 +3,28 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { selectIsStoryViewerOpen, selectTabState } from '../../global/selectors';
+import type { ApiTypeStory } from '../../api/types';
+import type { StoryViewerOrigin } from '../../types';
+
+import {
+  selectIsStoryViewerOpen,
+  selectTabState,
+  selectUserStory,
+  selectPerformanceSettingsValue,
+} from '../../global/selectors';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
+
+import { ANIMATION_END_DELAY } from '../../config';
 
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import usePrevious from '../../hooks/usePrevious';
+import { useStoryProps } from './hooks/useStoryProps';
+import { useSlideSizes } from './hooks/useSlideSizes';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { animateOpening, animateClosing } from './helpers/ghostAnimation';
 import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 
 import ShowTransition from '../ui/ShowTransition';
@@ -22,11 +37,16 @@ import StorySettings from './StorySettings';
 
 import styles from './StoryViewer.module.scss';
 
+const ANIMATION_DURATION = 350;
+
 interface StateProps {
   isOpen: boolean;
   userId?: string;
   storyId?: number;
+  story?: ApiTypeStory;
+  origin?: StoryViewerOrigin;
   shouldSkipHistoryAnimations?: boolean;
+  withAnimation?: boolean;
   isPrivacyModalOpen?: boolean;
 }
 
@@ -34,7 +54,10 @@ function StoryViewer({
   isOpen,
   userId,
   storyId,
+  story,
+  origin,
   shouldSkipHistoryAnimations,
+  withAnimation,
   isPrivacyModalOpen,
 }: StateProps) {
   const { closeStoryViewer, closeStoryPrivacyEditor } = getActions();
@@ -43,6 +66,14 @@ function StoryViewer({
   const [idStoryForDelete, setIdStoryForDelete] = useState<number | undefined>(undefined);
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag(false);
+
+  const { bestImageData, thumbnail } = useStoryProps(story);
+  const slideSizes = useSlideSizes();
+  const isPrevOpen = usePrevious(isOpen);
+  const prevBestImageData = usePrevious(bestImageData);
+  const prevUserId = usePrevious(userId);
+  const prevOrigin = usePrevious(origin);
+  const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
   useEffect(() => {
     if (!isOpen) {
@@ -89,6 +120,29 @@ function StoryViewer({
   useEffect(() => (isOpen ? captureEscKeyListener(() => {
     handleClose();
   }) : undefined), [handleClose, isOpen]);
+
+  useEffect(() => {
+    if (isGhostAnimation && !isPrevOpen && isOpen && userId && thumbnail && origin !== undefined) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      animateOpening(userId, origin, thumbnail, bestImageData, slideSizes.activeSlide);
+    }
+    if (isGhostAnimation && isPrevOpen && !isOpen && prevUserId && prevBestImageData && prevOrigin !== undefined) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      animateClosing(prevUserId, prevOrigin, prevBestImageData);
+    }
+  }, [
+    isGhostAnimation,
+    bestImageData,
+    prevBestImageData,
+    isOpen,
+    isPrevOpen,
+    slideSizes.activeSlide,
+    thumbnail,
+    userId,
+    prevUserId,
+    origin,
+    prevOrigin,
+  ]);
 
   return (
     <ShowTransition
@@ -137,13 +191,22 @@ function StoryViewer({
 }
 
 export default memo(withGlobal((global): StateProps => {
-  const { shouldSkipHistoryAnimations, storyViewer: { storyId, userId, isPrivacyModalOpen } } = selectTabState(global);
+  const {
+    shouldSkipHistoryAnimations, storyViewer: {
+      storyId, userId, isPrivacyModalOpen, origin,
+    },
+  } = selectTabState(global);
+  const story = userId && storyId ? selectUserStory(global, userId, storyId) : undefined;
+  const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
   return {
     isOpen: selectIsStoryViewerOpen(global),
     shouldSkipHistoryAnimations,
     userId,
     storyId,
+    story,
+    origin,
+    withAnimation,
     isPrivacyModalOpen,
   };
 })(StoryViewer));

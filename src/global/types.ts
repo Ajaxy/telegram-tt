@@ -94,6 +94,7 @@ import type {
   ShippingOption,
   ThemeKey,
   ProfileTabType,
+  StoryViewerOrigin,
 } from '../types';
 import type { P2pMessage } from '../lib/secret-sauce';
 import type { ApiCredentials } from '../components/payment/PaymentModal';
@@ -361,6 +362,7 @@ export type TabState = {
     // Used for better switch animation between users.
     lastViewedByUserIds?: Record<string, number>;
     isPrivacyModalOpen?: boolean;
+    origin?: StoryViewerOrigin;
   };
 
   mediaViewer: {
@@ -1970,10 +1972,12 @@ export interface ActionPayloads {
     isSingleStory?: boolean;
     isPrivate?: boolean;
     isArchive?: boolean;
+    origin?: StoryViewerOrigin;
   } & WithTabId;
   openStoryViewerByUsername: {
     username: string;
     storyId: number;
+    origin?: StoryViewerOrigin;
   } & WithTabId;
   openPreviousStory: WithTabId | undefined;
   openNextStory: WithTabId | undefined;

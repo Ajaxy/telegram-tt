@@ -5,6 +5,7 @@ import { getActions } from '../../global';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { StoryViewerOrigin } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
 import { IS_TEST } from '../../config';
@@ -16,6 +17,7 @@ import {
   isUserId,
   isChatWithRepliesBot,
   isDeletedUser,
+  getUserStoryHtmlId,
 } from '../../global/helpers';
 import { getFirstLetters } from '../../util/textFormat';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
@@ -51,6 +53,7 @@ type OwnProps = {
   withStory?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
+  storyViewerOrigin?: StoryViewerOrigin;
   storyViewerMode?: 'full' | 'single-user' | 'disabled';
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
@@ -69,6 +72,7 @@ const Avatar: FC<OwnProps> = ({
   withStory,
   withStoryGap,
   withStorySolid,
+  storyViewerOrigin,
   storyViewerMode = 'single-user',
   loopIndefinitely,
   noPersonalPhoto,
@@ -220,7 +224,11 @@ const Avatar: FC<OwnProps> = ({
     if (withStory && storyViewerMode !== 'disabled' && user?.hasStories) {
       e.stopPropagation();
 
-      openStoryViewer({ userId: user.id, isSingleUser: storyViewerMode === 'single-user' });
+      openStoryViewer({
+        userId: user.id,
+        isSingleUser: storyViewerMode === 'single-user',
+        origin: storyViewerOrigin,
+      });
       return;
     }
 
@@ -233,6 +241,7 @@ const Avatar: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
+      id={peer?.id && withStory ? getUserStoryHtmlId(peer.id) : undefined}
       data-test-sender-id={IS_TEST ? peer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
       onClick={handleClick}

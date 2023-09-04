@@ -292,6 +292,13 @@ export enum MediaViewerOrigin {
   SuggestedAvatar,
 }
 
+export enum StoryViewerOrigin {
+  StoryRibbon,
+  MiddleHeaderAvatar,
+  ChatList,
+  SearchResult,
+}
+
 export enum AudioOrigin {
   Inline,
   SharedMedia,

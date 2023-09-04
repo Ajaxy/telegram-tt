@@ -10,6 +10,7 @@ import type { Signal } from '../../util/signals';
 import type {
   ApiChat, ApiMessage, ApiTypingStatus, ApiUser,
 } from '../../api/types';
+import { StoryViewerOrigin } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
@@ -22,7 +23,12 @@ import {
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
 } from '../../config';
 import {
-  getChatTitle, getMessageKey, getSenderTitle, isChatChannel, isChatSuperGroup, isUserId,
+  getChatTitle,
+  getMessageKey,
+  getSenderTitle,
+  isChatChannel,
+  isChatSuperGroup,
+  isUserId,
 } from '../../global/helpers';
 import {
   selectAllowedMessageActions,
@@ -379,6 +385,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer
               withStory={!isChatWithSelf}
               withUpdatingStatus
+              storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
               emojiStatusSize={EMOJI_STATUS_SIZE}
               noRtl
               onEmojiStatusClick={handleStatusClick}

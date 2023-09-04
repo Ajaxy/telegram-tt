@@ -3,6 +3,7 @@ import React, { useCallback, useMemo, memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiUserStatus } from '../../../api/types';
+import { StoryViewerOrigin } from '../../../types';
 
 import { filterUsersByName, sortUserIds } from '../../../global/helpers';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
@@ -75,7 +76,14 @@ const ContactList: FC<OwnProps & StateProps> = ({
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => handleClick(id)}
           >
-            <PrivateChatInfo userId={id} forceShowSelf avatarSize="large" withStory ripple={!isMobile} />
+            <PrivateChatInfo
+              userId={id}
+              forceShowSelf
+              avatarSize="large"
+              withStory
+              storyViewerOrigin={StoryViewerOrigin.ChatList}
+              ripple={!isMobile}
+            />
           </ListItem>
         ))
       ) : viewportIds && !viewportIds.length ? (

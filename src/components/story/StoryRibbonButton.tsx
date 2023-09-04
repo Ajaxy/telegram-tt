@@ -2,6 +2,7 @@ import React, { memo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiUser } from '../../api/types';
+import { StoryViewerOrigin } from '../../types';
 
 import buildClassName from '../../util/buildClassName';
 import { getUserFirstOrLastName } from '../../global/helpers';
@@ -62,7 +63,7 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
   const handleClick = useLastCallback(() => {
     if (isContextMenuOpen) return;
 
-    openStoryViewer({ userId: user.id });
+    openStoryViewer({ userId: user.id, origin: StoryViewerOrigin.StoryRibbon });
   });
 
   const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -103,6 +104,7 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
       <Avatar
         peer={user}
         withStory
+        storyViewerOrigin={StoryViewerOrigin.StoryRibbon}
         storyViewerMode="full"
       />
       <div className={buildClassName(styles.name, user.hasUnreadStories && styles.name_hasUnreadStory)}>

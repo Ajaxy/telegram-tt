@@ -3,6 +3,7 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiChat, ApiUser } from '../../../api/types';
+import { StoryViewerOrigin } from '../../../types';
 
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
@@ -85,7 +86,13 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
       buttonRef={buttonRef}
     >
       {isUserId(chatId) ? (
-        <PrivateChatInfo userId={chatId} withUsername={withUsername} withStory avatarSize="large" />
+        <PrivateChatInfo
+          userId={chatId}
+          withUsername={withUsername}
+          withStory
+          avatarSize="large"
+          storyViewerOrigin={StoryViewerOrigin.SearchResult}
+        />
       ) : (
         <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
       )}

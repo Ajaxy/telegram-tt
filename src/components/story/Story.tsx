@@ -8,20 +8,19 @@ import type { ApiStory, ApiTypeStory, ApiUser } from '../../api/types';
 import type { IDimensions } from '../../global/types';
 import type { Signal } from '../../util/signals';
 
-import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
-import {
-  getStoryMediaHash, getUserFirstOrLastName, hasMessageText,
-} from '../../global/helpers';
+import { getUserFirstOrLastName } from '../../global/helpers';
 import { formatRelativeTime } from '../../util/dateFormat';
 import { getServerTime } from '../../util/serverTime';
-import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
+import {
+  selectChat, selectTabState, selectUserStory, selectUserStories, selectIsCurrentUserPremium,
+} from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
-import useMedia from '../../hooks/useMedia';
 import useStoryPreloader from './hooks/useStoryPreloader';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -34,6 +33,7 @@ import useLongPress from '../../hooks/useLongPress';
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import { useStoryProps } from './hooks/useStoryProps';
 
 import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
@@ -139,9 +139,22 @@ function Story({
   const [isPausedByLongPress, markIsPausedByLongPress, unmarkIsPausedByLongPress] = useFlag(false);
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);
+  const {
+    isDeletedStory,
+    hasText,
+    thumbnail,
+    previewBlobUrl,
+    isVideo,
+    noSound,
+    fullMediaData,
+    altMediaHash,
+    altMediaData,
+    hasFullData,
+    hasThumb,
+  } = useStoryProps(story);
+
   const isLoadedStory = story && 'content' in story;
-  const isDeletedStory = story && 'isDeleted' in story;
-  const hasText = isLoadedStory ? hasMessageText(story) : false;
+
   const canPinToProfile = useCurrentOrPrev(
     isSelf && isLoadedStory ? !story.isPinned : undefined,
     true,
@@ -159,6 +172,7 @@ function Story({
     && userId !== storyChangelogUserId
     && user?.usernames?.length,
   );
+
   const canShare = Boolean(
     isLoadedStory
     && story.isPublic
@@ -167,26 +181,6 @@ function Story({
     && !isCaptionExpanded,
   );
 
-  let thumbnail: string | undefined;
-  if (isLoadedStory) {
-    if (story.content.photo?.thumbnail) {
-      thumbnail = story.content.photo.thumbnail.dataUri;
-    }
-    if (story.content.video?.thumbnail?.dataUri) {
-      thumbnail = story.content.video.thumbnail.dataUri;
-    }
-  }
-
-  const previewHash = isLoadedStory ? getStoryMediaHash(story) : undefined;
-  const previewBlobUrl = useMedia(previewHash);
-  const isVideo = Boolean(isLoadedStory && story.content.video);
-  const noSound = isLoadedStory && story.content.video?.noSound;
-  const fullMediaHash = isLoadedStory ? getStoryMediaHash(story, 'full') : undefined;
-  const fullMediaData = useMedia(fullMediaHash, !story, isVideo ? ApiMediaFormat.Progressive : ApiMediaFormat.BlobUrl);
-  const altMediaHash = isVideo && isLoadedStory ? getStoryMediaHash(story, 'full', true) : undefined;
-  const altMediaData = useMedia(altMediaHash, !story, ApiMediaFormat.Progressive);
-
-  const hasFullData = Boolean(fullMediaData || altMediaData);
   const canPlayStory = Boolean(
     hasFullData && !shouldForcePause && isAppFocused && !isComposerHasFocus && !isCaptionExpanded
     && !isPausedBySpacebar && !isPausedByLongPress,
@@ -199,7 +193,6 @@ function Story({
     transitionClassNames: mediaTransitionClassNames,
   } = useShowTransition(Boolean(fullMediaData));
 
-  const hasThumb = !previewBlobUrl && !hasFullData;
   const thumbRef = useCanvasBlur(thumbnail, !hasThumb);
   const previewTransitionClassNames = useMediaTransition(previewBlobUrl);
 
@@ -777,10 +770,8 @@ export default memo(withGlobal<OwnProps>((global, {
     premiumModal,
   } = tabState;
   const { isOpen: isPremiumModalOpen } = premiumModal || {};
-  const {
-    byId, orderedIds, pinnedIds, archiveIds,
-  } = global.stories.byUserId[userId] || {};
-  const story = byId && storyId ? byId[storyId] : undefined;
+  const { orderedIds, pinnedIds, archiveIds } = selectUserStories(global, userId) || {};
+  const story = selectUserStory(global, userId, storyId);
   const shouldForcePause = Boolean(
     storyIdSeenBy || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
     || isPremiumModalOpen || isDeleteModalOpen,
