@@ -158,7 +158,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         const tabState = selectTabState(global, tabId);
         global = updateTabState(global, {
           activeEmojiInteractions: [...(tabState.activeEmojiInteractions || []), {
-            id: tabState.activeEmojiInteractions?.length || 0,
+            id: Math.random(),
             animatedEffect: update.emoji,
             messageId: update.messageId,
           } as ActiveEmojiInteraction],
