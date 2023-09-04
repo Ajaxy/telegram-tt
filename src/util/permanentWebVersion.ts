@@ -1,3 +1,4 @@
+// Handled by the legacy version. Cannot be updated
 const PERMANENT_VERSION_KEY = 'kz_version';
 const AVAILABLE_VERSIONS = ['Z', 'K'] as const;
 
