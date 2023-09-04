@@ -1727,6 +1727,7 @@ export interface ActionPayloads {
   } & WithTabId;
   loadFullChat: {
     chatId: string;
+    withPhotos?: boolean;
     force?: boolean;
   } & WithTabId;
   updateChatPhoto: {
@@ -2095,7 +2096,7 @@ export interface ActionPayloads {
   setUserSearchQuery: { query?: string } & WithTabId;
   loadCommonChats: WithTabId | undefined;
   reportSpam: { chatId: string };
-  loadFullUser: { userId: string };
+  loadFullUser: { userId: string; withPhotos?: boolean };
   openAddContactDialog: { userId?: string } & WithTabId;
   openNewContactDialog: WithTabId | undefined;
   closeNewContactDialog: WithTabId | undefined;

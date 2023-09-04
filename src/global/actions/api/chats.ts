@@ -343,16 +343,25 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
 });
 
 addActionHandler('loadFullChat', (global, actions, payload): ActionReturnType => {
-  const { chatId, force, tabId = getCurrentTabId() } = payload!;
+  const {
+    chatId, force, tabId = getCurrentTabId(), withPhotos,
+  } = payload!;
   const chat = selectChat(global, chatId);
   if (!chat) {
     return;
   }
 
+  const loadChat = async () => {
+    await loadFullChat(global, actions, chat, tabId);
+    if (withPhotos) {
+      actions.loadProfilePhotos({ profileId: chatId });
+    }
+  };
+
   if (force) {
-    loadFullChat(global, actions, chat, tabId);
+    void loadChat();
   } else {
-    runDebouncedForLoadFullChat(() => loadFullChat(global, actions, chat, tabId));
+    runDebouncedForLoadFullChat(loadChat);
   }
 });
 
@@ -1354,6 +1363,10 @@ addActionHandler('updateChat', async (global, actions, payload): Promise<void> =
   global = getGlobal();
   global = updateManagementProgress(global, ManagementProgress.Complete, tabId);
   setGlobal(global);
+
+  if (photo) {
+    actions.loadFullChat({ chatId, tabId, withPhotos: true });
+  }
 });
 
 addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<void> => {
@@ -1371,8 +1384,7 @@ addActionHandler('updateChatPhoto', async (global, actions, payload): Promise<vo
   });
   // Explicitly delete the old photo reference
   await callApi('deleteProfilePhotos', [photo]);
-  actions.loadFullChat({ chatId, tabId });
-  actions.loadProfilePhotos({ profileId: chatId });
+  actions.loadFullChat({ chatId, tabId, withPhotos: true });
 });
 
 addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<void> => {
@@ -1396,11 +1408,19 @@ addActionHandler('deleteChatPhoto', async (global, actions, payload): Promise<vo
       photo: nextPhoto,
     });
   }
+
+  const { photos = [] } = chat;
+
+  const newPhotos = photos.filter((p) => photosToDelete.some((toDelete) => toDelete.id !== p.id));
+  global = getGlobal();
+  global = updateChat(global, chatId, { photos: newPhotos });
+
+  setGlobal(global);
+
   // Delete references to the old photos
   const result = await callApi('deleteProfilePhotos', photosToDelete);
   if (!result) return;
-  actions.loadFullChat({ chatId, tabId });
-  actions.loadProfilePhotos({ profileId: chatId });
+  actions.loadFullChat({ chatId, tabId, withPhotos: true });
 });
 
 addActionHandler('toggleSignatures', (global, actions, payload): ActionReturnType => {
