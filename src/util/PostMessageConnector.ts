@@ -6,7 +6,6 @@ export interface CancellableCallback {
   ): void;
 
   isCanceled?: boolean;
-  acceptsBuffer?: boolean;
 }
 
 type InitData = {

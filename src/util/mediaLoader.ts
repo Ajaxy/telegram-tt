@@ -24,7 +24,6 @@ const asCacheApiType = {
   [ApiMediaFormat.Text]: cacheApi.Type.Text,
   [ApiMediaFormat.DownloadUrl]: undefined,
   [ApiMediaFormat.Progressive]: undefined,
-  [ApiMediaFormat.Stream]: undefined,
 };
 
 const PROGRESSIVE_URL_PREFIX = `${IS_ELECTRON ? ELECTRON_HOST_URL : '.'}/progressive/`;
@@ -157,29 +156,6 @@ async function fetchFromCacheOrRemote(
     }
   }
 
-  if (mediaFormat === ApiMediaFormat.Stream) {
-    const mediaSource = new MediaSource();
-    const streamUrl = URL.createObjectURL(mediaSource);
-    let isOpen = false;
-
-    mediaSource.addEventListener('sourceopen', () => {
-      if (isOpen) {
-        return;
-      }
-      isOpen = true;
-
-      const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
-
-      const onProgress = makeOnProgress(url, mediaSource, sourceBuffer);
-      cancellableCallbacks.set(url, onProgress);
-
-      void callApi('downloadMedia', { url, mediaFormat }, onProgress);
-    });
-
-    memoryCache.set(url, streamUrl);
-    return streamUrl;
-  }
-
   const onProgress = makeOnProgress(url);
   cancellableCallbacks.set(url, onProgress);
 
@@ -221,22 +197,12 @@ async function fetchFromCacheOrRemote(
   return prepared;
 }
 
-function makeOnProgress(url: string, mediaSource?: MediaSource, sourceBuffer?: SourceBuffer) {
-  const onProgress: ApiOnProgress = (progress: number, arrayBuffer: ArrayBuffer) => {
+function makeOnProgress(url: string) {
+  const onProgress: ApiOnProgress = (progress: number) => {
     progressCallbacks.get(url)?.forEach((callback) => {
       callback(progress);
       if (callback.isCanceled) onProgress.isCanceled = true;
     });
-
-    if (progress === 1) {
-      mediaSource?.endOfStream();
-    }
-
-    if (!arrayBuffer) {
-      return;
-    }
-
-    sourceBuffer?.appendBuffer(arrayBuffer);
   };
 
   return onProgress;

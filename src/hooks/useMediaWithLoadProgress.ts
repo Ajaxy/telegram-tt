@@ -21,9 +21,7 @@ export default function useMediaWithLoadProgress(
   isHtmlAllowed = false,
 ) {
   const mediaData = mediaHash ? mediaLoader.getFromMemory(mediaHash) : undefined;
-  const isStreaming = mediaFormat === ApiMediaFormat.Stream || (
-    IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive
-  );
+  const isStreaming = IS_PROGRESSIVE_SUPPORTED && mediaFormat === ApiMediaFormat.Progressive;
   const forceUpdate = useForceUpdate();
   const id = useUniqueId();
   const [loadProgress, setLoadProgress] = useState(mediaData && !isStreaming ? 1 : 0);
