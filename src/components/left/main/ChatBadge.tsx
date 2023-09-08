@@ -48,7 +48,7 @@ const ChatBadge: FC<OwnProps> = ({
 
   const shouldBeMuted = useMemo(() => {
     const hasUnmutedUnreadTopics = chat.topics
-      && Object.values(chat.topics).some((acc) => acc.isMuted && acc.unreadCount);
+      && Object.values(chat.topics).some((acc) => !acc.isMuted && acc.unreadCount);
 
     return isMuted || (chat.topics && !hasUnmutedUnreadTopics);
   }, [chat, isMuted]);
