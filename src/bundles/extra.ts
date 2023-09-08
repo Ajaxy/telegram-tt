@@ -7,13 +7,13 @@ export { default as AttachBotRecipientPicker } from '../components/main/AttachBo
 export { default as Dialogs } from '../components/main/Dialogs';
 export { default as Notifications } from '../components/main/Notifications';
 export { default as SafeLinkModal } from '../components/main/SafeLinkModal';
-export { default as MapModal } from '../components/modals/mapModal/MapModal';
-export { default as UrlAuthModal } from '../components/main/UrlAuthModal';
+export { default as MapModal } from '../components/modals/map/MapModal';
+export { default as UrlAuthModal } from '../components/modals/urlAuth/UrlAuthModal';
 export { default as HistoryCalendar } from '../components/main/HistoryCalendar';
 export { default as NewContactModal } from '../components/main/NewContactModal';
-export { default as WebAppModal } from '../components/main/WebAppModal';
+export { default as WebAppModal } from '../components/modals/webApp/WebAppModal';
 export { default as BotTrustModal } from '../components/main/BotTrustModal';
-export { default as AttachBotInstallModal } from '../components/main/AttachBotInstallModal';
+export { default as AttachBotInstallModal } from '../components/modals/attachBotInstall/AttachBotInstallModal';
 export { default as DeleteFolderDialog } from '../components/main/DeleteFolderDialog';
 export { default as PremiumMainModal } from '../components/main/premium/PremiumMainModal';
 export { default as GiftPremiumModal } from '../components/main/premium/GiftPremiumModal';

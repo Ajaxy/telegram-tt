@@ -426,6 +426,8 @@ function buildAction(
     if (action.domain) {
       text = 'ActionBotAllowed';
       translationValues.push(action.domain);
+    } else if (action.fromRequest) {
+      text = 'lng_action_webapp_bot_allowed';
     } else {
       text = 'ActionAttachMenuBotAllowed';
     }

@@ -417,6 +417,40 @@ addActionHandler('startBot', async (global, actions, payload): Promise<void> => 
   });
 });
 
+addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<void> => {
+  const { botId } = payload;
+  const bot = selectUser(global, botId);
+  if (!bot) {
+    return;
+  }
+
+  let fullInfo = selectUserFullInfo(global, botId);
+  if (!fullInfo) {
+    const result = await callApi('fetchFullUser', { id: bot.id, accessHash: bot.accessHash });
+    fullInfo = result?.fullInfo;
+  }
+
+  if (fullInfo?.isBlocked) {
+    await callApi('unblockUser', { user: bot });
+  }
+
+  global = getGlobal();
+  const chat = selectChat(global, botId);
+  const currentUser = selectUser(global, global.currentUserId!)!;
+
+  if (!chat) return;
+
+  await callApi('sendMessage', {
+    chat,
+    contact: {
+      firstName: currentUser.firstName || '',
+      lastName: currentUser.lastName || '',
+      phoneNumber: currentUser.phoneNumber || '',
+      userId: currentUser.id,
+    },
+  });
+});
+
 addActionHandler('requestSimpleWebView', async (global, actions, payload): Promise<void> => {
   const {
     url, botId, theme, buttonText,
