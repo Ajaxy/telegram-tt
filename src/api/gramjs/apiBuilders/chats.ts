@@ -548,7 +548,7 @@ export function buildApiTopic(forumTopic: GramJs.TypeForumTopic): ApiTopic | und
     unreadMentionsCount,
     unreadReactionsCount,
     fromId: getApiChatIdFromMtpPeer(fromId),
-    isMuted: silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil),
+    isMuted: silent || (typeof muteUntil === 'number' ? getServerTime() < muteUntil : undefined),
     muteUntil,
   };
 }
