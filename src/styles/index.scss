@@ -50,6 +50,10 @@ noscript {
   }
 }
 
+html.theme-dark {
+  color-scheme: dark;
+}
+
 body.is-ios,
 body.is-macos {
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
