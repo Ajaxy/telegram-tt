@@ -1,18 +1,18 @@
 import React, {
   memo, useCallback, useEffect, useState,
-} from '../../lib/teact/teact';
-import { getActions } from '../../global';
+} from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { ApiAttachBot } from '../../api/types';
+import type { FC } from '../../../lib/teact/teact';
+import type { ApiAttachBot } from '../../../api/types';
 
-import renderText from '../common/helpers/renderText';
+import renderText from '../../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
+import useLang from '../../../hooks/useLang';
+import usePrevious from '../../../hooks/usePrevious';
 
-import ConfirmDialog from '../ui/ConfirmDialog';
-import Checkbox from '../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import Checkbox from '../../ui/Checkbox';
 
 export type OwnProps = {
   bot?: ApiAttachBot;

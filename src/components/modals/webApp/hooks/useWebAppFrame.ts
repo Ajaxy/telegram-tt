@@ -1,155 +1,11 @@
-import { useCallback, useEffect, useRef } from '../../../lib/teact/teact';
-import { getActions } from '../../../lib/teact/teactn';
-import { extractCurrentThemeParams } from '../../../util/themeStyle';
-import useWindowSize from '../../../hooks/useWindowSize';
+import { useCallback, useEffect, useRef } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
-export type PopupOptions = {
-  title: string;
-  message: string;
-  buttons: {
-    id: string;
-    type: 'default' | 'ok' | 'close' | 'cancel' | 'destructive';
-    text: string;
-  }[];
-};
+import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/webapp';
 
-export type WebAppInboundEvent = {
-  eventType: 'web_app_data_send';
-  eventData: {
-    data: string;
-  };
-} | {
-  eventType: 'web_app_setup_main_button';
-  eventData: {
-    is_visible: boolean;
-    is_active: boolean;
-    text: string;
-    color: string;
-    text_color: string;
-    is_progress_visible: boolean;
-  };
-} | {
-  eventType: 'web_app_setup_back_button';
-  eventData: {
-    is_visible: boolean;
-  };
-} | {
-  eventType: 'web_app_open_link';
-  eventData: {
-    url: string;
-    try_instant_view?: boolean;
-  };
-} | {
-  eventType: 'web_app_open_tg_link';
-  eventData: {
-    path_full: string;
-  };
-} | {
-  eventType: 'web_app_open_invoice';
-  eventData: {
-    slug: string;
-  };
-} | {
-  eventType: 'web_app_trigger_haptic_feedback';
-  eventData: {
-    type: 'impact' | 'notification' | 'selection_change';
-    impact_style?: 'light' | 'medium' | 'heavy';
-    notification_type?: 'error' | 'success' | 'warning';
-  };
-} | {
-  eventType: 'web_app_set_background_color';
-  eventData: {
-    color: string;
-  };
-} | {
-  eventType: 'web_app_set_header_color';
-  eventData: {
-    color_key: 'bg_color' | 'secondary_bg_color';
-  };
-} | {
-  eventType: 'web_app_open_popup';
-  eventData: PopupOptions;
-} | {
-  eventType: 'web_app_setup_closing_behavior';
-  eventData: {
-    need_confirmation: boolean;
-  };
-} | {
-  eventType: 'web_app_open_scan_qr_popup';
-  eventData: {
-    text?: string;
-  };
-} | {
-  eventType: 'web_app_read_text_from_clipboard';
-  eventData: {
-    req_id: string;
-  };
-} | {
-  eventType: 'web_app_switch_inline_query';
-  eventData: {
-    query: string;
-    chat_types: ('users' | 'bots' | 'groups' | 'channels')[];
-  };
-} | {
-  eventType: 'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
-  | 'web_app_request_phone' | 'web_app_close' | 'iframe_ready' | 'web_app_close_scan_qr_popup';
-  eventData: null;
-};
+import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 
-type WebAppOutboundEvent = {
-  eventType: 'viewport_changed';
-  eventData: {
-    height: number;
-    width?: number;
-    is_expanded?: boolean;
-    is_state_stable?: boolean;
-  };
-} | {
-  eventType: 'theme_changed';
-  eventData: {
-    theme_params: {
-      bg_color: string;
-      text_color: string;
-      hint_color: string;
-      link_color: string;
-      button_color: string;
-      button_text_color: string;
-      secondary_bg_color: string;
-    };
-  };
-} | {
-  eventType: 'set_custom_style';
-  eventData: string;
-} | {
-  eventType: 'invoice_closed';
-  eventData: {
-    slug: string;
-    status: 'paid' | 'cancelled' | 'pending' | 'failed';
-  };
-} | {
-  eventType: 'phone_requested';
-  eventData: {
-    phone_number: string;
-  };
-} | {
-  eventType: 'popup_closed';
-  eventData: {
-    button_id?: string;
-  };
-} | {
-  eventType: 'qr_text_received';
-  eventData: {
-    data: string;
-  };
-} | {
-  eventType: 'clipboard_text_received';
-  eventData: {
-    req_id: string;
-    data: string | null;
-  };
-} | {
-  eventType: 'main_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed';
-};
+import useWindowSize from '../../../../hooks/useWindowSize';
 
 const SCROLLBAR_STYLE = `* {
   scrollbar-width: thin;
@@ -180,6 +36,9 @@ const useWebAppFrame = (
 ) => {
   const {
     showNotification,
+    setWebAppPaymentSlug,
+    openInvoice,
+    closeWebApp,
   } = getActions();
 
   const ignoreEventsRef = useRef<boolean>(false);
@@ -253,34 +112,40 @@ const useWebAppFrame = (
 
     try {
       const data = JSON.parse(event.data) as WebAppInboundEvent;
+      const { eventType, eventData } = data;
       // Handle some app requests here to simplify hook usage
-      if (data.eventType === 'web_app_ready') {
+      if (eventType === 'web_app_ready') {
         onLoad?.();
       }
 
-      if (data.eventType === 'web_app_request_viewport') {
+      if (eventType === 'web_app_close') {
+        closeWebApp();
+      }
+
+      if (eventType === 'web_app_request_viewport') {
         sendViewport(windowSize.isResizing);
       }
 
-      if (data.eventType === 'web_app_request_theme') {
+      if (eventType === 'web_app_request_theme') {
         sendTheme();
       }
 
-      if (data.eventType === 'iframe_ready') {
+      if (eventType === 'iframe_ready') {
         const scrollbarColor = getComputedStyle(document.body).getPropertyValue('--color-scrollbar');
         sendCustomStyle(SCROLLBAR_STYLE.replace(/%SCROLLBAR_COLOR%/g, scrollbarColor));
       }
 
-      if (data.eventType === 'web_app_data_send') {
+      if (eventType === 'web_app_data_send') {
         if (!isSimpleView) return; // Allowed only in simple view
         ignoreEventsRef.current = true;
       }
 
-      if (data.eventType === 'web_app_read_text_from_clipboard') {
+      // Clipboard access temporarily disabled to address security concerns
+      if (eventType === 'web_app_read_text_from_clipboard') {
         sendEvent({
           eventType: 'clipboard_text_received',
           eventData: {
-            req_id: data.eventData.req_id,
+            req_id: eventData.req_id,
             // eslint-disable-next-line no-null/no-null
             data: null,
           },
@@ -290,6 +155,27 @@ const useWebAppFrame = (
           message: 'Clipboard access is not supported in this client yet',
         });
       }
+
+      if (eventType === 'web_app_open_scan_qr_popup') {
+        showNotification({
+          message: 'Scanning QR code is not supported in this client yet',
+        });
+      }
+
+      if (eventType === 'web_app_open_invoice') {
+        setWebAppPaymentSlug({
+          slug: eventData.slug,
+        });
+        openInvoice({
+          slug: eventData.slug,
+        });
+      }
+
+      if (eventType === 'web_app_open_link') {
+        const linkUrl = eventData.url;
+        window.open(linkUrl, '_blank', 'noreferrer');
+      }
+
       onEvent(data);
     } catch (err) {
       // Ignore other messages

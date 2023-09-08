@@ -80,11 +80,11 @@ import PhoneCall from '../calls/phone/PhoneCall.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import NewContactModal from './NewContactModal.async';
 import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
-import WebAppModal from './WebAppModal.async';
+import WebAppModal from '../modals/webApp/WebAppModal.async';
 import BotTrustModal from './BotTrustModal.async';
-import AttachBotInstallModal from './AttachBotInstallModal.async';
+import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
 import ConfettiContainer from './ConfettiContainer';
-import UrlAuthModal from './UrlAuthModal.async';
+import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
 import PremiumMainModal from './premium/PremiumMainModal.async';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
@@ -96,7 +96,7 @@ import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import StoryViewer from '../story/StoryViewer.async';
-import MapModal from '../modals/mapModal/MapModal.async';
+import MapModal from '../modals/map/MapModal.async';
 
 import './Main.scss';
 

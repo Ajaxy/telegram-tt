@@ -1,10 +1,10 @@
-import type { FC } from '../../lib/teact/teact';
-import React from '../../lib/teact/teact';
-import { Bundles } from '../../util/moduleLoader';
+import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
+import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './WebAppModal';
 
-import useModuleLoader from '../../hooks/useModuleLoader';
+import useModuleLoader from '../../../hooks/useModuleLoader';
 
 const WebAppModalAsync: FC<OwnProps> = (props) => {
   const { webApp } = props;

@@ -468,6 +468,55 @@ export async function acceptLinkUrlAuth({ url, isWriteAllowed }: { url: string; 
   return authResult;
 }
 
+export function fetchBotCanSendMessage({ bot } : { bot: ApiUser }) {
+  return invokeRequest(new GramJs.bots.CanSendMessage({
+    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+  }));
+}
+
+export function allowBotSendMessages({ bot } : { bot: ApiUser }) {
+  return invokeRequest(new GramJs.bots.AllowSendMessage({
+    bot: buildInputEntity(bot.id, bot.accessHash) as GramJs.InputUser,
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function invokeWebViewCustomMethod({
+  bot,
+  customMethod,
+  parameters,
+}: {
+  bot: ApiUser;
+  customMethod: string;
+  parameters: string;
+}): Promise<{
+    result: object;
+  } | {
+    error: string;
+  }> {
+  try {
+    const result = await invokeRequest(new GramJs.bots.InvokeWebViewCustomMethod({
+      bot: buildInputPeer(bot.id, bot.accessHash),
+      params: new GramJs.DataJSON({
+        data: parameters,
+      }),
+      customMethod,
+    }), {
+      shouldThrow: true,
+    });
+
+    return {
+      result: JSON.parse(result!.data),
+    };
+  } catch (e) {
+    const error = e as Error;
+    return {
+      error: error.message,
+    };
+  }
+}
+
 function processInlineBotResult(queryId: string, results: GramJs.TypeBotInlineResult[]) {
   return results.map((result) => {
     if (result instanceof GramJs.BotInlineMediaResult) {

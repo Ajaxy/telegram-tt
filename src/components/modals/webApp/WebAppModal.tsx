@@ -1,36 +1,39 @@
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
-} from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+  memo, useEffect, useMemo, useRef, useState,
+} from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { ApiAttachBot, ApiChat, ApiUser } from '../../api/types';
-import type { TabState } from '../../global/types';
-import type { ThemeKey } from '../../types';
-import type { PopupOptions, WebAppInboundEvent } from './hooks/useWebAppFrame';
+import type { FC } from '../../../lib/teact/teact';
+import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
+import type { TabState } from '../../../global/types';
+import type { ThemeKey } from '../../../types';
+import type { PopupOptions, WebAppInboundEvent } from '../../../types/webapp';
 
-import { TME_LINK_PREFIX } from '../../config';
+import { callApi } from '../../../api/gramjs';
+import { TME_LINK_PREFIX } from '../../../config';
 import {
   selectCurrentChat, selectTabState, selectTheme, selectUser,
-} from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
-import { extractCurrentThemeParams, validateHexColor } from '../../util/themeStyle';
-import { convertToApiChatType } from '../../global/helpers';
+} from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
+import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
+import { convertToApiChatType } from '../../../global/helpers';
 
-import useInterval from '../../hooks/useInterval';
-import useLang from '../../hooks/useLang';
-import useSyncEffect from '../../hooks/useSyncEffect';
+import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import useWebAppFrame from './hooks/useWebAppFrame';
-import usePrevious from '../../hooks/usePrevious';
-import useFlag from '../../hooks/useFlag';
-import useAppLayout from '../../hooks/useAppLayout';
+import usePrevious from '../../../hooks/usePrevious';
+import useFlag from '../../../hooks/useFlag';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useLastCallback from '../../../hooks/useLastCallback';
+import usePopupLimit from './hooks/usePopupLimit';
 
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import DropdownMenu from '../ui/DropdownMenu';
-import MenuItem from '../ui/MenuItem';
-import Spinner from '../ui/Spinner';
-import ConfirmDialog from '../ui/ConfirmDialog';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import DropdownMenu from '../../ui/DropdownMenu';
+import MenuItem from '../../ui/MenuItem';
+import Spinner from '../../ui/Spinner';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 
 import styles from './WebAppModal.module.scss';
 
@@ -61,6 +64,8 @@ const NBSP = '\u00A0';
 const MAIN_BUTTON_ANIMATION_TIME = 250;
 const PROLONG_INTERVAL = 45000; // 45s
 const ANIMATION_WAIT = 400;
+const POPUP_SEQUENTIAL_LIMIT = 3;
+const POPUP_RESET_DELAY = 2000; // 2s
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
   'allow-same-origin',
@@ -92,22 +97,29 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     toggleAttachBot,
     openTelegramLink,
     openChat,
-    openInvoice,
     setWebAppPaymentSlug,
-    showNotification,
     switchBotInline,
+    sharePhoneWithBot,
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
+
   const [backgroundColor, setBackgroundColor] = useState<string>();
   const [headerColor, setHeaderColor] = useState<string>();
-  const [confirmClose, setConfirmClose] = useState(false);
-  const [isCloseModalOpen, openCloseModal, closeModal] = useFlag(false);
+
+  const [shouldConfirmClosing, setShouldConfirmClosing] = useState(false);
+  const [isCloseModalOpen, openCloseModal, hideCloseModal] = useFlag(false);
+
   const [isLoaded, markLoaded, markUnloaded] = useFlag(false);
-  const [popupParams, setPopupParams] = useState<PopupOptions | undefined>();
+
+  const [popupParameters, setPopupParameters] = useState<PopupOptions | undefined>();
+  const [isRequestingPhone, setIsRequestingPhone] = useState(false);
+  const [isRequesingWriteAccess, setIsRequestingWriteAccess] = useState(false);
+  const {
+    unlockPopupsAt, handlePopupOpened, handlePopupClosed,
+  } = usePopupLimit(POPUP_SEQUENTIAL_LIMIT, POPUP_RESET_DELAY);
+
   const { isMobile } = useAppLayout();
-  const prevPopupParams = usePrevious(popupParams);
-  const renderingPopupParams = popupParams || prevPopupParams;
 
   useEffect(() => {
     const themeParams = extractCurrentThemeParams();
@@ -125,30 +137,222 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const isOpen = Boolean(url);
   const isSimple = Boolean(buttonText);
 
-  const handleEvent = useCallback((event: WebAppInboundEvent) => {
-    const { eventType, eventData } = event;
-    if (eventType === 'web_app_close') {
+  const {
+    reloadFrame, sendEvent, sendViewport, sendTheme,
+  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent, markLoaded);
+
+  const shouldShowMainButton = mainButton?.isVisible && mainButton.text.trim().length > 0;
+
+  useInterval(() => {
+    prolongWebView({
+      botId: bot!.id,
+      queryId: queryId!,
+      peerId: chat!.id,
+      replyToMessageId,
+      threadId,
+    });
+  }, queryId ? PROLONG_INTERVAL : undefined, true);
+
+  const handleMainButtonClick = useLastCallback(() => {
+    sendEvent({
+      eventType: 'main_button_pressed',
+    });
+  });
+
+  const handleSettingsButtonClick = useLastCallback(() => {
+    sendEvent({
+      eventType: 'settings_button_pressed',
+    });
+  });
+
+  const handleRefreshClick = useLastCallback(() => {
+    reloadFrame(webApp!.url);
+  });
+
+  const handleClose = useLastCallback(() => {
+    if (shouldConfirmClosing) {
+      openCloseModal();
+    } else {
       closeWebApp();
     }
+  });
 
-    if (eventType === 'web_app_open_invoice') {
-      setWebAppPaymentSlug({
-        slug: eventData.slug,
+  const handleAppPopupClose = useLastCallback((buttonId?: string) => {
+    setPopupParameters(undefined);
+    handlePopupClosed();
+    sendEvent({
+      eventType: 'popup_closed',
+      eventData: {
+        button_id: buttonId,
+      },
+    });
+  });
+
+  const handleAppPopupModalClose = useLastCallback(() => {
+    handleAppPopupClose();
+  });
+
+  // Notify view that height changed
+  useSyncEffect(() => {
+    setTimeout(() => {
+      sendViewport();
+    }, ANIMATION_WAIT);
+  }, [mainButton?.isVisible, sendViewport]);
+
+  // Notify view that theme changed
+  useSyncEffect(() => {
+    setTimeout(() => {
+      sendTheme();
+    }, ANIMATION_WAIT);
+  }, [theme, sendTheme]);
+
+  useSyncEffect(([prevIsPaymentModalOpen]) => {
+    if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
+    if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
+      sendEvent({
+        eventType: 'invoice_closed',
+        eventData: {
+          slug: webApp.slug,
+          status: paymentStatus,
+        },
       });
-      openInvoice({
-        slug: eventData.slug,
+      setWebAppPaymentSlug({
+        slug: undefined,
+      });
+    }
+  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp]);
+
+  const handleToggleClick = useLastCallback(() => {
+    toggleAttachBot({
+      botId: bot!.id,
+      isEnabled: !attachBot,
+    });
+  });
+
+  const handleBackClick = useLastCallback(() => {
+    if (isBackButtonVisible) {
+      sendEvent({
+        eventType: 'back_button_pressed',
+      });
+    } else {
+      handleClose();
+    }
+  });
+
+  const handleRejectPhone = useLastCallback(() => {
+    setIsRequestingPhone(false);
+    handlePopupClosed();
+    sendEvent({
+      eventType: 'phone_requested',
+      eventData: {
+        status: 'cancelled',
+      },
+    });
+  });
+
+  const handleAcceptPhone = useLastCallback(() => {
+    sharePhoneWithBot({ botId: bot!.id });
+    setIsRequestingPhone(false);
+    handlePopupClosed();
+    sendEvent({
+      eventType: 'phone_requested',
+      eventData: {
+        status: 'sent',
+      },
+    });
+  });
+
+  const handleRejectWriteAccess = useLastCallback(() => {
+    sendEvent({
+      eventType: 'write_access_requested',
+      eventData: {
+        status: 'cancelled',
+      },
+    });
+    setIsRequestingWriteAccess(false);
+    handlePopupClosed();
+  });
+
+  const handleAcceptWriteAccess = useLastCallback(async () => {
+    const result = await callApi('allowBotSendMessages', { bot: bot! });
+    if (!result) {
+      handleRejectWriteAccess();
+      return;
+    }
+
+    sendEvent({
+      eventType: 'write_access_requested',
+      eventData: {
+        status: 'allowed',
+      },
+    });
+    setIsRequestingWriteAccess(false);
+    handlePopupClosed();
+  });
+
+  async function handleRequestWriteAccess() {
+    const canWrite = await callApi('fetchBotCanSendMessage', {
+      bot: bot!,
+    });
+
+    if (canWrite) {
+      sendEvent({
+        eventType: 'write_access_requested',
+        eventData: {
+          status: 'allowed',
+        },
       });
     }
 
+    setIsRequestingWriteAccess(!canWrite);
+  }
+
+  async function handleInvokeCustomMethod(requestId: string, method: string, parameters: string) {
+    const result = await callApi('invokeWebViewCustomMethod', {
+      bot: bot!,
+      customMethod: method,
+      parameters,
+    });
+
+    sendEvent({
+      eventType: 'custom_method_invoked',
+      eventData: {
+        req_id: requestId,
+        ...result,
+      },
+    });
+  }
+
+  const openBotChat = useLastCallback(() => {
+    openChat({
+      id: bot!.id,
+    });
+    closeWebApp();
+  });
+
+  useEffect(() => {
+    if (!isOpen) {
+      const themeParams = extractCurrentThemeParams();
+
+      setShouldConfirmClosing(false);
+      hideCloseModal();
+      setPopupParameters(undefined);
+      setIsRequestingPhone(false);
+      setIsRequestingWriteAccess(false);
+      setMainButton(undefined);
+      setIsBackButtonVisible(false);
+      setBackgroundColor(themeParams.bg_color);
+      setHeaderColor(themeParams.bg_color);
+      markUnloaded();
+    }
+  }, [hideCloseModal, isOpen, markUnloaded]);
+
+  function handleEvent(event: WebAppInboundEvent) {
+    const { eventType, eventData } = event;
     if (eventType === 'web_app_open_tg_link' && !isPaymentModalOpen) {
       const linkUrl = TME_LINK_PREFIX + eventData.path_full;
       openTelegramLink({ url: linkUrl });
       closeWebApp();
-    }
-
-    if (eventType === 'web_app_open_link') {
-      const linkUrl = eventData.url;
-      window.open(linkUrl, '_blank', 'noreferrer');
     }
 
     if (eventType === 'web_app_setup_back_button') {
@@ -193,18 +397,19 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_setup_closing_behavior') {
-      setConfirmClose(eventData.need_confirmation);
+      setShouldConfirmClosing(eventData.need_confirmation);
     }
 
     if (eventType === 'web_app_open_popup') {
-      if (!eventData.message.trim().length || !eventData.buttons?.length || eventData.buttons.length > 3) return;
-      setPopupParams(eventData);
-    }
+      if (popupParameters || !eventData.message.trim().length || !eventData.buttons?.length
+      || eventData.buttons.length > 3 || isRequestingPhone || isRequesingWriteAccess
+      || unlockPopupsAt > Date.now()) {
+        handleAppPopupClose(undefined);
+        return;
+      }
 
-    if (eventType === 'web_app_open_scan_qr_popup') {
-      showNotification({
-        message: 'Scan QR code is not supported in this client yet',
-      });
+      setPopupParameters(eventData);
+      handlePopupOpened();
     }
 
     if (eventType === 'web_app_switch_inline_query') {
@@ -220,127 +425,32 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
       closeWebApp();
     }
-  }, [
-    bot, buttonText, closeWebApp, openInvoice, openTelegramLink, sendWebViewData, setWebAppPaymentSlug,
-    isPaymentModalOpen, showNotification,
-  ]);
 
-  const {
-    reloadFrame, sendEvent, sendViewport, sendTheme,
-  } = useWebAppFrame(frameRef, isOpen, isSimple, handleEvent, markLoaded);
+    if (eventType === 'web_app_request_phone') {
+      if (popupParameters || isRequesingWriteAccess || unlockPopupsAt > Date.now()) {
+        handleRejectPhone();
+        return;
+      }
 
-  const shouldShowMainButton = mainButton?.isVisible && mainButton.text.trim().length > 0;
-
-  useInterval(() => {
-    prolongWebView({
-      botId: bot!.id,
-      queryId: queryId!,
-      peerId: chat!.id,
-      replyToMessageId,
-      threadId,
-    });
-  }, queryId ? PROLONG_INTERVAL : undefined, true);
-
-  const handleMainButtonClick = useCallback(() => {
-    sendEvent({
-      eventType: 'main_button_pressed',
-    });
-  }, [sendEvent]);
-
-  const handleSettingsButtonClick = useCallback(() => {
-    sendEvent({
-      eventType: 'settings_button_pressed',
-    });
-  }, [sendEvent]);
-
-  const handleRefreshClick = useCallback(() => {
-    reloadFrame(webApp!.url);
-  }, [reloadFrame, webApp]);
-
-  const handleClose = useCallback(() => {
-    if (confirmClose) {
-      openCloseModal();
-    } else {
-      closeWebApp();
+      setIsRequestingPhone(true);
+      handlePopupOpened();
     }
-  }, [confirmClose, openCloseModal, closeWebApp]);
 
-  const handlePopupClose = useCallback((buttonId?: string) => {
-    setPopupParams(undefined);
-    sendEvent({
-      eventType: 'popup_closed',
-      eventData: {
-        button_id: buttonId,
-      },
-    });
-  }, [sendEvent]);
+    if (eventType === 'web_app_request_write_access') {
+      if (popupParameters || isRequestingPhone || unlockPopupsAt > Date.now()) {
+        handleRejectWriteAccess();
+        return;
+      }
 
-  const handlePopupModalClose = useCallback(() => {
-    handlePopupClose();
-  }, [handlePopupClose]);
-
-  // Notify view that height changed
-  useSyncEffect(() => {
-    setTimeout(() => {
-      sendViewport();
-    }, ANIMATION_WAIT);
-  }, [mainButton?.isVisible, sendViewport]);
-
-  // Notify view that theme changed
-  useSyncEffect(() => {
-    setTimeout(() => {
-      sendTheme();
-    }, ANIMATION_WAIT);
-  }, [theme, sendTheme]);
-
-  useSyncEffect(([prevIsPaymentModalOpen]) => {
-    if (isPaymentModalOpen === prevIsPaymentModalOpen) return;
-    if (webApp?.slug && !isPaymentModalOpen && paymentStatus) {
-      sendEvent({
-        eventType: 'invoice_closed',
-        eventData: {
-          slug: webApp.slug,
-          status: paymentStatus,
-        },
-      });
-      setWebAppPaymentSlug({
-        slug: undefined,
-      });
+      handleRequestWriteAccess();
+      handlePopupOpened();
     }
-  }, [isPaymentModalOpen, paymentStatus, sendEvent, setWebAppPaymentSlug, webApp]);
 
-  const handleToggleClick = useCallback(() => {
-    toggleAttachBot({
-      botId: bot!.id,
-      isEnabled: !attachBot,
-    });
-  }, [bot, attachBot, toggleAttachBot]);
-
-  const handleBackClick = useCallback(() => {
-    if (isBackButtonVisible) {
-      sendEvent({
-        eventType: 'back_button_pressed',
-      });
-    } else {
-      handleClose();
+    if (eventType === 'web_app_invoke_custom_method') {
+      const { method, params, req_id: requestId } = eventData;
+      handleInvokeCustomMethod(requestId, method, JSON.stringify(params));
     }
-  }, [handleClose, isBackButtonVisible, sendEvent]);
-
-  const openBotChat = useCallback(() => {
-    openChat({
-      id: bot!.id,
-    });
-    closeWebApp();
-  }, [bot, closeWebApp, openChat]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setConfirmClose(false);
-      closeModal();
-      setPopupParams(undefined);
-      markUnloaded();
-    }
-  }, [closeModal, isOpen, markUnloaded]);
+  }
 
   const MoreMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen: isMenuOpen }) => (
@@ -414,16 +524,6 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   const mainButtonCurrentIsActive = mainButton?.isActive !== undefined ? mainButton.isActive : prevMainButtonIsActive;
   const mainButtonCurrentText = mainButton?.text || prevMainButtonText;
 
-  useEffect(() => {
-    if (!isOpen) {
-      const themeParams = extractCurrentThemeParams();
-      setMainButton(undefined);
-      setIsBackButtonVisible(false);
-      setBackgroundColor(themeParams.bg_color);
-      setHeaderColor(themeParams.bg_color);
-    }
-  }, [isOpen]);
-
   const [shouldDecreaseWebFrameSize, setShouldDecreaseWebFrameSize] = useState(false);
   const [shouldHideButton, setShouldHideButton] = useState(true);
 
@@ -479,30 +579,35 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           </Button>
         </>
       )}
-      {confirmClose && (
-        <ConfirmDialog
-          isOpen={isCloseModalOpen}
-          onClose={closeModal}
-          title={lang('lng_bot_close_warning_title')}
-          text={lang('lng_bot_close_warning')}
-          confirmHandler={closeWebApp}
-          confirmIsDestructive
-          confirmLabel={lang('lng_bot_close_warning_sure')}
-        />
-      )}
-      {renderingPopupParams && (
+      <ConfirmDialog
+        isOpen={isRequestingPhone}
+        onClose={handleRejectPhone}
+        title={lang('ShareYouPhoneNumberTitle')}
+        text={lang('AreYouSureShareMyContactInfoBot')}
+        confirmHandler={handleAcceptPhone}
+        confirmLabel={lang('ContactShare')}
+      />
+      <ConfirmDialog
+        isOpen={isRequesingWriteAccess}
+        onClose={handleRejectWriteAccess}
+        title={lang('lng_bot_allow_write_title')}
+        text={lang('lng_bot_allow_write')}
+        confirmHandler={handleAcceptWriteAccess}
+        confirmLabel={lang('lng_bot_allow_write_confirm')}
+      />
+      {popupParameters && (
         <Modal
-          isOpen={Boolean(popupParams)}
-          title={renderingPopupParams.title || NBSP}
-          onClose={handlePopupModalClose}
+          isOpen={Boolean(popupParameters)}
+          title={popupParameters.title || NBSP}
+          onClose={handleAppPopupModalClose}
           hasCloseButton
           className={
-            buildClassName(styles.webAppPopup, !renderingPopupParams.title?.trim().length && styles.withoutTitle)
+            buildClassName(styles.webAppPopup, !popupParameters.title?.trim().length && styles.withoutTitle)
           }
         >
-          {renderingPopupParams.message}
+          {popupParameters.message}
           <div className="dialog-buttons mt-2">
-            {renderingPopupParams.buttons.map((button) => (
+            {popupParameters.buttons.map((button) => (
               <Button
                 key={button.id || button.type}
                 className="confirm-dialog-button"
@@ -510,7 +615,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
                 isText
                 size="smaller"
                 // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => handlePopupClose(button.id)}
+                onClick={() => handleAppPopupClose(button.id)}
               >
                 {button.text || lang(DEFAULT_BUTTON_TEXT[button.type])}
               </Button>
@@ -518,6 +623,16 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
           </div>
         </Modal>
       )}
+
+      <ConfirmDialog
+        isOpen={isCloseModalOpen}
+        onClose={hideCloseModal}
+        title={lang('lng_bot_close_warning_title')}
+        text={lang('lng_bot_close_warning')}
+        confirmHandler={closeWebApp}
+        confirmIsDestructive
+        confirmLabel={lang('lng_bot_close_warning_sure')}
+      />
     </Modal>
   );
 };

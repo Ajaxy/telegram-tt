@@ -529,6 +529,7 @@ export type TabState = {
     slug?: string;
     replyToMessageId?: number;
     threadId?: number;
+    canSendMessages?: boolean;
   };
 
   botTrustRequest?: {
@@ -2304,6 +2305,9 @@ export interface ActionPayloads {
   restartBot: {
     chatId: string;
   } & WithTabId;
+  sharePhoneWithBot: {
+    botId: string;
+  };
 
   clickBotInlineButton: {
     messageId: number;
