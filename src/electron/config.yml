@@ -36,6 +36,18 @@ mac:
   icon: "public/icon-electron-macos.icns"
   notarize:
     teamId: "Y54Z4K69Z9"
+dmg:
+  title: "Telegram A installer"
+  background: "public/background-electron-dmg.tiff"
+  iconSize: 100
+  contents:
+    - x: 138
+      y: 225
+      type: "file"
+    - x: 402
+      y: 225
+      type: "link"
+      path: "/Applications"
 linux:
   category: "Community"
   target: ["AppImage"]
