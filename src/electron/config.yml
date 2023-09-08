@@ -1,9 +1,9 @@
-productName: "Telegram A"
-artifactName: "${productName}-${arch}.${ext}"
-appId: "org.telegram.TelegramA"
+productName: Telegram A
+artifactName: ${productName}-${arch}.${ext}
+appId: org.telegram.TelegramA
 extraMetadata:
-  main: "./dist/electron.js"
-  productName: "Telegram A"
+  main: ./dist/electron.js
+  productName: Telegram A
 files:
   - "dist"
   - "package.json"
@@ -14,40 +14,47 @@ files:
   - "!dist/get"
   - "!node_modules"
 directories:
-  buildResources: "./public"
-  output: "./dist-electron"
+  buildResources: ./public
+  output: ./dist-electron
+protocols:
+  - name: Tg
+    schemes:
+      - tg
 publish:
-  provider: "github"
-  owner: "Ajaxy"
-  repo: "telegram-tt"
-  releaseType: "draft"
+  provider: github
+  owner: Ajaxy
+  repo: telegram-tt
+  releaseType: draft
 win:
-  target: "nsis"
-  icon: "public/icon-electron-windows.ico"
+  target: nsis
+  icon: public/icon-electron-windows.ico
 nsis:
   oneClick: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
 mac:
   target:
-    target: "default"
-    arch: ["x64", "arm64"]
-  entitlements: "public/electron-entitlements.mac.plist"
-  icon: "public/icon-electron-macos.icns"
+    target: default
+    arch:
+      - x64
+      - arm64
+  entitlements: public/electron-entitlements.mac.plist
+  icon: public/icon-electron-macos.icns
   notarize:
-    teamId: "Y54Z4K69Z9"
+    teamId: Y54Z4K69Z9
 dmg:
-  title: "Telegram A installer"
-  background: "public/background-electron-dmg.tiff"
+  title: Telegram A installer
+  background: public/background-electron-dmg.tiff
   iconSize: 100
   contents:
     - x: 138
       y: 225
-      type: "file"
+      type: file
     - x: 402
       y: 225
-      type: "link"
+      type: link
       path: "/Applications"
 linux:
-  category: "Community"
-  target: ["AppImage"]
+  category: Community
+  target:
+    - AppImage

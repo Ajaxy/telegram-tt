@@ -2,6 +2,7 @@ export enum ElectronEvent {
   FULLSCREEN_CHANGE = 'fullscreen-change',
   UPDATE_ERROR = 'update-error',
   UPDATE_DOWNLOADED = 'update-downloaded',
+  DEEPLINK = 'deeplink',
 }
 
 export enum ElectronAction {

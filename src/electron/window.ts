@@ -7,6 +7,7 @@ import path from 'path';
 import { ElectronAction, ElectronEvent } from '../types/electron';
 import type { TrafficLightPosition } from '../types/electron';
 import setupAutoUpdates from './autoUpdates';
+import { processDeeplink } from './deeplink';
 import {
   forceQuit, getAppTitle, IS_MAC_OS, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
@@ -123,6 +124,7 @@ export function createWindow(url?: string) {
 
   window.webContents.once('dom-ready', () => {
     window.show();
+    processDeeplink();
 
     if (process.env.APP_ENV === 'production') {
       setupAutoUpdates(window, windowState);
