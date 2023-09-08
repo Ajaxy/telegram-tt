@@ -74,6 +74,7 @@ addActionHandler('sync', (global, actions): ActionReturnType => {
         ...global,
         isSyncing: false,
         isSynced: true,
+        isFetchingDifference: false,
       };
       setGlobal(global);
 

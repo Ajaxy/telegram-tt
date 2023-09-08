@@ -49,7 +49,7 @@ export function applyState(state: State) {
   localDb.commonBoxState.qts = state.qts;
 }
 
-export function processUpdate(update: Update, isFromDifference?: boolean) {
+export function processUpdate(update: Update, isFromDifference?: boolean, shouldOnlySave?: boolean) {
   if (update instanceof UpdateConnectionState) {
     if (update.state === UpdateConnectionState.connected && isInited) {
       scheduleGetDifference();
@@ -75,7 +75,7 @@ export function processUpdate(update: Update, isFromDifference?: boolean) {
       (update as SeqUpdate)._isFromDifference = true;
     }
 
-    saveSeqUpdate(update);
+    saveSeqUpdate(update, shouldOnlySave);
     return;
   }
 
@@ -88,7 +88,7 @@ export function processUpdate(update: Update, isFromDifference?: boolean) {
       // eslint-disable-next-line no-underscore-dangle
       (update as PtsUpdate)._isFromDifference = true;
     }
-    savePtsUpdate(update);
+    savePtsUpdate(update, shouldOnlySave);
     return;
   }
 
@@ -150,13 +150,13 @@ function applyUpdate(updateObject: SeqUpdate | PtsUpdate) {
   }
 }
 
-function saveSeqUpdate(update: GramJs.Updates | GramJs.UpdatesCombined) {
+function saveSeqUpdate(update: GramJs.Updates | GramJs.UpdatesCombined, shouldOnlySave?: boolean) {
   SEQ_QUEUE.add(update);
 
-  popSeqQueue();
+  if (!shouldOnlySave) popSeqQueue();
 }
 
-function savePtsUpdate(update: PtsUpdate) {
+function savePtsUpdate(update: PtsUpdate, shouldOnlySave?: boolean) {
   const channelId = getUpdateChannelId(update);
 
   const ptsQueue = PTS_QUEUE.get(channelId) || new SortedQueue<PtsUpdate>(ptsComparator);
@@ -164,7 +164,7 @@ function savePtsUpdate(update: PtsUpdate) {
 
   PTS_QUEUE.set(channelId, ptsQueue);
 
-  popPtsQueue(channelId);
+  if (!shouldOnlySave) popPtsQueue(channelId);
 }
 
 function popSeqQueue() {
@@ -282,9 +282,6 @@ export async function getDifference() {
     qts: localDb.commonBoxState.qts,
   }));
 
-  SEQ_QUEUE.clear();
-  PTS_QUEUE.get(COMMON_BOX_QUEUE_ID)?.clear();
-
   if (!response || response instanceof GramJs.updates.DifferenceTooLong) {
     forceSync();
     return;
@@ -333,8 +330,6 @@ async function getChannelDifference(channelId: string) {
     limit: CHANNEL_DIFFERENCE_LIMIT,
   }));
 
-  PTS_QUEUE.delete(channelId);
-
   if (!response) {
     if (DEBUG) {
       // eslint-disable-next-line no-console
@@ -351,10 +346,11 @@ async function getChannelDifference(channelId: string) {
   localDb.channelPtsById[channelId] = response.pts;
 
   if (response instanceof GramJs.updates.ChannelDifferenceEmpty) {
+    popPtsQueue(channelId); // Continue processing updates in queue
     return;
   }
 
-  processDifference(response);
+  processDifference(response, channelId);
 
   if (!response.final) {
     getChannelDifference(channelId);
@@ -403,6 +399,7 @@ async function loadRemoteState() {
 
 function processDifference(
   difference: GramJs.updates.Difference | GramJs.updates.DifferenceSlice | GramJs.updates.ChannelDifference,
+  channelId?: string,
 ) {
   difference.newMessages.forEach((message) => {
     updater(new GramJs.UpdateNewMessage({
@@ -418,9 +415,27 @@ function processDifference(
   dispatchUserAndChatUpdates(difference.users);
   dispatchUserAndChatUpdates(difference.chats);
 
+  // Ignore `pts`/`seq` holes when applying updates from difference
+  // BUT, if we got an `UpdateChannelTooLong`, make sure to process other updates after receiving `ChannelDifference`
+  const channelTooLongIds = new Set<string>();
+
   difference.otherUpdates.forEach((update) => {
-    processUpdate(update, true);
+    const updateChannelId = getUpdateChannelId(update);
+
+    if (update instanceof GramJs.UpdateChannelTooLong) {
+      channelTooLongIds.add(getUpdateChannelId(update));
+    }
+
+    const shouldApplyImmediately = !channelTooLongIds.has(updateChannelId);
+    processUpdate(update, shouldApplyImmediately, !shouldApplyImmediately);
   });
+
+  // Continue processing updates in queues
+  if (channelId) {
+    popPtsQueue(channelId);
+  } else {
+    popSeqQueue();
+  }
 }
 
 function getPtsCount(update: PtsUpdate) {
