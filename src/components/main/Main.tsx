@@ -395,6 +395,12 @@ const Main: FC<OwnProps & StateProps> = ({
   }, []);
 
   useEffect(() => {
+    return window.electron?.on(ElectronEvent.DEEPLINK, (link: string) => {
+      processDeepLink(decodeURIComponent(link));
+    });
+  }, []);
+
+  useEffect(() => {
     const parsedLocationHash = parseLocationHash();
     if (!parsedLocationHash) return;
 
