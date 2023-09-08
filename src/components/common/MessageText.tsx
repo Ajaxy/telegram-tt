@@ -10,6 +10,7 @@ import trimText from '../../util/trimText';
 import { extractMessageText, getMessageText, stripCustomEmoji } from '../../global/helpers';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import useUniqueId from '../../hooks/useUniqueId';
 
 interface OwnProps {
   messageOrStory: ApiMessage | ApiStory;
@@ -57,6 +58,8 @@ function MessageText({
   const adaptedFormattedText = isForAnimation && formattedText ? stripCustomEmoji(formattedText) : formattedText;
   const { text, entities } = adaptedFormattedText || {};
 
+  const containerId = useUniqueId();
+
   useSyncEffect(() => {
     textCacheBusterRef.current += 1;
   }, [text, entities]);
@@ -87,7 +90,7 @@ function MessageText({
           highlight,
           emojiSize,
           shouldRenderAsHtml,
-          messageId: messageOrStory.id,
+          containerId,
           isSimple,
           isProtected,
           observeIntersectionForLoading,

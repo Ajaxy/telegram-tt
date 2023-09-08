@@ -4,6 +4,7 @@ import type { TextPart } from '../../../types';
 import type { LangFn } from '../../../hooks/useLang';
 
 import {
+  getMessageKey,
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
   getMessageSummaryText,
@@ -23,6 +24,7 @@ export function renderMessageText({
   isProtected,
   forcePlayback,
   shouldRenderAsHtml,
+  isForMediaViewer,
 } : {
   message: ApiMessage;
   highlight?: string;
@@ -32,6 +34,7 @@ export function renderMessageText({
   isProtected?: boolean;
   forcePlayback?: boolean;
   shouldRenderAsHtml?: boolean;
+  isForMediaViewer?: boolean;
 }) {
   const { text, entities } = message.content.text || {};
 
@@ -40,13 +43,15 @@ export function renderMessageText({
     return contentNotSupportedText ? [trimText(contentNotSupportedText, truncateLength)] : undefined;
   }
 
+  const messageKey = getMessageKey(message);
+
   return renderTextWithEntities({
     text: trimText(text, truncateLength),
     entities,
     highlight,
     emojiSize,
     shouldRenderAsHtml,
-    messageId: message.id,
+    containerId: `${isForMediaViewer ? 'mv-' : ''}${messageKey}`,
     isSimple,
     isProtected,
     forcePlayback,
