@@ -33,7 +33,7 @@ export function renderTextWithEntities({
   highlight,
   emojiSize,
   shouldRenderAsHtml,
-  messageId,
+  containerId,
   isSimple,
   isProtected,
   observeIntersectionForLoading,
@@ -49,7 +49,7 @@ export function renderTextWithEntities({
   highlight?: string;
   emojiSize?: number;
   shouldRenderAsHtml?: boolean;
-  messageId?: number;
+  containerId?: string;
   isSimple?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -138,7 +138,7 @@ export function renderTextWithEntities({
         entityContent,
         nestedEntityContent,
         highlight,
-        messageId,
+        containerId,
         isSimple,
         isProtected,
         observeIntersectionForLoading,
@@ -320,7 +320,7 @@ function processEntity({
   entityContent,
   nestedEntityContent,
   highlight,
-  messageId,
+  containerId,
   isSimple,
   isProtected,
   observeIntersectionForLoading,
@@ -336,7 +336,7 @@ function processEntity({
   entityContent: TextPart;
   nestedEntityContent: TextPart[];
   highlight?: string;
-  messageId?: number;
+  containerId?: string;
   isSimple?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
@@ -492,7 +492,7 @@ function processEntity({
     case ApiMessageEntityTypes.Underline:
       return <ins data-entity-type={entity.type}>{renderNestedMessagePart()}</ins>;
     case ApiMessageEntityTypes.Spoiler:
-      return <Spoiler messageId={messageId}>{renderNestedMessagePart()}</Spoiler>;
+      return <Spoiler containerId={containerId}>{renderNestedMessagePart()}</Spoiler>;
     case ApiMessageEntityTypes.CustomEmoji:
       return (
         <CustomEmoji
