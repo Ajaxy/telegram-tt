@@ -9,8 +9,6 @@ import { Foreman } from '../../../util/foreman';
 
 interface OnProgress {
     isCanceled?: boolean;
-    acceptsBuffer?: boolean;
-
     (
         progress: number, // Float between 0 and 1.
         ...args: any[]

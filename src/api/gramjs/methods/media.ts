@@ -33,7 +33,7 @@ export default async function downloadMedia(
 ) {
   const {
     data, mimeType, fullSize,
-  } = await download(url, client, onProgress, start, end, mediaFormat, isHtmlAllowed) || {};
+  } = await download(url, client, onProgress, start, end, isHtmlAllowed) || {};
 
   if (!data) {
     return undefined;
@@ -75,7 +75,6 @@ async function download(
   onProgress?: ApiOnProgress,
   start?: number,
   end?: number,
-  mediaFormat?: ApiMediaFormat,
   isHtmlAllowed?: boolean,
 ) {
   const parsed = parseMediaUrl(url);
@@ -146,10 +145,6 @@ async function download(
   }
 
   if (MEDIA_ENTITY_TYPES.has(entityType)) {
-    if (mediaFormat === ApiMediaFormat.Stream) {
-      onProgress!.acceptsBuffer = true;
-    }
-
     const data = await client.downloadMedia(entity, {
       sizeType, start, end, progressCallback: onProgress, workers: DOWNLOAD_WORKERS,
     });
