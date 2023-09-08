@@ -1,6 +1,6 @@
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 
-import type { ApiUpdateChat } from '../../../api/types';
+import type { ApiMessage, ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
@@ -25,6 +25,7 @@ import {
   selectThreadParam,
   selectChatFullInfo,
   selectTabState,
+  selectTopicFromMessage,
 } from '../../selectors';
 import { updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
@@ -140,6 +141,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       if (hasMention) {
         global = updateChat(global, update.chatId, {
           unreadMentions: [...(chat.unreadMentions || []), update.message.id!],
+        });
+      }
+
+      const topic = chat.isForum ? selectTopicFromMessage(global, message as ApiMessage) : undefined;
+      if (topic) {
+        global = updateTopic(global, update.chatId, topic.id, {
+          unreadCount: topic.unreadCount ? topic.unreadCount + 1 : 1,
         });
       }
 
