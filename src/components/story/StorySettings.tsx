@@ -5,6 +5,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiStory, ApiUser } from '../../api/types';
 import type { ApiPrivacySettings, PrivacyVisibility } from '../../types';
+import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
 import { selectTabState, selectUserStory } from '../../global/selectors';
@@ -44,7 +45,7 @@ interface PrivacyOption {
   name: string;
   value: PrivacyVisibility;
   color: [string, string];
-  icon: string;
+  icon: IconName;
   actions?: PrivacyAction;
 }
 

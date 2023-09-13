@@ -156,7 +156,7 @@ const Document: FC<OwnProps> = ({
       sender={sender}
       isSelectable={isSelectable}
       isSelected={isSelected}
-      actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'icon-play' : 'icon-eye') : 'icon-download'}
+      actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'play' : 'eye') : 'download'}
       onClick={handleClick}
       onDateClick={onDateClick ? handleDateClick : undefined}
     />

@@ -1,6 +1,7 @@
 import type { ApiSession } from '../../../../api/types';
+import type { DeviceType } from '../../../../types/icons/device';
 
-export default function getSessionIcon(session: ApiSession): string {
+export default function getSessionIcon(session: ApiSession): DeviceType {
   const platform = session.platform.toLowerCase();
   const device = session.deviceModel.toLowerCase();
   const systemVersion = session.systemVersion.toLowerCase();

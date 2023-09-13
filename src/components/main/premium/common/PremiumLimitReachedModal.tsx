@@ -3,6 +3,7 @@ import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact
 
 import type { ApiLimitTypeWithModal } from '../../../../global/types';
 import type { LangFn } from '../../../../hooks/useLang';
+import type { IconName } from '../../../../types/icons';
 
 import renderText from '../../../common/helpers/renderText';
 import buildClassName from '../../../../util/buildClassName';
@@ -52,15 +53,15 @@ const LIMIT_DESCRIPTION_PREMIUM: Record<ApiLimitTypeWithModal, string> = {
   chatlistJoined: 'LimitReachedSharedFoldersPremium',
 };
 
-const LIMIT_ICON: Record<ApiLimitTypeWithModal, string> = {
-  dialogFiltersChats: 'icon-chat-badge',
-  uploadMaxFileparts: 'icon-file-badge',
-  dialogFilters: 'icon-folder-badge',
-  dialogFolderPinned: 'icon-pin-badge',
-  channelsPublic: 'icon-link-badge',
-  channels: 'icon-chats-badge',
-  chatlistInvites: 'icon-link-badge',
-  chatlistJoined: 'icon-folder-badge',
+const LIMIT_ICON: Record<ApiLimitTypeWithModal, IconName> = {
+  dialogFiltersChats: 'chat-badge',
+  uploadMaxFileparts: 'file-badge',
+  dialogFilters: 'folder-badge',
+  dialogFolderPinned: 'pin-badge',
+  channelsPublic: 'link-badge',
+  channels: 'chats-badge',
+  chatlistInvites: 'link-badge',
+  chatlistJoined: 'folder-badge',
 };
 
 const LIMIT_VALUE_FORMATTER: Partial<Record<ApiLimitTypeWithModal, (...args: any[]) => string>> = {

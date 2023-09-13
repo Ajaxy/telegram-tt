@@ -7,6 +7,7 @@ import type {
 } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 import { MediaViewerOrigin } from '../../types';
+import type { IconName } from '../../types/icons';
 
 import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
@@ -28,7 +29,7 @@ type OwnProps = {
   avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   status?: string;
-  statusIcon?: string;
+  statusIcon?: IconName;
   ripple?: boolean;
   withDots?: boolean;
   withMediaViewer?: boolean;
@@ -119,7 +120,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         <DotAnimation className="status" content={status} />
       ) : (
         <span className="status" dir="auto">
-          {statusIcon && <i className={`icon ${statusIcon} status-icon`} />}
+          {statusIcon && <i className={`icon icon-${statusIcon} status-icon`} />}
           {renderText(status)}
         </span>
       );

@@ -80,7 +80,7 @@ function SeenByModal({
               userId={userId}
               noStatusOrTyping
               status={formatDateAtTime(lang, renderingSeenByDates![userId] * 1000)}
-              statusIcon="icon-message-read"
+              statusIcon="message-read"
             />
           </ListItem>
         ))}

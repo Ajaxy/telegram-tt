@@ -20,7 +20,7 @@ import useInterval from '../../../hooks/useInterval';
 import useForceUpdate from '../../../hooks/useForceUpdate';
 import useFlag from '../../../hooks/useFlag';
 
-import ListItem from '../../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -237,7 +237,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
   };
 
   const prepareContextActions = (invite: ApiExportedInvite) => {
-    const actions = [];
+    const actions: MenuItemContextAction[] = [];
     actions.push({
       title: lang('Copy'),
       icon: 'copy',

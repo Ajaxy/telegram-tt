@@ -3,6 +3,8 @@ import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
+import type { IconName } from '../../types/icons';
+
 import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
@@ -24,7 +26,7 @@ import './ListItem.scss';
 
 type MenuItemContextActionItem = {
   title: string;
-  icon: string;
+  icon: IconName;
   destructive?: boolean;
   handler?: () => void;
 };
@@ -41,9 +43,10 @@ export type MenuItemContextAction =
 interface OwnProps {
   ref?: RefObject<HTMLDivElement>;
   buttonRef?: RefObject<HTMLDivElement | HTMLAnchorElement>;
-  icon?: string;
+  icon?: IconName;
+  iconClassName?: string;
   leftElement?: TeactNode;
-  secondaryIcon?: string;
+  secondaryIcon?: IconName;
   rightElement?: TeactNode;
   buttonClassName?: string;
   className?: string;
@@ -74,6 +77,7 @@ const ListItem: FC<OwnProps> = ({
   ref,
   buttonRef,
   icon,
+  iconClassName,
   leftElement,
   buttonClassName,
   menuBubbleClassName,
@@ -234,7 +238,7 @@ const ListItem: FC<OwnProps> = ({
       >
         {leftElement}
         {icon && (
-          <i className={`icon icon-${icon}`} />
+          <i className={buildClassName('icon', `icon-${icon}`, iconClassName)} />
         )}
         {multiline && (<div className="multiline-item">{children}</div>)}
         {!multiline && children}

@@ -1,11 +1,12 @@
 import type { StateReducer, Dispatch } from '../useReducer';
 import type { ApiChatFolder } from '../../api/types';
+import type { IconName } from '../../types/icons';
 
 import { pick, omit } from '../../util/iteratees';
 import useReducer from '../useReducer';
 
 export type FolderChatType = {
-  icon: string;
+  icon: IconName;
   title: string;
   key: keyof Pick<ApiChatFolder, (
     'contacts' | 'nonContacts' | 'groups' | 'channels' | 'bots' |

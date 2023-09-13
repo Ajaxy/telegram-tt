@@ -88,7 +88,7 @@ const useChatContextActions = ({
       };
 
     if (isInSearch) {
-      return compact([actionOpenInNewTab, actionPin, actionAddToFolder, actionMute]);
+      return compact([actionOpenInNewTab, actionPin, actionAddToFolder, actionMute]) as MenuItemContextAction[];
     }
 
     const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)

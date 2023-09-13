@@ -1,5 +1,7 @@
 import React, { memo } from '../../../../lib/teact/teact';
+
 import type { FC } from '../../../../lib/teact/teact';
+import type { IconName } from '../../../../types/icons';
 
 import buildClassName from '../../../../util/buildClassName';
 import useLang from '../../../../hooks/useLang';
@@ -7,7 +9,7 @@ import useLang from '../../../../hooks/useLang';
 import styles from './PremiumLimitsCompare.module.scss';
 
 type OwnProps = {
-  floatingBadgeIcon?: string;
+  floatingBadgeIcon?: IconName;
   leftValue?: string;
   rightValue?: string;
   className?: string;
@@ -27,7 +29,7 @@ const PremiumLimitsCompare: FC<OwnProps> = ({
     <div className={buildClassName(styles.root, className)}>
       {floatingBadgeIcon && (
         <div className={styles.floatingBadge}>
-          <i className={buildClassName(styles.floatingBadgeIcon, floatingBadgeIcon, 'icon')} />
+          <i className={buildClassName(styles.floatingBadgeIcon, `icon-${floatingBadgeIcon}`, 'icon')} />
           <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>{leftValue}</div>
           <div className={styles.floatingBadgeTriangle}>
             <svg width="26" height="9" viewBox="0 0 26 9" fill="none">

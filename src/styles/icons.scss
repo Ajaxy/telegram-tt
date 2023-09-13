@@ -1,16 +1,27 @@
+@use "sass:map";
+$icons-font: "icons";
+
 @font-face {
-  font-family: 'icomoon';
-  src: url('../assets/fonts/icomoon.woff2?n9djnk') format('woff2'),
-    url('../assets/fonts/icomoon.woff?n9djnk') format('woff');
+  font-family: $icons-font;
+  src: url("./icons.woff2?2fc8ce731efb721947ab7acfba88eb91") format("woff2"),
+url("./icons.woff?2fc8ce731efb721947ab7acfba88eb91") format("woff");
   font-weight: normal;
   font-style: normal;
   font-display: block;
 }
 
+.icon-char::before {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  content: attr(data-char);
+  width: 1.5rem;
+  text-align: center;
+  display: block;
+}
+
 .icon {
   /* use !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-  font-family: 'icomoon' !important;
+  font-family: "icons" !important;
   speak: none;
   font-style: normal;
   font-weight: normal;
@@ -23,656 +34,866 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-char::before {
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  content: attr(data-char);
-  width: 1.5rem;
-  text-align: center;
-  display: block;
-}
+$icons-map: (
+  "active-sessions": "\f101",
+  "add-one-badge": "\f102",
+  "add-user-filled": "\f103",
+  "add-user": "\f104",
+  "add": "\f105",
+  "admin": "\f106",
+  "allow-speak": "\f107",
+  "animals": "\f108",
+  "animations": "\f109",
+  "archive-filled": "\f10a",
+  "archive-from-main": "\f10b",
+  "archive-to-main": "\f10c",
+  "archive": "\f10d",
+  "arrow-down-circle": "\f10e",
+  "arrow-down": "\f10f",
+  "arrow-left": "\f110",
+  "arrow-right": "\f111",
+  "attach": "\f112",
+  "avatar-archived-chats": "\f113",
+  "avatar-deleted-account": "\f114",
+  "avatar-saved-messages": "\f115",
+  "bold": "\f116",
+  "bot-command": "\f117",
+  "bot-commands-filled": "\f118",
+  "bots": "\f119",
+  "bug": "\f11a",
+  "calendar-filter": "\f11b",
+  "calendar": "\f11c",
+  "camera-add": "\f11d",
+  "camera": "\f11e",
+  "car": "\f11f",
+  "card": "\f120",
+  "channel-filled": "\f121",
+  "channel": "\f122",
+  "channelviews": "\f123",
+  "chat-badge": "\f124",
+  "chats-badge": "\f125",
+  "check": "\f126",
+  "close-circle": "\f127",
+  "close-topic": "\f128",
+  "close": "\f129",
+  "cloud-download": "\f12a",
+  "collapse": "\f12b",
+  "colorize": "\f12c",
+  "comments-sticker": "\f12d",
+  "comments": "\f12e",
+  "copy-media": "\f12f",
+  "copy": "\f130",
+  "darkmode": "\f131",
+  "data": "\f132",
+  "delete-filled": "\f133",
+  "delete-left": "\f134",
+  "delete-user": "\f135",
+  "delete": "\f136",
+  "document": "\f137",
+  "double-badge": "\f138",
+  "down": "\f139",
+  "download": "\f13a",
+  "eats": "\f13b",
+  "edit": "\f13c",
+  "email": "\f13d",
+  "enter": "\f13e",
+  "expand": "\f13f",
+  "eye-closed-outline": "\f140",
+  "eye-closed": "\f141",
+  "eye-outline": "\f142",
+  "eye": "\f143",
+  "favorite-filled": "\f144",
+  "favorite": "\f145",
+  "file-badge": "\f146",
+  "flag": "\f147",
+  "folder-badge": "\f148",
+  "folder": "\f149",
+  "fontsize": "\f14a",
+  "forums": "\f14b",
+  "forward": "\f14c",
+  "fullscreen": "\f14d",
+  "gifs": "\f14e",
+  "gift": "\f14f",
+  "group-filled": "\f150",
+  "group": "\f151",
+  "grouped-disable": "\f152",
+  "grouped": "\f153",
+  "hand-stop": "\f154",
+  "hashtag": "\f155",
+  "heart-outline": "\f156",
+  "heart": "\f157",
+  "help": "\f158",
+  "info-filled": "\f159",
+  "info": "\f15a",
+  "install": "\f15b",
+  "italic": "\f15c",
+  "key": "\f15d",
+  "keyboard": "\f15e",
+  "lamp": "\f15f",
+  "language": "\f160",
+  "large-pause": "\f161",
+  "large-play": "\f162",
+  "link-badge": "\f163",
+  "link-broken": "\f164",
+  "link": "\f165",
+  "location": "\f166",
+  "lock-badge": "\f167",
+  "lock": "\f168",
+  "logout": "\f169",
+  "loop": "\f16a",
+  "mention": "\f16b",
+  "message-failed": "\f16c",
+  "message-pending": "\f16d",
+  "message-read": "\f16e",
+  "message-succeeded": "\f16f",
+  "message": "\f170",
+  "microphone-alt": "\f171",
+  "microphone": "\f172",
+  "monospace": "\f173",
+  "more-circle": "\f174",
+  "more": "\f175",
+  "mute": "\f176",
+  "muted": "\f177",
+  "new-chat-filled": "\f178",
+  "next": "\f179",
+  "noise-suppression": "\f17a",
+  "non-contacts": "\f17b",
+  "open-in-new-tab": "\f17c",
+  "password-off": "\f17d",
+  "pause": "\f17e",
+  "permissions": "\f17f",
+  "phone-discard-outline": "\f180",
+  "phone-discard": "\f181",
+  "phone": "\f182",
+  "photo": "\f183",
+  "pin-badge": "\f184",
+  "pin-list": "\f185",
+  "pin": "\f186",
+  "pinned-chat": "\f187",
+  "pinned-message": "\f188",
+  "pip": "\f189",
+  "play-story": "\f18a",
+  "play": "\f18b",
+  "poll": "\f18c",
+  "premium": "\f18d",
+  "previous": "\f18e",
+  "readchats": "\f18f",
+  "recent": "\f190",
+  "reload": "\f191",
+  "remove": "\f192",
+  "reopen-topic": "\f193",
+  "replace": "\f194",
+  "replies": "\f195",
+  "reply-filled": "\f196",
+  "reply": "\f197",
+  "revote": "\f198",
+  "save-story": "\f199",
+  "saved-messages": "\f19a",
+  "schedule": "\f19b",
+  "search": "\f19c",
+  "select": "\f19d",
+  "send-outline": "\f19e",
+  "send": "\f19f",
+  "settings-filled": "\f1a0",
+  "settings": "\f1a1",
+  "share-filled": "\f1a2",
+  "share-screen-outlined": "\f1a3",
+  "share-screen-stop": "\f1a4",
+  "share-screen": "\f1a5",
+  "sidebar": "\f1a6",
+  "skip-next": "\f1a7",
+  "skip-previous": "\f1a8",
+  "smallscreen": "\f1a9",
+  "smile": "\f1aa",
+  "sort": "\f1ab",
+  "speaker-muted-story": "\f1ac",
+  "speaker-outline": "\f1ad",
+  "speaker-story": "\f1ae",
+  "speaker": "\f1af",
+  "spoiler-disable": "\f1b0",
+  "spoiler": "\f1b1",
+  "sport": "\f1b2",
+  "stats": "\f1b3",
+  "stealth-future": "\f1b4",
+  "stealth-past": "\f1b5",
+  "stickers": "\f1b6",
+  "stop-raising-hand": "\f1b7",
+  "stop": "\f1b8",
+  "story-caption": "\f1b9",
+  "story-expired": "\f1ba",
+  "story-priority": "\f1bb",
+  "story-reply": "\f1bc",
+  "strikethrough": "\f1bd",
+  "timer": "\f1be",
+  "transcribe": "\f1bf",
+  "truck": "\f1c0",
+  "unarchive": "\f1c1",
+  "underlined": "\f1c2",
+  "unlock-badge": "\f1c3",
+  "unlock": "\f1c4",
+  "unmute": "\f1c5",
+  "unpin": "\f1c6",
+  "unread": "\f1c7",
+  "up": "\f1c8",
+  "user-filled": "\f1c9",
+  "user-online": "\f1ca",
+  "user": "\f1cb",
+  "video-outlined": "\f1cc",
+  "video-stop": "\f1cd",
+  "video": "\f1ce",
+  "voice-chat": "\f1cf",
+  "volume-1": "\f1d0",
+  "volume-2": "\f1d1",
+  "volume-3": "\f1d2",
+  "web": "\f1d3",
+  "webapp": "\f1d4",
+  "word-wrap": "\f1d5",
+  "zoom-in": "\f1d6",
+  "zoom-out": "\f1d7",
+);
 
-.icon-eye-outline:before {
-  content: "\e9cf";
+.icon-active-sessions::before {
+  content: map.get($icons-map, "active-sessions");
 }
-.icon-eye-closed-outline:before {
-  content: "\e9d3";
+.icon-add-one-badge::before {
+  content: map.get($icons-map, "add-one-badge");
 }
-.icon-story-caption:before {
-  content: "\e9d4";
+.icon-add-user-filled::before {
+  content: map.get($icons-map, "add-user-filled");
 }
-.icon-story-priority:before {
-  content: "\e9ce";
+.icon-add-user::before {
+  content: map.get($icons-map, "add-user");
 }
-.icon-stealth-past:before {
-  content: "\e9d0";
+.icon-add::before {
+  content: map.get($icons-map, "add");
 }
-.icon-stealth-future:before {
-  content: "\e9d1";
+.icon-admin::before {
+  content: map.get($icons-map, "admin");
 }
-.icon-timer:before {
-  content: "\e9d2";
+.icon-allow-speak::before {
+  content: map.get($icons-map, "allow-speak");
 }
-.icon-arrow-down-circle:before {
-  content: "\e9d5";
+.icon-animals::before {
+  content: map.get($icons-map, "animals");
 }
-.icon-story-reply:before {
-  content: "\e9d6";
+.icon-animations::before {
+  content: map.get($icons-map, "animations");
 }
-.icon-loop:before {
-  content: "\e98c";
+.icon-archive-filled::before {
+  content: map.get($icons-map, "archive-filled");
 }
-.icon-skip-next:before {
-  content: "\e98d";
+.icon-archive-from-main::before {
+  content: map.get($icons-map, "archive-from-main");
 }
-.icon-skip-previous:before {
-  content: "\e98e";
+.icon-archive-to-main::before {
+  content: map.get($icons-map, "archive-to-main");
 }
-.icon-volume-1:before {
-  content: "\e98f";
+.icon-archive::before {
+  content: map.get($icons-map, "archive");
 }
-.icon-volume-2:before {
-  content: "\e990";
+.icon-arrow-down-circle::before {
+  content: map.get($icons-map, "arrow-down-circle");
 }
-.icon-volume-3:before {
-  content: "\e991";
+.icon-arrow-down::before {
+  content: map.get($icons-map, "arrow-down");
 }
-.icon-hand-stop:before {
-  content: "\e9c7";
+.icon-arrow-left::before {
+  content: map.get($icons-map, "arrow-left");
 }
-.icon-more-circle:before {
-  content: "\e9c8";
+.icon-arrow-right::before {
+  content: map.get($icons-map, "arrow-right");
 }
-.icon-close-circle:before {
-  content: "\e9c9";
+.icon-attach::before {
+  content: map.get($icons-map, "attach");
 }
-.icon-play-story:before {
-  content: "\e9c6";
+.icon-avatar-archived-chats::before {
+  content: map.get($icons-map, "avatar-archived-chats");
 }
-.icon-story-expired:before {
-  content: "\e9c5";
+.icon-avatar-deleted-account::before {
+  content: map.get($icons-map, "avatar-deleted-account");
 }
-.icon-save-story:before {
-  content: "\e9c3";
+.icon-avatar-saved-messages::before {
+  content: map.get($icons-map, "avatar-saved-messages");
 }
-.icon-settings-filled:before {
-  content: "\e9c1";
+.icon-bold::before {
+  content: map.get($icons-map, "bold");
 }
-.icon-share-screen-stop:before {
-  content: "\e9c2";
+.icon-bot-command::before {
+  content: map.get($icons-map, "bot-command");
 }
-.icon-user-online:before {
-  content: "\e9c0";
+.icon-bot-commands-filled::before {
+  content: map.get($icons-map, "bot-commands-filled");
 }
-.icon-forums:before {
-  content: "\e9b4";
+.icon-bots::before {
+  content: map.get($icons-map, "bots");
 }
-.icon-hashtag:before {
-  content: "\e9b1";
+.icon-bug::before {
+  content: map.get($icons-map, "bug");
 }
-.icon-reopen-topic:before {
-  content: "\e9b2";
+.icon-calendar-filter::before {
+  content: map.get($icons-map, "calendar-filter");
 }
-.icon-close-topic:before {
-  content: "\e9b3";
+.icon-calendar::before {
+  content: map.get($icons-map, "calendar");
 }
-.icon-open-in-new-tab:before {
-  content: "\e9af";
+.icon-camera-add::before {
+  content: map.get($icons-map, "camera-add");
 }
-.icon-pip:before {
-  content: "\e9ae";
+.icon-camera::before {
+  content: map.get($icons-map, "camera");
 }
-.icon-gift:before {
-  content: "\e9ad";
+.icon-car::before {
+  content: map.get($icons-map, "car");
 }
-.icon-sort:before {
-  content: "\e9ac";
+.icon-card::before {
+  content: map.get($icons-map, "card");
 }
-.icon-web:before {
-  content: "\e9ab";
+.icon-channel-filled::before {
+  content: map.get($icons-map, "channel-filled");
 }
-.icon-transcribe:before {
-  content: "\e9aa";
+.icon-channel::before {
+  content: map.get($icons-map, "channel");
 }
-.icon-add-one-badge:before {
-  content: "\e99b";
+.icon-channelviews::before {
+  content: map.get($icons-map, "channelviews");
 }
-.icon-double-badge:before {
-  content: "\e9a2";
+.icon-chat-badge::before {
+  content: map.get($icons-map, "chat-badge");
 }
-.icon-file-badge:before {
-  content: "\e9a3";
+.icon-chats-badge::before {
+  content: map.get($icons-map, "chats-badge");
 }
-.icon-folder-badge:before {
-  content: "\e9a4";
+.icon-check::before {
+  content: map.get($icons-map, "check");
 }
-.icon-link-badge:before {
-  content: "\e9a5";
+.icon-close-circle::before {
+  content: map.get($icons-map, "close-circle");
 }
-.icon-premium:before {
-  content: "\e9a7";
+.icon-close-topic::before {
+  content: map.get($icons-map, "close-topic");
 }
-.icon-heart-outline:before {
-  content: "\e99e";
+.icon-close::before {
+  content: map.get($icons-map, "close");
 }
-.icon-heart:before {
-  content: "\e99f";
+.icon-cloud-download::before {
+  content: map.get($icons-map, "cloud-download");
 }
-.icon-word-wrap:before {
-  content: "\e99d";
+.icon-collapse::before {
+  content: map.get($icons-map, "collapse");
 }
-.icon-webapp:before {
-  content: "\e993";
+.icon-colorize::before {
+  content: map.get($icons-map, "colorize");
 }
-.icon-reload:before {
-  content: "\e994";
+.icon-comments-sticker::before {
+  content: map.get($icons-map, "comments-sticker");
 }
-.icon-install:before {
-  content: "\e999";
+.icon-comments::before {
+  content: map.get($icons-map, "comments");
 }
-.icon-favorite-filled:before {
-  content: "\e998";
+.icon-copy-media::before {
+  content: map.get($icons-map, "copy-media");
 }
-.icon-video-outlined:before {
-  content: "\e997";
+.icon-copy::before {
+  content: map.get($icons-map, "copy");
 }
-.icon-stats:before {
-  content: "\e996";
+.icon-darkmode::before {
+  content: map.get($icons-map, "darkmode");
 }
-.icon-copy-media:before {
-  content: "\e995";
+.icon-data::before {
+  content: map.get($icons-map, "data");
 }
-.icon-sidebar:before {
-  content: "\e992";
+.icon-delete-filled::before {
+  content: map.get($icons-map, "delete-filled");
 }
-.icon-microphone:before {
-  content: "\e935";
+.icon-delete-left::before {
+  content: map.get($icons-map, "delete-left");
 }
-.icon-microphone-alt:before {
-  content: "\e93b";
+.icon-delete-user::before {
+  content: map.get($icons-map, "delete-user");
 }
-.icon-camera-add:before {
-  content: "\e90f";
+.icon-delete::before {
+  content: map.get($icons-map, "delete");
 }
-.icon-camera:before {
-  content: "\e90e";
+.icon-document::before {
+  content: map.get($icons-map, "document");
 }
-.icon-video-stop:before {
-  content: "\e98b";
+.icon-double-badge::before {
+  content: map.get($icons-map, "double-badge");
 }
-.icon-speaker-muted-story:before {
-  content: "\e9ca";
+.icon-down::before {
+  content: map.get($icons-map, "down");
 }
-.icon-speaker-story:before {
-  content: "\e9c4";
+.icon-download::before {
+  content: map.get($icons-map, "download");
 }
-.icon-speaker:before {
-  content: "\e981";
+.icon-eats::before {
+  content: map.get($icons-map, "eats");
 }
-.icon-speaker-outline:before {
-  content: "\e982";
+.icon-edit::before {
+  content: map.get($icons-map, "edit");
 }
-.icon-phone-discard-outline:before {
-  content: "\e983";
+.icon-email::before {
+  content: map.get($icons-map, "email");
 }
-.icon-allow-speak:before {
-  content: "\e984";
+.icon-enter::before {
+  content: map.get($icons-map, "enter");
 }
-.icon-stop-raising-hand:before {
-  content: "\e985";
+.icon-expand::before {
+  content: map.get($icons-map, "expand");
 }
-.icon-voice-chat:before {
-  content: "\e987";
+.icon-eye-closed-outline::before {
+  content: map.get($icons-map, "eye-closed-outline");
 }
-.icon-video:before {
-  content: "\e988";
+.icon-eye-closed::before {
+  content: map.get($icons-map, "eye-closed");
 }
-.icon-noise-suppression:before {
-  content: "\e989";
+.icon-eye-outline::before {
+  content: map.get($icons-map, "eye-outline");
 }
-.icon-phone-discard:before {
-  content: "\e98a";
+.icon-eye::before {
+  content: map.get($icons-map, "eye");
 }
-.icon-bot-commands-filled:before {
-  content: "\e97f";
+.icon-favorite-filled::before {
+  content: map.get($icons-map, "favorite-filled");
 }
-.icon-reply-filled:before {
-  content: "\e980";
+.icon-favorite::before {
+  content: map.get($icons-map, "favorite");
 }
-.icon-bug:before {
-  content: "\e97e";
+.icon-file-badge::before {
+  content: map.get($icons-map, "file-badge");
 }
-.icon-data:before {
-  content: "\e97d";
+.icon-flag::before {
+  content: map.get($icons-map, "flag");
 }
-.icon-darkmode:before {
-  content: "\e979";
+.icon-folder-badge::before {
+  content: map.get($icons-map, "folder-badge");
 }
-.icon-animations:before {
-  content: "\e99c";
+.icon-folder::before {
+  content: map.get($icons-map, "folder");
 }
-.icon-enter:before {
-  content: "\e97b";
+.icon-fontsize::before {
+  content: map.get($icons-map, "fontsize");
 }
-.icon-fontsize:before {
-  content: "\e97c";
+.icon-forums::before {
+  content: map.get($icons-map, "forums");
 }
-.icon-permissions:before {
-  content: "\e976";
+.icon-forward::before {
+  content: map.get($icons-map, "forward");
 }
-.icon-card:before {
-  content: "\e977";
+.icon-fullscreen::before {
+  content: map.get($icons-map, "fullscreen");
 }
-.icon-truck:before {
-  content: "\e978";
+.icon-gifs::before {
+  content: map.get($icons-map, "gifs");
 }
-.icon-share-filled:before {
-  content: "\e95a";
+.icon-gift::before {
+  content: map.get($icons-map, "gift");
 }
-.icon-bold:before {
-  content: "\e961";
+.icon-group-filled::before {
+  content: map.get($icons-map, "group-filled");
 }
-.icon-bot-command:before {
-  content: "\e962";
+.icon-group::before {
+  content: map.get($icons-map, "group");
 }
-.icon-calendar-filter:before {
-  content: "\e963";
+.icon-grouped-disable::before {
+  content: map.get($icons-map, "grouped-disable");
 }
-.icon-arrow-down:before {
-  content: "\e966";
+.icon-grouped::before {
+  content: map.get($icons-map, "grouped");
 }
-.icon-email:before {
-  content: "\e967";
+.icon-hand-stop::before {
+  content: map.get($icons-map, "hand-stop");
 }
-.icon-italic:before {
-  content: "\e968";
+.icon-hashtag::before {
+  content: map.get($icons-map, "hashtag");
 }
-.icon-link:before {
-  content: "\e969";
+.icon-heart-outline::before {
+  content: map.get($icons-map, "heart-outline");
 }
-.icon-link-broken:before {
-  content: "\e9b0";
+.icon-heart::before {
+  content: map.get($icons-map, "heart");
 }
-.icon-mention:before {
-  content: "\e96a";
+.icon-help::before {
+  content: map.get($icons-map, "help");
 }
-.icon-monospace:before {
-  content: "\e96b";
+.icon-info-filled::before {
+  content: map.get($icons-map, "info-filled");
 }
-.icon-password-off:before {
-  content: "\e96d";
+.icon-info::before {
+  content: map.get($icons-map, "info");
 }
-.icon-pin-list:before {
-  content: "\e96e";
+.icon-install::before {
+  content: map.get($icons-map, "install");
 }
-.icon-replace:before {
-  content: "\e970";
+.icon-italic::before {
+  content: map.get($icons-map, "italic");
 }
-.icon-schedule:before {
-  content: "\e971";
+.icon-key::before {
+  content: map.get($icons-map, "key");
 }
-.icon-strikethrough:before {
-  content: "\e972";
+.icon-keyboard::before {
+  content: map.get($icons-map, "keyboard");
 }
-.icon-underlined:before {
-  content: "\e973";
+.icon-lamp::before {
+  content: map.get($icons-map, "lamp");
 }
-.icon-zoom-out:before {
-  content: "\e975";
+.icon-language::before {
+  content: map.get($icons-map, "language");
 }
-.icon-zoom-in:before {
-  content: "\e974";
+.icon-large-pause::before {
+  content: map.get($icons-map, "large-pause");
 }
-.icon-spoiler-disable:before {
-  content: "\e9b5";
+.icon-large-play::before {
+  content: map.get($icons-map, "large-play");
 }
-.icon-grouped:before {
-  content: "\e9b6";
+.icon-link-badge::before {
+  content: map.get($icons-map, "link-badge");
 }
-.icon-grouped-disable:before {
-  content: "\e9b7";
+.icon-link-broken::before {
+  content: map.get($icons-map, "link-broken");
 }
-.icon-spoiler:before {
-  content: "\e9b8";
+.icon-link::before {
+  content: map.get($icons-map, "link");
 }
-.icon-select:before {
-  content: "\e960";
+.icon-location::before {
+  content: map.get($icons-map, "location");
 }
-.icon-folder:before {
-  content: "\e913";
+.icon-lock-badge::before {
+  content: map.get($icons-map, "lock-badge");
 }
-.icon-bots:before {
-  content: "\e915";
+.icon-lock::before {
+  content: map.get($icons-map, "lock");
 }
-.icon-calendar:before {
-  content: "\e916";
+.icon-logout::before {
+  content: map.get($icons-map, "logout");
 }
-.icon-cloud-download:before {
-  content: "\e917";
+.icon-loop::before {
+  content: map.get($icons-map, "loop");
 }
-.icon-colorize:before {
-  content: "\e918";
+.icon-mention::before {
+  content: map.get($icons-map, "mention");
 }
-.icon-forward:before {
-  content: "\e927";
+.icon-message-failed::before {
+  content: map.get($icons-map, "message-failed");
 }
-.icon-reply:before {
-  content: "\e947";
+.icon-message-pending::before {
+  content: map.get($icons-map, "message-pending");
 }
-.icon-help:before {
-  content: "\e92a";
+.icon-message-read::before {
+  content: map.get($icons-map, "message-read");
 }
-.icon-info:before {
-  content: "\e92b";
+.icon-message-succeeded::before {
+  content: map.get($icons-map, "message-succeeded");
 }
-.icon-info-filled:before {
-  content: "\e91b";
+.icon-message::before {
+  content: map.get($icons-map, "message");
 }
-.icon-delete-filled:before {
-  content: "\e91c";
+.icon-microphone-alt::before {
+  content: map.get($icons-map, "microphone-alt");
 }
-.icon-delete:before {
-  content: "\e91d";
+.icon-microphone::before {
+  content: map.get($icons-map, "microphone");
 }
-.icon-edit:before {
-  content: "\e923";
+.icon-monospace::before {
+  content: map.get($icons-map, "monospace");
 }
-.icon-new-chat-filled:before {
-  content: "\e939";
+.icon-more-circle::before {
+  content: map.get($icons-map, "more-circle");
 }
-.icon-send:before {
-  content: "\e94a";
+.icon-more::before {
+  content: map.get($icons-map, "more");
 }
-.icon-send-outline:before {
-  content: "\e94b";
+.icon-mute::before {
+  content: map.get($icons-map, "mute");
 }
-.icon-poll:before {
-  content: "\e938";
+.icon-muted::before {
+  content: map.get($icons-map, "muted");
 }
-.icon-revote:before {
-  content: "\e93a";
+.icon-new-chat-filled::before {
+  content: map.get($icons-map, "new-chat-filled");
 }
-.icon-photo:before {
-  content: "\e940";
+.icon-next::before {
+  content: map.get($icons-map, "next");
 }
-.icon-document:before {
-  content: "\e91f";
+.icon-noise-suppression::before {
+  content: map.get($icons-map, "noise-suppression");
 }
-.icon-logout:before {
-  content: "\e932";
+.icon-non-contacts::before {
+  content: map.get($icons-map, "non-contacts");
 }
-.icon-saved-messages:before {
-  content: "\e948";
+.icon-open-in-new-tab::before {
+  content: map.get($icons-map, "open-in-new-tab");
 }
-.icon-settings:before {
-  content: "\e94e";
+.icon-password-off::before {
+  content: map.get($icons-map, "password-off");
 }
-.icon-phone:before {
-  content: "\e93f";
+.icon-pause::before {
+  content: map.get($icons-map, "pause");
 }
-.icon-attach:before {
-  content: "\e909";
+.icon-permissions::before {
+  content: map.get($icons-map, "permissions");
 }
-.icon-copy:before {
-  content: "\e91a";
+.icon-phone-discard-outline::before {
+  content: map.get($icons-map, "phone-discard-outline");
 }
-.icon-channel-filled:before {
-  content: "\e9cb";
+.icon-phone-discard::before {
+  content: map.get($icons-map, "phone-discard");
 }
-.icon-channel:before {
-  content: "\e911";
+.icon-phone::before {
+  content: map.get($icons-map, "phone");
 }
-.icon-group-filled:before {
-  content: "\e9cc";
+.icon-photo::before {
+  content: map.get($icons-map, "photo");
 }
-.icon-group:before {
-  content: "\e929";
+.icon-pin-badge::before {
+  content: map.get($icons-map, "pin-badge");
 }
-.icon-add-user-filled:before {
-  content: "\e904";
+.icon-pin-list::before {
+  content: map.get($icons-map, "pin-list");
 }
-.icon-add-user:before {
-  content: "\e905";
+.icon-pin::before {
+  content: map.get($icons-map, "pin");
 }
-.icon-delete-user:before {
-  content: "\e91e";
+.icon-pinned-chat::before {
+  content: map.get($icons-map, "pinned-chat");
 }
-.icon-non-contacts:before {
-  content: "\e928";
+.icon-pinned-message::before {
+  content: map.get($icons-map, "pinned-message");
 }
-.icon-user:before {
-  content: "\e959";
+.icon-pip::before {
+  content: map.get($icons-map, "pip");
 }
-.icon-user-filled:before {
-  content: "\e9cd";
+.icon-play-story::before {
+  content: map.get($icons-map, "play-story");
 }
-.icon-active-sessions:before {
-  content: "\e902";
+.icon-play::before {
+  content: map.get($icons-map, "play");
 }
-.icon-admin:before {
-  content: "\e906";
+.icon-poll::before {
+  content: map.get($icons-map, "poll");
 }
-.icon-previous:before {
-  content: "\e96f";
+.icon-premium::before {
+  content: map.get($icons-map, "premium");
 }
-.icon-next:before {
-  content: "\e96c";
+.icon-previous::before {
+  content: map.get($icons-map, "previous");
 }
-.icon-expand:before {
-  content: "\e9be";
+.icon-readchats::before {
+  content: map.get($icons-map, "readchats");
 }
-.icon-collapse:before {
-  content: "\e9bd";
+.icon-recent::before {
+  content: map.get($icons-map, "recent");
 }
-.icon-download:before {
-  content: "\e921";
+.icon-reload::before {
+  content: map.get($icons-map, "reload");
 }
-.icon-pinned-message:before {
-  content: "\e9bf";
+.icon-remove::before {
+  content: map.get($icons-map, "remove");
 }
-.icon-pin-badge:before {
-  content: "\e9a6";
+.icon-reopen-topic::before {
+  content: map.get($icons-map, "reopen-topic");
 }
-.icon-location:before {
-  content: "\e930";
+.icon-replace::before {
+  content: map.get($icons-map, "replace");
 }
-.icon-stop:before {
-  content: "\e952";
+.icon-replies::before {
+  content: map.get($icons-map, "replies");
 }
-.icon-archive-to-main:before {
-  content: "\e9bc";
+.icon-reply-filled::before {
+  content: map.get($icons-map, "reply-filled");
 }
-.icon-archive-from-main:before {
-  content: "\e9bb";
+.icon-reply::before {
+  content: map.get($icons-map, "reply");
 }
-.icon-archive-filled:before {
-  content: "\e9ba";
+.icon-revote::before {
+  content: map.get($icons-map, "revote");
 }
-.icon-archive:before {
-  content: "\e908";
+.icon-save-story::before {
+  content: map.get($icons-map, "save-story");
 }
-.icon-unarchive:before {
-  content: "\e953";
+.icon-saved-messages::before {
+  content: map.get($icons-map, "saved-messages");
 }
-.icon-chats-badge:before {
-  content: "\e9a1";
+.icon-schedule::before {
+  content: map.get($icons-map, "schedule");
 }
-.icon-chat-badge:before {
-  content: "\e9a0";
+.icon-search::before {
+  content: map.get($icons-map, "search");
 }
-.icon-share-screen:before {
-  content: "\e97a";
+.icon-select::before {
+  content: map.get($icons-map, "select");
 }
-.icon-share-screen-outlined:before {
-  content: "\e986";
+.icon-send-outline::before {
+  content: map.get($icons-map, "send-outline");
 }
-.icon-replies:before {
-  content: "\e9b9";
+.icon-send::before {
+  content: map.get($icons-map, "send");
 }
-.icon-readchats:before {
-  content: "\e933";
+.icon-settings-filled::before {
+  content: map.get($icons-map, "settings-filled");
 }
-.icon-unread:before {
-  content: "\e957";
+.icon-settings::before {
+  content: map.get($icons-map, "settings");
 }
-.icon-message:before {
-  content: "\e934";
+.icon-share-filled::before {
+  content: map.get($icons-map, "share-filled");
 }
-.icon-comments:before {
-  content: "\e964";
+.icon-share-screen-outlined::before {
+  content: map.get($icons-map, "share-screen-outlined");
 }
-.icon-comments-sticker:before {
-  content: "\e965";
+.icon-share-screen-stop::before {
+  content: map.get($icons-map, "share-screen-stop");
 }
-.icon-key:before {
-  content: "\e99a";
+.icon-share-screen::before {
+  content: map.get($icons-map, "share-screen");
 }
-.icon-unlock-badge:before {
-  content: "\e9a8";
+.icon-sidebar::before {
+  content: map.get($icons-map, "sidebar");
 }
-.icon-lock-badge:before {
-  content: "\e9a9";
+.icon-skip-next::before {
+  content: map.get($icons-map, "skip-next");
 }
-.icon-lock:before {
-  content: "\e931";
+.icon-skip-previous::before {
+  content: map.get($icons-map, "skip-previous");
 }
-.icon-unlock:before {
-  content: "\e954";
+.icon-smallscreen::before {
+  content: map.get($icons-map, "smallscreen");
 }
-.icon-mute:before {
-  content: "\e937";
+.icon-smile::before {
+  content: map.get($icons-map, "smile");
 }
-.icon-unmute:before {
-  content: "\e955";
+.icon-sort::before {
+  content: map.get($icons-map, "sort");
 }
-.icon-pin:before {
-  content: "\e941";
+.icon-speaker-muted-story::before {
+  content: map.get($icons-map, "speaker-muted-story");
 }
-.icon-unpin:before {
-  content: "\e956";
+.icon-speaker-outline::before {
+  content: map.get($icons-map, "speaker-outline");
 }
-.icon-smallscreen:before {
-  content: "\e95e";
+.icon-speaker-story::before {
+  content: map.get($icons-map, "speaker-story");
 }
-.icon-fullscreen:before {
-  content: "\e95f";
+.icon-speaker::before {
+  content: map.get($icons-map, "speaker");
 }
-.icon-large-pause:before {
-  content: "\e92e";
+.icon-spoiler-disable::before {
+  content: map.get($icons-map, "spoiler-disable");
 }
-.icon-large-play:before {
-  content: "\e92f";
+.icon-spoiler::before {
+  content: map.get($icons-map, "spoiler");
 }
-.icon-pause:before {
-  content: "\e93d";
+.icon-sport::before {
+  content: map.get($icons-map, "sport");
 }
-.icon-play:before {
-  content: "\e943";
+.icon-stats::before {
+  content: map.get($icons-map, "stats");
 }
-.icon-channelviews:before {
-  content: "\e912";
+.icon-stealth-future::before {
+  content: map.get($icons-map, "stealth-future");
 }
-.icon-message-succeeded:before {
-  content: "\e900";
+.icon-stealth-past::before {
+  content: map.get($icons-map, "stealth-past");
 }
-.icon-message-read:before {
-  content: "\e901";
+.icon-stickers::before {
+  content: map.get($icons-map, "stickers");
 }
-.icon-message-pending:before {
-  content: "\e94c";
+.icon-stop-raising-hand::before {
+  content: map.get($icons-map, "stop-raising-hand");
 }
-.icon-message-failed:before {
-  content: "\e94d";
+.icon-stop::before {
+  content: map.get($icons-map, "stop");
 }
-.icon-favorite:before {
-  content: "\e93e";
+.icon-story-caption::before {
+  content: map.get($icons-map, "story-caption");
 }
-.icon-keyboard:before {
-  content: "\e944";
+.icon-story-expired::before {
+  content: map.get($icons-map, "story-expired");
 }
-.icon-delete-left:before {
-  content: "\e945";
+.icon-story-priority::before {
+  content: map.get($icons-map, "story-priority");
 }
-.icon-recent:before {
-  content: "\e946";
+.icon-story-reply::before {
+  content: map.get($icons-map, "story-reply");
 }
-.icon-gifs:before {
-  content: "\e94f";
+.icon-strikethrough::before {
+  content: map.get($icons-map, "strikethrough");
 }
-.icon-stickers:before {
-  content: "\e95b";
+.icon-timer::before {
+  content: map.get($icons-map, "timer");
 }
-.icon-smile:before {
-  content: "\e950";
+.icon-transcribe::before {
+  content: map.get($icons-map, "transcribe");
 }
-.icon-animals:before {
-  content: "\e907";
+.icon-truck::before {
+  content: map.get($icons-map, "truck");
 }
-.icon-eats:before {
-  content: "\e922";
+.icon-unarchive::before {
+  content: map.get($icons-map, "unarchive");
 }
-.icon-sport:before {
-  content: "\e951";
+.icon-underlined::before {
+  content: map.get($icons-map, "underlined");
 }
-.icon-car:before {
-  content: "\e910";
+.icon-unlock-badge::before {
+  content: map.get($icons-map, "unlock-badge");
 }
-.icon-lamp:before {
-  content: "\e92c";
+.icon-unlock::before {
+  content: map.get($icons-map, "unlock");
 }
-.icon-language:before {
-  content: "\e92d";
+.icon-unmute::before {
+  content: map.get($icons-map, "unmute");
 }
-.icon-flag:before {
-  content: "\e926";
+.icon-unpin::before {
+  content: map.get($icons-map, "unpin");
 }
-.icon-more:before {
-  content: "\e936";
+.icon-unread::before {
+  content: map.get($icons-map, "unread");
 }
-.icon-search:before {
-  content: "\e949";
+.icon-up::before {
+  content: map.get($icons-map, "up");
 }
-.icon-remove:before {
-  content: "\e95c";
+.icon-user-filled::before {
+  content: map.get($icons-map, "user-filled");
 }
-.icon-add:before {
-  content: "\e903";
+.icon-user-online::before {
+  content: map.get($icons-map, "user-online");
 }
-.icon-check:before {
-  content: "\e914";
+.icon-user::before {
+  content: map.get($icons-map, "user");
 }
-.icon-close:before {
-  content: "\e919";
+.icon-video-outlined::before {
+  content: map.get($icons-map, "video-outlined");
 }
-.icon-arrow-left:before {
-  content: "\e90d";
+.icon-video-stop::before {
+  content: map.get($icons-map, "video-stop");
 }
-.icon-arrow-right:before {
-  content: "\e93c";
+.icon-video::before {
+  content: map.get($icons-map, "video");
 }
-.icon-down:before {
-  content: "\e920";
+.icon-voice-chat::before {
+  content: map.get($icons-map, "voice-chat");
 }
-.icon-up:before {
-  content: "\e958";
+.icon-volume-1::before {
+  content: map.get($icons-map, "volume-1");
 }
-.icon-eye-closed:before {
-  content: "\e925";
+.icon-volume-2::before {
+  content: map.get($icons-map, "volume-2");
 }
-.icon-eye:before {
-  content: "\e924";
+.icon-volume-3::before {
+  content: map.get($icons-map, "volume-3");
 }
-.icon-muted:before {
-  content: "\e95d";
+.icon-web::before {
+  content: map.get($icons-map, "web");
 }
-.icon-avatar-archived-chats:before {
-  content: "\e90a";
+.icon-webapp::before {
+  content: map.get($icons-map, "webapp");
 }
-.icon-avatar-deleted-account:before {
-  content: "\e90b";
+.icon-word-wrap::before {
+  content: map.get($icons-map, "word-wrap");
 }
-.icon-avatar-saved-messages:before {
-  content: "\e90c";
+.icon-zoom-in::before {
+  content: map.get($icons-map, "zoom-in");
 }
-.icon-pinned-chat:before {
-  content: "\e942";
+.icon-zoom-out::before {
+  content: map.get($icons-map, "zoom-out");
 }

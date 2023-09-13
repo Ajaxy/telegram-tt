@@ -1,6 +1,8 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
+import type { IconName } from '../../../types/icons';
+
 import buildClassName from '../../../util/buildClassName';
 
 import Button from '../../ui/Button';
@@ -10,7 +12,7 @@ import styles from './PhoneCallButton.module.scss';
 type OwnProps = {
   onClick: VoidFunction;
   label: string;
-  icon?: string;
+  icon?: IconName;
   iconClassName?: string;
   customIcon?: React.ReactNode;
   className?: string;
