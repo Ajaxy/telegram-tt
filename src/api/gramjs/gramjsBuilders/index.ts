@@ -39,6 +39,12 @@ import localDb from '../localDb';
 
 const CHANNEL_ID_MIN_LENGTH = 11; // Example: -1000000000
 
+function checkIfChannelId(id: string) {
+  // HOTFIX New group id range starts with -4
+  if (id.length === CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
+  return id.length >= CHANNEL_ID_MIN_LENGTH;
+}
+
 export function getEntityTypeById(chatOrUserId: string) {
   if (typeof chatOrUserId === 'number') {
     return getEntityTypeByDeprecatedId(chatOrUserId);
@@ -46,7 +52,7 @@ export function getEntityTypeById(chatOrUserId: string) {
 
   if (!chatOrUserId.startsWith('-')) {
     return 'user';
-  } else if (chatOrUserId.length >= CHANNEL_ID_MIN_LENGTH) {
+  } else if (checkIfChannelId(chatOrUserId)) {
     return 'channel';
   } else {
     return 'chat';
