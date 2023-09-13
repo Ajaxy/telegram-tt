@@ -1221,7 +1221,14 @@ export async function migrateChat(chat: ApiChat) {
 
   updateLocalDb(result);
 
-  return buildApiChatFromPreview(result.chats[1]);
+  const newChannelId = result.updates
+    .find((update): update is GramJs.UpdateChannel => update instanceof GramJs.UpdateChannel)!.channelId;
+
+  const newChannel = result.chats.find((c) => (
+    c instanceof GramJs.Channel && c.id.toString() === newChannelId.toString()
+  ))!;
+
+  return buildApiChatFromPreview(newChannel);
 }
 
 export async function openChatByInvite(hash: string) {

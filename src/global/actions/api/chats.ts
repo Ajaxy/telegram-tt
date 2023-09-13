@@ -1257,7 +1257,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
 
   global = getGlobal();
 
-  const updatedFullInfo = selectChatFullInfo(global, chatId);
+  const updatedFullInfo = selectChatFullInfo(global, chat.id);
   if (!updatedFullInfo) {
     return;
   }
@@ -1267,7 +1267,7 @@ addActionHandler('updateChatMemberBannedRights', async (global, actions, payload
   const isBanned = Boolean(bannedRights.viewMessages);
   const isUnblocked = !Object.keys(bannedRights).length;
 
-  global = updateChatFullInfo(global, chatId, {
+  global = updateChatFullInfo(global, chat.id, {
     ...(members && isBanned && {
       members: members.filter((m) => m.userId !== userId),
     }),
@@ -1330,7 +1330,7 @@ addActionHandler('updateChatAdmin', async (global, actions, payload): Promise<vo
 
   if (newAdminMembersById) {
     global = getGlobal();
-    global = updateChatFullInfo(global, chatId, { adminMembersById: newAdminMembersById });
+    global = updateChatFullInfo(global, chat.id, { adminMembersById: newAdminMembersById });
     setGlobal(global);
   }
 });
@@ -1806,12 +1806,6 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     return;
   }
 
-  global = getGlobal();
-
-  const prevIsForum = chat.isForum;
-  global = updateChat(global, chatId, { isForum: isEnabled });
-  setGlobal(global);
-
   let result: true | undefined;
   try {
     result = await callApi('toggleForum', { chat, isEnabled });
@@ -1823,10 +1817,16 @@ addActionHandler('toggleForum', async (global, actions, payload): Promise<void> 
     }
   }
 
-  if (!result) {
+  if (result) {
     global = getGlobal();
-    global = updateChat(global, chatId, { isForum: prevIsForum });
+    global = updateChat(global, chat.id, { isForum: isEnabled });
     setGlobal(global);
+
+    if (!isEnabled) {
+      actions.closeForumPanel({ tabId });
+    } else {
+      actions.openForumPanel({ chatId: chat.id, tabId });
+    }
   }
 });
 

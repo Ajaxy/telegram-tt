@@ -74,7 +74,7 @@ addActionHandler('updatePublicLink', async (global, actions, payload): Promise<v
 
   global = getGlobal();
   global = updateManagementProgress(global, result ? ManagementProgress.Complete : ManagementProgress.Error, tabId);
-  global = updateManagement(global, chatId, {
+  global = updateManagement(global, chat.id, {
     isUsernameAvailable: undefined,
     checkedUsername: undefined,
     error: undefined,
