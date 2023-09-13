@@ -227,7 +227,7 @@ function onUpdateConnectionState<T extends GlobalState>(
     .map((messageList) => messageList.chatId)
     .filter((chatId) => {
       const chat = global.chats.byId[chatId];
-      return isChatChannel(chat) || isChatSuperGroup(chat);
+      return chat && (isChatChannel(chat) || isChatSuperGroup(chat));
     });
   if (connectionState === 'connectionStateReady' && channelStackIds.length) {
     unique(channelStackIds).forEach((chatId) => {
