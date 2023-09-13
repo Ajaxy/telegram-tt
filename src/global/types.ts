@@ -931,7 +931,7 @@ export type CallbackAction = Values<{
   }
 }>;
 
-export type ApiDraft = ApiFormattedText & { isLocal?: boolean; shouldForce?: boolean };
+export type ApiDraft = ApiFormattedText & { isLocal?: boolean };
 
 type WithTabId = { tabId?: number };
 
@@ -1383,13 +1383,11 @@ export interface ActionPayloads {
     chatId: string;
     threadId: number;
     draft: ApiDraft;
-    shouldForce?: boolean;
   };
   clearDraft: {
     chatId: string;
     threadId?: number;
     localOnly?: boolean;
-    shouldForce?: boolean;
   };
   loadPinnedMessages: {
     chatId: string;

@@ -4,7 +4,7 @@ import {
 } from '../../index';
 
 import type {
-  ActionReturnType, ApiDraft, GlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 import type {
   ApiAttachment,
@@ -396,7 +396,7 @@ addActionHandler('cancelSendingMessage', (global, actions, payload): ActionRetur
 
 addActionHandler('saveDraft', async (global, actions, payload): Promise<void> => {
   const {
-    chatId, threadId, draft, shouldForce,
+    chatId, threadId, draft,
   } = payload;
   if (!draft) {
     return;
@@ -408,7 +408,6 @@ addActionHandler('saveDraft', async (global, actions, payload): Promise<void> =>
   if (user && isDeletedUser(user)) return;
 
   draft.isLocal = true;
-  draft.shouldForce = shouldForce;
   global = replaceThreadParam(global, chatId, threadId, 'draft', draft);
   global = updateChat(global, chatId, { draftDate: Math.round(Date.now() / 1000) });
 
@@ -435,7 +434,7 @@ addActionHandler('saveDraft', async (global, actions, payload): Promise<void> =>
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, threadId = MAIN_THREAD_ID, localOnly, shouldForce,
+    chatId, threadId = MAIN_THREAD_ID, localOnly,
   } = payload;
   if (!selectDraft(global, chatId, threadId)) {
     return undefined;
@@ -447,8 +446,7 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
     void callApi('clearDraft', chat, selectThreadTopMessageId(global, chatId, threadId));
   }
 
-  const newDraft: ApiDraft | undefined = shouldForce ? { shouldForce, text: '' } : undefined;
-  global = replaceThreadParam(global, chatId, threadId, 'draft', newDraft);
+  global = replaceThreadParam(global, chatId, threadId, 'draft', undefined);
   global = updateChat(global, chatId, { draftDate: undefined });
 
   return global;
