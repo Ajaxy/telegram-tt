@@ -2496,12 +2496,11 @@ export async function fetchChatByPhoneNumber<T extends GlobalState>(global: T, p
 
   global = getGlobal();
   global = updateChat(global, chat.id, chat);
-  setGlobal(global);
 
   if (user) {
     global = updateUser(global, user.id, user);
-    setGlobal(global);
   }
+  setGlobal(global);
 
   return chat;
 }
