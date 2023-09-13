@@ -261,13 +261,8 @@ export function filterUsersByName(
   });
 }
 
-export function getUserIdDividend(userId: string) {
-  // Workaround for old-fashioned IDs stored locally
-  if (typeof userId === 'number') {
-    return Math.abs(userId);
-  }
-
-  return Math.abs(Number(userId));
+export function getUserIdDividend(peerId: string) {
+  return Math.abs(Number(peerId));
 }
 
 // https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
