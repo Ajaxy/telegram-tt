@@ -1,16 +1,17 @@
-import type { RequiredGlobalActions } from '../../index';
-import {
-  addActionHandler, getActions, getGlobal, setGlobal,
-} from '../../index';
 import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ApiChat, ApiMessage } from '../../../api/types';
-import { MAIN_THREAD_ID } from '../../../api/types';
+import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, Thread } from '../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { DEBUG, MESSAGE_LIST_SLICE, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { callApi } from '../../../api/gramjs';
+import { init as initFolderManager } from '../../../util/folderManager';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { callApi } from '../../../api/gramjs';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 import {
   addChatMessagesById,
   safeReplaceViewportIds,
@@ -20,6 +21,7 @@ import {
   updateThreadInfos,
   updateUsers,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChatMessage,
   selectChatMessages,
@@ -30,8 +32,6 @@ import {
   selectTabState,
   selectThreadInfo,
 } from '../../selectors';
-import { init as initFolderManager } from '../../../util/folderManager';
-import { updateTabState } from '../../reducers/tabs';
 
 const RELEASE_STATUS_TIMEOUT = 15000; // 15 sec;
 

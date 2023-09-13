@@ -6,10 +6,11 @@ import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
-import { getPrivacyKey } from './helpers/privacy';
 import { selectUserFullInfo } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
+import { getPrivacyKey } from './helpers/privacy';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';

@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useEffect, useRef } from '../lib/teact/teact';
+
 import { IS_ELECTRON } from '../config';
 import { IS_MAC_OS } from '../util/windowEnvironment';
 

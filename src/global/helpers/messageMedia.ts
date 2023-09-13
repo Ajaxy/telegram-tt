@@ -19,8 +19,8 @@ import {
   IS_SAFARI,
   MAX_BUFFER_SIZE,
 } from '../../util/windowEnvironment';
-import { getMessageKey, isMessageLocal, matchLinkInMessageText } from './messages';
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
+import { getMessageKey, isMessageLocal, matchLinkInMessageText } from './messages';
 
 type Target =
   'micro'

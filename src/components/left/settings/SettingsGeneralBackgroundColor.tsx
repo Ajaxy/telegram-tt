@@ -6,16 +6,17 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { ThemeKey } from '../../../types';
+import type { RealTouchEvent } from '../../../util/captureEvents';
 
-import { pick } from '../../../util/iteratees';
+import { selectTheme } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
+import { captureEvents } from '../../../util/captureEvents';
 import {
   getPatternColor, hex2rgb, hsb2rgb, rgb2hex, rgb2hsb,
 } from '../../../util/colors';
-import type { RealTouchEvent } from '../../../util/captureEvents';
-import { captureEvents } from '../../../util/captureEvents';
-import { selectTheme } from '../../../global/selectors';
+import { pick } from '../../../util/iteratees';
+
 import useFlag from '../../../hooks/useFlag';
-import buildClassName from '../../../util/buildClassName';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import InputText from '../../ui/InputText';

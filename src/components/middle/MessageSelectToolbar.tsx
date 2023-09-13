@@ -10,22 +10,22 @@ import {
   selectCanDownloadSelectedMessages,
   selectCanForwardMessages,
   selectCanReportSelectedMessages,
-  selectCurrentMessageList, selectTabState,
-  selectHasProtectedMessage,
+  selectCurrentMessageList, selectHasProtectedMessage,
   selectSelectedMessagesCount,
+  selectTabState,
 } from '../../global/selectors';
-import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import buildClassName from '../../util/buildClassName';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useFlag from '../../hooks/useFlag';
-import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevious from '../../hooks/usePrevious';
 import useCopySelectedMessages from './hooks/useCopySelectedMessages';
 
+import ReportModal from '../common/ReportModal';
 import Button from '../ui/Button';
 import DeleteSelectedMessageModal from './DeleteSelectedMessageModal';
-import ReportModal from '../common/ReportModal';
 
 import './MessageSelectToolbar.scss';
 

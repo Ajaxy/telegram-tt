@@ -1,30 +1,30 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { ActiveReaction } from '../../../global/types';
 import type { ApiAvailableReaction, ApiReaction, ApiStickerSet } from '../../../api/types';
+import type { ActiveReaction } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import buildClassName from '../../../util/buildClassName';
 import { isSameReaction } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 import { REM } from '../../common/helpers/mediaDimensions';
 
-import useMedia from '../../../hooks/useMedia';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
+import useShowTransition from '../../../hooks/useShowTransition';
 import useCustomEmoji from '../../common/hooks/useCustomEmoji';
 
+import AnimatedSticker from '../../common/AnimatedSticker';
 import CustomEmoji from '../../common/CustomEmoji';
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
-import AnimatedSticker from '../../common/AnimatedSticker';
 import CustomEmojiEffect from './CustomEmojiEffect';
 
 import styles from './ReactionAnimatedEmoji.module.scss';
-import useLastCallback from '../../../hooks/useLastCallback';
 
 type OwnProps = {
   reaction: ApiReaction;

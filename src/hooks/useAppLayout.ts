@@ -1,13 +1,13 @@
+import { useEffect } from '../lib/teact/teact';
+
 import {
   MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN,
   MOBILE_SCREEN_LANDSCAPE_MAX_HEIGHT,
   MOBILE_SCREEN_LANDSCAPE_MAX_WIDTH,
   MOBILE_SCREEN_MAX_WIDTH,
 } from '../config';
-import { useEffect } from '../lib/teact/teact';
-
-import { IS_IOS } from '../util/windowEnvironment';
 import { createCallbackManager } from '../util/callbacks';
+import { IS_IOS } from '../util/windowEnvironment';
 import { updateSizes } from '../util/windowSize';
 import useForceUpdate from './useForceUpdate';
 

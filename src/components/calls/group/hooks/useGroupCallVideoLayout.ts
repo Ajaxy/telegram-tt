@@ -2,9 +2,10 @@ import type { RefObject } from 'react';
 import {
   useEffect, useMemo, useState,
 } from '../../../../lib/teact/teact';
-import useResizeObserver from '../../../../hooks/useResizeObserver';
-import usePrevious from '../../../../hooks/usePrevious';
+
 import useLastCallback from '../../../../hooks/useLastCallback';
+import usePrevious from '../../../../hooks/usePrevious';
+import useResizeObserver from '../../../../hooks/useResizeObserver';
 
 const PADDING_HORIZONTAL = 10;
 const PADDING_VERTICAL = 8;

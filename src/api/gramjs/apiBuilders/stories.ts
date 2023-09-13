@@ -5,9 +5,9 @@ import type {
 } from '../../types';
 
 import { buildCollectionByCallback } from '../../../util/iteratees';
-import { buildApiPeerId } from './peers';
 import { buildPrivacyRules } from './common';
 import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
+import { buildApiPeerId } from './peers';
 import { buildApiReaction } from './reactions';
 
 export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiTypeStory {

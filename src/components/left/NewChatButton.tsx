@@ -1,9 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useState, useEffect, useCallback, useMemo,
+  useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';

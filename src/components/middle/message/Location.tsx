@@ -1,32 +1,32 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
-  getMessageLocation,
   buildStaticMapHash,
+  getMessageLocation,
   isGeoLiveExpired,
 } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 import { formatCountdownShort, formatLastUpdated } from '../../../util/dateFormat';
 import {
   getMetersPerPixel, getVenueColor, getVenueIconUrl,
 } from '../../../util/map';
 import { getServerTime } from '../../../util/serverTime';
 
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
-import useForceUpdate from '../../../hooks/useForceUpdate';
-import useTimeout from '../../../hooks/useTimeout';
-import buildClassName from '../../../util/buildClassName';
 import usePrevious from '../../../hooks/usePrevious';
-import useInterval from '../../../hooks/useInterval';
+import useTimeout from '../../../hooks/useTimeout';
 
 import Avatar from '../../common/Avatar';
 import Skeleton from '../../ui/placeholder/Skeleton';

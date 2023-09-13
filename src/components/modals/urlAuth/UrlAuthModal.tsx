@@ -1,20 +1,20 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { TabState } from '../../../global/types';
 
+import { getUserFullName } from '../../../global/helpers';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import renderText from '../../common/helpers/renderText';
-import { getUserFullName } from '../../../global/helpers';
 
-import useLang from '../../../hooks/useLang';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import Checkbox from '../../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 
 import styles from './UrlAuthModal.module.scss';
 

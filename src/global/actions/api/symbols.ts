@@ -1,35 +1,35 @@
+import type {
+  ApiError, ApiSticker, ApiStickerSet, ApiStickerSetInfo,
+} from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { translate } from '../../../util/langProvider';
+import * as langProvider from '../../../util/langProvider';
+import { pause, throttle } from '../../../util/schedulers';
+import searchWords from '../../../util/searchWords';
+import { callApi } from '../../../api/gramjs';
 import {
   addActionHandler,
   getGlobal, setGlobal,
 } from '../../index';
-
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import type {
-  ApiError, ApiSticker, ApiStickerSet, ApiStickerSetInfo,
-} from '../../../api/types';
-import { callApi } from '../../../api/gramjs';
-import { pause, throttle } from '../../../util/schedulers';
 import {
-  updateStickerSets,
-  updateStickerSet,
-  replaceAnimatedEmojis,
-  updateGifSearch,
-  updateStickersForEmoji,
   rebuildStickersForEmoji,
+  replaceAnimatedEmojis,
   updateCustomEmojiForEmoji,
   updateCustomEmojiSets,
+  updateGifSearch,
   updateRecentStatusCustomEmojis,
   updateStickerSearch,
+  updateStickerSet,
+  updateStickerSets,
+  updateStickersForEmoji,
 } from '../../reducers';
-import searchWords from '../../../util/searchWords';
-import { selectTabState, selectIsCurrentUserPremium, selectStickerSet } from '../../selectors';
-import { translate } from '../../../util/langProvider';
-import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
-import * as langProvider from '../../../util/langProvider';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { selectIsCurrentUserPremium, selectStickerSet, selectTabState } from '../../selectors';
+import { selectCurrentLimit, selectPremiumLimit } from '../../selectors/limits';
 
 const ADDED_SETS_THROTTLE = 200;
 const ADDED_SETS_THROTTLE_CHUNK = 10;

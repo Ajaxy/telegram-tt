@@ -4,9 +4,9 @@ import type { OwnProps as AnimatedStickerProps } from './AnimatedSticker';
 
 import buildClassName from '../../util/buildClassName';
 
+import useFlag from '../../hooks/useFlag';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import useFlag from '../../hooks/useFlag';
 
 import AnimatedSticker from './AnimatedSticker';
 

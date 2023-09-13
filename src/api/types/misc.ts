@@ -1,6 +1,6 @@
+import type { ApiLimitType, CallbackAction } from '../../global/types';
 import type { ApiDocument, ApiPhoto, ApiReaction } from './messages';
 import type { ApiUser } from './users';
-import type { ApiLimitType, CallbackAction } from '../../global/types';
 
 export interface ApiInitialArgs {
   userAgent: string;

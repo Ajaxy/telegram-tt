@@ -2,9 +2,10 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
-import useShowTransition from '../../hooks/useShowTransition';
 import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
+import useShowTransition from '../../hooks/useShowTransition';
 
 import './NothingFound.scss';
 

@@ -1,20 +1,21 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiUsername } from '../../api/types';
 
-import { copyTextToClipboard } from '../../util/clipboard';
 import buildClassName from '../../util/buildClassName';
+import { copyTextToClipboard } from '../../util/clipboard';
 import { isBetween } from '../../util/math';
-import usePrevious from '../../hooks/usePrevious';
-import useLang from '../../hooks/useLang';
 
+import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
+
+import ConfirmDialog from '../ui/ConfirmDialog';
 import Draggable from '../ui/Draggable';
 import ListItem from '../ui/ListItem';
-import ConfirmDialog from '../ui/ConfirmDialog';
 
 import styles from './ManageUsernames.module.scss';
 

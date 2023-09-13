@@ -1,8 +1,8 @@
 import type { ApiMessage } from '../../../api/types';
 import type { IAlbum } from '../../../types';
 
-import { getDayStartAt } from '../../../util/dateFormat';
 import { isActionMessage } from '../../../global/helpers';
+import { getDayStartAt } from '../../../util/dateFormat';
 
 type SenderGroup = (ApiMessage | IAlbum)[];
 

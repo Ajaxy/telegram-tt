@@ -2,6 +2,7 @@ import type { MediaWorkerApi } from '../lib/mediaWorker/index.worker';
 import type { Connector } from './PostMessageConnector';
 
 import { IS_TEST } from '../config';
+
 import { createConnector } from './PostMessageConnector';
 
 export const MAX_WORKERS = Math.min(navigator.hardwareConcurrency || 4, 4);

@@ -4,13 +4,14 @@ import { withGlobal } from '../../../global';
 
 import type { ApiTopic } from '../../../api/types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
 import { selectChat } from '../../../global/selectors';
+import { REM } from '../../common/helpers/mediaDimensions';
 import renderText from '../../common/helpers/renderText';
+
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
 
-import ListItem from '../../ui/ListItem';
 import TopicIcon from '../../common/TopicIcon';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;

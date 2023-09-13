@@ -1,25 +1,21 @@
-import type { RequiredGlobalActions } from '../../index';
-import {
-  addActionHandler, getActions, getGlobal, setGlobal,
-} from '../../index';
-
-import type {
-  ActionReturnType, GlobalState, TabArgs,
-} from '../../types';
 import type {
   ApiAttachment,
   ApiChat,
   ApiMessage,
   ApiMessageEntity,
-  ApiTypeReplyTo,
   ApiNewPoll,
   ApiOnProgress,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiTypeReplyTo,
   ApiUser,
   ApiVideo,
 } from '../../../api/types';
+import type { RequiredGlobalActions } from '../../index';
+import type {
+  ActionReturnType, GlobalState, TabArgs,
+} from '../../types';
 import { MAIN_THREAD_ID, MESSAGE_DELETED } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
@@ -35,11 +31,25 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { IS_IOS } from '../../../util/windowEnvironment';
-import { callApi, cancelApiProgress } from '../../../api/gramjs';
+import { ensureProtocol } from '../../../util/ensureProtocol';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
   areSortedArraysIntersecting, buildCollectionByKey, omit, split, unique,
 } from '../../../util/iteratees';
+import { translate } from '../../../util/langProvider';
+import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
+import { IS_IOS } from '../../../util/windowEnvironment';
+import { callApi, cancelApiProgress } from '../../../api/gramjs';
+import {
+  getMessageOriginalId,
+  getUserFullName, isChatChannel,
+  isDeletedUser, isMessageLocal,
+  isServiceNotificationMessage,
+  isUserBot,
+} from '../../helpers';
+import {
+  addActionHandler, getActions, getGlobal, setGlobal,
+} from '../../index';
 import {
   addChatMessagesById,
   addChats,
@@ -64,10 +74,10 @@ import {
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatMessage,
-  selectTranslationLanguage,
   selectCurrentChat,
   selectCurrentMessageList,
   selectCurrentViewedStory,
@@ -95,23 +105,12 @@ import {
   selectThreadIdFromMessage,
   selectThreadOriginChat,
   selectThreadTopMessageId,
+  selectTranslationLanguage,
   selectUser,
   selectUserFullInfo,
   selectUserStory,
   selectViewportIds,
 } from '../../selectors';
-import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
-import {
-  getMessageOriginalId,
-  getUserFullName, isChatChannel,
-  isDeletedUser, isMessageLocal,
-  isServiceNotificationMessage,
-  isUserBot,
-} from '../../helpers';
-import { translate } from '../../../util/langProvider';
-import { ensureProtocol } from '../../../util/ensureProtocol';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { deleteMessages } from '../apiUpdaters/messages';
 
 const AUTOLOGIN_TOKEN_KEY = 'autologin_token';

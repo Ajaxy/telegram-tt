@@ -6,20 +6,22 @@ import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
-import useLang from '../../hooks/useLang';
 import { decryptSession } from '../../util/passcode';
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
+
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useTimeout from '../../hooks/useTimeout';
-import useFlag from '../../hooks/useFlag';
 
 import AnimatedIconWithPreview from '../common/AnimatedIconWithPreview';
 import PasswordForm from '../common/PasswordForm';
-import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import Link from '../ui/Link';
 
 import styles from './LockScreen.module.scss';
+
 import lockPreviewUrl from '../../assets/lock.png';
 
 export type OwnProps = {

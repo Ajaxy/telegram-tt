@@ -1,25 +1,24 @@
 import type {
   ApiChat,
-  ApiUser,
-  ApiChatBannedRights,
   ApiChatAdminRights,
+  ApiChatBannedRights,
   ApiChatFolder,
   ApiTopic,
+  ApiUser,
 } from '../../api/types';
+import type { LangFn } from '../../hooks/useLang';
+import type { NotifyException, NotifySettings } from '../../types';
 import {
   MAIN_THREAD_ID,
 } from '../../api/types';
 
-import type { NotifyException, NotifySettings } from '../../types';
-import type { LangFn } from '../../hooks/useLang';
-
 import {
   ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
-import { orderBy } from '../../util/iteratees';
-import { getUserFirstOrLastName } from './users';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
+import { orderBy } from '../../util/iteratees';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 

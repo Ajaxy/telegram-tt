@@ -7,8 +7,9 @@ import type { ProfileTabType, SharedMediaType } from '../../../types';
 
 import { MEMBERS_SLICE, MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getMessageContentIds, sortChatIds, sortUserIds } from '../../../global/helpers';
-import useSyncEffect from '../../../hooks/useSyncEffect';
+
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 export default function useProfileViewportIds(
   loadMoreMembers: AnyToVoidFunction,

@@ -1,17 +1,16 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { GlobalState, MessageListType } from '../../global/types';
-import type { Signal } from '../../util/signals';
 import type {
   ApiChat, ApiMessage, ApiTypingStatus, ApiUser,
 } from '../../api/types';
-import { StoryViewerOrigin } from '../../types';
+import type { GlobalState, MessageListType } from '../../global/types';
+import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
+import { StoryViewerOrigin } from '../../types';
 
 import {
   EDITABLE_INPUT_CSS_SELECTOR,
@@ -22,6 +21,7 @@ import {
   SAFE_SCREEN_WIDTH_FOR_CHAT_INFO,
   SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
 } from '../../config';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
   getChatTitle,
   getMessageKey,
@@ -35,7 +35,6 @@ import {
   selectChat,
   selectChatMessage,
   selectChatMessages,
-  selectTabState,
   selectForwardedSender,
   selectIsChatBotNotStarted,
   selectIsChatWithBot,
@@ -45,36 +44,37 @@ import {
   selectIsUserBlocked,
   selectPinnedIds,
   selectScheduledIds,
+  selectTabState,
   selectThreadInfo,
   selectThreadParam,
   selectThreadTopMessageId,
 } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 import cycleRestrict from '../../util/cycleRestrict';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import { useFastClick } from '../../hooks/useFastClick';
-import useEnsureMessage from '../../hooks/useEnsureMessage';
-import useWindowSize from '../../hooks/useWindowSize';
-import useShowTransition from '../../hooks/useShowTransition';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
-import useConnectionStatus from '../../hooks/useConnectionStatus';
-import usePrevious from '../../hooks/usePrevious';
-import useElectronDrag from '../../hooks/useElectronDrag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useConnectionStatus from '../../hooks/useConnectionStatus';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useDerivedState from '../../hooks/useDerivedState';
+import useElectronDrag from '../../hooks/useElectronDrag';
+import useEnsureMessage from '../../hooks/useEnsureMessage';
+import { useFastClick } from '../../hooks/useFastClick';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevious from '../../hooks/usePrevious';
+import useShowTransition from '../../hooks/useShowTransition';
+import useWindowSize from '../../hooks/useWindowSize';
 
-import PrivateChatInfo from '../common/PrivateChatInfo';
+import GroupCallTopPane from '../calls/group/GroupCallTopPane';
 import GroupChatInfo from '../common/GroupChatInfo';
+import PrivateChatInfo from '../common/PrivateChatInfo';
 import UnreadCounter from '../common/UnreadCounter';
-import Transition from '../ui/Transition';
 import Button from '../ui/Button';
+import Transition from '../ui/Transition';
+import AudioPlayer from './AudioPlayer';
+import ChatReportPanel from './ChatReportPanel';
 import HeaderActions from './HeaderActions';
 import HeaderPinnedMessage from './HeaderPinnedMessage';
-import AudioPlayer from './AudioPlayer';
-import GroupCallTopPane from '../calls/group/GroupCallTopPane';
-import ChatReportPanel from './ChatReportPanel';
 
 import './MiddleHeader.scss';
 

@@ -1,9 +1,9 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiUser } from '../../api/types';
 
 import { getUserFullName } from '../../global/helpers';

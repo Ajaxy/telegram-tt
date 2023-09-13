@@ -1,21 +1,21 @@
+import type { TeactNode } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 
-import type { TeactNode } from '../../../lib/teact/teact';
 import type { TextPart } from '../../../types';
 
-import EMOJI_REGEX from '../../../lib/twemojiRegex';
 import {
   IS_ELECTRON, PRODUCTION_URL, RE_LINK_TEMPLATE, RE_MENTION_TEMPLATE,
 } from '../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
+import EMOJI_REGEX from '../../../lib/twemojiRegex';
+import buildClassName from '../../../util/buildClassName';
 import {
   fixNonStandardEmoji,
   handleEmojiLoad,
   LOADED_EMOJIS,
   nativeToUnifiedExtendedWithCache,
 } from '../../../util/emoji';
-import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
+import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 
 import MentionLink from '../../middle/message/MentionLink';
 import SafeLink from '../SafeLink';

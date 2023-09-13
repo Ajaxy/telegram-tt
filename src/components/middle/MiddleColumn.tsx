@@ -1,38 +1,46 @@
 import React, {
-  useEffect, useState, memo, useMemo,
+  memo, useEffect, useMemo,
+  useState,
 } from '../../lib/teact/teact';
-import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatBannedRights } from '../../api/types';
-import { MAIN_THREAD_ID } from '../../api/types';
 import type {
-  MessageListType,
   ActiveEmojiInteraction,
+  MessageListType,
 } from '../../global/types';
 import type { ThemeKey } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  MOBILE_SCREEN_MAX_WIDTH,
-  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
-  SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   ANIMATION_END_DELAY,
-  SUPPORTED_IMAGE_CONTENT_TYPES,
-  GENERAL_TOPIC_ID,
-  TMP_CHAT_ID,
-  MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
-  EDITABLE_INPUT_ID,
   EDITABLE_INPUT_CSS_SELECTOR,
+  EDITABLE_INPUT_ID,
+  GENERAL_TOPIC_ID,
   IS_ELECTRON,
+  MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
+  MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  MOBILE_SCREEN_MAX_WIDTH,
+  SAFE_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
+  SUPPORTED_IMAGE_CONTENT_TYPES,
+  TMP_CHAT_ID,
 } from '../../config';
+import { requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
-} from '../../util/windowEnvironment';
-import { DropAreaState } from './composer/DropArea';
+  getCanPostInChat,
+  getForumComposerPlaceholder,
+  getHasAdminRight,
+  getMessageSendingRestrictionReason,
+  isChatChannel,
+  isChatGroup,
+  isChatSuperGroup,
+  isUserId,
+  isUserRightBanned,
+} from '../../global/helpers';
 import {
+  selectBot,
   selectCanAnimateInterface,
   selectChat,
-  selectBot,
   selectChatFullInfo,
   selectChatMessage,
   selectCurrentMessageList,
@@ -48,52 +56,44 @@ import {
   selectThreadInfo,
   selectThreadTopMessageId,
 } from '../../global/selectors';
-import {
-  getCanPostInChat,
-  getMessageSendingRestrictionReason,
-  getForumComposerPlaceholder,
-  isChatChannel,
-  isChatGroup,
-  isChatSuperGroup,
-  isUserId,
-  isUserRightBanned,
-  getHasAdminRight,
-} from '../../global/helpers';
-import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
+import {
+  IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+} from '../../util/windowEnvironment';
+import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useCustomBackground from '../../hooks/useCustomBackground';
-import useWindowSize from '../../hooks/useWindowSize';
-import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import useLang from '../../hooks/useLang';
-import useHistoryBack from '../../hooks/useHistoryBack';
-import usePrevious from '../../hooks/usePrevious';
-import useForceUpdate from '../../hooks/useForceUpdate';
-import useSyncEffect from '../../hooks/useSyncEffect';
 import useAppLayout from '../../hooks/useAppLayout';
-import usePinnedMessage from './hooks/usePinnedMessage';
+import useCustomBackground from '../../hooks/useCustomBackground';
+import useForceUpdate from '../../hooks/useForceUpdate';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
+import usePrevious from '../../hooks/usePrevious';
 import { useResize } from '../../hooks/useResize';
+import useSyncEffect from '../../hooks/useSyncEffect';
+import useWindowSize from '../../hooks/useWindowSize';
+import usePinnedMessage from './hooks/usePinnedMessage';
 
-import Transition from '../ui/Transition';
-import MiddleHeader from './MiddleHeader';
-import MessageList from './MessageList';
-import FloatingActionButtons from './FloatingActionButtons';
-import Button from '../ui/Button';
-import MobileSearch from './MobileSearch.async';
-import MessageSelectToolbar from './MessageSelectToolbar.async';
-import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
-import SeenByModal from '../common/SeenByModal.async';
-import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
-import ReactorListModal from './ReactorListModal.async';
-import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
-import ChatLanguageModal from './ChatLanguageModal.async';
 import Composer from '../common/Composer';
+import SeenByModal from '../common/SeenByModal.async';
+import UnpinAllMessagesModal from '../common/UnpinAllMessagesModal.async';
+import GiftPremiumModal from '../main/premium/GiftPremiumModal.async';
+import Button from '../ui/Button';
+import Transition from '../ui/Transition';
+import ChatLanguageModal from './ChatLanguageModal.async';
+import { DropAreaState } from './composer/DropArea';
+import EmojiInteractionAnimation from './EmojiInteractionAnimation.async';
+import FloatingActionButtons from './FloatingActionButtons';
+import MessageList from './MessageList';
+import MessageSelectToolbar from './MessageSelectToolbar.async';
+import MiddleHeader from './MiddleHeader';
+import MobileSearch from './MobileSearch.async';
+import ReactorListModal from './ReactorListModal.async';
 
 import './MiddleColumn.scss';
-
 import styles from './MiddleColumn.module.scss';
 
 interface OwnProps {

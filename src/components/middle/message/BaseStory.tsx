@@ -3,17 +3,17 @@ import { getActions } from '../../../global';
 
 import type { ApiMessageStoryData, ApiTypeStory } from '../../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import { getStoryMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 
-import useMedia from '../../../hooks/useMedia';
-import useLastCallback from '../../../hooks/useLastCallback';
-import useLang from '../../../hooks/useLang';
-import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 
 import styles from './BaseStory.module.scss';

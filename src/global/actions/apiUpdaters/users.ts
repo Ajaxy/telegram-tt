@@ -1,13 +1,12 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
 import type { ApiUserStatus } from '../../../api/types';
+import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
+import { throttle } from '../../../util/schedulers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   deleteContact, replaceUserStatuses, toggleUserStoriesHidden, updateUser, updateUserFullInfo,
 } from '../../reducers';
-import { throttle } from '../../../util/schedulers';
 import { selectIsCurrentUserPremium, selectUser, selectUserFullInfo } from '../../selectors';
-import type { ActionReturnType, RequiredGlobalState } from '../../types';
 
 const STATUS_UPDATE_THROTTLE = 3000;
 

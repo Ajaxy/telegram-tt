@@ -1,20 +1,20 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
+import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
-import type { ApiVideo, ApiSticker } from '../../../api/types';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_MODAL_CSS_SELECTOR } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
 
 import Button from '../../ui/Button';
-import Spinner from '../../ui/Spinner';
 import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
+import Spinner from '../../ui/Spinner';
 import SymbolMenu from './SymbolMenu.async';
 
 const MOBILE_KEYBOARD_HIDE_DELAY_MS = 100;

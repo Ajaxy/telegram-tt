@@ -1,16 +1,17 @@
 import type { ChangeEvent } from 'react';
-import useRunDebounced from '../../../hooks/useRunDebounced';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 import {
-  playNotifySound,
   checkIfNotificationsSupported,
   checkIfOfflinePushFailed,
+  playNotifySound,
 } from '../../../util/notifications';
+
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useRunDebounced from '../../../hooks/useRunDebounced';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';

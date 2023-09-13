@@ -4,15 +4,15 @@ import { withGlobal } from '../../../../global';
 import type { ApiUser } from '../../../../api/types';
 
 import { selectUser } from '../../../../global/selectors';
-import { REM } from '../../../common/helpers/mediaDimensions';
-import { DPR } from '../../../../util/windowEnvironment';
-import { drawGradientCircle } from '../../../common/AvatarStoryCircle';
 import buildClassName from '../../../../util/buildClassName';
+import { DPR } from '../../../../util/windowEnvironment';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
 import useLang from '../../../../hooks/useLang';
 import useScrolledState from '../../../../hooks/useScrolledState';
 
 import Avatar from '../../../common/Avatar';
+import { drawGradientCircle } from '../../../common/AvatarStoryCircle';
 import PremiumFeatureItem from '../PremiumFeatureItem';
 
 import styles from './PremiumFeaturePreviewStories.module.scss';

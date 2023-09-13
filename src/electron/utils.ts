@@ -1,5 +1,5 @@
-import { app } from 'electron';
 import type { BrowserWindow, Point } from 'electron';
+import { app } from 'electron';
 
 import type { TrafficLightPosition } from '../types/electron';
 

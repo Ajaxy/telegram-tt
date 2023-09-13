@@ -1,26 +1,25 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
-import { callApi } from '../../../api/gramjs';
 import type {
-  ApiChat, ApiTopic, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
+  ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
+import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
+import { timestampPlusDay } from '../../../util/dateFormat';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { throttle } from '../../../util/schedulers';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
   addMessages,
   addUsers,
-  updateTopics,
   updateGlobalSearch,
   updateGlobalSearchFetchingStatus,
   updateGlobalSearchResults,
+  updateTopics,
 } from '../../reducers';
-import { throttle } from '../../../util/schedulers';
 import { selectChat, selectCurrentGlobalSearchQuery, selectTabState } from '../../selectors';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
-import { timestampPlusDay } from '../../../util/dateFormat';
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 

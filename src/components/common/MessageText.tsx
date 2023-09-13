@@ -4,11 +4,12 @@ import React, {
 
 import type { ApiFormattedText, ApiMessage, ApiStory } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-
 import { ApiMessageEntityTypes } from '../../api/types';
-import trimText from '../../util/trimText';
+
 import { extractMessageText, getMessageText, stripCustomEmoji } from '../../global/helpers';
+import trimText from '../../util/trimText';
 import { renderTextWithEntities } from './helpers/renderTextWithEntities';
+
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useUniqueId from '../../hooks/useUniqueId';
 

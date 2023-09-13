@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from '../lib/teact/teact';
 import type { Scheduler } from '../util/schedulers';
 
 import {
-  throttle, debounce, throttleWith,
+  debounce, throttle, throttleWith,
 } from '../util/schedulers';
 import useHeavyAnimationCheck from './useHeavyAnimationCheck';
 import useLastCallback from './useLastCallback';

@@ -1,17 +1,17 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 
 import { getMessageInvoice } from '../../../global/helpers';
-import { formatCurrency } from '../../../util/formatCurrency';
-import { formatMediaDuration } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
+import { formatMediaDuration } from '../../../util/dateFormat';
+import { formatCurrency } from '../../../util/formatCurrency';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useLang from '../../../hooks/useLang';
 import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import MediaSpoiler from '../../common/MediaSpoiler';
 

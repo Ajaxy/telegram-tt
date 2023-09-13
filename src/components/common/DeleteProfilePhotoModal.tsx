@@ -1,13 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiPhoto } from '../../api/types';
+
+import { isUserId } from '../../global/helpers';
+
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { isUserId } from '../../global/helpers';
+import Modal from '../ui/Modal';
 
 export type OwnProps = {
   isOpen: boolean;

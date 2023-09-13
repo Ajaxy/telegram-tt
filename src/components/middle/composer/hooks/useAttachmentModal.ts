@@ -3,13 +3,13 @@ import { getActions } from '../../../../global';
 
 import type { ApiAttachment } from '../../../../api/types';
 
-import buildAttachment from '../helpers/buildAttachment';
-import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
 import {
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../../config';
+import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
+import buildAttachment from '../helpers/buildAttachment';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 

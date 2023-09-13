@@ -1,8 +1,9 @@
-import type { GlobalState, TabArgs } from '../types';
 import type { InlineBotSettings } from '../../types';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 export function replaceInlineBotSettings<T extends GlobalState>(
   global: T, username: string, inlineBotSettings: InlineBotSettings | false,

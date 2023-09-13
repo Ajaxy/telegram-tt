@@ -1,11 +1,9 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import { formatMediaDuration } from '../../util/dateFormat';
-import stopEvent from '../../util/stopEvent';
 import {
   getMessageHtmlId,
   getMessageIsSpoiler,
@@ -14,12 +12,14 @@ import {
   getMessageVideo,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { formatMediaDuration } from '../../util/dateFormat';
+import stopEvent from '../../util/stopEvent';
 
+import useFlag from '../../hooks/useFlag';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import useFlag from '../../hooks/useFlag';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 
 import MediaSpoiler from './MediaSpoiler';
 

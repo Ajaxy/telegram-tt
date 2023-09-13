@@ -1,11 +1,12 @@
-import type { GlobalState, TabState, TabArgs } from '../types';
-import type { ShippingOption, PaymentStep } from '../../types';
 import type {
   ApiInvoice, ApiMessage, ApiPaymentForm, ApiReceipt,
 } from '../../api/types';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { PaymentStep, ShippingOption } from '../../types';
+import type { GlobalState, TabArgs, TabState } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 export function updatePayment<T extends GlobalState>(
   global: T, update: Partial<TabState['payment']>,

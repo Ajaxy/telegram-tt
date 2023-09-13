@@ -1,12 +1,12 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { createClassNameBuilder } from '../../../util/buildClassName';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import './Spoiler.scss';
 

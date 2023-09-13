@@ -1,20 +1,22 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, useCallback, useRef, memo,
+  memo,
+  useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
 import { getUserFirstOrLastName } from '../../../global/helpers';
-import renderText from '../../common/helpers/renderText';
-import { throttle } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
+import { throttle } from '../../../util/schedulers';
+import renderText from '../../common/helpers/renderText';
+
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useLang from '../../../hooks/useLang';
 
-import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
+import Button from '../../ui/Button';
 import LeftSearchResultChat from './LeftSearchResultChat';
 
 import './RecentContacts.scss';

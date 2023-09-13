@@ -1,5 +1,5 @@
-import { useHotkeys } from './useHotkeys';
 import getMessageIdsForSelectedText from '../util/getMessageIdsForSelectedText';
+import { useHotkeys } from './useHotkeys';
 
 const useNativeCopySelectedMessages = (copyMessagesByIds: ({ messageIds }: { messageIds?: number[] }) => void) => {
   function handleCopy(e: KeyboardEvent) {

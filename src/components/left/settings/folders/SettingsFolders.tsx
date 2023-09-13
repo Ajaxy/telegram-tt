@@ -1,16 +1,16 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
-import type { FC } from '../../../../lib/teact/teact';
 import type { ApiChatFolder } from '../../../../api/types';
-import { SettingsScreens } from '../../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../../hooks/reducers/useFoldersReducer';
+import { SettingsScreens } from '../../../../types';
 
 import { selectChatFilters } from '../../../../hooks/reducers/useFoldersReducer';
 
-import SettingsFoldersMain from './SettingsFoldersMain';
-import SettingsFoldersEdit, { ERROR_NO_CHATS, ERROR_NO_TITLE } from './SettingsFoldersEdit';
 import SettingsFoldersChatFilters from './SettingsFoldersChatFilters';
+import SettingsFoldersEdit, { ERROR_NO_CHATS, ERROR_NO_TITLE } from './SettingsFoldersEdit';
+import SettingsFoldersMain from './SettingsFoldersMain';
 import SettingsShareChatlist from './SettingsShareChatlist';
 
 import './SettingsFolders.scss';

@@ -1,6 +1,6 @@
 import {
-  IS_TEST,
   IS_ELECTRON,
+  IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../config';
 

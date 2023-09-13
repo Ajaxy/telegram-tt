@@ -1,16 +1,17 @@
 import type { RefObject, UIEvent } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, {
   useEffect, useLayoutEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
-import { requestForcedReflow } from '../../lib/fasterdom/fasterdom';
 
 import { LoadMoreDirection } from '../../types';
-import type { FC } from '../../lib/teact/teact';
 
-import { debounce } from '../../util/schedulers';
-import resetScroll from '../../util/resetScroll';
-import { IS_ANDROID } from '../../util/windowEnvironment';
+import { requestForcedReflow } from '../../lib/fasterdom/fasterdom';
 import buildStyle from '../../util/buildStyle';
+import resetScroll from '../../util/resetScroll';
+import { debounce } from '../../util/schedulers';
+import { IS_ANDROID } from '../../util/windowEnvironment';
+
 import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {

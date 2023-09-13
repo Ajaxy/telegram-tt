@@ -1,23 +1,23 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiMessage } from '../../api/types';
 import type { TextPart } from '../../types';
-import { MediaViewerOrigin, SettingsScreens } from '../../types';
 import { ApiMediaFormat, MAIN_THREAD_ID } from '../../api/types';
+import { MediaViewerOrigin, SettingsScreens } from '../../types';
 
 import { getMessageMediaHash } from '../../global/helpers';
 import * as mediaLoader from '../../util/mediaLoader';
 
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
 
 import Avatar from '../common/Avatar';
-import CropModal from '../ui/CropModal';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import CropModal from '../ui/CropModal';
 
 type OwnProps = {
   message: ApiMessage;

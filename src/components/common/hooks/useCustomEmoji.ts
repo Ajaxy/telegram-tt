@@ -1,14 +1,14 @@
 import { useEffect, useState } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
-import type { GlobalState } from '../../../global/types';
 import type { ApiSticker } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
 import { addCustomEmojiCallback, removeCustomEmojiCallback } from '../../../util/customEmojiManager';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useEnsureCustomEmoji from '../../../hooks/useEnsureCustomEmoji';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 export default function useCustomEmoji(documentId?: string) {
   const [customEmoji, setCustomEmoji] = useState<ApiSticker | undefined>(

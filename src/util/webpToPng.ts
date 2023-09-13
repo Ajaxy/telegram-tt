@@ -1,6 +1,6 @@
-import { isWebpSupported } from './windowEnvironment';
-import { dataUriToBlob, blobToDataUri } from './files';
+import { blobToDataUri, dataUriToBlob } from './files';
 import { pause } from './schedulers';
+import { isWebpSupported } from './windowEnvironment';
 
 const WORKER_INITIALIZATION_TIMEOUT = 2000;
 

@@ -6,11 +6,11 @@ import type { LangCode, TimeFormat } from '../types';
 import {
   DEFAULT_LANG_CODE, DEFAULT_LANG_PACK, LANG_CACHE_NAME, LANG_PACKS,
 } from '../config';
-import * as cacheApi from './cacheApi';
 import { callApi } from '../api/gramjs';
+import * as cacheApi from './cacheApi';
 import { createCallbackManager } from './callbacks';
-import { formatInteger } from './textFormat';
 import { fallbackLangPackInitial } from './fallbackLangPackInitial';
+import { formatInteger } from './textFormat';
 
 export interface LangFn {
   (key: string, value?: any, format?: 'i', pluralValue?: number): string;

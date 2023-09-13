@@ -1,11 +1,10 @@
-import React, { memo, useRef } from '../../lib/teact/teact';
-
 import type { FC } from '../../lib/teact/teact';
+import React, { memo, useRef } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
+import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import styles from './MediaSpoiler.module.scss';

@@ -1,11 +1,9 @@
-import { requestMutation } from '../lib/fasterdom/fasterdom';
-
 import type { ISettings } from '../types';
 
+import { requestMutation } from '../lib/fasterdom/fasterdom';
+import themeColors from '../styles/themes.json';
 import { animate } from './animation';
 import { lerp } from './math';
-
-import themeColors from '../styles/themes.json';
 
 type RGBAColor = {
   r: number;

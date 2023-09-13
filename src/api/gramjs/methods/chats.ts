@@ -1,76 +1,76 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
-  OnApiUpdate,
   ApiChat,
-  ApiMessage,
-  ApiUser,
-  ApiMessageEntity,
-  ApiFormattedText,
-  ApiChatFullInfo,
-  ApiChatFolder,
-  ApiChatBannedRights,
   ApiChatAdminRights,
+  ApiChatBannedRights,
+  ApiChatFolder,
+  ApiChatFullInfo,
+  ApiChatReactions,
+  ApiFormattedText,
   ApiGroupCall,
-  ApiUserStatus,
+  ApiMessage,
+  ApiMessageEntity,
   ApiPhoto,
   ApiTopic,
-  ApiChatReactions,
+  ApiUser,
+  ApiUserStatus,
+  OnApiUpdate,
 } from '../../types';
 
 import {
-  DEBUG,
+  ALL_FOLDER_ID,
   ARCHIVED_FOLDER_ID,
+  DEBUG,
+  GENERAL_TOPIC_ID,
+  MAX_INT_32,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
-  ALL_FOLDER_ID,
-  MAX_INT_32,
   TOPICS_SLICE,
-  GENERAL_TOPIC_ID,
 } from '../../../config';
-import { invokeRequest, uploadFile } from './client';
-import {
-  buildApiChatFromDialog,
-  getPeerKey,
-  buildChatMembers,
-  buildApiChatFromPreview,
-  buildApiChatFolder,
-  buildApiChatFolderFromSuggested,
-  buildApiChatBotCommands,
-  buildApiChatSettings,
-  buildApiChatReactions,
-  buildApiTopic,
-  buildApiChatlistInvite,
-  buildApiChatlistExportedInvite,
-} from '../apiBuilders/chats';
-import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
-import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
+  buildApiChatBotCommands,
+  buildApiChatFolder,
+  buildApiChatFolderFromSuggested,
+  buildApiChatFromDialog,
+  buildApiChatFromPreview,
+  buildApiChatlistExportedInvite,
+  buildApiChatlistInvite,
+  buildApiChatReactions,
+  buildApiChatSettings,
+  buildApiTopic,
+  buildChatMembers,
+  getPeerKey,
+} from '../apiBuilders/chats';
+import { buildApiPhoto } from '../apiBuilders/common';
+import { buildApiMessage, buildMessageDraft } from '../apiBuilders/messages';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
+import { buildStickerSet } from '../apiBuilders/symbols';
+import { buildApiUser, buildApiUsersAndStatuses } from '../apiBuilders/users';
+import {
+  buildChatAdminRights,
+  buildChatBannedRights,
+  buildFilterFromApiFolder,
+  buildInputChatReactions,
   buildInputEntity,
   buildInputPeer,
-  buildMtpMessageEntity,
-  buildFilterFromApiFolder,
-  isMessageWithMedia,
-  buildChatBannedRights,
-  buildChatAdminRights,
-  buildInputChatReactions,
   buildInputPhoto,
+  buildMtpMessageEntity,
   generateRandomBigInt,
+  isMessageWithMedia,
 } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
   addPhotoToLocalDb,
   isChatFolder,
-
 } from '../helpers';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
-import { buildApiPhoto } from '../apiBuilders/common';
-import { buildStickerSet } from '../apiBuilders/symbols';
 import localDb from '../localDb';
-import { updateChannelState } from '../updateManager';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
+import { updateChannelState } from '../updateManager';
+import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
   fullInfo: ApiChatFullInfo;

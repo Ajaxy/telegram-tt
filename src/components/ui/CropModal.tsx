@@ -1,15 +1,16 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, useState, memo, useCallback,
+  memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 
 import { DEBUG } from '../../config';
-import { blobToFile, blobToDataUri } from '../../util/files';
+import { blobToDataUri, blobToFile } from '../../util/files';
+
 import useLang from '../../hooks/useLang';
 
 import Button from './Button';
-import Modal from './Modal';
 import Loading from './Loading';
+import Modal from './Modal';
 
 import './CropModal.scss';
 

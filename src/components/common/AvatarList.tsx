@@ -1,10 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
-import type { AvatarSize } from './Avatar';
 import type { ApiChat, ApiUser } from '../../api/types';
+import type { AvatarSize } from './Avatar';
 
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';

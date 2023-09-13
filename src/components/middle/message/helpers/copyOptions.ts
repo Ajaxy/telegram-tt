@@ -1,9 +1,7 @@
 import type { ApiMessage } from '../../../../api/types';
+import type { IconName } from '../../../../types/icons';
 import { ApiMediaFormat } from '../../../../api/types';
 
-import type { IconName } from '../../../../types/icons';
-
-import * as mediaLoader from '../../../../util/mediaLoader';
 import {
   getMessageContact,
   getMessageMediaHash,
@@ -21,6 +19,7 @@ import {
   copyTextToClipboard,
 } from '../../../../util/clipboard';
 import getMessageIdsForSelectedText from '../../../../util/getMessageIdsForSelectedText';
+import * as mediaLoader from '../../../../util/mediaLoader';
 import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {

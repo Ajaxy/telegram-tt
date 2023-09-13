@@ -3,15 +3,16 @@ import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiSticker } from '../../../api/types';
-import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import { SettingsScreens } from '../../../types';
 
 import { selectAnimatedEmoji, selectChatFolder } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useAppLayout from '../../../hooks/useAppLayout';
 
-import Button from '../../ui/Button';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
+
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
+import Button from '../../ui/Button';
 
 import styles from './EmptyFolder.module.scss';
 

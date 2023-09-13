@@ -1,16 +1,18 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact';
-import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
+
 import type { MenuItemContextAction } from './ListItem';
 
-import { MouseButton } from '../../util/windowEnvironment';
-import forceReflow from '../../util/forceReflow';
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
+import forceReflow from '../../util/forceReflow';
+import { MouseButton } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
-import useMenuPosition from '../../hooks/useMenuPosition';
+
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useFastClick } from '../../hooks/useFastClick';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMenuPosition from '../../hooks/useMenuPosition';
 
 import Menu from './Menu';
 import MenuItem from './MenuItem';

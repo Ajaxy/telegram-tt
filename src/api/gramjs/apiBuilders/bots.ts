@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiAttachBot,
   ApiAttachBotIcon,
@@ -15,12 +16,12 @@ import type {
 } from '../../types';
 
 import { pick } from '../../../util/iteratees';
-import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
-import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
-import { buildStickerFromDocument } from './symbols';
 import localDb from '../localDb';
-import { buildApiPeerId } from './peers';
+import { buildApiPhoto, buildApiThumbnailFromStripped } from './common';
 import { omitVirtualClassFields } from './helpers';
+import { buildApiDocument, buildApiWebDocument, buildVideoFromDocument } from './messageContent';
+import { buildApiPeerId } from './peers';
+import { buildStickerFromDocument } from './symbols';
 
 export function buildApiBotInlineResult(result: GramJs.BotInlineResult, queryId: string): ApiBotInlineResult {
   const {

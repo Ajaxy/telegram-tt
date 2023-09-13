@@ -1,30 +1,34 @@
 /* eslint-disable eslint-multitab-tt/no-immediate-global */
 import { addCallback, removeCallback } from '../lib/teact/teactn';
 
-import { addActionHandler, getGlobal } from './index';
-
 import type { ActionReturnType, GlobalState, MessageList } from './types';
 import { MAIN_THREAD_ID } from '../api/types';
 
-import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';
 import {
+  ALL_FOLDER_ID,
+  ANIMATION_LEVEL_MED,
+  ANIMATION_LEVEL_MIN,
+  ARCHIVED_FOLDER_ID,
   DEBUG,
-  GLOBAL_STATE_CACHE_DISABLED,
-  GLOBAL_STATE_CACHE_KEY,
-  GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
+  DEFAULT_LIMITS,
   GLOBAL_STATE_CACHE_CHAT_LIST_LIMIT,
   GLOBAL_STATE_CACHE_CHATS_WITH_MESSAGES_LIMIT,
   GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT,
-  ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID,
-  DEFAULT_LIMITS,
-  ANIMATION_LEVEL_MIN,
-  ANIMATION_LEVEL_MED,
+  GLOBAL_STATE_CACHE_DISABLED,
+  GLOBAL_STATE_CACHE_KEY,
+  GLOBAL_STATE_CACHE_USER_LIST_LIMIT,
 } from '../config';
-import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
+import { getOrderedIds } from '../util/folderManager';
 import {
   compact, pick, pickTruthy, unique,
 } from '../util/iteratees';
+import { encryptSession } from '../util/passcode';
+import { onBeforeUnload, onIdle, throttle } from '../util/schedulers';
+import { hasStoredSession } from '../util/sessions';
+import { isUserId } from './helpers';
+import { addActionHandler, getGlobal } from './index';
+import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANCE_STATE_MIN } from './initialState';
+import { clearGlobalForLockScreen } from './reducers';
 import {
   selectChat,
   selectChatMessages,
@@ -32,13 +36,9 @@ import {
   selectThreadOriginChat,
   selectVisibleUsers,
 } from './selectors';
-import { hasStoredSession } from '../util/sessions';
-import { INITIAL_GLOBAL_STATE, INITIAL_PERFORMANCE_STATE_MID, INITIAL_PERFORMANCE_STATE_MIN } from './initialState';
-import { isUserId } from './helpers';
-import { getOrderedIds } from '../util/folderManager';
-import { clearGlobalForLockScreen } from './reducers';
-import { encryptSession } from '../util/passcode';
+
 import { getIsMobile } from '../hooks/useAppLayout';
+import { isHeavyAnimating } from '../hooks/useHeavyAnimationCheck';
 
 const UPDATE_THROTTLE = 5000;
 

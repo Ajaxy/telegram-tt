@@ -1,11 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useState, useRef, useCallback, useMemo,
+  useCallback, useMemo,
+  useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
-
-import Menu from './Menu';
 import Button from './Button';
+import Menu from './Menu';
 
 import './DropdownMenu.scss';
 

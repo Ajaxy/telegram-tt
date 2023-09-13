@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, useMemo, memo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
@@ -9,14 +9,15 @@ import type {
 } from '../../api/types';
 import { NewChatMembersProgress } from '../../types';
 
-import { unique } from '../../util/iteratees';
-import { selectChat, selectChatFullInfo, selectTabState } from '../../global/selectors';
 import {
   filterUsersByName, isChatChannel, isUserBot, sortChatIds,
 } from '../../global/helpers';
+import { selectChat, selectChatFullInfo, selectTabState } from '../../global/selectors';
+import { unique } from '../../util/iteratees';
+
+import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Picker from '../common/Picker';
 import FloatingActionButton from '../ui/FloatingActionButton';

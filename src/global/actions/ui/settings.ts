@@ -1,22 +1,22 @@
 import { addCallback } from '../../../lib/teact/teactn';
+
+import type { ActionReturnType, GlobalState } from '../../types';
+import { SettingsScreens } from '../../../types';
+
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { setLanguage, setTimeFormat } from '../../../util/langProvider';
+import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
+import switchTheme from '../../../util/switchTheme';
+import { IS_IOS } from '../../../util/windowEnvironment';
+import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
-
-import { SettingsScreens } from '../../../types';
-import type { ActionReturnType, GlobalState } from '../../types';
-
 import { replaceSettings, replaceThemeSettings } from '../../reducers';
-import switchTheme from '../../../util/switchTheme';
-import { setLanguage, setTimeFormat } from '../../../util/langProvider';
-import { IS_IOS } from '../../../util/windowEnvironment';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import { selectCanAnimateInterface, selectChatFolder } from '../../selectors';
-import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
-import { disableDebugConsole, initDebugConsole } from '../../../util/debugConsole';
 
 let prevGlobal: GlobalState | undefined;
 

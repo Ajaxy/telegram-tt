@@ -1,27 +1,27 @@
-import React, { useEffect, memo, useMemo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiUser, ApiTypingStatus, ApiUserStatus, ApiChatMember,
+  ApiChatMember, ApiTypingStatus, ApiUser, ApiUserStatus,
 } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
-import { MediaViewerOrigin } from '../../types';
 import type { IconName } from '../../types/icons';
+import { MediaViewerOrigin } from '../../types';
 
-import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import { getMainUsername, getUserStatus, isUserOnline } from '../../global/helpers';
+import { selectChatMessages, selectUser, selectUserStatus } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
+import RippleEffect from '../ui/RippleEffect';
 import Avatar from './Avatar';
-import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
-import RippleEffect from '../ui/RippleEffect';
+import TypingStatus from './TypingStatus';
 
 type OwnProps = {
   userId: string;

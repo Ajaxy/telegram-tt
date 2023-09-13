@@ -1,5 +1,5 @@
-import type { TabState, GlobalState } from './types';
 import type { PerformanceType } from '../types';
+import type { GlobalState, TabState } from './types';
 import { NewChatMembersProgress } from '../types';
 
 import {

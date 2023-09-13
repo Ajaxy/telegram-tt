@@ -1,18 +1,19 @@
 import type { RefObject } from 'react';
 import type React from '../../../../lib/teact/teact';
-import type { Signal } from '../../../../util/signals';
-
 import { useEffect, useRef } from '../../../../lib/teact/teact';
-import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
+import type { Signal } from '../../../../util/signals';
+
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
+import { captureEvents, SwipeDirection } from '../../../../util/captureEvents';
+import stopEvent from '../../../../util/stopEvent';
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import windowSize from '../../../../util/windowSize';
-import { captureEvents, SwipeDirection } from '../../../../util/captureEvents';
-import useFlag from '../../../../hooks/useFlag';
-import { preventMessageInputBlur } from '../../helpers/preventMessageInputBlur';
-import stopEvent from '../../../../util/stopEvent';
 import { REM } from '../../../common/helpers/mediaDimensions';
+import { preventMessageInputBlur } from '../../helpers/preventMessageInputBlur';
+
+import useFlag from '../../../../hooks/useFlag';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
 
 const ANDROID_KEYBOARD_HIDE_DELAY_MS = 350;

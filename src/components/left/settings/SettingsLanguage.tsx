@@ -1,26 +1,26 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import { SettingsScreens } from '../../../types';
-import type { ISettings, LangCode } from '../../../types';
 import type { ApiLanguage } from '../../../api/types';
+import type { ISettings, LangCode } from '../../../types';
+import { SettingsScreens } from '../../../types';
 
+import { selectIsCurrentUserPremium } from '../../../global/selectors';
 import { setLanguage } from '../../../util/langProvider';
 import { IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
-import { selectIsCurrentUserPremium } from '../../../global/selectors';
 
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import RadioGroup from '../../ui/RadioGroup';
-import Loading from '../../ui/Loading';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
+import Loading from '../../ui/Loading';
+import RadioGroup from '../../ui/RadioGroup';
 
 type OwnProps = {
   isActive?: boolean;

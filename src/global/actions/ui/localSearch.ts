@@ -1,15 +1,15 @@
-import { addActionHandler } from '../../index';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { buildChatThreadKey } from '../../helpers';
+import { addActionHandler } from '../../index';
 import {
-  updateLocalTextSearch,
   replaceLocalTextSearchResults,
   updateLocalMediaSearchType,
+  updateLocalTextSearch,
 } from '../../reducers';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { selectCurrentMessageList, selectTabState } from '../../selectors';
-import { buildChatThreadKey } from '../../helpers';
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 addActionHandler('openLocalTextSearch', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};

@@ -1,13 +1,14 @@
 import type { ApiMessage } from '../../../../api/types';
-import { calculateInlineImageDimensions, calculateVideoDimensions, REM } from '../../../common/helpers/mediaDimensions';
+
 import {
-  getMessageText,
   getMessagePhoto,
-  getMessageWebPagePhoto,
-  isOwnMessage,
+  getMessageText,
   getMessageVideo,
+  getMessageWebPagePhoto,
   getMessageWebPageVideo,
+  isOwnMessage,
 } from '../../../../global/helpers';
+import { calculateInlineImageDimensions, calculateVideoDimensions, REM } from '../../../common/helpers/mediaDimensions';
 
 const SMALL_IMAGE_THRESHOLD = 12;
 const MIN_MESSAGE_LENGTH_FOR_BLUR = 40;

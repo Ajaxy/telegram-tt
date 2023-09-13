@@ -11,12 +11,13 @@ import { selectCurrentMessageList, selectTabState } from '../../global/selectors
 import getReadableErrorText from '../../util/getReadableErrorText';
 import { pick } from '../../util/iteratees';
 import renderText from '../common/helpers/renderText';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
 
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+
 import Avatar from '../common/Avatar';
+import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 
 type StateProps = {
   currentMessageList?: MessageList;

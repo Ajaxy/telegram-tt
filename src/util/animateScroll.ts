@@ -1,18 +1,19 @@
-import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { getGlobal } from '../global';
 
 import { FocusDirection } from '../types';
 
 import {
-  FAST_SMOOTH_MIN_DURATION,
-  FAST_SMOOTH_MAX_DURATION,
   FAST_SMOOTH_MAX_DISTANCE,
+  FAST_SMOOTH_MAX_DURATION,
+  FAST_SMOOTH_MIN_DURATION,
   FAST_SMOOTH_SHORT_TRANSITION_MAX_DISTANCE,
 } from '../config';
-import { IS_ANDROID } from './windowEnvironment';
-import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
-import { animateSingle, cancelSingleAnimation } from './animation';
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
+import { animateSingle, cancelSingleAnimation } from './animation';
+import { IS_ANDROID } from './windowEnvironment';
+
+import { dispatchHeavyAnimationEvent } from '../hooks/useHeavyAnimationCheck';
 
 type Params = Parameters<typeof createMutateFunction>;
 

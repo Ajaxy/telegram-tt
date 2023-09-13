@@ -1,17 +1,17 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChatFolder, ApiChatlistInviteAlready } from '../../../api/types';
 
-import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
 
-import Button from '../../ui/Button';
 import Picker from '../../common/Picker';
 import Badge from '../../ui/Badge';
+import Button from '../../ui/Button';
 
 import styles from './ChatlistModal.module.scss';
 

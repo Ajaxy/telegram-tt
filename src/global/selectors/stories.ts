@@ -1,5 +1,6 @@
-import type { GlobalState, TabArgs } from '../types';
 import type { ApiTypeStory, ApiUserStories } from '../../api/types';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from './tabs';
 

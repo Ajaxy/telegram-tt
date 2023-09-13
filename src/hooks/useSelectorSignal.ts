@@ -1,11 +1,11 @@
+import { addCallback } from '../lib/teact/teactn';
+import { getGlobal } from '../global';
+
 import type { GlobalState } from '../global/types';
 import type { Signal, SignalSetter } from '../util/signals';
 
-import { getGlobal } from '../global';
 import { createSignal } from '../util/signals';
-
 import useEffectOnce from './useEffectOnce';
-import { addCallback } from '../lib/teact/teactn';
 
 /*
   This hook is a more performant variation of the standard React `useSelector` hook. It allows to:

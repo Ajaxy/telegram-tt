@@ -1,12 +1,12 @@
-import { addActionHandler } from '../../index';
-
-import { IS_PRODUCTION_HOST } from '../../../util/windowEnvironment';
-import { closeInvoice } from '../../reducers';
-import * as langProvider from '../../../util/langProvider';
-import { formatCurrency } from '../../../util/formatCurrency';
-import { selectChatMessage, selectTabState } from '../../selectors';
-import { updateTabState } from '../../reducers/tabs';
 import type { ActionReturnType } from '../../types';
+
+import { formatCurrency } from '../../../util/formatCurrency';
+import * as langProvider from '../../../util/langProvider';
+import { IS_PRODUCTION_HOST } from '../../../util/windowEnvironment';
+import { addActionHandler } from '../../index';
+import { closeInvoice } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
+import { selectChatMessage, selectTabState } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {

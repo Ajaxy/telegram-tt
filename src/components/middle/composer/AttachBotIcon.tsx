@@ -1,12 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { ISettings } from '../../../types';
 import type { ApiDocument } from '../../../api/types';
+import type { ISettings } from '../../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getDocumentMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+
 import useAppLayout from '../../../hooks/useAppLayout';
 import useMedia from '../../../hooks/useMedia';
 

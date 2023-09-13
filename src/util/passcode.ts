@@ -1,5 +1,5 @@
-import * as cacheApi from './cacheApi';
 import { PASSCODE_CACHE_NAME } from '../config';
+import * as cacheApi from './cacheApi';
 
 const IV_LENGTH = 12;
 const SALT = 'harder better faster stronger';

@@ -1,17 +1,17 @@
 import type { IDimensions } from '../../../global/types';
 import { StoryViewerOrigin } from '../../../types';
-import { getUserStoryHtmlId } from '../../../global/helpers';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import fastBlur from '../../../lib/fastBlur';
-import windowSize from '../../../util/windowSize';
-import stopEvent from '../../../util/stopEvent';
 
 import { ANIMATION_END_DELAY } from '../../../config';
-import { REM } from '../../common/helpers/mediaDimensions';
+import fastBlur from '../../../lib/fastBlur';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { getUserStoryHtmlId } from '../../../global/helpers';
+import stopEvent from '../../../util/stopEvent';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
+import windowSize from '../../../util/windowSize';
+import { REM } from '../../common/helpers/mediaDimensions';
 
-import styles from '../StoryViewer.module.scss';
 import storyRibbonStyles from '../StoryRibbon.module.scss';
+import styles from '../StoryViewer.module.scss';
 
 const ANIMATION_DURATION = 200;
 const OFFSET_DESKTOP = 3.5 * REM;

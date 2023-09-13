@@ -1,9 +1,10 @@
+import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type { OwnProps as ButtonProps } from './Button';
 
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import Button from './Button';

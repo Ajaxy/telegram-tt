@@ -1,9 +1,10 @@
-import type { GlobalState, TabArgs } from '../types';
 import type { ApiSticker, ApiStickerSet, ApiVideo } from '../../api/types';
-import { buildCollectionByKey, unique } from '../../util/iteratees';
-import { selectTabState, selectCustomEmojiForEmoji, selectStickersForEmoji } from '../selectors';
-import { updateTabState } from './tabs';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { buildCollectionByKey, unique } from '../../util/iteratees';
+import { selectCustomEmojiForEmoji, selectStickersForEmoji, selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 export function updateStickerSearch<T extends GlobalState>(
   global: T,

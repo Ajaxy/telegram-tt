@@ -6,9 +6,9 @@ import type { IconName } from '../../types/icons';
 import { IS_TEST } from '../../config';
 import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import './MenuItem.scss';
 

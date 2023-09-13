@@ -3,17 +3,17 @@ import React, { memo, useCallback, useEffect } from '../../../../lib/teact/teact
 import { getActions, withGlobal } from '../../../../global';
 
 import type { GlobalState } from '../../../../global/types';
+import type { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
 import { SettingsScreens } from '../../../../types';
 
-import type { TwoFaDispatch, TwoFaState } from '../../../../hooks/reducers/useTwoFaReducer';
 import useLang from '../../../../hooks/useLang';
 
-import SettingsTwoFaEnabled from './SettingsTwoFaEnabled';
 import SettingsTwoFaPassword from '../SettingsPasswordForm';
-import SettingsTwoFaStart from './SettingsTwoFaStart';
-import SettingsTwoFaSkippableForm from './SettingsTwoFaSkippableForm';
 import SettingsTwoFaCongratulations from './SettingsTwoFaCongratulations';
 import SettingsTwoFaEmailCode from './SettingsTwoFaEmailCode';
+import SettingsTwoFaEnabled from './SettingsTwoFaEnabled';
+import SettingsTwoFaSkippableForm from './SettingsTwoFaSkippableForm';
+import SettingsTwoFaStart from './SettingsTwoFaStart';
 
 export type OwnProps = {
   state: TwoFaState;

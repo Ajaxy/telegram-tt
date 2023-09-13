@@ -2,10 +2,11 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+
+import Button from '../ui/Button';
 
 import styles from './SliderDots.module.scss';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
-import Button from '../ui/Button';
 
 type OwnProps = {
   length: number;

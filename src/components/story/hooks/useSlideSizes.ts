@@ -1,6 +1,8 @@
-import useWindowSize from '../../../hooks/useWindowSize';
 import { useMemo } from '../../../lib/teact/teact';
+
 import { calculateSlideSizes } from '../helpers/dimensions';
+
+import useWindowSize from '../../../hooks/useWindowSize';
 
 export default function useSlideSizes() {
   const { width: windowWidth, height: windowHeight } = useWindowSize();

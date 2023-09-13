@@ -1,8 +1,8 @@
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 
+import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useRunDebounced from '../../../hooks/useRunDebounced';
-import useFlag from '../../../hooks/useFlag';
 
 const DEBOUNCE = 1000;
 const STICKY_TOP = 10;

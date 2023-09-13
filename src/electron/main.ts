@@ -5,8 +5,8 @@ import contextMenu from 'electron-context-menu';
 import path from 'path';
 
 import { initDeeplink } from './deeplink';
-import { createWindow, setupCloseHandlers, setupElectronActionHandlers } from './window';
 import { IS_MAC_OS, IS_WINDOWS } from './utils';
+import { createWindow, setupCloseHandlers, setupElectronActionHandlers } from './window';
 
 initDeeplink();
 

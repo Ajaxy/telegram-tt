@@ -1,12 +1,13 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
 
-import { selectCurrentChat, selectUser } from '../../global/selectors';
 import { getUserFirstOrLastName } from '../../global/helpers';
+import { selectCurrentChat, selectUser } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
 import ConfirmDialog from '../ui/ConfirmDialog';

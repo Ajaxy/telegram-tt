@@ -5,18 +5,19 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat } from '../../../api/types';
 
 import { STICKER_SIZE_JOIN_REQUESTS } from '../../../config';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import { selectChat } from '../../../global/selectors';
 import { isChatChannel, isUserId } from '../../../global/helpers';
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
+import { selectChat } from '../../../global/selectors';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import JoinRequest from './JoinRequest';
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
+import AnimatedIcon from '../../common/AnimatedIcon';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
 import Spinner from '../../ui/Spinner';
-import AnimatedIcon from '../../common/AnimatedIcon';
+import JoinRequest from './JoinRequest';
 
 type OwnProps = {
   chatId: string;

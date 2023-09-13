@@ -15,7 +15,6 @@ import './api/payments';
 import './api/reactions';
 import './api/statistics';
 import './api/stories';
-
 import './ui/initial';
 import './ui/chats';
 import './ui/messages';
@@ -31,7 +30,6 @@ import './ui/mediaViewer';
 import './ui/passcode';
 import './ui/reactions';
 import './ui/stories';
-
 import './apiUpdaters/initial';
 import './apiUpdaters/chats';
 import './apiUpdaters/messages';

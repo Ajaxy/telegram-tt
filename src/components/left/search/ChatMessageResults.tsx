@@ -1,7 +1,7 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
@@ -10,11 +10,11 @@ import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
-import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
 
-import InfiniteScroll from '../../ui/InfiniteScroll';
 import NothingFound from '../../common/NothingFound';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import ChatMessage from './ChatMessage';
 import DateSuggest from './DateSuggest';
 import LeftSearchResultTopic from './LeftSearchResultTopic';

@@ -7,23 +7,23 @@ import { ManagementScreens } from '../../../types';
 
 import { selectCurrentManagementType } from '../../../global/selectors';
 
-import ManageUser from './ManageUser';
-import ManageGroup from './ManageGroup';
-import ManageGroupPermissions from './ManageGroupPermissions';
-import ManageChatRemovedUsers from './ManageChatRemovedUsers';
 import ManageChannel from './ManageChannel';
-import ManageChatPrivacyType from './ManageChatPrivacyType';
-import ManageDiscussion from './ManageDiscussion';
-import ManageGroupUserPermissions from './ManageGroupUserPermissions';
 import ManageChatAdministrators from './ManageChatAdministrators';
+import ManageChatPrivacyType from './ManageChatPrivacyType';
+import ManageChatRemovedUsers from './ManageChatRemovedUsers';
+import ManageDiscussion from './ManageDiscussion';
+import ManageGroup from './ManageGroup';
 import ManageGroupAdminRights from './ManageGroupAdminRights';
 import ManageGroupMembers from './ManageGroupMembers';
+import ManageGroupPermissions from './ManageGroupPermissions';
+import ManageGroupUserPermissions from './ManageGroupUserPermissions';
 import ManageGroupUserPermissionsCreate from './ManageGroupUserPermissionsCreate';
-import ManageInvites from './ManageInvites';
 import ManageInvite from './ManageInvite';
-import ManageReactions from './ManageReactions';
 import ManageInviteInfo from './ManageInviteInfo';
+import ManageInvites from './ManageInvites';
 import ManageJoinRequests from './ManageJoinRequests';
+import ManageReactions from './ManageReactions';
+import ManageUser from './ManageUser';
 
 export type OwnProps = {
   chatId: string;

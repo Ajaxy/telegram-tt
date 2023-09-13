@@ -5,9 +5,9 @@ import { getActions } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
 
-import { unique } from '../../../util/iteratees';
 import { filterUsersByName } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { unique } from '../../../util/iteratees';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';

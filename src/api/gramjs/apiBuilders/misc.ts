@@ -1,18 +1,19 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type {
-  ApiConfig, ApiCountry, ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession, ApiLangString,
-} from '../../types';
 import type { ApiPrivacyKey } from '../../../types';
+import type {
+  ApiConfig, ApiCountry, ApiLangString,
+  ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
+} from '../../types';
 
-import { buildApiReaction } from './reactions';
-import { buildApiDocument } from './messageContent';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
-import { buildApiUser } from './users';
 import { addUserToLocalDb } from '../helpers';
 import { omitVirtualClassFields } from './helpers';
+import { buildApiDocument } from './messageContent';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiReaction } from './reactions';
+import { buildApiUser } from './users';
 
 export function buildApiWallpaper(wallpaper: GramJs.TypeWallPaper): ApiWallpaper | undefined {
   if (wallpaper instanceof GramJs.WallPaperNoFile) {

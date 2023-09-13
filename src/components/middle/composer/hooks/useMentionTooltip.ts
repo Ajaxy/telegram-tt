@@ -1,22 +1,22 @@
 import type { RefObject } from 'react';
 import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
-import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import type { ApiChatMember, ApiUser } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
-
 import { ApiMessageEntityTypes } from '../../../../api/types';
+
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { filterUsersByName, getMainUsername, getUserFirstOrLastName } from '../../../../global/helpers';
-import { prepareForRegExp } from '../helpers/prepareForRegExp';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import { pickTruthy, unique } from '../../../../util/iteratees';
 import { getCaretPosition, getHtmlBeforeSelection, setCaretPosition } from '../../../../util/selection';
+import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
-import useLastCallback from '../../../../hooks/useLastCallback';
-import useFlag from '../../../../hooks/useFlag';
-import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+import useFlag from '../../../../hooks/useFlag';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 const THROTTLE = 300;
 

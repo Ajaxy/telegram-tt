@@ -1,11 +1,11 @@
-import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
-import type { ApiMessagePublicForward } from '../../../api/types';
-
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { ApiMessagePublicForward } from '../../../api/types';
+
 import { getMainUsername } from '../../../global/helpers';
+
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';

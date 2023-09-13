@@ -1,28 +1,28 @@
 import type {
-  OnApiUpdate,
   ApiInitialArgs,
-  ApiUpdate,
   ApiOnProgress,
+  ApiUpdate,
+  OnApiUpdate,
 } from '../../types';
-import type { Methods, MethodArgs, MethodResponse } from './types';
 import type { LocalDb } from '../localDb';
+import type { MethodArgs, MethodResponse, Methods } from './types';
 
 import { API_THROTTLE_RESET_UPDATES, API_UPDATE_THROTTLE } from '../../../config';
 import { throttle, throttleWithTickEnd } from '../../../util/schedulers';
 import { updateFullLocalDb } from '../localDb';
 import { init as initUpdater } from '../updater';
 import { init as initAuth } from './auth';
-import { init as initChats } from './chats';
-import { init as initMessages } from './messages';
-import { init as initUsers } from './users';
-import { init as initClient } from './client';
-import { init as initStickers } from './symbols';
-import { init as initManagement } from './management';
-import { init as initTwoFaSettings } from './twoFaSettings';
 import { init as initBots } from './bots';
 import { init as initCalls } from './calls';
-import { init as initPayments } from './payments';
+import { init as initChats } from './chats';
+import { init as initClient } from './client';
 import * as methods from './index';
+import { init as initManagement } from './management';
+import { init as initMessages } from './messages';
+import { init as initPayments } from './payments';
+import { init as initStickers } from './symbols';
+import { init as initTwoFaSettings } from './twoFaSettings';
+import { init as initUsers } from './users';
 
 let onUpdate: OnApiUpdate;
 

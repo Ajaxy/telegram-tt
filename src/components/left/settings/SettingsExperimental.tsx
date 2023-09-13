@@ -1,20 +1,19 @@
-import React, { memo } from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
+import React, { memo } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
 import { DEBUG_LOG_FILENAME } from '../../../config';
-import { getActions, withGlobal } from '../../../global';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
-import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   isActive?: boolean;

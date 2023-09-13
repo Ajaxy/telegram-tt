@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef } from '../../../../lib/teact/teact';
-import { requestForcedReflow, requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
 
 import type { FocusDirection } from '../../../../types';
 
+import { requestForcedReflow, requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../../util/animateScroll';
 
 // This is used when the viewport was replaced.

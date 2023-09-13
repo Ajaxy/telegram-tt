@@ -1,21 +1,21 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiAvailableReaction, ApiChatReactions, ApiReaction, ApiReactionCount,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import buildClassName, { createClassNameBuilder } from '../../../util/buildClassName';
 import {
-  isSameReaction, canSendReaction, getReactionUniqueKey, sortReactions,
+  canSendReaction, getReactionUniqueKey, isSameReaction, sortReactions,
 } from '../../../global/helpers';
+import buildClassName, { createClassNameBuilder } from '../../../util/buildClassName';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import ReactionSelectorReaction from './ReactionSelectorReaction';
 import Button from '../../ui/Button';
+import ReactionSelectorReaction from './ReactionSelectorReaction';
 
 import './ReactionSelector.scss';
 

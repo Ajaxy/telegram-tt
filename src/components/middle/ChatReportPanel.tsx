@@ -1,22 +1,22 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useState } from '../../lib/teact/teact';
-import { withGlobal, getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
 
-import { selectChat, selectUser } from '../../global/selectors';
 import {
   getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup, isUserId,
 } from '../../global/helpers';
+import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
-import ConfirmDialog from '../ui/ConfirmDialog';
 import Checkbox from '../ui/Checkbox';
+import ConfirmDialog from '../ui/ConfirmDialog';
 
 import './ChatReportPanel.scss';
 

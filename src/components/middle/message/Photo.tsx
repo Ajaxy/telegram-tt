@@ -1,39 +1,39 @@
-import React, { useRef, useState } from '../../../lib/teact/teact';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-
 import type { FC } from '../../../lib/teact/teact';
+import React, { useRef, useState } from '../../../lib/teact/teact';
+
 import type { ApiMessage } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ISettings } from '../../../types';
 import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import {
+  getMediaTransferState,
+  getMessageMediaFormat,
+  getMessageMediaHash,
+  getMessageMediaThumbDataUri,
   getMessagePhoto,
   getMessageWebPagePhoto,
-  getMessageMediaHash,
-  getMediaTransferState,
   isOwnMessage,
-  getMessageMediaFormat,
-  getMessageMediaThumbDataUri,
 } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
 import { calculateMediaDimensions, MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
+import useMediaTransition from '../../../hooks/useMediaTransition';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
+import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
-import usePrevious from '../../../hooks/usePrevious';
-import useMediaTransition from '../../../hooks/useMediaTransition';
-import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
-import useFlag from '../../../hooks/useFlag';
-import useAppLayout from '../../../hooks/useAppLayout';
 
-import ProgressSpinner from '../../ui/ProgressSpinner';
 import MediaSpoiler from '../../common/MediaSpoiler';
+import ProgressSpinner from '../../ui/ProgressSpinner';
 
 export type OwnProps = {
   id?: string;

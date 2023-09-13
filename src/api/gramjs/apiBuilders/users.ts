@@ -1,4 +1,5 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiEmojiStatus,
   ApiPremiumGiftOption,
@@ -7,9 +8,10 @@ import type {
   ApiUserStatus,
   ApiUserType,
 } from '../../types';
-import { buildApiPeerId } from './peers';
+
 import { buildApiBotInfo } from './bots';
 import { buildApiPhoto, buildApiUsernames } from './common';
+import { buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
   const {

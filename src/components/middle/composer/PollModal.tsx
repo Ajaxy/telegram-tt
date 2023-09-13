@@ -3,20 +3,20 @@ import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 
 import type { ApiNewPoll } from '../../../api/types';
 
+import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import parseMessageInput from '../../../util/parseMessageInput';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
-import InputText from '../../ui/InputText';
 import Checkbox from '../../ui/Checkbox';
+import InputText from '../../ui/InputText';
+import Modal from '../../ui/Modal';
 import RadioGroup from '../../ui/RadioGroup';
 import TextArea from '../../ui/TextArea';
 

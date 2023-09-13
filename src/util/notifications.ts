@@ -1,13 +1,14 @@
-import { callApi } from '../api/gramjs';
+import { getActions, getGlobal, setGlobal } from '../global';
+
 import type {
-  ApiChat, ApiMessage, ApiPhoneCall, ApiUser, ApiPeerReaction,
+  ApiChat, ApiMessage, ApiPeerReaction,
+  ApiPhoneCall, ApiUser,
 } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
-import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
+
 import {
   APP_NAME, DEBUG, IS_ELECTRON, IS_TEST,
 } from '../config';
-import { getActions, getGlobal, setGlobal } from '../global';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -24,19 +25,21 @@ import {
 } from '../global/helpers';
 import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
+  selectChat,
   selectChatMessage,
   selectCurrentMessageList,
-  selectTopicFromMessage,
   selectNotifyExceptions,
   selectNotifySettings,
+  selectTopicFromMessage,
   selectUser,
-  selectChat,
 } from '../global/selectors';
-import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
+import { callApi } from '../api/gramjs';
+import { renderActionMessageText } from '../components/common/helpers/renderActionMessageText';
+import { buildCollectionByKey } from './iteratees';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
-import { buildCollectionByKey } from './iteratees';
+import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();

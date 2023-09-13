@@ -4,16 +4,16 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { IAnchorPosition, ISettings } from '../../../types';
 import type { ApiAttachBot } from '../../../api/types';
+import type { IAnchorPosition, ISettings } from '../../../types';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Portal from '../../ui/Portal';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
+import Portal from '../../ui/Portal';
 import AttachBotIcon from './AttachBotIcon';
 
 type OwnProps = {

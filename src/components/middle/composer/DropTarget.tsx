@@ -1,8 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
-import useFlag from '../../../hooks/useFlag';
 import buildClassName from '../../../util/buildClassName';
+
+import useFlag from '../../../hooks/useFlag';
 
 import './DropTarget.scss';
 

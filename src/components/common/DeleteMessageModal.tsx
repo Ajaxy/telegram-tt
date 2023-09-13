@@ -1,10 +1,17 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
 import type { IAlbum } from '../../types';
 
+import {
+  getPrivateChatUserId,
+  getUserFirstOrLastName,
+  isChatBasicGroup,
+  isChatSuperGroup,
+  isUserId,
+} from '../../global/helpers';
 import {
   selectAllowedMessageActions,
   selectBot,
@@ -12,18 +19,12 @@ import {
   selectCurrentMessageList,
   selectUser,
 } from '../../global/selectors';
-import {
-  isUserId,
-  getUserFirstOrLastName,
-  getPrivateChatUserId,
-  isChatBasicGroup,
-  isChatSuperGroup,
-} from '../../global/helpers';
 import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 
 export type OwnProps = {
   isOpen: boolean;

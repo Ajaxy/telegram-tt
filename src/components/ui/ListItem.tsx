@@ -1,26 +1,26 @@
 import type { RefObject } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
-import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 
 import type { IconName } from '../../types/icons';
 
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
+import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useMenuPosition from '../../hooks/useMenuPosition';
+import { useFastClick } from '../../hooks/useFastClick';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
-import { useFastClick } from '../../hooks/useFastClick';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMenuPosition from '../../hooks/useMenuPosition';
 
-import RippleEffect from './RippleEffect';
+import Button from './Button';
 import Menu from './Menu';
 import MenuItem from './MenuItem';
 import MenuSeparator from './MenuSeparator';
-import Button from './Button';
+import RippleEffect from './RippleEffect';
 
 import './ListItem.scss';
 

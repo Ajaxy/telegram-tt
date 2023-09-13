@@ -3,10 +3,11 @@ import { withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { getIsMobile } from '../../hooks/useAppLayout';
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
+
+import { getIsMobile } from '../../hooks/useAppLayout';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
+import useLang from '../../hooks/useLang';
 
 import StoryRibbonButton from './StoryRibbonButton';
 

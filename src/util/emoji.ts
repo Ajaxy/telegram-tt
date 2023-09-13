@@ -1,6 +1,5 @@
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import EMOJI_REGEX, { removeVS16s } from '../lib/twemojiRegex';
-
 import withCache from './withCache';
 
 // Due to the fact that emoji from Apple do not contain some characters, it is necessary to remove them from emoji-data

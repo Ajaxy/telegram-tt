@@ -2,9 +2,9 @@ import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiBotInlineMediaResult, ApiBotInlineResult } from '../../../../api/types';
+import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_INLINE_BOT_RESULT } from '../../../../config';
-import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 
 import StickerButton from '../../../common/StickerButton';
 

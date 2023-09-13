@@ -1,4 +1,5 @@
 import { useEffect } from '../lib/teact/teact';
+
 import { IS_IOS, IS_PWA, IS_TOUCH_ENV } from '../util/windowEnvironment';
 
 const metaViewport = document.querySelector('meta[name="viewport"]');

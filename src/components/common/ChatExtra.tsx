@@ -1,15 +1,24 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
   ApiChat, ApiCountryCode, ApiUser, ApiUsername,
 } from '../../api/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { TME_LINK_PREFIX } from '../../config';
+import {
+  getChatLink,
+  getHasAdminRight,
+  getTopicLink,
+  isChatChannel,
+  isUserId,
+  isUserRightBanned,
+  selectIsChatMuted,
+} from '../../global/helpers';
 import {
   selectChat,
   selectChatFullInfo,
@@ -19,23 +28,14 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
-import {
-  getChatLink,
-  getTopicLink,
-  getHasAdminRight,
-  isChatChannel,
-  isUserId,
-  isUserRightBanned,
-  selectIsChatMuted,
-} from '../../global/helpers';
-import renderText from './helpers/renderText';
 import { copyTextToClipboard } from '../../util/clipboard';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
 import { debounce } from '../../util/schedulers';
 import stopEvent from '../../util/stopEvent';
+import renderText from './helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import ListItem from '../ui/ListItem';
 import Switcher from '../ui/Switcher';

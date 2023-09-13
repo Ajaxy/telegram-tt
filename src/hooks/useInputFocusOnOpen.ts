@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
-import { requestMutation } from '../lib/fasterdom/fasterdom';
 
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import useAppLayout from './useAppLayout';
 
 // Focus slows down animation, also it breaks transition layout in Chrome

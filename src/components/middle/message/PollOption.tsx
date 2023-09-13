@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useState, useEffect,
+  useEffect,
+  useState,
 } from '../../../lib/teact/teact';
 
 import type { ApiPollAnswer, ApiPollResult } from '../../../api/types';

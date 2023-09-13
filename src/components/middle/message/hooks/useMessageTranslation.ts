@@ -1,6 +1,8 @@
 import { useEffect } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
+
 import type { ChatTranslatedMessages } from '../../../../global/types';
+
 import { throttle } from '../../../../util/schedulers';
 
 const MESSAGE_LIMIT_PER_REQUEST = 20;

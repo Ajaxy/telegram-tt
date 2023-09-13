@@ -1,31 +1,30 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import {
-  joinGroupCall,
-  startSharingScreen,
-  leaveGroupCall,
-  toggleStream,
-  isStreamEnabled,
-  setVolume, stopPhoneCall,
-} from '../../../lib/secret-sauce';
-
 import type { ActionReturnType } from '../../types';
 
 import { GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
-import { callApi } from '../../../api/gramjs';
-import { selectChat, selectTabState, selectUser } from '../../selectors';
 import {
-  selectActiveGroupCall, selectPhoneCallUser,
-} from '../../selectors/calls';
+  isStreamEnabled,
+  joinGroupCall,
+  leaveGroupCall,
+  setVolume, startSharingScreen,
+  stopPhoneCall,
+  toggleStream,
+} from '../../../lib/secret-sauce';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addUsers } from '../../reducers';
 import {
   removeGroupCall,
   updateActiveGroupCall,
 } from '../../reducers/calls';
+import { updateTabState } from '../../reducers/tabs';
+import { selectChat, selectTabState, selectUser } from '../../selectors';
+import {
+  selectActiveGroupCall, selectPhoneCallUser,
+} from '../../selectors/calls';
 import { getGroupCallAudioContext, getGroupCallAudioElement, removeGroupCallAudioElement } from '../ui/calls';
 import { loadFullChat } from './chats';
-import { addUsers } from '../../reducers';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 const HANG_UP_UI_DELAY = 500;
 

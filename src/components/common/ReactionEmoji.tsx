@@ -1,22 +1,22 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef,
 } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { EMOJI_SIZE_PICKER } from '../../config';
-import buildClassName from '../../util/buildClassName';
 import { getDocumentMediaHash, isSameReaction } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
-import CustomEmoji from './CustomEmoji';
 import AnimatedIconWithPreview from './AnimatedIconWithPreview';
+import CustomEmoji from './CustomEmoji';
 
 import styles from './ReactionEmoji.module.scss';
 

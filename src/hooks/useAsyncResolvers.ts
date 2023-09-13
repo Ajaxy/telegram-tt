@@ -1,9 +1,9 @@
-import type { Signal } from '../util/signals';
 import type { Scheduler } from '../util/schedulers';
+import type { Signal } from '../util/signals';
 
-import useThrottledCallback from './useThrottledCallback';
 import useDebouncedCallback from './useDebouncedCallback';
 import useDerivedSignal from './useDerivedSignal';
+import useThrottledCallback from './useThrottledCallback';
 
 export function useThrottledResolver<T>(
   resolver: () => T,

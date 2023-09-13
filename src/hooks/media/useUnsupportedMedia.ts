@@ -1,8 +1,9 @@
 import { useEffect, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-import useLastCallback from '../useLastCallback';
-import useLang from '../useLang';
+
 import { IS_MOBILE } from '../../util/windowEnvironment';
+import useLang from '../useLang';
+import useLastCallback from '../useLastCallback';
 
 const NOTIFICATION_DURATION = 8000;
 

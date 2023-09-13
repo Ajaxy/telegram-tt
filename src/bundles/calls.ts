@@ -1,5 +1,5 @@
-import { IS_IOS, IS_SAFARI } from '../util/windowEnvironment';
 import { initializeSoundsForSafari } from '../global/actions/ui/calls';
+import { IS_IOS, IS_SAFARI } from '../util/windowEnvironment';
 
 export { default as GroupCall } from '../components/calls/group/GroupCall';
 export { default as ActiveCallHeader } from '../components/calls/ActiveCallHeader';

@@ -1,17 +1,17 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
 import type { FC, FC_withDebug, Props } from './teact';
-import React, { DEBUG_resolveComponentName, useEffect } from './teact';
-import { requestMeasure } from '../fasterdom/fasterdom';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
-import { throttleWithTickEnd } from '../../util/schedulers';
 import arePropsShallowEqual, { logUnequalProps } from '../../util/arePropsShallowEqual';
-import { orderBy } from '../../util/iteratees';
 import { handleError } from '../../util/handleError';
+import { orderBy } from '../../util/iteratees';
+import { throttleWithTickEnd } from '../../util/schedulers';
+import { requestMeasure } from '../fasterdom/fasterdom';
+import React, { DEBUG_resolveComponentName, useEffect } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
-import useUniqueId from '../../hooks/useUniqueId';
 import { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
 

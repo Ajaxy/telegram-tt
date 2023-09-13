@@ -3,12 +3,7 @@ import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
-import type {
-  ActiveEmojiInteraction,
-  ActiveReaction,
-  ChatTranslatedMessages,
-  MessageListType,
-} from '../../../global/types';
+
 import type {
   ApiAvailableReaction,
   ApiChat,
@@ -23,16 +18,42 @@ import type {
   ApiUser,
   ApiUsername,
 } from '../../../api/types';
-import { MAIN_THREAD_ID } from '../../../api/types';
-import type { FocusDirection, IAlbum, ISettings } from '../../../types';
-import { AudioOrigin } from '../../../types';
+import type {
+  ActiveEmojiInteraction,
+  ActiveReaction,
+  ChatTranslatedMessages,
+  MessageListType,
+} from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
+import type { FocusDirection, IAlbum, ISettings } from '../../../types';
 import type { Signal } from '../../../util/signals';
+import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessage';
+import { MAIN_THREAD_ID } from '../../../api/types';
+import { AudioOrigin } from '../../../types';
 
-import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
+import {
+  areReactionsEmpty,
+  getMessageContent,
+  getMessageCustomShape,
+  getMessageHtmlId,
+  getMessageLocation,
+  getMessageSingleCustomEmoji,
+  getMessageSingleRegularEmoji,
+  getSenderTitle,
+  getUserColorKey,
+  hasMessageText,
+  isAnonymousOwnMessage,
+  isChatChannel,
+  isChatGroup,
+  isChatWithRepliesBot,
+  isGeoLiveExpired,
+  isMessageLocal,
+  isMessageTranslatable,
+  isOwnMessage,
+  isReplyMessage,
+  isUserId,
+} from '../../../global/helpers';
 import {
   selectAllowedMessageActions,
   selectAnimatedEmoji,
@@ -72,98 +93,78 @@ import {
   selectUser,
   selectUserStory,
 } from '../../../global/selectors';
-import {
-  areReactionsEmpty,
-  getMessageContent,
-  getMessageCustomShape,
-  getMessageHtmlId,
-  getMessageLocation,
-  getMessageSingleCustomEmoji,
-  getMessageSingleRegularEmoji,
-  getSenderTitle,
-  getUserColorKey,
-  hasMessageText,
-  isAnonymousOwnMessage,
-  isChatChannel,
-  isChatGroup,
-  isChatWithRepliesBot,
-  isGeoLiveExpired,
-  isMessageLocal,
-  isMessageTranslatable,
-  isOwnMessage,
-  isReplyMessage,
-  isUserId,
-} from '../../../global/helpers';
+import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
+import { isElementInViewport } from '../../../util/isElementInViewport';
+import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   calculateDimensionsForMessageMedia,
   getStickerDimensions,
   REM,
   ROUND_VIDEO_DIMENSIONS_PX,
 } from '../../common/helpers/mediaDimensions';
-import { buildContentClassName } from './helpers/buildContentClassName';
-import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
-import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
 import renderText from '../../common/helpers/renderText';
-import { isElementInViewport } from '../../../util/isElementInViewport';
 import { getCustomEmojiSize } from '../composer/helpers/customEmoji';
-import { isAnimatingScroll } from '../../../util/animateScroll';
+import { buildContentClassName } from './helpers/buildContentClassName';
+import { calculateAlbumLayout } from './helpers/calculateAlbumLayout';
+import { calculateMediaDimensions, getMinMediaWidth, MIN_MEDIA_WIDTH_WITH_TEXT } from './helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useEnsureMessage from '../../../hooks/useEnsureMessage';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useLang from '../../../hooks/useLang';
-import useShowTransition from '../../../hooks/useShowTransition';
-import useFlag from '../../../hooks/useFlag';
-import useFocusMessage from './hooks/useFocusMessage';
-import useOuterHandlers from './hooks/useOuterHandlers';
-import useInnerHandlers from './hooks/useInnerHandlers';
 import useAppLayout from '../../../hooks/useAppLayout';
-import useResizeObserver from '../../../hooks/useResizeObserver';
-import useThrottledCallback from '../../../hooks/useThrottledCallback';
-import useMessageTranslation from './hooks/useMessageTranslation';
-import usePrevious from '../../../hooks/usePrevious';
-import useTextLanguage from '../../../hooks/useTextLanguage';
-import useAuthorWidth from '../hooks/useAuthorWidth';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useEnsureMessage from '../../../hooks/useEnsureMessage';
 import useEnsureStory from '../../../hooks/useEnsureStory';
+import useFlag from '../../../hooks/useFlag';
 import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
+import { useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import usePrevious from '../../../hooks/usePrevious';
+import useResizeObserver from '../../../hooks/useResizeObserver';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useTextLanguage from '../../../hooks/useTextLanguage';
+import useThrottledCallback from '../../../hooks/useThrottledCallback';
+import useAuthorWidth from '../hooks/useAuthorWidth';
 import useDetectChatLanguage from './hooks/useDetectChatLanguage';
+import useFocusMessage from './hooks/useFocusMessage';
+import useInnerHandlers from './hooks/useInnerHandlers';
+import useMessageTranslation from './hooks/useMessageTranslation';
+import useOuterHandlers from './hooks/useOuterHandlers';
 
-import Button from '../../ui/Button';
-import Avatar from '../../common/Avatar';
-import EmbeddedMessage from '../../common/EmbeddedMessage';
-import Document from '../../common/Document';
 import Audio from '../../common/Audio';
-import MessageMeta from './MessageMeta';
-import ContextMenuContainer from './ContextMenuContainer.async';
-import Sticker from './Sticker';
-import AnimatedEmoji from './AnimatedEmoji';
+import Avatar from '../../common/Avatar';
+import CustomEmoji from '../../common/CustomEmoji';
+import Document from '../../common/Document';
+import DotAnimation from '../../common/DotAnimation';
+import EmbeddedMessage from '../../common/EmbeddedMessage';
+import EmbeddedStory from '../../common/EmbeddedStory';
+import FakeIcon from '../../common/FakeIcon';
+import MessageText from '../../common/MessageText';
+import PremiumIcon from '../../common/PremiumIcon';
+import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import TopicChip from '../../common/TopicChip';
+import Button from '../../ui/Button';
+import Album from './Album';
 import AnimatedCustomEmoji from './AnimatedCustomEmoji';
-import Photo from './Photo';
-import Video from './Video';
+import AnimatedEmoji from './AnimatedEmoji';
+import CommentButton from './CommentButton';
 import Contact from './Contact';
-import Poll from './Poll';
-import WebPage from './WebPage';
+import ContextMenuContainer from './ContextMenuContainer.async';
+import Game from './Game';
+import InlineButtons from './InlineButtons';
 import Invoice from './Invoice';
 import InvoiceMediaPreview from './InvoiceMediaPreview';
 import Location from './Location';
-import Game from './Game';
-import Album from './Album';
-import RoundVideo from './RoundVideo';
-import InlineButtons from './InlineButtons';
-import CommentButton from './CommentButton';
-import Reactions from './Reactions';
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import MessageMeta from './MessageMeta';
 import MessagePhoneCall from './MessagePhoneCall';
-import DotAnimation from '../../common/DotAnimation';
-import CustomEmoji from '../../common/CustomEmoji';
-import PremiumIcon from '../../common/PremiumIcon';
-import FakeIcon from '../../common/FakeIcon';
-import MessageText from '../../common/MessageText';
-import TopicChip from '../../common/TopicChip';
-import EmbeddedStory from '../../common/EmbeddedStory';
+import Photo from './Photo';
+import Poll from './Poll';
+import Reactions from './Reactions';
+import RoundVideo from './RoundVideo';
+import Sticker from './Sticker';
 import Story from './Story';
 import StoryMention from './StoryMention';
+import Video from './Video';
+import WebPage from './WebPage';
 
 import './Message.scss';
 

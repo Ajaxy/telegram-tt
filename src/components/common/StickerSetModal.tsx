@@ -1,13 +1,14 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
 import { EMOJI_SIZE_MODAL, STICKER_SIZE_MODAL, TME_LINK_PREFIX } from '../../config';
+import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import {
   selectCanScheduleUntilOnline,
   selectChat,
@@ -18,24 +19,23 @@ import {
   selectStickerSet,
   selectThreadInfo,
 } from '../../global/selectors';
-import renderText from './helpers/renderText';
-import { copyTextToClipboard } from '../../util/clipboard';
-import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { copyTextToClipboard } from '../../util/clipboard';
+import renderText from './helpers/renderText';
 
+import useAppLayout from '../../hooks/useAppLayout';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import useAppLayout from '../../hooks/useAppLayout';
-import useSchedule from '../../hooks/useSchedule';
 import usePrevious from '../../hooks/usePrevious';
+import useSchedule from '../../hooks/useSchedule';
 import useScrolledState from '../../hooks/useScrolledState';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import Loading from '../ui/Loading';
-import StickerButton from './StickerButton';
 import DropdownMenu from '../ui/DropdownMenu';
+import Loading from '../ui/Loading';
 import MenuItem from '../ui/MenuItem';
+import Modal from '../ui/Modal';
+import StickerButton from './StickerButton';
 
 import './StickerSetModal.scss';
 

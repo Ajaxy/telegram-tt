@@ -1,22 +1,22 @@
-import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSendAsPeerId } from '../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
-import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMouseInside from '../../../hooks/useMouseInside';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
-import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
-import Menu from '../../ui/Menu';
 import FullNameTitle from '../../common/FullNameTitle';
+import ListItem from '../../ui/ListItem';
+import Menu from '../../ui/Menu';
 
 import './SendAsMenu.scss';
 

@@ -3,16 +3,16 @@ import React, { memo } from '../../lib/teact/teact';
 import type { ApiFormattedText, ApiMessage } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../hooks/useLang';
-
 import { ApiMessageEntityTypes } from '../../api/types';
-import trimText from '../../util/trimText';
+
 import {
+  extractMessageText,
   getMessageSummaryDescription,
   getMessageSummaryEmoji,
   getMessageSummaryText,
-  extractMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../global/helpers';
+import trimText from '../../util/trimText';
 import renderText from './helpers/renderText';
 
 import MessageText from './MessageText';

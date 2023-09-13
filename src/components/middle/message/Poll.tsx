@@ -1,32 +1,32 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
+  memo,
   useEffect,
   useLayoutEffect,
-  useState,
-  memo,
   useMemo,
   useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { LangFn } from '../../../hooks/useLang';
 import type {
-  ApiMessage, ApiPoll, ApiPollAnswer, ApiChat, ApiUser,
+  ApiChat, ApiMessage, ApiPoll, ApiPollAnswer, ApiUser,
 } from '../../../api/types';
+import type { LangFn } from '../../../hooks/useLang';
 
+import { formatMediaDuration } from '../../../util/dateFormat';
+import { getServerTime } from '../../../util/serverTime';
 import renderText from '../../common/helpers/renderText';
 import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
-import { formatMediaDuration } from '../../../util/dateFormat';
-import useLang from '../../../hooks/useLang';
-import { getServerTime } from '../../../util/serverTime';
 
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import CheckboxGroup from '../../ui/CheckboxGroup';
-import RadioGroup from '../../ui/RadioGroup';
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
+import CheckboxGroup from '../../ui/CheckboxGroup';
 import Notification from '../../ui/Notification';
+import RadioGroup from '../../ui/RadioGroup';
 import PollOption from './PollOption';
 
 import './Poll.scss';

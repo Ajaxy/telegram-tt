@@ -1,32 +1,35 @@
+import { useMemo } from '../../../lib/teact/teact';
+
 import type {
-  ApiMessage, ApiChat, ApiUser,
+  ApiChat, ApiMessage, ApiUser,
 } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
+import { MediaViewerOrigin } from '../../../types';
+
 import {
-  getVideoAvatarMediaHash,
   getChatAvatarHash,
+  getMessageActionPhoto,
+  getMessageDocument,
+  getMessageFileName,
+  getMessageFileSize,
+  getMessageMediaFormat,
   getMessageMediaHash,
+  getMessageMediaThumbDataUri,
   getMessagePhoto,
   getMessageVideo,
   getMessageWebPagePhoto,
   getMessageWebPageVideo,
+  getPhotoFullDimensions,
+  getVideoAvatarMediaHash,
+  getVideoDimensions,
   isMessageDocumentPhoto,
   isMessageDocumentVideo,
-  getMessageMediaFormat,
-  getMessageMediaThumbDataUri,
-  getMessageFileName,
-  getMessageDocument,
-  getPhotoFullDimensions,
-  getVideoDimensions,
-  getMessageFileSize,
-  getMessageActionPhoto,
 } from '../../../global/helpers';
-import { useMemo } from '../../../lib/teact/teact';
+import { AVATAR_FULL_DIMENSIONS, VIDEO_AVATAR_FULL_DIMENSIONS } from '../../common/helpers/mediaDimensions';
+
+import useBlurSync from '../../../hooks/useBlurSync';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import useBlurSync from '../../../hooks/useBlurSync';
-import { MediaViewerOrigin } from '../../../types';
-import { VIDEO_AVATAR_FULL_DIMENSIONS, AVATAR_FULL_DIMENSIONS } from '../../common/helpers/mediaDimensions';
 
 type UseMediaProps = {
   mediaId?: number;

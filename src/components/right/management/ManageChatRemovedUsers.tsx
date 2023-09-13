@@ -4,16 +4,17 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiChatMember, ApiUser } from '../../../api/types';
 
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { getHasAdminRight, getUserFullName, isChatChannel } from '../../../global/helpers';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+
 import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import RemoveGroupUserModal from './RemoveGroupUserModal';
 
 type OwnProps = {

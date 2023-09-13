@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../lib/teact/teact';
+
 import { requestNextMutation } from '../lib/fasterdom/fasterdom';
 
 // Fix for memory leak when unmounting video element

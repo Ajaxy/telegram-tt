@@ -4,33 +4,34 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { TabState } from '../../global/types';
 import type { ApiChat, ApiCountry, ApiPaymentCredentials } from '../../api/types';
-import type { Price, ShippingOption } from '../../types';
+import type { TabState } from '../../global/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
-
+import type { Price, ShippingOption } from '../../types';
 import { PaymentStep } from '../../types';
+
 import { selectChat, selectTabState } from '../../global/selectors';
-import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
-import { detectCardTypeText } from '../common/helpers/detectCardType';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
+import { formatCurrency } from '../../util/formatCurrency';
+import { detectCardTypeText } from '../common/helpers/detectCardType';
+
 import usePaymentReducer from '../../hooks/reducers/usePaymentReducer';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
 
-import ShippingInfo from './ShippingInfo';
-import Shipping from './Shipping';
-import Checkout from './Checkout';
-import PaymentInfo from './PaymentInfo';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import Transition from '../ui/Transition';
 import Spinner from '../ui/Spinner';
+import Transition from '../ui/Transition';
+import Checkout from './Checkout';
 import ConfirmPayment from './ConfirmPayment';
-import SavedPaymentCredentials from './SavedPaymentCredentials';
 import PasswordConfirm from './PasswordConfirm';
+import PaymentInfo from './PaymentInfo';
+import SavedPaymentCredentials from './SavedPaymentCredentials';
+import Shipping from './Shipping';
+import ShippingInfo from './ShippingInfo';
 
 import './PaymentModal.scss';
 

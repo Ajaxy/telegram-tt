@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useState, useEffect } from '../lib/teact/teact';
+import { useEffect, useState } from '../lib/teact/teact';
 
 import useLastCallback from './useLastCallback';
 

@@ -1,27 +1,27 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection, MediaViewerOrigin } from '../../../types';
 
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { createMapStateToProps } from './helpers/createMapStateToProps';
 import buildClassName from '../../../util/buildClassName';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
+import { createMapStateToProps } from './helpers/createMapStateToProps';
 
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
-import InfiniteScroll from '../../ui/InfiniteScroll';
 import Media from '../../common/Media';
-import ChatMessage from './ChatMessage';
 import NothingFound from '../../common/NothingFound';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
+import ChatMessage from './ChatMessage';
 
 export type OwnProps = {
   searchQuery?: string;

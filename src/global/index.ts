@@ -1,7 +1,8 @@
 import type { ActionOptions } from '../lib/teact/teactn';
 import { typify } from '../lib/teact/teactn';
+
 import type {
-  GlobalState, ActionPayloads, RequiredActionPayloads, RequiredGlobalState,
+  ActionPayloads, GlobalState, RequiredActionPayloads, RequiredGlobalState,
 } from './types';
 
 const typed = typify<GlobalState, ActionPayloads & RequiredActionPayloads>();

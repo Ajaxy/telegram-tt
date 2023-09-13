@@ -10,6 +10,7 @@
     "no-async-without-await",
     "teactn",
     "no-null",
+    "simple-import-sort",
     "react-hooks-static-deps",
     "eslint-multitab-tt"
   ],
@@ -149,7 +150,58 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "teactn/prefer-separate-component-file": "off"
+    "teactn/prefer-separate-component-file": "off",
+    "simple-import-sort/imports": [
+      "error",
+      {
+        "groups": [
+          // Side effect imports
+          ["^\\u0000"],
+          // Lib and global imports
+          [
+            "^react",
+            "^@?\\w",
+            "dist(/.*|$)",
+            "^(\\.+/)+(lib/(teact|gramjs))(/.*|$)",
+            "^(\\.+/)+global$"
+          ],
+          // Type imports
+          [
+            "^(\\.+/)+.+\\u0000$",
+            "^(\\.+/|\\w+/)+(types)(/.*|$)",
+            "^(\\.+/|\\w+/)+(types)\\u0000"
+          ],
+          // Config, utils, helpers
+          [
+            "^(\\.+/)+config",
+            "^(\\.+/)+(lib)(?!/(gramjs|teact))(/.*|$)",
+            "^(\\.+/)+global/.+",
+            "^(\\.+/)+(util)(/.*|$)",
+            "^\\.\\.(?!/?$)",
+            "^\\.\\./?$",
+            "^\\./(?=.*/)(?!/?$)",
+            "^\\.(?!/?$)",
+            "^\\./?$"
+          ],
+          // Hooks
+          [
+            ".+(/hooks/)(.*|$)"
+          ],
+          // Components
+          [
+            "\/[A-Z](([a-z]+[A-Z]?)*)"
+          ],
+          // Styles and CSS modules
+          [
+            "^.+\\.s?css$"
+          ],
+          // Assets: images, stickers, etc
+          [
+            "^(\\.+/)+(assets)(/.*|$)"
+          ]
+        ]
+      }
+    ]
   },
   "settings": {
     "import/resolver": "webpack",

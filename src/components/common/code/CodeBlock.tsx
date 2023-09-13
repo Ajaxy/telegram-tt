@@ -1,14 +1,14 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 
 import useAsync from '../../../hooks/useAsync';
 
-import PreBlock from './PreBlock';
 import CodeOverlay from './CodeOverlay';
+import PreBlock from './PreBlock';
 
 import './CodeBlock.scss';
 

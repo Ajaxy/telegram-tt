@@ -8,21 +8,22 @@ import type { ApiChat } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_DISCUSSION_GROUPS } from '../../../config';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import { selectChat, selectChatFullInfo } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-
-import ListItem from '../../ui/ListItem';
-import NothingFound from '../../common/NothingFound';
-import GroupChatInfo from '../../common/GroupChatInfo';
-import ConfirmDialog from '../../ui/ConfirmDialog';
-import useFlag from '../../../hooks/useFlag';
-import renderText from '../../common/helpers/renderText';
-import Avatar from '../../common/Avatar';
 import { isChatChannel } from '../../../global/helpers';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import renderText from '../../common/helpers/renderText';
+
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import AnimatedIcon from '../../common/AnimatedIcon';
+import Avatar from '../../common/Avatar';
+import GroupChatInfo from '../../common/GroupChatInfo';
+import NothingFound from '../../common/NothingFound';
 import Checkbox from '../../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;

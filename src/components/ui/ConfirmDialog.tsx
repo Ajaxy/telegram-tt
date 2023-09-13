@@ -4,11 +4,12 @@ import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import type { TextPart } from '../../types';
 
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 
-import Modal from './Modal';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useLang from '../../hooks/useLang';
+
 import Button from './Button';
+import Modal from './Modal';
 
 type OwnProps = {
   isOpen: boolean;

@@ -4,10 +4,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
-import buildClassName from '../../util/buildClassName';
 import { selectCanAnimateInterface } from '../../global/selectors';
-import useLang from '../../hooks/useLang';
+import buildClassName from '../../util/buildClassName';
+
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 
 import styles from './AnimatedCounter.module.scss';
 

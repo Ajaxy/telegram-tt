@@ -1,10 +1,10 @@
 import { useRef } from '../lib/teact/teact';
+
 import { LoadMoreDirection } from '../types';
 
 import { areSortedArraysEqual } from '../util/iteratees';
-
-import useLastCallback from './useLastCallback';
 import useForceUpdate from './useForceUpdate';
+import useLastCallback from './useLastCallback';
 import usePrevious from './usePrevious';
 
 type GetMore = (args: { direction: LoadMoreDirection }) => void;

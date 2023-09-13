@@ -1,13 +1,13 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { selectChat, selectCurrentMessageList } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
 import animateScroll from '../../util/animateScroll';
+import buildClassName from '../../util/buildClassName';
 
 import useLastCallback from '../../hooks/useLastCallback';
 

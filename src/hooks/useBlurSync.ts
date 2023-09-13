@@ -1,9 +1,9 @@
 import { useRef } from '../lib/teact/teact';
 
 import fastBlur from '../lib/fastBlur';
-import useSyncEffect from './useSyncEffect';
-import useBlur from './useBlur';
 import { imgToCanvas } from '../util/files';
+import useBlur from './useBlur';
+import useSyncEffect from './useSyncEffect';
 
 const RADIUS = 2;
 const ITERATIONS = 2;

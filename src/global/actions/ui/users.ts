@@ -1,9 +1,9 @@
-import { addActionHandler } from '../../index';
-
-import { closeNewContactDialog, updateUserSearch } from '../../reducers';
 import type { ActionReturnType } from '../../types';
-import { updateTabState } from '../../reducers/tabs';
+
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addActionHandler } from '../../index';
+import { closeNewContactDialog, updateUserSearch } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 
 addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnType => {
   const {

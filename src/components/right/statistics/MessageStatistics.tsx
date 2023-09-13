@@ -1,16 +1,18 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useState, useEffect, useRef,
+  memo, useEffect, useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { callApi } from '../../../api/gramjs';
-import type { ApiMessageStatistics, ApiMessagePublicForward, StatisticsGraph } from '../../../api/types';
+import type { ApiMessagePublicForward, ApiMessageStatistics, StatisticsGraph } from '../../../api/types';
 
 import { selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import useLang from '../../../hooks/useLang';
+import { callApi } from '../../../api/gramjs';
+
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useLang from '../../../hooks/useLang';
 
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';

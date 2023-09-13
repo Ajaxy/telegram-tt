@@ -6,9 +6,10 @@ import type { ApiUser } from '../../../api/types';
 
 import { getUserFullName } from '../../../global/helpers';
 import { selectUser } from '../../../global/selectors';
+import { createClassNameBuilder } from '../../../util/buildClassName';
 import { formatHumanDate, formatTime, isToday } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
-import { createClassNameBuilder } from '../../../util/buildClassName';
+
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';

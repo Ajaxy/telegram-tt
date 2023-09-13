@@ -1,18 +1,19 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useCallback, useMemo, memo } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChat } from '../../../api/types';
 
+import { filterUsersByName, isUserBot, sortChatIds } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
-import { filterUsersByName, isUserBot, sortChatIds } from '../../../global/helpers';
-import useLang from '../../../hooks/useLang';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import Picker from '../../common/Picker';
-import FloatingActionButton from '../../ui/FloatingActionButton';
 import Button from '../../ui/Button';
+import FloatingActionButton from '../../ui/FloatingActionButton';
 
 export type OwnProps = {
   isChannel?: boolean;

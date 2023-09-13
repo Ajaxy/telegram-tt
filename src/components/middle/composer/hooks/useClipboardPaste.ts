@@ -1,17 +1,17 @@
+import type { StateHookSetter } from '../../../../lib/teact/teact';
 import { useEffect } from '../../../../lib/teact/teact';
 
-import type { StateHookSetter } from '../../../../lib/teact/teact';
 import type { ApiAttachment, ApiFormattedText, ApiMessage } from '../../../../api/types';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import buildAttachment from '../helpers/buildAttachment';
 import {
   DEBUG, EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
 } from '../../../../config';
-import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
-import parseMessageInput, { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
 import cleanDocsHtml from '../../../../lib/cleanDocsHtml';
 import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
+import parseMessageInput, { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
+import buildAttachment from '../helpers/buildAttachment';
+import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
 
 const MAX_MESSAGE_LENGTH = 4096;
 

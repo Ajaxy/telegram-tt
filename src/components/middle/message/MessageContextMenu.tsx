@@ -1,9 +1,9 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiAvailableReaction,
   ApiChat,
@@ -17,25 +17,25 @@ import type {
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
-import { getMessageCopyOptions } from './helpers/copyOptions';
-import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
-import buildClassName from '../../../util/buildClassName';
-import renderText from '../../common/helpers/renderText';
 import { getUserFullName, isUserId } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { disableScrolling, enableScrolling } from '../../../util/scrollLock';
+import { REM } from '../../common/helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
+import { getMessageCopyOptions } from './helpers/copyOptions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useFlag from '../../../hooks/useFlag';
-import useMenuPosition from '../../../hooks/useMenuPosition';
-import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 
+import AvatarList from '../../common/AvatarList';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 import Skeleton from '../../ui/placeholder/Skeleton';
 import ReactionSelector from './ReactionSelector';
-import AvatarList from '../../common/AvatarList';
 
 import './MessageContextMenu.scss';
 

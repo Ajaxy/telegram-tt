@@ -3,8 +3,8 @@ import React, { memo } from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
 

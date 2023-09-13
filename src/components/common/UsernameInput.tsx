@@ -1,9 +1,8 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useState, useCallback, memo, useEffect, useMemo,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-
-import type { FC } from '../../lib/teact/teact';
 
 import { TME_LINK_PREFIX } from '../../config';
 import { debounce } from '../../util/schedulers';

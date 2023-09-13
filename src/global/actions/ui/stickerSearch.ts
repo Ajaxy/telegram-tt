@@ -1,7 +1,8 @@
+import type { ActionReturnType } from '../../types';
+
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
-import type { ActionReturnType } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 addActionHandler('setStickerSearchQuery', (global, actions, payload): ActionReturnType => {
   const { query, tabId = getCurrentTabId() } = payload!;

@@ -1,12 +1,13 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiMessage, ApiStickerSet } from '../../../api/types';
 import type { ActiveReaction } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { getReactionUniqueKey } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+
 import useLang from '../../../hooks/useLang';
 
 import ReactionButton from './ReactionButton';

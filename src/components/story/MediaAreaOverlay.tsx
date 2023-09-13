@@ -4,8 +4,8 @@ import { getActions } from '../../global';
 import type { ApiMediaArea } from '../../api/types';
 import type { IDimensions } from '../../global/types';
 
-import buildStyle from '../../util/buildStyle';
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
 
 import styles from './StoryViewer.module.scss';
 

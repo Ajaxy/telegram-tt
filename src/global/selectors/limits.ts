@@ -1,6 +1,7 @@
 import type { ApiLimitType, GlobalState } from '../types';
-import { selectIsCurrentUserPremium } from './users';
+
 import { DEFAULT_LIMITS } from '../../config';
+import { selectIsCurrentUserPremium } from './users';
 
 export function selectCurrentLimit<T extends GlobalState>(global: T, limit: ApiLimitType) {
   const { appConfig } = global;

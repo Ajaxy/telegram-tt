@@ -9,13 +9,13 @@ import { getStoryMediaHash, getUserFirstOrLastName } from '../../../global/helpe
 import {
   selectUser, selectUserStories, selectUserStory,
 } from '../../../global/selectors';
-import renderText from '../../common/helpers/renderText';
 import buildClassName from '../../../util/buildClassName';
+import renderText from '../../common/helpers/renderText';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useEnsureStory from '../../../hooks/useEnsureStory';
-import useMedia from '../../../hooks/useMedia';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
 
 interface OwnProps {
   message: ApiMessage;

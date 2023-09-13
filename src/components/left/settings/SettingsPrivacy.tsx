@@ -7,11 +7,11 @@ import { SettingsScreens } from '../../../types';
 
 import { selectCanSetPasscode, selectIsCurrentUserPremium } from '../../../global/selectors';
 
-import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
-import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   isActive?: boolean;

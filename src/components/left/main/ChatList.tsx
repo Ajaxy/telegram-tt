@@ -1,40 +1,40 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import { LeftColumnContent } from '../../../types';
-import type { SettingsScreens } from '../../../types';
 import type { GlobalState } from '../../../global/types';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { SettingsScreens } from '../../../types';
+import { LeftColumnContent } from '../../../types';
 
 import {
   ALL_FOLDER_ID,
-  ARCHIVED_FOLDER_ID,
   ARCHIVE_MINIMIZED_HEIGHT,
+  ARCHIVED_FOLDER_ID,
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
 } from '../../../config';
-import { IS_MAC_OS, IS_APP } from '../../../util/windowEnvironment';
-import { getPinnedChatsCount, getOrderKey } from '../../../util/folderManager';
 import buildClassName from '../../../util/buildClassName';
+import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
+import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
-import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import { useHotkeys } from '../../../hooks/useHotkeys';
-import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
-import useOrderDiff from './hooks/useOrderDiff';
 import useUserStoriesPolling from '../../../hooks/polling/useUserStoriesPolling';
+import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';
+import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
+import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
+import { useHotkeys } from '../../../hooks/useHotkeys';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useOrderDiff from './hooks/useOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
+import Archive from './Archive';
 import Chat from './Chat';
 import EmptyFolder from './EmptyFolder';
-import Archive from './Archive';
-import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';

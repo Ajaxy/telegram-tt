@@ -6,18 +6,19 @@ import { withGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { selectAnimatedEmoji } from '../../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import renderText from '../../../common/helpers/renderText';
-import useFlag from '../../../../hooks/useFlag';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useAppLayout from '../../../../hooks/useAppLayout';
 
-import Button from '../../../ui/Button';
-import Modal from '../../../ui/Modal';
-import InputText from '../../../ui/InputText';
+import useAppLayout from '../../../../hooks/useAppLayout';
+import useFlag from '../../../../hooks/useFlag';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
+
 import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
+import Button from '../../../ui/Button';
+import InputText from '../../../ui/InputText';
+import Modal from '../../../ui/Modal';
 
 type OwnProps = {
   icon: 'hint' | 'email';

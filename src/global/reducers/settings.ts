@@ -1,8 +1,10 @@
-import type { GlobalState } from '../types';
-import type {
-  ISettings, IThemeSettings, ThemeKey, NotifyException,
-} from '../../types';
 import type { ApiNotifyException } from '../../api/types';
+import type {
+  ISettings, IThemeSettings, NotifyException,
+  ThemeKey,
+} from '../../types';
+import type { GlobalState } from '../types';
+
 import { updateUserBlockedState } from './users';
 
 export function replaceSettings<T extends GlobalState>(global: T, newSettings?: Partial<ISettings>): T {

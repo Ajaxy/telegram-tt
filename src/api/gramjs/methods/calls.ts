@@ -1,24 +1,25 @@
 import BigInt from 'big-integer';
-import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
-import type {
-  ApiChat, ApiUser, OnApiUpdate, ApiGroupCall, ApiPhoneCall,
-} from '../../types';
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { invokeRequest, invokeRequestBeacon } from './client';
+import type { JoinGroupCallPayload } from '../../../lib/secret-sauce';
+import type {
+  ApiChat, ApiGroupCall, ApiPhoneCall,
+  ApiUser, OnApiUpdate,
+} from '../../types';
+
+import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../config';
+import {
+  buildApiGroupCall,
+  buildApiGroupCallParticipant, buildCallProtocol,
+  buildPhoneCall,
+} from '../apiBuilders/calls';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputGroupCall, buildInputPeer, buildInputPhoneCall, generateRandomInt,
 } from '../gramjsBuilders';
-import {
-  buildCallProtocol,
-  buildApiGroupCall,
-  buildApiGroupCallParticipant, buildPhoneCall,
-
-} from '../apiBuilders/calls';
-import { buildApiUser } from '../apiBuilders/users';
-import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { addEntitiesToLocalDb } from '../helpers';
-import { GROUP_CALL_PARTICIPANTS_LIMIT } from '../../../config';
+import { invokeRequest, invokeRequestBeacon } from './client';
 
 let onUpdate: OnApiUpdate;
 

@@ -3,23 +3,23 @@ import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import {
-  selectCanDeleteSelectedMessages, selectCurrentChat, selectTabState, selectUser,
-} from '../../global/selectors';
-import {
-  isUserId,
-  getUserFirstOrLastName,
   getPrivateChatUserId,
+  getUserFirstOrLastName,
   isChatBasicGroup,
   isChatSuperGroup,
+  isUserId,
 } from '../../global/helpers';
+import {
+  selectCanDeleteSelectedMessages, selectCurrentChat, selectTabState, selectUser,
+} from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 
 export type OwnProps = {
   isOpen: boolean;

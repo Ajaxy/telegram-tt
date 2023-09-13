@@ -1,5 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getGlobal } from '../../../global';
 
 import type { ApiUser } from '../../../api/types';
@@ -12,8 +12,8 @@ import usePrevious from '../../../hooks/usePrevious';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
-import ListItem from '../../ui/ListItem';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import ListItem from '../../ui/ListItem';
 
 import './MentionTooltip.scss';
 

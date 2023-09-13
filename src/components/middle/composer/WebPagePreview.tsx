@@ -1,29 +1,29 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiFormattedText, ApiMessage, ApiMessageEntityTextUrl, ApiWebPage,
 } from '../../../api/types';
-import { ApiMessageEntityTypes } from '../../../api/types';
 import type { ISettings } from '../../../types';
 import type { Signal } from '../../../util/signals';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { RE_LINK_TEMPLATE } from '../../../config';
-import { selectTabState, selectNoWebPage, selectTheme } from '../../../global/selectors';
+import { selectNoWebPage, selectTabState, selectTheme } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import parseMessageInput from '../../../util/parseMessageInput';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useSyncEffect from '../../../hooks/useSyncEffect';
-import useShowTransition from '../../../hooks/useShowTransition';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
-import useDerivedState from '../../../hooks/useDerivedState';
-import useDerivedSignal from '../../../hooks/useDerivedSignal';
 import { useDebouncedResolver } from '../../../hooks/useAsyncResolvers';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useDerivedSignal from '../../../hooks/useDerivedSignal';
+import useDerivedState from '../../../hooks/useDerivedState';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
-import WebPage from '../message/WebPage';
 import Button from '../../ui/Button';
+import WebPage from '../message/WebPage';
 
 import './WebPagePreview.scss';
 

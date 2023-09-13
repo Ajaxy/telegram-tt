@@ -1,14 +1,14 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import { STICKER_SIZE_AUTH, STICKER_SIZE_AUTH_MOBILE, STICKER_SIZE_TWO_FA } from '../../config';
 import { LOCAL_TGS_URLS } from './helpers/animatedAssets';
 
-import AnimatedSticker from './AnimatedSticker';
-
-import useTimeout from '../../hooks/useTimeout';
-import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useFlag from '../../hooks/useFlag';
+import useTimeout from '../../hooks/useTimeout';
+
+import AnimatedSticker from './AnimatedSticker';
 
 import './PasswordMonkey.scss';
 

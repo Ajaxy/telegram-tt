@@ -1,20 +1,20 @@
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { useEffect, useRef } from '../../lib/teact/teact';
 
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { TextPart } from '../../types';
 
-import captureKeyboardListeners from '../../util/captureKeyboardListeners';
-import trapFocus from '../../util/trapFocus';
 import buildClassName from '../../util/buildClassName';
-import { enableDirectTextInput, disableDirectTextInput } from '../../util/directInputManager';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
 import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
+import trapFocus from '../../util/trapFocus';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useShowTransition from '../../hooks/useShowTransition';
-import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useLang from '../../hooks/useLang';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
+import useShowTransition from '../../hooks/useShowTransition';
 
 import Button from './Button';
 import Portal from './Portal';

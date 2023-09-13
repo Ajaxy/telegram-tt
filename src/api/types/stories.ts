@@ -1,5 +1,5 @@
-import type { ApiGeoPoint, ApiMessage, ApiReaction } from './messages';
 import type { ApiPrivacySettings } from '../../types';
+import type { ApiGeoPoint, ApiMessage, ApiReaction } from './messages';
 
 export interface ApiStory {
   '@type'?: 'story';

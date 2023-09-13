@@ -5,11 +5,12 @@ import { SettingsScreens } from '../../../../types';
 
 import { STICKER_SIZE_TWO_FA } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
 
-import Button from '../../../ui/Button';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
+
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import Button from '../../../ui/Button';
 
 type OwnProps = {
   isActive?: boolean;

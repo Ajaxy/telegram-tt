@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { useLayoutEffect } from '../../../lib/teact/teact';
+
 import { requestForcedReflow } from '../../../lib/fasterdom/fasterdom';
 
 export default function useAuthorWidth(

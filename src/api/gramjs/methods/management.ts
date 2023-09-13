@@ -1,16 +1,16 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import { invokeRequest } from './client';
-import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
 import type {
   ApiChat, ApiError, ApiUser, ApiUsername, OnApiUpdate,
 } from '../../types';
 
 import { USERNAME_PURCHASE_ERROR } from '../../../config';
-import { addEntitiesToLocalDb } from '../helpers';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiExportedInvite, buildChatInviteImporter } from '../apiBuilders/chats';
 import { buildApiUser } from '../apiBuilders/users';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildInputEntity, buildInputPeer } from '../gramjsBuilders';
+import { addEntitiesToLocalDb } from '../helpers';
+import { invokeRequest } from './client';
 
 let onUpdate: OnApiUpdate;
 

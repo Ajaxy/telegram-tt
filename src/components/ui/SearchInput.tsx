@@ -1,16 +1,17 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useRef, useEffect, memo, useCallback,
+  memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
-import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
 
-import Loading from './Loading';
+import useFlag from '../../hooks/useFlag';
+import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
+import useLang from '../../hooks/useLang';
+
 import Button from './Button';
+import Loading from './Loading';
 import Transition from './Transition';
 
 import './SearchInput.scss';

@@ -1,12 +1,13 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
-import type { MessageListType } from '../../global/types';
 import type { ApiTopic } from '../../api/types';
+import type { MessageListType } from '../../global/types';
 import type { LangFn } from '../../hooks/useLang';
 
 import { REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
 import TopicIcon from '../common/TopicIcon';

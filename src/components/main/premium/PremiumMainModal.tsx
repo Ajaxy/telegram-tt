@@ -1,57 +1,58 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiPremiumPromo, ApiSticker, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 
+import { TME_LINK_PREFIX } from '../../../config';
+import { getUserFullName } from '../../../global/helpers';
+import {
+  selectIsCurrentUserPremium, selectStickerSet,
+  selectTabState, selectUser,
+} from '../../../global/selectors';
+import { selectPremiumLimit } from '../../../global/selectors/limits';
+import buildClassName from '../../../util/buildClassName';
+import { formatCurrency } from '../../../util/formatCurrency';
+import { REM } from '../../common/helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
+
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useSyncEffect from '../../../hooks/useSyncEffect';
+
+import CustomEmoji from '../../common/CustomEmoji';
+import Button from '../../ui/Button';
+import Modal from '../../ui/Modal';
+import Transition from '../../ui/Transition';
+import PremiumFeatureItem from './PremiumFeatureItem';
 import PremiumFeatureModal, {
   PREMIUM_FEATURE_DESCRIPTIONS,
   PREMIUM_FEATURE_SECTIONS,
   PREMIUM_FEATURE_TITLES,
 } from './PremiumFeatureModal';
-import { TME_LINK_PREFIX } from '../../../config';
-import { formatCurrency } from '../../../util/formatCurrency';
-import buildClassName from '../../../util/buildClassName';
-import {
-  selectTabState, selectIsCurrentUserPremium, selectUser, selectStickerSet,
-} from '../../../global/selectors';
-import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
-import { selectPremiumLimit } from '../../../global/selectors/limits';
-import renderText from '../../common/helpers/renderText';
-import { getUserFullName } from '../../../global/helpers';
-import { REM } from '../../common/helpers/mediaDimensions';
-
-import useLang from '../../../hooks/useLang';
-import useSyncEffect from '../../../hooks/useSyncEffect';
-import useLastCallback from '../../../hooks/useLastCallback';
-
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import PremiumFeatureItem from './PremiumFeatureItem';
-import Transition from '../../ui/Transition';
-import CustomEmoji from '../../common/CustomEmoji';
-
-import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
-import PremiumLimits from '../../../assets/premium/PremiumLimits.svg';
-import PremiumFile from '../../../assets/premium/PremiumFile.svg';
-import PremiumSpeed from '../../../assets/premium/PremiumSpeed.svg';
-import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
-import PremiumAds from '../../../assets/premium/PremiumAds.svg';
-import PremiumReactions from '../../../assets/premium/PremiumReactions.svg';
-import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
-import PremiumChats from '../../../assets/premium/PremiumChats.svg';
-import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
-import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
-import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
-import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
-import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
 
 import styles from './PremiumMainModal.module.scss';
+
+import PremiumAds from '../../../assets/premium/PremiumAds.svg';
+import PremiumBadge from '../../../assets/premium/PremiumBadge.svg';
+import PremiumChats from '../../../assets/premium/PremiumChats.svg';
+import PremiumEmoji from '../../../assets/premium/PremiumEmoji.svg';
+import PremiumFile from '../../../assets/premium/PremiumFile.svg';
+import PremiumLimits from '../../../assets/premium/PremiumLimits.svg';
+import PremiumLogo from '../../../assets/premium/PremiumLogo.svg';
+import PremiumReactions from '../../../assets/premium/PremiumReactions.svg';
+import PremiumSpeed from '../../../assets/premium/PremiumSpeed.svg';
+import PremiumStatus from '../../../assets/premium/PremiumStatus.svg';
+import PremiumStickers from '../../../assets/premium/PremiumStickers.svg';
+import PremiumTranslate from '../../../assets/premium/PremiumTranslate.svg';
+import PremiumVideo from '../../../assets/premium/PremiumVideo.svg';
+import PremiumVoice from '../../../assets/premium/PremiumVoice.svg';
 
 const LIMIT_ACCOUNTS = 4;
 const STATUS_EMOJI_SIZE = 8 * REM;

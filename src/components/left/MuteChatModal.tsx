@@ -1,14 +1,15 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import { MAX_INT_32 } from '../../config';
+
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 import RadioGroup from '../ui/RadioGroup';
 
 export type OwnProps = {

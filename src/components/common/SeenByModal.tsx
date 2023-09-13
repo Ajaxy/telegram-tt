@@ -2,17 +2,17 @@ import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { selectChatMessage, selectTabState } from '../../global/selectors';
-import { formatDateAtTime } from '../../util/dateFormat';
 import buildClassName from '../../util/buildClassName';
+import { formatDateAtTime } from '../../util/dateFormat';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import PrivateChatInfo from './PrivateChatInfo';
 import ListItem from '../ui/ListItem';
+import Modal from '../ui/Modal';
+import PrivateChatInfo from './PrivateChatInfo';
 
 import styles from './SeenByModal.module.scss';
 

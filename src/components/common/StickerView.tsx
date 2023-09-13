@@ -1,28 +1,28 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { ApiSticker } from '../../api/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import { IS_ANDROID, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
-import * as mediaLoader from '../../util/mediaLoader';
-import buildClassName from '../../util/buildClassName';
 import { getStickerPreviewHash } from '../../global/helpers';
 import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
+import * as mediaLoader from '../../util/mediaLoader';
+import { IS_ANDROID, IS_WEBM_SUPPORTED } from '../../util/windowEnvironment';
 
-import useMedia from '../../hooks/useMedia';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useThumbnail from '../../hooks/useThumbnail';
-import useMediaTransition from '../../hooks/useMediaTransition';
-import useFlag from '../../hooks/useFlag';
-import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
 import useColorFilter from '../../hooks/stickers/useColorFilter';
+import useCoordsInSharedCanvas from '../../hooks/useCoordsInSharedCanvas';
+import useFlag from '../../hooks/useFlag';
+import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
+import useThumbnail from '../../hooks/useThumbnail';
 import useUniqueId from '../../hooks/useUniqueId';
 
-import AnimatedSticker from './AnimatedSticker';
 import OptimizedVideo from '../ui/OptimizedVideo';
+import AnimatedSticker from './AnimatedSticker';
 
 import styles from './StickerView.module.scss';
 

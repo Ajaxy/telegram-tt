@@ -5,19 +5,20 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiChat, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { CHAT_HEIGHT_PX } from '../../../config';
-import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import { getMainUsername, isUserId } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import useFlag from '../../../hooks/useFlag';
+import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
-import ListItem from '../../ui/ListItem';
-import FloatingActionButton from '../../ui/FloatingActionButton';
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import Avatar from '../../common/Avatar';
+import FullNameTitle from '../../common/FullNameTitle';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import BlockUserModal from './BlockUserModal';
-import FullNameTitle from '../../common/FullNameTitle';
 
 type OwnProps = {
   isActive?: boolean;

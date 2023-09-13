@@ -5,24 +5,24 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
-import { LeftColumnContent, SettingsScreens } from '../../types';
-import type { ReducerAction } from '../../hooks/useReducer';
 import type { FoldersActions } from '../../hooks/reducers/useFoldersReducer';
+import type { ReducerAction } from '../../hooks/useReducer';
+import { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { IS_MAC_OS, IS_APP, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
+import { IS_APP, IS_MAC_OS, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';
+import useLastCallback from '../../hooks/useLastCallback';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import Transition from '../ui/Transition';
-import LeftMain from './main/LeftMain';
-import Settings from './settings/Settings.async';
-import NewChat from './newChat/NewChat.async';
 import ArchivedChats from './ArchivedChats.async';
+import LeftMain from './main/LeftMain';
+import NewChat from './newChat/NewChat.async';
+import Settings from './settings/Settings.async';
 
 import './LeftColumn.scss';
 

@@ -4,27 +4,27 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
-import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 
 import { IS_ELECTRON } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import buildClassName from '../../../util/buildClassName';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useForumPanelRender from '../../../hooks/useForumPanelRender';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useLang from '../../../hooks/useLang';
-import useForumPanelRender from '../../../hooks/useForumPanelRender';
 
-import Transition from '../../ui/Transition';
-import LeftMainHeader from './LeftMainHeader';
-import ChatFolders from './ChatFolders';
-import LeftSearch from '../search/LeftSearch.async';
-import ContactList from './ContactList.async';
-import NewChatButton from '../NewChatButton';
 import Button from '../../ui/Button';
+import Transition from '../../ui/Transition';
+import NewChatButton from '../NewChatButton';
+import LeftSearch from '../search/LeftSearch.async';
+import ChatFolders from './ChatFolders';
+import ContactList from './ContactList.async';
 import ForumPanel from './ForumPanel';
+import LeftMainHeader from './LeftMainHeader';
 
 import './LeftMain.scss';
 

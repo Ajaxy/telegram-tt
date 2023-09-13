@@ -2,18 +2,18 @@ import type { FC } from '../../lib/teact/teact';
 import { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { GlobalState, TabState } from '../../global/types';
 import type { ApiMessage } from '../../api/types';
+import type { GlobalState, TabState } from '../../global/types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { selectTabState } from '../../global/selectors';
-import { IS_OPFS_SUPPORTED, IS_SERVICE_WORKER_SUPPORTED, MAX_BUFFER_SIZE } from '../../util/windowEnvironment';
-import * as mediaLoader from '../../util/mediaLoader';
-import download from '../../util/download';
 import {
   getMessageContentFilename, getMessageMediaFormat, getMessageMediaHash,
 } from '../../global/helpers';
+import { selectTabState } from '../../global/selectors';
+import download from '../../util/download';
 import { compact } from '../../util/iteratees';
+import * as mediaLoader from '../../util/mediaLoader';
+import { IS_OPFS_SUPPORTED, IS_SERVICE_WORKER_SUPPORTED, MAX_BUFFER_SIZE } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useRunDebounced from '../../hooks/useRunDebounced';

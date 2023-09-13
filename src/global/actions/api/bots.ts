@@ -1,30 +1,29 @@
-import type { RequiredGlobalActions } from '../../index';
-import {
-  addActionHandler, getGlobal, setGlobal,
-} from '../../index';
-
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import type {
   ApiChat, ApiChatType, ApiContact, ApiUrlAuthResult, ApiUser,
 } from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
-
+import type { RequiredGlobalActions } from '../../index';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { callApi } from '../../../api/gramjs';
-import {
-  selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectTabState, selectBot,
-  selectIsTrustedBot, selectReplyingToId, selectSendAs, selectUser, selectThreadTopMessageId, selectUserFullInfo,
-} from '../../selectors';
-import { addChats, addUsers, removeBlockedUser } from '../../reducers';
+
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
+import { translate } from '../../../util/langProvider';
+import PopupManager from '../../../util/PopupManager';
 import { debounce } from '../../../util/schedulers';
-import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
-import PopupManager from '../../../util/PopupManager';
+import { callApi } from '../../../api/gramjs';
+import {
+  addActionHandler, getGlobal, setGlobal,
+} from '../../index';
+import { addChats, addUsers, removeBlockedUser } from '../../reducers';
+import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { translate } from '../../../util/langProvider';
+import {
+  selectBot, selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectIsTrustedBot,
+  selectReplyingToId, selectSendAs, selectTabState, selectThreadTopMessageId, selectUser, selectUserFullInfo,
+} from '../../selectors';
 
 const GAMEE_URL = 'https://prizes.gamee.com/';
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min

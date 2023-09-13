@@ -1,11 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { TabState } from '../../global/types';
 
-import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 
 import RecipientPicker from '../common/RecipientPicker';
 

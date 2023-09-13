@@ -1,22 +1,23 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiBotInfo } from '../../api/types';
 
-import { DPR } from '../../util/windowEnvironment';
-import renderText from '../common/helpers/renderText';
 import {
   getBotCoverMediaHash,
   getDocumentMediaHash,
   getPhotoFullDimensions,
   getVideoDimensions,
 } from '../../global/helpers';
-import buildStyle from '../../util/buildStyle';
-import buildClassName from '../../util/buildClassName';
 import { selectBot, selectUserFullInfo } from '../../global/selectors';
-import useMedia from '../../hooks/useMedia';
+import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
+import { DPR } from '../../util/windowEnvironment';
+import renderText from '../common/helpers/renderText';
+
 import useLang from '../../hooks/useLang';
+import useMedia from '../../hooks/useMedia';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import Skeleton from '../ui/placeholder/Skeleton';

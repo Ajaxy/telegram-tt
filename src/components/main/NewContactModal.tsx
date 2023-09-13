@@ -6,20 +6,21 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiCountryCode, ApiUser, ApiUserStatus } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getUserStatus } from '../../global/helpers';
 import { selectUser, selectUserStatus } from '../../global/selectors';
-import renderText from '../common/helpers/renderText';
 import { formatPhoneNumberWithCode } from '../../util/phoneNumber';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import renderText from '../common/helpers/renderText';
 
-import Modal from '../ui/Modal';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+
 import Avatar from '../common/Avatar';
-import InputText from '../ui/InputText';
-import Checkbox from '../ui/Checkbox';
 import Button from '../ui/Button';
+import Checkbox from '../ui/Checkbox';
+import InputText from '../ui/InputText';
+import Modal from '../ui/Modal';
 
 import './NewContactModal.scss';
 

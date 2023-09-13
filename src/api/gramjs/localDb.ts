@@ -1,9 +1,11 @@
 import BigInt from 'big-integer';
-import type { Api as GramJs } from '../../lib/gramjs';
-import { omitVirtualClassFields } from './apiBuilders/helpers';
-import { DATA_BROADCAST_CHANNEL_NAME } from '../../config';
 import { constructors } from '../../lib/gramjs/tl';
+
+import type { Api as GramJs } from '../../lib/gramjs';
+
+import { DATA_BROADCAST_CHANNEL_NAME } from '../../config';
 import { throttle } from '../../util/schedulers';
+import { omitVirtualClassFields } from './apiBuilders/helpers';
 
 // eslint-disable-next-line no-restricted-globals
 const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in self;

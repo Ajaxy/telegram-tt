@@ -8,16 +8,17 @@ import {
 } from '../api/types';
 
 import {
-  DEBUG, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS, IS_ELECTRON, ELECTRON_HOST_URL,
+  DEBUG, ELECTRON_HOST_URL,
+  IS_ELECTRON, MEDIA_CACHE_DISABLED, MEDIA_CACHE_NAME, MEDIA_CACHE_NAME_AVATARS,
 } from '../config';
 import { callApi, cancelApiProgress } from '../api/gramjs';
 import * as cacheApi from './cacheApi';
 import { fetchBlob } from './files';
+import { oggToWav } from './oggToWav';
+import { webpToPng } from './webpToPng';
 import {
   IS_OPUS_SUPPORTED, IS_PROGRESSIVE_SUPPORTED, isWebpSupported,
 } from './windowEnvironment';
-import { oggToWav } from './oggToWav';
-import { webpToPng } from './webpToPng';
 
 const asCacheApiType = {
   [ApiMediaFormat.BlobUrl]: cacheApi.Type.Blob,

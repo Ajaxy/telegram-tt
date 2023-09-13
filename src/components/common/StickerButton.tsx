@@ -5,25 +5,24 @@ import React, {
 import { getActions } from '../../global';
 
 import type { ApiBotInlineMediaResult, ApiSticker } from '../../api/types';
-
-import buildClassName from '../../util/buildClassName';
-import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
-import { getServerTimeOffset } from '../../util/serverTime';
-
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import useLastCallback from '../../hooks/useLastCallback';
+import buildClassName from '../../util/buildClassName';
+import { getServerTimeOffset } from '../../util/serverTime';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useLastCallback from '../../hooks/useLastCallback';
 import useMenuPosition from '../../hooks/useMenuPosition';
-import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 
-import StickerView from './StickerView';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import StickerView from './StickerView';
 
 import './StickerButton.scss';
 

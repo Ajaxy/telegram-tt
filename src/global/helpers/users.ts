@@ -1,12 +1,12 @@
 import type { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
+import type { LangFn } from '../../hooks/useLang';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
 import { formatFullDate, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
-import type { LangFn } from '../../hooks/useLang';
-import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { formatPhoneNumber } from '../../util/phoneNumber';
+import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
 
 const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 

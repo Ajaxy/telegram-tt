@@ -1,16 +1,16 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useRef, useState, useCallback,
+  memo, useCallback, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-
-import useLang from '../../../hooks/useLang';
 import buildClassName from '../../../util/buildClassName';
 
-import Modal from '../../ui/Modal';
+import useLang from '../../../hooks/useLang';
+
 import Button from '../../ui/Button';
 import InputText from '../../ui/InputText';
+import Modal from '../../ui/Modal';
 
 import styles from './RatePhoneCallModal.module.scss';
 

@@ -5,9 +5,10 @@ import type { MessageListType } from '../../../global/types';
 import type { PinnedIntersectionChangedCallback } from './usePinnedMessage';
 
 import { IS_ANDROID } from '../../../util/windowEnvironment';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useBackgroundMode, { isBackgroundModeActive } from '../../../hooks/useBackgroundMode';
+
 import useAppLayout from '../../../hooks/useAppLayout';
+import useBackgroundMode, { isBackgroundModeActive } from '../../../hooks/useBackgroundMode';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 
 const INTERSECTION_THROTTLE_FOR_READING = 150;
 const INTERSECTION_THROTTLE_FOR_MEDIA = IS_ANDROID ? 1000 : 350;

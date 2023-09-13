@@ -1,31 +1,31 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm, ApiBotInlineSwitchWebview,
 } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 import buildClassName from '../../../util/buildClassName';
-import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { throttle } from '../../../util/schedulers';
+import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import usePrevious from '../../../hooks/usePrevious';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
-import MediaResult from './inlineResults/MediaResult';
+import InfiniteScroll from '../../ui/InfiniteScroll';
+import ListItem from '../../ui/ListItem';
 import ArticleResult from './inlineResults/ArticleResult';
 import GifResult from './inlineResults/GifResult';
+import MediaResult from './inlineResults/MediaResult';
 import StickerResult from './inlineResults/StickerResult';
-import ListItem from '../../ui/ListItem';
-import InfiniteScroll from '../../ui/InfiniteScroll';
 
 import './InlineBotTooltip.scss';
 

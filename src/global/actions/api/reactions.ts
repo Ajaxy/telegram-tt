@@ -1,9 +1,20 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { callApi } from '../../../api/gramjs';
-
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import * as mediaLoader from '../../../util/mediaLoader';
+import { callApi } from '../../../api/gramjs';
+import {
+  getDocumentMediaHash,
+  getUserReactions, isMessageLocal, isSameReaction,
+} from '../../helpers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addChatMessagesById, addChats, addUsers, updateChatMessage,
+} from '../../reducers';
+import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
   selectChatMessage,
@@ -14,17 +25,6 @@ import {
   selectPerformanceSettingsValue,
   selectTabState,
 } from '../../selectors';
-import { addMessageReaction, subtractXForEmojiInteraction, updateUnreadReactions } from '../../reducers/reactions';
-import {
-  addChatMessagesById, addChats, addUsers, updateChatMessage,
-} from '../../reducers';
-import { updateTabState } from '../../reducers/tabs';
-import * as mediaLoader from '../../../util/mediaLoader';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import {
-  isSameReaction, getUserReactions, isMessageLocal, getDocumentMediaHash,
-} from '../../helpers';
 
 const INTERACTION_RANDOM_OFFSET = 40;
 

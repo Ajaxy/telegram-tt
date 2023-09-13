@@ -1,16 +1,16 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useRef, useEffect, useState,
+  memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../config';
-import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
@@ -18,13 +18,13 @@ import {
   getMessageMediaThumbDataUri,
   isMessageDocumentVideo,
 } from '../../global/helpers';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentInfo';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import useMedia from '../../hooks/useMedia';
 import useFlag from '../../hooks/useFlag';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 
 import File from './File';
 

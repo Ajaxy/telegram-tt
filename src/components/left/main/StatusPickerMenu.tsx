@@ -1,18 +1,19 @@
 import type { RefObject } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useCallback, memo, useEffect, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 
 import { selectIsContextMenuTranslucent } from '../../../global/selectors';
+
 import useFlag from '../../../hooks/useFlag';
 
+import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Menu from '../../ui/Menu';
 import Portal from '../../ui/Portal';
-import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 
 import styles from './StatusPickerMenu.module.scss';
 

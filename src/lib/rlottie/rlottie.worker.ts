@@ -1,6 +1,8 @@
 import { inflate } from 'pako/dist/pako_inflate';
-import { createWorkerInterface } from '../../util/createPostMessageInterface';
+
 import type { CancellableCallback } from '../../util/PostMessageConnector';
+
+import { createWorkerInterface } from '../../util/createPostMessageInterface';
 
 importScripts(new URL('./rlottie-wasm.js', import.meta.url));
 

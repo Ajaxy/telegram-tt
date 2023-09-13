@@ -1,6 +1,7 @@
 import { useRef } from '../../../../lib/teact/teact';
-import usePrevious from '../../../../hooks/usePrevious';
+
 import useForceUpdate from '../../../../hooks/useForceUpdate';
+import usePrevious from '../../../../hooks/usePrevious';
 
 export default function useLeftHeaderButtonRtlForumTransition(shouldHideSearch?: boolean) {
   const forceUpdate = useForceUpdate();

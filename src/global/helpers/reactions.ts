@@ -1,10 +1,10 @@
 import type {
+  ApiAvailableReaction,
   ApiChatReactions,
   ApiMessage,
   ApiReaction,
-  ApiReactions,
   ApiReactionCount,
-  ApiAvailableReaction,
+  ApiReactions,
 } from '../../api/types';
 import type { GlobalState } from '../types';
 

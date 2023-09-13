@@ -2,24 +2,24 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import type { ApiMessage, ApiWebPage } from '../../api/types';
-import type { TextPart } from '../../types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { TextPart } from '../../types';
 
 import {
   getFirstLinkInMessage, getMessageText,
   getMessageWebPage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
-import trimText from '../../util/trimText';
-import renderText from './helpers/renderText';
 import { formatPastTimeShort } from '../../util/dateFormat';
+import trimText from '../../util/trimText';
 import { renderMessageSummary } from './helpers/renderMessageText';
+import renderText from './helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import Media from './Media';
 import Link from '../ui/Link';
+import Media from './Media';
 import SafeLink from './SafeLink';
 
 import './WebLink.scss';

@@ -1,9 +1,13 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { callApi } from '../../../api/gramjs';
-
-import type { ActionReturnType } from '../../types';
 import type { ApiStoryView } from '../../../api/types';
+import type { ActionReturnType } from '../../types';
 
+import { copyTextToClipboard } from '../../../util/clipboard';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addStoriesForUser, addUsers } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectCurrentViewedStory,
@@ -13,12 +17,7 @@ import {
   selectUserFirstUnreadStoryId,
   selectUserStories,
 } from '../../selectors';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { copyTextToClipboard } from '../../../util/clipboard';
 import { fetchChatByUsername } from '../api/chats';
-import { addStoriesForUser, addUsers } from '../../reducers';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import * as langProvider from '../../../util/langProvider';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
   const {

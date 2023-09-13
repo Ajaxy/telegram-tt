@@ -1,9 +1,10 @@
-import { addActionHandler } from '../../index';
 import type { ActionReturnType } from '../../types';
+
+import { DEFAULT_PLAYBACK_RATE } from '../../../config';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { DEFAULT_PLAYBACK_RATE } from '../../../config';
 
 addActionHandler('openMediaViewer', (global, actions, payload): ActionReturnType => {
   const {

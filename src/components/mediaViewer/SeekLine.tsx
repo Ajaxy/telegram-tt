@@ -1,25 +1,25 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useRef, useState, useEffect, memo, useMemo, useLayoutEffect,
+  memo, useEffect, useLayoutEffect,
+  useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { BufferedRange } from '../../hooks/useBuffering';
 import type { ApiDimensions } from '../../api/types';
+import type { BufferedRange } from '../../hooks/useBuffering';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useSignal from '../../hooks/useSignal';
-import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
-import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
-import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
-
-import { captureEvents } from '../../util/captureEvents';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { createVideoPreviews, getPreviewDimensions, renderVideoPreview } from '../../lib/video-preview/VideoPreview';
+import { animateNumber } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
+import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { clamp, round } from '../../util/math';
-import { animateNumber } from '../../util/animation';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
-import { createVideoPreviews, renderVideoPreview, getPreviewDimensions } from '../../lib/video-preview/VideoPreview';
+import { useThrottledSignal } from '../../hooks/useAsyncResolvers';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
+import useLastCallback from '../../hooks/useLastCallback';
+import useSignal from '../../hooks/useSignal';
+import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
 
 import ShowTransition from '../ui/ShowTransition';
 

@@ -1,21 +1,21 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
-
-import type { LangFn } from '../../../hooks/useLang';
-import useLang from '../../../hooks/useLang';
 import { getActions } from '../../../global';
 
 import type { ApiMessage, StatisticsRecentMessage as StatisticsRecentMessageType } from '../../../api/types';
+import type { LangFn } from '../../../hooks/useLang';
 
-import buildClassName from '../../../util/buildClassName';
-import { formatDateTimeToString } from '../../../util/dateFormat';
 import {
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
-  getMessageVideo,
   getMessageRoundVideo,
+  getMessageVideo,
 } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { formatDateTimeToString } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
+
+import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 
 import './StatisticsRecentMessage.scss';

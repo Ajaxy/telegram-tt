@@ -4,13 +4,14 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import { selectChat, selectTabState, selectUser } from '../../global/selectors';
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
-import useLang from '../../hooks/useLang';
+import { selectChat, selectTabState, selectUser } from '../../global/selectors';
+
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import RecipientPicker from '../common/RecipientPicker';
-import usePrevious from '../../hooks/usePrevious';
 
 export type OwnProps = {
   isOpen: boolean;

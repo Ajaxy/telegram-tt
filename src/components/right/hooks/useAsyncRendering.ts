@@ -1,7 +1,7 @@
 import { useEffect, useRef } from '../../../lib/teact/teact';
 
-import useSyncEffect from '../../../hooks/useSyncEffect';
 import useForceUpdate from '../../../hooks/useForceUpdate';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 export default function useAsyncRendering<T extends any[]>(dependencies: T, delay?: number) {
   const isDisabled = delay === undefined;

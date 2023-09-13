@@ -1,4 +1,5 @@
 import { useRef, useState } from '../../../../lib/teact/teact';
+
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 export default function usePopupLimit(sequentialLimit: number, resetAfter: number) {

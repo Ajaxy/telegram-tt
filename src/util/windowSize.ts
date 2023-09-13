@@ -1,7 +1,8 @@
 import type { IDimensions } from '../global/types';
+
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { throttle } from './schedulers';
 import { IS_IOS } from './windowEnvironment';
-import { requestMutation } from '../lib/fasterdom/fasterdom';
 
 const WINDOW_ORIENTATION_CHANGE_THROTTLE_MS = 100;
 const WINDOW_RESIZE_THROTTLE_MS = 250;

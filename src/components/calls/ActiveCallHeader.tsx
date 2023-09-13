@@ -4,9 +4,10 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiGroupCall, ApiUser } from '../../api/types';
 
-import { selectActiveGroupCall, selectPhoneCallUser } from '../../global/selectors/calls';
 import { selectTabState } from '../../global/selectors';
+import { selectActiveGroupCall, selectPhoneCallUser } from '../../global/selectors/calls';
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import './ActiveCallHeader.scss';

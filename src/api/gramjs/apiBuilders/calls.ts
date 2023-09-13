@@ -1,3 +1,5 @@
+import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiCallProtocol,
   ApiPhoneCallConnection,
@@ -5,8 +7,8 @@ import type {
   GroupCallParticipantVideo,
   SsrcGroup,
 } from '../../../lib/secret-sauce';
-import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiGroupCall, ApiPhoneCall } from '../../types';
+
 import { getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 
 export function buildApiGroupCallParticipant(participant: GramJs.GroupCallParticipant): GroupCallParticipant {

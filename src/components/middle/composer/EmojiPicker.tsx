@@ -1,33 +1,34 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useState, useEffect, memo, useRef, useMemo,
+  memo, useEffect, useMemo,
+  useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { GlobalState } from '../../../global/types';
 import type {
+  EmojiData,
   EmojiModule,
   EmojiRawData,
-  EmojiData,
 } from '../../../util/emoji';
 
 import { MENU_TRANSITION_DURATION, RECENT_SYMBOL_SET_ID } from '../../../config';
-import { REM } from '../../common/helpers/mediaDimensions';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { uncompressEmoji } from '../../../util/emoji';
-import animateScroll from '../../../util/animateScroll';
-import { pick } from '../../../util/iteratees';
-import buildClassName from '../../../util/buildClassName';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
+import animateScroll from '../../../util/animateScroll';
+import buildClassName from '../../../util/buildClassName';
+import { uncompressEmoji } from '../../../util/emoji';
+import { pick } from '../../../util/iteratees';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { REM } from '../../common/helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
-import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useScrolledState from '../../../hooks/useScrolledState';
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Button from '../../ui/Button';
 import Loading from '../../ui/Loading';

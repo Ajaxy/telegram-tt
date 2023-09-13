@@ -1,10 +1,10 @@
-import { addActionHandler } from '../../index';
-
-import { clearPayment, closeInvoice } from '../../reducers';
 import type { ActionReturnType } from '../../types';
-import { selectTabState } from '../../selectors';
-import { updateTabState } from '../../reducers/tabs';
+
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addActionHandler } from '../../index';
+import { clearPayment, closeInvoice } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
+import { selectTabState } from '../../selectors';
 
 addActionHandler('closePaymentModal', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload || {};

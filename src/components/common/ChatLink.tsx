@@ -1,7 +1,6 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-
-import type { FC } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 

@@ -10,9 +10,9 @@ import { getServerTime } from '../../util/serverTime';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import ListItem from '../ui/ListItem';
+import Modal from '../ui/Modal';
 import TextTimer from '../ui/TextTimer';
 
 import styles from './StealthModeModal.module.scss';

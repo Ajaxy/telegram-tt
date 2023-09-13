@@ -3,8 +3,9 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import { formatCardExpiry } from '../middle/helpers/inputFormatters';
 
-import InputText from '../ui/InputText';
 import useLang from '../../hooks/useLang';
+
+import InputText from '../ui/InputText';
 
 const MAX_FIELD_LENGTH = 5;
 

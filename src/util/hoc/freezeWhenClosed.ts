@@ -1,4 +1,4 @@
-import { useRef, type FC, type Props } from '../../lib/teact/teact';
+import { type FC, type Props, useRef } from '../../lib/teact/teact';
 
 export default function freezeWhenClosed<T extends FC>(Component: T) {
   function ComponentWrapper(props: Props) {

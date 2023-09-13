@@ -1,32 +1,32 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../../lib/teact/teact';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiVideo } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { selectIsContextMenuTranslucent, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { selectTabState, selectIsContextMenuTranslucent } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
-import useMouseInside from '../../../hooks/useMouseInside';
-import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMouseInside from '../../../hooks/useMouseInside';
+import useShowTransition from '../../../hooks/useShowTransition';
 
+import CustomEmojiPicker from '../../common/CustomEmojiPicker';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
+import Portal from '../../ui/Portal';
 import Transition from '../../ui/Transition';
 import EmojiPicker from './EmojiPicker';
-import CustomEmojiPicker from '../../common/CustomEmojiPicker';
-import StickerPicker from './StickerPicker';
 import GifPicker from './GifPicker';
+import StickerPicker from './StickerPicker';
 import SymbolMenuFooter, { SYMBOL_MENU_TAB_TITLES, SymbolMenuTabs } from './SymbolMenuFooter';
-import Portal from '../../ui/Portal';
 
 import './SymbolMenu.scss';
 

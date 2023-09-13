@@ -1,24 +1,26 @@
 import { useEffect, useRef } from '../../../../lib/teact/teact';
-import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
-import type { ApiDraft } from '../../../../global/types';
 import type { ApiMessage } from '../../../../api/types';
+import type { ApiDraft } from '../../../../global/types';
 import type { Signal } from '../../../../util/signals';
-
 import { ApiMessageEntityTypes } from '../../../../api/types';
+
 import { DRAFT_DEBOUNCE, EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
+import {
+  requestMeasure, requestNextMutation,
+} from '../../../../lib/fasterdom/fasterdom';
 import focusEditableElement from '../../../../util/focusEditableElement';
 import parseMessageInput from '../../../../util/parseMessageInput';
+import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
-import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
-import { useStateRef } from '../../../../hooks/useStateRef';
-import useRunDebounced from '../../../../hooks/useRunDebounced';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../../../hooks/useLayoutEffectWithPrevDeps';
+import useRunDebounced from '../../../../hooks/useRunDebounced';
+import { useStateRef } from '../../../../hooks/useStateRef';
 
 let isFrozen = false;
 

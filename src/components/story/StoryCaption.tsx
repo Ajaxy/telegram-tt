@@ -1,16 +1,16 @@
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 
 import type { ApiStory } from '../../api/types';
 
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 import { REM } from '../common/helpers/mediaDimensions';
 
-import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useLang from '../../hooks/useLang';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransition from '../../hooks/useShowTransition';
 
 import MessageText from '../common/MessageText';

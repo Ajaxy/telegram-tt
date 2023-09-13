@@ -1,18 +1,18 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
-import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { withGlobal } from '../../global';
 
 import type { TabState } from '../../global/types';
-import type { FC } from '../../lib/teact/teact';
 
-import { pick } from '../../util/iteratees';
-import buildStyle from '../../util/buildStyle';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { selectTabState } from '../../global/selectors';
+import buildStyle from '../../util/buildStyle';
+import { pick } from '../../util/iteratees';
 
-import useWindowSize from '../../hooks/useWindowSize';
-import useSyncEffect from '../../hooks/useSyncEffect';
-import useForceUpdate from '../../hooks/useForceUpdate';
 import useAppLayout from '../../hooks/useAppLayout';
+import useForceUpdate from '../../hooks/useForceUpdate';
+import useSyncEffect from '../../hooks/useSyncEffect';
+import useWindowSize from '../../hooks/useWindowSize';
 
 import styles from './ConfettiContainer.module.scss';
 

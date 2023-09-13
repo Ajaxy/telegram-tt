@@ -3,34 +3,35 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiUser, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiMessage, ApiMessageOutgoingStatus,
+  ApiUser,
 } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useLang';
 
 import {
-  getPrivateChatUserId,
+  getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageMediaThumbDataUri,
-  getMessageVideo,
   getMessageRoundVideo,
   getMessageSticker,
-  getMessageIsSpoiler,
+  getMessageVideo,
+  getPrivateChatUserId,
 } from '../../../global/helpers';
 import { selectChat, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatPastTimeShort } from '../../../util/dateFormat';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
+import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
 import useSelectWithEnter from '../../../hooks/useSelectWithEnter';
-import useAppLayout from '../../../hooks/useAppLayout';
 
 import Avatar from '../../common/Avatar';
-import ListItem from '../../ui/ListItem';
-import Link from '../../ui/Link';
 import FullNameTitle from '../../common/FullNameTitle';
+import Link from '../../ui/Link';
+import ListItem from '../../ui/ListItem';
 
 import './ChatMessage.scss';
 

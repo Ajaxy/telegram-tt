@@ -1,9 +1,9 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-
 import { TME_LINK_PREFIX } from '../../config';
+
 import useLang from '../../hooks/useLang';
 
 import './ConfirmPayment.scss';

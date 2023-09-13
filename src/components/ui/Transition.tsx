@@ -3,16 +3,16 @@ import React, { useEffect, useLayoutEffect, useRef } from '../../lib/teact/teact
 import {
   addExtraClass, removeExtraClass, setExtraStyles, toggleExtraClass,
 } from '../../lib/teact/teact-dom';
-import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
-
 import { getGlobal } from '../../global';
 
-import buildClassName from '../../util/buildClassName';
-import forceReflow from '../../util/forceReflow';
-import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import { requestForcedReflow, requestMutation } from '../../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
+import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
+import forceReflow from '../../util/forceReflow';
+
 import useForceUpdate from '../../hooks/useForceUpdate';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import usePrevious from '../../hooks/usePrevious';
 
 import './Transition.scss';

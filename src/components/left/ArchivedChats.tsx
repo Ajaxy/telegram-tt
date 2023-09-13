@@ -1,26 +1,27 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-import type { LeftColumnContent, SettingsScreens } from '../../types';
-import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
+
 import type { GlobalState } from '../../global/types';
+import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
+import type { LeftColumnContent, SettingsScreens } from '../../types';
 
 import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
-import useHistoryBack from '../../hooks/useHistoryBack';
-import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
-import useShowTransition from '../../hooks/useShowTransition';
 import useForumPanelRender from '../../hooks/useForumPanelRender';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useShowTransition from '../../hooks/useShowTransition';
+import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
-import Button from '../ui/Button';
-import ChatList from './main/ChatList';
-import ForumPanel from './main/ForumPanel';
-import DropdownMenu from '../ui/DropdownMenu';
-import MenuItem from '../ui/MenuItem';
 import StoryRibbon from '../story/StoryRibbon';
 import StoryToggler from '../story/StoryToggler';
+import Button from '../ui/Button';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
+import ChatList from './main/ChatList';
+import ForumPanel from './main/ForumPanel';
 
 import './ArchivedChats.scss';
 

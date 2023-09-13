@@ -1,12 +1,12 @@
 import type { TeactNode } from '../../lib/teact/teact';
+
 import type { ApiMessage } from '../../api/types';
-import { ApiMessageEntityTypes } from '../../api/types';
-import { CONTENT_NOT_SUPPORTED } from '../../config';
-import { getGlobal } from '../index';
-
 import type { LangFn } from '../../hooks/useLang';
+import { ApiMessageEntityTypes } from '../../api/types';
 
+import { CONTENT_NOT_SUPPORTED } from '../../config';
 import trimText from '../../util/trimText';
+import { getGlobal } from '../index';
 import { getMessageText, getMessageTranscription } from './messages';
 import { getUserFirstOrLastName } from './users';
 

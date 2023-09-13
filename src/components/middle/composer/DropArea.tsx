@@ -1,14 +1,13 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 
-import useShowTransition from '../../../hooks/useShowTransition';
 import buildClassName from '../../../util/buildClassName';
-import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
-
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import Portal from '../../ui/Portal';
 import DropTarget from './DropTarget';

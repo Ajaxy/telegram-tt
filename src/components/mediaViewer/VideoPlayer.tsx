@@ -6,22 +6,22 @@ import { getActions } from '../../global';
 
 import type { ApiDimensions } from '../../api/types';
 
-import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/windowEnvironment';
+import { clamp } from '../../util/math';
 import safePlay from '../../util/safePlay';
 import stopEvent from '../../util/stopEvent';
-import { clamp } from '../../util/math';
+import { IS_IOS, IS_TOUCH_ENV, IS_YA_BROWSER } from '../../util/windowEnvironment';
 
-import useLastCallback from '../../hooks/useLastCallback';
+import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
+import useAppLayout from '../../hooks/useAppLayout';
 import useBuffering from '../../hooks/useBuffering';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useFullscreen from '../../hooks/useFullscreen';
+import useLastCallback from '../../hooks/useLastCallback';
 import usePictureInPicture from '../../hooks/usePictureInPicture';
 import useShowTransition from '../../hooks/useShowTransition';
 import useVideoCleanup from '../../hooks/useVideoCleanup';
-import useAppLayout from '../../hooks/useAppLayout';
-import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useControlsSignal from './hooks/useControlsSignal';
 import useVideoWaitingSignal from './hooks/useVideoWaitingSignal';
-import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 
 import Button from '../ui/Button';
 import ProgressSpinner from '../ui/ProgressSpinner';

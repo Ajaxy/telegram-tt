@@ -1,26 +1,26 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { useEffect, useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
-import { ApiMediaFormat } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import { ApiMediaFormat } from '../../../api/types';
 
-import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 import { getMessageMediaHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { IS_WEBM_SUPPORTED } from '../../../util/windowEnvironment';
-import { getActions } from '../../../global';
+import { getStickerDimensions } from '../../common/helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useMedia from '../../../hooks/useMedia';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
 import usePrevious from '../../../hooks/usePrevious';
 
-import StickerView from '../../common/StickerView';
 import AnimatedSticker from '../../common/AnimatedSticker';
+import StickerView from '../../common/StickerView';
 
 import './Sticker.scss';
 

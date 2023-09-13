@@ -1,15 +1,16 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiPaymentCredentials } from '../../api/types';
 import type { FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import { selectTabState } from '../../global/selectors';
+
 import useLang from '../../hooks/useLang';
 
-import PasswordMonkey from '../common/PasswordMonkey';
 import PasswordForm from '../common/PasswordForm';
+import PasswordMonkey from '../common/PasswordMonkey';
 
 interface OwnProps {
   isActive?: boolean;

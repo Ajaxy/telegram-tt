@@ -1,7 +1,9 @@
 import type { ApiTypeStory } from '../../../api/types';
-import { hasMessageText, getStoryMediaHash } from '../../../global/helpers';
-import useMedia from '../../../hooks/useMedia';
 import { ApiMediaFormat } from '../../../api/types';
+
+import { getStoryMediaHash, hasMessageText } from '../../../global/helpers';
+
+import useMedia from '../../../hooks/useMedia';
 
 export default function useStoryProps(
   story?: ApiTypeStory, isCurrentUserPremium = false, isDropdownMenuOpen = false,

@@ -1,5 +1,6 @@
 import type { ApiMessage } from '../../api/types';
 import { ApiMessageEntityTypes } from '../../api/types';
+
 import parseEmojiOnlyString from '../../util/parseEmojiOnlyString';
 
 export function getEmojiOnlyCountForMessage(content: ApiMessage['content'], groupedId?: string): number | undefined {

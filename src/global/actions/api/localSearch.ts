@@ -1,19 +1,14 @@
+import type { SharedMediaType } from '../../../types';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+import { type ApiChat, MAIN_THREAD_ID } from '../../../api/types';
+
+import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { callApi } from '../../../api/gramjs';
 import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
-
-import { MAIN_THREAD_ID, type ApiChat } from '../../../api/types';
-
-import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
-import { callApi } from '../../../api/gramjs';
-import {
-  selectCurrentTextSearch,
-  selectCurrentMediaSearch,
-  selectCurrentMessageList,
-  selectChat,
-  selectThreadInfo,
-} from '../../selectors';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import {
   addChatMessagesById,
   addChats,
@@ -21,9 +16,13 @@ import {
   updateLocalMediaSearchResults,
   updateLocalTextSearchResults,
 } from '../../reducers';
-import type { SharedMediaType } from '../../../types';
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import {
+  selectChat,
+  selectCurrentMediaSearch,
+  selectCurrentMessageList,
+  selectCurrentTextSearch,
+  selectThreadInfo,
+} from '../../selectors';
 
 addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Promise<void> => {
   const { tabId = getCurrentTabId() } = payload || {};

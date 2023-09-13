@@ -1,18 +1,18 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiPhoto } from '../../../api/types';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 
-import ListItem from '../../ui/ListItem';
-import SelectAvatar from '../../ui/SelectAvatar';
 import Avatar from '../../common/Avatar';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
+import SelectAvatar from '../../ui/SelectAvatar';
 
 import styles from './SettingsPrivacyPublicPhoto.module.scss';
 

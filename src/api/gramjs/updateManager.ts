@@ -1,15 +1,16 @@
 import { Api as GramJs } from '../../lib/gramjs';
-import type { Update } from './updater';
-import type { invokeRequest } from './methods/client';
-
 import { UpdateConnectionState, UpdateServerTimeOffset } from '../../lib/gramjs/network';
+
+import type { invokeRequest } from './methods/client';
+import type { Update } from './updater';
+
 import { DEBUG } from '../../config';
-import localDb from './localDb';
 import SortedQueue from '../../util/SortedQueue';
-import { dispatchUserAndChatUpdates, sendUpdate, updater } from './updater';
-import { addEntitiesToLocalDb } from './helpers';
-import { buildInputEntity } from './gramjsBuilders';
 import { buildApiPeerId } from './apiBuilders/peers';
+import { buildInputEntity } from './gramjsBuilders';
+import { addEntitiesToLocalDb } from './helpers';
+import localDb from './localDb';
+import { dispatchUserAndChatUpdates, sendUpdate, updater } from './updater';
 
 export type State = {
   seq: number;

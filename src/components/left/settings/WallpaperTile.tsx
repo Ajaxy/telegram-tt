@@ -1,20 +1,23 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState, useRef,
+  memo, useCallback, useEffect, useRef,
+  useState,
 } from '../../../lib/teact/teact';
+
 import type { ApiWallpaper } from '../../../api/types';
 import type { ThemeKey } from '../../../types';
 import { UPLOADING_WALLPAPER_SLUG } from '../../../types';
 
 import { CUSTOM_BG_CACHE_NAME } from '../../../config';
+import buildClassName from '../../../util/buildClassName';
 import * as cacheApi from '../../../util/cacheApi';
 import { fetchBlob } from '../../../util/files';
-import buildClassName from '../../../util/buildClassName';
+
+import useCanvasBlur from '../../../hooks/useCanvasBlur';
 import useMedia from '../../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
-import useCanvasBlur from '../../../hooks/useCanvasBlur';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import ProgressSpinner from '../../ui/ProgressSpinner';
 

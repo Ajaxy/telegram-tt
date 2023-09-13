@@ -1,11 +1,12 @@
+import { getGlobal } from '../../../../global';
+
 import type { ApiMessageEntityCustomEmoji, ApiSticker } from '../../../../api/types';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
-import { getGlobal } from '../../../../global';
 import { EMOJI_SIZES } from '../../../../config';
-import { REM } from '../../../common/helpers/mediaDimensions';
-import { getInputCustomEmojiParams } from '../../../../util/customEmojiManager';
 import buildClassName from '../../../../util/buildClassName';
+import { getInputCustomEmojiParams } from '../../../../util/customEmojiManager';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
 export const INPUT_CUSTOM_EMOJI_SELECTOR = 'img[data-document-id]';
 

@@ -6,16 +6,16 @@ import type {
   ApiAvailableReaction, ApiMessage, ApiMessageOutgoingStatus, ApiThreadInfo,
 } from '../../../api/types';
 
+import buildClassName from '../../../util/buildClassName';
 import { formatDateTimeToString, formatTime } from '../../../util/dateFormat';
 import { formatIntegerCompact } from '../../../util/textFormat';
-
 import renderText from '../../common/helpers/renderText';
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
-import buildClassName from '../../../util/buildClassName';
 
-import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
+
 import AnimatedCounter from '../../common/AnimatedCounter';
+import MessageOutgoingStatus from '../../common/MessageOutgoingStatus';
 
 import './MessageMeta.scss';
 

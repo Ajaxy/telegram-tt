@@ -1,7 +1,9 @@
-import {
-  DEBUG, IS_MOCKED_CLIENT, IS_ELECTRON, APP_CODE_NAME,
-} from '../config';
 import { getGlobal } from '../global';
+
+import {
+  APP_CODE_NAME,
+  DEBUG, IS_ELECTRON, IS_MOCKED_CLIENT,
+} from '../config';
 import { hasStoredSession } from './sessions';
 
 const WEBSYNC_URLS = [

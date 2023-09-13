@@ -1,17 +1,17 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useEffect } from '../../lib/teact/teact';
 import { getActions } from '../../lib/teact/teactn';
+import { withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { TabState } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { withGlobal } from '../../global';
-import { selectChat } from '../../global/selectors';
 import { getCanPostInChat } from '../../global/helpers';
+import { selectChat } from '../../global/selectors';
 
+import useInterval from '../../hooks/useInterval';
 import useLang from '../../hooks/useLang';
 import useSendMessageAction from '../../hooks/useSendMessageAction';
-import useInterval from '../../hooks/useInterval';
 
 import Modal from '../ui/Modal';
 

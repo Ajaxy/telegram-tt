@@ -1,28 +1,28 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage, ApiTypeStory } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ISettings } from '../../../types';
 
 import { getMessageWebPage } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import trimText from '../../../util/trimText';
+import renderText from '../../common/helpers/renderText';
 import { calculateMediaDimensions } from './helpers/mediaDimensions';
 import { getWebpageButtonText } from './helpers/webpageType';
-import renderText from '../../common/helpers/renderText';
-import trimText from '../../../util/trimText';
-import buildClassName from '../../../util/buildClassName';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useAppLayout from '../../../hooks/useAppLayout';
-import useLang from '../../../hooks/useLang';
 import useEnsureStory from '../../../hooks/useEnsureStory';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import SafeLink from '../../common/SafeLink';
-import Photo from './Photo';
-import Video from './Video';
 import Button from '../../ui/Button';
 import BaseStory from './BaseStory';
+import Photo from './Photo';
+import Video from './Video';
 
 import './WebPage.scss';
 

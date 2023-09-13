@@ -1,7 +1,8 @@
-import { useLayoutEffect, useState, useEffect } from '../lib/teact/teact';
-import { IS_IOS } from '../util/windowEnvironment';
+import { useEffect, useLayoutEffect, useState } from '../lib/teact/teact';
 
 import { ElectronEvent } from '../types/electron';
+
+import { IS_IOS } from '../util/windowEnvironment';
 
 type RefType = {
   current: HTMLVideoElement | null;

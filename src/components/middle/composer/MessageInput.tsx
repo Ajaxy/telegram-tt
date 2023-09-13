@@ -1,38 +1,39 @@
-import type { RefObject, ChangeEvent } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, useRef, memo, useState, useLayoutEffect,
+  memo, useEffect, useLayoutEffect,
+  useRef, useState,
 } from '../../../lib/teact/teact';
-import { requestMutation, requestForcedReflow } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
 import type { IAnchorPosition, ISettings } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
-import {
-  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
-} from '../../../util/windowEnvironment';
+import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { selectCanPlayAnimatedEmojis, selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
-import { debounce } from '../../../util/schedulers';
-import focusEditableElement from '../../../util/focusEditableElement';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
+import focusEditableElement from '../../../util/focusEditableElement';
 import parseEmojiOnlyString from '../../../util/parseEmojiOnlyString';
-import { isSelectionInsideInput } from './helpers/selection';
+import { debounce } from '../../../util/schedulers';
+import {
+  IS_ANDROID, IS_EMOJI_SUPPORTED, IS_IOS, IS_TOUCH_ENV,
+} from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
+import { isSelectionInsideInput } from './helpers/selection';
 
-import useLastCallback from '../../../hooks/useLastCallback';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useDerivedState from '../../../hooks/useDerivedState';
 import useFlag from '../../../hooks/useFlag';
 import { isHeavyAnimating } from '../../../hooks/useHeavyAnimationCheck';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useInputCustomEmojis from './hooks/useInputCustomEmojis';
-import useAppLayout from '../../../hooks/useAppLayout';
-import useDerivedState from '../../../hooks/useDerivedState';
 
-import TextFormatter from './TextFormatter';
 import TextTimer from '../../ui/TextTimer';
+import TextFormatter from './TextFormatter';
 
 const CONTEXT_MENU_CLOSE_DELAY_MS = 100;
 // Focus slows down animation, also it breaks transition layout in Chrome

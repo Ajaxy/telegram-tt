@@ -1,12 +1,14 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useMemo, useEffect,
+  memo, useCallback, useEffect,
+  useMemo,
 } from '../../lib/teact/teact';
 
+import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 import type { ShippingOption } from '../../types';
 
 import { formatCurrency } from '../../util/formatCurrency';
-import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+
 import useLang from '../../hooks/useLang';
 
 import RadioGroup from '../ui/RadioGroup';

@@ -1,35 +1,35 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { VideoLayout, VideoParticipant } from './hooks/useGroupCallVideoLayout';
-import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 import type { ApiChat, ApiUser } from '../../../api/types';
+import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
+import type { VideoLayout, VideoParticipant } from './hooks/useGroupCallVideoLayout';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
+import fastBlur from '../../../lib/fastBlur';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getUserStreams, THRESHOLD } from '../../../lib/secret-sauce';
-import buildClassName from '../../../util/buildClassName';
 import { selectChat, selectUser } from '../../../global/selectors';
 import { animate } from '../../../util/animation';
+import buildClassName from '../../../util/buildClassName';
 import { fastRaf } from '../../../util/schedulers';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import formatGroupCallVolume from './helpers/formatGroupCallVolume';
-import fastBlur from '../../../lib/fastBlur';
 
-import useLang from '../../../hooks/useLang';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useMenuPosition from '../../../hooks/useMenuPosition';
-import useLastCallback from '../../../hooks/useLastCallback';
 import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMenuPosition from '../../../hooks/useMenuPosition';
 
-import Button from '../../ui/Button';
-import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
 import FullNameTitle from '../../common/FullNameTitle';
-import GroupCallParticipantMenu from './GroupCallParticipantMenu';
+import Button from '../../ui/Button';
 import Skeleton from '../../ui/placeholder/Skeleton';
+import GroupCallParticipantMenu from './GroupCallParticipantMenu';
+import OutlinedMicrophoneIcon from './OutlinedMicrophoneIcon';
 
 import styles from './GroupCallParticipantVideo.module.scss';
 

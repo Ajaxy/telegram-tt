@@ -1,13 +1,12 @@
 import { useCallback, useRef } from '../lib/teact/teact';
 import { getActions } from '../lib/teact/teactn';
-import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 import { IS_TEST } from '../config';
+import { requestMeasure } from '../lib/fasterdom/fasterdom';
 import { IS_IOS } from '../util/windowEnvironment';
-
-import useSyncEffect from './useSyncEffect';
 import useEffectOnce from './useEffectOnce';
 import useLastCallback from './useLastCallback';
+import useSyncEffect from './useSyncEffect';
 
 const PATH_BASE = `${window.location.pathname}${window.location.search}`;
 // Carefully selected by swiping and observing visual changes

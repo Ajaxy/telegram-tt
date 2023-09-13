@@ -5,8 +5,8 @@ import { ANIMATION_END_DELAY } from '../../../config';
 import animateScroll from '../../../util/animateScroll';
 import { REM } from '../helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useSyncEffect from '../../../hooks/useSyncEffect';
 
 const STICKER_INTERSECTION_THROTTLE = 200;

@@ -3,12 +3,12 @@
 // https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/ui/grouped_layout.cpp
 // https://github.com/overtake/TelegramSwift/blob/master/Telegram-Mac/GroupedLayout.swift#L83
 
+import type { ApiDimensions, ApiMessage } from '../../../../api/types';
 import type { IAlbum } from '../../../../types';
-import type { ApiMessage, ApiDimensions } from '../../../../api/types';
 
+import { clamp } from '../../../../util/math';
 import { getAvailableWidth, REM } from '../../../common/helpers/mediaDimensions';
 import { calculateMediaDimensions } from './mediaDimensions';
-import { clamp } from '../../../../util/math';
 
 export const AlbumRectPart = {
   None: 0,

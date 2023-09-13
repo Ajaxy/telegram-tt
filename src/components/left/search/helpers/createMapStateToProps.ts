@@ -1,7 +1,7 @@
-import type { GlobalState, TabState } from '../../../../global/types';
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiUser,
 } from '../../../../api/types';
+import type { GlobalState, TabState } from '../../../../global/types';
 import type { ISettings } from '../../../../types';
 
 import { selectChat, selectTabState, selectTheme } from '../../../../global/selectors';

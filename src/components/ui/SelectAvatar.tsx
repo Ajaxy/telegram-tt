@@ -1,12 +1,12 @@
 import type { RefObject } from 'react';
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
+import { openSystemFilesDialog } from '../../util/systemFilesDialog';
 
 import CropModal from './CropModal';
 
 import styles from './SelectAvatar.module.scss';
-import { openSystemFilesDialog } from '../../util/systemFilesDialog';
 
 type OwnProps = {
   onChange: (file: File) => void;

@@ -5,8 +5,9 @@ import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Button from '../ui/Button';
 
-import appInactivePath from '../../assets/app-inactive.png';
 import './AppInactive.scss';
+
+import appInactivePath from '../../assets/app-inactive.png';
 
 const AppInactive: FC = () => {
   const handleReload = useCallback(() => {

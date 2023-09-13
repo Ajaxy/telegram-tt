@@ -1,12 +1,12 @@
 import { useEffect } from '../lib/teact/teact';
 
 import {
-  getOrderedIds,
-  getUnreadCounters,
-  getChatsCount,
+  addChatsCountCallback,
   addOrderedIdsCallback,
   addUnreadCountersCallback,
-  addChatsCountCallback,
+  getChatsCount,
+  getOrderedIds,
+  getUnreadCounters,
 } from '../util/folderManager';
 import useForceUpdate from './useForceUpdate';
 

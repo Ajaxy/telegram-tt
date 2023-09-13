@@ -1,6 +1,5 @@
-import React, { memo } from '../../lib/teact/teact';
-
 import type { FC } from '../../lib/teact/teact';
+import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 

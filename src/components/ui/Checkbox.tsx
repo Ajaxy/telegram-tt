@@ -5,8 +5,9 @@ import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import type { IconName } from '../../types/icons';
 
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
 import renderText from '../common/helpers/renderText';
+
+import useLang from '../../hooks/useLang';
 
 import Spinner from './Spinner';
 

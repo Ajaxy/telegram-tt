@@ -5,14 +5,12 @@ import React, {
 import { getActions } from '../../global';
 
 import type { ApiAudio, ApiMessage, ApiVoice } from '../../api/types';
-import { ApiMediaFormat } from '../../api/types';
-import type { ISettings } from '../../types';
-import { AudioOrigin } from '../../types';
+import type { BufferedRange } from '../../hooks/useBuffering';
 import type { LangFn } from '../../hooks/useLang';
+import type { ISettings } from '../../types';
+import { ApiMediaFormat } from '../../api/types';
+import { AudioOrigin } from '../../types';
 
-import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
-import renderText from './helpers/renderText';
-import { getFileSizeString } from './helpers/documentInfo';
 import {
   getMediaDuration,
   getMediaTransferState,
@@ -21,25 +19,27 @@ import {
   isMessageLocal,
   isOwnMessage,
 } from '../../global/helpers';
+import { makeTrackId } from '../../util/audioPlayer';
 import buildClassName from '../../util/buildClassName';
+import { captureEvents } from '../../util/captureEvents';
 import { formatMediaDateTime, formatMediaDuration, formatPastTimeShort } from '../../util/dateFormat';
 import { decodeWaveform, interpolateArray } from '../../util/waveform';
-import { makeTrackId } from '../../util/audioPlayer';
+import { getFileSizeString } from './helpers/documentInfo';
+import renderText from './helpers/renderText';
+import { MAX_EMPTY_WAVEFORM_POINTS, renderWaveform } from './helpers/waveform';
 
+import useAppLayout from '../../hooks/useAppLayout';
+import useAudioPlayer from '../../hooks/useAudioPlayer';
+import useBuffering from '../../hooks/useBuffering';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useShowTransition from '../../hooks/useShowTransition';
-import type { BufferedRange } from '../../hooks/useBuffering';
-import useBuffering from '../../hooks/useBuffering';
-import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useLang from '../../hooks/useLang';
-import { captureEvents } from '../../util/captureEvents';
-import useMedia from '../../hooks/useMedia';
-import useAppLayout from '../../hooks/useAppLayout';
 
 import Button from '../ui/Button';
-import ProgressSpinner from '../ui/ProgressSpinner';
 import Link from '../ui/Link';
+import ProgressSpinner from '../ui/ProgressSpinner';
 
 import './Audio.scss';
 

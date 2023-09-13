@@ -1,12 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
-
 import { GENERAL_TOPIC_ID } from '../../config';
-import { getFirstLetters } from '../../util/textFormat';
 import buildClassName from '../../util/buildClassName';
-import renderText from './helpers/renderText';
 import { getTopicDefaultIcon } from '../../util/forumColors';
+import { getFirstLetters } from '../../util/textFormat';
+import renderText from './helpers/renderText';
 
 import styles from './TopicDefaultIcon.module.scss';
 

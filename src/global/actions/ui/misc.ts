@@ -1,15 +1,26 @@
+import { addCallback } from '../../../lib/teact/teactn';
+
+import type { ApiError, ApiNotification } from '../../../api/types';
+import type { ActionReturnType, GlobalState } from '../../types';
+import { MAIN_THREAD_ID } from '../../../api/types';
+
+import {
+  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, IS_ELECTRON,
+  PAGE_TITLE,
+} from '../../../config';
+import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
+import { getAllNotificationsCount } from '../../../util/folderManager';
+import generateUniqueId from '../../../util/generateUniqueId';
+import getReadableErrorText from '../../../util/getReadableErrorText';
+import { compact, unique } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import updateIcon from '../../../util/updateIcon';
+import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
+import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
-
-import type { ApiError, ApiNotification } from '../../../api/types';
-import { MAIN_THREAD_ID } from '../../../api/types';
-import type { ActionReturnType, GlobalState } from '../../types';
-
-import {
-  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, PAGE_TITLE, IS_ELECTRON,
-} from '../../../config';
-import getReadableErrorText from '../../../util/getReadableErrorText';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -19,17 +30,8 @@ import {
   selectIsTrustedBot,
   selectTabState,
 } from '../../selectors';
-import generateUniqueId from '../../../util/generateUniqueId';
-import { compact, unique } from '../../../util/iteratees';
-import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
-import { getAllNotificationsCount } from '../../../util/folderManager';
-import updateIcon from '../../../util/updateIcon';
-import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
-import { updateTabState } from '../../reducers/tabs';
+
 import { getIsMobile, getIsTablet } from '../../../hooks/useAppLayout';
-import * as langProvider from '../../../util/langProvider';
-import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
-import { addCallback } from '../../../lib/teact/teactn';
 
 export const APP_VERSION_URL = 'version.txt';
 const MAX_STORED_EMOJIS = 8 * 4; // Represents four rows of recent emojis

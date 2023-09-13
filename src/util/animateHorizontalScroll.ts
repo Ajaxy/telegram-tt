@@ -1,8 +1,8 @@
 import { getGlobal } from '../global';
 
-import { animate } from './animation';
 import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { selectCanAnimateInterface } from '../global/selectors';
+import { animate } from './animation';
 
 const DEFAULT_DURATION = 300;
 

@@ -1,6 +1,6 @@
-import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
-import type { ApiWebDocument } from './bots';
 import type { ApiInvoiceContainer } from '../../types';
+import type { ApiWebDocument } from './bots';
+import type { ApiDocument, ApiMessageEntity, ApiPaymentCredentials } from './messages';
 
 export interface ApiShippingAddress {
   streetLine1: string;

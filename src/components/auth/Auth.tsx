@@ -1,21 +1,23 @@
+import '../../global/actions/initial';
+
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
-import '../../global/actions/initial';
 import { PLATFORM_ENV } from '../../util/windowEnvironment';
-import useHistoryBack from '../../hooks/useHistoryBack';
+
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useElectronDrag from '../../hooks/useElectronDrag';
+import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Transition from '../ui/Transition';
-import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthCode from './AuthCode.async';
 import AuthPassword from './AuthPassword.async';
-import AuthRegister from './AuthRegister.async';
+import AuthPhoneNumber from './AuthPhoneNumber';
 import AuthQrCode from './AuthQrCode';
+import AuthRegister from './AuthRegister.async';
 
 import './Auth.scss';
 

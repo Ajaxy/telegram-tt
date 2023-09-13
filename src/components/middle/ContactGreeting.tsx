@@ -5,11 +5,11 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 import { getUserIdDividend } from '../../global/helpers';
+import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import StickerView from '../common/StickerView';
 

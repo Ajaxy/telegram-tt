@@ -1,10 +1,11 @@
-import type { GlobalState, TabState, TabArgs } from '../types';
-import type { GlobalSearchContent } from '../../types';
 import type { ApiGlobalMessageSearchType, ApiMessage } from '../../api/types';
-import { areSortedArraysEqual } from '../../util/iteratees';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { GlobalSearchContent } from '../../types';
+import type { GlobalState, TabArgs, TabState } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { areSortedArraysEqual } from '../../util/iteratees';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 const getComplexKey = (message: ApiMessage) => `${message.chatId}_${message.id}`;
 

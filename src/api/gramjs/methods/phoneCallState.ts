@@ -1,9 +1,9 @@
-import BigInt from 'big-integer';
 import type bigInt from 'big-integer';
-import MTProtoState from '../../../lib/gramjs/network/MTProtoState';
+import BigInt from 'big-integer';
+import AuthKey from '../../../lib/gramjs/crypto/AuthKey';
 import Logger from '../../../lib/gramjs/extensions/Logger';
 import Helpers from '../../../lib/gramjs/Helpers';
-import AuthKey from '../../../lib/gramjs/crypto/AuthKey';
+import MTProtoState from '../../../lib/gramjs/network/MTProtoState';
 
 type DhConfig = {
   p: number[];

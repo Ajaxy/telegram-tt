@@ -9,19 +9,20 @@ import type {
 } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { selectChat, selectChatFullInfo } from '../../../global/selectors';
 import { getUserFullName, isChatBasicGroup, isChatChannel } from '../../../global/helpers';
-import useLang from '../../../hooks/useLang';
+import { selectChat, selectChatFullInfo } from '../../../global/selectors';
+
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import ListItem from '../../ui/ListItem';
 import Checkbox from '../../ui/Checkbox';
-import FloatingActionButton from '../../ui/FloatingActionButton';
-import Spinner from '../../ui/Spinner';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
+import ListItem from '../../ui/ListItem';
+import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;

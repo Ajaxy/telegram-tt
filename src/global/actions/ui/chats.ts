@@ -1,19 +1,18 @@
-import { addActionHandler, setGlobal } from '../../index';
-
-import { IS_ELECTRON } from '../../../config';
+import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
+import { IS_ELECTRON } from '../../../config';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { createMessageHashUrl } from '../../../util/routing';
+import { addActionHandler, setGlobal } from '../../index';
 import {
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectCurrentMessageList, selectTabState,
 } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
-import type { ActionReturnType } from '../../types';
-import { updateTabState } from '../../reducers/tabs';
-import { createMessageHashUrl } from '../../../util/routing';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   const {

@@ -1,18 +1,18 @@
-import React, { memo, useMemo, useEffect } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-
-import type { Price } from '../../types';
 import type { ApiShippingAddress, ApiWebDocument } from '../../api/types';
+import type { Price } from '../../types';
 
 import { selectTabState } from '../../global/selectors';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
 
-import Checkout from './Checkout';
-import Modal from '../ui/Modal';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import Checkout from './Checkout';
 
 import './PaymentModal.scss';
 

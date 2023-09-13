@@ -5,19 +5,19 @@ import { getGlobal, withGlobal } from '../../global';
 
 import type { ApiUserStories } from '../../api/types';
 
-import { IS_FIREFOX, IS_SAFARI } from '../../util/windowEnvironment';
 import { ANIMATION_END_DELAY } from '../../config';
 import { selectIsStoryViewerOpen, selectTabState, selectUser } from '../../global/selectors';
-import { calculateOffsetX } from './helpers/dimensions';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import { IS_FIREFOX, IS_SAFARI } from '../../util/windowEnvironment';
+import { calculateOffsetX } from './helpers/dimensions';
 
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useSignal from '../../hooks/useSignal';
 import useSlideSizes from './hooks/useSlideSizes';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Story from './Story';
 import StoryPreview from './StoryPreview';

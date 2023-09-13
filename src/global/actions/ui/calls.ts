@@ -1,31 +1,30 @@
+import type { ApiGroupCall } from '../../../api/types';
 import type { RequiredGlobalActions } from '../../index';
+import type {
+  ActionReturnType, CallSound, GlobalState, TabArgs,
+} from '../../types';
+
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
+import { copyTextToClipboard } from '../../../util/clipboard';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import safePlay from '../../../util/safePlay';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
+import { callApi } from '../../../api/gramjs';
+import { getMainUsername } from '../../helpers';
 import {
   addActionHandler, getGlobal,
   setGlobal,
 } from '../../index';
-import { callApi } from '../../../api/gramjs';
+import { addChats, addUsers } from '../../reducers';
+import { updateGroupCall } from '../../reducers/calls';
+import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectChatFullInfo, selectTabState, selectUser,
 } from '../../selectors';
-import { copyTextToClipboard } from '../../../util/clipboard';
-import { fetchChatByUsername, loadFullChat } from '../api/chats';
-
-import type { ApiGroupCall } from '../../../api/types';
-import type {
-  CallSound, ActionReturnType, GlobalState, TabArgs,
-} from '../../types';
-
-import { addChats, addUsers } from '../../reducers';
-import { updateGroupCall } from '../../reducers/calls';
 import { selectActiveGroupCall, selectChatGroupCall, selectGroupCall } from '../../selectors/calls';
-import { getMainUsername } from '../../helpers';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import safePlay from '../../../util/safePlay';
-import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
-import * as langProvider from '../../../util/langProvider';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { fetchChatByUsername, loadFullChat } from '../api/chats';
 
 // This is a tiny MP3 file that is silent - retrieved from https://bigsoundbank.com and then modified
 // eslint-disable-next-line max-len

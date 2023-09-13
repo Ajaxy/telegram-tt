@@ -1,7 +1,9 @@
 import { useMemo } from '../../../../lib/teact/teact';
-import usePrevious from '../../../../hooks/usePrevious';
+
 import { mapValues } from '../../../../util/iteratees';
 import { useChatAnimationType } from './useChatAnimationType';
+
+import usePrevious from '../../../../hooks/usePrevious';
 
 export default function useOrderDiff(orderedIds: (string | number)[] | undefined, key?: string) {
   const orderById = useMemo(() => {

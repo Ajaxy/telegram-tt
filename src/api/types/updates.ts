@@ -1,16 +1,21 @@
 import type {
   GroupCallConnectionData,
-  GroupCallParticipant,
   GroupCallConnectionState,
-  VideoState,
+  GroupCallParticipant,
   VideoRotation,
+  VideoState,
 } from '../../lib/secret-sauce';
+import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
+import type { ApiBotMenuButton } from './bots';
+import type {
+  ApiGroupCall, ApiPhoneCall,
+} from './calls';
 import type {
   ApiChat,
-  ApiChatFullInfo,
-  ApiTypingStatus,
-  ApiChatMember,
   ApiChatFolder,
+  ApiChatFullInfo,
+  ApiChatMember,
+  ApiTypingStatus,
 } from './chats';
 import type {
   ApiFormattedText,
@@ -24,17 +29,12 @@ import type {
   ApiThreadInfo,
 } from './messages';
 import type {
-  ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
-} from './users';
-import type {
   ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
 } from './misc';
-import type {
-  ApiGroupCall, ApiPhoneCall,
-} from './calls';
-import type { ApiBotMenuButton } from './bots';
-import type { ApiPrivacyKey, PrivacyVisibility } from '../../types';
 import type { ApiStealthMode, ApiStory, ApiStorySkipped } from './stories';
+import type {
+  ApiEmojiStatus, ApiUser, ApiUserFullInfo, ApiUserStatus,
+} from './users';
 
 export type ApiUpdateReady = {
   '@type': 'updateApiReady';

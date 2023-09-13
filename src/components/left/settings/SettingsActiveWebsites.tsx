@@ -1,23 +1,23 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiWebSession } from '../../../api/types';
 
-import { formatPastTimeShort } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
+import { formatPastTimeShort } from '../../../util/dateFormat';
 
 import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
-import ListItem from '../../ui/ListItem';
-import ConfirmDialog from '../../ui/ConfirmDialog';
-import SettingsActiveWebsite from './SettingsActiveWebsite';
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
+import SettingsActiveWebsite from './SettingsActiveWebsite';
 
 import styles from './SettingsActiveWebsites.module.scss';
 

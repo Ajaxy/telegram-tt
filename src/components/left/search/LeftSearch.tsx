@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useState, useMemo, useRef,
+  memo, useCallback, useMemo, useRef,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -8,18 +9,19 @@ import { GlobalSearchContent } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
 import { parseDateString } from '../../../util/dateFormat';
+
+import useHistoryBack from '../../../hooks/useHistoryBack';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
 import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
-import ChatResults from './ChatResults';
-import ChatMessageResults from './ChatMessageResults';
-import MediaResults from './MediaResults';
-import LinkResults from './LinkResults';
-import FileResults from './FileResults';
 import AudioResults from './AudioResults';
+import ChatMessageResults from './ChatMessageResults';
+import ChatResults from './ChatResults';
+import FileResults from './FileResults';
+import LinkResults from './LinkResults';
+import MediaResults from './MediaResults';
 
 import './LeftSearch.scss';
 

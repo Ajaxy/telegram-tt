@@ -3,9 +3,9 @@ import { useRef } from '../lib/teact/teact';
 import type { Signal } from '../util/signals';
 
 import useForceUpdate from './useForceUpdate';
-import useSyncEffect from './useSyncEffect';
-import { useStateRef } from './useStateRef';
 import { useSignalEffect } from './useSignalEffect';
+import { useStateRef } from './useStateRef';
+import useSyncEffect from './useSyncEffect';
 
 type SyncResolver<T> = () => T;
 type AsyncResolver<T> = (setter: (newValue: T) => void) => void;

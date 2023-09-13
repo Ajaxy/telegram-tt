@@ -1,20 +1,21 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../api/types';
 
-import buildClassName from '../../util/buildClassName';
 import { isSameReaction } from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 
-import useMediaTransition from '../../hooks/useMediaTransition';
 import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
 import CustomEmoji from './CustomEmoji';
 
-import blankUrl from '../../assets/blank.png';
 import './ReactionStaticEmoji.scss';
+
+import blankUrl from '../../assets/blank.png';
 
 type OwnProps = {
   reaction: ApiReaction;

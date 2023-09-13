@@ -9,22 +9,22 @@ import type { RealTouchEvent } from '../../util/captureEvents';
 import { animateNumber, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
 import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD } from '../../util/captureEvents';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useDebouncedCallback from '../../hooks/useDebouncedCallback';
-import useLang from '../../hooks/useLang';
-import useTimeout from '../../hooks/useTimeout';
-import useWindowSize from '../../hooks/useWindowSize';
-import useHistoryBack from '../../hooks/useHistoryBack';
-import useSignal from '../../hooks/useSignal';
 import useDerivedState from '../../hooks/useDerivedState';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
-import useZoomChange from './hooks/useZoomChangeSignal';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useSignal from '../../hooks/useSignal';
 import { useSignalRef } from '../../hooks/useSignalRef';
+import useTimeout from '../../hooks/useTimeout';
+import useWindowSize from '../../hooks/useWindowSize';
 import useControlsSignal from './hooks/useControlsSignal';
+import useZoomChange from './hooks/useZoomChangeSignal';
 
 import MediaViewerContent from './MediaViewerContent';
 

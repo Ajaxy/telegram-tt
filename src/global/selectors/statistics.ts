@@ -1,9 +1,9 @@
 import type { GlobalState, TabArgs } from '../types';
 
-import { selectCurrentMessageList } from './messages';
-import { selectChatFullInfo } from './chats';
-import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectChatFullInfo } from './chats';
+import { selectCurrentMessageList } from './messages';
+import { selectTabState } from './tabs';
 
 export function selectStatistics<T extends GlobalState>(
   global: T, chatId: string,

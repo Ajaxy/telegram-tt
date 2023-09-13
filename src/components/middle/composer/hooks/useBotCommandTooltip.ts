@@ -4,9 +4,10 @@ import type { ApiBotCommand } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
-import useFlag from '../../../../hooks/useFlag';
-import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+import useFlag from '../../../../hooks/useFlag';
 
 const RE_COMMAND = /^\/([\w@]{1,32})?$/i;
 

@@ -1,29 +1,29 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { StateProps } from './helpers/createMapStateToProps';
 import { LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { createMapStateToProps } from './helpers/createMapStateToProps';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
-import { getSenderName } from './helpers/getSenderName';
-import { throttle } from '../../../util/schedulers';
 import { getMessageDocument } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { throttle } from '../../../util/schedulers';
+import { createMapStateToProps } from './helpers/createMapStateToProps';
+import { getSenderName } from './helpers/getSenderName';
 
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import useLang from '../../../hooks/useLang';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import Document from '../../common/Document';
-import InfiniteScroll from '../../ui/InfiniteScroll';
 import NothingFound from '../../common/NothingFound';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 
 export type OwnProps = {

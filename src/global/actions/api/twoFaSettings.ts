@@ -1,8 +1,8 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import type { ActionReturnType } from '../../types';
 
 import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { replaceSettings, updateTwoFaSettings } from '../../reducers';
-import type { ActionReturnType } from '../../types';
 
 addActionHandler('loadPasswordInfo', async (global): Promise<void> => {
   const result = await callApi('getPasswordInfo');

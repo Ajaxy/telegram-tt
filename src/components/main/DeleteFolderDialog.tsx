@@ -1,11 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiChatFolder } from '../../api/types';
 
-import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 

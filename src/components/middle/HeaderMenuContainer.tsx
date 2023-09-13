@@ -6,24 +6,10 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiBotCommand, ApiChat } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
-import { MAIN_THREAD_ID } from '../../api/types';
 import type { IconName } from '../../types/icons';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { REPLIES_USER_ID } from '../../config';
-import { disableScrolling, enableScrolling } from '../../util/scrollLock';
-import {
-  selectChat,
-  selectBot,
-  selectChatFullInfo,
-  selectCurrentMessageList,
-  selectIsPremiumPurchaseBlocked,
-  selectNotifyExceptions,
-  selectNotifySettings,
-  selectTabState,
-  selectUser,
-  selectUserFullInfo,
-  selectCanManage, selectIsRightColumnShown, selectCanTranslateChat,
-} from '../../global/selectors';
 import {
   getCanAddContact,
   getCanDeleteChat,
@@ -35,21 +21,35 @@ import {
   isUserRightBanned,
   selectIsChatMuted,
 } from '../../global/helpers';
+import {
+  selectBot,
+  selectCanManage, selectCanTranslateChat,
+  selectChat,
+  selectChatFullInfo,
+  selectCurrentMessageList,
+  selectIsPremiumPurchaseBlocked,
+  selectIsRightColumnShown, selectNotifyExceptions,
+  selectNotifySettings,
+  selectTabState,
+  selectUser,
+  selectUserFullInfo,
+} from '../../global/selectors';
+import { disableScrolling, enableScrolling } from '../../util/scrollLock';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useShowTransition from '../../hooks/useShowTransition';
-import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
+import useShowTransition from '../../hooks/useShowTransition';
 
-import Portal from '../ui/Portal';
+import DeleteChatModal from '../common/DeleteChatModal';
+import ReportModal from '../common/ReportModal';
+import MuteChatModal from '../left/MuteChatModal.async';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
-import DeleteChatModal from '../common/DeleteChatModal';
-import MuteChatModal from '../left/MuteChatModal.async';
-import ReportModal from '../common/ReportModal';
+import Portal from '../ui/Portal';
 
 import './HeaderMenuContainer.scss';
 

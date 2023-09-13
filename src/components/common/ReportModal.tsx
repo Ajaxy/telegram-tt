@@ -1,5 +1,4 @@
 import type { ChangeEvent } from 'react';
-
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo, useState } from '../../lib/teact/teact';
 import { getActions } from '../../global';
@@ -7,13 +6,14 @@ import { getActions } from '../../global';
 import type { ApiPhoto, ApiReportReason } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+
 import Button from '../ui/Button';
-import RadioGroup from '../ui/RadioGroup';
 import InputText from '../ui/InputText';
+import Modal from '../ui/Modal';
+import RadioGroup from '../ui/RadioGroup';
 
 export type OwnProps = {
   isOpen: boolean;

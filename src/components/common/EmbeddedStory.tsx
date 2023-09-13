@@ -1,24 +1,24 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { ApiUser, ApiChat, ApiTypeStory } from '../../api/types';
+import type { ApiChat, ApiTypeStory, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
   getSenderTitle,
-  getUserColorKey,
   getStoryMediaHash,
+  getUserColorKey,
 } from '../../global/helpers';
-import renderText from './helpers/renderText';
-import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
+import { getPictogramDimensions } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
 
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useMedia from '../../hooks/useMedia';
-import useLang from '../../hooks/useLang';
 import { useFastClick } from '../../hooks/useFastClick';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
 
 import './EmbeddedMessage.scss';
 

@@ -4,12 +4,13 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { selectChatMessage, selectCurrentMessageList } from '../../../global/selectors';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+
 import useMouseInside from '../../../hooks/useMouseInside';
 
-import Menu from '../../ui/Menu';
 import Button from '../../ui/Button';
+import Menu from '../../ui/Menu';
 
 import './BotKeyboardMenu.scss';
 

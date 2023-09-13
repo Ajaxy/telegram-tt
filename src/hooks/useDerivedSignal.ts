@@ -1,9 +1,9 @@
 import type { Signal } from '../util/signals';
 
-import useSyncEffect from './useSyncEffect';
 import useSignal from './useSignal';
-import { useStateRef } from './useStateRef';
 import { useSignalEffect } from './useSignalEffect';
+import { useStateRef } from './useStateRef';
+import useSyncEffect from './useSyncEffect';
 
 type SyncResolver<T> = () => T;
 type AsyncResolver<T> = (setter: (newValue: T) => void) => void;

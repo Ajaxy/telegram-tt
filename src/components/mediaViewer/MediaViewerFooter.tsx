@@ -3,13 +3,14 @@ import React, { useEffect, useState } from '../../lib/teact/teact';
 
 import type { TextPart } from '../../types';
 
+import buildClassName from '../../util/buildClassName';
+import { throttle } from '../../util/schedulers';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { REM } from '../common/helpers/mediaDimensions';
-import { throttle } from '../../util/schedulers';
-import buildClassName from '../../util/buildClassName';
+
 import useAppLayout from '../../hooks/useAppLayout';
-import useControlsSignal from './hooks/useControlsSignal';
 import useDerivedState from '../../hooks/useDerivedState';
+import useControlsSignal from './hooks/useControlsSignal';
 
 import './MediaViewerFooter.scss';
 

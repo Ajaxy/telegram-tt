@@ -4,29 +4,30 @@ import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { MessageListType } from '../../global/types';
-import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 import type { Signal } from '../../util/signals';
+import type { MessageDateGroup } from './helpers/groupMessages';
+import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
-import { MAIN_THREAD_ID } from '../../api/types';
-import buildClassName from '../../util/buildClassName';
-import { compact } from '../../util/iteratees';
-import { formatHumanDate } from '../../util/dateFormat';
 import {
   getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
 } from '../../global/helpers';
-import useLang from '../../hooks/useLang';
-import type { MessageDateGroup } from './helpers/groupMessages';
+import buildClassName from '../../util/buildClassName';
+import { formatHumanDate } from '../../util/dateFormat';
+import { compact } from '../../util/iteratees';
 import { isAlbum } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-import useScrollHooks from './hooks/useScrollHooks';
-import useMessageObservers from './hooks/useMessageObservers';
-import usePrevious from '../../hooks/usePrevious';
-import useDerivedSignal from '../../hooks/useDerivedSignal';
 
+import useDerivedSignal from '../../hooks/useDerivedSignal';
+import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
+import useMessageObservers from './hooks/useMessageObservers';
+import useScrollHooks from './hooks/useScrollHooks';
+
+import ActionMessage from './ActionMessage';
 import Message from './message/Message';
 import SponsoredMessage from './message/SponsoredMessage';
-import ActionMessage from './ActionMessage';
 import MessageListBotInfo from './MessageListBotInfo';
 
 interface OwnProps {

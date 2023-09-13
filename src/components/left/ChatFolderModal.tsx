@@ -1,17 +1,18 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useMemo, useState,
+  memo, useCallback, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChatFolder } from '../../api/types';
 
 import { ALL_FOLDER_ID } from '../../config';
+
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import CheckboxGroup from '../ui/CheckboxGroup';
+import Modal from '../ui/Modal';
 
 export type OwnProps = {
   isOpen: boolean;

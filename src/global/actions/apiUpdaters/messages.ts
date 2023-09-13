@@ -1,67 +1,67 @@
-import type { RequiredGlobalActions } from '../../index';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
 import type {
   ApiChat, ApiMessage, ApiPollResult, ApiReactions, ApiThreadInfo,
 } from '../../../api/types';
+import type { RequiredGlobalActions } from '../../index';
 import type {
-  ActiveEmojiInteraction, ActionReturnType, GlobalState, RequiredGlobalState,
+  ActionReturnType, ActiveEmojiInteraction, GlobalState, RequiredGlobalState,
 } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
-import { omit, pickTruthy, unique } from '../../../util/iteratees';
 import { areDeepEqual } from '../../../util/areDeepEqual';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { omit, pickTruthy, unique } from '../../../util/iteratees';
 import { notifyAboutMessage } from '../../../util/notifications';
+import { onTickEnd } from '../../../util/schedulers';
 import {
-  updateChat,
+  checkIfHasUnreadReactions, getMessageContent, getMessageText, isActionMessage,
+  isMessageLocal, isUserId,
+} from '../../helpers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addViewportId,
+  clearMessageTranslation,
   deleteChatMessages,
+  deleteChatScheduledMessages,
+  deleteTopic,
+  removeChatFromChatLists,
+  replaceThreadParam,
+  updateChat,
   updateChatMessage,
   updateListedIds,
-  addViewportId,
-  updateThreadInfo,
-  replaceThreadParam,
+  updateMessageTranslations,
   updateScheduledMessage,
-  deleteChatScheduledMessages,
+  updateThreadInfo,
   updateThreadUnreadFromForwardedMessage,
   updateTopic,
-  deleteTopic,
-  updateMessageTranslations,
-  clearMessageTranslation,
-  removeChatFromChatLists,
 } from '../../reducers';
-import {
-  selectChatMessage,
-  selectChatMessages,
-  selectIsViewportNewest,
-  selectListedIds,
-  selectChatMessageByPollId,
-  selectCommonBoxChatId,
-  selectIsChatListed,
-  selectThreadInfo,
-  selectThreadByMessage,
-  selectPinnedIds,
-  selectScheduledMessage,
-  selectChatScheduledMessages,
-  selectIsMessageInCurrentMessageList,
-  selectScheduledIds,
-  selectCurrentMessageList,
-  selectViewportIds,
-  selectFirstUnreadId,
-  selectChat,
-  selectIsServiceChatReady,
-  selectThreadIdFromMessage,
-  selectTopicFromMessage,
-  selectTabState,
-  selectSendAs,
-} from '../../selectors';
-import {
-  getMessageContent, isUserId, isMessageLocal, getMessageText, checkIfHasUnreadReactions, isActionMessage,
-} from '../../helpers';
-import { onTickEnd } from '../../../util/schedulers';
 import { updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import {
+  selectChat,
+  selectChatMessage,
+  selectChatMessageByPollId,
+  selectChatMessages,
+  selectChatScheduledMessages,
+  selectCommonBoxChatId,
+  selectCurrentMessageList,
+  selectFirstUnreadId,
+  selectIsChatListed,
+  selectIsMessageInCurrentMessageList,
+  selectIsServiceChatReady,
+  selectIsViewportNewest,
+  selectListedIds,
+  selectPinnedIds,
+  selectScheduledIds,
+  selectScheduledMessage,
+  selectSendAs,
+  selectTabState,
+  selectThreadByMessage,
+  selectThreadIdFromMessage,
+  selectThreadInfo,
+  selectTopicFromMessage,
+  selectViewportIds,
+} from '../../selectors';
 
 const ANIMATION_DELAY = 350;
 

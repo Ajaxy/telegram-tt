@@ -1,10 +1,10 @@
 import React, { memo, useMemo, useRef } from '../../lib/teact/teact';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
-import useVideoCleanup from '../../hooks/useVideoCleanup';
 import useBuffering from '../../hooks/useBuffering';
+import useLastCallback from '../../hooks/useLastCallback';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import useVideoCleanup from '../../hooks/useVideoCleanup';
+import useVideoAutoPause from '../middle/message/hooks/useVideoAutoPause';
 
 type VideoProps = React.DetailedHTMLProps<React.VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
 

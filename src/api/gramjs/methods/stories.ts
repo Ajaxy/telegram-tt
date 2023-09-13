@@ -1,15 +1,19 @@
-import { invokeRequest } from './client';
-import type {
-  ApiUser, ApiUserStories, ApiReportReason, ApiTypeStory, ApiReaction, ApiStealthMode,
-} from '../../types';
-import type { PrivacyVisibility } from '../../../types';
 import { Api as GramJs } from '../../../lib/gramjs';
-import { addEntitiesToLocalDb, addStoryToLocalDb } from '../helpers';
-import { buildApiUser } from '../apiBuilders/users';
+
+import type { PrivacyVisibility } from '../../../types';
+import type {
+  ApiReaction, ApiReportReason, ApiStealthMode,
+  ApiTypeStory, ApiUser, ApiUserStories,
+} from '../../types';
+
+import { STORY_LIST_LIMIT } from '../../../config';
+import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import {
-  buildApiStoryView, buildApiStory, buildApiUsersStories, buildApiStealthMode,
+  buildApiStealthMode,
+  buildApiStory, buildApiStoryView, buildApiUsersStories,
 } from '../apiBuilders/stories';
+import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity,
   buildInputPeer,
@@ -18,8 +22,8 @@ import {
   buildInputReaction,
   buildInputReportReason,
 } from '../gramjsBuilders';
-import { STORY_LIST_LIMIT } from '../../../config';
-import { buildCollectionByCallback } from '../../../util/iteratees';
+import { addEntitiesToLocalDb, addStoryToLocalDb } from '../helpers';
+import { invokeRequest } from './client';
 
 export async function fetchAllStories({
   stateHash,

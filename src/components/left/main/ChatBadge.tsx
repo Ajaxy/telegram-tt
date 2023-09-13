@@ -1,17 +1,17 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
 import type { ApiChat, ApiTopic } from '../../../api/types';
-import type { FC } from '../../../lib/teact/teact';
-
 import type { Signal } from '../../../util/signals';
+
+import buildClassName from '../../../util/buildClassName';
 import { isSignal } from '../../../util/signals';
 import { formatIntegerCompact } from '../../../util/textFormat';
-import buildClassName from '../../../util/buildClassName';
 
 import useDerivedState from '../../../hooks/useDerivedState';
 
-import ShowTransition from '../../ui/ShowTransition';
 import AnimatedCounter from '../../common/AnimatedCounter';
+import ShowTransition from '../../ui/ShowTransition';
 
 import './ChatBadge.scss';
 
