@@ -655,7 +655,15 @@ const Composer: FC<OwnProps & StateProps> = ({
     chatBotCommands,
   );
 
-  useDraft(draft, chatId, threadId, getHtml, setHtml, editingMessage, isInStoryViewer);
+  useDraft({
+    draft,
+    chatId,
+    threadId,
+    getHtml,
+    setHtml,
+    editedMessage: editingMessage,
+    isDisabled: isInStoryViewer,
+  });
 
   const resetComposer = useLastCallback((shouldPreserveInput = false) => {
     if (!shouldPreserveInput) {

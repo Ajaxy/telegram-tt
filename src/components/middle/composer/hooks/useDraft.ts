@@ -1,4 +1,4 @@
-import { useEffect } from '../../../../lib/teact/teact';
+import { useEffect, useRef } from '../../../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../../global';
 
@@ -17,8 +17,8 @@ import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../../../hooks/useBeforeUnload';
 import { useStateRef } from '../../../../hooks/useStateRef';
-import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useRunDebounced from '../../../../hooks/useRunDebounced';
+import useLayoutEffectWithPrevDeps from '../../../../hooks/useLayoutEffectWithPrevDeps';
 
 let isFrozen = false;
 
@@ -30,21 +30,44 @@ function freeze() {
   });
 }
 
-const useDraft = (
-  draft: ApiDraft | undefined,
-  chatId: string,
-  threadId: number,
-  getHtml: Signal<string>,
-  setHtml: (html: string) => void,
-  editedMessage: ApiMessage | undefined,
-  isDisabled: boolean | undefined,
-) => {
+const useDraft = ({
+  draft,
+  chatId,
+  threadId,
+  getHtml,
+  setHtml,
+  editedMessage,
+  isDisabled,
+} : {
+  draft?: ApiDraft;
+  chatId: string;
+  threadId: number;
+  getHtml: Signal<string>;
+  setHtml: (html: string) => void;
+  editedMessage?: ApiMessage;
+  isDisabled?: boolean;
+}) => {
   const { saveDraft, clearDraft, loadCustomEmojis } = getActions();
+
+  const isTouchedRef = useRef(false);
+
+  useEffect(() => {
+    const html = getHtml();
+    const isLocalDraft = draft?.isLocal !== undefined;
+    if (getTextWithEntitiesAsHtml(draft) === html && !isLocalDraft) {
+      isTouchedRef.current = false;
+    } else {
+      isTouchedRef.current = true;
+    }
+  }, [draft, getHtml]);
+  useEffect(() => {
+    isTouchedRef.current = false;
+  }, [chatId, threadId]);
 
   const isEditing = Boolean(editedMessage);
 
-  const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: number } = {}, shouldForce = false) => {
-    if (isDisabled || isEditing) return;
+  const updateDraft = useLastCallback((prevState: { chatId?: string; threadId?: number } = {}) => {
+    if (isDisabled || isEditing || !isTouchedRef.current) return;
 
     const html = getHtml();
 
@@ -53,34 +76,31 @@ const useDraft = (
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
         draft: parseMessageInput(html),
-        shouldForce,
       });
     } else {
       clearDraft({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
-        shouldForce,
       });
     }
   });
 
-  const updateDraftRef = useStateRef(updateDraft);
   const runDebouncedForSaveDraft = useRunDebounced(DRAFT_DEBOUNCE, true, undefined, [chatId, threadId]);
 
   // Restore draft on chat change
-  useEffectWithPrevDeps(([prevChatId, prevThreadId, prevDraft]) => {
+  useLayoutEffectWithPrevDeps(([prevChatId, prevThreadId, prevDraft]) => {
     if (isDisabled) {
       return;
     }
+    const isTouched = isTouchedRef.current;
 
     if (chatId === prevChatId && threadId === prevThreadId) {
+      if (isTouched && !draft) return; // Prevent reset from other client if we have local edits
       if (!draft && prevDraft) {
         setHtml('');
       }
 
-      if (!draft?.shouldForce) {
-        return;
-      }
+      if (isTouched) return;
     }
 
     if (editedMessage || !draft) {
@@ -102,7 +122,7 @@ const useDraft = (
         }
       });
     }
-  }, [chatId, threadId, draft, setHtml, editedMessage, loadCustomEmojis, isDisabled]);
+  }, [chatId, threadId, draft, getHtml, setHtml, editedMessage, isDisabled]);
 
   // Save draft on chat change
   useEffect(() => {
@@ -111,15 +131,13 @@ const useDraft = (
     }
 
     return () => {
-      // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
       if (!isEditing) {
-        // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-        updateDraftRef.current({ chatId, threadId });
+        updateDraft({ chatId, threadId });
       }
 
       freeze();
     };
-  }, [chatId, threadId, isEditing, updateDraftRef, isDisabled]);
+  }, [chatId, threadId, isEditing, updateDraft, isDisabled]);
 
   const chatIdRef = useStateRef(chatId);
   const threadIdRef = useStateRef(threadId);
@@ -129,27 +147,23 @@ const useDraft = (
     }
 
     if (!getHtml()) {
-      updateDraftRef.current();
+      updateDraft();
 
       return;
     }
 
-    const scopedShatId = chatIdRef.current;
+    const scopedСhatId = chatIdRef.current;
     const scopedThreadId = threadIdRef.current;
 
     runDebouncedForSaveDraft(() => {
-      if (chatIdRef.current === scopedShatId && threadIdRef.current === scopedThreadId) {
-        updateDraftRef.current();
+      if (chatIdRef.current === scopedСhatId && threadIdRef.current === scopedThreadId) {
+        updateDraft();
       }
     });
-  }, [chatIdRef, getHtml, isDisabled, runDebouncedForSaveDraft, threadIdRef, updateDraftRef]);
+  }, [chatIdRef, getHtml, isDisabled, runDebouncedForSaveDraft, threadIdRef, updateDraft]);
 
-  function forceUpdateDraft() {
-    updateDraft(undefined, true);
-  }
-
-  useBackgroundMode(forceUpdateDraft);
-  useBeforeUnload(forceUpdateDraft);
+  useBackgroundMode(updateDraft);
+  useBeforeUnload(updateDraft);
 };
 
 export default useDraft;
