@@ -3,6 +3,7 @@ import React, {
 } from '../../lib/teact/teact';
 
 import type { FC } from '../../lib/teact/teact';
+import type { IconName } from '../../types/icons';
 
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
@@ -37,7 +38,7 @@ type OwnProps = {
   isSelectable?: boolean;
   isSelected?: boolean;
   transferProgress?: number;
-  actionIcon?: string;
+  actionIcon?: IconName;
   onClick?: () => void;
   onDateClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 };
@@ -142,7 +143,7 @@ const File: FC<OwnProps> = ({
             className={buildClassName(
               'action-icon',
               'icon',
-              actionIcon || 'icon-download',
+              actionIcon ? `icon-${actionIcon}` : 'icon-download',
               shouldSpinnerRender && 'hidden',
             )}
           />

@@ -5,6 +5,7 @@ import type { FC } from '../../lib/teact/teact';
 import type { FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import type { LangCode, Price } from '../../types';
 import type { ApiChat, ApiInvoice, ApiPaymentCredentials } from '../../api/types';
+import type { IconName } from '../../types/icons';
 
 import { PaymentStep } from '../../types';
 import { getWebDocumentHash } from '../../global/helpers';
@@ -247,7 +248,7 @@ function renderCheckoutItem({
 }: {
   title : string | undefined;
   label: string | undefined;
-  icon?: string;
+  icon?: IconName;
   onClick?: NoneToVoidFunction;
   customIcon?: string;
 }) {

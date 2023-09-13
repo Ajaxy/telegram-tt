@@ -9,6 +9,7 @@ import type { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { GlobalState } from '../../../global/types';
 import type { TabWithProperties } from '../../ui/TabList';
+import type { MenuItemContextAction } from '../../ui/ListItem';
 import TabList from '../../ui/TabList';
 
 import { ALL_FOLDER_ID } from '../../../config';
@@ -137,7 +138,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       const { id, title } = folder;
       const isBlocked = id !== ALL_FOLDER_ID && i > maxFolders - 1;
       const canShareFolder = selectCanShareFolder(getGlobal(), id);
-      const contextActions = [];
+      const contextActions: MenuItemContextAction[] = [];
 
       if (canShareFolder) {
         contextActions.push({

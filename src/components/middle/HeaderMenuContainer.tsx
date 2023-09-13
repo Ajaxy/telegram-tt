@@ -7,6 +7,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiBotCommand, ApiChat } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
 import { MAIN_THREAD_ID } from '../../api/types';
+import type { IconName } from '../../types/icons';
 
 import { REPLIES_USER_ID } from '../../config';
 import { disableScrolling, enableScrolling } from '../../util/scrollLock';
@@ -52,7 +53,7 @@ import ReportModal from '../common/ReportModal';
 
 import './HeaderMenuContainer.scss';
 
-const BOT_BUTTONS: Record<string, { icon: string; label: string }> = {
+const BOT_BUTTONS: Record<string, { icon: IconName; label: string }> = {
   settings: {
     icon: 'bots',
     label: 'BotSettings',

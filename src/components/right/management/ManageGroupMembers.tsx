@@ -19,7 +19,7 @@ import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation'
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import NothingFound from '../../common/NothingFound';
-import ListItem from '../../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import InputText from '../../ui/InputText';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
@@ -165,7 +165,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
     onBack: onClose,
   });
 
-  function getMemberContextAction(memberId: string) {
+  function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
       title: lang('lng_context_remove_from_group'),
       icon: 'stop',

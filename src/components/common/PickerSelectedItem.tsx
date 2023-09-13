@@ -3,6 +3,7 @@ import { withGlobal } from '../../global';
 
 import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiUser } from '../../api/types';
+import type { IconName } from '../../types/icons';
 
 import { selectChat, selectUser } from '../../global/selectors';
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
@@ -16,7 +17,7 @@ import './PickerSelectedItem.scss';
 
 type OwnProps = {
   chatOrUserId?: string;
-  icon?: string;
+  icon?: IconName;
   title?: string;
   isMinimized?: boolean;
   canClose?: boolean;

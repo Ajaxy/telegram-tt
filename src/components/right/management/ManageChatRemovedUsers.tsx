@@ -12,7 +12,7 @@ import useHistoryBack from '../../../hooks/useHistoryBack';
 import useFlag from '../../../hooks/useFlag';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
-import ListItem from '../../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import FloatingActionButton from '../../ui/FloatingActionButton';
 import RemoveGroupUserModal from './RemoveGroupUserModal';
 
@@ -62,7 +62,7 @@ const ManageChatRemovedUsers: FC<OwnProps & StateProps> = ({
     return lang('UserRemovedBy', getUserFullName(kickedByUser));
   }, [lang, usersById]);
 
-  const getContextActions = useCallback((member: ApiChatMember) => {
+  const getContextActions = useCallback((member: ApiChatMember): MenuItemContextAction[] | undefined => {
     if (!chat) {
       return undefined;
     }

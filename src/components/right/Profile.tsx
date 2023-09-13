@@ -59,7 +59,7 @@ import Transition from '../ui/Transition';
 import InfiniteScroll from '../ui/InfiniteScroll';
 import TabList from '../ui/TabList';
 import Spinner from '../ui/Spinner';
-import ListItem from '../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 import ProfileInfo from '../common/ProfileInfo';
 import Document from '../common/Document';
@@ -342,7 +342,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   }
   const canRenderContent = useAsyncRendering([chatId, topicId, resultType, renderingActiveTab], renderingDelay);
 
-  function getMemberContextAction(memberId: string) {
+  function getMemberContextAction(memberId: string): MenuItemContextAction[] | undefined {
     return memberId === currentUserId || !canDeleteMembers ? undefined : [{
       title: lang('lng_context_remove_from_group'),
       icon: 'stop',

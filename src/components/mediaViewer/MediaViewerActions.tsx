@@ -211,7 +211,7 @@ const MediaViewerActions: FC<OwnProps & StateProps> = ({
     if (!isProtected) {
       if (isVideo) {
         menuItems.push({
-          icon: isDownloading ? 'cancel' : 'download',
+          icon: isDownloading ? 'close' : 'download',
           onClick: handleDownloadClick,
           children: isDownloading ? `${Math.round(downloadProgress * 100)}% Downloading...` : 'Download',
         });

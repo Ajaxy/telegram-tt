@@ -3,6 +3,7 @@ import React, { memo, useEffect } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { MessageListType } from '../../global/types';
+import type { IconName } from '../../types/icons';
 
 import {
   selectCanDeleteSelectedMessages,
@@ -116,7 +117,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
   );
 
   const renderButton = (
-    icon: string, label: string, onClick: AnyToVoidFunction, destructive?: boolean,
+    icon: IconName, label: string, onClick: AnyToVoidFunction, destructive?: boolean,
   ) => {
     return (
       <div

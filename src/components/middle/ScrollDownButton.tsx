@@ -1,6 +1,8 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 
+import type { IconName } from '../../types/icons';
+
 import { formatIntegerCompact } from '../../util/textFormat';
 import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
@@ -13,7 +15,7 @@ import MenuItem from '../ui/MenuItem';
 import styles from './ScrollDownButton.module.scss';
 
 type OwnProps = {
-  icon: string;
+  icon: IconName;
   ariaLabelLang: string;
   unreadCount?: number;
   onClick: VoidFunction;

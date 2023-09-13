@@ -1,6 +1,8 @@
 import type { ApiMessage } from '../../../../api/types';
 import { ApiMediaFormat } from '../../../../api/types';
 
+import type { IconName } from '../../../../types/icons';
+
 import * as mediaLoader from '../../../../util/mediaLoader';
 import {
   getMessageContact,
@@ -23,7 +25,7 @@ import { renderMessageText } from '../../../common/helpers/renderMessageText';
 
 type ICopyOptions = {
   label: string;
-  icon: string;
+  icon: IconName;
   handler: () => void;
 }[];
 

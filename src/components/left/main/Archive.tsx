@@ -14,7 +14,7 @@ import { getChatTitle } from '../../../global/helpers';
 import useLang from '../../../hooks/useLang';
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
-import ListItem from '../../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import Badge from '../../ui/Badge';
 
 import styles from './Archive.module.scss';
@@ -71,7 +71,7 @@ const Archive: FC<OwnProps> = ({
       handler: () => {
         updateArchiveSettings({ isMinimized: true });
       },
-    };
+    } satisfies MenuItemContextAction;
 
     const actionExpand = archiveSettings.isMinimized && {
       title: lang('lng_context_archive_expand'),
@@ -79,7 +79,7 @@ const Archive: FC<OwnProps> = ({
       handler: () => {
         updateArchiveSettings({ isMinimized: false });
       },
-    };
+    } satisfies MenuItemContextAction;
 
     const actionHide = {
       title: lang('lng_context_archive_to_menu'),
@@ -87,7 +87,7 @@ const Archive: FC<OwnProps> = ({
       handler: () => {
         updateArchiveSettings({ isHidden: true });
       },
-    };
+    } satisfies MenuItemContextAction;
 
     return compact([actionMinimize, actionExpand, actionHide]);
   }, [archiveSettings.isMinimized, lang, updateArchiveSettings]);

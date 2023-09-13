@@ -148,7 +148,7 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
           {lang('AuthSessions.CurrentSession')}
         </h4>
 
-        <ListItem narrow inactive icon={`device-${getSessionIcon(session)} icon-device`}>
+        <ListItem narrow inactive icon={`device-${getSessionIcon(session)}`} iconClassName="icon-device">
           <div className="multiline-menu-item full-size" dir="auto">
             <span className="title" dir="auto">{session.deviceModel}</span>
             <span className="subtitle black tight">
@@ -219,7 +219,8 @@ const SettingsActiveSessions: FC<OwnProps & StateProps> = ({
             handleTerminateSessionClick(session.hash);
           },
         }]}
-        icon={`device-${getSessionIcon(session)} icon-device`}
+        icon={`device-${getSessionIcon(session)}`}
+        iconClassName="icon-device"
         onClick={() => { handleOpenSessionModal(session.hash); }}
       >
         <div className="multiline-menu-item full-size" dir="auto">

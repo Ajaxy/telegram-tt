@@ -12,7 +12,7 @@ import { getUserFullName } from '../../global/helpers';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
 
-import ListItem from '../ui/ListItem';
+import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import PrivateChatInfo from '../common/PrivateChatInfo';
 
@@ -54,7 +54,7 @@ const StoryView = ({
     const { isContact } = user || {};
     const fullName = getUserFullName(user);
 
-    const actions = [];
+    const actions: MenuItemContextAction[] = [];
 
     if (!isUserBlocked) {
       if (!areStoriesBlocked) {
@@ -134,7 +134,7 @@ const StoryView = ({
         userId={storyView.userId}
         noStatusOrTyping
         status={formatDateAtTime(lang, storyView.date * 1000)}
-        statusIcon="icon-message-read"
+        statusIcon="message-read"
         withStory
         forceShowSelf
       />

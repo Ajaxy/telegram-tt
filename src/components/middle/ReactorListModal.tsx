@@ -237,7 +237,7 @@ const ReactorListModal: FC<OwnProps & StateProps> = ({
                         noStatusOrTyping
                         avatarSize="medium"
                         status={seenByUser ? formatDateAtTime(lang, seenByUser * 1000) : undefined}
-                        statusIcon="icon-message-read"
+                        statusIcon="message-read"
                       />
                     </ListItem>,
                   );
