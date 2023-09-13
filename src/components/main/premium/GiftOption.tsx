@@ -1,11 +1,12 @@
 import type { ChangeEvent } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiPremiumGiftOption } from '../../../api/types';
 
-import { formatCurrency } from '../../../util/formatCurrency';
 import buildClassName from '../../../util/buildClassName';
+import { formatCurrency } from '../../../util/formatCurrency';
+
 import useLang from '../../../hooks/useLang';
 
 import styles from './GiftOption.module.scss';

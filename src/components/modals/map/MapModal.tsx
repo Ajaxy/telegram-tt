@@ -3,14 +3,14 @@ import { getActions } from '../../../global';
 
 import type { ApiGeoPoint } from '../../../api/types';
 
-import { IS_IOS, IS_MAC_OS } from '../../../util/windowEnvironment';
 import { prepareMapUrl } from '../../../util/map';
+import { IS_IOS, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
+import Modal from '../../ui/Modal';
 
 import styles from './MapModal.module.scss';
 

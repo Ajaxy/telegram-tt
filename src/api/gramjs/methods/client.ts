@@ -1,10 +1,11 @@
 import {
-  sessions, Api as GramJs,
+  Api as GramJs,
+  sessions,
 } from '../../../lib/gramjs';
-import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
-
-import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
 import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
+import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
+import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
+
 import type {
   ApiInitialArgs,
   ApiMediaFormat,
@@ -14,31 +15,33 @@ import type {
 } from '../../types';
 
 import {
-  DEBUG, DEBUG_GRAMJS, UPLOAD_WORKERS, IS_TEST, APP_CODE_NAME,
+  APP_CODE_NAME,
+  DEBUG, DEBUG_GRAMJS, IS_TEST, UPLOAD_WORKERS,
 } from '../../../config';
-import {
-  onRequestPhoneNumber, onRequestCode, onRequestPassword, onRequestRegistration,
-  onAuthError, onAuthReady, onCurrentUserUpdate, onRequestQrCode, onWebAuthTokenFailed,
-} from './auth';
+import { pause } from '../../../util/schedulers';
 import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
-import downloadMediaWithClient, { parseMediaUrl } from './media';
-import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
-import localDb, { clearLocalDb } from '../localDb';
 import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
 import {
   addEntitiesToLocalDb,
   addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
 } from '../helpers';
-import { ChatAbortController } from '../ChatAbortController';
+import localDb, { clearLocalDb } from '../localDb';
 import {
-  updateChannelState,
   getDifference,
   init as initUpdatesManager,
   processUpdate,
   reset as resetUpdatesManager,
   scheduleGetChannelDifference,
+  updateChannelState,
 } from '../updateManager';
-import { pause } from '../../../util/schedulers';
+import {
+  onAuthError, onAuthReady, onCurrentUserUpdate, onRequestCode, onRequestPassword, onRequestPhoneNumber,
+  onRequestQrCode, onRequestRegistration, onWebAuthTokenFailed,
+} from './auth';
+import downloadMediaWithClient, { parseMediaUrl } from './media';
+
+import { ChatAbortController } from '../ChatAbortController';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';

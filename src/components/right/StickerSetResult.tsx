@@ -1,6 +1,6 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, memo, useMemo, useCallback, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -9,10 +9,11 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { STICKER_SIZE_SEARCH } from '../../config';
 import { selectIsCurrentUserPremium, selectShouldLoopStickers, selectStickerSet } from '../../global/selectors';
+
 import useLang from '../../hooks/useLang';
 
-import Button from '../ui/Button';
 import StickerButton from '../common/StickerButton';
+import Button from '../ui/Button';
 import Spinner from '../ui/Spinner';
 
 type OwnProps = {

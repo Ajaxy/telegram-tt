@@ -1,7 +1,7 @@
 import { getActions, getGlobal } from '../global';
 
-import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
 import { DEBUG } from '../config';
+import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
 
 export { default as Main } from '../components/main/Main';
 export { default as LockScreen } from '../components/main/LockScreen';

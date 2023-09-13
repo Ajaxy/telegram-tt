@@ -1,26 +1,25 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-
+import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../config';
 import {
   selectLanguageCode,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectTabState,
 } from '../../global/selectors';
-import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import renderText from '../common/helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import Modal from '../ui/Modal';
-import ListItem from '../ui/ListItem';
 import InputText from '../ui/InputText';
+import ListItem from '../ui/ListItem';
+import Modal from '../ui/Modal';
 
 import styles from './ChatLanguageModal.module.scss';
 

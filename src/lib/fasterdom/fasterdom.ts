@@ -1,6 +1,5 @@
-import { fastRaf, throttleWith } from '../../util/schedulers';
 import safeExec from '../../util/safeExec';
-
+import { fastRaf, throttleWith } from '../../util/schedulers';
 import { setPhase } from './stricterdom';
 
 let pendingMeasureTasks: NoneToVoidFunction[] = [];

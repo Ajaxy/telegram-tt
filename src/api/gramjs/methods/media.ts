@@ -1,5 +1,6 @@
-import type { TelegramClient } from '../../../lib/gramjs';
 import { Api as GramJs } from '../../../lib/gramjs';
+
+import type { TelegramClient } from '../../../lib/gramjs';
 import type { ApiOnProgress, ApiParsedMedia } from '../../types';
 import {
   ApiMediaFormat,
@@ -12,9 +13,9 @@ import {
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
 } from '../../../config';
-import localDb from '../localDb';
 import * as cacheApi from '../../../util/cacheApi';
 import { getEntityTypeById } from '../gramjsBuilders';
+import localDb from '../localDb';
 
 const MEDIA_ENTITY_TYPES = new Set([
   'msg', 'sticker', 'gif', 'wallpaper', 'photo', 'webDocument', 'document', 'videoAvatar',

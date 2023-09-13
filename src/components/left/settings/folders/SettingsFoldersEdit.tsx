@@ -5,34 +5,35 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
 import type { ApiChatlistExportedInvite } from '../../../../api/types';
-
-import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
-import { findIntersectionWithSet } from '../../../../util/iteratees';
-import { isUserId } from '../../../../global/helpers';
 import type {
   FolderEditDispatch,
   FoldersState,
 } from '../../../../hooks/reducers/useFoldersReducer';
+
+import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
+import { isUserId } from '../../../../global/helpers';
+import { selectCanShareFolder } from '../../../../global/selectors';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import { findIntersectionWithSet } from '../../../../util/iteratees';
+import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+
 import {
   EXCLUDED_CHAT_TYPES,
   INCLUDED_CHAT_TYPES,
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';
-import { selectCanShareFolder } from '../../../../global/selectors';
-import { selectCurrentLimit } from '../../../../global/selectors/limits';
-import useLang from '../../../../hooks/useLang';
 import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 
-import ListItem from '../../../ui/ListItem';
-import InputText from '../../../ui/InputText';
-import PrivateChatInfo from '../../../common/PrivateChatInfo';
-import GroupChatInfo from '../../../common/GroupChatInfo';
-import FloatingActionButton from '../../../ui/FloatingActionButton';
-import Spinner from '../../../ui/Spinner';
-import ShowMoreButton from '../../../ui/ShowMoreButton';
 import AnimatedIcon from '../../../common/AnimatedIcon';
+import GroupChatInfo from '../../../common/GroupChatInfo';
+import PrivateChatInfo from '../../../common/PrivateChatInfo';
+import FloatingActionButton from '../../../ui/FloatingActionButton';
+import InputText from '../../../ui/InputText';
+import ListItem from '../../../ui/ListItem';
+import ShowMoreButton from '../../../ui/ShowMoreButton';
+import Spinner from '../../../ui/Spinner';
 
 type OwnProps = {
   state: FoldersState;

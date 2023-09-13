@@ -5,8 +5,9 @@ import type { ApiWebDocument } from '../../../../api/types';
 
 import { getFirstLetters } from '../../../../util/textFormat';
 import renderText from '../../../common/helpers/renderText';
-import useMedia from '../../../../hooks/useMedia';
 import { preventMessageInputBlurWithBubbling } from '../../helpers/preventMessageInputBlur';
+
+import useMedia from '../../../../hooks/useMedia';
 
 import ListItem from '../../../ui/ListItem';
 

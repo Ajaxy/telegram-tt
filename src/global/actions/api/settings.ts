@@ -1,32 +1,32 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
-import type { ActionReturnType, GlobalState } from '../../types';
-import type {
-  PrivacyVisibility, InputPrivacyRules, InputPrivacyContact, ApiPrivacySettings,
-} from '../../../types';
 import type { ApiUser, ApiUsername } from '../../../api/types';
+import type {
+  ApiPrivacySettings,
+  InputPrivacyContact, InputPrivacyRules, PrivacyVisibility,
+} from '../../../types';
+import type { ActionReturnType, GlobalState } from '../../types';
 import {
   ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
 } from '../../../types';
 
 import { APP_CONFIG_REFETCH_INTERVAL, COUNTRIES_WITH_12H_TIME_FORMAT } from '../../../config';
-import { callApi } from '../../../api/gramjs';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
-import { subscribe, unsubscribe, requestPermission } from '../../../util/notifications';
 import { setTimeFormat } from '../../../util/langProvider';
+import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
-import {
-  selectChat, selectUser, selectTabState, selectUserFullInfo,
-} from '../../selectors';
-import {
-  addUsers, addBlockedUser, updateChats, updateUser, removeBlockedUser, replaceSettings, updateNotifySettings,
-  addNotifyExceptions, updateChat, updateUserFullInfo,
-} from '../../reducers';
+import { callApi } from '../../../api/gramjs';
 import { isUserId } from '../../helpers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addBlockedUser, addNotifyExceptions, addUsers, removeBlockedUser, replaceSettings, updateChat, updateChats,
+  updateNotifySettings, updateUser, updateUserFullInfo,
+} from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import {
+  selectChat, selectTabState, selectUser, selectUserFullInfo,
+} from '../../selectors';
 
 addActionHandler('updateProfile', async (global, actions, payload): Promise<void> => {
   const {

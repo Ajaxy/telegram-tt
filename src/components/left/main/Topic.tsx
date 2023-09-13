@@ -1,16 +1,16 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
-  ApiChat, ApiFormattedText, ApiTopic, ApiMessage, ApiMessageOutgoingStatus,
-  ApiTypingStatus,
+  ApiChat, ApiFormattedText, ApiMessage, ApiMessageOutgoingStatus,
+  ApiTopic, ApiTypingStatus,
   ApiUser,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
+import { getMessageAction } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectCanDeleteTopic,
@@ -25,21 +25,21 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
-import { getMessageAction } from '../../../global/helpers';
 
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useChatListEntry from './hooks/useChatListEntry';
 import useTopicContextActions from './hooks/useTopicContextActions';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 
-import ListItem from '../../ui/ListItem';
 import LastMessageMeta from '../../common/LastMessageMeta';
-import ChatBadge from './ChatBadge';
-import MuteChatModal from '../MuteChatModal.async';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import TopicIcon from '../../common/TopicIcon';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
+import MuteChatModal from '../MuteChatModal.async';
+import ChatBadge from './ChatBadge';
 
 import styles from './Topic.module.scss';
 

@@ -6,13 +6,14 @@ import type { ApiSticker } from '../../../api/types';
 import type { ActiveEmojiInteraction } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
-import { LIKE_STICKER_ID } from '../../common/helpers/mediaDimensions';
 import {
   selectAnimatedEmoji,
   selectAnimatedEmojiEffect,
   selectAnimatedEmojiSound,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { LIKE_STICKER_ID } from '../../common/helpers/mediaDimensions';
+
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useAnimatedEmoji from '../../common/hooks/useAnimatedEmoji';
 

@@ -1,28 +1,28 @@
 import { useEffect, useState } from '../../../../lib/teact/teact';
-import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { EmojiData, EmojiModule, EmojiRawData } from '../../../../util/emoji';
-import { uncompressEmoji } from '../../../../util/emoji';
 import type { Signal } from '../../../../util/signals';
 
 import { EDITABLE_INPUT_CSS_SELECTOR, EDITABLE_INPUT_ID } from '../../../../config';
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
+import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
+import { uncompressEmoji } from '../../../../util/emoji';
+import focusEditableElement from '../../../../util/focusEditableElement';
 import {
   buildCollectionByKey, mapValues, pickTruthy, unique, uniqueByField,
 } from '../../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../../util/memo';
-import { prepareForRegExp } from '../helpers/prepareForRegExp';
-import focusEditableElement from '../../../../util/focusEditableElement';
 import memoized from '../../../../util/memoized';
 import renderText from '../../../common/helpers/renderText';
-import { selectCustomEmojiForEmojis } from '../../../../global/selectors';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
+import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
-import useLastCallback from '../../../../hooks/useLastCallback';
-import useFlag from '../../../../hooks/useFlag';
-import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
+import useFlag from '../../../../hooks/useFlag';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 interface Library {
   keywords: string[];

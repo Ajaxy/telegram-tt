@@ -3,18 +3,18 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiStoryView, ApiUser } from '../../api/types';
 
+import { getUserFullName } from '../../global/helpers';
 import { selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { REM } from '../common/helpers/mediaDimensions';
 import { formatDateAtTime } from '../../util/dateFormat';
-import { getUserFullName } from '../../global/helpers';
+import { REM } from '../common/helpers/mediaDimensions';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
-import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
 import PrivateChatInfo from '../common/PrivateChatInfo';
+import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
+import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
 
 import styles from './StoryViewModal.module.scss';
 

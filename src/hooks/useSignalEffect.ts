@@ -1,4 +1,5 @@
 import { useRef } from '../lib/teact/teact';
+
 import { cleanupEffect, isSignal } from '../util/signals';
 import useEffectOnce from './useEffectOnce';
 

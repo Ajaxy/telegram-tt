@@ -3,8 +3,8 @@ import React, { memo } from '../../lib/teact/teact';
 
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 
 export type OwnProps = {
   isOpen: boolean;

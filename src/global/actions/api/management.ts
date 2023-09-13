@@ -1,9 +1,12 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
-import { ManagementProgress } from '../../../types';
 import type { ActionReturnType } from '../../types';
+import { ManagementProgress } from '../../../types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
 import { callApi } from '../../../api/gramjs';
+import { getUserFirstOrLastName } from '../../helpers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addUsers, updateChat, updateChatFullInfo, updateManagement, updateManagementProgress,
 } from '../../reducers';
@@ -11,10 +14,6 @@ import {
   selectChat, selectCurrentMessageList, selectTabState, selectUser,
 } from '../../selectors';
 import { ensureIsSuperGroup } from './chats';
-import { getUserFirstOrLastName } from '../../helpers';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import * as langProvider from '../../../util/langProvider';
 
 addActionHandler('checkPublicLink', async (global, actions, payload): Promise<void> => {
   const { username, tabId = getCurrentTabId() } = payload;

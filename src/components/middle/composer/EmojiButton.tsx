@@ -1,11 +1,10 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
-
 import { IS_ELECTRON, PRODUCTION_URL } from '../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
-import { handleEmojiLoad, LOADED_EMOJIS } from '../../../util/emoji';
 import buildClassName from '../../../util/buildClassName';
+import { handleEmojiLoad, LOADED_EMOJIS } from '../../../util/emoji';
+import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 

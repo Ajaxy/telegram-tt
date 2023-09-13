@@ -1,13 +1,13 @@
-import type { GlobalState, TabArgs, TabState } from '../types';
 import type { ApiUser, ApiUserFullInfo, ApiUserStatus } from '../../api/types';
+import type { GlobalState, TabArgs, TabState } from '../types';
 
+import { areDeepEqual } from '../../util/areDeepEqual';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { omit, pick } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { selectTabState } from '../selectors';
 import { updateChat } from './chats';
 import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
-import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { areDeepEqual } from '../../util/areDeepEqual';
 
 export function replaceUsers<T extends GlobalState>(global: T, newById: Record<string, ApiUser>): T {
   return {

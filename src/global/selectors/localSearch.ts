@@ -1,8 +1,9 @@
 import type { GlobalState, TabArgs } from '../types';
-import { selectCurrentMessageList } from './messages';
-import { buildChatThreadKey } from '../helpers';
-import { selectTabState } from './tabs';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { buildChatThreadKey } from '../helpers';
+import { selectCurrentMessageList } from './messages';
+import { selectTabState } from './tabs';
 
 export function selectCurrentTextSearch<T extends GlobalState>(
   global: T,

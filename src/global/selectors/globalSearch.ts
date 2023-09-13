@@ -1,6 +1,7 @@
 import type { GlobalState, TabArgs } from '../types';
-import { selectTabState } from './tabs';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from './tabs';
 
 export function selectCurrentGlobalSearchQuery<T extends GlobalState>(
   global: T,

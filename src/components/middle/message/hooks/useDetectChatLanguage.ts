@@ -1,10 +1,11 @@
+import { useEffect } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
+
 import type { ApiMessage } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
-import { getActions } from '../../../../global';
 import LimitedMap from '../../../../util/primitives/LimitedMap';
 import { throttle } from '../../../../util/schedulers';
-import { useEffect } from '../../../../lib/teact/teact';
 
 // https://github.com/DrKLO/Telegram/blob/dfd74f809e97d1ecad9672fc7388cb0223a95dfc/TMessagesProj/src/main/java/org/telegram/messenger/TranslateController.java#L35
 const MIN_MESSAGES_CHECKED = 8;

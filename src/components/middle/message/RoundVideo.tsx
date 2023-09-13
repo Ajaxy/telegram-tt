@@ -9,28 +9,28 @@ import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-
 import { ApiMediaFormat } from '../../../api/types';
-import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
+
 import { getMessageMediaFormat, getMessageMediaHash, getMessageMediaThumbDataUri } from '../../../global/helpers';
-import { formatMediaDuration } from '../../../util/dateFormat';
-import buildClassName from '../../../util/buildClassName';
 import { stopCurrentAudio } from '../../../util/audioPlayer';
+import buildClassName from '../../../util/buildClassName';
+import { formatMediaDuration } from '../../../util/dateFormat';
 import safePlay from '../../../util/safePlay';
+import { ROUND_VIDEO_DIMENSIONS_PX } from '../../common/helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import useShowTransition from '../../../hooks/useShowTransition';
-import useMediaTransition from '../../../hooks/useMediaTransition';
-import usePrevious from '../../../hooks/usePrevious';
-import useFlag from '../../../hooks/useFlag';
-import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
-import useSignal from '../../../hooks/useSignal';
 import { useThrottledSignal } from '../../../hooks/useAsyncResolvers';
+import useFlag from '../../../hooks/useFlag';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
+import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useSignal from '../../../hooks/useSignal';
+import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import ProgressSpinner from '../../ui/ProgressSpinner';
 import OptimizedVideo from '../../ui/OptimizedVideo';
+import ProgressSpinner from '../../ui/ProgressSpinner';
 
 import './RoundVideo.scss';
 

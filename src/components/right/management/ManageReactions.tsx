@@ -1,6 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState, useMemo,
+  memo, useCallback, useEffect, useMemo,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -10,14 +11,15 @@ import type {
 
 import { isSameReaction } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
-import Spinner from '../../ui/Spinner';
 import RadioGroup from '../../ui/RadioGroup';
+import Spinner from '../../ui/Spinner';
 
 type OwnProps = {
   chatId: string;

@@ -1,13 +1,14 @@
 import type React from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
+import type {
+  ApiChat, ApiMessage, ApiStory,
+  ApiTopic, ApiUser,
+} from '../../../../api/types';
 import type { LangFn } from '../../../../hooks/useLang';
 import type { IAlbum } from '../../../../types';
-import type {
-  ApiChat, ApiTopic, ApiMessage, ApiUser, ApiStory,
-} from '../../../../api/types';
-import { MediaViewerOrigin } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
+import { MediaViewerOrigin } from '../../../../types';
 
 import useLastCallback from '../../../../hooks/useLastCallback';
 

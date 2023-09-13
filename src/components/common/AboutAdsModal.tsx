@@ -2,10 +2,11 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
-import Modal from '../ui/Modal';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 import SafeLink from './SafeLink';
 
 export type OwnProps = {

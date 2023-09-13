@@ -1,11 +1,11 @@
 import React, { type FC, memo, useEffect } from '../../lib/teact/teact';
 
-import { getServerTime } from '../../util/serverTime';
 import { formatMediaDuration } from '../../util/dateFormat';
+import { getServerTime } from '../../util/serverTime';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
-import useLang from '../../hooks/useLang';
 import useInterval from '../../hooks/useInterval';
+import useLang from '../../hooks/useLang';
 
 type OwnProps = {
   langKey: string;

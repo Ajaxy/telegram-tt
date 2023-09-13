@@ -1,4 +1,5 @@
-import type { StateReducer, Dispatch } from '../useReducer';
+import type { Dispatch, StateReducer } from '../useReducer';
+
 import useReducer from '../useReducer';
 
 export type FormState = {

@@ -1,23 +1,23 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiAvailableReaction, ApiChat, ApiMessage, ApiReactionCount, ApiStickerSet, ApiUser,
 } from '../../../api/types';
 import type { ActiveReaction } from '../../../global/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
+import { isReactionChosen, isSameReaction } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
-import { isSameReaction, isReactionChosen } from '../../../global/helpers';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 
-import Button from '../../ui/Button';
-import AvatarList from '../../common/AvatarList';
-import ReactionAnimatedEmoji from './ReactionAnimatedEmoji';
 import AnimatedCounter from '../../common/AnimatedCounter';
+import AvatarList from '../../common/AvatarList';
+import Button from '../../ui/Button';
+import ReactionAnimatedEmoji from './ReactionAnimatedEmoji';
 
 import './Reactions.scss';
 

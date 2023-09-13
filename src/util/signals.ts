@@ -1,4 +1,5 @@
 import type { CallbackManager } from './callbacks';
+
 import { createCallbackManager } from './callbacks';
 
 interface SignalState<T> {

@@ -1,6 +1,7 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, useState, memo, useEffect,
+  memo, useCallback, useEffect,
+  useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
@@ -10,16 +11,18 @@ import type {
   ApiPollAnswer,
   ApiPollResult,
 } from '../../api/types';
-import { selectTabState } from '../../global/selectors';
-import { isUserId } from '../../global/helpers';
-import usePrevious from '../../hooks/usePrevious';
-import useLang from '../../hooks/useLang';
 
-import ShowMoreButton from '../ui/ShowMoreButton';
-import Loading from '../ui/Loading';
-import ListItem from '../ui/ListItem';
-import PrivateChatInfo from '../common/PrivateChatInfo';
+import { isUserId } from '../../global/helpers';
+import { selectTabState } from '../../global/selectors';
+
+import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
+
 import GroupChatInfo from '../common/GroupChatInfo';
+import PrivateChatInfo from '../common/PrivateChatInfo';
+import ListItem from '../ui/ListItem';
+import Loading from '../ui/Loading';
+import ShowMoreButton from '../ui/ShowMoreButton';
 
 import './PollAnswerResults.scss';
 

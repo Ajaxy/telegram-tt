@@ -1,16 +1,17 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { useState, memo, useCallback } from '../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
+
 import useLang from '../../hooks/useLang';
 
+import AvatarEditable from '../ui/AvatarEditable';
 import Button from '../ui/Button';
 import InputText from '../ui/InputText';
-import AvatarEditable from '../ui/AvatarEditable';
 
 type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError'>;
 

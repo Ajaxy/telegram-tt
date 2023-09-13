@@ -1,12 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction, ApiSticker } from '../../api/types';
-import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { StickerSetOrReactionsSetOrRecent } from '../../types';
 
 import {
   DEFAULT_STATUS_ICON_ID,
@@ -17,23 +17,23 @@ import {
   RECENT_SYMBOL_SET_ID,
   STICKER_SIZE_PICKER,
 } from '../../config';
-import buildClassName from '../../util/buildClassName';
-import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
 import { getReactionUniqueKey } from '../../global/helpers';
+import { selectIsAlwaysHighPriorityEmoji, selectIsSetPremium } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
+import useAppLayout from '../../hooks/useAppLayout';
 import useFlag from '../../hooks/useFlag';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useResizeObserver from '../../hooks/useResizeObserver';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useAppLayout from '../../hooks/useAppLayout';
 import useWindowSize from '../../hooks/useWindowSize';
 
-import StickerButton from './StickerButton';
-import ConfirmDialog from '../ui/ConfirmDialog';
 import Button from '../ui/Button';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import ReactionEmoji from './ReactionEmoji';
+import StickerButton from './StickerButton';
 
 import grey from '../../assets/icons/forumTopic/grey.svg';
 

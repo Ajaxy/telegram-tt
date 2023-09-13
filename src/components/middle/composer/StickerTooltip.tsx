@@ -5,16 +5,17 @@ import { withGlobal } from '../../../global';
 import type { ApiSticker } from '../../../api/types';
 
 import { STICKER_SIZE_PICKER } from '../../../config';
+import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
 import useSendMessageAction from '../../../hooks/useSendMessageAction';
-import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../global/selectors';
+import useShowTransition from '../../../hooks/useShowTransition';
 
-import Loading from '../../ui/Loading';
 import StickerButton from '../../common/StickerButton';
+import Loading from '../../ui/Loading';
 
 import './StickerTooltip.scss';
 

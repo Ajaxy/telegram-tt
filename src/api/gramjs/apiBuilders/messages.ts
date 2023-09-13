@@ -1,26 +1,27 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
-  ApiMessage,
-  ApiMessageForwardInfo,
-  ApiPhoto,
-  ApiSticker,
-  ApiVideo,
   ApiAction,
-  ApiContact,
   ApiAttachment,
-  ApiNewPoll,
-  ApiMessageEntity,
-  ApiReplyKeyboard,
-  ApiKeyboardButton,
   ApiChat,
-  ApiThreadInfo,
+  ApiContact,
   ApiGroupCall,
+  ApiKeyboardButton,
+  ApiMessage,
+  ApiMessageEntity,
+  ApiMessageForwardInfo,
+  ApiNewPoll,
+  ApiPhoto,
+  ApiReplyKeyboard,
   ApiSponsoredMessage,
-  ApiUser,
-  PhoneCallAction,
-  ApiTypeReplyTo,
+  ApiSticker,
   ApiStory,
   ApiStorySkipped,
+  ApiThreadInfo,
+  ApiTypeReplyTo,
+  ApiUser,
+  ApiVideo,
+  PhoneCallAction,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
@@ -34,13 +35,9 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { pick } from '../../../util/iteratees';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import { pick } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
-import { buildMessageContent, buildMessageTextContent } from './messageContent';
-import {
-  buildApiPhoto,
-} from './common';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
 import {
@@ -48,9 +45,13 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
+import { buildApiCallDiscardReason } from './calls';
+import {
+  buildApiPhoto,
+} from './common';
+import { buildMessageContent, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildMessageReactions } from './reactions';
-import { buildApiCallDiscardReason } from './calls';
 
 const LOCAL_MESSAGES_LIMIT = 1e6; // 1M
 

@@ -5,13 +5,14 @@ import { withGlobal } from '../../../global';
 import type { ApiChatMember, ApiUser, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
+import { isChatChannel, sortUserIds } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
-import { sortUserIds, isChatChannel } from '../../../global/helpers';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
 
+import NothingFound from '../../common/NothingFound';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
-import NothingFound from '../../common/NothingFound';
 
 type OwnProps = {
   chatId: string;

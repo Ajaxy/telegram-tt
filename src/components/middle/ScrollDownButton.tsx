@@ -3,13 +3,14 @@ import React, { memo, useRef } from '../../lib/teact/teact';
 
 import type { IconName } from '../../types/icons';
 
-import { formatIntegerCompact } from '../../util/textFormat';
-import useLang from '../../hooks/useLang';
-import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
 import buildClassName from '../../util/buildClassName';
+import { formatIntegerCompact } from '../../util/textFormat';
 
-import Menu from '../ui/Menu';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useLang from '../../hooks/useLang';
+
 import Button from '../ui/Button';
+import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 
 import styles from './ScrollDownButton.module.scss';

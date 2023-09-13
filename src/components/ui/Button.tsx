@@ -1,16 +1,15 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from 'react';
-
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef, useState } from '../../lib/teact/teact';
 
-import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
+import { IS_TOUCH_ENV, MouseButton } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
-import Spinner from './Spinner';
 import RippleEffect from './RippleEffect';
+import Spinner from './Spinner';
 
 import './Button.scss';
 

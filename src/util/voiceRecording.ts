@@ -1,4 +1,5 @@
 import type { IOpusRecorder } from 'opus-recorder';
+
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
 
 export type Result = { blob: Blob; duration: number; waveform: number[] };

@@ -1,19 +1,17 @@
 import React, {
   useCallback, useLayoutEffect, useMemo, useRef,
 } from '../../../../lib/teact/teact';
-import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getGlobal } from '../../../../global';
 
-import type { LangFn } from '../../../../hooks/useLang';
-import useLang from '../../../../hooks/useLang';
 import type {
   ApiChat, ApiMessage, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../../../api/types';
-import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
 import type { Thread } from '../../../../global/types';
+import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
+import type { LangFn } from '../../../../hooks/useLang';
 
 import { ANIMATION_END_DELAY, CHAT_HEIGHT_PX } from '../../../../config';
-import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import {
   getMessageIsSpoiler,
   getMessageMediaHash,
@@ -25,15 +23,18 @@ import {
   isActionMessage,
   isChatChannel,
 } from '../../../../global/helpers';
+import buildClassName from '../../../../util/buildClassName';
 import { renderActionMessageText } from '../../../common/helpers/renderActionMessageText';
 import renderText from '../../../common/helpers/renderText';
-import buildClassName from '../../../../util/buildClassName';
-import useEnsureMessage from '../../../../hooks/useEnsureMessage';
-import useMedia from '../../../../hooks/useMedia';
+import { renderTextWithEntities } from '../../../common/helpers/renderTextWithEntities';
 import { ChatAnimationTypes } from './useChatAnimationType';
 
-import MessageSummary from '../../../common/MessageSummary';
+import useEnsureMessage from '../../../../hooks/useEnsureMessage';
+import useLang from '../../../../hooks/useLang';
+import useMedia from '../../../../hooks/useMedia';
+
 import ChatForumLastMessage from '../../../common/ChatForumLastMessage';
+import MessageSummary from '../../../common/MessageSummary';
 import TypingStatus from '../../../common/TypingStatus';
 
 const ANIMATION_DURATION = 200;

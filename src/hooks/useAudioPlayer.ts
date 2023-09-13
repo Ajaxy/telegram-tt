@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
-import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../config';
 import type { Track, TrackId } from '../util/audioPlayer';
-import { register } from '../util/audioPlayer';
-import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
 import type { MediaSessionHandlers } from '../util/mediaSession';
+
+import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../config';
+import { selectTabState } from '../global/selectors';
+import { register } from '../util/audioPlayer';
 import {
   registerMediaSession, setPlaybackState, setPositionState, updateMetadata,
 } from '../util/mediaSession';
-import { selectTabState } from '../global/selectors';
-
+import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
 import useEffectWithPrevDeps from './useEffectWithPrevDeps';
-import useSyncEffect from './useSyncEffect';
 import useLastCallback from './useLastCallback';
+import useSyncEffect from './useSyncEffect';
 
 type Handler = (e: Event) => void;
 

@@ -1,30 +1,30 @@
 import {
   useEffect, useLayoutEffect, useRef,
 } from '../../../../lib/teact/teact';
-import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
-import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
+import { getGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
-import { getGlobal } from '../../../../global';
+import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
+import { ensureRLottie } from '../../../../lib/rlottie/RLottie.async';
 import { selectIsAlwaysHighPriorityEmoji } from '../../../../global/selectors';
+import AbsoluteVideo from '../../../../util/AbsoluteVideo';
 import {
   addCustomEmojiInputRenderCallback,
   getCustomEmojiMediaDataForInput,
 } from '../../../../util/customEmojiManager';
 import { round } from '../../../../util/math';
-import AbsoluteVideo from '../../../../util/AbsoluteVideo';
-import { REM } from '../../../common/helpers/mediaDimensions';
 import { hexToRgb } from '../../../../util/switchTheme';
-import useColorFilter from '../../../../hooks/stickers/useColorFilter';
+import { REM } from '../../../common/helpers/mediaDimensions';
 
+import useColorFilter from '../../../../hooks/stickers/useColorFilter';
+import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
+import useBackgroundMode from '../../../../hooks/useBackgroundMode';
+import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 import useLastCallback from '../../../../hooks/useLastCallback';
 import useResizeObserver from '../../../../hooks/useResizeObserver';
-import useBackgroundMode from '../../../../hooks/useBackgroundMode';
 import useThrottledCallback from '../../../../hooks/useThrottledCallback';
-import useDynamicColorListener from '../../../../hooks/stickers/useDynamicColorListener';
-import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
 
 const SIZE = 1.25 * REM;
 const THROTTLE_MS = 300;

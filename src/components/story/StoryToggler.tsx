@@ -4,8 +4,8 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiUser } from '../../api/types';
 
 import { PREVIEW_AVATAR_COUNT } from '../../config';
-import buildClassName from '../../util/buildClassName';
 import { selectTabState } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 
 import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';

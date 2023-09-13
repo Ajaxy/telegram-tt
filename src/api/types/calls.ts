@@ -1,8 +1,9 @@
 import type {
-  GroupCallParticipant,
+  ApiCallProtocol, ApiPhoneCallConnection,
   GroupCallConnectionState,
-  ApiPhoneCallConnection,
-  ApiCallProtocol, VideoState, VideoRotation,
+  GroupCallParticipant,
+  VideoRotation,
+  VideoState,
 } from '../../lib/secret-sauce';
 
 export interface ApiGroupCall {

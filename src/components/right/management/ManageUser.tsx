@@ -9,6 +9,7 @@ import type { ApiPhoto, ApiUser } from '../../../api/types';
 import { ManagementProgress } from '../../../types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
 import {
   selectChat,
   selectNotifyExceptions,
@@ -17,20 +18,20 @@ import {
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
-import { isUserBot, selectIsChatMuted } from '../../../global/helpers';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
+import Avatar from '../../common/Avatar';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Checkbox from '../../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import Checkbox from '../../ui/Checkbox';
-import FloatingActionButton from '../../ui/FloatingActionButton';
-import Spinner from '../../ui/Spinner';
-import PrivateChatInfo from '../../common/PrivateChatInfo';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 import SelectAvatar from '../../ui/SelectAvatar';
-import Avatar from '../../common/Avatar';
+import Spinner from '../../ui/Spinner';
 
 import './Management.scss';
 

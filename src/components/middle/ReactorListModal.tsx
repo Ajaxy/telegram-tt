@@ -1,38 +1,39 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useMemo, useEffect, useState, useRef,
+  memo, useEffect, useMemo, useRef,
+  useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiAvailableReaction, ApiMessage, ApiReaction } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
+import { getReactionUniqueKey, isSameReaction } from '../../global/helpers';
 import {
   selectChatMessage,
   selectTabState,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
-import { formatIntegerCompact } from '../../util/textFormat';
-import { unique } from '../../util/iteratees';
-import { isSameReaction, getReactionUniqueKey } from '../../global/helpers';
 import { formatDateAtTime } from '../../util/dateFormat';
+import { unique } from '../../util/iteratees';
+import { formatIntegerCompact } from '../../util/textFormat';
 
-import useLang from '../../hooks/useLang';
-import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useFlag from '../../hooks/useFlag';
+import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import InfiniteScroll from '../ui/InfiniteScroll';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
-import ListItem from '../ui/ListItem';
-import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
-import Loading from '../ui/Loading';
 import FullNameTitle from '../common/FullNameTitle';
 import PrivateChatInfo from '../common/PrivateChatInfo';
+import ReactionStaticEmoji from '../common/ReactionStaticEmoji';
+import Button from '../ui/Button';
+import InfiniteScroll from '../ui/InfiniteScroll';
+import ListItem from '../ui/ListItem';
+import Loading from '../ui/Loading';
+import Modal from '../ui/Modal';
 
 import './ReactorListModal.scss';
-import useLastCallback from '../../hooks/useLastCallback';
 
 const MIN_REACTIONS_COUNT_FOR_FILTERS = 10;
 

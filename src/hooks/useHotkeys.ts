@@ -1,6 +1,7 @@
 import { useEffect } from '../lib/teact/teact';
-import { getHotkeyMatcher } from '../util/parseHotkey';
+
 import { createCallbackManager } from '../util/callbacks';
+import { getHotkeyMatcher } from '../util/parseHotkey';
 
 const IGNORE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
 

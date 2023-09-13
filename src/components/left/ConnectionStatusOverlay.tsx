@@ -1,12 +1,13 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
-import useLang from '../../hooks/useLang';
 import type { ConnectionStatus } from '../../hooks/useConnectionStatus';
 
-import Transition from '../ui/Transition';
-import Spinner from '../ui/Spinner';
+import useLang from '../../hooks/useLang';
+
 import Button from '../ui/Button';
+import Spinner from '../ui/Spinner';
+import Transition from '../ui/Transition';
 
 import './ConnectionStatusOverlay.scss';
 

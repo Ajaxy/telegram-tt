@@ -1,15 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { useRef, useState } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
-import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { IMediaDimensions } from './helpers/calculateAlbumLayout';
 
-import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
-import { formatMediaDuration } from '../../../util/dateFormat';
-import buildClassName from '../../../util/buildClassName';
-import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
 import {
   getMediaTransferState,
   getMessageMediaFormat,
@@ -19,23 +15,27 @@ import {
   getMessageWebPageVideo,
   isOwnMessage,
 } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { formatMediaDuration } from '../../../util/dateFormat';
 import * as mediaLoader from '../../../util/mediaLoader';
+import { calculateVideoDimensions } from '../../common/helpers/mediaDimensions';
+import { MIN_MEDIA_HEIGHT } from './helpers/mediaDimensions';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
-import useMedia from '../../../hooks/useMedia';
-import useShowTransition from '../../../hooks/useShowTransition';
-import usePrevious from '../../../hooks/usePrevious';
-import useMediaTransition from '../../../hooks/useMediaTransition';
-import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
-import useFlag from '../../../hooks/useFlag';
-import useAppLayout from '../../../hooks/useAppLayout';
 import useUnsupportedMedia from '../../../hooks/media/useUnsupportedMedia';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
+import useMediaTransition from '../../../hooks/useMediaTransition';
+import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
+import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 
-import ProgressSpinner from '../../ui/ProgressSpinner';
-import OptimizedVideo from '../../ui/OptimizedVideo';
 import MediaSpoiler from '../../common/MediaSpoiler';
+import OptimizedVideo from '../../ui/OptimizedVideo';
+import ProgressSpinner from '../../ui/ProgressSpinner';
 
 export type OwnProps = {
   id?: string;

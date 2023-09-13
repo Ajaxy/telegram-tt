@@ -21,16 +21,11 @@ import {
   IS_TEST,
   PRODUCTION_HOSTNAME,
 } from '../../../config';
-import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 import {
   INITIAL_PERFORMANCE_STATE_MAX,
   INITIAL_PERFORMANCE_STATE_MID,
   INITIAL_PERFORMANCE_STATE_MIN,
 } from '../../../global/initialState';
-import buildClassName from '../../../util/buildClassName';
-import { formatDateToString } from '../../../util/dateFormat';
-import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
-import { clearWebsync } from '../../../util/websync';
 import {
   selectCanSetPasscode,
   selectCurrentMessageList,
@@ -38,30 +33,35 @@ import {
   selectTabState,
   selectTheme,
 } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useConnectionStatus from '../../../hooks/useConnectionStatus';
-import { useHotkeys } from '../../../hooks/useHotkeys';
-import { getPromptInstall } from '../../../util/installPrompt';
+import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { formatDateToString } from '../../../util/dateFormat';
+import { getPromptInstall } from '../../../util/installPrompt';
+import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
+import { clearWebsync } from '../../../util/websync';
+import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
-import { useFullscreenStatus } from '../../../hooks/useFullscreen';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useElectronDrag from '../../../hooks/useElectronDrag';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
-import useAppLayout from '../../../hooks/useAppLayout';
+import { useFullscreenStatus } from '../../../hooks/useFullscreen';
+import { useHotkeys } from '../../../hooks/useHotkeys';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
+import PickerSelectedItem from '../../common/PickerSelectedItem';
+import StoryToggler from '../../story/StoryToggler';
+import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
-import Button from '../../ui/Button';
 import SearchInput from '../../ui/SearchInput';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
-import Switcher from '../../ui/Switcher';
 import ShowTransition from '../../ui/ShowTransition';
+import Switcher from '../../ui/Switcher';
+import Toggle from '../../ui/Toggle';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import StatusButton from './StatusButton';
-import Toggle from '../../ui/Toggle';
-import StoryToggler from '../../story/StoryToggler';
 
 import './LeftMainHeader.scss';
 

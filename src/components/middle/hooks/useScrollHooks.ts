@@ -1,21 +1,21 @@
 import type { RefObject } from 'react';
 import { useEffect, useMemo, useRef } from '../../../lib/teact/teact';
-import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { getActions } from '../../../global';
 
-import { LoadMoreDirection } from '../../../types';
 import type { MessageListType } from '../../../global/types';
 import type { Signal } from '../../../util/signals';
+import { LoadMoreDirection } from '../../../types';
 
-import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
-import { debounce } from '../../../util/schedulers';
+import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
 import { isLocalMessageId } from '../../../global/helpers';
+import { debounce } from '../../../util/schedulers';
+import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
-import useSyncEffect from '../../../hooks/useSyncEffect';
-import { useSignalEffect } from '../../../hooks/useSignalEffect';
 import { useDebouncedSignal } from '../../../hooks/useAsyncResolvers';
+import { useIntersectionObserver, useOnIntersect } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import { useSignalEffect } from '../../../hooks/useSignalEffect';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 
 const FAB_THRESHOLD = 50;
 const NOTCH_THRESHOLD = 1; // Notch has zero height so we at least need a 1px margin to intersect

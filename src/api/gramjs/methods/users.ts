@@ -1,26 +1,28 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
-  OnApiUpdate, ApiUser, ApiChat, ApiSticker,
+  ApiChat, ApiSticker,
+  ApiUser, OnApiUpdate,
 } from '../../types';
 
 import { COMMON_CHATS_LIMIT, PROFILE_PHOTOS_LIMIT } from '../../../config';
-import { invokeRequest } from './client';
-import { searchMessagesLocal } from './messages';
-import {
-  buildInputEntity,
-  buildInputPeer,
-  buildInputContact,
-  buildMtpPeerId,
-  getEntityTypeById,
-  buildInputEmojiStatus,
-} from '../gramjsBuilders';
-import { buildApiUser, buildApiUserFullInfo, buildApiUsersAndStatuses } from '../apiBuilders/users';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiPhoto } from '../apiBuilders/common';
-import { addEntitiesToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildApiUser, buildApiUserFullInfo, buildApiUsersAndStatuses } from '../apiBuilders/users';
+import {
+  buildInputContact,
+  buildInputEmojiStatus,
+  buildInputEntity,
+  buildInputPeer,
+  buildMtpPeerId,
+  getEntityTypeById,
+} from '../gramjsBuilders';
+import { addEntitiesToLocalDb, addPhotoToLocalDb, addUserToLocalDb } from '../helpers';
 import localDb from '../localDb';
+import { invokeRequest } from './client';
+import { searchMessagesLocal } from './messages';
 
 let onUpdate: OnApiUpdate;
 

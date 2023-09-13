@@ -1,5 +1,7 @@
-import { createWorkerInterface } from '../../util/createPostMessageInterface';
 import type { CancellableCallback } from '../../util/PostMessageConnector';
+
+import { createWorkerInterface } from '../../util/createPostMessageInterface';
+
 import { MP4Demuxer } from './MP4Demuxer';
 
 let decoder: any;

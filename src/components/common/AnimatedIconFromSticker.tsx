@@ -1,7 +1,7 @@
 import React, { memo } from '../../lib/teact/teact';
 
-import type { OwnProps as AnimatedIconProps } from './AnimatedIcon';
 import type { ApiSticker } from '../../api/types';
+import type { OwnProps as AnimatedIconProps } from './AnimatedIcon';
 import { ApiMediaFormat } from '../../api/types';
 
 import { getStickerPreviewHash } from '../../global/helpers';

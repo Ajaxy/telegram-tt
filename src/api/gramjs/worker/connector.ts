@@ -1,17 +1,17 @@
 import type { Api } from '../../../lib/gramjs';
+import type { TypedBroadcastChannel } from '../../../util/multitab';
 import type { ApiInitialArgs, ApiOnProgress, OnApiUpdate } from '../../types';
+import type { LocalDb } from '../localDb';
 import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 import type { OriginRequest, ThenArg, WorkerMessageEvent } from './types';
-import type { LocalDb } from '../localDb';
-import type { TypedBroadcastChannel } from '../../../util/multitab';
 
-import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 import { DATA_BROADCAST_CHANNEL_NAME, DEBUG } from '../../../config';
+import { logDebugMessage } from '../../../util/debugConsole';
+import Deferred from '../../../util/Deferred';
+import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
 import generateUniqueId from '../../../util/generateUniqueId';
 import { pause } from '../../../util/schedulers';
-import { getCurrentTabId, subscribeToMasterChange } from '../../../util/establishMultitabRole';
-import Deferred from '../../../util/Deferred';
-import { logDebugMessage } from '../../../util/debugConsole';
+import { IS_MULTITAB_SUPPORTED } from '../../../util/windowEnvironment';
 
 type RequestStates = {
   messageId: string;

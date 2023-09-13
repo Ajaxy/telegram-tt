@@ -1,22 +1,23 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, useMemo, useRef, useState, memo, useCallback,
+  memo, useCallback,
+  useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiMessage,
   ApiChat,
   ApiChatMember,
+  ApiMessage,
+  ApiTypeStory,
   ApiUser,
   ApiUserStatus,
-  ApiTypeStory,
 } from '../../api/types';
-import { MAIN_THREAD_ID } from '../../api/types';
 import type {
   ISettings, ProfileState, ProfileTabType, SharedMediaType,
 } from '../../types';
-import { NewChatMembersProgress, MediaViewerOrigin, AudioOrigin } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
+import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
 import {
   MEMBERS_SLICE,
@@ -24,7 +25,6 @@ import {
   SHARED_MEDIA_SLICE,
   SLIDE_TRANSITION_DURATION,
 } from '../../config';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import {
   getHasAdminRight, isChatAdmin, isChatChannel, isChatGroup, isUserBot, isUserId, isUserRightBanned,
 } from '../../global/helpers';
@@ -42,36 +42,37 @@ import {
   selectUserStories,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useCacheBuster from '../../hooks/useCacheBuster';
-import useProfileViewportIds from './hooks/useProfileViewportIds';
-import useProfileState from './hooks/useProfileState';
-import useTransitionFixes from './hooks/useTransitionFixes';
-import useAsyncRendering from './hooks/useAsyncRendering';
-import useLang from '../../hooks/useLang';
-import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useUserStoriesPolling from '../../hooks/polling/useUserStoriesPolling';
+import useCacheBuster from '../../hooks/useCacheBuster';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useAsyncRendering from './hooks/useAsyncRendering';
+import useProfileState from './hooks/useProfileState';
+import useProfileViewportIds from './hooks/useProfileViewportIds';
+import useTransitionFixes from './hooks/useTransitionFixes';
 
-import Transition from '../ui/Transition';
-import InfiniteScroll from '../ui/InfiniteScroll';
-import TabList from '../ui/TabList';
-import Spinner from '../ui/Spinner';
-import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
-import PrivateChatInfo from '../common/PrivateChatInfo';
-import ProfileInfo from '../common/ProfileInfo';
-import Document from '../common/Document';
 import Audio from '../common/Audio';
 import ChatExtra from '../common/ChatExtra';
-import Media from '../common/Media';
-import MediaStory from '../story/MediaStory';
-import WebLink from '../common/WebLink';
-import NothingFound from '../common/NothingFound';
-import FloatingActionButton from '../ui/FloatingActionButton';
-import DeleteMemberModal from './DeleteMemberModal';
+import Document from '../common/Document';
 import GroupChatInfo from '../common/GroupChatInfo';
+import Media from '../common/Media';
+import NothingFound from '../common/NothingFound';
+import PrivateChatInfo from '../common/PrivateChatInfo';
+import ProfileInfo from '../common/ProfileInfo';
+import WebLink from '../common/WebLink';
+import MediaStory from '../story/MediaStory';
+import FloatingActionButton from '../ui/FloatingActionButton';
+import InfiniteScroll from '../ui/InfiniteScroll';
+import ListItem, { type MenuItemContextAction } from '../ui/ListItem';
+import Spinner from '../ui/Spinner';
+import TabList from '../ui/TabList';
+import Transition from '../ui/Transition';
+import DeleteMemberModal from './DeleteMemberModal';
 
 import './Profile.scss';
 

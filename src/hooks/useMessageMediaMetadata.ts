@@ -7,13 +7,12 @@ import type {
 import {
   getAudioHasCover, getChatAvatarHash, getChatTitle, getMessageContent, getMessageMediaHash, getSenderTitle,
 } from '../global/helpers';
+import { resizeImage, scaleImage } from '../util/imageResize';
 import { buildMediaMetadata } from '../util/mediaSession';
-import { scaleImage, resizeImage } from '../util/imageResize';
 import { AVATAR_FULL_DIMENSIONS } from '../components/common/helpers/mediaDimensions';
-
+import useAsync from './useAsync';
 import useLang from './useLang';
 import useMedia from './useMedia';
-import useAsync from './useAsync';
 
 import telegramLogoPath from '../assets/telegram-logo-filled.svg';
 

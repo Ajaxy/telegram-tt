@@ -8,17 +8,17 @@ import { ApiMessageEntityTypes } from '../../../api/types';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { ensureProtocol } from '../../../util/ensureProtocol';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { ensureProtocol } from '../../../util/ensureProtocol';
 import getKeyFromEvent from '../../../util/getKeyFromEvent';
-import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
 import stopEvent from '../../../util/stopEvent';
+import { INPUT_CUSTOM_EMOJI_SELECTOR } from './helpers/customEmoji';
 
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useVirtualBackdrop from '../../../hooks/useVirtualBackdrop';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';
 

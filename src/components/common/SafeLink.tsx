@@ -1,15 +1,16 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
-import convertPunycode from '../../lib/punycode';
 
-import type { FC } from '../../lib/teact/teact';
 import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
   DEBUG,
 } from '../../config';
+import convertPunycode from '../../lib/punycode';
 import buildClassName from '../../util/buildClassName';
 import { ensureProtocol } from '../../util/ensureProtocol';
+
 import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {

@@ -1,18 +1,18 @@
 import { useEffect } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
-import { getActions } from '../../../../global';
 import { EMOJI_IMG_REGEX } from '../../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
-import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
 import twemojiRegex from '../../../../lib/twemojiRegex';
+import parseEmojiOnlyString from '../../../../util/parseEmojiOnlyString';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
 import { prepareForRegExp } from '../helpers/prepareForRegExp';
 
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../../hooks/useDerivedState';
 import useFlag from '../../../../hooks/useFlag';
-import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 
 const MAX_LENGTH = 8;
 const STARTS_ENDS_ON_EMOJI_IMG_REGEX = new RegExp(`^${EMOJI_IMG_REGEX.source}$`, 'g');

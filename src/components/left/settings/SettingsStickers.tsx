@@ -1,31 +1,31 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import { SettingsScreens } from '../../../types';
-import type { ISettings } from '../../../types';
 import type {
   ApiAvailableReaction,
   ApiReaction,
   ApiSticker,
   ApiStickerSet,
 } from '../../../api/types';
-
-import renderText from '../../common/helpers/renderText';
-import { pick } from '../../../util/iteratees';
-import { REM } from '../../common/helpers/mediaDimensions';
+import type { ISettings } from '../../../types';
+import { SettingsScreens } from '../../../types';
 
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import { pick } from '../../../util/iteratees';
+import { REM } from '../../common/helpers/mediaDimensions';
+import renderText from '../../common/helpers/renderText';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';
 
 import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import StickerSetCard from '../../common/StickerSetCard';
 import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
-import StickerSetCard from '../../common/StickerSetCard';
 
 const DEFAULT_REACTION_SIZE = 1.5 * REM;
 

@@ -1,11 +1,11 @@
-import type { RequiredGlobalActions } from '../../index';
-import {
-  addActionHandler, getGlobal, setGlobal,
-} from '../../index';
-
 import type {
-  ApiChat, ApiUser, ApiError, ApiChatMember, ApiChatFolder, ApiChatlistExportedInvite,
+  ApiChat, ApiChatFolder, ApiChatlistExportedInvite,
+  ApiChatMember, ApiError, ApiUser,
 } from '../../../api/types';
+import type { RequiredGlobalActions } from '../../index';
+import type {
+  ActionReturnType, GlobalState, TabArgs,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import {
   ChatCreationProgress,
@@ -13,78 +13,80 @@ import {
   NewChatMembersProgress,
   SettingsScreens,
 } from '../../../types';
-import type {
-  GlobalState, ActionReturnType, TabArgs,
-} from '../../types';
 
 import {
+  ALL_FOLDER_ID,
   ARCHIVED_FOLDER_ID,
-  TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   CHAT_LIST_LOAD_SLICE,
+  DEBUG,
   RE_TG_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
+  TME_WEB_DOMAINS,
   TMP_CHAT_ID,
-  ALL_FOLDER_ID,
-  DEBUG,
+  TOP_CHAT_MESSAGES_PRELOAD_LIMIT,
   TOPICS_SLICE,
   TOPICS_SLICE_SECOND_LOAD,
-  TME_WEB_DOMAINS,
 } from '../../../config';
+import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { getOrderedIds } from '../../../util/folderManager';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import { debounce, pause, throttle } from '../../../util/schedulers';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 import {
-  addChats,
-  addUsers,
-  addUserStatuses,
-  replaceThreadParam,
-  updateChatListIds,
-  updateChats,
-  updateChat,
-  updateChatListSecondaryInfo,
-  updateManagementProgress,
-  leaveChat,
-  replaceUsers,
-  replaceUserStatuses,
-  replaceChats,
-  replaceChatListIds,
-  addChatMembers,
-  updateUser,
-  addMessages,
-  updateTopics,
-  deleteTopic,
-  updateTopic,
-  updateThreadInfo,
-  updateListedTopicIds,
-  updateChatFullInfo,
-  replaceChatFullInfo,
-  updateUserFullInfo,
-} from '../../reducers';
-import {
-  selectChat, selectUser, selectChatListType, selectIsChatPinned,
-  selectChatFolder, selectSupportChat, selectChatByUsername,
-  selectCurrentMessageList, selectThreadInfo, selectCurrentChat, selectLastServiceNotification,
-  selectVisibleUsers, selectUserByPhoneNumber, selectDraft, selectThreadTopMessageId,
-  selectTabState, selectThreadOriginChat, selectThread, selectChatFullInfo, selectStickerSet,
-} from '../../selectors';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
-import { debounce, pause, throttle } from '../../../util/schedulers';
-import {
-  isChatSummaryOnly,
   isChatArchived,
   isChatBasicGroup,
   isChatChannel,
+  isChatSummaryOnly,
   isChatSuperGroup,
   isUserBot,
   isUserId,
 } from '../../helpers';
-import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
+import {
+  addActionHandler, getGlobal, setGlobal,
+} from '../../index';
+import {
+  addChatMembers,
+  addChats,
+  addMessages,
+  addUsers,
+  addUserStatuses,
+  deleteTopic,
+  leaveChat,
+  replaceChatFullInfo,
+  replaceChatListIds,
+  replaceChats,
+  replaceThreadParam,
+  replaceUsers,
+  replaceUserStatuses,
+  updateChat,
+  updateChatFullInfo,
+  updateChatListIds,
+  updateChatListSecondaryInfo,
+  updateChats,
+  updateListedTopicIds,
+  updateManagementProgress,
+  updateThreadInfo,
+  updateTopic,
+  updateTopics,
+  updateUser,
+  updateUserFullInfo,
+} from '../../reducers';
 import { updateGroupCall } from '../../reducers/calls';
-import { selectGroupCall } from '../../selectors/calls';
-import { getOrderedIds } from '../../../util/folderManager';
-import * as langProvider from '../../../util/langProvider';
-import { selectCurrentLimit } from '../../selectors/limits';
 import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { extractCurrentThemeParams } from '../../../util/themeStyle';
+import {
+  selectChat, selectChatByUsername,
+  selectChatFolder, selectChatFullInfo, selectChatListType, selectCurrentChat, selectCurrentMessageList, selectDraft,
+  selectIsChatPinned,
+  selectLastServiceNotification,
+  selectStickerSet,
+  selectSupportChat, selectTabState, selectThread, selectThreadInfo, selectThreadOriginChat, selectThreadTopMessageId,
+  selectUser, selectUserByPhoneNumber, selectVisibleUsers,
+} from '../../selectors';
+import { selectGroupCall } from '../../selectors/calls';
+import { selectCurrentLimit } from '../../selectors/limits';
 
 const TOP_CHAT_MESSAGES_PRELOAD_INTERVAL = 100;
 const INFINITE_LOOP_MARKER = 100;

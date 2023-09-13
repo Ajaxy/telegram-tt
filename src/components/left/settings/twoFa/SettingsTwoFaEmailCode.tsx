@@ -6,15 +6,16 @@ import { withGlobal } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 
-import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { selectAnimatedEmoji } from '../../../../global/selectors';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
-import useAppLayout from '../../../../hooks/useAppLayout';
+import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 
+import useAppLayout from '../../../../hooks/useAppLayout';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
+
+import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 import InputText from '../../../ui/InputText';
 import Loading from '../../../ui/Loading';
-import AnimatedIconFromSticker from '../../../common/AnimatedIconFromSticker';
 
 type OwnProps = {
   isLoading?: boolean;

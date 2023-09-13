@@ -5,10 +5,11 @@ import { getActions, withGlobal } from '../../global';
 import type { GlobalState } from '../../global/types';
 
 import { pick } from '../../util/iteratees';
+
 import useLang from '../../hooks/useLang';
 
-import MonkeyPassword from '../common/PasswordMonkey';
 import PasswordForm from '../common/PasswordForm';
+import MonkeyPassword from '../common/PasswordMonkey';
 
 type StateProps = Pick<GlobalState, 'authIsLoading' | 'authError' | 'authHint'>;
 

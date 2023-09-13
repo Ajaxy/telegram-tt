@@ -1,79 +1,80 @@
-import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import { Api as GramJs, connection } from '../../lib/gramjs';
+
+import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import type {
-  ApiMessage, ApiMessageExtendedMediaPreview, ApiUpdate, ApiUpdateConnectionStateType, OnApiUpdate,
-  ApiStory, ApiStorySkipped,
+  ApiMessage, ApiMessageExtendedMediaPreview, ApiStory, ApiStorySkipped,
+  ApiUpdate, ApiUpdateConnectionStateType, OnApiUpdate,
 } from '../types';
 
-import localDb from './localDb';
 import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
 import { omit, pick } from '../../util/iteratees';
 import { getServerTimeOffset, setServerTimeOffset } from '../../util/serverTime';
-import {
-  addMessageToLocalDb,
-  addEntitiesToLocalDb,
-  addPhotoToLocalDb,
-  resolveMessageApiChatId,
-  serializeBytes,
-  log,
-  swapLocalInvoiceMedia,
-  isChatFolder,
-  addStoryToLocalDb,
-} from './helpers';
-import { scheduleMutedTopicUpdate, scheduleMutedChatUpdate } from './scheduleUnmute';
-import {
-  buildApiMessage,
-  buildApiMessageFromShort,
-  buildApiMessageFromShortChat,
-  buildApiMessageFromNotification,
-  buildMessageDraft,
-} from './apiBuilders/messages';
-import {
-  buildApiReaction,
-  buildMessageReactions,
-} from './apiBuilders/reactions';
-import {
-  buildChatMember,
-  buildChatMembers,
-  buildChatTypingStatus,
-  buildAvatarHash,
-  buildApiChatFromPreview,
-  buildApiChatFolder,
-  buildApiChatSettings,
-} from './apiBuilders/chats';
-import {
-  buildApiUser,
-  buildApiUserEmojiStatus,
-  buildApiUserStatus,
-} from './apiBuilders/users';
-import { omitVirtualClassFields } from './apiBuilders/helpers';
-import {
-  buildApiNotifyException,
-  buildApiNotifyExceptionTopic,
-  buildPrivacyKey,
-} from './apiBuilders/misc';
-import {
-  buildApiMessageExtendedMediaPreview,
-  buildMessageMediaContent,
-  buildPoll,
-  buildPollResults,
-} from './apiBuilders/messageContent';
-import { buildApiStealthMode, buildApiStory } from './apiBuilders/stories';
-import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from './apiBuilders/common';
+import { buildApiBotMenuButton } from './apiBuilders/bots';
 import {
   buildApiGroupCall,
   buildApiGroupCallParticipant,
   buildPhoneCall,
   getGroupCallId,
 } from './apiBuilders/calls';
-import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
-import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
-import { buildApiBotMenuButton } from './apiBuilders/bots';
 import {
+  buildApiChatFolder,
+  buildApiChatFromPreview,
+  buildApiChatSettings,
+  buildAvatarHash,
+  buildChatMember,
+  buildChatMembers,
+  buildChatTypingStatus,
+} from './apiBuilders/chats';
+import { buildApiPhoto, buildApiUsernames, buildPrivacyRules } from './apiBuilders/common';
+import { omitVirtualClassFields } from './apiBuilders/helpers';
+import {
+  buildApiMessageExtendedMediaPreview,
+  buildMessageMediaContent,
+  buildPoll,
+  buildPollResults,
+} from './apiBuilders/messageContent';
+import {
+  buildApiMessage,
+  buildApiMessageFromNotification,
+  buildApiMessageFromShort,
+  buildApiMessageFromShortChat,
+  buildMessageDraft,
+} from './apiBuilders/messages';
+import {
+  buildApiNotifyException,
+  buildApiNotifyExceptionTopic,
+  buildPrivacyKey,
+} from './apiBuilders/misc';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './apiBuilders/peers';
+import {
+  buildApiReaction,
+  buildMessageReactions,
+} from './apiBuilders/reactions';
+import { buildApiStealthMode, buildApiStory } from './apiBuilders/stories';
+import { buildApiEmojiInteraction, buildStickerSet } from './apiBuilders/symbols';
+import {
+  buildApiUser,
+  buildApiUserEmojiStatus,
+  buildApiUserStatus,
+} from './apiBuilders/users';
+import {
+  buildChatPhotoForLocalDb,
   buildMessageFromUpdate,
   isMessageWithMedia,
-  buildChatPhotoForLocalDb,
 } from './gramjsBuilders';
+import {
+  addEntitiesToLocalDb,
+  addMessageToLocalDb,
+  addPhotoToLocalDb,
+  addStoryToLocalDb,
+  isChatFolder,
+  log,
+  resolveMessageApiChatId,
+  serializeBytes,
+  swapLocalInvoiceMedia,
+} from './helpers';
+import localDb from './localDb';
+import { scheduleMutedChatUpdate, scheduleMutedTopicUpdate } from './scheduleUnmute';
 
 export type Update = (
   (GramJs.TypeUpdate | GramJs.TypeUpdates) & { _entities?: (GramJs.TypeUser | GramJs.TypeChat)[] }

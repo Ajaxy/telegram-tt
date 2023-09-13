@@ -1,16 +1,18 @@
-import type { GroupCallConnectionState } from '../../../lib/secret-sauce';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import type { GroupCallConnectionState } from '../../../lib/secret-sauce';
+
+import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
 import { vibrateShort } from '../../../util/vibrate';
-import usePrevious from '../../../hooks/usePrevious';
-import { selectActiveGroupCall, selectGroupCallParticipant } from '../../../global/selectors/calls';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+
 import useLang from '../../../hooks/useLang';
+import usePrevious from '../../../hooks/usePrevious';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
 import Button from '../../ui/Button';

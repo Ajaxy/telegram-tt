@@ -1,9 +1,9 @@
 import type { RefObject } from 'react';
-import { useState, useEffect, useLayoutEffect } from '../lib/teact/teact';
-import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { useEffect, useLayoutEffect, useState } from '../lib/teact/teact';
 
-import useLastCallback from './useLastCallback';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import useFlag from './useFlag';
+import useLastCallback from './useLastCallback';
 
 export function useResize(
   elementRef: RefObject<HTMLElement>,

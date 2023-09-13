@@ -1,8 +1,8 @@
 import { useEffect, useRef } from '../lib/teact/teact';
-import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../util/windowEnvironment';
 import fastBlur from '../lib/fastBlur';
+import { requestMeasure, requestMutation } from '../lib/fasterdom/fasterdom';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../util/windowEnvironment';
 import useSyncEffect from './useSyncEffect';
 
 const RADIUS = 2;

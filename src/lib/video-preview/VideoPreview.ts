@@ -1,9 +1,9 @@
-import { requestMutation } from '../fasterdom/fasterdom';
-
-import { callApi } from '../../api/gramjs';
 import { ApiMediaFormat } from '../../api/types';
-import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
+
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
+import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
+import { callApi } from '../../api/gramjs';
+import { requestMutation } from '../fasterdom/fasterdom';
 
 const IS_MOBILE = IS_ANDROID || IS_IOS;
 const PREVIEW_SIZE_RATIO = (IS_ANDROID || IS_IOS) ? 0.3 : 0.25;

@@ -1,5 +1,6 @@
-import type { MP4ArrayBuffer, MP4VideoTrack, MP4Info } from 'mp4box';
+import type { MP4ArrayBuffer, MP4Info, MP4VideoTrack } from 'mp4box';
 import MP4Box, { DataStream } from 'mp4box';
+
 import { requestPart } from './requestPart';
 
 const META_PART_SIZE = 128 * 1024;

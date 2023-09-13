@@ -1,30 +1,32 @@
 import type BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
+  ApiBotCommand,
   ApiChat,
   ApiChatAdminRights,
   ApiChatBannedRights,
-  ApiBotCommand,
   ApiChatFolder,
-  ApiChatMember,
-  ApiRestrictionReason,
-  ApiExportedInvite,
   ApiChatInviteImporter,
-  ApiChatSettings,
-  ApiTopic,
-  ApiSendAsPeerId,
-  ApiChatReactions,
-  ApiChatlistInvite,
   ApiChatlistExportedInvite,
+  ApiChatlistInvite,
+  ApiChatMember,
+  ApiChatReactions,
+  ApiChatSettings,
+  ApiExportedInvite,
+  ApiRestrictionReason,
+  ApiSendAsPeerId,
+  ApiTopic,
 } from '../../types';
+
 import { pick, pickTruthy } from '../../../util/iteratees';
+import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
+import { buildApiUsernames } from './common';
+import { omitVirtualClassFields } from './helpers';
 import {
   buildApiPeerId, getApiChatIdFromMtpPeer, isPeerChat, isPeerUser,
 } from './peers';
-import { omitVirtualClassFields } from './helpers';
-import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { buildApiReaction } from './reactions';
-import { buildApiUsernames } from './common';
 
 type PeerEntityApiChatFields = Omit<ApiChat, (
   'id' | 'type' | 'title' |

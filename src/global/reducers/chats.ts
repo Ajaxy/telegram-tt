@@ -1,15 +1,15 @@
-import type { GlobalState } from '../types';
 import type {
   ApiChat, ApiChatFullInfo, ApiChatMember, ApiPhoto, ApiTopic,
 } from '../../api/types';
+import type { GlobalState } from '../types';
 
 import { ARCHIVED_FOLDER_ID } from '../../config';
+import { areDeepEqual } from '../../util/areDeepEqual';
 import {
   areSortedArraysEqual, buildCollectionByKey, omit, unique,
 } from '../../util/iteratees';
 import { selectChat, selectChatFullInfo } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
-import { areDeepEqual } from '../../util/areDeepEqual';
 
 export function replaceChatListIds<T extends GlobalState>(
   global: T,

@@ -4,17 +4,30 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { MessageListType, TabState } from '../../../global/types';
 import type {
-  ApiAvailableReaction, ApiStickerSetInfo, ApiMessage, ApiStickerSet, ApiChatReactions, ApiReaction, ApiThreadInfo,
+  ApiAvailableReaction, ApiChatReactions, ApiMessage, ApiReaction, ApiStickerSet, ApiStickerSetInfo, ApiThreadInfo,
 } from '../../../api/types';
+import type { MessageListType, TabState } from '../../../global/types';
 import type { IAlbum, IAnchorPosition } from '../../../types';
 
+import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
+import {
+  areReactionsEmpty,
+  getChatMessageLink,
+  getMessageVideo,
+  isActionMessage,
+  isChatChannel,
+  isChatGroup,
+  isMessageLocal,
+  isOwnMessage,
+  isUserId,
+} from '../../../global/helpers';
 import {
   selectActiveDownloads,
   selectAllowedMessageActions,
   selectCanPlayAnimatedEmojis,
   selectCanScheduleUntilOnline,
+  selectCanTranslateMessage,
   selectChat,
   selectChatFullInfo,
   selectCurrentMessageList,
@@ -22,39 +35,26 @@ import {
   selectIsMessageProtected,
   selectIsPremiumPurchaseBlocked,
   selectIsReactionPickerOpen,
-  selectCanTranslateMessage,
   selectMessageCustomEmojiSets,
   selectMessageTranslations,
+  selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
   selectStickerSet,
-  selectRequestedChatTranslationLanguage,
 } from '../../../global/selectors';
-import {
-  isActionMessage,
-  isChatChannel,
-  isChatGroup,
-  isOwnMessage,
-  areReactionsEmpty,
-  isUserId,
-  isMessageLocal,
-  getMessageVideo,
-  getChatMessageLink,
-} from '../../../global/helpers';
-import { PREVIEW_AVATAR_COUNT, SERVICE_NOTIFICATIONS_USER_ID } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { copyTextToClipboard } from '../../../util/clipboard';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useSchedule from '../../../hooks/useSchedule';
+import useShowTransition from '../../../hooks/useShowTransition';
 
 import DeleteMessageModal from '../../common/DeleteMessageModal';
-import ReportModal from '../../common/ReportModal';
 import PinMessageModal from '../../common/PinMessageModal';
-import MessageContextMenu from './MessageContextMenu';
+import ReportModal from '../../common/ReportModal';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import MessageContextMenu from './MessageContextMenu';
 
 export type OwnProps = {
   isOpen: boolean;

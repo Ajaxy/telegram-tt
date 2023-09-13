@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useMemo, useEffect,
+  memo, useEffect,
+  useMemo,
 } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { GlobalState } from '../../../global/types';
 import type { ApiAttachMenuPeerType } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
 import type { ISettings } from '../../../types';
 
 import {
@@ -12,19 +13,19 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { validateFiles } from '../../../util/files';
 import { getDebugLogs } from '../../../util/debugConsole';
+import { validateFiles } from '../../../util/files';
+import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
 
-import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
+import ResponsiveHoverButton from '../../ui/ResponsiveHoverButton';
 import AttachBotItem from './AttachBotItem';
 
 import './AttachMenu.scss';

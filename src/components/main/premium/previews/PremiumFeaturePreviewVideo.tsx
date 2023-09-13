@@ -3,15 +3,17 @@ import React, { memo } from '../../../../lib/teact/teact';
 
 import type { ApiThumbnail } from '../../../../api/types';
 
-import useMedia from '../../../../hooks/useMedia';
 import buildClassName from '../../../../util/buildClassName';
+
 import useCanvasBlur from '../../../../hooks/useCanvasBlur';
+import useMedia from '../../../../hooks/useMedia';
 import useMediaTransition from '../../../../hooks/useMediaTransition';
 
-import DeviceFrame from '../../../../assets/premium/DeviceFrame.svg';
 import OptimizedVideo from '../../../ui/OptimizedVideo';
 
 import styles from './PremiumFeaturePreviewVideo.module.scss';
+
+import DeviceFrame from '../../../../assets/premium/DeviceFrame.svg';
 
 type OwnProps = {
   videoId: string;

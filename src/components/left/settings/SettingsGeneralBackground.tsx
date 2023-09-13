@@ -1,24 +1,25 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useCallback, useRef,
+  memo, useCallback, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiWallpaper } from '../../../api/types';
 import type { ThemeKey } from '../../../types';
 import { SettingsScreens, UPLOADING_WALLPAPER_SLUG } from '../../../types';
-import type { ApiWallpaper } from '../../../api/types';
 
 import { DARK_THEME_PATTERN_COLOR, DEFAULT_PATTERN_COLOR } from '../../../config';
-import { throttle } from '../../../util/schedulers';
-import { validateFiles } from '../../../util/files';
-import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
 import { selectTheme } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
+import { getAverageColor, getPatternColor, rgb2hex } from '../../../util/colors';
+import { validateFiles } from '../../../util/files';
+import { throttle } from '../../../util/schedulers';
+import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 
-import ListItem from '../../ui/ListItem';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import Checkbox from '../../ui/Checkbox';
+import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
 import WallpaperTile from './WallpaperTile';
 

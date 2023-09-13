@@ -1,41 +1,41 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useState } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import { SettingsScreens } from '../../../types';
 import type { FolderEditDispatch, FoldersState } from '../../../hooks/reducers/useFoldersReducer';
+import { SettingsScreens } from '../../../types';
 
-import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 import { selectTabState } from '../../../global/selectors';
+import { LAYERS_ANIMATION_NAME } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useTwoFaReducer from '../../../hooks/reducers/useTwoFaReducer';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import Transition from '../../ui/Transition';
-import SettingsHeader from './SettingsHeader';
-import SettingsMain from './SettingsMain';
-import SettingsEditProfile from './SettingsEditProfile';
-import SettingsDataStorage from './SettingsDataStorage';
 import SettingsFolders from './folders/SettingsFolders';
+import SettingsPasscode from './passcode/SettingsPasscode';
+import SettingsActiveSessions from './SettingsActiveSessions';
+import SettingsActiveWebsites from './SettingsActiveWebsites';
+import SettingsCustomEmoji from './SettingsCustomEmoji';
+import SettingsDataStorage from './SettingsDataStorage';
+import SettingsDoNotTranslate from './SettingsDoNotTranslate';
+import SettingsEditProfile from './SettingsEditProfile';
+import SettingsExperimental from './SettingsExperimental';
 import SettingsGeneral from './SettingsGeneral';
 import SettingsGeneralBackground from './SettingsGeneralBackground';
 import SettingsGeneralBackgroundColor from './SettingsGeneralBackgroundColor';
-import SettingsNotifications from './SettingsNotifications';
-import SettingsPrivacy from './SettingsPrivacy';
+import SettingsHeader from './SettingsHeader';
 import SettingsLanguage from './SettingsLanguage';
-import SettingsPrivacyVisibility from './SettingsPrivacyVisibility';
-import SettingsActiveSessions from './SettingsActiveSessions';
-import SettingsActiveWebsites from './SettingsActiveWebsites';
+import SettingsMain from './SettingsMain';
+import SettingsNotifications from './SettingsNotifications';
+import SettingsPerformance from './SettingsPerformance';
+import SettingsPrivacy from './SettingsPrivacy';
 import SettingsPrivacyBlockedUsers from './SettingsPrivacyBlockedUsers';
-import SettingsTwoFa from './twoFa/SettingsTwoFa';
+import SettingsPrivacyVisibility from './SettingsPrivacyVisibility';
 import SettingsPrivacyVisibilityExceptionList from './SettingsPrivacyVisibilityExceptionList';
 import SettingsQuickReaction from './SettingsQuickReaction';
-import SettingsPasscode from './passcode/SettingsPasscode';
 import SettingsStickers from './SettingsStickers';
-import SettingsCustomEmoji from './SettingsCustomEmoji';
-import SettingsDoNotTranslate from './SettingsDoNotTranslate';
-import SettingsExperimental from './SettingsExperimental';
-import SettingsPerformance from './SettingsPerformance';
+import SettingsTwoFa from './twoFa/SettingsTwoFa';
 
 import './Settings.scss';
 

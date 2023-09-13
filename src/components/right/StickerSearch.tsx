@@ -4,11 +4,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import { throttle } from '../../util/schedulers';
 import { selectCurrentStickerSearch, selectTabState } from '../../global/selectors';
+import { throttle } from '../../util/schedulers';
+
+import useHistoryBack from '../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import useHistoryBack from '../../hooks/useHistoryBack';
 
 import Loading from '../ui/Loading';
 import StickerSetResult from './StickerSetResult';

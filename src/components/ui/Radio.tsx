@@ -3,6 +3,7 @@ import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import Spinner from './Spinner';

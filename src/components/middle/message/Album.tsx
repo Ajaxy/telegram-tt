@@ -1,22 +1,22 @@
 import type { FC } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { GlobalState } from '../../../global/types';
 import type { ApiMessage } from '../../../api/types';
+import type { GlobalState } from '../../../global/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { IAlbum, ISettings } from '../../../types';
 import type { IAlbumLayout } from './helpers/calculateAlbumLayout';
-import { AlbumRectPart } from './helpers/calculateAlbumLayout';
 
 import { getMessageContent, getMessageHtmlId, getMessageOriginalId } from '../../../global/helpers';
-import { getActions, getGlobal, withGlobal } from '../../../global';
-import withSelectControl from './hocs/withSelectControl';
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import {
   selectActiveDownloads,
   selectCanAutoLoadMedia,
   selectCanAutoPlayMedia,
   selectTheme,
 } from '../../../global/selectors';
+import { AlbumRectPart } from './helpers/calculateAlbumLayout';
+import withSelectControl from './hocs/withSelectControl';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 

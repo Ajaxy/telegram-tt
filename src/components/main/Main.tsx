@@ -1,12 +1,13 @@
-import React, {
-  useEffect, memo, useState, useRef, useLayoutEffect,
-} from '../../lib/teact/teact';
-import { addExtraClass } from '../../lib/teact/teact-dom';
-import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
-import { getActions, getGlobal, withGlobal } from '../../global';
+import '../../global/actions/all';
 
 import type { FC } from '../../lib/teact/teact';
-import type { LangCode } from '../../types';
+import React, {
+  memo, useEffect, useLayoutEffect,
+  useRef, useState,
+} from '../../lib/teact/teact';
+import { addExtraClass } from '../../lib/teact/teact-dom';
+import { getActions, getGlobal, withGlobal } from '../../global';
+
 import type {
   ApiAttachBot,
   ApiChat,
@@ -16,87 +17,88 @@ import type {
   ApiUser,
 } from '../../api/types';
 import type { ApiLimitTypeWithModal, TabState } from '../../global/types';
+import type { LangCode } from '../../types';
 import { ElectronEvent } from '../../types/electron';
 
-import '../../global/actions/all';
 import {
   BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, IS_ELECTRON,
 } from '../../config';
-import { IS_ANDROID } from '../../util/windowEnvironment';
+import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
+import { getUserFullName } from '../../global/helpers';
 import {
+  selectCanAnimateInterface,
+  selectChatFolder,
   selectChatMessage,
-  selectTabState,
   selectCurrentMessageList,
   selectIsCurrentUserPremium,
   selectIsForwardModalOpen,
   selectIsMediaViewerOpen,
+  selectIsReactionPickerOpen,
   selectIsRightColumnShown,
   selectIsServiceChatReady,
-  selectUser,
-  selectIsReactionPickerOpen,
-  selectPerformanceSettingsValue,
-  selectCanAnimateInterface,
-  selectChatFolder,
   selectIsStoryViewerOpen,
+  selectPerformanceSettingsValue,
+  selectTabState,
+  selectUser,
 } from '../../global/selectors';
-import { getUserFullName } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import { processDeepLink } from '../../util/deeplink';
-import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
+import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
+import { IS_ANDROID } from '../../util/windowEnvironment';
 
-import useLastCallback from '../../hooks/useLastCallback';
+import useAppLayout from '../../hooks/useAppLayout';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
-import useSyncEffect from '../../hooks/useSyncEffect';
-import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useForceUpdate from '../../hooks/useForceUpdate';
-import useShowTransition from '../../hooks/useShowTransition';
+import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
-import { useFullscreenStatus } from '../../hooks/useFullscreen';
-import useAppLayout from '../../hooks/useAppLayout';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
+import useShowTransition from '../../hooks/useShowTransition';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useTimeout from '../../hooks/useTimeout';
 
+import ActiveCallHeader from '../calls/ActiveCallHeader.async';
+import GroupCall from '../calls/group/GroupCall.async';
+import PhoneCall from '../calls/phone/PhoneCall.async';
+import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
+import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
-import MiddleColumn from '../middle/MiddleColumn';
-import RightColumn from '../right/RightColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
-import DownloadManager from './DownloadManager';
-import GameModal from './GameModal';
-import Notifications from './Notifications.async';
-import Dialogs from './Dialogs.async';
-import ForwardRecipientPicker from './ForwardRecipientPicker.async';
-import SafeLinkModal from './SafeLinkModal.async';
-import HistoryCalendar from './HistoryCalendar.async';
-import GroupCall from '../calls/group/GroupCall.async';
-import ActiveCallHeader from '../calls/ActiveCallHeader.async';
-import PhoneCall from '../calls/phone/PhoneCall.async';
+import ReactionPicker from '../middle/message/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
-import NewContactModal from './NewContactModal.async';
-import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
-import WebAppModal from '../modals/webApp/WebAppModal.async';
-import BotTrustModal from './BotTrustModal.async';
+import MiddleColumn from '../middle/MiddleColumn';
 import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
-import ConfettiContainer from './ConfettiContainer';
+import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
+import MapModal from '../modals/map/MapModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
-import PremiumMainModal from './premium/PremiumMainModal.async';
+import WebAppModal from '../modals/webApp/WebAppModal.async';
 import PaymentModal from '../payment/PaymentModal.async';
 import ReceiptModal from '../payment/ReceiptModal.async';
-import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
-import DeleteFolderDialog from './DeleteFolderDialog.async';
-import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
-import DraftRecipientPicker from './DraftRecipientPicker.async';
-import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
-import ReactionPicker from '../middle/message/ReactionPicker.async';
-import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
+import RightColumn from '../right/RightColumn';
 import StoryViewer from '../story/StoryViewer.async';
-import MapModal from '../modals/map/MapModal.async';
+import AttachBotRecipientPicker from './AttachBotRecipientPicker.async';
+import BotTrustModal from './BotTrustModal.async';
+import ConfettiContainer from './ConfettiContainer';
+import DeleteFolderDialog from './DeleteFolderDialog.async';
+import Dialogs from './Dialogs.async';
+import DownloadManager from './DownloadManager';
+import DraftRecipientPicker from './DraftRecipientPicker.async';
+import ForwardRecipientPicker from './ForwardRecipientPicker.async';
+import GameModal from './GameModal';
+import HistoryCalendar from './HistoryCalendar.async';
+import NewContactModal from './NewContactModal.async';
+import Notifications from './Notifications.async';
+import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
+import PremiumMainModal from './premium/PremiumMainModal.async';
+import SafeLinkModal from './SafeLinkModal.async';
 
 import './Main.scss';
 

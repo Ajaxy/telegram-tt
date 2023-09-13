@@ -1,39 +1,39 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachBot, ApiChat, ApiUser } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 import type { ThemeKey } from '../../../types';
 import type { PopupOptions, WebAppInboundEvent } from '../../../types/webapp';
 
-import { callApi } from '../../../api/gramjs';
 import { TME_LINK_PREFIX } from '../../../config';
+import { convertToApiChatType } from '../../../global/helpers';
 import {
   selectCurrentChat, selectTabState, selectTheme, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
-import { convertToApiChatType } from '../../../global/helpers';
+import { callApi } from '../../../api/gramjs';
 
+import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
 import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
-import useSyncEffect from '../../../hooks/useSyncEffect';
-import useWebAppFrame from './hooks/useWebAppFrame';
-import usePrevious from '../../../hooks/usePrevious';
-import useFlag from '../../../hooks/useFlag';
-import useAppLayout from '../../../hooks/useAppLayout';
 import useLastCallback from '../../../hooks/useLastCallback';
+import usePrevious from '../../../hooks/usePrevious';
+import useSyncEffect from '../../../hooks/useSyncEffect';
 import usePopupLimit from './hooks/usePopupLimit';
+import useWebAppFrame from './hooks/useWebAppFrame';
 
-import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
+import ConfirmDialog from '../../ui/ConfirmDialog';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
+import Modal from '../../ui/Modal';
 import Spinner from '../../ui/Spinner';
-import ConfirmDialog from '../../ui/ConfirmDialog';
 
 import styles from './WebAppModal.module.scss';
 

@@ -1,7 +1,7 @@
 import type { ApiMessage } from '../../../api/types';
-import { ApiMessageEntityTypes } from '../../../api/types';
-import type { TextPart } from '../../../types';
 import type { LangFn } from '../../../hooks/useLang';
+import type { TextPart } from '../../../types';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import {
   getMessageKey,
@@ -11,9 +11,9 @@ import {
   getMessageText,
   TRUNCATED_SUMMARY_LENGTH,
 } from '../../../global/helpers';
+import trimText from '../../../util/trimText';
 import renderText from './renderText';
 import { renderTextWithEntities } from './renderTextWithEntities';
-import trimText from '../../../util/trimText';
 
 export function renderMessageText({
   message,

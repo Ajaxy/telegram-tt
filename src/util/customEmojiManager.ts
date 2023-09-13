@@ -1,21 +1,21 @@
 import { addCallback } from '../lib/teact/teactn';
-import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { getGlobal } from '../global';
 
-import { ApiMediaFormat } from '../api/types';
 import type { ApiSticker } from '../api/types';
 import type { GlobalState } from '../global/types';
+import { ApiMediaFormat } from '../api/types';
 
-import { selectCanPlayAnimatedEmojis } from '../global/selectors';
+import { requestMutation } from '../lib/fasterdom/fasterdom';
 import { getStickerPreviewHash } from '../global/helpers';
+import { selectCanPlayAnimatedEmojis } from '../global/selectors';
+import { createCallbackManager } from './callbacks';
+import generateUniqueId from './generateUniqueId';
 import * as mediaLoader from './mediaLoader';
 import { throttle } from './schedulers';
-import generateUniqueId from './generateUniqueId';
 import { IS_WEBM_SUPPORTED } from './windowEnvironment';
-import { createCallbackManager } from './callbacks';
 
-import placeholderSrc from '../assets/square.svg';
 import blankSrc from '../assets/blank.png';
+import placeholderSrc from '../assets/square.svg';
 
 type CustomEmojiLoadCallback = (customEmojis: GlobalState['customEmojis']) => void;
 type CustomEmojiInputRenderCallback = (emojiId: string) => void;

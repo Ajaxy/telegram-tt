@@ -1,10 +1,11 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiPaymentCredentials } from '../../api/types';
-import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+
 import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';

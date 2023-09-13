@@ -1,4 +1,5 @@
 import type { ApiAttachment } from '../../../../api/types';
+
 import {
   GIF_MIME_TYPE,
   SUPPORTED_AUDIO_CONTENT_TYPES,
@@ -7,9 +8,9 @@ import {
 } from '../../../../config';
 import { parseAudioMetadata } from '../../../../util/audio';
 import {
+  createPosterForVideo,
   preloadImage,
   preloadVideo,
-  createPosterForVideo,
 } from '../../../../util/files';
 import { scaleImage } from '../../../../util/imageResize';
 

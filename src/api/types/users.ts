@@ -1,6 +1,6 @@
-import type { ApiDocument, ApiPhoto } from './messages';
-import type { ApiBotInfo } from './bots';
 import type { API_CHAT_TYPES } from '../../config';
+import type { ApiBotInfo } from './bots';
+import type { ApiDocument, ApiPhoto } from './messages';
 
 export interface ApiUser {
   id: string;

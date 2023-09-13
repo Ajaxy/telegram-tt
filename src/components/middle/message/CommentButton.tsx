@@ -7,14 +7,14 @@ import type {
 } from '../../../api/types';
 
 import { isUserId } from '../../../global/helpers';
-import { formatIntegerCompact } from '../../../util/textFormat';
 import buildClassName from '../../../util/buildClassName';
+import { formatIntegerCompact } from '../../../util/textFormat';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Avatar from '../../common/Avatar';
 import AnimatedCounter from '../../common/AnimatedCounter';
+import Avatar from '../../common/Avatar';
 
 import './CommentButton.scss';
 

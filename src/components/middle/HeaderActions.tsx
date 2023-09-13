@@ -1,16 +1,15 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { MessageListType } from '../../global/types';
-import { MAIN_THREAD_ID } from '../../api/types';
 import type { IAnchorPosition } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens } from '../../types';
 
-import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
+import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
   isChatBasicGroup, isChatChannel, isChatSuperGroup, isUserId,
 } from '../../global/helpers';
@@ -30,16 +29,17 @@ import {
   selectTranslationLanguage,
   selectUserFullInfo,
 } from '../../global/selectors';
+import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 import { useHotkeys } from '../../hooks/useHotkeys';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Button from '../ui/Button';
-import HeaderMenuContainer from './HeaderMenuContainer.async';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import MenuSeparator from '../ui/MenuSeparator';
+import HeaderMenuContainer from './HeaderMenuContainer.async';
 
 interface OwnProps {
   chatId: string;

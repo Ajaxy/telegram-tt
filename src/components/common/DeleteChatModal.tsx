@@ -1,26 +1,27 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
 
-import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import {
-  isUserId,
-  isUserBot,
-  getUserFirstOrLastName,
-  getPrivateChatUserId,
-  isChatBasicGroup,
-  isChatSuperGroup,
-  isChatChannel,
   getChatTitle,
+  getPrivateChatUserId,
+  getUserFirstOrLastName,
+  isChatBasicGroup,
+  isChatChannel,
+  isChatSuperGroup,
+  isUserBot,
+  isUserId,
 } from '../../global/helpers';
-import useLang from '../../hooks/useLang';
+import { selectIsChatWithSelf, selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
 
-import Avatar from './Avatar';
-import Modal from '../ui/Modal';
+import useLang from '../../hooks/useLang';
+
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
+import Avatar from './Avatar';
 
 import './DeleteChatModal.scss';
 

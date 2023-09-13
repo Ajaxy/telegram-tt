@@ -1,21 +1,22 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useCallback, useMemo, memo } from '../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiUser, ApiUserStatus } from '../../../api/types';
 import { StoryViewerOrigin } from '../../../types';
 
 import { filterUsersByName, sortUserIds } from '../../../global/helpers';
-import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
+
 import useAppLayout from '../../../hooks/useAppLayout';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
+import useLang from '../../../hooks/useLang';
 
 import PrivateChatInfo from '../../common/PrivateChatInfo';
+import FloatingActionButton from '../../ui/FloatingActionButton';
 import InfiniteScroll from '../../ui/InfiniteScroll';
 import ListItem from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
-import FloatingActionButton from '../../ui/FloatingActionButton';
 
 export type OwnProps = {
   filter: string;

@@ -1,18 +1,19 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useCallback, memo, useRef, useEffect,
+  memo, useCallback, useEffect,
+  useRef,
 } from '../../lib/teact/teact';
 
 import type { ApiCountry } from '../../api/types';
+import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
-import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import useLang from '../../hooks/useLang';
 
-import InputText from '../ui/InputText';
 import Checkbox from '../ui/Checkbox';
+import InputText from '../ui/InputText';
 import Select from '../ui/Select';
-import ExpiryInput from './ExpiryInput';
 import CardInput from './CardInput';
+import ExpiryInput from './ExpiryInput';
 
 import './PaymentInfo.scss';
 

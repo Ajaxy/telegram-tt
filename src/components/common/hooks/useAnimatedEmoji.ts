@@ -4,9 +4,8 @@ import { getActions } from '../../../global';
 import type { ActiveEmojiInteraction } from '../../../global/types';
 
 import { IS_ELECTRON } from '../../../config';
-
-import safePlay from '../../../util/safePlay';
 import buildStyle from '../../../util/buildStyle';
+import safePlay from '../../../util/safePlay';
 import { REM } from '../helpers/mediaDimensions';
 
 import useLastCallback from '../../../hooks/useLastCallback';

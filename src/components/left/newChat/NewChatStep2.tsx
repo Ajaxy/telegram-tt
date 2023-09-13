@@ -1,22 +1,24 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useState, useCallback, useEffect, memo,
+  memo,
+  useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { ChatCreationProgress } from '../../../types';
 
 import { selectTabState } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
-import InputText from '../../ui/InputText';
-import FloatingActionButton from '../../ui/FloatingActionButton';
-import Spinner from '../../ui/Spinner';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
+import PrivateChatInfo from '../../common/PrivateChatInfo';
 import AvatarEditable from '../../ui/AvatarEditable';
 import Button from '../../ui/Button';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import PrivateChatInfo from '../../common/PrivateChatInfo';
+import Spinner from '../../ui/Spinner';
 
 export type OwnProps = {
   isChannel?: boolean;

@@ -1,11 +1,11 @@
-import { pause } from '../util/schedulers';
-import generateUniqueId from '../util/generateUniqueId';
 import {
   DEBUG,
   MEDIA_CACHE_MAX_BYTES,
   MEDIA_PROGRESSIVE_CACHE_DISABLED,
   MEDIA_PROGRESSIVE_CACHE_NAME,
 } from '../config';
+import generateUniqueId from '../util/generateUniqueId';
+import { pause } from '../util/schedulers';
 
 declare const self: ServiceWorkerGlobalScope;
 

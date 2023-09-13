@@ -1,6 +1,6 @@
 import { DEBUG_ALERT_MSG } from '../config';
-import { throttle } from './schedulers';
 import { getAllMultitabTokens } from './establishMultitabRole';
+import { throttle } from './schedulers';
 import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
 // eslint-disable-next-line prefer-destructuring

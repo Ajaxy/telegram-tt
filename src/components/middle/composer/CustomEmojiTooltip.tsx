@@ -1,7 +1,7 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 import type { GlobalActions } from '../../../global';
 
@@ -10,14 +10,14 @@ import { selectIsChatWithSelf, selectIsCurrentUserPremium } from '../../../globa
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useShowTransition from '../../../hooks/useShowTransition';
-import usePrevious from '../../../hooks/usePrevious';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
 
-import Loading from '../../ui/Loading';
 import StickerButton from '../../common/StickerButton';
+import Loading from '../../ui/Loading';
 
 import styles from './CustomEmojiTooltip.module.scss';
 

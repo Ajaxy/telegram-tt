@@ -1,5 +1,6 @@
 import type {
-  CancellableCallback, OriginMessageEvent, OriginMessageData, WorkerMessageData, ApiUpdate,
+  ApiUpdate,
+  CancellableCallback, OriginMessageData, OriginMessageEvent, WorkerMessageData,
 } from './PostMessageConnector';
 
 import { DEBUG } from '../config';

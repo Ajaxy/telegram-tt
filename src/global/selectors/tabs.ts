@@ -1,6 +1,8 @@
 import type {
-  GlobalState, TabState, TabArgs,
+  GlobalState, TabArgs,
+  TabState,
 } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 
 export function selectTabState<T extends GlobalState>(

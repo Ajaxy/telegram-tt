@@ -1,22 +1,23 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser } from '../../selectors/calls';
-import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import type { ApiPhoneCall } from '../../../api/types';
 import type { ApiCallProtocol } from '../../../lib/secret-sauce';
+import type { ActionReturnType } from '../../types';
+
 import {
   handleUpdateGroupCallConnection,
   handleUpdateGroupCallParticipants,
   joinPhoneCall, processSignalingMessage,
 } from '../../../lib/secret-sauce';
-import type { ApiPhoneCall } from '../../../api/types';
-import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
-import { callApi } from '../../../api/gramjs';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import { EMOJI_DATA, EMOJI_OFFSETS } from '../../../util/phoneCallEmojiConstants';
-import type { ActionReturnType } from '../../types';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { addUsers } from '../../reducers';
+import { updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
+import { updateTabState } from '../../reducers/tabs';
+import { selectActiveGroupCall, selectGroupCallParticipant, selectPhoneCallUser } from '../../selectors/calls';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   const { activeGroupCallId } = global.groupCalls;

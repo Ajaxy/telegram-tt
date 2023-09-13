@@ -1,12 +1,12 @@
-import type { GlobalState, TabArgs } from '../types';
 import type { ApiMessageSearchType } from '../../api/types';
-
-import { areSortedArraysEqual, unique } from '../../util/iteratees';
 import type { SharedMediaType } from '../../types';
-import { buildChatThreadKey } from '../helpers';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { areSortedArraysEqual, unique } from '../../util/iteratees';
+import { buildChatThreadKey } from '../helpers';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 interface TextSearchParams {
   isActive: boolean;

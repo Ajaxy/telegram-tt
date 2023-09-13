@@ -1,30 +1,31 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useLayoutEffect,
+  memo, useEffect, useLayoutEffect,
+  useMemo,
 } from '../../lib/teact/teact';
 
-import type { BufferedRange } from '../../hooks/useBuffering';
 import type { ApiDimensions } from '../../api/types';
-
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useAppLayout from '../../hooks/useAppLayout';
-import useDerivedState from '../../hooks/useDerivedState';
-import useSignal from '../../hooks/useSignal';
-import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
-import useControlsSignal from './hooks/useControlsSignal';
+import type { BufferedRange } from '../../hooks/useBuffering';
 
 import buildClassName from '../../util/buildClassName';
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { formatMediaDuration } from '../../util/dateFormat';
 import { formatFileSize } from '../../util/textFormat';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 
-import SeekLine from './SeekLine';
+import useAppLayout from '../../hooks/useAppLayout';
+import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
+import useDerivedState from '../../hooks/useDerivedState';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useSignal from '../../hooks/useSignal';
+import useControlsSignal from './hooks/useControlsSignal';
+
 import Button from '../ui/Button';
-import RangeSlider from '../ui/RangeSlider';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import RangeSlider from '../ui/RangeSlider';
+import SeekLine from './SeekLine';
 
 import './VideoPlayerControls.scss';
 

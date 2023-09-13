@@ -1,6 +1,5 @@
-import React from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
+import React from '../../../lib/teact/teact';
 
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';

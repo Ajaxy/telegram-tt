@@ -1,10 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useState } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
+
 import type { GlobalState } from '../../global/types';
 
-import SubTest from './SubTest';
 import ErrorTest from './ErrorTest';
+import SubTest from './SubTest';
 
 type StateProps = Pick<GlobalState, 'authState'> & {
   globalRand: number;

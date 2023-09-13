@@ -1,4 +1,5 @@
 import type { LangFn } from '../hooks/useLang';
+
 import EMOJI_REGEX from '../lib/twemojiRegex';
 import { fixNonStandardEmoji } from './emoji';
 import withCache from './withCache';

@@ -7,16 +7,17 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { TextPart } from '../../types';
 import type { CallbackAction } from '../../global/types';
+import type { TextPart } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import useShowTransition from '../../hooks/useShowTransition';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
-import Portal from './Portal';
+import useShowTransition from '../../hooks/useShowTransition';
+
 import Button from './Button';
+import Portal from './Portal';
 
 import './Notification.scss';
 

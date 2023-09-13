@@ -1,38 +1,37 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { callApi } from '../../../api/gramjs';
-
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import type { ApiInvoice, ApiRequestInputInvoice } from '../../../api/types';
+import type { ApiCredentials } from '../../../components/payment/PaymentModal';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import { PaymentStep } from '../../../types';
 
 import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
-import {
-  selectPaymentRequestId,
-  selectProviderPublishableKey,
-  selectStripeCredentials,
-  selectChatMessage,
-  selectChat,
-  selectPaymentFormId,
-  selectProviderPublicToken,
-  selectSmartGlocalCredentials,
-  selectPaymentInputInvoice, selectTabState,
-} from '../../selectors';
-import { getStripeError } from '../../helpers';
-import { buildQueryString } from '../../../util/requestQuery';
-import {
-  updateShippingOptions,
-  setPaymentStep,
-  setRequestInfoId,
-  setPaymentForm,
-  setStripeCardInfo,
-  setReceipt,
-  closeInvoice,
-  setSmartGlocalCardInfo, addUsers, setInvoiceInfo, updatePayment,
-} from '../../reducers';
-import { buildCollectionByKey } from '../../../util/iteratees';
-import { updateTabState } from '../../reducers/tabs';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import type { ApiCredentials } from '../../../components/payment/PaymentModal';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildQueryString } from '../../../util/requestQuery';
+import { callApi } from '../../../api/gramjs';
+import { getStripeError } from '../../helpers';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addUsers, closeInvoice,
+  setInvoiceInfo, setPaymentForm,
+  setPaymentStep,
+  setReceipt,
+  setRequestInfoId,
+  setSmartGlocalCardInfo, setStripeCardInfo,
+  updatePayment,
+  updateShippingOptions,
+} from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
+import {
+  selectChat,
+  selectChatMessage,
+  selectPaymentFormId,
+  selectPaymentInputInvoice, selectPaymentRequestId,
+  selectProviderPublicToken,
+  selectProviderPublishableKey,
+  selectSmartGlocalCredentials,
+  selectStripeCredentials,
+  selectTabState,
+} from '../../selectors';
 
 addActionHandler('validateRequestedInfo', (global, actions, payload): ActionReturnType => {
   const { requestInfo, saveInfo, tabId = getCurrentTabId() } = payload;

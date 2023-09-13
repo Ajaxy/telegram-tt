@@ -1,12 +1,11 @@
-import React, { memo, useState } from '../../../lib/teact/teact';
-
 import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useState } from '../../../lib/teact/teact';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useMouseInside from '../../../hooks/useMouseInside';
 import useLang from '../../../hooks/useLang';
+import useMouseInside from '../../../hooks/useMouseInside';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';

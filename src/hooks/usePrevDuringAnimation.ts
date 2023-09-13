@@ -1,7 +1,7 @@
 import { useRef } from '../lib/teact/teact';
 
-import usePrevious from './usePrevious';
 import useForceUpdate from './useForceUpdate';
+import usePrevious from './usePrevious';
 import useSyncEffect from './useSyncEffect';
 
 export default function usePrevDuringAnimation<T>(current: T, duration?: number) {

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from '../../lib/teact/teact';
-import { getPropertyHexColor } from '../../util/themeStyle';
 
+import { getPropertyHexColor } from '../../util/themeStyle';
 import useLastCallback from '../useLastCallback';
 import useResizeObserver from '../useResizeObserver';
 

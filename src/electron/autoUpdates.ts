@@ -1,11 +1,12 @@
-import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
+import { ipcMain } from 'electron';
 import type { UpdateInfo } from 'electron-updater';
 import { autoUpdater } from 'electron-updater';
 
-import { ElectronAction, ElectronEvent } from '../types/electron';
-import { IS_MAC_OS, forceQuit, windows } from './utils';
 import type { WindowState } from './windowState';
+import { ElectronAction, ElectronEvent } from '../types/electron';
+
+import { forceQuit, IS_MAC_OS, windows } from './utils';
 
 let interval: NodeJS.Timer;
 const CHECK_UPDATE_INTERVAL = 5 * 60 * 1000;

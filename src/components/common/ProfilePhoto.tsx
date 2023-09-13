@@ -1,30 +1,32 @@
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
 import {
   getChatAvatarHash,
   getChatTitle,
   getUserColorKey,
   getUserFullName,
-  isUserId,
+  getVideoAvatarMediaHash,
   isChatWithRepliesBot,
-  isDeletedUser, getVideoAvatarMediaHash,
+  isDeletedUser,
+  isUserId,
 } from '../../global/helpers';
-import renderText from './helpers/renderText';
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
-import useMedia from '../../hooks/useMedia';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useMediaTransition from '../../hooks/useMediaTransition';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useAppLayout from '../../hooks/useAppLayout';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
+import renderText from './helpers/renderText';
 
-import Spinner from '../ui/Spinner';
+import useAppLayout from '../../hooks/useAppLayout';
+import useCanvasBlur from '../../hooks/useCanvasBlur';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
+
 import OptimizedVideo from '../ui/OptimizedVideo';
+import Spinner from '../ui/Spinner';
 
 import './ProfilePhoto.scss';
 

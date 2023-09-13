@@ -1,28 +1,29 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useRef, useCallback } from '../../lib/teact/teact';
+import React, { memo, useCallback, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiVideo } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import {
-  selectCurrentGifSearch,
-  selectChat,
-  selectIsChatWithBot,
-  selectCurrentMessageList,
   selectCanScheduleUntilOnline,
+  selectChat,
+  selectCurrentGifSearch,
+  selectCurrentMessageList,
+  selectIsChatWithBot,
   selectIsChatWithSelf, selectThreadInfo,
 } from '../../global/selectors';
-import { getAllowedAttachmentOptions, getCanPostInChat } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+
+import useHistoryBack from '../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import useLang from '../../hooks/useLang';
-import useHistoryBack from '../../hooks/useHistoryBack';
 import useSchedule from '../../hooks/useSchedule';
 
-import InfiniteScroll from '../ui/InfiniteScroll';
 import GifButton from '../common/GifButton';
+import InfiniteScroll from '../ui/InfiniteScroll';
 import Loading from '../ui/Loading';
 
 import './GifSearch.scss';

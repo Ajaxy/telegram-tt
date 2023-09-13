@@ -1,16 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  TabState, MessageListType, GlobalState, ApiDraft, MessageList,
-} from '../../global/types';
-import type {
-  ApiAttachMenuPeerType,
   ApiAttachment,
+  ApiAttachMenuPeerType,
   ApiAvailableReaction,
   ApiBotCommand,
   ApiBotInlineMediaResult,
@@ -29,7 +25,10 @@ import type {
   ApiUser,
   ApiVideo,
 } from '../../api/types';
-import type { InlineBotSettings, ISettings, IAnchorPosition } from '../../types';
+import type {
+  ApiDraft, GlobalState, MessageList, MessageListType, TabState,
+} from '../../global/types';
+import type { IAnchorPosition, InlineBotSettings, ISettings } from '../../types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
@@ -39,8 +38,14 @@ import {
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
 } from '../../config';
-import { IS_VOICE_RECORDING_SUPPORTED, IS_IOS } from '../../util/windowEnvironment';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
+import {
+  getAllowedAttachmentOptions,
+  isChatAdmin,
+  isChatChannel,
+  isChatSuperGroup,
+  isUserId,
+} from '../../global/helpers';
 import {
   selectBot,
   selectCanPlayAnimatedEmojis,
@@ -71,84 +76,79 @@ import {
   selectUserFullInfo,
   selectUserStory,
 } from '../../global/selectors';
-import {
-  getAllowedAttachmentOptions,
-  isChatAdmin,
-  isChatChannel,
-  isChatSuperGroup,
-  isUserId,
-} from '../../global/helpers';
+import { selectCurrentLimit } from '../../global/selectors/limits';
+import buildClassName from '../../util/buildClassName';
+import { processMessageInputForCustomEmoji } from '../../util/customEmojiManager';
 import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dateFormat';
+import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import focusEditableElement from '../../util/focusEditableElement';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import parseMessageInput from '../../util/parseMessageInput';
 import { insertHtmlInSelection } from '../../util/selection';
-import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
-import buildClassName from '../../util/buildClassName';
-import windowSize from '../../util/windowSize';
 import { getServerTime } from '../../util/serverTime';
-import { selectCurrentLimit } from '../../global/selectors/limits';
-import { processMessageInputForCustomEmoji } from '../../util/customEmojiManager';
-import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
-import { getTextWithEntitiesAsHtml } from './helpers/renderTextWithEntities';
-import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
-import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
+import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/windowEnvironment';
+import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
-import renderText from './helpers/renderText';
+import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
+import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
+import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
 import { REM } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
+import { getTextWithEntitiesAsHtml } from './helpers/renderTextWithEntities';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useSignal from '../../hooks/useSignal';
-import useFlag from '../../hooks/useFlag';
-import usePrevious from '../../hooks/usePrevious';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useLang from '../../hooks/useLang';
-import useSendMessageAction from '../../hooks/useSendMessageAction';
-import useInterval from '../../hooks/useInterval';
-import useSyncEffect from '../../hooks/useSyncEffect';
-import useGetSelectionRange from '../../hooks/useGetSelectionRange';
 import useDerivedState from '../../hooks/useDerivedState';
-import { useStateRef } from '../../hooks/useStateRef';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useTimeout from '../../hooks/useTimeout';
+import useFlag from '../../hooks/useFlag';
+import useGetSelectionRange from '../../hooks/useGetSelectionRange';
+import useInterval from '../../hooks/useInterval';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePrevious from '../../hooks/usePrevious';
 import useSchedule from '../../hooks/useSchedule';
+import useSendMessageAction from '../../hooks/useSendMessageAction';
+import useShowTransition from '../../hooks/useShowTransition';
+import useSignal from '../../hooks/useSignal';
+import { useStateRef } from '../../hooks/useStateRef';
+import useSyncEffect from '../../hooks/useSyncEffect';
+import useTimeout from '../../hooks/useTimeout';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
-import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
-import useEmojiTooltip from '../middle/composer/hooks/useEmojiTooltip';
-import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
-import useStickerTooltip from '../middle/composer/hooks/useStickerTooltip';
-import useMentionTooltip from '../middle/composer/hooks/useMentionTooltip';
-import useInlineBotTooltip from '../middle/composer/hooks/useInlineBotTooltip';
 import useBotCommandTooltip from '../middle/composer/hooks/useBotCommandTooltip';
+import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
+import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
 import useDraft from '../middle/composer/hooks/useDraft';
 import useEditing from '../middle/composer/hooks/useEditing';
-import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
-import useShowTransition from '../../hooks/useShowTransition';
+import useEmojiTooltip from '../middle/composer/hooks/useEmojiTooltip';
+import useInlineBotTooltip from '../middle/composer/hooks/useInlineBotTooltip';
+import useMentionTooltip from '../middle/composer/hooks/useMentionTooltip';
+import useStickerTooltip from '../middle/composer/hooks/useStickerTooltip';
+import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 
-import DropArea, { DropAreaState } from '../middle/composer/DropArea.async';
 import AttachmentModal from '../middle/composer/AttachmentModal.async';
-import PollModal from '../middle/composer/PollModal.async';
-import DeleteMessageModal from './DeleteMessageModal.async';
-import SendAsMenu from '../middle/composer/SendAsMenu.async';
-import MentionTooltip from '../middle/composer/MentionTooltip.async';
-import BotCommandTooltip from '../middle/composer/BotCommandTooltip.async';
-import InlineBotTooltip from '../middle/composer/InlineBotTooltip.async';
-import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
-import WebPagePreview from '../middle/composer/WebPagePreview';
-import BotMenuButton from '../middle/composer/BotMenuButton';
-import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
-import Button from '../ui/Button';
-import Avatar from './Avatar';
-import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
-import MessageInput from '../middle/composer/MessageInput';
-import Spinner from '../ui/Spinner';
 import AttachMenu from '../middle/composer/AttachMenu';
-import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
+import BotCommandTooltip from '../middle/composer/BotCommandTooltip.async';
+import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
+import BotMenuButton from '../middle/composer/BotMenuButton';
+import ComposerEmbeddedMessage from '../middle/composer/ComposerEmbeddedMessage';
 import CustomEmojiTooltip from '../middle/composer/CustomEmojiTooltip.async';
-import StickerTooltip from '../middle/composer/StickerTooltip.async';
-import EmojiTooltip from '../middle/composer/EmojiTooltip.async';
 import CustomSendMenu from '../middle/composer/CustomSendMenu.async';
+import DropArea, { DropAreaState } from '../middle/composer/DropArea.async';
+import EmojiTooltip from '../middle/composer/EmojiTooltip.async';
+import InlineBotTooltip from '../middle/composer/InlineBotTooltip.async';
+import MentionTooltip from '../middle/composer/MentionTooltip.async';
+import MessageInput from '../middle/composer/MessageInput';
+import PollModal from '../middle/composer/PollModal.async';
+import SendAsMenu from '../middle/composer/SendAsMenu.async';
+import StickerTooltip from '../middle/composer/StickerTooltip.async';
+import SymbolMenuButton from '../middle/composer/SymbolMenuButton';
+import WebPagePreview from '../middle/composer/WebPagePreview';
 import ReactionSelector from '../middle/message/ReactionSelector';
+import Button from '../ui/Button';
+import ResponsiveHoverButton from '../ui/ResponsiveHoverButton';
+import Spinner from '../ui/Spinner';
+import Avatar from './Avatar';
+import DeleteMessageModal from './DeleteMessageModal.async';
 import ReactionStaticEmoji from './ReactionStaticEmoji';
 
 import './Composer.scss';

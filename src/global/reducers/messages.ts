@@ -1,39 +1,40 @@
 import type {
-  GlobalState, MessageList, MessageListType, TabArgs, Thread, TabThread,
-} from '../types';
-import type {
   ApiMessage, ApiSponsoredMessage, ApiThreadInfo,
 } from '../../api/types';
-import { MAIN_THREAD_ID } from '../../api/types';
 import type { FocusDirection } from '../../types';
+import type {
+  GlobalState, MessageList, MessageListType, TabArgs, TabThread,
+  Thread,
+} from '../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   IS_MOCKED_CLIENT,
   IS_TEST, MESSAGE_LIST_SLICE, MESSAGE_LIST_VIEWPORT_LIMIT, TMP_CHAT_ID,
 } from '../../config';
-import {
-  selectListedIds,
-  selectChatMessages,
-  selectViewportIds,
-  selectPinnedIds,
-  selectThreadInfo,
-  selectMessageIdsByGroupId,
-  selectChatScheduledMessages,
-  selectScheduledIds,
-  selectCurrentMessageIds,
-  selectChatMessage,
-  selectCurrentMessageList,
-  selectChat,
-  selectTabState, selectOutlyingLists,
-} from '../selectors';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   areSortedArraysEqual, omit, pickTruthy, unique,
 } from '../../util/iteratees';
-import { updateTabState } from './tabs';
-import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   isLocalMessageId, mergeIdRanges, orderHistoryIds, orderPinnedIds,
 } from '../helpers';
+import {
+  selectChat,
+  selectChatMessage,
+  selectChatMessages,
+  selectChatScheduledMessages,
+  selectCurrentMessageIds,
+  selectCurrentMessageList,
+  selectListedIds,
+  selectMessageIdsByGroupId,
+  selectOutlyingLists,
+  selectPinnedIds,
+  selectScheduledIds,
+  selectTabState, selectThreadInfo,
+  selectViewportIds,
+} from '../selectors';
+import { updateTabState } from './tabs';
 
 type MessageStoreSections = {
   byId: Record<number, ApiMessage>;

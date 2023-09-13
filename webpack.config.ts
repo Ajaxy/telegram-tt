@@ -1,7 +1,12 @@
-import path from 'path';
-import fs from 'fs';
-import dotenv from 'dotenv';
+import 'webpack-dev-server';
 
+import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+import dotenv from 'dotenv';
+import fs from 'fs';
+import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import path from 'path';
 import type { Compiler, Configuration } from 'webpack';
 import {
   ContextReplacementPlugin,
@@ -10,11 +15,6 @@ import {
   NormalModuleReplacementPlugin,
   ProvidePlugin,
 } from 'webpack';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
-import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
-import 'webpack-dev-server';
 
 import { version as appVersion } from './package.json';
 

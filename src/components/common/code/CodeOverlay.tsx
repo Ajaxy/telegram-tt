@@ -4,12 +4,12 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import { copyTextToClipboard } from '../../../util/clipboard';
 import buildClassName from '../../../util/buildClassName';
+import { copyTextToClipboard } from '../../../util/clipboard';
 import { areLinesWrapping } from '../helpers/renderText';
 
-import useWindowSize from '../../../hooks/useWindowSize';
 import useLang from '../../../hooks/useLang';
+import useWindowSize from '../../../hooks/useWindowSize';
 
 import styles from './CodeOverlay.module.scss';
 

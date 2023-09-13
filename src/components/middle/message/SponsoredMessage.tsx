@@ -7,21 +7,21 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { ApiChat, ApiSponsoredMessage, ApiUser } from '../../../api/types';
 
-import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
-import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
+import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
+import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import renderText from '../../common/helpers/renderText';
+import { renderTextWithEntities } from '../../common/helpers/renderTextWithEntities';
 import { preventMessageInputBlur } from '../helpers/preventMessageInputBlur';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useLang from '../../../hooks/useLang';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useFlag from '../../../hooks/useFlag';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
-import Button from '../../ui/Button';
 import AboutAdsModal from '../../common/AboutAdsModal.async';
+import Button from '../../ui/Button';
 import SponsoredMessageContextMenuContainer from './SponsoredMessageContextMenuContainer.async';
 
 import './SponsoredMessage.scss';

@@ -1,4 +1,5 @@
 import type { ApiPhoto, ApiStory } from '../../api/types';
+
 import { getVideoOrAudioBaseHash } from './messageMedia';
 
 export function getVideoAvatarMediaHash(photo: ApiPhoto) {

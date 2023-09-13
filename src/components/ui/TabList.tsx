@@ -1,15 +1,15 @@
-import React, { memo, useRef, useEffect } from '../../lib/teact/teact';
-
 import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
+
 import type { MenuItemContextAction } from './ListItem';
 
 import { ALL_FOLDER_ID } from '../../config';
-import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 import animateHorizontalScroll from '../../util/animateHorizontalScroll';
+import { IS_ANDROID, IS_IOS } from '../../util/windowEnvironment';
 
-import usePrevious from '../../hooks/usePrevious';
 import useHorizontalScroll from '../../hooks/useHorizontalScroll';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import Tab from './Tab';
 

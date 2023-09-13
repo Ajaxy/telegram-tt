@@ -2,16 +2,17 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiMessageStatistics, ApiMessagePublicForward, StatisticsGraph,
+  ApiChat, ApiMessagePublicForward, ApiMessageStatistics, StatisticsGraph,
 } from '../../types';
 
-import { invokeRequest } from './client';
-import { addEntitiesToLocalDb } from '../helpers';
-import { buildInputEntity } from '../gramjsBuilders';
 import {
-  buildChannelStatistics, buildGroupStatistics, buildMessageStatistics, buildMessagePublicForwards, buildGraph,
+  buildChannelStatistics, buildGraph,
+  buildGroupStatistics, buildMessagePublicForwards, buildMessageStatistics,
 } from '../apiBuilders/statistics';
 import { buildApiUser } from '../apiBuilders/users';
+import { buildInputEntity } from '../gramjsBuilders';
+import { addEntitiesToLocalDb } from '../helpers';
+import { invokeRequest } from './client';
 
 export async function fetchChannelStatistics({
   chat, dcId,

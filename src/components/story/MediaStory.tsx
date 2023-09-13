@@ -10,11 +10,11 @@ import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
-import useMedia from '../../hooks/useMedia';
-import useLang from '../../hooks/useLang';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import useMenuPosition from '../../hooks/useMenuPosition';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
+import useMenuPosition from '../../hooks/useMenuPosition';
 
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';

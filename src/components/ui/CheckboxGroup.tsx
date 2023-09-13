@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, memo, useState } from '../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 
 import Checkbox from './Checkbox';
 

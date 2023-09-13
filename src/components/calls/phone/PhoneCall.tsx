@@ -1,37 +1,39 @@
+import '../../../global/actions/calls';
+
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
-import '../../../global/actions/calls';
 
 import type { ApiPhoneCall, ApiUser } from '../../../api/types';
 
+import {
+  getStreams, IS_SCREENSHARE_SUPPORTED, switchCameraInputP2p, toggleStreamP2p,
+} from '../../../lib/secret-sauce';
+import { selectTabState } from '../../../global/selectors';
+import { selectPhoneCallUser } from '../../../global/selectors/calls';
+import buildClassName from '../../../util/buildClassName';
+import { formatMediaDuration } from '../../../util/dateFormat';
 import {
   IS_ANDROID,
   IS_IOS,
   IS_REQUEST_FULLSCREEN_SUPPORTED,
 } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import { selectTabState } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
-import { selectPhoneCallUser } from '../../../global/selectors/calls';
-import useLang from '../../../hooks/useLang';
 import renderText from '../../common/helpers/renderText';
-import useFlag from '../../../hooks/useFlag';
-import { formatMediaDuration } from '../../../util/dateFormat';
-import {
-  getStreams, IS_SCREENSHARE_SUPPORTED, switchCameraInputP2p, toggleStreamP2p,
-} from '../../../lib/secret-sauce';
-import useInterval from '../../../hooks/useInterval';
-import useForceUpdate from '../../../hooks/useForceUpdate';
-import useAppLayout from '../../../hooks/useAppLayout';
 
-import Modal from '../../ui/Modal';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useFlag from '../../../hooks/useFlag';
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
+
+import AnimatedIcon from '../../common/AnimatedIcon';
 import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
+import Modal from '../../ui/Modal';
 import PhoneCallButton from './PhoneCallButton';
-import AnimatedIcon from '../../common/AnimatedIcon';
 
 import styles from './PhoneCall.module.scss';
 

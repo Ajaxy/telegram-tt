@@ -1,10 +1,12 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useCallback, useState, useRef, useEffect,
+  memo, useCallback, useEffect,
+  useRef, useState,
 } from '../../lib/teact/teact';
 
+import { CardType, detectCardType } from '../common/helpers/detectCardType';
 import { formatCardNumber } from '../middle/helpers/inputFormatters';
-import { detectCardType, CardType } from '../common/helpers/detectCardType';
+
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import useLang from '../../hooks/useLang';
 
@@ -13,8 +15,8 @@ import InputText from '../ui/InputText';
 import './CardInput.scss';
 
 import mastercardIconPath from '../../assets/mastercard.svg';
-import visaIconPath from '../../assets/visa.svg';
 import mirIconPath from '../../assets/mir.svg';
+import visaIconPath from '../../assets/visa.svg';
 
 const CARD_NUMBER_MAX_LENGTH = 23;
 

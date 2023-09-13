@@ -1,62 +1,62 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
 import type { ApiMessage } from '../../../api/types';
+import type {
+  ActionReturnType,
+  GlobalState,
+} from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { FocusDirection } from '../../../types';
-import type {
-  GlobalState, ActionReturnType,
-} from '../../types';
 
 import {
   ANIMATION_END_DELAY,
-  RELEASE_DATETIME,
   FAST_SMOOTH_MAX_DURATION,
+  RELEASE_DATETIME,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../../config';
+import { copyHtmlToClipboard } from '../../../util/clipboard';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { compact, findLast } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import parseMessageInput from '../../../util/parseMessageInput';
+import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import versionNotification from '../../../versionNotification.txt';
+import { getMessageSummaryText, getSenderTitle, isChatChannel } from '../../helpers';
+import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
+  addActiveMessageMediaDownload,
+  cancelMessageMediaDownload,
   enterMessageSelectMode,
-  toggleMessageSelection,
   exitMessageSelectMode,
-  replaceThreadParam,
   replaceTabThreadParam,
+  replaceThreadParam,
+  toggleMessageSelection,
   updateFocusDirection,
   updateFocusedMessage,
-  cancelMessageMediaDownload,
-  addActiveMessageMediaDownload,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
-  selectCurrentChat,
-  selectViewportIds,
-  selectIsRightColumnShown,
-  selectCurrentMessageList,
-  selectChat,
-  selectThreadInfo,
-  selectChatMessages,
   selectAllowedMessageActions,
-  selectMessageIdsByGroupId,
+  selectChat,
+  selectChatMessages,
+  selectChatScheduledMessages,
+  selectCurrentChat,
+  selectCurrentMessageList,
   selectForwardedMessageIdsByGroupId,
+  selectIsRightColumnShown,
   selectIsViewportNewest,
+  selectMessageIdsByGroupId,
+  selectPinnedIds,
   selectReplyingToId,
   selectReplyStack,
-  selectSender,
-  selectChatScheduledMessages,
-  selectTabState,
-  selectRequestedMessageTranslationLanguage,
-  selectPinnedIds,
   selectRequestedChatTranslationLanguage,
+  selectRequestedMessageTranslationLanguage,
+  selectSender,
+  selectTabState,
+  selectThreadInfo,
+  selectViewportIds,
 } from '../../selectors';
-import { compact, findLast } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
 
-import versionNotification from '../../../versionNotification.txt';
-import parseMessageInput from '../../../util/parseMessageInput';
-import { getMessageSummaryText, getSenderTitle, isChatChannel } from '../../helpers';
-import * as langProvider from '../../../util/langProvider';
-import { copyHtmlToClipboard } from '../../../util/clipboard';
-import { renderMessageSummaryHtml } from '../../helpers/renderMessageSummaryHtml';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getIsMobile } from '../../../hooks/useAppLayout';
 
 const FOCUS_DURATION = 1500;

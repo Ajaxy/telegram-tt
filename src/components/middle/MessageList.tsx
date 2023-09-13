@@ -1,3 +1,4 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo,
   useEffect,
@@ -5,18 +6,15 @@ import React, {
   useRef,
 } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
-import { requestForcedReflow, forceMeasure, requestMeasure } from '../../lib/fasterdom/fasterdom';
-
-import type { FC } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
+
 import type {
   ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
-
-import { MAIN_THREAD_ID } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
+import { MAIN_THREAD_ID } from '../../api/types';
 import { LoadMoreDirection } from '../../types';
 
 import {
@@ -24,59 +22,60 @@ import {
   MESSAGE_LIST_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
+import { forceMeasure, requestForcedReflow, requestMeasure } from '../../lib/fasterdom/fasterdom';
 import {
-  selectChatMessages,
-  selectIsViewportNewest,
-  selectFirstUnreadId,
-  selectFocusedMessageId,
-  selectChat,
-  selectIsInSelectMode,
-  selectIsChatWithSelf,
+  getMessageHtmlId,
+  isChatChannel,
+  isChatGroup,
+  isChatWithRepliesBot,
+  isLocalMessageId,
+  isUserId,
+} from '../../global/helpers';
+import {
   selectBot,
-  selectScrollOffset,
-  selectThreadTopMessageId,
+  selectChat,
+  selectChatFullInfo,
+  selectChatMessages,
   selectChatScheduledMessages,
   selectCurrentMessageIds,
+  selectFirstUnreadId,
+  selectFocusedMessageId,
+  selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectIsInSelectMode,
+  selectIsViewportNewest,
   selectLastScrollOffset,
-  selectThreadInfo,
-  selectTabState,
-  selectChatFullInfo,
   selectPerformanceSettingsValue,
+  selectScrollOffset,
+  selectTabState,
+  selectThreadInfo,
+  selectThreadTopMessageId,
 } from '../../global/selectors';
-import {
-  isChatChannel,
-  isUserId,
-  isChatWithRepliesBot,
-  isChatGroup,
-  isLocalMessageId,
-  getMessageHtmlId,
-} from '../../global/helpers';
-import { orderBy } from '../../util/iteratees';
-import { debounce, onTickEnd } from '../../util/schedulers';
+import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
+import { orderBy } from '../../util/iteratees';
+import resetScroll from '../../util/resetScroll';
+import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-import resetScroll from '../../util/resetScroll';
-import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import { useStateRef } from '../../hooks/useStateRef';
-import useSyncEffect from '../../hooks/useSyncEffect';
-import useStickyDates from './hooks/useStickyDates';
+import { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
-import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
+import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useNativeCopySelectedMessages from '../../hooks/useNativeCopySelectedMessages';
+import { useStateRef } from '../../hooks/useStateRef';
+import useSyncEffect from '../../hooks/useSyncEffect';
 import useContainerHeight from './hooks/useContainerHeight';
-import { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
+import useStickyDates from './hooks/useStickyDates';
 
 import Loading from '../ui/Loading';
-import MessageListContent from './MessageListContent';
 import ContactGreeting from './ContactGreeting';
-import NoMessages from './NoMessages';
 import MessageListBotInfo from './MessageListBotInfo';
+import MessageListContent from './MessageListContent';
+import NoMessages from './NoMessages';
 
 import './MessageList.scss';
 

@@ -1,34 +1,34 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import {
+  filterUsersByName,
+  sortChatIds,
+} from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
-import {
-  sortChatIds,
-  filterUsersByName,
-} from '../../../global/helpers';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
 import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 
-import useLang from '../../../hooks/useLang';
-import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
+import useLang from '../../../hooks/useLang';
 
-import InfiniteScroll from '../../ui/InfiniteScroll';
-import LeftSearchResultChat from './LeftSearchResultChat';
-import RecentContacts from './RecentContacts';
-import ChatMessage from './ChatMessage';
-import DateSuggest from './DateSuggest';
-import Link from '../../ui/Link';
 import NothingFound from '../../common/NothingFound';
 import PickerSelectedItem from '../../common/PickerSelectedItem';
+import InfiniteScroll from '../../ui/InfiniteScroll';
+import Link from '../../ui/Link';
+import ChatMessage from './ChatMessage';
+import DateSuggest from './DateSuggest';
+import LeftSearchResultChat from './LeftSearchResultChat';
+import RecentContacts from './RecentContacts';
 
 export type OwnProps = {
   searchQuery?: string;

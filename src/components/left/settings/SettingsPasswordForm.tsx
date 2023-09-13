@@ -1,11 +1,11 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../../lib/teact/teact';
 
-import useLang from '../../../hooks/useLang';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
-import PasswordMonkey from '../../common/PasswordMonkey';
 import PasswordForm from '../../common/PasswordForm';
+import PasswordMonkey from '../../common/PasswordMonkey';
 
 type OwnProps = {
   error?: string;

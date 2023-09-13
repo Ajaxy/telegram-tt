@@ -1,16 +1,16 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
-import renderText from '../../common/helpers/renderText';
-import { pick } from '../../../util/iteratees';
-
 import { selectCanPlayAnimatedEmojis } from '../../../global/selectors';
+import { pick } from '../../../util/iteratees';
+import renderText from '../../common/helpers/renderText';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLang from '../../../hooks/useLang';

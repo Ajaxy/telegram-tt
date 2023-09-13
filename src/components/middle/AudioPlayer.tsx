@@ -1,39 +1,38 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { useMemo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { AudioOrigin } from '../../types';
 import type {
   ApiAudio, ApiChat, ApiMessage, ApiUser,
 } from '../../api/types';
+import type { AudioOrigin } from '../../types';
 
-import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { PLAYBACK_RATE_FOR_AUDIO_MIN_DURATION } from '../../config';
-
-import * as mediaLoader from '../../util/mediaLoader';
 import {
   getMediaDuration, getMessageContent, getMessageMediaHash, getSenderTitle, isMessageLocal,
 } from '../../global/helpers';
-import { selectChat, selectTabState, selectSender } from '../../global/selectors';
-import buildClassName from '../../util/buildClassName';
+import { selectChat, selectSender, selectTabState } from '../../global/selectors';
 import { makeTrackId } from '../../util/audioPlayer';
+import buildClassName from '../../util/buildClassName';
+import * as mediaLoader from '../../util/mediaLoader';
 import { clearMediaSession } from '../../util/mediaSession';
+import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
-import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
 import useAudioPlayer from '../../hooks/useAudioPlayer';
-import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMessageMediaMetadata from '../../hooks/useMessageMediaMetadata';
 
-import RippleEffect from '../ui/RippleEffect';
 import Button from '../ui/Button';
-import RangeSlider from '../ui/RangeSlider';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
+import RangeSlider from '../ui/RangeSlider';
+import RippleEffect from '../ui/RippleEffect';
 
 import './AudioPlayer.scss';
-import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   message: ApiMessage;

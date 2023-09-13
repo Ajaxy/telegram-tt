@@ -1,30 +1,32 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useMemo, memo, useRef, useEffect, useCallback,
+  memo, useCallback,
+  useEffect, useMemo, useRef,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-import type { ApiMessage, ApiUser, ApiChat } from '../../api/types';
+import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import {
-  selectUser,
-  selectChatMessages,
   selectChat,
+  selectChatMessages,
   selectCurrentTextSearch,
+  selectUser,
 } from '../../global/selectors';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 import { renderMessageSummary } from '../common/helpers/renderMessageText';
-import useLang from '../../hooks/useLang';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useLang from '../../hooks/useLang';
 
-import InfiniteScroll from '../ui/InfiniteScroll';
-import ListItem from '../ui/ListItem';
-import LastMessageMeta from '../common/LastMessageMeta';
 import Avatar from '../common/Avatar';
 import FullNameTitle from '../common/FullNameTitle';
+import LastMessageMeta from '../common/LastMessageMeta';
+import InfiniteScroll from '../ui/InfiniteScroll';
+import ListItem from '../ui/ListItem';
 
 import './RightSearch.scss';
 

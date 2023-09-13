@@ -6,8 +6,9 @@ import type { ISettings } from '../../../types';
 
 import { AUTODOWNLOAD_FILESIZE_MB_LIMITS } from '../../../config';
 import { pick } from '../../../util/iteratees';
-import useLang from '../../../hooks/useLang';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';
 import RangeSlider from '../../ui/RangeSlider';

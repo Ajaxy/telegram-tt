@@ -1,26 +1,28 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useCallback, memo,
+  memo,
+  useCallback,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ISettings, TimeFormat } from '../../../types';
+import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
+import { pick } from '../../../util/iteratees';
+import { setTimeFormat } from '../../../util/langProvider';
+import { getSystemTheme } from '../../../util/systemTheme';
 import {
   IS_ANDROID, IS_IOS, IS_MAC_OS,
 } from '../../../util/windowEnvironment';
-import { getSystemTheme } from '../../../util/systemTheme';
-import { pick } from '../../../util/iteratees';
-import { setTimeFormat } from '../../../util/langProvider';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
+
 import useAppLayout from '../../../hooks/useAppLayout';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 
 import ListItem from '../../ui/ListItem';
-import RangeSlider from '../../ui/RangeSlider';
-import type { IRadioOption } from '../../ui/RadioGroup';
 import RadioGroup from '../../ui/RadioGroup';
+import RangeSlider from '../../ui/RangeSlider';
 
 type OwnProps = {
   isActive?: boolean;

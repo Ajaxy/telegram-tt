@@ -1,30 +1,29 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import type RLottieInstance from '../../lib/rlottie/RLottie';
-import { requestMeasure } from '../../lib/fasterdom/fasterdom';
-import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
-
 import React, {
-  useEffect, useRef, memo, useState,
+  memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
 
-import { IS_ELECTRON } from '../../config';
+import type RLottieInstance from '../../lib/rlottie/RLottie';
 
+import { IS_ELECTRON } from '../../config';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
+import { ensureRLottie, getRLottie } from '../../lib/rlottie/RLottie.async';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import generateUniqueId from '../../util/generateUniqueId';
 import { hexToRgb } from '../../util/switchTheme';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
-import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
+import useColorFilter from '../../hooks/stickers/useColorFilter';
 import useBackgroundMode, { isBackgroundModeActive } from '../../hooks/useBackgroundMode';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import { useStateRef } from '../../hooks/useStateRef';
+import useHeavyAnimationCheck, { isHeavyAnimating } from '../../hooks/useHeavyAnimationCheck';
+import useLastCallback from '../../hooks/useLastCallback';
+import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../hooks/usePriorityPlaybackCheck';
 import useSharedIntersectionObserver from '../../hooks/useSharedIntersectionObserver';
-import useThrottledCallback from '../../hooks/useThrottledCallback';
-import useColorFilter from '../../hooks/stickers/useColorFilter';
+import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
+import useThrottledCallback from '../../hooks/useThrottledCallback';
 import useUniqueId from '../../hooks/useUniqueId';
 
 export type OwnProps = {

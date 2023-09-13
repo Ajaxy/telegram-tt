@@ -1,4 +1,5 @@
 import { useRef } from '../lib/teact/teact';
+
 import generateUniqueId from '../util/generateUniqueId';
 
 export default function useUniqueId() {

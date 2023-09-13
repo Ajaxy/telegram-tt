@@ -1,9 +1,9 @@
 import type React from '../lib/teact/teact';
 import { useMemo, useState } from '../lib/teact/teact';
-import { debounce } from '../util/schedulers';
-import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
-import { areDeepEqual } from '../util/areDeepEqual';
 
+import { areDeepEqual } from '../util/areDeepEqual';
+import { isSafariPatchInProgress } from '../util/patchSafariProgressiveAudio';
+import { debounce } from '../util/schedulers';
 import useLastCallback from './useLastCallback';
 
 type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => void;

@@ -1,6 +1,7 @@
-import usePrevious from './usePrevious';
 import { useRef } from '../lib/teact/teact';
+
 import useEffectOnce from './useEffectOnce';
+import usePrevious from './usePrevious';
 
 export default function useSyncEffect<const T extends readonly any[]>(
   effect: (args: T | readonly []) => NoneToVoidFunction | void,

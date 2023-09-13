@@ -3,7 +3,7 @@ import { Api as GramJs, errors } from '../../../lib/gramjs';
 import type { OnApiUpdate } from '../../types';
 
 import { DEBUG } from '../../../config';
-import { invokeRequest, updateTwoFaSettings, getTmpPassword } from './client';
+import { getTmpPassword, invokeRequest, updateTwoFaSettings } from './client';
 
 const ApiErrors: { [k: string]: string } = {
   EMAIL_UNCONFIRMED: 'Email unconfirmed',

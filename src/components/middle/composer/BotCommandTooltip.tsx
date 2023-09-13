@@ -1,16 +1,16 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { useEffect, useRef, memo } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useRef } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { Signal } from '../../../util/signals';
 import type { ApiBotCommand } from '../../../api/types';
+import type { Signal } from '../../../util/signals';
 
 import buildClassName from '../../../util/buildClassName';
 import setTooltipItemVisible from '../../../util/setTooltipItemVisible';
 
 import useLastCallback from '../../../hooks/useLastCallback';
-import useShowTransition from '../../../hooks/useShowTransition';
 import usePrevious from '../../../hooks/usePrevious';
+import useShowTransition from '../../../hooks/useShowTransition';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import BotCommand from './BotCommand';

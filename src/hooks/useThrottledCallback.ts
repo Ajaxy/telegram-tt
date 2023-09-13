@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from '../lib/teact/teact';
 
 import type { Scheduler } from '../util/schedulers';
+
 import { throttle, throttleWith } from '../util/schedulers';
 
 export default function useThrottledCallback<T extends AnyToVoidFunction>(

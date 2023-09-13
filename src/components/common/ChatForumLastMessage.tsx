@@ -1,3 +1,4 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo,
   useEffect,
@@ -7,17 +8,17 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import type { FC } from '../../lib/teact/teact';
 import type { ApiChat } from '../../api/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
-import buildClassName from '../../util/buildClassName';
 import { getOrderedTopics } from '../../global/helpers';
-import { getIsMobile } from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
-import { useFastClick } from '../../hooks/useFastClick';
+import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
+
+import { getIsMobile } from '../../hooks/useAppLayout';
+import { useFastClick } from '../../hooks/useFastClick';
+import useLang from '../../hooks/useLang';
 
 import TopicIcon from './TopicIcon';
 

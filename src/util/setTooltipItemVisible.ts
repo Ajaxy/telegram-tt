@@ -1,6 +1,6 @@
+import animateScroll from './animateScroll';
 import findInViewport from './findInViewport';
 import isFullyVisible from './isFullyVisible';
-import animateScroll from './animateScroll';
 
 const VIEWPORT_MARGIN = 8;
 const SCROLL_MARGIN = 10;

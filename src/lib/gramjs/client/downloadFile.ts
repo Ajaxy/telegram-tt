@@ -1,11 +1,13 @@
 import BigInt from 'big-integer';
-import Api from '../tl/api';
-import type TelegramClient from './TelegramClient';
-import { sleep } from '../Helpers';
-import { getDownloadPartSize } from '../Utils';
-import errors from '../errors';
+
 import Deferred from '../../../util/Deferred';
 import { Foreman } from '../../../util/foreman';
+import errors from '../errors';
+import Api from '../tl/api';
+
+import { sleep } from '../Helpers';
+import { getDownloadPartSize } from '../Utils';
+import type TelegramClient from './TelegramClient';
 
 interface OnProgress {
     isCanceled?: boolean;

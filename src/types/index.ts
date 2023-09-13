@@ -1,4 +1,5 @@
 import type { TeactNode } from '../lib/teact/teact';
+
 import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,

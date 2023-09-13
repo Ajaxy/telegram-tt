@@ -1,18 +1,18 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiUser, ApiWebSession } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
 
-import useLang from '../../../hooks/useLang';
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
+import useLang from '../../../hooks/useLang';
 
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
 import FullNameTitle from '../../common/FullNameTitle';
+import Button from '../../ui/Button';
+import Modal from '../../ui/Modal';
 
 import styles from './SettingsActiveWebsite.module.scss';
 

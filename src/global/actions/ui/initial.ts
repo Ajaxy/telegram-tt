@@ -1,28 +1,31 @@
 import { addCallback } from '../../../lib/teact/teactn';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+
+import type { ActionReturnType, GlobalState } from '../../types';
 
 import { IS_ELECTRON } from '../../../config';
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS, IS_LINUX,
-} from '../../../util/windowEnvironment';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { setLanguage } from '../../../util/langProvider';
+import { subscribe, unsubscribe } from '../../../util/notifications';
+import { decryptSessionByCurrentHash } from '../../../util/passcode';
+import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
+import { hasStoredSession, storeSession } from '../../../util/sessions';
 import switchTheme from '../../../util/switchTheme';
 import { getSystemTheme, setSystemThemeChangeCallback } from '../../../util/systemTheme';
-import {
-  selectTabState, selectNotifySettings, selectTheme, selectPerformanceSettings, selectCanAnimateInterface,
-} from '../../selectors';
 import { startWebsync, stopWebsync } from '../../../util/websync';
-import { subscribe, unsubscribe } from '../../../util/notifications';
-import { clearCaching, setupCaching } from '../../cache';
-import { decryptSessionByCurrentHash } from '../../../util/passcode';
-import { hasStoredSession, storeSession } from '../../../util/sessions';
+import {
+  IS_ANDROID, IS_IOS, IS_LINUX,
+  IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS,
+} from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';
-import type { ActionReturnType, GlobalState } from '../../types';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
+import { clearCaching, setupCaching } from '../../cache';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { replaceSettings } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
+import {
+  selectCanAnimateInterface,
+  selectNotifySettings, selectPerformanceSettings, selectTabState, selectTheme,
+} from '../../selectors';
 
 const HISTORY_ANIMATION_DURATION = 450;
 

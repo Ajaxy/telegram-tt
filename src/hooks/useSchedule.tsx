@@ -3,9 +3,8 @@ import React, { useState } from '../lib/teact/teact';
 import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getDayStartAt } from '../util/dateFormat';
 import { getServerTimeOffset } from '../util/serverTime';
-
-import useLastCallback from './useLastCallback';
 import useLang from './useLang';
+import useLastCallback from './useLastCallback';
 
 import CalendarModal from '../components/common/CalendarModal.async';
 

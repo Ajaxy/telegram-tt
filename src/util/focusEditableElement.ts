@@ -1,5 +1,5 @@
-import { IS_TOUCH_ENV } from './windowEnvironment';
 import { requestMeasure } from '../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV } from './windowEnvironment';
 
 export default function focusEditableElement(element: HTMLElement, force?: boolean, forcePlaceCaretAtEnd?: boolean) {
   if (!force && element === document.activeElement) {

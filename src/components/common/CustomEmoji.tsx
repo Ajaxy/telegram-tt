@@ -1,23 +1,24 @@
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useRef, useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMessageEntityTypes } from '../../api/types';
 
+import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import safePlay from '../../util/safePlay';
-import { selectIsAlwaysHighPriorityEmoji } from '../../global/selectors';
 
+import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 import useLastCallback from '../../hooks/useLastCallback';
 import useCustomEmoji from './hooks/useCustomEmoji';
-import useDynamicColorListener from '../../hooks/stickers/useDynamicColorListener';
 
 import StickerView from './StickerView';
 
 import styles from './CustomEmoji.module.scss';
-import svgPlaceholder from '../../assets/square.svg';
+
 import blankImg from '../../assets/blank.png';
+import svgPlaceholder from '../../assets/square.svg';
 
 type OwnProps = {
   ref?: React.RefObject<HTMLDivElement>;

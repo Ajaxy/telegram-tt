@@ -7,22 +7,22 @@ import type { ApiStory, ApiUser } from '../../api/types';
 import type { ApiPrivacySettings, PrivacyVisibility } from '../../types';
 import type { IconName } from '../../types/icons';
 
-import buildClassName from '../../util/buildClassName';
-import { selectTabState, selectUserStory } from '../../global/selectors';
 import { getUserFullName } from '../../global/helpers';
+import { selectTabState, selectUserStory } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 
-import useLang from '../../hooks/useLang';
 import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
-import Modal from '../ui/Modal';
-import ListItem from '../ui/ListItem';
-import Switcher from '../ui/Switcher';
 import Button from '../ui/Button';
+import ListItem from '../ui/ListItem';
+import Modal from '../ui/Modal';
+import Switcher from '../ui/Switcher';
 import Transition from '../ui/Transition';
-import CloseFriends from './privacy/CloseFriends';
 import AllowDenyList from './privacy/AllowDenyList';
+import CloseFriends from './privacy/CloseFriends';
 
 import styles from './StorySettings.module.scss';
 

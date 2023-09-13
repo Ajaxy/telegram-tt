@@ -1,27 +1,27 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiPremiumGiftOption, ApiUser } from '../../../api/types';
 
-import { formatCurrency } from '../../../util/formatCurrency';
-import renderText from '../../common/helpers/renderText';
 import { getUserFirstOrLastName } from '../../../global/helpers';
 import {
   selectTabState,
   selectUser,
   selectUserFullInfo,
 } from '../../../global/selectors';
+import { formatCurrency } from '../../../util/formatCurrency';
+import renderText from '../../common/helpers/renderText';
 
 import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 
-import Modal from '../../ui/Modal';
+import Avatar from '../../common/Avatar';
 import Button from '../../ui/Button';
 import Link from '../../ui/Link';
-import Avatar from '../../common/Avatar';
+import Modal from '../../ui/Modal';
 import GiftOption from './GiftOption';
 
 import styles from './GiftPremiumModal.module.scss';

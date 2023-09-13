@@ -1,32 +1,32 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
-  ApiMessage, ApiReaction, ApiSticker, ApiReactionCustomEmoji, ApiStory, ApiStorySkipped,
-  ApiMessageEntity,
+  ApiMessage, ApiMessageEntity,
+  ApiReaction, ApiReactionCustomEmoji, ApiSticker, ApiStory, ApiStorySkipped,
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
-import buildClassName from '../../../util/buildClassName';
 import { isUserId } from '../../../global/helpers';
 import {
   selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectIsCurrentUserPremium,
   selectTabState, selectUserStory,
 } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import parseMessageInput from '../../../util/parseMessageInput';
+import { REM } from '../../common/helpers/mediaDimensions';
 import { buildCustomEmojiHtml } from '../composer/helpers/customEmoji';
 
+import { getIsMobile } from '../../../hooks/useAppLayout';
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useMenuPosition from '../../../hooks/useMenuPosition';
-import { getIsMobile } from '../../../hooks/useAppLayout';
 
 import CustomEmojiPicker from '../../common/CustomEmojiPicker';
-import ReactionPickerLimited from './ReactionPickerLimited';
 import Menu from '../../ui/Menu';
+import ReactionPickerLimited from './ReactionPickerLimited';
 
 import styles from './ReactionPicker.module.scss';
 

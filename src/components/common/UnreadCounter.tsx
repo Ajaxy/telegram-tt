@@ -1,10 +1,11 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect } from '../../lib/teact/teact';
 
-import { formatIntegerCompact } from '../../util/textFormat';
-import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';
-import { getAllNotificationsCount } from '../../util/folderManager';
 import { updateAppBadge } from '../../util/appBadge';
+import { getAllNotificationsCount } from '../../util/folderManager';
+import { formatIntegerCompact } from '../../util/textFormat';
+
+import { useFolderManagerForUnreadCounters } from '../../hooks/useFolderManager';
 
 interface OwnProps {
   isForAppBadge?: boolean;

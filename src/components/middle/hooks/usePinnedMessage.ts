@@ -1,14 +1,14 @@
-import { getGlobal } from '../../../global';
 import { useEffect, useRef } from '../../../lib/teact/teact';
+import { getGlobal } from '../../../global';
 
 import {
   selectFocusedMessageId,
   selectListedIds,
   selectOutlyingListByMessageId,
 } from '../../../global/selectors';
+import cycleRestrict from '../../../util/cycleRestrict';
 import { unique } from '../../../util/iteratees';
 import { clamp } from '../../../util/math';
-import cycleRestrict from '../../../util/cycleRestrict';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 import useSignal from '../../../hooks/useSignal';

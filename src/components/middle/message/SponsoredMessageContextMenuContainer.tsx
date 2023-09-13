@@ -8,9 +8,9 @@ import type { IAnchorPosition } from '../../../types';
 import { selectIsCurrentUserPremium, selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 
+import useFlag from '../../../hooks/useFlag';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useFlag from '../../../hooks/useFlag';
 
 import MessageContextMenu from './MessageContextMenu';
 

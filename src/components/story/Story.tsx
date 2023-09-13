@@ -1,9 +1,9 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
   ApiStealthMode, ApiStory, ApiTypeStory, ApiUser,
 } from '../../api/types';
@@ -12,44 +12,45 @@ import type { Signal } from '../../util/signals';
 import { MAIN_THREAD_ID } from '../../api/types';
 
 import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../../config';
-import buildClassName from '../../util/buildClassName';
-import renderText from '../common/helpers/renderText';
-import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
 import { getUserFirstOrLastName } from '../../global/helpers';
-import { getServerTime } from '../../util/serverTime';
 import {
-  selectChat, selectTabState, selectUserStory, selectUserStories, selectIsCurrentUserPremium,
+  selectChat, selectIsCurrentUserPremium,
+  selectTabState, selectUserStories, selectUserStory,
 } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
 import download from '../../util/download';
+import { getServerTime } from '../../util/serverTime';
+import renderText from '../common/helpers/renderText';
 
+import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
-import useLang from '../../hooks/useLang';
-import useStoryPreloader from './hooks/useStoryPreloader';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
-import useShowTransition from '../../hooks/useShowTransition';
-import useLastCallback from '../../hooks/useLastCallback';
+import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useFlag from '../../hooks/useFlag';
 import useCurrentTimeSignal from '../../hooks/useCurrentTimeSignal';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
-import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
-import useCanvasBlur from '../../hooks/useCanvasBlur';
 import useMediaTransition from '../../hooks/useMediaTransition';
+import useShowTransition from '../../hooks/useShowTransition';
+import useStoryPreloader from './hooks/useStoryPreloader';
 import useStoryProps from './hooks/useStoryProps';
 
-import Button from '../ui/Button';
 import Avatar from '../common/Avatar';
-import OptimizedVideo from '../ui/OptimizedVideo';
-import StoryProgress from './StoryProgress';
-import Composer from '../common/Composer';
-import MenuItem from '../ui/MenuItem';
-import DropdownMenu from '../ui/DropdownMenu';
-import Skeleton from '../ui/placeholder/Skeleton';
-import StoryCaption from './StoryCaption';
 import AvatarList from '../common/AvatarList';
+import Composer from '../common/Composer';
+import Button from '../ui/Button';
+import DropdownMenu from '../ui/DropdownMenu';
+import MenuItem from '../ui/MenuItem';
+import OptimizedVideo from '../ui/OptimizedVideo';
+import Skeleton from '../ui/placeholder/Skeleton';
 import MediaAreaOverlay from './MediaAreaOverlay';
+import StoryCaption from './StoryCaption';
+import StoryProgress from './StoryProgress';
 
 import styles from './StoryViewer.module.scss';
 

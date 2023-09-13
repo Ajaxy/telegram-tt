@@ -1,29 +1,29 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
-  useEffect, useRef, memo, useCallback, useLayoutEffect,
+  memo, useCallback, useEffect, useLayoutEffect, useRef,
 } from '../../lib/teact/teact';
-import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { GlobalState } from '../../global/types';
 import type { LangCode } from '../../types';
 
 import { DEFAULT_LANG_CODE } from '../../config';
-import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
-import { setLanguage } from '../../util/langProvider';
+import { disableStrict, enableStrict } from '../../lib/fasterdom/stricterdom';
 import buildClassName from '../../util/buildClassName';
+import { setLanguage } from '../../util/langProvider';
+import { LOCAL_TGS_URLS } from '../common/helpers/animatedAssets';
 import renderText from '../common/helpers/renderText';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
 
-import useLangString from '../../hooks/useLangString';
+import useAsync from '../../hooks/useAsync';
 import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
+import useLangString from '../../hooks/useLangString';
 import useMediaTransition from '../../hooks/useMediaTransition';
-import useAsync from '../../hooks/useAsync';
 
-import Loading from '../ui/Loading';
-import Button from '../ui/Button';
 import AnimatedIcon from '../common/AnimatedIcon';
+import Button from '../ui/Button';
+import Loading from '../ui/Loading';
 
 import blankUrl from '../../assets/blank.png';
 

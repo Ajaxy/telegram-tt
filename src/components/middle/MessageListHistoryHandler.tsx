@@ -1,11 +1,12 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { MessageList as GlobalMessageList } from '../../global/types';
 
-import { createLocationHash } from '../../util/routing';
 import { selectTabState } from '../../global/selectors';
+import { createLocationHash } from '../../util/routing';
+
 import useHistoryBack from '../../hooks/useHistoryBack';
 
 type StateProps = {

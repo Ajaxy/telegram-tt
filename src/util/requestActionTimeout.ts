@@ -1,4 +1,5 @@
 import { getActions } from '../global';
+
 import type { CallbackAction } from '../global/types';
 
 const callbacks = new Map<string, number>();

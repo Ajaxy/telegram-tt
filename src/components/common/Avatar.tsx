@@ -1,8 +1,8 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { StoryViewerOrigin } from '../../types';
@@ -14,20 +14,20 @@ import {
   getChatTitle,
   getUserColorKey,
   getUserFullName,
-  isUserId,
+  getUserStoryHtmlId,
   isChatWithRepliesBot,
   isDeletedUser,
-  getUserStoryHtmlId,
+  isUserId,
 } from '../../global/helpers';
-import { getFirstLetters } from '../../util/textFormat';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
+import { getFirstLetters } from '../../util/textFormat';
 import renderText from './helpers/renderText';
 
-import useMedia from '../../hooks/useMedia';
-import useMediaTransition from '../../hooks/useMediaTransition';
+import { useFastClick } from '../../hooks/useFastClick';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import { useFastClick } from '../../hooks/useFastClick';
+import useMedia from '../../hooks/useMedia';
+import useMediaTransition from '../../hooks/useMediaTransition';
 
 import OptimizedVideo from '../ui/OptimizedVideo';
 import AvatarStoryCircle from './AvatarStoryCircle';

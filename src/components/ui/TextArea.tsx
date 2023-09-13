@@ -1,10 +1,12 @@
 import type { ChangeEvent, FormEvent, RefObject } from 'react';
-import useLang from '../../hooks/useLang';
-import buildClassName from '../../util/buildClassName';
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
+
+import buildClassName from '../../util/buildClassName';
+
+import useLang from '../../hooks/useLang';
 
 type OwnProps = {
   ref?: RefObject<HTMLTextAreaElement>;

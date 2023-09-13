@@ -1,5 +1,6 @@
-import { createSignal } from '../util/signals';
 import { useEffect } from '../lib/teact/teact';
+
+import { createSignal } from '../util/signals';
 
 export const [getCurrentTime, setCurrentTime] = createSignal(0);
 

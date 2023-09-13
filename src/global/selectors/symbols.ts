@@ -1,10 +1,10 @@
+import type { ApiSticker, ApiStickerSet, ApiStickerSetInfo } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
-import type { ApiStickerSetInfo, ApiSticker, ApiStickerSet } from '../../api/types';
 
 import { RESTRICTED_EMOJI_SET_ID } from '../../config';
-import { selectIsCurrentUserPremium } from './users';
-import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from './tabs';
+import { selectIsCurrentUserPremium } from './users';
 
 export function selectIsStickerFavorite<T extends GlobalState>(global: T, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;

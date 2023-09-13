@@ -4,6 +4,7 @@ import React, { memo } from '../../lib/teact/teact';
 import type { ApiMessage, ApiMessageOutgoingStatus } from '../../api/types';
 
 import { formatPastTimeShort } from '../../util/dateFormat';
+
 import useLang from '../../hooks/useLang';
 
 import MessageOutgoingStatus from './MessageOutgoingStatus';

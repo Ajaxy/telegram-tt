@@ -1,10 +1,11 @@
+import type { FC } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiKeyboardButton, ApiMessage } from '../../../api/types';
 
 import { RE_TME_LINK } from '../../../config';
 import renderText from '../../common/helpers/renderText';
+
 import useLang from '../../../hooks/useLang';
 
 import Button from '../../ui/Button';

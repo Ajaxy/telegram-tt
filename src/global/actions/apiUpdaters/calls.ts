@@ -1,16 +1,17 @@
-import { addActionHandler, getGlobal } from '../../index';
-import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
+import type { ActionReturnType } from '../../types';
+
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { omit } from '../../../util/iteratees';
-import { selectChat } from '../../selectors';
-import { updateChat, updateChatFullInfo } from '../../reducers';
-import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
 import { notifyAboutCall } from '../../../util/notifications';
+import { onTickEnd } from '../../../util/schedulers';
+import { ARE_CALLS_SUPPORTED } from '../../../util/windowEnvironment';
+import { addActionHandler, getGlobal } from '../../index';
+import { updateChat, updateChatFullInfo } from '../../reducers';
+import { removeGroupCall, updateGroupCall, updateGroupCallParticipant } from '../../reducers/calls';
+import { updateTabState } from '../../reducers/tabs';
+import { selectChat } from '../../selectors';
 import { selectGroupCall, selectPhoneCallUser } from '../../selectors/calls';
 import { checkNavigatorUserMediaPermissions, initializeSounds } from '../ui/calls';
-import { onTickEnd } from '../../../util/schedulers';
-import type { ActionReturnType } from '../../types';
-import { updateTabState } from '../../reducers/tabs';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {

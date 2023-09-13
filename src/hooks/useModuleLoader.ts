@@ -1,8 +1,8 @@
 import { useEffect } from '../lib/teact/teact';
 
 import type { BundleModules, Bundles } from '../util/moduleLoader';
-import { getModuleFromMemory, loadModule, addLoadListener } from '../util/moduleLoader';
 
+import { addLoadListener, getModuleFromMemory, loadModule } from '../util/moduleLoader';
 import useForceUpdate from './useForceUpdate';
 
 const useModuleLoader = <B extends Bundles, M extends BundleModules<B>>(

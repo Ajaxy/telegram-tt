@@ -3,36 +3,36 @@ import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ProfileTabType } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 import {
   ManagementScreens, NewChatMembersProgress, ProfileState, RightColumnContent,
 } from '../../types';
-import { MAIN_THREAD_ID } from '../../api/types';
 
 import { ANIMATION_END_DELAY, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
   selectAreActiveChatsLoaded, selectChat, selectCurrentMessageList, selectRightColumnContentKey, selectTabState,
 } from '../../global/selectors';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import useLayoutEffectWithPrevDeps from '../../hooks/useLayoutEffectWithPrevDeps';
 import useWindowSize from '../../hooks/useWindowSize';
-import useHistoryBack from '../../hooks/useHistoryBack';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 
-import RightHeader from './RightHeader';
-import Profile from './Profile';
 import Transition from '../ui/Transition';
-import RightSearch from './RightSearch.async';
-import Management from './management/Management.async';
-import Statistics from './statistics/Statistics.async';
-import MessageStatistics from './statistics/MessageStatistics.async';
-import StickerSearch from './StickerSearch.async';
-import GifSearch from './GifSearch.async';
-import PollResults from './PollResults.async';
 import AddChatMembers from './AddChatMembers';
 import CreateTopic from './CreateTopic.async';
 import EditTopic from './EditTopic.async';
+import GifSearch from './GifSearch.async';
+import Management from './management/Management.async';
+import PollResults from './PollResults.async';
+import Profile from './Profile';
+import RightHeader from './RightHeader';
+import RightSearch from './RightSearch.async';
+import MessageStatistics from './statistics/MessageStatistics.async';
+import Statistics from './statistics/Statistics.async';
+import StickerSearch from './StickerSearch.async';
 
 import './RightColumn.scss';
 

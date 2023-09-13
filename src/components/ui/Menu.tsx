@@ -2,20 +2,20 @@ import React, {
   type FC, memo, useEffect, useRef,
 } from '../../lib/teact/teact';
 
-import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
-import captureEscKeyListener from '../../util/captureEscKeyListener';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
+import captureEscKeyListener from '../../util/captureEscKeyListener';
 import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
+import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
+import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
-import useShowTransition from '../../hooks/useShowTransition';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
-import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
-import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
-import useHistoryBack from '../../hooks/useHistoryBack';
 import useAppLayout from '../../hooks/useAppLayout';
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
+import useHistoryBack from '../../hooks/useHistoryBack';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useShowTransition from '../../hooks/useShowTransition';
+import useVirtualBackdrop from '../../hooks/useVirtualBackdrop';
 
 import Portal from './Portal';
 

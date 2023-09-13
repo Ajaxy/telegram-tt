@@ -1,20 +1,20 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { TabState } from '../../../global/types';
 import type { ApiChatFolder } from '../../../api/types';
+import type { TabState } from '../../../global/types';
 
 import { selectChatFolder } from '../../../global/selectors';
 
-import usePrevious from '../../../hooks/usePrevious';
 import useLang from '../../../hooks/useLang';
+import usePrevious from '../../../hooks/usePrevious';
 
-import ChatlistNew from './ChatlistNew';
-import ChatlistAlready from './ChatlistAlready';
-import ChatlistDelete from './ChatlistDelete';
 import Modal from '../../ui/Modal';
 import Tab from '../../ui/Tab';
+import ChatlistAlready from './ChatlistAlready';
+import ChatlistDelete from './ChatlistDelete';
+import ChatlistNew from './ChatlistNew';
 
 import styles from './ChatlistModal.module.scss';
 

@@ -1,10 +1,9 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type {
   ApiAttachment, ApiChatMember, ApiSticker,
 } from '../../../api/types';
@@ -19,40 +18,41 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../../global/helpers';
-import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
-import { getHtmlTextLength } from './helpers/getHtmlTextLength';
 import { selectChatFullInfo, selectIsChatWithSelf } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
 import buildClassName from '../../../util/buildClassName';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { validateFiles } from '../../../util/files';
 import { removeAllSelections } from '../../../util/selection';
+import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
+import getFilesFromDataTransferItems from './helpers/getFilesFromDataTransferItems';
+import { getHtmlTextLength } from './helpers/getHtmlTextLength';
 
+import useAppLayout from '../../../hooks/useAppLayout';
+import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useDerivedState from '../../../hooks/useDerivedState';
+import useFlag from '../../../hooks/useFlag';
+import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import usePrevious from '../../../hooks/usePrevious';
-import useMentionTooltip from './hooks/useMentionTooltip';
-import useEmojiTooltip from './hooks/useEmojiTooltip';
-import useLang from '../../../hooks/useLang';
-import useFlag from '../../../hooks/useFlag';
-import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
-import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
-import useAppLayout from '../../../hooks/useAppLayout';
 import useScrolledState from '../../../hooks/useScrolledState';
-import useGetSelectionRange from '../../../hooks/useGetSelectionRange';
-import useDerivedState from '../../../hooks/useDerivedState';
+import useCustomEmojiTooltip from './hooks/useCustomEmojiTooltip';
+import useEmojiTooltip from './hooks/useEmojiTooltip';
+import useMentionTooltip from './hooks/useMentionTooltip';
 
 import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
-import MessageInput from './MessageInput';
-import MentionTooltip from './MentionTooltip';
-import EmojiTooltip from './EmojiTooltip.async';
-import CustomSendMenu from './CustomSendMenu.async';
-import CustomEmojiTooltip from './CustomEmojiTooltip.async';
-import AttachmentModalItem from './AttachmentModalItem';
 import DropdownMenu from '../../ui/DropdownMenu';
 import MenuItem from '../../ui/MenuItem';
+import Modal from '../../ui/Modal';
+import AttachmentModalItem from './AttachmentModalItem';
+import CustomEmojiTooltip from './CustomEmojiTooltip.async';
+import CustomSendMenu from './CustomSendMenu.async';
+import EmojiTooltip from './EmojiTooltip.async';
+import MentionTooltip from './MentionTooltip';
+import MessageInput from './MessageInput';
 import SymbolMenuButton from './SymbolMenuButton';
 
 import styles from './AttachmentModal.module.scss';

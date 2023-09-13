@@ -1,7 +1,7 @@
-import { IS_IOS } from './windowEnvironment';
 import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';
+import { IS_IOS } from './windowEnvironment';
 import windowSize from './windowSize';
 
 export enum SwipeDirection {

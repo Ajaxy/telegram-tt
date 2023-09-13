@@ -1,4 +1,5 @@
 import { useEffect } from '../../lib/teact/teact';
+
 import { hexToRgb } from '../../util/switchTheme';
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';

@@ -1,18 +1,18 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiMessage } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { CUSTOM_APPENDIX_ATTRIBUTE, MESSAGE_CONTENT_SELECTOR } from '../../../config';
 import { getMessageInvoice, getWebDocumentHash } from '../../../global/helpers';
+import buildStyle from '../../../util/buildStyle';
 import { formatCurrency } from '../../../util/formatCurrency';
 import renderText from '../../common/helpers/renderText';
 import getCustomAppendixBg from './helpers/getCustomAppendixBg';
-import buildStyle from '../../../util/buildStyle';
 
-import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
+import useLayoutEffectWithPrevDeps from '../../../hooks/useLayoutEffectWithPrevDeps';
 import useMedia from '../../../hooks/useMedia';
 import useBlurredMediaThumbRef from './hooks/useBlurredMediaThumbRef';
 

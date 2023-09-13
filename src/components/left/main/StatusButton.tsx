@@ -1,21 +1,22 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useRef } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiEmojiStatus, ApiSticker } from '../../../api/types';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../../config';
 import { selectUser } from '../../../global/selectors';
-import useFlag from '../../../hooks/useFlag';
-import useAppLayout from '../../../hooks/useAppLayout';
-import useTimeout from '../../../hooks/useTimeout';
-import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import { getServerTimeOffset } from '../../../util/serverTime';
 
-import Button from '../../ui/Button';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useFlag from '../../../hooks/useFlag';
+import useTimeout from '../../../hooks/useTimeout';
+
 import CustomEmoji from '../../common/CustomEmoji';
 import PremiumIcon from '../../common/PremiumIcon';
 import CustomEmojiEffect from '../../middle/message/CustomEmojiEffect';
+import Button from '../../ui/Button';
 import StatusPickerMenu from './StatusPickerMenu.async';
 
 interface StateProps {

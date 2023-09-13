@@ -1,11 +1,12 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
-  ApiEmojiInteraction, ApiStickerSetInfo, ApiSticker, ApiStickerSet, GramJsEmojiInteraction,
+  ApiEmojiInteraction, ApiSticker, ApiStickerSet, ApiStickerSetInfo, GramJsEmojiInteraction,
 } from '../../types';
 
-import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
-import localDb from '../localDb';
 import { compact } from '../../../util/iteratees';
+import localDb from '../localDb';
+import { buildApiThumbnailFromCached, buildApiThumbnailFromPath } from './common';
 
 const LOTTIE_STICKER_MIME_TYPE = 'application/x-tgsticker';
 const VIDEO_STICKER_MIME_TYPE = 'video/webm';

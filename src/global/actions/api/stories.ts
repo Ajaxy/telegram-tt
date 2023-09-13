@@ -1,9 +1,12 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { callApi } from '../../../api/gramjs';
-
 import type { ActionReturnType } from '../../types';
 
 import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { translate } from '../../../util/langProvider';
+import { getServerTime } from '../../../util/serverTime';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addStories,
   addStoriesForUser,
@@ -20,13 +23,9 @@ import {
   updateUserStory,
   updateUsersWithStories,
 } from '../../reducers';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import {
   selectUser, selectUserStories, selectUserStory,
 } from '../../selectors';
-import { getServerTime } from '../../../util/serverTime';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { translate } from '../../../util/langProvider';
 
 const INFINITE_LOOP_MARKER = 100;
 

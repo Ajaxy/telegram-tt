@@ -1,12 +1,12 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
-import { callApi } from '../../../api/gramjs';
-import {
-  updateStatistics, updateMessageStatistics, updateStatisticsGraph, addUsers,
-} from '../../reducers';
-import { selectChatMessages, selectChat, selectChatFullInfo } from '../../selectors';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import {
+  addUsers,
+  updateMessageStatistics, updateStatistics, updateStatisticsGraph,
+} from '../../reducers';
+import { selectChat, selectChatFullInfo, selectChatMessages } from '../../selectors';
 
 addActionHandler('loadStatistics', async (global, actions, payload): Promise<void> => {
   const { chatId, isGroup, tabId = getCurrentTabId() } = payload;

@@ -5,30 +5,30 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../api/types';
-import type { LeftColumnContent, SettingsScreens } from '../../../types';
-import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { GlobalState } from '../../../global/types';
-import type { TabWithProperties } from '../../ui/TabList';
+import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
+import type { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
-import TabList from '../../ui/TabList';
+import type { TabWithProperties } from '../../ui/TabList';
 
 import { ALL_FOLDER_ID } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
+import { selectCurrentLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import { selectCurrentLimit } from '../../../global/selectors/limits';
-import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
+import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
-import Transition from '../../ui/Transition';
 import StoryRibbon from '../../story/StoryRibbon';
+import TabList from '../../ui/TabList';
+import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
 
 type OwnProps = {

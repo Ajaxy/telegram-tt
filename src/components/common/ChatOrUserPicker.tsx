@@ -1,32 +1,32 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useRef, useState, useMemo,
+  memo, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
 import type { ApiChat, ApiTopic } from '../../api/types';
 
-import { REM } from './helpers/mediaDimensions';
 import { CHAT_HEIGHT_PX } from '../../config';
-import renderText from './helpers/renderText';
 import { getCanPostInChat, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
+import { REM } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
-import useLang from '../../hooks/useLang';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
+import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import Loading from '../ui/Loading';
-import Modal from '../ui/Modal';
-import InputText from '../ui/InputText';
 import Button from '../ui/Button';
 import InfiniteScroll from '../ui/InfiniteScroll';
+import InputText from '../ui/InputText';
 import ListItem from '../ui/ListItem';
+import Loading from '../ui/Loading';
+import Modal from '../ui/Modal';
+import Transition from '../ui/Transition';
 import GroupChatInfo from './GroupChatInfo';
 import PrivateChatInfo from './PrivateChatInfo';
-import Transition from '../ui/Transition';
 import TopicIcon from './TopicIcon';
 
 import './ChatOrUserPicker.scss';

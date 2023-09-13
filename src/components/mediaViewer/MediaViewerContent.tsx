@@ -7,20 +7,20 @@ import type {
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_TOUCH_ENV, ARE_WEBCODECS_SUPPORTED } from '../../util/windowEnvironment';
 import {
-  selectChat, selectChatMessage, selectTabState, selectIsMessageProtected, selectScheduledMessage, selectUser,
+  selectChat, selectChatMessage, selectIsMessageProtected, selectScheduledMessage, selectTabState, selectUser,
 } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
+import stopEvent from '../../util/stopEvent';
+import { ARE_WEBCODECS_SUPPORTED, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { calculateMediaViewerDimensions } from '../common/helpers/mediaDimensions';
 import { renderMessageText } from '../common/helpers/renderMessageText';
-import stopEvent from '../../util/stopEvent';
-import buildClassName from '../../util/buildClassName';
-import { useMediaProps } from './hooks/useMediaProps';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useAppLayout from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import useControlsSignal from './hooks/useControlsSignal';
+import { useMediaProps } from './hooks/useMediaProps';
 
 import Spinner from '../ui/Spinner';
 import MediaViewerFooter from './MediaViewerFooter';

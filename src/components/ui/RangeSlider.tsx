@@ -1,8 +1,9 @@
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
-import React, { useCallback, useMemo, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
+
 import useLang from '../../hooks/useLang';
 
 import './RangeSlider.scss';

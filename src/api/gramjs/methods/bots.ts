@@ -6,18 +6,8 @@ import type {
   ApiChat, ApiThemeParameters, ApiUser, OnApiUpdate,
 } from '../../types';
 
-import localDb from '../localDb';
 import { WEB_APP_PLATFORM } from '../../../config';
-import { invokeRequest } from './client';
-import {
-  buildInputBotApp,
-  buildInputEntity,
-  buildInputPeer,
-  buildInputReplyToMessage,
-  buildInputThemeParams,
-  generateRandomBigInt,
-} from '../gramjsBuilders';
-import { buildApiUser } from '../apiBuilders/users';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import {
   buildApiAttachBot,
   buildApiBotApp,
@@ -27,10 +17,20 @@ import {
   buildBotSwitchWebview,
 } from '../apiBuilders/bots';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
-import { addEntitiesToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
 import { omitVirtualClassFields } from '../apiBuilders/helpers';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { buildApiUrlAuthResult } from '../apiBuilders/misc';
+import { buildApiUser } from '../apiBuilders/users';
+import {
+  buildInputBotApp,
+  buildInputEntity,
+  buildInputPeer,
+  buildInputReplyToMessage,
+  buildInputThemeParams,
+  generateRandomBigInt,
+} from '../gramjsBuilders';
+import { addEntitiesToLocalDb, addUserToLocalDb, deserializeBytes } from '../helpers';
+import localDb from '../localDb';
+import { invokeRequest } from './client';
 
 let onUpdate: OnApiUpdate;
 

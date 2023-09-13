@@ -3,15 +3,16 @@ import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
 } from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
 
 import { MIN_PASSWORD_LENGTH } from '../../config';
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+
+import useAppLayout from '../../hooks/useAppLayout';
 import useLang from '../../hooks/useLang';
 import useTimeout from '../../hooks/useTimeout';
-import useAppLayout from '../../hooks/useAppLayout';
 
 import Button from '../ui/Button';
 

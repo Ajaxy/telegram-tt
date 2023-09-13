@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import type { FC, TeactNode } from '../../lib/teact/teact';
-import React, { useCallback, memo } from '../../lib/teact/teact';
+import React, { memo, useCallback } from '../../lib/teact/teact';
 
 import Radio from './Radio';
 

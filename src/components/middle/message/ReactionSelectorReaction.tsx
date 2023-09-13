@@ -1,12 +1,13 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiAvailableReaction, ApiReaction } from '../../../api/types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
 import { createClassNameBuilder } from '../../../util/buildClassName';
-import useMedia from '../../../hooks/useMedia';
+import { REM } from '../../common/helpers/mediaDimensions';
+
 import useFlag from '../../../hooks/useFlag';
+import useMedia from '../../../hooks/useMedia';
 
 import AnimatedSticker from '../../common/AnimatedSticker';
 

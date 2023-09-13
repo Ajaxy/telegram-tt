@@ -5,8 +5,8 @@ import { ProfileState } from '../../../types';
 import animateScroll from '../../../util/animateScroll';
 import { throttle } from '../../../util/schedulers';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 const TRANSITION_DURATION = 300;
 const PROGRAMMATIC_SCROLL_TIMEOUT_MS = 350;

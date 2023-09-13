@@ -7,8 +7,9 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { ManagementScreens, ProfileState } from '../../types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { debounce } from '../../util/schedulers';
-import buildClassName from '../../util/buildClassName';
+import {
+  getCanAddContact, getCanManageTopic, isChatChannel, isUserBot, isUserId,
+} from '../../global/helpers';
 import {
   selectCanManage,
   selectChat,
@@ -19,22 +20,21 @@ import {
   selectTabState,
   selectUser,
 } from '../../global/selectors';
-import {
-  getCanAddContact, getCanManageTopic, isChatChannel, isUserBot, isUserId,
-} from '../../global/helpers';
+import buildClassName from '../../util/buildClassName';
 import { getDayStartAt } from '../../util/dateFormat';
+import { debounce } from '../../util/schedulers';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useElectronDrag from '../../hooks/useElectronDrag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useElectronDrag from '../../hooks/useElectronDrag';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import SearchInput from '../ui/SearchInput';
 import Button from '../ui/Button';
-import Transition from '../ui/Transition';
 import ConfirmDialog from '../ui/ConfirmDialog';
+import SearchInput from '../ui/SearchInput';
+import Transition from '../ui/Transition';
 
 import './RightHeader.scss';
 

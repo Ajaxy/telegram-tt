@@ -1,42 +1,42 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
 
+import { isUserId, stripCustomEmoji } from '../../../global/helpers';
 import {
+  selectCanAnimateInterface,
   selectChat,
   selectChatMessage,
-  selectSender,
-  selectForwardedSender,
-  selectUser,
   selectCurrentMessageList,
-  selectReplyingToId,
   selectEditingId,
-  selectEditingScheduledId,
   selectEditingMessage,
+  selectEditingScheduledId,
+  selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectReplyingToId,
+  selectSender,
   selectTabState,
-  selectCanAnimateInterface,
+  selectUser,
 } from '../../../global/selectors';
-import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import buildClassName from '../../../util/buildClassName';
-import { isUserId, stripCustomEmoji } from '../../../global/helpers';
+import captureEscKeyListener from '../../../util/captureEscKeyListener';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
-import useShowTransition from '../../../hooks/useShowTransition';
-import useLang from '../../../hooks/useLang';
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMenuPosition from '../../../hooks/useMenuPosition';
+import useShowTransition from '../../../hooks/useShowTransition';
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import Button from '../../ui/Button';
 import EmbeddedMessage from '../../common/EmbeddedMessage';
-import MenuItem from '../../ui/MenuItem';
+import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
 import MenuSeparator from '../../ui/MenuSeparator';
 
 import './ComposerEmbeddedMessage.scss';

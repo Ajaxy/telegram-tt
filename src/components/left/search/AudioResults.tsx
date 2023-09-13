@@ -1,24 +1,24 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import { AudioOrigin, LoadMoreDirection } from '../../../types';
 import type { StateProps } from './helpers/createMapStateToProps';
+import { AudioOrigin, LoadMoreDirection } from '../../../types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
-import { createMapStateToProps } from './helpers/createMapStateToProps';
-import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
-import { getSenderName } from './helpers/getSenderName';
-import { throttle } from '../../../util/schedulers';
 import buildClassName from '../../../util/buildClassName';
+import { formatMonthAndYear, toYearMonth } from '../../../util/dateFormat';
+import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+import { throttle } from '../../../util/schedulers';
+import { createMapStateToProps } from './helpers/createMapStateToProps';
+import { getSenderName } from './helpers/getSenderName';
 
-import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 import useLang from '../../../hooks/useLang';
+import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import InfiniteScroll from '../../ui/InfiniteScroll';
 import Audio from '../../common/Audio';
 import NothingFound from '../../common/NothingFound';
+import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 
 export type OwnProps = {

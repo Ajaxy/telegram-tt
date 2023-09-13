@@ -1,14 +1,13 @@
 /* eslint-disable eslint-multitab-tt/set-global-only-variable */
+import { addCallback } from '../lib/teact/teactn';
 import { getActions, getGlobal, setGlobal } from '../global';
 
-import type { MethodArgs, Methods } from '../api/gramjs/methods/types';
 import type { LocalDb } from '../api/gramjs/localDb';
+import type { MethodArgs, Methods } from '../api/gramjs/methods/types';
 import type { ApiInitialArgs } from '../api/types';
 import type { GlobalState } from '../global/types';
 
-import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
-import { deepMerge } from './deepMerge';
 import { selectTabState } from '../global/selectors';
 import {
   callApiLocal,
@@ -19,10 +18,11 @@ import {
   updateFullLocalDb,
   updateLocalDb,
 } from '../api/gramjs';
-import { addCallback } from '../lib/teact/teactn';
 import { deepDiff } from './deepDiff';
+import { deepMerge } from './deepMerge';
 import { getCurrentTabId, signalPasscodeHash, subscribeToTokenDied } from './establishMultitabRole';
 import { omit } from './iteratees';
+import { IS_MULTITAB_SUPPORTED } from './windowEnvironment';
 
 type BroadcastChannelRequestGlobal = {
   type: 'requestGlobal';

@@ -1,13 +1,15 @@
-import type { GlobalState, TabArgs } from '../types';
 import type {
-  ApiUserStories, ApiStory, ApiStorySkipped, ApiStoryDeleted, ApiTypeStory, ApiStoryView, ApiStealthMode,
+  ApiStealthMode,
+  ApiStory, ApiStoryDeleted, ApiStorySkipped, ApiStoryView, ApiTypeStory, ApiUserStories,
 } from '../../api/types';
-import { orderBy, unique } from '../../util/iteratees';
-import { updateUser } from './users';
-import { selectTabState, selectUser, selectUserStories } from '../selectors';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { updateTabState } from './tabs';
+import { orderBy, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
+import { selectTabState, selectUser, selectUserStories } from '../selectors';
+import { updateTabState } from './tabs';
+import { updateUser } from './users';
 
 export function addStories<T extends GlobalState>(global: T, newStoriesByUserId: Record<string, ApiUserStories>): T {
   const updatedByUserId = Object.entries(newStoriesByUserId).reduce((acc, [userId, newUserStories]) => {

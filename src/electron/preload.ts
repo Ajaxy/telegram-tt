@@ -1,6 +1,6 @@
+import type { IpcRendererEvent } from 'electron';
 import { contextBridge, ipcRenderer } from 'electron';
 
-import type { IpcRendererEvent } from 'electron';
 import type { ElectronApi, ElectronEvent, TrafficLightPosition } from '../types/electron';
 import { ElectronAction } from '../types/electron';
 

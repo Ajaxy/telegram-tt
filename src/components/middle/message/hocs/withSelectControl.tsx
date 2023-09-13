@@ -1,16 +1,17 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { FC } from '../../../../lib/teact/teact';
-import React, { useMemo, memo } from '../../../../lib/teact/teact';
+import React, { memo, useMemo } from '../../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../../global';
 
 import type { OwnProps as PhotoProps } from '../Photo';
 import type { OwnProps as VideoProps } from '../Video';
 
-import buildClassName from '../../../../util/buildClassName';
 import {
   selectIsInSelectMode,
   selectIsMessageSelected,
 } from '../../../../global/selectors';
+import buildClassName from '../../../../util/buildClassName';
+
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 type OwnProps =

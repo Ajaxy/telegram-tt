@@ -1,25 +1,26 @@
 import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiAttachment,
   ApiChat,
+  ApiContact,
+  ApiFormattedText,
   ApiGlobalMessageSearchType,
   ApiMessage,
   ApiMessageEntity,
   ApiMessageSearchType,
   ApiNewPoll,
   ApiOnProgress,
+  ApiPoll,
   ApiReportReason,
+  ApiSendMessageAction,
   ApiSticker,
+  ApiStory,
+  ApiStorySkipped,
+  ApiTypeReplyTo,
   ApiUser,
   ApiVideo,
   OnApiUpdate,
-  ApiSendMessageAction,
-  ApiContact,
-  ApiPoll,
-  ApiFormattedText,
-  ApiTypeReplyTo,
-  ApiStory,
-  ApiStorySkipped,
 } from '../../types';
 import {
   MAIN_THREAD_ID,
@@ -33,51 +34,51 @@ import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
-import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
-import {
-  buildApiMessage,
-  buildLocalForwardedMessage,
-  buildLocalMessage,
-  buildApiSponsoredMessage,
-} from '../apiBuilders/messages';
+import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
+import { fetchFile } from '../../../util/files';
+import { compact } from '../../../util/iteratees';
+import { getServerTimeOffset } from '../../../util/serverTime';
+import { interpolateArray } from '../../../util/waveform';
+import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
+import { buildApiFormattedText } from '../apiBuilders/common';
 import {
   buildMessageMediaContent, buildMessageTextContent, buildWebPage,
 } from '../apiBuilders/messageContent';
-import { buildApiFormattedText } from '../apiBuilders/common';
+import {
+  buildApiMessage,
+  buildApiSponsoredMessage,
+  buildLocalForwardedMessage,
+  buildLocalMessage,
+} from '../apiBuilders/messages';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity,
   buildInputMediaDocument,
   buildInputPeer,
   buildInputPoll,
+  buildInputPollFromExisting,
+  buildInputReplyTo,
   buildInputReportReason,
+  buildInputStory,
+  buildInputTextWithEntities,
+  buildMessageFromUpdate,
   buildMtpMessageEntity,
+  buildSendMessageAction,
   generateRandomBigInt,
   getEntityTypeById,
   isMessageWithMedia,
   isServiceMessageWithMedia,
-  buildSendMessageAction,
-  buildInputPollFromExisting,
-  buildInputTextWithEntities,
-  buildMessageFromUpdate,
-  buildInputStory,
-  buildInputReplyTo,
 } from '../gramjsBuilders';
-import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
-import { fetchFile } from '../../../util/files';
 import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
   deserializeBytes,
   resolveMessageApiChatId,
 } from '../helpers';
-import { interpolateArray } from '../../../util/waveform';
-import { requestChatUpdate } from './chats';
-import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
-import { getServerTimeOffset } from '../../../util/serverTime';
-import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import { updateChannelState } from '../updateManager';
-import { compact } from '../../../util/iteratees';
+import { requestChatUpdate } from './chats';
+import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 
 const FAST_SEND_TIMEOUT = 1000;
 const INPUT_WAVEFORM_LENGTH = 63;

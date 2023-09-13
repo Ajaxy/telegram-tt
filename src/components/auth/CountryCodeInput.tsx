@@ -1,17 +1,18 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useState, memo, useCallback, useRef,
+  memo, useCallback, useRef, useState,
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { ApiCountryCode } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
-import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import buildClassName from '../../util/buildClassName';
-import renderText from '../common/helpers/renderText';
-import useLang from '../../hooks/useLang';
 import { isoToEmoji } from '../../util/emoji';
+import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import renderText from '../common/helpers/renderText';
+
+import useLang from '../../hooks/useLang';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import DropdownMenu from '../ui/DropdownMenu';

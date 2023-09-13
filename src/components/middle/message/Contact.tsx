@@ -2,11 +2,11 @@ import type { FC } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiUser, ApiContact, ApiCountryCode } from '../../../api/types';
+import type { ApiContact, ApiCountryCode, ApiUser } from '../../../api/types';
 
 import { selectUser } from '../../../global/selectors';
-import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 import buildClassName from '../../../util/buildClassName';
+import { formatPhoneNumberWithCode } from '../../../util/phoneNumber';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 

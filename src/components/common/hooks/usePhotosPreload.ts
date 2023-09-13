@@ -1,6 +1,8 @@
+import { useEffect } from '../../../lib/teact/teact';
+
 import type { ApiPhoto } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
-import { useEffect } from '../../../lib/teact/teact';
+
 import * as mediaLoader from '../../../util/mediaLoader';
 
 const PHOTOS_TO_PRELOAD = 4;

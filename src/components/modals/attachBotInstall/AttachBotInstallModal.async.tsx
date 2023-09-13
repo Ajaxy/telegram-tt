@@ -1,8 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import React from '../../../lib/teact/teact';
-import { Bundles } from '../../../util/moduleLoader';
 
 import type { OwnProps } from './AttachBotInstallModal';
+
+import { Bundles } from '../../../util/moduleLoader';
 
 import useModuleLoader from '../../../hooks/useModuleLoader';
 

@@ -1,13 +1,13 @@
-import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
-
-import {
-  DPR, IS_SAFARI, IS_ANDROID, IS_IOS,
-} from '../../util/windowEnvironment';
 import { animate } from '../../util/animation';
 import cycleRestrict from '../../util/cycleRestrict';
+import Deferred from '../../util/Deferred';
 import generateUniqueId from '../../util/generateUniqueId';
 import launchMediaWorkers, { MAX_WORKERS } from '../../util/launchMediaWorkers';
-import Deferred from '../../util/Deferred';
+import {
+  DPR, IS_ANDROID, IS_IOS,
+  IS_SAFARI,
+} from '../../util/windowEnvironment';
+import { requestMeasure, requestMutation } from '../fasterdom/fasterdom';
 
 interface Params {
   size: number;

@@ -7,10 +7,12 @@ import { getActions, getGlobal, withGlobal } from '../../global';
 import type {
   ApiChat, ApiMessage, ApiSticker, ApiTopic, ApiUser,
 } from '../../api/types';
+import type { MessageListType } from '../../global/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { FocusDirection } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
-import type { MessageListType } from '../../global/types';
 
+import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import {
   selectCanPlayAnimatedEmojis,
   selectChat,
@@ -20,22 +22,21 @@ import {
   selectTopicFromMessage,
   selectUser,
 } from '../../global/selectors';
-import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { renderActionMessageText } from '../common/helpers/renderActionMessageText';
 import { preventMessageInputBlur } from './helpers/preventMessageInputBlur';
-import useEnsureMessage from '../../hooks/useEnsureMessage';
-import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
-import useFocusMessage from './message/hooks/useFocusMessage';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useShowTransition from '../../hooks/useShowTransition';
 
-import ContextMenuContainer from './message/ContextMenuContainer.async';
+import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import useEnsureMessage from '../../hooks/useEnsureMessage';
+import useFlag from '../../hooks/useFlag';
+import { useIsIntersecting, useOnIntersect } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
+import useShowTransition from '../../hooks/useShowTransition';
+import useFocusMessage from './message/hooks/useFocusMessage';
+
 import AnimatedIconFromSticker from '../common/AnimatedIconFromSticker';
 import ActionMessageSuggestedAvatar from './ActionMessageSuggestedAvatar';
+import ContextMenuContainer from './message/ContextMenuContainer.async';
 
 type OwnProps = {
   message: ApiMessage;

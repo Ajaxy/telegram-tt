@@ -1,9 +1,10 @@
-import { addActionHandler, setGlobal } from '../../index';
-
-import {
-  addNotifyException, updateChat, updateTopic, updateNotifySettings,
-} from '../../reducers';
 import type { ActionReturnType } from '../../types';
+
+import { addActionHandler, setGlobal } from '../../index';
+import {
+  addNotifyException, updateChat, updateNotifySettings,
+  updateTopic,
+} from '../../reducers';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {

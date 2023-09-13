@@ -1,12 +1,12 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiAttachment } from '../../../api/types';
 
 import { GIF_MIME_TYPE, SUPPORTED_IMAGE_CONTENT_TYPES, SUPPORTED_VIDEO_CONTENT_TYPES } from '../../../config';
-import { getFileExtension } from '../../common/helpers/documentInfo';
 import buildClassName from '../../../util/buildClassName';
 import { formatMediaDuration } from '../../../util/dateFormat';
+import { getFileExtension } from '../../common/helpers/documentInfo';
 import { REM } from '../../common/helpers/mediaDimensions';
 
 import useLastCallback from '../../../hooks/useLastCallback';

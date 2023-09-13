@@ -1,30 +1,30 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import type { FC } from '../../../../lib/teact/teact';
-
 import { STICKER_SIZE_FOLDER_SETTINGS } from '../../../../config';
-import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import renderText from '../../../common/helpers/renderText';
-import { partition } from '../../../../util/iteratees';
+import { isChatChannel, isUserBot } from '../../../../global/helpers';
 import {
   selectCanInviteToChat, selectChat,
   selectChatFolder,
   selectTabState, selectUser,
 } from '../../../../global/selectors';
-import { isChatChannel, isUserBot } from '../../../../global/helpers';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
+import { partition } from '../../../../util/iteratees';
+import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
+import renderText from '../../../common/helpers/renderText';
+
 import useEffectWithPrevDeps from '../../../../hooks/useEffectWithPrevDeps';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
 import InviteLink from '../../../common/InviteLink';
 import Picker from '../../../common/Picker';
-import Spinner from '../../../ui/Spinner';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
+import Spinner from '../../../ui/Spinner';
 
 type OwnProps = {
   isActive?: boolean;

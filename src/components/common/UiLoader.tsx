@@ -1,34 +1,33 @@
+import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import { ApiMediaFormat } from '../../api/types';
 import type { TabState } from '../../global/types';
-import type { FC } from '../../lib/teact/teact';
+import { ApiMediaFormat } from '../../api/types';
 
 import { getChatAvatarHash } from '../../global/helpers/chats'; // Direct import for better module splitting
 import { selectIsRightColumnShown, selectTabState } from '../../global/selectors';
-import { pause } from '../../util/schedulers';
+import buildClassName from '../../util/buildClassName';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import * as mediaLoader from '../../util/mediaLoader';
 import { Bundles, loadModule } from '../../util/moduleLoader';
-import buildClassName from '../../util/buildClassName';
+import { pause } from '../../util/schedulers';
 
+import useEffectOnce from '../../hooks/useEffectOnce';
 import useFlag from '../../hooks/useFlag';
 import useShowTransition from '../../hooks/useShowTransition';
-import useEffectOnce from '../../hooks/useEffectOnce';
-
-import styles from './UiLoader.module.scss';
-import appStyles from '../App.module.scss';
 
 // Workaround for incorrect bundling by Webpack: force including in the main chunk
 import '../ui/Modal.scss';
 import './Avatar.scss';
+import appStyles from '../App.module.scss';
+import styles from './UiLoader.module.scss';
 
-import telegramLogoPath from '../../assets/telegram-logo.svg';
 import lockPreviewPath from '../../assets/lock.png';
 import monkeyPath from '../../assets/monkey.svg';
 import spoilerMaskPath from '../../assets/spoilers/mask.svg';
+import telegramLogoPath from '../../assets/telegram-logo.svg';
 
 export type UiLoaderPage =
   'main'

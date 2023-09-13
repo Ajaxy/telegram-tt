@@ -1,22 +1,22 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useEffect, memo, useRef,
+  memo, useEffect, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { ApiVideo } from '../../../api/types';
 
 import { SLIDE_TRANSITION_DURATION } from '../../../config';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import buildClassName from '../../../util/buildClassName';
 import { selectCurrentMessageList, selectIsChatWithSelf } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import Loading from '../../ui/Loading';
 import GifButton from '../../common/GifButton';
+import Loading from '../../ui/Loading';
 
 import './GifPicker.scss';
 

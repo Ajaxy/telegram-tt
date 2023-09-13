@@ -1,18 +1,18 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ISettings } from '../../../types';
 import type { IRadioOption } from '../../ui/CheckboxGroup';
 
 import { SUPPORTED_TRANSLATION_LANGUAGES } from '../../../config';
-import { partition, unique } from '../../../util/iteratees';
 import buildClassName from '../../../util/buildClassName';
+import { partition, unique } from '../../../util/iteratees';
 
-import useHistoryBack from '../../../hooks/useHistoryBack';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
 import Checkbox from '../../ui/Checkbox';

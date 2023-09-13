@@ -1,24 +1,24 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useRef } from '../../../lib/teact/teact';
 
 import type { ApiSticker } from '../../../api/types';
-import type { FC } from '../../../lib/teact/teact';
 
+import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 import buildClassName from '../../../util/buildClassName';
 import findInViewport from '../../../util/findInViewport';
 import isFullyVisible from '../../../util/isFullyVisible';
-import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
 
-import useLastCallback from '../../../hooks/useLastCallback';
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useShowTransition from '../../../hooks/useShowTransition';
-import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
-import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import useHorizontalScroll from '../../../hooks/useHorizontalScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import usePrevDuringAnimation from '../../../hooks/usePrevDuringAnimation';
+import useShowTransition from '../../../hooks/useShowTransition';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
 import Loading from '../../ui/Loading';
-import EmojiButton from './EmojiButton';
 import CustomEmojiButton from './CustomEmojiButton';
+import EmojiButton from './EmojiButton';
 
 import './EmojiTooltip.scss';
 

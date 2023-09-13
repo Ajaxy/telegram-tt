@@ -4,22 +4,23 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ManagementScreens } from '../../../types';
 import type { ApiChat, ApiChatBannedRights, ApiChatMember } from '../../../api/types';
+import { ManagementScreens } from '../../../types';
 
-import stopEvent from '../../../util/stopEvent';
-import buildClassName from '../../../util/buildClassName';
 import { isChatPublic } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
+import buildClassName from '../../../util/buildClassName';
+import stopEvent from '../../../util/stopEvent';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
 import useManagePermissions from '../hooks/useManagePermissions';
 
-import ListItem from '../../ui/ListItem';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
 import Checkbox from '../../ui/Checkbox';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import ListItem from '../../ui/ListItem';
 import Spinner from '../../ui/Spinner';
-import PrivateChatInfo from '../../common/PrivateChatInfo';
 
 type OwnProps = {
   chatId: string;

@@ -1,35 +1,36 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiUser, ApiMessage, ApiChat,
+  ApiChat,
+  ApiMessage, ApiUser,
 } from '../../api/types';
 import type { ChatTranslatedMessages } from '../../global/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
-  getMessageMediaHash,
-  isActionMessage,
-  getSenderTitle,
-  getMessageRoundVideo,
-  getUserColorKey,
   getMessageIsSpoiler,
+  getMessageMediaHash,
+  getMessageRoundVideo,
+  getSenderTitle,
+  getUserColorKey,
+  isActionMessage,
   isMessageTranslatable,
 } from '../../global/helpers';
-import renderText from './helpers/renderText';
-import { getPictogramDimensions } from './helpers/mediaDimensions';
 import buildClassName from '../../util/buildClassName';
+import { getPictogramDimensions } from './helpers/mediaDimensions';
+import renderText from './helpers/renderText';
 
+import { useFastClick } from '../../hooks/useFastClick';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
-import useLang from '../../hooks/useLang';
-import { useFastClick } from '../../hooks/useFastClick';
 import useMessageTranslation from '../middle/message/hooks/useMessageTranslation';
 
 import ActionMessage from '../middle/ActionMessage';
-import MessageSummary from './MessageSummary';
 import MediaSpoiler from './MediaSpoiler';
+import MessageSummary from './MessageSummary';
 
 import './EmbeddedMessage.scss';
 

@@ -1,4 +1,5 @@
 import type { GlobalState, TabState } from '../types';
+
 import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from '../initialState';
 
 export function updatePasscodeSettings<T extends GlobalState>(

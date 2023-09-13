@@ -1,7 +1,4 @@
 import type {
-  GlobalState, MessageListType, TabArgs, Thread, TabThread, ChatTranslatedMessages,
-} from '../types';
-import type {
   ApiChat,
   ApiMessage,
   ApiMessageEntityCustomEmoji,
@@ -9,24 +6,23 @@ import type {
   ApiStickerSetInfo,
   ApiUser,
 } from '../../api/types';
+import type {
+  ChatTranslatedMessages,
+  GlobalState, MessageListType, TabArgs, TabThread, Thread,
+} from '../types';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
-import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { findLast } from '../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { getServerTime } from '../../util/serverTime';
+import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
 import {
-  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectRequestedChatTranslationLanguage,
-} from './chats';
-import {
-  selectBot,
-  selectIsCurrentUserPremium,
-  selectIsUserOrChatContact,
-  selectUser,
-  selectUserStatus,
-} from './users';
-import {
+  canSendReaction,
+  getAllowedAttachmentOptions,
   getCanPostInChat,
   getHasAdminRight,
   getMessageAudio,
@@ -45,21 +41,26 @@ import {
   isChatSuperGroup,
   isCommonBoxChat,
   isForwardedMessage,
-  isMessageLocal,
+  isLocalMessageId, isMessageFailed, isMessageLocal,
+  isMessageTranslatable,
   isOwnMessage,
   isServiceNotificationMessage,
   isUserId,
   isUserRightBanned,
-  canSendReaction,
-  getAllowedAttachmentOptions,
-  isLocalMessageId, isMessageFailed, isMessageTranslatable,
 } from '../helpers';
-import { findLast } from '../../util/iteratees';
-import { selectIsStickerFavorite } from './symbols';
-import { getServerTime } from '../../util/serverTime';
-import { selectTabState } from './tabs';
-import { getCurrentTabId } from '../../util/establishMultitabRole';
+import {
+  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectRequestedChatTranslationLanguage,
+} from './chats';
 import { selectUserStory } from './stories';
+import { selectIsStickerFavorite } from './symbols';
+import { selectTabState } from './tabs';
+import {
+  selectBot,
+  selectIsCurrentUserPremium,
+  selectIsUserOrChatContact,
+  selectUser,
+  selectUserStatus,
+} from './users';
 
 const MESSAGE_EDIT_ALLOWED_TIME = 172800; // 48 hours
 

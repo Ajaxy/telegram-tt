@@ -1,10 +1,11 @@
-import type { GlobalState, TabArgs } from '../types';
 import type {
   ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsGraph,
 } from '../../api/types';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 export function updateStatistics<T extends GlobalState>(
   global: T, chatId: string, statistics: ApiChannelStatistics | ApiGroupStatistics,

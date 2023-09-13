@@ -1,7 +1,7 @@
 import { useRef } from '../lib/teact/teact';
 
-import useLastCallback from './useLastCallback';
 import useForceUpdate from './useForceUpdate';
+import useLastCallback from './useLastCallback';
 import useSyncEffect from './useSyncEffect';
 
 export default function useForumPanelRender(isForumPanelOpen = false) {

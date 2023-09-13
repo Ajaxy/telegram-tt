@@ -1,14 +1,15 @@
+import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { FC, TeactNode } from '../../lib/teact/teact';
 import type { ApiChat, ApiUser } from '../../api/types';
 import type { IconName } from '../../types/icons';
 
-import { selectChat, selectUser } from '../../global/selectors';
 import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
-import renderText from './helpers/renderText';
+import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
 import Avatar from './Avatar';

@@ -6,14 +6,14 @@ import { getActions } from '../../../global';
 
 import { SettingsScreens } from '../../../types';
 
+import useAppLayout from '../../../hooks/useAppLayout';
 import useLang from '../../../hooks/useLang';
 import useMultiClick from '../../../hooks/useMultiClick';
-import useAppLayout from '../../../hooks/useAppLayout';
 
-import DropdownMenu from '../../ui/DropdownMenu';
-import MenuItem from '../../ui/MenuItem';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import DropdownMenu from '../../ui/DropdownMenu';
+import MenuItem from '../../ui/MenuItem';
 
 type OwnProps = {
   currentScreen: SettingsScreens;

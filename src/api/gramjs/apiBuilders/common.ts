@@ -1,23 +1,24 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 import { strippedPhotoToJpg } from '../../../lib/gramjs/Utils';
+
+import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
 import type {
-  ApiPhoto,
-  ApiPhotoSize,
-  ApiThumbnail,
-  ApiVideoSize,
-  ApiUsername,
   ApiFormattedText,
   ApiMessageEntity,
   ApiMessageEntityDefault,
+  ApiPhoto,
+  ApiPhotoSize,
+  ApiThumbnail,
+  ApiUsername,
+  ApiVideoSize,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
 } from '../../types';
-import type { ApiPrivacySettings, PrivacyVisibility } from '../../../types';
 
+import { compact } from '../../../util/iteratees';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
-import { compact } from '../../../util/iteratees';
 import { buildApiPeerId } from './peers';
 
 const DEFAULT_THUMB_SIZE = { w: 100, h: 100 };

@@ -1,21 +1,21 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { GlobalState } from '../../../global/types';
 
 import { ARCHIVED_FOLDER_ID } from '../../../config';
+import { getChatTitle } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
 import { formatIntegerCompact } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
-import { getChatTitle } from '../../../global/helpers';
 
-import useLang from '../../../hooks/useLang';
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import useLang from '../../../hooks/useLang';
 
-import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import Badge from '../../ui/Badge';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 
 import styles from './Archive.module.scss';
 

@@ -1,15 +1,16 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { useEffect, memo, useState } from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiUser, ApiChat, ApiUserStatus, ApiTopic, ApiPhoto,
+  ApiChat, ApiPhoto, ApiTopic, ApiUser, ApiUserStatus,
 } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import { MediaViewerOrigin } from '../../types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
-import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import {
+  getUserStatus, isChatChannel, isUserId, isUserOnline,
+} from '../../global/helpers';
 import {
   selectChat,
   selectChatFullInfo,
@@ -20,28 +21,26 @@ import {
   selectUserFullInfo,
   selectUserStatus,
 } from '../../global/selectors';
-import {
-  getUserStatus, isChatChannel, isUserId, isUserOnline,
-} from '../../global/helpers';
-import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import buildClassName from '../../util/buildClassName';
+import { captureEvents, SwipeDirection } from '../../util/captureEvents';
+import { MEMO_EMPTY_ARRAY } from '../../util/memo';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import renderText from './helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import usePhotosPreload from './hooks/usePhotosPreload';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
+import { useStateRef } from '../../hooks/useStateRef';
+import usePhotosPreload from './hooks/usePhotosPreload';
 
+import Transition from '../ui/Transition';
+import Avatar from './Avatar';
 import FullNameTitle from './FullNameTitle';
 import ProfilePhoto from './ProfilePhoto';
-import Transition from '../ui/Transition';
 import TopicIcon from './TopicIcon';
-import Avatar from './Avatar';
 
 import './ProfileInfo.scss';
-
 import styles from './ProfileInfo.module.scss';
-import { useStateRef } from '../../hooks/useStateRef';
 
 type OwnProps = {
   userId: string;

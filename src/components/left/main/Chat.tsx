@@ -2,10 +2,6 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
-import { StoryViewerOrigin } from '../../../types';
-import type { ChatAnimationTypes } from './hooks';
-import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import type {
   ApiChat,
   ApiFormattedText,
@@ -16,9 +12,11 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../../api/types';
-
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
+import { StoryViewerOrigin } from '../../../types';
+
 import {
   getMessageAction,
   getPrivateChatUserId,
@@ -45,25 +43,27 @@ import {
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { createLocationHash } from '../../../util/routing';
+import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../util/windowEnvironment';
 
-import useLastCallback from '../../../hooks/useLastCallback';
-import useSelectorSignal from '../../../hooks/useSelectorSignal';
+import useAppLayout from '../../../hooks/useAppLayout';
 import useChatContextActions from '../../../hooks/useChatContextActions';
 import useFlag from '../../../hooks/useFlag';
-import useChatListEntry from './hooks/useChatListEntry';
-import useAppLayout from '../../../hooks/useAppLayout';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useSelectorSignal from '../../../hooks/useSelectorSignal';
 import useShowTransition from '../../../hooks/useShowTransition';
+import useChatListEntry from './hooks/useChatListEntry';
 
-import ListItem from '../../ui/ListItem';
 import Avatar from '../../common/Avatar';
-import LastMessageMeta from '../../common/LastMessageMeta';
 import DeleteChatModal from '../../common/DeleteChatModal';
-import ReportModal from '../../common/ReportModal';
 import FullNameTitle from '../../common/FullNameTitle';
+import LastMessageMeta from '../../common/LastMessageMeta';
+import ReportModal from '../../common/ReportModal';
+import ListItem from '../../ui/ListItem';
 import ChatFolderModal from '../ChatFolderModal.async';
 import MuteChatModal from '../MuteChatModal.async';
-import ChatCallStatus from './ChatCallStatus';
 import ChatBadge from './ChatBadge';
+import ChatCallStatus from './ChatCallStatus';
 
 import './Chat.scss';
 

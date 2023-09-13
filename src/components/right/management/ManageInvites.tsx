@@ -1,31 +1,32 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiChat, ApiExportedInvite } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
 import { STICKER_SIZE_INVITES, TME_LINK_PREFIX } from '../../../config';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
-import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
 import { getMainUsername, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectTabState } from '../../../global/selectors';
 import { copyTextToClipboard } from '../../../util/clipboard';
+import { formatCountdown, MILLISECONDS_IN_DAY } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
-import useHistoryBack from '../../../hooks/useHistoryBack';
-import useLang from '../../../hooks/useLang';
-import useInterval from '../../../hooks/useInterval';
-import useForceUpdate from '../../../hooks/useForceUpdate';
-import useFlag from '../../../hooks/useFlag';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
-import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
+import useFlag from '../../../hooks/useFlag';
+import useForceUpdate from '../../../hooks/useForceUpdate';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useInterval from '../../../hooks/useInterval';
+import useLang from '../../../hooks/useLang';
+
+import AnimatedIcon from '../../common/AnimatedIcon';
+import InviteLink from '../../common/InviteLink';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
-import AnimatedIcon from '../../common/AnimatedIcon';
-import InviteLink from '../../common/InviteLink';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;

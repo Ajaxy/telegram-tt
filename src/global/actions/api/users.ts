@@ -1,19 +1,19 @@
+import type { ApiUser } from '../../../api/types';
+import type { ActionReturnType } from '../../types';
+import { ManagementProgress } from '../../../types';
+
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey, unique } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
+import { throttle } from '../../../util/schedulers';
+import { getServerTime } from '../../../util/serverTime';
+import { callApi } from '../../../api/gramjs';
+import { isUserBot, isUserId } from '../../helpers';
 import {
   addActionHandler,
   getGlobal,
   setGlobal,
 } from '../../index';
-
-import type { ApiUser } from '../../../api/types';
-import { ManagementProgress } from '../../../types';
-
-import { throttle } from '../../../util/schedulers';
-import { buildCollectionByKey, unique } from '../../../util/iteratees';
-import { isUserBot, isUserId } from '../../helpers';
-import { callApi } from '../../../api/gramjs';
-import {
-  selectChat, selectCurrentMessageList, selectTabState, selectUser, selectUserFullInfo,
-} from '../../selectors';
 import {
   addChats,
   addUsers,
@@ -23,15 +23,14 @@ import {
   updateChat,
   updateManagementProgress,
   updateUser,
+  updateUserFullInfo,
   updateUsers,
   updateUserSearch,
   updateUserSearchFetchingStatus,
-  updateUserFullInfo,
 } from '../../reducers';
-import { getServerTime } from '../../../util/serverTime';
-import * as langProvider from '../../../util/langProvider';
-import type { ActionReturnType } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import {
+  selectChat, selectCurrentMessageList, selectTabState, selectUser, selectUserFullInfo,
+} from '../../selectors';
 
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
 const runThrottledForSearch = throttle((cb) => cb(), 500, false);

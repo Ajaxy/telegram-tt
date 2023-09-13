@@ -1,40 +1,42 @@
+import '../../../global/actions/calls';
+
+import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
-import '../../../global/actions/calls';
 
 import type {
   GroupCallConnectionState, GroupCallParticipant as TypeGroupCallParticipant,
 } from '../../../lib/secret-sauce';
-import type { FC } from '../../../lib/teact/teact';
 import type { VideoParticipant } from './hooks/useGroupCallVideoLayout';
 
 import { IS_SCREENSHARE_SUPPORTED } from '../../../lib/secret-sauce';
-import buildClassName from '../../../util/buildClassName';
+import { selectChat, selectTabState } from '../../../global/selectors';
 import {
   selectCanInviteToActiveGroupCall,
   selectGroupCall,
   selectGroupCallParticipant,
   selectIsAdminInActiveGroupCall,
 } from '../../../global/selectors/calls';
-import { selectChat, selectTabState } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
 import { compact } from '../../../util/iteratees';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
+
 import useAppLayout from '../../../hooks/useAppLayout';
-import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
-import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
-import useLastCallback from '../../../hooks/useLastCallback';
+import useFlag from '../../../hooks/useFlag';
 import { useFullscreenStatus } from '../../../hooks/useFullscreen';
+import { useIntersectionObserver, useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useGroupCallVideoLayout from './hooks/useGroupCallVideoLayout';
 
 import Button from '../../ui/Button';
-import Modal from '../../ui/Modal';
-import MicrophoneButton from './MicrophoneButton';
 import Checkbox from '../../ui/Checkbox';
-import GroupCallParticipantList from './GroupCallParticipantList';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import Modal from '../../ui/Modal';
+import GroupCallParticipantList from './GroupCallParticipantList';
 import GroupCallParticipantVideo from './GroupCallParticipantVideo';
+import MicrophoneButton from './MicrophoneButton';
 
 import styles from './GroupCall.module.scss';
 

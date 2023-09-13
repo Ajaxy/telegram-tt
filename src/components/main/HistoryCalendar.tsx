@@ -3,6 +3,7 @@ import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import { selectTabState } from '../../global/selectors';
+
 import useLang from '../../hooks/useLang';
 
 import CalendarModal from '../common/CalendarModal';

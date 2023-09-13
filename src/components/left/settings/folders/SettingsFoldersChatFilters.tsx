@@ -1,24 +1,25 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useMemo, useCallback } from '../../../../lib/teact/teact';
+import React, { memo, useCallback, useMemo } from '../../../../lib/teact/teact';
 import { getGlobal } from '../../../../global';
 
-import { unique } from '../../../../util/iteratees';
+import type {
+  FolderEditDispatch,
+  FoldersState,
+} from '../../../../hooks/reducers/useFoldersReducer';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
 import { filterChatsByName } from '../../../../global/helpers';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
-import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
-import type {
-  FoldersState,
-  FolderEditDispatch,
-} from '../../../../hooks/reducers/useFoldersReducer';
+import { unique } from '../../../../util/iteratees';
+
 import {
   selectChatFilters,
 } from '../../../../hooks/reducers/useFoldersReducer';
+import { useFolderManagerForOrderedIds } from '../../../../hooks/useFolderManager';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
 
-import SettingsFoldersChatsPicker from './SettingsFoldersChatsPicker';
 import Loading from '../../../ui/Loading';
+import SettingsFoldersChatsPicker from './SettingsFoldersChatsPicker';
 
 type OwnProps = {
   mode: 'included' | 'excluded';

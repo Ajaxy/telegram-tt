@@ -1,9 +1,10 @@
-import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
 import { getActions } from '../global';
+
+import { DEBUG, DEBUG_MORE, IS_TEST } from '../config';
 import { formatShareText } from './deeplink';
-import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './windowEnvironment';
 import { validateFiles } from './files';
 import { notifyClientReady, playNotifySoundDebounced } from './notifications';
+import { IS_ANDROID, IS_IOS, IS_SERVICE_WORKER_SUPPORTED } from './windowEnvironment';
 
 type WorkerAction = {
   type: string;

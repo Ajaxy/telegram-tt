@@ -1,16 +1,17 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useRef,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiSticker, ApiStickerSet } from '../../api/types';
 
-import buildClassName from '../../util/buildClassName';
 import { selectCanPlayAnimatedEmojis } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
+
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
-import usePrevious from '../../hooks/usePrevious';
 import useLang from '../../hooks/useLang';
+import usePrevious from '../../hooks/usePrevious';
 
 import Modal from '../ui/Modal';
 import StickerSetCard from './StickerSetCard';

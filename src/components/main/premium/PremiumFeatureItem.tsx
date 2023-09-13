@@ -1,9 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
-import renderText from '../../common/helpers/renderText';
-import { hexToRgb, lerpRgb } from '../../../util/switchTheme';
 import buildClassName from '../../../util/buildClassName';
+import { hexToRgb, lerpRgb } from '../../../util/switchTheme';
+import renderText from '../../common/helpers/renderText';
 
 import ListItem from '../../ui/ListItem';
 

@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from '../lib/teact/teact';
 
+import useForceUpdate from './useForceUpdate';
+import useHeavyAnimationCheck, { isHeavyAnimating } from './useHeavyAnimationCheck';
 import useRunDebounced from './useRunDebounced';
 import useSyncEffect from './useSyncEffect';
-import useHeavyAnimationCheck, { isHeavyAnimating } from './useHeavyAnimationCheck';
-import useForceUpdate from './useForceUpdate';
 
 export default function useDebouncedMemo<R extends any, D extends any[]>(
   resolverFn: () => R, ms: number, dependencies: D,

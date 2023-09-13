@@ -1,9 +1,10 @@
 import { useEffect, useRef } from '../../../../lib/teact/teact';
+
 import { requestMeasure } from '../../../../lib/fasterdom/fasterdom';
 
-import useLastCallback from '../../../../hooks/useLastCallback';
 import useBackgroundMode, { isBackgroundModeActive } from '../../../../hooks/useBackgroundMode';
 import useHeavyAnimationCheck, { isHeavyAnimating } from '../../../../hooks/useHeavyAnimationCheck';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import usePriorityPlaybackCheck, { isPriorityPlaybackActive } from '../../../../hooks/usePriorityPlaybackCheck';
 
 export default function useVideoAutoPause(

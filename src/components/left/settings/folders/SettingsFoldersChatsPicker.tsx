@@ -1,30 +1,32 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  useCallback, useRef, useEffect, memo, useState,
+  memo, useCallback, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
-import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../../../global';
 
-import { isUserId } from '../../../../global/helpers';
 import type { FolderChatType } from '../../../../hooks/reducers/useFoldersReducer';
-import {
-  INCLUDED_CHAT_TYPES,
-  EXCLUDED_CHAT_TYPES,
-} from '../../../../hooks/reducers/useFoldersReducer';
+
+import { requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import { isUserId } from '../../../../global/helpers';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
+
+import {
+  EXCLUDED_CHAT_TYPES,
+  INCLUDED_CHAT_TYPES,
+} from '../../../../hooks/reducers/useFoldersReducer';
 import useInfiniteScroll from '../../../../hooks/useInfiniteScroll';
 import useLang from '../../../../hooks/useLang';
-import { selectCurrentLimit } from '../../../../global/selectors/limits';
 
-import Checkbox from '../../../ui/Checkbox';
-import InputText from '../../../ui/InputText';
-import ListItem from '../../../ui/ListItem';
-import PrivateChatInfo from '../../../common/PrivateChatInfo';
 import GroupChatInfo from '../../../common/GroupChatInfo';
 import PickerSelectedItem from '../../../common/PickerSelectedItem';
-import InfiniteScroll from '../../../ui/InfiniteScroll';
-import Loading from '../../../ui/Loading';
+import PrivateChatInfo from '../../../common/PrivateChatInfo';
+import Checkbox from '../../../ui/Checkbox';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
+import InfiniteScroll from '../../../ui/InfiniteScroll';
+import InputText from '../../../ui/InputText';
+import ListItem from '../../../ui/ListItem';
+import Loading from '../../../ui/Loading';
 
 import '../../../common/Picker.scss';
 import './SettingsFoldersChatsPicker.scss';

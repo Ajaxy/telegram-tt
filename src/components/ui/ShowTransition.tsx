@@ -1,9 +1,10 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
-import useShowTransition from '../../hooks/useShowTransition';
-import usePrevious from '../../hooks/usePrevious';
 import buildClassName from '../../util/buildClassName';
+
+import usePrevious from '../../hooks/usePrevious';
+import useShowTransition from '../../hooks/useShowTransition';
 
 type OwnProps = {
   isOpen: boolean;

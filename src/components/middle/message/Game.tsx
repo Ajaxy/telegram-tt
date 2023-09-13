@@ -1,9 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
 import type { ApiMessage } from '../../../api/types';
 
-import { getActions } from '../../../global';
 import { getGamePreviewPhotoHash, getGamePreviewVideoHash, getMessageText } from '../../../global/helpers';
 
 import useMedia from '../../../hooks/useMedia';

@@ -5,7 +5,6 @@ import { getActions, withGlobal } from '../../../global';
 
 import type { AnimationLevel, PerformanceType, PerformanceTypeKey } from '../../../types';
 
-import { IS_BACKDROP_BLUR_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   ANIMATION_LEVEL_CUSTOM, ANIMATION_LEVEL_MAX, ANIMATION_LEVEL_MED, ANIMATION_LEVEL_MIN,
 } from '../../../config';
@@ -16,11 +15,13 @@ import {
 } from '../../../global/initialState';
 import { selectPerformanceSettings } from '../../../global/selectors';
 import { areDeepEqual } from '../../../util/areDeepEqual';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
+import { IS_BACKDROP_BLUR_SUPPORTED } from '../../../util/windowEnvironment';
 
-import RangeSlider from '../../ui/RangeSlider';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import Checkbox from '../../ui/Checkbox';
+import RangeSlider from '../../ui/RangeSlider';
 
 type PerformanceSection = [string, PerformanceOption[]];
 type PerformanceOption = {

@@ -1,9 +1,10 @@
 import type { ApiMessage } from '../../../../api/types';
 
-import { IS_CANVAS_FILTER_SUPPORTED } from '../../../../util/windowEnvironment';
 import { getMessageMediaThumbDataUri } from '../../../../global/helpers';
-import useCanvasBlur from '../../../../hooks/useCanvasBlur';
+import { IS_CANVAS_FILTER_SUPPORTED } from '../../../../util/windowEnvironment';
+
 import useAppLayout from '../../../../hooks/useAppLayout';
+import useCanvasBlur from '../../../../hooks/useCanvasBlur';
 
 export default function useBlurredMediaThumbRef(
   message: ApiMessage,

@@ -7,24 +7,26 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChatMember, ApiUserStatus } from '../../../api/types';
 import { ManagementScreens } from '../../../types';
 
-import { unique } from '../../../util/iteratees';
-import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import {
-  sortUserIds, isChatChannel, filterUsersByName, sortChatIds, isUserBot, getHasAdminRight, isChatBasicGroup,
+  filterUsersByName, getHasAdminRight, isChatBasicGroup,
+  isChatChannel, isUserBot, sortChatIds, sortUserIds,
 } from '../../../global/helpers';
-import useLang from '../../../hooks/useLang';
+import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
+import { unique } from '../../../util/iteratees';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
+import useLang from '../../../hooks/useLang';
 
-import PrivateChatInfo from '../../common/PrivateChatInfo';
 import NothingFound from '../../common/NothingFound';
-import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
-import InputText from '../../ui/InputText';
+import PrivateChatInfo from '../../common/PrivateChatInfo';
 import InfiniteScroll from '../../ui/InfiniteScroll';
+import InputText from '../../ui/InputText';
+import ListItem, { type MenuItemContextAction } from '../../ui/ListItem';
 import Loading from '../../ui/Loading';
-import DeleteMemberModal from '../DeleteMemberModal';
 import Switcher from '../../ui/Switcher';
+import DeleteMemberModal from '../DeleteMemberModal';
 
 type OwnProps = {
   chatId: string;

@@ -3,32 +3,32 @@ import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
 import { getActions, withGlobal } from '../global';
 
 import type { GlobalState } from '../global/types';
-import type { UiLoaderPage } from './common/UiLoader';
 import type { ThemeKey } from '../types';
+import type { UiLoaderPage } from './common/UiLoader';
 
-import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from '../util/windowEnvironment';
 import {
   DARK_THEME_BG_COLOR, INACTIVE_MARKER, LIGHT_THEME_BG_COLOR, PAGE_TITLE,
 } from '../config';
 import { selectTabState, selectTheme } from '../global/selectors';
-import { updateSizes } from '../util/windowSize';
 import { addActiveTabChangeListener } from '../util/activeTabMonitor';
-import { hasStoredSession } from '../util/sessions';
 import buildClassName from '../util/buildClassName';
-import { parseInitialLocationHash } from '../util/routing';
 import { setupBeforeInstallPrompt } from '../util/installPrompt';
+import { parseInitialLocationHash } from '../util/routing';
+import { hasStoredSession } from '../util/sessions';
+import { IS_INSTALL_PROMPT_SUPPORTED, IS_MULTITAB_SUPPORTED, PLATFORM_ENV } from '../util/windowEnvironment';
+import { updateSizes } from '../util/windowSize';
 
+import useAppLayout from '../hooks/useAppLayout';
 import useFlag from '../hooks/useFlag';
 import usePrevious from '../hooks/usePrevious';
-import useAppLayout from '../hooks/useAppLayout';
 
-import Auth from './auth/Auth';
-import Main from './main/Main.async';
-import LockScreen from './main/LockScreen.async';
-import AppInactive from './main/AppInactive';
-import Transition from './ui/Transition';
-import UiLoader from './common/UiLoader';
 // import Test from './test/TestSvg';
+import Auth from './auth/Auth';
+import UiLoader from './common/UiLoader';
+import AppInactive from './main/AppInactive';
+import LockScreen from './main/LockScreen.async';
+import Main from './main/Main.async';
+import Transition from './ui/Transition';
 
 import styles from './App.module.scss';
 

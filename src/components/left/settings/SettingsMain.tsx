@@ -1,17 +1,18 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useEffect } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import { SettingsScreens } from '../../../types';
 
 import { selectIsPremiumPurchaseBlocked } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
-import ListItem from '../../ui/ListItem';
-import ProfileInfo from '../../common/ProfileInfo';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import ChatExtra from '../../common/ChatExtra';
 import PremiumIcon from '../../common/PremiumIcon';
+import ProfileInfo from '../../common/ProfileInfo';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   isActive?: boolean;

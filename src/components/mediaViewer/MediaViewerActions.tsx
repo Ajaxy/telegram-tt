@@ -1,35 +1,35 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiMessage, ApiPhoto, ApiChat, ApiUser,
+  ApiChat, ApiMessage, ApiPhoto, ApiUser,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { MenuItemProps } from '../ui/MenuItem';
 
+import { getMessageMediaFormat, getMessageMediaHash, isUserId } from '../../global/helpers';
 import {
-  selectIsDownloading,
-  selectIsMessageProtected,
   selectAllowedMessageActions,
   selectCurrentMessageList,
   selectIsChatProtected,
+  selectIsDownloading,
+  selectIsMessageProtected,
 } from '../../global/selectors';
-import { getMessageMediaFormat, getMessageMediaHash, isUserId } from '../../global/helpers';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
-import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
-import useFlag from '../../hooks/useFlag';
 import useAppLayout from '../../hooks/useAppLayout';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 import useZoomChange from './hooks/useZoomChangeSignal';
 
+import DeleteMessageModal from '../common/DeleteMessageModal';
+import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 import ProgressSpinner from '../ui/ProgressSpinner';
-import DeleteMessageModal from '../common/DeleteMessageModal';
-import DeleteProfilePhotoModal from '../common/DeleteProfilePhotoModal';
 
 import './MediaViewerActions.scss';
 

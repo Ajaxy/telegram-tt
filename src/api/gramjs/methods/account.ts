@@ -1,10 +1,12 @@
 import BigInt from 'big-integer';
+import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiChat, ApiPhoto, ApiReportReason, ApiUser,
 } from '../../types';
+
+import { buildInputPeer, buildInputPhoto, buildInputReportReason } from '../gramjsBuilders';
 import { invokeRequest } from './client';
-import { Api as GramJs } from '../../../lib/gramjs';
-import { buildInputPeer, buildInputReportReason, buildInputPhoto } from '../gramjsBuilders';
 
 export async function reportPeer({
   peer,

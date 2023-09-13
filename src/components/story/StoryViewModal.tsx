@@ -1,9 +1,9 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiStory, ApiStoryView } from '../../api/types';
 
 import {
@@ -20,20 +20,20 @@ import buildClassName from '../../util/buildClassName';
 import { getServerTime } from '../../util/serverTime';
 import renderText from '../common/helpers/renderText';
 
+import useDebouncedCallback from '../../hooks/useDebouncedCallback';
+import useFlag from '../../hooks/useFlag';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-import useFlag from '../../hooks/useFlag';
 import useScrolledState from '../../hooks/useScrolledState';
-import useDebouncedCallback from '../../hooks/useDebouncedCallback';
 
-import Modal from '../ui/Modal';
-import ListItem from '../ui/ListItem';
 import Button from '../ui/Button';
-import InfiniteScroll from '../ui/InfiniteScroll';
-import SearchInput from '../ui/SearchInput';
 import DropdownMenu from '../ui/DropdownMenu';
+import InfiniteScroll from '../ui/InfiniteScroll';
+import ListItem from '../ui/ListItem';
 import MenuItem from '../ui/MenuItem';
+import Modal from '../ui/Modal';
 import PlaceholderChatInfo from '../ui/placeholder/PlaceholderChatInfo';
+import SearchInput from '../ui/SearchInput';
 import StoryView from './StoryView';
 
 import styles from './StoryViewModal.module.scss';

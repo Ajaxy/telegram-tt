@@ -1,41 +1,40 @@
-import {
-  addActionHandler, getGlobal, setGlobal,
-} from '../../index';
+import type { ActionReturnType } from '../../types';
 
 import {
-  initApi, callApi, callApiLocal, setShouldEnableDebugLog,
-} from '../../../api/gramjs';
-
-import {
-  LANG_CACHE_NAME,
   CUSTOM_BG_CACHE_NAME,
+  IS_TEST,
+  LANG_CACHE_NAME,
+  LOCK_SCREEN_ANIMATION_DURATION_MS,
   MEDIA_CACHE_NAME,
   MEDIA_CACHE_NAME_AVATARS,
   MEDIA_PROGRESSIVE_CACHE_NAME,
-  IS_TEST,
-  LOCK_SCREEN_ANIMATION_DURATION_MS,
 } from '../../../config';
+import { updateAppBadge } from '../../../util/appBadge';
+import * as cacheApi from '../../../util/cacheApi';
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { unsubscribe } from '../../../util/notifications';
+import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
+import { parseInitialLocationHash, resetInitialLocationHash } from '../../../util/routing';
+import {
+  clearLegacySessions,
+  clearStoredSession,
+  importLegacySession,
+  loadStoredSession,
+  storeSession,
+} from '../../../util/sessions';
+import { forceWebsync } from '../../../util/websync';
 import {
   IS_WEBM_SUPPORTED, MAX_BUFFER_SIZE, PLATFORM_ENV,
 } from '../../../util/windowEnvironment';
-import { unsubscribe } from '../../../util/notifications';
-import * as cacheApi from '../../../util/cacheApi';
-import { updateAppBadge } from '../../../util/appBadge';
 import {
-  storeSession,
-  loadStoredSession,
-  clearStoredSession,
-  importLegacySession,
-  clearLegacySessions,
-} from '../../../util/sessions';
-import { forceWebsync } from '../../../util/websync';
-import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
-import { clearEncryptedSession, encryptSession, forgetPasscode } from '../../../util/passcode';
+  callApi, callApiLocal, initApi, setShouldEnableDebugLog,
+} from '../../../api/gramjs';
 import { serializeGlobal } from '../../cache';
-import { parseInitialLocationHash, resetInitialLocationHash } from '../../../util/routing';
-import type { ActionReturnType } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import {
+  addActionHandler, getGlobal, setGlobal,
+} from '../../index';
+import { addUsers, clearGlobalForLockScreen, updatePasscodeSettings } from '../../reducers';
 
 addActionHandler('initApi', async (global, actions): Promise<void> => {
   if (!IS_TEST) {

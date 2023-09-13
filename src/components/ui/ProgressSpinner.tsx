@@ -1,13 +1,14 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 
-import { DPR } from '../../util/windowEnvironment';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { animate, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
+import { DPR } from '../../util/windowEnvironment';
+
+import { useStateRef } from '../../hooks/useStateRef';
 
 import './ProgressSpinner.scss';
-import { animate, timingFunctions } from '../../util/animation';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
-import { useStateRef } from '../../hooks/useStateRef';
 
 const SIZES = {
   s: 42, m: 48, l: 54, xl: 52,

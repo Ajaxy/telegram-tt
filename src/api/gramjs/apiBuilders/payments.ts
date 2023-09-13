@@ -1,13 +1,13 @@
 import type { Api as GramJs } from '../../../lib/gramjs';
-
 import type {
-  ApiInvoice, ApiPaymentSavedInfo, ApiPremiumPromo, ApiPremiumSubscriptionOption,
-  ApiPaymentForm, ApiReceipt, ApiLabeledPrice, ApiPaymentCredentials,
+  ApiInvoice, ApiLabeledPrice, ApiPaymentCredentials,
+  ApiPaymentForm, ApiPaymentSavedInfo, ApiPremiumPromo, ApiPremiumSubscriptionOption,
+  ApiReceipt,
 } from '../../types';
 
-import { buildApiDocument, buildApiWebDocument } from './messageContent';
 import { buildApiMessageEntity } from './common';
 import { omitVirtualClassFields } from './helpers';
+import { buildApiDocument, buildApiWebDocument } from './messageContent';
 
 export function buildShippingOptions(shippingOptions: GramJs.ShippingOption[] | undefined) {
   if (!shippingOptions) {

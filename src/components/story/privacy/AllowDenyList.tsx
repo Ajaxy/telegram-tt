@@ -1,10 +1,14 @@
 import React, { memo, useMemo, useState } from '../../../lib/teact/teact';
-import Picker from '../../common/Picker';
-import { unique } from '../../../util/iteratees';
-import { filterUsersByName } from '../../../global/helpers';
+
 import type { ApiUser } from '../../../api/types';
-import useLang from '../../../hooks/useLang';
+
+import { filterUsersByName } from '../../../global/helpers';
+import { unique } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
+
+import useLang from '../../../hooks/useLang';
+
+import Picker from '../../common/Picker';
 
 interface OwnProps {
   id: string;

@@ -6,34 +6,34 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiTypeStory } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import {
   selectIsStoryViewerOpen,
+  selectPerformanceSettingsValue,
   selectTabState,
   selectUserStory,
-  selectPerformanceSettingsValue,
 } from '../../global/selectors';
+import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import { disableDirectTextInput, enableDirectTextInput } from '../../util/directInputManager';
-import { animateOpening, animateClosing } from './helpers/ghostAnimation';
-import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
-import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
-import buildClassName from '../../util/buildClassName';
-import { ANIMATION_END_DELAY } from '../../config';
+import { animateClosing, animateOpening } from './helpers/ghostAnimation';
 
 import useFlag from '../../hooks/useFlag';
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
-import useStoryProps from './hooks/useStoryProps';
+import { dispatchPriorityPlaybackEvent } from '../../hooks/usePriorityPlaybackCheck';
 import useSlideSizes from './hooks/useSlideSizes';
+import useStoryProps from './hooks/useStoryProps';
 
-import ShowTransition from '../ui/ShowTransition';
-import Button from '../ui/Button';
-import StorySlides from './StorySlides';
-import StoryDeleteConfirmModal from './StoryDeleteConfirmModal';
-import StoryViewModal from './StoryViewModal';
 import ReportModal from '../common/ReportModal';
-import StorySettings from './StorySettings';
+import Button from '../ui/Button';
+import ShowTransition from '../ui/ShowTransition';
 import StealthModeModal from './StealthModeModal';
+import StoryDeleteConfirmModal from './StoryDeleteConfirmModal';
+import StorySettings from './StorySettings';
+import StorySlides from './StorySlides';
+import StoryViewModal from './StoryViewModal';
 
 import styles from './StoryViewer.module.scss';
 

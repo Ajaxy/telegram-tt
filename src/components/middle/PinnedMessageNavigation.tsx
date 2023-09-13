@@ -1,9 +1,9 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useRef,
+  memo,
   useLayoutEffect,
   useMemo,
-  memo,
+  useRef,
 } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';

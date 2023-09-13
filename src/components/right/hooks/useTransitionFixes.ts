@@ -1,5 +1,6 @@
 import { useEffect } from '../../../lib/teact/teact';
-import { requestMutation, requestMeasure } from '../../../lib/fasterdom/fasterdom';
+
+import { requestMeasure, requestMutation } from '../../../lib/fasterdom/fasterdom';
 
 import useLastCallback from '../../../hooks/useLastCallback';
 

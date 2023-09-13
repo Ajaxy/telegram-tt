@@ -1,8 +1,7 @@
-import { addActionHandler } from '../../index';
-
 import type { ActionReturnType } from '../../types';
 
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 

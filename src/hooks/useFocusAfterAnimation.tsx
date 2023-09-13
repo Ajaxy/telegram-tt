@@ -1,8 +1,8 @@
 import type { RefObject } from 'react';
-import { requestMutation } from '../lib/fasterdom/fasterdom';
-
-import { IS_TOUCH_ENV } from '../util/windowEnvironment';
 import { useEffect } from '../lib/teact/teact';
+
+import { requestMutation } from '../lib/fasterdom/fasterdom';
+import { IS_TOUCH_ENV } from '../util/windowEnvironment';
 
 const DEFAULT_DURATION = 400;
 

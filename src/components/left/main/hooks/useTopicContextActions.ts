@@ -4,8 +4,8 @@ import { getActions } from '../../../../global';
 import type { ApiChat, ApiTopic } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 
-import { compact } from '../../../../util/iteratees';
 import { getCanManageTopic, getHasAdminRight } from '../../../../global/helpers';
+import { compact } from '../../../../util/iteratees';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment';
 
 import useLang from '../../../../hooks/useLang';

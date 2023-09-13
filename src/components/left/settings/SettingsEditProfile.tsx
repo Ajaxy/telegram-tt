@@ -1,33 +1,35 @@
 import type { ChangeEvent } from 'react';
+import type { FC } from '../../../lib/teact/teact';
 import React, {
-  useState, useCallback, memo, useEffect, useMemo,
+  memo, useCallback, useEffect, useMemo,
+  useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiUsername } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import { ProfileEditProgress } from '../../../types';
 
 import { PURCHASE_USERNAME, TME_LINK_PREFIX, USERNAME_PURCHASE_ERROR } from '../../../config';
-import { throttle } from '../../../util/schedulers';
-import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { getChatAvatarHash } from '../../../global/helpers';
+import { selectTabState, selectUser, selectUserFullInfo } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
+import { throttle } from '../../../util/schedulers';
 import renderText from '../../common/helpers/renderText';
-import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
+
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useMedia from '../../../hooks/useMedia';
 import usePrevious from '../../../hooks/usePrevious';
 
-import AvatarEditable from '../../ui/AvatarEditable';
-import FloatingActionButton from '../../ui/FloatingActionButton';
-import Spinner from '../../ui/Spinner';
-import InputText from '../../ui/InputText';
-import UsernameInput from '../../common/UsernameInput';
-import TextArea from '../../ui/TextArea';
 import ManageUsernames from '../../common/ManageUsernames';
 import SafeLink from '../../common/SafeLink';
+import UsernameInput from '../../common/UsernameInput';
+import AvatarEditable from '../../ui/AvatarEditable';
+import FloatingActionButton from '../../ui/FloatingActionButton';
+import InputText from '../../ui/InputText';
+import Spinner from '../../ui/Spinner';
+import TextArea from '../../ui/TextArea';
 
 type OwnProps = {
   isActive: boolean;

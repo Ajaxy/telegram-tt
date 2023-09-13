@@ -1,14 +1,13 @@
-import React, { useEffect, memo, useMemo } from '../../lib/teact/teact';
+import type { FC } from '../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type {
-  ApiChat, ApiTopic, ApiThreadInfo, ApiTypingStatus,
+  ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import { MediaViewerOrigin } from '../../types';
 
-import { REM } from './helpers/mediaDimensions';
 import {
   getChatTypeString,
   getMainUsername,
@@ -22,15 +21,17 @@ import {
   selectThreadMessagesCount,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { REM } from './helpers/mediaDimensions';
 import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Avatar from './Avatar';
-import TypingStatus from './TypingStatus';
 import DotAnimation from './DotAnimation';
 import FullNameTitle from './FullNameTitle';
 import TopicIcon from './TopicIcon';
-import useLastCallback from '../../hooks/useLastCallback';
+import TypingStatus from './TypingStatus';
 
 const TOPIC_ICON_SIZE = 2.5 * REM;
 

@@ -1,4 +1,5 @@
 import { useRef } from '../lib/teact/teact';
+
 import { createSignal } from '../util/signals';
 
 export default function useSignal<T>(initial?: T) {

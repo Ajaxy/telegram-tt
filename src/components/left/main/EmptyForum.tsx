@@ -1,18 +1,19 @@
+import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
 import type { ApiSticker } from '../../../api/types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
-import { selectAnimatedEmoji, selectChat } from '../../../global/selectors';
 import { getHasAdminRight } from '../../../global/helpers';
+import { selectAnimatedEmoji, selectChat } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import useLang from '../../../hooks/useLang';
-import useAppLayout from '../../../hooks/useAppLayout';
+import { REM } from '../../common/helpers/mediaDimensions';
 
-import Button from '../../ui/Button';
+import useAppLayout from '../../../hooks/useAppLayout';
+import useLang from '../../../hooks/useLang';
+
 import AnimatedIconFromSticker from '../../common/AnimatedIconFromSticker';
+import Button from '../../ui/Button';
 
 import styles from './EmptyForum.module.scss';
 

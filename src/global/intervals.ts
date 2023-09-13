@@ -1,11 +1,11 @@
 import { addCallback } from '../lib/teact/teactn';
-import { getGlobal, setGlobal } from '.';
 
 import type { GlobalState } from './types';
 
 import { getServerTime } from '../util/serverTime';
 import { removeUserStory } from './reducers';
 import { selectTabState } from './selectors';
+import { getGlobal, setGlobal } from '.';
 
 const STORY_EXPIRATION_INTERVAL = 2 * 60 * 1000; // 2 min
 
@@ -39,6 +39,7 @@ function stopIntervals() {
 }
 
 function checkStoryExpiration() {
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   let global = getGlobal();
   const serverTime = getServerTime();
 

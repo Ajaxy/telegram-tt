@@ -6,15 +6,16 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiGroupCall } from '../../../api/types';
 
+import { selectChat, selectTabState } from '../../../global/selectors';
 import { selectChatGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
-import { selectChat, selectTabState } from '../../../global/selectors';
+
+import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 import useLang from '../../../hooks/useLang';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useCurrentOrPrev from '../../../hooks/useCurrentOrPrev';
 
-import Button from '../../ui/Button';
 import Avatar from '../../common/Avatar';
+import Button from '../../ui/Button';
 
 import './GroupCallTopPane.scss';
 

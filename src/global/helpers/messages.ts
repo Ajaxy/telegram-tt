@@ -1,20 +1,20 @@
 import type {
   ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiStory, ApiUser,
 } from '../../api/types';
-import { ApiMessageEntityTypes } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
+import { ApiMessageEntityTypes } from '../../api/types';
 
 import {
   CONTENT_NOT_SUPPORTED,
   RE_LINK_TEMPLATE,
   SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
-import { getUserFullName } from './users';
-import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/windowEnvironment';
-import { getChatTitle, isUserId } from './chats';
-import { getGlobal } from '../index';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
+import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/windowEnvironment';
+import { getGlobal } from '../index';
+import { getChatTitle, isUserId } from './chats';
+import { getUserFullName } from './users';
 
 const RE_LINK = new RegExp(RE_LINK_TEMPLATE, 'i');
 

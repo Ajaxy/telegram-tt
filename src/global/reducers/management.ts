@@ -1,8 +1,9 @@
-import type { GlobalState, TabArgs } from '../types';
 import type { ManagementProgress, ManagementState } from '../../types';
-import { updateTabState } from './tabs';
-import { selectTabState } from '../selectors';
+import type { GlobalState, TabArgs } from '../types';
+
 import { getCurrentTabId } from '../../util/establishMultitabRole';
+import { selectTabState } from '../selectors';
+import { updateTabState } from './tabs';
 
 export function updateManagementProgress<T extends GlobalState>(
   global: T, progress: ManagementProgress,

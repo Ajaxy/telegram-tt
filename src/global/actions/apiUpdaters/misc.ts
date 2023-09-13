@@ -1,8 +1,7 @@
-import { addActionHandler, setGlobal } from '../../index';
-
 import type { ActionReturnType } from '../../types';
 import { PaymentStep } from '../../../types';
 
+import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
   addStoriesForUser,

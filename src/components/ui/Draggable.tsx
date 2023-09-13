@@ -1,14 +1,14 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
 
-import type { FC } from '../../lib/teact/teact';
-
 import buildClassName from '../../util/buildClassName';
+import buildStyle from '../../util/buildStyle';
+
+import useLang from '../../hooks/useLang';
 
 import styles from './Draggable.module.scss';
-import useLang from '../../hooks/useLang';
-import buildStyle from '../../util/buildStyle';
 
 type TPoint = {
   x: number;

@@ -1,23 +1,23 @@
 import type { RefObject } from 'react';
 import { useEffect } from '../../../../lib/teact/teact';
-import twemojiRegex from '../../../../lib/twemojiRegex';
-import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
+import { getActions } from '../../../../global';
 
 import type { ApiSticker } from '../../../../api/types';
 import type { Signal } from '../../../../util/signals';
 
-import { getActions } from '../../../../global';
 import { EMOJI_IMG_REGEX } from '../../../../config';
-import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
-import { getHtmlBeforeSelection } from '../../../../util/selection';
+import { requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
+import twemojiRegex from '../../../../lib/twemojiRegex';
 import focusEditableElement from '../../../../util/focusEditableElement';
+import { getHtmlBeforeSelection } from '../../../../util/selection';
+import { IS_EMOJI_SUPPORTED } from '../../../../util/windowEnvironment';
 import { buildCustomEmojiHtml } from '../helpers/customEmoji';
 
-import useLastCallback from '../../../../hooks/useLastCallback';
+import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+import useDerivedSignal from '../../../../hooks/useDerivedSignal';
 import useDerivedState from '../../../../hooks/useDerivedState';
 import useFlag from '../../../../hooks/useFlag';
-import useDerivedSignal from '../../../../hooks/useDerivedSignal';
-import { useThrottledResolver } from '../../../../hooks/useAsyncResolvers';
+import useLastCallback from '../../../../hooks/useLastCallback';
 
 const THROTTLE = 300;
 const RE_ENDS_ON_EMOJI = new RegExp(`(${twemojiRegex.source})$`, 'g');

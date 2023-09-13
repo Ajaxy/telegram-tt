@@ -1,28 +1,28 @@
 import React from '../../../lib/teact/teact';
 
 import type {
-  ApiChat, ApiMessage, ApiUser, ApiGroupCall, ApiTopic,
+  ApiChat, ApiGroupCall, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
-import type { TextPart } from '../../../types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { LangFn } from '../../../hooks/useLang';
+import type { TextPart } from '../../../types';
 
 import {
   getChatTitle,
   getMessageSummaryText,
   getUserFullName,
 } from '../../../global/helpers';
-import trimText from '../../../util/trimText';
 import { formatCurrency } from '../../../util/formatCurrency';
+import trimText from '../../../util/trimText';
 import renderText from './renderText';
 
-import UserLink from '../UserLink';
-import MessageLink from '../MessageLink';
 import ChatLink from '../ChatLink';
-import GroupCallLink from '../GroupCallLink';
-import MessageSummary from '../MessageSummary';
 import CustomEmoji from '../CustomEmoji';
+import GroupCallLink from '../GroupCallLink';
+import MessageLink from '../MessageLink';
+import MessageSummary from '../MessageSummary';
 import TopicDefaultIcon from '../TopicDefaultIcon';
+import UserLink from '../UserLink';
 
 interface RenderOptions {
   asPlainText?: boolean;

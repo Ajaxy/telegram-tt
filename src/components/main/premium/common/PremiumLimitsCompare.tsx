@@ -1,9 +1,10 @@
+import type { FC } from '../../../../lib/teact/teact';
 import React, { memo } from '../../../../lib/teact/teact';
 
-import type { FC } from '../../../../lib/teact/teact';
 import type { IconName } from '../../../../types/icons';
 
 import buildClassName from '../../../../util/buildClassName';
+
 import useLang from '../../../../hooks/useLang';
 
 import styles from './PremiumLimitsCompare.module.scss';

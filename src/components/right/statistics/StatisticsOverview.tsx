@@ -5,9 +5,10 @@ import type {
   ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsOverviewItem,
 } from '../../../api/types';
 
-import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
-import { formatFullDate } from '../../../util/dateFormat';
 import buildClassName from '../../../util/buildClassName';
+import { formatFullDate } from '../../../util/dateFormat';
+import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
+
 import useLang from '../../../hooks/useLang';
 
 import './StatisticsOverview.scss';

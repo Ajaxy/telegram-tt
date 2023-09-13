@@ -1,17 +1,17 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
-
-import { copyTextToClipboard } from '../../util/clipboard';
 import buildClassName from '../../util/buildClassName';
-import useLang from '../../hooks/useLang';
+import { copyTextToClipboard } from '../../util/clipboard';
+
 import useAppLayout from '../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
+import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
-import Button from '../ui/Button';
 
 import styles from './InviteLink.module.scss';
 

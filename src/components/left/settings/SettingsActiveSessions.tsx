@@ -8,13 +8,14 @@ import { getActions, withGlobal } from '../../../global';
 import type { ApiSession } from '../../../api/types';
 
 import { formatPastTimeShort } from '../../../util/dateFormat';
-import useFlag from '../../../hooks/useFlag';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 import getSessionIcon from './helpers/getSessionIcon';
 
-import ListItem from '../../ui/ListItem';
+import useFlag from '../../../hooks/useFlag';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import ConfirmDialog from '../../ui/ConfirmDialog';
+import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import SettingsActiveSession from './SettingsActiveSession';
 

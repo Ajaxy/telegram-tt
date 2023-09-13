@@ -1,7 +1,6 @@
 import * as langProvider from '../util/langProvider';
-
-import useForceUpdate from './useForceUpdate';
 import useEffectOnce from './useEffectOnce';
+import useForceUpdate from './useForceUpdate';
 
 export type LangFn = langProvider.LangFn;
 

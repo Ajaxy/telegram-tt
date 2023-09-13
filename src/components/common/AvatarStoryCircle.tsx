@@ -3,13 +3,13 @@ import React, {
 } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { AvatarSize } from './Avatar';
 import type { ThemeKey } from '../../types';
+import type { AvatarSize } from './Avatar';
 
-import { REM } from './helpers/mediaDimensions';
-import { DPR } from '../../util/windowEnvironment';
 import { selectTheme, selectUser, selectUserStories } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { DPR } from '../../util/windowEnvironment';
+import { REM } from './helpers/mediaDimensions';
 
 interface OwnProps {
   // eslint-disable-next-line react/no-unused-prop-types

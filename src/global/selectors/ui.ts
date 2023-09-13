@@ -1,14 +1,14 @@
-import type { GlobalState, TabArgs } from '../types';
-import type { PerformanceTypeKey } from '../../types';
-import { NewChatMembersProgress, RightColumnContent } from '../../types';
 import type { ApiMessage } from '../../api/types';
+import type { PerformanceTypeKey } from '../../types';
+import type { GlobalState, TabArgs } from '../types';
+import { NewChatMembersProgress, RightColumnContent } from '../../types';
 
-import { selectCurrentTextSearch } from './localSearch';
-import { selectIsStatisticsShown } from './statistics';
-import { selectCurrentManagement } from './management';
-import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { getMessageVideo, getMessageWebPageVideo } from '../helpers';
+import { selectCurrentTextSearch } from './localSearch';
+import { selectCurrentManagement } from './management';
+import { selectIsStatisticsShown } from './statistics';
+import { selectTabState } from './tabs';
 
 export function selectIsMediaViewerOpen<T extends GlobalState>(
   global: T,

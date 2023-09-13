@@ -1,27 +1,27 @@
+import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
 import type { ApiChat, ApiSticker } from '../../api/types';
 import type { TabState } from '../../global/types';
 
 import { DEFAULT_TOPIC_ICON_STICKER_ID } from '../../config';
 import { selectChat, selectIsCurrentUserPremium, selectTabState } from '../../global/selectors';
-import { getTopicColors } from '../../util/forumColors';
-import cycleRestrict from '../../util/cycleRestrict';
 import buildClassName from '../../util/buildClassName';
+import cycleRestrict from '../../util/cycleRestrict';
+import { getTopicColors } from '../../util/forumColors';
 import { REM } from '../common/helpers/mediaDimensions';
 
-import useLang from '../../hooks/useLang';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import useLang from '../../hooks/useLang';
 
-import TopicIcon from '../common/TopicIcon';
-import InputText from '../ui/InputText';
-import FloatingActionButton from '../ui/FloatingActionButton';
-import Spinner from '../ui/Spinner';
 import CustomEmojiPicker from '../common/CustomEmojiPicker';
+import TopicIcon from '../common/TopicIcon';
+import FloatingActionButton from '../ui/FloatingActionButton';
+import InputText from '../ui/InputText';
+import Spinner from '../ui/Spinner';
 import Transition from '../ui/Transition';
 
 import styles from './ManageTopic.module.scss';

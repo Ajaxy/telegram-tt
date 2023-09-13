@@ -6,20 +6,21 @@ import React, {
 import type { ApiPremiumPromo } from '../../../api/types';
 import type { ApiLimitType, GlobalState } from '../../../global/types';
 
-import buildClassName from '../../../util/buildClassName';
-import useLang from '../../../hooks/useLang';
 import animateHorizontalScroll from '../../../util/animateHorizontalScroll';
-import useFlag from '../../../hooks/useFlag';
-import renderText from '../../common/helpers/renderText';
-import usePrevious from '../../../hooks/usePrevious';
+import buildClassName from '../../../util/buildClassName';
 import { formatCurrency } from '../../../util/formatCurrency';
+import renderText from '../../common/helpers/renderText';
 
+import useFlag from '../../../hooks/useFlag';
+import useLang from '../../../hooks/useLang';
+import usePrevious from '../../../hooks/usePrevious';
+
+import SliderDots from '../../common/SliderDots';
 import Button from '../../ui/Button';
 import PremiumLimitPreview from './common/PremiumLimitPreview';
-import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
-import SliderDots from '../../common/SliderDots';
 import PremiumFeaturePreviewStickers from './previews/PremiumFeaturePreviewStickers';
 import PremiumFeaturePreviewStories from './previews/PremiumFeaturePreviewStories';
+import PremiumFeaturePreviewVideo from './previews/PremiumFeaturePreviewVideo';
 
 import styles from './PremiumFeatureModal.module.scss';
 

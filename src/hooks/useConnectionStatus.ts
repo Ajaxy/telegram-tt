@@ -1,7 +1,7 @@
 import type { GlobalState } from '../global/types';
+import type { LangFn } from './useLang';
 
 import useBrowserOnline from './useBrowserOnline';
-import type { LangFn } from './useLang';
 
 export enum ConnectionStatus {
   waitingForNetwork,

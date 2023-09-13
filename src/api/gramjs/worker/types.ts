@@ -1,7 +1,7 @@
-import type { ApiInitialArgs, ApiUpdate } from '../../types';
-import type { Methods, MethodArgs, MethodResponse } from '../methods/types';
-import type { LocalDb } from '../localDb';
 import type { DebugLevel } from '../../../util/debugConsole';
+import type { ApiInitialArgs, ApiUpdate } from '../../types';
+import type { LocalDb } from '../localDb';
+import type { MethodArgs, MethodResponse, Methods } from '../methods/types';
 
 export type ThenArg<T> = T extends Promise<infer U> ? U : T;
 

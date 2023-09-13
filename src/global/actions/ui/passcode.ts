@@ -1,17 +1,17 @@
-import { addActionHandler, setGlobal, getGlobal } from '../../index';
+import type { ActionReturnType } from '../../types';
+import { SettingsScreens } from '../../../types';
 
-import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
-import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
+import { getCurrentTabId, signalPasscodeHash } from '../../../util/establishMultitabRole';
+import { cloneDeep } from '../../../util/iteratees';
 import {
   clearEncryptedSession, decryptSession, encryptSession, forgetPasscode, setupPasscode,
 } from '../../../util/passcode';
-import { forceUpdateCache, migrateCache, serializeGlobal } from '../../cache';
 import { onBeforeUnload } from '../../../util/schedulers';
-import { cloneDeep } from '../../../util/iteratees';
+import { clearStoredSession, loadStoredSession, storeSession } from '../../../util/sessions';
+import { forceUpdateCache, migrateCache, serializeGlobal } from '../../cache';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import { INITIAL_GLOBAL_STATE } from '../../initialState';
-import type { ActionReturnType } from '../../types';
-import { getCurrentTabId, signalPasscodeHash } from '../../../util/establishMultitabRole';
-import { SettingsScreens } from '../../../types';
+import { clearPasscodeSettings, updatePasscodeSettings } from '../../reducers';
 
 let noLockOnUnload = false;
 onBeforeUnload(() => {

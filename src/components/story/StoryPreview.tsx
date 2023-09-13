@@ -4,9 +4,10 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiTypeStory, ApiUser, ApiUserStories } from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 
+import { getStoryMediaHash, getUserFirstOrLastName } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
-import { getStoryMediaHash, getUserFirstOrLastName } from '../../global/helpers';
+
 import useMedia from '../../hooks/useMedia';
 
 import Avatar from '../common/Avatar';

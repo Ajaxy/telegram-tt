@@ -4,8 +4,9 @@ import { getActions } from '../../global';
 
 import { ensureProtocol } from '../../util/ensureProtocol';
 import renderText from '../common/helpers/renderText';
-import useLang from '../../hooks/useLang';
+
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
+import useLang from '../../hooks/useLang';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 

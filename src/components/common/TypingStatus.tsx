@@ -2,11 +2,12 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiUser, ApiTypingStatus } from '../../api/types';
+import type { ApiTypingStatus, ApiUser } from '../../api/types';
 
-import { selectUser } from '../../global/selectors';
 import { getUserFirstOrLastName } from '../../global/helpers';
+import { selectUser } from '../../global/selectors';
 import renderText from './helpers/renderText';
+
 import useLang from '../../hooks/useLang';
 
 import DotAnimation from './DotAnimation';

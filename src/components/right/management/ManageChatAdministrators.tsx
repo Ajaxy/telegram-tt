@@ -2,17 +2,18 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getGlobal, withGlobal } from '../../../global';
 
-import { ManagementScreens } from '../../../types';
 import type { ApiChat, ApiChatMember } from '../../../api/types';
+import { ManagementScreens } from '../../../types';
 
 import { getUserFullName, isChatChannel } from '../../../global/helpers';
 import { selectChat, selectChatFullInfo } from '../../../global/selectors';
-import useLang from '../../../hooks/useLang';
-import useHistoryBack from '../../../hooks/useHistoryBack';
 
-import ListItem from '../../ui/ListItem';
+import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import FloatingActionButton from '../../ui/FloatingActionButton';
+import ListItem from '../../ui/ListItem';
 
 type OwnProps = {
   chatId: string;

@@ -1,26 +1,26 @@
-import type { ApiChatType, ApiChat, ApiChatFullInfo } from '../../api/types';
-import { MAIN_THREAD_ID } from '../../api/types';
+import type { ApiChat, ApiChatFullInfo, ApiChatType } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
-import {
-  getPrivateChatUserId,
-  isChatChannel,
-  isUserId,
-  isHistoryClearMessage,
-  isUserBot,
-  isUserOnline,
-  getHasAdminRight,
-  isChatSuperGroup,
-} from '../helpers';
-import {
-  selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
-} from './users';
 import {
   ALL_FOLDER_ID, ARCHIVED_FOLDER_ID, MEMBERS_LOAD_SLICE, SERVICE_NOTIFICATIONS_USER_ID,
 } from '../../config';
-import { selectTabState } from './tabs';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { IS_TRANSLATION_SUPPORTED } from '../../util/windowEnvironment';
+import {
+  getHasAdminRight,
+  getPrivateChatUserId,
+  isChatChannel,
+  isChatSuperGroup,
+  isHistoryClearMessage,
+  isUserBot,
+  isUserId,
+  isUserOnline,
+} from '../helpers';
+import { selectTabState } from './tabs';
+import {
+  selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
+} from './users';
 
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];

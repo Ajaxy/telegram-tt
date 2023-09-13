@@ -1,4 +1,5 @@
 import { useRef, useState } from '../lib/teact/teact';
+
 import buildClassName from '../util/buildClassName';
 
 const CLOSE_DURATION = 350;

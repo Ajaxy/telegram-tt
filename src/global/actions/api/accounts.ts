@@ -1,10 +1,10 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { selectChat } from '../../selectors';
-import { callApi } from '../../../api/gramjs';
-import { translate } from '../../../util/langProvider';
-import { addUsers } from '../../reducers';
-import { buildCollectionByKey } from '../../../util/iteratees';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { buildCollectionByKey } from '../../../util/iteratees';
+import { translate } from '../../../util/langProvider';
+import { callApi } from '../../../api/gramjs';
+import { addActionHandler, getGlobal, setGlobal } from '../../index';
+import { addUsers } from '../../reducers';
+import { selectChat } from '../../selectors';
 
 addActionHandler('reportPeer', async (global, actions, payload): Promise<void> => {
   const {

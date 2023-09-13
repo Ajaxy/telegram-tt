@@ -1,25 +1,27 @@
+import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FC } from '../../lib/teact/teact';
+import type {
+  ApiChat, ApiInvoice, ApiPaymentCredentials,
+} from '../../api/types';
 import type { FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
 import type { LangCode, Price } from '../../types';
-import type { ApiChat, ApiInvoice, ApiPaymentCredentials } from '../../api/types';
 import type { IconName } from '../../types/icons';
-
 import { PaymentStep } from '../../types';
+
 import { getWebDocumentHash } from '../../global/helpers';
-import { formatCurrency } from '../../util/formatCurrency';
 import buildClassName from '../../util/buildClassName';
+import { formatCurrency } from '../../util/formatCurrency';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 
-import Checkbox from '../ui/Checkbox';
-import Skeleton from '../ui/placeholder/Skeleton';
 import SafeLink from '../common/SafeLink';
+import Checkbox from '../ui/Checkbox';
 import ListItem from '../ui/ListItem';
+import Skeleton from '../ui/placeholder/Skeleton';
 
 import styles from './Checkout.module.scss';
 

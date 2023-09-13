@@ -1,16 +1,16 @@
-import React, { memo, useRef, useMemo } from '../../../lib/teact/teact';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useMemo, useRef } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { FC } from '../../../lib/teact/teact';
-import type { ApiReaction, ApiAvailableReaction, ApiChatReactions } from '../../../api/types';
+import type { ApiAvailableReaction, ApiChatReactions, ApiReaction } from '../../../api/types';
 
-import { REM } from '../../common/helpers/mediaDimensions';
-import buildClassName from '../../../util/buildClassName';
 import { getReactionUniqueKey, sortReactions } from '../../../global/helpers';
 import { selectChatFullInfo } from '../../../global/selectors';
+import buildClassName from '../../../util/buildClassName';
+import { REM } from '../../common/helpers/mediaDimensions';
 
-import useWindowSize from '../../../hooks/useWindowSize';
 import useAppLayout from '../../../hooks/useAppLayout';
+import useWindowSize from '../../../hooks/useWindowSize';
 
 import ReactionEmoji from '../../common/ReactionEmoji';
 

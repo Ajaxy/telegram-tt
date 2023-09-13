@@ -1,21 +1,22 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  memo, useEffect, useRef, useState, useLayoutEffect,
+  memo, useEffect, useLayoutEffect,
+  useRef, useState,
 } from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat } from '../../api/types';
 
-import { IS_IOS } from '../../util/windowEnvironment';
-import { debounce } from '../../util/schedulers';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import {
-  selectCurrentTextSearch,
   selectCurrentChat,
-  selectTabState,
   selectCurrentMessageList,
+  selectCurrentTextSearch,
+  selectTabState,
 } from '../../global/selectors';
 import { getDayStartAt } from '../../util/dateFormat';
+import { debounce } from '../../util/schedulers';
+import { IS_IOS } from '../../util/windowEnvironment';
 
 import useLastCallback from '../../hooks/useLastCallback';
 

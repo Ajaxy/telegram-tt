@@ -1,23 +1,25 @@
-import type { GroupCallParticipant } from '../../../lib/secret-sauce';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { GroupCallParticipant } from '../../../lib/secret-sauce';
+
 import { GROUP_CALL_DEFAULT_VOLUME, GROUP_CALL_VOLUME_MULTIPLIER } from '../../../config';
-import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
-import useRunThrottled from '../../../hooks/useRunThrottled';
+import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
+
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import { selectIsAdminInActiveGroupCall } from '../../../global/selectors/calls';
+import useRunThrottled from '../../../hooks/useRunThrottled';
 
-import Menu from '../../ui/Menu';
-import MenuItem from '../../ui/MenuItem';
 import AnimatedIcon from '../../common/AnimatedIcon';
 import DeleteMemberModal from '../../right/DeleteMemberModal';
+import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
 
 import './GroupCallParticipantMenu.scss';
 

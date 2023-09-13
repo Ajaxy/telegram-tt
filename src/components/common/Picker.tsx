@@ -1,27 +1,25 @@
-import React, {
-  useRef, useEffect, memo, useMemo,
-} from '../../lib/teact/teact';
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
-
 import type { FC } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useMemo, useRef,
+} from '../../lib/teact/teact';
 
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
 
-import useLastCallback from '../../hooks/useLastCallback';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
-import InfiniteScroll from '../ui/InfiniteScroll';
 import Checkbox from '../ui/Checkbox';
+import InfiniteScroll from '../ui/InfiniteScroll';
 import InputText from '../ui/InputText';
 import ListItem from '../ui/ListItem';
-import PrivateChatInfo from './PrivateChatInfo';
+import Loading from '../ui/Loading';
 import GroupChatInfo from './GroupChatInfo';
 import PickerSelectedItem from './PickerSelectedItem';
-
-import Loading from '../ui/Loading';
+import PrivateChatInfo from './PrivateChatInfo';
 
 import './Picker.scss';
 

@@ -1,4 +1,5 @@
-import { useState, useEffect } from '../lib/teact/teact';
+import { useEffect, useState } from '../lib/teact/teact';
+
 import type { IAnchorPosition } from '../types';
 
 interface Layout {

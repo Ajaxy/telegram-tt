@@ -4,32 +4,32 @@ import { getActions } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
 
-import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
 import {
   getMessageIsSpoiler,
   getMessageMediaHash, getMessageSingleInlineButton,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { getPictogramDimensions, REM } from '../common/helpers/mediaDimensions';
 import renderText from '../common/helpers/renderText';
 
+import { useFastClick } from '../../hooks/useFastClick';
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useThumbnail from '../../hooks/useThumbnail';
-import useFlag from '../../hooks/useFlag';
-import useLang from '../../hooks/useLang';
-import { useFastClick } from '../../hooks/useFastClick';
 import useAsyncRendering from '../right/hooks/useAsyncRendering';
 
-import RippleEffect from '../ui/RippleEffect';
-import ConfirmDialog from '../ui/ConfirmDialog';
-import Button from '../ui/Button';
-import PinnedMessageNavigation from './PinnedMessageNavigation';
-import MessageSummary from '../common/MessageSummary';
-import MediaSpoiler from '../common/MediaSpoiler';
 import AnimatedCounter from '../common/AnimatedCounter';
-import Transition from '../ui/Transition';
+import MediaSpoiler from '../common/MediaSpoiler';
+import MessageSummary from '../common/MessageSummary';
+import Button from '../ui/Button';
+import ConfirmDialog from '../ui/ConfirmDialog';
+import RippleEffect from '../ui/RippleEffect';
 import Spinner from '../ui/Spinner';
+import Transition from '../ui/Transition';
+import PinnedMessageNavigation from './PinnedMessageNavigation';
 
 import styles from './HeaderPinnedMessage.module.scss';
 

@@ -1,16 +1,17 @@
-import type { GlobalState } from '../types';
 import type { ApiChat, ApiMessage, ApiReaction } from '../../api/types';
+import type { GlobalState } from '../types';
 
 import { MIN_SCREEN_WIDTH_FOR_STATIC_LEFT_COLUMN, MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN } from '../../config';
+import windowSize from '../../util/windowSize';
 import {
   MIN_LEFT_COLUMN_WIDTH,
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
-import windowSize from '../../util/windowSize';
-import { updateChat } from './chats';
-import { isSameReaction, isReactionChosen } from '../helpers';
-import { updateChatMessage } from './messages';
+import { isReactionChosen, isSameReaction } from '../helpers';
 import { selectSendAs, selectTabState } from '../selectors';
+import { updateChat } from './chats';
+import { updateChatMessage } from './messages';
+
 import { getIsMobile } from '../../hooks/useAppLayout';
 
 function getLeftColumnWidth(windowWidth: number) {

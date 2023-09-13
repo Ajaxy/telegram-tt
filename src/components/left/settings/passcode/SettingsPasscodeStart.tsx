@@ -3,11 +3,12 @@ import React, { memo } from '../../../../lib/teact/teact';
 
 import { STICKER_SIZE_PASSCODE } from '../../../../config';
 import { LOCAL_TGS_URLS } from '../../../common/helpers/animatedAssets';
-import useLang from '../../../../hooks/useLang';
-import useHistoryBack from '../../../../hooks/useHistoryBack';
 
-import Button from '../../../ui/Button';
+import useHistoryBack from '../../../../hooks/useHistoryBack';
+import useLang from '../../../../hooks/useLang';
+
 import AnimatedIconWithPreview from '../../../common/AnimatedIconWithPreview';
+import Button from '../../../ui/Button';
 
 import lockPreviewUrl from '../../../../assets/lock.png';
 

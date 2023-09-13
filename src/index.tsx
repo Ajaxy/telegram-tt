@@ -1,24 +1,23 @@
 import './util/handleError';
 import './util/setupServiceWorker';
+import './global/init';
 
 import React from './lib/teact/teact';
 import TeactDOM from './lib/teact/teact-dom';
-import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
-
 import {
   getActions, getGlobal,
 } from './global';
-import updateWebmanifest from './util/updateWebmanifest';
-import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
-import './global/init';
 
 import {
   DEBUG, MULTITAB_LOCALSTORAGE_KEY, STRICTERDOM_ENABLED,
 } from './config';
+import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
+import { selectTabState } from './global/selectors';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
 import { onBeforeUnload } from './util/schedulers';
-import { selectTabState } from './global/selectors';
+import updateWebmanifest from './util/updateWebmanifest';
+import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
 
 import App from './components/App';
 

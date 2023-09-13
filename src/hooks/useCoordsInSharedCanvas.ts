@@ -3,11 +3,10 @@ import {
 } from '../lib/teact/teact';
 
 import { round } from '../util/math';
-
 import useLastCallback from './useLastCallback';
 import useResizeObserver from './useResizeObserver';
-import useThrottledCallback from './useThrottledCallback';
 import useSharedIntersectionObserver from './useSharedIntersectionObserver';
+import useThrottledCallback from './useThrottledCallback';
 
 const THROTTLE_MS = 150;
 

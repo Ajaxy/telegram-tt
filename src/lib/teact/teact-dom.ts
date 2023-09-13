@@ -1,4 +1,5 @@
 import type { ChangeEvent } from 'react';
+
 import type {
   VirtualElement,
   VirtualElementChildren,
@@ -8,6 +9,10 @@ import type {
   VirtualElementReal,
   VirtualElementTag,
 } from './teact';
+
+import { DEBUG } from '../../config';
+import { unique } from '../../util/iteratees';
+import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
 import {
   captureImmediateEffects,
   hasElementChanged,
@@ -18,9 +23,6 @@ import {
   unmountComponent,
   VirtualType,
 } from './teact';
-import { DEBUG } from '../../config';
-import { addEventListener, removeAllDelegatedListeners, removeEventListener } from './dom-events';
-import { unique } from '../../util/iteratees';
 
 interface VirtualDomHead {
   children: [VirtualElement] | [];

@@ -3,8 +3,8 @@ import { getGlobal } from '../../../global';
 
 import { ApiMediaFormat } from '../../../api/types';
 
-import { selectUserStories } from '../../../global/selectors';
 import { getStoryMediaHash } from '../../../global/helpers';
+import { selectUserStories } from '../../../global/selectors';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { pause } from '../../../util/schedulers';
 

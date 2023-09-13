@@ -1,11 +1,12 @@
+import type { HandlerDetails } from 'electron';
 import {
   app, BrowserWindow, ipcMain, shell, systemPreferences,
 } from 'electron';
-import type { HandlerDetails } from 'electron';
 import path from 'path';
 
-import { ElectronAction, ElectronEvent } from '../types/electron';
 import type { TrafficLightPosition } from '../types/electron';
+import { ElectronAction, ElectronEvent } from '../types/electron';
+
 import setupAutoUpdates from './autoUpdates';
 import { processDeeplink } from './deeplink';
 import {

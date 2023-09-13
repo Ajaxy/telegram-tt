@@ -5,18 +5,18 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
 
 import { getSenderTitle, isUserId } from '../../global/helpers';
-import { formatMediaDateTime } from '../../util/dateFormat';
-import renderText from '../common/helpers/renderText';
 import {
   selectChat,
   selectChatMessage,
   selectSender,
   selectUser,
 } from '../../global/selectors';
+import { formatMediaDateTime } from '../../util/dateFormat';
+import renderText from '../common/helpers/renderText';
 
-import useLastCallback from '../../hooks/useLastCallback';
-import useLang from '../../hooks/useLang';
 import useAppLayout from '../../hooks/useAppLayout';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Avatar from '../common/Avatar';
 

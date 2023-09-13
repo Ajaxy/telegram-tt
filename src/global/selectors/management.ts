@@ -1,13 +1,13 @@
 import type { GlobalState, TabArgs } from '../types';
 
-import { selectCurrentMessageList } from './messages';
-import { selectChat, selectIsChatWithSelf } from './chats';
+import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
   getCanAddContact,
   isChatAdmin, isChatGroup, isUserBot, isUserId,
 } from '../helpers';
+import { selectChat, selectIsChatWithSelf } from './chats';
+import { selectCurrentMessageList } from './messages';
 import { selectTabState } from './tabs';
-import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectUser } from './users';
 
 export function selectManagement<T extends GlobalState>(

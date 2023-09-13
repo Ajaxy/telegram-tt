@@ -1,5 +1,6 @@
-import { DEBUG } from '../config';
 import { getGlobal } from '../global';
+
+import { DEBUG } from '../config';
 import { selectTabState } from '../global/selectors';
 
 export function updateAppBadge(unreadCount: number) {

@@ -1,5 +1,3 @@
-import { addActionHandler, getGlobal, setGlobal } from '../../index';
-
 import type { ApiMessage, ApiUpdateChat } from '../../../api/types';
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -7,6 +5,9 @@ import { MAIN_THREAD_ID } from '../../../api/types';
 import { ARCHIVED_FOLDER_ID, MAX_ACTIVE_PINNED_CHATS } from '../../../config';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import { closeMessageNotifications, notifyAboutMessage } from '../../../util/notifications';
+import {
+  addActionHandler, getGlobal, setGlobal,
+} from '../../index';
 import {
   leaveChat,
   replaceThreadParam,
@@ -16,19 +17,19 @@ import {
   updateChatListType,
   updateTopic,
 } from '../../reducers';
-import {
-  selectChat,
-  selectCommonBoxChatId,
-  selectIsChatListed,
-  selectChatListType,
-  selectCurrentMessageList,
-  selectThreadParam,
-  selectChatFullInfo,
-  selectTabState,
-  selectTopicFromMessage,
-} from '../../selectors';
 import { updateUnreadReactions } from '../../reducers/reactions';
 import { updateTabState } from '../../reducers/tabs';
+import {
+  selectChat,
+  selectChatFullInfo,
+  selectChatListType,
+  selectCommonBoxChatId,
+  selectCurrentMessageList,
+  selectIsChatListed,
+  selectTabState,
+  selectThreadParam,
+  selectTopicFromMessage,
+} from '../../selectors';
 
 const TYPING_STATUS_CLEAR_DELAY = 6000; // 6 seconds
 

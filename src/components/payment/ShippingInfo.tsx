@@ -1,17 +1,18 @@
 import type { FC } from '../../lib/teact/teact';
 import React, {
-  useRef, useCallback, useEffect, memo,
+  memo,
+  useCallback, useEffect, useRef,
 } from '../../lib/teact/teact';
 
 import type { ApiCountry } from '../../api/types';
-import type { FormState, FormEditDispatch } from '../../hooks/reducers/usePaymentReducer';
+import type { FormEditDispatch, FormState } from '../../hooks/reducers/usePaymentReducer';
 
 import useFocusAfterAnimation from '../../hooks/useFocusAfterAnimation';
 import useLang from '../../hooks/useLang';
 
+import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
 import Select from '../ui/Select';
-import Checkbox from '../ui/Checkbox';
 
 import './ShippingInfo.scss';
 

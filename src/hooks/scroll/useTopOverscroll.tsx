@@ -1,11 +1,10 @@
 import React, { useEffect, useRef } from '../../lib/teact/teact';
+
 import { forceMutation, requestMutation } from '../../lib/fasterdom/fasterdom';
-
-import { IS_IOS, IS_SAFARI } from '../../util/windowEnvironment';
 import { stopScrollInertia } from '../../util/resetScroll';
-
-import useLastCallback from '../useLastCallback';
+import { IS_IOS, IS_SAFARI } from '../../util/windowEnvironment';
 import useDebouncedCallback from '../useDebouncedCallback';
+import useLastCallback from '../useLastCallback';
 
 const MOUSE_WHEEL_DEBOUNCE = 250;
 const TRIGGER_HEIGHT = 1;

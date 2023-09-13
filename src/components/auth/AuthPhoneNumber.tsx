@@ -1,34 +1,34 @@
 import type { ChangeEvent } from 'react';
-import { requestMeasure } from '../../lib/fasterdom/fasterdom';
-
-import monkeyPath from '../../assets/monkey.svg';
-
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ApiCountryCode } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { LangCode } from '../../types';
-import type { ApiCountryCode } from '../../api/types';
 
-import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
+import { requestMeasure } from '../../lib/fasterdom/fasterdom';
 import { preloadImage } from '../../util/files';
 import preloadFonts from '../../util/fonts';
 import { pick } from '../../util/iteratees';
-import { formatPhoneNumber, getCountryCodesByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
 import { setLanguage } from '../../util/langProvider';
-import useLang from '../../hooks/useLang';
-import useFlag from '../../hooks/useFlag';
-import useLangString from '../../hooks/useLangString';
+import { formatPhoneNumber, getCountryCodesByIso, getCountryFromPhoneNumber } from '../../util/phoneNumber';
+import { IS_SAFARI, IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSuggestedLanguage } from './helpers/getSuggestedLanguage';
+
+import useFlag from '../../hooks/useFlag';
+import useLang from '../../hooks/useLang';
+import useLangString from '../../hooks/useLangString';
 
 import Button from '../ui/Button';
 import Checkbox from '../ui/Checkbox';
 import InputText from '../ui/InputText';
 import Loading from '../ui/Loading';
 import CountryCodeInput from './CountryCodeInput';
+
+import monkeyPath from '../../assets/monkey.svg';
 
 type StateProps = Pick<GlobalState, (
   'connectionState' | 'authState' |

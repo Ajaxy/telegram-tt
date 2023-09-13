@@ -1,5 +1,4 @@
 import React, { memo, useCallback } from '../../lib/teact/teact';
-
 import { getActions } from '../../global';
 
 import useLang from '../../hooks/useLang';

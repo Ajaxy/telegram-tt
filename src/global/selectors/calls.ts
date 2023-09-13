@@ -1,6 +1,7 @@
 import type { GlobalState } from '../types';
-import { selectChat, selectChatFullInfo } from './chats';
+
 import { getMainUsername, isChatBasicGroup } from '../helpers';
+import { selectChat, selectChatFullInfo } from './chats';
 import { selectUser } from './users';
 
 export function selectChatGroupCall<T extends GlobalState>(global: T, chatId: string) {

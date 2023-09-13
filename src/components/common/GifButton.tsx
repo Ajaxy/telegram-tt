@@ -4,29 +4,29 @@ import React, {
 } from '../../lib/teact/teact';
 
 import type { ApiVideo } from '../../api/types';
+import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import { ApiMediaFormat } from '../../api/types';
 
-import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import buildClassName from '../../util/buildClassName';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
-import useMedia from '../../hooks/useMedia';
 import useBuffering from '../../hooks/useBuffering';
 import useCanvasBlur from '../../hooks/useCanvasBlur';
-import useLang from '../../hooks/useLang';
-import useMenuPosition from '../../hooks/useMenuPosition';
 import useContextMenuHandlers from '../../hooks/useContextMenuHandlers';
+import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
+import useLastCallback from '../../hooks/useLastCallback';
+import useMedia from '../../hooks/useMedia';
+import useMenuPosition from '../../hooks/useMenuPosition';
 
-import Spinner from '../ui/Spinner';
 import Button from '../ui/Button';
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
 import OptimizedVideo from '../ui/OptimizedVideo';
+import Spinner from '../ui/Spinner';
 
 import './GifButton.scss';
-import useLastCallback from '../../hooks/useLastCallback';
 
 type OwnProps = {
   gif: ApiVideo;

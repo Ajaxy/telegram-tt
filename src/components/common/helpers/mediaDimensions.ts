@@ -1,11 +1,11 @@
 import type {
-  ApiPhoto, ApiVideo, ApiSticker, ApiDimensions,
+  ApiDimensions, ApiPhoto, ApiSticker, ApiVideo,
 } from '../../../api/types';
 
 import { STICKER_SIZE_INLINE_DESKTOP_FACTOR, STICKER_SIZE_INLINE_MOBILE_FACTOR } from '../../../config';
+import { getPhotoInlineDimensions, getVideoDimensions } from '../../../global/helpers';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
-import { getPhotoInlineDimensions, getVideoDimensions } from '../../../global/helpers';
 
 export const MEDIA_VIEWER_MEDIA_QUERY = '(max-height: 640px)';
 export const REM = parseInt(getComputedStyle(document.documentElement).fontSize, 10);

@@ -5,11 +5,11 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import { ManagementProgress, ManagementScreens } from '../../../types';
 import type {
   ApiAvailableReaction, ApiChat, ApiChatBannedRights, ApiChatFullInfo, ApiExportedInvite,
 } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
+import { ManagementProgress, ManagementScreens } from '../../../types';
 
 import {
   getChatAvatarHash,
@@ -17,24 +17,25 @@ import {
   isChatBasicGroup,
   isChatPublic,
 } from '../../../global/helpers';
-import { debounce } from '../../../util/schedulers';
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
+import { debounce } from '../../../util/schedulers';
 import { formatInteger } from '../../../util/textFormat';
 import renderText from '../../common/helpers/renderText';
-import useMedia from '../../../hooks/useMedia';
-import useLang from '../../../hooks/useLang';
+
 import useFlag from '../../../hooks/useFlag';
 import useHistoryBack from '../../../hooks/useHistoryBack';
+import useLang from '../../../hooks/useLang';
+import useMedia from '../../../hooks/useMedia';
 
 import AvatarEditable from '../../ui/AvatarEditable';
+import Checkbox from '../../ui/Checkbox';
+import ConfirmDialog from '../../ui/ConfirmDialog';
+import FloatingActionButton from '../../ui/FloatingActionButton';
 import InputText from '../../ui/InputText';
 import ListItem from '../../ui/ListItem';
-import Checkbox from '../../ui/Checkbox';
 import Spinner from '../../ui/Spinner';
-import FloatingActionButton from '../../ui/FloatingActionButton';
-import ConfirmDialog from '../../ui/ConfirmDialog';
-import TextArea from '../../ui/TextArea';
 import Switcher from '../../ui/Switcher';
+import TextArea from '../../ui/TextArea';
 
 import './Management.scss';
 

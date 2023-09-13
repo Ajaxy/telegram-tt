@@ -1,9 +1,9 @@
-import { addActionHandler } from '../../index';
+import type { ActionReturnType } from '../../types';
 
+import { getCurrentTabId } from '../../../util/establishMultitabRole';
+import { addActionHandler } from '../../index';
 import { updateGlobalSearch, updateGlobalSearchContent } from '../../reducers';
 import { selectTabState } from '../../selectors';
-import type { ActionReturnType } from '../../types';
-import { getCurrentTabId } from '../../../util/establishMultitabRole';
 
 const MAX_RECENTLY_FOUND_IDS = 10;
 

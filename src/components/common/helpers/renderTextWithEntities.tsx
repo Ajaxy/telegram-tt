@@ -1,23 +1,23 @@
 import React from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { TextPart } from '../../../types';
 import type { ApiFormattedText, ApiMessageEntity } from '../../../api/types';
-import { ApiMessageEntityTypes } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
+import type { TextPart } from '../../../types';
 import type { TextFilter } from './renderText';
+import { ApiMessageEntityTypes } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
-import renderText from './renderText';
 import { copyTextToClipboard } from '../../../util/clipboard';
 import { translate } from '../../../util/langProvider';
 import { buildCustomEmojiHtmlFromEntity } from '../../middle/composer/helpers/customEmoji';
+import renderText from './renderText';
 
 import MentionLink from '../../middle/message/MentionLink';
+import CodeBlock from '../code/CodeBlock';
+import CustomEmoji from '../CustomEmoji';
 import SafeLink from '../SafeLink';
 import Spoiler from '../spoiler/Spoiler';
-import CustomEmoji from '../CustomEmoji';
-import CodeBlock from '../code/CodeBlock';
 
 interface IOrganizedEntity {
   entity: ApiMessageEntity;
