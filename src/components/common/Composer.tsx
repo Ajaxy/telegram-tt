@@ -94,6 +94,7 @@ import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import renderText from './helpers/renderText';
+import { REM } from './helpers/mediaDimensions';
 
 import useLastCallback from '../../hooks/useLastCallback';
 import useSignal from '../../hooks/useSignal';
@@ -259,6 +260,7 @@ const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 
+const REACTION_SIZE = 1.5 * REM;
 const HEART_REACTION: ApiReaction = {
   emoticon: '❤',
 };
@@ -1532,32 +1534,32 @@ const Composer: FC<OwnProps & StateProps> = ({
         onClick={handleBotCommandSelect}
         onClose={closeBotCommandTooltip}
       />
-      <div className={buildClassName('composer-wrapper', isInMessageList && 'full-featured')}>
+      <div className={buildClassName('composer-wrapper', isInStoryViewer && 'with-story-tweaks')}>
+        <svg className="svg-appendix" width="9" height="20">
+          <defs>
+            <filter
+              x="-50%"
+              y="-14.7%"
+              width="200%"
+              height="141.2%"
+              filterUnits="objectBoundingBox"
+              id="composerAppendix"
+            >
+              <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
+              <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
+              <feColorMatrix
+                values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
+                in="shadowBlurOuter1"
+              />
+            </filter>
+          </defs>
+          <g fill="none" fill-rule="evenodd">
+            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#composerAppendix)" />
+            <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" className="corner" />
+          </g>
+        </svg>
         {isInMessageList && (
           <>
-            <svg className="svg-appendix" width="9" height="20">
-              <defs>
-                <filter
-                  x="-50%"
-                  y="-14.7%"
-                  width="200%"
-                  height="141.2%"
-                  filterUnits="objectBoundingBox"
-                  id="composerAppendix"
-                >
-                  <feOffset dy="1" in="SourceAlpha" result="shadowOffsetOuter1" />
-                  <feGaussianBlur stdDeviation="1" in="shadowOffsetOuter1" result="shadowBlurOuter1" />
-                  <feColorMatrix
-                    values="0 0 0 0 0.0621962482 0 0 0 0 0.138574144 0 0 0 0 0.185037364 0 0 0 0.15 0"
-                    in="shadowBlurOuter1"
-                  />
-                </filter>
-              </defs>
-              <g fill="none" fill-rule="evenodd">
-                <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#000" filter="url(#composerAppendix)" />
-                <path d="M6 17H0V0c.193 2.84.876 5.767 2.05 8.782.904 2.325 2.446 4.485 4.625 6.48A1 1 0 016 17z" fill="#FFF" className="corner" />
-              </g>
-            </svg>
             <InlineBotTooltip
               isOpen={isInlineBotTooltipOpen}
               botId={inlineBotId}
@@ -1684,33 +1686,6 @@ const Composer: FC<OwnProps & StateProps> = ({
             onFocus={markInputHasFocus}
             onBlur={unmarkInputHasFocus}
           />
-          {isInStoryViewer && !activeVoiceRecording && (
-            <Button
-              round
-              className="story-reaction-button"
-              color="translucent"
-              onClick={handleLikeStory}
-              onContextMenu={handleStoryPickerContextMenu}
-              onMouseDown={handleBeforeStoryPickerContextMenu}
-              ariaLabel={lang('AccDescrLike')}
-              ref={storyReactionRef}
-            >
-              {sentStoryReaction && !isSentStoryReactionHeart && (
-                <ReactionStaticEmoji
-                  reaction={sentStoryReaction}
-                  availableReactions={availableReactions}
-                />
-              )}
-              <i
-                className={buildClassName(
-                  'icon',
-                  !sentStoryReaction && 'icon-heart-outline',
-                  isSentStoryReactionHeart && 'icon-heart story-reaction-heart',
-                )}
-                aria-hidden
-              />
-            </Button>
-          )}
           {isInMessageList && (
             <>
               {isInlineBotLoading && Boolean(inlineBotId) && (
@@ -1818,6 +1793,35 @@ const Composer: FC<OwnProps & StateProps> = ({
           ariaLabel="Cancel voice recording"
         >
           <i className="icon icon-delete" />
+        </Button>
+      )}
+      {isInStoryViewer && !activeVoiceRecording && (
+        <Button
+          round
+          className="story-reaction-button"
+          color="secondary"
+          onClick={handleLikeStory}
+          onContextMenu={handleStoryPickerContextMenu}
+          onMouseDown={handleBeforeStoryPickerContextMenu}
+          ariaLabel={lang('AccDescrLike')}
+          ref={storyReactionRef}
+        >
+          {sentStoryReaction && !isSentStoryReactionHeart ? (
+            <ReactionStaticEmoji
+              reaction={sentStoryReaction}
+              availableReactions={availableReactions}
+              size={REACTION_SIZE}
+            />
+          ) : (
+            <i
+              className={buildClassName(
+                'icon',
+                'icon-heart',
+                isSentStoryReactionHeart && 'story-reaction-heart',
+              )}
+              aria-hidden
+            />
+          )}
         </Button>
       )}
       <Button
