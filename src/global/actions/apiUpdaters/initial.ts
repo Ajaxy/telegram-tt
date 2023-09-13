@@ -221,17 +221,19 @@ function onUpdateConnectionState<T extends GlobalState>(
   };
   setGlobal(global);
 
-  const channelStackIds = Object.values(global.byTabId)
-    .flatMap((tab) => tab.messageLists)
-    .map((messageList) => messageList.chatId)
-    .filter((chatId) => {
-      const chat = global.chats.byId[chatId];
-      return chat && (isChatChannel(chat) || isChatSuperGroup(chat));
-    });
-  if (connectionState === 'connectionStateReady' && channelStackIds.length) {
-    unique(channelStackIds).forEach((chatId) => {
-      actions.requestChannelDifference({ chatId });
-    });
+  if (global.isSynced) {
+    const channelStackIds = Object.values(global.byTabId)
+      .flatMap((tab) => tab.messageLists)
+      .map((messageList) => messageList.chatId)
+      .filter((chatId) => {
+        const chat = global.chats.byId[chatId];
+        return chat && (isChatChannel(chat) || isChatSuperGroup(chat));
+      });
+    if (connectionState === 'connectionStateReady' && channelStackIds.length) {
+      unique(channelStackIds).forEach((chatId) => {
+        actions.requestChannelDifference({ chatId });
+      });
+    }
   }
 
   if (connectionState === 'connectionStateBroken') {
