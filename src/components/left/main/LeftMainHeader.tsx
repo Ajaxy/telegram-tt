@@ -20,6 +20,7 @@ import {
   IS_ELECTRON,
   IS_TEST,
   PRODUCTION_HOSTNAME,
+  WEB_VERSION_BASE,
 } from '../../../config';
 import {
   INITIAL_PERFORMANCE_STATE_MAX,
@@ -37,8 +38,7 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { formatDateToString } from '../../../util/dateFormat';
 import { getPromptInstall } from '../../../util/installPrompt';
-import { setPermanentWebVersion } from '../../../util/permanentWebVersion';
-import { clearWebsync } from '../../../util/websync';
+import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -99,7 +99,6 @@ type StateProps =
 
 const CLEAR_DATE_SEARCH_PARAM = { date: undefined };
 const CLEAR_CHAT_SEARCH_PARAM = { id: undefined };
-const WEBK_VERSION_URL = 'https://web.telegram.org/k/';
 
 const LeftMainHeader: FC<OwnProps & StateProps> = ({
   shouldHideSearch,
@@ -140,7 +139,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     openChatByUsername,
     lockScreen,
     requestNextSettingsScreen,
-    skipLockOnUnload,
     openUrl,
     updatePerformanceSettings,
   } = getActions();
@@ -252,9 +250,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   });
 
   const handleSwitchToWebK = useLastCallback(() => {
-    setPermanentWebVersion('K');
-    clearWebsync();
-    skipLockOnUnload();
+    switchPermanentWebVersion('K');
   });
 
   const handleOpenTipsChat = useLastCallback(() => {
@@ -378,7 +374,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         <MenuItem
           icon="K"
           isCharIcon
-          href={WEBK_VERSION_URL}
+          href={`${WEB_VERSION_BASE}k`}
           onClick={handleSwitchToWebK}
         >
           Switch to K Version
@@ -394,9 +390,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       )}
     </>
   ), [
-    animationLevelValue, archivedUnreadChatsCount, canInstall, handleAnimationLevelChange, handleBugReportClick, lang,
-    handleChangelogClick, handleDarkModeToggle, handleOpenTipsChat, handleSelectSaved, handleSwitchToWebK,
-    onSelectArchived, onSelectContacts, onSelectSettings, theme, withOtherVersions, archiveSettings,
+    animationLevelValue, archiveSettings.isHidden, archivedUnreadChatsCount, canInstall, lang, onSelectArchived,
+    onSelectContacts, onSelectSettings, theme, withOtherVersions,
   ]);
 
   const searchContent = useMemo(() => {

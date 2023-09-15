@@ -6,6 +6,7 @@ export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
 export const PRODUCTION_URL = 'https://web.telegram.org/a';
+export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect to other versions
 
 export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';

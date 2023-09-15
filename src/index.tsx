@@ -15,6 +15,7 @@ import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
 import { selectTabState } from './global/selectors';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
+import { checkAndAssignPermanentWebVersion } from './util/permanentWebVersion';
 import { onBeforeUnload } from './util/schedulers';
 import updateWebmanifest from './util/updateWebmanifest';
 import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
@@ -36,6 +37,8 @@ async function init() {
   }
 
   if (!(window as any).isCompatTestPassed) return;
+
+  checkAndAssignPermanentWebVersion();
 
   if (IS_MULTITAB_SUPPORTED) {
     subscribeToMultitabBroadcastChannel();
