@@ -1,8 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 
-import type { ApiAvailableReaction, ApiMessage, ApiStickerSet } from '../../../api/types';
-import type { ActiveReaction } from '../../../global/types';
+import type { ApiMessage } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { getReactionUniqueKey } from '../../../global/helpers';
@@ -18,13 +17,9 @@ type OwnProps = {
   message: ApiMessage;
   isOutside?: boolean;
   maxWidth?: number;
-  activeReactions?: ActiveReaction[];
-  availableReactions?: ApiAvailableReaction[];
   metaChildren?: React.ReactNode;
-  genericEffects?: ApiStickerSet;
   observeIntersection?: ObserveFn;
   noRecentReactors?: boolean;
-  withEffects?: boolean;
 };
 
 const MAX_RECENT_AVATARS = 3;
@@ -33,13 +28,9 @@ const Reactions: FC<OwnProps> = ({
   message,
   isOutside,
   maxWidth,
-  activeReactions,
-  availableReactions,
   metaChildren,
-  genericEffects,
   observeIntersection,
   noRecentReactors,
-  withEffects,
 }) => {
   const lang = useLang();
 
@@ -58,12 +49,8 @@ const Reactions: FC<OwnProps> = ({
           key={getReactionUniqueKey(reaction.reaction)}
           reaction={reaction}
           message={message}
-          activeReactions={activeReactions}
-          availableReactions={availableReactions}
           withRecentReactors={totalCount <= MAX_RECENT_AVATARS && !noRecentReactors}
-          genericEffects={genericEffects}
           observeIntersection={observeIntersection}
-          withEffects={withEffects}
         />
       ))}
       {metaChildren}

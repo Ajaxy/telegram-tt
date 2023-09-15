@@ -1,11 +1,12 @@
 import React, {
   memo, useEffect, useLayoutEffect, useMemo, useRef, useState,
 } from '../../lib/teact/teact';
-import { getGlobal, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiUserStories } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
+import { getStoryKey } from '../../global/helpers';
 import { selectIsStoryViewerOpen, selectTabState, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -66,6 +67,7 @@ function StorySlides({
   onClose,
   onReport,
 }: OwnProps & StateProps) {
+  const { stopActiveReaction } = getActions();
   const [renderingUserId, setRenderingUserId] = useState(currentUserId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
   const prevUserId = usePrevious(currentUserId);
@@ -167,6 +169,15 @@ function StorySlides({
       window.clearTimeout(timeOutId);
     };
   }, [prevUserId, currentUserId, setIsAnimating]);
+
+  useEffect(() => {
+    return () => {
+      if (!currentStoryId || !currentUserId) return;
+      stopActiveReaction({
+        containerId: getStoryKey(currentUserId, currentStoryId),
+      });
+    };
+  }, [currentStoryId, currentUserId]);
 
   const slideAmount = currentUserPosition - renderingUserPosition;
   const isBackward = renderingUserPosition > currentUserPosition;

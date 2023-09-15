@@ -99,6 +99,7 @@ const ReactionEmoji: FC<OwnProps> = ({
           className={transitionClassNames}
           sharedCanvas={sharedCanvasRef!.current || undefined}
           sharedCanvasCoords={coords}
+          forceAlways={forcePlayback}
         />
       )}
     </div>

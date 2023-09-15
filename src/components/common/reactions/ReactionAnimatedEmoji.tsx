@@ -1,51 +1,65 @@
-import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef,
 } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import { getActions, withGlobal } from '../../../global';
 
 import type { ApiAvailableReaction, ApiReaction, ApiStickerSet } from '../../../api/types';
-import type { ActiveReaction } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import { isSameReaction } from '../../../global/helpers';
+import { selectPerformanceSettingsValue, selectTabState } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import { REM } from '../../common/helpers/mediaDimensions';
+import { roundToNearestEven } from '../../../util/math';
+import { REM } from '../helpers/mediaDimensions';
 
 import useFlag from '../../../hooks/useFlag';
 import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
-import useCustomEmoji from '../../common/hooks/useCustomEmoji';
+import useCustomEmoji from '../hooks/useCustomEmoji';
 
-import AnimatedSticker from '../../common/AnimatedSticker';
-import CustomEmoji from '../../common/CustomEmoji';
-import ReactionStaticEmoji from '../../common/ReactionStaticEmoji';
+import AnimatedSticker from '../AnimatedSticker';
+import CustomEmoji from '../CustomEmoji';
+import ReactionStaticEmoji from '../ReactionStaticEmoji';
 import CustomEmojiEffect from './CustomEmojiEffect';
 
 import styles from './ReactionAnimatedEmoji.module.scss';
 
 type OwnProps = {
+  containerId: string;
   reaction: ApiReaction;
-  activeReactions?: ActiveReaction[];
+  className?: string;
+  size?: number;
+  effectSize?: number;
+  withEffectOnly?: boolean;
+  observeIntersection?: ObserveFn;
+};
+
+type StateProps = {
+  activeReactions?: ApiReaction[];
   availableReactions?: ApiAvailableReaction[];
   genericEffects?: ApiStickerSet;
-  observeIntersection?: ObserveFn;
   withEffects?: boolean;
 };
 
-const CENTER_ICON_SIZE = 2.5 * REM;
+const ICON_SIZE = 1.5 * REM;
+const CENTER_ICON_MULTIPLIER = 1.9;
 const EFFECT_SIZE = 6.5 * REM;
 
-const ReactionAnimatedEmoji: FC<OwnProps> = ({
+const ReactionAnimatedEmoji = ({
+  containerId,
   reaction,
-  genericEffects,
+  className,
+  size = ICON_SIZE,
+  effectSize = EFFECT_SIZE,
   activeReactions,
   availableReactions,
-  observeIntersection,
+  genericEffects,
   withEffects,
-}) => {
+  withEffectOnly,
+  observeIntersection,
+}: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -93,7 +107,7 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   const mediaDataEffect = useMedia(mediaHashEffect, !effectId);
 
   const activeReaction = useMemo(() => (
-    activeReactions?.find((active) => isSameReaction(active.reaction, reaction))
+    activeReactions?.find((active) => isSameReaction(active, reaction))
   ), [activeReactions, reaction]);
 
   const shouldPlay = Boolean(withEffects && activeReaction && (isCustom || mediaDataCenterIcon) && mediaDataEffect);
@@ -103,26 +117,39 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   } = useShowTransition(shouldPlay, undefined, true, 'slow');
 
   const handleEnded = useLastCallback(() => {
-    if (!activeReaction?.messageId) return;
-    stopActiveReaction({ messageId: activeReaction.messageId, reaction });
+    stopActiveReaction({ containerId, reaction });
   });
 
   const [isAnimationLoaded, markAnimationLoaded, unmarkAnimationLoaded] = useFlag();
-  const shouldRenderStatic = !isCustom && (!shouldPlay || !isAnimationLoaded);
+  const shouldShowStatic = !isCustom && (!shouldPlay || !isAnimationLoaded);
+  const {
+    shouldRender: shouldRenderStatic,
+    transitionClassNames: staticClassNames,
+  } = useShowTransition(shouldShowStatic, undefined, true);
 
-  const className = buildClassName(
+  const rootClassName = buildClassName(
     styles.root,
     shouldRenderAnimation && styles.animating,
-    isCustom && styles.isCustomEmoji,
+    withEffectOnly && styles.withEffectOnly,
+    className,
   );
 
   return (
-    <div className={className} ref={ref}>
-      {shouldRenderStatic && <ReactionStaticEmoji reaction={reaction} availableReactions={availableReactions} />}
-      {isCustom && (
+    <div className={rootClassName} ref={ref}>
+      {!withEffectOnly && shouldRenderStatic && (
+        <ReactionStaticEmoji
+          className={staticClassNames}
+          reaction={reaction}
+          availableReactions={availableReactions}
+          size={size}
+          observeIntersection={observeIntersection}
+        />
+      )}
+      {!withEffectOnly && isCustom && (
         <CustomEmoji
           documentId={reaction.documentId}
           className={styles.customEmoji}
+          size={size}
           observeIntersectionForPlaying={observeIntersection}
         />
       )}
@@ -131,20 +158,19 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
           <AnimatedSticker
             key={effectId}
             className={buildClassName(styles.effect, animationClassNames)}
-            size={EFFECT_SIZE}
+            size={effectSize}
             tgsUrl={mediaDataEffect}
             play={isIntersecting}
             noLoop
             forceAlways
             onEnded={handleEnded}
           />
-          {isCustom ? (
-            !assignedEffectId && isIntersecting && <CustomEmojiEffect reaction={reaction} />
-          ) : (
+          {isCustom && !assignedEffectId && isIntersecting && <CustomEmojiEffect reaction={reaction} />}
+          {!isCustom && !withEffectOnly && (
             <AnimatedSticker
               key={centerIconId}
               className={buildClassName(styles.animatedIcon, animationClassNames)}
-              size={CENTER_ICON_SIZE}
+              size={roundToNearestEven(size * CENTER_ICON_MULTIPLIER)}
               tgsUrl={mediaDataCenterIcon}
               play={isIntersecting}
               noLoop
@@ -159,4 +185,18 @@ const ReactionAnimatedEmoji: FC<OwnProps> = ({
   );
 };
 
-export default memo(ReactionAnimatedEmoji);
+export default memo(withGlobal<OwnProps>(
+  (global, { containerId }) => {
+    const { availableReactions, genericEmojiEffects } = global;
+    const { activeReactions } = selectTabState(global);
+
+    const withEffects = selectPerformanceSettingsValue(global, 'reactionEffects');
+
+    return {
+      activeReactions: activeReactions?.[containerId],
+      availableReactions,
+      genericEffects: genericEmojiEffects,
+      withEffects,
+    };
+  },
+)(ReactionAnimatedEmoji));

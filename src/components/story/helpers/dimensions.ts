@@ -1,5 +1,7 @@
 import type { IDimensions } from '../../../global/types';
 
+import { roundToNearestEven } from '../../../util/math';
+
 const BASE_SCREEN_WIDTH = 1200;
 const BASE_SCREEN_HEIGHT = 800;
 const BASE_ACTIVE_SLIDE_WIDTH = 405;
@@ -55,9 +57,4 @@ function calculateScale(baseWidth: number, baseHeight: number, newWidth: number,
   const heightScale = newHeight / baseHeight;
 
   return Math.min(widthScale, heightScale);
-}
-
-// Fractional values cause blurry text. Round to even to keep whole numbers while centering
-function roundToNearestEven(value: number) {
-  return Math.round(value / 2) * 2;
 }

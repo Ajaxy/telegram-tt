@@ -11,7 +11,6 @@ import type {
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiReaction,
-  ApiStickerSet,
   ApiThreadInfo,
   ApiTopic,
   ApiTypeStory,
@@ -20,7 +19,6 @@ import type {
 } from '../../../api/types';
 import type {
   ActiveEmojiInteraction,
-  ActiveReaction,
   ChatTranslatedMessages,
   MessageListType,
 } from '../../../global/types';
@@ -37,6 +35,7 @@ import {
   getMessageContent,
   getMessageCustomShape,
   getMessageHtmlId,
+  getMessageKey,
   getMessageLocation,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
@@ -230,7 +229,7 @@ type StateProps = {
   highlight?: string;
   animatedEmoji?: string;
   animatedCustomEmoji?: string;
-  genericEffects?: ApiStickerSet;
+  hasActiveReactions?: boolean;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   isGroupSelected?: boolean;
@@ -247,7 +246,6 @@ type StateProps = {
   reactionMessage?: ApiMessage;
   availableReactions?: ApiAvailableReaction[];
   defaultReaction?: ApiReaction;
-  activeReactions?: ActiveReaction[];
   activeEmojiInteractions?: ActiveEmojiInteraction[];
   hasUnreadReaction?: boolean;
   isTranscribing?: boolean;
@@ -262,7 +260,6 @@ type StateProps = {
   shouldDetectChatLanguage?: boolean;
   requestedTranslationLanguage?: string;
   requestedChatTranslationLanguage?: string;
-  withReactionEffects?: boolean;
   withStickerEffects?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
@@ -341,7 +338,7 @@ const Message: FC<OwnProps & StateProps> = ({
   highlight,
   animatedEmoji,
   animatedCustomEmoji,
-  genericEffects,
+  hasActiveReactions,
   hasLinkedChat,
   isInSelectMode,
   isSelected,
@@ -350,7 +347,6 @@ const Message: FC<OwnProps & StateProps> = ({
   reactionMessage,
   availableReactions,
   defaultReaction,
-  activeReactions,
   activeEmojiInteractions,
   messageListType,
   isPinnedList,
@@ -371,7 +367,6 @@ const Message: FC<OwnProps & StateProps> = ({
   shouldDetectChatLanguage,
   requestedTranslationLanguage,
   requestedChatTranslationLanguage,
-  withReactionEffects,
   withStickerEffects,
   webPageStory,
   isConnected,
@@ -611,7 +606,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isSwiped && 'is-swiped',
     transitionClassNames,
     isJustAdded && 'is-just-added',
-    (Boolean(activeReactions) || hasActiveStickerEffect) && 'has-active-reaction',
+    (hasActiveReactions || hasActiveStickerEffect) && 'has-active-reaction',
     isStoryMention && 'is-story-mention',
   );
 
@@ -864,7 +859,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <div
-        className={buildClassName('quick-reaction', isQuickReactionVisible && !activeReactions && 'visible')}
+        className={buildClassName('quick-reaction', isQuickReactionVisible && !hasActiveReactions && 'visible')}
         onClick={handleSendQuickReaction}
         ref={quickReactionRef}
       >
@@ -877,7 +872,7 @@ const Message: FC<OwnProps & StateProps> = ({
       </div>
     );
   }, [
-    activeReactions, availableReactions, defaultReaction, handleSendQuickReaction, isQuickReactionVisible,
+    hasActiveReactions, availableReactions, defaultReaction, handleSendQuickReaction, isQuickReactionVisible,
     observeIntersectionForPlaying,
   ]);
 
@@ -908,14 +903,10 @@ const Message: FC<OwnProps & StateProps> = ({
 
     return (
       <Reactions
-        activeReactions={activeReactions}
         message={reactionMessage!}
         metaChildren={meta}
-        availableReactions={availableReactions}
-        genericEffects={genericEffects}
         observeIntersection={observeIntersectionForPlaying}
         noRecentReactors={isChannel}
-        withEffects={withReactionEffects}
       />
     );
   }
@@ -1381,12 +1372,8 @@ const Message: FC<OwnProps & StateProps> = ({
             message={reactionMessage!}
             isOutside
             maxWidth={reactionsMaxWidth}
-            activeReactions={activeReactions}
-            availableReactions={availableReactions}
-            genericEffects={genericEffects}
             observeIntersection={observeIntersectionForPlaying}
             noRecentReactors={isChannel}
-            withEffects={withReactionEffects}
           />
         )}
       </div>
@@ -1437,7 +1424,7 @@ function MessageAppendix({ isOwn } : { isOwn: boolean }) {
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {
     const {
-      focusedMessage, forwardMessages, activeReactions, activeEmojiInteractions,
+      focusedMessage, forwardMessages, activeEmojiInteractions, activeReactions,
     } = selectTabState(global);
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
@@ -1538,6 +1525,8 @@ export default memo(withGlobal<OwnProps>(
 
     const isConnected = global.connectionState === 'connectionStateReady';
 
+    const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
+
     return {
       theme: selectTheme(global),
       chatUsernames,
@@ -1584,7 +1573,7 @@ export default memo(withGlobal<OwnProps>(
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) || messageListType === 'scheduled'
         ? undefined : selectDefaultReaction(global, chatId),
-      activeReactions: reactionMessage && activeReactions[reactionMessage.id],
+      hasActiveReactions,
       activeEmojiInteractions,
       hasUnreadReaction,
       isTranscribing: transcriptionId !== undefined && global.transcriptions[transcriptionId]?.isPending,
@@ -1592,7 +1581,6 @@ export default memo(withGlobal<OwnProps>(
       isPremium: selectIsCurrentUserPremium(global),
       senderAdminMember,
       messageTopic,
-      genericEffects: global.genericEmojiEffects,
       hasTopicChip,
       chatTranslations,
       areTranslationsEnabled,
@@ -1600,7 +1588,6 @@ export default memo(withGlobal<OwnProps>(
       requestedTranslationLanguage,
       requestedChatTranslationLanguage,
       hasLinkedChat: Boolean(chatFullInfo?.linkedChatId),
-      withReactionEffects: selectPerformanceSettingsValue(global, 'reactionEffects'),
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,

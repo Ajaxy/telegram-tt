@@ -8,6 +8,7 @@
   max-width: calc(var(--max-width) + 2.25rem);
 
   .Button {
+    --custom-emoji-size: 1.25rem;
     --reaction-background: var(--color-reaction);
     --reaction-background-hover: var(--hover-color-reaction);
     --reaction-text-color: var(--text-color-reaction);
@@ -36,10 +37,6 @@
 
     transition: background-color 150ms, color 150ms, backdrop-filter 150ms, filter 150ms;
 
-    .ReactionStaticEmoji {
-      width: 1.25rem;
-    }
-
     .avatars {
       display: flex;
 
@@ -54,6 +51,14 @@
           margin: 0;
         }
       }
+    }
+
+    &.message-reaction {
+      gap: 0.125rem;
+    }
+
+    .reaction-animated-emoji {
+      margin: 0.25rem;
     }
 
     &.chosen {

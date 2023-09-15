@@ -7,7 +7,10 @@ import * as mediaLoader from '../../../util/mediaLoader';
 import { callApi } from '../../../api/gramjs';
 import {
   getDocumentMediaHash,
-  getUserReactions, isMessageLocal, isSameReaction,
+  getMessageKey,
+  getUserReactions,
+  isMessageLocal,
+  isSameReaction,
 } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
@@ -150,22 +153,14 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
 
   const limit = selectMaxUserReactions(global);
   const reactions = newUserReactions.slice(-limit);
-  const tabState = selectTabState(global, tabId);
+  const messageKey = getMessageKey(message);
 
   if (selectPerformanceSettingsValue(global, 'reactionEffects')) {
-    const newActiveReactions = hasReaction ? omit(tabState.activeReactions, [messageId]) : {
-      ...tabState.activeReactions,
-      [messageId]: [
-        ...(tabState.activeReactions[messageId] || []),
-        {
-          messageId,
-          reaction,
-        },
-      ],
-    };
-    global = updateTabState(global, {
-      activeReactions: newActiveReactions,
-    }, tabId);
+    if (hasReaction) {
+      actions.stopActiveReaction({ containerId: messageKey, reaction, tabId });
+    } else {
+      actions.startActiveReaction({ containerId: messageKey, reaction, tabId });
+    }
   }
 
   global = addMessageReaction(global, message, reactions);
@@ -185,21 +180,41 @@ addActionHandler('toggleReaction', async (global, actions, payload): Promise<voi
   }
 });
 
-addActionHandler('stopActiveReaction', (global, actions, payload): ActionReturnType => {
-  const { messageId, reaction, tabId = getCurrentTabId() } = payload;
-
+addActionHandler('startActiveReaction', (global, actions, payload): ActionReturnType => {
+  const { containerId, reaction, tabId = getCurrentTabId() } = payload;
   const tabState = selectTabState(global, tabId);
-  if (!tabState.activeReactions[messageId]?.some((active) => isSameReaction(active.reaction, reaction))) {
-    return global;
+
+  if (!selectPerformanceSettingsValue(global, 'reactionEffects')) return undefined;
+
+  const currentActiveReactions = tabState.activeReactions[containerId] || [];
+  if (currentActiveReactions.some((active) => isSameReaction(active, reaction))) {
+    return undefined;
   }
 
-  const newMessageActiveReactions = tabState.activeReactions[messageId]
-    .filter((active) => !isSameReaction(active.reaction, reaction));
+  const newActiveReactions = currentActiveReactions.concat(reaction);
+
+  return updateTabState(global, {
+    activeReactions: {
+      ...tabState.activeReactions,
+      [containerId]: newActiveReactions,
+    },
+  }, tabId);
+});
+
+addActionHandler('stopActiveReaction', (global, actions, payload): ActionReturnType => {
+  const { containerId, reaction, tabId = getCurrentTabId() } = payload;
+
+  const tabState = selectTabState(global, tabId);
+
+  const currentActiveReactions = tabState.activeReactions[containerId] || [];
+  // Remove all reactions if reaction is not specified
+  const newMessageActiveReactions = reaction
+    ? currentActiveReactions.filter((active) => !isSameReaction(active, reaction)) : [];
 
   const newActiveReactions = newMessageActiveReactions.length ? {
     ...tabState.activeReactions,
-    [messageId]: newMessageActiveReactions,
-  } : omit(tabState.activeReactions, [messageId]);
+    [containerId]: newMessageActiveReactions,
+  } : omit(tabState.activeReactions, [containerId]);
 
   return updateTabState(global, {
     activeReactions: newActiveReactions,

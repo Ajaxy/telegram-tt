@@ -6,23 +6,27 @@
   align-items: center;
   justify-content: center;
 
-  width: 1.75rem;
-  height: 1.75rem;
-  margin-inline-end: 0.125rem;
+  width: var(--custom-emoji-size);
+  height: var(--custom-emoji-size);
 
   z-index: 1;
 }
 
-.animated-icon, .effect {
-  position: fixed;
-  top: -0.375rem;
-  left: -0.375rem;
-  pointer-events: none;
+.animated-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
-  &.effect {
-    top: -2.25rem;
-    left: -2.25rem;
-  }
+.effect {
+  position: fixed;
+  top: -2.25rem;
+  left: -2.25rem;
+}
+
+.animated-icon, .effect {
+  pointer-events: none;
 
   &:not(:global(.open)) {
     opacity: 1 !important;
@@ -38,4 +42,11 @@
   transform: translateZ(0);
   // Fix for redundant scroll in Firefox
   contain: layout;
+}
+
+.withEffectOnly {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }

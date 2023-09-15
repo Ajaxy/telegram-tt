@@ -132,11 +132,6 @@ export type IDimensions = {
 
 export type ApiPaymentStatus = 'paid' | 'failed' | 'pending' | 'cancelled';
 
-export interface ActiveReaction {
-  messageId?: number;
-  reaction?: ApiReaction;
-}
-
 export interface TabThread {
   scrollOffset?: number;
   replyStack?: number[];
@@ -321,7 +316,7 @@ export type TabState = {
   };
 
   activeEmojiInteractions?: ActiveEmojiInteraction[];
-  activeReactions: Record<number, ActiveReaction[]>;
+  activeReactions: Record<string, ApiReaction[]>;
 
   localTextSearch: {
     byChatThreadKey: Record<string, {
@@ -1927,9 +1922,13 @@ export interface ActionPayloads {
     enabledReactions?: ApiChatReactions;
   } & WithTabId;
 
-  stopActiveReaction: {
-    messageId: number;
+  startActiveReaction: {
+    containerId: string;
     reaction: ApiReaction;
+  } & WithTabId;
+  stopActiveReaction: {
+    containerId: string;
+    reaction?: ApiReaction;
   } & WithTabId;
 
   openMessageReactionPicker: {
@@ -2051,7 +2050,7 @@ export interface ActionPayloads {
     storyId: number;
     reaction?: ApiReaction;
     shouldAddToRecent?: boolean;
-  };
+  } & WithTabId;
   toggleStealthModal: {
     isOpen: boolean;
   } & WithTabId;
