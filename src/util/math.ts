@@ -4,3 +4,8 @@ export const round = (num: number, decimals: number = 0) => Math.round(num * 10 
 export const lerp = (start: number, end: number, interpolationRatio: number) => {
   return (1 - interpolationRatio) * start + interpolationRatio * end;
 };
+
+// Fractional values cause blurry text & canvas. Round to even to keep whole numbers while centering
+export function roundToNearestEven(value: number) {
+  return Math.round(value / 2) * 2;
+}

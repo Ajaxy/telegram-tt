@@ -6,6 +6,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
+import { getStoryKey } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addStories,
@@ -428,7 +429,7 @@ addActionHandler('loadStoriesMaxIds', async (global, actions, payload): Promise<
 
 addActionHandler('sendStoryReaction', async (global, actions, payload): Promise<void> => {
   const {
-    userId, storyId, reaction, shouldAddToRecent,
+    userId, storyId, reaction, shouldAddToRecent, tabId = getCurrentTabId(),
   } = payload;
   const user = selectUser(global, userId);
   if (!user) return;
@@ -441,6 +442,13 @@ addActionHandler('sendStoryReaction', async (global, actions, payload): Promise<
     sentReaction: reaction,
   });
   setGlobal(global);
+
+  const containerId = getStoryKey(userId, storyId);
+  if (reaction) {
+    actions.startActiveReaction({ containerId, reaction, tabId });
+  } else {
+    actions.stopActiveReaction({ containerId, tabId });
+  }
 
   const result = await callApi('sendStoryReaction', {
     user, storyId, reaction, shouldAddToRecent,

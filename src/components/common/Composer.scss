@@ -110,7 +110,8 @@
 
     &.story-reaction-button {
       --custom-emoji-size: 1.5rem;
-      --custom-emoji-border-radius: 0.25rem;
+
+      overflow: visible !important;
 
       &:hover {
         background-color: var(--color-background) !important;

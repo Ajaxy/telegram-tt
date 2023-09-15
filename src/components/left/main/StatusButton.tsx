@@ -15,7 +15,7 @@ import useTimeout from '../../../hooks/useTimeout';
 
 import CustomEmoji from '../../common/CustomEmoji';
 import PremiumIcon from '../../common/PremiumIcon';
-import CustomEmojiEffect from '../../middle/message/CustomEmojiEffect';
+import CustomEmojiEffect from '../../common/reactions/CustomEmojiEffect';
 import Button from '../../ui/Button';
 import StatusPickerMenu from './StatusPickerMenu.async';
 

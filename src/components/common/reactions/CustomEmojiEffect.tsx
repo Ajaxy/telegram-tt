@@ -9,7 +9,7 @@ import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useMedia from '../../../hooks/useMedia';
 
-import CustomEmoji from '../../common/CustomEmoji';
+import CustomEmoji from '../CustomEmoji';
 
 import styles from './CustomEmojiEffect.module.scss';
 
