@@ -43,6 +43,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
   globalMessagesByChatId,
   foundIds,
   activeDownloads,
+  shouldWarnAboutSvg,
 }) => {
   const {
     searchMessagesGlobal,
@@ -117,6 +118,7 @@ const FileResults: FC<OwnProps & StateProps> = ({
             sender={getSenderName(lang, message, chatsById, usersById)}
             className="scroll-item"
             isDownloading={activeDownloads[message.chatId]?.ids?.includes(message.id)}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
             observeIntersection={observeIntersectionForMedia}
             onDateClick={handleMessageFocus}
           />
