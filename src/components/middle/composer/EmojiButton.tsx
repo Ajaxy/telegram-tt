@@ -1,7 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
-import { IS_ELECTRON, PRODUCTION_URL } from '../../../config';
+import { BASE_URL, IS_ELECTRON_BUILD } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { handleEmojiLoad, LOADED_EMOJIS } from '../../../util/emoji';
 import { IS_EMOJI_SUPPORTED } from '../../../util/windowEnvironment';
@@ -31,7 +31,7 @@ const EmojiButton: FC<OwnProps> = ({
     focus && 'focus',
   );
 
-  const src = `${IS_ELECTRON ? PRODUCTION_URL : '.'}/img-apple-64/${emoji.image}.png`;
+  const src = `${IS_ELECTRON_BUILD ? BASE_URL : '.'}/img-apple-64/${emoji.image}.png`;
   const isLoaded = LOADED_EMOJIS.has(src);
 
   return (

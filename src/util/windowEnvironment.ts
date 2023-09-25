@@ -1,8 +1,4 @@
-import {
-  IS_ELECTRON,
-  IS_TEST,
-  PRODUCTION_HOSTNAME,
-} from '../config';
+import { IS_TEST, PRODUCTION_HOSTNAME } from '../config';
 
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
@@ -40,6 +36,7 @@ export const IS_YA_BROWSER = navigator.userAgent.includes('YaBrowser');
 export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
   || navigator.userAgent.toLowerCase().includes('iceweasel')
   || navigator.userAgent.toLowerCase().includes('icecat');
+export const IS_ELECTRON = Boolean(window.electron);
 
 export enum MouseButton {
   Main = 0,

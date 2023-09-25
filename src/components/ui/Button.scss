@@ -252,6 +252,20 @@
     }
   }
 
+  &.green {
+    background-color: var(--color-green);
+    color: var(--color-white);
+    --ripple-color: rgba(0, 0, 0, 0.08);
+
+    @include active-styles() {
+      background-color: var(--color-green-darker);
+    }
+
+    @include no-ripple-styles() {
+      background-color: var(--color-green);
+    }
+  }
+
   &.smaller {
     height: 2.75rem;
     padding: 0.3125rem;

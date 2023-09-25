@@ -8,12 +8,11 @@ import type { ISettings, TimeFormat } from '../../../types';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
-import { IS_ELECTRON } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
 import { getSystemTheme } from '../../../util/systemTheme';
 import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_WINDOWS,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_WINDOWS,
 } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';

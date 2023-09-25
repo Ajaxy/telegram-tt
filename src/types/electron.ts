@@ -1,7 +1,7 @@
 export enum ElectronEvent {
   FULLSCREEN_CHANGE = 'fullscreen-change',
   UPDATE_ERROR = 'update-error',
-  UPDATE_DOWNLOADED = 'update-downloaded',
+  UPDATE_AVAILABLE = 'update-available',
   DEEPLINK = 'deeplink',
 }
 
@@ -12,8 +12,11 @@ export enum ElectronAction {
   OPEN_NEW_WINDOW = 'open-new-window',
   SET_WINDOW_TITLE = 'set-window-title',
   SET_TRAFFIC_LIGHT_POSITION = 'set-traffic-light-position',
+  SET_IS_AUTO_UPDATE_ENABLED = 'set-is-auto-update-enabled',
+  GET_IS_AUTO_UPDATE_ENABLED = 'get-is-auto-update-enabled',
   SET_IS_TRAY_ICON_ENABLED = 'set-is-tray-icon-enabled',
   GET_IS_TRAY_ICON_ENABLED = 'get-is-tray-icon-enabled',
+  RESTORE_LOCAL_STORAGE = 'restore-local-storage',
 }
 
 export type TrafficLightPosition = 'standard' | 'lowered';
@@ -25,8 +28,11 @@ export interface ElectronApi {
   openNewWindow: (url: string, title?: string) => Promise<void>;
   setWindowTitle: (title?: string) => Promise<void>;
   setTrafficLightPosition: (position: TrafficLightPosition) => Promise<void>;
+  setIsAutoUpdateEnabled: (value: boolean) => Promise<void>;
+  getIsAutoUpdateEnabled: () => Promise<boolean>;
   setIsTrayIconEnabled: (value: boolean) => Promise<void>;
   getIsTrayIconEnabled: () => Promise<boolean>;
+  restoreLocalStorage: () => Promise<void>;
   on: (eventName: ElectronEvent, callback: any) => VoidFunction;
 }
 

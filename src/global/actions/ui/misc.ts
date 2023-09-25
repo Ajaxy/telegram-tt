@@ -5,17 +5,19 @@ import type { ActionReturnType, GlobalState } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
 import {
-  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER, IS_ELECTRON,
+  DEBUG, GLOBAL_STATE_CACHE_CUSTOM_EMOJI_LIMIT, INACTIVE_MARKER,
   PAGE_TITLE,
 } from '../../../config';
 import { getAllMultitabTokens, getCurrentTabId, reestablishMasterToSelf } from '../../../util/establishMultitabRole';
 import { getAllNotificationsCount } from '../../../util/folderManager';
 import generateUniqueId from '../../../util/generateUniqueId';
+import getIsAppUpdateNeeded from '../../../util/getIsAppUpdateNeeded';
 import getReadableErrorText from '../../../util/getReadableErrorText';
 import { compact, unique } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import updateIcon from '../../../util/updateIcon';
 import { setPageTitle, setPageTitleInstant } from '../../../util/updatePageTitle';
+import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
@@ -612,22 +614,16 @@ addActionHandler('closeMapModal', (global, actions, payload): ActionReturnType =
 });
 
 addActionHandler('checkAppVersion', (global): ActionReturnType => {
-  if (IS_ELECTRON) {
-    return;
-  }
-
-  const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
-
   fetch(`${APP_VERSION_URL}?${Date.now()}`)
     .then((response) => response.text())
     .then((version) => {
       version = version.trim();
 
-      if (APP_VERSION_REGEX.test(version) && version !== APP_VERSION) {
+      if (getIsAppUpdateNeeded(version, APP_VERSION)) {
         global = getGlobal();
         global = {
           ...global,
-          isUpdateAvailable: true,
+          isAppUpdateAvailable: true,
         };
         setGlobal(global);
       }
@@ -640,11 +636,11 @@ addActionHandler('checkAppVersion', (global): ActionReturnType => {
     });
 });
 
-addActionHandler('setIsAppUpdateAvailable', (global, action, payload): ActionReturnType => {
+addActionHandler('setIsElectronUpdateAvailable', (global, action, payload): ActionReturnType => {
   global = getGlobal();
   global = {
     ...global,
-    isUpdateAvailable: Boolean(payload),
+    isElectronUpdateAvailable: Boolean(payload),
   };
   setGlobal(global);
 });

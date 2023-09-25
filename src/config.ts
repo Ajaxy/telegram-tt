@@ -7,17 +7,18 @@ export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
 export const PRODUCTION_URL = 'https://web.telegram.org/a';
 export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect to other versions
+export const BASE_URL = process.env.BASE_URL;
 
 export const IS_MOCKED_CLIENT = process.env.APP_MOCKED_CLIENT === '1';
 export const IS_TEST = process.env.APP_ENV === 'test';
 export const IS_PERF = process.env.APP_ENV === 'perf';
 export const IS_BETA = process.env.APP_ENV === 'staging';
-export const IS_ELECTRON = process.env.IS_ELECTRON;
+export const IS_ELECTRON_BUILD = process.env.IS_ELECTRON_BUILD;
 
 export const DEBUG = process.env.APP_ENV !== 'production';
 export const DEBUG_MORE = false;
 export const DEBUG_LOG_FILENAME = 'tt-log.json';
-export const STRICTERDOM_ENABLED = DEBUG && !IS_ELECTRON;
+export const STRICTERDOM_ENABLED = DEBUG;
 
 export const BETA_CHANGELOG_URL = 'https://telegra.ph/WebA-Beta-03-20';
 export const ELECTRON_HOST_URL = process.env.ELECTRON_HOST_URL!;

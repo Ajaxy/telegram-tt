@@ -4,13 +4,13 @@ import { getActions } from '../global';
 import type { ApiChat, ApiUser } from '../api/types';
 import type { MenuItemContextAction } from '../components/ui/ListItem';
 
-import { IS_ELECTRON, SERVICE_NOTIFICATIONS_USER_ID } from '../config';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import {
   getCanDeleteChat, isChatArchived, isChatChannel, isChatGroup,
   isUserId,
 } from '../global/helpers';
 import { compact } from '../util/iteratees';
-import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
+import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import useLang from './useLang';
 
 const useChatContextActions = ({

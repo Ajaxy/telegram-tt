@@ -17,7 +17,6 @@ import {
   EDITABLE_INPUT_CSS_SELECTOR,
   EDITABLE_INPUT_ID,
   GENERAL_TOPIC_ID,
-  IS_ELECTRON,
   MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
@@ -60,7 +59,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/windowEnvironment';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 

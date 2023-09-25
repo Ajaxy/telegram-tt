@@ -17,7 +17,6 @@ import {
   DEBUG,
   FEEDBACK_URL,
   IS_BETA,
-  IS_ELECTRON,
   IS_TEST,
   PRODUCTION_HOSTNAME,
   WEB_VERSION_BASE,
@@ -39,7 +38,7 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { formatDateToString } from '../../../util/dateFormat';
 import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
-import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
+import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';

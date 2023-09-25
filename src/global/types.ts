@@ -628,7 +628,8 @@ export type GlobalState = {
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
   isSyncing?: boolean;
-  isUpdateAvailable?: boolean;
+  isAppUpdateAvailable?: boolean;
+  isElectronUpdateAvailable?: boolean;
   isSynced?: boolean;
   isFetchingDifference?: boolean;
   leftColumnWidth?: number;
@@ -1660,7 +1661,7 @@ export interface ActionPayloads {
   openLimitReachedModal: { limit: ApiLimitTypeWithModal } & WithTabId;
   closeLimitReachedModal: WithTabId | undefined;
   checkAppVersion: undefined;
-  setIsAppUpdateAvailable: boolean;
+  setIsElectronUpdateAvailable: boolean;
   setGlobalSearchClosing: ({
     isClosing?: boolean;
   } & WithTabId) | undefined;

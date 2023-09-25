@@ -8,7 +8,7 @@ import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReduc
 import type { SettingsScreens } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 
-import { IS_ELECTRON } from '../../../config';
+import { PRODUCTION_URL } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
@@ -35,7 +35,8 @@ type OwnProps = {
   contactsFilter: string;
   shouldSkipTransition?: boolean;
   foldersDispatch: FolderEditDispatch;
-  isUpdateAvailable?: boolean;
+  isAppUpdateAvailable?: boolean;
+  isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
   onSearchQuery: (query: string) => void;
@@ -58,7 +59,8 @@ const LeftMain: FC<OwnProps> = ({
   contactsFilter,
   shouldSkipTransition,
   foldersDispatch,
-  isUpdateAvailable,
+  isAppUpdateAvailable,
+  isElectronUpdateAvailable,
   isForumPanelOpen,
   onSearchQuery,
   onContentChange,
@@ -68,6 +70,11 @@ const LeftMain: FC<OwnProps> = ({
 }) => {
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
+  const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
+
+  useEffect(() => {
+    window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
+  }, []);
 
   const {
     shouldRenderForumPanel, handleForumPanelAnimationEnd,
@@ -79,7 +86,7 @@ const LeftMain: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderUpdateButton,
     transitionClassNames: updateButtonClassNames,
-  } = useShowTransition(isUpdateAvailable);
+  } = useShowTransition(isAppUpdateAvailable || isElectronUpdateAvailable);
 
   const isMouseInside = useRef(false);
 
@@ -120,7 +127,9 @@ const LeftMain: FC<OwnProps> = ({
   });
 
   const handleUpdateClick = useLastCallback(() => {
-    if (IS_ELECTRON) {
+    if (!isElectronAutoUpdateEnabled) {
+      window.open(`${PRODUCTION_URL}/get`, '_blank', 'noopener');
+    } else if (isElectronUpdateAvailable) {
       window.electron?.installUpdate();
     } else {
       window.location.reload();
@@ -214,6 +223,7 @@ const LeftMain: FC<OwnProps> = ({
         <Button
           fluid
           pill
+          color={isElectronAutoUpdateEnabled ? 'primary' : 'green'}
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
         >

@@ -6,9 +6,7 @@ import type {
 } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
 
-import {
-  APP_NAME, DEBUG, IS_ELECTRON, IS_TEST,
-} from '../config';
+import { APP_NAME, DEBUG, IS_TEST } from '../config';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -39,7 +37,7 @@ import { buildCollectionByKey } from './iteratees';
 import { translate } from './langProvider';
 import * as mediaLoader from './mediaLoader';
 import { debounce } from './schedulers';
-import { IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
+import { IS_ELECTRON, IS_SERVICE_WORKER_SUPPORTED, IS_TOUCH_ENV } from './windowEnvironment';
 
 function getDeviceToken(subscription: PushSubscription) {
   const data = subscription.toJSON();

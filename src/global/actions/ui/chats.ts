@@ -1,9 +1,9 @@
 import type { ActionReturnType } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
-import { IS_ELECTRON } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { createMessageHashUrl } from '../../../util/routing';
+import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   exitMessageSelectMode, replaceTabThreadParam, updateCurrentMessageList, updateRequestedChatTranslation,
