@@ -2346,10 +2346,13 @@ export interface ActionPayloads {
     threadId?: number;
   } & WithTabId;
   requestSimpleWebView: {
-    url: string;
+    url?: string;
     botId: string;
     buttonText: string;
     theme?: ApiThemeParameters;
+    startParam?: string;
+    isFromSwitchWebView?: boolean;
+    isFromSideMenu?: boolean;
   } & WithTabId;
   requestAppWebView: {
     botId: string;
@@ -2407,6 +2410,7 @@ export interface ActionPayloads {
     bot?: ApiAttachBot;
     url?: string;
     startParam?: string;
+    isFromSideMenu?: boolean;
   } & WithTabId;
 
   requestBotUrlAuth: {

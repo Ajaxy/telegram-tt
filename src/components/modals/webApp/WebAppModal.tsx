@@ -15,6 +15,9 @@ import {
   selectCurrentChat, selectTabState, selectTheme, selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
+import { getColorLuma } from '../../../util/colors';
+import { hexToRgb } from '../../../util/switchTheme';
 import { extractCurrentThemeParams, validateHexColor } from '../../../util/themeStyle';
 import { callApi } from '../../../api/gramjs';
 
@@ -65,6 +68,7 @@ const MAIN_BUTTON_ANIMATION_TIME = 250;
 const PROLONG_INTERVAL = 45000; // 45s
 const ANIMATION_WAIT = 400;
 const POPUP_SEQUENTIAL_LIMIT = 3;
+const LUMA_THRESHOLD = 128;
 const POPUP_RESET_DELAY = 2000; // 2s
 const SANDBOX_ATTRIBUTES = [
   'allow-scripts',
@@ -366,11 +370,18 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     }
 
     if (eventType === 'web_app_set_header_color') {
-      const themeParams = extractCurrentThemeParams();
-      const key = eventData.color_key;
-      const newColor = themeParams[key];
-      const color = validateHexColor(newColor) ? newColor : themeParams.bg_color;
-      setHeaderColor(color);
+      if (eventData.color_key) {
+        const themeParams = extractCurrentThemeParams();
+        const key = eventData.color_key;
+        const newColor = themeParams[key];
+        const color = validateHexColor(newColor) ? newColor : headerColor;
+        setHeaderColor(color);
+      }
+
+      if (eventData.color) {
+        const color = validateHexColor(eventData.color) ? eventData.color : headerColor;
+        setHeaderColor(color);
+      }
     }
 
     if (eventType === 'web_app_data_send') {
@@ -459,7 +470,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
         ripple={!isMobile}
         size="smaller"
         color="translucent"
-        className={isMenuOpen ? 'active' : ''}
+        className={buildClassName(styles.moreButton, isMenuOpen && 'active')}
         onClick={onTrigger}
         ariaLabel="More actions"
       >
@@ -473,9 +484,23 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
     isBackButtonVisible && styles.stateBack,
   );
 
+  const headerTextVar = useMemo(() => {
+    if (!headerColor) return undefined;
+    const { r, g, b } = hexToRgb(headerColor);
+    const luma = getColorLuma([r, g, b]);
+    const adaptedLuma = theme === 'dark' ? 255 - luma : luma;
+    return adaptedLuma > LUMA_THRESHOLD ? 'color-text' : 'color-background';
+  }, [headerColor, theme]);
+
   function renderHeader() {
     return (
-      <div className="modal-header" style={`background-color: ${headerColor}`}>
+      <div
+        className="modal-header"
+        style={buildStyle(
+          headerColor && `background-color: ${headerColor}`,
+          headerTextVar && `--color-header-text: var(--${headerTextVar})`,
+        )}
+      >
         <Button
           round
           color="translucent"

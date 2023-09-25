@@ -4,28 +4,15 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { GlobalState, TabState } from '../../../global/types';
-import type { AnimationLevel, ISettings } from '../../../types';
+import type { GlobalState } from '../../../global/types';
+import type { ISettings } from '../../../types';
 import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import {
-  ANIMATION_LEVEL_MAX,
-  ANIMATION_LEVEL_MIN,
   APP_NAME,
-  ARCHIVED_FOLDER_ID,
-  BETA_CHANGELOG_URL,
   DEBUG,
-  FEEDBACK_URL,
   IS_BETA,
-  IS_TEST,
-  PRODUCTION_HOSTNAME,
-  WEB_VERSION_BASE,
 } from '../../../config';
-import {
-  INITIAL_PERFORMANCE_STATE_MAX,
-  INITIAL_PERFORMANCE_STATE_MID,
-  INITIAL_PERFORMANCE_STATE_MIN,
-} from '../../../global/initialState';
 import {
   selectCanSetPasscode,
   selectCurrentMessageList,
@@ -36,14 +23,12 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { formatDateToString } from '../../../util/dateFormat';
-import { getPromptInstall } from '../../../util/installPrompt';
-import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useElectronDrag from '../../../hooks/useElectronDrag';
-import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import useFlag from '../../../hooks/useFlag';
 import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
@@ -54,12 +39,10 @@ import PickerSelectedItem from '../../common/PickerSelectedItem';
 import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
-import MenuItem from '../../ui/MenuItem';
 import SearchInput from '../../ui/SearchInput';
 import ShowTransition from '../../ui/ShowTransition';
-import Switcher from '../../ui/Switcher';
-import Toggle from '../../ui/Toggle';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
+import LeftSideMenuItems from './LeftSideMenuItems';
 import StatusButton from './StatusButton';
 
 import './LeftMainHeader.scss';
@@ -71,21 +54,19 @@ type OwnProps = {
   isClosingSearch?: boolean;
   shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
-  onSelectSettings: () => void;
-  onSelectContacts: () => void;
-  onSelectArchived: () => void;
-  onReset: () => void;
+  onSelectSettings: NoneToVoidFunction;
+  onSelectContacts: NoneToVoidFunction;
+  onSelectArchived: NoneToVoidFunction;
+  onReset: NoneToVoidFunction;
 };
 
 type StateProps =
   {
     searchQuery?: string;
     isLoading: boolean;
-    currentUserId?: string;
     globalSearchChatId?: string;
     searchDate?: number;
     theme: ISettings['theme'];
-    animationLevel: AnimationLevel;
     isMessageListOpen: boolean;
     isCurrentUserPremium?: boolean;
     isConnectionStatusMinimized: ISettings['isConnectionStatusMinimized'];
@@ -93,8 +74,7 @@ type StateProps =
     hasPasscode?: boolean;
     canSetPasscode?: boolean;
   }
-  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'isFetchingDifference' | 'archiveSettings'>
-  & Pick<TabState, 'canInstall'>;
+  & Pick<GlobalState, 'connectionState' | 'isSyncing' | 'isFetchingDifference'>;
 
 const CLEAR_DATE_SEARCH_PARAM = { date: undefined };
 const CLEAR_CHAT_SEARCH_PARAM = { id: undefined };
@@ -103,21 +83,14 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   shouldHideSearch,
   content,
   contactsFilter,
-  onSearchQuery,
   isClosingSearch,
-  onSelectSettings,
-  onSelectContacts,
-  onSelectArchived,
-  onReset,
   searchQuery,
   isLoading,
   isCurrentUserPremium,
   shouldSkipTransition,
-  currentUserId,
   globalSearchChatId,
   searchDate,
   theme,
-  animationLevel,
   connectionState,
   isSyncing,
   isFetchingDifference,
@@ -126,32 +99,31 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   areChatsLoaded,
   hasPasscode,
   canSetPasscode,
-  canInstall,
-  archiveSettings,
+  onSearchQuery,
+  onSelectSettings,
+  onSelectContacts,
+  onSelectArchived,
+  onReset,
 }) => {
   const {
-    openChat,
-    openChatWithInfo,
     setGlobalSearchDate,
     setSettingOption,
     setGlobalSearchChatId,
-    openChatByUsername,
     lockScreen,
     requestNextSettingsScreen,
-    openUrl,
-    updatePerformanceSettings,
   } = getActions();
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
+
+  const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
+
   const hasMenu = content === LeftColumnContent.ChatList;
   const selectedSearchDate = useMemo(() => {
     return searchDate
       ? formatDateToString(new Date(searchDate * 1000))
       : undefined;
   }, [searchDate]);
-
-  const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const { connectionStatus, connectionStatusText, connectionStatusPosition } = useConnectionStatus(
     lang,
@@ -172,18 +144,12 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const handleOpenMyStories = useLastCallback(() => {
-    openChatWithInfo({ id: currentUserId, shouldReplaceHistory: true, profileTab: 'stories' });
-  });
-
   useHotkeys(canSetPasscode ? {
     'Ctrl+Shift+L': handleLockScreenHotkey,
     'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined);
-
-  const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
 
   const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
     return ({ onTrigger, isOpen }) => (
@@ -217,49 +183,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     setSettingOption({ isConnectionStatusMinimized: !isConnectionStatusMinimized });
   });
 
-  const handleSelectSaved = useLastCallback(() => {
-    openChat({ id: currentUserId, shouldReplaceHistory: true });
-  });
-
-  const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    e.stopPropagation();
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-
-    setSettingOption({ theme: newTheme });
-    setSettingOption({ shouldUseSystemTheme: false });
-  });
-
-  const handleAnimationLevelChange = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
-    e.stopPropagation();
-
-    let newLevel = animationLevel + 1;
-    if (newLevel > ANIMATION_LEVEL_MAX) {
-      newLevel = ANIMATION_LEVEL_MIN;
-    }
-    const performanceSettings = newLevel === ANIMATION_LEVEL_MIN
-      ? INITIAL_PERFORMANCE_STATE_MIN
-      : (newLevel === ANIMATION_LEVEL_MAX ? INITIAL_PERFORMANCE_STATE_MAX : INITIAL_PERFORMANCE_STATE_MID);
-
-    setSettingOption({ animationLevel: newLevel as AnimationLevel });
-    updatePerformanceSettings(performanceSettings);
-  });
-
-  const handleChangelogClick = useLastCallback(() => {
-    window.open(BETA_CHANGELOG_URL, '_blank', 'noopener');
-  });
-
-  const handleSwitchToWebK = useLastCallback(() => {
-    switchPermanentWebVersion('K');
-  });
-
-  const handleOpenTipsChat = useLastCallback(() => {
-    openChatByUsername({ username: lang('Settings.TipsUsername') });
-  });
-
-  const handleBugReportClick = useLastCallback(() => {
-    openUrl({ url: FEEDBACK_URL });
-  });
-
   const handleLockScreen = useLastCallback(() => {
     lockScreen();
   });
@@ -277,9 +200,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     : lang('Search');
 
   const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
-  const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
-    ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid')
-    : 'min';
 
   const isFullscreen = useFullscreenStatus();
 
@@ -292,106 +212,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   // eslint-disable-next-line no-null/no-null
   const headerRef = useRef<HTMLDivElement>(null);
   useElectronDrag(headerRef);
-
-  const menuItems = useMemo(() => (
-    <>
-      <MenuItem
-        icon="saved-messages"
-        onClick={handleSelectSaved}
-      >
-        {lang('SavedMessages')}
-      </MenuItem>
-      {archiveSettings.isHidden && (
-        <MenuItem
-          icon="archive"
-          onClick={onSelectArchived}
-        >
-          <span className="menu-item-name">{lang('ArchivedChats')}</span>
-          {archivedUnreadChatsCount > 0 && (
-            <div className="right-badge">{archivedUnreadChatsCount}</div>
-          )}
-        </MenuItem>
-      )}
-      <MenuItem
-        icon="user"
-        onClick={onSelectContacts}
-      >
-        {lang('Contacts')}
-      </MenuItem>
-      <MenuItem
-        icon="play-story"
-        onClick={handleOpenMyStories}
-      >
-        {lang('Settings.MyStories')}
-      </MenuItem>
-      <MenuItem
-        icon="settings"
-        onClick={onSelectSettings}
-      >
-        {lang('Settings')}
-      </MenuItem>
-      <MenuItem
-        icon="darkmode"
-        onClick={handleDarkModeToggle}
-      >
-        <span className="menu-item-name">{lang('lng_menu_night_mode')}</span>
-        <Switcher
-          id="darkmode"
-          label={lang(theme === 'dark' ? 'lng_settings_disable_night_theme' : 'lng_settings_enable_night_theme')}
-          checked={theme === 'dark'}
-          noAnimation
-        />
-      </MenuItem>
-      <MenuItem
-        icon="animations"
-        onClick={handleAnimationLevelChange}
-      >
-        <span className="menu-item-name capitalize">{lang('Appearance.Animations').toLowerCase()}</span>
-        <Toggle value={animationLevelValue} />
-      </MenuItem>
-      <MenuItem
-        icon="help"
-        onClick={handleOpenTipsChat}
-      >
-        {lang('TelegramFeatures')}
-      </MenuItem>
-      <MenuItem
-        icon="bug"
-        onClick={handleBugReportClick}
-      >
-        Report Bug
-      </MenuItem>
-      {IS_BETA && (
-        <MenuItem
-          icon="permissions"
-          onClick={handleChangelogClick}
-        >
-          Beta Changelog
-        </MenuItem>
-      )}
-      {withOtherVersions && (
-        <MenuItem
-          icon="K"
-          isCharIcon
-          href={`${WEB_VERSION_BASE}k`}
-          onClick={handleSwitchToWebK}
-        >
-          Switch to K Version
-        </MenuItem>
-      )}
-      {canInstall && (
-        <MenuItem
-          icon="install"
-          onClick={getPromptInstall()}
-        >
-          Install App
-        </MenuItem>
-      )}
-    </>
-  ), [
-    animationLevelValue, archiveSettings.isHidden, archivedUnreadChatsCount, canInstall, lang, onSelectArchived,
-    onSelectContacts, onSelectSettings, theme, withOtherVersions,
-  ]);
 
   const searchContent = useMemo(() => {
     return (
@@ -432,11 +252,18 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             shouldHideSearch && lang.isRtl && 'right-aligned',
             shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
           )}
+          forceOpen={isBotMenuOpen}
           positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
           transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
           onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
         >
-          {menuItems}
+          <LeftSideMenuItems
+            onSelectArchived={onSelectArchived}
+            onSelectContacts={onSelectContacts}
+            onSelectSettings={onSelectSettings}
+            onBotMenuOpened={markBotMenuOpen}
+            onBotMenuClosed={unmarkBotMenuOpen}
+          />
         </DropdownMenu>
         <SearchInput
           inputId="telegram-search-input"
@@ -498,18 +325,16 @@ export default memo(withGlobal<OwnProps>(
       query: searchQuery, fetchingStatus, chatId, date,
     } = tabState.globalSearch;
     const {
-      currentUserId, connectionState, isSyncing, archiveSettings, isFetchingDifference,
+      connectionState, isSyncing, isFetchingDifference,
     } = global;
-    const { isConnectionStatusMinimized, animationLevel } = global.settings.byKey;
+    const { isConnectionStatusMinimized } = global.settings.byKey;
 
     return {
       searchQuery,
       isLoading: fetchingStatus ? Boolean(fetchingStatus.chats || fetchingStatus.messages) : false,
-      currentUserId,
       globalSearchChatId: chatId,
       searchDate: date,
       theme: selectTheme(global),
-      animationLevel,
       connectionState,
       isSyncing,
       isFetchingDifference,
@@ -518,8 +343,6 @@ export default memo(withGlobal<OwnProps>(
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       areChatsLoaded: Boolean(global.chats.listIds.active),
       hasPasscode: Boolean(global.passcode.hasPasscode),
-      canInstall: Boolean(tabState.canInstall),
-      archiveSettings,
       canSetPasscode: selectCanSetPasscode(global),
     };
   },

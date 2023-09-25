@@ -141,6 +141,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       global = updateStealthMode(global, update.stealthMode);
       setGlobal(global);
       break;
+
+    case 'updateAttachMenuBots':
+      actions.loadAttachBots({ hash: global.attachMenu.hash });
+      break;
   }
 
   return undefined;

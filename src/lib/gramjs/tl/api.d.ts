@@ -86,7 +86,7 @@ namespace Api {
   export type TypeImportedContact = ImportedContact;
   export type TypeContactStatus = ContactStatus;
   export type TypeMessagesFilter = InputMessagesFilterEmpty | InputMessagesFilterPhotos | InputMessagesFilterVideo | InputMessagesFilterPhotoVideo | InputMessagesFilterDocument | InputMessagesFilterUrl | InputMessagesFilterGif | InputMessagesFilterVoice | InputMessagesFilterMusic | InputMessagesFilterChatPhotos | InputMessagesFilterPhoneCalls | InputMessagesFilterRoundVoice | InputMessagesFilterRoundVideo | InputMessagesFilterMyMentions | InputMessagesFilterGeo | InputMessagesFilterContacts | InputMessagesFilterPinned;
-  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateChannelPinnedTopic | UpdateChannelPinnedTopics | UpdateUser | UpdateAutoSaveSettings | UpdateGroupInvitePrivacyForbidden | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction;
+  export type TypeUpdate = UpdateNewMessage | UpdateMessageID | UpdateDeleteMessages | UpdateUserTyping | UpdateChatUserTyping | UpdateChatParticipants | UpdateUserStatus | UpdateUserName | UpdateNewAuthorization | UpdateNewEncryptedMessage | UpdateEncryptedChatTyping | UpdateEncryption | UpdateEncryptedMessagesRead | UpdateChatParticipantAdd | UpdateChatParticipantDelete | UpdateDcOptions | UpdateNotifySettings | UpdateServiceNotification | UpdatePrivacy | UpdateUserPhone | UpdateReadHistoryInbox | UpdateReadHistoryOutbox | UpdateWebPage | UpdateReadMessagesContents | UpdateChannelTooLong | UpdateChannel | UpdateNewChannelMessage | UpdateReadChannelInbox | UpdateDeleteChannelMessages | UpdateChannelMessageViews | UpdateChatParticipantAdmin | UpdateNewStickerSet | UpdateStickerSetsOrder | UpdateStickerSets | UpdateSavedGifs | UpdateBotInlineQuery | UpdateBotInlineSend | UpdateEditChannelMessage | UpdateBotCallbackQuery | UpdateEditMessage | UpdateInlineBotCallbackQuery | UpdateReadChannelOutbox | UpdateDraftMessage | UpdateReadFeaturedStickers | UpdateRecentStickers | UpdateConfig | UpdatePtsChanged | UpdateChannelWebPage | UpdateDialogPinned | UpdatePinnedDialogs | UpdateBotWebhookJSON | UpdateBotWebhookJSONQuery | UpdateBotShippingQuery | UpdateBotPrecheckoutQuery | UpdatePhoneCall | UpdateLangPackTooLong | UpdateLangPack | UpdateFavedStickers | UpdateChannelReadMessagesContents | UpdateContactsReset | UpdateChannelAvailableMessages | UpdateDialogUnreadMark | UpdateMessagePoll | UpdateChatDefaultBannedRights | UpdateFolderPeers | UpdatePeerSettings | UpdatePeerLocated | UpdateNewScheduledMessage | UpdateDeleteScheduledMessages | UpdateTheme | UpdateGeoLiveViewed | UpdateLoginToken | UpdateMessagePollVote | UpdateDialogFilter | UpdateDialogFilterOrder | UpdateDialogFilters | UpdatePhoneCallSignalingData | UpdateChannelMessageForwards | UpdateReadChannelDiscussionInbox | UpdateReadChannelDiscussionOutbox | UpdatePeerBlocked | UpdateChannelUserTyping | UpdatePinnedMessages | UpdatePinnedChannelMessages | UpdateChat | UpdateGroupCallParticipants | UpdateGroupCall | UpdatePeerHistoryTTL | UpdateChatParticipant | UpdateChannelParticipant | UpdateBotStopped | UpdateGroupCallConnection | UpdateBotCommands | UpdatePendingJoinRequests | UpdateBotChatInviteRequester | UpdateMessageReactions | UpdateAttachMenuBots | UpdateWebViewResultSent | UpdateBotMenuButton | UpdateSavedRingtones | UpdateTranscribedAudio | UpdateReadFeaturedEmojiStickers | UpdateUserEmojiStatus | UpdateRecentEmojiStatuses | UpdateRecentReactions | UpdateMoveStickerSetToTop | UpdateMessageExtendedMedia | UpdateChannelPinnedTopic | UpdateChannelPinnedTopics | UpdateUser | UpdateAutoSaveSettings | UpdateGroupInvitePrivacyForbidden | UpdateStory | UpdateReadStories | UpdateStoryID | UpdateStoriesStealthMode | UpdateSentStoryReaction;
   export type TypeUpdates = UpdatesTooLong | UpdateShortMessage | UpdateShortChatMessage | UpdateShort | UpdatesCombined | Updates | UpdateShortSentMessage;
   export type TypeDcOption = DcOption;
   export type TypeConfig = Config;
@@ -2371,6 +2371,21 @@ namespace Api {
     lastName: string;
     usernames: Api.TypeUsername[];
   };
+  export class UpdateNewAuthorization extends VirtualClass<{
+    // flags: undefined;
+    unconfirmed?: true;
+    hash: long;
+    date?: int;
+    device?: string;
+    location?: string;
+  }> {
+    // flags: undefined;
+    unconfirmed?: true;
+    hash: long;
+    date?: int;
+    device?: string;
+    location?: string;
+  };
   export class UpdateNewEncryptedMessage extends VirtualClass<{
     message: Api.TypeEncryptedMessage;
     qts: int;
@@ -2502,13 +2517,17 @@ namespace Api {
     ptsCount: int;
   };
   export class UpdateReadMessagesContents extends VirtualClass<{
+    // flags: undefined;
     messages: int[];
     pts: int;
     ptsCount: int;
+    date?: int;
   }> {
+    // flags: undefined;
     messages: int[];
     pts: int;
     ptsCount: int;
+    date?: int;
   };
   export class UpdateChannelTooLong extends VirtualClass<{
     // flags: undefined;
@@ -4013,6 +4032,7 @@ namespace Api {
     passwordPending?: true;
     encryptedRequestsDisabled?: true;
     callRequestsDisabled?: true;
+    unconfirmed?: true;
     hash: long;
     deviceModel: string;
     platform: string;
@@ -4032,6 +4052,7 @@ namespace Api {
     passwordPending?: true;
     encryptedRequestsDisabled?: true;
     callRequestsDisabled?: true;
+    unconfirmed?: true;
     hash: long;
     deviceModel: string;
     platform: string;
@@ -7812,18 +7833,24 @@ namespace Api {
     inactive?: true;
     hasSettings?: true;
     requestWriteAccess?: true;
+    showInAttachMenu?: true;
+    showInSideMenu?: true;
+    sideMenuDisclaimerNeeded?: true;
     botId: long;
     shortName: string;
-    peerTypes: Api.TypeAttachMenuPeerType[];
+    peerTypes?: Api.TypeAttachMenuPeerType[];
     icons: Api.TypeAttachMenuBotIcon[];
   }> {
     // flags: undefined;
     inactive?: true;
     hasSettings?: true;
     requestWriteAccess?: true;
+    showInAttachMenu?: true;
+    showInSideMenu?: true;
+    sideMenuDisclaimerNeeded?: true;
     botId: long;
     shortName: string;
-    peerTypes: Api.TypeAttachMenuPeerType[];
+    peerTypes?: Api.TypeAttachMenuPeerType[];
     icons: Api.TypeAttachMenuBotIcon[];
   };
   export class AttachMenuBotsNotModified extends VirtualClass<void> {};
@@ -9669,11 +9696,13 @@ namespace Api {
       // flags: undefined;
       inactive?: true;
       requestWriteAccess?: true;
+      hasSettings?: true;
       app: Api.TypeBotApp;
     }> {
       // flags: undefined;
       inactive?: true;
       requestWriteAccess?: true;
+      hasSettings?: true;
       app: Api.TypeBotApp;
     };
   }
@@ -11476,11 +11505,13 @@ namespace Api {
     };
     export class ChangeAuthorizationSettings extends Request<Partial<{
       // flags: undefined;
+      confirmed?: true;
       hash: long;
       encryptedRequestsDisabled?: Bool;
       callRequestsDisabled?: Bool;
     }>, Bool> {
       // flags: undefined;
+      confirmed?: true;
       hash: long;
       encryptedRequestsDisabled?: Bool;
       callRequestsDisabled?: Bool;
@@ -13409,15 +13440,19 @@ namespace Api {
     export class RequestSimpleWebView extends Request<Partial<{
       // flags: undefined;
       fromSwitchWebview?: true;
+      fromSideMenu?: true;
       bot: Api.TypeInputUser;
-      url: string;
+      url?: string;
+      startParam?: string;
       themeParams?: Api.TypeDataJSON;
       platform: string;
     }>, Api.TypeSimpleWebViewResult> {
       // flags: undefined;
       fromSwitchWebview?: true;
+      fromSideMenu?: true;
       bot: Api.TypeInputUser;
-      url: string;
+      url?: string;
+      startParam?: string;
       themeParams?: Api.TypeDataJSON;
       platform: string;
     };

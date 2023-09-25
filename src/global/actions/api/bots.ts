@@ -452,7 +452,7 @@ addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<
 
 addActionHandler('requestSimpleWebView', async (global, actions, payload): Promise<void> => {
   const {
-    url, botId, theme, buttonText,
+    url, botId, theme, buttonText, isFromSideMenu, isFromSwitchWebView, startParam,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -474,7 +474,14 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     return;
   }
 
-  const webViewUrl = await callApi('requestSimpleWebView', { url, bot, theme });
+  const webViewUrl = await callApi('requestSimpleWebView', {
+    url,
+    bot,
+    theme,
+    startParam,
+    isFromSideMenu,
+    isFromSwitchWebView,
+  });
   if (!webViewUrl) {
     return;
   }
@@ -724,16 +731,8 @@ addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<vo
 
   if (!bot) return;
 
-  await toggleAttachBot(global, bot, isEnabled, isWriteAllowed);
-});
-
-async function toggleAttachBot<T extends GlobalState>(
-  global: T, bot: ApiUser, isEnabled: boolean, isWriteAllowed?: boolean,
-) {
   await callApi('toggleAttachBot', { bot, isWriteAllowed, isEnabled });
-  global = getGlobal();
-  await loadAttachBots(global);
-}
+});
 
 async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
   const result = await callApi('loadAttachBots', { hash });
@@ -755,33 +754,52 @@ async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
 
 addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, bot, url, startParam, threadId,
+    chatId, bot, url, startParam, threadId, isFromSideMenu,
     tabId = getCurrentTabId(),
   } = payload;
   const isFromBotMenu = !bot;
-  if (!isFromBotMenu && !global.attachMenu.bots[bot.id]) {
+  if ((!isFromBotMenu && !global.attachMenu.bots[bot.id])
+    || (isFromSideMenu && (bot?.isInactive || bot?.isDisclaimerNeeded))) {
     return updateTabState(global, {
       requestedAttachBotInstall: {
         bot,
         onConfirm: {
           action: 'callAttachBot',
-          payload,
+          payload: {
+            ...payload,
+            bot: {
+              ...bot,
+              isInactive: false,
+              isDisclaimerNeeded: false,
+            },
+          },
         },
       },
     }, tabId);
   }
+
   const theme = extractCurrentThemeParams();
-  actions.openChat({ id: chatId, threadId, tabId });
-  actions.requestWebView({
-    url,
-    peerId: chatId,
-    botId: isFromBotMenu ? chatId : bot.id,
-    theme,
-    buttonText: '',
-    isFromBotMenu,
-    startParam,
-    tabId,
-  });
+  if (isFromSideMenu) {
+    actions.requestSimpleWebView({
+      botId: bot!.id,
+      buttonText: '',
+      isFromSideMenu: true,
+      theme,
+      tabId,
+    });
+  } else {
+    actions.openChat({ id: chatId, threadId, tabId });
+    actions.requestWebView({
+      url,
+      peerId: chatId,
+      botId: isFromBotMenu ? chatId : bot.id,
+      theme,
+      buttonText: '',
+      isFromBotMenu,
+      startParam,
+      tabId,
+    });
+  }
 
   return undefined;
 });
@@ -800,7 +818,7 @@ addActionHandler('confirmAttachBotInstall', async (global, actions, payload): Pr
   const botUser = selectUser(global, bot.id);
   if (!botUser) return;
 
-  await toggleAttachBot(global, botUser, true, isWriteAllowed);
+  await callApi('toggleAttachBot', { bot: botUser, isWriteAllowed, isEnabled: true });
   if (onConfirm) {
     const { action, payload: actionPayload } = onConfirm;
     // @ts-ignore
@@ -821,11 +839,11 @@ addActionHandler('requestAttachBotInChat', (global, actions, payload): ActionRet
   } = payload;
   const currentChatId = selectCurrentMessageList(global, tabId)?.chatId;
 
-  const supportedFilters = bot.peerTypes.filter((type): type is ApiChatType => (
+  const supportedFilters = bot.attachMenuPeerTypes?.filter((type): type is ApiChatType => (
     type !== 'self' && filter.includes(type)
   ));
 
-  if (!supportedFilters.length) {
+  if (!supportedFilters?.length) {
     actions.callAttachBot({
       chatId: currentChatId || bot.id,
       bot,

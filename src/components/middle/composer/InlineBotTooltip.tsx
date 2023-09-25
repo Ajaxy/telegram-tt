@@ -113,6 +113,7 @@ const InlineBotTooltip: FC<OwnProps> = ({
       url: switchWebview!.url,
       buttonText: switchWebview!.text,
       theme,
+      isFromSwitchWebView: true,
     });
   });
 

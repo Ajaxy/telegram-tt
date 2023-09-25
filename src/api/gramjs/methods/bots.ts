@@ -214,17 +214,28 @@ export async function requestWebView({
 }
 
 export async function requestSimpleWebView({
-  bot, url, theme,
+  bot,
+  url,
+  theme,
+  startParam,
+  isFromSwitchWebView,
+  isFromSideMenu,
 }: {
   bot: ApiUser;
-  url: string;
+  url?: string;
   theme?: ApiThemeParameters;
+  startParam?: string;
+  isFromSwitchWebView?: boolean;
+  isFromSideMenu?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestSimpleWebView({
     url,
     bot: buildInputPeer(bot.id, bot.accessHash),
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     platform: WEB_APP_PLATFORM,
+    startParam,
+    fromSwitchWebview: isFromSwitchWebView || undefined,
+    fromSideMenu: isFromSideMenu || undefined,
   }));
 
   return result?.url;
