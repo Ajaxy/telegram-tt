@@ -244,6 +244,7 @@ const Avatar: FC<OwnProps> = ({
       ref={ref}
       className={fullClassName}
       id={peer?.id && withStory ? getUserStoryHtmlId(peer.id) : undefined}
+      data-peer-id={peer?.id}
       data-test-sender-id={IS_TEST ? peer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
       onClick={handleClick}

@@ -5,6 +5,7 @@ import { ANIMATION_END_DELAY } from '../../../config';
 import fastBlur from '../../../lib/fastBlur';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getUserStoryHtmlId } from '../../../global/helpers';
+import { applyStyles } from '../../../util/animation';
 import stopEvent from '../../../util/stopEvent';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
 import windowSize from '../../../util/windowSize';
@@ -230,8 +231,4 @@ function getNodes(origin: StoryViewerOrigin, userId: string) {
     container,
     mediaEl: mediaEls?.[0],
   };
-}
-
-function applyStyles(element: HTMLElement, css: Record<string, string>) {
-  Object.assign(element.style, css);
 }

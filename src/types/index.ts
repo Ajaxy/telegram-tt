@@ -35,6 +35,7 @@ export type PerformanceTypeKey = (
   'pageTransitions' | 'messageSendingAnimations' | 'mediaViewerAnimations'
   | 'messageComposerAnimations' | 'contextMenuAnimations' | 'contextMenuBlur' | 'rightColumnAnimations'
   | 'animatedEmoji' | 'loopAnimatedStickers' | 'reactionEffects' | 'stickerEffects' | 'autoplayGifs' | 'autoplayVideos'
+  | 'storyRibbonAnimations'
 );
 export type PerformanceType = {
   [key in PerformanceTypeKey]: boolean;
