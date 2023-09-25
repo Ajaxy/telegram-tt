@@ -37,33 +37,20 @@ import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers';
 import localDb from '../localDb';
 
-const CHANNEL_ID_MIN_LENGTH = 11; // Example: -1000000000
+const CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
+const CHANNEL_ID_NEW_FORMAT_MIN_LENGTH = 14; // Example: -1001234567890
 
 function checkIfChannelId(id: string) {
-  // HOTFIX New group id range starts with -4
+  if (id.length >= CHANNEL_ID_NEW_FORMAT_MIN_LENGTH) return id.startsWith('-100');
+  // LEGACY Unprefixed channel id
   if (id.length === CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
   return id.length >= CHANNEL_ID_MIN_LENGTH;
 }
 
 export function getEntityTypeById(chatOrUserId: string) {
-  if (typeof chatOrUserId === 'number') {
-    return getEntityTypeByDeprecatedId(chatOrUserId);
-  }
-
   if (!chatOrUserId.startsWith('-')) {
     return 'user';
   } else if (checkIfChannelId(chatOrUserId)) {
-    return 'channel';
-  } else {
-    return 'chat';
-  }
-}
-
-// Workaround for old-fashioned IDs stored locally
-export function getEntityTypeByDeprecatedId(chatOrUserId: number) {
-  if (chatOrUserId > 0) {
-    return 'user';
-  } else if (chatOrUserId <= -1000000000) {
     return 'channel';
   } else {
     return 'chat';
@@ -546,12 +533,20 @@ export function buildInputThemeParams(params: ApiThemeParameters) {
 }
 
 export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
-  // Workaround for old-fashioned IDs stored locally
-  if (typeof id === 'number') {
-    return BigInt(Math.abs(id));
+  if (type === 'user') {
+    return BigInt(id);
   }
 
-  return type === 'user' ? BigInt(id) : BigInt(id.slice(1));
+  if (type === 'channel') {
+    if (id.length === CHANNEL_ID_NEW_FORMAT_MIN_LENGTH) {
+      return BigInt(id.slice(4));
+    }
+
+    // LEGACY Unprefixed channel id
+    return BigInt(id.slice(1));
+  }
+
+  return BigInt(id.slice(1));
 }
 
 export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
