@@ -112,6 +112,7 @@ type StateProps = {
   activeDownloadIds?: number[];
   isChatProtected?: boolean;
   nextProfileTab?: ProfileTabType;
+  shouldWarnAboutSvg?: boolean;
 };
 
 const TABS = [
@@ -156,6 +157,7 @@ const Profile: FC<OwnProps & StateProps> = ({
   activeDownloadIds,
   isChatProtected,
   nextProfileTab,
+  shouldWarnAboutSvg,
 }) => {
   const {
     setLocalMediaSearchType,
@@ -441,6 +443,7 @@ const Profile: FC<OwnProps & StateProps> = ({
               isDownloading={activeDownloadIds?.includes(id)}
               observeIntersection={observeIntersectionForMedia}
               onDateClick={handleMessageFocus}
+              shouldWarnAboutSvg={shouldWarnAboutSvg}
             />
           ))
         ) : resultType === 'links' ? (
@@ -646,6 +649,7 @@ export default memo(withGlobal<OwnProps>(
       storyByIds,
       isChatProtected: chat?.isProtected,
       nextProfileTab: selectTabState(global).nextProfileTab,
+      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       ...(hasMembersTab && members && { members, adminMembersById }),
       ...(hasCommonChatsTab && user && { commonChatIds: user.commonChats?.ids }),
     };

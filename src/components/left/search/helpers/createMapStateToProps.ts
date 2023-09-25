@@ -16,6 +16,7 @@ export type StateProps = {
   searchChatId?: string;
   activeDownloads: TabState['activeDownloads']['byChatId'];
   isChatProtected?: boolean;
+  shouldWarnAboutSvg?: boolean;
 };
 
 export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
@@ -48,6 +49,7 @@ export function createMapStateToProps(type: ApiGlobalMessageSearchType) {
       searchChatId: chatId,
       activeDownloads,
       isChatProtected: chatId ? selectChat(global, chatId)?.isProtected : undefined,
+      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
     };
   };
 }

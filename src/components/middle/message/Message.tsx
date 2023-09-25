@@ -191,8 +191,8 @@ type OwnProps =
     appearanceOrder: number;
     isJustAdded: boolean;
     memoFirstUnreadIdRef: { current: number | undefined };
-    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
     getIsMessageListReady: Signal<boolean>;
+    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   }
   & MessagePositionProperties;
 
@@ -261,6 +261,7 @@ type StateProps = {
   withStickerEffects?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
+  shouldWarnAboutSvg?: boolean;
 };
 
 type MetaPosition =
@@ -367,8 +368,9 @@ const Message: FC<OwnProps & StateProps> = ({
   withStickerEffects,
   webPageStory,
   isConnected,
-  onPinnedIntersectionChange,
   getIsMessageListReady,
+  shouldWarnAboutSvg,
+  onPinnedIntersectionChange,
 }) => {
   const {
     toggleMessageSelection,
@@ -1094,6 +1096,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onMediaClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
           />
         )}
         {storyData && !isStoryMention && (
@@ -1584,6 +1587,7 @@ export default memo(withGlobal<OwnProps>(
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
+      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),
