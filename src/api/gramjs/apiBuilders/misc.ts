@@ -64,6 +64,8 @@ export function buildPrivacyKey(key: GramJs.TypePrivacyKey): ApiPrivacyKey | und
   switch (key.className) {
     case 'PrivacyKeyPhoneNumber':
       return 'phoneNumber';
+    case 'PrivacyKeyAddedByPhone':
+      return 'addByPhone';
     case 'PrivacyKeyStatusTimestamp':
       return 'lastSeen';
     case 'PrivacyKeyProfilePhoto':

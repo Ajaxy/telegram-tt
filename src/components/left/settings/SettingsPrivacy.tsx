@@ -38,7 +38,7 @@ type StateProps = {
   privacyVoiceMessages?: ApiPrivacySettings;
   privacyGroupChats?: ApiPrivacySettings;
   privacyPhoneCall?: ApiPrivacySettings;
-  privacyPhoneP2P?: ApiPrivacySettings;
+  privacyBio?: ApiPrivacySettings;
 };
 
 const SettingsPrivacy: FC<OwnProps & StateProps> = ({
@@ -53,6 +53,7 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   canDisplayAutoarchiveSetting,
   shouldArchiveAndMuteNewNonContact,
   canDisplayChatInTitle,
+  canSetPasscode,
   privacyPhoneNumber,
   privacyLastSeen,
   privacyProfilePhoto,
@@ -60,10 +61,9 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   privacyVoiceMessages,
   privacyGroupChats,
   privacyPhoneCall,
-  privacyPhoneP2P,
+  privacyBio,
   onScreenSelect,
   onReset,
-  canSetPasscode,
 }) => {
   const {
     loadPrivacySettings,
@@ -250,25 +250,12 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
           narrow
           className="no-icon"
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneCall)}
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyBio)}
         >
           <div className="multiline-menu-item">
-            <span className="title">{lang('WhoCanCallMe')}</span>
+            <span className="title">{lang('PrivacyBio')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyPhoneCall)}
-            </span>
-          </div>
-        </ListItem>
-        <ListItem
-          narrow
-          className="no-icon"
-          // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneP2P)}
-        >
-          <div className="multiline-menu-item">
-            <span className="title">{lang('PrivacyP2P')}</span>
-            <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyPhoneP2P)}
+              {getVisibilityValue(privacyBio)}
             </span>
           </div>
         </ListItem>
@@ -287,16 +274,14 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
         </ListItem>
         <ListItem
           narrow
-          disabled={!isCurrentUserPremium}
-          allowDisabledClick
-          rightElement={!isCurrentUserPremium && <i className="icon icon-lock-badge settings-icon-locked" />}
           className="no-icon"
-          onClick={handleVoiceMessagesClick}
+          // eslint-disable-next-line react/jsx-no-bind
+          onClick={() => onScreenSelect(SettingsScreens.PrivacyPhoneCall)}
         >
           <div className="multiline-menu-item">
-            <span className="title">{lang('PrivacyVoiceMessagesTitle')}</span>
+            <span className="title">{lang('WhoCanCallMe')}</span>
             <span className="subtitle" dir="auto">
-              {getVisibilityValue(privacyVoiceMessages)}
+              {getVisibilityValue(privacyPhoneCall)}
             </span>
           </div>
         </ListItem>
@@ -310,6 +295,21 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
             <span className="title">{lang('WhoCanAddMe')}</span>
             <span className="subtitle" dir="auto">
               {getVisibilityValue(privacyGroupChats)}
+            </span>
+          </div>
+        </ListItem>
+        <ListItem
+          narrow
+          disabled={!isCurrentUserPremium}
+          allowDisabledClick
+          rightElement={!isCurrentUserPremium && <i className="icon icon-lock-badge settings-icon-locked" />}
+          className="no-icon"
+          onClick={handleVoiceMessagesClick}
+        >
+          <div className="multiline-menu-item">
+            <span className="title">{lang('PrivacyVoiceMessagesTitle')}</span>
+            <span className="subtitle" dir="auto">
+              {getVisibilityValue(privacyVoiceMessages)}
             </span>
           </div>
         </ListItem>
@@ -392,7 +392,7 @@ export default memo(withGlobal<OwnProps>(
       privacyVoiceMessages: privacy.voiceMessages,
       privacyGroupChats: privacy.chatInvite,
       privacyPhoneCall: privacy.phoneCall,
-      privacyPhoneP2P: privacy.phoneP2P,
+      privacyBio: privacy.bio,
       canDisplayChatInTitle,
       canSetPasscode: selectCanSetPasscode(global),
     };

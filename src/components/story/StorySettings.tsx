@@ -69,7 +69,7 @@ const OPTIONS: PrivacyOption[] = [{
   actions: 'closeFriends',
 }, {
   name: 'StoryPrivacyOptionSelectedContacts',
-  value: 'selectedContacts',
+  value: 'nobody',
   color: ['#FFB743', '#F69A36'],
   icon: 'group-filled',
   actions: 'allowUserIds',

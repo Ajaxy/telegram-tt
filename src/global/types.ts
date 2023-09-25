@@ -1064,7 +1064,7 @@ export interface ActionPayloads {
   setPrivacySettings: {
     privacyKey: ApiPrivacyKey;
     isAllowList: boolean;
-    contactsIds: string[];
+    updatedIds: string[];
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;

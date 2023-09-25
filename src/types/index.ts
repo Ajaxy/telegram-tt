@@ -3,9 +3,10 @@ import type { TeactNode } from '../lib/teact/teact';
 import type {
   ApiBotInlineMediaResult, ApiBotInlineResult, ApiBotInlineSwitchPm,
   ApiBotInlineSwitchWebview,
+  ApiChat,
   ApiChatInviteImporter,
   ApiExportedInvite,
-  ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet,
+  ApiLanguage, ApiMessage, ApiReaction, ApiStickerSet, ApiUser,
 } from '../api/types';
 
 export type TextPart = TeactNode;
@@ -112,23 +113,20 @@ export interface ISettings extends NotifySettings, Record<string, any> {
 
 export interface ApiPrivacySettings {
   visibility: PrivacyVisibility;
+  isUnspecified?: boolean;
   allowUserIds: string[];
   allowChatIds: string[];
   blockUserIds: string[];
   blockChatIds: string[];
 }
 
-export interface InputPrivacyContact {
-  id: string;
-  accessHash?: string;
-}
-
-export interface InputPrivacyRules {
+export interface ApiInputPrivacyRules {
   visibility: PrivacyVisibility;
-  allowedUsers?: InputPrivacyContact[];
-  allowedChats?: InputPrivacyContact[];
-  blockedUsers?: InputPrivacyContact[];
-  blockedChats?: InputPrivacyContact[];
+  isUnspecified?: boolean;
+  allowedUsers?: ApiUser[];
+  allowedChats?: ApiChat[];
+  blockedUsers?: ApiUser[];
+  blockedChats?: ApiChat[];
 }
 
 export type IAnchorPosition = {
@@ -173,8 +171,10 @@ export enum SettingsScreens {
   GeneralChatBackgroundColor,
   Privacy,
   PrivacyPhoneNumber,
+  PrivacyAddByPhone,
   PrivacyLastSeen,
   PrivacyProfilePhoto,
+  PrivacyBio,
   PrivacyPhoneCall,
   PrivacyPhoneP2P,
   PrivacyForwarding,
@@ -186,6 +186,8 @@ export enum SettingsScreens {
   PrivacyLastSeenDeniedContacts,
   PrivacyProfilePhotoAllowedContacts,
   PrivacyProfilePhotoDeniedContacts,
+  PrivacyBioAllowedContacts,
+  PrivacyBioDeniedContacts,
   PrivacyPhoneCallAllowedContacts,
   PrivacyPhoneCallDeniedContacts,
   PrivacyPhoneP2PAllowedContacts,
@@ -354,10 +356,9 @@ export type ProfileTabType = (
   'members' | 'commonChats' | 'media' | 'documents' | 'links' | 'audio' | 'voice' | 'stories' | 'storiesArchive'
 );
 export type SharedMediaType = 'media' | 'documents' | 'links' | 'audio' | 'voice';
-export type ApiPrivacyKey = 'phoneNumber' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
-'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P';
-export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'selectedContacts' | 'nonContacts' |
-'nobody';
+export type ApiPrivacyKey = 'phoneNumber' | 'addByPhone' | 'lastSeen' | 'profilePhoto' | 'voiceMessages' |
+'forwards' | 'chatInvite' | 'phoneCall' | 'phoneP2P' | 'bio';
+export type PrivacyVisibility = 'everybody' | 'contacts' | 'closeFriends' | 'nonContacts' | 'nobody';
 
 export enum ProfileState {
   Profile,
