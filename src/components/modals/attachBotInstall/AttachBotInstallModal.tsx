@@ -1,15 +1,15 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
 import type { ApiAttachBot } from '../../../api/types';
 
+import { MINI_APP_TOS_URL } from '../../../config';
 import renderText from '../../common/helpers/renderText';
 
 import useLang from '../../../hooks/useLang';
-import usePrevious from '../../../hooks/usePrevious';
 
 import Checkbox from '../../ui/Checkbox';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -22,44 +22,51 @@ const AttachBotInstallModal: FC<OwnProps> = ({
   bot,
 }) => {
   const { confirmAttachBotInstall, cancelAttachBotInstall } = getActions();
-  const [isWriteAllowed, setIsWriteAllowed] = useState(bot?.shouldRequestWriteAccess || false);
+  const [isTosAccepted, setIsTosAccepted] = useState(false);
 
   const lang = useLang();
 
-  const prevBot = usePrevious(bot);
-  const renderingBot = bot || prevBot;
-
   const handleConfirm = useCallback(() => {
     confirmAttachBotInstall({
-      isWriteAllowed,
+      isWriteAllowed: Boolean(bot?.shouldRequestWriteAccess),
     });
-  }, [confirmAttachBotInstall, isWriteAllowed]);
+  }, [confirmAttachBotInstall, bot]);
 
   // Reset on re-open
   useEffect(() => {
     if (bot) {
-      setIsWriteAllowed(bot.shouldRequestWriteAccess ?? false);
+      setIsTosAccepted(false);
     }
   }, [bot]);
+
+  const tosLabel = useMemo(() => {
+    const base = lang('lng_mini_apps_disclaimer_button');
+    const split = base.split('{link}');
+    const linkText = lang('lng_mini_apps_disclaimer_link');
+    return [
+      split[0],
+      <a href={MINI_APP_TOS_URL} target="_blank" rel="noopener noreferrer">{linkText}</a>,
+      split[1],
+    ];
+  }, [lang]);
 
   return (
     <ConfirmDialog
       isOpen={Boolean(bot)}
       onClose={cancelAttachBotInstall}
-      title={renderingBot?.shortName}
+      title={lang('lng_mini_apps_disclaimer_title')}
       confirmHandler={handleConfirm}
+      isConfirmDisabled={!isTosAccepted}
     >
-      {lang('WebApp.AddToAttachmentText', renderingBot?.shortName)}
-      {renderingBot?.shouldRequestWriteAccess && (
-        <Checkbox
-          className="dialog-checkbox"
-          checked={isWriteAllowed}
-          label={renderText(
-            lang('WebApp.AddToAttachmentAllowMessages', renderingBot?.shortName),
-            ['simple_markdown'],
-          )}
-          onCheck={setIsWriteAllowed}
-        />
+      {renderText(lang('lng_mini_apps_disclaimer_text', bot?.shortName), ['simple_markdown'])}
+      <Checkbox
+        className="dialog-checkbox"
+        checked={isTosAccepted}
+        label={tosLabel}
+        onCheck={setIsTosAccepted}
+      />
+      {bot?.isInactive && bot.isForSideMenu && (
+        renderText(lang('WebBot.Account.Desclaimer.Desc', bot?.shortName), ['simple_markdown'])
       )}
     </ConfirmDialog>
   );

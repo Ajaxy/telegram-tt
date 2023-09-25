@@ -59,7 +59,8 @@ export type WebAppInboundEvent = {
 } | {
   eventType: 'web_app_set_header_color';
   eventData: {
-    color_key: 'bg_color' | 'secondary_bg_color';
+    color_key?: 'bg_color' | 'secondary_bg_color';
+    color?: string;
   };
 } | {
   eventType: 'web_app_open_popup';

@@ -13,13 +13,13 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
-import Portal from '../../ui/Portal';
 import AttachBotIcon from './AttachBotIcon';
 
 type OwnProps = {
   bot: ApiAttachBot;
   theme: ISettings['theme'];
-  chatId: string;
+  isInSideMenu?: true;
+  chatId?: string;
   threadId?: number;
   onMenuOpened: VoidFunction;
   onMenuClosed: VoidFunction;
@@ -30,6 +30,7 @@ const AttachBotItem: FC<OwnProps> = ({
   theme,
   chatId,
   threadId,
+  isInSideMenu,
   onMenuOpened,
   onMenuClosed,
 }) => {
@@ -50,6 +51,15 @@ const AttachBotItem: FC<OwnProps> = ({
     setMenuPosition({ x: rect.right, y: rect.bottom });
     onMenuOpened();
     openMenu();
+  });
+
+  const handleClick = useLastCallback(() => {
+    callAttachBot({
+      bot,
+      chatId: chatId!,
+      threadId,
+      isFromSideMenu: isInSideMenu,
+    });
   });
 
   const handleCloseMenu = useLastCallback(() => {
@@ -73,29 +83,23 @@ const AttachBotItem: FC<OwnProps> = ({
       key={bot.id}
       customIcon={icon && <AttachBotIcon icon={icon} theme={theme} />}
       icon={!icon ? 'bots' : undefined}
-      // eslint-disable-next-line react/jsx-no-bind
-      onClick={() => callAttachBot({
-        bot,
-        chatId,
-        threadId,
-      })}
+      onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
       {bot.shortName}
       {menuPosition && (
-        <Portal>
-          <Menu
-            isOpen={isMenuOpen}
-            positionX="right"
-            style={`left: ${menuPosition.x}px;top: ${menuPosition.y}px;`}
-            className="bot-attach-context-menu"
-            autoClose
-            onClose={handleCloseMenu}
-            onCloseAnimationEnd={handleCloseAnimationEnd}
-          >
-            <MenuItem icon="stop" destructive onClick={handleRemoveBot}>{lang('WebApp.RemoveBot')}</MenuItem>
-          </Menu>
-        </Portal>
+        <Menu
+          isOpen={isMenuOpen}
+          positionX="right"
+          style={`left: ${menuPosition.x}px;top: ${menuPosition.y}px;`}
+          className="bot-attach-context-menu"
+          autoClose
+          withPortal
+          onClose={handleCloseMenu}
+          onCloseAnimationEnd={handleCloseAnimationEnd}
+        >
+          <MenuItem icon="stop" destructive onClick={handleRemoveBot}>{lang('WebApp.RemoveBot')}</MenuItem>
+        </Menu>
       )}
 
     </MenuItem>

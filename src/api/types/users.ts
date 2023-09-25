@@ -74,14 +74,23 @@ export interface ApiUsername {
 export type ApiChatType = typeof API_CHAT_TYPES[number];
 export type ApiAttachMenuPeerType = 'self' | ApiChatType;
 
-export interface ApiAttachBot {
+type ApiAttachBotForMenu = {
+  isForAttachMenu: true;
+  attachMenuPeerTypes: ApiAttachMenuPeerType[];
+};
+
+type ApiAttachBotBase = {
   id: string;
   hasSettings?: boolean;
   shouldRequestWriteAccess?: boolean;
   shortName: string;
-  peerTypes: ApiAttachMenuPeerType[];
+  isForSideMenu?: true;
+  isDisclaimerNeeded?: boolean;
   icons: ApiAttachBotIcon[];
-}
+  isInactive?: boolean;
+};
+
+export type ApiAttachBot = OptionalCombine<ApiAttachBotBase, ApiAttachBotForMenu>;
 
 export interface ApiAttachBotIcon {
   name: string;

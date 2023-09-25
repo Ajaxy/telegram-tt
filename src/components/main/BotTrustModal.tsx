@@ -10,7 +10,6 @@ import { getUserFullName } from '../../global/helpers';
 import renderText from '../common/helpers/renderText';
 
 import useLang from '../../hooks/useLang';
-import usePrevious from '../../hooks/usePrevious';
 
 import Checkbox from '../ui/Checkbox';
 import ConfirmDialog from '../ui/ConfirmDialog';
@@ -27,11 +26,6 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
   const [isWriteAllowed, setIsWriteAllowed] = useState(shouldRequestWriteAccess || false);
 
   const lang = useLang();
-  // Keep props a little bit longer, to show correct text on closing animation
-  const previousBot = usePrevious(bot, false);
-  const previousType = usePrevious(type, false);
-  const currentBot = bot || previousBot;
-  const currentType = type || previousType;
 
   const handleBotTrustAccept = useCallback(() => {
     markBotTrusted({ botId: bot!.id, isWriteAllowed });
@@ -41,18 +35,18 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
     cancelBotTrustRequest();
   }, []);
 
-  const title = currentType === 'game' ? lang('AppName') : lang('BotOpenPageTitle');
+  const title = type === 'game' ? lang('AppName') : lang('BotOpenPageTitle');
   const text = useMemo(() => {
-    switch (currentType) {
+    switch (type) {
       case 'game':
-        return lang('BotPermissionGameAlert', getUserFullName(currentBot));
+        return lang('BotPermissionGameAlert', getUserFullName(bot));
       case 'webApp':
-        return lang('BotOpenPageMessage', getUserFullName(currentBot));
+        return lang('BotOpenPageMessage', getUserFullName(bot));
       case 'botApp':
       default:
         return lang('BotWebViewStartPermission');
     }
-  }, [currentBot, currentType, lang]);
+  }, [bot, type, lang]);
 
   return (
     <ConfirmDialog
@@ -67,7 +61,7 @@ const BotTrustModal: FC<OwnProps> = ({ bot, type, shouldRequestWriteAccess }) =>
           className="dialog-checkbox"
           checked={isWriteAllowed}
           label={renderText(
-            lang('WebApp.AddToAttachmentAllowMessages', currentBot?.firstName),
+            lang('WebApp.AddToAttachmentAllowMessages', bot?.firstName),
             ['simple_markdown'],
           )}
           onCheck={setIsWriteAllowed}
