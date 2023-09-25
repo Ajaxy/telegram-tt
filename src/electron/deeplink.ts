@@ -4,7 +4,7 @@ import path from 'path';
 import { ElectronEvent } from '../types/electron';
 
 import {
-  IS_LINUX, IS_MAC_OS, IS_WINDOWS, windows,
+  getLastWindow, IS_LINUX, IS_MAC_OS, IS_WINDOWS,
 } from './utils';
 
 const TG_PROTOCOL = 'tg';
@@ -12,7 +12,7 @@ const TG_PROTOCOL = 'tg';
 let deeplinkUrl: string | undefined;
 
 export function initDeeplink() {
-  const currentWindow = Array.from(windows).pop();
+  const window = getLastWindow();
 
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
@@ -51,24 +51,24 @@ export function initDeeplink() {
 
     processDeeplink();
 
-    if (currentWindow) {
-      if (currentWindow.isMinimized()) {
-        currentWindow.restore();
+    if (window) {
+      if (window.isMinimized()) {
+        window.restore();
       }
 
-      currentWindow.focus();
+      window.focus();
     }
   });
 }
 
 export function processDeeplink() {
-  const currentWindow = Array.from(windows).pop();
+  const window = getLastWindow();
 
-  if (!currentWindow || !deeplinkUrl) {
+  if (!window || !deeplinkUrl) {
     return;
   }
 
-  currentWindow.webContents.send(ElectronEvent.DEEPLINK, deeplinkUrl);
+  window.webContents.send(ElectronEvent.DEEPLINK, deeplinkUrl);
 
   deeplinkUrl = undefined;
 }

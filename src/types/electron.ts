@@ -12,6 +12,8 @@ export enum ElectronAction {
   OPEN_NEW_WINDOW = 'open-new-window',
   SET_WINDOW_TITLE = 'set-window-title',
   SET_TRAFFIC_LIGHT_POSITION = 'set-traffic-light-position',
+  SET_IS_TRAY_ICON_ENABLED = 'set-is-tray-icon-enabled',
+  GET_IS_TRAY_ICON_ENABLED = 'get-is-tray-icon-enabled',
 }
 
 export type TrafficLightPosition = 'standard' | 'lowered';
@@ -23,6 +25,8 @@ export interface ElectronApi {
   openNewWindow: (url: string, title?: string) => Promise<void>;
   setWindowTitle: (title?: string) => Promise<void>;
   setTrafficLightPosition: (position: TrafficLightPosition) => Promise<void>;
+  setIsTrayIconEnabled: (value: boolean) => Promise<void>;
+  getIsTrayIconEnabled: () => Promise<boolean>;
   on: (eventName: ElectronEvent, callback: any) => VoidFunction;
 }
 

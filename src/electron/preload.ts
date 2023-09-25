@@ -12,6 +12,8 @@ const electronApi: ElectronApi = {
   setWindowTitle: (title?: string) => ipcRenderer.invoke(ElectronAction.SET_WINDOW_TITLE, title),
   setTrafficLightPosition:
     (position: TrafficLightPosition) => ipcRenderer.invoke(ElectronAction.SET_TRAFFIC_LIGHT_POSITION, position),
+  setIsTrayIconEnabled: (value: boolean) => ipcRenderer.invoke(ElectronAction.SET_IS_TRAY_ICON_ENABLED, value),
+  getIsTrayIconEnabled: () => ipcRenderer.invoke(ElectronAction.GET_IS_TRAY_ICON_ENABLED),
 
   on: (eventName: ElectronEvent, callback) => {
     const subscription = (event: IpcRendererEvent, ...args: any) => callback(...args);

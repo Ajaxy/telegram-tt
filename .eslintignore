@@ -17,6 +17,7 @@ src/lib/secret-sauce/
 playwright.config.ts
 
 dist
+dist-electron
 public
 
 deploy/update_version.js

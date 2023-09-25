@@ -1,7 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo,
-  useCallback,
+  memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -9,17 +8,19 @@ import type { ISettings, TimeFormat } from '../../../types';
 import type { IRadioOption } from '../../ui/RadioGroup';
 import { SettingsScreens } from '../../../types';
 
+import { IS_ELECTRON } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
 import { getSystemTheme } from '../../../util/systemTheme';
 import {
-  IS_ANDROID, IS_IOS, IS_MAC_OS,
+  IS_ANDROID, IS_IOS, IS_MAC_OS, IS_WINDOWS,
 } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
 
+import Checkbox from '../../ui/Checkbox';
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
 import RangeSlider from '../../ui/RangeSlider';
@@ -117,6 +118,15 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
     setSettingOption({ messageSendKeyCombo: newCombo as ISettings['messageSendKeyCombo'] });
   }, [setSettingOption]);
 
+  const [isTrayIconEnabled, setIsTrayIconEnabled] = useState(false);
+  useEffect(() => {
+    window.electron?.getIsTrayIconEnabled().then(setIsTrayIconEnabled);
+  }, []);
+
+  const handleIsTrayIconEnabledChange = useCallback((isChecked: boolean) => {
+    window.electron?.setIsTrayIconEnabled(isChecked);
+  }, []);
+
   useHistoryBack({
     isActive,
     onBack: onReset,
@@ -142,6 +152,14 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
         >
           {lang('ChatBackground')}
         </ListItem>
+
+        {IS_ELECTRON && IS_WINDOWS && (
+          <Checkbox
+            label={lang('GeneralSettings.StatusBarItem')}
+            checked={Boolean(isTrayIconEnabled)}
+            onCheck={handleIsTrayIconEnabledChange}
+          />
+        )}
       </div>
 
       <div className="settings-item">

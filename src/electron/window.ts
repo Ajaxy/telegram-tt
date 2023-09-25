@@ -9,8 +9,10 @@ import { ElectronAction, ElectronEvent } from '../types/electron';
 
 import setupAutoUpdates from './autoUpdates';
 import { processDeeplink } from './deeplink';
+import tray from './tray';
 import {
-  forceQuit, getAppTitle, IS_MAC_OS, TRAFFIC_LIGHT_POSITION, windows,
+  forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows, IS_MAC_OS, IS_WINDOWS,
+  TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
 
@@ -25,7 +27,7 @@ export function createWindow(url?: string) {
   let x;
   let y;
 
-  const currentWindow = BrowserWindow.getFocusedWindow();
+  const currentWindow = getCurrentWindow();
   if (currentWindow) {
     const [currentWindowX, currentWindowY] = currentWindow.getPosition();
     x = currentWindowX + 24;
@@ -90,20 +92,16 @@ export function createWindow(url?: string) {
   });
 
   window.on('close', (event) => {
-    if (IS_MAC_OS) {
+    if (IS_MAC_OS || IS_WINDOWS) {
       if (forceQuit.isEnabled) {
         app.exit(0);
         forceQuit.disable();
+      } else if (hasExtraWindows()) {
+        windows.delete(window);
+        windowState.unmanage();
       } else {
-        const hasExtraWindows = BrowserWindow.getAllWindows().length > 1;
-
-        if (hasExtraWindows) {
-          windows.delete(window);
-          windowState.unmanage();
-        } else {
-          event.preventDefault();
-          window.hide();
-        }
+        event.preventDefault();
+        window.hide();
       }
     }
   });
@@ -121,6 +119,11 @@ export function createWindow(url?: string) {
 
   if (!IS_MAC_OS) {
     window.removeMenu();
+  }
+
+  if (IS_WINDOWS && tray.isEnabled) {
+    tray.setupListeners(window);
+    tray.create();
   }
 
   window.webContents.once('dom-ready', () => {
@@ -141,17 +144,15 @@ export function setupElectronActionHandlers() {
   });
 
   ipcMain.handle(ElectronAction.SET_WINDOW_TITLE, (_, newTitle?: string) => {
-    const currentWindow = BrowserWindow.getFocusedWindow();
-    currentWindow?.setTitle(getAppTitle(newTitle));
+    getCurrentWindow()?.setTitle(getAppTitle(newTitle));
   });
 
   ipcMain.handle(ElectronAction.GET_IS_FULLSCREEN, () => {
-    const currentWindow = BrowserWindow.getFocusedWindow();
-    currentWindow?.isFullScreen();
+    getCurrentWindow()?.isFullScreen();
   });
 
   ipcMain.handle(ElectronAction.HANDLE_DOUBLE_CLICK, () => {
-    const currentWindow = BrowserWindow.getFocusedWindow();
+    const currentWindow = getCurrentWindow();
     const doubleClickAction = systemPreferences.getUserDefault('AppleActionOnDoubleClick', 'string');
 
     if (doubleClickAction === 'Minimize') {
@@ -170,9 +171,18 @@ export function setupElectronActionHandlers() {
       return;
     }
 
-    const currentWindow = BrowserWindow.getFocusedWindow();
-    currentWindow?.setTrafficLightPosition(TRAFFIC_LIGHT_POSITION[position]);
+    getCurrentWindow()?.setTrafficLightPosition(TRAFFIC_LIGHT_POSITION[position]);
   });
+
+  ipcMain.handle(ElectronAction.SET_IS_TRAY_ICON_ENABLED, (_, value: boolean) => {
+    if (value) {
+      tray.enable();
+    } else {
+      tray.disable();
+    }
+  });
+
+  ipcMain.handle(ElectronAction.GET_IS_TRAY_ICON_ENABLED, () => tray.isEnabled);
 }
 
 export function setupCloseHandlers() {
@@ -197,9 +207,7 @@ export function setupCloseHandlers() {
       createWindow();
     } else if (IS_MAC_OS) {
       forceQuit.disable();
-
-      const currentWindow = Array.from(windows).pop();
-      currentWindow?.show();
+      getLastWindow()?.show();
     }
   });
 }
