@@ -1065,7 +1065,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       tabId,
     });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
-    const chatId = `-${chatOrChannelPostId}`;
+    const chatId = `-100${chatOrChannelPostId}`;
     const chat = selectChat(global, chatId);
     if (!chat) {
       showNotification({ message: 'Chat does not exist', tabId });
@@ -1073,7 +1073,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     }
 
     focusMessage({
-      chatId,
+      chatId: chat.id,
       messageId,
       tabId,
     });

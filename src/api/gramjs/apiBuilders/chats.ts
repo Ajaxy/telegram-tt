@@ -220,9 +220,14 @@ export function buildApiChatFromPreview(
   if (preview instanceof GramJs.ChatEmpty || preview instanceof GramJs.UserEmpty) {
     return undefined;
   }
+  const id = buildApiPeerId(
+    preview.id,
+    preview instanceof GramJs.User ? 'user'
+      : (preview instanceof GramJs.Chat || preview instanceof GramJs.ChatForbidden) ? 'chat' : 'channel',
+  );
 
   return {
-    id: buildApiPeerId(preview.id, preview instanceof GramJs.User ? 'user' : 'chat'),
+    id,
     type: getApiChatTypeFromPeerEntity(preview),
     title: preview instanceof GramJs.User ? getUserName(preview) : preview.title,
     ...buildApiChatFieldsFromPeerEntity(preview, isSupport),

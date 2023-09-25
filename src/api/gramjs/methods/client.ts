@@ -480,7 +480,7 @@ export async function repairFileReference({
     if (!result || result instanceof GramJs.messages.MessagesNotModified) return false;
 
     if (peer && 'pts' in result) {
-      updateChannelState(peer.channelId.toString(), result.pts);
+      updateChannelState(buildApiPeerId(peer.channelId, 'channel'), result.pts);
     }
 
     const message = result.messages[0];

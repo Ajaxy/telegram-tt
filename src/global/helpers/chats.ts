@@ -18,7 +18,7 @@ import {
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
-import { getUserFirstOrLastName } from './users';
+import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
@@ -26,11 +26,6 @@ const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
 
 export function isUserId(entityId: string) {
-  // Workaround for old-fashioned IDs stored locally
-  if (typeof entityId === 'number') {
-    return entityId > 0;
-  }
-
   return !entityId.startsWith('-');
 }
 
@@ -87,20 +82,9 @@ export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
 }
 
 export function getChatLink(chat: ApiChat) {
-  const activeUsername = chat.usernames?.find((u) => u.isActive);
+  const activeUsername = getMainUsername(chat);
 
-  return activeUsername ? `${TME_LINK_PREFIX}${activeUsername.username}` : undefined;
-}
-
-export function getChatMessageLink(chatId: string, chatUsername?: string, threadId?: number, messageId?: number) {
-  const chatPart = chatUsername || `c/${chatId.replace('-', '')}`;
-  const threadPart = threadId && threadId !== MAIN_THREAD_ID ? `/${threadId}` : '';
-  const messagePart = messageId ? `/${messageId}` : '';
-  return `${TME_LINK_PREFIX}${chatPart}${threadPart}${messagePart}`;
-}
-
-export function getTopicLink(chatId: string, chatUsername?: string, topicId?: number) {
-  return getChatMessageLink(chatId, chatUsername, topicId);
+  return activeUsername ? `${TME_LINK_PREFIX}${activeUsername}` : undefined;
 }
 
 export function getChatAvatarHash(

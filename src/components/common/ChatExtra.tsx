@@ -13,7 +13,6 @@ import { TME_LINK_PREFIX } from '../../config';
 import {
   getChatLink,
   getHasAdminRight,
-  getTopicLink,
   isChatChannel,
   isUserId,
   isUserRightBanned,
@@ -25,6 +24,7 @@ import {
   selectCurrentMessageList,
   selectNotifyExceptions,
   selectNotifySettings,
+  selectTopicLink,
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
@@ -55,6 +55,7 @@ type StateProps =
     topicId?: number;
     description?: string;
     chatInviteLink?: string;
+    topicLink?: string;
   };
 
 const runDebounced = debounce((cb) => cb(), 500, false);
@@ -69,6 +70,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   topicId,
   description,
   chatInviteLink,
+  topicLink,
 }) => {
   const {
     loadFullUser,
@@ -118,10 +120,8 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
       return undefined;
     }
 
-    return isTopicInfo
-      ? getTopicLink(chat.id, activeChatUsernames?.[0].username, topicId)
-      : getChatLink(chat) || chatInviteLink;
-  }, [chat, isTopicInfo, activeChatUsernames, topicId, chatInviteLink]);
+    return isTopicInfo ? topicLink! : getChatLink(chat) || chatInviteLink;
+  }, [chat, isTopicInfo, topicLink, chatInviteLink]);
 
   const handleNotificationChange = useLastCallback(() => {
     setAreNotificationsEnabled((current) => {
@@ -281,6 +281,8 @@ export default memo(withGlobal<OwnProps>(
       || getHasAdminRight(chat, 'inviteUsers')
     );
 
+    const topicLink = topicId ? selectTopicLink(global, chatOrUserId, topicId) : undefined;
+
     return {
       phoneCodeList,
       chat,
@@ -290,6 +292,7 @@ export default memo(withGlobal<OwnProps>(
       topicId,
       chatInviteLink,
       description,
+      topicLink,
     };
   },
 )(ChatExtra));

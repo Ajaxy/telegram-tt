@@ -15,7 +15,6 @@ import type {
   ApiTopic,
   ApiTypeStory,
   ApiUser,
-  ApiUsername,
 } from '../../../api/types';
 import type {
   ActiveEmojiInteraction,
@@ -200,7 +199,6 @@ type OwnProps =
 type StateProps = {
   theme: ISettings['theme'];
   forceSenderName?: boolean;
-  chatUsernames?: ApiUsername[];
   sender?: ApiUser | ApiChat;
   canShowSender: boolean;
   originSender?: ApiUser | ApiChat;
@@ -288,7 +286,6 @@ const RESIZE_ANIMATION_DURATION = 400;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
-  chatUsernames,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -1278,7 +1275,6 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   const forwardAuthor = isGroup && asForwarded ? message.postAuthorTitle : undefined;
-  const chatUsername = useMemo(() => chatUsernames?.find((c) => c.isActive), [chatUsernames]);
 
   return (
     <div
@@ -1384,7 +1380,6 @@ const Message: FC<OwnProps & StateProps> = ({
           targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
           message={message}
           album={album}
-          chatUsername={chatUsername?.username}
           messageListType={messageListType}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -1439,7 +1434,6 @@ export default memo(withGlobal<OwnProps>(
     const isRepliesChat = isChatWithRepliesBot(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
-    const chatUsernames = chat?.usernames;
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const webPageStoryData = message.content.webPage?.story;
     const webPageStory = webPageStoryData
@@ -1529,7 +1523,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       theme: selectTheme(global),
-      chatUsernames,
       forceSenderName,
       canShowSender,
       originSender,
