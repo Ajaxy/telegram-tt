@@ -17,6 +17,7 @@ import {
 } from '../../types';
 
 import { compact } from '../../../util/iteratees';
+import localDb from '../localDb';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
 import { buildApiPeerId } from './peers';
@@ -154,6 +155,8 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
   let blockUserIds: string[] | undefined;
   let blockChatIds: string[] | undefined;
 
+  const localChats = localDb.chats;
+
   rules.forEach((rule) => {
     if (rule instanceof GramJs.PrivacyValueAllowAll) {
       visibility ||= 'everybody';
@@ -170,9 +173,20 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
       blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
-      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+      // Server allows channel ids here, so we need to check
+      allowChatIds = rule.chats.map((chatId) => {
+        const dialogId = buildApiPeerId(chatId, 'chat');
+        const channelId = buildApiPeerId(chatId, 'channel');
+        if (localChats[dialogId]) return dialogId;
+        return channelId;
+      });
     } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
-      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+      blockChatIds = rule.chats.map((chatId) => {
+        const dialogId = buildApiPeerId(chatId, 'chat');
+        const channelId = buildApiPeerId(chatId, 'channel');
+        if (localChats[dialogId]) return dialogId;
+        return channelId;
+      });
     }
   });
 

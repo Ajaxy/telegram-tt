@@ -31,19 +31,18 @@ import {
   ApiMessageEntityTypes,
 } from '../../types';
 
-import { DEFAULT_STATUS_ICON_ID } from '../../../config';
+import { CHANNEL_ID_LENGTH, DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers';
 import localDb from '../localDb';
 
-const CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
-const CHANNEL_ID_NEW_FORMAT_MIN_LENGTH = 14; // Example: -1001234567890
+const LEGACY_CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
 
 function checkIfChannelId(id: string) {
-  if (id.length >= CHANNEL_ID_NEW_FORMAT_MIN_LENGTH) return id.startsWith('-100');
+  if (id.length >= CHANNEL_ID_LENGTH) return id.startsWith('-100');
   // LEGACY Unprefixed channel id
-  if (id.length === CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
-  return id.length >= CHANNEL_ID_MIN_LENGTH;
+  if (id.length === LEGACY_CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
+  return id.length >= LEGACY_CHANNEL_ID_MIN_LENGTH;
 }
 
 export function getEntityTypeById(chatOrUserId: string) {
@@ -543,7 +542,7 @@ export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
   }
 
   if (type === 'channel') {
-    if (id.length === CHANNEL_ID_NEW_FORMAT_MIN_LENGTH) {
+    if (id.length === CHANNEL_ID_LENGTH) {
       return BigInt(id.slice(4));
     }
 

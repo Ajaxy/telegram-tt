@@ -54,12 +54,18 @@ const AttachBotItem: FC<OwnProps> = ({
   });
 
   const handleClick = useLastCallback(() => {
-    callAttachBot({
-      bot,
-      chatId: chatId!,
-      threadId,
-      isFromSideMenu: isInSideMenu,
-    });
+    if (isInSideMenu) {
+      callAttachBot({
+        bot,
+        isFromSideMenu: true,
+      });
+    } else {
+      callAttachBot({
+        bot,
+        chatId: chatId!,
+        threadId,
+      });
+    }
   });
 
   const handleCloseMenu = useLastCallback(() => {

@@ -13,7 +13,7 @@ import {
 } from '../../api/types';
 
 import {
-  ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+  ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
@@ -24,9 +24,14 @@ const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
+const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
+}
+
+export function isChannelId(entityId: string) {
+  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-100');
 }
 
 export function isChatGroup(chat: ApiChat) {
@@ -447,4 +452,19 @@ export function getOrderedTopics(
 
     return [...pinnedOrdered, ...ordered, ...hidden];
   }
+}
+
+export function getCleanPeerId(peerId: string) {
+  return isChannelId(peerId) ? peerId.replace('-100', '') : peerId.replace('-', '');
+}
+
+export function getPeerIdDividend(peerId: string) {
+  return Math.abs(Number(getCleanPeerId(peerId)));
+}
+
+// https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
+export function getPeerColorKey(peer: ApiUser | ApiChat | undefined) {
+  const index = peer ? getPeerIdDividend(peer.id) % 7 : 0;
+
+  return USER_COLOR_KEYS[index];
 }

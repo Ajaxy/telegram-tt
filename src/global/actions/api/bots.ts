@@ -6,10 +6,12 @@ import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
+import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import PopupManager from '../../../util/PopupManager';
+import requestActionTimeout from '../../../util/requestActionTimeout';
 import { debounce } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -721,7 +723,12 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
 
 addActionHandler('loadAttachBots', async (global, actions, payload): Promise<void> => {
   const { hash } = payload || {};
-  await loadAttachBots(global, hash);
+  const result = await loadAttachBots(global, hash);
+
+  requestActionTimeout({
+    action: 'loadAttachBots',
+    payload: { hash: result?.hash },
+  }, GENERAL_REFETCH_INTERVAL);
 });
 
 addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<void> => {
@@ -737,7 +744,7 @@ addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<vo
 async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
   const result = await callApi('loadAttachBots', { hash });
   if (!result) {
-    return;
+    return undefined;
   }
 
   global = getGlobal();
@@ -750,16 +757,20 @@ async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
     },
   };
   setGlobal(global);
+
+  return result;
 }
 
 addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, bot, url, startParam, threadId, isFromSideMenu,
-    tabId = getCurrentTabId(),
+    bot, startParam, isFromConfirm, tabId = getCurrentTabId(),
   } = payload;
+  const isFromSideMenu = 'isFromSideMenu' in payload && payload.isFromSideMenu;
+
   const isFromBotMenu = !bot;
-  if ((!isFromBotMenu && !global.attachMenu.bots[bot.id])
-    || (isFromSideMenu && (bot?.isInactive || bot?.isDisclaimerNeeded))) {
+  const shouldDisplayDisclaimer = (!isFromBotMenu && !global.attachMenu.bots[bot.id])
+    || (isFromSideMenu && (bot?.isInactive || bot?.isDisclaimerNeeded));
+  if (!isFromConfirm && shouldDisplayDisclaimer) {
     return updateTabState(global, {
       requestedAttachBotInstall: {
         bot,
@@ -767,11 +778,7 @@ addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType =
           action: 'callAttachBot',
           payload: {
             ...payload,
-            bot: {
-              ...bot,
-              isInactive: false,
-              isDisclaimerNeeded: false,
-            },
+            isFromConfirm: true,
           },
         },
       },
@@ -784,15 +791,19 @@ addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType =
       botId: bot!.id,
       buttonText: '',
       isFromSideMenu: true,
+      startParam,
       theme,
       tabId,
     });
-  } else {
+  }
+
+  if ('chatId' in payload) {
+    const { chatId, threadId, url } = payload;
     actions.openChat({ id: chatId, threadId, tabId });
     actions.requestWebView({
       url,
-      peerId: chatId,
-      botId: isFromBotMenu ? chatId : bot.id,
+      peerId: chatId!,
+      botId: (isFromBotMenu ? chatId : bot.id)!,
       theme,
       buttonText: '',
       isFromBotMenu,
@@ -818,6 +829,7 @@ addActionHandler('confirmAttachBotInstall', async (global, actions, payload): Pr
   const botUser = selectUser(global, bot.id);
   if (!botUser) return;
 
+  actions.markBotTrusted({ botId: bot.id, isWriteAllowed, tabId });
   await callApi('toggleAttachBot', { bot: botUser, isWriteAllowed, isEnabled: true });
   if (onConfirm) {
     const { action, payload: actionPayload } = onConfirm;

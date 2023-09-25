@@ -999,14 +999,15 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     hash = part2;
   }
 
-  const startAttach = params.hasOwnProperty('startattach') && !params.startattach ? true : params.startattach;
+  const hasStartAttach = params.hasOwnProperty('startattach');
+  const hasStartApp = params.hasOwnProperty('startapp');
   const choose = parseChooseParameter(params.choose);
   const storyId = part2 === 's' && (Number(part3) || undefined);
 
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
     openChatByPhoneNumber({
       phoneNumber: part1.substr(1, part1.length - 1),
-      startAttach,
+      startAttach: params.startattach,
       attach: params.attach,
       tabId,
     });
@@ -1087,11 +1088,11 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       slug: part2,
       tabId,
     });
-  } else if (startAttach && choose) {
+  } else if ((hasStartAttach && choose) || (!part2 && hasStartApp)) {
     processAttachBotParameters({
       username: part1,
       filter: choose,
-      ...(typeof startAttach === 'string' && { startParam: startAttach }),
+      startParam: params.startattach || params.startapp,
       tabId,
     });
   } else {
@@ -1101,7 +1102,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       threadId: messageId ? Number(chatOrChannelPostId) : undefined,
       commentId,
       startParam: params.start,
-      startAttach,
+      startAttach: params.startattach,
       attach: params.attach,
       startApp: params.startapp,
       originalParts: [part1, part2, part3],
@@ -1701,6 +1702,18 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload):
   const bot = await getAttachBotOrNotify(global, actions, username, tabId);
   if (!bot) return;
 
+  const isForChat = Boolean(filter);
+
+  if (!isForChat) {
+    actions.callAttachBot({
+      isFromSideMenu: true,
+      bot,
+      startParam,
+      tabId,
+    });
+    return;
+  }
+
   global = getGlobal();
   const { attachMenu: { bots } } = global;
   if (!bots[bot.id]) {
@@ -1720,7 +1733,6 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload):
     setGlobal(global);
     return;
   }
-
   actions.requestAttachBotInChat({
     bot,
     filter,
