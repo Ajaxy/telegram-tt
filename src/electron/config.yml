@@ -7,6 +7,7 @@ extraMetadata:
 files:
   - "dist"
   - "package.json"
+  - "public/icon-electron-windows.ico"
   - "!dist/**/build-stats.json"
   - "!dist/**/statoscope-report.html"
   - "!dist/**/reference.json"
