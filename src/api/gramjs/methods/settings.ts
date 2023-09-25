@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { LANG_PACKS } from '../../../config';
-import type { ApiPrivacyKey, InputPrivacyRules, LangCode } from '../../../types';
+import type { ApiInputPrivacyRules, ApiPrivacyKey, LangCode } from '../../../types';
 import type {
   ApiAppConfig,
   ApiConfig,
@@ -33,6 +33,7 @@ import { buildApiUser } from '../apiBuilders/users';
 import {
   buildInputEntity, buildInputPeer, buildInputPhoto,
   buildInputPrivacyKey,
+  buildInputPrivacyRules,
 } from '../gramjsBuilders';
 import { addEntitiesToLocalDb, addPhotoToLocalDb } from '../helpers';
 import localDb from '../localDb';
@@ -506,48 +507,10 @@ export function unregisterDevice(token: string) {
 }
 
 export async function setPrivacySettings(
-  privacyKey: ApiPrivacyKey, rules: InputPrivacyRules,
+  privacyKey: ApiPrivacyKey, rules: ApiInputPrivacyRules,
 ) {
   const key = buildInputPrivacyKey(privacyKey);
-  const privacyRules: GramJs.TypeInputPrivacyRule[] = [];
-
-  if (rules.allowedUsers) {
-    privacyRules.push(new GramJs.InputPrivacyValueAllowUsers({
-      users: rules.allowedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
-    }));
-  }
-  if (rules.allowedChats) {
-    privacyRules.push(new GramJs.InputPrivacyValueAllowChatParticipants({
-      chats: rules.allowedChats.map(({ id }) => buildInputEntity(id) as BigInt.BigInteger),
-    }));
-  }
-  if (rules.blockedUsers) {
-    privacyRules.push(new GramJs.InputPrivacyValueDisallowUsers({
-      users: rules.blockedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
-    }));
-  }
-  if (rules.blockedChats) {
-    privacyRules.push(new GramJs.InputPrivacyValueDisallowChatParticipants({
-      chats: rules.blockedChats.map(({ id }) => buildInputEntity(id) as BigInt.BigInteger),
-    }));
-  }
-  switch (rules.visibility) {
-    case 'everybody':
-      privacyRules.push(new GramJs.InputPrivacyValueAllowAll());
-      break;
-
-    case 'contacts':
-      privacyRules.push(new GramJs.InputPrivacyValueAllowContacts());
-      break;
-
-    case 'nonContacts':
-      privacyRules.push(new GramJs.InputPrivacyValueDisallowContacts());
-      break;
-
-    case 'nobody':
-      privacyRules.push(new GramJs.InputPrivacyValueDisallowAll());
-      break;
-  }
+  const privacyRules = buildInputPrivacyRules(rules);
 
   const result = await invokeRequest(new GramJs.account.SetPrivacy({ key, rules: privacyRules }));
 

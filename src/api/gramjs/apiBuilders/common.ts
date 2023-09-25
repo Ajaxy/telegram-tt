@@ -148,6 +148,7 @@ export function buildApiUsernames(mtpPeer: GramJs.User | GramJs.Channel | GramJs
 
 export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
   let visibility: PrivacyVisibility | undefined;
+  let isUnspecified: boolean | undefined;
   let allowUserIds: string[] | undefined;
   let allowChatIds: string[] | undefined;
   let blockUserIds: string[] | undefined;
@@ -165,7 +166,6 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
       visibility ||= 'nobody';
     } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
-      visibility ||= 'selectedContacts';
       allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
       blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
@@ -179,10 +179,12 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
   if (!visibility) {
     // Disallow by default
     visibility = 'nobody';
+    isUnspecified = true;
   }
 
   return {
     visibility,
+    isUnspecified,
     allowUserIds: allowUserIds || [],
     allowChatIds: allowChatIds || [],
     blockUserIds: blockUserIds || [],

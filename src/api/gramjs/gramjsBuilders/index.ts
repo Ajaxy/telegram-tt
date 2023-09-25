@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
-import type { ApiPrivacyKey, PrivacyVisibility } from '../../../types';
+import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiBotApp,
   ApiChatAdminRights,
@@ -25,7 +25,6 @@ import type {
   ApiStorySkipped,
   ApiThemeParameters,
   ApiTypeReplyTo,
-  ApiUser,
   ApiVideo,
 } from '../../types';
 import {
@@ -458,6 +457,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
     case 'phoneNumber':
       return new GramJs.InputPrivacyKeyPhoneNumber();
 
+    case 'addByPhone':
+      return new GramJs.InputPrivacyKeyAddedByPhone();
+
     case 'lastSeen':
       return new GramJs.InputPrivacyKeyStatusTimestamp();
 
@@ -478,6 +480,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'voiceMessages':
       return new GramJs.InputPrivacyKeyVoiceMessages();
+
+    case 'bio':
+      return new GramJs.InputPrivacyKeyAbout();
   }
 
   return undefined;
@@ -660,63 +665,54 @@ export function buildInputReplyTo(replyingTo: ApiTypeReplyTo) {
 }
 
 export function buildInputPrivacyRules(
-  visibility: PrivacyVisibility,
-  allowedUserList?: ApiUser[],
-  deniedUserList?: ApiUser[],
+  rules: ApiInputPrivacyRules,
 ) {
-  const rules: GramJs.TypeInputPrivacyRule[] = [];
+  const privacyRules: GramJs.TypeInputPrivacyRule[] = [];
 
-  switch (visibility) {
-    case 'everybody':
-    case 'contacts': {
-      if (visibility === 'contacts') {
-        rules.push(new GramJs.InputPrivacyValueAllowContacts());
-      }
-
-      if (visibility === 'everybody') {
-        rules.push(new GramJs.InputPrivacyValueAllowAll());
-      }
-
-      const users = deniedUserList?.reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
-        acc.push(new GramJs.InputPeerUser({
-          userId: buildMtpPeerId(id, 'user'),
-          accessHash: BigInt(accessHash!),
-        }));
-        return acc;
-      }, []);
-
-      if (users?.length) {
-        rules.push(new GramJs.InputPrivacyValueDisallowUsers({ users }));
-      }
-      break;
-    }
-
-    case 'closeFriends':
-      rules.push(new GramJs.InputPrivacyValueAllowCloseFriends());
-      break;
-
-    case 'nonContacts':
-      rules.push(new GramJs.InputPrivacyValueDisallowContacts());
-      break;
-
-    case 'selectedContacts': {
-      const users = (allowedUserList || []).reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
-        acc.push(new GramJs.InputPeerUser({
-          userId: buildMtpPeerId(id, 'user'),
-          accessHash: BigInt(accessHash!),
-        }));
-
-        return acc;
-      }, []);
-
-      rules.push(new GramJs.InputPrivacyValueAllowUsers({ users }));
-      break;
-    }
-
-    case 'nobody':
-      rules.push(new GramJs.InputPrivacyValueDisallowAll());
-      break;
+  if (rules.allowedUsers?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowUsers({
+      users: rules.allowedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
+    }));
+  }
+  if (rules.allowedChats?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowChatParticipants({
+      chats: rules.allowedChats.map(({ id, type }) => (
+        buildMtpPeerId(id, type === 'chatTypeBasicGroup' ? 'chat' : 'channel')
+      )),
+    }));
+  }
+  if (rules.blockedUsers?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowUsers({
+      users: rules.blockedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
+    }));
+  }
+  if (rules.blockedChats?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowChatParticipants({
+      chats: rules.blockedChats.map(({ id, type }) => (
+        buildMtpPeerId(id, type === 'chatTypeBasicGroup' ? 'chat' : 'channel')
+      )),
+    }));
   }
 
-  return rules;
+  if (!rules.isUnspecified) {
+    switch (rules.visibility) {
+      case 'everybody':
+        privacyRules.push(new GramJs.InputPrivacyValueAllowAll());
+        break;
+
+      case 'contacts':
+        privacyRules.push(new GramJs.InputPrivacyValueAllowContacts());
+        break;
+
+      case 'nonContacts':
+        privacyRules.push(new GramJs.InputPrivacyValueDisallowContacts());
+        break;
+
+      case 'nobody':
+        privacyRules.push(new GramJs.InputPrivacyValueDisallowAll());
+        break;
+    }
+  }
+
+  return privacyRules;
 }

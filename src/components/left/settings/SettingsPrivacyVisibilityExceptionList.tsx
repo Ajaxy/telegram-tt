@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useMemo, useState,
+  memo, useCallback, useEffect, useMemo, useState,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
@@ -9,7 +9,7 @@ import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../config';
-import { filterChatsByName, isUserId } from '../../../global/helpers';
+import { filterChatsByName } from '../../../global/helpers';
 import { unique } from '../../../util/iteratees';
 import { getPrivacyKey } from './helpers/privacy';
 
@@ -37,10 +37,10 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   isAllowList,
   screen,
   isActive,
-  onScreenSelect,
-  onReset,
   currentUserId,
   settings,
+  onScreenSelect,
+  onReset,
 }) => {
   const { setPrivacySettings } = getActions();
 
@@ -61,6 +61,11 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
   const [isSubmitShown, setIsSubmitShown] = useState<boolean>(false);
   const [newSelectedContactIds, setNewSelectedContactIds] = useState<string[]>(selectedContactIds);
 
+  // Reset selected contact ids on change from other client when screen is not active
+  useEffect(() => {
+    if (!isActive) setNewSelectedContactIds(selectedContactIds);
+  }, [isActive, selectedContactIds]);
+
   const folderAllOrderedIds = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
   const folderArchivedOrderedIds = useFolderManagerForOrderedIds(ARCHIVED_FOLDER_ID);
   const displayedIds = useMemo(() => {
@@ -68,11 +73,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     const chatsById = getGlobal().chats.byId;
 
     const chatIds = unique([...folderAllOrderedIds || [], ...folderArchivedOrderedIds || []])
-      .filter((chatId) => {
-        const chat = chatsById[chatId];
-
-        return chat && isUserId(chat.id) && chat.id !== currentUserId;
-      });
+      .filter((chatId) => chatId !== currentUserId);
 
     return unique([
       ...selectedContactIds,
@@ -89,7 +90,7 @@ const SettingsPrivacyVisibilityExceptionList: FC<OwnProps & StateProps> = ({
     setPrivacySettings({
       privacyKey: getPrivacyKey(screen)!,
       isAllowList: Boolean(isAllowList),
-      contactsIds: newSelectedContactIds,
+      updatedIds: newSelectedContactIds,
     });
 
     onScreenSelect(SettingsScreens.Privacy);
@@ -136,6 +137,9 @@ function getCurrentPrivacySettings(global: GlobalState, screen: SettingsScreens)
     case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
     case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
       return privacy.profilePhoto;
+    case SettingsScreens.PrivacyBioAllowedContacts:
+    case SettingsScreens.PrivacyBioDeniedContacts:
+      return privacy.bio;
     case SettingsScreens.PrivacyPhoneCallAllowedContacts:
     case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       return privacy.phoneCall;

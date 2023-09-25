@@ -6,7 +6,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
-import { getStoryKey } from '../../helpers';
+import { buildApiInputPrivacyRules, getStoryKey } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addStories,
@@ -378,13 +378,19 @@ addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnTyp
     privacy,
   } = payload;
 
-  const allowedUserList = privacy.allowUserIds?.map((userId) => selectUser(global, userId)).filter(Boolean);
-  const deniedUserList = privacy.blockUserIds?.map((userId) => selectUser(global, userId)).filter(Boolean);
+  const allowedIds = [...privacy.allowUserIds, ...privacy.allowChatIds];
+  const blockedIds = [...privacy.blockUserIds, ...privacy.blockChatIds];
+
+  const inputPrivacy = buildApiInputPrivacyRules(global, {
+    visibility: privacy.visibility,
+    isUnspecified: privacy.isUnspecified,
+    allowedIds,
+    blockedIds,
+  });
+
   void callApi('editStoryPrivacy', {
     id: storyId,
-    visibility: privacy.visibility,
-    allowedUserList,
-    deniedUserList,
+    privacy: inputPrivacy,
   });
 });
 

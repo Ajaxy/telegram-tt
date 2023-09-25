@@ -182,8 +182,10 @@ function LeftColumn({
           return;
 
         case SettingsScreens.PrivacyPhoneNumber:
+        case SettingsScreens.PrivacyAddByPhone:
         case SettingsScreens.PrivacyLastSeen:
         case SettingsScreens.PrivacyProfilePhoto:
+        case SettingsScreens.PrivacyBio:
         case SettingsScreens.PrivacyPhoneCall:
         case SettingsScreens.PrivacyPhoneP2P:
         case SettingsScreens.PrivacyForwarding:
@@ -232,6 +234,10 @@ function LeftColumn({
         case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
         case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyProfilePhoto);
+          return;
+        case SettingsScreens.PrivacyBioAllowedContacts:
+        case SettingsScreens.PrivacyBioDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyBio);
           return;
         case SettingsScreens.PrivacyPhoneCallAllowedContacts:
         case SettingsScreens.PrivacyPhoneCallDeniedContacts:

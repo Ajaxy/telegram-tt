@@ -439,12 +439,12 @@ function Story({
   const handleInfoPrivacyClick = useLastCallback(() => {
     const visibility = !isLoadedStory || story.isPublic
       ? undefined
-      : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'selectedContacts');
+      : story.isForContacts ? 'contacts' : (story.isForCloseFriends ? 'closeFriends' : 'nobody');
 
     let message;
     const myName = getUserFirstOrLastName(user);
     switch (visibility) {
-      case 'selectedContacts':
+      case 'nobody':
         message = lang('StorySelectedContactsHint', myName);
         break;
       case 'contacts':
@@ -560,7 +560,7 @@ function Story({
         case 'closeFriends':
           privacyIcon = 'favorite-filled';
           break;
-        case 'selectedContacts':
+        case 'nobody':
           privacyIcon = 'group-filled';
       }
     } else {

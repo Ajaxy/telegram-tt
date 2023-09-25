@@ -106,8 +106,15 @@
 }
 
 .settings-main-menu {
-  padding: 0 0.5rem 0.75rem;
+  padding: 0.5rem;
   background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+  border-bottom: 0.625rem solid var(--color-background-secondary);
+
+  &:last-child {
+    border-bottom: none;
+    box-shadow: none;
+  }
 
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;

@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../../api/types';
+import type { ApiPhoto } from '../../../api/types';
 import type { ApiPrivacySettings } from '../../../types';
 import { SettingsScreens } from '../../../types';
 
@@ -11,6 +11,7 @@ import { getPrivacyKey } from './helpers/privacy';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
 
 import ListItem from '../../ui/ListItem';
 import RadioGroup from '../../ui/RadioGroup';
@@ -23,57 +24,131 @@ type OwnProps = {
   onReset: () => void;
 };
 
-type StateProps =
-  Partial<ApiPrivacySettings> & {
-    chatsById?: Record<string, ApiChat>;
-    usersById?: Record<string, ApiUser>;
-    currentUserId: string;
-    hasCurrentUserFullInfo?: boolean;
-    currentUserFallbackPhoto?: ApiPhoto;
-  };
+type StateProps = {
+  currentUserId: string;
+  hasCurrentUserFullInfo?: boolean;
+  currentUserFallbackPhoto?: ApiPhoto;
+  primaryPrivacy?: ApiPrivacySettings;
+  secondaryPrivacy?: ApiPrivacySettings;
+};
 
 const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
   screen,
   isActive,
-  onScreenSelect,
-  onReset,
-  visibility,
-  allowUserIds,
-  allowChatIds,
-  blockUserIds,
-  blockChatIds,
-  chatsById,
+  primaryPrivacy,
+  secondaryPrivacy,
   currentUserId,
   hasCurrentUserFullInfo,
   currentUserFallbackPhoto,
+  onScreenSelect,
+  onReset,
 }) => {
-  const { setPrivacyVisibility } = getActions();
+  useHistoryBack({
+    isActive,
+    onBack: onReset,
+  });
 
+  const secondaryScreen = useMemo(() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyPhoneCall:
+        return SettingsScreens.PrivacyPhoneP2P;
+      case SettingsScreens.PrivacyPhoneNumber: {
+        return primaryPrivacy?.visibility === 'nobody' ? SettingsScreens.PrivacyAddByPhone : undefined;
+      }
+      default:
+        return undefined;
+    }
+  }, [primaryPrivacy, screen]);
+
+  return (
+    <div className="settings-content custom-scroll">
+      <PrivacySubsection
+        screen={screen}
+        privacy={primaryPrivacy}
+        onScreenSelect={onScreenSelect}
+      />
+      {screen === SettingsScreens.PrivacyProfilePhoto && primaryPrivacy?.visibility !== 'everybody' && (
+        <SettingsPrivacyPublicProfilePhoto
+          currentUserId={currentUserId}
+          hasCurrentUserFullInfo={hasCurrentUserFullInfo}
+          currentUserFallbackPhoto={currentUserFallbackPhoto}
+        />
+      )}
+      {secondaryScreen && (
+        <PrivacySubsection
+          screen={secondaryScreen}
+          privacy={secondaryPrivacy}
+          onScreenSelect={onScreenSelect}
+        />
+      )}
+    </div>
+  );
+};
+
+function PrivacySubsection({
+  screen,
+  privacy,
+  onScreenSelect,
+}: {
+  screen: SettingsScreens;
+  privacy?: ApiPrivacySettings;
+  onScreenSelect: (screen: SettingsScreens) => void;
+}) {
+  const { setPrivacyVisibility } = getActions();
   const lang = useLang();
 
   const visibilityOptions = useMemo(() => {
-    return [
+    const hasNobody = screen !== SettingsScreens.PrivacyAddByPhone;
+    const options = [
       { value: 'everybody', label: lang('P2PEverybody') },
       { value: 'contacts', label: lang('P2PContacts') },
-      { value: 'nobody', label: lang('P2PNobody') },
     ];
-  }, [lang]);
+    if (hasNobody) {
+      options.push({ value: 'nobody', label: lang('P2PNobody') });
+    }
+    return options;
+  }, [lang, screen]);
 
-  const exceptionLists = {
-    shouldShowDenied: visibility !== 'nobody',
-    shouldShowAllowed: visibility !== 'everybody',
-  };
+  const primaryExceptionLists = useMemo(() => {
+    if (screen === SettingsScreens.PrivacyAddByPhone) {
+      return {
+        shouldShowDenied: false,
+        shouldShowAllowed: false,
+      };
+    }
+
+    return {
+      shouldShowDenied: privacy?.visibility !== 'nobody',
+      shouldShowAllowed: privacy?.visibility !== 'everybody',
+    };
+  }, [privacy, screen]);
 
   const privacyKey = getPrivacyKey(screen);
+
+  const descriptionText = useMemo(() => {
+    switch (screen) {
+      case SettingsScreens.PrivacyLastSeen:
+        return lang('CustomHelp');
+      case SettingsScreens.PrivacyAddByPhone: {
+        return privacy?.visibility === 'everybody' ? lang('PrivacyPhoneInfo') : lang('PrivacyPhoneInfo3');
+      }
+      default:
+        return undefined;
+    }
+  }, [lang, screen, privacy]);
 
   const headerText = useMemo(() => {
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
         return lang('PrivacyPhoneTitle');
+      case SettingsScreens.PrivacyAddByPhone:
+        return lang('PrivacyPhoneTitle2');
       case SettingsScreens.PrivacyLastSeen:
         return lang('LastSeenTitle');
       case SettingsScreens.PrivacyProfilePhoto:
         return lang('PrivacyProfilePhotoTitle');
+      case SettingsScreens.PrivacyBio:
+        return lang('PrivacyBioTitle');
       case SettingsScreens.PrivacyForwarding:
         return lang('PrivacyForwardsTitle');
       case SettingsScreens.PrivacyVoiceMessages:
@@ -89,19 +164,34 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
     }
   }, [lang, screen]);
 
-  useHistoryBack({
-    isActive,
-    onBack: onReset,
+  const prepareSubtitle = useLastCallback((userIds?: string[], chatIds?: string[]) => {
+    const userIdsCount = userIds?.length || 0;
+    const chatIdsCount = chatIds?.length || 0;
+
+    if (!userIdsCount && !chatIdsCount) {
+      return lang('EditAdminAddUsers');
+    }
+
+    const userCountString = userIdsCount > 0 ? lang('Users', userIdsCount) : undefined;
+    const chatCountString = chatIdsCount > 0 ? lang('Chats', chatIdsCount) : undefined;
+
+    return [userCountString, chatCountString].filter(Boolean).join(', ');
   });
 
-  const descriptionText = useMemo(() => {
-    switch (screen) {
-      case SettingsScreens.PrivacyLastSeen:
-        return lang('CustomHelp');
-      default:
-        return undefined;
-    }
-  }, [lang, screen]);
+  const allowedString = useMemo(() => {
+    return prepareSubtitle(privacy?.allowUserIds, privacy?.allowChatIds);
+  }, [privacy]);
+
+  const blockString = useMemo(() => {
+    return prepareSubtitle(privacy?.blockUserIds, privacy?.blockChatIds);
+  }, [privacy]);
+
+  const handleVisibilityChange = useCallback((value) => {
+    setPrivacyVisibility({
+      privacyKey: privacyKey!,
+      visibility: value,
+    });
+  }, [privacyKey]);
 
   const allowedContactsScreen = (() => {
     switch (screen) {
@@ -111,6 +201,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         return SettingsScreens.PrivacyLastSeenAllowedContacts;
       case SettingsScreens.PrivacyProfilePhoto:
         return SettingsScreens.PrivacyProfilePhotoAllowedContacts;
+      case SettingsScreens.PrivacyBio:
+        return SettingsScreens.PrivacyBioAllowedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingAllowedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -132,6 +224,8 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
         return SettingsScreens.PrivacyLastSeenDeniedContacts;
       case SettingsScreens.PrivacyProfilePhoto:
         return SettingsScreens.PrivacyProfilePhotoDeniedContacts;
+      case SettingsScreens.PrivacyBio:
+        return SettingsScreens.PrivacyBioDeniedContacts;
       case SettingsScreens.PrivacyForwarding:
         return SettingsScreens.PrivacyForwardingDeniedContacts;
       case SettingsScreens.PrivacyPhoneCall:
@@ -145,105 +239,68 @@ const SettingsPrivacyVisibility: FC<OwnProps & StateProps> = ({
     }
   })();
 
-  const allowedCount = useMemo(() => {
-    if (!allowUserIds || !allowChatIds || !chatsById) {
-      return 0;
-    }
-
-    return allowChatIds.reduce((result, chatId) => {
-      return result + (chatsById[chatId] ? chatsById[chatId].membersCount! : 0);
-    }, allowUserIds.length);
-  }, [allowChatIds, allowUserIds, chatsById]);
-
-  const blockCount = useMemo(() => {
-    if (!blockUserIds || !blockChatIds || !chatsById) {
-      return 0;
-    }
-
-    return blockChatIds.reduce((result, chatId) => {
-      return result + (chatsById[chatId] ? chatsById[chatId].membersCount! : 0);
-    }, blockUserIds.length);
-  }, [blockChatIds, blockUserIds, chatsById]);
-
-  const handleVisibilityChange = useCallback((value) => {
-    setPrivacyVisibility({
-      privacyKey: privacyKey!,
-      visibility: value,
-    });
-  }, [privacyKey, setPrivacyVisibility]);
-
   return (
-    <div className="settings-content custom-scroll">
+    <>
       <div className="settings-item">
         <h4 className="settings-item-header" dir={lang.isRtl ? 'rtl' : undefined}>{headerText}</h4>
-
         <RadioGroup
           name={`visibility-${privacyKey}`}
           options={visibilityOptions}
           onChange={handleVisibilityChange}
-          selected={visibility}
+          selected={privacy?.visibility}
         />
-
         {descriptionText && (
           <p className="settings-item-description-larger" dir={lang.isRtl ? 'rtl' : undefined}>{descriptionText}</p>
         )}
       </div>
-
-      <div className="settings-item">
-        <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>{lang('PrivacyExceptions')}</h4>
-
-        {exceptionLists.shouldShowAllowed && (
-          <ListItem
-            narrow
-            icon="add-user"
-            // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => {
-              onScreenSelect(allowedContactsScreen);
-            }}
-          >
-            <div className="multiline-menu-item full-size">
-              {allowedCount > 0 && <span className="date" dir="auto">+{allowedCount}</span>}
-              <span className="title">{lang('AlwaysAllow')}</span>
-              <span className="subtitle">{lang('EditAdminAddUsers')}</span>
-            </div>
-          </ListItem>
-        )}
-        {exceptionLists.shouldShowDenied && (
-          <ListItem
-            narrow
-            icon="delete-user"
-            // eslint-disable-next-line react/jsx-no-bind
-            onClick={() => {
-              onScreenSelect(deniedContactsScreen);
-            }}
-          >
-            <div className="multiline-menu-item full-size">
-              {blockCount > 0 && <span className="date" dir="auto">&minus;{blockCount}</span>}
-              <span className="title">{lang('NeverAllow')}</span>
-              <span className="subtitle">{lang('EditAdminAddUsers')}</span>
-            </div>
-          </ListItem>
-        )}
-      </div>
-
-      {screen === SettingsScreens.PrivacyProfilePhoto && exceptionLists.shouldShowAllowed && (
-        <SettingsPrivacyPublicProfilePhoto
-          currentUserId={currentUserId}
-          hasCurrentUserFullInfo={hasCurrentUserFullInfo}
-          currentUserFallbackPhoto={currentUserFallbackPhoto}
-        />
+      {(primaryExceptionLists.shouldShowAllowed || primaryExceptionLists.shouldShowDenied) && (
+        <div className="settings-item">
+          <h4 className="settings-item-header mb-4" dir={lang.isRtl ? 'rtl' : undefined}>
+            {lang('PrivacyExceptions')}
+          </h4>
+          {primaryExceptionLists.shouldShowAllowed && (
+            <ListItem
+              narrow
+              icon="add-user"
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => {
+                onScreenSelect(allowedContactsScreen);
+              }}
+            >
+              <div className="multiline-menu-item full-size">
+                <span className="title">{lang('AlwaysAllow')}</span>
+                <span className="subtitle">{allowedString}</span>
+              </div>
+            </ListItem>
+          )}
+          {primaryExceptionLists.shouldShowDenied && (
+            <ListItem
+              narrow
+              icon="delete-user"
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => {
+                onScreenSelect(deniedContactsScreen);
+              }}
+            >
+              <div className="multiline-menu-item full-size">
+                <span className="title">{lang('NeverAllow')}</span>
+                <span className="subtitle">{blockString}</span>
+              </div>
+            </ListItem>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
-};
+}
 
 export default memo(withGlobal<OwnProps>(
   (global, { screen }): StateProps => {
-    let privacySettings: ApiPrivacySettings | undefined;
+    let primaryPrivacy: ApiPrivacySettings | undefined;
+    let secondaryPrivacy: ApiPrivacySettings | undefined;
 
     const {
       currentUserId,
-      chats: { byId: chatsById },
       settings: { privacy },
     } = global;
 
@@ -251,39 +308,42 @@ export default memo(withGlobal<OwnProps>(
 
     switch (screen) {
       case SettingsScreens.PrivacyPhoneNumber:
-        privacySettings = privacy.phoneNumber;
+        primaryPrivacy = privacy.phoneNumber;
+        secondaryPrivacy = privacy.addByPhone;
         break;
 
       case SettingsScreens.PrivacyLastSeen:
-        privacySettings = privacy.lastSeen;
+        primaryPrivacy = privacy.lastSeen;
         break;
 
       case SettingsScreens.PrivacyProfilePhoto:
-        privacySettings = privacy.profilePhoto;
+        primaryPrivacy = privacy.profilePhoto;
         break;
 
-      case SettingsScreens.PrivacyPhoneCall:
-        privacySettings = privacy.phoneCall;
+      case SettingsScreens.PrivacyBio:
+        primaryPrivacy = privacy.bio;
         break;
 
       case SettingsScreens.PrivacyPhoneP2P:
-        privacySettings = privacy.phoneP2P;
+      case SettingsScreens.PrivacyPhoneCall:
+        primaryPrivacy = privacy.phoneCall;
+        secondaryPrivacy = privacy.phoneP2P;
         break;
 
       case SettingsScreens.PrivacyForwarding:
-        privacySettings = privacy.forwards;
+        primaryPrivacy = privacy.forwards;
         break;
 
       case SettingsScreens.PrivacyVoiceMessages:
-        privacySettings = privacy.voiceMessages;
+        primaryPrivacy = privacy.voiceMessages;
         break;
 
       case SettingsScreens.PrivacyGroupChats:
-        privacySettings = privacy.chatInvite;
+        primaryPrivacy = privacy.chatInvite;
         break;
     }
 
-    if (!privacySettings) {
+    if (!primaryPrivacy) {
       return {
         currentUserId: currentUserId!,
         hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
@@ -292,8 +352,8 @@ export default memo(withGlobal<OwnProps>(
     }
 
     return {
-      ...privacySettings,
-      chatsById,
+      primaryPrivacy,
+      secondaryPrivacy,
       currentUserId: currentUserId!,
       hasCurrentUserFullInfo: Boolean(currentUserFullInfo),
       currentUserFallbackPhoto: currentUserFullInfo?.fallbackPhoto,
