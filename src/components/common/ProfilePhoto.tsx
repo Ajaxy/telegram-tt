@@ -6,7 +6,7 @@ import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import {
   getChatAvatarHash,
   getChatTitle,
-  getUserColorKey,
+  getPeerColorKey,
   getUserFullName,
   getVideoAvatarMediaHash,
   isChatWithRepliesBot,
@@ -139,7 +139,7 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'ProfilePhoto',
-    `color-bg-${getUserColorKey(user || chat)}`,
+    `color-bg-${getPeerColorKey(user || chat)}`,
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',

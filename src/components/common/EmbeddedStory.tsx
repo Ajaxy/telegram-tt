@@ -6,9 +6,9 @@ import type { ApiChat, ApiTypeStory, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
+  getPeerColorKey,
   getSenderTitle,
   getStoryMediaHash,
-  getUserColorKey,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { getPictogramDimensions } from './helpers/mediaDimensions';
@@ -75,7 +75,7 @@ const EmbeddedStory: FC<OwnProps> = ({
       ref={ref}
       className={buildClassName(
         'EmbeddedMessage',
-        sender && !noUserColors && `color-${getUserColorKey(sender)}`,
+        sender && !noUserColors && `color-${getPeerColorKey(sender)}`,
       )}
       onClick={handleClick}
       onMouseDown={handleMouseDown}

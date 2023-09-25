@@ -2378,7 +2378,7 @@ export interface ActionPayloads {
 
   processAttachBotParameters: {
     username: string;
-    filter: ApiChatType[];
+    filter?: ApiChatType[];
     startParam?: string;
   } & WithTabId;
   requestAttachBotInChat: {
@@ -2404,13 +2404,16 @@ export interface ActionPayloads {
     isEnabled: boolean;
   };
 
-  callAttachBot: {
+  callAttachBot: ({
     chatId: string;
     threadId?: number;
-    bot?: ApiAttachBot;
     url?: string;
+  } | {
+    isFromSideMenu: true;
+  }) & {
     startParam?: string;
-    isFromSideMenu?: boolean;
+    bot?: ApiAttachBot;
+    isFromConfirm?: boolean;
   } & WithTabId;
 
   requestBotUrlAuth: {

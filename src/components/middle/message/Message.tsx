@@ -38,8 +38,8 @@ import {
   getMessageLocation,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
+  getPeerColorKey,
   getSenderTitle,
-  getUserColorKey,
   hasMessageText,
   isAnonymousOwnMessage,
   isChatChannel,
@@ -1209,7 +1209,7 @@ const Message: FC<OwnProps & StateProps> = ({
       senderTitle = getSenderTitle(lang, senderPeer);
 
       if (!asForwarded && !isOwn) {
-        senderColor = `color-${getUserColorKey(senderPeer)}`;
+        senderColor = `color-${getPeerColorKey(senderPeer)}`;
       }
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
