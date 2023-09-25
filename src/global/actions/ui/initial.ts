@@ -2,7 +2,6 @@ import { addCallback } from '../../../lib/teact/teactn';
 
 import type { ActionReturnType, GlobalState } from '../../types';
 
-import { IS_ELECTRON } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { setLanguage } from '../../../util/langProvider';
@@ -14,7 +13,7 @@ import switchTheme from '../../../util/switchTheme';
 import { getSystemTheme, setSystemThemeChangeCallback } from '../../../util/systemTheme';
 import { startWebsync, stopWebsync } from '../../../util/websync';
 import {
-  IS_ANDROID, IS_IOS, IS_LINUX,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_LINUX,
   IS_MAC_OS, IS_SAFARI, IS_TOUCH_ENV, IS_WINDOWS,
 } from '../../../util/windowEnvironment';
 import { callApi } from '../../../api/gramjs';

@@ -57,6 +57,10 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions $KEY_CHAIN
           security find-identity -v -p codesigning $KEY_CHAIN
 
+      - name: Get branch name for current workflow run
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+
       - name: Build, package and publish
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
@@ -67,6 +71,8 @@ jobs:
 
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           PUBLISH_REPO: ${{ vars.PUBLISH_REPO }}
+          BASE_URL: ${{ vars.BASE_URL }}
+          IS_PREVIEW: ${{ steps.branch-name.outputs.current_branch != 'master' }}
         run: |
           if [ -z "$PUBLISH_REPO" ]; then
             npm run electron:package:staging

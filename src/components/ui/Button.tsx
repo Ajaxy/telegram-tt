@@ -20,7 +20,7 @@ export type OwnProps = {
   size?: 'default' | 'smaller' | 'tiny';
   color?: (
     'primary' | 'secondary' | 'gray' | 'danger' | 'translucent' | 'translucent-white' | 'translucent-black'
-    | 'translucent-bordered' | 'dark'
+    | 'translucent-bordered' | 'dark' | 'green'
   );
   backgroundImage?: string;
   id?: string;

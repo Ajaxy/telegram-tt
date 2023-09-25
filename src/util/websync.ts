@@ -2,9 +2,10 @@ import { getGlobal } from '../global';
 
 import {
   APP_CODE_NAME,
-  DEBUG, IS_ELECTRON, IS_MOCKED_CLIENT,
+  DEBUG, IS_MOCKED_CLIENT,
 } from '../config';
 import { hasStoredSession } from './sessions';
+import { IS_ELECTRON } from './windowEnvironment';
 
 const WEBSYNC_URLS = [
   't.me',

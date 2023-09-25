@@ -7,12 +7,13 @@ import path from 'path';
 import type { TrafficLightPosition } from '../types/electron';
 import { ElectronAction, ElectronEvent } from '../types/electron';
 
-import setupAutoUpdates from './autoUpdates';
+import setupAutoUpdates, { AUTO_UPDATE_SETTING_KEY, getIsAutoUpdateEnabled } from './autoUpdates';
 import { processDeeplink } from './deeplink';
+import { captureLocalStorage, restoreLocalStorage } from './localStorage';
 import tray from './tray';
 import {
-  forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows, IS_MAC_OS, IS_WINDOWS,
-  TRAFFIC_LIGHT_POSITION, windows,
+  forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS,
+  IS_PREVIEW, IS_WINDOWS, reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
 
@@ -68,10 +69,6 @@ export function createWindow(url?: string) {
     }),
   });
 
-  window.on('page-title-updated', (event: Event) => {
-    event.preventDefault();
-  });
-
   windowState.manage(window);
 
   window.webContents.setWindowOpenHandler((details: HandlerDetails) => {
@@ -81,6 +78,10 @@ export function createWindow(url?: string) {
 
   window.webContents.session.setDevicePermissionHandler(({ deviceType, origin }) => {
     return deviceType === 'hid' && ALLOWED_DEVICE_ORIGINS.includes(origin);
+  });
+
+  window.on('page-title-updated', (event: Event) => {
+    event.preventDefault();
   });
 
   window.on('enter-full-screen', () => {
@@ -106,15 +107,6 @@ export function createWindow(url?: string) {
     }
   });
 
-  if (url) {
-    window.loadURL(url);
-  } else if (app.isPackaged) {
-    window.loadURL(`file://${__dirname}/index.html${windowState.urlHash}`);
-  } else {
-    window.loadURL(`http://localhost:1234${windowState.urlHash}`);
-    window.webContents.openDevTools();
-  }
-
   windowState.clearLastUrlHash();
 
   if (!IS_MAC_OS) {
@@ -126,16 +118,40 @@ export function createWindow(url?: string) {
     tray.create();
   }
 
-  window.webContents.once('dom-ready', () => {
-    window.show();
+  window.webContents.once('dom-ready', async () => {
     processDeeplink();
 
     if (process.env.APP_ENV === 'production') {
-      setupAutoUpdates(window, windowState);
+      setupAutoUpdates(windowState);
     }
+
+    if (!IS_FIRST_RUN && getIsAutoUpdateEnabled() === undefined) {
+      store.set(AUTO_UPDATE_SETTING_KEY, true);
+      await captureLocalStorage();
+      reloadWindows();
+    }
+
+    window.show();
   });
 
   windows.add(window);
+  loadWindowUrl(window, url, windowState.urlHash);
+}
+
+function loadWindowUrl(window: BrowserWindow, url?: string, hash?: string): void {
+  if (url) {
+    window.loadURL(url);
+  } else if (!app.isPackaged) {
+    window.loadURL(`http://localhost:1234${hash}`);
+    window.webContents.openDevTools();
+  } else if (getIsAutoUpdateEnabled()) {
+    window.loadURL(`${process.env.BASE_URL}${hash}`);
+  } else if (getIsAutoUpdateEnabled() === undefined && IS_FIRST_RUN) {
+    store.set(AUTO_UPDATE_SETTING_KEY, true);
+    window.loadURL(`${process.env.BASE_URL}${hash}`);
+  } else {
+    window.loadURL(`file://${__dirname}/index.html${hash}`);
+  }
 }
 
 export function setupElectronActionHandlers() {
@@ -174,8 +190,22 @@ export function setupElectronActionHandlers() {
     getCurrentWindow()?.setTrafficLightPosition(TRAFFIC_LIGHT_POSITION[position]);
   });
 
-  ipcMain.handle(ElectronAction.SET_IS_TRAY_ICON_ENABLED, (_, value: boolean) => {
-    if (value) {
+  ipcMain.handle(ElectronAction.SET_IS_AUTO_UPDATE_ENABLED, async (_, isAutoUpdateEnabled: boolean) => {
+    if (IS_PREVIEW) {
+      return;
+    }
+
+    store.set(AUTO_UPDATE_SETTING_KEY, isAutoUpdateEnabled);
+    await captureLocalStorage();
+    reloadWindows(isAutoUpdateEnabled);
+  });
+
+  ipcMain.handle(ElectronAction.GET_IS_AUTO_UPDATE_ENABLED, () => {
+    return getIsAutoUpdateEnabled();
+  });
+
+  ipcMain.handle(ElectronAction.SET_IS_TRAY_ICON_ENABLED, (_, isTrayIconEnabled: boolean) => {
+    if (isTrayIconEnabled) {
       tray.enable();
     } else {
       tray.disable();
@@ -183,6 +213,8 @@ export function setupElectronActionHandlers() {
   });
 
   ipcMain.handle(ElectronAction.GET_IS_TRAY_ICON_ENABLED, () => tray.isEnabled);
+
+  ipcMain.handle(ElectronAction.RESTORE_LOCAL_STORAGE, () => restoreLocalStorage());
 }
 
 export function setupCloseHandlers() {

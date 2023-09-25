@@ -1,5 +1,7 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback, useEffect, useState,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import { DEBUG_LOG_FILENAME } from '../../../config';
@@ -40,6 +42,11 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
   const { requestConfetti, setSettingOption } = getActions();
   const lang = useLang();
 
+  const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
+  useEffect(() => {
+    window.electron?.getIsAutoUpdateEnabled().then(setIsAutoUpdateEnabled);
+  }, []);
+
   useHistoryBack({
     isActive,
     onBack: onReset,
@@ -50,6 +57,10 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
     const url = URL.createObjectURL(file);
     download(url, DEBUG_LOG_FILENAME);
   });
+
+  const handleIsAutoUpdateEnabledChange = useCallback((isChecked: boolean) => {
+    window.electron?.setIsAutoUpdateEnabled(isChecked);
+  }, []);
 
   return (
     <div className="settings-content custom-scroll">
@@ -106,6 +117,12 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           checked={Boolean(shouldDebugExportedSenders)}
           // eslint-disable-next-line react/jsx-no-bind
           onCheck={() => setSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
+        />
+
+        <Checkbox
+          label="Enable autoupdates"
+          checked={Boolean(isAutoUpdateEnabled)}
+          onCheck={handleIsAutoUpdateEnabledChange}
         />
 
         <ListItem

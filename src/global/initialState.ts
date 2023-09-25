@@ -66,7 +66,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   attachMenu: { bots: {} },
   passcode: {},
   twoFaSettings: {},
-  isUpdateAvailable: false,
+  isAppUpdateAvailable: false,
+  isElectronUpdateAvailable: false,
   shouldShowContextMenuHint: true,
 
   audioPlayer: {

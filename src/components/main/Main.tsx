@@ -21,7 +21,7 @@ import type { LangCode } from '../../types';
 import { ElectronEvent } from '../../types/electron';
 
 import {
-  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER, IS_ELECTRON,
+  BASE_EMOJI_KEYWORD_LANG, DEBUG, INACTIVE_MARKER,
 } from '../../config';
 import { requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import { getUserFullName } from '../../global/helpers';
@@ -47,7 +47,7 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
-import { IS_ANDROID } from '../../util/windowEnvironment';
+import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
@@ -252,7 +252,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadTopReactions,
     loadRecentReactions,
     loadFeaturedEmojiStickers,
-    setIsAppUpdateAvailable,
+    setIsElectronUpdateAvailable,
     loadPremiumSetStickers,
   } = getActions();
 
@@ -283,25 +283,25 @@ const Main: FC<OwnProps & StateProps> = ({
     }
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
 
-  useInterval(checkAppVersion, (isMasterTab && !IS_ELECTRON) ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
+  useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 
   useEffect(() => {
     if (!IS_ELECTRON) {
       return undefined;
     }
 
-    const removeUpdateDownloadedListener = window.electron!.on(ElectronEvent.UPDATE_DOWNLOADED, () => {
-      setIsAppUpdateAvailable(true);
+    const removeUpdateAvailableListener = window.electron!.on(ElectronEvent.UPDATE_AVAILABLE, () => {
+      setIsElectronUpdateAvailable(true);
     });
 
     const removeUpdateErrorListener = window.electron!.on(ElectronEvent.UPDATE_ERROR, () => {
-      setIsAppUpdateAvailable(false);
-      removeUpdateDownloadedListener?.();
+      setIsElectronUpdateAvailable(false);
+      removeUpdateAvailableListener?.();
     });
 
     return () => {
       removeUpdateErrorListener?.();
-      removeUpdateDownloadedListener?.();
+      removeUpdateAvailableListener?.();
     };
   }, []);
 

@@ -16,21 +16,25 @@ import {
   ProvidePlugin,
 } from 'webpack';
 
+import { PRODUCTION_URL } from './src/config';
 import { version as appVersion } from './package.json';
 
 const {
   HEAD,
   APP_ENV = 'production',
   APP_MOCKED_CLIENT = '',
-  IS_ELECTRON,
+  IS_ELECTRON_BUILD,
 } = process.env;
 
 dotenv.config();
 
 const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
+// GitHub workflow uses an empty string as the default value if it's not in repository variables, so we cannot define a default value here
+process.env.BASE_URL = process.env.BASE_URL || PRODUCTION_URL;
+
 const {
-  BASE_URL = 'https://web.telegram.org/a/',
+  BASE_URL,
   ELECTRON_HOST_URL = 'https://telegram-a-host',
   APP_TITLE = DEFAULT_APP_TITLE,
 } = process.env;
@@ -40,8 +44,9 @@ const CSP = `
   connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss:' : ''};
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/ ${IS_ELECTRON ? BASE_URL : ''};
-  media-src 'self' blob: data: ${IS_ELECTRON ? [BASE_URL, ELECTRON_HOST_URL].join(' ') : ''};
+  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/
+  ${IS_ELECTRON_BUILD ? `${BASE_URL}/` : ''};
+  media-src 'self' blob: data: ${IS_ELECTRON_BUILD ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
   object-src 'none';
   frame-src http: https:;
   base-uri 'none';
@@ -211,14 +216,15 @@ export default function createConfig(
         APP_MOCKED_CLIENT,
         // eslint-disable-next-line no-null/no-null
         APP_NAME: null,
-        IS_ELECTRON: false,
         APP_TITLE,
         RELEASE_DATETIME: Date.now(),
         TELEGRAM_API_ID: undefined,
         TELEGRAM_API_HASH: undefined,
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
+        IS_ELECTRON_BUILD: false,
         ELECTRON_HOST_URL,
+        BASE_URL,
       }),
       // Updates each dev re-build to provide current git branch or commit hash
       new DefinePlugin({
@@ -247,7 +253,7 @@ export default function createConfig(
       }),
     ],
 
-    devtool: APP_ENV === 'production' && IS_ELECTRON ? undefined : 'source-map',
+    devtool: APP_ENV === 'production' && IS_ELECTRON_BUILD ? undefined : 'source-map',
 
     optimization: {
       splitChunks: {
