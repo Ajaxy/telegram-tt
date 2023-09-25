@@ -4,8 +4,6 @@ import {
   PRODUCTION_HOSTNAME,
 } from '../config';
 
-export * from './environmentWebp';
-
 export function getPlatform() {
   const { userAgent, platform } = window.navigator;
 

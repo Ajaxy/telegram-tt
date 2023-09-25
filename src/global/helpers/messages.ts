@@ -11,7 +11,7 @@ import {
 } from '../../config';
 import { areSortedArraysIntersecting, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
-import { IS_OPUS_SUPPORTED, isWebpSupported } from '../../util/windowEnvironment';
+import { IS_OPUS_SUPPORTED } from '../../util/windowEnvironment';
 import { getGlobal } from '../index';
 import { getChatTitle, isUserId } from './chats';
 import { getUserFullName } from './users';
@@ -227,8 +227,7 @@ export function getMessageContentFilename(message: ApiMessage) {
   }
 
   if (content.sticker) {
-    const extension = content.sticker.isLottie ? 'tgs' : content.sticker.isVideo
-      ? 'webm' : isWebpSupported() ? 'webp' : 'png';
+    const extension = content.sticker.isLottie ? 'tgs' : content.sticker.isVideo ? 'webm' : 'webp';
     return `${content.sticker.id}.${extension}`;
   }
 
