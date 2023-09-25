@@ -44,6 +44,7 @@ function StoryRibbon({
   return (
     <div
       ref={ref}
+      id="StoryRibbon"
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : undefined}
     >

@@ -6,7 +6,9 @@ import type { GlobalState } from '../../global/types';
 import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
 import type { LeftColumnContent, SettingsScreens } from '../../types';
 
+import { ANIMATION_END_DELAY } from '../../config';
 import buildClassName from '../../util/buildClassName';
+import { ANIMATION_DURATION } from '../story/helpers/ribbonAnimation';
 
 import useForumPanelRender from '../../hooks/useForumPanelRender';
 import useHistoryBack from '../../hooks/useHistoryBack';
@@ -80,7 +82,7 @@ const ArchivedChats: FC<OwnProps> = ({
     shouldRender: shouldRenderStoryRibbon,
     transitionClassNames: storyRibbonClassNames,
     isClosing: isStoryRibbonClosing,
-  } = useShowTransition(isStoryRibbonShown, undefined, undefined, '');
+  } = useShowTransition(isStoryRibbonShown, undefined, undefined, '', false, ANIMATION_DURATION + ANIMATION_END_DELAY);
 
   return (
     <div className="ArchivedChats">

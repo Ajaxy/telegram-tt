@@ -110,3 +110,7 @@ export function animateNumber<T extends number | number[]>({
     if (onEnd) onEnd();
   };
 }
+
+export function applyStyles(element: HTMLElement, css: Record<string, string>) {
+  Object.assign(element.style, css);
+}
