@@ -10,7 +10,7 @@ import { LeftColumnContent } from '../../../types';
 
 import { PRODUCTION_URL } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLang from '../../../hooks/useLang';
@@ -127,7 +127,7 @@ const LeftMain: FC<OwnProps> = ({
   });
 
   const handleUpdateClick = useLastCallback(() => {
-    if (!isElectronAutoUpdateEnabled) {
+    if (IS_ELECTRON && !isElectronAutoUpdateEnabled) {
       window.open(`${PRODUCTION_URL}/get`, '_blank', 'noopener');
     } else if (isElectronUpdateAvailable) {
       window.electron?.installUpdate();
@@ -223,7 +223,6 @@ const LeftMain: FC<OwnProps> = ({
         <Button
           fluid
           pill
-          color={isElectronAutoUpdateEnabled ? 'primary' : 'green'}
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
         >
