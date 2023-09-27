@@ -1132,7 +1132,8 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const isWebApp = webAppName && !Number(webAppName) && !originalParts?.[2];
 
   if (!commentId) {
-    if (!startAttach && messageId && !startParam && chat?.usernames?.some((c) => c.username === username)) {
+    if (startAttach === undefined && messageId && !startParam
+      && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, tabId,
       });
@@ -2559,7 +2560,7 @@ async function openChatByUsername<T extends GlobalState>(
   threadId?: number,
   channelPostId?: number,
   startParam?: string,
-  startAttach?: string | boolean,
+  startAttach?: string,
   attach?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -2567,7 +2568,7 @@ async function openChatByUsername<T extends GlobalState>(
   const currentChat = selectCurrentChat(global, tabId);
 
   // Attach in the current chat
-  if (startAttach && !attach) {
+  if (startAttach !== undefined && !attach) {
     const bot = await getAttachBotOrNotify(global, actions, username, tabId);
 
     if (!currentChat || !bot) return;
@@ -2575,7 +2576,7 @@ async function openChatByUsername<T extends GlobalState>(
     actions.callAttachBot({
       bot,
       chatId: currentChat.id,
-      ...(typeof startAttach === 'string' && { startParam: startAttach }),
+      startParam: startAttach,
       tabId,
     });
 

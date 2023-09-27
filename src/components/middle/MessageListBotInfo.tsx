@@ -70,6 +70,7 @@ const MessageListBotInfo: FC<OwnProps & StateProps> = ({
         >
           {botInfoPhotoUrl && (
             <img
+              className={styles.image}
               src={botInfoPhotoUrl}
               width={botInfoRealDimensions?.width}
               height={botInfoRealDimensions?.height}
