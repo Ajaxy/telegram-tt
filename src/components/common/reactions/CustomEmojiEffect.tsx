@@ -60,6 +60,7 @@ const CustomEmojiEffect: FC<OwnProps> = ({
             alt=""
             className={styles.particle}
             style={style}
+            draggable={false}
           />
         );
       })}

@@ -123,7 +123,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
       )}
       <div className={styles.wrapper}>
         {thumbUrl && (
-          <img src={thumbUrl} alt="" className={styles.media} />
+          <img src={thumbUrl} alt="" className={styles.media} draggable={false} />
         )}
         {isProtected && <span className="protector" />}
       </div>

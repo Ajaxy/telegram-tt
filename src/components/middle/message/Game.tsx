@@ -59,6 +59,7 @@ const Game: FC<OwnProps> = ({
             className="preview-content"
             src={photoBlobUrl}
             alt={title}
+            draggable={false}
           />
         )}
         {videoBlobUrl && (

@@ -55,6 +55,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
           className={cn('static-icon')}
           src={staticIconData}
           alt=""
+          draggable={false}
         />
       )}
       {!isAnimationLoaded && !noAppearAnimation && (

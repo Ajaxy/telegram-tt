@@ -103,6 +103,7 @@ const Invoice: FC<OwnProps> = ({
                 alt=""
                 style={style}
                 crossOrigin="anonymous"
+                draggable={false}
               />
             )}
             {!photoUrl && photo && (

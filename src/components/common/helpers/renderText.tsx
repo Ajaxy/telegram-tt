@@ -128,6 +128,7 @@ function replaceEmojis(textParts: TextPart[], size: 'big' | 'small', type: 'jsx'
               className={`${className}${!isLoaded ? ' opacity-transition slow shown' : ''}`}
               alt={emoji}
               data-path={src}
+              draggable={false}
               onLoad={!isLoaded ? handleEmojiLoad : undefined}
             />,
           );

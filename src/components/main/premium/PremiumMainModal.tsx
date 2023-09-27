@@ -311,7 +311,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
                 size={STATUS_EMOJI_SIZE}
               />
             ) : (
-              <img className={styles.logo} src={PremiumLogo} alt="" />
+              <img className={styles.logo} src={PremiumLogo} alt="" draggable={false} />
             )}
             <h2 className={buildClassName(styles.headerText, fromUserStatusSet && styles.stickerSetText)}>
               {fromUserStatusSet ? stickerSetTitle : renderText(getHeaderText(), ['simple_markdown', 'emoji'])}

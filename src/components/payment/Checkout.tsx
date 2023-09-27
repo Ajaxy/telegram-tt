@@ -158,7 +158,7 @@ const Checkout: FC<OwnProps> = ({
   return (
     <div className={styles.root}>
       <div className={styles.description}>
-        {photoUrl && <img className={styles.checkoutPicture} src={photoUrl} alt="" />}
+        {photoUrl && <img className={styles.checkoutPicture} src={photoUrl} draggable={false} alt="" />}
         {!photoUrl && photo && (
           <Skeleton
             width={photo.dimensions?.width}

@@ -74,6 +74,7 @@ const ReactionStaticEmoji: FC<OwnProps> = ({
       style={size ? `width: ${size}px; height: ${size}px` : undefined}
       src={mediaData || blankUrl}
       alt={availableReaction?.title}
+      draggable={false}
     />
   );
 };

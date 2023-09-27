@@ -51,8 +51,13 @@ const MediaResult: FC<OwnProps> = ({
   if (isForGallery) {
     return (
       <div className="MediaResult chat-item-clickable" onClick={handleClick}>
-        <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" />
-        <img src={mediaBlobUrl} className={buildClassName('full-media', transitionClassNames)} alt="" />
+        <img src={(photo?.thumbnail?.dataUri) || thumbnailDataUrl} alt="" draggable={false} />
+        <img
+          src={mediaBlobUrl}
+          className={buildClassName('full-media', transitionClassNames)}
+          alt=""
+          draggable={false}
+        />
       </div>
     );
   }

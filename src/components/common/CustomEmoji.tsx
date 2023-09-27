@@ -126,7 +126,7 @@ const CustomEmoji: FC<OwnProps> = ({
     >
       <img className={styles.highlightCatch} src={blankImg} alt={customEmoji?.emoji} draggable={false} />
       {!customEmoji ? (
-        <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" />
+        <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" draggable={false} />
       ) : (
         <StickerView
           containerRef={containerRef}
