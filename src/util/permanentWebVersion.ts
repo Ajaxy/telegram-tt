@@ -27,7 +27,7 @@ export function switchPermanentWebVersion(version: AvailableVersions) {
   setPermanentWebVersion(version);
   clearWebsync();
   getActions().skipLockOnUnload();
-  window.location.assign(`${WEB_VERSION_BASE}${version}`);
+  window.location.assign(`${WEB_VERSION_BASE}${version.toLowerCase()}`);
 }
 
 export function checkAndAssignPermanentWebVersion() {
