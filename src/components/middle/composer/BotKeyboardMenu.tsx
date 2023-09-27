@@ -49,7 +49,7 @@ const BotKeyboardMenu: FC<OwnProps & StateProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCompact
     >
-      <div className="content">
+      <div className="content custom-scroll">
         {message.keyboardButtons.map((row) => (
           <div className="row">
             {row.map((button) => (

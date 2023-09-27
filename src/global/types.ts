@@ -1353,7 +1353,7 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     startParam?: string;
-    startAttach?: string | boolean;
+    startAttach?: string;
     attach?: string;
     startApp?: string;
     originalParts?: string[];

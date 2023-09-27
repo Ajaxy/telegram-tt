@@ -1,3 +1,5 @@
+@import "../../../styles/mixins";
+
 .BotKeyboardMenu {
   .bubble {
     width: 100% !important;
@@ -9,12 +11,9 @@
     display: flex;
     flex-direction: column;
     padding: 0.1875rem 0.625rem;
-    max-height: 80vh;
-    overflow: auto;
-
-    @media (max-width: 600px) {
-      max-height: 75vh;
-    }
+    max-height: 75vh;
+    overflow-y: scroll;
+    @include adapt-padding-to-scrollbar(0.625rem);
 
     .row {
       display: flex;
