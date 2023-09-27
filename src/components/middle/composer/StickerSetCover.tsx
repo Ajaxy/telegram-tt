@@ -110,6 +110,7 @@ const StickerSetCover: FC<OwnProps> = ({
             style={colorFilter}
             className={buildClassName(styles.image, transitionClassNames)}
             alt=""
+            draggable={false}
           />
         )
       ) : (

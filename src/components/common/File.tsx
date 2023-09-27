@@ -114,6 +114,7 @@ const File: FC<OwnProps> = ({
               className="full-media"
               width={width}
               height={height}
+              draggable={false}
               alt=""
             />
             {withThumb && (

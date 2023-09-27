@@ -48,6 +48,7 @@ const EmojiButton: FC<OwnProps> = ({
           loading="lazy"
           data-path={src}
           onLoad={!isLoaded ? handleEmojiLoad : undefined}
+          draggable={false}
         />
       )}
     </div>

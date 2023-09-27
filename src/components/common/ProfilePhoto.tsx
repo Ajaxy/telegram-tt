@@ -98,7 +98,7 @@ const ProfilePhoto: FC<OwnProps> = ({
         {isBlurredThumb ? (
           <canvas ref={blurredThumbCanvasRef} className="thumb" />
         ) : (
-          <img src={avatarBlobUrl} className="thumb" alt="" />
+          <img src={avatarBlobUrl} draggable={false} className="thumb" alt="" />
         )}
         {photo && (
           isVideo ? (

@@ -164,6 +164,7 @@ const GifButton: FC<OwnProps> = ({
           src={previewBlobUrl}
           alt=""
           className="preview"
+          draggable={false}
         />
       )}
       {shouldRenderVideo && (

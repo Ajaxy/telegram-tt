@@ -46,7 +46,7 @@ const PremiumFeaturePreviewVideo: FC<OwnProps> = ({
         )}
         id={`premium_feature_preview_video_${index}`}
       >
-        <img src={DeviceFrame} alt="" className={styles.frame} />
+        <img src={DeviceFrame} alt="" className={styles.frame} draggable={false} />
         <canvas ref={thumbnailRef} className={styles.video} />
         <OptimizedVideo
           canPlay={isActive}

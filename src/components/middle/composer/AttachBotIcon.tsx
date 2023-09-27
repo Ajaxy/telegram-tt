@@ -45,7 +45,12 @@ const AttachBotIcon: FC<OwnProps> = ({
 
   return (
     <i className={buildClassName(styles.root, 'icon', !isTouchScreen && styles.compact)}>
-      <img src={iconSvg} alt="" className={buildClassName(styles.image, !isTouchScreen && styles.compact)} />
+      <img
+        src={iconSvg}
+        alt=""
+        className={buildClassName(styles.image, !isTouchScreen && styles.compact)}
+        draggable={false}
+      />
     </i>
   );
 };

@@ -87,6 +87,7 @@ function BaseStory({
           src={mediaUrl}
           alt=""
           className={buildClassName(styles.media, isPreview && styles.linkPreview, transitionClassNames)}
+          draggable={false}
         />
       )}
       {isExpired && (

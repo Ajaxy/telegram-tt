@@ -726,7 +726,12 @@ function Story({
       >
         <canvas ref={thumbRef} className={styles.thumbnail} />
         {previewBlobUrl && (
-          <img src={previewBlobUrl} alt="" className={buildClassName(styles.media, previewTransitionClassNames)} />
+          <img
+            src={previewBlobUrl}
+            draggable={false}
+            alt=""
+            className={buildClassName(styles.media, previewTransitionClassNames)}
+          />
         )}
         {shouldRenderSkeleton && (
           <Skeleton className={buildClassName(skeletonTransitionClassNames, styles.fullSize)} />
