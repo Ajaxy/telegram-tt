@@ -21,19 +21,19 @@
     "requireindex": "^1.2.0"
   },
   "devDependencies": {
-    "chalk": "^5.2.0",
-    "eslint": "^8.19.0",
-    "eslint-doc-generator": "^1.0.0",
-    "eslint-plugin-eslint-plugin": "^5.0.0",
+    "chalk": "^5.3.0",
+    "eslint": "^8.49.0",
+    "eslint-doc-generator": "^1.4.3",
+    "eslint-plugin-eslint-plugin": "^5.1.1",
     "eslint-plugin-node": "^11.1.0",
-    "mocha": "^10.0.0",
+    "mocha": "^10.2.0",
     "npm-run-all": "^4.1.5"
   },
   "engines": {
-    "node": "^14.17.0 || ^16.0.0 || >= 18.0.0"
+    "node": "^18 || ^20"
   },
   "peerDependencies": {
-    "eslint": ">=7"
+    "eslint": ">=8"
   },
   "license": "ISC"
 }

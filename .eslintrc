@@ -1,14 +1,11 @@
 {
   "extends": [
-    "react-app",
-    "plugin:teactn/recommended",
+    "teact-app",
     "airbnb",
     "airbnb-typescript"
   ],
   "plugins": [
-    "jsx-expressions",
     "no-async-without-await",
-    "teactn",
     "no-null",
     "simple-import-sort",
     "react-hooks-static-deps",
@@ -117,12 +114,6 @@
         "ignoreDOMComponents": true
       }
     ],
-    "jsx-expressions/strict-logical-expressions": [
-      "error",
-      {
-        "allowString": true
-      }
-    ],
     "jsx-a11y/click-events-have-key-events": "off",
     "jsx-a11y/no-static-element-interactions": "off",
     "jsx-a11y/label-has-associated-control": "off",
@@ -150,7 +141,6 @@
         "disallowTypeAnnotations": false
       }
     ],
-    "teactn/prefer-separate-component-file": "off",
     "simple-import-sort/imports": [
       "error",
       {
@@ -204,7 +194,11 @@
     ]
   },
   "settings": {
-    "import/resolver": "webpack",
+    "import/resolver": {
+      "webpack": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    },
     "import/core-modules": [
       "fs",
       "path",

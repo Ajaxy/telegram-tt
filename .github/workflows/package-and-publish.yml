@@ -22,12 +22,12 @@ jobs:
     runs-on: macOS-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 20.x
 
       - name: Cache node modules
         id: npm-cache
@@ -110,7 +110,7 @@ jobs:
       PUBLISH_REPO: ${{ vars.PUBLISH_REPO }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup certificate
         shell: bash
