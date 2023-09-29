@@ -2,7 +2,6 @@ import 'webpack-dev-server';
 
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 import dotenv from 'dotenv';
-import fs from 'fs';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -52,9 +51,6 @@ const CSP = `
   base-uri 'none';
   form-action 'none';`
   .replace(/\s+/g, ' ').trim();
-
-const STATOSCOPE_REFERENCE_URL = 'https://tga.dev/build-stats.json';
-let isReferenceFetched = false;
 
 export default function createConfig(
   _: any,
@@ -112,7 +108,7 @@ export default function createConfig(
     module: {
       rules: [
         {
-          test: /\.(ts|tsx|js)$/,
+          test: /\.(ts|tsx|js|mjs|cjs)$/,
           loader: 'babel-loader',
           exclude: /node_modules/,
         },
@@ -174,20 +170,6 @@ export default function createConfig(
     },
 
     plugins: [
-      ...(APP_ENV === 'staging' ? [{
-        apply: (compiler: Compiler) => {
-          compiler.hooks.compile.tap('Before Compilation', async () => {
-            try {
-              const stats = await fetch(STATOSCOPE_REFERENCE_URL).then((res) => res.text());
-              fs.writeFileSync(path.resolve('./public/reference.json'), stats);
-              isReferenceFetched = true;
-            } catch (err: any) {
-              // eslint-disable-next-line no-console
-              console.warn('Failed to fetch reference statoscope stats: ', err.message);
-            }
-          });
-        },
-      }] : []),
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
         /highlight\.js[\\/]lib[\\/]languages/,
@@ -247,9 +229,6 @@ export default function createConfig(
         normalizeStats: true,
         open: 'file',
         extensions: [new WebpackContextExtension()], // eslint-disable-line @typescript-eslint/no-use-before-define
-        ...(APP_ENV === 'staging' && isReferenceFetched && {
-          additionalStats: ['./public/reference.json'],
-        }),
       }),
     ],
 

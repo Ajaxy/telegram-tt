@@ -13,7 +13,7 @@ const WINDOW_BLUR_TIMEOUT = 800;
 interface TrayHelper {
   instance?: Tray;
   lastFocusedWindow?: BrowserWindow;
-  lastFocusedWindowTimer?: NodeJS.Timer;
+  lastFocusedWindowTimer?: ReturnType<typeof setTimeout>;
   setupListeners: (window: BrowserWindow) => void;
   create: () => void;
   enable: () => void;

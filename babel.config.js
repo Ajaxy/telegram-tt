@@ -13,10 +13,9 @@ module.exports = {
     ],
   ],
   plugins: [
-    '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-nullish-coalescing-operator',
+    '@babel/plugin-transform-class-properties',
     '@babel/plugin-syntax-nullish-coalescing-operator',
-    '@babel/plugin-proposal-logical-assignment-operators',
+    '@babel/plugin-transform-logical-assignment-operators',
     ...(isTest ? ['babel-plugin-transform-import-meta'] : []),
   ],
 };

@@ -44,7 +44,7 @@ const DEFAULT_OPTIONS = {
 function windowStateKeeper(options: Options): WindowState {
   let state: State;
   let winRef: BrowserWindow | undefined;
-  let stateChangeTimer: NodeJS.Timer | number;
+  let stateChangeTimer: ReturnType<typeof setTimeout>;
 
   options = {
     ...DEFAULT_OPTIONS,
