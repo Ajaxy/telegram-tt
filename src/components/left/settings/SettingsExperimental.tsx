@@ -7,6 +7,7 @@ import { getActions, withGlobal } from '../../../global';
 import { DEBUG_LOG_FILENAME } from '../../../config';
 import { getDebugLogs } from '../../../util/debugConsole';
 import download from '../../../util/download';
+import { IS_ELECTRON } from '../../../util/windowEnvironment';
 import { LOCAL_TGS_URLS } from '../../common/helpers/animatedAssets';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -119,11 +120,13 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
           onCheck={() => setSettingOption({ shouldDebugExportedSenders: !shouldDebugExportedSenders })}
         />
 
-        <Checkbox
-          label="Enable autoupdates"
-          checked={Boolean(isAutoUpdateEnabled)}
-          onCheck={handleIsAutoUpdateEnabledChange}
-        />
+        {IS_ELECTRON && (
+          <Checkbox
+            label="Enable autoupdates"
+            checked={Boolean(isAutoUpdateEnabled)}
+            onCheck={handleIsAutoUpdateEnabledChange}
+          />
+        )}
 
         <ListItem
           // eslint-disable-next-line react/jsx-no-bind
