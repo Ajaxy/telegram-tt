@@ -23,6 +23,7 @@ import {
 import { selectTabState, selectTheme } from '../../../global/selectors';
 import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
+import { IS_ELECTRON } from '../../../util/windowEnvironment';
 
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useLang from '../../../hooks/useLang';
@@ -74,7 +75,7 @@ const LeftSideMenuItems = ({
   const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
     ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid') : 'min';
 
-  const withOtherVersions = window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST;
+  const withOtherVersions = !IS_ELECTRON && (window.location.hostname === PRODUCTION_HOSTNAME || IS_TEST);
 
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
