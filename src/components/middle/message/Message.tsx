@@ -1429,8 +1429,9 @@ export default memo(withGlobal<OwnProps>(
     } = ownProps;
     const {
       id, chatId, viaBotId, replyToChatId, replyToMessageId, isOutgoing, forwardInfo,
-      transcriptionId, isPinned, replyToStoryUserId, replyToStoryId, repliesThreadInfo,
+      transcriptionId, isPinned, replyToStoryUserId, replyToStoryId,
     } = message;
+    const repliesThreadInfo = message.repliesThreadInfo || album?.messages[0].repliesThreadInfo;
 
     const chat = selectChat(global, chatId);
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
