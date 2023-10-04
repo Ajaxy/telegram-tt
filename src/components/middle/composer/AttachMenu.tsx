@@ -44,11 +44,11 @@ export type OwnProps = {
   attachBots?: GlobalState['attachMenu']['bots'];
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
+  theme: ISettings['theme'];
   onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
   onPollCreate: NoneToVoidFunction;
   onMenuOpen: NoneToVoidFunction;
   onMenuClose: NoneToVoidFunction;
-  theme: ISettings['theme'];
 };
 
 const AttachMenu: FC<OwnProps> = ({
@@ -64,12 +64,12 @@ const AttachMenu: FC<OwnProps> = ({
   attachBots,
   peerType,
   isScheduled,
+  theme,
+  shouldCollectDebugLogs,
   onFileSelect,
   onMenuOpen,
   onMenuClose,
   onPollCreate,
-  theme,
-  shouldCollectDebugLogs,
 }) => {
   const [isAttachMenuOpen, openAttachMenu, closeAttachMenu] = useFlag();
   const [handleMouseEnter, handleMouseLeave, markMouseInside] = useMouseInside(isAttachMenuOpen, closeAttachMenu);
@@ -135,11 +135,11 @@ const AttachMenu: FC<OwnProps> = ({
   const bots = useMemo(() => {
     return attachBots
       ? Object.values(attachBots).filter((bot) => {
-        if (!peerType) return false;
-        if (peerType === 'bots' && bot.id === chatId && bot.peerTypes.includes('self')) {
+        if (!peerType || !bot.isForAttachMenu) return false;
+        if (peerType === 'bots' && bot.id === chatId && bot.attachMenuPeerTypes.includes('self')) {
           return true;
         }
-        return bot.peerTypes.includes(peerType);
+        return bot.attachMenuPeerTypes!.includes(peerType);
       })
       : undefined;
   }, [attachBots, chatId, peerType]);

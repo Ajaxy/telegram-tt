@@ -15,7 +15,15 @@ export function isPeerChannel(peer: GramJs.TypePeer | GramJs.TypeInputPeer): pee
 }
 
 export function buildApiPeerId(id: BigInt.BigInteger, type: 'user' | 'chat' | 'channel') {
-  return type === 'user' ? String(id) : `-${id}`;
+  if (type === 'user') {
+    return id.toString();
+  }
+
+  if (type === 'channel') {
+    return `-100${id}`;
+  }
+
+  return `-${id}`;
 }
 
 export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer | GramJs.TypeInputPeer) {

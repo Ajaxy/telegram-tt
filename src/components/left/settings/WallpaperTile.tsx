@@ -104,6 +104,7 @@ const WallpaperTile: FC<OwnProps> = ({
           src={previewBlobUrl || localBlobUrl}
           className={buildClassName('full-media', transitionClassNames)}
           alt=""
+          draggable={false}
         />
         {shouldRenderSpinner && (
           <div className={buildClassName('spinner-container', spinnerClassNames)}>

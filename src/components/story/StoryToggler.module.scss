@@ -1,7 +1,10 @@
+/* stylelint-disable-next-line */
+@value name from "./StoryRibbon.module.scss";
+
 .root {
   position: absolute;
   top: 50%;
-  right: 0.125rem;
+  right: 0.25rem;
   transform: translateY(-50%);
   padding: 0;
   margin: 0;
@@ -19,17 +22,48 @@
 }
 
 .avatar {
-  border: 0.125rem solid var(--color-background);
+  z-index: 1;
 
-  &::before {
-    z-index: -2;
+  &:not(:first-child):before {
+    mask-image: linear-gradient(90deg, #fff 75%, transparent 0);
+    mask-composite: exclude;
   }
 
-  &:global(.has-unread-story)::before {
-    z-index: -1;
+  &:global(.animating) {
+    opacity: 0;
   }
 }
 
+.avatarHidden {
+  display: none;
+}
+
 .avatar + .avatar {
-  margin-inline-end: -1.125rem;
+  margin-inline-end: -0.875rem;
+}
+
+.ghost {
+  position: absolute;
+  transform-origin: top left;
+  --transform-transition: transform 250ms ease;
+  --opacity-transition: opacity 250ms ease;
+  transition: var(--transform-transition), var(--opacity-transition);
+}
+
+.ghostAnimateName {
+  :global(.name) {
+    transition: var(--opacity-transition);
+    opacity: 0;
+  }
+}
+
+.ghostRevealName {
+  :global(.name) {
+    opacity: 1;
+  }
+}
+
+
+.ghostLast:before {
+  mask: none !important;
 }

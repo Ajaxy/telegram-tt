@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 import { generateRandomBytes, readBigIntFromBuffer } from '../../../lib/gramjs/Helpers';
 
-import type { ApiPrivacyKey, PrivacyVisibility } from '../../../types';
+import type { ApiInputPrivacyRules, ApiPrivacyKey } from '../../../types';
 import type {
   ApiBotApp,
   ApiChatAdminRights,
@@ -25,45 +25,30 @@ import type {
   ApiStorySkipped,
   ApiThemeParameters,
   ApiTypeReplyTo,
-  ApiUser,
   ApiVideo,
 } from '../../types';
 import {
   ApiMessageEntityTypes,
 } from '../../types';
 
-import { DEFAULT_STATUS_ICON_ID } from '../../../config';
+import { CHANNEL_ID_LENGTH, DEFAULT_STATUS_ICON_ID } from '../../../config';
 import { pick } from '../../../util/iteratees';
 import { deserializeBytes } from '../helpers';
 import localDb from '../localDb';
 
-const CHANNEL_ID_MIN_LENGTH = 11; // Example: -1000000000
+const LEGACY_CHANNEL_ID_MIN_LENGTH = 11; // Example: -1234567890
 
 function checkIfChannelId(id: string) {
-  // HOTFIX New group id range starts with -4
-  if (id.length === CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
-  return id.length >= CHANNEL_ID_MIN_LENGTH;
+  if (id.length >= CHANNEL_ID_LENGTH) return id.startsWith('-100');
+  // LEGACY Unprefixed channel id
+  if (id.length === LEGACY_CHANNEL_ID_MIN_LENGTH && id.startsWith('-4')) return false;
+  return id.length >= LEGACY_CHANNEL_ID_MIN_LENGTH;
 }
 
 export function getEntityTypeById(chatOrUserId: string) {
-  if (typeof chatOrUserId === 'number') {
-    return getEntityTypeByDeprecatedId(chatOrUserId);
-  }
-
   if (!chatOrUserId.startsWith('-')) {
     return 'user';
   } else if (checkIfChannelId(chatOrUserId)) {
-    return 'channel';
-  } else {
-    return 'chat';
-  }
-}
-
-// Workaround for old-fashioned IDs stored locally
-export function getEntityTypeByDeprecatedId(chatOrUserId: number) {
-  if (chatOrUserId > 0) {
-    return 'user';
-  } else if (chatOrUserId <= -1000000000) {
     return 'channel';
   } else {
     return 'chat';
@@ -471,6 +456,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
     case 'phoneNumber':
       return new GramJs.InputPrivacyKeyPhoneNumber();
 
+    case 'addByPhone':
+      return new GramJs.InputPrivacyKeyAddedByPhone();
+
     case 'lastSeen':
       return new GramJs.InputPrivacyKeyStatusTimestamp();
 
@@ -491,6 +479,9 @@ export function buildInputPrivacyKey(privacyKey: ApiPrivacyKey) {
 
     case 'voiceMessages':
       return new GramJs.InputPrivacyKeyVoiceMessages();
+
+    case 'bio':
+      return new GramJs.InputPrivacyKeyAbout();
   }
 
   return undefined;
@@ -546,12 +537,20 @@ export function buildInputThemeParams(params: ApiThemeParameters) {
 }
 
 export function buildMtpPeerId(id: string, type: 'user' | 'chat' | 'channel') {
-  // Workaround for old-fashioned IDs stored locally
-  if (typeof id === 'number') {
-    return BigInt(Math.abs(id));
+  if (type === 'user') {
+    return BigInt(id);
   }
 
-  return type === 'user' ? BigInt(id) : BigInt(id.slice(1));
+  if (type === 'channel') {
+    if (id.length === CHANNEL_ID_LENGTH) {
+      return BigInt(id.slice(4));
+    }
+
+    // LEGACY Unprefixed channel id
+    return BigInt(id.slice(1));
+  }
+
+  return BigInt(id.slice(1));
 }
 
 export function buildInputGroupCall(groupCall: Partial<ApiGroupCall>) {
@@ -665,63 +664,54 @@ export function buildInputReplyTo(replyingTo: ApiTypeReplyTo) {
 }
 
 export function buildInputPrivacyRules(
-  visibility: PrivacyVisibility,
-  allowedUserList?: ApiUser[],
-  deniedUserList?: ApiUser[],
+  rules: ApiInputPrivacyRules,
 ) {
-  const rules: GramJs.TypeInputPrivacyRule[] = [];
+  const privacyRules: GramJs.TypeInputPrivacyRule[] = [];
 
-  switch (visibility) {
-    case 'everybody':
-    case 'contacts': {
-      if (visibility === 'contacts') {
-        rules.push(new GramJs.InputPrivacyValueAllowContacts());
-      }
-
-      if (visibility === 'everybody') {
-        rules.push(new GramJs.InputPrivacyValueAllowAll());
-      }
-
-      const users = deniedUserList?.reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
-        acc.push(new GramJs.InputPeerUser({
-          userId: buildMtpPeerId(id, 'user'),
-          accessHash: BigInt(accessHash!),
-        }));
-        return acc;
-      }, []);
-
-      if (users?.length) {
-        rules.push(new GramJs.InputPrivacyValueDisallowUsers({ users }));
-      }
-      break;
-    }
-
-    case 'closeFriends':
-      rules.push(new GramJs.InputPrivacyValueAllowCloseFriends());
-      break;
-
-    case 'nonContacts':
-      rules.push(new GramJs.InputPrivacyValueDisallowContacts());
-      break;
-
-    case 'selectedContacts': {
-      const users = (allowedUserList || []).reduce<GramJs.InputUser[]>((acc, { id, accessHash }) => {
-        acc.push(new GramJs.InputPeerUser({
-          userId: buildMtpPeerId(id, 'user'),
-          accessHash: BigInt(accessHash!),
-        }));
-
-        return acc;
-      }, []);
-
-      rules.push(new GramJs.InputPrivacyValueAllowUsers({ users }));
-      break;
-    }
-
-    case 'nobody':
-      rules.push(new GramJs.InputPrivacyValueDisallowAll());
-      break;
+  if (rules.allowedUsers?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowUsers({
+      users: rules.allowedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
+    }));
+  }
+  if (rules.allowedChats?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueAllowChatParticipants({
+      chats: rules.allowedChats.map(({ id, type }) => (
+        buildMtpPeerId(id, type === 'chatTypeBasicGroup' ? 'chat' : 'channel')
+      )),
+    }));
+  }
+  if (rules.blockedUsers?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowUsers({
+      users: rules.blockedUsers.map(({ id, accessHash }) => buildInputEntity(id, accessHash) as GramJs.InputUser),
+    }));
+  }
+  if (rules.blockedChats?.length) {
+    privacyRules.push(new GramJs.InputPrivacyValueDisallowChatParticipants({
+      chats: rules.blockedChats.map(({ id, type }) => (
+        buildMtpPeerId(id, type === 'chatTypeBasicGroup' ? 'chat' : 'channel')
+      )),
+    }));
   }
 
-  return rules;
+  if (!rules.isUnspecified) {
+    switch (rules.visibility) {
+      case 'everybody':
+        privacyRules.push(new GramJs.InputPrivacyValueAllowAll());
+        break;
+
+      case 'contacts':
+        privacyRules.push(new GramJs.InputPrivacyValueAllowContacts());
+        break;
+
+      case 'nonContacts':
+        privacyRules.push(new GramJs.InputPrivacyValueDisallowContacts());
+        break;
+
+      case 'nobody':
+        privacyRules.push(new GramJs.InputPrivacyValueDisallowAll());
+        break;
+    }
+  }
+
+  return privacyRules;
 }

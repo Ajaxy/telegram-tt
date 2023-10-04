@@ -13,7 +13,7 @@ import type {
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
-  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID,
+  GENERAL_TOPIC_ID, REPLIES_USER_ID, SERVICE_NOTIFICATIONS_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { findLast } from '../../util/iteratees';
@@ -25,6 +25,7 @@ import {
   getAllowedAttachmentOptions,
   getCanPostInChat,
   getHasAdminRight,
+  getMainUsername,
   getMessageAudio,
   getMessageDocument,
   getMessageOriginalId,
@@ -1352,4 +1353,29 @@ export function selectCanTranslateMessage<T extends GlobalState>(
 
   return IS_TRANSLATION_SUPPORTED && isTranslationEnabled && canTranslateLanguage && isTranslatable
     && !chatRequestedLanguage;
+}
+
+export function selectMessageLink<T extends GlobalState>(
+  global: T, chatId: string, threadId?: number, messageId?: number,
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat) {
+    return undefined;
+  }
+
+  const chatUsername = getMainUsername(chat);
+
+  const isChannelId = isChatChannel(chat) || isChatSuperGroup(chat);
+  const normalizedId = isChannelId ? chatId.replace('-100', '') : chatId.replace('-', '');
+
+  const chatPart = chatUsername || `c/${normalizedId}`;
+  const threadPart = threadId && threadId !== MAIN_THREAD_ID ? `/${threadId}` : '';
+  const messagePart = messageId ? `/${messageId}` : '';
+  return `${TME_LINK_PREFIX}${chatPart}${threadPart}${messagePart}`;
+}
+
+export function selectTopicLink<T extends GlobalState>(
+  global: T, chatId: string, topicId?: number,
+) {
+  return selectMessageLink(global, chatId, topicId);
 }

@@ -95,6 +95,7 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
     <div
       ref={ref}
       role="button"
+      data-peer-id={user.id}
       tabIndex={0}
       className={styles.user}
       onMouseDown={handleMouseDown}

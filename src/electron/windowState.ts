@@ -1,6 +1,7 @@
 import type { BrowserWindow, Rectangle } from 'electron';
 import { screen } from 'electron';
-import Store from 'electron-store';
+
+import { store } from './utils';
 
 type Options = {
   defaultHeight?: number;
@@ -40,12 +41,10 @@ const DEFAULT_OPTIONS = {
   fullScreen: true,
 };
 
-const store: Store = new Store();
-
 function windowStateKeeper(options: Options): WindowState {
   let state: State;
   let winRef: BrowserWindow | undefined;
-  let stateChangeTimer: NodeJS.Timer | number;
+  let stateChangeTimer: ReturnType<typeof setTimeout>;
 
   options = {
     ...DEFAULT_OPTIONS,

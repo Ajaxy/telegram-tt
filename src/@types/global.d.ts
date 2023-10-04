@@ -118,6 +118,11 @@ interface Navigator {
   setAppBadge?(count: number): Promise<void>;
 }
 
+type Undefined<T> = {
+  [K in keyof T]: undefined;
+};
+type OptionalCombine<A, B> = (A & B) | (A & Undefined<B>);
+
 // Fix to make Boolean() work as !!
 // https://github.com/microsoft/TypeScript/issues/16655
 type Falsy = false | 0 | '' | null | undefined;

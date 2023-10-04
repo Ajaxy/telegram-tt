@@ -12,7 +12,7 @@ import { IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
-  getUserColorKey,
+  getPeerColorKey,
   getUserFullName,
   getUserStoryHtmlId,
   isChatWithRepliesBot,
@@ -208,7 +208,7 @@ const Avatar: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
-    `color-bg-${getUserColorKey(peer)}`,
+    `color-bg-${getPeerColorKey(peer)}`,
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
@@ -244,6 +244,7 @@ const Avatar: FC<OwnProps> = ({
       ref={ref}
       className={fullClassName}
       id={peer?.id && withStory ? getUserStoryHtmlId(peer.id) : undefined}
+      data-peer-id={peer?.id}
       data-test-sender-id={IS_TEST ? peer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
       onClick={handleClick}

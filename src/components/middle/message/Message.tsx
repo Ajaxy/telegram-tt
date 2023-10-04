@@ -15,7 +15,6 @@ import type {
   ApiTopic,
   ApiTypeStory,
   ApiUser,
-  ApiUsername,
 } from '../../../api/types';
 import type {
   ActiveEmojiInteraction,
@@ -29,7 +28,7 @@ import type { PinnedIntersectionChangedCallback } from '../hooks/usePinnedMessag
 import { MAIN_THREAD_ID } from '../../../api/types';
 import { AudioOrigin } from '../../../types';
 
-import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID, IS_ELECTRON } from '../../../config';
+import { EMOJI_STATUS_LOOP_LIMIT, GENERAL_TOPIC_ID } from '../../../config';
 import {
   areReactionsEmpty,
   getMessageContent,
@@ -39,8 +38,8 @@ import {
   getMessageLocation,
   getMessageSingleCustomEmoji,
   getMessageSingleRegularEmoji,
+  getPeerColorKey,
   getSenderTitle,
-  getUserColorKey,
   hasMessageText,
   isAnonymousOwnMessage,
   isChatChannel,
@@ -95,7 +94,7 @@ import {
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
 import { isElementInViewport } from '../../../util/isElementInViewport';
-import { IS_ANDROID, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
+import { IS_ANDROID, IS_ELECTRON, IS_TRANSLATION_SUPPORTED } from '../../../util/windowEnvironment';
 import {
   calculateDimensionsForMessageMedia,
   getStickerDimensions,
@@ -192,15 +191,14 @@ type OwnProps =
     appearanceOrder: number;
     isJustAdded: boolean;
     memoFirstUnreadIdRef: { current: number | undefined };
-    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
     getIsMessageListReady: Signal<boolean>;
+    onPinnedIntersectionChange: PinnedIntersectionChangedCallback;
   }
   & MessagePositionProperties;
 
 type StateProps = {
   theme: ISettings['theme'];
   forceSenderName?: boolean;
-  chatUsernames?: ApiUsername[];
   sender?: ApiUser | ApiChat;
   canShowSender: boolean;
   originSender?: ApiUser | ApiChat;
@@ -263,6 +261,7 @@ type StateProps = {
   withStickerEffects?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
+  shouldWarnAboutSvg?: boolean;
 };
 
 type MetaPosition =
@@ -288,7 +287,6 @@ const RESIZE_ANIMATION_DURATION = 400;
 
 const Message: FC<OwnProps & StateProps> = ({
   message,
-  chatUsernames,
   observeIntersectionForBottom,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -370,8 +368,9 @@ const Message: FC<OwnProps & StateProps> = ({
   withStickerEffects,
   webPageStory,
   isConnected,
-  onPinnedIntersectionChange,
   getIsMessageListReady,
+  shouldWarnAboutSvg,
+  onPinnedIntersectionChange,
 }) => {
   const {
     toggleMessageSelection,
@@ -1097,6 +1096,7 @@ const Message: FC<OwnProps & StateProps> = ({
             onMediaClick={handleMediaClick}
             onCancelUpload={handleCancelUpload}
             isDownloading={isDownloading}
+            shouldWarnAboutSvg={shouldWarnAboutSvg}
           />
         )}
         {storyData && !isStoryMention && (
@@ -1209,7 +1209,7 @@ const Message: FC<OwnProps & StateProps> = ({
       senderTitle = getSenderTitle(lang, senderPeer);
 
       if (!asForwarded && !isOwn) {
-        senderColor = `color-${getUserColorKey(senderPeer)}`;
+        senderColor = `color-${getPeerColorKey(senderPeer)}`;
       }
     } else if (forwardInfo?.hiddenUserName) {
       senderTitle = forwardInfo.hiddenUserName;
@@ -1278,7 +1278,6 @@ const Message: FC<OwnProps & StateProps> = ({
   }
 
   const forwardAuthor = isGroup && asForwarded ? message.postAuthorTitle : undefined;
-  const chatUsername = useMemo(() => chatUsernames?.find((c) => c.isActive), [chatUsernames]);
 
   return (
     <div
@@ -1384,7 +1383,6 @@ const Message: FC<OwnProps & StateProps> = ({
           targetHref={contextMenuTarget?.matches('a[href]') ? (contextMenuTarget as HTMLAnchorElement).href : undefined}
           message={message}
           album={album}
-          chatUsername={chatUsername?.username}
           messageListType={messageListType}
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
@@ -1439,7 +1437,6 @@ export default memo(withGlobal<OwnProps>(
     const isRepliesChat = isChatWithRepliesBot(chatId);
     const isChannel = chat && isChatChannel(chat);
     const isGroup = chat && isChatGroup(chat);
-    const chatUsernames = chat?.usernames;
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const webPageStoryData = message.content.webPage?.story;
     const webPageStory = webPageStoryData
@@ -1529,7 +1526,6 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       theme: selectTheme(global),
-      chatUsernames,
       forceSenderName,
       canShowSender,
       originSender,
@@ -1591,6 +1587,7 @@ export default memo(withGlobal<OwnProps>(
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
+      shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       ...((canShowSender || isLocation) && { sender }),
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

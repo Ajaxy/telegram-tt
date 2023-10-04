@@ -17,7 +17,6 @@ import {
   EDITABLE_INPUT_CSS_SELECTOR,
   EDITABLE_INPUT_ID,
   GENERAL_TOPIC_ID,
-  IS_ELECTRON,
   MAX_SCREEN_WIDTH_FOR_EXPAND_PINNED_MESSAGES,
   MIN_SCREEN_WIDTH_FOR_STATIC_RIGHT_COLUMN,
   MOBILE_SCREEN_MAX_WIDTH,
@@ -60,7 +59,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  IS_ANDROID, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/windowEnvironment';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
@@ -145,6 +144,7 @@ type StateProps = {
   pinnedIds?: number[];
   topMessageId?: number;
   canUnpin?: boolean;
+  canUnblock?: boolean;
 };
 
 function isImage(item: DataTransferItem) {
@@ -199,6 +199,7 @@ function MiddleColumn({
   pinnedIds,
   topMessageId,
   canUnpin,
+  canUnblock,
 }: OwnProps & StateProps) {
   const {
     openChat,
@@ -215,6 +216,7 @@ function MiddleColumn({
     loadFullChat,
     setLeftColumnWidth,
     resetLeftColumnWidth,
+    unblockUser,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -252,8 +254,10 @@ function MiddleColumn({
   const renderingCanSubscribe = usePrevDuringAnimation(canSubscribe, closeAnimationDuration);
   const renderingCanStartBot = usePrevDuringAnimation(canStartBot, closeAnimationDuration);
   const renderingCanRestartBot = usePrevDuringAnimation(canRestartBot, closeAnimationDuration);
+  const renderingCanUnblock = usePrevDuringAnimation(canUnblock, closeAnimationDuration);
   const renderingCanPost = usePrevDuringAnimation(canPost, closeAnimationDuration)
-    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && chatId !== TMP_CHAT_ID;
+    && !renderingCanRestartBot && !renderingCanStartBot && !renderingCanSubscribe && !renderingCanUnblock
+    && chatId !== TMP_CHAT_ID;
   const renderingHasTools = usePrevDuringAnimation(hasTools, closeAnimationDuration);
   const renderingIsFabShown = usePrevDuringAnimation(isFabShown, closeAnimationDuration) && chatId !== TMP_CHAT_ID;
   const renderingIsChannel = usePrevDuringAnimation(isChannel, closeAnimationDuration);
@@ -400,6 +404,10 @@ function MiddleColumn({
     restartBot({ chatId: chatId! });
   });
 
+  const handleUnblock = useLastCallback(() => {
+    unblockUser({ userId: chatId! });
+  });
+
   const customBackgroundValue = useCustomBackground(theme, customBackground);
 
   const className = buildClassName(
@@ -461,7 +469,7 @@ function MiddleColumn({
   );
   const withMessageListBottomShift = Boolean(
     renderingCanRestartBot || renderingCanSubscribe || renderingShouldSendJoinRequest || renderingCanStartBot
-    || isPinnedMessageList,
+    || isPinnedMessageList || renderingCanUnblock,
   );
   const withExtraShift = Boolean(isMessagingDisabled || isSelectModeActive || isPinnedMessageList);
 
@@ -623,6 +631,19 @@ function MiddleColumn({
                     </Button>
                   </div>
                 )}
+                {isMobile && renderingCanUnblock && (
+                  <div className="middle-column-footer-button-container" dir={lang.isRtl ? 'rtl' : undefined}>
+                    <Button
+                      size="tiny"
+                      fluid
+                      ripple
+                      className="join-subscribe-button"
+                      onClick={handleUnblock}
+                    >
+                      {lang('Unblock')}
+                    </Button>
+                  </div>
+                )}
                 <MessageSelectToolbar
                   messageListType={renderingMessageListType}
                   isActive={isSelectModeActive}
@@ -724,8 +745,10 @@ export default memo(withGlobal<OwnProps>(
     );
     const shouldJoinToSend = Boolean(chat?.isNotJoined && chat.isJoinToSend);
     const shouldSendJoinRequest = Boolean(chat?.isNotJoined && chat.isJoinRequest);
-    const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
+    const isUserBlocked = isPrivate ? selectIsUserBlocked(global, chatId) : false;
+    const canRestartBot = Boolean(bot && isUserBlocked);
     const canStartBot = !canRestartBot && isBotNotStarted;
+    const canUnblock = isUserBlocked && !bot;
     const shouldLoadFullChat = Boolean(
       chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id),
     );
@@ -779,6 +802,7 @@ export default memo(withGlobal<OwnProps>(
       pinnedIds,
       topMessageId,
       canUnpin,
+      canUnblock,
     };
   },
 )(MiddleColumn));

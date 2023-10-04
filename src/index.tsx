@@ -40,6 +40,8 @@ async function init() {
 
   checkAndAssignPermanentWebVersion();
 
+  await window.electron?.restoreLocalStorage();
+
   if (IS_MULTITAB_SUPPORTED) {
     subscribeToMultitabBroadcastChannel();
 

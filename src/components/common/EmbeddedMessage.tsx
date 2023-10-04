@@ -12,8 +12,8 @@ import {
   getMessageIsSpoiler,
   getMessageMediaHash,
   getMessageRoundVideo,
+  getPeerColorKey,
   getSenderTitle,
-  getUserColorKey,
   isActionMessage,
   isMessageTranslatable,
 } from '../../global/helpers';
@@ -93,7 +93,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       className={buildClassName(
         'EmbeddedMessage',
         className,
-        sender && !noUserColors && `color-${getUserColorKey(sender)}`,
+        sender && !noUserColors && `color-${getPeerColorKey(sender)}`,
       )}
       onClick={message && handleClick}
       onMouseDown={message && handleMouseDown}

@@ -1,6 +1,6 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
-import type { PrivacyVisibility } from '../../../types';
+import type { ApiInputPrivacyRules } from '../../../types';
 import type {
   ApiReaction, ApiReportReason, ApiStealthMode,
   ApiTypeStory, ApiUser, ApiUserStories,
@@ -306,16 +306,15 @@ export function reportStory({
 }
 
 export function editStoryPrivacy({
-  id, visibility, allowedUserList, deniedUserList,
+  id,
+  privacy,
 }: {
   id: number;
-  visibility: PrivacyVisibility;
-  allowedUserList?: ApiUser[];
-  deniedUserList?: ApiUser[];
+  privacy: ApiInputPrivacyRules;
 }) {
   return invokeRequest(new GramJs.stories.EditStory({
     id,
-    privacyRules: buildInputPrivacyRules(visibility, allowedUserList, deniedUserList),
+    privacyRules: buildInputPrivacyRules(privacy),
   }), {
     shouldReturnTrue: true,
   });

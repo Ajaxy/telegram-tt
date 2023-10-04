@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiSticker, ApiUpdateConnectionStateType } from '../../api/types';
 import type { MessageList } from '../../global/types';
 
-import { getUserIdDividend } from '../../global/helpers';
+import { getPeerIdDividend } from '../../global/helpers';
 import { selectChat, selectCurrentMessageList } from '../../global/selectors';
 
 import useLang from '../../hooks/useLang';
@@ -94,7 +94,7 @@ const ContactGreeting: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { userId }): StateProps => {
     const { stickers } = global.stickers.greeting;
-    const dividend = getUserIdDividend(userId) + getUserIdDividend(global.currentUserId!);
+    const dividend = getPeerIdDividend(userId) + getPeerIdDividend(global.currentUserId!);
     const sticker = stickers?.length ? stickers[dividend % stickers.length] : undefined;
     const chat = selectChat(global, userId);
     if (!chat) {

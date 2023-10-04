@@ -13,34 +13,36 @@ import Modal from './Modal';
 
 type OwnProps = {
   isOpen: boolean;
-  onClose: () => void;
-  onCloseAnimationEnd?: () => void;
   title?: string;
   header?: TeactNode;
   textParts?: TextPart;
   text?: string;
   confirmLabel?: string;
-  confirmHandler: () => void;
   confirmIsDestructive?: boolean;
+  isConfirmDisabled?: boolean;
   areButtonsInColumn?: boolean;
   className?: string;
   children?: React.ReactNode;
+  confirmHandler: NoneToVoidFunction;
+  onClose: NoneToVoidFunction;
+  onCloseAnimationEnd?: NoneToVoidFunction;
 };
 
 const ConfirmDialog: FC<OwnProps> = ({
   isOpen,
-  onClose,
-  onCloseAnimationEnd,
   title,
   header,
   text,
   textParts,
   confirmLabel = 'Confirm',
-  confirmHandler,
   confirmIsDestructive,
+  isConfirmDisabled,
   areButtonsInColumn,
   className,
   children,
+  confirmHandler,
+  onClose,
+  onCloseAnimationEnd,
 }) => {
   const lang = useLang();
 
@@ -76,6 +78,7 @@ const ConfirmDialog: FC<OwnProps> = ({
           isText
           onClick={confirmHandler}
           color={confirmIsDestructive ? 'danger' : 'primary'}
+          disabled={isConfirmDisabled}
         >
           {confirmLabel}
         </Button>

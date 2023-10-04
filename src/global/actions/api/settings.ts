@@ -1,9 +1,8 @@
 import type { ApiUser, ApiUsername } from '../../../api/types';
 import type {
   ApiPrivacySettings,
-  InputPrivacyContact, InputPrivacyRules, PrivacyVisibility,
 } from '../../../types';
-import type { ActionReturnType, GlobalState } from '../../types';
+import type { ActionReturnType } from '../../types';
 import {
   ProfileEditProgress,
   UPLOADING_WALLPAPER_SLUG,
@@ -17,7 +16,7 @@ import { requestPermission, subscribe, unsubscribe } from '../../../util/notific
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
-import { isUserId } from '../../helpers';
+import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addBlockedUser, addNotifyExceptions, addUsers, removeBlockedUser, replaceSettings, updateChat, updateChats,
@@ -413,6 +412,7 @@ addActionHandler('loadLanguages', async (global): Promise<void> => {
 addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
   const result = await Promise.all([
     callApi('fetchPrivacySettings', 'phoneNumber'),
+    callApi('fetchPrivacySettings', 'addByPhone'),
     callApi('fetchPrivacySettings', 'lastSeen'),
     callApi('fetchPrivacySettings', 'profilePhoto'),
     callApi('fetchPrivacySettings', 'forwards'),
@@ -420,6 +420,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     callApi('fetchPrivacySettings', 'phoneCall'),
     callApi('fetchPrivacySettings', 'phoneP2P'),
     callApi('fetchPrivacySettings', 'voiceMessages'),
+    callApi('fetchPrivacySettings', 'bio'),
   ]);
 
   if (result.some((e) => e === undefined)) {
@@ -428,6 +429,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
 
   const [
     phoneNumberSettings,
+    addByPhoneSettings,
     lastSeenSettings,
     profilePhotoSettings,
     forwardsSettings,
@@ -435,6 +437,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
     phoneCallSettings,
     phoneP2PSettings,
     voiceMessagesSettings,
+    bioSettings,
   ] = result as {
     users: ApiUser[];
     rules: ApiPrivacySettings;
@@ -451,6 +454,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
       privacy: {
         ...global.settings.privacy,
         phoneNumber: phoneNumberSettings.rules,
+        addByPhone: addByPhoneSettings.rules,
         lastSeen: lastSeenSettings.rules,
         profilePhoto: profilePhotoSettings.rules,
         forwards: forwardsSettings.rules,
@@ -458,6 +462,7 @@ addActionHandler('loadPrivacySettings', async (global): Promise<void> => {
         phoneCall: phoneCallSettings.rules,
         phoneP2P: phoneP2PSettings.rules,
         voiceMessages: voiceMessagesSettings.rules,
+        bio: bioSettings.rules,
       },
     },
   };
@@ -475,10 +480,10 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
     return;
   }
 
-  const rules = buildInputPrivacyRules(global, {
+  const rules = buildApiInputPrivacyRules(global, {
     visibility,
     allowedIds: [...settings.allowUserIds, ...settings.allowChatIds],
-    deniedIds: [...settings.blockUserIds, ...settings.blockChatIds],
+    blockedIds: [...settings.blockUserIds, ...settings.blockChatIds],
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);
@@ -502,7 +507,7 @@ addActionHandler('setPrivacyVisibility', async (global, actions, payload): Promi
 });
 
 addActionHandler('setPrivacySettings', async (global, actions, payload): Promise<void> => {
-  const { privacyKey, isAllowList, contactsIds } = payload!;
+  const { privacyKey, isAllowList, updatedIds } = payload!;
   const {
     privacy: { [privacyKey]: settings },
   } = global.settings;
@@ -511,10 +516,11 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
     return;
   }
 
-  const rules = buildInputPrivacyRules(global, {
+  const rules = buildApiInputPrivacyRules(global, {
     visibility: settings.visibility,
-    allowedIds: isAllowList ? contactsIds : [...settings.allowUserIds, ...settings.allowChatIds],
-    deniedIds: !isAllowList ? contactsIds : [...settings.blockUserIds, ...settings.blockChatIds],
+    isUnspecified: settings.isUnspecified,
+    allowedIds: isAllowList ? updatedIds : [...settings.allowUserIds, ...settings.allowChatIds],
+    blockedIds: !isAllowList ? updatedIds : [...settings.blockUserIds, ...settings.blockChatIds],
   });
 
   const result = await callApi('setPrivacySettings', privacyKey, rules);
@@ -536,74 +542,6 @@ addActionHandler('setPrivacySettings', async (global, actions, payload): Promise
   };
   setGlobal(global);
 });
-
-function buildInputPrivacyRules(global: GlobalState, {
-  visibility,
-  allowedIds,
-  deniedIds,
-}: {
-  visibility: PrivacyVisibility;
-  allowedIds: string[];
-  deniedIds: string[];
-}): InputPrivacyRules {
-  const {
-    users: { byId: usersById },
-    chats: { byId: chatsById },
-  } = global;
-
-  const rules: InputPrivacyRules = {
-    visibility,
-  };
-  let users: InputPrivacyContact[];
-  let chats: InputPrivacyContact[];
-
-  const collectUsers = (userId: string) => {
-    if (!isUserId(userId)) {
-      return undefined;
-    }
-    const { id, accessHash } = usersById[userId] || {};
-    if (!id) {
-      return undefined;
-    }
-
-    return { id, accessHash };
-  };
-
-  const collectChats = (userId: string) => {
-    if (isUserId(userId)) {
-      return undefined;
-    }
-    const chat = chatsById[userId];
-
-    return chat ? { id: chat.id } : undefined;
-  };
-
-  if (visibility === 'contacts' || visibility === 'nobody') {
-    users = allowedIds.map(collectUsers).filter(Boolean) as InputPrivacyContact[];
-    chats = allowedIds.map(collectChats).filter(Boolean) as InputPrivacyContact[];
-
-    if (users.length > 0) {
-      rules.allowedUsers = users;
-    }
-    if (chats.length > 0) {
-      rules.allowedChats = chats;
-    }
-  }
-
-  if (visibility === 'everybody' || visibility === 'contacts') {
-    users = deniedIds.map(collectUsers).filter(Boolean) as InputPrivacyContact[];
-    chats = deniedIds.map(collectChats).filter(Boolean) as InputPrivacyContact[];
-
-    if (users.length > 0) {
-      rules.blockedUsers = users;
-    }
-    if (chats.length > 0) {
-      rules.blockedChats = chats;
-    }
-  }
-
-  return rules;
-}
 
 addActionHandler('updateIsOnline', (global, actions, payload): ActionReturnType => {
   if (global.connectionState !== 'connectionStateReady') return;

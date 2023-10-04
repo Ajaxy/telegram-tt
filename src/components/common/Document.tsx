@@ -22,10 +22,13 @@ import { getDocumentExtension, getDocumentHasPreview } from './helpers/documentI
 
 import useFlag from '../../hooks/useFlag';
 import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
+import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import useMedia from '../../hooks/useMedia';
 import useMediaWithLoadProgress from '../../hooks/useMediaWithLoadProgress';
 
+import Checkbox from '../ui/Checkbox';
+import ConfirmDialog from '../ui/ConfirmDialog';
 import File from './File';
 
 type OwnProps = {
@@ -42,12 +45,14 @@ type OwnProps = {
   sender?: string;
   autoLoadFileMaxSizeMb?: number;
   isDownloading?: boolean;
+  shouldWarnAboutSvg?: boolean;
   onCancelUpload?: () => void;
   onMediaClick?: () => void;
   onDateClick?: (messageId: number, chatId: string) => void;
 };
 
 const BYTES_PER_MB = 1024 * 1024;
+const SVG_EXTENSIONS = new Set(['svg', 'svgz']);
 
 const Document: FC<OwnProps> = ({
   message,
@@ -62,15 +67,20 @@ const Document: FC<OwnProps> = ({
   sender,
   isSelected,
   isSelectable,
+  shouldWarnAboutSvg,
+  isDownloading,
   onCancelUpload,
   onMediaClick,
   onDateClick,
-  isDownloading,
 }) => {
-  const dispatch = getActions();
+  const { cancelMessageMediaDownload, downloadMessageMedia, setSettingOption } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
+
+  const lang = useLang();
+  const [isSvgDialogOpen, openSvgDialog, closeSvgDialog] = useFlag();
+  const [shouldNotWarnAboutSvg, setShouldNotWarnAboutSvg] = useState(false);
 
   const document = message.content.document!;
   const { fileName, size, timestamp } = document;
@@ -110,6 +120,10 @@ const Document: FC<OwnProps> = ({
     SUPPORTED_VIDEO_CONTENT_TYPES.has(document.mimeType) || SUPPORTED_IMAGE_CONTENT_TYPES.has(document.mimeType)
   );
 
+  const handleDownload = useLastCallback(() => {
+    downloadMessageMedia({ message });
+  });
+
   const handleClick = useLastCallback(() => {
     if (isUploading) {
       if (onCancelUpload) {
@@ -119,7 +133,7 @@ const Document: FC<OwnProps> = ({
     }
 
     if (isDownloading) {
-      dispatch.cancelMessageMediaDownload({ message });
+      cancelMessageMediaDownload({ message });
       return;
     }
 
@@ -130,9 +144,21 @@ const Document: FC<OwnProps> = ({
 
     if (withMediaViewer) {
       onMediaClick!();
-    } else {
-      dispatch.downloadMessageMedia({ message });
+      return;
     }
+
+    if (SVG_EXTENSIONS.has(extension) && shouldWarnAboutSvg) {
+      openSvgDialog();
+      return;
+    }
+
+    handleDownload();
+  });
+
+  const handleSvgConfirm = useLastCallback(() => {
+    setSettingOption({ shouldWarnAboutSvg: !shouldNotWarnAboutSvg });
+    closeSvgDialog();
+    handleDownload();
   });
 
   const handleDateClick = useLastCallback(() => {
@@ -140,26 +166,41 @@ const Document: FC<OwnProps> = ({
   });
 
   return (
-    <File
-      ref={ref}
-      name={fileName}
-      extension={extension}
-      size={size}
-      timestamp={withDate ? datetime || timestamp : undefined}
-      thumbnailDataUri={thumbDataUri}
-      previewData={localBlobUrl || previewData}
-      smaller={smaller}
-      isTransferring={isTransferring}
-      isUploading={isUploading}
-      transferProgress={transferProgress}
-      className={className}
-      sender={sender}
-      isSelectable={isSelectable}
-      isSelected={isSelected}
-      actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'play' : 'eye') : 'download'}
-      onClick={handleClick}
-      onDateClick={onDateClick ? handleDateClick : undefined}
-    />
+    <>
+      <File
+        ref={ref}
+        name={fileName}
+        extension={extension}
+        size={size}
+        timestamp={withDate ? datetime || timestamp : undefined}
+        thumbnailDataUri={thumbDataUri}
+        previewData={localBlobUrl || previewData}
+        smaller={smaller}
+        isTransferring={isTransferring}
+        isUploading={isUploading}
+        transferProgress={transferProgress}
+        className={className}
+        sender={sender}
+        isSelectable={isSelectable}
+        isSelected={isSelected}
+        actionIcon={withMediaViewer ? (isMessageDocumentVideo(message) ? 'play' : 'eye') : 'download'}
+        onClick={handleClick}
+        onDateClick={onDateClick ? handleDateClick : undefined}
+      />
+      <ConfirmDialog
+        isOpen={isSvgDialogOpen}
+        onClose={closeSvgDialog}
+        confirmHandler={handleSvgConfirm}
+      >
+        {lang('lng_launch_svg_warning')}
+        <Checkbox
+          className="dialog-checkbox"
+          checked={shouldNotWarnAboutSvg}
+          label={lang('lng_launch_exe_dont_ask')}
+          onCheck={setShouldNotWarnAboutSvg}
+        />
+      </ConfirmDialog>
+    </>
   );
 };
 

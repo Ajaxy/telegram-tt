@@ -57,6 +57,7 @@ interface StateProps {
   isRightColumnShown?: boolean;
   canStartBot?: boolean;
   canRestartBot?: boolean;
+  canUnblock?: boolean;
   canSubscribe?: boolean;
   canSearch?: boolean;
   canCall?: boolean;
@@ -88,6 +89,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   isChannel,
   canStartBot,
   canRestartBot,
+  canUnblock,
   canSubscribe,
   canSearch,
   canCall,
@@ -124,6 +126,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     togglePeerTranslations,
     openChatLanguageModal,
     setSettingOption,
+    unblockUser,
   } = getActions();
   // eslint-disable-next-line no-null/no-null
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -160,6 +163,10 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
 
   const handleRestartBot = useLastCallback(() => {
     restartBot({ chatId });
+  });
+
+  const handleUnblock = useLastCallback(() => {
+    unblockUser({ userId: chatId });
   });
 
   const handleTranslateClick = useLastCallback(() => {
@@ -341,6 +348,16 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               {lang('BotRestart')}
             </Button>
           )}
+          {canExpandActions && canUnblock && (
+            <Button
+              size="tiny"
+              ripple
+              fluid
+              onClick={handleUnblock}
+            >
+              {lang('Unblock')}
+            </Button>
+          )}
           {canSearch && (
             <Button
               round
@@ -403,7 +420,6 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
           withExtraActions={isMobile || !canExpandActions}
           isChannel={isChannel}
           canStartBot={canStartBot}
-          canRestartBot={canRestartBot}
           canSubscribe={canSubscribe}
           canSearch={canSearch}
           canCall={canCall}
@@ -434,6 +450,7 @@ export default memo(withGlobal<OwnProps>(
     const isChannel = Boolean(chat && isChatChannel(chat));
     const language = selectLanguageCode(global);
     const translationLanguage = selectTranslationLanguage(global);
+    const isPrivate = isUserId(chatId);
     const { doNotTranslate } = global.settings.byKey;
 
     if (!chat || chat.isRestricted || selectIsInSelectMode(global)) {
@@ -446,16 +463,18 @@ export default memo(withGlobal<OwnProps>(
     }
 
     const bot = selectBot(global, chatId);
-    const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
-    const userFullInfo = isUserId(chatId) ? selectUserFullInfo(global, chatId) : undefined;
+    const chatFullInfo = !isPrivate ? selectChatFullInfo(global, chatId) : undefined;
+    const userFullInfo = isPrivate ? selectUserFullInfo(global, chatId) : undefined;
     const fullInfo = chatFullInfo || userFullInfo;
     const isChatWithSelf = selectIsChatWithSelf(global, chatId);
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
     const isDiscussionThread = messageListType === 'thread' && threadId !== MAIN_THREAD_ID;
     const isRightColumnShown = selectIsRightColumnShown(global, isMobile);
 
-    const canRestartBot = Boolean(bot && selectIsUserBlocked(global, bot.id));
+    const isUserBlocked = isPrivate ? selectIsUserBlocked(global, chatId) : false;
+    const canRestartBot = Boolean(bot && isUserBlocked);
     const canStartBot = !canRestartBot && Boolean(selectIsChatBotNotStarted(global, chatId));
+    const canUnblock = isUserBlocked && !bot;
     const canSubscribe = Boolean(
       (isMainThread || chat.isForum) && (isChannel || isChatSuperGroup(chat)) && chat.isNotJoined,
     );
@@ -499,6 +518,7 @@ export default memo(withGlobal<OwnProps>(
       language,
       doNotTranslate,
       detectedChatLanguage: chat.detectedLanguage,
+      canUnblock,
     };
   },
 )(HeaderActions));

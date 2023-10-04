@@ -1104,6 +1104,10 @@ export function updater(update: Update) {
       '@type': 'updateStealthMode',
       stealthMode: buildApiStealthMode(update.stealthMode),
     });
+  } else if (update instanceof GramJs.UpdateAttachMenuBots) {
+    onUpdate({
+      '@type': 'updateAttachMenuBots',
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

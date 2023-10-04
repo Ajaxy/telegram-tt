@@ -6,10 +6,12 @@ import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 import { MAIN_THREAD_ID } from '../../../api/types';
 
+import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import PopupManager from '../../../util/PopupManager';
+import requestActionTimeout from '../../../util/requestActionTimeout';
 import { debounce } from '../../../util/schedulers';
 import { getServerTime } from '../../../util/serverTime';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -452,7 +454,7 @@ addActionHandler('sharePhoneWithBot', async (global, actions, payload): Promise<
 
 addActionHandler('requestSimpleWebView', async (global, actions, payload): Promise<void> => {
   const {
-    url, botId, theme, buttonText,
+    url, botId, theme, buttonText, isFromSideMenu, isFromSwitchWebView, startParam,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -474,7 +476,14 @@ addActionHandler('requestSimpleWebView', async (global, actions, payload): Promi
     return;
   }
 
-  const webViewUrl = await callApi('requestSimpleWebView', { url, bot, theme });
+  const webViewUrl = await callApi('requestSimpleWebView', {
+    url,
+    bot,
+    theme,
+    startParam,
+    isFromSideMenu,
+    isFromSwitchWebView,
+  });
   if (!webViewUrl) {
     return;
   }
@@ -714,7 +723,12 @@ addActionHandler('markBotTrusted', (global, actions, payload): ActionReturnType 
 
 addActionHandler('loadAttachBots', async (global, actions, payload): Promise<void> => {
   const { hash } = payload || {};
-  await loadAttachBots(global, hash);
+  const result = await loadAttachBots(global, hash);
+
+  requestActionTimeout({
+    action: 'loadAttachBots',
+    payload: { hash: result?.hash },
+  }, GENERAL_REFETCH_INTERVAL);
 });
 
 addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<void> => {
@@ -724,21 +738,13 @@ addActionHandler('toggleAttachBot', async (global, actions, payload): Promise<vo
 
   if (!bot) return;
 
-  await toggleAttachBot(global, bot, isEnabled, isWriteAllowed);
-});
-
-async function toggleAttachBot<T extends GlobalState>(
-  global: T, bot: ApiUser, isEnabled: boolean, isWriteAllowed?: boolean,
-) {
   await callApi('toggleAttachBot', { bot, isWriteAllowed, isEnabled });
-  global = getGlobal();
-  await loadAttachBots(global);
-}
+});
 
 async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
   const result = await callApi('loadAttachBots', { hash });
   if (!result) {
-    return;
+    return undefined;
   }
 
   global = getGlobal();
@@ -751,37 +757,60 @@ async function loadAttachBots<T extends GlobalState>(global: T, hash?: string) {
     },
   };
   setGlobal(global);
+
+  return result;
 }
 
 addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, bot, url, startParam, threadId,
-    tabId = getCurrentTabId(),
+    bot, startParam, isFromConfirm, tabId = getCurrentTabId(),
   } = payload;
+  const isFromSideMenu = 'isFromSideMenu' in payload && payload.isFromSideMenu;
+
   const isFromBotMenu = !bot;
-  if (!isFromBotMenu && !global.attachMenu.bots[bot.id]) {
+  const shouldDisplayDisclaimer = (!isFromBotMenu && !global.attachMenu.bots[bot.id])
+    || (isFromSideMenu && (bot?.isInactive || bot?.isDisclaimerNeeded));
+  if (!isFromConfirm && shouldDisplayDisclaimer) {
     return updateTabState(global, {
       requestedAttachBotInstall: {
         bot,
         onConfirm: {
           action: 'callAttachBot',
-          payload,
+          payload: {
+            ...payload,
+            isFromConfirm: true,
+          },
         },
       },
     }, tabId);
   }
+
   const theme = extractCurrentThemeParams();
-  actions.openChat({ id: chatId, threadId, tabId });
-  actions.requestWebView({
-    url,
-    peerId: chatId,
-    botId: isFromBotMenu ? chatId : bot.id,
-    theme,
-    buttonText: '',
-    isFromBotMenu,
-    startParam,
-    tabId,
-  });
+  if (isFromSideMenu) {
+    actions.requestSimpleWebView({
+      botId: bot!.id,
+      buttonText: '',
+      isFromSideMenu: true,
+      startParam,
+      theme,
+      tabId,
+    });
+  }
+
+  if ('chatId' in payload) {
+    const { chatId, threadId, url } = payload;
+    actions.openChat({ id: chatId, threadId, tabId });
+    actions.requestWebView({
+      url,
+      peerId: chatId!,
+      botId: (isFromBotMenu ? chatId : bot.id)!,
+      theme,
+      buttonText: '',
+      isFromBotMenu,
+      startParam,
+      tabId,
+    });
+  }
 
   return undefined;
 });
@@ -800,7 +829,8 @@ addActionHandler('confirmAttachBotInstall', async (global, actions, payload): Pr
   const botUser = selectUser(global, bot.id);
   if (!botUser) return;
 
-  await toggleAttachBot(global, botUser, true, isWriteAllowed);
+  actions.markBotTrusted({ botId: bot.id, isWriteAllowed, tabId });
+  await callApi('toggleAttachBot', { bot: botUser, isWriteAllowed, isEnabled: true });
   if (onConfirm) {
     const { action, payload: actionPayload } = onConfirm;
     // @ts-ignore
@@ -821,11 +851,11 @@ addActionHandler('requestAttachBotInChat', (global, actions, payload): ActionRet
   } = payload;
   const currentChatId = selectCurrentMessageList(global, tabId)?.chatId;
 
-  const supportedFilters = bot.peerTypes.filter((type): type is ApiChatType => (
+  const supportedFilters = bot.attachMenuPeerTypes?.filter((type): type is ApiChatType => (
     type !== 'self' && filter.includes(type)
   ));
 
-  if (!supportedFilters.length) {
+  if (!supportedFilters?.length) {
     actions.callAttachBot({
       chatId: currentChatId || bot.id,
       bot,

@@ -1,12 +1,14 @@
-import React, { memo, useMemo } from '../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { PREVIEW_AVATAR_COUNT } from '../../config';
-import { selectTabState } from '../../global/selectors';
+import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
+import { selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
+import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
+import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';
 import useStoryPreloader from './hooks/useStoryPreloader';
@@ -24,6 +26,7 @@ interface StateProps {
   currentUserId: string;
   orderedUserIds: string[];
   isShown: boolean;
+  withAnimation?: boolean;
   usersById: Record<string, ApiUser>;
 }
 
@@ -36,6 +39,7 @@ function StoryToggler({
   canShow,
   isShown,
   isArchived,
+  withAnimation,
 }: OwnProps & StateProps) {
   const { toggleStoryRibbon } = getActions();
 
@@ -58,8 +62,20 @@ function StoryToggler({
   }, [orderedUserIds]);
   useStoryPreloader(preloadUserIds);
 
+  const isVisible = canShow && isShown;
   // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
-  const { shouldRender, transitionClassNames } = useShowTransition(canShow && isShown, undefined, undefined, 'slow');
+  const { shouldRender, transitionClassNames } = useShowTransition(isVisible, undefined, undefined, 'slow');
+
+  useEffect(() => {
+    if (!withAnimation) return;
+    if (isVisible) {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      animateClosing(isArchived);
+    } else {
+      dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
+      animateOpening(isArchived);
+    }
+  }, [isArchived, isVisible, withAnimation]);
 
   if (!shouldRender) {
     return undefined;
@@ -68,6 +84,7 @@ function StoryToggler({
   return (
     <button
       type="button"
+      id="StoryToggler"
       className={buildClassName(styles.root, transitionClassNames)}
       aria-label={lang('Chat.Context.Peer.OpenStory')}
       onClick={() => toggleStoryRibbon({ isShown: true, isArchived })}
@@ -89,11 +106,13 @@ function StoryToggler({
 export default memo(withGlobal<OwnProps>((global, { isArchived }): StateProps => {
   const { orderedUserIds: { archived, active } } = global.stories;
   const { storyViewer: { isRibbonShown, isArchivedRibbonShown } } = selectTabState(global);
+  const withAnimation = selectPerformanceSettingsValue(global, 'storyRibbonAnimations');
 
   return {
     currentUserId: global.currentUserId!,
     orderedUserIds: isArchived ? archived : active,
     isShown: isArchived ? !isArchivedRibbonShown : !isRibbonShown,
+    withAnimation,
     usersById: global.users.byId,
   };
 })(StoryToggler));

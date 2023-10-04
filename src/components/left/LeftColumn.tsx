@@ -40,7 +40,8 @@ type StateProps = {
   nextSettingsScreen?: SettingsScreens;
   nextFoldersAction?: ReducerAction<FoldersActions>;
   isChatOpen: boolean;
-  isUpdateAvailable?: boolean;
+  isAppUpdateAvailable?: boolean;
+  isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   forumPanelChatId?: string;
   isClosingSearch?: boolean;
@@ -73,7 +74,8 @@ function LeftColumn({
   nextSettingsScreen,
   nextFoldersAction,
   isChatOpen,
-  isUpdateAvailable,
+  isAppUpdateAvailable,
+  isElectronUpdateAvailable,
   isForumPanelOpen,
   forumPanelChatId,
   isClosingSearch,
@@ -180,8 +182,10 @@ function LeftColumn({
           return;
 
         case SettingsScreens.PrivacyPhoneNumber:
+        case SettingsScreens.PrivacyAddByPhone:
         case SettingsScreens.PrivacyLastSeen:
         case SettingsScreens.PrivacyProfilePhoto:
+        case SettingsScreens.PrivacyBio:
         case SettingsScreens.PrivacyPhoneCall:
         case SettingsScreens.PrivacyPhoneP2P:
         case SettingsScreens.PrivacyForwarding:
@@ -230,6 +234,10 @@ function LeftColumn({
         case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
         case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
           setSettingsScreen(SettingsScreens.PrivacyProfilePhoto);
+          return;
+        case SettingsScreens.PrivacyBioAllowedContacts:
+        case SettingsScreens.PrivacyBioDeniedContacts:
+          setSettingsScreen(SettingsScreens.PrivacyBio);
           return;
         case SettingsScreens.PrivacyPhoneCallAllowedContacts:
         case SettingsScreens.PrivacyPhoneCallDeniedContacts:
@@ -491,7 +499,8 @@ function LeftColumn({
             onSettingsScreenSelect={handleSettingsScreenSelect}
             onReset={handleReset}
             shouldSkipTransition={shouldSkipHistoryAnimations}
-            isUpdateAvailable={isUpdateAvailable}
+            isAppUpdateAvailable={isAppUpdateAvailable}
+            isElectronUpdateAvailable={isElectronUpdateAvailable}
             isForumPanelOpen={isForumPanelOpen}
             onTopicSearch={handleTopicSearch}
           />
@@ -537,7 +546,8 @@ export default memo(withGlobal<OwnProps>(
       passcode: {
         hasPasscode,
       },
-      isUpdateAvailable,
+      isAppUpdateAvailable,
+      isElectronUpdateAvailable,
       archiveSettings,
     } = global;
 
@@ -556,7 +566,8 @@ export default memo(withGlobal<OwnProps>(
       nextSettingsScreen,
       nextFoldersAction,
       isChatOpen,
-      isUpdateAvailable,
+      isAppUpdateAvailable,
+      isElectronUpdateAvailable,
       isForumPanelOpen,
       forumPanelChatId,
       isClosingSearch: tabState.globalSearch.isClosing,

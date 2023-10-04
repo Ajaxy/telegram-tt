@@ -90,8 +90,16 @@ const HeaderPinnedMessage: FC<OwnProps> = ({
 
     return (
       <div className={styles.pinnedThumb}>
-        {thumbDataUri && !spoiler
-          && <img className={styles.pinnedThumbImage} src={srcUrl} width={width} height={height} alt="" />}
+        {thumbDataUri && !spoiler && (
+          <img
+            className={styles.pinnedThumbImage}
+            src={srcUrl}
+            width={width}
+            height={height}
+            alt=""
+            draggable={false}
+          />
+        )}
         {thumbDataUri
           && <MediaSpoiler thumbDataUri={srcUrl} isVisible={Boolean(spoiler)} width={width} height={height} />}
       </div>

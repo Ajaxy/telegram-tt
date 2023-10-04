@@ -4,7 +4,6 @@
   column-gap: 0.625rem;
   padding: 0.25rem 0.5rem 0.5rem 1rem;
   overflow-x: auto;
-  overflow-y: hidden;
   white-space: nowrap;
   max-height: 5.5rem;
   position: relative;
@@ -37,6 +36,10 @@
   &:focus {
     outline: none;
   }
+
+  &:global(.animating) {
+    opacity: 0;
+  }
 }
 
 .name {
@@ -44,6 +47,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   unicode-bidi: plaintext;
+  white-space: nowrap;
   max-width: 110%;
 
   &_hasUnreadStory {

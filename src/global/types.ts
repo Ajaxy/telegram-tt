@@ -628,7 +628,8 @@ export type GlobalState = {
   connectionState?: ApiUpdateConnectionStateType;
   currentUserId?: string;
   isSyncing?: boolean;
-  isUpdateAvailable?: boolean;
+  isAppUpdateAvailable?: boolean;
+  isElectronUpdateAvailable?: boolean;
   isSynced?: boolean;
   isFetchingDifference?: boolean;
   leftColumnWidth?: number;
@@ -1063,7 +1064,7 @@ export interface ActionPayloads {
   setPrivacySettings: {
     privacyKey: ApiPrivacyKey;
     isAllowList: boolean;
-    contactsIds: string[];
+    updatedIds: string[];
   };
   loadNotificationExceptions: undefined;
   setThemeSettings: { theme: ThemeKey } & Partial<IThemeSettings>;
@@ -1352,7 +1353,7 @@ export interface ActionPayloads {
     messageId?: number;
     commentId?: number;
     startParam?: string;
-    startAttach?: string | boolean;
+    startAttach?: string;
     attach?: string;
     startApp?: string;
     originalParts?: string[];
@@ -1660,7 +1661,7 @@ export interface ActionPayloads {
   openLimitReachedModal: { limit: ApiLimitTypeWithModal } & WithTabId;
   closeLimitReachedModal: WithTabId | undefined;
   checkAppVersion: undefined;
-  setIsAppUpdateAvailable: boolean;
+  setIsElectronUpdateAvailable: boolean;
   setGlobalSearchClosing: ({
     isClosing?: boolean;
   } & WithTabId) | undefined;
@@ -2345,10 +2346,13 @@ export interface ActionPayloads {
     threadId?: number;
   } & WithTabId;
   requestSimpleWebView: {
-    url: string;
+    url?: string;
     botId: string;
     buttonText: string;
     theme?: ApiThemeParameters;
+    startParam?: string;
+    isFromSwitchWebView?: boolean;
+    isFromSideMenu?: boolean;
   } & WithTabId;
   requestAppWebView: {
     botId: string;
@@ -2374,7 +2378,7 @@ export interface ActionPayloads {
 
   processAttachBotParameters: {
     username: string;
-    filter: ApiChatType[];
+    filter?: ApiChatType[];
     startParam?: string;
   } & WithTabId;
   requestAttachBotInChat: {
@@ -2400,12 +2404,16 @@ export interface ActionPayloads {
     isEnabled: boolean;
   };
 
-  callAttachBot: {
+  callAttachBot: ({
     chatId: string;
     threadId?: number;
-    bot?: ApiAttachBot;
     url?: string;
+  } | {
+    isFromSideMenu: true;
+  }) & {
     startParam?: string;
+    bot?: ApiAttachBot;
+    isFromConfirm?: boolean;
   } & WithTabId;
 
   requestBotUrlAuth: {

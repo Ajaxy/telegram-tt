@@ -76,7 +76,6 @@ export type OwnProps = {
   anchor: IAnchorPosition;
   isChannel?: boolean;
   canStartBot?: boolean;
-  canRestartBot?: boolean;
   canSubscribe?: boolean;
   canSearch?: boolean;
   canCall?: boolean;
@@ -114,6 +113,8 @@ type StateProps = {
   isRightColumnShown?: boolean;
   canManage?: boolean;
   canTranslate?: boolean;
+  isBlocked?: boolean;
+  isBot?: boolean;
 };
 
 const CLOSE_MENU_ANIMATION_DURATION = 200;
@@ -131,7 +132,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   isForum,
   isChatInfoShown,
   canStartBot,
-  canRestartBot,
   canSubscribe,
   canSearch,
   canCall,
@@ -154,6 +154,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canManage,
   isRightColumnShown,
   canTranslate,
+  isBlocked,
+  isBot,
   onJoinRequestsClick,
   onSubscribeChannel,
   onSearchClick,
@@ -179,6 +181,8 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openChat,
     toggleManagement,
     togglePeerTranslations,
+    blockUser,
+    unblockUser,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -343,6 +347,16 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     closeMenu();
   });
 
+  const handleBlock = useLastCallback(() => {
+    blockUser({ userId: chatId });
+    closeMenu();
+  });
+
+  const handleUnblock = useLastCallback(() => {
+    unblockUser({ userId: chatId });
+    closeMenu();
+  });
+
   useEffect(() => {
     disableScrolling();
 
@@ -459,14 +473,6 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('BotStart')}
             </MenuItem>
           )}
-          {withExtraActions && canRestartBot && (
-            <MenuItem
-              icon="bots"
-              onClick={handleRestartBot}
-            >
-              {lang('BotRestart')}
-            </MenuItem>
-          )}
           {withExtraActions && canSubscribe && (
             <MenuItem
               icon={isChannel ? 'channel' : 'group'}
@@ -573,6 +579,22 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               {lang('GiftPremium')}
             </MenuItem>
           )}
+          {isBot && (
+            <MenuItem
+              icon={isBlocked ? 'bots' : 'hand-stop'}
+              onClick={isBlocked ? handleRestartBot : handleBlock}
+            >
+              {isBlocked ? lang('BotRestart') : lang('Bot.Stop')}
+            </MenuItem>
+          )}
+          {isPrivate && !isBot && (
+            <MenuItem
+              icon={isBlocked ? 'user' : 'hand-stop'}
+              onClick={isBlocked ? handleUnblock : handleBlock}
+            >
+              {isBlocked ? lang('Unblock') : lang('BlockUser')}
+            </MenuItem>
+          )}
           {canLeave && (
             <>
               <MenuSeparator />
@@ -666,6 +688,8 @@ export default memo(withGlobal<OwnProps>(
       canManage,
       isRightColumnShown: selectIsRightColumnShown(global),
       canTranslate,
+      isBlocked: userFullInfo?.isBlocked,
+      isBot: Boolean(chatBot),
     };
   },
 )(HeaderMenuContainer));

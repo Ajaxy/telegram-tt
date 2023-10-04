@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--color-background);
 
   > .Transition {
     flex: 1;
@@ -47,6 +48,7 @@
       padding-left: 0.625rem;
       padding-right: 0.625rem;
 
+      /* stylelint-disable-next-line */
       > span {
         padding-left: 0.5rem;
         padding-right: 0.5rem;

@@ -999,14 +999,15 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     hash = part2;
   }
 
-  const startAttach = params.hasOwnProperty('startattach') && !params.startattach ? true : params.startattach;
+  const hasStartAttach = params.hasOwnProperty('startattach');
+  const hasStartApp = params.hasOwnProperty('startapp');
   const choose = parseChooseParameter(params.choose);
   const storyId = part2 === 's' && (Number(part3) || undefined);
 
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
     openChatByPhoneNumber({
       phoneNumber: part1.substr(1, part1.length - 1),
-      startAttach,
+      startAttach: params.startattach,
       attach: params.attach,
       tabId,
     });
@@ -1065,7 +1066,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       tabId,
     });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
-    const chatId = `-${chatOrChannelPostId}`;
+    const chatId = `-100${chatOrChannelPostId}`;
     const chat = selectChat(global, chatId);
     if (!chat) {
       showNotification({ message: 'Chat does not exist', tabId });
@@ -1073,7 +1074,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     }
 
     focusMessage({
-      chatId,
+      chatId: chat.id,
       messageId,
       tabId,
     });
@@ -1087,11 +1088,11 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       slug: part2,
       tabId,
     });
-  } else if (startAttach && choose) {
+  } else if ((hasStartAttach && choose) || (!part2 && hasStartApp)) {
     processAttachBotParameters({
       username: part1,
       filter: choose,
-      ...(typeof startAttach === 'string' && { startParam: startAttach }),
+      startParam: params.startattach || params.startapp,
       tabId,
     });
   } else {
@@ -1101,7 +1102,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       threadId: messageId ? Number(chatOrChannelPostId) : undefined,
       commentId,
       startParam: params.start,
-      startAttach,
+      startAttach: params.startattach,
       attach: params.attach,
       startApp: params.startapp,
       originalParts: [part1, part2, part3],
@@ -1131,7 +1132,8 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const isWebApp = webAppName && !Number(webAppName) && !originalParts?.[2];
 
   if (!commentId) {
-    if (!startAttach && messageId && !startParam && chat?.usernames?.some((c) => c.username === username)) {
+    if (startAttach === undefined && messageId && !startParam
+      && chat?.usernames?.some((c) => c.username === username)) {
       actions.focusMessage({
         chatId: chat.id, threadId, messageId, tabId,
       });
@@ -1701,6 +1703,18 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload):
   const bot = await getAttachBotOrNotify(global, actions, username, tabId);
   if (!bot) return;
 
+  const isForChat = Boolean(filter);
+
+  if (!isForChat) {
+    actions.callAttachBot({
+      isFromSideMenu: true,
+      bot,
+      startParam,
+      tabId,
+    });
+    return;
+  }
+
   global = getGlobal();
   const { attachMenu: { bots } } = global;
   if (!bots[bot.id]) {
@@ -1720,7 +1734,6 @@ addActionHandler('processAttachBotParameters', async (global, actions, payload):
     setGlobal(global);
     return;
   }
-
   actions.requestAttachBotInChat({
     bot,
     filter,
@@ -2547,7 +2560,7 @@ async function openChatByUsername<T extends GlobalState>(
   threadId?: number,
   channelPostId?: number,
   startParam?: string,
-  startAttach?: string | boolean,
+  startAttach?: string,
   attach?: string,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
@@ -2555,7 +2568,7 @@ async function openChatByUsername<T extends GlobalState>(
   const currentChat = selectCurrentChat(global, tabId);
 
   // Attach in the current chat
-  if (startAttach && !attach) {
+  if (startAttach !== undefined && !attach) {
     const bot = await getAttachBotOrNotify(global, actions, username, tabId);
 
     if (!currentChat || !bot) return;
@@ -2563,7 +2576,7 @@ async function openChatByUsername<T extends GlobalState>(
     actions.callAttachBot({
       bot,
       chatId: currentChat.id,
-      ...(typeof startAttach === 'string' && { startParam: startAttach }),
+      startParam: startAttach,
       tabId,
     });
 

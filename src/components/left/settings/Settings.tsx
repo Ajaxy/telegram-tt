@@ -99,6 +99,11 @@ const PRIVACY_PROFILE_PHOTO_SCREENS = [
   SettingsScreens.PrivacyProfilePhotoDeniedContacts,
 ];
 
+const PRIVACY_BIO_SCREENS = [
+  SettingsScreens.PrivacyBioAllowedContacts,
+  SettingsScreens.PrivacyBioDeniedContacts,
+];
+
 const PRIVACY_PHONE_CALL_SCREENS = [
   SettingsScreens.PrivacyPhoneCallAllowedContacts,
   SettingsScreens.PrivacyPhoneCallDeniedContacts,
@@ -190,6 +195,7 @@ const Settings: FC<OwnProps> = ({
       [SettingsScreens.PrivacyPhoneNumber]: PRIVACY_PHONE_NUMBER_SCREENS.includes(screen),
       [SettingsScreens.PrivacyLastSeen]: PRIVACY_LAST_SEEN_PHONE_SCREENS.includes(screen),
       [SettingsScreens.PrivacyProfilePhoto]: PRIVACY_PROFILE_PHOTO_SCREENS.includes(screen),
+      [SettingsScreens.PrivacyBio]: PRIVACY_BIO_SCREENS.includes(screen),
       [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(screen),
       [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(screen),
       [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(screen),
@@ -314,8 +320,8 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneNumber:
       case SettingsScreens.PrivacyLastSeen:
       case SettingsScreens.PrivacyProfilePhoto:
+      case SettingsScreens.PrivacyBio:
       case SettingsScreens.PrivacyPhoneCall:
-      case SettingsScreens.PrivacyPhoneP2P:
       case SettingsScreens.PrivacyForwarding:
       case SettingsScreens.PrivacyVoiceMessages:
       case SettingsScreens.PrivacyGroupChats:
@@ -331,6 +337,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneNumberAllowedContacts:
       case SettingsScreens.PrivacyLastSeenAllowedContacts:
       case SettingsScreens.PrivacyProfilePhotoAllowedContacts:
+      case SettingsScreens.PrivacyBioAllowedContacts:
       case SettingsScreens.PrivacyPhoneCallAllowedContacts:
       case SettingsScreens.PrivacyPhoneP2PAllowedContacts:
       case SettingsScreens.PrivacyForwardingAllowedContacts:
@@ -349,6 +356,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.PrivacyPhoneNumberDeniedContacts:
       case SettingsScreens.PrivacyLastSeenDeniedContacts:
       case SettingsScreens.PrivacyProfilePhotoDeniedContacts:
+      case SettingsScreens.PrivacyBioDeniedContacts:
       case SettingsScreens.PrivacyPhoneCallDeniedContacts:
       case SettingsScreens.PrivacyPhoneP2PDeniedContacts:
       case SettingsScreens.PrivacyForwardingDeniedContacts:

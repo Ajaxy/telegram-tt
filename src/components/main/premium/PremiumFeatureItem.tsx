@@ -47,7 +47,7 @@ const PremiumFeatureItem: FC<OwnProps> = ({
           style={`--item-color: rgb(${r},${g},${b})`}
         />
       ) : (
-        <img src={icon} className={styles.icon} alt="" style={`--item-color: rgb(${r},${g},${b})`} />
+        <img src={icon} className={styles.icon} alt="" style={`--item-color: rgb(${r},${g},${b})`} draggable={false} />
       )}
       <div className={styles.text}>
         <div className={styles.title}>{renderText(title, ['br'])}</div>

@@ -13,25 +13,25 @@ import {
 } from '../../api/types';
 
 import {
-  ARCHIVED_FOLDER_ID, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
+  ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
 } from '../../config';
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
-import { getUserFirstOrLastName } from './users';
+import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
+const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
 export function isUserId(entityId: string) {
-  // Workaround for old-fashioned IDs stored locally
-  if (typeof entityId === 'number') {
-    return entityId > 0;
-  }
-
   return !entityId.startsWith('-');
+}
+
+export function isChannelId(entityId: string) {
+  return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-100');
 }
 
 export function isChatGroup(chat: ApiChat) {
@@ -87,20 +87,9 @@ export function getChatTitle(lang: LangFn, chat: ApiChat, isSelf = false) {
 }
 
 export function getChatLink(chat: ApiChat) {
-  const activeUsername = chat.usernames?.find((u) => u.isActive);
+  const activeUsername = getMainUsername(chat);
 
-  return activeUsername ? `${TME_LINK_PREFIX}${activeUsername.username}` : undefined;
-}
-
-export function getChatMessageLink(chatId: string, chatUsername?: string, threadId?: number, messageId?: number) {
-  const chatPart = chatUsername || `c/${chatId.replace('-', '')}`;
-  const threadPart = threadId && threadId !== MAIN_THREAD_ID ? `/${threadId}` : '';
-  const messagePart = messageId ? `/${messageId}` : '';
-  return `${TME_LINK_PREFIX}${chatPart}${threadPart}${messagePart}`;
-}
-
-export function getTopicLink(chatId: string, chatUsername?: string, topicId?: number) {
-  return getChatMessageLink(chatId, chatUsername, topicId);
+  return activeUsername ? `${TME_LINK_PREFIX}${activeUsername}` : undefined;
 }
 
 export function getChatAvatarHash(
@@ -463,4 +452,19 @@ export function getOrderedTopics(
 
     return [...pinnedOrdered, ...ordered, ...hidden];
   }
+}
+
+export function getCleanPeerId(peerId: string) {
+  return isChannelId(peerId) ? peerId.replace('-100', '') : peerId.replace('-', '');
+}
+
+export function getPeerIdDividend(peerId: string) {
+  return Math.abs(Number(getCleanPeerId(peerId)));
+}
+
+// https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
+export function getPeerColorKey(peer: ApiUser | ApiChat | undefined) {
+  const index = peer ? getPeerIdDividend(peer.id) % 7 : 0;
+
+  return USER_COLOR_KEYS[index];
 }

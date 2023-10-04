@@ -73,11 +73,11 @@ export default memo(CardInput);
 function getCardIcon(cardType: CardType) {
   switch (cardType) {
     case CardType.Mastercard:
-      return <img src={mastercardIconPath} alt="" />;
+      return <img src={mastercardIconPath} draggable={false} alt="" />;
     case CardType.Visa:
-      return <img src={visaIconPath} alt="" />;
+      return <img src={visaIconPath} draggable={false} alt="" />;
     case CardType.Mir:
-      return <img src={mirIconPath} alt="" />;
+      return <img src={mirIconPath} draggable={false} alt="" />;
     default:
       return undefined;
   }

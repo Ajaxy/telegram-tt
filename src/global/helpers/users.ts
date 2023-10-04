@@ -8,8 +8,6 @@ import { formatPhoneNumber } from '../../util/phoneNumber';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
 import { getServerTime, getServerTimeOffset } from '../../util/serverTime';
 
-const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
-
 export function getUserFirstOrLastName(user?: ApiUser) {
   if (!user) {
     return undefined;
@@ -259,17 +257,6 @@ export function filterUsersByName(
 
     return (name && searchWords(name)) || Boolean(user.usernames?.find(({ username }) => searchWords(username)));
   });
-}
-
-export function getUserIdDividend(peerId: string) {
-  return Math.abs(Number(peerId));
-}
-
-// https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
-export function getUserColorKey(peer: ApiUser | ApiChat | undefined) {
-  const index = peer ? getUserIdDividend(peer.id) % 7 : 0;
-
-  return USER_COLOR_KEYS[index];
 }
 
 export function getMainUsername(userOrChat: ApiUser | ApiChat) {

@@ -75,8 +75,12 @@ export function buildApiAttachBot(bot: GramJs.AttachMenuBot): ApiAttachBot {
     hasSettings: bot.hasSettings,
     shouldRequestWriteAccess: bot.requestWriteAccess,
     shortName: bot.shortName,
-    peerTypes: bot.peerTypes.map(buildApiAttachMenuPeerType),
+    isForAttachMenu: bot.showInAttachMenu!,
+    isForSideMenu: bot.showInSideMenu,
+    attachMenuPeerTypes: bot.peerTypes?.map(buildApiAttachMenuPeerType)!,
     icons: bot.icons.map(buildApiAttachMenuIcon).filter(Boolean),
+    isInactive: bot.inactive,
+    isDisclaimerNeeded: bot.sideMenuDisclaimerNeeded,
   };
 }
 

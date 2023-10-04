@@ -1,9 +1,11 @@
 import type { ActionReturnType } from '../../types';
 import { ApiMediaFormat } from '../../../api/types';
 
+import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as mediaLoader from '../../../util/mediaLoader';
+import requestActionTimeout from '../../../util/requestActionTimeout';
 import { callApi } from '../../../api/gramjs';
 import {
   getDocumentMediaHash,
@@ -61,6 +63,11 @@ addActionHandler('loadAvailableReactions', async (global): Promise<void> => {
     availableReactions: result,
   };
   setGlobal(global);
+
+  requestActionTimeout({
+    action: 'loadAvailableReactions',
+    payload: undefined,
+  }, GENERAL_REFETCH_INTERVAL);
 });
 
 addActionHandler('interactWithAnimatedEmoji', (global, actions, payload): ActionReturnType => {

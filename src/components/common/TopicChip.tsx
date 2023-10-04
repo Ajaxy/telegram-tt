@@ -38,7 +38,7 @@ const TopicChip: FC<OwnProps> = ({
     >
       {topic
         ? <TopicIcon topic={topic} size={TOPIC_ICON_SIZE} />
-        : <img src={blankSrc} alt="" />}
+        : <img src={blankSrc} alt="" draggable={false} />}
       {topic?.title ? renderText(topic.title) : lang('Loading')}
       {topic?.isClosed && <i className="icon icon-lock" />}
       <i className="icon icon-next" />

@@ -17,6 +17,7 @@ import {
 } from '../../types';
 
 import { compact } from '../../../util/iteratees';
+import localDb from '../localDb';
 import { bytesToDataUri } from './helpers';
 import { pathBytesToSvg } from './pathBytesToSvg';
 import { buildApiPeerId } from './peers';
@@ -148,10 +149,13 @@ export function buildApiUsernames(mtpPeer: GramJs.User | GramJs.Channel | GramJs
 
 export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySettings {
   let visibility: PrivacyVisibility | undefined;
+  let isUnspecified: boolean | undefined;
   let allowUserIds: string[] | undefined;
   let allowChatIds: string[] | undefined;
   let blockUserIds: string[] | undefined;
   let blockChatIds: string[] | undefined;
+
+  const localChats = localDb.chats;
 
   rules.forEach((rule) => {
     if (rule instanceof GramJs.PrivacyValueAllowAll) {
@@ -165,24 +169,36 @@ export function buildPrivacyRules(rules: GramJs.TypePrivacyRule[]): ApiPrivacySe
     } else if (rule instanceof GramJs.PrivacyValueDisallowAll) {
       visibility ||= 'nobody';
     } else if (rule instanceof GramJs.PrivacyValueAllowUsers) {
-      visibility ||= 'selectedContacts';
       allowUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueDisallowUsers) {
       blockUserIds = rule.users.map((chatId) => buildApiPeerId(chatId, 'user'));
     } else if (rule instanceof GramJs.PrivacyValueAllowChatParticipants) {
-      allowChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+      // Server allows channel ids here, so we need to check
+      allowChatIds = rule.chats.map((chatId) => {
+        const dialogId = buildApiPeerId(chatId, 'chat');
+        const channelId = buildApiPeerId(chatId, 'channel');
+        if (localChats[dialogId]) return dialogId;
+        return channelId;
+      });
     } else if (rule instanceof GramJs.PrivacyValueDisallowChatParticipants) {
-      blockChatIds = rule.chats.map((chatId) => buildApiPeerId(chatId, 'chat'));
+      blockChatIds = rule.chats.map((chatId) => {
+        const dialogId = buildApiPeerId(chatId, 'chat');
+        const channelId = buildApiPeerId(chatId, 'channel');
+        if (localChats[dialogId]) return dialogId;
+        return channelId;
+      });
     }
   });
 
   if (!visibility) {
     // Disallow by default
     visibility = 'nobody';
+    isUnspecified = true;
   }
 
   return {
     visibility,
+    isUnspecified,
     allowUserIds: allowUserIds || [],
     allowChatIds: allowChatIds || [],
     blockUserIds: blockUserIds || [],

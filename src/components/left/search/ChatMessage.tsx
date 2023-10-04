@@ -127,6 +127,7 @@ function renderSummary(
         className={
           buildClassName('media-preview--image', isRoundVideo && 'round', isSpoiler && 'media-preview-spoiler')
         }
+        draggable={false}
       />
       {getMessageVideo(message) && <i className="icon icon-play" />}
       {renderMessageSummary(lang, message, true, searchQuery)}
