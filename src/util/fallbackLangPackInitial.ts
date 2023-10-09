@@ -12,7 +12,7 @@ export const fallbackLangPackInitial = {
   'Login.PhonePlaceholder': 'Your phone number',
   'Login.Next': 'Next',
   'Login.QR.Login': 'Log in by QR Code',
-  'Login.QR.Title': 'Log in to Telegram by QR Code',
+  'Login.QR.Title': 'Log in to Quote by QR Code',
   'Login.QR.Help1': 'Open Telegram on your phone',
   'Login.QR.Help2': 'Go to **Settings** > **Devices** > **Link Desktop Device**',
   'Login.QR2.Help2': 'Go to **Settings** → **Devices** → **Link Desktop Device**',

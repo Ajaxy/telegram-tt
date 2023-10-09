@@ -37,10 +37,10 @@ const SettingsPasscodeStart: FC<OwnProps> = ({
 
         <p className="settings-item-description" dir="auto">
           When you set up an additional passcode, a lock icon will appear on the chats page.
-          Tap it to lock and unlock your Telegram Web A.
+          Tap it to lock and unlock your Quote.
         </p>
         <p className="settings-item-description mb-3" dir="auto">
-          Note: if you forget your local passcode, you&apos;ll need to log out of Telegram Web A and log in again.
+          Note: if you forget your local passcode, you&apos;ll need to log out of Quote and log in again.
         </p>
       </div>
 
