@@ -26,7 +26,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 
-import StoryRibbon from '../../story/StoryRibbon';
+// import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
@@ -100,7 +100,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const {
     shouldRender: shouldRenderStoryRibbon,
     transitionClassNames: storyRibbonClassNames,
-    isClosing: isStoryRibbonClosing,
+    // isClosing: isStoryRibbonClosing,
   } = useShowTransition(isStoryRibbonShown, undefined, undefined, '');
 
   const allChatsFolder: ApiChatFolder = useMemo(() => {
@@ -314,7 +314,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         storyRibbonClassNames,
       )}
     >
-      {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
+      {/* {shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />} */}
       {shouldRenderFolders ? (
         <TabList
           contextRootElementSelector="#LeftColumn"
