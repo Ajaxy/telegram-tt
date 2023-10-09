@@ -8,7 +8,7 @@ import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { StoryViewerOrigin } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
 
-import { IS_TEST } from '../../config';
+import { IS_STORIES_ENABLED, IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
@@ -213,9 +213,9 @@ const Avatar: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
-    ((withStory && user?.hasStories) || forPremiumPromo) && 'with-story-circle',
-    withStorySolid && user?.hasStories && 'with-story-solid',
-    withStorySolid && user?.hasUnreadStories && 'has-unread-story',
+    IS_STORIES_ENABLED && ((withStory && user?.hasStories) || forPremiumPromo) && 'with-story-circle',
+    IS_STORIES_ENABLED && withStorySolid && user?.hasStories && 'with-story-solid',
+    IS_STORIES_ENABLED && withStorySolid && user?.hasUnreadStories && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
@@ -223,7 +223,7 @@ const Avatar: FC<OwnProps> = ({
   const hasMedia = Boolean(isSavedMessages || imgBlobUrl);
 
   const { handleClick, handleMouseDown } = useFastClick((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (withStory && storyViewerMode !== 'disabled' && user?.hasStories) {
+    if (IS_STORIES_ENABLED && withStory && storyViewerMode !== 'disabled' && user?.hasStories) {
       e.stopPropagation();
 
       openStoryViewer({
@@ -253,7 +253,7 @@ const Avatar: FC<OwnProps> = ({
       <div className="inner">
         {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
       </div>
-      {withStory && user?.hasStories && (
+      {IS_STORIES_ENABLED && withStory && user?.hasStories && (
         <AvatarStoryCircle userId={user.id} size={size} withExtraGap={withStoryGap} />
       )}
     </div>

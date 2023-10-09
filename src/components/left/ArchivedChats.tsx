@@ -6,7 +6,7 @@ import type { GlobalState } from '../../global/types';
 import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
 import type { LeftColumnContent, SettingsScreens } from '../../types';
 
-import { ANIMATION_END_DELAY } from '../../config';
+import { ANIMATION_END_DELAY, IS_STORIES_ENABLED } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { ANIMATION_DURATION } from '../story/helpers/ribbonAnimation';
 
@@ -17,8 +17,8 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useShowTransition from '../../hooks/useShowTransition';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
-// import StoryRibbon from '../story/StoryRibbon';
-// import StoryToggler from '../story/StoryToggler';
+import StoryRibbon from '../story/StoryRibbon';
+import StoryToggler from '../story/StoryToggler';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -81,7 +81,7 @@ const ArchivedChats: FC<OwnProps> = ({
   const {
     shouldRender: shouldRenderStoryRibbon,
     transitionClassNames: storyRibbonClassNames,
-    // isClosing: isStoryRibbonClosing,
+    isClosing: isStoryRibbonClosing,
   } = useShowTransition(isStoryRibbonShown, undefined, undefined, '', false, ANIMATION_DURATION + ANIMATION_END_DELAY);
 
   return (
@@ -104,9 +104,11 @@ const ArchivedChats: FC<OwnProps> = ({
           <i className="icon icon-arrow-left" />
         </Button>
         {shouldRenderTitle && <h3 className={titleClassNames}>{lang('ArchivedChats')}</h3>}
-        {/* <div className="story-toggler-wrapper">
-          <StoryToggler canShow isArchived />
-        </div> */}
+        {IS_STORIES_ENABLED && (
+          <div className="story-toggler-wrapper">
+            <StoryToggler canShow isArchived />
+          </div>
+        )}
         {archiveSettings.isHidden && (
           <DropdownMenu
             className="archived-chats-more-menu"
@@ -126,9 +128,9 @@ const ArchivedChats: FC<OwnProps> = ({
           storyRibbonClassNames,
         )}
       >
-        {/* {shouldRenderStoryRibbon && (
+        {IS_STORIES_ENABLED && shouldRenderStoryRibbon && (
           <StoryRibbon isArchived className="left-header-shadow" isClosing={isStoryRibbonClosing} />
-        )} */}
+        )}
         <ChatList
           folderType="archived"
           isActive={isActive}

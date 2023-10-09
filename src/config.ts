@@ -327,3 +327,5 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
   chatlistInvites: [3, 100],
   chatlistJoined: [2, 20],
 };
+
+export const IS_STORIES_ENABLED = false;

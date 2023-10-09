@@ -12,6 +12,7 @@ import {
   APP_NAME,
   DEBUG,
   IS_BETA,
+  IS_STORIES_ENABLED,
 } from '../../../config';
 import {
   selectCanSetPasscode,
@@ -36,7 +37,7 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useLeftHeaderButtonRtlForumTransition from './hooks/useLeftHeaderButtonRtlForumTransition';
 
 import PickerSelectedItem from '../../common/PickerSelectedItem';
-// import StoryToggler from '../../story/StoryToggler';
+import StoryToggler from '../../story/StoryToggler';
 import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import SearchInput from '../../ui/SearchInput';
@@ -286,7 +287,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
         >
           {searchContent}
-          {/* <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} /> */}
+          {IS_STORIES_ENABLED && (
+            <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} />
+          )}
         </SearchInput>
         {isCurrentUserPremium && <StatusButton />}
         {hasPasscode && (
