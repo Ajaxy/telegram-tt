@@ -20,6 +20,7 @@ import { MAIN_THREAD_ID } from '../../api/types';
 import { AudioOrigin, MediaViewerOrigin, NewChatMembersProgress } from '../../types';
 
 import {
+  IS_STORIES_ENABLED,
   MEMBERS_SLICE,
   PROFILE_SENSITIVE_AREA,
   SHARED_MEDIA_SLICE,
@@ -617,7 +618,8 @@ export default memo(withGlobal<OwnProps>(
       user = selectUser(global, resolvedUserId);
       const userFullInfo = selectUserFullInfo(global, chatId);
       hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
-      hasStoriesTab = user && (user.isSelf || (!user.areStoriesHidden && userFullInfo?.hasPinnedStories));
+      hasStoriesTab = IS_STORIES_ENABLED
+        && user && (user.isSelf || (!user.areStoriesHidden && userFullInfo?.hasPinnedStories));
       const userStories = hasStoriesTab ? selectUserStories(global, user!.id) : undefined;
       storyIds = userStories?.pinnedIds;
       storyByIds = userStories?.byId;
