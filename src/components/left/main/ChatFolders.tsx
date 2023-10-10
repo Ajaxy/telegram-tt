@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
-import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../api/types';
+import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { LeftColumnContent, SettingsScreens } from '../../../types';
@@ -53,6 +53,7 @@ type StateProps = {
   hasArchivedStories?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
   isStoryRibbonShown?: boolean;
+  sessions?: Record<string, ApiSession>;
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
@@ -77,6 +78,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   hasArchivedStories,
   archiveSettings,
   isStoryRibbonShown,
+  sessions,
 }) => {
   const {
     loadChatFolders,
@@ -299,6 +301,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         onLeftColumnContentChange={onLeftColumnContentChange}
         canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
         archiveSettings={archiveSettings}
+        sessions={sessions}
       />
     );
   }
@@ -356,6 +359,9 @@ export default memo(withGlobal<OwnProps>(
           archived: archivedStories,
         },
       },
+      activeSessions: {
+        byHash: sessions,
+      },
       currentUserId,
       archiveSettings,
     } = global;
@@ -376,6 +382,7 @@ export default memo(withGlobal<OwnProps>(
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       archiveSettings,
       isStoryRibbonShown,
+      sessions,
     };
   },
 )(ChatFolders));

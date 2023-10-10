@@ -1682,6 +1682,7 @@ export interface ActionPayloads {
     hash: string;
     areCallsEnabled?: boolean;
     areSecretChatsEnabled?: boolean;
+    isConfirmed?: boolean;
   };
   changeSessionTtl: {
     days: number;

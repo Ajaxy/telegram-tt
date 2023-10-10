@@ -76,6 +76,7 @@ export interface ApiSession {
   region: string;
   areCallsEnabled: boolean;
   areSecretChatsEnabled: boolean;
+  isUnconfirmed?: true;
 }
 
 export interface ApiWebSession {

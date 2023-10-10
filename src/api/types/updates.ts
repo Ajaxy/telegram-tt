@@ -665,6 +665,15 @@ export type ApiUpdateAttachMenuBots = {
   '@type': 'updateAttachMenuBots';
 };
 
+export type ApiUpdateNewAuthorization = {
+  '@type': 'updateNewAuthorization';
+  hash: string;
+  isUnconfirmed?: true;
+  date?: number;
+  device?: string;
+  location?: string;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -693,7 +702,7 @@ export type ApiUpdate = (
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
-  ApiUpdateStealthMode | ApiUpdateAttachMenuBots
+  ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;
