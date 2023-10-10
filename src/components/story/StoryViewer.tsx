@@ -9,9 +9,9 @@ import type { StoryViewerOrigin } from '../../types';
 import { ANIMATION_END_DELAY } from '../../config';
 import {
   selectIsStoryViewerOpen,
+  selectPeerStory,
   selectPerformanceSettingsValue,
   selectTabState,
-  selectUserStory,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
@@ -41,7 +41,7 @@ const ANIMATION_DURATION = 250;
 
 interface StateProps {
   isOpen: boolean;
-  userId?: string;
+  peerId: string;
   storyId?: number;
   story?: ApiTypeStory;
   origin?: StoryViewerOrigin;
@@ -52,7 +52,7 @@ interface StateProps {
 
 function StoryViewer({
   isOpen,
-  userId,
+  peerId,
   storyId,
   story,
   origin,
@@ -63,7 +63,7 @@ function StoryViewer({
   const { closeStoryViewer, closeStoryPrivacyEditor } = getActions();
 
   const lang = useLang();
-  const [idStoryForDelete, setIdStoryForDelete] = useState<number | undefined>(undefined);
+  const [storyToDelete, setStoryToDelete] = useState<ApiTypeStory | undefined>(undefined);
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag(false);
   const [isReportModalOpen, openReportModal, closeReportModal] = useFlag(false);
 
@@ -71,13 +71,13 @@ function StoryViewer({
   const slideSizes = useSlideSizes();
   const isPrevOpen = usePrevious(isOpen);
   const prevBestImageData = usePrevious(bestImageData);
-  const prevUserId = usePrevious(userId);
+  const prevPeerId = usePrevious(peerId);
   const prevOrigin = usePrevious(origin);
   const isGhostAnimation = Boolean(withAnimation && !shouldSkipHistoryAnimations);
 
   useEffect(() => {
     if (!isOpen) {
-      setIdStoryForDelete(undefined);
+      setStoryToDelete(undefined);
       closeReportModal();
       closeDeleteModal();
     }
@@ -101,14 +101,14 @@ function StoryViewer({
     closeStoryViewer();
   }, [closeStoryViewer]);
 
-  const handleOpenDeleteModal = useCallback((id: number) => {
-    setIdStoryForDelete(id);
+  const handleOpenDeleteModal = useCallback((s: ApiTypeStory) => {
+    setStoryToDelete(s);
     openDeleteModal();
   }, []);
 
   const handleCloseDeleteModal = useCallback(() => {
     closeDeleteModal();
-    setIdStoryForDelete(undefined);
+    setStoryToDelete(undefined);
   }, []);
 
   useEffect(() => (isOpen ? captureEscKeyListener(() => {
@@ -116,13 +116,13 @@ function StoryViewer({
   }) : undefined), [handleClose, isOpen]);
 
   useEffect(() => {
-    if (isGhostAnimation && !isPrevOpen && isOpen && userId && thumbnail && origin !== undefined) {
+    if (isGhostAnimation && !isPrevOpen && isOpen && peerId && thumbnail && origin !== undefined) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
-      animateOpening(userId, origin, thumbnail, bestImageData, slideSizes.activeSlide);
+      animateOpening(peerId, origin, thumbnail, bestImageData, slideSizes.activeSlide);
     }
-    if (isGhostAnimation && isPrevOpen && !isOpen && prevUserId && prevBestImageData && prevOrigin !== undefined) {
+    if (isGhostAnimation && isPrevOpen && !isOpen && prevPeerId && prevBestImageData && prevOrigin !== undefined) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
-      animateClosing(prevUserId, prevOrigin, prevBestImageData);
+      animateClosing(prevPeerId, prevOrigin, prevBestImageData);
     }
   }, [
     isGhostAnimation,
@@ -132,8 +132,8 @@ function StoryViewer({
     isPrevOpen,
     slideSizes.activeSlide,
     thumbnail,
-    userId,
-    prevUserId,
+    peerId,
+    prevPeerId,
     origin,
     prevOrigin,
   ]);
@@ -169,7 +169,7 @@ function StoryViewer({
 
       <StoryDeleteConfirmModal
         isOpen={isDeleteModalOpen}
-        storyId={idStoryForDelete}
+        story={storyToDelete}
         onClose={handleCloseDeleteModal}
       />
       <StoryViewModal />
@@ -179,7 +179,7 @@ function StoryViewer({
         isOpen={isReportModalOpen}
         onClose={closeReportModal}
         subject="story"
-        userId={userId}
+        peerId={peerId!}
         storyId={storyId}
       />
     </ShowTransition>
@@ -189,16 +189,16 @@ function StoryViewer({
 export default memo(withGlobal((global): StateProps => {
   const {
     shouldSkipHistoryAnimations, storyViewer: {
-      storyId, userId, isPrivacyModalOpen, origin,
+      storyId, peerId, isPrivacyModalOpen, origin,
     },
   } = selectTabState(global);
-  const story = userId && storyId ? selectUserStory(global, userId, storyId) : undefined;
+  const story = peerId && storyId ? selectPeerStory(global, peerId, storyId) : undefined;
   const withAnimation = selectPerformanceSettingsValue(global, 'mediaViewerAnimations');
 
   return {
     isOpen: selectIsStoryViewerOpen(global),
     shouldSkipHistoryAnimations,
-    userId,
+    peerId: peerId!,
     storyId,
     story,
     origin,

@@ -13,8 +13,8 @@ import {
 } from '../../config';
 import {
   selectIsCurrentUserPremium,
+  selectPeerStory,
   selectTabState,
-  selectUserStory,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { getServerTime } from '../../util/serverTime';
@@ -110,6 +110,7 @@ function StoryViewModal({
   const handleLoadMore = useLastCallback(() => {
     if (!story?.id || nextOffset === undefined) return;
     loadStoryViews({
+      peerId: story.peerId,
       storyId: story.id,
       offset: nextOffset,
       areReactionsFirst: areReactionsFirst || undefined,
@@ -278,7 +279,7 @@ export default memo(withGlobal((global) => {
   const {
     storyId, viewsById, nextOffset, isLoading,
   } = viewModal || {};
-  const story = storyId ? selectUserStory(global, global.currentUserId!, storyId) : undefined;
+  const story = storyId ? selectPeerStory(global, global.currentUserId!, storyId) : undefined;
 
   return {
     storyId,

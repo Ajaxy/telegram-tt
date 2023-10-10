@@ -1,4 +1,4 @@
-import type { ApiTypeStory, ApiUserStories } from '../../api/types';
+import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
@@ -8,51 +8,51 @@ export function selectCurrentViewedStory<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const { storyViewer: { userId, storyId } } = selectTabState(global, tabId);
+  const { storyViewer: { peerId, storyId } } = selectTabState(global, tabId);
 
-  return { userId, storyId };
+  return { peerId, storyId };
 }
 
 export function selectIsStoryViewerOpen<T extends GlobalState>(
   global: T,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ) {
-  const { userId, storyId } = selectCurrentViewedStory(global, tabId);
+  const { peerId, storyId } = selectCurrentViewedStory(global, tabId);
 
-  return Boolean(userId) && Boolean(storyId);
+  return Boolean(peerId) && Boolean(storyId);
 }
 
-export function selectUserStories<T extends GlobalState>(
-  global: T, userId: string,
-): ApiUserStories | undefined {
-  return global.stories.byUserId[userId];
+export function selectPeerStories<T extends GlobalState>(
+  global: T, peerId: string,
+): ApiPeerStories | undefined {
+  return global.stories.byPeerId[peerId];
 }
 
-export function selectUserStory<T extends GlobalState>(
-  global: T, userId: string, storyId: number,
+export function selectPeerStory<T extends GlobalState>(
+  global: T, peerId: string, storyId: number,
 ): ApiTypeStory | undefined {
-  return selectUserStories(global, userId)?.byId[storyId];
+  return selectPeerStories(global, peerId)?.byId[storyId];
 }
 
-export function selectUserFirstUnreadStoryId<T extends GlobalState>(
-  global: T, userId: string,
+export function selectPeerFirstUnreadStoryId<T extends GlobalState>(
+  global: T, peerId: string,
 ) {
-  const userStories = selectUserStories(global, userId);
-  if (!userStories) {
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peerStories) {
     return undefined;
   }
 
-  if (!userStories.lastReadId) {
-    return userStories.orderedIds?.[0];
+  if (!peerStories.lastReadId) {
+    return peerStories.orderedIds?.[0];
   }
 
-  const lastReadIndex = userStories.orderedIds.findIndex((id) => id === userStories.lastReadId);
+  const lastReadIndex = peerStories.orderedIds.findIndex((id) => id === peerStories.lastReadId);
 
-  return userStories.orderedIds?.[lastReadIndex + 1];
+  return peerStories.orderedIds?.[lastReadIndex + 1];
 }
 
-export function selectUserFirstStoryId<T extends GlobalState>(
-  global: T, userId: string,
+export function selectPeerFirstStoryId<T extends GlobalState>(
+  global: T, peerId: string,
 ) {
-  return selectUserStories(global, userId)?.orderedIds?.[0];
+  return selectPeerStories(global, peerId)?.orderedIds?.[0];
 }

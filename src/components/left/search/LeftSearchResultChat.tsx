@@ -96,7 +96,13 @@ const LeftSearchResultChat: FC<OwnProps & StateProps> = ({
           storyViewerOrigin={StoryViewerOrigin.SearchResult}
         />
       ) : (
-        <GroupChatInfo chatId={chatId} withUsername={withUsername} avatarSize="large" />
+        <GroupChatInfo
+          chatId={chatId}
+          withUsername={withUsername}
+          avatarSize="large"
+          withStory
+          storyViewerOrigin={StoryViewerOrigin.SearchResult}
+        />
       )}
       {shouldRenderMuteModal && (
         <MuteChatModal

@@ -1,10 +1,12 @@
 import type { ApiPrivacySettings } from '../../types';
-import type { ApiGeoPoint, ApiMessage, ApiReaction } from './messages';
+import type {
+  ApiGeoPoint, ApiMessage, ApiReaction, ApiReactionCount,
+} from './messages';
 
 export interface ApiStory {
   '@type'?: 'story';
   id: number;
-  userId: string;
+  peerId: string;
   date: number;
   expireDate: number;
   content: ApiMessage['content'];
@@ -14,9 +16,11 @@ export interface ApiStory {
   isForContacts?: boolean;
   isForSelectedContacts?: boolean;
   isPublic?: boolean;
+  isOut?: true;
   noForwards?: boolean;
   viewsCount?: number;
   reactionsCount?: number;
+  reactions?: ApiReactionCount[];
   recentViewerIds?: string[];
   visibility?: ApiPrivacySettings;
   sentReaction?: ApiReaction;
@@ -26,7 +30,7 @@ export interface ApiStory {
 export interface ApiStorySkipped {
   '@type'?: 'storySkipped';
   id: number;
-  userId: string;
+  peerId: string;
   isForCloseFriends?: boolean;
   date: number;
   expireDate: number;
@@ -35,15 +39,15 @@ export interface ApiStorySkipped {
 export interface ApiStoryDeleted {
   '@type'?: 'storyDeleted';
   id: number;
-  userId: string;
+  peerId: string;
   isDeleted: true;
 }
 
 export type ApiTypeStory = ApiStory | ApiStorySkipped | ApiStoryDeleted;
 
-export type ApiUserStories = {
+export type ApiPeerStories = {
   byId: Record<number, ApiTypeStory>;
-  orderedIds: number[]; // Actual user stories
+  orderedIds: number[]; // Actual peer stories
   pinnedIds: number[]; // Profile Shared Media: Pinned Stories tab
   archiveIds?: number[]; // Profile Shared Media: Archive Stories tab
   lastUpdatedAt?: number;
@@ -52,13 +56,13 @@ export type ApiUserStories = {
 
 export type ApiMessageStoryData = {
   id: number;
-  userId: string;
+  peerId: string;
   isMention?: boolean;
 };
 
 export type ApiWebPageStoryData = {
   id: number;
-  userId: string;
+  peerId: string;
 };
 
 export type ApiStoryView = {
@@ -95,4 +99,12 @@ export type ApiMediaAreaGeoPoint = {
   geo: ApiGeoPoint;
 };
 
-export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint;
+export type ApiMediaAreaSuggestedReaction = {
+  type: 'suggestedReaction';
+  coordinates: ApiMediaAreaCoordinates;
+  reaction: ApiReaction;
+  isDark?: boolean;
+  isFlipped?: boolean;
+};
+
+export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction;

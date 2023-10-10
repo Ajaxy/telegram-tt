@@ -6,14 +6,14 @@ import { withGlobal } from '../../global';
 import type { ThemeKey } from '../../types';
 import type { AvatarSize } from './Avatar';
 
-import { selectTheme, selectUser, selectUserStories } from '../../global/selectors';
+import { selectPeerStories, selectTheme, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { DPR } from '../../util/windowEnvironment';
 import { REM } from './helpers/mediaDimensions';
 
 interface OwnProps {
   // eslint-disable-next-line react/no-unused-prop-types
-  userId: string;
+  peerId: string;
   className?: string;
   size: AvatarSize;
   withExtraGap?: boolean;
@@ -108,15 +108,15 @@ function AvatarStoryCircle({
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, { userId }): StateProps => {
-  const user = selectUser(global, userId);
-  const userStories = selectUserStories(global, userId);
+export default memo(withGlobal<OwnProps>((global, { peerId }): StateProps => {
+  const user = selectUser(global, peerId);
+  const peerStories = selectPeerStories(global, peerId);
   const appTheme = selectTheme(global);
 
   return {
     isCloseFriend: user?.isCloseFriend,
-    storyIds: userStories?.orderedIds,
-    lastReadId: userStories?.lastReadId,
+    storyIds: peerStories?.orderedIds,
+    lastReadId: peerStories?.lastReadId,
     appTheme,
   };
 })(AvatarStoryCircle));

@@ -3,7 +3,7 @@ import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, getGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiReactionCount, ApiUser,
+  ApiMessage, ApiPeer, ApiReactionCount,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
@@ -49,7 +49,7 @@ const ReactionButton: FC<{
     return recentReactions
       .filter((recentReaction) => isSameReaction(recentReaction.reaction, reaction.reaction))
       .map((recentReaction) => usersById[recentReaction.peerId] || chatsById[recentReaction.peerId])
-      .filter(Boolean) as (ApiChat | ApiUser)[];
+      .filter(Boolean) as ApiPeer[];
   }, [reaction.reaction, recentReactions, withRecentReactors]);
 
   const handleClick = useLastCallback(() => {

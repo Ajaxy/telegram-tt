@@ -629,25 +629,25 @@ export type ApiRequestReconnectApi = {
 
 export type ApiUpdateStory = {
   '@type': 'updateStory';
-  userId: string;
+  peerId: string;
   story: ApiStory | ApiStorySkipped;
 };
 
 export type ApiUpdateDeleteStory = {
   '@type': 'deleteStory';
-  userId: string;
+  peerId: string;
   storyId: number;
 };
 
 export type ApiUpdateReadStories = {
   '@type': 'updateReadStories';
-  userId: string;
+  peerId: string;
   lastReadId: number;
 };
 
 export type ApiUpdateSentStoryReaction = {
   '@type': 'updateSentStoryReaction';
-  userId: string;
+  peerId: string;
   storyId: number;
   reaction?: ApiReaction;
 };

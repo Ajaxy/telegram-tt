@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiPeer } from '../../../api/types';
 import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../lib/secret-sauce';
 
 import { GROUP_CALL_DEFAULT_VOLUME } from '../../../config';
@@ -31,7 +31,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  peer?: ApiUser | ApiChat;
+  peer?: ApiPeer;
 };
 
 const GroupCallParticipant: FC<OwnProps & StateProps> = ({

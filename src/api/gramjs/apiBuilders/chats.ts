@@ -51,6 +51,9 @@ function buildApiChatFieldsFromPeerEntity(
   const isJoinRequest = Boolean('joinRequest' in peerEntity && peerEntity.joinRequest);
   const usernames = buildApiUsernames(peerEntity);
   const isForum = Boolean('forum' in peerEntity && peerEntity.forum);
+  const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
+  const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
+  const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
 
   return {
     isMin,
@@ -77,6 +80,9 @@ function buildApiChatFieldsFromPeerEntity(
     isJoinToSend,
     isJoinRequest,
     isForum,
+    areStoriesHidden,
+    maxStoryId,
+    hasStories: Boolean(maxStoryId) && !storiesUnavailable,
   };
 }
 

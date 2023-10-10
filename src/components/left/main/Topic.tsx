@@ -4,8 +4,7 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat, ApiFormattedText, ApiMessage, ApiMessageOutgoingStatus,
-  ApiTopic, ApiTypingStatus,
-  ApiUser,
+  ApiPeer, ApiTopic, ApiTypingStatus,
 } from '../../../api/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
@@ -61,7 +60,7 @@ type StateProps = {
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   actionTargetMessage?: ApiMessage;
   actionTargetUserIds?: string[];
-  lastMessageSender?: ApiUser | ApiChat;
+  lastMessageSender?: ApiPeer;
   actionTargetChatId?: string;
   typingStatus?: ApiTypingStatus;
   draft?: ApiFormattedText;

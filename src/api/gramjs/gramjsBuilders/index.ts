@@ -278,9 +278,9 @@ export function buildFilterFromApiFolder(folder: ApiChatFolder): GramJs.DialogFi
 }
 
 export function buildInputStory(story: ApiStory | ApiStorySkipped) {
-  const user = localDb.users[story.userId];
+  const peer = buildInputPeerFromLocalDb(story.peerId)!;
   return new GramJs.InputMediaStory({
-    userId: new GramJs.InputUser({ userId: BigInt(user!.id), accessHash: user!.accessHash! }),
+    peer,
     id: story.id,
   });
 }

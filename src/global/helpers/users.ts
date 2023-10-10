@@ -1,4 +1,4 @@
-import type { ApiChat, ApiUser, ApiUserStatus } from '../../api/types';
+import type { ApiPeer, ApiUser, ApiUserStatus } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../../config';
@@ -259,10 +259,10 @@ export function filterUsersByName(
   });
 }
 
-export function getMainUsername(userOrChat: ApiUser | ApiChat) {
+export function getMainUsername(userOrChat: ApiPeer) {
   return userOrChat.usernames?.find((u) => u.isActive)?.username;
 }
 
-export function getUserStoryHtmlId(userId: string) {
-  return `user-story${userId}`;
+export function getPeerStoryHtmlId(userId: string) {
+  return `peer-story${userId}`;
 }

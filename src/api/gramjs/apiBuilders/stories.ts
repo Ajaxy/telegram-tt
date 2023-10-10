@@ -7,14 +7,14 @@ import type {
 import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildPrivacyRules } from './common';
 import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiPeerId } from './peers';
-import { buildApiReaction } from './reactions';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiReaction, buildReactionCount } from './reactions';
 
-export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
+export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
   if (story instanceof GramJs.StoryItemDeleted) {
     return {
       id: story.id,
-      userId,
+      peerId,
       isDeleted: true,
     };
   }
@@ -26,7 +26,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
 
     return {
       id,
-      userId,
+      peerId,
       ...(closeFriends && { isForCloseFriends: true }),
       date,
       expireDate,
@@ -37,7 +37,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
     edited, pinned, expireDate, id, date, caption,
     entities, media, privacy, views,
     public: isPublic, noforwards, closeFriends, contacts, selectedContacts,
-    mediaAreas, sentReaction,
+    mediaAreas, sentReaction, out,
   } = story;
 
   const content: ApiMessage['content'] = {
@@ -50,7 +50,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
 
   return {
     id,
-    userId,
+    peerId,
     date,
     expireDate,
     content,
@@ -63,9 +63,11 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
     ...(noforwards && { noForwards: true }),
     ...(views?.viewsCount && { viewsCount: views.viewsCount }),
     ...(views?.reactionsCount && { reactionsCount: views.reactionsCount }),
+    ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount) }),
     ...(views?.recentViewers && {
       recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
     }),
+    ...(out && { isOut: true }),
     ...(privacy && { visibility: buildPrivacyRules(privacy) }),
     ...(mediaAreas && { mediaAreas: mediaAreas.map(buildApiMediaArea).filter(Boolean) }),
     ...(sentReaction && { sentReaction: buildApiReaction(sentReaction) }),
@@ -134,11 +136,28 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
     };
   }
 
+  if (area instanceof GramJs.MediaAreaSuggestedReaction) {
+    const {
+      coordinates, reaction, dark, flipped,
+    } = area;
+
+    const apiReaction = buildApiReaction(reaction);
+    if (!apiReaction) return undefined;
+
+    return {
+      type: 'suggestedReaction',
+      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      reaction: apiReaction,
+      ...(dark && { isDark: true }),
+      ...(flipped && { isFlipped: true }),
+    };
+  }
+
   return undefined;
 }
 
-export function buildApiUsersStories(userStories: GramJs.UserStories) {
-  const userId = buildApiPeerId(userStories.userId, 'user');
+export function buildApiPeerStories(peerStories: GramJs.PeerStories) {
+  const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
 
-  return buildCollectionByCallback(userStories.stories, (story) => [story.id, buildApiStory(userId, story)]);
+  return buildCollectionByCallback(peerStories.stories, (story) => [story.id, buildApiStory(peerId, story)]);
 }

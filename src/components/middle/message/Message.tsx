@@ -6,10 +6,10 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiAvailableReaction,
-  ApiChat,
   ApiChatMember,
   ApiMessage,
   ApiMessageOutgoingStatus,
+  ApiPeer,
   ApiReaction,
   ApiThreadInfo,
   ApiTopic,
@@ -75,6 +75,7 @@ import {
   selectIsMessageSelected,
   selectMessageIdsByGroupId,
   selectOutgoingStatus,
+  selectPeerStory,
   selectPerformanceSettingsValue,
   selectReplySender,
   selectRequestedChatTranslationLanguage,
@@ -89,7 +90,6 @@ import {
   selectTopicFromMessage,
   selectUploadProgress,
   selectUser,
-  selectUserStory,
 } from '../../../global/selectors';
 import { isAnimatingScroll } from '../../../util/animateScroll';
 import buildClassName from '../../../util/buildClassName';
@@ -199,14 +199,14 @@ type OwnProps =
 type StateProps = {
   theme: ISettings['theme'];
   forceSenderName?: boolean;
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   canShowSender: boolean;
-  originSender?: ApiUser | ApiChat;
+  originSender?: ApiPeer;
   botSender?: ApiUser;
   isThreadTop?: boolean;
   shouldHideReply?: boolean;
   replyMessage?: ApiMessage;
-  replyMessageSender?: ApiUser | ApiChat;
+  replyMessageSender?: ApiPeer;
   replyStory?: ApiTypeStory;
   storySender?: ApiUser;
   outgoingStatus?: ApiMessageOutgoingStatus;
@@ -499,7 +499,7 @@ const Message: FC<OwnProps & StateProps> = ({
 
   const shouldPreferOriginSender = forwardInfo && (isChatWithSelf || isRepliesChat || !messageSender);
   const avatarPeer = shouldPreferOriginSender ? originSender : messageSender;
-  const senderPeer = forwardInfo ? originSender : messageSender;
+  const senderPeer = (forwardInfo || message.content.storyData) ? originSender : messageSender;
 
   const {
     handleMouseDown,
@@ -1440,7 +1440,7 @@ export default memo(withGlobal<OwnProps>(
     const chatFullInfo = !isUserId(chatId) ? selectChatFullInfo(global, chatId) : undefined;
     const webPageStoryData = message.content.webPage?.story;
     const webPageStory = webPageStoryData
-      ? selectUserStory(global, webPageStoryData.userId, webPageStoryData.id)
+      ? selectPeerStory(global, webPageStoryData.peerId, webPageStoryData.id)
       : undefined;
 
     const isForwarding = forwardMessages.messageIds && forwardMessages.messageIds.includes(id);
@@ -1463,7 +1463,7 @@ export default memo(withGlobal<OwnProps>(
     const replyMessageSender = replyMessage && selectReplySender(global, replyMessage, Boolean(forwardInfo));
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = replyToStoryId && replyToStoryUserId
-      ? selectUserStory(global, replyToStoryUserId, replyToStoryId)
+      ? selectPeerStory(global, replyToStoryUserId, replyToStoryId)
       : undefined;
     const storySender = replyToStoryUserId ? selectUser(global, replyToStoryUserId) : undefined;
 

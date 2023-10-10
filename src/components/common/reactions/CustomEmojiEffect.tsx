@@ -5,6 +5,7 @@ import type { ApiEmojiStatus, ApiReactionCustomEmoji } from '../../../api/types'
 
 import { getStickerPreviewHash } from '../../../global/helpers';
 import buildClassName from '../../../util/buildClassName';
+import buildStyle from '../../../util/buildStyle';
 import { IS_OFFSET_PATH_SUPPORTED } from '../../../util/windowEnvironment';
 
 import useMedia from '../../../hooks/useMedia';
@@ -17,6 +18,8 @@ type OwnProps = {
   reaction: ApiReactionCustomEmoji | ApiEmojiStatus;
   className?: string;
   isLottie?: boolean;
+  particleSize?: number;
+  onEnded?: NoneToVoidFunction;
 };
 
 const EFFECT_AMOUNT = 7;
@@ -25,6 +28,8 @@ const CustomEmojiEffect: FC<OwnProps> = ({
   reaction,
   isLottie,
   className,
+  particleSize,
+  onEnded,
 }) => {
   const stickerHash = getStickerPreviewHash(reaction.documentId);
 
@@ -32,16 +37,19 @@ const CustomEmojiEffect: FC<OwnProps> = ({
 
   const paths: string[] = useMemo(() => {
     if (!IS_OFFSET_PATH_SUPPORTED) return [];
-    return Array.from({ length: EFFECT_AMOUNT }).map(() => generateRandomDropPath());
-  }, []);
+    return Array.from({ length: EFFECT_AMOUNT }).map(() => generateRandomDropPath(particleSize));
+  }, [particleSize]);
 
   if (!previewMediaData && !isLottie) {
     return undefined;
   }
 
   return (
-    <div className={buildClassName(styles.root, className)}>
-      {paths.map((path) => {
+    <div
+      className={buildClassName(styles.root, className)}
+      style={buildStyle(Boolean(particleSize) && `--particle-size: ${particleSize}px`)}
+    >
+      {paths.map((path, i) => {
         const style = `--offset-path: path('${path}');`;
         if (isLottie) {
           return (
@@ -50,6 +58,8 @@ const CustomEmojiEffect: FC<OwnProps> = ({
               className={styles.particle}
               style={style}
               withSharedAnimation
+              size={particleSize}
+              onAnimationEnd={i === 0 ? onEnded : undefined}
             />
           );
         }
@@ -61,6 +71,7 @@ const CustomEmojiEffect: FC<OwnProps> = ({
             className={styles.particle}
             style={style}
             draggable={false}
+            onAnimationEnd={i === 0 ? onEnded : undefined}
           />
         );
       })}
@@ -70,9 +81,9 @@ const CustomEmojiEffect: FC<OwnProps> = ({
 
 export default memo(CustomEmojiEffect);
 
-function generateRandomDropPath() {
-  const x = (10 + Math.random() * 60) * (Math.random() > 0.5 ? 1 : -1);
-  const y = 20 + Math.random() * 80;
+function generateRandomDropPath(particleSize = 20) {
+  const x = (particleSize / 2 + Math.random() * particleSize * 3) * (Math.random() > 0.5 ? 1 : -1);
+  const y = particleSize + Math.random() * particleSize * 4;
 
-  return `M 0 0 C 0 0 ${x} ${-y - 20} ${x} ${y}`;
+  return `M 0 0 C 0 0 ${x} ${-y - particleSize} ${x} ${y}`;
 }

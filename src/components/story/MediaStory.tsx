@@ -18,6 +18,7 @@ import useMenuPosition from '../../hooks/useMenuPosition';
 
 import Menu from '../ui/Menu';
 import MenuItem from '../ui/MenuItem';
+import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
 
 import styles from './MediaStory.module.scss';
 
@@ -30,7 +31,7 @@ interface OwnProps {
 function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   const {
     openStoryViewer,
-    loadUserSkippedStories,
+    loadPeerSkippedStories,
     toggleStoryPinned,
     showNotification,
   } = getActions();
@@ -44,6 +45,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   const getMenuElement = useLastCallback(() => document.querySelector('#portals .story-context-menu .bubble'));
   const getLayout = useLastCallback(() => ({ withPortal: true, isDense: true }));
 
+  const peerId = story && story.peerId;
   const isFullyLoaded = story && 'content' in story;
   const isDeleted = story && 'isDeleted' in story;
   const video = isFullyLoaded ? (story as ApiStory).content.video : undefined;
@@ -53,7 +55,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
 
   useEffect(() => {
     if (story && !(isFullyLoaded || isDeleted)) {
-      loadUserSkippedStories({ userId: story.userId });
+      loadPeerSkippedStories({ peerId: story.peerId });
     }
   }, [isDeleted, isFullyLoaded, story]);
 
@@ -74,13 +76,13 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
 
   const handleClick = useCallback(() => {
     openStoryViewer({
-      userId: story.userId,
+      peerId: story.peerId,
       storyId: story.id,
-      isSingleUser: true,
+      isSinglePeer: true,
       isPrivate: true,
       isArchive,
     });
-  }, [isArchive, story.id, story.userId]);
+  }, [isArchive, story.id, story.peerId]);
 
   const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
     preventMessageInputBlurWithBubbling(e);
@@ -90,7 +92,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   const handlePinClick = useLastCallback((e: React.SyntheticEvent) => {
     stopEvent(e);
 
-    toggleStoryPinned({ storyId: story.id, isPinned: true });
+    toggleStoryPinned({ peerId, storyId: story.id, isPinned: true });
     showNotification({
       message: lang('Story.ToastSavedToProfileText'),
     });
@@ -100,7 +102,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
   const handleUnpinClick = useLastCallback((e: React.SyntheticEvent) => {
     stopEvent(e);
 
-    toggleStoryPinned({ storyId: story.id, isPinned: false });
+    toggleStoryPinned({ peerId, storyId: story.id, isPinned: false });
     showNotification({
       message: lang('Story.ToastRemovedFromProfileText'),
     });
@@ -125,6 +127,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
         {thumbUrl && (
           <img src={thumbUrl} alt="" className={styles.media} draggable={false} />
         )}
+        {isFullyLoaded && <MediaAreaOverlay story={story} />}
         {isProtected && <span className="protector" />}
       </div>
       {contextMenuPosition !== undefined && (

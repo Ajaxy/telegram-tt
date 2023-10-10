@@ -12,7 +12,7 @@ const IS_MULTITAB_SUPPORTED = 'BroadcastChannel' in self;
 
 export type StoryRepairInfo = {
   storyData?: {
-    userId: string;
+    peerId: string;
     id: number;
   };
 };

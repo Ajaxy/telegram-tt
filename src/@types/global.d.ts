@@ -123,6 +123,10 @@ type Undefined<T> = {
 };
 type OptionalCombine<A, B> = (A & B) | (A & Undefined<B>);
 
+type CommonProperties<T, U> = {
+  [K in keyof T & keyof U]: T[K] & U[K];
+};
+
 // Fix to make Boolean() work as !!
 // https://github.com/microsoft/TypeScript/issues/16655
 type Falsy = false | 0 | '' | null | undefined;

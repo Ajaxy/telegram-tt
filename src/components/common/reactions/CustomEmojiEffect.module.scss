@@ -4,11 +4,12 @@
 }
 
 .particle {
+  --custom-emoji-size: var(--particle-size, 1rem);
   color: var(--color-primary);
 
   position: absolute;
-  width: 1rem;
-  height: 1rem;
+  width: var(--particle-size, 1rem);
+  height: var(--particle-size, 1rem);
   border-radius: 0.25rem;
   offset-path: var(--offset-path);
   offset-rotate: 0deg;

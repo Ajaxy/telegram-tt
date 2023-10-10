@@ -2,14 +2,13 @@ import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
+import type { ApiMessage, ApiPeer } from '../../api/types';
 
-import { getSenderTitle, isUserId } from '../../global/helpers';
+import { getSenderTitle } from '../../global/helpers';
 import {
-  selectChat,
   selectChatMessage,
+  selectPeer,
   selectSender,
-  selectUser,
 } from '../../global/selectors';
 import { formatMediaDateTime } from '../../util/dateFormat';
 import renderText from '../common/helpers/renderText';
@@ -30,7 +29,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   message?: ApiMessage;
 };
 
@@ -96,7 +95,7 @@ export default withGlobal<OwnProps>(
   (global, { chatId, messageId, isAvatar }): StateProps => {
     if (isAvatar && chatId) {
       return {
-        sender: isUserId(chatId) ? selectUser(global, chatId) : selectChat(global, chatId),
+        sender: selectPeer(global, chatId),
       };
     }
 

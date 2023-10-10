@@ -34,6 +34,7 @@ import type { IAnchorPosition, InlineBotSettings, ISettings } from '../../types'
 import {
   BASE_EMOJI_KEYWORD_LANG,
   EDITABLE_INPUT_MODAL_ID,
+  HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
@@ -68,6 +69,7 @@ import {
   selectIsReactionPickerOpen,
   selectIsRightColumnShown,
   selectNewestMessageWithBotKeyboardButtons,
+  selectPeerStory,
   selectReplyingToId,
   selectRequestedDraftFiles,
   selectRequestedDraftText,
@@ -76,7 +78,6 @@ import {
   selectTheme,
   selectUser,
   selectUserFullInfo,
-  selectUserStory,
 } from '../../global/selectors';
 import { selectCurrentLimit } from '../../global/selectors/limits';
 import buildClassName from '../../util/buildClassName';
@@ -260,10 +261,6 @@ const SELECT_MODE_TRANSITION_MS = 200;
 const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
-
-const HEART_REACTION: ApiReaction = {
-  emoticon: '❤',
-};
 
 const Composer: FC<OwnProps & StateProps> = ({
   type,
@@ -779,7 +776,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     if (storyReactionPickerPosition) {
       openStoryReactionPicker({
-        storyUserId: chatId,
+        peerId: chatId,
         storyId: storyId!,
         position: storyReactionPickerPosition,
       });
@@ -1412,7 +1409,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleReactionPickerOpen = useLastCallback((position: IAnchorPosition) => {
     openStoryReactionPicker({
-      storyUserId: chatId,
+      peerId: chatId,
       storyId: storyId!,
       position,
       sendAsMessage: true,
@@ -1421,7 +1418,12 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const handleLikeStory = useLastCallback(() => {
     const reaction = sentStoryReaction ? undefined : HEART_REACTION;
-    sendStoryReaction({ userId: chatId, storyId: storyId!, reaction });
+    sendStoryReaction({
+      peerId: chatId,
+      storyId: storyId!,
+      containerId: getStoryKey(chatId, storyId!),
+      reaction,
+    });
   });
 
   const handleSendScheduled = useLastCallback(() => {
@@ -1816,6 +1818,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         >
           {sentStoryReaction && (
             <ReactionAnimatedEmoji
+              key={'documentId' in sentStoryReaction ? sentStoryReaction.documentId : sentStoryReaction.emoticon}
               containerId={getStoryKey(chatId, storyId!)}
               reaction={sentStoryReaction}
               withEffectOnly={isSentStoryReactionHeart}
@@ -1928,7 +1931,7 @@ export default memo(withGlobal<OwnProps>(
 
     const replyingToId = selectReplyingToId(global, chatId, threadId);
 
-    const story = storyId && selectUserStory(global, chatId, storyId);
+    const story = storyId && selectPeerStory(global, chatId, storyId);
     const sentStoryReaction = story && 'sentReaction' in story ? story.sentReaction : undefined;
 
     return {
