@@ -7,6 +7,7 @@ import type {
   ApiFormattedText,
   ApiMessage,
   ApiMessageOutgoingStatus,
+  ApiPeer,
   ApiTopic,
   ApiTypingStatus,
   ApiUser,
@@ -86,7 +87,7 @@ type StateProps = {
   actionTargetUserIds?: string[];
   actionTargetMessage?: ApiMessage;
   actionTargetChatId?: string;
-  lastMessageSender?: ApiUser | ApiChat;
+  lastMessageSender?: ApiPeer;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
   draft?: ApiFormattedText;
   isSelected?: boolean;
@@ -264,10 +265,10 @@ const Chat: FC<OwnProps & StateProps> = ({
         <Avatar
           peer={peer}
           isSavedMessages={user?.isSelf}
-          withStory={user && !user?.isSelf}
+          withStory={!user?.isSelf}
           withStoryGap={isAvatarOnlineShown}
           storyViewerOrigin={StoryViewerOrigin.ChatList}
-          storyViewerMode="single-user"
+          storyViewerMode="single-peer"
         />
         <div className="avatar-badge-wrapper">
           <div className={buildClassName('avatar-online', isAvatarOnlineShown && 'avatar-online-shown')} />
@@ -328,7 +329,7 @@ const Chat: FC<OwnProps & StateProps> = ({
           isOpen={isReportModalOpen}
           onClose={closeReportModal}
           onCloseAnimationEnd={unmarkRenderReportModal}
-          chatId={chatId}
+          peerId={chatId}
           subject="peer"
         />
       )}

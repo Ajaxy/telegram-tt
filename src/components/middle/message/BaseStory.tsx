@@ -16,6 +16,8 @@ import useLastCallback from '../../../hooks/useLastCallback';
 import useMedia from '../../../hooks/useMedia';
 import useShowTransition from '../../../hooks/useShowTransition';
 
+import MediaAreaOverlay from '../../story/mediaArea/MediaAreaOverlay';
+
 import styles from './BaseStory.module.scss';
 
 interface OwnProps {
@@ -28,7 +30,7 @@ interface OwnProps {
 function BaseStory({
   story, isPreview, isProtected, isConnected,
 }: OwnProps) {
-  const { openStoryViewer, loadUserStoriesByIds, showNotification } = getActions();
+  const { openStoryViewer, loadPeerStoriesByIds, showNotification } = getActions();
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
@@ -56,7 +58,7 @@ function BaseStory({
 
   useEffect(() => {
     if (story && !(isLoaded || isExpired)) {
-      loadUserStoriesByIds({ userId: story.userId, storyIds: [story.id] });
+      loadPeerStoriesByIds({ peerId: story.peerId, storyIds: [story.id] });
     }
   }, [story, isExpired, isLoaded]);
 
@@ -69,9 +71,9 @@ function BaseStory({
     }
 
     openStoryViewer({
-      userId: story!.userId,
+      peerId: story!.peerId,
       storyId: story!.id,
-      isSingleUser: true,
+      isSinglePeer: true,
       isSingleStory: true,
     });
   });
@@ -83,12 +85,15 @@ function BaseStory({
     >
       {!isExpired && isPreview && <canvas ref={blurredBackgroundRef} className="thumbnail blurred-bg" />}
       {shouldRender && (
-        <img
-          src={mediaUrl}
-          alt=""
-          className={buildClassName(styles.media, isPreview && styles.linkPreview, transitionClassNames)}
-          draggable={false}
-        />
+        <>
+          <img
+            src={mediaUrl}
+            alt=""
+            className={buildClassName(styles.media, isPreview && styles.linkPreview, transitionClassNames)}
+            draggable={false}
+          />
+          {isLoaded && <MediaAreaOverlay story={story} className={transitionClassNames} />}
+        </>
       )}
       {isExpired && (
         <span>

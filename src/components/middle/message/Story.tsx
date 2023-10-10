@@ -5,7 +5,7 @@ import type {
   ApiMessage, ApiTypeStory,
 } from '../../../api/types';
 
-import { selectUserStory } from '../../../global/selectors';
+import { selectPeerStory } from '../../../global/selectors';
 
 import BaseStory from './BaseStory';
 
@@ -34,10 +34,10 @@ function Story({
 }
 
 export default memo(withGlobal<OwnProps>((global, { message }): StateProps => {
-  const { id, userId } = message.content.storyData!;
+  const { id, peerId } = message.content.storyData!;
 
   return {
-    story: selectUserStory(global, userId, id),
+    story: selectPeerStory(global, peerId, id),
     isConnected: global.connectionState === 'connectionStateReady',
   };
 })(Story));

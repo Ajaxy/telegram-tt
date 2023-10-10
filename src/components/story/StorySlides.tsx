@@ -3,11 +3,11 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiUserStories } from '../../api/types';
+import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
 
 import { ANIMATION_END_DELAY } from '../../config';
 import { getStoryKey } from '../../global/helpers';
-import { selectIsStoryViewerOpen, selectTabState, selectUser } from '../../global/selectors';
+import { selectIsStoryViewerOpen, selectPeer, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import { IS_FIREFOX, IS_SAFARI } from '../../util/windowEnvironment';
@@ -29,17 +29,17 @@ interface OwnProps {
   isOpen?: boolean;
   isReportModalOpen?: boolean;
   isDeleteModalOpen?: boolean;
-  onDelete: (storyId: number) => void;
+  onDelete: (story: ApiTypeStory) => void;
   onReport: NoneToVoidFunction;
   onClose: NoneToVoidFunction;
 }
 
 interface StateProps {
-  userIds: string[];
-  currentUserId?: string;
+  peerIds: string[];
+  currentPeerId?: string;
   currentStoryId?: number;
-  byUserId?: Record<string, ApiUserStories>;
-  isSingleUser?: boolean;
+  byPeerId?: Record<string, ApiPeerStories>;
+  isSinglePeer?: boolean;
   isSingleStory?: boolean;
   isPrivate?: boolean;
   isArchive?: boolean;
@@ -52,15 +52,15 @@ const ANIMATION_TO_ACTIVE_SCALE = '3';
 const ANIMATION_FROM_ACTIVE_SCALE = `${FROM_ACTIVE_SCALE_VALUE}`;
 
 function StorySlides({
-  userIds,
-  currentUserId,
+  peerIds,
+  currentPeerId,
   currentStoryId,
   isOpen,
-  isSingleUser,
+  isSinglePeer,
   isSingleStory,
   isPrivate,
   isArchive,
-  byUserId,
+  byPeerId,
   isReportModalOpen,
   isDeleteModalOpen,
   onDelete,
@@ -68,12 +68,12 @@ function StorySlides({
   onReport,
 }: OwnProps & StateProps) {
   const { stopActiveReaction } = getActions();
-  const [renderingUserId, setRenderingUserId] = useState(currentUserId);
+  const [renderingPeerId, setRenderingPeerId] = useState(currentPeerId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
-  const prevUserId = usePrevious(currentUserId);
+  const prevPeerId = usePrevious(currentPeerId);
   const renderingIsArchive = useCurrentOrPrev(isArchive, true);
   const renderingIsPrivate = useCurrentOrPrev(isPrivate, true);
-  const renderingIsSingleUser = useCurrentOrPrev(isSingleUser, true);
+  const renderingIsSinglePeer = useCurrentOrPrev(isSinglePeer, true);
   const renderingIsSingleStory = useCurrentOrPrev(isSingleStory, true);
   const slideSizes = useSlideSizes();
 
@@ -86,62 +86,62 @@ function StorySlides({
     shouldBeReplaced: true,
   });
 
-  function setRef(ref: HTMLDivElement | null, userId: string) {
+  function setRef(ref: HTMLDivElement | null, peerId: string) {
     if (!ref) {
       return;
     }
-    if (!rendersRef.current[userId]) {
-      rendersRef.current[userId] = { current: ref };
+    if (!rendersRef.current[peerId]) {
+      rendersRef.current[peerId] = { current: ref };
     } else {
-      rendersRef.current[userId].current = ref;
+      rendersRef.current[peerId].current = ref;
     }
   }
 
-  const renderingUserIds = useMemo(() => {
-    if (renderingUserId && (renderingIsSingleUser || renderingIsSingleStory)) {
-      return [renderingUserId];
+  const renderingPeerIds = useMemo(() => {
+    if (renderingPeerId && (renderingIsSinglePeer || renderingIsSingleStory)) {
+      return [renderingPeerId];
     }
 
-    const index = renderingUserId ? userIds.indexOf(renderingUserId) : -1;
-    if (!renderingUserId || index === -1) {
+    const index = renderingPeerId ? peerIds.indexOf(renderingPeerId) : -1;
+    if (!renderingPeerId || index === -1) {
       return [];
     }
 
     const start = Math.max(index - 4, 0);
-    const end = Math.min(index + 5, userIds.length);
+    const end = Math.min(index + 5, peerIds.length);
 
-    return userIds.slice(start, end);
-  }, [renderingIsSingleStory, renderingIsSingleUser, renderingUserId, userIds]);
+    return peerIds.slice(start, end);
+  }, [renderingIsSingleStory, renderingIsSinglePeer, renderingPeerId, peerIds]);
 
-  const renderingUserPosition = useMemo(() => {
-    if (!renderingUserIds.length || !renderingUserId) {
+  const renderingPeerPosition = useMemo(() => {
+    if (!renderingPeerIds.length || !renderingPeerId) {
       return -1;
     }
 
-    return renderingUserIds.indexOf(renderingUserId);
-  }, [renderingUserId, renderingUserIds]);
+    return renderingPeerIds.indexOf(renderingPeerId);
+  }, [renderingPeerId, renderingPeerIds]);
 
-  const currentUserPosition = useMemo(() => {
-    if (!renderingUserIds.length || !currentUserId) {
+  const currentPeerPosition = useMemo(() => {
+    if (!renderingPeerIds.length || !currentPeerId) {
       return -1;
     }
-    return renderingUserIds.indexOf(currentUserId);
-  }, [currentUserId, renderingUserIds]);
+    return renderingPeerIds.indexOf(currentPeerId);
+  }, [currentPeerId, renderingPeerIds]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      setRenderingUserId(currentUserId);
+      setRenderingPeerId(currentPeerId);
     }, ANIMATION_DURATION_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [currentUserId]);
+  }, [currentPeerId]);
 
   useEffect(() => {
     let timeOutId: number | undefined;
 
-    if (renderingUserId !== currentUserId) {
+    if (renderingPeerId !== currentPeerId) {
       timeOutId = window.setTimeout(() => {
         setRenderingStoryId(currentStoryId);
       }, ANIMATION_DURATION_MS);
@@ -152,12 +152,12 @@ function StorySlides({
     return () => {
       window.clearTimeout(timeOutId);
     };
-  }, [renderingUserId, currentStoryId, currentUserId, renderingStoryId]);
+  }, [renderingPeerId, currentStoryId, currentPeerId, renderingStoryId]);
 
   useEffect(() => {
     let timeOutId: number | undefined;
 
-    if (prevUserId && prevUserId !== currentUserId) {
+    if (prevPeerId && prevPeerId !== currentPeerId) {
       setIsAnimating(true);
       timeOutId = window.setTimeout(() => {
         setIsAnimating(false);
@@ -168,24 +168,24 @@ function StorySlides({
       setIsAnimating(false);
       window.clearTimeout(timeOutId);
     };
-  }, [prevUserId, currentUserId, setIsAnimating]);
+  }, [prevPeerId, currentPeerId, setIsAnimating]);
 
   useEffect(() => {
     return () => {
-      if (!currentStoryId || !currentUserId) return;
+      if (!currentStoryId || !currentPeerId) return;
       stopActiveReaction({
-        containerId: getStoryKey(currentUserId, currentStoryId),
+        containerId: getStoryKey(currentPeerId, currentStoryId),
       });
     };
-  }, [currentStoryId, currentUserId]);
+  }, [currentStoryId, currentPeerId]);
 
-  const slideAmount = currentUserPosition - renderingUserPosition;
-  const isBackward = renderingUserPosition > currentUserPosition;
+  const slideAmount = currentPeerPosition - renderingPeerPosition;
+  const isBackward = renderingPeerPosition > currentPeerPosition;
 
   const calculateTransformX = useLastCallback(() => {
-    return userIds.reduce<Record<string, number>>((transformX, userId, index) => {
-      if (userId === renderingUserId) {
-        transformX[userId] = calculateOffsetX({
+    return peerIds.reduce<Record<string, number>>((transformX, peerId, index) => {
+      if (peerId === renderingPeerId) {
+        transformX[peerId] = calculateOffsetX({
           scale: slideSizes.scale,
           slideAmount,
           isBackward,
@@ -193,18 +193,18 @@ function StorySlides({
         });
       } else {
         let isMoveThroughActiveSlide = false;
-        if (!isBackward && index > 0 && userIds[index - 1] === renderingUserId) {
+        if (!isBackward && index > 0 && peerIds[index - 1] === renderingPeerId) {
           isMoveThroughActiveSlide = true;
         }
-        if (isBackward && index < userIds.length - 1 && userIds[index + 1] === renderingUserId) {
+        if (isBackward && index < peerIds.length - 1 && peerIds[index + 1] === renderingPeerId) {
           isMoveThroughActiveSlide = true;
         }
 
-        transformX[userId] = calculateOffsetX({
+        transformX[peerId] = calculateOffsetX({
           scale: slideSizes.scale,
           slideAmount,
           isBackward,
-          isActiveSlideSize: currentUserId === userId && !isBackward,
+          isActiveSlideSize: currentPeerId === peerId && !isBackward,
           isMoveThroughActiveSlide,
         });
       }
@@ -216,7 +216,7 @@ function StorySlides({
   useLayoutEffect(() => {
     const transformX = calculateTransformX();
 
-    Object.entries(rendersRef.current).forEach(([userId, { current }]) => {
+    Object.entries(rendersRef.current).forEach(([peerId, { current }]) => {
       if (!current) return;
 
       if (!getIsAnimating()) {
@@ -228,28 +228,28 @@ function StorySlides({
         return;
       }
 
-      const scale = currentUserId === userId
+      const scale = currentPeerId === peerId
         ? ANIMATION_TO_ACTIVE_SCALE
-        : userId === renderingUserId ? ANIMATION_FROM_ACTIVE_SCALE : '1';
+        : peerId === renderingPeerId ? ANIMATION_FROM_ACTIVE_SCALE : '1';
 
       let offsetY = 0;
-      if (userId === renderingUserId) {
+      if (peerId === renderingPeerId) {
         offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * FROM_ACTIVE_SCALE_VALUE;
         current.classList.add(styles.slideAnimationFromActive);
       }
-      if (userId === currentUserId) {
+      if (peerId === currentPeerId) {
         offsetY = ACTIVE_SLIDE_VERTICAL_CORRECTION_REM;
         current.classList.add(styles.slideAnimationToActive);
       }
 
       current.classList.add(styles.slideAnimation);
-      current.style.setProperty('--slide-translate-x', `${transformX[userId] || 0}px`);
+      current.style.setProperty('--slide-translate-x', `${transformX[peerId] || 0}px`);
       current.style.setProperty('--slide-translate-y', `${offsetY}rem`);
       current.style.setProperty('--slide-translate-scale', scale);
     });
-  }, [currentUserId, getIsAnimating, renderingUserId]);
+  }, [currentPeerId, getIsAnimating, renderingPeerId]);
 
-  function renderStoryPreview(userId: string, index: number, position: number) {
+  function renderStoryPreview(peerId: string, index: number, position: number) {
     const style = buildStyle(
       `width: ${slideSizes.slide.width}px`,
       `height: ${slideSizes.slide.height}px`,
@@ -262,20 +262,20 @@ function StorySlides({
 
     return (
       <div
-        key={userId}
-        ref={(ref) => setRef(ref, userId)}
+        key={peerId}
+        ref={(ref) => setRef(ref, peerId)}
         className={className}
         style={style}
       >
         <StoryPreview
-          user={selectUser(getGlobal(), userId)}
-          userStories={byUserId?.[userId]}
+          peer={selectPeer(getGlobal(), peerId)}
+          peerStories={byPeerId?.[peerId]}
         />
       </div>
     );
   }
 
-  function renderStory(userId: string) {
+  function renderStory(peerId: string) {
     const style = buildStyle(
       `width: ${slideSizes.activeSlide.width}px`,
       `--slide-media-height: ${slideSizes.activeSlide.height}px`,
@@ -283,13 +283,13 @@ function StorySlides({
 
     return (
       <div
-        key={userId}
-        ref={(ref) => setRef(ref, userId)}
+        key={peerId}
+        ref={(ref) => setRef(ref, peerId)}
         className={buildClassName(styles.slide, styles.activeSlide)}
         style={style}
       >
         <Story
-          userId={userId}
+          peerId={peerId}
           storyId={renderingStoryId!}
           onDelete={onDelete}
           dimensions={slideSizes.activeSlide}
@@ -309,15 +309,15 @@ function StorySlides({
   return (
     <div className={styles.wrapper} style={`--story-viewer-scale: ${slideSizes.scale}`}>
       <div className={styles.fullSize} onClick={onClose} />
-      {renderingUserIds.length > 1 && (
+      {renderingPeerIds.length > 1 && (
         <div className={styles.backdropNonInteractive} style={`height: ${slideSizes.slide.height}px`} />
       )}
-      {renderingUserIds.map((userId, index) => {
-        if (userId === renderingUserId) {
-          return renderStory(renderingUserId);
+      {renderingPeerIds.map((peerId, index) => {
+        if (peerId === renderingPeerId) {
+          return renderStory(renderingPeerId);
         }
 
-        return renderStoryPreview(userId, index, index - renderingUserPosition);
+        return renderStoryPreview(peerId, index, index - renderingPeerPosition);
       })}
     </div>
   );
@@ -326,18 +326,18 @@ function StorySlides({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     storyViewer: {
-      userId: currentUserId, storyId: currentStoryId, isSingleUser, isSingleStory, isPrivate, isArchive,
+      peerId: currentPeerId, storyId: currentStoryId, isSinglePeer, isSingleStory, isPrivate, isArchive,
     },
   } = selectTabState(global);
-  const { byUserId, orderedUserIds: { archived, active } } = global.stories;
-  const user = currentUserId ? selectUser(global, currentUserId) : undefined;
+  const { byPeerId, orderedPeerIds: { archived, active } } = global.stories;
+  const peer = currentPeerId ? selectPeer(global, currentPeerId) : undefined;
 
   return {
-    byUserId,
-    userIds: user?.areStoriesHidden ? archived : active,
-    currentUserId,
+    byPeerId,
+    peerIds: peer?.areStoriesHidden ? archived : active,
+    currentPeerId,
     currentStoryId,
-    isSingleUser,
+    isSinglePeer,
     isSingleStory,
     isPrivate,
     isArchive,

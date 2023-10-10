@@ -244,7 +244,7 @@
 
   @media (max-width: 600px) {
     width: 100% !important;
-    height: calc(100% - 4rem) !important;
+    height: calc(100% - 4rem) !important; // Update `MOBILE_MEDIA_BOTTOM_MARGIN` in MediaAreaOverlay on change
     border-radius: 0;
   }
 
@@ -273,6 +273,18 @@
 
   :global(body.ghost-animating) .activeSlide & {
     display: none;
+  }
+}
+
+.mediaAreaOverlay {
+  @media (max-width: 600px) {
+    right: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    max-width: 100%;
+    max-height: 100%;
   }
 }
 
@@ -644,48 +656,6 @@
   right: 0;
 }
 
-.ownForward {
-  position: absolute;
-  bottom: 0.25rem;
-  right: 0;
-}
-
-.recentViewers {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  transition: background-color 200ms, opacity 350ms !important;
-  padding: 0.5rem;
-  border-radius: var(--border-radius-default);
-  color: #fff;
-}
-
-.recentViewersInteractive {
-  cursor: var(--custom-cursor, pointer);
-
-  &:hover {
-    background-color: rgba(var(--color-text-secondary-rgb), 0.2);
-  }
-}
-
-.recentViewersAvatars {
-  margin-inline-end: 0.5rem;
-}
-
-.reactionCount {
-  margin-inline-start: 0.5rem;
-  display: flex;
-  gap: 0.125rem;
-  align-items: center;
-}
-
-.reactionCountHeart {
-  color: var(--color-heart);
-  font-size: 1.25rem;
-}
-
 .modal :global(.modal-content) {
   padding: 0.5rem !important;
   max-height: 35rem;
@@ -703,21 +673,6 @@
   height: 100%;
   display: block;
   object-fit: cover;
-}
-
-.mediaAreaOverlay {
-  position: absolute;
-  width: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.mediaArea {
-  position: absolute;
-  transform-origin: top left;
-  pointer-events: all;
-  cursor: var(--custom-cursor, pointer);
 }
 
 .ghost {

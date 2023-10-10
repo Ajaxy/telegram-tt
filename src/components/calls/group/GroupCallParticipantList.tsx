@@ -6,6 +6,7 @@ import type { GroupCallParticipant as TypeGroupCallParticipant } from '../../../
 
 import { selectActiveGroupCall } from '../../../global/selectors/calls';
 import buildClassName from '../../../util/buildClassName';
+import { compareFields } from '../../../util/iteratees';
 
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -71,10 +72,6 @@ const GroupCallParticipantList: FC<OwnProps & StateProps> = ({
     </InfiniteScroll>
   );
 };
-
-function compareFields<T>(a: T, b: T) {
-  return Number(b) - Number(a);
-}
 
 function compareParticipants(a: TypeGroupCallParticipant, b: TypeGroupCallParticipant) {
   return compareFields(!a.isMuted, !b.isMuted)

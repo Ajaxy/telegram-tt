@@ -11,6 +11,7 @@ import type {
   ApiMessageEntity,
   ApiMessageForwardInfo,
   ApiNewPoll,
+  ApiPeer,
   ApiPhoto,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
@@ -19,7 +20,6 @@ import type {
   ApiStorySkipped,
   ApiThreadInfo,
   ApiTypeReplyTo,
-  ApiUser,
   ApiVideo,
   PhoneCallAction,
 } from '../../types';
@@ -690,7 +690,7 @@ export function buildLocalMessage(
   contact?: ApiContact,
   groupedId?: string,
   scheduledAt?: number,
-  sendAs?: ApiChat | ApiUser,
+  sendAs?: ApiPeer,
   story?: ApiStory | ApiStorySkipped,
 ): ApiMessage {
   const localId = getNextLocalMessageId(chat.lastMessage?.id);

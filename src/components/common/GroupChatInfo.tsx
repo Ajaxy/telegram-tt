@@ -6,7 +6,7 @@ import type {
   ApiChat, ApiThreadInfo, ApiTopic, ApiTypingStatus,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
-import { MediaViewerOrigin } from '../../types';
+import { MediaViewerOrigin, type StoryViewerOrigin } from '../../types';
 
 import {
   getChatTypeString,
@@ -51,6 +51,8 @@ type OwnProps = {
   noRtl?: boolean;
   noAvatar?: boolean;
   noStatusOrTyping?: boolean;
+  withStory?: boolean;
+  storyViewerOrigin?: StoryViewerOrigin;
   onClick?: VoidFunction;
 };
 
@@ -84,6 +86,8 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
   topic,
   messagesCount,
   noStatusOrTyping,
+  withStory,
+  storyViewerOrigin,
   onClick,
 }) => {
   const {
@@ -186,6 +190,9 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
           key={chat.id}
           size={avatarSize}
           peer={chat}
+          withStory={withStory}
+          storyViewerOrigin={storyViewerOrigin}
+          storyViewerMode="single-peer"
           onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
         />
       )}

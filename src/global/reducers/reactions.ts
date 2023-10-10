@@ -7,7 +7,7 @@ import {
   MIN_LEFT_COLUMN_WIDTH,
   SIDE_COLUMN_MAX_WIDTH,
 } from '../../components/middle/helpers/calculateMiddleFooterTransforms';
-import { isReactionChosen, isSameReaction } from '../helpers';
+import { updateReactionCount } from '../helpers';
 import { selectSendAs, selectTabState } from '../selectors';
 import { updateChat } from './chats';
 import { updateChatMessage } from './messages';
@@ -46,30 +46,7 @@ export function addMessageReaction<T extends GlobalState>(
   const currentSendAs = selectSendAs(global, message.chatId);
 
   // Update UI without waiting for server response
-  const results = currentReactions.results.map((current) => (
-    isReactionChosen(current) ? {
-      ...current,
-      chosenOrder: undefined,
-      count: current.count - 1,
-    } : current
-  )).filter(({ count }) => count > 0);
-
-  userReactions.forEach((reaction, i) => {
-    const existingIndex = results.findIndex((r) => isSameReaction(r.reaction, reaction));
-    if (existingIndex > -1) {
-      results[existingIndex] = {
-        ...results[existingIndex],
-        chosenOrder: i,
-        count: results[existingIndex].count + 1,
-      };
-    } else {
-      results.push({
-        reaction,
-        chosenOrder: i,
-        count: 1,
-      });
-    }
-  });
+  const results = updateReactionCount(currentReactions.results, userReactions);
 
   let { recentReactions = [] } = currentReactions;
 

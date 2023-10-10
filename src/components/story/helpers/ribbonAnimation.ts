@@ -19,10 +19,10 @@ export function animateOpening(isArchived?: boolean) {
   cancelDelayedCallbacks();
 
   const {
-    container, toggler, leftMainHeader, ribbonUsers, toggleAvatars,
+    container, toggler, leftMainHeader, ribbonPeers, toggleAvatars,
   } = getHTMLElements(isArchived);
 
-  if (!toggler || !toggleAvatars || !ribbonUsers || !container || !leftMainHeader) {
+  if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
     return;
   }
 
@@ -32,13 +32,13 @@ export function animateOpening(isArchived?: boolean) {
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
   const firstToggleAvatar = toggleAvatars[toggleAvatars.length - 1];
-  const lastId = getUserId(lastToggleAvatar);
+  const lastId = getPeerId(lastToggleAvatar);
 
-  Array.from(ribbonUsers).reverse().forEach((user, index, { length }) => {
-    const id = getUserId(user);
+  Array.from(ribbonPeers).reverse().forEach((peer, index, { length }) => {
+    const id = getPeerId(peer);
     if (!id) return;
     const isLast = id === lastId;
-    let toggleAvatar = selectByUserId(toggler, id);
+    let toggleAvatar = selectByPeerId(toggler, id);
     let zIndex = RIBBON_Z_INDEX + index + 1;
     if (!toggleAvatar) {
       const isSelf = index === length - 1;
@@ -60,7 +60,7 @@ export function animateOpening(isArchived?: boolean) {
     const {
       left: toLeft,
       width: toWidth,
-    } = user.getBoundingClientRect();
+    } = peer.getBoundingClientRect();
 
     if (toLeft > headerRight) {
       return;
@@ -81,7 +81,7 @@ export function animateOpening(isArchived?: boolean) {
 
     requestMutation(() => {
       if (!toggleAvatar) return;
-      const ghost = createGhost(user);
+      const ghost = createGhost(peer);
 
       let ghost2: HTMLElement | undefined;
 
@@ -117,7 +117,7 @@ export function animateOpening(isArchived?: boolean) {
         container.appendChild(ghost2);
       }
       toggleAvatar.classList.add('animating');
-      user.classList.add('animating');
+      peer.classList.add('animating');
 
       requestMutation(() => {
         applyStyles(ghost, {
@@ -143,7 +143,7 @@ export function animateOpening(isArchived?: boolean) {
               container.removeChild(ghost2);
             }
             toggleAvatar?.classList.remove('animating');
-            user.classList.remove('animating');
+            peer.classList.remove('animating');
           });
         }, ANIMATION_DURATION + ANIMATION_END_DELAY);
 
@@ -160,11 +160,11 @@ export function animateClosing(isArchived?: boolean) {
     container,
     toggler,
     toggleAvatars,
-    ribbonUsers,
+    ribbonPeers,
     leftMainHeader,
   } = getHTMLElements(isArchived);
 
-  if (!toggler || !toggleAvatars || !ribbonUsers || !container || !leftMainHeader) {
+  if (!toggler || !toggleAvatars || !ribbonPeers || !container || !leftMainHeader) {
     return;
   }
   const { right: headerRight } = leftMainHeader.getBoundingClientRect();
@@ -172,13 +172,13 @@ export function animateClosing(isArchived?: boolean) {
   // Toggle avatars are in the reverse order
   const lastToggleAvatar = toggleAvatars[0];
   const firstToggleAvatar = toggleAvatars[toggleAvatars.length - 1];
-  const lastId = getUserId(lastToggleAvatar);
+  const lastId = getPeerId(lastToggleAvatar);
 
-  Array.from(ribbonUsers).reverse().forEach((user, index, { length }) => {
-    const id = getUserId(user);
+  Array.from(ribbonPeers).reverse().forEach((peer, index, { length }) => {
+    const id = getPeerId(peer);
     if (!id) return;
     const isLast = id === lastId;
-    let toggleAvatar = selectByUserId(toggler, id);
+    let toggleAvatar = selectByPeerId(toggler, id);
     let zIndex = RIBBON_Z_INDEX + index + 1;
     if (!toggleAvatar) {
       const isSelf = index === length - 1;
@@ -194,7 +194,7 @@ export function animateClosing(isArchived?: boolean) {
       top: fromTop,
       left: fromLeft,
       width: fromWidth,
-    } = user.getBoundingClientRect();
+    } = peer.getBoundingClientRect();
 
     let {
       left: toLeft,
@@ -220,7 +220,7 @@ export function animateClosing(isArchived?: boolean) {
     const fromScale = fromWidth / (toWidth + 2 * STROKE_OFFSET);
 
     requestMutation(() => {
-      const ghost = createGhost(user);
+      const ghost = createGhost(peer);
       let ghost2: HTMLElement | undefined;
 
       if (zIndex > RIBBON_Z_INDEX) {
@@ -249,7 +249,7 @@ export function animateClosing(isArchived?: boolean) {
         });
       }
 
-      user.classList.add('animating');
+      peer.classList.add('animating');
       toggleAvatar!.classList.add('animating');
 
       container.appendChild(ghost);
@@ -280,7 +280,7 @@ export function animateClosing(isArchived?: boolean) {
             if (ghost2 && container.contains(ghost2)) {
               container.removeChild(ghost2);
             }
-            user.classList.remove('animating');
+            peer.classList.remove('animating');
             toggleAvatar!.classList.remove('animating');
           });
         }, ANIMATION_DURATION + ANIMATION_END_DELAY);
@@ -300,14 +300,14 @@ function getHTMLElements(isArchived?: boolean) {
   const toggler = container.querySelector<HTMLElement>('#StoryToggler');
   const ribbon = container.querySelector<HTMLElement>('#StoryRibbon');
   const leftMainHeader = container.querySelector<HTMLElement>('.left-header');
-  const ribbonUsers = ribbon?.querySelectorAll<HTMLElement>(`.${ribbonStyles.user}`);
+  const ribbonPeers = ribbon?.querySelectorAll<HTMLElement>(`.${ribbonStyles.peer}`);
   const toggleAvatars = toggler?.querySelectorAll<HTMLElement>('.Avatar');
 
   return {
     container,
     toggler,
     leftMainHeader,
-    ribbonUsers,
+    ribbonPeers,
     toggleAvatars,
   };
 }
@@ -331,11 +331,11 @@ function createGhost(sourceEl: HTMLElement) {
   return ghost;
 }
 
-function getUserId(el: HTMLElement) {
+function getPeerId(el: HTMLElement) {
   return el.getAttribute('data-peer-id');
 }
 
-function selectByUserId(el: HTMLElement, id: string) {
+function selectByPeerId(el: HTMLElement, id: string) {
   return el.querySelector<HTMLElement>(`[data-peer-id="${id}"]`);
 }
 

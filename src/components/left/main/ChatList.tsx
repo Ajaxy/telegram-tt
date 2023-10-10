@@ -23,7 +23,7 @@ import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
-import useUserStoriesPolling from '../../../hooks/polling/useUserStoriesPolling';
+import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling';
 import useTopOverscroll from '../../../hooks/scroll/useTopOverscroll';
 import useDebouncedCallback from '../../../hooks/useDebouncedCallback';
 import { useFolderManagerForOrderedIds } from '../../../hooks/useFolderManager';
@@ -89,7 +89,7 @@ const ChatList: FC<OwnProps> = ({
   const shouldDisplayArchive = isAllFolder && canDisplayArchive;
 
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
-  useUserStoriesPolling(orderedIds);
+  usePeerStoriesPolling(orderedIds);
 
   const chatsHeight = (orderedIds?.length || 0) * CHAT_HEIGHT_PX;
   const archiveHeight = shouldDisplayArchive

@@ -1,7 +1,7 @@
 import { useMemo } from '../../../lib/teact/teact';
 
 import type {
-  ApiChat, ApiMessage, ApiUser,
+  ApiMessage, ApiPeer,
 } from '../../../api/types';
 import { ApiMediaFormat } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
@@ -34,7 +34,7 @@ import useMediaWithLoadProgress from '../../../hooks/useMediaWithLoadProgress';
 type UseMediaProps = {
   mediaId?: number;
   message?: ApiMessage;
-  avatarOwner?: ApiChat | ApiUser;
+  avatarOwner?: ApiPeer;
   origin?: MediaViewerOrigin;
   delay: number | false;
 };

@@ -34,7 +34,6 @@ export default function useStoryProps(
   const hasFullData = Boolean(fullMediaData || altMediaData);
   const bestImageData = isVideo ? previewBlobUrl : fullMediaData || previewBlobUrl;
   const hasThumb = !previewBlobUrl && !hasFullData;
-  const mediaAreas = isLoadedStory ? story.mediaAreas : undefined;
 
   const canDownload = isCurrentUserPremium && isLoadedStory && !story.noForwards;
   const downloadHash = isLoadedStory ? getStoryMediaHash(story, 'download') : undefined;
@@ -56,7 +55,6 @@ export default function useStoryProps(
     hasFullData,
     bestImageData,
     hasThumb,
-    mediaAreas,
     canDownload,
     downloadMediaData,
   };

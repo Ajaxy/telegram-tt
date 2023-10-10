@@ -22,6 +22,7 @@ import { pause } from '../../../util/schedulers';
 import { setMessageBuilderCurrentUserId } from '../apiBuilders/messages';
 import { buildApiPeerId } from '../apiBuilders/peers';
 import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
+import { buildInputPeerFromLocalDb } from '../gramjsBuilders';
 import {
   addEntitiesToLocalDb,
   addMessageToLocalDb, addStoryToLocalDb, addUserToLocalDb, isResponseUpdate, log,
@@ -444,17 +445,17 @@ export async function repairFileReference({
   if (mediaMatchType === 'document' || mediaMatchType === 'photo') {
     const entity = mediaMatchType === 'document' ? localDb.documents[entityId] : localDb.photos[entityId];
     if (!entity.storyData) return false;
-    const user = localDb.users[entity.storyData.userId];
-    if (!user?.accessHash) return false;
+    const peer = buildInputPeerFromLocalDb(entity.storyData.peerId);
+    if (!peer) return false;
 
     const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
-      userId: new GramJs.InputUser({ userId: user.id, accessHash: user.accessHash }),
+      peer,
       id: [entity.storyData.id],
     }));
     if (!result) return false;
 
     addEntitiesToLocalDb(result.users);
-    result.stories.forEach((story) => addStoryToLocalDb(story, entity.storyData!.userId));
+    result.stories.forEach((story) => addStoryToLocalDb(story, entity.storyData!.peerId));
     return true;
   }
 

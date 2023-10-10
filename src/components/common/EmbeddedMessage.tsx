@@ -2,8 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 
 import type {
-  ApiChat,
-  ApiMessage, ApiUser,
+  ApiMessage, ApiPeer,
 } from '../../api/types';
 import type { ChatTranslatedMessages } from '../../global/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
@@ -37,7 +36,7 @@ import './EmbeddedMessage.scss';
 type OwnProps = {
   className?: string;
   message?: ApiMessage;
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   title?: string;
   customText?: string;
   noUserColors?: boolean;

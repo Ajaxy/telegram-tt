@@ -1,3 +1,4 @@
+import type { ApiReactionEmoji } from './api/types';
 import type { ApiLimitType } from './global/types';
 
 export const APP_CODE_NAME = 'A';
@@ -213,7 +214,6 @@ export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
 export const VIDEO_WEBM_TYPE = 'video/webm';
-
 export const GIF_MIME_TYPE = 'image/gif';
 
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
@@ -278,6 +278,10 @@ export const WEB_APP_PLATFORM = 'weba';
 export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', 'EG', 'HN', 'IE', 'IN', 'JO', 'MX', 'MY', 'NI', 'NZ', 'PH', 'PK', 'SA', 'SV', 'US']);
 
 export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
+
+export const HEART_REACTION: ApiReactionEmoji = {
+  emoticon: '❤',
+};
 
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';

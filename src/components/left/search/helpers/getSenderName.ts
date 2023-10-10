@@ -22,7 +22,7 @@ export function getSenderName(
 
   const chat = chatsById[message.chatId];
   if (chat) {
-    if (isUserId(senderId) && (sender as ApiUser).isSelf) {
+    if ('isSelf' in sender && sender.isSelf) {
       senderName = `${lang('FromYou')} → ${getChatTitle(lang, chat)}`;
     } else if (isChatGroup(chat)) {
       senderName += ` → ${getChatTitle(lang, chat)}`;

@@ -1,51 +1,60 @@
 import type {
+  ApiPeerStories,
+  ApiReaction,
   ApiStealthMode,
-  ApiStory, ApiStoryDeleted, ApiStorySkipped, ApiStoryView, ApiTypeStory, ApiUserStories,
+  ApiStory,
+  ApiStoryDeleted,
+  ApiStorySkipped,
+  ApiStoryView,
+  ApiTypeStory,
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
 import { getCurrentTabId } from '../../util/establishMultitabRole';
-import { orderBy, unique } from '../../util/iteratees';
+import { compareFields, unique } from '../../util/iteratees';
 import { getServerTime } from '../../util/serverTime';
-import { selectTabState, selectUser, selectUserStories } from '../selectors';
+import { isUserId, updateReactionCount } from '../helpers';
+import {
+  selectPeer, selectPeerStories, selectPeerStory, selectTabState, selectUser,
+} from '../selectors';
+import { updatePeer } from './general';
 import { updateTabState } from './tabs';
-import { updateUser } from './users';
 
-export function addStories<T extends GlobalState>(global: T, newStoriesByUserId: Record<string, ApiUserStories>): T {
-  const updatedByUserId = Object.entries(newStoriesByUserId).reduce((acc, [userId, newUserStories]) => {
-    if (!acc[userId]) {
-      acc[userId] = newUserStories;
+export function addStories<T extends GlobalState>(global: T, newStoriesByPeerId: Record<string, ApiPeerStories>): T {
+  const updatedByPeerId = Object.entries(newStoriesByPeerId).reduce((acc, [peerId, newPeerStories]) => {
+    if (!acc[peerId]) {
+      acc[peerId] = newPeerStories;
     } else {
-      acc[userId].byId = { ...acc[userId].byId, ...newUserStories.byId };
-      acc[userId].orderedIds = unique(newUserStories.orderedIds.concat(acc[userId].orderedIds));
-      acc[userId].pinnedIds = unique(newUserStories.pinnedIds.concat(acc[userId].pinnedIds)).sort((a, b) => b - a);
-      acc[userId].lastUpdatedAt = newUserStories.lastUpdatedAt;
-      acc[userId].lastReadId = newUserStories.lastReadId;
+      acc[peerId].byId = { ...acc[peerId].byId, ...newPeerStories.byId };
+      acc[peerId].orderedIds = unique(newPeerStories.orderedIds.concat(acc[peerId].orderedIds));
+      acc[peerId].pinnedIds = unique(newPeerStories.pinnedIds.concat(acc[peerId].pinnedIds)).sort((a, b) => b - a);
+      acc[peerId].lastUpdatedAt = newPeerStories.lastUpdatedAt;
+      acc[peerId].lastReadId = newPeerStories.lastReadId;
     }
 
     return acc;
-  }, global.stories.byUserId);
+  }, global.stories.byPeerId);
 
   global = {
     ...global,
     stories: {
       ...global.stories,
-      byUserId: updatedByUserId,
+      byPeerId: updatedByPeerId,
     },
   };
 
-  return updateOrderedStoriesUserIds(global, Object.keys(newStoriesByUserId));
+  return updateOrderedStoriesPeerIds(global, Object.keys(newStoriesByPeerId));
 }
 
-export function addStoriesForUser<T extends GlobalState>(
+export function addStoriesForPeer<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
   newStories: Record<number, ApiTypeStory>,
   addToArchive?: boolean,
 ): T {
   const {
     byId, orderedIds, pinnedIds, archiveIds,
-  } = global.stories.byUserId[userId] || {};
+  } = global.stories.byPeerId[peerId] || {};
   const deletedIds = Object.keys(newStories).filter((id) => 'isDeleted' in newStories[Number(id)]).map(Number);
   const updatedById = { ...byId, ...newStories };
   let updatedOrderedIds = [...(orderedIds || [])];
@@ -68,7 +77,7 @@ export function addStoriesForUser<T extends GlobalState>(
     return acc;
   }, updatedOrderedIds)).filter((storyId) => !deletedIds.includes(storyId));
 
-  if (addToArchive && userId === global.currentUserId) {
+  if (addToArchive && peerId === global.currentUserId) {
     updatedArchiveIds = unique(updatedArchiveIds.concat(Object.keys(newStories).map(Number)))
       .sort((a, b) => b - a)
       .filter((storyId) => !deletedIds.includes(storyId));
@@ -78,10 +87,10 @@ export function addStoriesForUser<T extends GlobalState>(
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: {
-          ...global.stories.byUserId[userId],
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: {
+          ...global.stories.byPeerId[peerId],
           byId: updatedById,
           orderedIds: updatedOrderedIds,
           pinnedIds: updatedPinnedIds,
@@ -91,45 +100,45 @@ export function addStoriesForUser<T extends GlobalState>(
     },
   };
 
-  if (userId === global.currentUserId
-    || selectUser(global, userId)?.isContact
-    || userId === global.appConfig?.storyChangelogUserId) {
-    global = updateUserLastUpdatedAt(global, userId);
-    global = updateOrderedStoriesUserIds(global, [userId]);
+  if (peerId === global.currentUserId
+    || selectUser(global, peerId)?.isContact
+    || peerId === global.appConfig?.storyChangelogUserId) {
+    global = updatePeerLastUpdatedAt(global, peerId);
+    global = updateOrderedStoriesPeerIds(global, [peerId]);
   }
 
   return global;
 }
 
-export function updateStoriesForUser<T extends GlobalState>(
+export function updateStoriesForPeer<T extends GlobalState>(
   global: T,
-  userId: string,
-  userStories: ApiUserStories,
+  peerId: string,
+  peerStories: ApiPeerStories,
 ): T {
   return {
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: userStories,
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: peerStories,
       },
     },
   };
 }
 
-export function updateLastReadStoryForUser<T extends GlobalState>(
+export function updateLastReadStoryForPeer<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
   lastReadId: number,
 ): T {
-  const { orderedIds } = selectUserStories(global, userId) || {};
+  const { orderedIds } = selectPeerStories(global, peerId) || {};
   if (!orderedIds) {
     return global;
   }
 
   if (lastReadId >= orderedIds[orderedIds.length - 1]) {
-    global = updateUser(global, userId, {
+    global = updatePeer(global, peerId, {
       hasUnreadStories: false,
     });
   }
@@ -138,10 +147,10 @@ export function updateLastReadStoryForUser<T extends GlobalState>(
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: {
-          ...global.stories.byUserId[userId],
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: {
+          ...global.stories.byPeerId[peerId],
           lastReadId,
         },
       },
@@ -149,13 +158,13 @@ export function updateLastReadStoryForUser<T extends GlobalState>(
   };
 }
 
-export function updateLastViewedStoryForUser<T extends GlobalState>(
+export function updateLastViewedStoryForPeer<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
   lastViewedId: number,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
-  const { orderedIds } = selectUserStories(global, userId) || {};
+  const { orderedIds } = selectPeerStories(global, peerId) || {};
   if (!orderedIds || !orderedIds.includes(lastViewedId)) {
     return global;
   }
@@ -165,28 +174,27 @@ export function updateLastViewedStoryForUser<T extends GlobalState>(
   return updateTabState(global, {
     storyViewer: {
       ...storyViewer,
-      lastViewedByUserIds: {
-        ...storyViewer.lastViewedByUserIds,
-        [userId]: lastViewedId,
+      lastViewedByPeerIds: {
+        ...storyViewer.lastViewedByPeerIds,
+        [peerId]: lastViewedId,
       },
     },
   }, tabId);
 }
 
-export function updateUsersWithStories<T extends GlobalState>(
+export function updatePeersWithStories<T extends GlobalState>(
   global: T,
-  storiesByUserId: Record<string, ApiUserStories>,
+  storiesByPeerId: Record<string, ApiPeerStories>,
 ): T {
-  Object.entries(storiesByUserId).forEach(([userId, { lastReadId, orderedIds }]) => {
-    const user = global.users.byId[userId];
+  Object.entries(storiesByPeerId).forEach(([peerId, { lastReadId, orderedIds }]) => {
+    const peer = selectPeer(global, peerId);
+    if (!peer) return;
 
-    if (user) {
-      global = updateUser(global, userId, {
-        hasStories: true,
-        hasUnreadStories: !lastReadId
-          || Boolean(lastReadId && lastReadId < (user.maxStoryId || orderedIds[orderedIds.length - 1])),
-      });
-    }
+    global = updatePeer(global, peerId, {
+      hasStories: true,
+      hasUnreadStories: !lastReadId
+        || Boolean(lastReadId && lastReadId < (peer.maxStoryId || orderedIds[orderedIds.length - 1])),
+    });
   });
 
   return global;
@@ -242,14 +250,14 @@ export function updateStoryViewsLoading<T extends GlobalState>(
   }, tabId);
 }
 
-export function removeUserStory<T extends GlobalState>(
+export function removePeerStory<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
   storyId: number,
 ): T {
   const {
     orderedIds, pinnedIds, lastReadId, byId,
-  } = selectUserStories(global, userId) || { orderedIds: [] as number[], pinnedIds: [] as number[] };
+  } = selectPeerStories(global, peerId) || { orderedIds: [] as number[], pinnedIds: [] as number[] };
 
   const newOrderedIds = orderedIds.filter((id) => id !== storyId);
   const newPinnedIds = pinnedIds.filter((id) => id !== storyId);
@@ -260,16 +268,17 @@ export function removeUserStory<T extends GlobalState>(
 
   const newById = {
     ...byId,
-    [storyId]: { id: storyId, userId, isDeleted: true } as ApiStoryDeleted,
+    [storyId]: { id: storyId, peerId, isDeleted: true } as ApiStoryDeleted,
   };
   const lastUpdatedAt = lastStoryId ? (newById[lastStoryId] as ApiStory | undefined)?.date : undefined;
   const hasStories = Boolean(newOrderedIds.length);
 
-  global = updateUser(global, userId, {
+  global = updatePeer(global, peerId, {
     hasStories,
     hasUnreadStories: Boolean(hasStories && lastReadId && lastStoryId && lastReadId < lastStoryId),
   });
-  global = updateStoriesForUser(global, userId, {
+
+  global = updateStoriesForPeer(global, peerId, {
     byId: newById,
     orderedIds: newOrderedIds,
     pinnedIds: newPinnedIds,
@@ -278,8 +287,8 @@ export function removeUserStory<T extends GlobalState>(
   });
 
   Object.values(global.byTabId).forEach((tab) => {
-    if (tab.storyViewer.lastViewedByUserIds?.[userId] === storyId) {
-      global = updateLastViewedStoryForUser(global, userId, previousStoryId, tab.id);
+    if (tab.storyViewer.lastViewedByPeerIds?.[peerId] === storyId) {
+      global = updateLastViewedStoryForPeer(global, peerId, previousStoryId, tab.id);
     }
   });
 
@@ -288,9 +297,9 @@ export function removeUserStory<T extends GlobalState>(
       ...global,
       stories: {
         ...global.stories,
-        orderedUserIds: {
-          active: global.stories.orderedUserIds.active.filter((id) => id !== userId),
-          archived: global.stories.orderedUserIds.archived.filter((id) => id !== userId),
+        orderedPeerIds: {
+          active: global.stories.orderedPeerIds.active.filter((id) => id !== peerId),
+          archived: global.stories.orderedPeerIds.archived.filter((id) => id !== peerId),
         },
       },
     };
@@ -299,13 +308,38 @@ export function removeUserStory<T extends GlobalState>(
   return global;
 }
 
-export function updateUserStory<T extends GlobalState>(
+export function updateSentStoryReaction<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
+  storyId: number,
+  reaction: ApiReaction | undefined,
+): T {
+  const story = selectPeerStory(global, peerId, storyId);
+  if (!story || !('content' in story)) return global;
+
+  const reactionsCount = story.reactionsCount || 0;
+  const hasReaction = story.reactions?.some((r) => r.chosenOrder);
+  const reactions = updateReactionCount(story.reactions || [], [reaction].filter(Boolean));
+
+  const countDiff = !reaction ? -1 : hasReaction ? 0 : 1;
+  const newReactionsCount = reactionsCount + countDiff;
+
+  global = updatePeerStory(global, peerId, storyId, {
+    sentReaction: reaction,
+    reactionsCount: newReactionsCount,
+    reactions,
+  });
+
+  return global;
+}
+
+export function updatePeerStory<T extends GlobalState>(
+  global: T,
+  peerId: string,
   storyId: number,
   storyUpdate: Partial<ApiStory>,
 ): T {
-  const userStories = selectUserStories(global, userId) || {
+  const peerStories = selectPeerStories(global, peerId) || {
     byId: {}, orderedIds: [], pinnedIds: [], archiveIds: [],
   };
 
@@ -313,14 +347,14 @@ export function updateUserStory<T extends GlobalState>(
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: {
-          ...userStories,
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: {
+          ...peerStories,
           byId: {
-            ...userStories.byId,
+            ...peerStories.byId,
             [storyId]: {
-              ...userStories.byId[storyId],
+              ...peerStories.byId[storyId],
               ...storyUpdate,
             },
           },
@@ -330,28 +364,28 @@ export function updateUserStory<T extends GlobalState>(
   };
 }
 
-export function updateUserPinnedStory<T extends GlobalState>(
+export function updatePeerPinnedStory<T extends GlobalState>(
   global: T,
-  userId: string,
+  peerId: string,
   storyId: number,
   isPinned?: boolean,
 ): T {
-  const userStories = selectUserStories(global, userId) || {
+  const peerStories = selectPeerStories(global, peerId) || {
     byId: {}, orderedIds: [], pinnedIds: [], archiveIds: [],
   };
 
   const newPinnedIds = isPinned
-    ? unique(userStories.pinnedIds.concat(storyId)).sort((a, b) => b - a)
-    : userStories.pinnedIds.filter((id) => storyId !== id);
+    ? unique(peerStories.pinnedIds.concat(storyId)).sort((a, b) => b - a)
+    : peerStories.pinnedIds.filter((id) => storyId !== id);
 
   return {
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: {
-          ...userStories,
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: {
+          ...peerStories,
           pinnedIds: newPinnedIds,
         },
       },
@@ -359,68 +393,81 @@ export function updateUserPinnedStory<T extends GlobalState>(
   };
 }
 
-export function toggleUserStoriesHidden<T extends GlobalState>(global: T, userId: string, isHidden: boolean) {
-  global = updateUser(global, userId, {
-    areStoriesHidden: isHidden ? true : undefined,
+export function updatePeerStoriesHidden<T extends GlobalState>(global: T, peerId: string, areHidden: boolean) {
+  const peer = selectPeer(global, peerId);
+  if (!peer) return global;
+
+  const currentState = peer.areStoriesHidden;
+  if (currentState === areHidden) return global; // `updateOrderedStoriesPeerIds` is computationally expensive
+
+  global = updatePeer(global, peerId, {
+    areStoriesHidden: areHidden,
   });
 
-  return updateOrderedStoriesUserIds(global, [userId]);
+  return updateOrderedStoriesPeerIds(global, [peerId]);
 }
 
-function updateOrderedStoriesUserIds<T extends GlobalState>(global: T, updateUserIds: string[]): T {
-  const { currentUserId, stories: { byUserId, orderedUserIds } } = global;
+function updateOrderedStoriesPeerIds<T extends GlobalState>(global: T, updatePeerIds: string[]): T {
+  const { currentUserId, stories: { byPeerId, orderedPeerIds } } = global;
 
-  const allUserIds = orderedUserIds.active.concat(orderedUserIds.archived).concat(updateUserIds);
-  const newOrderedUserIds = allUserIds.reduce<{ active: string[]; archived: string[] }>((acc, userId) => {
-    if (!byUserId[userId]?.orderedIds?.length) return acc;
+  const allPeerIds = orderedPeerIds.active.concat(orderedPeerIds.archived).concat(updatePeerIds);
+  const newOrderedPeerIds = allPeerIds.reduce<{ active: string[]; archived: string[] }>((acc, peerId) => {
+    if (!byPeerId[peerId]?.orderedIds?.length) return acc;
+    const peer = selectPeer(global, peerId);
 
-    if (selectUser(global, userId)?.areStoriesHidden) {
-      acc.archived.push(userId);
+    if (peer?.areStoriesHidden) {
+      acc.archived.push(peerId);
     } else {
-      acc.active.push(userId);
+      acc.active.push(peerId);
     }
 
     return acc;
   }, { active: [], archived: [] });
 
-  function sort(userId: string) {
-    const UNREAD_PRIORITY = 1e12;
-    const PREMIUM_PRIORITY = 1e6;
-    const isPremium = selectUser(global, userId)?.isPremium;
-    const { lastUpdatedAt = 0, orderedIds, lastReadId = 0 } = byUserId[userId] || {};
-    const hasUnread = lastReadId < orderedIds?.[orderedIds.length - 1];
+  function compare(peerIdA: string, peerIdB: string) {
+    const peerA = selectPeer(global, peerIdA)!;
+    const peerB = selectPeer(global, peerIdB)!;
 
-    const priority = (hasUnread ? UNREAD_PRIORITY : 0) + (isPremium ? PREMIUM_PRIORITY : 0);
+    const diffCurrentUser = compareFields(currentUserId === peerIdA, currentUserId === peerIdB);
+    if (diffCurrentUser) return diffCurrentUser;
 
-    return currentUserId === userId ? Infinity : (lastUpdatedAt + priority);
+    const { lastUpdatedAt: luaA = 0, orderedIds: orderedA, lastReadId: lriA = 0 } = byPeerId[peerIdA] || {};
+    const hasUnreadA = lriA < orderedA?.[orderedA.length - 1];
+    const { lastUpdatedAt: luaB = 0, orderedIds: orderedB, lastReadId: lriB = 0 } = byPeerId[peerIdB] || {};
+    const hasUnreadB = lriB < orderedB?.[orderedB.length - 1];
+
+    const diffUnread = compareFields(hasUnreadA, hasUnreadB);
+    if (diffUnread) return diffUnread;
+
+    const diffPremium = compareFields('isPremium' in peerA, 'isPremium' in peerB);
+    if (diffPremium) return diffPremium;
+
+    const diffType = compareFields(isUserId(peerIdA), isUserId(peerIdB));
+    if (diffType) return diffType;
+
+    return compareFields(luaA, luaB);
   }
 
-  newOrderedUserIds.archived = orderBy(
-    unique(newOrderedUserIds.archived)
-      .filter((userId) => byUserId[userId]?.orderedIds?.length),
-    sort,
-    'desc',
-  );
-  newOrderedUserIds.active = orderBy(
-    unique(newOrderedUserIds.active)
-      .filter((userId) => byUserId[userId]?.orderedIds?.length),
-    sort,
-    'desc',
-  );
+  newOrderedPeerIds.archived = unique(newOrderedPeerIds.archived)
+    .filter((peerId) => byPeerId[peerId]?.orderedIds?.length)
+    .sort(compare);
+  newOrderedPeerIds.active = unique(newOrderedPeerIds.active)
+    .filter((peerId) => byPeerId[peerId]?.orderedIds?.length)
+    .sort(compare);
 
   return {
     ...global,
     stories: {
       ...global.stories,
-      orderedUserIds: newOrderedUserIds,
+      orderedPeerIds: newOrderedPeerIds,
     },
   };
 }
 
-function updateUserLastUpdatedAt<T extends GlobalState>(global: T, userId: string): T {
-  const userStories = global.stories.byUserId[userId];
-  const lastUpdatedAt = userStories.orderedIds.reduce<number | undefined>((acc, storyId) => {
-    const { date } = userStories.byId[storyId] as ApiStorySkipped || {};
+function updatePeerLastUpdatedAt<T extends GlobalState>(global: T, peerId: string): T {
+  const peerStories = global.stories.byPeerId[peerId];
+  const lastUpdatedAt = peerStories.orderedIds.reduce<number | undefined>((acc, storyId) => {
+    const { date } = peerStories.byId[storyId] as ApiStorySkipped || {};
     if (date && (!acc || acc < date)) {
       acc = date;
     }
@@ -432,10 +479,10 @@ function updateUserLastUpdatedAt<T extends GlobalState>(global: T, userId: strin
     ...global,
     stories: {
       ...global.stories,
-      byUserId: {
-        ...global.stories.byUserId,
-        [userId]: {
-          ...userStories,
+      byPeerId: {
+        ...global.stories.byPeerId,
+        [peerId]: {
+          ...peerStories,
           lastUpdatedAt,
         },
       },

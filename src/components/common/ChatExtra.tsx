@@ -34,6 +34,7 @@ import { debounce } from '../../util/schedulers';
 import stopEvent from '../../util/stopEvent';
 import renderText from './helpers/renderText';
 
+import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -77,7 +78,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     showNotification,
     updateChatMutedState,
     updateTopicMutedState,
-    loadUserStories,
+    loadPeerStories,
   } = getActions();
 
   const {
@@ -87,6 +88,7 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
     isSelf,
   } = user || {};
   const { id: chatId, usernames: chatUsernames } = chat || {};
+  const peerId = userId || chatId;
   const lang = useLang();
 
   const [areNotificationsEnabled, setAreNotificationsEnabled] = useState(!isMuted);
@@ -98,8 +100,14 @@ const ChatExtra: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     if (!userId) return;
     loadFullUser({ userId });
-    loadUserStories({ userId });
   }, [userId]);
+
+  useEffectWithPrevDeps(([prevPeerId]) => {
+    if (!peerId || prevPeerId === peerId) return;
+    if (user || (chat && isChatChannel(chat))) {
+      loadPeerStories({ peerId });
+    }
+  }, [peerId, chat, user]);
 
   const isTopicInfo = Boolean(topicId && topicId !== MAIN_THREAD_ID);
 

@@ -3,7 +3,7 @@ import { addCallback } from '../lib/teact/teactn';
 import type { GlobalState } from './types';
 
 import { getServerTime } from '../util/serverTime';
-import { removeUserStory } from './reducers';
+import { removePeerStory } from './reducers';
 import { selectTabState } from './selectors';
 import { getGlobal, setGlobal } from '.';
 
@@ -43,15 +43,15 @@ function checkStoryExpiration() {
   let global = getGlobal();
   const serverTime = getServerTime();
 
-  Object.values(global.stories.byUserId).forEach((userStories) => {
-    const stories = Object.values(userStories.byId);
+  Object.values(global.stories.byPeerId).forEach((peerStories) => {
+    const stories = Object.values(peerStories.byId);
     stories.forEach((story) => {
       if (!('expireDate' in story)) return;
       if (story.expireDate > serverTime) return;
       if ('isPinned' in story && story.isPinned) return;
       if ('isPublic' in story && !story.isPublic) return;
 
-      global = removeUserStory(global, story.userId, story.id);
+      global = removePeerStory(global, story.peerId, story.id);
     });
   });
 

@@ -6,7 +6,7 @@ import type {
   ApiThreadInfo,
 } from '../../../api/types';
 
-import { isUserId } from '../../../global/helpers';
+import { selectPeer } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { formatIntegerCompact } from '../../../util/textFormat';
 
@@ -44,10 +44,10 @@ const CommentButton: FC<OwnProps> = ({
     }
 
     // No need for expensive global updates on chats and users, so we avoid them
-    const { users: { byId: usersById }, chats: { byId: chatsById } } = getGlobal();
+    const global = getGlobal();
 
     return recentReplierIds.map((peerId) => {
-      return isUserId(peerId) ? usersById[peerId] : chatsById[peerId];
+      return selectPeer(global, peerId);
     }).filter(Boolean);
   }, [recentReplierIds]);
 

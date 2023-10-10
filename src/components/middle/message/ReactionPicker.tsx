@@ -8,10 +8,10 @@ import type {
 } from '../../../api/types';
 import type { IAnchorPosition } from '../../../types';
 
-import { isUserId } from '../../../global/helpers';
+import { getStoryKey, isUserId } from '../../../global/helpers';
 import {
   selectChat, selectChatFullInfo, selectChatMessage, selectIsContextMenuTranslucent, selectIsCurrentUserPremium,
-  selectTabState, selectUserStory,
+  selectPeerStory, selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import parseMessageInput from '../../../util/parseMessageInput';
@@ -66,7 +66,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
 
   const renderedMessageId = useCurrentOrPrev(message?.id, true);
   const renderedChatId = useCurrentOrPrev(message?.chatId, true);
-  const renderedStoryUserId = useCurrentOrPrev(story?.userId, true);
+  const renderedStoryPeerId = useCurrentOrPrev(story?.peerId, true);
   const renderedStoryId = useCurrentOrPrev(story?.id);
   const storedPosition = useCurrentOrPrev(position, true);
   // eslint-disable-next-line no-null/no-null
@@ -89,7 +89,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
   const getMenuElement = useLastCallback(() => menuRef.current);
   const getLayout = useLastCallback(() => ({
     withPortal: true,
-    isDense: !renderedStoryUserId,
+    isDense: !renderedStoryPeerId,
     deltaX: !getIsMobile() && menuRef.current
       ? -(menuRef.current.offsetWidth - REACTION_SELECTOR_WIDTH) / 2 - FULL_PICKER_SHIFT_DELTA.x / 2
       : 0,
@@ -146,7 +146,11 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
 
     if (!sendAsMessage) {
       sendStoryReaction({
-        userId: renderedStoryUserId!, storyId: renderedStoryId!, reaction, shouldAddToRecent: true,
+        peerId: renderedStoryPeerId!,
+        storyId: renderedStoryId!,
+        containerId: getStoryKey(renderedStoryPeerId!, renderedStoryId!),
+        reaction,
+        shouldAddToRecent: true,
       });
       closeReactionPicker();
       return;
@@ -223,15 +227,15 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const state = selectTabState(global);
   const {
-    chatId, messageId, storyUserId, storyId, position, sendAsMessage,
+    chatId, messageId, storyPeerId, storyId, position, sendAsMessage,
   } = state.reactionPicker || {};
-  const story = storyUserId && storyId
-    ? selectUserStory(global, storyUserId, storyId) as ApiStory | ApiStorySkipped
+  const story = storyPeerId && storyId
+    ? selectPeerStory(global, storyPeerId, storyId) as ApiStory | ApiStorySkipped
     : undefined;
   const chat = chatId ? selectChat(global, chatId) : undefined;
   const chatFullInfo = chatId ? selectChatFullInfo(global, chatId) : undefined;
   const message = chatId && messageId ? selectChatMessage(global, chatId, messageId) : undefined;
-  const isPrivateChat = chatId ? isUserId(chatId) : Boolean(storyUserId);
+  const isPrivateChat = isUserId(chatId || storyPeerId || '');
   const areSomeReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'some';
   const areCustomReactionsAllowed = chatFullInfo?.enabledReactions?.type === 'all'
     && chatFullInfo?.enabledReactions?.areCustomAllowed;

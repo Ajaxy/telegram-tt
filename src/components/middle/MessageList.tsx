@@ -173,7 +173,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadUserStoriesByIds,
+    loadMessageViews, loadPeerStoriesByIds,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -267,17 +267,17 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     if (!storyDataList.length) return;
 
-    const storiesByUserIds = storyDataList.reduce((acc, storyData) => {
-      const { userId, id } = storyData!;
-      if (!acc[userId]) {
-        acc[userId] = [];
+    const storiesByPeerIds = storyDataList.reduce((acc, storyData) => {
+      const { peerId, id } = storyData!;
+      if (!acc[peerId]) {
+        acc[peerId] = [];
       }
-      acc[userId].push(id);
+      acc[peerId].push(id);
       return acc;
     }, {} as Record<string, number[]>);
 
-    Object.entries(storiesByUserIds).forEach(([userId, storyIds]) => {
-      loadUserStoriesByIds({ userId, storyIds });
+    Object.entries(storiesByPeerIds).forEach(([peerId, storyIds]) => {
+      loadPeerStoriesByIds({ peerId, storyIds });
     });
   }, MESSAGE_STORY_POLLING_INTERVAL);
 

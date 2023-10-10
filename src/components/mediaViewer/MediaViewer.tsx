@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPhoto, ApiUser,
+  ApiMessage, ApiPeer, ApiPhoto, ApiUser,
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
@@ -63,7 +63,7 @@ type StateProps = {
   isChatWithSelf?: boolean;
   canUpdateMedia?: boolean;
   origin?: MediaViewerOrigin;
-  avatarOwner?: ApiChat | ApiUser;
+  avatarOwner?: ApiPeer;
   avatarOwnerFallbackPhoto?: ApiPhoto;
   message?: ApiMessage;
   chatMessages?: Record<number, ApiMessage>;
@@ -205,7 +205,7 @@ const MediaViewer: FC<StateProps> = ({
   const prevIsHidden = usePrevious<boolean | undefined>(isHidden);
   const prevOrigin = usePrevious(origin);
   const prevMediaId = usePrevious(mediaId);
-  const prevAvatarOwner = usePrevious<ApiChat | ApiUser | undefined>(avatarOwner);
+  const prevAvatarOwner = usePrevious<ApiPeer | undefined>(avatarOwner);
   const prevBestImageData = usePrevious(bestImageData);
   const textParts = message ? renderMessageText({ message, forcePlayback: true, isForMediaViewer: true }) : undefined;
   const hasFooter = Boolean(textParts);
@@ -362,7 +362,7 @@ const MediaViewer: FC<StateProps> = ({
           onClose={closeReportModal}
           subject="media"
           photo={avatarPhoto}
-          chatId={avatarOwner?.id}
+          peerId={avatarOwner?.id}
         />
       </div>
       <MediaViewerSlides

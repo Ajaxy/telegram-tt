@@ -12,6 +12,7 @@ import type {
   ApiGroupCall,
   ApiMessage,
   ApiMessageEntity,
+  ApiPeer,
   ApiPhoto,
   ApiTopic,
   ApiUser,
@@ -495,6 +496,7 @@ async function getFullChannelInfo(
     chatPhoto,
     participantsHidden,
     translationsDisabled,
+    storiesPinnedAvailable,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -569,6 +571,7 @@ async function getFullChannelInfo(
       stickerSet: stickerset ? buildStickerSet(stickerset) : undefined,
       areParticipantsHidden: participantsHidden,
       isTranslationDisabled: translationsDisabled,
+      hasPinnedStories: Boolean(storiesPinnedAvailable),
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
     userStatusesById: statusesById,
@@ -1487,7 +1490,7 @@ export async function createTopic({
   title: string;
   iconColor?: number;
   iconEmojiId?: string;
-  sendAs?: ApiUser | ApiChat;
+  sendAs?: ApiPeer;
 }) {
   const { id, accessHash } = chat;
 
@@ -1746,7 +1749,7 @@ export async function createChalistInvite({
 }: {
   folderId: number;
   title?: string;
-  peers: (ApiChat | ApiUser)[];
+  peers: ApiPeer[];
 }) {
   const result = await invokeRequest(new GramJs.chatlists.ExportChatlistInvite({
     chatlist: new GramJs.InputChatlistDialogFilter({
@@ -1786,7 +1789,7 @@ export async function editChatlistInvite({
   folderId: number;
   slug: string;
   title?: string;
-  peers: (ApiChat | ApiUser)[];
+  peers: ApiPeer[];
 }) {
   const result = await invokeRequest(new GramJs.chatlists.EditExportedInvite({
     chatlist: new GramJs.InputChatlistDialogFilter({

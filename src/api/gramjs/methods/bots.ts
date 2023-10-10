@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBotApp,
-  ApiChat, ApiThemeParameters, ApiUser, OnApiUpdate,
+  ApiChat, ApiPeer, ApiThemeParameters, ApiUser, OnApiUpdate,
 } from '../../types';
 
 import { WEB_APP_PLATFORM } from '../../../config';
@@ -131,7 +131,7 @@ export async function sendInlineBotResult({
   resultId: string;
   queryId: string;
   replyingTo?: number;
-  sendAs?: ApiUser | ApiChat;
+  sendAs?: ApiPeer;
   isSilent?: boolean;
   scheduleDate?: number;
 }) {
@@ -180,14 +180,14 @@ export async function requestWebView({
   isFromBotMenu,
 }: {
   isSilent?: boolean;
-  peer: ApiChat | ApiUser;
+  peer: ApiPeer;
   bot: ApiUser;
   url?: string;
   startParam?: string;
   replyToMessageId?: number;
   threadId?: number;
   theme?: ApiThemeParameters;
-  sendAs?: ApiUser | ApiChat;
+  sendAs?: ApiPeer;
   isFromBotMenu?: boolean;
 }) {
   const result = await invokeRequest(new GramJs.messages.RequestWebView({
@@ -269,7 +269,7 @@ export async function requestAppWebView({
   theme,
   isWriteAllowed,
 }: {
-  peer: ApiChat | ApiUser;
+  peer: ApiPeer;
   app: ApiBotApp;
   startParam?: string;
   theme?: ApiThemeParameters;
@@ -297,12 +297,12 @@ export function prolongWebView({
   sendAs,
 }: {
   isSilent?: boolean;
-  peer: ApiChat | ApiUser;
+  peer: ApiPeer;
   bot: ApiUser;
   queryId: string;
   replyToMessageId?: number;
   threadId?: number;
-  sendAs?: ApiUser | ApiChat;
+  sendAs?: ApiPeer;
 }) {
   return invokeRequest(new GramJs.messages.ProlongWebView({
     silent: isSilent || undefined,

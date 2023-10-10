@@ -188,7 +188,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
         isSavedMessages={isSavedMessages}
         withStory={withStory}
         storyViewerOrigin={storyViewerOrigin}
-        storyViewerMode="single-user"
+        storyViewerMode="single-peer"
         onClick={withMediaViewer ? handleAvatarViewerOpen : undefined}
       />
       <div className="info">

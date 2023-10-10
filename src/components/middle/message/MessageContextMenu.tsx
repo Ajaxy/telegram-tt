@@ -9,6 +9,7 @@ import type {
   ApiChat,
   ApiChatReactions,
   ApiMessage,
+  ApiPeer,
   ApiReaction,
   ApiSponsoredMessage,
   ApiStickerSet,
@@ -78,7 +79,7 @@ type OwnProps = {
   canClosePoll?: boolean;
   isDownloading?: boolean;
   canShowSeenBy?: boolean;
-  seenByRecentPeers?: (ApiChat | ApiUser)[];
+  seenByRecentPeers?: ApiPeer[];
   noReplies?: boolean;
   hasCustomEmoji?: boolean;
   customEmojiSets?: ApiStickerSet[];

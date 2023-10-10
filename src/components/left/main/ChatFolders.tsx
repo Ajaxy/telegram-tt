@@ -355,7 +355,7 @@ export default memo(withGlobal<OwnProps>(
         },
       },
       stories: {
-        orderedUserIds: {
+        orderedPeerIds: {
           archived: archivedStories,
         },
       },

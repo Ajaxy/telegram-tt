@@ -1,0 +1,84 @@
+.root {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 350ms !important;
+  color: #fff;
+
+  @media (max-width: 600px) {
+    padding: 0 0.5rem 0.5rem;
+  }
+
+  @supports (margin-bottom: env(safe-area-inset-bottom)) {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.viewInfo {
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-default);
+  transition: background-color 200ms;
+}
+
+.interactive {
+  cursor: var(--custom-cursor, pointer);
+
+  &:hover {
+    background-color: rgba(var(--color-text-secondary-rgb), 0.2);
+  }
+}
+
+.avatars {
+  margin-inline-end: 0.5rem;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.reactionCount {
+  margin-inline-start: 0.5rem;
+  display: flex;
+  gap: 0.125rem;
+  align-items: center;
+}
+
+.reactionCountHeart {
+  color: var(--color-heart);
+  font-size: 1.25rem;
+}
+
+.channelReaction {
+  display: flex;
+  align-items: center;
+  padding-inline-end: 0.5rem;
+}
+
+.views {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.viewIcon {
+  font-size: 1.5rem;
+}
+
+.reactionButton {
+  --custom-emoji-size: 1.5rem;
+
+  overflow: visible !important;
+
+  :global(.icon-heart) {
+    transition: color 0.2s ease-out;
+  }
+}
+
+.reactionHeart {
+  color: var(--color-heart) !important;
+}

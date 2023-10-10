@@ -41,6 +41,7 @@ type OwnProps = {
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   onClick?: NoneToVoidFunction;
+  onAnimationEnd?: NoneToVoidFunction;
 };
 
 const STICKER_SIZE = 20;
@@ -65,6 +66,7 @@ const CustomEmoji: FC<OwnProps> = ({
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   onClick,
+  onAnimationEnd,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let containerRef = useRef<HTMLDivElement>(null);
@@ -119,6 +121,7 @@ const CustomEmoji: FC<OwnProps> = ({
         withGridFix && styles.withGridFix,
       )}
       onClick={onClick}
+      onAnimationEnd={onAnimationEnd}
       data-entity-type={ApiMessageEntityTypes.CustomEmoji}
       data-document-id={documentId}
       data-alt={customEmoji?.emoji}

@@ -1,30 +1,34 @@
 import React, { memo, useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import type { ApiTypeStory } from '../../api/types';
+
 import useLang from '../../hooks/useLang';
 
 import ConfirmDialog from '../ui/ConfirmDialog';
 
 interface OwnProps {
   isOpen: boolean;
-  storyId?: number;
+  story?: ApiTypeStory;
   onClose: NoneToVoidFunction;
 }
 
-function StoryDeleteConfirmModal({ isOpen, storyId, onClose }: OwnProps) {
+function StoryDeleteConfirmModal({
+  isOpen, story, onClose,
+}: OwnProps) {
   const { deleteStory, openNextStory } = getActions();
 
   const lang = useLang();
 
   const handleDeleteStoryClick = useCallback(() => {
-    if (!storyId) {
+    if (!story) {
       return;
     }
 
     openNextStory();
-    deleteStory({ storyId });
+    deleteStory({ peerId: story.peerId, storyId: story.id });
     onClose();
-  }, [onClose, storyId]);
+  }, [onClose, story]);
 
   return (
     <ConfirmDialog

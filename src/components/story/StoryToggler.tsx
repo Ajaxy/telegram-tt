@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiChat, ApiUser } from '../../api/types';
 
 import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
 import { selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
@@ -24,18 +24,20 @@ interface OwnProps {
 
 interface StateProps {
   currentUserId: string;
-  orderedUserIds: string[];
+  orderedPeerIds: string[];
   isShown: boolean;
   withAnimation?: boolean;
   usersById: Record<string, ApiUser>;
+  chatsById: Record<string, ApiChat>;
 }
 
-const PRELOAD_USERS = 5;
+const PRELOAD_PEERS = 5;
 
 function StoryToggler({
   currentUserId,
-  orderedUserIds,
+  orderedPeerIds,
   usersById,
+  chatsById,
   canShow,
   isShown,
   isArchived,
@@ -45,22 +47,22 @@ function StoryToggler({
 
   const lang = useLang();
 
-  const users = useMemo(() => {
-    if (orderedUserIds.length === 1) {
-      return [usersById[orderedUserIds[0]]];
+  const peers = useMemo(() => {
+    if (orderedPeerIds.length === 1) {
+      return [usersById[orderedPeerIds[0]] || chatsById[orderedPeerIds[0]]];
     }
 
-    return orderedUserIds
-      .map((id) => usersById[id])
-      .filter((user) => user && user.id !== currentUserId)
+    return orderedPeerIds
+      .map((id) => usersById[id] || chatsById[id])
+      .filter((peer) => peer && peer.id !== currentUserId)
       .slice(0, PREVIEW_AVATAR_COUNT)
       .reverse();
-  }, [currentUserId, orderedUserIds, usersById]);
+  }, [currentUserId, orderedPeerIds, usersById, chatsById]);
 
-  const preloadUserIds = useMemo(() => {
-    return orderedUserIds.slice(0, PRELOAD_USERS);
-  }, [orderedUserIds]);
-  useStoryPreloader(preloadUserIds);
+  const preloadPeerIds = useMemo(() => {
+    return orderedPeerIds.slice(0, PRELOAD_PEERS);
+  }, [orderedPeerIds]);
+  useStoryPreloader(preloadPeerIds);
 
   const isVisible = canShow && isShown;
   // For some reason, setting 'slow' here also fixes scroll freezes on iOS when collapsing Story Ribbon
@@ -90,10 +92,10 @@ function StoryToggler({
       onClick={() => toggleStoryRibbon({ isShown: true, isArchived })}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      {users.map((user) => (
+      {peers.map((peer) => (
         <Avatar
-          key={user.id}
-          peer={user}
+          key={peer.id}
+          peer={peer}
           size="tiny"
           className={styles.avatar}
           withStorySolid
@@ -104,15 +106,16 @@ function StoryToggler({
 }
 
 export default memo(withGlobal<OwnProps>((global, { isArchived }): StateProps => {
-  const { orderedUserIds: { archived, active } } = global.stories;
+  const { orderedPeerIds: { archived, active } } = global.stories;
   const { storyViewer: { isRibbonShown, isArchivedRibbonShown } } = selectTabState(global);
   const withAnimation = selectPerformanceSettingsValue(global, 'storyRibbonAnimations');
 
   return {
     currentUserId: global.currentUserId!,
-    orderedUserIds: isArchived ? archived : active,
+    orderedPeerIds: isArchived ? archived : active,
     isShown: isArchived ? !isArchivedRibbonShown : !isRibbonShown,
     withAnimation,
     usersById: global.users.byId,
+    chatsById: global.chats.byId,
   };
 })(StoryToggler));

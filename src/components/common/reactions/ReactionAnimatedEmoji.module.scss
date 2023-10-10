@@ -12,13 +12,6 @@
   z-index: 1;
 }
 
-.animated-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .effect {
   position: fixed;
   top: -2.25rem;
@@ -44,7 +37,7 @@
   contain: layout;
 }
 
-.withEffectOnly {
+.withEffectOnly, .animated-icon {
   position: absolute;
   top: 50%;
   left: 50%;

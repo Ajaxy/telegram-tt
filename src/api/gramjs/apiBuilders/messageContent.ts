@@ -471,9 +471,9 @@ export function buildMessageStoryData(media: GramJs.TypeMessageMedia): ApiMessag
     return undefined;
   }
 
-  const userId = buildApiPeerId(media.userId, 'user');
+  const peerId = getApiChatIdFromMtpPeer(media.peer);
 
-  return { id: media.id, userId, ...(media.viaMention && { isMention: true }) };
+  return { id: media.id, peerId, ...(media.viaMention && { isMention: true }) };
 }
 
 export function buildPoll(poll: GramJs.Poll, pollResults: GramJs.PollResults): ApiPoll {
@@ -564,14 +564,14 @@ export function buildWebPage(media: GramJs.TypeMessageMedia): ApiWebPage | undef
   const attributeStory = attributes
     ?.find((a: any): a is GramJs.WebPageAttributeStory => a instanceof GramJs.WebPageAttributeStory);
   if (attributeStory) {
-    const userId = buildApiPeerId(attributeStory.userId, 'user');
+    const peerId = getApiChatIdFromMtpPeer(attributeStory.peer);
     story = {
       id: attributeStory.id,
-      userId,
+      peerId,
     };
 
     if (attributeStory.story instanceof GramJs.StoryItem) {
-      addStoryToLocalDb(attributeStory.story, userId);
+      addStoryToLocalDb(attributeStory.story, peerId);
     }
   }
 

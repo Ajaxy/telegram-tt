@@ -1,4 +1,6 @@
-import type { ApiChat, ApiChatFullInfo, ApiChatType } from '../../api/types';
+import type {
+  ApiChat, ApiChatFullInfo, ApiChatType, ApiPeer,
+} from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
@@ -22,12 +24,21 @@ import {
   selectBot, selectIsCurrentUserPremium, selectUser, selectUserFullInfo,
 } from './users';
 
+export function selectPeer<T extends GlobalState>(global: T, peerId: string): ApiPeer | undefined {
+  return selectUser(global, peerId) || selectChat(global, peerId);
+}
+
 export function selectChat<T extends GlobalState>(global: T, chatId: string): ApiChat | undefined {
   return global.chats.byId[chatId];
 }
 
 export function selectChatFullInfo<T extends GlobalState>(global: T, chatId: string): ApiChatFullInfo | undefined {
   return global.chats.fullInfoById[chatId];
+}
+
+export function selectPeerFullInfo<T extends GlobalState>(global: T, peerId: string) {
+  if (isUserId(peerId)) return selectUserFullInfo(global, peerId);
+  return selectChatFullInfo(global, peerId);
 }
 
 export function selectChatUser<T extends GlobalState>(global: T, chat: ApiChat) {
@@ -271,8 +282,7 @@ export function selectShouldDetectChatLanguage<T extends GlobalState>(
   global: T, chatId: string,
 ) {
   const chat = selectChat(global, chatId);
-  const fullInfo = isUserId(chatId) ? selectUserFullInfo(global, chatId) : selectChatFullInfo(global, chatId);
-  if (!chat || !fullInfo) return false;
+  if (!chat) return false;
   const { canTranslateChats } = global.settings.byKey;
 
   const isPremium = selectIsCurrentUserPremium(global);

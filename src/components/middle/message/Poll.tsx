@@ -10,7 +10,7 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPoll, ApiPollAnswer, ApiUser,
+  ApiMessage, ApiPeer, ApiPoll, ApiPollAnswer,
 } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useLang';
 
@@ -137,7 +137,7 @@ const Poll: FC<OwnProps & StateProps> = ({
     // No need for expensive global updates on chats or users, so we avoid them
     const chatsById = getGlobal().chats.byId;
     const usersById = getGlobal().users.byId;
-    return recentVoterIds ? recentVoterIds.reduce((result: (ApiChat | ApiUser)[], id) => {
+    return recentVoterIds ? recentVoterIds.reduce((result: ApiPeer[], id) => {
       const chat = chatsById[id];
       const user = usersById[id];
       if (user) {

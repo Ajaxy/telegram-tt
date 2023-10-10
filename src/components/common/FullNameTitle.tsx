@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiPeer, ApiUser } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import { EMOJI_STATUS_LOOP_LIMIT } from '../../config';
@@ -23,7 +23,7 @@ import VerifiedIcon from './VerifiedIcon';
 import styles from './FullNameTitle.module.scss';
 
 type OwnProps = {
-  peer: ApiChat | ApiUser;
+  peer: ApiPeer;
   className?: string;
   noVerified?: boolean;
   noFake?: boolean;

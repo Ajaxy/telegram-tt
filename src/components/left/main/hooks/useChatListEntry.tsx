@@ -4,7 +4,7 @@ import React, {
 import { getGlobal } from '../../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiTopic, ApiTypingStatus, ApiUser,
+  ApiChat, ApiMessage, ApiPeer, ApiTopic, ApiTypingStatus, ApiUser,
 } from '../../../../api/types';
 import type { Thread } from '../../../../global/types';
 import type { ObserveFn } from '../../../../hooks/useIntersectionObserver';
@@ -64,7 +64,7 @@ export default function useChatListEntry({
   actionTargetMessage?: ApiMessage;
   actionTargetUserIds?: string[];
   lastMessageTopic?: ApiTopic;
-  lastMessageSender?: ApiUser | ApiChat;
+  lastMessageSender?: ApiPeer;
   actionTargetChatId?: string;
   observeIntersection?: ObserveFn;
   isTopic?: boolean;

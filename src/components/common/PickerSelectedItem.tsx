@@ -5,7 +5,7 @@ import { withGlobal } from '../../global';
 import type { ApiChat, ApiUser } from '../../api/types';
 import type { IconName } from '../../types/icons';
 
-import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
+import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
 import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -111,8 +111,8 @@ export default memo(withGlobal<OwnProps>(
       return {};
     }
 
-    const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
-    const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const chat = selectChat(global, chatOrUserId);
+    const user = selectUser(global, chatOrUserId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
 
     return {

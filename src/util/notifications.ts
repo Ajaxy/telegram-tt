@@ -1,7 +1,7 @@
 import { getActions, getGlobal, setGlobal } from '../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPeerReaction,
+  ApiChat, ApiMessage, ApiPeer, ApiPeerReaction,
   ApiPhoneCall, ApiUser,
 } from '../api/types';
 import { ApiMediaFormat } from '../api/types';
@@ -389,7 +389,7 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   return { title, body };
 }
 
-async function getAvatar(chat: ApiChat | ApiUser) {
+async function getAvatar(chat: ApiPeer) {
   const imageHash = getChatAvatarHash(chat);
   if (!imageHash) return undefined;
   let mediaData = mediaLoader.getFromMemory(imageHash);

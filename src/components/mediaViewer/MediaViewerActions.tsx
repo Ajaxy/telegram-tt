@@ -3,7 +3,7 @@ import React, { memo, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiPhoto, ApiUser,
+  ApiMessage, ApiPeer, ApiPhoto,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import type { MenuItemProps } from '../ui/MenuItem';
@@ -50,7 +50,7 @@ type OwnProps = {
   canUpdateMedia?: boolean;
   isSingleMedia?: boolean;
   avatarPhoto?: ApiPhoto;
-  avatarOwner?: ApiChat | ApiUser;
+  avatarOwner?: ApiPeer;
   fileName?: string;
   canReport?: boolean;
   selectMedia: (mediaId?: number) => void;

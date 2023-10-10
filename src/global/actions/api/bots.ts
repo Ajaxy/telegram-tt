@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiChatType, ApiContact, ApiUrlAuthResult, ApiUser,
+  ApiChat, ApiChatType, ApiContact, ApiPeer, ApiUrlAuthResult,
 } from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
@@ -1068,7 +1068,7 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
 }
 
 async function sendBotCommand(
-  chat: ApiChat, threadId = MAIN_THREAD_ID, command: string, replyingTo?: number, sendAs?: ApiChat | ApiUser,
+  chat: ApiChat, threadId = MAIN_THREAD_ID, command: string, replyingTo?: number, sendAs?: ApiPeer,
 ) {
   await callApi('sendMessage', {
     chat,

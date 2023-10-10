@@ -15,6 +15,7 @@ import renderText from '../../../common/helpers/renderText';
 import useFlag from '../../../../hooks/useFlag';
 import useLang from '../../../../hooks/useLang';
 
+import Icon from '../../../common/Icon';
 import Button from '../../../ui/Button';
 import Modal from '../../../ui/Modal';
 import PremiumLimitsCompare from './PremiumLimitsCompare';
@@ -197,12 +198,13 @@ const PremiumLimitReachedModal: FC<OwnProps & StateProps> = ({
         {canUpgrade
       && (
         <Button
-          className={buildClassName('confirm-dialog-button', styles.subscribeButton)}
-          isShiny
+          className="confirm-dialog-button"
+          isText
           onClick={handleClick}
           color="primary"
         >
           {lang('IncreaseLimit')}
+          <Icon name="double-badge" className={styles.x2} />
         </Button>
       )}
       </div>

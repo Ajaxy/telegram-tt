@@ -42,7 +42,6 @@ import {
   isChatSummaryOnly,
   isChatSuperGroup,
   isUserBot,
-  isUserId,
 } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -68,11 +67,11 @@ import {
   updateChats,
   updateListedTopicIds,
   updateManagementProgress,
+  updatePeerFullInfo,
   updateThreadInfo,
   updateTopic,
   updateTopics,
   updateUser,
-  updateUserFullInfo,
 } from '../../reducers';
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
@@ -2249,15 +2248,9 @@ addActionHandler('togglePeerTranslations', async (global, actions, payload): Pro
   if (result === undefined) return;
 
   global = getGlobal();
-  if (isUserId(chatId)) {
-    global = updateUserFullInfo(global, chatId, {
-      isTranslationDisabled: isEnabled ? undefined : true,
-    });
-  } else {
-    global = updateChatFullInfo(global, chatId, {
-      isTranslationDisabled: isEnabled ? undefined : true,
-    });
-  }
+  global = updatePeerFullInfo(global, chatId, {
+    isTranslationDisabled: isEnabled ? undefined : true,
+  });
   setGlobal(global);
 });
 

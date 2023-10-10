@@ -4,7 +4,7 @@ import type { ActionReturnType, RequiredGlobalState } from '../../types';
 import { throttle } from '../../../util/schedulers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
-  deleteContact, replaceUserStatuses, toggleUserStoriesHidden, updateUser, updateUserFullInfo,
+  deleteContact, replaceUserStatuses, updatePeerStoriesHidden, updateUser, updateUserFullInfo,
 } from '../../reducers';
 import { selectIsCurrentUserPremium, selectUser, selectUserFullInfo } from '../../selectors';
 
@@ -55,15 +55,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         }
       });
 
-      const currentUser = selectUser(global, update.id);
+      const localUser = selectUser(global, update.id);
 
       global = updateUser(global, update.id, update.user);
       if (update.fullInfo) {
         global = updateUserFullInfo(global, update.id, update.fullInfo);
       }
 
-      if (currentUser?.areStoriesHidden !== update.user.areStoriesHidden) {
-        global = toggleUserStoriesHidden(global, update.id, update.user.areStoriesHidden || false);
+      if (localUser?.areStoriesHidden !== update.user.areStoriesHidden) {
+        global = updatePeerStoriesHidden(global, update.id, update.user.areStoriesHidden || false);
       }
 
       return global;

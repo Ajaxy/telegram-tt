@@ -33,6 +33,8 @@ type OwnProps = {
   size?: number;
   effectSize?: number;
   withEffectOnly?: boolean;
+  shouldPause?: boolean;
+  shouldLoop?: boolean;
   observeIntersection?: ObserveFn;
 };
 
@@ -46,6 +48,8 @@ type StateProps = {
 const ICON_SIZE = 1.5 * REM;
 const CENTER_ICON_MULTIPLIER = 1.9;
 const EFFECT_SIZE = 6.5 * REM;
+const CUSTOM_EMOJI_EFFECT_MULTIPLIER = 0.5;
+const MIN_PARTICLE_SIZE = REM;
 
 const ReactionAnimatedEmoji = ({
   containerId,
@@ -58,6 +62,8 @@ const ReactionAnimatedEmoji = ({
   genericEffects,
   withEffects,
   withEffectOnly,
+  shouldPause,
+  shouldLoop,
   observeIntersection,
 }: OwnProps & StateProps) => {
   const { stopActiveReaction } = getActions();
@@ -110,18 +116,25 @@ const ReactionAnimatedEmoji = ({
     activeReactions?.find((active) => isSameReaction(active, reaction))
   ), [activeReactions, reaction]);
 
-  const shouldPlay = Boolean(withEffects && activeReaction && (isCustom || mediaDataCenterIcon) && mediaDataEffect);
+  const shouldPlayEffect = Boolean(
+    withEffects && activeReaction && (isCustom || mediaDataCenterIcon) && mediaDataEffect,
+  );
+  const shouldPlayCenter = isIntersecting && ((shouldPlayEffect && !withEffectOnly) || shouldLoop);
   const {
-    shouldRender: shouldRenderAnimation,
+    shouldRender: shouldRenderEffect,
     transitionClassNames: animationClassNames,
-  } = useShowTransition(shouldPlay, undefined, true, 'slow');
+  } = useShowTransition(shouldPlayEffect, undefined, true, 'slow');
+  const {
+    shouldRender: shouldRenderCenter,
+    transitionClassNames: centerAnimationClassNames,
+  } = useShowTransition(shouldPlayCenter, undefined, true, 'slow');
 
   const handleEnded = useLastCallback(() => {
     stopActiveReaction({ containerId, reaction });
   });
 
   const [isAnimationLoaded, markAnimationLoaded, unmarkAnimationLoaded] = useFlag();
-  const shouldShowStatic = !isCustom && (!shouldPlay || !isAnimationLoaded);
+  const shouldShowStatic = !isCustom && (!shouldPlayCenter || !isAnimationLoaded);
   const {
     shouldRender: shouldRenderStatic,
     transitionClassNames: staticClassNames,
@@ -129,7 +142,7 @@ const ReactionAnimatedEmoji = ({
 
   const rootClassName = buildClassName(
     styles.root,
-    shouldRenderAnimation && styles.animating,
+    shouldRenderEffect && styles.animating,
     withEffectOnly && styles.withEffectOnly,
     className,
   );
@@ -150,13 +163,28 @@ const ReactionAnimatedEmoji = ({
           documentId={reaction.documentId}
           className={styles.customEmoji}
           size={size}
+          noPlay={shouldPause}
+          forceAlways
           observeIntersectionForPlaying={observeIntersection}
         />
       )}
-      {shouldRenderAnimation && (
+      {shouldRenderCenter && !isCustom && (
+        <AnimatedSticker
+          key={`${centerIconId}-${size}`}
+          className={buildClassName(styles.animatedIcon, centerAnimationClassNames)}
+          size={roundToNearestEven(size * CENTER_ICON_MULTIPLIER)}
+          tgsUrl={mediaDataCenterIcon}
+          play={isIntersecting && !shouldPause}
+          noLoop={!shouldLoop}
+          forceAlways
+          onLoad={markAnimationLoaded}
+          onEnded={unmarkAnimationLoaded}
+        />
+      )}
+      {shouldRenderEffect && (
         <>
           <AnimatedSticker
-            key={effectId}
+            key={`${effectId}-${effectSize}`}
             className={buildClassName(styles.effect, animationClassNames)}
             size={effectSize}
             tgsUrl={mediaDataEffect}
@@ -165,18 +193,12 @@ const ReactionAnimatedEmoji = ({
             forceAlways
             onEnded={handleEnded}
           />
-          {isCustom && !assignedEffectId && isIntersecting && <CustomEmojiEffect reaction={reaction} />}
-          {!isCustom && !withEffectOnly && (
-            <AnimatedSticker
-              key={centerIconId}
-              className={buildClassName(styles.animatedIcon, animationClassNames)}
-              size={roundToNearestEven(size * CENTER_ICON_MULTIPLIER)}
-              tgsUrl={mediaDataCenterIcon}
-              play={isIntersecting}
-              noLoop
-              forceAlways
-              onLoad={markAnimationLoaded}
-              onEnded={unmarkAnimationLoaded}
+          {isCustom && !assignedEffectId && isIntersecting && (
+            <CustomEmojiEffect
+              reaction={reaction}
+              className={animationClassNames}
+              particleSize={Math.max(size * CUSTOM_EMOJI_EFFECT_MULTIPLIER, MIN_PARTICLE_SIZE)}
+              onEnded={handleEnded}
             />
           )}
         </>
