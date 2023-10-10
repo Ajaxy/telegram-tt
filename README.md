@@ -80,13 +80,13 @@ More info in the [official documentation](https://www.electronjs.org/docs/latest
 
 #### Notarize on MacOS
 
-Application notarization is done automatically in [electron-builder](https://github.com/electron-userland/electron-builder/) module, which requires `APPLE_ID` and `APPLE_APP_SPECIFIC_PASSWORD` environment variables to be passed.
+Application notarization is done automatically in [electron-builder](https://github.com/electron-userland/electron-builder/) module, which requires `APPLE_ID` and `APPLE_APP_NO_PASSWORD` environment variables to be passed.
 
 How to obtain app-specific password:
 
 - Sign in to [appleid.apple.com](appleid.apple.com).
-- In the "Sign-In and Security" section, select "App-Specific Passwords".
-- Select "Generate an app-specific password" or select the Add button, then follow the steps on your screen.
+- In the "Sign-In and Security" section, select "App-NO Passwords".
+- Select "Generate an app-NO password" or select the Add button, then follow the steps on your screen.
 
 #### GitHub release
 
