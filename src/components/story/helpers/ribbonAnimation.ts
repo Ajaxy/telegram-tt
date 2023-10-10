@@ -11,7 +11,7 @@ export const ANIMATION_DURATION = 250;
 const RIBBON_OFFSET = 0.25 * REM;
 const RIBBON_Z_INDEX = 11;
 const STROKE_OFFSET = 0.1875 * REM;
-const CANVAS_OFFSET = 0.1 * REM;
+const CANVAS_OFFSET = 0.125 * REM;
 
 const callbacks: Set<NoneToVoidFunction> = new Set();
 
@@ -75,9 +75,9 @@ export function animateOpening(isArchived?: boolean) {
 
     fromTop -= STROKE_OFFSET;
 
-    const toTranslateX = toLeft - fromLeft;
-    const toTranslateY = toTop - fromTop - CANVAS_OFFSET;
-    const toScale = toWidth / fromWidth;
+    const toTranslateX = toLeft - fromLeft + 2 * STROKE_OFFSET;
+    const toTranslateY = toTop - fromTop + STROKE_OFFSET;
+    const toScale = toWidth / (fromWidth + 2 * STROKE_OFFSET);
 
     requestMutation(() => {
       if (!toggleAvatar) return;
@@ -215,9 +215,9 @@ export function animateClosing(isArchived?: boolean) {
 
     toTop -= STROKE_OFFSET;
 
-    const fromTranslateX = fromLeft - toLeft;
-    const fromTranslateY = fromTop - toTop;
-    const fromScale = fromWidth / toWidth;
+    const fromTranslateX = fromLeft - toLeft + 2 * STROKE_OFFSET;
+    const fromTranslateY = fromTop - toTop + STROKE_OFFSET;
+    const fromScale = fromWidth / (toWidth + 2 * STROKE_OFFSET);
 
     requestMutation(() => {
       const ghost = createGhost(user);
