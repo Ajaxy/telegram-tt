@@ -1,24 +1,26 @@
 import BigInt from 'big-integer';
-import type { MockTypes } from './mockUtils/MockTypes';
-import type { DownloadFileParams } from './downloadFile';
 
+import type { DownloadFileParams } from './downloadFile';
+import type { MockTypes } from './mockUtils/MockTypes';
+
+import { GENERAL_TOPIC_ID } from '../../../config';
 import { UpdateConnectionState } from '../network';
 import Api from '../tl/api';
-import createMockedUser from './mockUtils/createMockedUser';
-import createMockedDialog from './mockUtils/createMockedDialog';
+import createMockedAvailableReaction from './mockUtils/createMockedAvailableReaction';
 import createMockedChannel from './mockUtils/createMockedChannel';
 import createMockedChat from './mockUtils/createMockedChat';
-import createMockedMessage from './mockUtils/createMockedMessage';
-import getIdFromInputPeer from './mockUtils/getIdFromInputPeer';
-import createMockedAvailableReaction from './mockUtils/createMockedAvailableReaction';
-import MockSender from './MockSender';
-import { downloadFile } from './downloadFile';
-import getDocumentIdFromLocation from './mockUtils/getDocumentIdFromLocation';
+import createMockedDialog from './mockUtils/createMockedDialog';
 import createMockedDialogFilter from './mockUtils/createMockedDialogFilter';
-import createMockedTypePeer from './mockUtils/createMockedTypePeer';
 import createMockedForumTopic from './mockUtils/createMockedForumTopic';
-import { GENERAL_TOPIC_ID } from '../../../config';
 import createMockedJSON from './mockUtils/createMockedJSON';
+import createMockedMessage from './mockUtils/createMockedMessage';
+import createMockedTypePeer from './mockUtils/createMockedTypePeer';
+import createMockedUser from './mockUtils/createMockedUser';
+import getDocumentIdFromLocation from './mockUtils/getDocumentIdFromLocation';
+import getIdFromInputPeer from './mockUtils/getIdFromInputPeer';
+import { downloadFile } from './downloadFile';
+
+import MockSender from './MockSender';
 
 const sizeTypes = ['u', 'v', 'w', 'y', 'd', 'x', 'c', 'm', 'b', 'a', 's', 'f'];
 
@@ -403,6 +405,16 @@ class TelegramClient {
         }
         return undefined;
     }
+
+    public setPingCallback() {}
+
+    public setShouldDebugExportedSenders() {}
+
+    public isConnected() {
+        return true;
+    }
+
+    public releaseExportedSender() {}
 
     private getMessagesFrom(chatId: string) {
         return this.mockData.messages[chatId].map((message) => createMockedMessage(chatId, message.id, this.mockData));
