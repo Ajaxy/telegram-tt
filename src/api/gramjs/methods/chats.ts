@@ -69,7 +69,7 @@ import {
 } from '../helpers';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
-import { updateChannelState } from '../updateManager';
+import { applyState, updateChannelState } from '../updateManager';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -355,6 +355,8 @@ export async function requestChatUpdate({
     id,
     chat: chatUpdate,
   });
+
+  applyState(result.state);
 
   scheduleMutedChatUpdate(chatUpdate.id, chatUpdate.muteUntil, onUpdate);
 }
