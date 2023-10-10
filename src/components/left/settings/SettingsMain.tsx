@@ -40,7 +40,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadProfilePhotos,
-    loadAuthorizations,
     openPremiumModal,
     openSupportChat,
     openUrl,
@@ -60,10 +59,6 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
     isActive,
     onBack: onReset,
   });
-
-  useEffect(() => {
-    loadAuthorizations();
-  }, []);
 
   const handleOpenSupport = useLastCallback(() => {
     openSupportChat();

@@ -1108,6 +1108,15 @@ export function updater(update: Update) {
     onUpdate({
       '@type': 'updateAttachMenuBots',
     });
+  } else if (update instanceof GramJs.UpdateNewAuthorization) {
+    onUpdate({
+      '@type': 'updateNewAuthorization',
+      hash: update.hash.toString(),
+      date: update.date,
+      device: update.device,
+      location: update.location,
+      isUnconfirmed: update.unconfirmed,
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

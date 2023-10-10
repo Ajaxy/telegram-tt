@@ -1,9 +1,10 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useRef,
+  memo, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
+import type { ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
 import type { SettingsScreens } from '../../../types';
@@ -15,9 +16,11 @@ import {
   ARCHIVED_FOLDER_ID,
   CHAT_HEIGHT_PX,
   CHAT_LIST_SLICE,
+  FRESH_AUTH_PERIOD,
 } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { getOrderKey, getPinnedChatsCount } from '../../../util/folderManager';
+import { getServerTime } from '../../../util/serverTime';
 import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useUserStoriesPolling from '../../../hooks/polling/useUserStoriesPolling';
@@ -35,6 +38,7 @@ import Loading from '../../ui/Loading';
 import Archive from './Archive';
 import Chat from './Chat';
 import EmptyFolder from './EmptyFolder';
+import UnconfirmedSession from './UnconfirmedSession';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
@@ -43,7 +47,7 @@ type OwnProps = {
   canDisplayArchive?: boolean;
   archiveSettings: GlobalState['archiveSettings'];
   isForumPanelOpen?: boolean;
-  className?: string;
+  sessions?: Record<string, ApiSession>;
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
   onLeftColumnContentChange: (content: LeftColumnContent) => void;
@@ -60,6 +64,7 @@ const ChatList: FC<OwnProps> = ({
   isForumPanelOpen,
   canDisplayArchive,
   archiveSettings,
+  sessions,
   foldersDispatch,
   onSettingsScreenSelect,
   onLeftColumnContentChange,
@@ -73,13 +78,15 @@ const ChatList: FC<OwnProps> = ({
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldIgnoreDragRef = useRef(false);
+  const [unconfirmedSessionHeight, setUnconfirmedSessionHeight] = useState(0);
 
   const isArchived = folderType === 'archived';
+  const isAllFolder = folderType === 'all';
   const resolvedFolderId = (
-    folderType === 'all' ? ALL_FOLDER_ID : isArchived ? ARCHIVED_FOLDER_ID : folderId!
+    isAllFolder ? ALL_FOLDER_ID : isArchived ? ARCHIVED_FOLDER_ID : folderId!
   );
 
-  const shouldDisplayArchive = folderType === 'all' && canDisplayArchive;
+  const shouldDisplayArchive = isAllFolder && canDisplayArchive;
 
   const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
   useUserStoriesPolling(orderedIds);
@@ -91,6 +98,18 @@ const ChatList: FC<OwnProps> = ({
   const { orderDiffById, getAnimationType } = useOrderDiff(orderedIds);
 
   const [viewportIds, getMore] = useInfiniteScroll(undefined, orderedIds, undefined, CHAT_LIST_SLICE);
+
+  const shouldShowUnconfirmedSessions = useMemo(() => {
+    const sessionsArray = Object.values(sessions || {});
+    const current = sessionsArray.find((session) => session.isCurrent);
+    if (!current || getServerTime() - current.dateCreated < FRESH_AUTH_PERIOD) return false;
+
+    return isAllFolder && sessionsArray.some((session) => session.isUnconfirmed);
+  }, [isAllFolder, sessions]);
+
+  useEffect(() => {
+    if (!shouldShowUnconfirmedSessions) setUnconfirmedSessionHeight(0);
+  }, [shouldShowUnconfirmedSessions]);
 
   // Support <Alt>+<Up/Down> to navigate between chats
   useHotkeys(isActive && orderedIds?.length ? {
@@ -189,7 +208,7 @@ const ChatList: FC<OwnProps> = ({
 
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
-      const offsetTop = archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const offsetTop = unconfirmedSessionHeight + archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
 
       return (
         <Chat
@@ -217,10 +236,17 @@ const ChatList: FC<OwnProps> = ({
       preloadBackwards={CHAT_LIST_SLICE}
       withAbsolutePositioning
       beforeChildren={renderedOverflowTrigger}
-      maxHeight={chatsHeight + archiveHeight}
+      maxHeight={chatsHeight + archiveHeight + unconfirmedSessionHeight}
       onLoadMore={getMore}
       onDragLeave={handleDragLeave}
     >
+      {shouldShowUnconfirmedSessions && (
+        <UnconfirmedSession
+          key="unconfirmed"
+          sessions={sessions!}
+          onHeightChange={setUnconfirmedSessionHeight}
+        />
+      )}
       {shouldDisplayArchive && (
         <Archive
           key="archive"

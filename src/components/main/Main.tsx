@@ -254,6 +254,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadFeaturedEmojiStickers,
     setIsElectronUpdateAvailable,
     loadPremiumSetStickers,
+    loadAuthorizations,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -327,6 +328,7 @@ const Main: FC<OwnProps & StateProps> = ({
       loadTopReactions();
       loadRecentReactions();
       loadFeaturedEmojiStickers();
+      loadAuthorizations();
     }
   }, [isMasterTab, isSynced]);
 
