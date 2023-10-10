@@ -1,8 +1,10 @@
 import type {
   ApiAppConfig,
+  ApiApplyBoostInfo,
   ApiAttachBot,
   ApiAttachment,
   ApiAvailableReaction,
+  ApiBoostsStatus,
   ApiChannelStatistics,
   ApiChat,
   ApiChatAdminRights,
@@ -616,6 +618,12 @@ export type TabState = {
       folderId: number;
       suggestedPeerIds?: string[];
     };
+  };
+
+  boostModal?: {
+    chatId: string;
+    boostStatus?: ApiBoostsStatus;
+    applyInfo?: ApiApplyBoostInfo;
   };
 };
 
@@ -1358,6 +1366,10 @@ export interface ActionPayloads {
     startApp?: string;
     originalParts?: string[];
   } & WithTabId;
+  processBoostParameters: {
+    usernameOrId: string;
+    isPrivate?: boolean;
+  } & WithTabId;
   requestThreadInfoUpdate: {
     chatId: string;
     threadId: number;
@@ -2067,6 +2079,14 @@ export interface ActionPayloads {
     isForPast?: boolean;
     isForFuture?: boolean;
   } | undefined;
+
+  openBoostModal: {
+    chatId: string;
+  } & WithTabId;
+  closeBoostModal: WithTabId | undefined;
+  applyBoost: {
+    chatId: string;
+  } & WithTabId;
 
   // Media Viewer & Audio Player
   openMediaViewer: {

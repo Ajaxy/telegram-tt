@@ -161,7 +161,7 @@ function buildStatisticsOverview({ current, previous }: GramJs.StatsAbsValueAndP
   };
 }
 
-function buildStatisticsPercentage(data: GramJs.StatsPercentValue): StatisticsOverviewPercentage {
+export function buildStatisticsPercentage(data: GramJs.StatsPercentValue): StatisticsOverviewPercentage {
   return {
     percentage: ((data.part / data.total) * 100).toFixed(2),
   };

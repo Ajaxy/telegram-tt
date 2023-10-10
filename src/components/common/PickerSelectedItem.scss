@@ -16,6 +16,10 @@
 
   max-width: calc(50% - 0.5rem);
 
+  &.standalone {
+    max-width: 100%;
+  }
+
   &.minimized {
     padding-right: 0;
   }

@@ -348,7 +348,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-  
+
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -423,6 +423,7 @@ namespace Api {
     export type TypeEmojiGroups = messages.EmojiGroupsNotModified | messages.EmojiGroups;
     export type TypeTranslatedText = messages.TranslateResult;
     export type TypeBotApp = messages.BotApp;
+    export type TypeWebPage = messages.WebPage;
   }
 
   export namespace updates {
@@ -8915,7 +8916,7 @@ namespace Api {
   }> {
     entries: Api.TypeTlsBlock[];
   };
-  
+
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<void> {};
@@ -9752,6 +9753,15 @@ namespace Api {
       requestWriteAccess?: true;
       hasSettings?: true;
       app: Api.TypeBotApp;
+    };
+    export class WebPage extends VirtualClass<{
+      webpage: Api.TypeWebPage;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    }> {
+      webpage: Api.TypeWebPage;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
     };
   }
 
@@ -10807,6 +10817,7 @@ namespace Api {
       boosts: int;
       nextLevelBoosts?: int;
       premiumAudience?: Api.TypeStatsPercentValue;
+      boostUrl: string;
     }> {
       // flags: undefined;
       myBoost?: true;
@@ -10815,6 +10826,7 @@ namespace Api {
       boosts: int;
       nextLevelBoosts?: int;
       premiumAudience?: Api.TypeStatsPercentValue;
+      boostUrl: string;
     };
     export class CanApplyBoostOk extends VirtualClass<void> {};
     export class CanApplyBoostReplace extends VirtualClass<{
@@ -10971,7 +10983,7 @@ namespace Api {
   }>, Api.TypeDestroySessionRes> {
     sessionId: long;
   };
-  
+
 
   export namespace auth {
     export class SendCode extends Request<Partial<{
@@ -12727,7 +12739,7 @@ namespace Api {
     export class GetWebPage extends Request<Partial<{
       url: string;
       hash: int;
-    }>, Api.TypeWebPage> {
+    }>, messages.TypeWebPage> {
       url: string;
       hash: int;
     };

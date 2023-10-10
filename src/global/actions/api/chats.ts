@@ -42,6 +42,7 @@ import {
   isChatSummaryOnly,
   isChatSuperGroup,
   isUserBot,
+  toChannelId,
 } from '../../helpers';
 import {
   addActionHandler, getGlobal, setGlobal,
@@ -973,6 +974,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     checkChatlistInvite,
     openChatByUsername: openChatByUsernameAction,
     openStoryViewerByUsername,
+    processBoostParameters,
   } = actions;
 
   if (url.match(RE_TG_LINK)) {
@@ -1002,6 +1004,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
   const hasStartApp = params.hasOwnProperty('startapp');
   const choose = parseChooseParameter(params.choose);
   const storyId = part2 === 's' && (Number(part3) || undefined);
+  const hasBoost = params.hasOwnProperty('boost');
 
   if (part1.match(/^\+([0-9]+)(\?|$)/)) {
     openChatByPhoneNumber({
@@ -1064,19 +1067,39 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
       inviteHash: params.voicechat || params.livestream,
       tabId,
     });
+  } else if (part1 === 'boost') {
+    const username = part2;
+    const id = params.c;
+
+    const isPrivate = !username && Boolean(id);
+
+    processBoostParameters({
+      usernameOrId: username || id,
+      isPrivate,
+      tabId,
+    });
+  } else if (hasBoost) {
+    const isPrivate = part1 === 'c' && Boolean(chatOrChannelPostId);
+    processBoostParameters({
+      usernameOrId: chatOrChannelPostId || part1,
+      isPrivate,
+      tabId,
+    });
   } else if (part1 === 'c' && chatOrChannelPostId && messageId) {
-    const chatId = `-100${chatOrChannelPostId}`;
+    const chatId = toChannelId(chatOrChannelPostId);
     const chat = selectChat(global, chatId);
     if (!chat) {
       showNotification({ message: 'Chat does not exist', tabId });
       return;
     }
 
-    focusMessage({
-      chatId: chat.id,
-      messageId,
-      tabId,
-    });
+    if (messageId) {
+      focusMessage({
+        chatId: chat.id,
+        messageId,
+        tabId,
+      });
+    }
   } else if (part1.startsWith('$')) {
     openInvoice({
       slug: part1.substring(1),
@@ -1110,6 +1133,37 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
   }
 });
 
+addActionHandler('processBoostParameters', async (global, actions, payload): Promise<void> => {
+  const { usernameOrId, isPrivate, tabId = getCurrentTabId() } = payload;
+
+  let chat: ApiChat | undefined;
+
+  if (isPrivate) {
+    const chatId = toChannelId(usernameOrId);
+    chat = selectChat(global, chatId);
+    if (!chat) {
+      actions.showNotification({ message: 'Chat does not exist', tabId });
+      return;
+    }
+  } else {
+    chat = await fetchChatByUsername(global, usernameOrId);
+    if (!chat) {
+      actions.showNotification({ message: 'User does not exist', tabId });
+      return;
+    }
+  }
+
+  if (!isChatChannel(chat)) {
+    actions.openChat({ id: chat.id, tabId });
+    return;
+  }
+
+  actions.openBoostModal({
+    chatId: chat.id,
+    tabId,
+  });
+});
+
 addActionHandler('acceptInviteConfirmation', async (global, actions, payload): Promise<void> => {
   const { hash, tabId = getCurrentTabId() } = payload!;
   const result = await callApi('importChatInvite', { hash });
@@ -1139,7 +1193,9 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
       return;
     }
     if (!isWebApp) {
-      await openChatByUsername(global, actions, username, threadId, messageId, startParam, startAttach, attach, tabId);
+      await openChatByUsername(
+        global, actions, username, threadId, messageId, startParam, startAttach, attach, tabId,
+      );
       return;
     }
   }

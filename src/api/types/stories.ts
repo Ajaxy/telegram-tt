@@ -2,6 +2,7 @@ import type { ApiPrivacySettings } from '../../types';
 import type {
   ApiGeoPoint, ApiMessage, ApiReaction, ApiReactionCount,
 } from './messages';
+import type { StatisticsOverviewPercentage } from './statistics';
 
 export interface ApiStory {
   '@type'?: 'story';
@@ -108,3 +109,33 @@ export type ApiMediaAreaSuggestedReaction = {
 };
 
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction;
+
+export type ApiApplyBoostOk = {
+  type: 'ok';
+};
+
+export type ApiApplyBoostReplace = {
+  type: 'replace';
+  boostedChatId: string;
+};
+
+export type ApiApplyBoostWait = {
+  type: 'wait';
+  waitUntil: number;
+};
+
+export type ApiApplyBoostAlready = {
+  type: 'already';
+};
+
+export type ApiApplyBoostInfo = ApiApplyBoostOk | ApiApplyBoostReplace | ApiApplyBoostWait | ApiApplyBoostAlready;
+
+export type ApiBoostsStatus = {
+  level: number;
+  currentLevelBoosts: number;
+  boosts: number;
+  nextLevelBoosts?: number;
+  hasMyBoost?: boolean;
+  boostUrl: string;
+  premiumAudience?: StatisticsOverviewPercentage;
+};

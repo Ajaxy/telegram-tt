@@ -35,6 +35,10 @@ export function isChannelId(entityId: string) {
   return entityId.length === CHANNEL_ID_LENGTH && entityId.startsWith('-100');
 }
 
+export function toChannelId(mtpId: string) {
+  return `-100${mtpId}`;
+}
+
 export function isChatGroup(chat: ApiChat) {
   return isChatBasicGroup(chat) || isChatSuperGroup(chat);
 }

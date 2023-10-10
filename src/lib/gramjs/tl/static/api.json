@@ -314,5 +314,9 @@
     "stories.sendReaction",
     "stories.getPeerMaxIDs",
     "stories.togglePeerStoriesHidden",
-    "stories.getPeerStories"
+    "stories.getPeerStories",
+    "stories.getBoostsStatus",
+    "stories.getBoostersList",
+    "stories.canApplyBoost",
+    "stories.applyBoost"
 ]
