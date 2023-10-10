@@ -232,7 +232,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
         >
           {localResults.map((id) => (
             <PickerSelectedItem
-              chatOrUserId={id}
+              peerId={id}
               onClick={handlePickerItemClick}
               clickArg={id}
             />

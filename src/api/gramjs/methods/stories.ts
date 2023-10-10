@@ -17,6 +17,9 @@ import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
+  buildApiApplyBoostInfo,
+  buildApiApplyBoostInfoFromError,
+  buildApiBoostsStatus,
   buildApiPeerStories,
   buildApiStealthMode,
   buildApiStory,
@@ -425,4 +428,69 @@ export function activateStealthMode({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchCanApplyBoost({
+  chat,
+} : {
+  chat: ApiChat;
+}) {
+  let result: GramJs.stories.TypeCanApplyBoostResult | undefined;
+  try {
+    result = await invokeRequest(new GramJs.stories.CanApplyBoost({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+    }), {
+      shouldThrow: true,
+    });
+  } catch (error) {
+    const info = buildApiApplyBoostInfoFromError(error);
+    if (!info) return undefined;
+    return {
+      info,
+      chats: [],
+    };
+  }
+
+  if (!result) {
+    return undefined;
+  }
+
+  const mtpChats = 'chats' in result ? result.chats : [];
+  addEntitiesToLocalDb(mtpChats);
+
+  const chats = mtpChats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const info = buildApiApplyBoostInfo(result);
+
+  return {
+    info,
+    chats,
+  };
+}
+
+export function applyBoost({
+  chat,
+} : {
+  chat: ApiChat;
+}) {
+  return invokeRequest(new GramJs.stories.ApplyBoost({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function fetchBoostsStatus({
+  chat,
+}: {
+  chat: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.stories.GetBoostsStatus({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiBoostsStatus(result);
 }

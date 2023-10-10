@@ -6,7 +6,7 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
-import { buildApiInputPrivacyRules } from '../../helpers';
+import { buildApiInputPrivacyRules, isChatChannel } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
@@ -26,8 +26,10 @@ import {
   updateStoryViews,
   updateStoryViewsLoading,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
-  selectPeer, selectPeerStories, selectPeerStory,
+  selectChat,
+  selectPeer, selectPeerStories, selectPeerStory, selectTabState,
 } from '../../selectors';
 
 const INFINITE_LOOP_MARKER = 100;
@@ -501,4 +503,90 @@ addActionHandler('activateStealthMode', (global, actions, payload): ActionReturn
   const { isForPast = true, isForFuture = true } = payload || {};
 
   callApi('activateStealthMode', { isForPast: isForPast || true, isForFuture: isForFuture || true });
+});
+
+addActionHandler('openBoostModal', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat || !isChatChannel(chat)) return;
+
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!result) {
+    actions.closeBoostModal({ tabId });
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+      boostStatus: result,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const applyInfoResult = await callApi('fetchCanApplyBoost', {
+    chat,
+  });
+
+  if (!applyInfoResult?.info) return;
+
+  const applyInfo = applyInfoResult.info;
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal) return;
+
+  global = addChats(global, buildCollectionByKey(applyInfoResult.chats, 'id'));
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      applyInfo,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('applyBoost', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('applyBoost', {
+    chat,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  const newStatusResult = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!newStatusResult) {
+    return;
+  }
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal?.boostStatus) return;
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      boostStatus: newStatusResult,
+    },
+  }, tabId);
+  setGlobal(global);
 });

@@ -132,7 +132,7 @@ const Picker: FC<OwnProps> = ({
         <div className="picker-header custom-scroll" dir={lang.isRtl ? 'rtl' : undefined}>
           {lockedSelectedIds.map((id, i) => (
             <PickerSelectedItem
-              chatOrUserId={id}
+              peerId={id}
               isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
               forceShowSelf={forceShowSelf}
               onClick={handleItemClick}
@@ -141,7 +141,7 @@ const Picker: FC<OwnProps> = ({
           ))}
           {unlockedSelectedIds.map((id, i) => (
             <PickerSelectedItem
-              chatOrUserId={id}
+              peerId={id}
               isMinimized={
                 shouldMinimize && i + lockedSelectedIds.length < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT
               }

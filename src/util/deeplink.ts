@@ -7,7 +7,7 @@ import { IS_SAFARI } from './windowEnvironment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist';
+'invoice' | 'addlist' | 'boost';
 
 export const processDeepLink = (url: string) => {
   const {
@@ -28,6 +28,7 @@ export const processDeepLink = (url: string) => {
     openChatWithDraft,
     checkChatlistInvite,
     openStoryViewerByUsername,
+    processBoostParameters,
   } = getActions();
 
   // Safari thinks the path in tg://path links is hostname for some reason
@@ -43,6 +44,7 @@ export const processDeepLink = (url: string) => {
 
       const hasStartAttach = params.hasOwnProperty('startattach');
       const hasStartApp = params.hasOwnProperty('startapp');
+      const hasBoost = params.hasOwnProperty('boost');
       const choose = parseChooseParameter(params.choose);
       const threadId = Number(thread) || Number(topic) || undefined;
 
@@ -64,6 +66,8 @@ export const processDeepLink = (url: string) => {
             username: domain,
             inviteHash: voicechat || livestream,
           });
+        } else if (hasBoost) {
+          processBoostParameters({ usernameOrId: domain });
         } else if (phone) {
           openChatByPhoneNumber({ phoneNumber: phone, startAttach: startattach, attach });
         } else if (story) {
@@ -86,6 +90,13 @@ export const processDeepLink = (url: string) => {
       const {
         post, channel,
       } = params;
+
+      const hasBoost = params.hasOwnProperty('boost');
+
+      if (hasBoost) {
+        processBoostParameters({ usernameOrId: channel, isPrivate: true });
+        return;
+      }
 
       focusMessage({
         chatId: `-${channel}`,
@@ -136,6 +147,14 @@ export const processDeepLink = (url: string) => {
     case 'invoice': {
       const { slug } = params;
       openInvoice({ slug });
+      break;
+    }
+
+    case 'boost': {
+      const { channel, domain } = params;
+      const isPrivate = Boolean(channel);
+
+      processBoostParameters({ usernameOrId: channel || domain, isPrivate });
       break;
     }
     default:
