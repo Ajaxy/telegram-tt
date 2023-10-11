@@ -81,7 +81,8 @@ const StickerView: FC<OwnProps> = ({
   const {
     id, isLottie, stickerSetInfo, emoji,
   } = sticker;
-  const isUnsupportedVideo = sticker.isVideo && !IS_WEBM_SUPPORTED;
+  const [isVideoBroken, markVideoBroken] = useFlag();
+  const isUnsupportedVideo = sticker.isVideo && (!IS_WEBM_SUPPORTED || isVideoBroken);
   const isVideo = sticker.isVideo && !isUnsupportedVideo;
   const isStatic = !isLottie && !isVideo;
   const previewMediaHash = getStickerPreviewHash(sticker.id);
@@ -184,6 +185,7 @@ const StickerView: FC<OwnProps> = ({
           isPriority={forceAlways}
           disablePictureInPicture
           onReady={markPlayerReady}
+          onBroken={markVideoBroken}
           onEnded={onVideoEnded}
           style={filterStyle}
         />
