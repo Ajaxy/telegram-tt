@@ -171,3 +171,7 @@ export function findLast<T>(array: Array<T>, predicate: (value: T, index: number
 
   return undefined;
 }
+
+export function compareFields<T>(a: T, b: T) {
+  return Number(b) - Number(a);
+}

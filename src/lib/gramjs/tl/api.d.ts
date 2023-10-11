@@ -314,13 +314,14 @@ namespace Api {
   export type TypeSponsoredWebPage = SponsoredWebPage;
   export type TypeStoryViews = StoryViews;
   export type TypeStoryItem = StoryItemDeleted | StoryItemSkipped | StoryItem;
-  export type TypeUserStories = UserStories;
   export type TypeStoryView = StoryView;
   export type TypeInputReplyTo = InputReplyToMessage | InputReplyToStory;
   export type TypeExportedStoryLink = ExportedStoryLink;
   export type TypeStoriesStealthMode = StoriesStealthMode;
   export type TypeMediaAreaCoordinates = MediaAreaCoordinates;
-  export type TypeMediaArea = MediaAreaVenue | InputMediaAreaVenue | MediaAreaGeoPoint;
+  export type TypeMediaArea = MediaAreaVenue | InputMediaAreaVenue | MediaAreaGeoPoint | MediaAreaSuggestedReaction;
+  export type TypePeerStories = PeerStories;
+  export type TypeBooster = Booster;
   export type TypeResPQ = ResPQ;
   export type TypeP_Q_inner_data = PQInnerData | PQInnerDataDc | PQInnerDataTemp | PQInnerDataTempDc;
   export type TypeServer_DH_Params = ServerDHParamsFail | ServerDHParamsOk;
@@ -347,7 +348,7 @@ namespace Api {
   export type TypeAccessPointRule = AccessPointRule;
   export type TypeTlsClientHello = TlsClientHello;
   export type TypeTlsBlock = TlsBlockString | TlsBlockRandom | TlsBlockZero | TlsBlockDomain | TlsBlockGrease | TlsBlockScope;
-  
+
 
   export namespace storage {
     export type TypeFileType = storage.FileUnknown | storage.FilePartial | storage.FileJpeg | storage.FileGif | storage.FilePng | storage.FilePdf | storage.FileMp3 | storage.FileMov | storage.FileMp4 | storage.FileWebp;
@@ -422,6 +423,7 @@ namespace Api {
     export type TypeEmojiGroups = messages.EmojiGroupsNotModified | messages.EmojiGroups;
     export type TypeTranslatedText = messages.TranslateResult;
     export type TypeBotApp = messages.BotApp;
+    export type TypeWebPage = messages.WebPage;
   }
 
   export namespace updates {
@@ -539,9 +541,12 @@ namespace Api {
   export namespace stories {
     export type TypeAllStories = stories.AllStoriesNotModified | stories.AllStories;
     export type TypeStories = stories.Stories;
-    export type TypeUserStories = stories.UserStories;
     export type TypeStoryViewsList = stories.StoryViewsList;
     export type TypeStoryViews = stories.StoryViews;
+    export type TypePeerStories = stories.PeerStories;
+    export type TypeBoostsStatus = stories.BoostsStatus;
+    export type TypeCanApplyBoostResult = stories.CanApplyBoostOk | stories.CanApplyBoostReplace;
+    export type TypeBoostersList = stories.BoostersList;
   }
 
   export class InputPeerEmpty extends VirtualClass<void> {};
@@ -808,10 +813,10 @@ namespace Api {
     emoticon: string;
   };
   export class InputMediaStory extends VirtualClass<{
-    userId: Api.TypeInputUser;
+    peer: Api.TypeInputPeer;
     id: int;
   }> {
-    userId: Api.TypeInputUser;
+    peer: Api.TypeInputPeer;
     id: int;
   };
   export class InputChatPhotoEmpty extends VirtualClass<void> {};
@@ -1152,6 +1157,9 @@ namespace Api {
     joinRequest?: true;
     forum?: true;
     // flags2: undefined;
+    storiesHidden?: true;
+    storiesHiddenMin?: true;
+    storiesUnavailable?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -1164,6 +1172,7 @@ namespace Api {
     defaultBannedRights?: Api.TypeChatBannedRights;
     participantsCount?: int;
     usernames?: Api.TypeUsername[];
+    storiesMaxId?: int;
   }> {
     // flags: undefined;
     creator?: true;
@@ -1187,6 +1196,9 @@ namespace Api {
     joinRequest?: true;
     forum?: true;
     // flags2: undefined;
+    storiesHidden?: true;
+    storiesHiddenMin?: true;
+    storiesUnavailable?: true;
     id: long;
     accessHash?: long;
     title: string;
@@ -1199,6 +1211,7 @@ namespace Api {
     defaultBannedRights?: Api.TypeChatBannedRights;
     participantsCount?: int;
     usernames?: Api.TypeUsername[];
+    storiesMaxId?: int;
   };
   export class ChannelForbidden extends VirtualClass<{
     // flags: undefined;
@@ -1275,6 +1288,7 @@ namespace Api {
     antispam?: true;
     participantsHidden?: true;
     translationsDisabled?: true;
+    storiesPinnedAvailable?: true;
     id: long;
     about: string;
     participantsCount?: int;
@@ -1310,6 +1324,7 @@ namespace Api {
     recentRequesters?: long[];
     defaultSendAs?: Api.TypePeer;
     availableReactions?: Api.TypeChatReactions;
+    stories?: Api.TypePeerStories;
   }> {
     // flags: undefined;
     canViewParticipants?: true;
@@ -1325,6 +1340,7 @@ namespace Api {
     antispam?: true;
     participantsHidden?: true;
     translationsDisabled?: true;
+    storiesPinnedAvailable?: true;
     id: long;
     about: string;
     participantsCount?: int;
@@ -1360,6 +1376,7 @@ namespace Api {
     recentRequesters?: long[];
     defaultSendAs?: Api.TypePeer;
     availableReactions?: Api.TypeChatReactions;
+    stories?: Api.TypePeerStories;
   };
   export class ChatParticipant extends VirtualClass<{
     userId: long;
@@ -1647,13 +1664,13 @@ namespace Api {
   export class MessageMediaStory extends VirtualClass<{
     // flags: undefined;
     viaMention?: true;
-    userId: long;
+    peer: Api.TypePeer;
     id: int;
     story?: Api.TypeStoryItem;
   }> {
     // flags: undefined;
     viaMention?: true;
-    userId: long;
+    peer: Api.TypePeer;
     id: int;
     story?: Api.TypeStoryItem;
   };
@@ -2230,7 +2247,7 @@ namespace Api {
     botBroadcastAdminRights?: Api.TypeChatAdminRights;
     premiumGifts?: Api.TypePremiumGiftOption[];
     wallpaper?: Api.TypeWallPaper;
-    stories?: Api.TypeUserStories;
+    stories?: Api.TypePeerStories;
   }> {
     // flags: undefined;
     blocked?: true;
@@ -2261,7 +2278,7 @@ namespace Api {
     botBroadcastAdminRights?: Api.TypeChatAdminRights;
     premiumGifts?: Api.TypePremiumGiftOption[];
     wallpaper?: Api.TypeWallPaper;
-    stories?: Api.TypeUserStories;
+    stories?: Api.TypePeerStories;
   };
   export class Contact extends VirtualClass<{
     userId: long;
@@ -3268,17 +3285,17 @@ namespace Api {
     userId: long;
   };
   export class UpdateStory extends VirtualClass<{
-    userId: long;
+    peer: Api.TypePeer;
     story: Api.TypeStoryItem;
   }> {
-    userId: long;
+    peer: Api.TypePeer;
     story: Api.TypeStoryItem;
   };
   export class UpdateReadStories extends VirtualClass<{
-    userId: long;
+    peer: Api.TypePeer;
     maxId: int;
   }> {
-    userId: long;
+    peer: Api.TypePeer;
     maxId: int;
   };
   export class UpdateStoryID extends VirtualClass<{
@@ -3294,11 +3311,11 @@ namespace Api {
     stealthMode: Api.TypeStoriesStealthMode;
   };
   export class UpdateSentStoryReaction extends VirtualClass<{
-    userId: long;
+    peer: Api.TypePeer;
     storyId: int;
     reaction: Api.TypeReaction;
   }> {
-    userId: long;
+    peer: Api.TypePeer;
     storyId: int;
     reaction: Api.TypeReaction;
   };
@@ -5532,7 +5549,7 @@ namespace Api {
     prices: Api.TypeLabeledPrice[];
     maxTipAmount?: long;
     suggestedTipAmounts?: long[];
-    recurringTermsUrl?: string;
+    termsUrl?: string;
   }> {
     // flags: undefined;
     test?: true;
@@ -5548,7 +5565,7 @@ namespace Api {
     prices: Api.TypeLabeledPrice[];
     maxTipAmount?: long;
     suggestedTipAmounts?: long[];
-    recurringTermsUrl?: string;
+    termsUrl?: string;
   };
   export class PaymentCharge extends VirtualClass<{
     id: string;
@@ -6905,6 +6922,9 @@ namespace Api {
     manageCall?: true;
     other?: true;
     manageTopics?: true;
+    postStories?: true;
+    editStories?: true;
+    deleteStories?: true;
   } | void> {
     // flags: undefined;
     changeInfo?: true;
@@ -6919,6 +6939,9 @@ namespace Api {
     manageCall?: true;
     other?: true;
     manageTopics?: true;
+    postStories?: true;
+    editStories?: true;
+    deleteStories?: true;
   };
   export class ChatBannedRights extends VirtualClass<{
     // flags: undefined;
@@ -7258,12 +7281,12 @@ namespace Api {
   };
   export class WebPageAttributeStory extends VirtualClass<{
     // flags: undefined;
-    userId: long;
+    peer: Api.TypePeer;
     id: int;
     story?: Api.TypeStoryItem;
   }> {
     // flags: undefined;
-    userId: long;
+    peer: Api.TypePeer;
     id: int;
     story?: Api.TypeStoryItem;
   };
@@ -8348,13 +8371,17 @@ namespace Api {
     // flags: undefined;
     hasViewers?: true;
     viewsCount: int;
-    reactionsCount: int;
+    forwardsCount?: int;
+    reactions?: Api.TypeReactionCount[];
+    reactionsCount?: int;
     recentViewers?: long[];
   }> {
     // flags: undefined;
     hasViewers?: true;
     viewsCount: int;
-    reactionsCount: int;
+    forwardsCount?: int;
+    reactions?: Api.TypeReactionCount[];
+    reactionsCount?: int;
     recentViewers?: long[];
   };
   export class StoryItemDeleted extends VirtualClass<{
@@ -8385,6 +8412,7 @@ namespace Api {
     edited?: true;
     contacts?: true;
     selectedContacts?: true;
+    out?: true;
     id: int;
     date: int;
     expireDate: int;
@@ -8405,6 +8433,7 @@ namespace Api {
     edited?: true;
     contacts?: true;
     selectedContacts?: true;
+    out?: true;
     id: int;
     date: int;
     expireDate: int;
@@ -8415,17 +8444,6 @@ namespace Api {
     privacy?: Api.TypePrivacyRule[];
     views?: Api.TypeStoryViews;
     sentReaction?: Api.TypeReaction;
-  };
-  export class UserStories extends VirtualClass<{
-    // flags: undefined;
-    userId: long;
-    maxReadId?: int;
-    stories: Api.TypeStoryItem[];
-  }> {
-    // flags: undefined;
-    userId: long;
-    maxReadId?: int;
-    stories: Api.TypeStoryItem[];
   };
   export class StoryView extends VirtualClass<{
     // flags: undefined;
@@ -8517,6 +8535,37 @@ namespace Api {
   }> {
     coordinates: Api.TypeMediaAreaCoordinates;
     geo: Api.TypeGeoPoint;
+  };
+  export class MediaAreaSuggestedReaction extends VirtualClass<{
+    // flags: undefined;
+    dark?: true;
+    flipped?: true;
+    coordinates: Api.TypeMediaAreaCoordinates;
+    reaction: Api.TypeReaction;
+  }> {
+    // flags: undefined;
+    dark?: true;
+    flipped?: true;
+    coordinates: Api.TypeMediaAreaCoordinates;
+    reaction: Api.TypeReaction;
+  };
+  export class PeerStories extends VirtualClass<{
+    // flags: undefined;
+    peer: Api.TypePeer;
+    maxReadId?: int;
+    stories: Api.TypeStoryItem[];
+  }> {
+    // flags: undefined;
+    peer: Api.TypePeer;
+    maxReadId?: int;
+    stories: Api.TypeStoryItem[];
+  };
+  export class Booster extends VirtualClass<{
+    userId: long;
+    expires: int;
+  }> {
+    userId: long;
+    expires: int;
   };
   export class ResPQ extends VirtualClass<{
     nonce: int128;
@@ -8867,7 +8916,7 @@ namespace Api {
   }> {
     entries: Api.TypeTlsBlock[];
   };
-  
+
 
   export namespace storage {
     export class FileUnknown extends VirtualClass<void> {};
@@ -9704,6 +9753,15 @@ namespace Api {
       requestWriteAccess?: true;
       hasSettings?: true;
       app: Api.TypeBotApp;
+    };
+    export class WebPage extends VirtualClass<{
+      webpage: Api.TypeWebPage;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    }> {
+      webpage: Api.TypeWebPage;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
     };
   }
 
@@ -10695,7 +10753,8 @@ namespace Api {
       hasMore?: true;
       count: int;
       state: string;
-      userStories: Api.TypeUserStories[];
+      peerStories: Api.TypePeerStories[];
+      chats: Api.TypeChat[];
       users: Api.TypeUser[];
       stealthMode: Api.TypeStoriesStealthMode;
     }> {
@@ -10703,24 +10762,20 @@ namespace Api {
       hasMore?: true;
       count: int;
       state: string;
-      userStories: Api.TypeUserStories[];
+      peerStories: Api.TypePeerStories[];
+      chats: Api.TypeChat[];
       users: Api.TypeUser[];
       stealthMode: Api.TypeStoriesStealthMode;
     };
     export class Stories extends VirtualClass<{
       count: int;
       stories: Api.TypeStoryItem[];
+      chats: Api.TypeChat[];
       users: Api.TypeUser[];
     }> {
       count: int;
       stories: Api.TypeStoryItem[];
-      users: Api.TypeUser[];
-    };
-    export class UserStories extends VirtualClass<{
-      stories: Api.TypeUserStories;
-      users: Api.TypeUser[];
-    }> {
-      stories: Api.TypeUserStories;
+      chats: Api.TypeChat[];
       users: Api.TypeUser[];
     };
     export class StoryViewsList extends VirtualClass<{
@@ -10743,6 +10798,55 @@ namespace Api {
       users: Api.TypeUser[];
     }> {
       views: Api.TypeStoryViews[];
+      users: Api.TypeUser[];
+    };
+    export class PeerStories extends VirtualClass<{
+      stories: Api.TypePeerStories;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    }> {
+      stories: Api.TypePeerStories;
+      chats: Api.TypeChat[];
+      users: Api.TypeUser[];
+    };
+    export class BoostsStatus extends VirtualClass<{
+      // flags: undefined;
+      myBoost?: true;
+      level: int;
+      currentLevelBoosts: int;
+      boosts: int;
+      nextLevelBoosts?: int;
+      premiumAudience?: Api.TypeStatsPercentValue;
+      boostUrl: string;
+    }> {
+      // flags: undefined;
+      myBoost?: true;
+      level: int;
+      currentLevelBoosts: int;
+      boosts: int;
+      nextLevelBoosts?: int;
+      premiumAudience?: Api.TypeStatsPercentValue;
+      boostUrl: string;
+    };
+    export class CanApplyBoostOk extends VirtualClass<void> {};
+    export class CanApplyBoostReplace extends VirtualClass<{
+      currentBoost: Api.TypePeer;
+      chats: Api.TypeChat[];
+    }> {
+      currentBoost: Api.TypePeer;
+      chats: Api.TypeChat[];
+    };
+    export class BoostersList extends VirtualClass<{
+      // flags: undefined;
+      count: int;
+      boosters: Api.TypeBooster[];
+      nextOffset?: string;
+      users: Api.TypeUser[];
+    }> {
+      // flags: undefined;
+      count: int;
+      boosters: Api.TypeBooster[];
+      nextOffset?: string;
       users: Api.TypeUser[];
     };
   }
@@ -10879,7 +10983,7 @@ namespace Api {
   }>, Api.TypeDestroySessionRes> {
     sessionId: long;
   };
-  
+
 
   export namespace auth {
     export class SendCode extends Request<Partial<{
@@ -11617,11 +11721,6 @@ namespace Api {
       id: Api.TypeInputUser;
       errors: Api.TypeSecureValueError[];
     };
-    export class GetStoriesMaxIDs extends Request<Partial<{
-      id: Api.TypeInputUser[];
-    }>, int[]> {
-      id: Api.TypeInputUser[];
-    };
   }
 
   export namespace contacts {
@@ -11792,13 +11891,6 @@ namespace Api {
       id: long[];
     }>, Bool> {
       id: long[];
-    };
-    export class ToggleStoriesHidden extends Request<Partial<{
-      id: Api.TypeInputUser;
-      hidden: Bool;
-    }>, Bool> {
-      id: Api.TypeInputUser;
-      hidden: Bool;
     };
     export class SetBlocked extends Request<Partial<{
       // flags: undefined;
@@ -12647,7 +12739,7 @@ namespace Api {
     export class GetWebPage extends Request<Partial<{
       url: string;
       hash: int;
-    }>, Api.TypeWebPage> {
+    }>, messages.TypeWebPage> {
       url: string;
       hash: int;
     };
@@ -15122,11 +15214,16 @@ namespace Api {
   }
 
   export namespace stories {
-    export class CanSendStory extends Request<void, Bool> {};
+    export class CanSendStory extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+    }>, Bool> {
+      peer: Api.TypeInputPeer;
+    };
     export class SendStory extends Request<Partial<{
       // flags: undefined;
       pinned?: true;
       noforwards?: true;
+      peer: Api.TypeInputPeer;
       media: Api.TypeInputMedia;
       mediaAreas?: Api.TypeMediaArea[];
       caption?: string;
@@ -15138,6 +15235,7 @@ namespace Api {
       // flags: undefined;
       pinned?: true;
       noforwards?: true;
+      peer: Api.TypeInputPeer;
       media: Api.TypeInputMedia;
       mediaAreas?: Api.TypeMediaArea[];
       caption?: string;
@@ -15148,6 +15246,7 @@ namespace Api {
     };
     export class EditStory extends Request<Partial<{
       // flags: undefined;
+      peer: Api.TypeInputPeer;
       id: int;
       media?: Api.TypeInputMedia;
       mediaAreas?: Api.TypeMediaArea[];
@@ -15156,6 +15255,7 @@ namespace Api {
       privacyRules?: Api.TypeInputPrivacyRule[];
     }>, Api.TypeUpdates> {
       // flags: undefined;
+      peer: Api.TypeInputPeer;
       id: int;
       media?: Api.TypeInputMedia;
       mediaAreas?: Api.TypeMediaArea[];
@@ -15164,14 +15264,18 @@ namespace Api {
       privacyRules?: Api.TypeInputPrivacyRule[];
     };
     export class DeleteStories extends Request<Partial<{
+      peer: Api.TypeInputPeer;
       id: int[];
     }>, int[]> {
+      peer: Api.TypeInputPeer;
       id: int[];
     };
     export class TogglePinned extends Request<Partial<{
+      peer: Api.TypeInputPeer;
       id: int[];
       pinned: Bool;
     }>, int[]> {
+      peer: Api.TypeInputPeer;
       id: int[];
       pinned: Bool;
     };
@@ -15186,32 +15290,29 @@ namespace Api {
       hidden?: true;
       state?: string;
     };
-    export class GetUserStories extends Request<Partial<{
-      userId: Api.TypeInputUser;
-    }>, stories.TypeUserStories> {
-      userId: Api.TypeInputUser;
-    };
     export class GetPinnedStories extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       offsetId: int;
       limit: int;
     }>, stories.TypeStories> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       offsetId: int;
       limit: int;
     };
     export class GetStoriesArchive extends Request<Partial<{
+      peer: Api.TypeInputPeer;
       offsetId: int;
       limit: int;
     }>, stories.TypeStories> {
+      peer: Api.TypeInputPeer;
       offsetId: int;
       limit: int;
     };
     export class GetStoriesByID extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
     }>, stories.TypeStories> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
     };
     export class ToggleAllStoriesHidden extends Request<Partial<{
@@ -15219,25 +15320,25 @@ namespace Api {
     }>, Bool> {
       hidden: Bool;
     };
-    export class GetAllReadUserStories extends Request<void, Api.TypeUpdates> {};
     export class ReadStories extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       maxId: int;
     }>, int[]> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       maxId: int;
     };
     export class IncrementStoryViews extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
     }>, Bool> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
     };
     export class GetStoryViewsList extends Request<Partial<{
       // flags: undefined;
       justContacts?: true;
       reactionsFirst?: true;
+      peer: Api.TypeInputPeer;
       q?: string;
       id: int;
       offset: string;
@@ -15246,30 +15347,33 @@ namespace Api {
       // flags: undefined;
       justContacts?: true;
       reactionsFirst?: true;
+      peer: Api.TypeInputPeer;
       q?: string;
       id: int;
       offset: string;
       limit: int;
     };
     export class GetStoriesViews extends Request<Partial<{
+      peer: Api.TypeInputPeer;
       id: int[];
     }>, stories.TypeStoryViews> {
+      peer: Api.TypeInputPeer;
       id: int[];
     };
     export class ExportStoryLink extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int;
     }>, Api.TypeExportedStoryLink> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int;
     };
     export class Report extends Request<Partial<{
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
       reason: Api.TypeReportReason;
       message: string;
     }>, Bool> {
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       id: int[];
       reason: Api.TypeReportReason;
       message: string;
@@ -15286,23 +15390,66 @@ namespace Api {
     export class SendReaction extends Request<Partial<{
       // flags: undefined;
       addToRecent?: true;
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       storyId: int;
       reaction: Api.TypeReaction;
     }>, Api.TypeUpdates> {
       // flags: undefined;
       addToRecent?: true;
-      userId: Api.TypeInputUser;
+      peer: Api.TypeInputPeer;
       storyId: int;
       reaction: Api.TypeReaction;
+    };
+    export class GetPeerStories extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+    }>, stories.TypePeerStories> {
+      peer: Api.TypeInputPeer;
+    };
+    export class GetAllReadPeerStories extends Request<void, Api.TypeUpdates> {};
+    export class GetPeerMaxIDs extends Request<Partial<{
+      id: Api.TypeInputPeer[];
+    }>, int[]> {
+      id: Api.TypeInputPeer[];
+    };
+    export class GetChatsToSend extends Request<void, messages.TypeChats> {};
+    export class TogglePeerStoriesHidden extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+      hidden: Bool;
+    }>, Bool> {
+      peer: Api.TypeInputPeer;
+      hidden: Bool;
+    };
+    export class GetBoostsStatus extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+    }>, stories.TypeBoostsStatus> {
+      peer: Api.TypeInputPeer;
+    };
+    export class GetBoostersList extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+      offset: string;
+      limit: int;
+    }>, stories.TypeBoostersList> {
+      peer: Api.TypeInputPeer;
+      offset: string;
+      limit: int;
+    };
+    export class CanApplyBoost extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+    }>, stories.TypeCanApplyBoostResult> {
+      peer: Api.TypeInputPeer;
+    };
+    export class ApplyBoost extends Request<Partial<{
+      peer: Api.TypeInputPeer;
+    }>, Bool> {
+      peer: Api.TypeInputPeer;
     };
   }
 
   export type AnyRequest = InvokeAfterMsg | InvokeAfterMsgs | InitConnection | InvokeWithLayer | InvokeWithoutUpdates | InvokeWithMessagesRange | InvokeWithTakeout | ReqPq | ReqPqMulti | ReqPqMultiNew | ReqDHParams | SetClientDHParams | DestroyAuthKey | RpcDropAnswer | GetFutureSalts | Ping | PingDelayDisconnect | DestroySession
     | auth.SendCode | auth.SignUp | auth.SignIn | auth.LogOut | auth.ResetAuthorizations | auth.ExportAuthorization | auth.ImportAuthorization | auth.BindTempAuthKey | auth.ImportBotAuthorization | auth.CheckPassword | auth.RequestPasswordRecovery | auth.RecoverPassword | auth.ResendCode | auth.CancelCode | auth.DropTempAuthKeys | auth.ExportLoginToken | auth.ImportLoginToken | auth.AcceptLoginToken | auth.CheckRecoveryPassword | auth.ImportWebTokenAuthorization | auth.RequestFirebaseSms | auth.ResetLoginEmail
     | account.RegisterDevice | account.UnregisterDevice | account.UpdateNotifySettings | account.GetNotifySettings | account.ResetNotifySettings | account.UpdateProfile | account.UpdateStatus | account.GetWallPapers | account.ReportPeer | account.CheckUsername | account.UpdateUsername | account.GetPrivacy | account.SetPrivacy | account.DeleteAccount | account.GetAccountTTL | account.SetAccountTTL | account.SendChangePhoneCode | account.ChangePhone | account.UpdateDeviceLocked | account.GetAuthorizations | account.ResetAuthorization | account.GetPassword | account.GetPasswordSettings | account.UpdatePasswordSettings | account.SendConfirmPhoneCode | account.ConfirmPhone | account.GetTmpPassword | account.GetWebAuthorizations | account.ResetWebAuthorization | account.ResetWebAuthorizations | account.GetAllSecureValues | account.GetSecureValue | account.SaveSecureValue | account.DeleteSecureValue | account.GetAuthorizationForm | account.AcceptAuthorization | account.SendVerifyPhoneCode | account.VerifyPhone | account.SendVerifyEmailCode | account.VerifyEmail | account.InitTakeoutSession | account.FinishTakeoutSession | account.ConfirmPasswordEmail | account.ResendPasswordEmail | account.CancelPasswordEmail | account.GetContactSignUpNotification | account.SetContactSignUpNotification | account.GetNotifyExceptions | account.GetWallPaper | account.UploadWallPaper | account.SaveWallPaper | account.InstallWallPaper | account.ResetWallPapers | account.GetAutoDownloadSettings | account.SaveAutoDownloadSettings | account.UploadTheme | account.CreateTheme | account.UpdateTheme | account.SaveTheme | account.InstallTheme | account.GetTheme | account.GetThemes | account.SetContentSettings | account.GetContentSettings | account.GetMultiWallPapers | account.GetGlobalPrivacySettings | account.SetGlobalPrivacySettings | account.ReportProfilePhoto | account.ResetPassword | account.DeclinePasswordReset | account.GetChatThemes | account.SetAuthorizationTTL | account.ChangeAuthorizationSettings | account.GetSavedRingtones | account.SaveRingtone | account.UploadRingtone | account.UpdateEmojiStatus | account.GetDefaultEmojiStatuses | account.GetRecentEmojiStatuses | account.ClearRecentEmojiStatuses | account.ReorderUsernames | account.ToggleUsername | account.GetDefaultProfilePhotoEmojis | account.GetDefaultGroupPhotoEmojis | account.GetAutoSaveSettings | account.SaveAutoSaveSettings | account.DeleteAutoSaveExceptions | account.InvalidateSignInCodes
-    | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors | users.GetStoriesMaxIDs
-    | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.ToggleStoriesHidden | contacts.SetBlocked
+    | users.GetUsers | users.GetFullUser | users.SetSecureValueErrors
+    | contacts.GetContactIDs | contacts.GetStatuses | contacts.GetContacts | contacts.ImportContacts | contacts.DeleteContacts | contacts.DeleteByPhones | contacts.Block | contacts.Unblock | contacts.GetBlocked | contacts.Search | contacts.ResolveUsername | contacts.GetTopPeers | contacts.ResetTopPeerRating | contacts.ResetSaved | contacts.GetSaved | contacts.ToggleTopPeers | contacts.AddContact | contacts.AcceptContact | contacts.GetLocated | contacts.BlockFromReplies | contacts.ResolvePhone | contacts.ExportContactToken | contacts.ImportContactToken | contacts.EditCloseFriends | contacts.SetBlocked
     | messages.GetMessages | messages.GetDialogs | messages.GetHistory | messages.Search | messages.ReadHistory | messages.DeleteHistory | messages.DeleteMessages | messages.ReceivedMessages | messages.SetTyping | messages.SendMessage | messages.SendMedia | messages.ForwardMessages | messages.ReportSpam | messages.GetPeerSettings | messages.Report | messages.GetChats | messages.GetFullChat | messages.EditChatTitle | messages.EditChatPhoto | messages.AddChatUser | messages.DeleteChatUser | messages.CreateChat | messages.GetDhConfig | messages.RequestEncryption | messages.AcceptEncryption | messages.DiscardEncryption | messages.SetEncryptedTyping | messages.ReadEncryptedHistory | messages.SendEncrypted | messages.SendEncryptedFile | messages.SendEncryptedService | messages.ReceivedQueue | messages.ReportEncryptedSpam | messages.ReadMessageContents | messages.GetStickers | messages.GetAllStickers | messages.GetWebPagePreview | messages.ExportChatInvite | messages.CheckChatInvite | messages.ImportChatInvite | messages.GetStickerSet | messages.InstallStickerSet | messages.UninstallStickerSet | messages.StartBot | messages.GetMessagesViews | messages.EditChatAdmin | messages.MigrateChat | messages.SearchGlobal | messages.ReorderStickerSets | messages.GetDocumentByHash | messages.GetSavedGifs | messages.SaveGif | messages.GetInlineBotResults | messages.SetInlineBotResults | messages.SendInlineBotResult | messages.GetMessageEditData | messages.EditMessage | messages.EditInlineBotMessage | messages.GetBotCallbackAnswer | messages.SetBotCallbackAnswer | messages.GetPeerDialogs | messages.SaveDraft | messages.GetAllDrafts | messages.GetFeaturedStickers | messages.ReadFeaturedStickers | messages.GetRecentStickers | messages.SaveRecentSticker | messages.ClearRecentStickers | messages.GetArchivedStickers | messages.GetMaskStickers | messages.GetAttachedStickers | messages.SetGameScore | messages.SetInlineGameScore | messages.GetGameHighScores | messages.GetInlineGameHighScores | messages.GetCommonChats | messages.GetWebPage | messages.ToggleDialogPin | messages.ReorderPinnedDialogs | messages.GetPinnedDialogs | messages.SetBotShippingResults | messages.SetBotPrecheckoutResults | messages.UploadMedia | messages.SendScreenshotNotification | messages.GetFavedStickers | messages.FaveSticker | messages.GetUnreadMentions | messages.ReadMentions | messages.GetRecentLocations | messages.SendMultiMedia | messages.UploadEncryptedFile | messages.SearchStickerSets | messages.GetSplitRanges | messages.MarkDialogUnread | messages.GetDialogUnreadMarks | messages.ClearAllDrafts | messages.UpdatePinnedMessage | messages.SendVote | messages.GetPollResults | messages.GetOnlines | messages.EditChatAbout | messages.EditChatDefaultBannedRights | messages.GetEmojiKeywords | messages.GetEmojiKeywordsDifference | messages.GetEmojiKeywordsLanguages | messages.GetEmojiURL | messages.GetSearchCounters | messages.RequestUrlAuth | messages.AcceptUrlAuth | messages.HidePeerSettingsBar | messages.GetScheduledHistory | messages.GetScheduledMessages | messages.SendScheduledMessages | messages.DeleteScheduledMessages | messages.GetPollVotes | messages.ToggleStickerSets | messages.GetDialogFilters | messages.GetSuggestedDialogFilters | messages.UpdateDialogFilter | messages.UpdateDialogFiltersOrder | messages.GetOldFeaturedStickers | messages.GetReplies | messages.GetDiscussionMessage | messages.ReadDiscussion | messages.UnpinAllMessages | messages.DeleteChat | messages.DeletePhoneCallHistory | messages.CheckHistoryImport | messages.InitHistoryImport | messages.UploadImportedMedia | messages.StartHistoryImport | messages.GetExportedChatInvites | messages.GetExportedChatInvite | messages.EditExportedChatInvite | messages.DeleteRevokedExportedChatInvites | messages.DeleteExportedChatInvite | messages.GetAdminsWithInvites | messages.GetChatInviteImporters | messages.SetHistoryTTL | messages.CheckHistoryImportPeer | messages.SetChatTheme | messages.GetMessageReadParticipants | messages.GetSearchResultsCalendar | messages.GetSearchResultsPositions | messages.HideChatJoinRequest | messages.HideAllChatJoinRequests | messages.ToggleNoForwards | messages.SaveDefaultSendAs | messages.SendReaction | messages.GetMessagesReactions | messages.GetMessageReactionsList | messages.SetChatAvailableReactions | messages.GetAvailableReactions | messages.SetDefaultReaction | messages.TranslateText | messages.GetUnreadReactions | messages.ReadReactions | messages.SearchSentMedia | messages.GetAttachMenuBots | messages.GetAttachMenuBot | messages.ToggleBotInAttachMenu | messages.RequestWebView | messages.ProlongWebView | messages.RequestSimpleWebView | messages.SendWebViewResultMessage | messages.SendWebViewData | messages.TranscribeAudio | messages.RateTranscribedAudio | messages.GetCustomEmojiDocuments | messages.GetEmojiStickers | messages.GetFeaturedEmojiStickers | messages.ReportReaction | messages.GetTopReactions | messages.GetRecentReactions | messages.ClearRecentReactions | messages.GetExtendedMedia | messages.SetDefaultHistoryTTL | messages.GetDefaultHistoryTTL | messages.SendBotRequestedPeer | messages.GetEmojiGroups | messages.GetEmojiStatusGroups | messages.GetEmojiProfilePhotoGroups | messages.SearchCustomEmoji | messages.TogglePeerTranslations | messages.GetBotApp | messages.RequestAppWebView | messages.SetChatWallPaper
     | updates.GetState | updates.GetDifference | updates.GetChannelDifference
     | photos.UpdateProfilePhoto | photos.UploadProfilePhoto | photos.DeletePhotos | photos.GetUserPhotos | photos.UploadContactProfilePhoto
@@ -15317,6 +15464,6 @@ namespace Api {
     | folders.EditPeerFolders
     | stats.GetBroadcastStats | stats.LoadAsyncGraph | stats.GetMegagroupStats | stats.GetMessagePublicForwards | stats.GetMessageStats
     | chatlists.ExportChatlistInvite | chatlists.DeleteExportedInvite | chatlists.EditExportedInvite | chatlists.GetExportedInvites | chatlists.CheckChatlistInvite | chatlists.JoinChatlistInvite | chatlists.GetChatlistUpdates | chatlists.JoinChatlistUpdates | chatlists.HideChatlistUpdates | chatlists.GetLeaveChatlistSuggestions | chatlists.LeaveChatlist
-    | stories.CanSendStory | stories.SendStory | stories.EditStory | stories.DeleteStories | stories.TogglePinned | stories.GetAllStories | stories.GetUserStories | stories.GetPinnedStories | stories.GetStoriesArchive | stories.GetStoriesByID | stories.ToggleAllStoriesHidden | stories.GetAllReadUserStories | stories.ReadStories | stories.IncrementStoryViews | stories.GetStoryViewsList | stories.GetStoriesViews | stories.ExportStoryLink | stories.Report | stories.ActivateStealthMode | stories.SendReaction;
+    | stories.CanSendStory | stories.SendStory | stories.EditStory | stories.DeleteStories | stories.TogglePinned | stories.GetAllStories | stories.GetPinnedStories | stories.GetStoriesArchive | stories.GetStoriesByID | stories.ToggleAllStoriesHidden | stories.ReadStories | stories.IncrementStoryViews | stories.GetStoryViewsList | stories.GetStoriesViews | stories.ExportStoryLink | stories.Report | stories.ActivateStealthMode | stories.SendReaction | stories.GetPeerStories | stories.GetAllReadPeerStories | stories.GetPeerMaxIDs | stories.GetChatsToSend | stories.TogglePeerStoriesHidden | stories.GetBoostsStatus | stories.GetBoostersList | stories.CanApplyBoost | stories.ApplyBoost;
 
 }

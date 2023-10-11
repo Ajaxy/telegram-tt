@@ -82,3 +82,32 @@ export function getReactionUniqueKey(reaction: ApiReaction) {
 export function isReactionChosen(reaction: ApiReactionCount) {
   return reaction.chosenOrder !== undefined;
 }
+
+export function updateReactionCount(reactionCount: ApiReactionCount[], newReactions: ApiReaction[]) {
+  const results = reactionCount.map((current) => (
+    isReactionChosen(current) ? {
+      ...current,
+      chosenOrder: undefined,
+      count: current.count - 1,
+    } : current
+  )).filter(({ count }) => count > 0);
+
+  newReactions.forEach((reaction, i) => {
+    const existingIndex = results.findIndex((r) => isSameReaction(r.reaction, reaction));
+    if (existingIndex > -1) {
+      results[existingIndex] = {
+        ...results[existingIndex],
+        chosenOrder: i,
+        count: results[existingIndex].count + 1,
+      };
+    } else {
+      results.push({
+        reaction,
+        chosenOrder: i,
+        count: 1,
+      });
+    }
+  });
+
+  return results;
+}

@@ -29,7 +29,7 @@ import {
   updateUserSearchFetchingStatus,
 } from '../../reducers';
 import {
-  selectChat, selectCurrentMessageList, selectTabState, selectUser, selectUserFullInfo,
+  selectChat, selectCurrentMessageList, selectPeer, selectTabState, selectUser, selectUserFullInfo,
 } from '../../selectors';
 
 const TOP_PEERS_REQUEST_COOLDOWN = 60; // 1 min
@@ -213,7 +213,7 @@ addActionHandler('updateContact', async (global, actions, payload): Promise<void
 
   if (result) {
     actions.loadChatSettings({ chatId: userId });
-    actions.loadUserStories({ userId });
+    actions.loadPeerStories({ peerId: userId });
 
     global = getGlobal();
     global = updateUser(
@@ -359,12 +359,12 @@ addActionHandler('importContact', async (global, actions, payload): Promise<void
 
 addActionHandler('reportSpam', (global, actions, payload): ActionReturnType => {
   const { chatId } = payload!;
-  const userOrChat = isUserId(chatId) ? selectUser(global, chatId) : selectChat(global, chatId);
-  if (!userOrChat) {
+  const peer = selectPeer(global, chatId);
+  if (!peer) {
     return;
   }
 
-  void callApi('reportSpam', userOrChat);
+  void callApi('reportSpam', peer);
 });
 
 addActionHandler('setEmojiStatus', (global, actions, payload): ActionReturnType => {

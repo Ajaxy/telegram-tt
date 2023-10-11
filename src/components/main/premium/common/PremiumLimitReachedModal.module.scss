@@ -41,12 +41,12 @@
   align-items: flex-end;
   justify-content: flex-end;
   margin-top: 1rem;
+  gap: 1rem;
 }
 
-.subscribe-button {
-  margin-left: 1rem !important;
-  --premium-gradient: linear-gradient(88.39deg, #6C93FF -2.56%, #976FFF 51.27%, #DF69D1 107.39%);
-  background: var(--premium-gradient);
+.x2 {
+  font-size: 1.25rem;
+  margin-inline-start: 0.25rem;
 }
 
 .button-icon {

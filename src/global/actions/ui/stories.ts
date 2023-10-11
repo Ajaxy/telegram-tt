@@ -7,48 +7,49 @@ import { buildCollectionByKey, omit } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import { callApi } from '../../../api/gramjs';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
-import { addStoriesForUser, addUsers } from '../../reducers';
+import { addChats, addStoriesForPeer, addUsers } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectCurrentViewedStory,
+  selectPeer,
+  selectPeerFirstStoryId,
+  selectPeerFirstUnreadStoryId,
+  selectPeerStories,
   selectTabState,
-  selectUser,
-  selectUserFirstStoryId,
-  selectUserFirstUnreadStoryId,
-  selectUserStories,
 } from '../../selectors';
 import { fetchChatByUsername } from '../api/chats';
 
 addActionHandler('openStoryViewer', async (global, actions, payload): Promise<void> => {
   const {
-    userId, storyId, isSingleUser, isSingleStory, isPrivate, isArchive, origin, tabId = getCurrentTabId(),
+    peerId, storyId, isSinglePeer, isSingleStory, isPrivate, isArchive, origin, tabId = getCurrentTabId(),
   } = payload;
 
-  const user = selectUser(global, userId);
-  if (!user) {
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
     return;
   }
 
   const tabState = selectTabState(global, tabId);
-  const userStories = selectUserStories(global, userId);
+  const peerStories = selectPeerStories(global, peerId);
 
-  if (storyId && (!userStories || !userStories.byId[storyId])) {
-    const result = await callApi('fetchUserStoriesByIds', { user, ids: [storyId] });
+  if (storyId && (!peerStories || !peerStories.byId[storyId])) {
+    const result = await callApi('fetchPeerStoriesByIds', { peer, ids: [storyId] });
 
     if (!result) {
       return;
     }
     global = getGlobal();
     global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    global = addStoriesForUser(global, userId, result.stories);
+    global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+    global = addStoriesForPeer(global, peerId, result.stories);
   }
 
   global = updateTabState(global, {
     storyViewer: {
       ...tabState.storyViewer,
-      userId,
-      storyId: storyId || selectUserFirstUnreadStoryId(global, userId) || selectUserFirstStoryId(global, userId),
-      isSingleUser,
+      peerId,
+      storyId: storyId || selectPeerFirstUnreadStoryId(global, peerId) || selectPeerFirstStoryId(global, peerId),
+      isSinglePeer,
       isPrivate,
       isArchive,
       isSingleStory,
@@ -71,9 +72,9 @@ addActionHandler('openStoryViewerByUsername', async (global, actions, payload): 
   }
 
   actions.openStoryViewer({
-    userId: chat.id,
+    peerId: chat.id,
     storyId,
-    isSingleUser: true,
+    isSinglePeer: true,
     isSingleStory: true,
     origin,
     tabId,
@@ -93,7 +94,7 @@ addActionHandler('closeStoryViewer', (global, actions, payload): ActionReturnTyp
       isMuted,
       isRibbonShown,
       isArchivedRibbonShown,
-      lastViewedByUserIds: undefined,
+      lastViewedByPeerIds: undefined,
     },
   }, tabId);
 
@@ -117,7 +118,7 @@ addActionHandler('setStoryViewerMuted', (global, actions, payload): ActionReturn
 addActionHandler('toggleStoryRibbon', (global, actions, payload): ActionReturnType => {
   const { isShown, isArchived, tabId = getCurrentTabId() } = payload;
 
-  const orderedIds = global.stories.orderedUserIds[isArchived ? 'archived' : 'active'];
+  const orderedIds = global.stories.orderedPeerIds[isArchived ? 'archived' : 'active'];
   if (!orderedIds?.length) {
     return global;
   }
@@ -134,7 +135,7 @@ addActionHandler('openPreviousStory', (global, actions, payload): ActionReturnTy
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
   const {
-    userId, storyId, isSingleUser, isSingleStory, isPrivate, isArchive,
+    peerId, storyId, isSinglePeer, isSingleStory, isPrivate, isArchive,
   } = tabState.storyViewer;
 
   if (isSingleStory) {
@@ -142,38 +143,38 @@ addActionHandler('openPreviousStory', (global, actions, payload): ActionReturnTy
     return undefined;
   }
 
-  const { orderedUserIds: { active, archived } } = global.stories;
-  if (!userId || !storyId) {
+  const { orderedPeerIds: { active, archived } } = global.stories;
+  if (!peerId || !storyId) {
     return undefined;
   }
 
-  const user = selectUser(global, userId);
-  const userStories = selectUserStories(global, userId);
-  if (!userStories || !user) {
+  const peer = selectPeer(global, peerId);
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peerStories || !peer) {
     return undefined;
   }
 
-  const orderedUserIds = (user.areStoriesHidden ? archived : active) ?? [];
+  const orderedPeerIds = (peer.areStoriesHidden ? archived : active) ?? [];
   const storySourceProp = isArchive ? 'archiveIds' : isPrivate ? 'pinnedIds' : 'orderedIds';
-  const userStoryIds = userStories[storySourceProp] ?? [];
-  const currentStoryIndex = userStoryIds.indexOf(storyId);
+  const peerStoryIds = peerStories[storySourceProp] ?? [];
+  const currentStoryIndex = peerStoryIds.indexOf(storyId);
   let previousStoryIndex: number;
-  let previousUserId: string;
+  let previousPeerId: string;
 
   if (currentStoryIndex > 0) {
     previousStoryIndex = currentStoryIndex - 1;
-    previousUserId = userId;
+    previousPeerId = peerId;
   } else {
-    const previousUserIdIndex = orderedUserIds.indexOf(userId) - 1;
-    if (isSingleUser || previousUserIdIndex < 0) {
+    const previousPeerIdIndex = orderedPeerIds.indexOf(peerId) - 1;
+    if (isSinglePeer || previousPeerIdIndex < 0) {
       return undefined;
     }
 
-    previousUserId = orderedUserIds[previousUserIdIndex];
-    previousStoryIndex = (selectUserStories(global, previousUserId)?.orderedIds.length || 1) - 1;
+    previousPeerId = orderedPeerIds[previousPeerIdIndex];
+    previousStoryIndex = (selectPeerStories(global, previousPeerId)?.orderedIds.length || 1) - 1;
   }
 
-  const previousStoryId = selectUserStories(global, previousUserId)?.[storySourceProp]?.[previousStoryIndex];
+  const previousStoryId = selectPeerStories(global, previousPeerId)?.[storySourceProp]?.[previousStoryIndex];
   if (!previousStoryId) {
     return undefined;
   }
@@ -181,7 +182,7 @@ addActionHandler('openPreviousStory', (global, actions, payload): ActionReturnTy
   return updateTabState(global, {
     storyViewer: {
       ...tabState.storyViewer,
-      userId: previousUserId,
+      peerId: previousPeerId,
       storyId: previousStoryId,
     },
   }, tabId);
@@ -191,46 +192,46 @@ addActionHandler('openNextStory', (global, actions, payload): ActionReturnType =
   const { tabId = getCurrentTabId() } = payload || {};
   const tabState = selectTabState(global, tabId);
   const {
-    userId, storyId, isSingleUser, isSingleStory, isPrivate, isArchive,
+    peerId, storyId, isSinglePeer, isSingleStory, isPrivate, isArchive,
   } = tabState.storyViewer;
   if (isSingleStory) {
     actions.closeStoryViewer({ tabId });
     return undefined;
   }
 
-  const { orderedUserIds: { active, archived } } = global.stories;
-  if (!userId || !storyId) {
+  const { orderedPeerIds: { active, archived } } = global.stories;
+  if (!peerId || !storyId) {
     return undefined;
   }
 
-  const user = selectUser(global, userId);
-  const userStories = selectUserStories(global, userId);
-  if (!userStories || !user) {
+  const peer = selectPeer(global, peerId);
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peerStories || !peer) {
     return undefined;
   }
 
-  const orderedUserIds = (user.areStoriesHidden ? archived : active) ?? [];
+  const orderedPeerIds = (peer.areStoriesHidden ? archived : active) ?? [];
   const storySourceProp = isArchive ? 'archiveIds' : isPrivate ? 'pinnedIds' : 'orderedIds';
-  const userStoryIds = userStories[storySourceProp] ?? [];
-  const currentStoryIndex = userStoryIds.indexOf(storyId);
+  const peerStoryIds = peerStories[storySourceProp] ?? [];
+  const currentStoryIndex = peerStoryIds.indexOf(storyId);
   let nextStoryIndex: number;
-  let nextUserId: string;
+  let nextPeerId: string;
 
-  if (currentStoryIndex < userStoryIds.length - 1) {
+  if (currentStoryIndex < peerStoryIds.length - 1) {
     nextStoryIndex = currentStoryIndex + 1;
-    nextUserId = userId;
+    nextPeerId = peerId;
   } else {
-    const nextUserIdIndex = orderedUserIds.indexOf(userId) + 1;
-    if (isSingleUser || nextUserIdIndex > orderedUserIds.length - 1) {
+    const nextPeerIdIndex = orderedPeerIds.indexOf(peerId) + 1;
+    if (isSinglePeer || nextPeerIdIndex > orderedPeerIds.length - 1) {
       actions.closeStoryViewer({ tabId });
       return undefined;
     }
 
-    nextUserId = orderedUserIds[nextUserIdIndex];
+    nextPeerId = orderedPeerIds[nextPeerIdIndex];
     nextStoryIndex = 0;
   }
 
-  const nextStoryId = selectUserStories(global, nextUserId)?.[storySourceProp]?.[nextStoryIndex];
+  const nextStoryId = selectPeerStories(global, nextPeerId)?.[storySourceProp]?.[nextStoryIndex];
   if (!nextStoryId) {
     return undefined;
   }
@@ -238,7 +239,7 @@ addActionHandler('openNextStory', (global, actions, payload): ActionReturnType =
   return updateTabState(global, {
     storyViewer: {
       ...tabState.storyViewer,
-      userId: nextUserId,
+      peerId: nextPeerId,
       storyId: nextStoryId,
     },
   }, tabId);
@@ -270,9 +271,14 @@ addActionHandler('closeStoryViewModal', (global, actions, payload): ActionReturn
 });
 
 addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void> => {
-  const { userId, storyId, tabId = getCurrentTabId() } = payload;
+  const { peerId, storyId, tabId = getCurrentTabId() } = payload;
 
-  const link = await callApi('fetchStoryLink', { userId, storyId });
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const link = await callApi('fetchStoryLink', { peer, storyId });
   if (!link) {
     return;
   }
@@ -286,8 +292,8 @@ addActionHandler('copyStoryLink', async (global, actions, payload): Promise<void
 
 addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => {
   const { tabId = getCurrentTabId() } = payload;
-  const { storyId, userId: storyUserId } = selectCurrentViewedStory(global, tabId);
-  const isStoryReply = Boolean(storyId && storyUserId);
+  const { storyId, peerId: storyPeerId } = selectCurrentViewedStory(global, tabId);
+  const isStoryReply = Boolean(storyId && storyPeerId);
 
   if (!isStoryReply) {
     return;
@@ -314,7 +320,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
       payload: undefined,
     }, {
       action: 'openChat',
-      payload: { id: storyUserId },
+      payload: { id: storyPeerId },
     }],
     tabId,
   });
@@ -403,5 +409,13 @@ addActionHandler('updateStoryView', (global, actions, payload): ActionReturnType
         viewsById: updatedViewsById,
       },
     },
+  }, tabId);
+});
+
+addActionHandler('closeBoostModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    boostModal: undefined,
   }, tabId);
 });

@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiChatSettings, ApiUser } from '../../api/types';
 
 import {
-  getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup, isUserId,
+  getChatTitle, getUserFirstOrLastName, getUserFullName, isChatBasicGroup,
 } from '../../global/helpers';
 import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
@@ -174,6 +174,6 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => ({
     currentUserId: global.currentUserId,
     chat: selectChat(global, chatId),
-    user: isUserId(chatId) ? selectUser(global, chatId) : undefined,
+    user: selectUser(global, chatId),
   }),
 )(ChatReportPanel));

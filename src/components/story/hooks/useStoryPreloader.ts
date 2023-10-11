@@ -4,20 +4,20 @@ import { getGlobal } from '../../../global';
 import { ApiMediaFormat } from '../../../api/types';
 
 import { getStoryMediaHash } from '../../../global/helpers';
-import { selectUserStories } from '../../../global/selectors';
+import { selectPeerStories } from '../../../global/selectors';
 import * as mediaLoader from '../../../util/mediaLoader';
 import { pause } from '../../../util/schedulers';
 
 const preloadedStories: Record<string, Set<number>> = {};
-const USER_STORIES_FOR_PRELOAD = 5;
+const PEER_STORIES_FOR_PRELOAD = 5;
 const PROGRESSIVE_PRELOAD_DURATION = 1000;
 
 const FIRST_PRELOAD_DELAY = 1000;
 const canPreload = pause(FIRST_PRELOAD_DELAY);
 
-function useStoryPreloader(userIds: string[]): void;
-function useStoryPreloader(userId: string, aroundStoryId?: number): void;
-function useStoryPreloader(userId: string | string[], aroundStoryId?: number) {
+function useStoryPreloader(peerIds: string[]): void;
+function useStoryPreloader(peerId: string, aroundStoryId?: number): void;
+function useStoryPreloader(peerId: string | string[], aroundStoryId?: number) {
   useEffect(() => {
     const preloadHashes = async (mediaHashes: { hash: string; format: ApiMediaFormat }[]) => {
       await canPreload;
@@ -30,14 +30,14 @@ function useStoryPreloader(userId: string | string[], aroundStoryId?: number) {
       });
     };
 
-    const userIds = Array.isArray(userId) ? userId : [userId];
+    const peerIds = Array.isArray(peerId) ? peerId : [peerId];
 
-    userIds.forEach((id) => {
-      const storyId = aroundStoryId || getGlobal().stories.byUserId[id]?.orderedIds?.[0];
+    peerIds.forEach((id) => {
+      const storyId = aroundStoryId || getGlobal().stories.byPeerId[id]?.orderedIds?.[0];
       if (!storyId) return;
       preloadHashes(getPreloadMediaHashes(id, storyId));
     });
-  }, [aroundStoryId, userId]);
+  }, [aroundStoryId, peerId]);
 }
 
 function findIdsAroundCurrentId<T>(ids: T[], currentId: T, aroundAmount: number): T[] {
@@ -46,21 +46,21 @@ function findIdsAroundCurrentId<T>(ids: T[], currentId: T, aroundAmount: number)
   return ids.slice(currentIndex - aroundAmount, currentIndex + aroundAmount);
 }
 
-function getPreloadMediaHashes(userId: string, storyId: number) {
-  const userStories = selectUserStories(getGlobal(), userId);
-  if (!userStories || !userStories.orderedIds?.length) {
+function getPreloadMediaHashes(peerId: string, storyId: number) {
+  const peerStories = selectPeerStories(getGlobal(), peerId);
+  if (!peerStories || !peerStories.orderedIds?.length) {
     return [];
   }
 
-  const preloadIds = findIdsAroundCurrentId(userStories.orderedIds, storyId, USER_STORIES_FOR_PRELOAD);
+  const preloadIds = findIdsAroundCurrentId(peerStories.orderedIds, storyId, PEER_STORIES_FOR_PRELOAD);
 
   const mediaHashes: { hash: string; format: ApiMediaFormat }[] = [];
   preloadIds.forEach((currentStoryId) => {
-    if (preloadedStories[userId]?.has(currentStoryId)) {
+    if (preloadedStories[peerId]?.has(currentStoryId)) {
       return;
     }
 
-    const story = userStories.byId[currentStoryId];
+    const story = peerStories.byId[currentStoryId];
     if (!story || !('content' in story)) {
       return;
     }
@@ -77,7 +77,7 @@ function getPreloadMediaHashes(userId: string, storyId: number) {
       mediaHashes.push({ hash: getStoryMediaHash(story, 'full', true)!, format: ApiMediaFormat.Progressive });
     }
 
-    preloadedStories[userId] = (preloadedStories[userId] || new Set()).add(currentStoryId);
+    preloadedStories[peerId] = (preloadedStories[peerId] || new Set()).add(currentStoryId);
   });
 
   return mediaHashes;

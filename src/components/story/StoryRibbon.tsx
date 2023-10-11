@@ -1,7 +1,7 @@
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiChat, ApiUser } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -20,17 +20,23 @@ interface OwnProps {
 }
 
 interface StateProps {
-  orderedUserIds: string[];
+  orderedPeerIds: string[];
   usersById: Record<string, ApiUser>;
+  chatsById: Record<string, ApiChat>;
 }
 
 function StoryRibbon({
-  isArchived, className, orderedUserIds, usersById, isClosing,
+  isArchived,
+  className,
+  orderedPeerIds,
+  usersById,
+  chatsById,
+  isClosing,
 }: OwnProps & StateProps) {
   const lang = useLang();
   const fullClassName = buildClassName(
     styles.root,
-    !orderedUserIds.length && styles.hidden,
+    !orderedPeerIds.length && styles.hidden,
     isClosing && styles.closing,
     className,
     'no-scrollbar',
@@ -48,17 +54,17 @@ function StoryRibbon({
       className={fullClassName}
       dir={lang.isRtl ? 'rtl' : undefined}
     >
-      {orderedUserIds.map((userId) => {
-        const user = usersById[userId];
+      {orderedPeerIds.map((peerId) => {
+        const peer = usersById[peerId] || chatsById[peerId];
 
-        if (!user) {
+        if (!peer) {
           return undefined;
         }
 
         return (
           <StoryRibbonButton
-            key={userId}
-            user={user}
+            key={peerId}
+            peer={peer}
             isArchived={isArchived}
           />
         );
@@ -69,12 +75,14 @@ function StoryRibbon({
 
 export default memo(withGlobal<OwnProps>(
   (global, { isArchived }): StateProps => {
-    const { orderedUserIds: { active, archived } } = global.stories;
+    const { orderedPeerIds: { active, archived } } = global.stories;
     const usersById = global.users.byId;
+    const chatsById = global.chats.byId;
 
     return {
-      orderedUserIds: isArchived ? archived : active,
+      orderedPeerIds: isArchived ? archived : active,
       usersById,
+      chatsById,
     };
   },
 )(StoryRibbon));

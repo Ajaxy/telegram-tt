@@ -359,7 +359,8 @@
     .Spinner {
       position: absolute;
       right: 0.875rem;
-      top: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
 
       --spinner-size: 1.8125rem;
     }

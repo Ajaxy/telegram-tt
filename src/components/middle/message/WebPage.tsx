@@ -81,7 +81,7 @@ const WebPage: FC<OwnProps> = ({
 
   const { story: storyData } = webPage || {};
 
-  useEnsureStory(storyData?.userId, storyData?.id, story);
+  useEnsureStory(storyData?.peerId, storyData?.id, story);
 
   if (!webPage) {
     return undefined;

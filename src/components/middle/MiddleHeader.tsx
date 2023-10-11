@@ -5,7 +5,7 @@ import React, {
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiTypingStatus, ApiUser,
+  ApiChat, ApiMessage, ApiPeer, ApiTypingStatus,
 } from '../../api/types';
 import type { GlobalState, MessageListType } from '../../global/types';
 import type { Signal } from '../../util/signals';
@@ -98,7 +98,7 @@ type StateProps = {
   pinnedMessageIds?: number[] | number;
   messagesById?: Record<number, ApiMessage>;
   canUnpin?: boolean;
-  topMessageSender?: ApiChat | ApiUser;
+  topMessageSender?: ApiPeer;
   typingStatus?: ApiTypingStatus;
   isSelectModeActive?: boolean;
   isLeftColumnShown?: boolean;
@@ -401,6 +401,8 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
               withMediaViewer={threadId === MAIN_THREAD_ID}
               withFullInfo={threadId === MAIN_THREAD_ID}
               withUpdatingStatus
+              withStory
+              storyViewerOrigin={StoryViewerOrigin.MiddleHeaderAvatar}
               noRtl
             />
           )}

@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiStory, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import { ApiMessageEntityTypes } from '../../api/types';
@@ -184,7 +184,7 @@ export function isAnonymousOwnMessage(message: ApiMessage) {
   return Boolean(message.senderId) && !isUserId(message.senderId!) && isOwnMessage(message);
 }
 
-export function getSenderTitle(lang: LangFn, sender: ApiUser | ApiChat) {
+export function getSenderTitle(lang: LangFn, sender: ApiPeer) {
   return isUserId(sender.id) ? getUserFullName(sender as ApiUser) : getChatTitle(lang, sender as ApiChat);
 }
 

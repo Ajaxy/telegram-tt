@@ -164,9 +164,9 @@ export function deleteContact<T extends GlobalState>(global: T, userId: string):
     ...global,
     stories: {
       ...global.stories,
-      orderedUserIds: {
-        active: global.stories.orderedUserIds.active.filter((id) => id !== userId),
-        archived: global.stories.orderedUserIds.archived.filter((id) => id !== userId),
+      orderedPeerIds: {
+        active: global.stories.orderedPeerIds.active.filter((id) => id !== userId),
+        archived: global.stories.orderedPeerIds.archived.filter((id) => id !== userId),
       },
     },
   };

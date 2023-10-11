@@ -18,8 +18,7 @@ import RadioGroup from '../ui/RadioGroup';
 export type OwnProps = {
   isOpen: boolean;
   subject?: 'peer' | 'messages' | 'media' | 'story';
-  chatId?: string;
-  userId?: string;
+  peerId?: string;
   photo?: ApiPhoto;
   messageIds?: number[];
   storyId?: number;
@@ -30,8 +29,7 @@ export type OwnProps = {
 const ReportModal: FC<OwnProps> = ({
   isOpen,
   subject = 'messages',
-  chatId,
-  userId,
+  peerId,
   photo,
   messageIds,
   storyId,
@@ -56,16 +54,16 @@ const ReportModal: FC<OwnProps> = ({
         exitMessageSelectMode();
         break;
       case 'peer':
-        reportPeer({ chatId, reason: selectedReason, description });
+        reportPeer({ chatId: peerId, reason: selectedReason, description });
         break;
       case 'media':
         reportProfilePhoto({
-          chatId, photo, reason: selectedReason, description,
+          chatId: peerId, photo, reason: selectedReason, description,
         });
         break;
       case 'story':
         reportStory({
-          userId: userId!, storyId: storyId!, reason: selectedReason, description,
+          peerId: peerId!, storyId: storyId!, reason: selectedReason, description,
         });
     }
     onClose();
@@ -94,9 +92,9 @@ const ReportModal: FC<OwnProps> = ({
 
   if (
     (subject === 'messages' && !messageIds)
-    || (subject === 'peer' && !chatId)
-    || (subject === 'media' && (!chatId || !photo))
-    || (subject === 'story' && (!storyId || !userId))
+    || (subject === 'peer' && !peerId)
+    || (subject === 'media' && (!peerId || !photo))
+    || (subject === 'story' && (!storyId || !peerId))
   ) {
     return undefined;
   }

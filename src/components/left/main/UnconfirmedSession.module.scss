@@ -1,0 +1,32 @@
+/* stylelint-disable-next-line */
+@value minimized from "./Archive.module.scss";
+
+.root {
+  padding: 0.5rem;
+  text-align: center;
+
+  & + :global(.minimized) {
+    margin-top: 0 !important;
+  }
+}
+
+.title {
+  font-size: 1rem;
+}
+
+.info {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  column-gap: 1rem;
+}
+
+.button {
+  font-size: 0.875rem;
+  font-weight: 500;
+}

@@ -1,10 +1,10 @@
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiPeer } from '../../api/types';
 import { StoryViewerOrigin } from '../../types';
 
-import { getUserFirstOrLastName } from '../../global/helpers';
+import { getSenderTitle, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -21,11 +21,11 @@ import MenuItem from '../ui/MenuItem';
 import styles from './StoryRibbon.module.scss';
 
 interface OwnProps {
-  user: ApiUser;
+  peer: ApiPeer;
   isArchived?: boolean;
 }
 
-function StoryRibbonButton({ user, isArchived }: OwnProps) {
+function StoryRibbonButton({ peer, isArchived }: OwnProps) {
   const {
     openChat,
     openChatWithInfo,
@@ -37,7 +37,10 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
 
-  useStoryPreloader(user.id);
+  const isSelf = 'isSelf' in peer && peer.isSelf;
+  const isChannel = !isUserId(peer.id);
+
+  useStoryPreloader(peer.id);
 
   const {
     isContextMenuOpen, contextMenuPosition,
@@ -47,7 +50,7 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
 
   const getTriggerElement = useLastCallback(() => ref.current);
   const getRootElement = useLastCallback(() => document.body);
-  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.story-user-context-menu .bubble'));
+  const getMenuElement = useLastCallback(() => ref.current!.querySelector('.story-peer-context-menu .bubble'));
   const getLayout = useLastCallback(() => ({ withPortal: true, isDense: true }));
 
   const {
@@ -63,7 +66,7 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
   const handleClick = useLastCallback(() => {
     if (isContextMenuOpen) return;
 
-    openStoryViewer({ userId: user.id, origin: StoryViewerOrigin.StoryRibbon });
+    openStoryViewer({ peerId: peer.id, origin: StoryViewerOrigin.StoryRibbon });
   });
 
   const handleMouseDown = useLastCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -72,44 +75,44 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
   });
 
   const handleSavedStories = useLastCallback(() => {
-    openChatWithInfo({ id: user.id, shouldReplaceHistory: true, profileTab: 'stories' });
+    openChatWithInfo({ id: peer.id, shouldReplaceHistory: true, profileTab: 'stories' });
   });
 
   const handleArchivedStories = useLastCallback(() => {
-    openChatWithInfo({ id: user.id, shouldReplaceHistory: true, profileTab: 'storiesArchive' });
+    openChatWithInfo({ id: peer.id, shouldReplaceHistory: true, profileTab: 'storiesArchive' });
   });
 
   const handleOpenChat = useLastCallback(() => {
-    openChat({ id: user.id, shouldReplaceHistory: true });
+    openChat({ id: peer.id, shouldReplaceHistory: true });
   });
 
   const handleOpenProfile = useLastCallback(() => {
-    openChatWithInfo({ id: user.id, shouldReplaceHistory: true });
+    openChatWithInfo({ id: peer.id, shouldReplaceHistory: true });
   });
 
-  const handleArchiveUser = useLastCallback(() => {
-    toggleStoriesHidden({ userId: user.id, isHidden: !isArchived });
+  const handleArchivePeer = useLastCallback(() => {
+    toggleStoriesHidden({ peerId: peer.id, isHidden: !isArchived });
   });
 
   return (
     <div
       ref={ref}
       role="button"
-      data-peer-id={user.id}
+      data-peer-id={peer.id}
       tabIndex={0}
-      className={styles.user}
+      className={styles.peer}
       onMouseDown={handleMouseDown}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
       <Avatar
-        peer={user}
+        peer={peer}
         withStory
         storyViewerOrigin={StoryViewerOrigin.StoryRibbon}
         storyViewerMode="full"
       />
-      <div className={buildClassName(styles.name, user.hasUnreadStories && styles.name_hasUnreadStory)}>
-        {user.isSelf ? lang('MyStory') : getUserFirstOrLastName(user)}
+      <div className={buildClassName(styles.name, peer.hasUnreadStories && styles.name_hasUnreadStory)}>
+        {isSelf ? lang('MyStory') : getSenderTitle(lang, peer)}
       </div>
       {contextMenuPosition !== undefined && (
         <Menu
@@ -119,13 +122,13 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
           positionX={positionX}
           positionY={positionY}
           style={menuStyle}
-          className={buildClassName('story-user-context-menu', styles.contextMenu)}
+          className={buildClassName('story-peer-context-menu', styles.contextMenu)}
           autoClose
           withPortal
           onClose={handleContextMenuClose}
           onCloseAnimationEnd={handleContextMenuHide}
         >
-          {user.isSelf ? (
+          {isSelf ? (
             <>
               <MenuItem onClick={handleSavedStories} icon="play-story">
                 {lang('StoryList.Context.SavedStories')}
@@ -136,14 +139,22 @@ function StoryRibbonButton({ user, isArchived }: OwnProps) {
             </>
           ) : (
             <>
-              <MenuItem onClick={handleOpenChat} icon="message">
-                {lang('SendMessageTitle')}
-              </MenuItem>
-              <MenuItem onClick={handleOpenProfile} icon="user">
-                {lang('StoryList.Context.ViewProfile')}
-              </MenuItem>
+              {!isChannel && (
+                <MenuItem onClick={handleOpenChat} icon="message">
+                  {lang('SendMessageTitle')}
+                </MenuItem>
+              )}
+              {isChannel ? (
+                <MenuItem onClick={handleOpenProfile} icon="channel">
+                  {lang('ChatList.ContextOpenChannel')}
+                </MenuItem>
+              ) : (
+                <MenuItem onClick={handleOpenProfile} icon="user">
+                  {lang('StoryList.Context.ViewProfile')}
+                </MenuItem>
+              )}
               <MenuItem
-                onClick={handleArchiveUser}
+                onClick={handleArchivePeer}
                 icon={isArchived ? 'unarchive' : 'archive'}
               >
                 {lang(isArchived ? 'StoryList.Context.Unarchive' : 'StoryList.Context.Archive')}

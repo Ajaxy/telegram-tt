@@ -1,3 +1,4 @@
+import type { ApiReactionEmoji } from './api/types';
 import type { ApiLimitType } from './global/types';
 
 export const APP_CODE_NAME = 'A';
@@ -51,7 +52,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v23';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v24';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -213,7 +214,6 @@ export const MENU_TRANSITION_DURATION = 200;
 export const SLIDE_TRANSITION_DURATION = 450;
 
 export const VIDEO_WEBM_TYPE = 'video/webm';
-
 export const GIF_MIME_TYPE = 'image/gif';
 
 export const SUPPORTED_IMAGE_CONTENT_TYPES = new Set([
@@ -279,6 +279,10 @@ export const COUNTRIES_WITH_12H_TIME_FORMAT = new Set(['AU', 'BD', 'CA', 'CO', '
 
 export const API_CHAT_TYPES = ['bots', 'channels', 'chats', 'users'] as const;
 
+export const HEART_REACTION: ApiReactionEmoji = {
+  emoticon: '❤',
+};
+
 // MTProto constants
 export const SERVICE_NOTIFICATIONS_USER_ID = '777000';
 export const REPLIES_USER_ID = '1271266957'; // TODO For Test connection ID must be equal to 708513
@@ -301,6 +305,7 @@ export const MINI_APP_TOS_URL = 'https://telegram.org/tos/mini-apps';
 export const GENERAL_TOPIC_ID = 1;
 export const STORY_EXPIRE_PERIOD = 86400; // 1 day
 export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
+export const FRESH_AUTH_PERIOD = 86400; // 1 day
 
 export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';

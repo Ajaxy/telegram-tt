@@ -36,17 +36,17 @@ import {
   selectChatMessages,
   selectCurrentMediaSearch,
   selectIsRightColumnShown,
+  selectPeerFullInfo,
+  selectPeerStories,
   selectTabState,
   selectTheme,
   selectUser,
-  selectUserFullInfo,
-  selectUserStories,
 } from '../../global/selectors';
 import { captureEvents, SwipeDirection } from '../../util/captureEvents';
 import { IS_TOUCH_ENV } from '../../util/windowEnvironment';
 import { getSenderName } from '../left/search/helpers/getSenderName';
 
-import useUserStoriesPolling from '../../hooks/polling/useUserStoriesPolling';
+import usePeerStoriesPolling from '../../hooks/polling/usePeerStoriesPolling';
 import useCacheBuster from '../../hooks/useCacheBuster';
 import useEffectWithPrevDeps from '../../hooks/useEffectWithPrevDeps';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
@@ -171,7 +171,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     focusMessage,
     loadProfilePhotos,
     setNewChatMembersDialogState,
-    loadUserPinnedStories,
+    loadPeerPinnedStories,
     loadStoriesArchive,
   } = getActions();
 
@@ -216,18 +216,18 @@ const Profile: FC<OwnProps & StateProps> = ({
 
   const renderingActiveTab = activeTab > tabs.length - 1 ? tabs.length - 1 : activeTab;
   const tabType = tabs[renderingActiveTab].type as ProfileTabType;
-  const handleLoadUserStories = useCallback(({ offsetId }: { offsetId: number }) => {
-    loadUserPinnedStories({ userId: chatId, offsetId });
+  const handleLoadPeerStories = useCallback(({ offsetId }: { offsetId: number }) => {
+    loadPeerPinnedStories({ peerId: chatId, offsetId });
   }, [chatId]);
   const handleLoadStoriesArchive = useCallback(({ offsetId }: { offsetId: number }) => {
-    loadStoriesArchive({ offsetId });
-  }, []);
+    loadStoriesArchive({ peerId: currentUserId!, offsetId });
+  }, [currentUserId]);
 
   const [resultType, viewportIds, getMore, noProfileInfo] = useProfileViewportIds(
     loadMoreMembers,
     loadCommonChats,
     searchMediaMessagesLocal,
-    handleLoadUserStories,
+    handleLoadPeerStories,
     handleLoadStoriesArchive,
     tabType,
     mediaSearchType,
@@ -247,7 +247,7 @@ const Profile: FC<OwnProps & StateProps> = ({
     || (!hasMembersTab && resultType === 'media');
   const activeKey = tabs.findIndex(({ type }) => type === resultType);
 
-  useUserStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
+  usePeerStoriesPolling(resultType === 'members' ? viewportIds as string[] : undefined);
 
   const { handleScroll } = useProfileState(containerRef, resultType, profileState, onProfileStateChange);
 
@@ -607,24 +607,22 @@ export default memo(withGlobal<OwnProps>(
     const activeDownloads = selectActiveDownloads(global, chatId);
 
     let hasCommonChatsTab;
-    let hasStoriesTab;
     let resolvedUserId;
     let user;
-    let storyIds;
-    let archiveStoryIds;
-    let storyByIds;
     if (isUserId(chatId)) {
       resolvedUserId = chatId;
       user = selectUser(global, resolvedUserId);
-      const userFullInfo = selectUserFullInfo(global, chatId);
       hasCommonChatsTab = user && !user.isSelf && !isUserBot(user);
-      hasStoriesTab = IS_STORIES_ENABLED
-        && user && (user.isSelf || (!user.areStoriesHidden && userFullInfo?.hasPinnedStories));
-      const userStories = hasStoriesTab ? selectUserStories(global, user!.id) : undefined;
-      storyIds = userStories?.pinnedIds;
-      storyByIds = userStories?.byId;
-      archiveStoryIds = userStories?.archiveIds;
     }
+
+    const peer = user || chat;
+    const peerFullInfo = selectPeerFullInfo(global, chatId);
+    const hasStoriesTab = IS_STORIES_ENABLED
+      && peer && (user?.isSelf || (!peer.areStoriesHidden && peerFullInfo?.hasPinnedStories));
+    const peerStories = hasStoriesTab ? selectPeerStories(global, peer.id) : undefined;
+    const storyIds = peerStories?.pinnedIds;
+    const storyByIds = peerStories?.byId;
+    const archiveStoryIds = peerStories?.archiveIds;
 
     return {
       theme: selectTheme(global),

@@ -15,6 +15,7 @@ import {
   updateChatFullInfo,
   updateChatListIds,
   updateChatListType,
+  updatePeerStoriesHidden,
   updateTopic,
 } from '../../reducers';
 import { updateUnreadReactions } from '../../reducers/reactions';
@@ -46,7 +47,14 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
         };
       }
 
+      const localChat = selectChat(global, update.id);
+
       global = updateChat(global, update.id, update.chat, update.newProfilePhoto);
+
+      if (localChat?.areStoriesHidden !== update.chat.areStoriesHidden) {
+        global = updatePeerStoriesHidden(global, update.id, update.chat.areStoriesHidden || false);
+      }
+
       setGlobal(global);
 
       if (!update.noTopChatsRequest && !selectIsChatListed(global, update.id)) {

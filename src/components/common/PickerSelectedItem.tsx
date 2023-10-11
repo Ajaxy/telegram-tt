@@ -5,7 +5,7 @@ import { withGlobal } from '../../global';
 import type { ApiChat, ApiUser } from '../../api/types';
 import type { IconName } from '../../types/icons';
 
-import { getChatTitle, getUserFirstOrLastName, isUserId } from '../../global/helpers';
+import { getChatTitle, getUserFirstOrLastName } from '../../global/helpers';
 import { selectChat, selectUser } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import renderText from './helpers/renderText';
@@ -17,13 +17,14 @@ import Avatar from './Avatar';
 import './PickerSelectedItem.scss';
 
 type OwnProps = {
-  chatOrUserId?: string;
+  peerId?: string;
   icon?: IconName;
   title?: string;
   isMinimized?: boolean;
+  isStandalone?: boolean;
   canClose?: boolean;
   forceShowSelf?: boolean;
-  clickArg: any;
+  clickArg?: any;
   className?: string;
   onClick: (arg: any) => void;
 };
@@ -38,6 +39,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   icon,
   title,
   isMinimized,
+  isStandalone,
   canClose,
   clickArg,
   chat,
@@ -81,6 +83,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     chat?.isForum && 'forum-avatar',
     isMinimized && 'minimized',
     canClose && 'closeable',
+    isStandalone && 'standalone',
   );
 
   return (
@@ -106,13 +109,13 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
 };
 
 export default memo(withGlobal<OwnProps>(
-  (global, { chatOrUserId, forceShowSelf }): StateProps => {
-    if (!chatOrUserId) {
+  (global, { peerId, forceShowSelf }): StateProps => {
+    if (!peerId) {
       return {};
     }
 
-    const chat = chatOrUserId ? selectChat(global, chatOrUserId) : undefined;
-    const user = isUserId(chatOrUserId) ? selectUser(global, chatOrUserId) : undefined;
+    const chat = selectChat(global, peerId);
+    const user = selectUser(global, peerId);
     const isSavedMessages = !forceShowSelf && user && user.isSelf;
 
     return {

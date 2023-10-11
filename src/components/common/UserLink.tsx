@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { useCallback } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiPeer } from '../../api/types';
 
 import buildClassName from '../../util/buildClassName';
 
@@ -10,7 +10,7 @@ import Link from '../ui/Link';
 
 type OwnProps = {
   className?: string;
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   children: React.ReactNode;
 };
 

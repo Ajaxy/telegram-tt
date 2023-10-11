@@ -1070,32 +1070,32 @@ export function updater(update: Update) {
     }
 
     const { story } = update;
-    const userId = buildApiPeerId(update.userId, 'user');
-    addStoryToLocalDb(story, userId);
+    const peerId = getApiChatIdFromMtpPeer(update.peer);
+    addStoryToLocalDb(story, peerId);
 
     if (story instanceof GramJs.StoryItemDeleted) {
       onUpdate({
         '@type': 'deleteStory',
-        userId,
+        peerId,
         storyId: story.id,
       });
     } else {
       onUpdate({
         '@type': 'updateStory',
-        userId,
-        story: buildApiStory(userId, story) as ApiStory | ApiStorySkipped,
+        peerId,
+        story: buildApiStory(peerId, story) as ApiStory | ApiStorySkipped,
       });
     }
   } else if (update instanceof GramJs.UpdateReadStories) {
     onUpdate({
       '@type': 'updateReadStories',
-      userId: buildApiPeerId(update.userId, 'user'),
+      peerId: getApiChatIdFromMtpPeer(update.peer),
       lastReadId: update.maxId,
     });
   } else if (update instanceof GramJs.UpdateSentStoryReaction) {
     onUpdate({
       '@type': 'updateSentStoryReaction',
-      userId: buildApiPeerId(update.userId, 'user'),
+      peerId: getApiChatIdFromMtpPeer(update.peer),
       storyId: update.storyId,
       reaction: buildApiReaction(update.reaction),
     });
@@ -1107,6 +1107,15 @@ export function updater(update: Update) {
   } else if (update instanceof GramJs.UpdateAttachMenuBots) {
     onUpdate({
       '@type': 'updateAttachMenuBots',
+    });
+  } else if (update instanceof GramJs.UpdateNewAuthorization) {
+    onUpdate({
+      '@type': 'updateNewAuthorization',
+      hash: update.hash.toString(),
+      date: update.date,
+      device: update.device,
+      location: update.location,
+      isUnconfirmed: update.unconfirmed,
     });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;

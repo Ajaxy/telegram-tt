@@ -2,7 +2,7 @@ import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiChat, ApiSticker,
+  ApiChat, ApiPeer, ApiSticker,
   ApiUser, OnApiUpdate,
 } from '../../types';
 
@@ -285,7 +285,7 @@ export async function fetchProfilePhotos(user?: ApiUser, chat?: ApiChat) {
   };
 }
 
-export function reportSpam(userOrChat: ApiUser | ApiChat) {
+export function reportSpam(userOrChat: ApiPeer) {
   const { id, accessHash } = userOrChat;
 
   return invokeRequest(new GramJs.messages.ReportSpam({

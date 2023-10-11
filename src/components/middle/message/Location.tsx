@@ -4,7 +4,7 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import type { ApiMessage, ApiPeer } from '../../../api/types';
 import type { ISettings } from '../../../types';
 
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
@@ -47,7 +47,7 @@ const DEFAULT_MAP_CONFIG = {
 
 type OwnProps = {
   message: ApiMessage;
-  peer?: ApiUser | ApiChat;
+  peer?: ApiPeer;
   isInSelectMode?: boolean;
   isSelected?: boolean;
   theme: ISettings['theme'];

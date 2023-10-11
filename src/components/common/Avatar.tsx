@@ -3,7 +3,9 @@ import type { FC, TeactNode } from '../../lib/teact/teact';
 import React, { memo, useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
+import type {
+  ApiChat, ApiPeer, ApiPhoto, ApiUser,
+} from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 import type { StoryViewerOrigin } from '../../types';
 import { ApiMediaFormat } from '../../api/types';
@@ -13,8 +15,8 @@ import {
   getChatAvatarHash,
   getChatTitle,
   getPeerColorKey,
+  getPeerStoryHtmlId,
   getUserFullName,
-  getUserStoryHtmlId,
   isChatWithRepliesBot,
   isDeletedUser,
   isUserId,
@@ -45,7 +47,7 @@ cn.icon = cn('icon');
 type OwnProps = {
   className?: string;
   size?: AvatarSize;
-  peer?: ApiChat | ApiUser;
+  peer?: ApiPeer;
   photo?: ApiPhoto;
   text?: string;
   isSavedMessages?: boolean;
@@ -55,7 +57,7 @@ type OwnProps = {
   withStoryGap?: boolean;
   withStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
-  storyViewerMode?: 'full' | 'single-user' | 'disabled';
+  storyViewerMode?: 'full' | 'single-peer' | 'disabled';
   loopIndefinitely?: boolean;
   noPersonalPhoto?: boolean;
   observeIntersection?: ObserveFn;
@@ -75,7 +77,7 @@ const Avatar: FC<OwnProps> = ({
   withStoryGap,
   withStorySolid,
   storyViewerOrigin,
-  storyViewerMode = 'single-user',
+  storyViewerMode = 'single-peer',
   loopIndefinitely,
   noPersonalPhoto,
   onClick,
@@ -213,9 +215,9 @@ const Avatar: FC<OwnProps> = ({
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',
     isForum && 'forum',
-    IS_STORIES_ENABLED && ((withStory && user?.hasStories) || forPremiumPromo) && 'with-story-circle',
-    IS_STORIES_ENABLED && withStorySolid && user?.hasStories && 'with-story-solid',
-    IS_STORIES_ENABLED && withStorySolid && user?.hasUnreadStories && 'has-unread-story',
+    IS_STORIES_ENABLED && ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
+    IS_STORIES_ENABLED && withStorySolid && peer?.hasStories && 'with-story-solid',
+    IS_STORIES_ENABLED && withStorySolid && peer?.hasUnreadStories && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );
@@ -223,12 +225,12 @@ const Avatar: FC<OwnProps> = ({
   const hasMedia = Boolean(isSavedMessages || imgBlobUrl);
 
   const { handleClick, handleMouseDown } = useFastClick((e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (IS_STORIES_ENABLED && withStory && storyViewerMode !== 'disabled' && user?.hasStories) {
+    if (IS_STORIES_ENABLED && withStory && storyViewerMode !== 'disabled' && peer?.hasStories) {
       e.stopPropagation();
 
       openStoryViewer({
-        userId: user.id,
-        isSingleUser: storyViewerMode === 'single-user',
+        peerId: peer.id,
+        isSinglePeer: storyViewerMode === 'single-peer',
         origin: storyViewerOrigin,
       });
       return;
@@ -243,7 +245,7 @@ const Avatar: FC<OwnProps> = ({
     <div
       ref={ref}
       className={fullClassName}
-      id={peer?.id && withStory ? getUserStoryHtmlId(peer.id) : undefined}
+      id={peer?.id && withStory ? getPeerStoryHtmlId(peer.id) : undefined}
       data-peer-id={peer?.id}
       data-test-sender-id={IS_TEST ? peer?.id : undefined}
       aria-label={typeof content === 'string' ? author : undefined}
@@ -253,8 +255,8 @@ const Avatar: FC<OwnProps> = ({
       <div className="inner">
         {typeof content === 'string' ? renderText(content, [size === 'jumbo' ? 'hq_emoji' : 'emoji']) : content}
       </div>
-      {IS_STORIES_ENABLED && withStory && user?.hasStories && (
-        <AvatarStoryCircle userId={user.id} size={size} withExtraGap={withStoryGap} />
+      {IS_STORIES_ENABLED && withStory && peer?.hasStories && (
+        <AvatarStoryCircle peerId={peer.id} size={size} withExtraGap={withStoryGap} />
       )}
     </div>
   );

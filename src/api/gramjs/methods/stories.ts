@@ -2,22 +2,32 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiInputPrivacyRules } from '../../../types';
 import type {
-  ApiReaction, ApiReportReason, ApiStealthMode,
-  ApiTypeStory, ApiUser, ApiUserStories,
+  ApiChat,
+  ApiPeer,
+  ApiPeerStories,
+  ApiReaction,
+  ApiReportReason,
+  ApiStealthMode,
+  ApiTypeStory,
+  ApiUser,
 } from '../../types';
 
 import { STORY_LIST_LIMIT } from '../../../config';
 import { buildCollectionByCallback } from '../../../util/iteratees';
-import { buildApiPeerId } from '../apiBuilders/peers';
+import { buildApiChatFromPreview } from '../apiBuilders/chats';
+import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
+  buildApiApplyBoostInfo,
+  buildApiApplyBoostInfoFromError,
+  buildApiBoostsStatus,
+  buildApiPeerStories,
   buildApiStealthMode,
-  buildApiStory, buildApiStoryView, buildApiUsersStories,
+  buildApiStory,
+  buildApiStoryView,
 } from '../apiBuilders/stories';
 import { buildApiUser } from '../apiBuilders/users';
 import {
-  buildInputEntity,
   buildInputPeer,
-  buildInputPeerFromLocalDb,
   buildInputPrivacyRules,
   buildInputReaction,
   buildInputReportReason,
@@ -38,7 +48,8 @@ export async function fetchAllStories({
   | { state: string; stealthMode: ApiStealthMode }
   | {
     users: ApiUser[];
-    userStories: Record<string, ApiUserStories>;
+    chats: ApiChat[];
+    peerStories: Record<string, ApiPeerStories>;
     hasMore?: true;
     state: string;
     stealthMode: ApiStealthMode;
@@ -60,13 +71,14 @@ export async function fetchAllStories({
   }
 
   addEntitiesToLocalDb(result.users);
-  result.userStories.forEach((userStories) => (
-    userStories.stories.forEach((story) => addStoryToLocalDb(story, buildApiPeerId(userStories.userId, 'user')))
+  addEntitiesToLocalDb(result.chats);
+  result.peerStories.forEach((peerStories) => (
+    peerStories.stories.forEach((story) => addStoryToLocalDb(story, getApiChatIdFromMtpPeer(peerStories.peer)))
   ));
 
-  const allUserStories = result.userStories.reduce<Record<string, ApiUserStories>>((acc, userStories) => {
-    const userId = buildApiPeerId(userStories.userId, 'user');
-    const stories = buildApiUsersStories(userStories);
+  const allUserStories = result.peerStories.reduce<Record<string, ApiPeerStories>>((acc, peerStories) => {
+    const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
+    const stories = buildApiPeerStories(peerStories);
     const { pinnedIds, orderedIds, lastUpdatedAt } = Object.values(stories).reduce<
     {
       pinnedIds: number[];
@@ -93,12 +105,12 @@ export async function fetchAllStories({
       return acc;
     }
 
-    acc[userId] = {
+    acc[peerId] = {
       byId: stories,
       orderedIds,
       pinnedIds,
       lastUpdatedAt,
-      lastReadId: userStories.maxReadId,
+      lastReadId: peerStories.maxReadId,
     };
 
     return acc;
@@ -106,20 +118,21 @@ export async function fetchAllStories({
 
   return {
     users: result.users.map(buildApiUser).filter(Boolean),
-    userStories: allUserStories,
+    chats: result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+    peerStories: allUserStories,
     hasMore: result.hasMore,
     state: result.state,
     stealthMode: buildApiStealthMode(result.stealthMode),
   };
 }
 
-export async function fetchUserStories({
-  user,
+export async function fetchPeerStories({
+  peer,
 }: {
-  user: ApiUser;
+  peer: ApiPeer;
 }) {
-  const result = await invokeRequest(new GramJs.stories.GetUserStories({
-    userId: buildInputPeer(user.id, user.accessHash),
+  const result = await invokeRequest(new GramJs.stories.GetPeerStories({
+    peer: buildInputPeer(peer.id, peer.accessHash),
   }));
 
   if (!result) {
@@ -127,55 +140,58 @@ export async function fetchUserStories({
   }
 
   addEntitiesToLocalDb(result.users);
-  result.stories.stories.forEach((story) => addStoryToLocalDb(story, user.id));
+  result.stories.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const stories = buildCollectionByCallback(result.stories.stories, (story) => (
-    [story.id, buildApiStory(user.id, story)]
+    [story.id, buildApiStory(peer.id, story)]
   ));
 
   return {
+    chats,
     users,
     stories,
     lastReadStoryId: result.stories.maxReadId,
   };
 }
 
-export function fetchUserPinnedStories({
-  user, offsetId,
+export function fetchPeerPinnedStories({
+  peer, offsetId,
 }: {
-  user: ApiUser;
+  peer: ApiPeer;
   offsetId?: number;
 }) {
   return fetchCommonStoriesRequest({
     method: new GramJs.stories.GetPinnedStories({
-      userId: buildInputPeer(user.id, user.accessHash),
+      peer: buildInputPeer(peer.id, peer.accessHash),
       offsetId,
       limit: STORY_LIST_LIMIT,
     }),
-    userId: user.id,
+    peerId: peer.id,
   });
 }
 
 export function fetchStoriesArchive({
-  currentUserId,
+  peer,
   offsetId,
 }: {
-  currentUserId: string;
+  peer: ApiPeer;
   offsetId?: number;
 }) {
   return fetchCommonStoriesRequest({
     method: new GramJs.stories.GetStoriesArchive({
+      peer: peer && buildInputPeer(peer.id, peer.accessHash),
       offsetId,
       limit: STORY_LIST_LIMIT,
     }),
-    userId: currentUserId,
+    peerId: peer.id,
   });
 }
 
-export async function fetchUserStoriesByIds({ user, ids }: { user: ApiUser; ids: number[] }) {
+export async function fetchPeerStoriesByIds({ peer, ids }: { peer: ApiPeer; ids: number[] }) {
   const result = await invokeRequest(new GramJs.stories.GetStoriesByID({
-    userId: buildInputPeer(user.id, user.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id: ids,
   }));
 
@@ -184,17 +200,19 @@ export async function fetchUserStoriesByIds({ user, ids }: { user: ApiUser; ids:
   }
 
   addEntitiesToLocalDb(result.users);
-  result.stories.forEach((story) => addStoryToLocalDb(story, user.id));
+  addEntitiesToLocalDb(result.chats);
+  result.stories.forEach((story) => addStoryToLocalDb(story, peer.id));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const stories = ids.reduce<Record<string, ApiTypeStory>>((acc, id) => {
     const story = result.stories.find(({ id: currentId }) => currentId === id);
     if (story) {
-      acc[id] = buildApiStory(user.id, story);
+      acc[id] = buildApiStory(peer.id, story);
     } else {
       acc[id] = {
         id,
-        userId: user.id,
+        peerId: peer.id,
         isDeleted: true,
       };
     }
@@ -203,34 +221,43 @@ export async function fetchUserStoriesByIds({ user, ids }: { user: ApiUser; ids:
   }, {});
 
   return {
+    chats,
     users,
     stories,
   };
 }
 
-export function viewStory({ user, storyId }: { user: ApiUser; storyId: number }) {
+export function viewStory({ peer, storyId }: { peer: ApiPeer; storyId: number }) {
   return invokeRequest(new GramJs.stories.IncrementStoryViews({
-    userId: buildInputPeer(user.id, user.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id: [storyId],
   }));
 }
 
-export function markStoryRead({ user, storyId }: { user: ApiUser; storyId: number }) {
+export function markStoryRead({ peer, storyId }: { peer: ApiPeer; storyId: number }) {
   return invokeRequest(new GramJs.stories.ReadStories({
-    userId: buildInputPeer(user.id, user.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     maxId: storyId,
   }));
 }
 
-export function deleteStory({ storyId }: { storyId: number }) {
-  return invokeRequest(new GramJs.stories.DeleteStories({ id: [storyId] }));
+export function deleteStory({ peer, storyId }: { peer: ApiPeer; storyId: number }) {
+  return invokeRequest(new GramJs.stories.DeleteStories({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    id: [storyId],
+  }));
 }
 
-export function toggleStoryPinned({ storyId, isPinned }: { storyId: number; isPinned?: boolean }) {
-  return invokeRequest(new GramJs.stories.TogglePinned({ id: [storyId], pinned: isPinned }));
+export function toggleStoryPinned({ peer, storyId, isPinned }: { peer: ApiPeer; storyId: number; isPinned?: boolean }) {
+  return invokeRequest(new GramJs.stories.TogglePinned({
+    peer: buildInputPeer(peer.id, peer.accessHash),
+    id: [storyId],
+    pinned: isPinned,
+  }));
 }
 
 export async function fetchStoryViewList({
+  peer,
   storyId,
   areJustContacts,
   query,
@@ -238,6 +265,7 @@ export async function fetchStoryViewList({
   limit = STORY_LIST_LIMIT,
   offset = '',
 }: {
+  peer: ApiPeer;
   storyId: number;
   areJustContacts?: true;
   areReactionsFirst?: true;
@@ -246,6 +274,7 @@ export async function fetchStoryViewList({
   offset?: string;
 }) {
   const result = await invokeRequest(new GramJs.stories.GetStoryViewsList({
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id: storyId,
     justContacts: areJustContacts,
     q: query,
@@ -271,14 +300,9 @@ export async function fetchStoryViewList({
   };
 }
 
-export async function fetchStoryLink({ userId, storyId }: { userId: string; storyId: number }) {
-  const inputUser = buildInputPeerFromLocalDb(userId);
-  if (!inputUser) {
-    return undefined;
-  }
-
+export async function fetchStoryLink({ peer, storyId }: { peer: ApiPeer ; storyId: number }) {
   const result = await invokeRequest(new GramJs.stories.ExportStoryLink({
-    userId: inputUser,
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id: storyId,
   }));
 
@@ -290,15 +314,15 @@ export async function fetchStoryLink({ userId, storyId }: { userId: string; stor
 }
 
 export function reportStory({
-  user,
+  peer,
   storyId,
   reason,
   description,
 }: {
-  user: ApiUser; storyId: number; reason: ApiReportReason; description?: string;
+  peer: ApiPeer; storyId: number; reason: ApiReportReason; description?: string;
 }) {
   return invokeRequest(new GramJs.stories.Report({
-    userId: buildInputPeer(user.id, user.accessHash),
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id: [storyId],
     reason: buildInputReportReason(reason),
     message: description,
@@ -306,13 +330,16 @@ export function reportStory({
 }
 
 export function editStoryPrivacy({
+  peer,
   id,
   privacy,
 }: {
+  peer: ApiPeer;
   id: number;
   privacy: ApiInputPrivacyRules;
 }) {
   return invokeRequest(new GramJs.stories.EditStory({
+    peer: buildInputPeer(peer.id, peer.accessHash),
     id,
     privacyRules: buildInputPrivacyRules(privacy),
   }), {
@@ -321,31 +348,31 @@ export function editStoryPrivacy({
 }
 
 export function toggleStoriesHidden({
-  user,
+  peer,
   isHidden,
 }: {
-  user: ApiUser;
+  peer: ApiPeer;
   isHidden: boolean;
 }) {
-  return invokeRequest(new GramJs.contacts.ToggleStoriesHidden({
-    id: buildInputPeer(user.id, user.accessHash),
+  return invokeRequest(new GramJs.stories.TogglePeerStoriesHidden({
+    peer: buildInputPeer(peer.id, peer.accessHash),
     hidden: isHidden,
   }));
 }
 
 export function fetchStoriesMaxIds({
-  users,
+  peers,
 }: {
-  users: ApiUser[];
+  peers: ApiPeer[];
 }) {
-  return invokeRequest(new GramJs.users.GetStoriesMaxIDs({
-    id: users.map((user) => buildInputPeer(user.id, user.accessHash)),
+  return invokeRequest(new GramJs.stories.GetPeerMaxIDs({
+    id: peers.map((peer) => buildInputPeer(peer.id, peer.accessHash)),
   }));
 }
 
-async function fetchCommonStoriesRequest({ method, userId }: {
+async function fetchCommonStoriesRequest({ method, peerId }: {
   method: GramJs.stories.GetPinnedStories | GramJs.stories.GetStoriesArchive;
-  userId: string;
+  peerId: string;
 }) {
   const result = await invokeRequest(method);
 
@@ -354,30 +381,33 @@ async function fetchCommonStoriesRequest({ method, userId }: {
   }
 
   addEntitiesToLocalDb(result.users);
-  result.stories.forEach((story) => addStoryToLocalDb(story, userId));
+  addEntitiesToLocalDb(result.chats);
+  result.stories.forEach((story) => addStoryToLocalDb(story, peerId));
 
   const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const stories = buildCollectionByCallback(result.stories, (story) => (
-    [story.id, buildApiStory(userId, story)]
+    [story.id, buildApiStory(peerId, story)]
   ));
 
   return {
     users,
+    chats,
     stories,
   };
 }
 
 export function sendStoryReaction({
-  user, storyId, reaction, shouldAddToRecent,
+  peer, storyId, reaction, shouldAddToRecent,
 }: {
-  user: ApiUser;
+  peer: ApiPeer;
   storyId: number;
   reaction?: ApiReaction;
   shouldAddToRecent?: boolean;
 }) {
   return invokeRequest(new GramJs.stories.SendReaction({
     reaction: reaction ? buildInputReaction(reaction) : new GramJs.ReactionEmpty(),
-    userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+    peer: buildInputPeer(peer.id, peer.accessHash),
     storyId,
     ...(shouldAddToRecent && { addToRecent: true }),
   }), {
@@ -398,4 +428,69 @@ export function activateStealthMode({
   }), {
     shouldReturnTrue: true,
   });
+}
+
+export async function fetchCanApplyBoost({
+  chat,
+} : {
+  chat: ApiChat;
+}) {
+  let result: GramJs.stories.TypeCanApplyBoostResult | undefined;
+  try {
+    result = await invokeRequest(new GramJs.stories.CanApplyBoost({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+    }), {
+      shouldThrow: true,
+    });
+  } catch (error) {
+    const info = buildApiApplyBoostInfoFromError(error);
+    if (!info) return undefined;
+    return {
+      info,
+      chats: [],
+    };
+  }
+
+  if (!result) {
+    return undefined;
+  }
+
+  const mtpChats = 'chats' in result ? result.chats : [];
+  addEntitiesToLocalDb(mtpChats);
+
+  const chats = mtpChats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const info = buildApiApplyBoostInfo(result);
+
+  return {
+    info,
+    chats,
+  };
+}
+
+export function applyBoost({
+  chat,
+} : {
+  chat: ApiChat;
+}) {
+  return invokeRequest(new GramJs.stories.ApplyBoost({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }), {
+    shouldReturnTrue: true,
+  });
+}
+
+export async function fetchBoostsStatus({
+  chat,
+}: {
+  chat: ApiChat;
+}) {
+  const result = await invokeRequest(new GramJs.stories.GetBoostsStatus({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  return buildApiBoostsStatus(result);
 }

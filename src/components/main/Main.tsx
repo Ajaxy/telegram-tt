@@ -76,6 +76,7 @@ import ReactionPicker from '../middle/message/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
 import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
+import BoostModal from '../modals/boost/BoostModal.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 import MapModal from '../modals/map/MapModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
@@ -153,6 +154,7 @@ type StateProps = {
   isReactionPickerOpen: boolean;
   isCurrentUserPremium?: boolean;
   chatlistModal?: TabState['chatlistModal'];
+  boostModal?: TabState['boostModal'];
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
@@ -212,6 +214,7 @@ const Main: FC<OwnProps & StateProps> = ({
   deleteFolderDialog,
   isMasterTab,
   chatlistModal,
+  boostModal,
   noRightColumnAnimation,
   isSynced,
 }) => {
@@ -254,6 +257,7 @@ const Main: FC<OwnProps & StateProps> = ({
     loadFeaturedEmojiStickers,
     setIsElectronUpdateAvailable,
     loadPremiumSetStickers,
+    loadAuthorizations,
   } = getActions();
 
   if (DEBUG && !DEBUG_isLogged) {
@@ -327,6 +331,7 @@ const Main: FC<OwnProps & StateProps> = ({
       loadTopReactions();
       loadRecentReactions();
       loadFeaturedEmojiStickers();
+      loadAuthorizations();
     }
   }, [isMasterTab, isSynced]);
 
@@ -552,6 +557,7 @@ const Main: FC<OwnProps & StateProps> = ({
         userId={newContactUserId}
         isByPhoneNumber={newContactByPhoneNumber}
       />
+      <BoostModal info={boostModal} />
       <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />
@@ -614,6 +620,7 @@ export default memo(withGlobal<OwnProps>(
       limitReachedModal,
       deleteFolderDialogModal,
       chatlistModal,
+      boostModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -676,6 +683,7 @@ export default memo(withGlobal<OwnProps>(
       isMasterTab,
       requestedDraft,
       chatlistModal,
+      boostModal,
       noRightColumnAnimation,
       isSynced: global.isSynced,
     };

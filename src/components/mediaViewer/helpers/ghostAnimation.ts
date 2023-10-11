@@ -1,21 +1,20 @@
-import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-
 import type { ApiDimensions, ApiMessage } from '../../../api/types';
 import { MediaViewerOrigin } from '../../../types';
 
 import { ANIMATION_END_DELAY, MESSAGE_CONTENT_SELECTOR } from '../../../config';
+import { requestMutation } from '../../../lib/fasterdom/fasterdom';
+import { getMessageHtmlId } from '../../../global/helpers';
+import { applyStyles } from '../../../util/animation';
+import { isElementInViewport } from '../../../util/isElementInViewport';
+import stopEvent from '../../../util/stopEvent';
+import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import windowSize from '../../../util/windowSize';
 import {
   calculateDimensions,
   getMediaViewerAvailableDimensions,
   MEDIA_VIEWER_MEDIA_QUERY,
   REM,
 } from '../../common/helpers/mediaDimensions';
-import windowSize from '../../../util/windowSize';
-import stopEvent from '../../../util/stopEvent';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
-import { getMessageHtmlId } from '../../../global/helpers';
-import { isElementInViewport } from '../../../util/isElementInViewport';
-import { applyStyles } from '../../../util/animation';
 
 const ANIMATION_DURATION = 200;
 

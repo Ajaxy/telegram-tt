@@ -3,7 +3,7 @@ import React, { useMemo, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type {
-  ApiAudio, ApiChat, ApiMessage, ApiUser,
+  ApiAudio, ApiChat, ApiMessage, ApiPeer,
 } from '../../api/types';
 import type { AudioOrigin } from '../../types';
 
@@ -42,7 +42,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  sender?: ApiChat | ApiUser;
+  sender?: ApiPeer;
   chat?: ApiChat;
   volume: number;
   playbackRate: number;

@@ -14,6 +14,7 @@ import {
 import { selectChat, selectChatFullInfo, selectTabState } from '../../../global/selectors';
 import { unique } from '../../../util/iteratees';
 
+import usePeerStoriesPolling from '../../../hooks/polling/usePeerStoriesPolling';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import useKeyboardListNavigation from '../../../hooks/useKeyboardListNavigation';
@@ -104,6 +105,8 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
 
     return noAdmins ? userIds.filter((userId) => !adminIds.includes(userId)) : userIds;
   }, [members, userStatusesById, noAdmins, adminIds]);
+
+  usePeerStoriesPolling(memberIds);
 
   const displayedIds = useMemo(() => {
     // No need for expensive global updates on users, so we avoid them
@@ -223,7 +226,7 @@ const ManageGroupMembers: FC<OwnProps & StateProps> = ({
                   onClick={() => handleMemberClick(id)}
                   contextActions={getMemberContextAction(id)}
                 >
-                  <PrivateChatInfo userId={id} forceShowSelf />
+                  <PrivateChatInfo userId={id} forceShowSelf withStory />
                 </ListItem>
               ))}
             </InfiniteScroll>

@@ -363,6 +363,31 @@ export function formatDateAtTime(
   return lang('formatDateAtTime', [formattedDate, time]);
 }
 
+export function formatDateInFuture(
+  lang: LangFn,
+  currentTime: number,
+  datetime: number,
+) {
+  const diff = Math.ceil(datetime - currentTime);
+  if (diff < 0) {
+    return lang('RightNow');
+  }
+
+  if (diff < 60) {
+    return lang('Seconds', diff);
+  }
+
+  if (diff < 60 * 60) {
+    return lang('Minutes', Math.ceil(diff / 60));
+  }
+
+  if (diff < 60 * 60 * 24) {
+    return lang('Hours', Math.ceil(diff / (60 * 60)));
+  }
+
+  return lang('Days', Math.ceil(diff / (60 * 60 * 24)));
+}
+
 function isValidDate(day: number, month: number, year = 2021): boolean {
   if (month > (MAX_MONTH_IN_YEAR - 1) || day > MAX_DAY_IN_MONTH) {
     return false;

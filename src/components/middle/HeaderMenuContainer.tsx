@@ -630,7 +630,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
             isOpen={isReportModalOpen}
             onClose={closeReportModal}
             subject="peer"
-            chatId={chat.id}
+            peerId={chat.id}
           />
         )}
       </div>

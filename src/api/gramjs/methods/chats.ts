@@ -12,6 +12,7 @@ import type {
   ApiGroupCall,
   ApiMessage,
   ApiMessageEntity,
+  ApiPeer,
   ApiPhoto,
   ApiTopic,
   ApiUser,
@@ -69,7 +70,7 @@ import {
 } from '../helpers';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
-import { updateChannelState } from '../updateManager';
+import { applyState, updateChannelState } from '../updateManager';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -356,6 +357,8 @@ export async function requestChatUpdate({
     chat: chatUpdate,
   });
 
+  applyState(result.state);
+
   scheduleMutedChatUpdate(chatUpdate.id, chatUpdate.muteUntil, onUpdate);
 }
 
@@ -493,6 +496,7 @@ async function getFullChannelInfo(
     chatPhoto,
     participantsHidden,
     translationsDisabled,
+    storiesPinnedAvailable,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -567,6 +571,7 @@ async function getFullChannelInfo(
       stickerSet: stickerset ? buildStickerSet(stickerset) : undefined,
       areParticipantsHidden: participantsHidden,
       isTranslationDisabled: translationsDisabled,
+      hasPinnedStories: Boolean(storiesPinnedAvailable),
     },
     users: [...(users || []), ...(bannedUsers || []), ...(adminUsers || [])],
     userStatusesById: statusesById,
@@ -1485,7 +1490,7 @@ export async function createTopic({
   title: string;
   iconColor?: number;
   iconEmojiId?: string;
-  sendAs?: ApiUser | ApiChat;
+  sendAs?: ApiPeer;
 }) {
   const { id, accessHash } = chat;
 
@@ -1744,7 +1749,7 @@ export async function createChalistInvite({
 }: {
   folderId: number;
   title?: string;
-  peers: (ApiChat | ApiUser)[];
+  peers: ApiPeer[];
 }) {
   const result = await invokeRequest(new GramJs.chatlists.ExportChatlistInvite({
     chatlist: new GramJs.InputChatlistDialogFilter({
@@ -1784,7 +1789,7 @@ export async function editChatlistInvite({
   folderId: number;
   slug: string;
   title?: string;
-  peers: (ApiChat | ApiUser)[];
+  peers: ApiPeer[];
 }) {
   const result = await invokeRequest(new GramJs.chatlists.EditExportedInvite({
     chatlist: new GramJs.InputChatlistDialogFilter({

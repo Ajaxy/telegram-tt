@@ -1,8 +1,10 @@
 import type {
   ApiAppConfig,
+  ApiApplyBoostInfo,
   ApiAttachBot,
   ApiAttachment,
   ApiAvailableReaction,
+  ApiBoostsStatus,
   ApiChannelStatistics,
   ApiChat,
   ApiChatAdminRights,
@@ -36,6 +38,7 @@ import type {
   ApiPaymentCredentials,
   ApiPaymentFormNativeParams,
   ApiPaymentSavedInfo,
+  ApiPeerStories,
   ApiPhoneCall,
   ApiPhoto,
   ApiPremiumPromo,
@@ -61,7 +64,6 @@ import type {
   ApiUser,
   ApiUserFullInfo,
   ApiUserStatus,
-  ApiUserStories,
   ApiVideo,
   ApiWallpaper,
   ApiWebPage,
@@ -271,7 +273,7 @@ export type TabState = {
   reactionPicker?: {
     chatId?: string;
     messageId?: number;
-    storyUserId?: string;
+    storyPeerId?: string;
     storyId?: number;
     position?: IAnchorPosition;
     sendAsMessage?: boolean;
@@ -349,16 +351,16 @@ export type TabState = {
   storyViewer: {
     isRibbonShown?: boolean;
     isArchivedRibbonShown?: boolean;
-    userId?: string;
+    peerId?: string;
     storyId?: number;
     isMuted: boolean;
-    isSingleUser?: boolean;
+    isSinglePeer?: boolean;
     isSingleStory?: boolean;
     isPrivate?: boolean;
     isArchive?: boolean;
     // Last viewed story id in current view session.
-    // Used for better switch animation between users.
-    lastViewedByUserIds?: Record<string, number>;
+    // Used for better switch animation between peers.
+    lastViewedByPeerIds?: Record<string, number>;
     isPrivacyModalOpen?: boolean;
     isStealthModalOpen?: boolean;
     viewModal?: {
@@ -617,6 +619,12 @@ export type TabState = {
       suggestedPeerIds?: string[];
     };
   };
+
+  boostModal?: {
+    chatId: string;
+    boostStatus?: ApiBoostsStatus;
+    applyInfo?: ApiApplyBoostInfo;
+  };
 };
 
 export type GlobalState = {
@@ -744,12 +752,12 @@ export type GlobalState = {
   };
 
   stories: {
-    byUserId: Record<string, ApiUserStories>;
+    byPeerId: Record<string, ApiPeerStories>;
     hasNext?: boolean;
     stateHash?: string;
     hasNextInArchive?: boolean;
     archiveStateHash?: string;
-    orderedUserIds: {
+    orderedPeerIds: {
       active: string[];
       archived: string[];
     };
@@ -1358,6 +1366,10 @@ export interface ActionPayloads {
     startApp?: string;
     originalParts?: string[];
   } & WithTabId;
+  processBoostParameters: {
+    usernameOrId: string;
+    isPrivate?: boolean;
+  } & WithTabId;
   requestThreadInfoUpdate: {
     chatId: string;
     threadId: number;
@@ -1682,6 +1694,7 @@ export interface ActionPayloads {
     hash: string;
     areCallsEnabled?: boolean;
     areSecretChatsEnabled?: boolean;
+    isConfirmed?: boolean;
   };
   changeSessionTtl: {
     days: number;
@@ -1938,7 +1951,7 @@ export interface ActionPayloads {
     position: IAnchorPosition;
   } & WithTabId;
   openStoryReactionPicker: {
-    storyUserId: string;
+    peerId: string;
     storyId: number;
     position: IAnchorPosition;
     sendAsMessage?: boolean;
@@ -1948,31 +1961,34 @@ export interface ActionPayloads {
   // Stories
   loadAllStories: undefined;
   loadAllHiddenStories: undefined;
-  loadUserStories: {
-    userId: string;
+  loadPeerStories: {
+    peerId: string;
   };
-  loadUserPinnedStories: {
-    userId: string;
+  loadPeerPinnedStories: {
+    peerId: string;
     offsetId?: number;
   } & WithTabId;
   loadStoriesArchive: {
+    peerId: string;
     offsetId?: number;
   } & WithTabId;
-  loadUserSkippedStories: {
-    userId: string;
+  loadPeerSkippedStories: {
+    peerId: string;
   } & WithTabId;
-  loadUserStoriesByIds: {
-    userId: string;
+  loadPeerStoriesByIds: {
+    peerId: string;
     storyIds: number[];
   } & WithTabId;
   viewStory: {
-    userId: string;
+    peerId: string;
     storyId: number;
   } & WithTabId;
   deleteStory: {
+    peerId: string;
     storyId: number;
   } & WithTabId;
   toggleStoryPinned: {
+    peerId: string;
     storyId: number;
     isPinned?: boolean;
   } & WithTabId;
@@ -1981,9 +1997,9 @@ export interface ActionPayloads {
     isArchived?: boolean;
   } & WithTabId;
   openStoryViewer: {
-    userId: string;
+    peerId: string;
     storyId?: number;
-    isSingleUser?: boolean;
+    isSinglePeer?: boolean;
     isSingleStory?: boolean;
     isPrivate?: boolean;
     isArchive?: boolean;
@@ -2001,9 +2017,11 @@ export interface ActionPayloads {
   } & WithTabId;
   closeStoryViewer: WithTabId | undefined;
   loadStoryViews: ({
+    peerId: string;
     storyId: number;
     isPreload: true;
   } | {
+    peerId: string;
     storyId: number;
     offset?: string;
     query?: string;
@@ -2024,11 +2042,11 @@ export interface ActionPayloads {
   } & WithTabId;
   closeStoryViewModal: WithTabId | undefined;
   copyStoryLink: {
-    userId: string;
+    peerId: string;
     storyId: number;
   } & WithTabId;
   reportStory: {
-    userId: string;
+    peerId: string;
     storyId: number;
     reason: ApiReportReason;
     description: string;
@@ -2036,19 +2054,21 @@ export interface ActionPayloads {
   openStoryPrivacyEditor: WithTabId | undefined;
   closeStoryPrivacyEditor: WithTabId | undefined;
   editStoryPrivacy: {
+    peerId: string;
     storyId: number;
     privacy: ApiPrivacySettings;
   };
   toggleStoriesHidden: {
-    userId : string;
+    peerId : string;
     isHidden: boolean;
   };
   loadStoriesMaxIds: {
-    userIds: string[];
+    peerIds: string[];
   };
   sendStoryReaction: {
-    userId: string;
+    peerId: string;
     storyId: number;
+    containerId: string;
     reaction?: ApiReaction;
     shouldAddToRecent?: boolean;
   } & WithTabId;
@@ -2059,6 +2079,14 @@ export interface ActionPayloads {
     isForPast?: boolean;
     isForFuture?: boolean;
   } | undefined;
+
+  openBoostModal: {
+    chatId: string;
+  } & WithTabId;
+  closeBoostModal: WithTabId | undefined;
+  applyBoost: {
+    chatId: string;
+  } & WithTabId;
 
   // Media Viewer & Audio Player
   openMediaViewer: {

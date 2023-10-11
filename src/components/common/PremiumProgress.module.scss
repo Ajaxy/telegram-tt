@@ -1,0 +1,123 @@
+.root {
+  --percent: calc(var(--progress, 0.5) * 100%);
+  display: flex;
+  position: relative;
+  height: 2rem;
+  background: #F1F3F5;
+  border-radius: 0.625rem;
+  color: black;
+}
+
+.withBadge {
+  margin-top: 2rem;
+}
+
+.badgeContainer {
+  --shift-x: calc(clamp(10%, var(--percent), 90%) - 50%);
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  right: 0;
+  transform: translate(var(--shift-x), -20px);
+
+  transition: transform 0.2s ease-in-out;
+  animation: slide-in 0.5s ease-in-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translate(-50%, -20px);
+  }
+
+  to {
+    transform: translate(var(--shift-x), -20px);
+  }
+}
+
+.floating-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  position: relative;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #7E85FF;
+  animation: rotate-in 0.5s ease-in-out;
+}
+
+@keyframes rotate-in {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    // Rotate more if progress is higher
+    transform: rotate(calc(-20deg * var(--progress)));
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.floating-badge-triangle {
+  position: absolute;
+  bottom: -15px;
+}
+
+.floating-badge-icon {
+  font-size: 1.25rem;
+  margin-right: 0.25rem;
+}
+
+.floating-badge-value {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.left, .right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.left {
+  left: 0.75rem;
+}
+
+.right {
+  right: 0.75rem;
+}
+
+.progress {
+  --multiplier: calc(1 / var(--progress) - 1);
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--percent);
+  border-top-left-radius: 0.625rem;
+  border-bottom-left-radius: 0.625rem;
+  background-image: var(--premium-gradient);
+  background-size: calc(1 / var(--progress) * 100%) 100%;
+
+  .left, .right {
+    color: white;
+    white-space: nowrap;
+  }
+
+  .right {
+    right: calc(-100% * var(--multiplier) + 0.75rem);
+  }
+}
+
+.fullProgress {
+  border-radius: 0.625rem;
+}

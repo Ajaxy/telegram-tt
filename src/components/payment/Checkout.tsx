@@ -71,7 +71,7 @@ const Checkout: FC<OwnProps> = ({
   const isInteractive = Boolean(dispatch);
 
   const {
-    photo, title, text, isRecurring, recurringTermsUrl, suggestedTipAmounts, maxTipAmount,
+    photo, title, text, termsUrl, suggestedTipAmounts, maxTipAmount,
   } = invoice || {};
   const {
     paymentMethod,
@@ -218,7 +218,7 @@ const Checkout: FC<OwnProps> = ({
           icon: 'truck',
           onClick: isInteractive ? handleShippingMethodClick : undefined,
         })}
-        {isRecurring && renderTos(recurringTermsUrl!)}
+        {termsUrl && renderTos(termsUrl)}
       </div>
     </div>
   );

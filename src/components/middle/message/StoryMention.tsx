@@ -2,12 +2,15 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiMessage, ApiTypeStory, ApiUser,
+  ApiMessage, ApiPeer, ApiTypeStory, ApiUser,
 } from '../../../api/types';
 
-import { getStoryMediaHash, getUserFirstOrLastName } from '../../../global/helpers';
+import { getSenderTitle, getStoryMediaHash, getUserFirstOrLastName } from '../../../global/helpers';
 import {
-  selectUser, selectUserStories, selectUserStory,
+  selectPeer,
+  selectPeerStories,
+  selectPeerStory,
+  selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import renderText from '../../common/helpers/renderText';
@@ -23,13 +26,13 @@ interface OwnProps {
 
 interface StateProps {
   story?: ApiTypeStory;
-  user?: ApiUser;
+  peer?: ApiPeer;
   targetUser?: ApiUser;
   isUnread?: boolean;
 }
 
 function StoryMention({
-  message, story, user, isUnread, targetUser,
+  message, story, peer, isUnread, targetUser,
 }: OwnProps & StateProps) {
   const { openStoryViewer } = getActions();
 
@@ -39,9 +42,9 @@ function StoryMention({
 
   const handleClick = useLastCallback(() => {
     openStoryViewer({
-      userId: story!.userId,
+      peerId: story!.peerId,
       storyId: story!.id,
-      isSingleUser: true,
+      isSinglePeer: true,
       isSingleStory: true,
     });
   });
@@ -55,10 +58,10 @@ function StoryMention({
   const imgBlobUrl = useMedia(imageHash);
   const thumbUrl = imgBlobUrl || video?.thumbnail?.dataUri;
 
-  useEnsureStory(storyData!.userId, storyData!.id, story);
+  useEnsureStory(storyData!.peerId, storyData!.id, story);
 
   function getTitle() {
-    if (user?.isSelf) {
+    if (peer && 'isSelf' in peer && peer.isSelf) {
       return isDeleted
         ? lang('ExpiredStoryMentioned', getUserFirstOrLastName(targetUser))
         : lang('StoryYouMentionedTitle', getUserFirstOrLastName(targetUser));
@@ -66,7 +69,7 @@ function StoryMention({
 
     return isDeleted
       ? lang('ExpiredStoryMention')
-      : lang('StoryMentionedTitle', getUserFirstOrLastName(user));
+      : lang('StoryMentionedTitle', getSenderTitle(lang, peer!));
   }
 
   return (
@@ -90,12 +93,12 @@ function StoryMention({
 }
 
 export default memo(withGlobal<OwnProps>((global, { message }): StateProps => {
-  const { id, userId } = message.content.storyData!;
-  const lastReadId = selectUserStories(global, userId)?.lastReadId;
+  const { id, peerId } = message.content.storyData!;
+  const lastReadId = selectPeerStories(global, peerId)?.lastReadId;
 
   return {
-    story: selectUserStory(global, userId, id),
-    user: selectUser(global, userId),
+    story: selectPeerStory(global, peerId, id),
+    peer: selectPeer(global, peerId),
     targetUser: selectUser(global, message.chatId),
     isUnread: Boolean(lastReadId && lastReadId < id),
   };

@@ -3,7 +3,7 @@ import React, { memo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type {
-  ApiChat, ApiDimensions, ApiMessage, ApiUser,
+  ApiDimensions, ApiMessage, ApiPeer,
 } from '../../api/types';
 import { MediaViewerOrigin } from '../../types';
 
@@ -46,7 +46,7 @@ type StateProps = {
   mediaId?: number;
   senderId?: string;
   threadId?: number;
-  avatarOwner?: ApiChat | ApiUser;
+  avatarOwner?: ApiPeer;
   message?: ApiMessage;
   origin?: MediaViewerOrigin;
   isProtected?: boolean;

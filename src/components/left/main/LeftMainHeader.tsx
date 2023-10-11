@@ -230,7 +230,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         )}
         {globalSearchChatId && (
           <PickerSelectedItem
-            chatOrUserId={globalSearchChatId}
+            peerId={globalSearchChatId}
             onClick={setGlobalSearchChatId}
             canClose
             clickArg={CLEAR_CHAT_SEARCH_PARAM}

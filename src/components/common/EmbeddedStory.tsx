@@ -2,7 +2,7 @@ import type { FC } from '../../lib/teact/teact';
 import React, { useRef } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { ApiChat, ApiTypeStory, ApiUser } from '../../api/types';
+import type { ApiPeer, ApiTypeStory } from '../../api/types';
 import type { ObserveFn } from '../../hooks/useIntersectionObserver';
 
 import {
@@ -24,7 +24,7 @@ import './EmbeddedMessage.scss';
 
 type OwnProps = {
   story?: ApiTypeStory;
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   noUserColors?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;

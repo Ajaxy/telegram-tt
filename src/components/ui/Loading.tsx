@@ -9,12 +9,15 @@ import './Loading.scss';
 type OwnProps = {
   color?: 'blue' | 'white' | 'black' | 'yellow';
   backgroundColor?: 'light' | 'dark';
+  className?: string;
   onClick?: NoneToVoidFunction;
 };
 
-const Loading = ({ color = 'blue', backgroundColor, onClick }: OwnProps) => {
+const Loading = ({
+  color = 'blue', backgroundColor, className, onClick,
+}: OwnProps) => {
   return (
-    <div className={buildClassName('Loading', onClick && 'interactive')} onClick={onClick}>
+    <div className={buildClassName('Loading', onClick && 'interactive', className)} onClick={onClick}>
       <Spinner color={color} backgroundColor={backgroundColor} />
     </div>
   );

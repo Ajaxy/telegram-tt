@@ -5,7 +5,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../api/types';
+import type { ApiMessage, ApiPeer } from '../../api/types';
 
 import {
   selectChat,
@@ -130,7 +130,7 @@ const RightSearch: FC<OwnProps & StateProps> = ({
     message, senderPeer, onClick,
   }: {
     message: ApiMessage;
-    senderPeer: ApiUser | ApiChat;
+    senderPeer: ApiPeer;
     onClick: NoneToVoidFunction;
   }) => {
     const text = renderMessageSummary(lang, message, undefined, query);

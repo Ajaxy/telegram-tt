@@ -7,8 +7,8 @@ import type { ApiStory, ApiUser } from '../../api/types';
 import type { ApiPrivacySettings, PrivacyVisibility } from '../../types';
 import type { IconName } from '../../types/icons';
 
-import { getUserFullName } from '../../global/helpers';
-import { selectTabState, selectUserStory } from '../../global/selectors';
+import { getSenderTitle, getUserFullName } from '../../global/helpers';
+import { selectPeerStory, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import stopEvent from '../../util/stopEvent';
 
@@ -191,11 +191,12 @@ function StorySettings({
 
   const handleSubmit = useLastCallback(() => {
     editStoryPrivacy({
+      peerId: story!.peerId,
       storyId: story!.id,
       privacy: privacy!,
     });
     if (story!.isPinned !== isPinned) {
-      toggleStoryPinned({ storyId: story!.id, isPinned });
+      toggleStoryPinned({ peerId: story!.peerId, storyId: story!.id, isPinned });
     }
     closeModal();
   });
@@ -207,7 +208,7 @@ function StorySettings({
       }
 
       if (closeFriendIds.length === 1) {
-        return getUserFullName(usersById[closeFriendIds[0]]);
+        return getSenderTitle(lang, usersById[closeFriendIds[0]]);
       }
 
       return lang('StoryPrivacyOptionPeople', closeFriendIds.length, 'i');
@@ -401,11 +402,11 @@ function StorySettings({
 export default memo(withGlobal<OwnProps>((global): StateProps => {
   const {
     storyViewer: {
-      storyId, userId,
+      storyId, peerId,
     },
   } = selectTabState(global);
-  const story = (userId && storyId)
-    ? selectUserStory(global, userId, storyId)
+  const story = (peerId && storyId)
+    ? selectPeerStory(global, peerId, storyId)
     : undefined;
 
   return {

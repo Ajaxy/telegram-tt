@@ -2,8 +2,7 @@ import type React from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type {
-  ApiChat, ApiMessage, ApiStory,
-  ApiTopic, ApiUser,
+  ApiMessage, ApiPeer, ApiStory, ApiTopic, ApiUser,
 } from '../../../../api/types';
 import type { LangFn } from '../../../../hooks/useLang';
 import type { IAlbum } from '../../../../types';
@@ -23,8 +22,8 @@ export default function useInnerHandlers(
   isScheduled?: boolean,
   isChatWithRepliesBot?: boolean,
   album?: IAlbum,
-  avatarPeer?: ApiUser | ApiChat,
-  senderPeer?: ApiUser | ApiChat,
+  avatarPeer?: ApiPeer,
+  senderPeer?: ApiPeer,
   botSender?: ApiUser,
   messageTopic?: ApiTopic,
   isTranslatingChat?: boolean,
@@ -185,7 +184,7 @@ export default function useInnerHandlers(
   const handleStoryClick = useLastCallback(() => {
     if (!story) return;
     openStoryViewer({
-      userId: story.userId,
+      peerId: story.peerId,
       storyId: story.id,
       isSingleStory: true,
     });

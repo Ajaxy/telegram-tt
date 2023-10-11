@@ -1,20 +1,24 @@
-import { Api as GramJs } from '../../../lib/gramjs';
+import { Api as GramJs, errors } from '../../../lib/gramjs';
 
 import type {
+  ApiApplyBoostInfo,
+  ApiBoostsStatus,
   ApiMediaArea, ApiMediaAreaCoordinates, ApiMessage, ApiStealthMode, ApiStoryView, ApiTypeStory,
 } from '../../types';
 
 import { buildCollectionByCallback } from '../../../util/iteratees';
+import { getServerTime } from '../../../util/serverTime';
 import { buildPrivacyRules } from './common';
 import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
-import { buildApiPeerId } from './peers';
-import { buildApiReaction } from './reactions';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
+import { buildApiReaction, buildReactionCount } from './reactions';
+import { buildStatisticsPercentage } from './statistics';
 
-export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
+export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
   if (story instanceof GramJs.StoryItemDeleted) {
     return {
       id: story.id,
-      userId,
+      peerId,
       isDeleted: true,
     };
   }
@@ -26,7 +30,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
 
     return {
       id,
-      userId,
+      peerId,
       ...(closeFriends && { isForCloseFriends: true }),
       date,
       expireDate,
@@ -37,7 +41,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
     edited, pinned, expireDate, id, date, caption,
     entities, media, privacy, views,
     public: isPublic, noforwards, closeFriends, contacts, selectedContacts,
-    mediaAreas, sentReaction,
+    mediaAreas, sentReaction, out,
   } = story;
 
   const content: ApiMessage['content'] = {
@@ -50,7 +54,7 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
 
   return {
     id,
-    userId,
+    peerId,
     date,
     expireDate,
     content,
@@ -63,9 +67,11 @@ export function buildApiStory(userId: string, story: GramJs.TypeStoryItem): ApiT
     ...(noforwards && { noForwards: true }),
     ...(views?.viewsCount && { viewsCount: views.viewsCount }),
     ...(views?.reactionsCount && { reactionsCount: views.reactionsCount }),
+    ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount) }),
     ...(views?.recentViewers && {
       recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
     }),
+    ...(out && { isOut: true }),
     ...(privacy && { visibility: buildPrivacyRules(privacy) }),
     ...(mediaAreas && { mediaAreas: mediaAreas.map(buildApiMediaArea).filter(Boolean) }),
     ...(sentReaction && { sentReaction: buildApiReaction(sentReaction) }),
@@ -134,11 +140,81 @@ export function buildApiMediaArea(area: GramJs.TypeMediaArea): ApiMediaArea | un
     };
   }
 
+  if (area instanceof GramJs.MediaAreaSuggestedReaction) {
+    const {
+      coordinates, reaction, dark, flipped,
+    } = area;
+
+    const apiReaction = buildApiReaction(reaction);
+    if (!apiReaction) return undefined;
+
+    return {
+      type: 'suggestedReaction',
+      coordinates: buildApiMediaAreaCoordinates(coordinates),
+      reaction: apiReaction,
+      ...(dark && { isDark: true }),
+      ...(flipped && { isFlipped: true }),
+    };
+  }
+
   return undefined;
 }
 
-export function buildApiUsersStories(userStories: GramJs.UserStories) {
-  const userId = buildApiPeerId(userStories.userId, 'user');
+export function buildApiPeerStories(peerStories: GramJs.PeerStories) {
+  const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
 
-  return buildCollectionByCallback(userStories.stories, (story) => [story.id, buildApiStory(userId, story)]);
+  return buildCollectionByCallback(peerStories.stories, (story) => [story.id, buildApiStory(peerId, story)]);
+}
+
+export function buildApiApplyBoostInfo(
+  applyBoostInfo: GramJs.stories.TypeCanApplyBoostResult,
+): ApiApplyBoostInfo | undefined {
+  if (applyBoostInfo instanceof GramJs.stories.CanApplyBoostOk) {
+    return { type: 'ok' };
+  }
+
+  if (applyBoostInfo instanceof GramJs.stories.CanApplyBoostReplace) {
+    return {
+      type: 'replace',
+      boostedChatId: getApiChatIdFromMtpPeer(applyBoostInfo.currentBoost),
+    };
+  }
+
+  return undefined;
+}
+
+export function buildApiApplyBoostInfoFromError(
+  error: unknown,
+): ApiApplyBoostInfo | undefined {
+  if (error instanceof errors.FloodWaitError) {
+    return {
+      type: 'wait',
+      waitUntil: getServerTime() + error.seconds,
+    };
+  }
+
+  if (error instanceof Error) {
+    if (error.message === 'BOOST_NOT_MODIFIED') {
+      return {
+        type: 'already',
+      };
+    }
+  }
+
+  return undefined;
+}
+
+export function buildApiBoostsStatus(boostStatus: GramJs.stories.BoostsStatus): ApiBoostsStatus {
+  const {
+    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience,
+  } = boostStatus;
+  return {
+    level,
+    currentLevelBoosts,
+    boosts,
+    hasMyBoost: Boolean(myBoost),
+    boostUrl,
+    nextLevelBoosts,
+    ...(premiumAudience && { premiumAudience: buildStatisticsPercentage(premiumAudience) }),
+  };
 }

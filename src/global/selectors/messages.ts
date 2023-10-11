@@ -3,8 +3,8 @@ import type {
   ApiMessage,
   ApiMessageEntityCustomEmoji,
   ApiMessageOutgoingStatus,
+  ApiPeer,
   ApiStickerSetInfo,
-  ApiUser,
 } from '../../api/types';
 import type {
   ChatTranslatedMessages,
@@ -50,9 +50,9 @@ import {
   isUserRightBanned,
 } from '../helpers';
 import {
-  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectRequestedChatTranslationLanguage,
+  selectChat, selectChatFullInfo, selectIsChatWithSelf, selectPeer, selectRequestedChatTranslationLanguage,
 } from './chats';
-import { selectUserStory } from './stories';
+import { selectPeerStory } from './stories';
 import { selectIsStickerFavorite } from './symbols';
 import { selectTabState } from './tabs';
 import {
@@ -416,20 +416,20 @@ export function selectOutgoingStatus<T extends GlobalState>(
   return getSendingState(message);
 }
 
-export function selectSender<T extends GlobalState>(global: T, message: ApiMessage): ApiUser | ApiChat | undefined {
+export function selectSender<T extends GlobalState>(global: T, message: ApiMessage): ApiPeer | undefined {
   const { senderId } = message;
   if (!senderId) {
     return undefined;
   }
 
-  return isUserId(senderId) ? selectUser(global, senderId) : selectChat(global, senderId);
+  return selectPeer(global, senderId);
 }
 
 export function selectReplySender<T extends GlobalState>(global: T, message: ApiMessage, isForwarded = false) {
   if (isForwarded) {
     const { senderUserId, hiddenUserName } = message.forwardInfo || {};
     if (senderUserId) {
-      return isUserId(senderUserId) ? selectUser(global, senderUserId) : selectChat(global, senderUserId);
+      return selectPeer(global, senderUserId);
     }
     if (hiddenUserName) return undefined;
   }
@@ -439,15 +439,16 @@ export function selectReplySender<T extends GlobalState>(global: T, message: Api
     return undefined;
   }
 
-  return isUserId(senderId) ? selectUser(global, senderId) : selectChat(global, senderId);
+  return selectPeer(global, senderId);
 }
 
 export function selectForwardedSender<T extends GlobalState>(
   global: T, message: ApiMessage,
-): ApiUser | ApiChat | undefined {
+): ApiPeer | undefined {
   const isStoryForward = Boolean(message.content.storyData);
   if (isStoryForward) {
-    return selectUser(global, message.content.storyData!.userId);
+    const peerId = message.content.storyData!.peerId;
+    return selectPeer(global, peerId);
   }
 
   const { forwardInfo } = message;
@@ -615,9 +616,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   const canEdit = !isLocal && !isAction && isMessageEditable && hasMessageEditRight;
 
   const story = content.storyData
-    ? selectUserStory(global, content.storyData.userId, content.storyData.id)
+    ? selectPeerStory(global, content.storyData.peerId, content.storyData.id)
     : (content.webPage?.story
-      ? selectUserStory(global, content.webPage.story.userId, content.webPage.story.id)
+      ? selectPeerStory(global, content.webPage.story.peerId, content.webPage.story.id)
       : undefined
     );
 
@@ -1101,7 +1102,7 @@ function canAutoLoadMedia<T extends GlobalState>({
   canAutoLoadMediaInPrivateChats: boolean;
   canAutoLoadMediaInGroups: boolean;
   canAutoLoadMediaInChannels: boolean;
-  sender?: ApiChat | ApiUser;
+  sender?: ApiPeer;
 }) {
   const isMediaFromContact = Boolean(sender && (
     sender.id === global.currentUserId || selectIsUserOrChatContact(global, sender)

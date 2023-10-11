@@ -4,12 +4,11 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiChat, ApiMessage, ApiUser } from '../../../api/types';
+import type { ApiMessage, ApiPeer } from '../../../api/types';
 
-import { isUserId, stripCustomEmoji } from '../../../global/helpers';
+import { stripCustomEmoji } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
-  selectChat,
   selectChatMessage,
   selectCurrentMessageList,
   selectEditingId,
@@ -18,10 +17,10 @@ import {
   selectForwardedSender,
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
+  selectPeer,
   selectReplyingToId,
   selectSender,
   selectTabState,
-  selectUser,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
@@ -45,7 +44,7 @@ type StateProps = {
   replyingToId?: number;
   editingId?: number;
   message?: ApiMessage;
-  sender?: ApiUser | ApiChat;
+  sender?: ApiPeer;
   shouldAnimate?: boolean;
   forwardedMessagesCount?: number;
   noAuthors?: boolean;
@@ -313,7 +312,7 @@ export default memo(withGlobal<OwnProps>(
       message = forwardedMessages?.[0];
     }
 
-    let sender: ApiChat | ApiUser | undefined;
+    let sender: ApiPeer | undefined;
     if (replyingToId && message && !shouldForceShowEditing) {
       const { forwardInfo } = message;
       const isChatWithSelf = selectIsChatWithSelf(global, chatId);
@@ -332,7 +331,7 @@ export default memo(withGlobal<OwnProps>(
         }
       }
       if (!sender) {
-        sender = isUserId(fromChatId!) ? selectUser(global, fromChatId!) : selectChat(global, fromChatId!);
+        sender = selectPeer(global, fromChatId!);
       }
     }
 

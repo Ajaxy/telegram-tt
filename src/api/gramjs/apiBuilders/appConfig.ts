@@ -44,6 +44,7 @@ export interface GramJsAppConfig extends LimitsConfig {
   default_emoji_statuses_stickerset_id: string;
   hidden_members_group_size_min: number;
   autoarchive_setting_available: boolean;
+  authorization_autoconfirm_period: number;
   // Forums
   topics_pinned_limit: number;
   // Stories

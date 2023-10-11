@@ -22,6 +22,8 @@ export type FontIconName =
   | 'avatar-deleted-account'
   | 'avatar-saved-messages'
   | 'bold'
+  | 'boost'
+  | 'boostcircle'
   | 'bot-command'
   | 'bot-commands-filled'
   | 'bots'

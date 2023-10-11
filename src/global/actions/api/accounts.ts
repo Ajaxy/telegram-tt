@@ -135,11 +135,14 @@ addActionHandler('terminateAllAuthorizations', async (global): Promise<void> => 
 });
 
 addActionHandler('changeSessionSettings', async (global, actions, payload): Promise<void> => {
-  const { hash, areCallsEnabled, areSecretChatsEnabled } = payload;
+  const {
+    hash, areCallsEnabled, areSecretChatsEnabled, isConfirmed,
+  } = payload;
   const result = await callApi('changeSessionSettings', {
     hash,
     areCallsEnabled,
     areSecretChatsEnabled,
+    isConfirmed,
   });
 
   if (!result) {
@@ -157,6 +160,7 @@ addActionHandler('changeSessionSettings', async (global, actions, payload): Prom
           ...global.activeSessions.byHash[hash],
           ...(areCallsEnabled !== undefined ? { areCallsEnabled } : undefined),
           ...(areSecretChatsEnabled !== undefined ? { areSecretChatsEnabled } : undefined),
+          ...(isConfirmed && { isUnconfirmed: undefined }),
         },
       },
     },

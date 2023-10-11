@@ -1,0 +1,124 @@
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--media-width, auto);
+  aspect-ratio: 9 / 16;
+  pointer-events: none;
+}
+
+.mediaArea {
+  position: absolute;
+  transform-origin: top left;
+  pointer-events: all;
+  cursor: var(--custom-cursor, pointer);
+}
+
+.preview .mediaArea {
+  pointer-events: none;
+}
+
+.shiny {
+  overflow: hidden;
+}
+
+.shiny::before {
+  --color-shine: rgb(255, 255, 255, 0.5);
+  content: "";
+  position: absolute;
+  top: 0;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, transparent 0%, var(--color-shine) 50%, transparent 100%);
+  animation: wave 1s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+
+  @keyframes wave {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+.suggestedReaction {
+  --background-color: white;
+  color: black;
+}
+
+.dark {
+  --background-color: black;
+  color: white;
+}
+
+.background {
+  width: 100%;
+  height: 100%;
+  background-color: var(--background-color);
+  border-radius: 50%;
+  filter: drop-shadow(0 0.125rem 0.25rem var(--color-default-shadow));
+  cursor: var(--custom-cursor, pointer);
+
+  &::before,
+  &::after {
+    position: absolute;
+    content: "";
+    background-color: var(--background-color);
+    border-radius: 50%;
+  }
+
+  &::before {
+    bottom: 5%;
+    right: 5%;
+    width: 30%;
+    height: 30%;
+  }
+
+  &::after {
+    bottom: 0;
+    right: -5%;
+    width: 10%;
+    height: 10%;
+  }
+
+  &.flipped {
+    &::before {
+      right: auto;
+      left: 5%;
+    }
+
+    &::after {
+      right: auto;
+      left: -5%;
+    }
+  }
+
+  .dark & {
+    opacity: 0.5;
+  }
+}
+
+.reaction {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 200ms ease-out;
+
+  &.withCount {
+    transform: (translate(-50%, -65%) scale(0.7));
+  }
+}
+
+.reactionCount {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 500;
+}

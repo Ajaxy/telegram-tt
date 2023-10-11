@@ -43,6 +43,7 @@ export function buildApiSession(session: GramJs.Authorization): ApiSession {
     hash: String(session.hash),
     areCallsEnabled: !session.callRequestsDisabled,
     areSecretChatsEnabled: !session.encryptedRequestsDisabled,
+    isUnconfirmed: session.unconfirmed,
     ...pick(session, [
       'deviceModel', 'platform', 'systemVersion', 'appName', 'appVersion', 'dateCreated', 'dateActive',
       'ip', 'country', 'region',

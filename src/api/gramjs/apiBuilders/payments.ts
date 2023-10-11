@@ -146,7 +146,7 @@ export function buildApiInvoiceFromForm(form: GramJs.payments.PaymentForm): ApiI
     invoice, description: text, title, photo,
   } = form;
   const {
-    test, currency, prices, recurring, recurringTermsUrl, maxTipAmount, suggestedTipAmounts,
+    test, currency, prices, recurring, termsUrl, maxTipAmount, suggestedTipAmounts,
   } = invoice;
 
   const totalAmount = prices.reduce((ac, cur) => ac + cur.amount.toJSNumber(), 0);
@@ -159,7 +159,7 @@ export function buildApiInvoiceFromForm(form: GramJs.payments.PaymentForm): ApiI
     currency,
     isTest: test,
     isRecurring: recurring,
-    recurringTermsUrl,
+    termsUrl,
     maxTipAmount: maxTipAmount?.toJSNumber(),
     ...(suggestedTipAmounts && { suggestedTipAmounts: suggestedTipAmounts.map((tip) => tip.toJSNumber()) }),
   };

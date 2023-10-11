@@ -1,22 +1,26 @@
 import React, { memo, useEffect, useMemo } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiTypeStory, ApiUser, ApiUserStories } from '../../api/types';
+import type {
+  ApiPeer, ApiPeerStories, ApiTypeStory,
+} from '../../api/types';
 import type { StoryViewerOrigin } from '../../types';
 
-import { getStoryMediaHash, getUserFirstOrLastName } from '../../global/helpers';
+import { getSenderTitle, getStoryMediaHash } from '../../global/helpers';
 import { selectTabState } from '../../global/selectors';
 import renderText from '../common/helpers/renderText';
 
+import useLang from '../../hooks/useLang';
 import useMedia from '../../hooks/useMedia';
 
 import Avatar from '../common/Avatar';
+import MediaAreaOverlay from './mediaArea/MediaAreaOverlay';
 
 import styles from './StoryViewer.module.scss';
 
 interface OwnProps {
-  user?: ApiUser;
-  userStories?: ApiUserStories;
+  peer?: ApiPeer;
+  peerStories?: ApiPeerStories;
 }
 
 interface StateProps {
@@ -25,73 +29,75 @@ interface StateProps {
 }
 
 function StoryPreview({
-  user, userStories, lastViewedId, origin,
+  peer, peerStories, lastViewedId, origin,
 }: OwnProps & StateProps) {
-  const { openStoryViewer, loadUserSkippedStories } = getActions();
+  const { openStoryViewer, loadPeerSkippedStories } = getActions();
+  const lang = useLang();
 
   const story = useMemo<ApiTypeStory | undefined>(() => {
-    if (!userStories) {
+    if (!peerStories) {
       return undefined;
     }
 
     const {
       orderedIds, lastReadId, byId,
-    } = userStories;
+    } = peerStories;
     const hasUnreadStories = orderedIds[orderedIds.length - 1] !== lastReadId;
     const previewIndexId = lastViewedId ?? (hasUnreadStories ? (lastReadId ?? -1) : -1);
     const resultId = byId[previewIndexId]?.id || orderedIds[0];
 
     return byId[resultId];
-  }, [lastViewedId, userStories]);
+  }, [lastViewedId, peerStories]);
+
+  const isLoaded = story && 'content' in story;
 
   useEffect(() => {
-    if (story && !('content' in story)) {
-      loadUserSkippedStories({ userId: story.userId });
+    if (story && !isLoaded) {
+      loadPeerSkippedStories({ peerId: story.peerId });
     }
-  }, [story]);
+  }, [story, isLoaded]);
 
-  const video = story && 'content' in story ? story.content.video : undefined;
-  const imageHash = story && 'content' in story
-    ? getStoryMediaHash(story)
-    : undefined;
+  const video = isLoaded ? story.content.video : undefined;
+  const imageHash = isLoaded ? getStoryMediaHash(story) : undefined;
   const imgBlobUrl = useMedia(imageHash);
   const thumbUrl = imgBlobUrl || video?.thumbnail?.dataUri;
 
-  if (!user || !story || 'isDeleted' in story) {
+  if (!peer || !story || 'isDeleted' in story) {
     return undefined;
   }
 
   return (
     <div
       className={styles.slideInner}
-      onClick={() => { openStoryViewer({ userId: story.userId, storyId: story.id, origin }); }}
+      onClick={() => { openStoryViewer({ peerId: story.peerId, storyId: story.id, origin }); }}
     >
       {thumbUrl && (
         <img src={thumbUrl} alt="" className={styles.media} draggable={false} />
       )}
+      {isLoaded && <MediaAreaOverlay story={story} />}
 
       <div className={styles.content}>
         <Avatar
-          peer={user}
+          peer={peer}
           withStory
           storyViewerMode="disabled"
         />
-        <div className={styles.name}>{renderText(getUserFirstOrLastName(user) || '')}</div>
+        <div className={styles.name}>{renderText(getSenderTitle(lang, peer) || '')}</div>
       </div>
     </div>
   );
 }
 
-export default memo(withGlobal<OwnProps>((global, { user }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { peer }): StateProps => {
   const {
     storyViewer: {
-      lastViewedByUserIds,
+      lastViewedByPeerIds,
       origin,
     },
   } = selectTabState(global);
 
   return {
-    lastViewedId: user?.id ? lastViewedByUserIds?.[user.id] : undefined,
+    lastViewedId: peer?.id ? lastViewedByPeerIds?.[peer.id] : undefined,
     origin,
   };
 })(StoryPreview));

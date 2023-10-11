@@ -196,7 +196,7 @@ const SettingsFoldersChatsPicker: FC<OwnProps & StateProps> = ({
         {selectedChatTypes.map(renderSelectedChatType)}
         {selectedIds.map((id, i) => (
           <PickerSelectedItem
-            chatOrUserId={id}
+            peerId={id}
             isMinimized={shouldMinimize && i < selectedIds.length - ALWAYS_FULL_ITEMS_COUNT}
             canClose
             onClick={handleItemClick}

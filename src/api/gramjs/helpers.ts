@@ -81,14 +81,14 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
   }
 }
 
-export function addStoryToLocalDb(story: GramJs.TypeStoryItem, userId: string) {
+export function addStoryToLocalDb(story: GramJs.TypeStoryItem, peerId: string) {
   if (!(story instanceof GramJs.StoryItem)) {
     return;
   }
 
   const storyData = {
     id: story.id,
-    userId,
+    peerId,
   };
 
   if (story.media instanceof GramJs.MessageMediaPhoto) {

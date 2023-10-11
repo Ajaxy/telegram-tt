@@ -60,7 +60,6 @@
     "account.toggleUsername",
     "users.getUsers",
     "users.getFullUser",
-    "users.getStoriesMaxIDs",
     "contacts.getContacts",
     "contacts.importContacts",
     "contacts.deleteContacts",
@@ -73,7 +72,6 @@
     "contacts.addContact",
     "contacts.resolvePhone",
     "contacts.editCloseFriends",
-    "contacts.toggleStoriesHidden",
     "messages.getMessages",
     "messages.getDialogs",
     "messages.getHistory",
@@ -303,7 +301,7 @@
     "stories.deleteStories",
     "stories.togglePinned",
     "stories.getAllStories",
-    "stories.getUserStories",
+    "stories.getPeerStories",
     "stories.getPinnedStories",
     "stories.getStoriesArchive",
     "stories.getStoriesByID",
@@ -313,5 +311,12 @@
     "stories.exportStoryLink",
     "stories.report",
     "stories.activateStealthMode",
-    "stories.sendReaction"
+    "stories.sendReaction",
+    "stories.getPeerMaxIDs",
+    "stories.togglePeerStoriesHidden",
+    "stories.getPeerStories",
+    "stories.getBoostsStatus",
+    "stories.getBoostersList",
+    "stories.canApplyBoost",
+    "stories.applyBoost"
 ]

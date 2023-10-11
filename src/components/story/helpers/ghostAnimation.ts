@@ -4,7 +4,7 @@ import { StoryViewerOrigin } from '../../../types';
 import { ANIMATION_END_DELAY } from '../../../config';
 import fastBlur from '../../../lib/fastBlur';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { getUserStoryHtmlId } from '../../../global/helpers';
+import { getPeerStoryHtmlId } from '../../../global/helpers';
 import { applyStyles } from '../../../util/animation';
 import stopEvent from '../../../util/stopEvent';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../../util/windowEnvironment';
@@ -207,7 +207,7 @@ function createGhost(source: string, hasBlur = false, isGhost2 = false) {
 
 function getNodes(origin: StoryViewerOrigin, userId: string) {
   let containerSelector;
-  const mediaSelector = `#${getUserStoryHtmlId(userId)}`;
+  const mediaSelector = `#${getPeerStoryHtmlId(userId)}`;
 
   switch (origin) {
     case StoryViewerOrigin.StoryRibbon:

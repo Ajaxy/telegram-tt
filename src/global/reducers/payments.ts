@@ -55,7 +55,7 @@ export function setInvoiceInfo<T extends GlobalState>(
     isTest,
     photo,
     isRecurring,
-    recurringTermsUrl,
+    termsUrl,
     maxTipAmount,
     suggestedTipAmounts,
   } = invoice;
@@ -69,7 +69,7 @@ export function setInvoiceInfo<T extends GlobalState>(
       currency,
       isTest,
       isRecurring,
-      recurringTermsUrl,
+      termsUrl,
       maxTipAmount,
       suggestedTipAmounts,
     },

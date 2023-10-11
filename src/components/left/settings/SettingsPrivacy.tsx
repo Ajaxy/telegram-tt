@@ -68,7 +68,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
   const {
     loadPrivacySettings,
     loadBlockedUsers,
-    loadAuthorizations,
     loadContentSettings,
     updateContentSettings,
     loadGlobalPrivacySettings,
@@ -80,7 +79,6 @@ const SettingsPrivacy: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     loadBlockedUsers();
-    loadAuthorizations();
     loadPrivacySettings();
     loadContentSettings();
     loadWebAuthorizations();

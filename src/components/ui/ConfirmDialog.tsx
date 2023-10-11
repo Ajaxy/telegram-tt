@@ -20,6 +20,7 @@ type OwnProps = {
   confirmLabel?: string;
   confirmIsDestructive?: boolean;
   isConfirmDisabled?: boolean;
+  isOnlyConfirm?: boolean;
   areButtonsInColumn?: boolean;
   className?: string;
   children?: React.ReactNode;
@@ -37,6 +38,7 @@ const ConfirmDialog: FC<OwnProps> = ({
   confirmLabel = 'Confirm',
   confirmIsDestructive,
   isConfirmDisabled,
+  isOnlyConfirm,
   areButtonsInColumn,
   className,
   children,
@@ -82,7 +84,7 @@ const ConfirmDialog: FC<OwnProps> = ({
         >
           {confirmLabel}
         </Button>
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        {!isOnlyConfirm && <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>}
       </div>
     </Modal>
   );

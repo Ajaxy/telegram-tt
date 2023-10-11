@@ -35,7 +35,7 @@ function reactionCountComparator(a: ApiReactionCount, b: ApiReactionCount) {
   return 0;
 }
 
-function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount | undefined {
+export function buildReactionCount(reactionCount: GramJs.ReactionCount): ApiReactionCount | undefined {
   const { chosenOrder, count, reaction } = reactionCount;
 
   const apiReaction = buildApiReaction(reaction);

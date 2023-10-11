@@ -6,26 +6,30 @@ import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
-import { buildApiInputPrivacyRules, getStoryKey } from '../../helpers';
+import { buildApiInputPrivacyRules, isChatChannel } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
+  addChats,
   addStories,
-  addStoriesForUser,
+  addStoriesForPeer,
   addUsers,
-  removeUserStory,
-  toggleUserStoriesHidden,
-  updateLastReadStoryForUser,
-  updateLastViewedStoryForUser,
+  removePeerStory,
+  updateLastReadStoryForPeer,
+  updateLastViewedStoryForPeer,
+  updatePeer,
+  updatePeerPinnedStory,
+  updatePeerStoriesHidden,
+  updatePeerStory,
+  updatePeersWithStories,
+  updateSentStoryReaction,
   updateStealthMode,
   updateStoryViews,
   updateStoryViewsLoading,
-  updateUser,
-  updateUserPinnedStory,
-  updateUserStory,
-  updateUsersWithStories,
 } from '../../reducers';
+import { updateTabState } from '../../reducers/tabs';
 import {
-  selectUser, selectUserStories, selectUserStory,
+  selectChat,
+  selectPeer, selectPeerStories, selectPeerStory, selectTabState,
 } from '../../selectors';
 
 const INFINITE_LOOP_MARKER = 100;
@@ -61,10 +65,11 @@ addActionHandler('loadAllStories', async (global): Promise<void> => {
     global = getGlobal();
     global.stories.stateHash = result.state;
 
-    if ('userStories' in result) {
+    if ('peerStories' in result) {
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addStories(global, result.userStories);
-      global = updateUsersWithStories(global, result.userStories);
+      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+      global = addStories(global, result.peerStories);
+      global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
       global.stories.hasNext = result.hasMore;
     }
@@ -105,10 +110,11 @@ addActionHandler('loadAllHiddenStories', async (global): Promise<void> => {
     global = getGlobal();
     global.stories.archiveStateHash = result.state;
 
-    if ('userStories' in result) {
+    if ('peerStories' in result) {
       global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-      global = addStories(global, result.userStories);
-      global = updateUsersWithStories(global, result.userStories);
+      global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+      global = addStories(global, result.peerStories);
+      global = updatePeersWithStories(global, result.peerStories);
       global = updateStealthMode(global, result.stealthMode);
       global.stories.hasNextInArchive = result.hasMore;
     }
@@ -117,14 +123,14 @@ addActionHandler('loadAllHiddenStories', async (global): Promise<void> => {
   }
 });
 
-addActionHandler('loadUserSkippedStories', async (global, actions, payload): Promise<void> => {
-  const { userId } = payload;
-  const user = selectUser(global, userId);
-  const userStories = selectUserStories(global, userId);
-  if (!user || !userStories) {
+addActionHandler('loadPeerSkippedStories', async (global, actions, payload): Promise<void> => {
+  const { peerId } = payload;
+  const peer = selectPeer(global, peerId);
+  const peerStories = selectPeerStories(global, peerId);
+  if (!peer || !peerStories) {
     return;
   }
-  const skippedStoryIds = Object.values(userStories.byId).reduce((acc, story) => {
+  const skippedStoryIds = Object.values(peerStories.byId).reduce((acc, story) => {
     if (!('content' in story)) {
       acc.push(story.id);
     }
@@ -136,8 +142,8 @@ addActionHandler('loadUserSkippedStories', async (global, actions, payload): Pro
     return;
   }
 
-  const result = await callApi('fetchUserStoriesByIds', {
-    user,
+  const result = await callApi('fetchPeerStoriesByIds', {
+    peer,
     ids: skippedStoryIds,
   });
 
@@ -147,34 +153,35 @@ addActionHandler('loadUserSkippedStories', async (global, actions, payload): Pro
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addStoriesForUser(global, userId, result.stories);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addStoriesForPeer(global, peerId, result.stories);
   setGlobal(global);
 });
 
 addActionHandler('viewStory', async (global, actions, payload): Promise<void> => {
-  const { userId, storyId, tabId = getCurrentTabId() } = payload;
-  const user = selectUser(global, userId);
-  const story = selectUserStory(global, userId, storyId);
-  if (!user || !story || !('content' in story)) {
+  const { peerId, storyId, tabId = getCurrentTabId() } = payload;
+  const peer = selectPeer(global, peerId);
+  const story = selectPeerStory(global, peerId, storyId);
+  if (!peer || !story || !('content' in story)) {
     return;
   }
 
-  global = updateLastViewedStoryForUser(global, userId, storyId, tabId);
+  global = updateLastViewedStoryForPeer(global, peerId, storyId, tabId);
   setGlobal(global);
 
   const serverTime = getServerTime();
 
   if (story.expireDate < serverTime && story.isPinned) {
-    void callApi('viewStory', { user, storyId });
+    void callApi('viewStory', { peer, storyId });
   }
 
-  const isUnread = (global.stories.byUserId[userId].lastReadId || 0) < story.id;
+  const isUnread = (global.stories.byPeerId[peerId].lastReadId || 0) < story.id;
   if (!isUnread) {
     return;
   }
 
   const result = await callApi('markStoryRead', {
-    user,
+    peer,
     storyId,
   });
 
@@ -183,116 +190,130 @@ addActionHandler('viewStory', async (global, actions, payload): Promise<void> =>
   }
 
   global = getGlobal();
-  global = updateLastReadStoryForUser(global, userId, storyId);
+  global = updateLastReadStoryForPeer(global, peerId, storyId);
   setGlobal(global);
 });
 
 addActionHandler('deleteStory', async (global, actions, payload): Promise<void> => {
-  const { storyId } = payload;
+  const { peerId, storyId } = payload;
 
-  const result = await callApi('deleteStory', { storyId });
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const result = await callApi('deleteStory', { peer, storyId });
 
   if (!result) {
     return;
   }
 
   global = getGlobal();
-  global = removeUserStory(global, global.currentUserId!, storyId);
+  global = removePeerStory(global, peerId, storyId);
   setGlobal(global);
 });
 
 addActionHandler('toggleStoryPinned', async (global, actions, payload): Promise<void> => {
-  const { storyId, isPinned } = payload;
+  const { peerId, storyId, isPinned } = payload;
 
-  const story = selectUserStory(global, global.currentUserId!, storyId);
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
+  const story = selectPeerStory(global, peerId, storyId);
   const currentIsPinned = story && 'content' in story ? story.isPinned : undefined;
-  global = updateUserStory(global, global.currentUserId!, storyId, { isPinned });
-  global = updateUserPinnedStory(global, global.currentUserId!, storyId, isPinned);
+  global = updatePeerStory(global, peerId, storyId, { isPinned });
+  global = updatePeerPinnedStory(global, peerId, storyId, isPinned);
   setGlobal(global);
 
-  const result = await callApi('toggleStoryPinned', { storyId, isPinned });
+  const result = await callApi('toggleStoryPinned', { peer, storyId, isPinned });
   if (!result) {
     global = getGlobal();
-    global = updateUserStory(global, global.currentUserId!, storyId, { isPinned: currentIsPinned });
-    global = updateUserPinnedStory(global, global.currentUserId!, storyId, currentIsPinned);
+    global = updatePeerStory(global, peerId, storyId, { isPinned: currentIsPinned });
+    global = updatePeerPinnedStory(global, peerId, storyId, currentIsPinned);
     setGlobal(global);
   }
 });
 
-addActionHandler('loadUserStories', async (global, actions, payload): Promise<void> => {
-  const { userId } = payload;
-  const user = selectUser(global, userId);
-  if (!user) {
-    return;
-  }
+addActionHandler('loadPeerStories', async (global, actions, payload): Promise<void> => {
+  const { peerId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
 
-  const result = await callApi('fetchUserStories', { user });
+  const result = await callApi('fetchPeerStories', { peer });
   if (!result) {
     return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addStoriesForUser(global, userId, result.stories);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addStoriesForPeer(global, peerId, result.stories);
   if (result.lastReadStoryId) {
-    global = updateLastReadStoryForUser(global, userId, result.lastReadStoryId);
+    global = updateLastReadStoryForPeer(global, peerId, result.lastReadStoryId);
   }
   setGlobal(global);
 });
 
-addActionHandler('loadUserPinnedStories', async (global, actions, payload): Promise<void> => {
-  const { userId, offsetId } = payload;
-  const user = selectUser(global, userId);
-  if (!user) {
+addActionHandler('loadPeerPinnedStories', async (global, actions, payload): Promise<void> => {
+  const { peerId, offsetId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
     return;
   }
 
-  const result = await callApi('fetchUserPinnedStories', { user, offsetId });
+  const result = await callApi('fetchPeerPinnedStories', { peer, offsetId });
   if (!result) {
     return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addStoriesForUser(global, userId, result.stories);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addStoriesForPeer(global, peerId, result.stories);
   setGlobal(global);
 });
 
 addActionHandler('loadStoriesArchive', async (global, actions, payload): Promise<void> => {
-  const { offsetId } = payload;
-  const currentUserId = global.currentUserId!;
+  const { peerId, offsetId } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
 
-  const result = await callApi('fetchStoriesArchive', { currentUserId, offsetId });
+  const result = await callApi('fetchStoriesArchive', { peer, offsetId });
   if (!result) {
     return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addStoriesForUser(global, currentUserId, result.stories, true);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addStoriesForPeer(global, peerId, result.stories, true);
   setGlobal(global);
 });
 
-addActionHandler('loadUserStoriesByIds', async (global, actions, payload): Promise<void> => {
-  const { userId, storyIds } = payload;
-  const user = selectUser(global, userId);
-  if (!user) {
+addActionHandler('loadPeerStoriesByIds', async (global, actions, payload): Promise<void> => {
+  const { peerId, storyIds } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
     return;
   }
 
-  const result = await callApi('fetchUserStoriesByIds', { user, ids: storyIds });
+  const result = await callApi('fetchPeerStoriesByIds', { peer, ids: storyIds });
   if (!result) {
     return;
   }
 
   global = getGlobal();
   global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  global = addStoriesForUser(global, userId, result.stories);
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addStoriesForPeer(global, peerId, result.stories);
   setGlobal(global);
 });
 
 addActionHandler('loadStoryViews', async (global, actions, payload): Promise<void> => {
   const {
+    peerId,
     storyId,
     tabId = getCurrentTabId(),
   } = payload;
@@ -307,12 +328,18 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
     limit: PREVIEW_AVATAR_COUNT,
   } : payload;
 
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
+
   if (!isPreload) {
     global = updateStoryViewsLoading(global, true, tabId);
     setGlobal(global);
   }
 
   const result = await callApi('fetchStoryViewList', {
+    peer,
     storyId,
     offset,
     areReactionsFirst,
@@ -335,7 +362,7 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
 
   if (isPreload && result.views?.length) {
     const recentViewerIds = result.views.map((view) => view.userId);
-    global = updateUserStory(global, global.currentUserId!, storyId, {
+    global = updatePeerStory(global, peerId, storyId, {
       recentViewerIds,
       viewsCount: result.viewsCount,
       reactionsCount: result.reactionsCount,
@@ -346,19 +373,19 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
 
 addActionHandler('reportStory', async (global, actions, payload): Promise<void> => {
   const {
-    userId,
+    peerId,
     storyId,
     reason,
     description,
     tabId = getCurrentTabId(),
   } = payload;
-  const user = selectUser(global, userId);
-  if (!user) {
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
     return;
   }
 
   const result = await callApi('reportStory', {
-    user,
+    peer,
     storyId,
     reason,
     description,
@@ -374,9 +401,15 @@ addActionHandler('reportStory', async (global, actions, payload): Promise<void> 
 
 addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnType => {
   const {
+    peerId,
     storyId,
     privacy,
   } = payload;
+
+  const peer = selectPeer(global, peerId);
+  if (!peer) {
+    return;
+  }
 
   const allowedIds = [...privacy.allowUserIds, ...privacy.allowChatIds];
   const blockedIds = [...privacy.blockUserIds, ...privacy.blockChatIds];
@@ -389,67 +422,66 @@ addActionHandler('editStoryPrivacy', (global, actions, payload): ActionReturnTyp
   });
 
   void callApi('editStoryPrivacy', {
+    peer,
     id: storyId,
     privacy: inputPrivacy,
   });
 });
 
 addActionHandler('toggleStoriesHidden', async (global, actions, payload): Promise<void> => {
-  const { userId, isHidden } = payload;
-  const user = selectUser(global, userId);
-  if (!user) return;
+  const { peerId, isHidden } = payload;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
 
-  const result = await callApi('toggleStoriesHidden', { user, isHidden });
+  const result = await callApi('toggleStoriesHidden', { peer, isHidden });
   if (!result) return;
 
   global = getGlobal();
-  global = toggleUserStoriesHidden(global, userId, isHidden);
+  global = updatePeerStoriesHidden(global, peerId, isHidden);
   setGlobal(global);
 });
 
 addActionHandler('loadStoriesMaxIds', async (global, actions, payload): Promise<void> => {
-  const { userIds } = payload;
-  const users = userIds.map((userId) => selectUser(global, userId)).filter(Boolean);
-  if (!users.length) return;
+  const { peerIds } = payload;
+  const peers = peerIds.map((peerId) => selectPeer(global, peerId)).filter(Boolean);
+  if (!peers.length) return;
 
-  const result = await callApi('fetchStoriesMaxIds', { users });
+  const result = await callApi('fetchStoriesMaxIds', { peers });
   if (!result) return;
 
-  const userIdsToLoad: string[] = [];
+  const peerIdsToLoad: string[] = [];
 
   global = getGlobal();
   result.forEach((maxId, i) => {
-    const user = users[i];
-    global = updateUser(global, user.id, {
+    const peer = peers[i];
+    global = updatePeer(global, peer.id, {
       maxStoryId: maxId,
       hasStories: maxId !== 0,
     });
+
     if (maxId !== 0) {
-      userIdsToLoad.push(user.id);
+      peerIdsToLoad.push(peer.id);
     }
   });
   setGlobal(global);
 
-  userIdsToLoad?.forEach((userId) => actions.loadUserStories({ userId }));
+  peerIdsToLoad?.forEach((peerId) => actions.loadPeerStories({ peerId }));
 });
 
 addActionHandler('sendStoryReaction', async (global, actions, payload): Promise<void> => {
   const {
-    userId, storyId, reaction, shouldAddToRecent, tabId = getCurrentTabId(),
+    peerId, storyId, containerId, reaction, shouldAddToRecent, tabId = getCurrentTabId(),
   } = payload;
-  const user = selectUser(global, userId);
-  if (!user) return;
+  const peer = selectPeer(global, peerId);
+  if (!peer) return;
 
-  const story = selectUserStory(global, userId, storyId);
+  const story = selectPeerStory(global, peerId, storyId);
   if (!story || !('content' in story)) return;
 
   const previousReaction = story.sentReaction;
-  global = updateUserStory(global, userId, storyId, {
-    sentReaction: reaction,
-  });
+  global = updateSentStoryReaction(global, peerId, storyId, reaction);
   setGlobal(global);
 
-  const containerId = getStoryKey(userId, storyId);
   if (reaction) {
     actions.startActiveReaction({ containerId, reaction, tabId });
   } else {
@@ -457,14 +489,12 @@ addActionHandler('sendStoryReaction', async (global, actions, payload): Promise<
   }
 
   const result = await callApi('sendStoryReaction', {
-    user, storyId, reaction, shouldAddToRecent,
+    peer, storyId, reaction, shouldAddToRecent,
   });
 
   global = getGlobal();
   if (!result) {
-    global = updateUserStory(global, userId, storyId, {
-      sentReaction: previousReaction,
-    });
+    global = updateSentStoryReaction(global, peerId, storyId, previousReaction);
   }
   setGlobal(global);
 });
@@ -473,4 +503,90 @@ addActionHandler('activateStealthMode', (global, actions, payload): ActionReturn
   const { isForPast = true, isForFuture = true } = payload || {};
 
   callApi('activateStealthMode', { isForPast: isForPast || true, isForFuture: isForFuture || true });
+});
+
+addActionHandler('openBoostModal', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat || !isChatChannel(chat)) return;
+
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!result) {
+    actions.closeBoostModal({ tabId });
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+      boostStatus: result,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const applyInfoResult = await callApi('fetchCanApplyBoost', {
+    chat,
+  });
+
+  if (!applyInfoResult?.info) return;
+
+  const applyInfo = applyInfoResult.info;
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal) return;
+
+  global = addChats(global, buildCollectionByKey(applyInfoResult.chats, 'id'));
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      applyInfo,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('applyBoost', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('applyBoost', {
+    chat,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  const newStatusResult = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!newStatusResult) {
+    return;
+  }
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal?.boostStatus) return;
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      boostStatus: newStatusResult,
+    },
+  }, tabId);
+  setGlobal(global);
 });

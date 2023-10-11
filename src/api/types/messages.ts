@@ -194,7 +194,7 @@ export interface ApiInvoice {
   receiptMsgId?: number;
   isTest?: boolean;
   isRecurring?: boolean;
-  recurringTermsUrl?: string;
+  termsUrl?: string;
   extendedMedia?: ApiMessageExtendedMediaPreview;
   maxTipAmount?: number;
   suggestedTipAmounts?: number[];

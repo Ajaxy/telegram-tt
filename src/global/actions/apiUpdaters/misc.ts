@@ -4,17 +4,17 @@ import { PaymentStep } from '../../../types';
 import { addActionHandler, setGlobal } from '../../index';
 import {
   addBlockedUser,
-  addStoriesForUser,
+  addStoriesForPeer,
   removeBlockedUser,
-  removeUserStory,
+  removePeerStory,
   setConfirmPaymentUrl,
   setPaymentStep,
-  updateLastReadStoryForUser,
+  updateLastReadStoryForPeer,
+  updatePeerStory,
+  updatePeersWithStories,
   updateStealthMode,
-  updateUserStory,
-  updateUsersWithStories,
 } from '../../reducers';
-import { selectUserStories, selectUserStory } from '../../selectors';
+import { selectPeerStories, selectPeerStory } from '../../selectors';
 
 addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
@@ -40,6 +40,12 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
     case 'updateConfig':
       actions.loadConfig();
       break;
+
+    case 'updateNewAuthorization': {
+      // Load more info about this session
+      actions.loadAuthorizations();
+      break;
+    }
 
     case 'updateFavoriteStickers':
       actions.loadFavoriteStickers();
@@ -113,26 +119,26 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       break;
 
     case 'updateStory':
-      global = addStoriesForUser(global, update.userId, { [update.story.id]: update.story });
-      global = updateUsersWithStories(global, { [update.userId]: selectUserStories(global, update.userId)! });
+      global = addStoriesForPeer(global, update.peerId, { [update.story.id]: update.story });
+      global = updatePeersWithStories(global, { [update.peerId]: selectPeerStories(global, update.peerId)! });
       setGlobal(global);
       break;
 
     case 'deleteStory':
-      global = removeUserStory(global, update.userId, update.storyId);
+      global = removePeerStory(global, update.peerId, update.storyId);
       setGlobal(global);
       break;
 
     case 'updateReadStories':
-      global = updateLastReadStoryForUser(global, update.userId, update.lastReadId);
+      global = updateLastReadStoryForPeer(global, update.peerId, update.lastReadId);
       setGlobal(global);
       break;
 
     case 'updateSentStoryReaction': {
-      const { userId, storyId, reaction } = update;
-      const story = selectUserStory(global, userId, storyId);
+      const { peerId, storyId, reaction } = update;
+      const story = selectPeerStory(global, peerId, storyId);
       if (!story) return global;
-      global = updateUserStory(global, userId, storyId, { sentReaction: reaction });
+      global = updatePeerStory(global, peerId, storyId, { sentReaction: reaction });
       setGlobal(global);
       break;
     }
