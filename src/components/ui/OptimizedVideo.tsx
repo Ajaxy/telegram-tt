@@ -15,6 +15,7 @@ type OwnProps =
     canPlay: boolean;
     children?: React.ReactNode;
     onReady?: NoneToVoidFunction;
+    onBroken?: NoneToVoidFunction;
   }
   & VideoProps;
 
@@ -24,6 +25,7 @@ function OptimizedVideo({
   canPlay,
   children,
   onReady,
+  onBroken,
   onTimeUpdate,
   ...restProps
 }: OwnProps) {
@@ -45,7 +47,7 @@ function OptimizedVideo({
   });
 
   // This is only needed for browsers not allowing autoplay
-  const { isBuffered, bufferingHandlers } = useBuffering(true, onTimeUpdate);
+  const { isBuffered, bufferingHandlers } = useBuffering(true, onTimeUpdate, onBroken);
   const { onPlaying: handlePlayingForBuffering, ...otherBufferingHandlers } = bufferingHandlers;
   useSyncEffect(([prevIsBuffered]) => {
     if (prevIsBuffered === undefined) {
