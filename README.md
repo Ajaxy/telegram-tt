@@ -1,6 +1,6 @@
-# Quote — Telegram client for startups
+# Quote — Telegram client for teams
 
-Quote is aimed at improving the communication workflow for teams of developers, programmers, designers.
+Quote is aimed at improving the communication workflow for teams of developers, programmers, designers, startupers and creators.
 
 Quote brings productivity boosts:
 - no stories
