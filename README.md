@@ -1,4 +1,51 @@
-# Telegram Web A
+# Quote — Telegram client for startups
+
+Quote is aimed at improving the communication workflow for teams of developers, programmers, designers.
+
+It has improvements:
+- no stories
+- inbox (soon)
+- workspaces (soon)
+- ... (a lot of features in the design process, will be announced soon)
+
+## For Quote developers: How to...
+### 1) Get updates from upstream (if needed)
+```sh
+git remote add upstream git@github.com:Ajaxy/telegram-tt.git
+git fetch upstream
+git checkout master
+git merge upstream/master
+git commit -m "Upstream updates"
+git push
+```
+
+### 2) Rebuild before deploy
+```sh
+git checkout master
+npm run build:production
+git add .
+git commit -m "Build"
+git push
+```
+
+### 3) Deploy the build
+```sh
+git checkout deploy
+git reset --hard master
+git push --force
+```
+
+-> https://quote-web.github.io/app/dist/
+
+
+## Quote is the foͦrͬᴋ of the official Telegram Web A
+Great respect to the creators of the original project!
+
+**The original readme begins below...**
+
+---
+
+## Telegram Web A
 
 This project won the first prize 🥇 at [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and now is an official Telegram client available to anyone at [web.telegram.org/a](https://web.telegram.org/a).
 
