@@ -21,7 +21,6 @@ type OwnProps = {
   icon?: IconName;
   title?: string;
   isMinimized?: boolean;
-  isStandalone?: boolean;
   canClose?: boolean;
   forceShowSelf?: boolean;
   clickArg?: any;
@@ -39,7 +38,6 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   icon,
   title,
   isMinimized,
-  isStandalone,
   canClose,
   clickArg,
   chat,
@@ -83,7 +81,6 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     chat?.isForum && 'forum-avatar',
     isMinimized && 'minimized',
     canClose && 'closeable',
-    isStandalone && 'standalone',
   );
 
   return (

@@ -74,7 +74,7 @@
     margin: 2rem auto;
     background-color: var(--color-background);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
-    border-radius: var(--border-radius-default);
+    border-radius: var(--border-radius-modal);
     transform: translate3d(0, -1rem, 0);
 
     transition: transform 0.2s ease, opacity 0.2s ease;

@@ -11,13 +11,14 @@ type BufferingEvent = (e: Event | React.SyntheticEvent<HTMLMediaElement>) => voi
 const MIN_READY_STATE = 3;
 // Avoid flickering when re-mounting previously buffered video
 const DEBOUNCE = 200;
+const MIN_ALLOWED_MEDIA_DURATION = 0.1; // Some video emojis have weird duration of 0.04 causing extreme amount of events
 
 /**
  * Time range relative to the duration [0, 1]
  */
 export type BufferedRange = { start: number; end: number };
 
-const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunction) => {
+const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunction, onBroken?: AnyToVoidFunction) => {
   const [isBuffered, setIsBuffered] = useState(!noInitiallyBuffered);
   const [isReady, setIsReady] = useState(false);
   const [bufferedProgress, setBufferedProgress] = useState(0);
@@ -28,11 +29,16 @@ const useBuffering = (noInitiallyBuffered = false, onTimeUpdate?: AnyToVoidFunct
   }, []);
 
   const handleBuffering = useLastCallback<BufferingEvent>((e) => {
+    const media = e.currentTarget as HTMLMediaElement;
+
+    if (media.duration < MIN_ALLOWED_MEDIA_DURATION) {
+      onBroken?.();
+      return;
+    }
+
     if (e.type === 'timeupdate') {
       onTimeUpdate?.(e);
     }
-
-    const media = e.currentTarget as HTMLMediaElement;
 
     if (!isSafariPatchInProgress(media)) {
       if (media.buffered.length) {

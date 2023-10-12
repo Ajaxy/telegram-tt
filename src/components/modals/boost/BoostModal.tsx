@@ -6,7 +6,6 @@ import type { TabState } from '../../../global/types';
 
 import { getChatTitle } from '../../../global/helpers';
 import { selectChat } from '../../../global/selectors';
-import buildClassName from '../../../util/buildClassName';
 import { formatDateInFuture } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
@@ -18,7 +17,6 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import Avatar from '../../common/Avatar';
 import Icon from '../../common/Icon';
-import PickerSelectedItem from '../../common/PickerSelectedItem';
 import PremiumProgress from '../../common/PremiumProgress';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -60,7 +58,6 @@ const BoostModal = ({
   boostedChat,
 }: OwnProps & StateProps) => {
   const {
-    openChat,
     applyBoost,
     closeBoostModal,
     requestConfetti,
@@ -129,7 +126,7 @@ const BoostModal = ({
     const currentStoriesPerDay = lang('ChannelBoost.StoriesPerDay', level);
     const nextLevelStoriesPerDay = lang('ChannelBoost.StoriesPerDay', level + 1);
 
-    const modalTitle = hasBoost ? lang('ChannelBoost.YouBoostedOtherChannel')
+    const modalTitle = hasBoost ? lang('YouBoostedChannel2', chatTitle)
       : level === 0 ? lang('lng_boost_channel_title_first') : lang('lng_boost_channel_title_more');
 
     let description: string | undefined;
@@ -163,11 +160,6 @@ const BoostModal = ({
     };
   }, [chat, chatTitle, info, lang]);
 
-  const handleOpenChat = useLastCallback(() => {
-    openChat({ id: chat!.id });
-    closeBoostModal();
-  });
-
   const handleApplyBoost = useLastCallback(() => {
     closeReplaceModal();
     applyBoost({ chatId: chat!.id });
@@ -175,6 +167,11 @@ const BoostModal = ({
   });
 
   const handleButtonClick = useLastCallback(() => {
+    if (isBoosted) {
+      closeBoostModal();
+      return;
+    }
+
     if (applyInfo?.type === 'ok') {
       handleApplyBoost();
     }
@@ -186,10 +183,10 @@ const BoostModal = ({
     if (applyInfo?.type === 'wait') {
       openWaitDialog();
     }
+  });
 
-    if (isBoosted) {
-      closeBoostModal();
-    }
+  const handleCloseClick = useLastCallback(() => {
+    closeBoostModal();
   });
 
   function renderContent() {
@@ -199,14 +196,6 @@ const BoostModal = ({
 
     return (
       <>
-        {chat && (
-          <PickerSelectedItem
-            className={styles.chip}
-            peerId={chat.id}
-            isStandalone
-            onClick={handleOpenChat}
-          />
-        )}
         <PremiumProgress
           leftText={leftText}
           rightText={rightText}
@@ -214,25 +203,22 @@ const BoostModal = ({
           floatingBadgeText={value}
           floatingBadgeIcon="boost"
         />
-        <div className={buildClassName(styles.description, styles.textCenter)}>
+        <div className={styles.description}>
           {renderText(descriptionText, ['simple_markdown', 'emoji'])}
         </div>
-        <Button
-          className={styles.button}
-          size="smaller"
-          withPremiumGradient
-          isShiny
-          isLoading={!applyInfo}
-          ripple
-          onClick={handleButtonClick}
-        >
-          {!isBoosted ? (
-            <>
-              <Icon name="boost" />
-              {lang('ChannelBoost.BoostChannel')}
-            </>
-          ) : lang('OK')}
-        </Button>
+        <div className="dialog-buttons">
+          <Button isText className="confirm-dialog-button" disabled={!applyInfo} onClick={handleButtonClick}>
+            {!isBoosted ? (
+              <>
+                <Icon name="boost" />
+                {lang('ChannelBoost.BoostChannel')}
+              </>
+            ) : lang('OK')}
+          </Button>
+          <Button isText className="confirm-dialog-button" onClick={handleCloseClick}>
+            {lang('Cancel')}
+          </Button>
+        </div>
       </>
     );
   }
@@ -241,10 +227,9 @@ const BoostModal = ({
     <Modal
       isOpen={isOpen}
       title={title}
+      className={styles.modal}
       contentClassName={styles.content}
       onClose={closeBoostModal}
-      isSlim
-      hasCloseButton
     >
       {renderContent()}
       {applyInfo?.type === 'replace' && boostedChatTitle && (
@@ -262,7 +247,7 @@ const BoostModal = ({
             <Icon name="next" className={styles.arrow} />
             <Avatar peer={chat} size="large" />
           </div>
-          <div className={styles.textCenter}>
+          <div>
             {renderText(lang('ChannelBoost.ReplaceBoost', [boostedChatTitle, chatTitle]), ['simple_markdown', 'emoji'])}
           </div>
           <div className="dialog-buttons">
