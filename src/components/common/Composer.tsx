@@ -36,6 +36,7 @@ import {
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
+  QUOTE_APP as QUOTE_APP_CONSTANTS,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
@@ -48,6 +49,7 @@ import {
   isChatChannel,
   isChatSuperGroup,
   isUserId,
+  QUOTE_APP as QUOTE_APP_UTILS,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -261,8 +263,6 @@ const SELECT_MODE_TRANSITION_MS = 200;
 const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
-
-const QUOTE_APP_SHOULD_OPEN_REPLIES_CHAT_ON_REPLY = true; // TODO move somewhere
 
 const Composer: FC<OwnProps & StateProps> = ({
   type,
@@ -919,6 +919,11 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    const shouldForwardToRepliesChat = (
+      replyingToId
+      && QUOTE_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
+      && QUOTE_APP_UTILS.doesChatSupportThreads(chat)
+    );
     let currentAttachments = attachments;
 
     if (activeVoiceRecording) {
@@ -936,7 +941,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     const { text, entities } = parseMessageInput(getHtml());
 
     if (currentAttachments.length) {
-      if (QUOTE_APP_SHOULD_OPEN_REPLIES_CHAT_ON_REPLY && replyingToId) openChat({ id: chatId, threadId: replyingToId });
+      if (shouldForwardToRepliesChat) openChat({ id: chatId, threadId: replyingToId });
       sendAttachments({
         attachments: currentAttachments,
       });
@@ -974,7 +979,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     lastMessageSendTimeSeconds.current = getServerTime();
 
     clearDraft({ chatId, localOnly: true });
-    if (replyingToId) openChat({ id: chatId, threadId: replyingToId });
+    if (shouldForwardToRepliesChat) openChat({ id: chatId, threadId: replyingToId });
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }
