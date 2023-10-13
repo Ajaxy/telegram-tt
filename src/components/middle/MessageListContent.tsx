@@ -11,7 +11,12 @@ import { MAIN_THREAD_ID } from '../../api/types';
 
 import { SCHEDULED_WHEN_ONLINE } from '../../config';
 import {
-  getMessageHtmlId, getMessageOriginalId, isActionMessage, isOwnMessage, isServiceNotificationMessage,
+  getMessageHtmlId,
+  getMessageOriginalId,
+  isActionMessage,
+  isMainThread,
+  isOwnMessage,
+  isServiceNotificationMessage,
 } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { formatHumanDate } from '../../util/dateFormat';
@@ -212,8 +217,9 @@ const MessageListContent: FC<OwnProps> = ({
         // Service notifications saved in cache in previous versions may share the same `previousLocalId`
         const key = isServiceNotificationMessage(message) ? `${message.date}_${originalId}` : originalId;
 
+        const isScheduledMessage = type === 'scheduled';
         const noComments = hasLinkedChat === false || !isChannelChat;
-
+        const noReplies = !noComments || isScheduledMessage || !isMainThread(threadId);
         const isTopicTopMessage = message.id === threadTopMessageId;
 
         return compact([
@@ -231,7 +237,7 @@ const MessageListContent: FC<OwnProps> = ({
             threadId={threadId}
             messageListType={type}
             noComments={noComments}
-            noReplies={!noComments || threadId !== MAIN_THREAD_ID || type === 'scheduled'}
+            noReplies={noReplies}
             appearanceOrder={messageCountToAnimate - ++appearanceIndex}
             isJustAdded={position.isLastInList && isNewMessage}
             isFirstInGroup={position.isFirstInGroup}

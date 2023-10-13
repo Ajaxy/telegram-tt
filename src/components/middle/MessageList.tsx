@@ -27,8 +27,11 @@ import {
   getMessageHtmlId,
   isChatChannel,
   isChatGroup,
+  isChatSuperGroup,
   isChatWithRepliesBot,
   isLocalMessageId,
+  isMainThread,
+  isReplyMessage,
   isUserId,
 } from '../../global/helpers';
 import {
@@ -99,6 +102,7 @@ type StateProps = {
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isGroupChat?: boolean;
+  isSuperGroupChat?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
   isCreator?: boolean;
@@ -131,6 +135,7 @@ const MESSAGE_ANIMATION_DURATION = 500;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
+const QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD = false; // TODO move somewhere else
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
 
@@ -145,6 +150,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isChatLoaded,
   isChannelChat,
   isGroupChat,
+  isSuperGroupChat,
   canPost,
   isReady,
   isChatWithSelf,
@@ -196,6 +202,8 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
+  const withReplies = isMainThread(threadId) && isSuperGroupChat ? QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
+
   const areMessagesLoaded = Boolean(messageIds);
 
   useSyncEffect(() => {
@@ -231,12 +239,24 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   useNativeCopySelectedMessages(copyMessagesByIds);
 
+  const messagesByIdFiltered = useMemo(
+    () => (messagesById
+      ? Object.values(messagesById).reduce((acc, message) => {
+        if (!withReplies && isReplyMessage(message)) return acc;
+
+        acc[message.id] = message;
+        return acc;
+      }, {} as Record<number, ApiMessage>)
+      : {} as Record<number, ApiMessage>),
+    [messagesById, withReplies],
+  );
+
   const messageGroups = useMemo(() => {
-    if (!messageIds?.length || !messagesById) {
+    if (!messageIds?.length || !messagesByIdFiltered) {
       return undefined;
     }
 
-    const listedMessages = messageIds.map((id) => messagesById[id]).filter(Boolean);
+    const listedMessages = messageIds.map((id) => messagesByIdFiltered[id]).filter(Boolean);
 
     // Service notifications have local IDs which may be not in sync with real message history
     const orderRule: (keyof ApiMessage)[] = type === 'scheduled' || isServiceNotificationsChat
@@ -246,13 +266,13 @@ const MessageList: FC<OwnProps & StateProps> = ({
     return listedMessages.length
       ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current)
       : undefined;
-  }, [messageIds, messagesById, type, isServiceNotificationsChat]);
+  }, [messageIds, messagesByIdFiltered, type, isServiceNotificationsChat]);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || type === 'scheduled') {
+    if (!messageIds || !messagesByIdFiltered || type === 'scheduled') {
       return;
     }
-    const ids = messageIds.filter((id) => messagesById[id]?.reactions);
+    const ids = messageIds.filter((id) => messagesByIdFiltered[id]?.reactions);
 
     if (!ids.length) return;
 
@@ -260,10 +280,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, MESSAGE_REACTIONS_POLLING_INTERVAL);
 
   useInterval(() => {
-    if (!messageIds || !messagesById || type === 'scheduled') {
+    if (!messageIds || !messagesByIdFiltered || type === 'scheduled') {
       return;
     }
-    const storyDataList = messageIds.map((id) => messagesById[id]?.content.storyData).filter(Boolean);
+    const storyDataList = messageIds.map((id) => messagesByIdFiltered[id]?.content.storyData).filter(Boolean);
 
     if (!storyDataList.length) return;
 
@@ -672,6 +692,7 @@ export default memo(withGlobal<OwnProps>(
       restrictionReason,
       isChannelChat: isChatChannel(chat),
       isGroupChat: isChatGroup(chat),
+      isSuperGroupChat: isChatSuperGroup(chat),
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isRepliesChat: isChatWithRepliesBot(chatId),
