@@ -19,6 +19,11 @@ contextMenu({
 });
 
 app.on('ready', () => {
+  const customAppName = process.env.CUSTOM_APP_NAME;
+  if (customAppName !== undefined) {
+    app.setName(customAppName);
+  }
+
   if (IS_MAC_OS) {
     app.dock.setIcon(nativeImage.createFromPath(path.resolve(__dirname, '../public/icon-electron-macos.png')));
   }
