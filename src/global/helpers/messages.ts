@@ -2,7 +2,7 @@ import type {
   ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
-import { ApiMessageEntityTypes } from '../../api/types';
+import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
 
 import {
   CONTENT_NOT_SUPPORTED,
@@ -160,12 +160,20 @@ export function matchLinkInMessageText(message: ApiMessage) {
   };
 }
 
+export function isMainThread(threadId: number) {
+  return threadId === MAIN_THREAD_ID;
+}
+
 export function isOwnMessage(message: ApiMessage) {
   return message.isOutgoing;
 }
 
 export function isReplyMessage(message: ApiMessage) {
   return Boolean(message.replyToMessageId);
+}
+
+export function isReplyToUserThreadMessage(message: ApiMessage) {
+  return isReplyMessage(message) && !isMainThread(message.replyToMessageId!);
 }
 
 export function isForwardedMessage(message: ApiMessage) {
