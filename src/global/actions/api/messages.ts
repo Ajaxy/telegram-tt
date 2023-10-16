@@ -1135,10 +1135,12 @@ function findClosestIndex(sourceIds: number[], offsetId: number) {
 }
 
 function getViewportSlice(
-  sourceIds: number[],
+  sourceIds: number[] | undefined,
   offsetId: number | undefined,
   direction: LoadMoreDirection,
 ) {
+  if (!sourceIds) return { newViewportIds: [], areSomeLocal: true, areAllLocal: true };
+
   const { length } = sourceIds;
   const index = offsetId ? findClosestIndex(sourceIds, offsetId) : -1;
   const isBackwards = direction === LoadMoreDirection.Backwards;

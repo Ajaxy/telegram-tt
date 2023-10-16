@@ -48,6 +48,7 @@ import {
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
+  isMainThread,
   isUserId,
   QUOTE_APP as QUOTE_APP_UTILS,
 } from '../../global/helpers';
@@ -919,11 +920,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const shouldForwardToRepliesChat = (
+    const shouldOpenRepliesChat = (
       replyingToId
       && QUOTE_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
       && QUOTE_APP_UTILS.doesChatSupportThreads(chat)
     );
+    const repliesChatToOpen = {
+      id: chatId,
+      threadId: isMainThread(threadId) ? replyingToId : threadId,
+    };
     let currentAttachments = attachments;
 
     if (activeVoiceRecording) {
@@ -941,7 +946,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     const { text, entities } = parseMessageInput(getHtml());
 
     if (currentAttachments.length) {
-      if (shouldForwardToRepliesChat) openChat({ id: chatId, threadId: replyingToId });
+      if (shouldOpenRepliesChat) openChat(repliesChatToOpen);
       sendAttachments({
         attachments: currentAttachments,
       });
@@ -979,7 +984,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     lastMessageSendTimeSeconds.current = getServerTime();
 
     clearDraft({ chatId, localOnly: true });
-    if (shouldForwardToRepliesChat) openChat({ id: chatId, threadId: replyingToId });
+    if (shouldOpenRepliesChat) openChat(repliesChatToOpen);
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }
