@@ -8,7 +8,7 @@ Quote brings productivity boosts:
 - workspaces (soon)
 - ... (a lot of features in the design process, will be announced soon)
 
-## For Quote developers: How to...
+## [Quote Developers Area] How to...
 ### 1) Get updates from [upstream](https://github.com/Ajaxy/telegram-tt/network) (if needed)
 ```sh
 git remote add upstream git@github.com:Ajaxy/telegram-tt.git
