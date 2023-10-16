@@ -52,7 +52,9 @@ export function isChatSuperGroup(chat: ApiChat) {
 }
 
 export function isChatWithTopics(chat: ApiChat) {
-  return chat.topics !== undefined || chat.topicsCount !== undefined;
+  if (chat.topics === undefined) return !!chat.topicsCount;
+
+  return !!Object.values(chat.topics).filter((topic) => !topic.isClosed).length;
 }
 
 export function isChatSuperGroupWithoutTopics(chat: ApiChat) {

@@ -27,12 +27,12 @@ import {
   getMessageHtmlId,
   isChatChannel,
   isChatGroup,
-  isChatSuperGroup,
   isChatWithRepliesBot,
   isLocalMessageId,
   isMainThread,
-  isReplyMessage,
+  isReplyToUserThreadMessage,
   isUserId,
+  QUOTE_APP as QUOTE_APP_UTILS,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -98,11 +98,11 @@ type OwnProps = {
 };
 
 type StateProps = {
+  doesChatSupportThreads?: boolean;
   isCurrentUserPremium?: boolean;
   isChatLoaded?: boolean;
   isChannelChat?: boolean;
   isGroupChat?: boolean;
-  isSuperGroupChat?: boolean;
   isChatWithSelf?: boolean;
   isRepliesChat?: boolean;
   isCreator?: boolean;
@@ -146,11 +146,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
   hasTools,
   onFabToggle,
   onNotchToggle,
+  doesChatSupportThreads,
   isCurrentUserPremium,
   isChatLoaded,
   isChannelChat,
   isGroupChat,
-  isSuperGroupChat,
   canPost,
   isReady,
   isChatWithSelf,
@@ -202,7 +202,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
-  const withReplies = isMainThread(threadId) && isSuperGroupChat ? QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
+  const withRepliesToThreads = doesChatSupportThreads ? QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -242,13 +242,16 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const messagesByIdFiltered = useMemo(
     () => (messagesById
       ? Object.values(messagesById).reduce((acc, message) => {
-        if (!withReplies && isReplyMessage(message)) return acc;
+        if (
+          isMainThread(threadId)
+          && !withRepliesToThreads && isReplyToUserThreadMessage(message)
+        ) return acc;
 
         acc[message.id] = message;
         return acc;
       }, {} as Record<number, ApiMessage>)
       : {} as Record<number, ApiMessage>),
-    [messagesById, withReplies],
+    [messagesById, withRepliesToThreads, threadId],
   );
 
   const messageGroups = useMemo(() => {
@@ -692,7 +695,7 @@ export default memo(withGlobal<OwnProps>(
       restrictionReason,
       isChannelChat: isChatChannel(chat),
       isGroupChat: isChatGroup(chat),
-      isSuperGroupChat: isChatSuperGroup(chat),
+      doesChatSupportThreads: QUOTE_APP_UTILS.doesChatSupportThreads(chat),
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isRepliesChat: isChatWithRepliesBot(chatId),
