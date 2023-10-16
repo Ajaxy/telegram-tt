@@ -53,7 +53,7 @@ import {
 } from '../../global/selectors';
 import animateScroll, { isAnimatingScroll, restartCurrentScrollAnimation } from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
-import { orderBy } from '../../util/iteratees';
+import { findLast, orderBy } from '../../util/iteratees';
 import resetScroll from '../../util/resetScroll';
 import { debounce, onTickEnd } from '../../util/schedulers';
 import { groupMessages } from './helpers/groupMessages';
@@ -365,6 +365,26 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const rememberScrollPositionRef = useStateRef(() => {
     if (!messageIds || !listItemElementsRef.current) {
       return;
+    }
+
+    if (containerRef.current) {
+      const container = containerRef.current;
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const scrollable = clientHeight < scrollHeight;
+
+      // find first element that is visible in viewport
+      const topElement = !scrollable
+        ? ""
+        : findLast(
+            listItemElementsRef.current,
+            (elem) => elem.offsetTop < scrollTop
+        );
+      
+      if (topElement) {
+        anchorIdRef.current = topElement.id;
+        anchorTopRef.current = topElement.getBoundingClientRect().top;
+        return;
+      }
     }
 
     const preservedItemElements = listItemElementsRef.current
