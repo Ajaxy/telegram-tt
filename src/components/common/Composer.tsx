@@ -36,6 +36,7 @@ import {
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
+  QUOTE_APP as QUOTE_APP_CONSTANTS,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
@@ -47,7 +48,9 @@ import {
   isChatAdmin,
   isChatChannel,
   isChatSuperGroup,
+  isMainThread,
   isUserId,
+  QUOTE_APP as QUOTE_APP_UTILS,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -917,6 +920,15 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
+    const shouldOpenRepliesChat = (
+      replyingToId
+      && QUOTE_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
+      && QUOTE_APP_UTILS.doesChatSupportThreads(chat)
+    );
+    const repliesChatToOpen = {
+      id: chatId,
+      threadId: isMainThread(threadId) ? replyingToId : threadId,
+    };
     let currentAttachments = attachments;
 
     if (activeVoiceRecording) {
@@ -934,6 +946,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     const { text, entities } = parseMessageInput(getHtml());
 
     if (currentAttachments.length) {
+      if (shouldOpenRepliesChat) openChat(repliesChatToOpen);
       sendAttachments({
         attachments: currentAttachments,
       });
@@ -971,7 +984,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     lastMessageSendTimeSeconds.current = getServerTime();
 
     clearDraft({ chatId, localOnly: true });
-
+    if (shouldOpenRepliesChat) openChat(repliesChatToOpen);
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }

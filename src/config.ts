@@ -334,3 +334,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 };
 
 export const IS_STORIES_ENABLED = false;
+
+export const QUOTE_APP = {
+  SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: true,
+};

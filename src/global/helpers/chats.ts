@@ -51,6 +51,20 @@ export function isChatSuperGroup(chat: ApiChat) {
   return chat.type === 'chatTypeSuperGroup';
 }
 
+export function isChatWithTopics(chat: ApiChat) {
+  if (chat.topics === undefined) return !!chat.topicsCount;
+
+  return !!Object.values(chat.topics).filter((topic) => !topic.isClosed).length;
+}
+
+export function isChatSuperGroupWithoutTopics(chat: ApiChat) {
+  return isChatSuperGroup(chat) && !isChatWithTopics(chat);
+}
+
+export function isChatSuperGroupWithTopics(chat: ApiChat) {
+  return isChatSuperGroup(chat) && isChatWithTopics(chat);
+}
+
 export function isChatChannel(chat: ApiChat) {
   return chat.type === 'chatTypeChannel';
 }
@@ -62,6 +76,10 @@ export function isCommonBoxChat(chat: ApiChat) {
 export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
 }
+
+export const QUOTE_APP = {
+  doesChatSupportThreads: (chat: ApiChat | undefined) => chat && isChatSuperGroupWithoutTopics(chat),
+};
 
 export function getChatTypeString(chat: ApiChat) {
   switch (chat.type) {
