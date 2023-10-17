@@ -320,7 +320,7 @@ body:not(.is-ios) {
 }
 
 .component-theme-dark {
-  --color-background: rgb(33, 33, 33);
+  --color-background: rgba(27, 26, 29, 1);
   --color-background-compact-menu: rgb(33, 33, 33, 0.867);
   --color-background-compact-menu-reactions: rgb(33, 33, 33, 0.867);
   --color-background-compact-menu-hover: rgb(0, 0, 0, 0.4);
