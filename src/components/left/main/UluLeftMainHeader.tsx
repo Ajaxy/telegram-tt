@@ -152,6 +152,32 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined);
 
+  const handleSearchFocus = useLastCallback(() => {
+    if (!searchQuery) {
+      onSearchQuery('');
+    }
+  });
+
+  // Cmd+K to open search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.key === 'k') {
+        if (hasMenu) {
+          handleSearchFocus();
+          return;
+        }
+
+        onReset();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [hasMenu, onReset]);
+
   const MainButton: FC<{ onTrigger: () => void }> = useMemo(() => {
     return ({ onTrigger }) => (
       <UluHeaderProfile
@@ -160,12 +186,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       />
     );
   }, [hasMenu, onReset]);
-
-  const handleSearchFocus = useLastCallback(() => {
-    if (!searchQuery) {
-      onSearchQuery('');
-    }
-  });
 
   const toggleConnectionStatus = useLastCallback(() => {
     setSettingOption({ isConnectionStatusMinimized: !isConnectionStatusMinimized });
