@@ -77,7 +77,7 @@ export function isChatWithRepliesBot(chatId: string) {
   return chatId === REPLIES_USER_ID;
 }
 
-export const QUOTE_APP = {
+export const ULU_APP = {
   doesChatSupportThreads: (chat: ApiChat | undefined) => chat && isChatSuperGroupWithoutTopics(chat),
 };
 
