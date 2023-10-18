@@ -69,7 +69,7 @@ import RatePhoneCallModal from '../calls/phone/RatePhoneCallModal.async';
 import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
-import UluLeftColumn from '../left/UluLeftColumn';
+import LeftColumn from '../left/LeftColumn';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
@@ -527,7 +527,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
-      <UluLeftColumn ref={leftColumnRef} />
+      <LeftColumn ref={leftColumnRef} />
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
