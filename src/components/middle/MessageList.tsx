@@ -32,7 +32,7 @@ import {
   isMainThread,
   isReplyToUserThreadMessage,
   isUserId,
-  QUOTE_APP as QUOTE_APP_UTILS,
+  ULU_APP as ULU_APP_UTILS,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -135,7 +135,7 @@ const MESSAGE_ANIMATION_DURATION = 500;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
-const QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD = false; // TODO move somewhere else
+const ULU_APP_WITH_REPLIES_IN_MAIN_THREAD = false; // TODO move somewhere else
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
 
@@ -202,7 +202,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
-  const withRepliesToThreads = doesChatSupportThreads ? QUOTE_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
+  const withRepliesToThreads = doesChatSupportThreads ? ULU_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -695,7 +695,7 @@ export default memo(withGlobal<OwnProps>(
       restrictionReason,
       isChannelChat: isChatChannel(chat),
       isGroupChat: isChatGroup(chat),
-      doesChatSupportThreads: QUOTE_APP_UTILS.doesChatSupportThreads(chat),
+      doesChatSupportThreads: ULU_APP_UTILS.doesChatSupportThreads(chat),
       isCreator: chat.isCreator,
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isRepliesChat: isChatWithRepliesBot(chatId),
