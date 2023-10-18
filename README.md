@@ -1,14 +1,14 @@
-# Quote — Telegram client for teams
+# ulu — Telegram client for teams
 
-Quote is aimed at improving the communication workflow for teams of developers, programmers, designers, startupers and creators.
+ulu is aimed at improving the communication workflow for teams of developers, programmers, designers, startupers and creators.
 
-Quote brings productivity boosts:
+ulu brings productivity boosts:
 - no stories
 - inbox (soon)
 - workspaces (soon)
 - ... (a lot of features in the design process, will be announced soon)
 
-## [Quote Developers Area] How to...
+## [Ulu Developers Area] How to...
 ### 1) Get updates from [upstream](https://github.com/Ajaxy/telegram-tt/network) (if needed)
 ```sh
 git remote add upstream git@github.com:Ajaxy/telegram-tt.git
@@ -35,10 +35,9 @@ git reset --hard master
 git push --force
 ```
 
--> https://quote-web.github.io/app/dist/
+-> https://ulu.so
 
-
-## Quote is the foͦrͬᴋⷦ of the official Telegram Web A
+## ulu is the foͦrͬᴋⷦ of the official Telegram Web A
 Great respect to the creators of the original project!
 
 **The original readme begins below...**
