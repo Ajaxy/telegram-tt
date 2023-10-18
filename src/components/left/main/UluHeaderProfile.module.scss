@@ -18,10 +18,17 @@
 .photoWrapper {
   height: 1.5rem;
   width: 1.5rem;
+  border-radius: 0.5rem;
   
   :global(.avatar-media) {
     border-radius: 0.5rem;
     vertical-align: inherit;
+  }
+
+  :global(.no-photo) {
+    border-radius: inherit;
+    font-size: 0.6875rem;
+    white-space: nowrap;
   }
 }
 
