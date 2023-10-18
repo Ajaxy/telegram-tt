@@ -36,10 +36,10 @@ import {
   EDITABLE_INPUT_MODAL_ID,
   HEART_REACTION,
   MAX_UPLOAD_FILEPART_SIZE,
-  QUOTE_APP as QUOTE_APP_CONSTANTS,
   REPLIES_USER_ID,
   SCHEDULED_WHEN_ONLINE,
   SEND_MESSAGE_ACTION_INTERVAL,
+  ULU_APP as ULU_APP_CONSTANTS,
 } from '../../config';
 import { requestMeasure, requestNextMutation } from '../../lib/fasterdom/fasterdom';
 import {
@@ -50,7 +50,7 @@ import {
   isChatSuperGroup,
   isMainThread,
   isUserId,
-  QUOTE_APP as QUOTE_APP_UTILS,
+  ULU_APP as ULU_APP_UTILS,
 } from '../../global/helpers';
 import {
   selectBot,
@@ -922,8 +922,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     const shouldOpenRepliesChat = (
       replyingToId
-      && QUOTE_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
-      && QUOTE_APP_UTILS.doesChatSupportThreads(chat)
+      && ULU_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
+      && ULU_APP_UTILS.doesChatSupportThreads(chat)
     );
     const repliesChatToOpen = {
       id: chatId,

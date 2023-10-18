@@ -501,8 +501,8 @@ export default {
   'ChannelVisibility.Forwarding.Disabled': 'Restrict Forwarding',
   'Settings.TipsUsername': 'TelegramTips',
   FoldersAllChatsDesc: 'All undone chats',
-  'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Quote. Try opening it with our **desktop app** instead.',
-  'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Quote. Try opening it with our **mobile app** instead.',
+  'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Ulu. Try opening it with our **desktop app** instead.',
+  'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Ulu. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
 } as ApiLangPack;

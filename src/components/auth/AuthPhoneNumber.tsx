@@ -215,7 +215,7 @@ const AuthPhoneNumber: FC<StateProps> = ({
     <div id="auth-phone-number-form" className="custom-scroll">
       <div className="auth-form">
         <div id="logo" />
-        <h1>Quote — Telegram client for startups</h1>
+        <h1>Ulu — Telegram client for startups</h1>
         <p className="note">{lang('StartText')}</p>
         <form className="form" action="" onSubmit={handleSubmit}>
           <CountryCodeInput

@@ -2,7 +2,7 @@ import type { ApiReactionEmoji } from './api/types';
 import type { ApiLimitType } from './global/types';
 
 export const APP_CODE_NAME = 'A';
-export const APP_NAME = process.env.APP_NAME || 'Quote';
+export const APP_NAME = process.env.APP_NAME || 'Ulu';
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
@@ -335,6 +335,6 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 
 export const IS_STORIES_ENABLED = false;
 
-export const QUOTE_APP = {
+export const ULU_APP = {
   SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: true,
 };
