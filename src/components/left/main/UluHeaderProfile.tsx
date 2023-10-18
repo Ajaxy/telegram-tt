@@ -22,6 +22,19 @@ type StateProps = {
   userFallbackPhoto?: ApiPhoto;
 };
 
+const getUserFullName = (user?: ApiUser) => {
+  if (!user) {
+    return '';
+  }
+
+  let userFullName = user.firstName || '';
+  if (user.lastName) {
+    userFullName += ` ${user.lastName}`;
+  }
+
+  return userFullName;
+};
+
 const UluHeaderProfile: FC<OwnProps & StateProps> = ({
   user, userFallbackPhoto, userPersonalPhoto, userProfilePhoto, onClick,
 }) => {
@@ -43,7 +56,7 @@ const UluHeaderProfile: FC<OwnProps & StateProps> = ({
         {renderPhoto()}
       </div>
       <div className={styles.userName}>
-        { `${user!.firstName} ${user!.lastName}` }
+        { getUserFullName(user) }
       </div>
     </div>
   );
