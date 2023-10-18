@@ -1,0 +1,69 @@
+#NewChat {
+  height: 100%;
+}
+
+.left-header {
+  height: var(--header-height);
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background-color: var(--color-background);
+
+  h3 {
+    margin-bottom: 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin-left: 1.375rem;
+    margin-right: auto;
+    user-select: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .SearchInput {
+    margin-left: 0.8125rem;
+    max-width: calc(100% - 3.25rem);
+
+    @media (max-width: 600px) {
+      max-width: calc(100% - 3rem);
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: 0.5rem;
+  }
+
+  .Button.smaller {
+    width: 2.5rem;
+    height: 2.5rem;
+
+    + .DropdownMenu {
+      margin-left: 0.25rem;
+    }
+  }
+
+  body.is-electron.is-macos & {
+    -webkit-app-region: drag;
+
+    .SearchInput {
+      -webkit-app-region: no-drag;
+    }
+  }
+
+  body.is-electron.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem 0.5rem 4.5rem;
+
+    .SearchInput {
+      margin-left: 0.5rem;
+      max-width: calc(100% - 2.75rem);
+    }
+
+    .Menu.main-menu .bubble {
+      --offset-y: 100%;
+      --offset-x: -4.125rem;
+    }
+  }
+}

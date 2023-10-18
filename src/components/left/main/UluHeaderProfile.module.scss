@@ -1,0 +1,33 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  cursor: pointer;
+  border-radius: var(--border-radius-default-tiny);
+
+  &:hover {
+    background-color: var(--color-chat-hover);
+
+    .userName {
+      color: var(--color-text);
+    }
+  }
+}
+
+.photoWrapper {
+  height: 1.5rem;
+  width: 1.5rem;
+  
+  :global(.avatar-media) {
+    border-radius: 0.5rem;
+    vertical-align: inherit;
+  }
+}
+
+.userName {
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
