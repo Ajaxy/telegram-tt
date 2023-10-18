@@ -42,18 +42,19 @@ import Button from '../../ui/Button';
 import DropdownMenu from '../../ui/DropdownMenu';
 import SearchInput from '../../ui/SearchInput';
 import ShowTransition from '../../ui/ShowTransition';
+import UluSearchButton from '../../ui/UluSearchButton';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import LeftSideMenuItems from './LeftSideMenuItems';
 import StatusButton from './StatusButton';
+import UluHeaderProfile from './UluHeaderProfile';
 
-import './LeftMainHeader.scss';
+import styles from './LeftMainHeader.module.scss';
 
 type OwnProps = {
   shouldHideSearch?: boolean;
   content: LeftColumnContent;
   contactsFilter: string;
   isClosingSearch?: boolean;
-  shouldSkipTransition?: boolean;
   onSearchQuery: (query: string) => void;
   onSelectSettings: NoneToVoidFunction;
   onSelectContacts: NoneToVoidFunction;
@@ -88,7 +89,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   searchQuery,
   isLoading,
   isCurrentUserPremium,
-  shouldSkipTransition,
   globalSearchChatId,
   searchDate,
   theme,
@@ -152,33 +152,40 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined);
 
-  const MainButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
-    return ({ onTrigger, isOpen }) => (
-      <Button
-        round
-        ripple={hasMenu && !isMobile}
-        size="smaller"
-        color="translucent"
-        className={isOpen ? 'active' : ''}
-        // eslint-disable-next-line react/jsx-no-bind
-        onClick={hasMenu ? onTrigger : () => onReset()}
-        ariaLabel={hasMenu ? lang('AccDescrOpenMenu2') : 'Return to chat list'}
-      >
-        <div className={buildClassName(
-          'animated-menu-icon',
-          !hasMenu && 'state-back',
-          shouldSkipTransition && 'no-animation',
-        )}
-        />
-      </Button>
-    );
-  }, [hasMenu, isMobile, lang, onReset, shouldSkipTransition]);
-
   const handleSearchFocus = useLastCallback(() => {
     if (!searchQuery) {
       onSearchQuery('');
     }
   });
+
+  // Cmd+K to open search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.key === 'k') {
+        if (hasMenu) {
+          handleSearchFocus();
+          return;
+        }
+
+        onReset();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [hasMenu, onReset]);
+
+  const MainButton: FC<{ onTrigger: () => void }> = useMemo(() => {
+    return ({ onTrigger }) => (
+      <UluHeaderProfile
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={hasMenu ? onTrigger : () => onReset()}
+      />
+    );
+  }, [hasMenu, onReset]);
 
   const toggleConnectionStatus = useLastCallback(() => {
     setSettingOption({ isConnectionStatusMinimized: !isConnectionStatusMinimized });
@@ -244,54 +251,71 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     <div className="LeftMainHeader">
       <div id="LeftMainHeader" className="left-header" ref={headerRef}>
         {lang.isRtl && <div className="DropdownMenuFiller" />}
-        <DropdownMenu
-          trigger={MainButton}
-          footer={`${APP_NAME} ${versionString}`}
-          className={buildClassName(
-            'main-menu',
-            lang.isRtl && 'rtl',
-            shouldHideSearch && lang.isRtl && 'right-aligned',
-            shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
-          )}
-          forceOpen={isBotMenuOpen}
-          positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-          transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
-          onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
-        >
-          <LeftSideMenuItems
-            onSelectArchived={onSelectArchived}
-            onSelectContacts={onSelectContacts}
-            onSelectSettings={onSelectSettings}
-            onBotMenuOpened={markBotMenuOpen}
-            onBotMenuClosed={unmarkBotMenuOpen}
-          />
-        </DropdownMenu>
-        <SearchInput
-          inputId="telegram-search-input"
-          parentContainerClassName="LeftSearch"
-          className={buildClassName(
-            (globalSearchChatId || searchDate) ? 'with-picker-item' : undefined,
-            shouldHideSearch && 'SearchInput--hidden',
-          )}
-          value={isClosingSearch ? undefined : (contactsFilter || searchQuery)}
-          focused={isSearchFocused}
-          isLoading={isLoading || connectionStatusPosition === 'minimized'}
-          spinnerColor={connectionStatusPosition === 'minimized' ? 'yellow' : undefined}
-          spinnerBackgroundColor={connectionStatusPosition === 'minimized' && theme === 'light' ? 'light' : undefined}
-          placeholder={searchInputPlaceholder}
-          autoComplete="off"
-          canClose={Boolean(globalSearchChatId || searchDate)}
-          onChange={onSearchQuery}
-          onReset={onReset}
-          onFocus={handleSearchFocus}
-          onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
-        >
-          {searchContent}
-          {IS_STORIES_ENABLED && (
-            <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} />
-          )}
-        </SearchInput>
-        {isCurrentUserPremium && <StatusButton />}
+        { isSearchFocused ? (
+          <>
+            <Button
+              size="smaller"
+              round
+              color="translucent"
+              onClick={onReset}
+            >
+              <i className="icon icon-arrow-left" />
+            </Button>
+            <SearchInput
+              inputId="telegram-search-input"
+              parentContainerClassName="LeftSearch"
+              className={buildClassName(
+                (globalSearchChatId || searchDate) ? 'with-picker-item' : undefined,
+                shouldHideSearch && 'SearchInput--hidden',
+              )}
+              value={isClosingSearch ? undefined : (contactsFilter || searchQuery)}
+              focused={isSearchFocused}
+              isLoading={isLoading || connectionStatusPosition === 'minimized'}
+              spinnerColor={connectionStatusPosition === 'minimized' ? 'yellow' : undefined}
+              spinnerBackgroundColor={
+                connectionStatusPosition === 'minimized' && theme === 'light' ? 'light' : undefined
+              }
+              placeholder={searchInputPlaceholder}
+              autoComplete="off"
+              canClose={Boolean(globalSearchChatId || searchDate)}
+              onChange={onSearchQuery}
+              onReset={onReset}
+              onSpinnerClick={connectionStatusPosition === 'minimized' ? toggleConnectionStatus : undefined}
+            >
+              {searchContent}
+              {IS_STORIES_ENABLED && (
+                <StoryToggler canShow={!isSearchFocused && !selectedSearchDate && !globalSearchChatId} />
+              )}
+            </SearchInput>
+            {isCurrentUserPremium && <StatusButton />}
+          </>
+        ) : (
+          <div className={styles.profileWrapper}>
+            <DropdownMenu
+              trigger={MainButton}
+              footer={`${APP_NAME} ${versionString}`}
+              className={buildClassName(
+                'main-menu',
+                lang.isRtl && 'rtl',
+                shouldHideSearch && lang.isRtl && 'right-aligned',
+                shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+              )}
+              forceOpen={isBotMenuOpen}
+              positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+              transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
+              onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+            >
+              <LeftSideMenuItems
+                onSelectArchived={onSelectArchived}
+                onSelectContacts={onSelectContacts}
+                onSelectSettings={onSelectSettings}
+                onBotMenuOpened={markBotMenuOpen}
+                onBotMenuClosed={unmarkBotMenuOpen}
+              />
+            </DropdownMenu>
+            <UluSearchButton onClick={handleSearchFocus} />
+          </div>
+        ) }
         {hasPasscode && (
           <Button
             round
