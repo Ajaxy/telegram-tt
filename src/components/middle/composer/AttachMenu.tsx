@@ -121,20 +121,24 @@ const AttachMenu: FC<OwnProps> = ({
     );
   });
   
-  const handleShortcut = useLastCallback((e: KeyboardEvent) => {
-  if (
-    ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && 
-    e.key.toLowerCase() === 'u' && 
-    !window.getSelection()?.toString()
-  ) {
-    handleQuickSelect();
-  }
-});
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (
+        ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && 
+        e.key.toLowerCase() === 'u' && 
+        !window.getSelection()?.toString()
+      ) {
+        handleQuickSelect();
+      }
+    }
 
-useHotkeys({
-  'Cmd+U': handleShortcut,
-  'Ctrl+U': handleShortcut,
-});
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
 
   const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog(!canSendDocuments && canSendAudios
