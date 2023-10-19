@@ -20,8 +20,9 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';
+import useLastCallback from '../../../hooks/useLastCallback';  // Make sure it's imported
 import useMouseInside from '../../../hooks/useMouseInside';
+import useHotkeys from '../../../hooks/useHotkeys';  // Make sure it's imported
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -119,6 +120,16 @@ const AttachMenu: FC<OwnProps> = ({
       (e) => handleFileSelect(e, true),
     );
   });
+
+  const handleUploadPhotoOrVideo = useLastCallback(() => {
+    if (canSendVideoOrPhoto) {
+      handleQuickSelect();
+    }
+  });
+
+useHotkeys({
+  'Alt+U': handleUploadPhotoOrVideo,
+});
 
   const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog(!canSendDocuments && canSendAudios
