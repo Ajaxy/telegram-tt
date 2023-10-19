@@ -63,7 +63,6 @@ const LeftSideMenuItems = ({
   onBotMenuClosed,
 }: OwnProps & StateProps) => {
   const {
-    openChat,
     setSettingOption,
     updatePerformanceSettings,
     openChatByUsername,
@@ -80,10 +79,6 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
-
-  const handleSelectSaved = useLastCallback(() => {
-    openChat({ id: currentUserId, shouldReplaceHistory: true });
-  });
 
   const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -130,12 +125,6 @@ const LeftSideMenuItems = ({
 
   return (
     <>
-      <MenuItem
-        icon="saved-messages"
-        onClick={handleSelectSaved}
-      >
-        {lang('SavedMessages')}
-      </MenuItem>
       {archiveSettings.isHidden && (
         <MenuItem
           icon="archive"

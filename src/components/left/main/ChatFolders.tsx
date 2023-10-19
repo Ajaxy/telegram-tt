@@ -30,6 +30,7 @@ import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
+import UluSystemFolders from './UluSystemFolders';
 
 type OwnProps = {
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -37,6 +38,9 @@ type OwnProps = {
   onLeftColumnContentChange: (content: LeftColumnContent) => void;
   shouldHideFolderTabs?: boolean;
   isForumPanelOpen?: boolean;
+  content: LeftColumnContent;
+  chatId?: string;
+  userId?: string;
 };
 
 type StateProps = {
@@ -79,6 +83,9 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   archiveSettings,
   isStoryRibbonShown,
   sessions,
+  content,
+  chatId,
+  userId,
 }) => {
   const {
     loadChatFolders,
@@ -317,6 +324,12 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         storyRibbonClassNames,
       )}
     >
+      <UluSystemFolders
+        chatId={chatId}
+        userId={userId}
+        content={content}
+        onLeftColumnContentChange={onLeftColumnContentChange}
+      />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
         <TabList

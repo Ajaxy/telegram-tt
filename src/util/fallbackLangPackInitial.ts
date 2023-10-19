@@ -1,6 +1,24 @@
 /* eslint-disable max-len */
 
 import type { ApiLangPack } from '../api/types';
+import type { LangCode } from '../types';
+
+export const uluLanguagePack: Record<string, Record<LangCode[number], string>> = {
+  'Sidebar.SystemFolders.Inbox': {
+    ru: 'Входящие',
+    en: 'Inbox',
+  },
+  'Sidebar.SystemFolders.SavedMessages': {
+    ru: 'Сохранено',
+    en: 'Saved',
+  },
+  'Sidebar.SystemFolders.ArchivedChats': {
+    ru: 'Архив',
+    en: 'Archive',
+  },
+};
+
+export const uluGetTranslatedString = (key: string, langCode: LangCode[number], fallback = ''): string => uluLanguagePack[key]?.[langCode] ?? fallback;
 
 export const fallbackLangPackInitial = {
   WrongNumber: 'Wrong number?',
