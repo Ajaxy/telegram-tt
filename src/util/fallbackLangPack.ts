@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 
 import type { ApiLangPack } from '../api/types';
+import { IS_MAC_OS } from '../../../util/windowEnvironment';
 
 export default {
   Search: 'Search',
@@ -96,7 +97,7 @@ export default {
     oneValue: 'last seen 1 minute ago',
     otherValue: 'last seen %@ minutes ago',
   },
-  'AttachmentMenu.PhotoOrVideo': 'Photo or Video',
+  'AttachmentMenu.PhotoOrVideo': IS_MAC_OS ? 'Photo or Video [⌘+U]' : 'Photo or Video [Ctrl+U]',
   AttachDocument: 'File',
   SendWithoutSound: 'Send without sound',
   ScheduleMessage: 'Schedule message',
