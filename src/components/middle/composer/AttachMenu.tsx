@@ -204,7 +204,7 @@ const AttachMenu: FC<OwnProps> = ({
           <>
             {canSendVideoOrPhoto && (
               <MenuItem icon="photo" onClick={handleQuickSelect}>
-                {lang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideo'
+                {lang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideoHotkey'
                   : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
               </MenuItem>
             )}
