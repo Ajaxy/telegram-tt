@@ -129,11 +129,12 @@ const AttachMenu: FC<OwnProps> = ({
         e.key.toLowerCase() === 'u' && 
         !window.getSelection()?.toString()
       ) {
+        e.preventDefault();
         handleQuickSelect();
       }
-    }
+  }
 
-    document.addEventListener('keydown', handleKeyDown);
+  document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
