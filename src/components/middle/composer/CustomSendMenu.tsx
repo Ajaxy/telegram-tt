@@ -1,5 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useState } from '../../../lib/teact/teact';
+import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
@@ -48,6 +49,29 @@ const CustomSendMenu: FC<OwnProps> = ({
       setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
     }
   }, [isOpen, canScheduleUntilOnline]);
+
+  useEffect(() => {
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.altKey && e.key.toLowerCase() === 'enter') {
+      if (isSavedMessages) {
+        if (onSendSchedule) {
+          onSendSchedule();
+        }
+      } else {
+        if (onSendSchedule) {
+          onSendSchedule();
+        }
+      }
+    }
+  }
+
+  document.addEventListener('keydown', handleKeyDown);
+
+  return () => {
+    document.removeEventListener('keydown', handleKeyDown);
+  };
+}, [isSavedMessages, onSendSchedule]);
+
 
   return (
     <Menu
