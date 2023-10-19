@@ -120,15 +120,20 @@ const AttachMenu: FC<OwnProps> = ({
       (e) => handleFileSelect(e, true),
     );
   });
-
-  const handleUploadPhotoOrVideo = useLastCallback(() => {
-    if (canSendVideoOrPhoto) {
-      handleQuickSelect();
-    }
-  });
+  
+  const handleShortcut = useLastCallback((e: KeyboardEvent) => {
+  if (
+    ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && 
+    e.key.toLowerCase() === 'u' && 
+    !window.getSelection()?.toString()
+  ) {
+    handleQuickSelect();
+  }
+});
 
 useHotkeys({
-  'Alt+U': handleUploadPhotoOrVideo,
+  'Cmd+U': handleShortcut,
+  'Ctrl+U': handleShortcut,
 });
 
   const handleDocumentSelect = useLastCallback(() => {
