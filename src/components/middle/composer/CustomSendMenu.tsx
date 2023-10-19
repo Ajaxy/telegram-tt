@@ -53,6 +53,7 @@ const CustomSendMenu: FC<OwnProps> = ({
   useEffect(() => {
   function handleKeyDown(e: KeyboardEvent) {
     if (e.altKey && e.key.toLowerCase() === 'enter') {
+      e.preventDefault();
       if (isSavedMessages) {
         if (onSendSchedule) {
           onSendSchedule();
