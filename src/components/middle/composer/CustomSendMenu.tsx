@@ -1,7 +1,9 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useState } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../../lib/teact/teact';
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import {
+  IS_TOUCH_ENV,
+} from '../../../util/windowEnvironment';
 
 import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
 import useLang from '../../../hooks/useLang';
@@ -42,12 +44,32 @@ const CustomSendMenu: FC<OwnProps> = ({
 
   const lang = useLang();
 
-  useEffectWithPrevDeps(([prevIsOpen]) => {
-    // Avoid context menu item shuffling when opened
-    if (isOpen && !prevIsOpen) {
-      setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
+  useEffectWithPrevDeps(
+    ([prevIsOpen]) => {
+      // Avoid context menu item shuffling when opened
+      if (isOpen && !prevIsOpen) {
+        setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
+      }
+    },
+    [isOpen, canScheduleUntilOnline],
+  );
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.altKey && e.key.toLowerCase() === 'enter') {
+        if (canSchedule && onSendSchedule) {
+          onSendSchedule();
+          e.preventDefault();
+        }
+      }
     }
-  }, [isOpen, canScheduleUntilOnline]);
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [canSchedule, onSendSchedule]);
 
   return (
     <Menu
@@ -62,7 +84,11 @@ const CustomSendMenu: FC<OwnProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
-      {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{lang('SendWithoutSound')}</MenuItem>}
+      {onSendSilent && (
+        <MenuItem icon="mute" onClick={onSendSilent}>
+          {lang('SendWithoutSound')}
+        </MenuItem>
+      )}
       {canSchedule && onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
           {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
