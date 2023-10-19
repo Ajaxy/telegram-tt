@@ -2,6 +2,8 @@
 
 import type { ApiLangPack } from '../api/types';
 
+import { IS_MAC_OS } from './windowEnvironment';
+
 export default {
   Search: 'Search',
   SavedMessages: 'Saved Messages',
@@ -100,6 +102,7 @@ export default {
     otherValue: 'last seen %@ minutes ago',
   },
   'AttachmentMenu.PhotoOrVideo': 'Photo or Video',
+  'AttachmentMenu.PhotoOrVideoHotkey': IS_MAC_OS ? 'Photo or Video [⌘+U]' : 'Photo or Video [Ctrl+U]',
   AttachDocument: 'File',
   SendWithoutSound: 'Send without sound',
   ScheduleMessage: 'Schedule message',

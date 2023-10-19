@@ -16,7 +16,7 @@ import {
 import { getDebugLogs } from '../../../util/debugConsole';
 import { validateFiles } from '../../../util/files';
 import { openSystemFilesDialog } from '../../../util/systemFilesDialog';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { IS_MAC_OS, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
@@ -120,6 +120,21 @@ const AttachMenu: FC<OwnProps> = ({
     );
   });
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyU') {
+        e.preventDefault();
+        handleQuickSelect();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog(!canSendDocuments && canSendAudios
       ? Array.from(SUPPORTED_AUDIO_CONTENT_TYPES).join(',') : (
@@ -189,7 +204,7 @@ const AttachMenu: FC<OwnProps> = ({
           <>
             {canSendVideoOrPhoto && (
               <MenuItem icon="photo" onClick={handleQuickSelect}>
-                {lang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideo'
+                {lang(canSendVideoAndPhoto ? 'AttachmentMenu.PhotoOrVideoHotkey'
                   : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
               </MenuItem>
             )}
