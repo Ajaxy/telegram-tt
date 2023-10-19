@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 
 import type { ApiLangPack } from '../api/types';
-import { IS_MAC_OS } from '../../../util/windowEnvironment';
+import { IS_MAC_OS } from './windowEnvironment';
 
 export default {
   Search: 'Search',
