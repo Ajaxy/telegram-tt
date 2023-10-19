@@ -1,21 +1,18 @@
-import type { FC } from "../../../lib/teact/teact";
-import React, { memo, useState, useEffect } from "../../../lib/teact/teact";
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../../lib/teact/teact';
+
 import {
-  IS_APP,
-  IS_ELECTRON,
-  IS_MAC_OS,
-} from "../../../util/windowEnvironment";
+  IS_TOUCH_ENV,
+} from '../../../util/windowEnvironment';
 
-import { IS_TOUCH_ENV } from "../../../util/windowEnvironment";
+import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
+import useLang from '../../../hooks/useLang';
+import useMouseInside from '../../../hooks/useMouseInside';
 
-import useEffectWithPrevDeps from "../../../hooks/useEffectWithPrevDeps";
-import useLang from "../../../hooks/useLang";
-import useMouseInside from "../../../hooks/useMouseInside";
+import Menu from '../../ui/Menu';
+import MenuItem from '../../ui/MenuItem';
 
-import Menu from "../../ui/Menu";
-import MenuItem from "../../ui/MenuItem";
-
-import "./CustomSendMenu.scss";
+import './CustomSendMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -43,8 +40,7 @@ const CustomSendMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
-  const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] =
-    useState(false);
+  const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] = useState(false);
 
   const lang = useLang();
 
@@ -55,28 +51,26 @@ const CustomSendMenu: FC<OwnProps> = ({
         setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
       }
     },
-    [isOpen, canScheduleUntilOnline]
+    [isOpen, canScheduleUntilOnline],
   );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.altKey && e.key.toLowerCase() === "enter") {
+      if (e.altKey && e.key.toLowerCase() === 'enter') {
         if (isSavedMessages) {
           if (onSendSchedule) {
             onSendSchedule();
           }
-        } else {
-          if (onSendSchedule) {
-            onSendSchedule();
-          }
+        } else if (onSendSchedule) {
+          onSendSchedule();
         }
       }
     }
 
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isSavedMessages, onSendSchedule]);
 
@@ -85,7 +79,7 @@ const CustomSendMenu: FC<OwnProps> = ({
       isOpen={isOpen}
       autoClose
       positionX="right"
-      positionY={isOpenToBottom ? "top" : "bottom"}
+      positionY={isOpenToBottom ? 'top' : 'bottom'}
       className="CustomSendMenu with-menu-transitions"
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
@@ -95,17 +89,17 @@ const CustomSendMenu: FC<OwnProps> = ({
     >
       {onSendSilent && (
         <MenuItem icon="mute" onClick={onSendSilent}>
-          {lang("SendWithoutSound")}
+          {lang('SendWithoutSound')}
         </MenuItem>
       )}
       {canSchedule && onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
-          {lang(isSavedMessages ? "SetReminder" : "ScheduleMessage")}
+          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
         </MenuItem>
       )}
       {canSchedule && onSendSchedule && displayScheduleUntilOnline && (
         <MenuItem icon="user-online" onClick={onSendWhenOnline}>
-          {lang("SendWhenOnline")}
+          {lang('SendWhenOnline')}
         </MenuItem>
       )}
     </Menu>
