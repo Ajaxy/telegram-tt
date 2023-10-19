@@ -1,8 +1,5 @@
 import type { FC } from '../../../lib/teact/teact';
-import React, {
-  memo, useEffect,
-  useMemo,
-} from '../../../lib/teact/teact';
+import React, { memo, useState, useEffect } from '../../../lib/teact/teact';
 import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
