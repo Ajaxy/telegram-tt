@@ -20,9 +20,10 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useFlag from '../../../hooks/useFlag';
 import useLang from '../../../hooks/useLang';
-import useLastCallback from '../../../hooks/useLastCallback';  // Make sure it's imported
+import useLastCallback from '../../../hooks/useLastCallback';
 import useMouseInside from '../../../hooks/useMouseInside';
-import useHotkeys from '../../../hooks/useHotkeys';  // Make sure it's imported
+import useHotkeys from '../../../hooks/useHotkeys';
+import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
