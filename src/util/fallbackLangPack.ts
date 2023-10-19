@@ -23,6 +23,8 @@ export default {
   UnpinFromTop: 'Unpin from top',
   'ChatList.Mute': 'Mute',
   Archive: 'Archive',
+  Done: 'Done',
+  Undone: 'Undone',
   Delete: 'Delete',
   DeleteChat: 'Delete and exit',
   FromYou: 'You',
