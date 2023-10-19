@@ -1,17 +1,21 @@
-import type { FC } from '../../../lib/teact/teact';
-import React, { memo, useState, useEffect } from '../../../lib/teact/teact';
-import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
+import type { FC } from "../../../lib/teact/teact";
+import React, { memo, useState, useEffect } from "../../../lib/teact/teact";
+import {
+  IS_APP,
+  IS_ELECTRON,
+  IS_MAC_OS,
+} from "../../../util/windowEnvironment";
 
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import { IS_TOUCH_ENV } from "../../../util/windowEnvironment";
 
-import useEffectWithPrevDeps from '../../../hooks/useEffectWithPrevDeps';
-import useLang from '../../../hooks/useLang';
-import useMouseInside from '../../../hooks/useMouseInside';
+import useEffectWithPrevDeps from "../../../hooks/useEffectWithPrevDeps";
+import useLang from "../../../hooks/useLang";
+import useMouseInside from "../../../hooks/useMouseInside";
 
-import Menu from '../../ui/Menu';
-import MenuItem from '../../ui/MenuItem';
+import Menu from "../../ui/Menu";
+import MenuItem from "../../ui/MenuItem";
 
-import './CustomSendMenu.scss';
+import "./CustomSendMenu.scss";
 
 export type OwnProps = {
   isOpen: boolean;
@@ -39,47 +43,49 @@ const CustomSendMenu: FC<OwnProps> = ({
   onCloseAnimationEnd,
 }) => {
   const [handleMouseEnter, handleMouseLeave] = useMouseInside(isOpen, onClose);
-  const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] = useState(false);
+  const [displayScheduleUntilOnline, setDisplayScheduleUntilOnline] =
+    useState(false);
 
   const lang = useLang();
 
-  useEffectWithPrevDeps(([prevIsOpen]) => {
-    // Avoid context menu item shuffling when opened
-    if (isOpen && !prevIsOpen) {
-      setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
-    }
-  }, [isOpen, canScheduleUntilOnline]);
+  useEffectWithPrevDeps(
+    ([prevIsOpen]) => {
+      // Avoid context menu item shuffling when opened
+      if (isOpen && !prevIsOpen) {
+        setDisplayScheduleUntilOnline(Boolean(canScheduleUntilOnline));
+      }
+    },
+    [isOpen, canScheduleUntilOnline]
+  );
 
   useEffect(() => {
-  function handleKeyDown(e: KeyboardEvent) {
-    if (e.altKey && e.key.toLowerCase() === 'enter') {
-      e.preventDefault();
-      if (isSavedMessages) {
-        if (onSendSchedule) {
-          onSendSchedule();
-        }
-      } else {
-        if (onSendSchedule) {
-          onSendSchedule();
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.altKey && e.key.toLowerCase() === "enter") {
+        if (isSavedMessages) {
+          if (onSendSchedule) {
+            onSendSchedule();
+          }
+        } else {
+          if (onSendSchedule) {
+            onSendSchedule();
+          }
         }
       }
     }
-  }
 
-  document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
 
-  return () => {
-    document.removeEventListener('keydown', handleKeyDown);
-  };
-}, [isSavedMessages, onSendSchedule]);
-
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSavedMessages, onSendSchedule]);
 
   return (
     <Menu
       isOpen={isOpen}
       autoClose
       positionX="right"
-      positionY={isOpenToBottom ? 'top' : 'bottom'}
+      positionY={isOpenToBottom ? "top" : "bottom"}
       className="CustomSendMenu with-menu-transitions"
       onClose={onClose}
       onCloseAnimationEnd={onCloseAnimationEnd}
@@ -87,15 +93,19 @@ const CustomSendMenu: FC<OwnProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
       noCloseOnBackdrop={!IS_TOUCH_ENV}
     >
-      {onSendSilent && <MenuItem icon="mute" onClick={onSendSilent}>{lang('SendWithoutSound')}</MenuItem>}
+      {onSendSilent && (
+        <MenuItem icon="mute" onClick={onSendSilent}>
+          {lang("SendWithoutSound")}
+        </MenuItem>
+      )}
       {canSchedule && onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
-          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+          {lang(isSavedMessages ? "SetReminder" : "ScheduleMessage")}
         </MenuItem>
       )}
       {canSchedule && onSendSchedule && displayScheduleUntilOnline && (
         <MenuItem icon="user-online" onClick={onSendWhenOnline}>
-          {lang('SendWhenOnline')}
+          {lang("SendWhenOnline")}
         </MenuItem>
       )}
     </Menu>
