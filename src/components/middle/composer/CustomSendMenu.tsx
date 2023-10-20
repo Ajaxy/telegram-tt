@@ -91,7 +91,7 @@ const CustomSendMenu: FC<OwnProps> = ({
       )}
       {canSchedule && onSendSchedule && (
         <MenuItem icon="schedule" onClick={onSendSchedule}>
-          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessage')}
+          {lang(isSavedMessages ? 'SetReminder' : 'ScheduleMessageHotkey')}
         </MenuItem>
       )}
       {canSchedule && onSendSchedule && displayScheduleUntilOnline && (
