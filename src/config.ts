@@ -336,5 +336,6 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 export const IS_STORIES_ENABLED = false;
 
 export const ULU_APP = {
+  IS_AUTOARCHIVER_ENABLED: true,
   SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: true,
 };
