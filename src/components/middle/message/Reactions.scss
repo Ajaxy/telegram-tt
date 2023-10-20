@@ -69,13 +69,13 @@
       z-index: 1;
 
       .theme-dark & {
-        --reaction-background: #3390ec;
-        --reaction-background-hover: #4096ec;
+        --reaction-background: rgb(255, 255, 255, 0.24);
+        --reaction-background-hover: rgb(255, 255, 255, 0.4);
       }
 
       .theme-dark .own & {
-        --reaction-background: rgb(255, 255, 255, 0.75);
-        --reaction-background-hover: rgb(255, 255, 255, 0.85);
+        --reaction-background: rgb(255, 255, 255, 0.24);
+        --reaction-background-hover: rgb(255, 255, 255, 0.4);
         --reaction-text-color: rgb(62 62 62);
       }
     }

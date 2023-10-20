@@ -105,7 +105,7 @@ export default {
   'AttachmentMenu.PhotoOrVideoHotkey': IS_MAC_OS ? 'Photo or Video [⌘+U]' : 'Photo or Video [Ctrl+U]',
   AttachDocument: 'File',
   SendWithoutSound: 'Send without sound',
-  ScheduleMessage: 'Schedule message',
+  ScheduleMessage: 'Schedule message [⌥ + Enter]',
   'Chat.PanelUnpinAllMessages': 'Unpin All Messages',
   'Chat.UnpinAllMessagesConfirmation': {
     oneValue: 'Do you want to unpin %d message in this chat?',
