@@ -1,5 +1,6 @@
 import '../../global/actions/all';
 
+import { AnalyticsBrowser } from '@june-so/analytics-next';
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
@@ -102,6 +103,12 @@ import PremiumMainModal from './premium/PremiumMainModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
 import './Main.scss';
+
+// Near the entrypoint of your app, instantiate AnalyticsBrowser:
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const analytics = AnalyticsBrowser.load({
+  writeKey: 'vLfuHIHM8CWtzPnZ',
+});
 
 export interface OwnProps {
   isMobile?: boolean;

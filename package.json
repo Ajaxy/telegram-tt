@@ -136,6 +136,7 @@
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
+    "@june-so/analytics-next": "^2.0.0",
     "async-mutex": "^0.4.0",
     "big-integer": "github:painor/BigInteger.js",
     "croppie": "^2.6.5",
