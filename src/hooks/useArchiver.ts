@@ -8,10 +8,11 @@ import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
 
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import useInterval from './useInterval';
 
 const UPDATE_TIME_SEC = 5;
-const MESSAGE_DISPLAY_TIME_SEC = 2 * 60;
+const MESSAGE_DISPLAY_TIME_SEC = 60;
 const BATCH_SIZE = 5;
 
 export default function useArchiver() {
@@ -21,7 +22,8 @@ export default function useArchiver() {
 
   const shouldArchive = (chat: ApiChat) => {
     return chat && (chat.isMuted || !(
-      chat.hasUnreadMark
+      chat.id === SERVICE_NOTIFICATIONS_USER_ID // impossible to archive
+      || chat.hasUnreadMark
       || chat.unreadCount
       || chat.unreadMentionsCount
       || chat.unreadReactionsCount
