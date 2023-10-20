@@ -27,7 +27,6 @@ type StateProps = {
 } & Pick<ISettings, 'language'>;
 
 const INBOX_IS_ACTIVE = false; // TODO catch up with Niko
-const INBOX_MESSAGES_UNREAD_COUNT = 10_000; // TODO catch up with Niko
 const NONE_TO_VOID: NoneToVoidFunction = () => void 0;
 
 const UluSystemFolders: FC<OwnProps & StateProps> = ({
@@ -55,19 +54,23 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
     <div className={styles.wrapper}>
       <UluChatFolder
         active={INBOX_IS_ACTIVE}
+        shouldStressUnreadMessages={false}
         type="inbox"
         title={titleInbox}
-        messagesUnreadCount={INBOX_MESSAGES_UNREAD_COUNT}
+        messagesUnreadCount={0}
         onClick={NONE_TO_VOID}
       />
       <UluChatFolder
         active={isSavedMessages}
+        shouldStressUnreadMessages={false}
         type="saved-messages"
         title={titleSavedMessages}
+        messagesUnreadCount={100}
         onClick={handleOpenSavedMessages}
       />
       <UluChatFolder
         active={content === LeftColumnContent.Archived}
+        shouldStressUnreadMessages={false}
         type="archived-chats"
         title={titleArchivedChats}
         messagesUnreadCount={archiveUnreadCount}

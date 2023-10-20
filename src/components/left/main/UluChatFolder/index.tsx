@@ -1,5 +1,5 @@
 import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useState } from '../../../../lib/teact/teact';
+import React, { memo } from '../../../../lib/teact/teact';
 
 import buildClassName from '../../../../util/buildClassName';
 
@@ -14,6 +14,7 @@ type OwnProps = {
   title: string;
   messagesUnreadCount?: number;
   active: boolean;
+  shouldStressUnreadMessages: boolean;
   onClick: NoneToVoidFunction;
 };
 
@@ -24,27 +25,21 @@ const componentByType = {
 };
 
 const UluChatFolder: FC<OwnProps> = ({
-  active, type, title, messagesUnreadCount, onClick,
+  active, type, title, messagesUnreadCount, onClick, shouldStressUnreadMessages,
 }) => {
   const IconComponent = componentByType[type];
-
-  const [isHovered, setIsHovered] = useState(false);
-  const handleMouseOver = () => setIsHovered(true);
-  const handleMouseOut = () => setIsHovered(false);
 
   const classNameWrapper = buildClassName(
     styles.wrapper,
     active && styles.active,
+    !!messagesUnreadCount && shouldStressUnreadMessages && styles['has-unread-messages'],
   );
+  const svgFill = active ? 'var(--color-white)' : 'var(--color-gray)';
 
   // TODO use <ListItem/> with <Ripple/>
   return (
     <div
       className={classNameWrapper}
-      onFocus={handleMouseOver}
-      onMouseOver={handleMouseOver}
-      onBlur={handleMouseOut}
-      onMouseOut={handleMouseOut}
       onClick={onClick}
     >
       <div className={styles.info}>
@@ -52,7 +47,7 @@ const UluChatFolder: FC<OwnProps> = ({
           <IconComponent
             height="1.25rem"
             width="1.25rem"
-            fill={isHovered || active ? 'var(--color-white)' : 'var(--color-gray)'}
+            fill={svgFill}
           />
         </div>
         <div className={styles.title}>
