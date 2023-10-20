@@ -62,9 +62,9 @@
     }
 
     &.chosen {
-      --reaction-background: var(--color-reaction-chosen);
-      --reaction-background-hover: var(--hover-color-reaction-chosen);
-      --reaction-text-color: var(--text-color-reaction-chosen);
+      --reaction-background: rgb(255, 255, 255, 0.24);
+      --reaction-background-hover: rgb(255, 255, 255, 0.4);
+      --reaction-text-color: var(--color-text);
       position: relative;
       z-index: 1;
 
@@ -76,7 +76,7 @@
       .theme-dark .own & {
         --reaction-background: rgb(255, 255, 255, 0.24);
         --reaction-background-hover: rgb(255, 255, 255, 0.4);
-        --reaction-text-color: rgb(62 62 62);
+        --reaction-text-color: var(--color-text);
       }
     }
 
