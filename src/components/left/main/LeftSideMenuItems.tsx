@@ -74,13 +74,13 @@ const LeftSideMenuItems = ({
   const lang = useLang();
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    function handleKeyDown(e: KeyboardEvent) { // Shortcut: settings
       if (
         ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey))
-        && e.key === ',' // Запятая
+        && e.code === 'Comma'
       ) {
-        e.preventDefault(); // Отключение дефолтного поведения
-        onSelectSettings(); // Ваша функция для открытия настроек
+        e.preventDefault();
+        onSelectSettings();
       }
     }
 
