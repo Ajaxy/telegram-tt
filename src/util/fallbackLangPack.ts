@@ -2,11 +2,13 @@
 
 import type { ApiLangPack } from '../api/types';
 
+import { IS_MAC_OS } from './windowEnvironment';
+
 export default {
   Search: 'Search',
   SavedMessages: 'Saved Messages',
   ArchivedChats: 'Archived Chats',
-  DoneChats: 'Done Chats',
+  DoneChats: 'Archive',
   Contacts: 'Contacts',
   Settings: 'Settings',
   lng_menu_night_mode: 'Night Mode',
@@ -23,6 +25,8 @@ export default {
   UnpinFromTop: 'Unpin from top',
   'ChatList.Mute': 'Mute',
   Archive: 'Archive',
+  MarkDone: 'Mark done',
+  MarkNotDone: 'Mark not done',
   Delete: 'Delete',
   DeleteChat: 'Delete and exit',
   FromYou: 'You',
@@ -98,6 +102,7 @@ export default {
     otherValue: 'last seen %@ minutes ago',
   },
   'AttachmentMenu.PhotoOrVideo': 'Photo or Video',
+  'AttachmentMenu.PhotoOrVideoHotkey': IS_MAC_OS ? 'Photo or Video [⌘+U]' : 'Photo or Video [Ctrl+U]',
   AttachDocument: 'File',
   SendWithoutSound: 'Send without sound',
   ScheduleMessage: 'Schedule message',
@@ -500,7 +505,7 @@ export default {
   'ChannelVisibility.Forwarding.Enabled': 'Allow Forwarding',
   'ChannelVisibility.Forwarding.Disabled': 'Restrict Forwarding',
   'Settings.TipsUsername': 'TelegramTips',
-  FoldersAllChatsDesc: 'All undone chats',
+  FoldersAllChatsDesc: 'All chats',
   'Video.Unsupported.Desktop': 'Unfortunately, this video can\'t be played on Ulu. Try opening it with our **desktop app** instead.',
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Ulu. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',

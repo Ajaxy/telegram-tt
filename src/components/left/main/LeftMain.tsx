@@ -179,7 +179,6 @@ const LeftMain: FC<OwnProps> = ({
         onSelectContacts={handleSelectContacts}
         onSelectArchived={handleSelectArchived}
         onReset={onReset}
-        shouldSkipTransition={shouldSkipTransition}
         isClosingSearch={isClosingSearch}
       />
       <Transition

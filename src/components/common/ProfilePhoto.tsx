@@ -36,8 +36,10 @@ type OwnProps = {
   isSavedMessages?: boolean;
   photo?: ApiPhoto;
   canPlayVideo: boolean;
-  onClick: NoneToVoidFunction;
+  onClick?: NoneToVoidFunction;
 };
+
+const noneToVoid: NoneToVoidFunction = () => void 0;
 
 const ProfilePhoto: FC<OwnProps> = ({
   chat,
@@ -45,7 +47,7 @@ const ProfilePhoto: FC<OwnProps> = ({
   photo,
   isSavedMessages,
   canPlayVideo,
-  onClick,
+  onClick = noneToVoid,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const videoRef = useRef<HTMLVideoElement>(null);

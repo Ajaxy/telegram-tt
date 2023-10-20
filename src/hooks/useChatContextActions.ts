@@ -100,8 +100,8 @@ const useChatContextActions = ({
       : undefined;
 
     const actionArchive = isChatArchived(chat)
-      ? { title: lang('Unarchive'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
-      : { title: lang('Archive'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
+      ? { title: lang('MarkNotDone'), icon: 'unarchive', handler: () => toggleChatArchived({ id: chat.id }) }
+      : { title: lang('MarkDone'), icon: 'archive', handler: () => toggleChatArchived({ id: chat.id }) };
 
     const canReport = handleReport && (isChatChannel(chat) || isChatGroup(chat) || (user && !user.isSelf));
     const actionReport = canReport

@@ -388,6 +388,10 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       }
     }
 
+    if (e.altKey) { // for onSendSchedule Alt+Enter hotkey
+      return;
+    }
+
     if (!isComposing && e.key === 'Enter' && !e.shiftKey) {
       if (
         !isMobileDevice
