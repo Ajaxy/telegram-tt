@@ -268,8 +268,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
   byTabId: {},
 
   archiveSettings: {
-    isMinimized: false,
-    isHidden: false,
+    isMinimized: true,
+    isHidden: true,
   },
 };
 

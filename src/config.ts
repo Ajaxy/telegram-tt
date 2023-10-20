@@ -307,9 +307,9 @@ export const STORY_EXPIRE_PERIOD = 86400; // 1 day
 export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
 export const FRESH_AUTH_PERIOD = 86400; // 1 day
 
-export const LIGHT_THEME_BG_COLOR = '#99BA92';
+export const LIGHT_THEME_BG_COLOR = '#0F0F0F';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
-export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
+export const DEFAULT_PATTERN_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
 export const MAX_UPLOAD_FILEPART_SIZE = 524288;
 
@@ -336,5 +336,6 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 export const IS_STORIES_ENABLED = false;
 
 export const ULU_APP = {
+  IS_AUTOARCHIVER_ENABLED: true,
   SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: true,
 };

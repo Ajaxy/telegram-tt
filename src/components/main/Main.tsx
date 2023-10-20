@@ -50,6 +50,7 @@ import updateIcon from '../../util/updateIcon';
 import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
 
 import useAppLayout from '../../hooks/useAppLayout';
+import useArchiver from '../../hooks/useArchiver';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
 import useForceUpdate from '../../hooks/useForceUpdate';
@@ -288,6 +289,8 @@ const Main: FC<OwnProps & StateProps> = ({
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
 
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
+
+  useArchiver();
 
   useEffect(() => {
     if (!IS_ELECTRON) {
