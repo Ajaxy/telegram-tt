@@ -30,6 +30,8 @@ import './LeftMain.scss';
 
 type OwnProps = {
   content: LeftColumnContent;
+  chatId?: string;
+  userId?: string;
   searchQuery?: string;
   searchDate?: number;
   contactsFilter: string;
@@ -53,6 +55,8 @@ let closeTimeout: number | undefined;
 
 const LeftMain: FC<OwnProps> = ({
   content,
+  chatId,
+  userId,
   searchQuery,
   searchDate,
   isClosingSearch,
@@ -195,6 +199,9 @@ const LeftMain: FC<OwnProps> = ({
             case LeftColumnContent.ChatList:
               return (
                 <ChatFolders
+                  content={content}
+                  chatId={chatId}
+                  userId={userId}
                   shouldHideFolderTabs={isForumPanelVisible}
                   onSettingsScreenSelect={onSettingsScreenSelect}
                   onLeftColumnContentChange={onContentChange}

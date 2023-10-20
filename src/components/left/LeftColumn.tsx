@@ -36,6 +36,7 @@ type StateProps = {
   isFirstChatFolderActive: boolean;
   shouldSkipHistoryAnimations?: boolean;
   currentUserId?: string;
+  currentChatId?: string;
   hasPasscode?: boolean;
   nextSettingsScreen?: SettingsScreens;
   nextFoldersAction?: ReducerAction<FoldersActions>;
@@ -70,6 +71,7 @@ function LeftColumn({
   isFirstChatFolderActive,
   shouldSkipHistoryAnimations,
   currentUserId,
+  currentChatId,
   hasPasscode,
   nextSettingsScreen,
   nextFoldersAction,
@@ -489,6 +491,8 @@ function LeftColumn({
         return (
           <LeftMain
             content={content}
+            chatId={currentChatId}
+            userId={currentUserId}
             isClosingSearch={isClosingSearch}
             searchQuery={searchQuery}
             searchDate={searchDate}
@@ -562,6 +566,7 @@ export default memo(withGlobal<OwnProps>(
       isFirstChatFolderActive: activeChatFolder === 0,
       shouldSkipHistoryAnimations,
       currentUserId,
+      currentChatId: currentChat?.id,
       hasPasscode,
       nextSettingsScreen,
       nextFoldersAction,
