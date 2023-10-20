@@ -1,10 +1,9 @@
 /*
-Archives all read or muted chats
+It archives all read or muted chats.
 Inspired by https://github.com/rebryk/supertelega
 See original code here: https://github.com/rebryk/supertelega/blob/master/archive.py
 */
 
-// import { useState } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
@@ -12,10 +11,9 @@ import type { ApiChat } from '../api/types';
 import useInterval from './useInterval';
 
 const UPDATE_TIME_SEC = 5;
-const MESSAGE_DISPLAY_TIME_SEC = 10;
+const MESSAGE_DISPLAY_TIME_SEC = 2 * 60;
 
 export default function useArchiver() {
-  // const [isBusy, setIsBusy] = useState(false);
   const { toggleChatArchived } = getActions();
 
   const chatsToArchive: { [key: string]: Date } = {};
@@ -69,7 +67,6 @@ export default function useArchiver() {
   const process = () => {
     // eslint-disable-next-line no-console
     console.log('archiver | process');
-    // setIsBusy(true);
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
     if (notArchivedChatsIds) {
@@ -78,20 +75,17 @@ export default function useArchiver() {
         const chat = chatsById[chatId];
         if (chat) {
           if (shouldArchive(chat)) {
-            add(chat?.id);
+            add(chat.id);
           } else {
-            remove(chat?.id);
+            remove(chat.id);
           }
         }
       }
       update();
     }
-    // setIsBusy(false);
   };
 
   useInterval(() => {
-    // if (!isBusy) {
     process();
-    // }
   }, UPDATE_TIME_SEC * 1000);
 }
