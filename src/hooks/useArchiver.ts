@@ -12,6 +12,7 @@ import useInterval from './useInterval';
 
 const UPDATE_TIME_SEC = 5;
 const MESSAGE_DISPLAY_TIME_SEC = 2 * 60;
+const BATCH_SIZE = 5;
 
 export default function useArchiver() {
   const { toggleChatArchived } = getActions();
@@ -27,25 +28,19 @@ export default function useArchiver() {
     ));
   };
 
-  const add = (id: string) => {
-    if (id && !chatsToArchive[id]) {
-      // eslint-disable-next-line no-console
-      console.log('archiver | add chat', id);
-      chatsToArchive[id] = new Date();
+  const add = (chatId: string) => {
+    if (chatId && !chatsToArchive[chatId]) {
+      chatsToArchive[chatId] = new Date();
     }
   };
 
-  const remove = (id: string) => {
-    if (id && chatsToArchive[id]) {
-      // eslint-disable-next-line no-console
-      console.log('archiver | remove chat', id);
-      delete chatsToArchive[id];
+  const remove = (chatId: string) => {
+    if (chatId && chatsToArchive[chatId]) {
+      delete chatsToArchive[chatId];
     }
   };
 
   const update = () => {
-    // eslint-disable-next-line no-console
-    console.log('archiver | update');
     const now = new Date();
     const idsToArchive = [];
     for (const [chatId, date] of Object.entries(chatsToArchive)) {
@@ -54,19 +49,13 @@ export default function useArchiver() {
         idsToArchive.push(chatId);
       }
     }
-    // eslint-disable-next-line no-console
-    console.log('archiver | update idsToArchive', idsToArchive.length);
-    for (const id of idsToArchive.slice(0, 5)) {
+    for (const id of idsToArchive.slice(0, BATCH_SIZE)) {
       toggleChatArchived({ id });
       remove(id);
-      // eslint-disable-next-line no-console
-      console.log('archiver | toggleChatArchived', id);
     }
   };
 
   const process = () => {
-    // eslint-disable-next-line no-console
-    console.log('archiver | process');
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
     if (notArchivedChatsIds) {
