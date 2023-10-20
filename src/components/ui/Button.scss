@@ -133,7 +133,7 @@
     background-color: transparent;
 
     &.primary {
-      color: var(--color-primary);
+      color: var(--color-text);
       background-color: transparent;
 
       @include active-styles() {
