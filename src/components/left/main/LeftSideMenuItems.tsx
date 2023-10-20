@@ -31,8 +31,9 @@ import useLastCallback from '../../../hooks/useLastCallback';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
-import Switcher from '../../ui/Switcher';
 import Toggle from '../../ui/Toggle';
+
+/* import Switcher from '../../ui/Switcher'; */ // for hiding dark mode switcher
 
 type OwnProps = {
   onSelectSettings: NoneToVoidFunction;
@@ -85,6 +86,7 @@ const LeftSideMenuItems = ({
     openChat({ id: currentUserId, shouldReplaceHistory: true });
   });
 
+  /*
   const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -92,6 +94,7 @@ const LeftSideMenuItems = ({
     setSettingOption({ theme: newTheme });
     setSettingOption({ shouldUseSystemTheme: false });
   });
+*/
 
   const handleAnimationLevelChange = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -174,6 +177,7 @@ const LeftSideMenuItems = ({
       >
         {lang('Settings')}
       </MenuItem>
+      {/*
       <MenuItem
         icon="darkmode"
         onClick={handleDarkModeToggle}
@@ -186,6 +190,7 @@ const LeftSideMenuItems = ({
           noAnimation
         />
       </MenuItem>
+      */}
       <MenuItem
         icon="animations"
         onClick={handleAnimationLevelChange}
