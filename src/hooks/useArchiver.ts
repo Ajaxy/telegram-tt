@@ -29,19 +29,19 @@ export default function useArchiver() {
     ));
   };
 
-  const add = (chat: ApiChat) => {
-    if (chat && chat.id && !chatsToArchive[chat.id]) {
+  const add = (id: string) => {
+    if (id && !chatsToArchive[id]) {
       // eslint-disable-next-line no-console
-      console.log('archiver | add chat', chat.id);
-      chatsToArchive[chat.id] = new Date();
+      console.log('archiver | add chat', id);
+      chatsToArchive[id] = new Date();
     }
   };
 
-  const remove = (chat: ApiChat) => {
-    if (chat && chat.id && chatsToArchive[chat.id]) {
+  const remove = (id: string) => {
+    if (id && chatsToArchive[id]) {
       // eslint-disable-next-line no-console
-      console.log('archiver | add chat', chat.id);
-      delete chatsToArchive[chat.id];
+      console.log('archiver | remove chat', id);
+      delete chatsToArchive[id];
     }
   };
 
@@ -60,6 +60,7 @@ export default function useArchiver() {
     console.log('archiver | update idsToArchive', idsToArchive.length);
     for (const id of idsToArchive.slice(0, 5)) {
       toggleChatArchived({ id });
+      remove(id);
       // eslint-disable-next-line no-console
       console.log('archiver | toggleChatArchived', id);
     }
@@ -75,10 +76,12 @@ export default function useArchiver() {
       for (const chatId of notArchivedChatsIds) {
         const chatsById = global.chats.byId;
         const chat = chatsById[chatId];
-        if (shouldArchive(chat)) {
-          add(chat);
-        } else {
-          remove(chat);
+        if (chat) {
+          if (shouldArchive(chat)) {
+            add(chat?.id);
+          } else {
+            remove(chat?.id);
+          }
         }
       }
       update();
