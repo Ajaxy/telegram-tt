@@ -49,6 +49,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
 
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.chatsCount;
+  const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
 
   return (
     <div className={styles.wrapper}>
@@ -65,7 +66,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
         shouldStressUnreadMessages={false}
         type="saved-messages"
         title={titleSavedMessages}
-        messagesUnreadCount={100}
+        messagesUnreadCount={savedMessagesUnreadCount}
         onClick={handleOpenSavedMessages}
       />
       <UluChatFolder
