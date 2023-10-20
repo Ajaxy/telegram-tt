@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from '../../../lib/teact/teact';
+import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
@@ -23,7 +23,7 @@ import {
 import { selectTabState, selectTheme } from '../../../global/selectors';
 import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
-import { IS_ELECTRON } from '../../../util/windowEnvironment';
+import { IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useLang from '../../../hooks/useLang';
@@ -71,6 +71,24 @@ const LeftSideMenuItems = ({
     openChatWithInfo,
   } = getActions();
   const lang = useLang();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (
+        ((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey))
+        && e.key === ',' // Запятая
+      ) {
+        e.preventDefault(); // Отключение дефолтного поведения
+        onSelectSettings(); // Ваша функция для открытия настроек
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onSelectSettings]);
 
   const animationLevelValue = animationLevel !== ANIMATION_LEVEL_MIN
     ? (animationLevel === ANIMATION_LEVEL_MAX ? 'max' : 'mid') : 'min';
