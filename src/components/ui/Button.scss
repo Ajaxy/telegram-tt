@@ -398,3 +398,28 @@
     background: var(--premium-gradient);
   }
 }
+
+.frame {
+  align-items: flex-start;
+  background-color: #ffffff0a;
+  border: 1px solid;
+  border-color: #ffffff0a;
+  border-radius: 2px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0px 3px;
+  position: relative;
+}
+
+.frame .text-wrapper {
+  color: #ffffff66;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 15px;
+  margin-top: -1px;
+  position: relative;
+  white-space: nowrap;
+  width: fit-content;
+}
