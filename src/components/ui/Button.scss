@@ -398,3 +398,30 @@
     background: var(--premium-gradient);
   }
 }
+
+.hotkey-frame {
+  align-items: flex-start;
+  background-color: #ffffff0a;
+  border: 1px solid;
+  border-color: #ffffff0a;
+  border-radius: 2px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0px 3px;
+  position: relative;
+  margin-left: 4px;
+  box-shadow: 1px 1px 0px 0px rgba(27, 26, 29, 0.25);
+
+  .hotkey-text {
+    color: #ffffff66;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 15px;
+    margin-top: -1px;
+    position: relative;
+    white-space: nowrap;
+    width: fit-content;
+  }
+}

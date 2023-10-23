@@ -83,6 +83,9 @@ const MuteChatModal: FC<OwnProps> = ({
       <div className="dialog-buttons">
         <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
           {lang('Common.Done')}
+          <div className="hotkey-frame">
+            <div className="hotkey-text">⏎</div>
+          </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>
