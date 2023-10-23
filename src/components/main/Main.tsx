@@ -57,6 +57,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
+import { useJune } from '../../hooks/useJune';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -266,6 +267,15 @@ const Main: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  const [isAppOpen, setIsAppOpen] = useState(false);
+  const { track } = useJune();
+  useEffect(() => {
+    if (!isAppOpen && track) {
+      setIsAppOpen(true);
+      track('App: open');
+    }
+  }, [isAppOpen, setIsAppOpen, track]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
