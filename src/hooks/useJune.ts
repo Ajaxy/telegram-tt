@@ -1,4 +1,3 @@
-// import type { AnalyticsBuffered.track } from '@june-so/analytics-next';
 import { AnalyticsBrowser } from '@june-so/analytics-next';
 import { useEffect, useState } from '../lib/teact/teact';
 
