@@ -268,13 +268,13 @@ const Main: FC<OwnProps & StateProps> = ({
   }
 
   const [isAppOpen, setIsAppOpen] = useState(false);
-  const june = useJune();
+  const { track } = useJune();
   useEffect(() => {
-    if (!isAppOpen && june) {
+    if (!isAppOpen && track) {
       setIsAppOpen(true);
-      june.track('App: open');
+      track('App: open');
     }
-  }, [isAppOpen, setIsAppOpen, june]);
+  }, [isAppOpen, setIsAppOpen, track]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
