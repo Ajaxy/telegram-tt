@@ -1,6 +1,5 @@
 import '../../global/actions/all';
 
-import { AnalyticsBrowser } from '@june-so/analytics-next';
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useEffect, useLayoutEffect,
@@ -57,6 +56,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
 import useInterval from '../../hooks/useInterval';
+import { useJune } from '../../hooks/useJune';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShowTransition from '../../hooks/useShowTransition';
@@ -103,12 +103,6 @@ import PremiumMainModal from './premium/PremiumMainModal.async';
 import SafeLinkModal from './SafeLinkModal.async';
 
 import './Main.scss';
-
-// Near the entrypoint of your app, instantiate AnalyticsBrowser:
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const analytics = AnalyticsBrowser.load({
-  writeKey: 'vLfuHIHM8CWtzPnZ',
-});
 
 export interface OwnProps {
   isMobile?: boolean;
@@ -272,6 +266,15 @@ const Main: FC<OwnProps & StateProps> = ({
     // eslint-disable-next-line no-console
     console.log('>>> RENDER MAIN');
   }
+
+  const [isAppOpen, setIsAppOpen] = useState(false);
+  const june = useJune();
+  useEffect(() => {
+    if (!isAppOpen && june) {
+      setIsAppOpen(true);
+      june.track('App: open');
+    }
+  }, [isAppOpen, setIsAppOpen, june]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
