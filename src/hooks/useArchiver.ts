@@ -20,8 +20,8 @@ export default function useArchiver() {
 
   const chatsToArchive: { [key: string]: Date } = {};
 
-  const shouldArchive = (chat: ApiChat) => {
-    return chat && (chat.isMuted || !(
+  const shouldArchive = (chat: ApiChat, isPinnedInAllFolder: boolean) => {
+    return chat && !isPinnedInAllFolder && (chat.isMuted || !(
       chat.id === SERVICE_NOTIFICATIONS_USER_ID // impossible to archive
       || chat.hasUnreadMark
       || chat.unreadCount
@@ -60,12 +60,14 @@ export default function useArchiver() {
   const process = () => {
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
+    const pinnedChatIds = global.chats.orderedPinnedIds.active;
     if (notArchivedChatsIds) {
       for (const chatId of notArchivedChatsIds) {
         const chatsById = global.chats.byId;
         const chat = chatsById[chatId];
-        if (chat) {
-          if (shouldArchive(chat)) {
+        if (chat && chat.id) {
+          const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chatId));
+          if (shouldArchive(chat, isPinnedInAllFolder)) {
             add(chat.id);
           } else {
             remove(chat.id);
