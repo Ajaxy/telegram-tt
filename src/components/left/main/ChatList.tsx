@@ -257,7 +257,7 @@ const ChatList: FC<OwnProps> = ({
       )}
       {viewportIds?.length ? (
         renderChats()
-      ) : viewportIds && !viewportIds.length ? (
+      ) : (viewportIds && !viewportIds.length) || isAllFolder ? ( // TODO: improve tempfix for allFolder
         (
           <EmptyFolder
             folderId={folderId}
