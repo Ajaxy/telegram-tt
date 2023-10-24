@@ -8,7 +8,7 @@ import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID, ULU_APP } from '../config';
+import { ALL_FOLDER_ID, SERVICE_NOTIFICATIONS_USER_ID, ULU_APP } from '../config';
 import useInterval from './useInterval';
 
 const UPDATE_TIME_SEC = 5;
@@ -20,9 +20,10 @@ export default function useArchiver() {
 
   const chatsToArchive: { [key: string]: Date } = {};
 
-  const shouldArchive = (chat: ApiChat) => {
+  const shouldArchive = (chat: ApiChat, isPinnedInAllFolder: boolean) => {
     return chat && (chat.isMuted || !(
       chat.id === SERVICE_NOTIFICATIONS_USER_ID // impossible to archive
+      || isPinnedInAllFolder
       || chat.hasUnreadMark
       || chat.unreadCount
       || chat.unreadMentionsCount
@@ -60,12 +61,15 @@ export default function useArchiver() {
   const process = () => {
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
+    const { byId: chatFoldersById } = global.chatFolders;
+    const { pinnedChatIds } = chatFoldersById[ALL_FOLDER_ID] || {};
     if (notArchivedChatsIds) {
       for (const chatId of notArchivedChatsIds) {
         const chatsById = global.chats.byId;
         const chat = chatsById[chatId];
-        if (chat) {
-          if (shouldArchive(chat)) {
+        if (chat && chat.id) {
+          const isPinnedInAllFoler = Boolean(pinnedChatIds?.includes(chatId));
+          if (shouldArchive(chat, isPinnedInAllFoler)) {
             add(chat.id);
           } else {
             remove(chat.id);
