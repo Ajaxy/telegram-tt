@@ -450,11 +450,16 @@ function buildChatSummary(
   const shouldHideServiceChat = chat.id === SERVICE_NOTIFICATIONS_USER_ID && (
     !chat.lastMessage || unreadCount === 0 || chat.lastMessage.content.action?.type === 'historyClear'
   );
+  const shouldHideSavedChat = userInfo && userInfo?.isSelf && (
+    !chat.lastMessage || unreadCount === 0 || chat.lastMessage.content.action?.type === 'historyClear'
+  );
 
   return {
     id,
     type,
-    isListed: Boolean(!isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat && !isRemoved),
+    isListed: Boolean(
+      !isRestricted && !isNotJoined && !migratedTo && !shouldHideServiceChat && !shouldHideSavedChat && !isRemoved,
+    ),
     isArchived: folderId === ARCHIVED_FOLDER_ID,
     isMuted: selectIsChatMuted(chat, notifySettings, notifyExceptions),
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
