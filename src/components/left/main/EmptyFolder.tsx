@@ -16,22 +16,25 @@ import Button from '../../ui/Button';
 
 import styles from './EmptyFolder.module.scss';
 
+type FolderType = 'all' | 'archived' | 'folder';
+
 type OwnProps = {
   folderId?: number;
-  folderType: 'all' | 'archived' | 'folder';
+  folderType: FolderType;
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type StateProps = {
   chatFolder?: ApiChatFolder;
+  folderType?: FolderType;
   animatedEmoji?: ApiSticker;
 };
 
 const ICON_SIZE = 96;
 
 const EmptyFolder: FC<OwnProps & StateProps> = ({
-  chatFolder, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
+  chatFolder, folderType, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
 }) => {
   const lang = useLang();
   const { isMobile } = useAppLayout();
@@ -41,12 +44,14 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
     onSettingsScreenSelect(SettingsScreens.FoldersEditFolderFromChatList);
   }, [chatFolder, foldersDispatch, onSettingsScreenSelect]);
 
+  const isInbox = folderType === 'all';
+
   return (
     <div className={styles.root}>
       <div className={styles.sticker}>
         {animatedEmoji && <AnimatedIconFromSticker sticker={animatedEmoji} size={ICON_SIZE} />}
       </div>
-      <h3 className={styles.title} dir="auto">{lang('FilterNoChatsToDisplay')}</h3>
+      <h3 className={styles.title} dir="auto">{isInbox ? lang('InboxIsEmpty') : lang('FilterNoChatsToDisplay')}</h3>
       <p className={styles.description} dir="auto">
         {lang(chatFolder ? 'ChatList.EmptyChatListFilterText' : 'Chat.EmptyChat')}
       </p>
@@ -74,6 +79,7 @@ export default memo(withGlobal<OwnProps>((global, { folderId, folderType }): Sta
 
   return {
     chatFolder,
+    folderType,
     animatedEmoji: selectAnimatedEmoji(global, '📂'),
   };
 })(EmptyFolder));
