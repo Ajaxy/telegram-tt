@@ -400,6 +400,7 @@ export type TabState = {
 
   forwardMessages: {
     isModalShown?: boolean;
+    isSnoozeCalendarShown?: boolean;
     fromChatId?: string;
     messageIds?: number[];
     storyId?: number;
@@ -2205,6 +2206,7 @@ export interface ActionPayloads {
     storyId?: number;
     groupedId?: string;
     withMyScore?: boolean;
+    isSnooze?: boolean;
   } & WithTabId;
   openForwardMenuForSelectedMessages: WithTabId | undefined;
   setForwardChatOrTopic: {

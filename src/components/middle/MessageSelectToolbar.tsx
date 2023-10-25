@@ -199,7 +199,8 @@ export default memo(withGlobal<OwnProps>(
     const hasProtectedMessage = chatId ? selectHasProtectedMessage(global, chatId, selectedMessageIds) : false;
     const canForward = !isSchedule && chatId ? selectCanForwardMessages(global, chatId, selectedMessageIds) : false;
     const isForwardModalOpen = tabState.forwardMessages.isModalShown;
-    const isAnyModalOpen = Boolean(isForwardModalOpen || tabState.requestedDraft
+    const isSnoozeCalendarShown = tabState.forwardMessages.isSnoozeCalendarShown;
+    const isAnyModalOpen = Boolean(isForwardModalOpen || isSnoozeCalendarShown || tabState.requestedDraft
       || tabState.requestedAttachBotInChat || tabState.requestedAttachBotInstall);
 
     return {
