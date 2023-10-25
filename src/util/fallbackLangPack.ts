@@ -309,6 +309,7 @@ export default {
   Copy: 'Copy',
   DialogPin: 'Pin',
   Forward: 'Forward',
+  NotifyMe: 'Notify me...',
   'Common.Select': 'Select',
   DeleteSingleMessagesTitle: 'Delete message',
   AreYouSureDeleteSingleMessage: 'Are you sure you want to delete this message?',
