@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunktelegram_t=self.webpackChunktelegram_t||[]).push([[8150],{15777:(e,t,n)=>{n.r(t),n.d(t,{loadLegacyVideoPlugins:()=>a});var r=n(97582);function a(e){return(0,r.__awaiter)(this,void 0,void 0,(function(){var t;return(0,r.__generator)(this,(function(r){switch(r.label){case 0:return[4,n.e(834).then(n.t.bind(n,80834,23))];case 1:return t=r.sent(),e._plugins=t,[2]}}))}))}}}]);
+//# sourceMappingURL=8150.1b27427b76b6e48347b9.js.map

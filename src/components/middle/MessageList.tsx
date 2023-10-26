@@ -9,6 +9,7 @@ import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type {
+  // ApiChat,
   ApiMessage, ApiRestrictionReason, ApiTopic,
 } from '../../api/types';
 import type { MessageListType } from '../../global/types';
@@ -29,8 +30,8 @@ import {
   isChatGroup,
   isChatWithRepliesBot,
   isLocalMessageId,
-  isMainThread,
-  isReplyToUserThreadMessage,
+  // isMainThread,
+  // isReplyToUserThreadMessage,
   isUserId,
   ULU_APP as ULU_APP_UTILS,
 } from '../../global/helpers';
@@ -135,7 +136,7 @@ const MESSAGE_ANIMATION_DURATION = 500;
 const BOTTOM_FOCUS_MARGIN = 20;
 const SELECT_MODE_ANIMATION_DURATION = 200;
 const UNREAD_DIVIDER_CLASS = 'unread-divider';
-const ULU_APP_WITH_REPLIES_IN_MAIN_THREAD = false; // TODO move somewhere else
+// const ULU_APP_WITH_REPLIES_IN_MAIN_THREAD = false; // TODO move somewhere else
 
 const runDebouncedForScroll = debounce((cb) => cb(), SCROLL_DEBOUNCE, false);
 
@@ -146,7 +147,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   hasTools,
   onFabToggle,
   onNotchToggle,
-  doesChatSupportThreads,
+  // doesChatSupportThreads,
   isCurrentUserPremium,
   isChatLoaded,
   isChannelChat,
@@ -202,7 +203,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   const isScrollTopJustUpdatedRef = useRef(false);
   const shouldAnimateAppearanceRef = useRef(Boolean(lastMessage));
 
-  const withRepliesToThreads = doesChatSupportThreads ? ULU_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
+  // const withRepliesToThreads = doesChatSupportThreads ? ULU_APP_WITH_REPLIES_IN_MAIN_THREAD : true; // TODO other group types
 
   const areMessagesLoaded = Boolean(messageIds);
 
@@ -239,20 +240,22 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
   useNativeCopySelectedMessages(copyMessagesByIds);
 
-  const messagesByIdFiltered = useMemo(
-    () => (messagesById
-      ? Object.values(messagesById).reduce((acc, message) => {
-        if (
-          isMainThread(threadId)
-          && !withRepliesToThreads && isReplyToUserThreadMessage(message)
-        ) return acc;
+  // TODO fix filtering when 100% of first batch messages are replies
+  const messagesByIdFiltered = messagesById;
+  // const messagesByIdFiltered = useMemo(
+  //   () => (messagesById
+  //     ? Object.values(messagesById).reduce((acc, message) => {
+  //       // if (
+  //       //   isMainThread(threadId)
+  //       //   && !withRepliesToThreads && isReplyToUserThreadMessage(message)
+  //       // ) return acc;
 
-        acc[message.id] = message;
-        return acc;
-      }, {} as Record<number, ApiMessage>)
-      : {} as Record<number, ApiMessage>),
-    [messagesById, withRepliesToThreads, threadId],
-  );
+  //       acc[message.id] = message;
+  //       return acc;
+  //     }, {} as Record<number, ApiMessage>)
+  //     : {} as Record<number, ApiMessage>),
+  //   // [messagesById, withRepliesToThreads, threadId],
+  // );
 
   const messageGroups = useMemo(() => {
     if (!messageIds?.length || !messagesByIdFiltered) {
