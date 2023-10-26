@@ -393,7 +393,7 @@ const MessageContextMenu: FC<OwnProps> = ({
           </MenuItem>
         )}
         {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('Forward')}</MenuItem>}
-        {canForward && <MenuItem icon="forward" onClick={onForward}>{lang('NotifyMe')}</MenuItem>}
+        {canForward && <MenuItem icon="schedule" onClick={onForward}>{lang('NotifyMe')}</MenuItem>}
         {canSelect && <MenuItem icon="select" onClick={onSelect}>{lang('Common.Select')}</MenuItem>}
         {canReport && <MenuItem icon="flag" onClick={onReport}>{lang('lng_context_report_msg')}</MenuItem>}
         {(canShowSeenBy || canShowReactionsCount) && !isSponsoredMessage && (
