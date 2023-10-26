@@ -333,6 +333,33 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     }
   });
 
+  const handleSnoozeScheduleMessage = useLastCallback((scheduledAt: number) => {
+    // eslint-disable-next-line no-console
+    console.log('scheduledAt', scheduledAt);
+    /*
+    rescheduleMessage({
+      chatId: message.chatId,
+      messageId: message.id,
+      scheduledAt,
+    });
+    */
+    onClose();
+  });
+
+  const handleSnooze = useLastCallback(() => {
+    /*
+    closeMenu();
+    if (album?.messages) {
+      const messageIds = album.messages.map(({ id }) => id);
+      openForwardMenu({ fromChatId: message.chatId, messageIds });
+    } else {
+      openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
+    }
+    */
+    setIsMenuOpen(false);
+    requestCalendar(handleSnoozeScheduleMessage);
+  });
+
   const handleFaveSticker = useLastCallback(() => {
     closeMenu();
     faveSticker({ sticker: message.content.sticker! });
@@ -525,6 +552,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onPin={handlePin}
         onUnpin={handleUnpin}
         onForward={handleForward}
+        onSnooze={handleSnooze}
         onDelete={handleDelete}
         onReport={handleReport}
         onFaveSticker={handleFaveSticker}
@@ -573,7 +601,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         confirmLabel={lang('lng_polls_stop_sure')}
         confirmHandler={handlePollClose}
       />
-      {canReschedule && calendar}
+      {(canReschedule || canForward) && calendar}
     </div>
   );
 };
