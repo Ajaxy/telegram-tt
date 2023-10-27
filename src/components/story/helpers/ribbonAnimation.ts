@@ -332,11 +332,11 @@ function createGhost(sourceEl: HTMLElement) {
 }
 
 function getPeerId(el: HTMLElement) {
-  return el.getAttribute('data-peer-id');
+  return el?.getAttribute('data-peer-id');
 }
 
 function selectByPeerId(el: HTMLElement, id: string) {
-  return el.querySelector<HTMLElement>(`[data-peer-id="${id}"]`);
+  return el?.querySelector<HTMLElement>(`[data-peer-id="${id}"]`);
 }
 
 function createDelayedCallback(callback: NoneToVoidFunction, ms: number) {

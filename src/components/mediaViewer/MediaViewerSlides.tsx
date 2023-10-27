@@ -8,7 +8,12 @@ import type { RealTouchEvent } from '../../util/captureEvents';
 
 import { animateNumber, timingFunctions } from '../../util/animation';
 import buildClassName from '../../util/buildClassName';
-import { captureEvents, IOS_SCREEN_EDGE_THRESHOLD } from '../../util/captureEvents';
+import {
+  captureEvents,
+  IOS_SCREEN_EDGE_THRESHOLD,
+  SWIPE_DIRECTION_THRESHOLD,
+  SWIPE_DIRECTION_TOLERANCE,
+} from '../../util/captureEvents';
 import { clamp, isBetween, round } from '../../util/math';
 import { debounce } from '../../util/schedulers';
 import { IS_IOS, IS_TOUCH_ENV } from '../../util/windowEnvironment';
@@ -459,8 +464,6 @@ const MediaViewerSlides: FC<OwnProps> = ({
         const absOffsetX = Math.abs(dragOffsetX);
         const absOffsetY = Math.abs(dragOffsetY);
         const { x, y, scale } = transformRef.current;
-        const threshold = 10;
-        const tolerance = 1.5;
 
         // If user is inactive but is still touching the screen
         // we reset last gesture time
@@ -490,7 +493,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
           // If user is swiping horizontally or horizontal shift is dominant
           // we change only horizontal position
           if (swipeDirectionRef.current === SwipeDirection.Horizontal
-            || Math.abs(x) > threshold || absOffsetX / absOffsetY > tolerance) {
+            || Math.abs(x) > SWIPE_DIRECTION_THRESHOLD || absOffsetX / absOffsetY > SWIPE_DIRECTION_TOLERANCE) {
             swipeDirectionRef.current = SwipeDirection.Horizontal;
             setIsActive(false);
             const limit = windowWidth + SLIDES_GAP;
@@ -512,7 +515,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
         }
         // If vertical shift is dominant we change only vertical position
         if (swipeDirectionRef.current === SwipeDirection.Vertical
-          || Math.abs(y) > threshold || absOffsetY / absOffsetX > tolerance) {
+          || Math.abs(y) > SWIPE_DIRECTION_THRESHOLD || absOffsetY / absOffsetX > SWIPE_DIRECTION_TOLERANCE) {
           swipeDirectionRef.current = SwipeDirection.Vertical;
           const limit = windowHeight;
           const y1 = clamp(dragOffsetY, -limit, limit);

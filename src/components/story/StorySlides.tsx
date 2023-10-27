@@ -4,20 +4,35 @@ import React, {
 import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { ApiPeerStories, ApiTypeStory } from '../../api/types';
+import type { RealTouchEvent } from '../../util/captureEvents';
 
-import { ANIMATION_END_DELAY } from '../../config';
+import { ANIMATION_END_DELAY, EDITABLE_STORY_INPUT_ID } from '../../config';
+import { requestMutation } from '../../lib/fasterdom/fasterdom';
 import { getStoryKey } from '../../global/helpers';
 import { selectIsStoryViewerOpen, selectPeer, selectTabState } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
-import { IS_FIREFOX, IS_SAFARI } from '../../util/windowEnvironment';
+import {
+  captureEvents,
+  IOS_SCREEN_EDGE_THRESHOLD,
+  SWIPE_DIRECTION_THRESHOLD,
+  SWIPE_DIRECTION_TOLERANCE,
+} from '../../util/captureEvents';
+import focusEditableElement from '../../util/focusEditableElement';
+import { clamp } from '../../util/math';
+import { disableScrolling, enableScrolling } from '../../util/scrollLock';
+import {
+  IS_FIREFOX, IS_IOS, IS_SAFARI,
+} from '../../util/windowEnvironment';
 import { calculateOffsetX } from './helpers/dimensions';
 
+import useAppLayout from '../../hooks/useAppLayout';
 import useCurrentOrPrev from '../../hooks/useCurrentOrPrev';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious from '../../hooks/usePrevious';
 import useSignal from '../../hooks/useSignal';
+import useWindowSize from '../../hooks/useWindowSize';
 import useSlideSizes from './hooks/useSlideSizes';
 
 import Story from './Story';
@@ -47,6 +62,13 @@ interface StateProps {
 
 const ANIMATION_DURATION_MS = 350 + (IS_SAFARI || IS_FIREFOX ? ANIMATION_END_DELAY : 20);
 const ACTIVE_SLIDE_VERTICAL_CORRECTION_REM = 1.75;
+const SWIPE_Y_THRESHOLD = 50;
+const SCROLL_RELEASE_DELAY = 1500;
+
+enum SwipeDirection {
+  Horizontal,
+  Vertical,
+}
 
 function StorySlides({
   peerIds,
@@ -65,6 +87,8 @@ function StorySlides({
   onReport,
 }: OwnProps & StateProps) {
   const { stopActiveReaction } = getActions();
+  // eslint-disable-next-line no-null/no-null
+  const containerRef = useRef<HTMLDivElement>(null);
   const [renderingPeerId, setRenderingPeerId] = useState(currentPeerId);
   const [renderingStoryId, setRenderingStoryId] = useState(currentStoryId);
   const prevPeerId = usePrevious(currentPeerId);
@@ -73,6 +97,11 @@ function StorySlides({
   const renderingIsSinglePeer = useCurrentOrPrev(isSinglePeer, true);
   const renderingIsSingleStory = useCurrentOrPrev(isSingleStory, true);
   const slideSizes = useSlideSizes();
+  const { height: windowHeight, width: windowWidth } = useWindowSize();
+  const swipeDirectionRef = useRef<SwipeDirection | undefined>(undefined);
+  const isReleasedRef = useRef(false);
+  const { isMobile } = useAppLayout();
+  const animationDuration = isMobile ? 0 : ANIMATION_DURATION_MS;
 
   const rendersRef = useRef<Record<string, { current: HTMLDivElement | null }>>({});
   const [getIsAnimating, setIsAnimating] = useSignal(false);
@@ -128,12 +157,12 @@ function StorySlides({
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setRenderingPeerId(currentPeerId);
-    }, ANIMATION_DURATION_MS);
+    }, animationDuration);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [currentPeerId]);
+  }, [animationDuration, currentPeerId]);
 
   useEffect(() => {
     let timeOutId: number | undefined;
@@ -141,7 +170,7 @@ function StorySlides({
     if (renderingPeerId !== currentPeerId) {
       timeOutId = window.setTimeout(() => {
         setRenderingStoryId(currentStoryId);
-      }, ANIMATION_DURATION_MS);
+      }, animationDuration);
     } else if (currentStoryId !== renderingStoryId) {
       setRenderingStoryId(currentStoryId);
     }
@@ -149,7 +178,7 @@ function StorySlides({
     return () => {
       window.clearTimeout(timeOutId);
     };
-  }, [renderingPeerId, currentStoryId, currentPeerId, renderingStoryId]);
+  }, [renderingPeerId, currentStoryId, currentPeerId, renderingStoryId, animationDuration]);
 
   useEffect(() => {
     let timeOutId: number | undefined;
@@ -158,14 +187,14 @@ function StorySlides({
       setIsAnimating(true);
       timeOutId = window.setTimeout(() => {
         setIsAnimating(false);
-      }, ANIMATION_DURATION_MS);
+      }, animationDuration);
     }
 
     return () => {
       setIsAnimating(false);
       window.clearTimeout(timeOutId);
     };
-  }, [prevPeerId, currentPeerId, setIsAnimating]);
+  }, [prevPeerId, currentPeerId, setIsAnimating, animationDuration]);
 
   useEffect(() => {
     return () => {
@@ -210,6 +239,91 @@ function StorySlides({
     }, {});
   });
 
+  useEffect(() => {
+    if (!containerRef.current || !isOpen) {
+      return undefined;
+    }
+
+    let offsetY = 0;
+
+    const getCurrentStoryRef = () => {
+      return renderingPeerId ? rendersRef.current[renderingPeerId]?.current : undefined;
+    };
+
+    const onRelease = (event: MouseEvent | TouchEvent | WheelEvent) => {
+      // This allows to prevent onRelease triggered by debounced wheel event
+      // after onRelease was triggered manually in onDrag
+      if (isReleasedRef.current) {
+        isReleasedRef.current = false;
+        return;
+      }
+      const current = getCurrentStoryRef();
+      if (!current) return;
+
+      if (offsetY < -SWIPE_Y_THRESHOLD) {
+        const composer = document.getElementById(EDITABLE_STORY_INPUT_ID);
+        if (composer) {
+          requestMutation(() => {
+            focusEditableElement(composer);
+          });
+        }
+        return;
+      }
+
+      if (offsetY > SWIPE_Y_THRESHOLD) {
+        onClose();
+        if (event.type === 'wheel') {
+          disableScrolling();
+          setTimeout(enableScrolling, SCROLL_RELEASE_DELAY);
+        }
+      } else {
+        requestMutation(() => {
+          current.style.setProperty('--slide-translate-y', '0px');
+        });
+      }
+    };
+
+    return captureEvents(containerRef.current, {
+      isNotPassive: true,
+      withNativeDrag: true,
+      excludedClosestSelector: '.Composer',
+      onDrag: (event, captureEvent, {
+        dragOffsetX, dragOffsetY,
+      }) => {
+        if (isReleasedRef.current) return;
+        // Avoid conflicts with swipe-to-back gestures
+        if (IS_IOS && captureEvent.type === 'touchstart') {
+          const { pageX } = (captureEvent as RealTouchEvent).touches[0];
+          if (pageX <= IOS_SCREEN_EDGE_THRESHOLD || pageX >= windowWidth - IOS_SCREEN_EDGE_THRESHOLD) {
+            return;
+          }
+        }
+        if (event.type === 'mousemove') return;
+        const absOffsetX = Math.abs(dragOffsetX);
+        const absOffsetY = Math.abs(dragOffsetY);
+        const current = getCurrentStoryRef();
+        if (!current) return;
+        // If vertical shift is dominant we change only vertical position
+        if (swipeDirectionRef.current === SwipeDirection.Vertical
+          || Math.abs(absOffsetY) > SWIPE_DIRECTION_THRESHOLD || absOffsetY / absOffsetX > SWIPE_DIRECTION_TOLERANCE) {
+          swipeDirectionRef.current = SwipeDirection.Vertical;
+          const limit = windowHeight;
+          offsetY = clamp(dragOffsetY, -limit, limit);
+          if (offsetY > 0) {
+            requestMutation(() => {
+              current.style.setProperty('--slide-translate-y', `${-offsetY}px`);
+            });
+          }
+          if (event.type === 'wheel' && Math.abs(offsetY) > SWIPE_Y_THRESHOLD * 2) {
+            onRelease(event);
+            isReleasedRef.current = true;
+          }
+        }
+      },
+      onRelease,
+    });
+  }, [isOpen, renderingPeerId, onClose, windowWidth, windowHeight]);
+
   useLayoutEffect(() => {
     const transformX = calculateTransformX();
 
@@ -225,25 +339,33 @@ function StorySlides({
         return;
       }
 
-      const scale = String(currentPeerId === peerId ? slideSizes.toActiveScale
-        : peerId === renderingPeerId ? slideSizes.fromActiveScale : 1);
+      const getScale = () => {
+        if (isMobile) return '1';
+        if (currentPeerId === peerId) {
+          return String(slideSizes.toActiveScale);
+        }
+        if (peerId === renderingPeerId) {
+          return String(slideSizes.fromActiveScale);
+        }
+        return '1';
+      };
 
       let offsetY = 0;
       if (peerId === renderingPeerId) {
-        offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * slideSizes.fromActiveScale;
+        if (!isMobile) offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * slideSizes.fromActiveScale;
         current.classList.add(styles.slideAnimationFromActive);
       }
       if (peerId === currentPeerId) {
-        offsetY = ACTIVE_SLIDE_VERTICAL_CORRECTION_REM;
+        if (!isMobile) offsetY = ACTIVE_SLIDE_VERTICAL_CORRECTION_REM;
         current.classList.add(styles.slideAnimationToActive);
       }
 
       current.classList.add(styles.slideAnimation);
       current.style.setProperty('--slide-translate-x', `${transformX[peerId] || 0}px`);
       current.style.setProperty('--slide-translate-y', `${offsetY}rem`);
-      current.style.setProperty('--slide-translate-scale', scale);
+      current.style.setProperty('--slide-translate-scale', getScale());
     });
-  }, [currentPeerId, getIsAnimating, renderingPeerId, slideSizes]);
+  }, [currentPeerId, getIsAnimating, renderingPeerId, isMobile, slideSizes]);
 
   function renderStoryPreview(peerId: string, index: number, position: number) {
     const style = buildStyle(
@@ -303,7 +425,11 @@ function StorySlides({
   }
 
   return (
-    <div className={styles.wrapper} style={`--story-viewer-scale: ${slideSizes.scale}`}>
+    <div
+      className={styles.wrapper}
+      ref={containerRef}
+      style={`--story-viewer-scale: ${slideSizes.scale}`}
+    >
       <div className={styles.fullSize} onClick={onClose} />
       {renderingPeerIds.length > 1 && (
         <div className={styles.backdropNonInteractive} style={`height: ${slideSizes.slide.height}px`} />
