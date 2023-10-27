@@ -5,7 +5,7 @@ import type { ApiApplyBoostInfo, ApiChat } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { getChatTitle } from '../../../global/helpers';
-import { selectChat } from '../../../global/selectors';
+import { selectChat, selectIsCurrentUserPremium } from '../../../global/selectors';
 import { formatDateInFuture } from '../../../util/dateFormat';
 import { getServerTime } from '../../../util/serverTime';
 import { getBoostProgressInfo } from '../../common/helpers/boostInfo';
@@ -50,21 +50,25 @@ export type OwnProps = {
 type StateProps = {
   chat?: ApiChat;
   boostedChat?: ApiChat;
+  isCurrentUserPremium?: boolean;
 };
 
 const BoostModal = ({
   info,
   chat,
   boostedChat,
+  isCurrentUserPremium,
 }: OwnProps & StateProps) => {
   const {
     applyBoost,
     closeBoostModal,
     requestConfetti,
+    openPremiumModal,
   } = getActions();
 
   const [isReplaceModalOpen, openReplaceModal, closeReplaceModal] = useFlag();
   const [isWaitDialogOpen, openWaitDialog, closeWaitDialog] = useFlag();
+  const [isPremiumDialogOpen, openPremiumDialog, closePremiumDialog] = useFlag();
 
   const isOpen = Boolean(info);
 
@@ -160,13 +164,26 @@ const BoostModal = ({
     };
   }, [chat, chatTitle, info, lang]);
 
+  const isBoostDisabled = !applyInfo && isCurrentUserPremium;
+
   const handleApplyBoost = useLastCallback(() => {
     closeReplaceModal();
     applyBoost({ chatId: chat!.id });
     requestConfetti();
   });
 
+  const handleProceedPremium = useLastCallback(() => {
+    openPremiumModal();
+    closePremiumDialog();
+    closeBoostModal();
+  });
+
   const handleButtonClick = useLastCallback(() => {
+    if (!isCurrentUserPremium) {
+      openPremiumDialog();
+      return;
+    }
+
     if (isBoosted) {
       closeBoostModal();
       return;
@@ -207,7 +224,7 @@ const BoostModal = ({
           {renderText(descriptionText, ['simple_markdown', 'emoji'])}
         </div>
         <div className="dialog-buttons">
-          <Button isText className="confirm-dialog-button" disabled={!applyInfo} onClick={handleButtonClick}>
+          <Button isText className="confirm-dialog-button" disabled={isBoostDisabled} onClick={handleButtonClick}>
             {!isBoosted ? (
               <>
                 <Icon name="boost" />
@@ -278,6 +295,17 @@ const BoostModal = ({
           )}
         </ConfirmDialog>
       )}
+      {!isCurrentUserPremium && (
+        <ConfirmDialog
+          isOpen={isPremiumDialogOpen}
+          confirmLabel={lang('Common.Yes')}
+          title={lang('PremiumNeeded')}
+          onClose={closePremiumDialog}
+          confirmHandler={handleProceedPremium}
+        >
+          {renderText(lang('PremiumNeededForBoosting'), ['simple_markdown', 'emoji'])}
+        </ConfirmDialog>
+      )}
     </Modal>
   );
 };
@@ -291,6 +319,7 @@ export default memo(withGlobal<OwnProps>(
     return {
       chat,
       boostedChat,
+      isCurrentUserPremium: selectIsCurrentUserPremium(global),
     };
   },
 )(BoostModal));
