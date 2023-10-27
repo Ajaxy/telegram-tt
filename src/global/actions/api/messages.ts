@@ -1505,7 +1505,7 @@ addActionHandler('setForwardChatOrTopic', async (global, actions, payload): Prom
 });
 
 addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionReturnType => {
-  const { tabId = getCurrentTabId() } = payload || {};
+  const { tabId = getCurrentTabId(), scheduledAt } = payload || {};
   global = updateTabState(global, {
     forwardMessages: {
       ...selectTabState(global, tabId).forwardMessages,
@@ -1515,7 +1515,7 @@ addActionHandler('forwardToSavedMessages', (global, actions, payload): ActionRet
   setGlobal(global);
 
   actions.exitMessageSelectMode({ tabId });
-  actions.forwardMessages({ isSilent: true, tabId });
+  actions.forwardMessages({ isSilent: true, tabId, scheduledAt });
 });
 
 addActionHandler('forwardStory', (global, actions, payload): ActionReturnType => {

@@ -483,6 +483,7 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType => {
   const {
     fromChatId, messageIds, storyId, groupedId, withMyScore, tabId = getCurrentTabId(),
+    isSnooze,
   } = payload;
   let groupedMessageIds;
   if (groupedId) {
@@ -491,9 +492,11 @@ addActionHandler('openForwardMenu', (global, actions, payload): ActionReturnType
   return updateTabState(global, {
     forwardMessages: {
       fromChatId,
+      toChatId: isSnooze ? global.currentUserId : undefined,
       messageIds: groupedMessageIds || messageIds,
       storyId,
-      isModalShown: true,
+      isModalShown: !isSnooze,
+      isSnoozeCalendarShown: isSnooze,
       withMyScore,
     },
   }, tabId);

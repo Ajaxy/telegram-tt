@@ -310,6 +310,7 @@ export default {
   Copy: 'Copy',
   DialogPin: 'Pin',
   Forward: 'Forward',
+  NotifyMe: 'Notify me...',
   'Common.Select': 'Select',
   DeleteSingleMessagesTitle: 'Delete message',
   AreYouSureDeleteSingleMessage: 'Are you sure you want to delete this message?',
@@ -513,4 +514,5 @@ export default {
   'Video.Unsupported.Mobile': 'Unfortunately, this video can\'t be played on Ulu. Try opening it with our **mobile app** instead.',
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
+  YouWillBeNotified: 'You will be notified!',
 } as ApiLangPack;

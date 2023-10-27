@@ -193,6 +193,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showOriginalMessage,
     openChatLanguageModal,
     openMessageReactionPicker,
+    showNotification,
+    forwardToSavedMessages,
   } = getActions();
 
   const lang = useLang();
@@ -331,6 +333,23 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     } else {
       openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
     }
+  });
+
+  const handleSnoozeScheduleMessage = useLastCallback((scheduledAt: number) => {
+    forwardToSavedMessages({ scheduledAt });
+    showNotification({ message: lang('YouWillBeNotified') });
+    onClose();
+  });
+
+  const handleSnooze = useLastCallback(() => {
+    if (album?.messages) {
+      const messageIds = album.messages.map(({ id }) => id);
+      openForwardMenu({ fromChatId: message.chatId, messageIds, isSnooze: true });
+    } else {
+      openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id], isSnooze: true });
+    }
+    setIsMenuOpen(false);
+    requestCalendar(handleSnoozeScheduleMessage);
   });
 
   const handleFaveSticker = useLastCallback(() => {
@@ -525,6 +544,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         onPin={handlePin}
         onUnpin={handleUnpin}
         onForward={handleForward}
+        onSnooze={handleSnooze}
         onDelete={handleDelete}
         onReport={handleReport}
         onFaveSticker={handleFaveSticker}
@@ -573,7 +593,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
         confirmLabel={lang('lng_polls_stop_sure')}
         confirmHandler={handlePollClose}
       />
-      {canReschedule && calendar}
+      {(canReschedule || canForward) && calendar}
     </div>
   );
 };
