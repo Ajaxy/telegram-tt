@@ -104,7 +104,7 @@ export function rafPromise() {
   });
 }
 
-const FAST_RAF_TIMEOUT_FALLBACK_MS = 300;
+const FAST_RAF_TIMEOUT_FALLBACK_MS = 35; // < 30 FPS
 
 let fastRafCallbacks: Set<NoneToVoidFunction> | undefined;
 let fastRafFallbackCallbacks: Set<NoneToVoidFunction> | undefined;
