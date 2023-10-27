@@ -18,15 +18,17 @@ import styles from './InviteLink.module.scss';
 type OwnProps = {
   title?: string;
   inviteLink: string;
-  onRevoke?: VoidFunction;
   isDisabled?: boolean;
+  className?: string;
+  onRevoke?: VoidFunction;
 };
 
 const InviteLink: FC<OwnProps> = ({
   title,
   inviteLink,
-  onRevoke,
   isDisabled,
+  className,
+  onRevoke,
 }) => {
   const lang = useLang();
   const { showNotification, openChatWithDraft } = getActions();
@@ -66,8 +68,8 @@ const InviteLink: FC<OwnProps> = ({
   }, [isMobile, lang]);
 
   return (
-    <div className="settings-item">
-      <p className="text-muted">
+    <div className={className}>
+      <p className={styles.title}>
         {lang(title || 'InviteLink.InviteLink')}
       </p>
       <div className={styles.primaryLink}>
@@ -88,24 +90,13 @@ const InviteLink: FC<OwnProps> = ({
           )}
         </DropdownMenu>
       </div>
-      <div className={styles.buttons}>
-        <Button
-          onClick={handleCopyPrimaryClicked}
-          className={styles.button}
-          size="smaller"
-          disabled={isDisabled}
-        >
-          {lang('FolderLinkScreen.LinkActionCopy')}
-        </Button>
-        <Button
-          onClick={handleShare}
-          className={styles.button}
-          size="smaller"
-          disabled={isDisabled}
-        >
-          {lang('FolderLinkScreen.LinkActionShare')}
-        </Button>
-      </div>
+      <Button
+        size="smaller"
+        disabled={isDisabled}
+        onClick={handleShare}
+      >
+        {lang('FolderLinkScreen.LinkActionShare')}
+      </Button>
     </div>
   );
 };

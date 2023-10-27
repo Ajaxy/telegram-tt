@@ -36,16 +36,12 @@
   }
 }
 
-.floating-badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  position: relative;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  background-color: #7E85FF;
+.floating-badge-wrapper {
   animation: rotate-in 0.5s ease-in-out;
+  border-radius: 0.5rem;
+  height: 2.6875rem;
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes rotate-in {
@@ -63,9 +59,24 @@
   }
 }
 
+.floating-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  background-color: #7E85FF;
+  position: relative;
+  z-index: 1;
+}
+
 .floating-badge-triangle {
+  display: inline-block;
   position: absolute;
-  bottom: -15px;
+  bottom: -5px;
+  left: calc(var(--tail-position, 0.5) * 100%);
+  transform: translateX(-50%);
 }
 
 .floating-badge-icon {

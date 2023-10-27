@@ -160,6 +160,7 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
       </div>
 
       <InviteLink
+        className="settings-item"
         inviteLink={!url ? lang('Loading') : url}
         onRevoke={handleRevoke}
         isDisabled={!chatsCount || isTouched}

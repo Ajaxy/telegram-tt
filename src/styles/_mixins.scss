@@ -98,3 +98,14 @@
     box-shadow: 0 0.125rem 0.125rem var(--color-light-shadow);
   }
 }
+
+@mixin side-panel-section {
+  background-color: var(--color-background);
+  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+  border-bottom: 0.625rem solid var(--color-background-secondary);
+
+  &:last-child {
+    border-bottom: none;
+    box-shadow: none;
+  }
+}

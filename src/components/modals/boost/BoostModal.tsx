@@ -114,7 +114,7 @@ const BoostModal = ({
       hasNextLevel,
       levelProgress,
       remainingBoosts,
-    } = getBoostProgressInfo(info.boostStatus);
+    } = getBoostProgressInfo(info.boostStatus, true);
 
     const hasBoost = hasMyBoost || info.applyInfo?.type === 'already';
     const isJustUpgraded = boosts === currentLevelBoosts && hasBoost;

@@ -284,6 +284,7 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
         </div>
         {primaryInviteLink && (
           <InviteLink
+            className="section"
             inviteLink={primaryInviteLink}
             onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
             title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}

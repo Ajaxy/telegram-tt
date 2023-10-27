@@ -3,7 +3,12 @@ import { Api as GramJs, errors } from '../../../lib/gramjs';
 import type {
   ApiApplyBoostInfo,
   ApiBoostsStatus,
-  ApiMediaArea, ApiMediaAreaCoordinates, ApiMessage, ApiStealthMode, ApiStoryView, ApiTypeStory,
+  ApiMediaArea,
+  ApiMediaAreaCoordinates,
+  ApiMessage,
+  ApiStealthMode,
+  ApiStoryView,
+  ApiTypeStory,
 } from '../../types';
 
 import { buildCollectionByCallback } from '../../../util/iteratees';
@@ -215,6 +220,6 @@ export function buildApiBoostsStatus(boostStatus: GramJs.stories.BoostsStatus): 
     hasMyBoost: Boolean(myBoost),
     boostUrl,
     nextLevelBoosts,
-    ...(premiumAudience && { premiumAudience: buildStatisticsPercentage(premiumAudience) }),
+    ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
   };
 }

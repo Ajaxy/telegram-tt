@@ -39,6 +39,13 @@ export interface ApiMessageStatistics {
   publicForwardsData?: ApiMessagePublicForward[];
 }
 
+export interface ApiBoostStatistics {
+  level: number;
+  boosts: number;
+  premiumSubscribers: StatisticsOverviewPercentage;
+  remainingBoosts: number;
+}
+
 export interface ApiMessagePublicForward {
   messageId: number;
   views?: number;
@@ -76,6 +83,8 @@ export interface StatisticsOverviewItem {
 }
 
 export interface StatisticsOverviewPercentage {
+  part: number;
+  total: number;
   percentage: string;
 }
 

@@ -137,5 +137,5 @@ export type ApiBoostsStatus = {
   nextLevelBoosts?: number;
   hasMyBoost?: boolean;
   boostUrl: string;
-  premiumAudience?: StatisticsOverviewPercentage;
+  premiumSubscribers?: StatisticsOverviewPercentage;
 };

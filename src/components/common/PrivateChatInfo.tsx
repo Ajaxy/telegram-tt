@@ -43,6 +43,7 @@ type OwnProps = {
   noStatusOrTyping?: boolean;
   noRtl?: boolean;
   adminMember?: ApiChatMember;
+  className?: string;
   onEmojiStatusClick?: NoneToVoidFunction;
 };
 
@@ -75,8 +76,9 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   areMessagesLoaded,
   adminMember,
   ripple,
-  onEmojiStatusClick,
+  className,
   storyViewerOrigin,
+  onEmojiStatusClick,
 }) => {
   const {
     loadFullUser,
@@ -180,7 +182,7 @@ const PrivateChatInfo: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className="ChatInfo" dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
+    <div className={buildClassName('ChatInfo', className)} dir={!noRtl && lang.isRtl ? 'rtl' : undefined}>
       <Avatar
         key={user.id}
         size={avatarSize}

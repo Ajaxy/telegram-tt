@@ -625,6 +625,16 @@ export type TabState = {
     boostStatus?: ApiBoostsStatus;
     applyInfo?: ApiApplyBoostInfo;
   };
+
+  boostStatistics?: {
+    chatId: string;
+    boosters?: Record<string, number>;
+    boosterIds?: string[];
+    boostStatus?: ApiBoostsStatus;
+    isLoadingBoosters?: boolean;
+    nextOffset?: string;
+    count?: number;
+  };
 };
 
 export type GlobalState = {
@@ -2084,6 +2094,11 @@ export interface ActionPayloads {
     chatId: string;
   } & WithTabId;
   closeBoostModal: WithTabId | undefined;
+  openBoostStatistics: {
+    chatId: string;
+  } & WithTabId;
+  closeBoostStatistics: WithTabId | undefined;
+  loadMoreBoosters: WithTabId | undefined;
   applyBoost: {
     chatId: string;
   } & WithTabId;
