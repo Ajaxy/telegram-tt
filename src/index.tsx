@@ -13,6 +13,7 @@ import {
 } from './config';
 import { enableStrict, requestMutation } from './lib/fasterdom/fasterdom';
 import { selectTabState } from './global/selectors';
+import { betterView } from './util/betterView';
 import { establishMultitabRole, subscribeToMasterChange } from './util/establishMultitabRole';
 import { requestGlobal, subscribeToMultitabBroadcastChannel } from './util/multitab';
 import { checkAndAssignPermanentWebVersion } from './util/permanentWebVersion';
@@ -81,6 +82,8 @@ async function init() {
       <App />,
       document.getElementById('root')!,
     );
+
+    betterView();
   });
 
   if (DEBUG) {
