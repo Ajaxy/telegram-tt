@@ -149,6 +149,7 @@ const Settings: FC<OwnProps> = ({
   shouldSkipTransition,
 }) => {
   const { closeShareChatFolderModal } = getActions();
+
   const [twoFaState, twoFaDispatch] = useTwoFaReducer();
   const [privacyPasscode, setPrivacyPasscode] = useState<string>('');
 
@@ -476,6 +477,7 @@ const Settings: FC<OwnProps> = ({
       activeKey={currentScreen}
       renderCount={TRANSITION_RENDER_COUNT}
       shouldWrap
+      withSwipeControl
     >
       {renderCurrentSection}
     </Transition>

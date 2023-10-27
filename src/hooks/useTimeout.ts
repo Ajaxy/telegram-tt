@@ -1,19 +1,19 @@
-import { useEffect, useLayoutEffect, useRef } from '../lib/teact/teact';
+import { useEffect } from '../lib/teact/teact';
 
-function useTimeout(callback: () => void, delay?: number) {
-  const savedCallback = useRef(callback);
+import useLastCallback from './useLastCallback';
 
-  useLayoutEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
+function useTimeout(callback: () => void, delay?: number, dependencies: readonly any[] = []) {
+  const savedCallback = useLastCallback(callback);
 
   useEffect(() => {
     if (typeof delay !== 'number') {
       return undefined;
     }
-    const id = setTimeout(() => savedCallback.current(), delay);
+
+    const id = setTimeout(() => savedCallback(), delay);
     return () => clearTimeout(id);
-  }, [delay]);
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [delay, savedCallback, ...dependencies]);
 }
 
 export default useTimeout;

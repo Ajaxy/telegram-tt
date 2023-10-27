@@ -4,13 +4,13 @@ const ANIMATION_END_DELAY = 50;
 export function waitForTransitionEnd(
   node: Node, handler: NoneToVoidFunction, propertyName?: string, fallbackMs?: number,
 ) {
-  waitForEndEvent('transitionend', node, handler, propertyName, fallbackMs);
+  return waitForEndEvent('transitionend', node, handler, propertyName, fallbackMs);
 }
 
 export function waitForAnimationEnd(
   node: Node, handler: NoneToVoidFunction, animationName?: string, fallbackMs?: number,
 ) {
-  waitForEndEvent('animationend', node, handler, animationName, fallbackMs);
+  return waitForEndEvent('animationend', node, handler, animationName, fallbackMs);
 }
 
 function waitForEndEvent(
@@ -21,6 +21,10 @@ function waitForEndEvent(
   fallbackMs?: number,
 ) {
   let isHandled = false;
+
+  function cleanup() {
+    node.removeEventListener(eventType, handleAnimationEnd);
+  }
 
   function handleAnimationEnd(e: TransitionEvent | AnimationEvent | Event) {
     if (isHandled || e.target !== e.currentTarget) {
@@ -36,7 +40,7 @@ function waitForEndEvent(
 
     isHandled = true;
 
-    node.removeEventListener(eventType, handleAnimationEnd);
+    cleanup();
 
     setTimeout(() => {
       handler();
@@ -49,9 +53,11 @@ function waitForEndEvent(
     setTimeout(() => {
       if (isHandled) return;
 
-      node.removeEventListener(eventType, handleAnimationEnd);
+      cleanup();
 
       handler();
     }, fallbackMs);
   }
+
+  return cleanup;
 }

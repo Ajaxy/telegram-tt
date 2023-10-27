@@ -1,7 +1,5 @@
 import type { RefObject } from 'react';
-import React, {
-  memo, useEffect, useState,
-} from '../../lib/teact/teact';
+import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
@@ -11,11 +9,16 @@ import { LeftColumnContent, SettingsScreens } from '../../types';
 
 import { selectCurrentChat, selectIsForumPanelOpen, selectTabState } from '../../global/selectors';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import { IS_APP, IS_MAC_OS, LAYERS_ANIMATION_NAME } from '../../util/windowEnvironment';
+import { captureControlledSwipe } from '../../util/swipeController';
+import {
+  IS_APP, IS_MAC_OS, IS_TOUCH_ENV, LAYERS_ANIMATION_NAME,
+} from '../../util/windowEnvironment';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
+import usePrevious2 from '../../hooks/usePrevious2';
+import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import Transition from '../ui/Transition';
@@ -436,6 +439,23 @@ function LeftColumn({
     setSettingsScreen(screen);
   });
 
+  const prevSettingsScreenRef = useStateRef(usePrevious2(contentType === ContentType.Settings ? settingsScreen : -1));
+
+  useEffect(() => {
+    if (!IS_TOUCH_ENV) {
+      return undefined;
+    }
+
+    return captureControlledSwipe(ref.current!, {
+      excludedClosestSelector: '.ProfileInfo, .color-picker, .hue-picker',
+      onSwipeRightStart: handleReset,
+      onCancel: () => {
+        setContent(LeftColumnContent.Settings);
+        handleSettingsScreenSelect(prevSettingsScreenRef.current!);
+      },
+    });
+  }, [prevSettingsScreenRef, ref]);
+
   function renderContent(isActive: boolean) {
     switch (contentType) {
       case ContentType.Archived:
@@ -459,9 +479,9 @@ function LeftColumn({
             currentScreen={settingsScreen}
             foldersState={foldersState}
             foldersDispatch={foldersDispatch}
+            shouldSkipTransition={shouldSkipHistoryAnimations}
             onScreenSelect={handleSettingsScreenSelect}
             onReset={handleReset}
-            shouldSkipTransition={shouldSkipHistoryAnimations}
           />
         );
       case ContentType.NewChannel:
@@ -519,6 +539,7 @@ function LeftColumn({
       shouldWrap
       wrapExceptionKey={ContentType.Main}
       id="LeftColumn"
+      withSwipeControl
     >
       {renderContent}
     </Transition>

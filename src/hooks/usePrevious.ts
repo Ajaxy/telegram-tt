@@ -1,5 +1,6 @@
 import { useRef } from '../lib/teact/teact';
 
+// Deprecated. Use `usePrevious2` instead
 function usePrevious<T extends any>(next: T): T | undefined;
 function usePrevious<T extends any>(next: T, shouldSkipUndefined: true): Exclude<T, undefined> | undefined;
 function usePrevious<T extends any>(next: T, shouldSkipUndefined?: boolean): Exclude<T, undefined> | undefined;
