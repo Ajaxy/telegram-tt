@@ -25,7 +25,6 @@ export interface ActionOptions {
   forceOnHeavyAnimation?: boolean;
   // Workaround for iOS gesture history navigation
   forceSyncOnIOs?: boolean;
-  noUpdate?: boolean;
 }
 
 type Actions = Record<ActionNames, (payload?: ActionPayload, options?: ActionOptions) => void>;
@@ -50,7 +49,6 @@ const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
 
 const actionHandlers: Record<string, ActionHandler[]> = {};
 const callbacks: Function[] = [updateContainers];
-const immediateCallbacks: Function[] = [];
 const actions = {} as Actions;
 const containers = new Map<string, {
   mapStateToProps: MapStateToProps<any>;
@@ -65,10 +63,6 @@ const containers = new Map<string, {
 const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
 let forceOnHeavyAnimation = true;
-
-function runImmediateCallbacks() {
-  immediateCallbacks.forEach((cb) => cb(currentGlobal));
-}
 
 function runCallbacks() {
   if (forceOnHeavyAnimation) {
@@ -92,8 +86,6 @@ export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
     }
 
     currentGlobal = newGlobal;
-
-    if (!options?.noUpdate) runImmediateCallbacks();
 
     if (options?.forceSyncOnIOs) {
       forceOnHeavyAnimation = true;
@@ -225,14 +217,14 @@ export function addActionHandler(name: ActionNames, handler: ActionHandler) {
   actionHandlers[name].push(handler);
 }
 
-export function addCallback(cb: Function, isImmediate = false) {
-  (isImmediate ? immediateCallbacks : callbacks).push(cb);
+export function addCallback(cb: Function) {
+  callbacks.push(cb);
 }
 
-export function removeCallback(cb: Function, isImmediate = false) {
-  const index = (isImmediate ? immediateCallbacks : callbacks).indexOf(cb);
+export function removeCallback(cb: Function) {
+  const index = callbacks.indexOf(cb);
   if (index !== -1) {
-    (isImmediate ? immediateCallbacks : callbacks).splice(index, 1);
+    callbacks.splice(index, 1);
   }
 }
 

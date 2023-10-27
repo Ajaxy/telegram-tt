@@ -7,7 +7,7 @@ import type { MethodArgs, Methods } from '../api/gramjs/methods/types';
 import type { ApiInitialArgs } from '../api/types';
 import type { GlobalState } from '../global/types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
+import { DATA_BROADCAST_CHANNEL_NAME, DEBUG, MULTITAB_LOCALSTORAGE_KEY } from '../config';
 import { selectTabState } from '../global/selectors';
 import {
   callApiLocal,
@@ -157,6 +157,10 @@ export function subscribeToMultitabBroadcastChannel() {
       return;
     }
 
+    if (prevGlobal === global) {
+      return;
+    }
+
     if (!prevGlobal) {
       prevGlobal = global;
       channel.postMessage({
@@ -165,6 +169,7 @@ export function subscribeToMultitabBroadcastChannel() {
       });
       return;
     }
+
     const diff = deepDiff(prevGlobal, global);
 
     if (typeof diff !== 'symbol') {
@@ -175,7 +180,7 @@ export function subscribeToMultitabBroadcastChannel() {
     }
 
     prevGlobal = global;
-  }, true);
+  });
 
   channel.addEventListener('message', handleMessage);
 }
@@ -198,11 +203,12 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       const { diff } = data;
       const oldGlobal = getGlobal();
       const global = deepMerge(oldGlobal, diff);
+
       // @ts-ignore
       global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
 
-      setGlobal(global, { noUpdate: true });
       prevGlobal = global;
+      setGlobal(global);
       break;
     }
 
@@ -211,8 +217,8 @@ export function handleMessage({ data }: { data: BroadcastChannelMessage }) {
       const oldGlobal = getGlobal();
       // @ts-ignore
       data.global.DEBUG_capturedId = oldGlobal.DEBUG_capturedId;
-      setGlobal(data.global, { noUpdate: true });
       prevGlobal = data.global;
+      setGlobal(data.global);
       if (resolveGlobalPromise) {
         resolveGlobalPromise();
         resolveGlobalPromise = undefined;
