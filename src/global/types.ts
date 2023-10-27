@@ -2225,7 +2225,7 @@ export interface ActionPayloads {
   } & WithTabId;
   exitForwardMode: WithTabId | undefined;
   changeForwardRecipient: WithTabId | undefined;
-  forwardToSavedMessages: WithTabId | undefined;
+  forwardToSavedMessages: { scheduledAt?: number } & WithTabId | undefined;
   forwardStory: {
     toChatId: string;
   } & WithTabId;
