@@ -207,6 +207,7 @@ type StateProps = {
   shouldHideReply?: boolean;
   replyMessage?: ApiMessage;
   replyMessageSender?: ApiPeer;
+  replyMessageForwardSender?: ApiPeer;
   replyStory?: ApiTypeStory;
   storySender?: ApiUser;
   outgoingStatus?: ApiMessageOutgoingStatus;
@@ -316,6 +317,7 @@ const Message: FC<OwnProps & StateProps> = ({
   shouldHideReply,
   replyMessage,
   replyMessageSender,
+  replyMessageForwardSender,
   replyStory,
   storySender,
   outgoingStatus,
@@ -943,6 +945,7 @@ const Message: FC<OwnProps & StateProps> = ({
                 noUserColors={isOwn || isChannel}
                 isProtected={isProtected}
                 sender={replyMessageSender}
+                forwardSender={replyMessageForwardSender}
                 chatTranslations={chatTranslations}
                 requestedChatTranslationLanguage={requestedChatTranslationLanguage}
                 observeIntersectionForLoading={observeIntersectionForLoading}
@@ -1461,6 +1464,7 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, isRepliesChat && replyToChatId ? replyToChatId : chatId, replyToMessageId)
       : undefined;
     const replyMessageSender = replyMessage && selectReplySender(global, replyMessage, Boolean(forwardInfo));
+    const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = replyToStoryId && replyToStoryUserId
       ? selectPeerStory(global, replyToStoryUserId, replyToStoryId)
@@ -1534,6 +1538,7 @@ export default memo(withGlobal<OwnProps>(
       isThreadTop,
       replyMessage,
       replyMessageSender,
+      replyMessageForwardSender,
       replyStory,
       storySender,
       isInDocumentGroup,
