@@ -14,20 +14,26 @@ export function calculateSlideSizes(windowWidth: number, windowHeight: number): 
   activeSlide: IDimensions;
   slide: IDimensions;
   scale: number;
+  toActiveScale: number;
+  fromActiveScale: number;
 } {
   const scale = calculateScale(BASE_SCREEN_WIDTH, BASE_SCREEN_HEIGHT, windowWidth, windowHeight);
 
+  const activeSlideWidth = roundToNearestEven(BASE_ACTIVE_SLIDE_WIDTH * scale);
+  const slideWidth = roundToNearestEven(BASE_SLIDE_WIDTH * scale);
   // Avoid fractional values to prevent blurry text
   return {
     activeSlide: {
-      width: roundToNearestEven(BASE_ACTIVE_SLIDE_WIDTH * scale),
+      width: activeSlideWidth,
       height: roundToNearestEven(BASE_ACTIVE_SLIDE_HEIGHT * scale),
     },
     slide: {
-      width: roundToNearestEven(BASE_SLIDE_WIDTH * scale),
+      width: slideWidth,
       height: roundToNearestEven(BASE_SLIDE_HEIGHT * scale),
     },
     scale,
+    toActiveScale: activeSlideWidth / slideWidth,
+    fromActiveScale: slideWidth / activeSlideWidth,
   };
 }
 

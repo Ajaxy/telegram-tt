@@ -18,8 +18,8 @@ import PollAnswerResults from './PollAnswerResults';
 import './PollResults.scss';
 
 type OwnProps = {
-  onClose: NoneToVoidFunction;
   isActive: boolean;
+  onClose: NoneToVoidFunction;
 };
 
 type StateProps = {
@@ -28,10 +28,10 @@ type StateProps = {
 };
 
 const PollResults: FC<OwnProps & StateProps> = ({
-  onClose,
   isActive,
   chat,
   message,
+  onClose,
 }) => {
   const lang = useLang();
 

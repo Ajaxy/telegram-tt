@@ -55,6 +55,7 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
 
     global = updateTabState(global, {
       isStatisticsShown: false,
+      boostStatistics: undefined,
       contentToBeScheduled: undefined,
       ...(id !== selectTabState(global, tabId).forwardMessages.toChatId && {
         forwardMessages: {},

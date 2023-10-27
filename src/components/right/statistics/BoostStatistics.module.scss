@@ -1,0 +1,40 @@
+@import '../../../styles/mixins';
+
+.root {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.noResults {
+  color: var(--color-text-secondary);
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.section-header {
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.section {
+  padding: 1rem;
+  @include side-panel-section;
+}
+
+.user :global(.status) {
+  overflow: hidden;
+}
+
+.stats {
+  margin-bottom: 0;
+  border: none;
+  padding: 0.75rem 0 0 0;
+}
+
+.down {
+  font-size: 1.5rem;
+}
+
+.loadMoreSpinner {
+  margin-inline-end: 1rem;
+}

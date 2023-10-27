@@ -318,7 +318,7 @@ export function updateSentStoryReaction<T extends GlobalState>(
   if (!story || !('content' in story)) return global;
 
   const reactionsCount = story.reactionsCount || 0;
-  const hasReaction = story.reactions?.some((r) => r.chosenOrder);
+  const hasReaction = story.reactions?.some((r) => r.chosenOrder !== undefined);
   const reactions = updateReactionCount(story.reactions || [], [reaction].filter(Boolean));
 
   const countDiff = !reaction ? -1 : hasReaction ? 0 : 1;

@@ -76,7 +76,7 @@ const StealthModeModal = ({ isOpen, stealthMode, isCurrentUserPremium } : StateP
         round
         color="translucent"
         size="smaller"
-        className={styles.close}
+        className={styles.closeButton}
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >

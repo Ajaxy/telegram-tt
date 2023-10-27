@@ -1,3 +1,5 @@
+@import '../../styles/mixins';
+
 .Profile {
   height: 100%;
   display: flex;
@@ -16,8 +18,7 @@
 
   > .profile-info > .ChatExtra {
     padding: 0.875rem 0.5rem 0.5rem;
-    box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-    border-bottom: 0.625rem solid var(--color-background-secondary);
+    @include side-panel-section;
 
     .narrow {
       margin-bottom: 0;

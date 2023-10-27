@@ -42,7 +42,13 @@
 
     &-value {
       font-weight: 500;
-      font-size: 1rem;
+      font-size: 1.25rem;
+    }
+
+    &-secondary-value {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin-inline-start: 0.25rem;
     }
   }
 

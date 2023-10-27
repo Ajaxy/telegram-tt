@@ -46,6 +46,7 @@ type OwnProps = {
   isSearch?: boolean;
   isManagement?: boolean;
   isStatistics?: boolean;
+  isBoostStatistics?: boolean;
   isMessageStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
@@ -88,6 +89,7 @@ enum HeaderContent {
   Search,
   Statistics,
   MessageStatistics,
+  BoostStatistics,
   Management,
   ManageInitial,
   ManageChannelSubscribers,
@@ -126,6 +128,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isManagement,
   isStatistics,
   isMessageStatistics,
+  isBoostStatistics,
   isStickerSearch,
   isGifSearch,
   isPollResults,
@@ -139,8 +142,6 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isSelf,
   canManage,
   isChannel,
-  onClose,
-  onScreenSelect,
   messageSearchQuery,
   stickerSearchQuery,
   gifSearchQuery,
@@ -151,6 +152,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isBot,
   isInsideTopic,
   canEditTopic,
+  onClose,
+  onScreenSelect,
 }) => {
   const {
     setLocalTextSearchQuery,
@@ -288,6 +291,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.Statistics
   ) : isMessageStatistics ? (
     HeaderContent.MessageStatistics
+  ) : isBoostStatistics ? (
+    HeaderContent.BoostStatistics
   ) : isCreatingTopic ? (
     HeaderContent.CreateTopic
   ) : isEditingTopic ? (
@@ -437,6 +442,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
       case HeaderContent.MessageStatistics:
         return <h3>{lang('Stats.MessageTitle')}</h3>;
+      case HeaderContent.BoostStatistics:
+        return <h3>{lang('Boosts')}</h3>;
       case HeaderContent.SharedMedia:
         return <h3>{lang('SharedMedia')}</h3>;
       case HeaderContent.ManageChannelSubscribers:

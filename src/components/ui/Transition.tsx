@@ -10,6 +10,7 @@ import { selectCanAnimateInterface } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { waitForAnimationEnd, waitForTransitionEnd } from '../../util/cssAnimationEndListeners';
 import forceReflow from '../../util/forceReflow';
+import { allowSwipeControlForTransition } from '../../util/swipeController';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
@@ -20,8 +21,8 @@ import './Transition.scss';
 type AnimationName = (
   'none' | 'slide' | 'slideRtl' | 'slideFade' | 'zoomFade' | 'slideLayers'
   | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
-  | 'slideVertical' | 'slideVerticalFade'
-);
+  | 'slideVertical' | 'slideVerticalFade' | 'slideFadeAndroid'
+  );
 export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => React.ReactNode;
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
@@ -39,6 +40,7 @@ export type TransitionProps = {
   id?: string;
   className?: string;
   slideClassName?: string;
+  withSwipeControl?: boolean;
   onStart?: NoneToVoidFunction;
   onStop?: NoneToVoidFunction;
   children: React.ReactNode | ChildrenFn;
@@ -52,6 +54,10 @@ const CLASSES = {
   to: 'Transition_slide-to',
   inactive: 'Transition_slide-inactive',
 };
+
+export const ACTIVE_SLIDE_CLASS_NAME = CLASSES.active;
+export const TO_SLIDE_CLASS_NAME = CLASSES.to;
+
 const DISABLEABLE_ANIMATIONS = new Set<AnimationName>([
   'slide', 'slideRtl', 'slideFade', 'zoomFade', 'slideLayers', 'pushSlide', 'reveal',
   'slideOptimized', 'slideOptimizedRtl', 'slideVertical', 'slideVerticalFade',
@@ -72,6 +78,7 @@ function Transition({
   id,
   className,
   slideClassName,
+  withSwipeControl,
   onStart,
   onStop,
   children,
@@ -90,6 +97,7 @@ function Transition({
   const rendersRef = useRef<Record<number, React.ReactNode | ChildrenFn>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
   const forceUpdate = useForceUpdate();
+  const isSwipeJustCancelledRef = useRef(false);
 
   const activeKeyChanged = prevActiveKey !== undefined && activeKey !== prevActiveKey;
 
@@ -169,6 +177,7 @@ function Transition({
       if (!childNodes[activeIndex]) {
         return;
       }
+
       performSlideOptimized(
         shouldDisableAnimation,
         name,
@@ -187,7 +196,11 @@ function Transition({
       return;
     }
 
-    if (name === 'none' || shouldDisableAnimation) {
+    if (name === 'none' || shouldDisableAnimation || isSwipeJustCancelledRef.current) {
+      if (isSwipeJustCancelledRef.current) {
+        isSwipeJustCancelledRef.current = false;
+      }
+
       childNodes.forEach((node, i) => {
         if (node instanceof HTMLElement) {
           removeExtraClass(node, CLASSES.from);
@@ -252,12 +265,27 @@ function Transition({
       });
     }
 
-    const watchedNode = name === 'reveal' && isBackwards
+    const watchedNode = (name === 'reveal' || name === 'slideFadeAndroid') && isBackwards
       ? childNodes[prevActiveIndex]
       : childNodes[activeIndex];
 
     if (watchedNode) {
-      waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
+      if (withSwipeControl && childNodes[prevActiveIndex]) {
+        const giveUpAnimationEnd = waitForAnimationEnd(watchedNode, onAnimationEnd);
+
+        allowSwipeControlForTransition(
+          childNodes[prevActiveIndex] as HTMLElement,
+          childNodes[activeIndex] as HTMLElement,
+          () => {
+            giveUpAnimationEnd();
+            isSwipeJustCancelledRef.current = true;
+            onStop?.();
+            dispatchHeavyAnimationStop();
+          },
+        );
+      } else {
+        waitForAnimationEnd(watchedNode, onAnimationEnd, undefined, FALLBACK_ANIMATION_END);
+      }
     } else {
       onAnimationEnd();
     }
@@ -277,6 +305,7 @@ function Transition({
     cleanupExceptionKey,
     shouldDisableAnimation,
     forceUpdate,
+    withSwipeControl,
   ]);
 
   useEffect(() => {

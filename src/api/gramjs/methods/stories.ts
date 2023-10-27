@@ -494,3 +494,40 @@ export async function fetchBoostsStatus({
 
   return buildApiBoostsStatus(result);
 }
+
+export async function fetchBoostersList({
+  chat,
+  offset = '',
+  limit,
+}: {
+  chat: ApiChat;
+  offset?: string;
+  limit?: number;
+}) {
+  const result = await invokeRequest(new GramJs.stories.GetBoostersList({
+    peer: buildInputPeer(chat.id, chat.accessHash),
+    offset,
+    limit,
+  }));
+
+  if (!result) {
+    return undefined;
+  }
+
+  addEntitiesToLocalDb(result.users);
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+
+  const boosterIds = result.boosters.map((booster) => booster.userId.toString());
+  const boosters = buildCollectionByCallback(result.boosters, (booster) => (
+    [booster.userId.toString(), booster.expires]
+  ));
+
+  return {
+    count: result.count,
+    users,
+    boosters,
+    boosterIds,
+    nextOffset: result.nextOffset,
+  };
+}

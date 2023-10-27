@@ -15,8 +15,8 @@ import storyRibbonStyles from '../StoryRibbon.module.scss';
 import styles from '../StoryViewer.module.scss';
 
 const ANIMATION_DURATION = 200;
-const OFFSET_DESKTOP = 3.5 * REM;
-const OFFSET_MOBILE = 4 * REM;
+const OFFSET_BOTTOM = 3.5 * REM;
+const MOBILE_OFFSET = 0.5 * REM;
 const MOBILE_WIDTH = 600;
 
 export function animateOpening(
@@ -36,12 +36,12 @@ export function animateOpening(
   const isMobile = windowWidth <= MOBILE_WIDTH;
 
   if (isMobile) {
-    toWidth = windowWidth;
-    toHeight = windowHeight - OFFSET_MOBILE;
+    toWidth = windowWidth - 2 * MOBILE_OFFSET;
+    toHeight = windowHeight - OFFSET_BOTTOM - 2 * MOBILE_OFFSET;
   }
 
-  const toLeft = isMobile ? 0 : (windowWidth - toWidth) / 2;
-  const toTop = isMobile ? 0 : (windowHeight - (toHeight + OFFSET_DESKTOP)) / 2;
+  const toLeft = isMobile ? MOBILE_OFFSET : (windowWidth - toWidth) / 2;
+  const toTop = isMobile ? MOBILE_OFFSET : (windowHeight - (toHeight + OFFSET_BOTTOM)) / 2;
 
   const {
     top: fromTop, left: fromLeft, width: fromWidth, height: fromHeight,

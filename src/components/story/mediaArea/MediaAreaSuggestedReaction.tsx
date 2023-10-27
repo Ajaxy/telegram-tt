@@ -28,7 +28,7 @@ type OwnProps = {
 };
 
 const REACTION_SIZE_MULTIPLIER = 0.6;
-const EFFECT_SIZE_MULTIPLIER = 2;
+const EFFECT_SIZE_MULTIPLIER = 4;
 
 const MediaAreaSuggestedReaction = ({
   story,

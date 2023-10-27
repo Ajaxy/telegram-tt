@@ -459,7 +459,7 @@ export function selectForwardedSender<T extends GlobalState>(
   if (forwardInfo.isChannelPost && forwardInfo.fromChatId) {
     return selectChat(global, forwardInfo.fromChatId);
   } else if (forwardInfo.senderUserId) {
-    return selectUser(global, forwardInfo.senderUserId) || selectChat(global, forwardInfo.senderUserId);
+    return selectPeer(global, forwardInfo.senderUserId);
   }
 
   return undefined;

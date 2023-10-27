@@ -17,12 +17,7 @@
   z-index: 1;
 }
 
-.buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.button {
-  width: auto;
-  flex: 1 0 auto;
+.title {
+  font-weight: 500;
+  color: var(--color-text-secondary);
 }

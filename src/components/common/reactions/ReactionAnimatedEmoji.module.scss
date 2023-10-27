@@ -12,12 +12,6 @@
   z-index: 1;
 }
 
-.effect {
-  position: fixed;
-  top: -2.25rem;
-  left: -2.25rem;
-}
-
 .animated-icon, .effect {
   pointer-events: none;
 
@@ -37,7 +31,7 @@
   contain: layout;
 }
 
-.withEffectOnly, .animated-icon {
+.withEffectOnly, .animated-icon, .effect {
   position: absolute;
   top: 50%;
   left: 50%;

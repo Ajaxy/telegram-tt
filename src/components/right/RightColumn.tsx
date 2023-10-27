@@ -30,6 +30,7 @@ import PollResults from './PollResults.async';
 import Profile from './Profile';
 import RightHeader from './RightHeader';
 import RightSearch from './RightSearch.async';
+import BoostStatistics from './statistics/BoostStatistics';
 import MessageStatistics from './statistics/MessageStatistics.async';
 import Statistics from './statistics/Statistics.async';
 import StickerSearch from './StickerSearch.async';
@@ -90,6 +91,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     resetNextProfileTab,
     closeCreateTopicPanel,
     closeEditTopicPanel,
+    closeBoostStatistics,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -105,6 +107,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isManagement = contentKey === RightColumnContent.Management;
   const isStatistics = contentKey === RightColumnContent.Statistics;
   const isMessageStatistics = contentKey === RightColumnContent.MessageStatistics;
+  const isBoostStatistics = contentKey === RightColumnContent.BoostStatistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
   const isPollResults = contentKey === RightColumnContent.PollResults;
@@ -175,6 +178,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         break;
       case RightColumnContent.Statistics:
         toggleStatistics();
+        break;
+      case RightColumnContent.BoostStatistics:
+        closeBoostStatistics();
         break;
       case RightColumnContent.Search: {
         blurSearchInput();
@@ -312,6 +318,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
 
       case RightColumnContent.Statistics:
         return <Statistics chatId={chatId!} />;
+      case RightColumnContent.BoostStatistics:
+        return <BoostStatistics />;
       case RightColumnContent.MessageStatistics:
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StickerSearch:
@@ -346,6 +354,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           isSearch={isSearch}
           isManagement={isManagement}
           isStatistics={isStatistics}
+          isBoostStatistics={isBoostStatistics}
           isMessageStatistics={isMessageStatistics}
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}

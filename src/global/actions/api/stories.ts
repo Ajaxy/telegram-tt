@@ -2,7 +2,7 @@ import type { ActionReturnType } from '../../types';
 
 import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, unique } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
@@ -552,6 +552,91 @@ addActionHandler('openBoostModal', async (global, actions, payload): Promise<voi
     boostModal: {
       ...tabState.boostModal,
       applyInfo,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openBoostStatistics', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const [boostersListResult, boostStatusResult] = await Promise.all([
+    callApi('fetchBoostersList', { chat }),
+    callApi('fetchBoostsStatus', { chat }),
+  ]);
+
+  global = getGlobal();
+  if (!boostersListResult || !boostStatusResult) {
+    global = updateTabState(global, {
+      boostStatistics: undefined,
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  global = addUsers(global, buildCollectionByKey(boostersListResult.users, 'id'));
+  global = updateTabState(global, {
+    boostStatistics: {
+      chatId,
+      boostStatus: boostStatusResult,
+      boosters: boostersListResult.boosters,
+      boosterIds: boostersListResult.boosterIds,
+      count: boostersListResult.count,
+      nextOffset: boostersListResult.nextOffset,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  let tabState = selectTabState(global, tabId);
+  if (!tabState.boostStatistics) return;
+
+  const chat = selectChat(global, tabState.boostStatistics.chatId);
+  if (!chat) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      ...tabState.boostStatistics,
+      isLoadingBoosters: true,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchBoostersList', {
+    chat,
+    offset: tabState.boostStatistics.nextOffset,
+  });
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+
+  tabState = selectTabState(global, tabId);
+  if (!tabState.boostStatistics) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      ...tabState.boostStatistics,
+      boosters: {
+        ...tabState.boostStatistics.boosters,
+        ...result.boosters,
+      },
+      boosterIds: unique([...tabState.boostStatistics.boosterIds || [], ...result.boosterIds]),
+      count: result.count,
+      nextOffset: result.nextOffset,
+      isLoadingBoosters: false,
     },
   }, tabId);
   setGlobal(global);

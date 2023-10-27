@@ -497,11 +497,11 @@ function Story({
           ripple={!isMobile}
           size="tiny"
           color="translucent-white"
-          className={isOpen ? 'active' : ''}
           onClick={onTrigger}
+          className={buildClassName(styles.button, isOpen && 'active')}
           ariaLabel={lang('AccDescrOpenMenu2')}
         >
-          <i className={buildClassName('icon icon-more', styles.topIcon)} aria-hidden />
+          <i className={buildClassName('icon icon-more')} aria-hidden />
         </Button>
       );
     };
@@ -604,7 +604,7 @@ function Story({
           {renderStoryPrivacyButton()}
           {isVideo && (
             <Button
-              className={buildClassName(styles.button, styles.buttonVolume)}
+              className={styles.button}
               round
               ripple={!isMobile}
               size="tiny"
@@ -617,14 +617,13 @@ function Story({
                 className={buildClassName(
                   'icon',
                   isMuted || noSound ? 'icon-speaker-muted-story' : 'icon-speaker-story',
-                  styles.topIcon,
                 )}
                 aria-hidden
               />
             </Button>
           )}
           <DropdownMenu
-            className={buildClassName(styles.button, styles.buttonMenu)}
+            className={styles.buttonMenu}
             trigger={MenuButton}
             positionX="right"
             onOpen={handleDropdownMenuOpen}
@@ -646,6 +645,16 @@ function Story({
             {!isOut && <MenuItem icon="flag" onClick={handleReportStoryClick}>{lang('lng_report_story')}</MenuItem>}
             {isOut && <MenuItem icon="delete" destructive onClick={handleDeleteStoryClick}>{lang('Delete')}</MenuItem>}
           </DropdownMenu>
+          <Button
+            className={buildClassName(styles.button, styles.closeButton)}
+            round
+            size="tiny"
+            color="translucent-white"
+            ariaLabel={lang('Close')}
+            onClick={onClose}
+          >
+            <i className={buildClassName('icon icon-close')} aria-hidden />
+          </Button>
         </div>
       </div>
     );
@@ -727,7 +736,7 @@ function Story({
           </>
         )}
         {isLoadedStory && fullMediaData && (
-          <MediaAreaOverlay story={story} className={styles.mediaAreaOverlay} isActive />
+          <MediaAreaOverlay story={story} isActive />
         )}
       </div>
 
