@@ -69,11 +69,18 @@
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   }
 
-  .icon {
+  .embedded-more {
     font-size: 1.125rem;
     margin-inline-end: 0.125rem;
     line-height: 0.9375rem;
     vertical-align: -0.1875rem;
+  }
+
+  .embedded-origin-icon {
+    display: inline-block;
+    font-size: 0.75rem;
+    margin-inline: 0.125rem;
+    transform: translateY(1px);
   }
 
   .message-text {

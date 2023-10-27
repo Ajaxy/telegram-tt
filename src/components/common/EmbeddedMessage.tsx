@@ -28,6 +28,7 @@ import useThumbnail from '../../hooks/useThumbnail';
 import useMessageTranslation from '../middle/message/hooks/useMessageTranslation';
 
 import ActionMessage from '../middle/ActionMessage';
+import Icon from './Icon';
 import MediaSpoiler from './MediaSpoiler';
 import MessageSummary from './MessageSummary';
 
@@ -37,6 +38,7 @@ type OwnProps = {
   className?: string;
   message?: ApiMessage;
   sender?: ApiPeer;
+  forwardSender?: ApiPeer;
   title?: string;
   customText?: string;
   noUserColors?: boolean;
@@ -55,6 +57,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   className,
   message,
   sender,
+  forwardSender,
   title,
   customText,
   isProtected,
@@ -83,6 +86,9 @@ const EmbeddedMessage: FC<OwnProps> = ({
   const lang = useLang();
 
   const senderTitle = sender ? getSenderTitle(lang, sender) : message?.forwardInfo?.hiddenUserName;
+  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+    : message?.forwardInfo?.hiddenUserName;
+  const areSendersSame = sender?.id === forwardSender?.id;
 
   const { handleClick, handleMouseDown } = useFastClick(onClick);
 
@@ -120,9 +126,17 @@ const EmbeddedMessage: FC<OwnProps> = ({
             />
           )}
         </p>
-        <div className="message-title" dir="auto">{renderText(senderTitle || title || NBSP)}</div>
+        <div className="message-title" dir="auto">
+          {renderText(senderTitle || title || NBSP)}
+          {forwardSenderTitle && !areSendersSame && (
+            <>
+              <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
+              {renderText(forwardSenderTitle)}
+            </>
+          )}
+        </div>
       </div>
-      {hasContextMenu && <i className="embedded-more icon icon-more" />}
+      {hasContextMenu && <Icon name="more" className="embedded-more" />}
     </div>
   );
 };
