@@ -448,6 +448,7 @@ function LeftColumn({
 
     return captureControlledSwipe(ref.current!, {
       excludedClosestSelector: '.ProfileInfo, .color-picker, .hue-picker',
+      selectorToPreventScroll: '#Settings .custom-scroll',
       onSwipeRightStart: handleReset,
       onCancel: () => {
         setContent(LeftColumnContent.Settings);

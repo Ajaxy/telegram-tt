@@ -18,6 +18,7 @@ let onRelease: ((onCancel: NoneToVoidFunction) => void) | undefined;
 export function captureControlledSwipe(
   element: HTMLElement, options: {
     excludedClosestSelector?: string;
+    selectorToPreventScroll?: string;
     onSwipeLeftStart?: NoneToVoidFunction;
     onSwipeRightStart?: NoneToVoidFunction;
     onCancel: NoneToVoidFunction;
@@ -25,6 +26,7 @@ export function captureControlledSwipe(
 ) {
   return captureEvents(element, {
     excludedClosestSelector: options.excludedClosestSelector,
+    selectorToPreventScroll: options.selectorToPreventScroll,
     swipeThreshold: 10,
 
     onSwipe(e, direction, offsets) {
