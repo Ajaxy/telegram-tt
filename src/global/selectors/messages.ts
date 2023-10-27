@@ -873,14 +873,6 @@ export function selectIsForwardModalOpen<T extends GlobalState>(
   return Boolean(forwardMessages.isModalShown);
 }
 
-export function selectIsSnoozeCalendarOpen<T extends GlobalState>(
-  global: T,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-) {
-  const { forwardMessages } = selectTabState(global, tabId);
-  return Boolean(forwardMessages.isSnoozeCalendarShown);
-}
-
 export function selectCommonBoxChatId<T extends GlobalState>(global: T, messageId: number) {
   const fromLastMessage = Object.values(global.chats.byId).find((chat) => (
     isCommonBoxChat(chat) && chat.lastMessage && chat.lastMessage.id === messageId
