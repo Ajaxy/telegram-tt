@@ -163,6 +163,8 @@ class RLottie {
   }
 
   pause(viewId?: string) {
+    this.lastRenderAt = undefined;
+
     if (viewId) {
       this.views.get(viewId)!.isPaused = true;
 
