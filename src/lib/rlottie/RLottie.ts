@@ -502,7 +502,7 @@ class RLottie {
 
       const now = Date.now();
       const currentSpeed = this.lastRenderAt ? this.msPerFrame / (now - this.lastRenderAt) : 1;
-      const delta = Math.min(1, (this.direction * this.speed) / currentSpeed);
+      const delta = (this.direction * this.speed) / currentSpeed;
       const expectedNextFrameIndex = Math.round(this.approxFrameIndex + delta);
 
       this.lastRenderAt = now;
