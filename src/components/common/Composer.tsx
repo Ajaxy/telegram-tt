@@ -93,6 +93,7 @@ import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/windowEnvironme
 import windowSize from '../../util/windowSize';
 import applyIosAutoCapitalizationFix from '../middle/composer/helpers/applyIosAutoCapitalizationFix';
 import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/helpers/buildAttachment';
+import { escapeHtml } from '../middle/composer/helpers/cleanHtml';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
 import renderText from './helpers/renderText';
@@ -1038,7 +1039,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   useEffect(() => {
     if (requestedDraftText) {
-      setHtml(requestedDraftText);
+      setHtml(escapeHtml(requestedDraftText));
       resetOpenChatWithDraft();
 
       requestNextMutation(() => {
