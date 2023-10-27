@@ -1,4 +1,3 @@
-/* eslint-disable eslint-multitab-tt/set-global-only-variable */
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
@@ -25,6 +24,7 @@ export interface ActionOptions {
   forceOnHeavyAnimation?: boolean;
   // Workaround for iOS gesture history navigation
   forceSyncOnIOs?: boolean;
+  forceOutdated?: boolean;
 }
 
 type Actions = Record<ActionNames, (payload?: ActionPayload, options?: ActionOptions) => void>;
@@ -78,7 +78,10 @@ function runCallbacks() {
 export function setGlobal(newGlobal?: GlobalState, options?: ActionOptions) {
   if (typeof newGlobal === 'object' && newGlobal !== currentGlobal) {
     if (DEBUG) {
-      if (newGlobal.DEBUG_capturedId && newGlobal.DEBUG_capturedId !== DEBUG_currentCapturedId) {
+      if (
+        !options?.forceOutdated
+        && newGlobal.DEBUG_capturedId && newGlobal.DEBUG_capturedId !== DEBUG_currentCapturedId
+      ) {
         throw new Error('[TeactN.setGlobal] Attempt to set an outdated global');
       }
 
@@ -117,6 +120,10 @@ export function getActions() {
   return actions;
 }
 
+export function forceOnHeavyAnimationOnce() {
+  forceOnHeavyAnimation = true;
+}
+
 let actionQueue: NoneToVoidFunction[] = [];
 
 function handleAction(name: string, payload?: ActionPayload, options?: ActionOptions) {
@@ -127,6 +134,7 @@ function handleAction(name: string, payload?: ActionPayload, options?: ActionOpt
         return;
       }
 
+      // eslint-disable-next-line eslint-multitab-tt/set-global-only-variable
       setGlobal(response as GlobalState, options);
     });
   });
