@@ -193,6 +193,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     showOriginalMessage,
     openChatLanguageModal,
     openMessageReactionPicker,
+    showNotification,
   } = getActions();
 
   const lang = useLang();
@@ -343,6 +344,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       scheduledAt,
     });
     */
+    showNotification({ message: lang('YouWillBeNotified') });
     onClose();
   });
 
