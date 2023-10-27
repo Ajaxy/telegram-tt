@@ -336,13 +336,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSnoozeScheduleMessage = useLastCallback((scheduledAt: number) => {
-    /*
-    rescheduleMessage({
-      chatId: message.chatId,
-      messageId: message.id,
-      scheduledAt,
-    });
-    */
     forwardToSavedMessages({ scheduledAt });
     showNotification({ message: lang('YouWillBeNotified') });
     onClose();
