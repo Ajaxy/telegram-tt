@@ -93,7 +93,7 @@ export class Lethargy {
     const newSum = lastDeltasNew.reduce((t, s) => t + s);
     const oldAverage = oldSum / lastDeltasOld.length;
     const newAverage = newSum / lastDeltasNew.length;
-    return Math.abs(oldAverage) < Math.abs(newAverage * this.tolerance)
+    return Math.abs(oldAverage) <= Math.abs(newAverage * this.tolerance)
       && this.sensitivity < Math.abs(newAverage);
   }
 }

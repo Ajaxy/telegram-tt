@@ -273,7 +273,7 @@ $color-message-story-mention-to: #74bcff;
   --z-sticky-date: 9;
   --z-register-add-avatar: 5;
   --z-media-viewer-head: 3;
-  --z-symbol-menu-mobile: 2;
+  --z-symbol-menu-mobile: calc(var(--z-story-viewer) + 1);
   --z-resize-handle: 2;
   --z-below: -1;
 

@@ -1,7 +1,7 @@
 import { Lethargy } from './lethargy';
 import { clamp, round } from './math';
 import { debounce } from './schedulers';
-import { IS_IOS } from './windowEnvironment';
+import { IS_IOS, IS_WINDOWS } from './windowEnvironment';
 import windowSize from './windowSize';
 
 export enum SwipeDirection {
@@ -68,6 +68,9 @@ type TSwipeAxis =
   | undefined;
 
 export const IOS_SCREEN_EDGE_THRESHOLD = 20;
+export const SWIPE_DIRECTION_THRESHOLD = 10;
+export const SWIPE_DIRECTION_TOLERANCE = 1.5;
+
 const MOVED_THRESHOLD = 15;
 const SWIPE_THRESHOLD = 50;
 const RELEASE_WHEEL_ZOOM_DELAY = 150;
@@ -89,7 +92,7 @@ let lastClickTime = 0;
 const lethargy = new Lethargy({
   stability: 5,
   sensitivity: 25,
-  tolerance: 0.6,
+  tolerance: IS_WINDOWS ? 1 : 0.6, // Windows scrollDelta does not die down to 0
   delay: 150,
 });
 

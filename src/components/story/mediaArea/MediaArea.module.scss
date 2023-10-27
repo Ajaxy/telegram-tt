@@ -5,8 +5,16 @@
   right: 0;
   bottom: 0;
   width: var(--media-width, auto);
+  height: var(--media-height, auto);
   aspect-ratio: 9 / 16;
   pointer-events: none;
+
+  @media (max-width: 600px) {
+    right: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .mediaArea {
@@ -22,6 +30,7 @@
 
 .shiny {
   overflow: hidden;
+  border-radius: var(--border-radius-default-small);
 }
 
 .shiny::before {

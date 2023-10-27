@@ -22,7 +22,8 @@ type OwnProps = {
 };
 
 const STORY_ASPECT_RATIO = 9 / 16;
-const MOBILE_MEDIA_BOTTOM_MARGIN = 4 * REM;
+const MOBILE_MEDIA_OFFSET_X = Number(REM);
+const MOBILE_MEDIA_OFFSET_Y = 4.5 * REM;
 
 const MediaAreaOverlay = ({
   story, isActive, className,
@@ -41,17 +42,22 @@ const MediaAreaOverlay = ({
     if (windowSize.width > MOBILE_SCREEN_MAX_WIDTH) {
       requestMutation(() => {
         element.style.removeProperty('--media-width');
+        element.style.removeProperty('--media-height');
       });
       return;
     }
 
-    const adaptedHeight = windowSize.height - MOBILE_MEDIA_BOTTOM_MARGIN;
+    const adaptedHeight = windowSize.height - MOBILE_MEDIA_OFFSET_Y;
+    const adoptedWidth = windowSize.width - MOBILE_MEDIA_OFFSET_X;
 
-    const screenAspectRatio = windowSize.width / adaptedHeight;
+    const screenAspectRatio = windowSize.width / windowSize.height;
 
-    const width = screenAspectRatio > STORY_ASPECT_RATIO ? adaptedHeight * STORY_ASPECT_RATIO : windowSize.width;
+    const width = screenAspectRatio < STORY_ASPECT_RATIO ? adaptedHeight * STORY_ASPECT_RATIO : adoptedWidth;
+    const height = screenAspectRatio < STORY_ASPECT_RATIO ? adaptedHeight : adoptedWidth / STORY_ASPECT_RATIO;
+
     requestMutation(() => {
       element.style.setProperty('--media-width', `${width}px`);
+      element.style.setProperty('--media-height', `${height}px`);
     });
   }, [isActive, windowSize]);
 

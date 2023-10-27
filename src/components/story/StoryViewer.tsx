@@ -155,7 +155,7 @@ function StoryViewer({
         ariaLabel={lang('Close')}
         onClick={handleClose}
       >
-        <i className={buildClassName('icon icon-close', styles.topIcon)} aria-hidden />
+        <i className={buildClassName('icon icon-close')} aria-hidden />
       </Button>
 
       <StorySlides
