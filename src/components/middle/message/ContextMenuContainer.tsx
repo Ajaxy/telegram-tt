@@ -194,6 +194,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
     openChatLanguageModal,
     openMessageReactionPicker,
     showNotification,
+    forwardToSavedMessages,
   } = getActions();
 
   const lang = useLang();
@@ -335,8 +336,6 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleSnoozeScheduleMessage = useLastCallback((scheduledAt: number) => {
-    // eslint-disable-next-line no-console
-    console.log('scheduledAt', scheduledAt);
     /*
     rescheduleMessage({
       chatId: message.chatId,
@@ -344,20 +343,18 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
       scheduledAt,
     });
     */
+    forwardToSavedMessages({ scheduledAt });
     showNotification({ message: lang('YouWillBeNotified') });
     onClose();
   });
 
   const handleSnooze = useLastCallback(() => {
-    /*
-    closeMenu();
     if (album?.messages) {
       const messageIds = album.messages.map(({ id }) => id);
-      openForwardMenu({ fromChatId: message.chatId, messageIds });
+      openForwardMenu({ fromChatId: message.chatId, messageIds, isSnooze: true });
     } else {
-      openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id] });
+      openForwardMenu({ fromChatId: message.chatId, messageIds: [message.id], isSnooze: true });
     }
-    */
     setIsMenuOpen(false);
     requestCalendar(handleSnoozeScheduleMessage);
   });
