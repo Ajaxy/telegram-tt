@@ -39,6 +39,8 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.MessageStatistics
   ) : selectIsStatisticsShown(global, tabId) ? (
     RightColumnContent.Statistics
+  ) : tabState.boostStatistics ? (
+    RightColumnContent.BoostStatistics
   ) : tabState.stickerSearch.query !== undefined ? (
     RightColumnContent.StickerSearch
   ) : tabState.gifSearch.query !== undefined ? (

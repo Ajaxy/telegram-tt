@@ -82,7 +82,8 @@
 
     > .icon {
       font-size: 1.5rem;
-      margin-right: 2rem;
+      margin-inline-start: 0.125rem;
+      margin-inline-end: 1.25rem;
       color: var(--color-text-secondary);
     }
 
@@ -487,13 +488,6 @@
       &.black {
         color: var(--color-text);
       }
-    }
-  }
-
-  &[dir="rtl"] {
-    .ListItem-button > .icon {
-      margin-left: 2rem;
-      margin-right: 0;
     }
   }
 }

@@ -419,3 +419,11 @@ addActionHandler('closeBoostModal', (global, actions, payload): ActionReturnType
     boostModal: undefined,
   }, tabId);
 });
+
+addActionHandler('closeBoostStatistics', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    boostStatistics: undefined,
+  }, tabId);
+});

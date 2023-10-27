@@ -178,7 +178,11 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={buildClassName('Statistics custom-scroll', isReady && 'ready')}>
-      <StatisticsOverview statistics={statistics} isGroup={isGroup} />
+      <StatisticsOverview
+        statistics={statistics}
+        type={isGroup ? 'group' : 'channel'}
+        title={lang('StatisticOverview')}
+      />
 
       {!loadedCharts.current.length && <Loading />}
 

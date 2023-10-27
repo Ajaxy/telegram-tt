@@ -21,6 +21,8 @@ type OwnProps = {
   className?: string;
 };
 
+const PROGRESS_LOCK = 0.1;
+
 const LimitPreview: FC<OwnProps> = ({
   leftText,
   rightText,
@@ -34,6 +36,8 @@ const LimitPreview: FC<OwnProps> = ({
   const hasFloatingBadge = Boolean(floatingBadgeIcon || floatingBadgeText);
   const isProgressFull = Boolean(progress) && progress > 0.99;
 
+  const tailPosition = progress && (progress < PROGRESS_LOCK ? 0 : progress > 1 - PROGRESS_LOCK ? 1 : 0.5);
+
   return (
     <div
       className={buildClassName(
@@ -41,18 +45,25 @@ const LimitPreview: FC<OwnProps> = ({
         hasFloatingBadge && styles.withBadge,
         className,
       )}
-      style={buildStyle(progress !== undefined && `--progress: ${progress}`)}
+      style={buildStyle(
+        progress !== undefined && `--progress: ${progress}`,
+        tailPosition !== undefined && `--tail-position: ${tailPosition}`,
+      )}
     >
       {hasFloatingBadge && (
         <div className={styles.badgeContainer}>
-          <div className={styles.floatingBadge}>
-            {floatingBadgeIcon && <Icon name={floatingBadgeIcon} className={styles.floatingBadgeIcon} />}
-            {floatingBadgeText && (
-              <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>{floatingBadgeText}</div>
-            )}
+          <div className={styles.floatingBadgeWrapper}>
+            <div className={styles.floatingBadge}>
+              {floatingBadgeIcon && <Icon name={floatingBadgeIcon} className={styles.floatingBadgeIcon} />}
+              {floatingBadgeText && (
+                <div className={styles.floatingBadgeValue} dir={lang.isRtl ? 'rtl' : undefined}>
+                  {floatingBadgeText}
+                </div>
+              )}
+            </div>
             <div className={styles.floatingBadgeTriangle}>
-              <svg width="26" height="9" viewBox="0 0 26 9" fill="none">
-                <path d="M0 0H26H24.4853C22.894 0 21.3679 0.632141 20.2426 1.75736L14.4142 7.58579C13.6332 8.36684 12.3668 8.36683 11.5858 7.58579L5.75736 1.75736C4.63214 0.632139 3.10602 0 1.51472 0H0Z" fill="#7E85FF" />
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <path d="m 28,4 v 9 c 0.0089,7.283278 -3.302215,5.319646 -6.750951,8.589815 l -5.8284,5.82843 c -0.781,0.78105 -2.0474,0.78104 -2.8284,0 L 6.7638083,21.589815 C 2.8288652,17.959047 0.04527024,20.332086 0,13 V 4 C 0,4 0.00150581,0.97697493 3,1 5.3786658,1.018266 22.594519,0.9142007 25,1 c 2.992326,0.1067311 3,3 3,3 z" fill="#7E85FF" />
               </svg>
             </div>
           </div>

@@ -81,6 +81,7 @@ export type OwnProps = {
   canCall?: boolean;
   canMute?: boolean;
   canViewStatistics?: boolean;
+  canViewBoosts?: boolean;
   withForumActions?: boolean;
   canLeave?: boolean;
   canEnterVoiceChat?: boolean;
@@ -137,6 +138,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   canCall,
   canMute,
   canViewStatistics,
+  canViewBoosts,
   pendingJoinRequests,
   canLeave,
   canEnterVoiceChat,
@@ -174,6 +176,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     openAddContactDialog,
     requestMasterAndRequestCall,
     toggleStatistics,
+    openBoostStatistics,
     openGiftPremiumModal,
     openChatWithInfo,
     openCreateTopicPanel,
@@ -328,6 +331,12 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleStatisticsClick = useLastCallback(() => {
     toggleStatistics();
+    setShouldCloseFast(!isRightColumnShown);
+    closeMenu();
+  });
+
+  const handleBoostClick = useLastCallback(() => {
+    openBoostStatistics({ chatId });
     setShouldCloseFast(!isRightColumnShown);
     closeMenu();
   });
@@ -544,6 +553,14 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               onClick={handleSelectMessages}
             >
               {lang('ReportSelectMessages')}
+            </MenuItem>
+          )}
+          {canViewBoosts && (
+            <MenuItem
+              icon="boost"
+              onClick={handleBoostClick}
+            >
+              {lang('Boosts')}
             </MenuItem>
           )}
           {canViewStatistics && (

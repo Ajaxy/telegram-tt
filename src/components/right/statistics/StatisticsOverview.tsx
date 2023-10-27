@@ -2,6 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
 
 import type {
+  ApiBoostStatistics,
   ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsOverviewItem,
 } from '../../../api/types';
 
@@ -17,6 +18,7 @@ type OverviewCell = {
   name: string;
   title: string;
   isPercentage?: boolean;
+  withAbsoluteValue?: boolean;
   isPlain?: boolean;
   isApproximate?: boolean;
 };
@@ -55,13 +57,38 @@ const MESSAGE_OVERVIEW: OverviewCell[][] = [
   ],
 ];
 
+const BOOST_OVERVIEW: OverviewCell[][] = [
+  [
+    { name: 'level', title: 'Stats.Boosts.Level', isPlain: true },
+    {
+      name: 'premiumSubscribers',
+      title: 'Stats.Boosts.PremiumSubscribers',
+      isPercentage: true,
+      isApproximate: true,
+      withAbsoluteValue: true,
+    },
+  ],
+  [
+    { name: 'boosts', title: 'Stats.Boosts.ExistingBoosts', isPlain: true },
+    { name: 'remainingBoosts', title: 'Stats.Boosts.BoostsToLevelUp', isPlain: true },
+  ],
+];
+
+type StatisticsType = 'channel' | 'group' | 'message' | 'boost';
+
 export type OwnProps = {
-  isGroup?: boolean;
-  isMessage?: boolean;
-  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiMessageStatistics;
+  type: StatisticsType;
+  title?: string;
+  className?: string;
+  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiMessageStatistics | ApiBoostStatistics;
 };
 
-const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) => {
+const StatisticsOverview: FC<OwnProps> = ({
+  title,
+  type,
+  statistics,
+  className,
+}) => {
   const lang = useLang();
 
   const renderOverviewItemValue = ({ change, percentage }: StatisticsOverviewItem) => {
@@ -86,10 +113,17 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) =>
 
   const { period } = (statistics as ApiGroupStatistics);
 
+  const schema = type === 'boost' ? BOOST_OVERVIEW : type === 'message' ? MESSAGE_OVERVIEW : type === 'group'
+    ? GROUP_OVERVIEW : CHANNEL_OVERVIEW;
+
   return (
-    <div className="StatisticsOverview">
+    <div className={buildClassName('StatisticsOverview', className)}>
       <div className="StatisticsOverview__header">
-        <div className="StatisticsOverview__title">{lang('StatisticOverview')}</div>
+        {title && (
+          <div className="StatisticsOverview__title">
+            {title}
+          </div>
+        )}
 
         {period && (
           <div className="StatisticsOverview__caption">
@@ -99,7 +133,7 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) =>
       </div>
 
       <table className="StatisticsOverview__table">
-        {(isMessage ? MESSAGE_OVERVIEW : isGroup ? GROUP_OVERVIEW : CHANNEL_OVERVIEW).map((row) => (
+        {schema.map((row) => (
           <tr>
             {row.map((cell: OverviewCell) => {
               const field = (statistics as any)[cell.name];
@@ -108,7 +142,7 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) =>
                 return (
                   <td className="StatisticsOverview__table-cell">
                     <b className="StatisticsOverview__table-value">
-                      {cell.isApproximate ? `≈${formatInteger(field)}` : formatInteger(field)}
+                      {`${cell.isApproximate ? '≈' : ''}${formatInteger(field)}`}
                     </b>
                     <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
                   </td>
@@ -118,7 +152,14 @@ const StatisticsOverview: FC<OwnProps> = ({ isGroup, isMessage, statistics }) =>
               if (cell.isPercentage) {
                 return (
                   <td className="StatisticsOverview__table-cell">
-                    <b className="StatisticsOverview__table-value">{field.percentage}%</b>
+                    {cell.withAbsoluteValue && (
+                      <span className="StatisticsOverview__table-value">
+                        {`${cell.isApproximate ? '≈' : ''}${formatInteger(field.part)}`}
+                      </span>
+                    )}
+                    <span className={`StatisticsOverview__table-${cell.withAbsoluteValue ? 'secondary-' : ''}value`}>
+                      {field.percentage}%
+                    </span>
                     <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
                   </td>
                 );

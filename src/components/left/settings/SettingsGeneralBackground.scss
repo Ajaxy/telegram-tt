@@ -1,11 +1,12 @@
+@import "../../../styles/mixins";
+
 .SettingsGeneralBackground {
   .settings-wallpapers {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: 1fr;
     grid-gap: 0.0625rem;
-    background-color: var(--color-background);
-    box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
+    @include side-panel-section;
   }
 
   .Loading {

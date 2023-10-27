@@ -1,3 +1,5 @@
+@import "../../../styles/mixins";
+
 #Settings {
   height: 100%;
 
@@ -78,9 +80,9 @@
   align-items: center;
   padding: 0 1.5rem 1rem;
   text-align: center;
-  background-color: var(--color-background);
-  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
   margin-bottom: 0.625rem;
+
+  @include side-panel-section;
 
   &.no-border {
     margin-bottom: 0;
@@ -107,20 +109,12 @@
 
 .settings-main-menu {
   padding: 0.5rem;
-  background-color: var(--color-background);
-  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-  border-bottom: 0.625rem solid var(--color-background-secondary);
-
-  &:last-child {
-    border-bottom: none;
-    box-shadow: none;
-  }
+  @include side-panel-section;
 
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;
     margin: 0 -0.5rem 0.625rem;
-    box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-    border-bottom: 0.625rem solid var(--color-background-secondary);
+    @include side-panel-section;
 
     .ListItem.narrow {
       margin-bottom: 0.25rem;
@@ -130,15 +124,8 @@
 
 .settings-item-simple,
 .settings-item {
-  background-color: var(--color-background);
   padding: 1.5rem 1.5rem 1rem;
-  box-shadow: inset 0 -0.0625rem 0 0 var(--color-background-secondary-accent);
-  border-bottom: 0.625rem solid var(--color-background-secondary);
-
-  &:last-child {
-    border-bottom: none;
-    box-shadow: none;
-  }
+  @include side-panel-section;
 }
 
 .settings-item {
