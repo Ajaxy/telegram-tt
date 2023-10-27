@@ -1,5 +1,6 @@
 .Transition {
   position: relative;
+
   width: 100%;
   height: 100%;
 
@@ -14,6 +15,10 @@
       position: absolute;
       top: 0;
       left: 0;
+    }
+
+    &-from {
+      pointer-events: none;
     }
 
     &-inactive {
@@ -46,6 +51,7 @@
   &-slide {
     > .Transition_slide-to {
       transform: translateX(100%);
+
       animation: slide-in var(--slide-transition);
     }
 
@@ -57,6 +63,7 @@
   &-slideBackwards {
     > .Transition_slide-to {
       transform: translateX(-100%);
+
       animation: slide-out-backwards var(--slide-transition);
     }
 
@@ -68,6 +75,7 @@
   &-slideRtl {
     > .Transition_slide-to {
       transform: translateX(-100%);
+
       animation: slide-in var(--slide-transition);
     }
 
@@ -80,6 +88,7 @@
   &-slideRtlBackwards {
     > .Transition_slide-to {
       transform: translateX(100%);
+
       animation: slide-out-backwards var(--slide-transition);
     }
 
@@ -91,6 +100,7 @@
   &-slideVertical {
     > .Transition_slide-to {
       transform: translateY(100%);
+
       animation: slide-vertical-in var(--slide-transition);
     }
 
@@ -102,6 +112,7 @@
   &-slideVerticalBackwards {
     > .Transition_slide-to {
       transform: translateY(-100%);
+
       animation: slide-vertical-out-backwards var(--slide-transition);
     }
 
@@ -113,6 +124,7 @@
   &-slideVerticalFade {
     > .Transition_slide-to {
       transform: translateY(100%);
+
       animation: slide-vertical-fade-in var(--slide-transition);
     }
 
@@ -124,6 +136,7 @@
   &-slideVerticalFadeBackwards {
     > .Transition_slide-to {
       transform: translateY(-100%);
+
       animation: slide-vertical-fade-out-backwards var(--slide-transition);
     }
 
@@ -136,14 +149,18 @@
     > .Transition_slide-from {
       transform: translateX(0);
       transform-origin: left;
+
       opacity: 1;
+
       animation: fade-out-opacity var(--slide-transition), slide-fade-out-move var(--slide-transition);
     }
 
     > .Transition_slide-to {
       transform: translateX(1.5rem);
       transform-origin: left;
+
       opacity: 0;
+
       animation: fade-in-opacity var(--slide-transition), slide-fade-in-move var(--slide-transition);
     }
   }
@@ -151,16 +168,58 @@
   &-slideFadeBackwards {
     > .Transition_slide-from {
       transform: translateX(0);
+
       opacity: 1;
+
       animation: fade-in-backwards-opacity var(--slide-transition),
       slide-fade-in-backwards-move var(--slide-transition);
     }
 
     > .Transition_slide-to {
       transform: translateX(-1.5rem);
+
       opacity: 0;
+
       animation: fade-out-backwards-opacity var(--slide-transition),
       slide-fade-out-backwards-move var(--slide-transition);
+    }
+  }
+
+  &-slideFadeAndroid {
+    --background-color: var(--color-background);
+
+    > .Transition_slide {
+      z-index: 0;
+
+      background: var(--background-color);
+    }
+
+    > .Transition_slide-to {
+      transform: translateX(1.5rem);
+      transform-origin: left;
+
+      opacity: 0;
+
+      animation: fade-in-opacity var(--slide-transition), slide-fade-in-move-android var(--slide-transition);
+    }
+  }
+
+  &-slideFadeAndroidBackwards {
+    --background-color: var(--color-background);
+
+    > .Transition_slide {
+      z-index: 0;
+
+      background: var(--background-color);
+    }
+
+    > .Transition_slide-from {
+      transform: translateX(0);
+
+      opacity: 1;
+
+      animation: fade-in-backwards-opacity var(--slide-transition),
+      slide-fade-in-backwards-move-android var(--slide-transition);
     }
   }
 
@@ -168,29 +227,34 @@
     > .Transition_slide-from {
       transform: scale(1);
       transform-origin: center;
+
       opacity: 1;
+
       animation: fade-out-opacity 0.15s ease;
     }
 
     > .Transition_slide-to {
       transform-origin: center;
+
       opacity: 0;
       // We can omit `transform: scale(1.1);` here because `opacity` is 0.
       // We need to for proper position calculation in `InfiniteScroll`.
 
-      animation: fade-in-opacity 0.15s ease, zoomFade-in-move 0.15s ease;
+      animation: fade-in-opacity 0.15s ease, zoom-fade-in-move 0.15s ease;
     }
   }
 
   &-zoomFadeBackwards {
     > .Transition_slide-from {
       transform: scale(1);
-      animation: fade-in-backwards-opacity 0.1s ease, zoomFade-in-backwards-move 0.15s ease;
+
+      animation: fade-in-backwards-opacity 0.1s ease, zoom-fade-in-backwards-move 0.15s ease;
     }
 
     > .Transition_slide-to {
       transform: scale(0.95);
-      animation: fade-out-backwards-opacity 0.15s ease, zoomFade-out-backwards-move 0.15s ease;
+
+      animation: fade-out-backwards-opacity 0.15s ease, zoom-fade-out-backwards-move 0.15s ease;
     }
   }
 
@@ -198,11 +262,13 @@
   &-fadeBackwards {
     > .Transition_slide-from {
       opacity: 1;
+
       animation: fade-out-opacity 0.15s ease;
     }
 
     > .Transition_slide-to {
       opacity: 0;
+
       animation: fade-in-opacity 0.15s ease;
     }
   }
@@ -218,6 +284,7 @@
 
     > .Transition_slide-to {
       opacity: 0;
+
       animation: fade-in-opacity 250ms ease;
     }
   }
@@ -225,11 +292,13 @@
   &-semiFadeBackwards {
     > .Transition_slide-from {
       opacity: 1;
+
       animation: fade-in-backwards-opacity 250ms ease;
     }
 
     > .Transition_slide-to {
       opacity: 1;
+
       animation: none !important;
     }
   }
@@ -245,11 +314,12 @@
 
     > .Transition_slide-to {
       transform: translateX(100%);
+
       animation: slide-in var(--layer-transition);
     }
 
     > .Transition_slide-from {
-      animation: slide-layers-out var(--layer-transition);
+      animation: slide-layers-out var(--layer-transition-behind);
     }
   }
 
@@ -258,10 +328,17 @@
 
     background: black !important;
 
+    > .Transition_slide {
+      background: var(--background-color);
+    }
+
     > .Transition_slide-to {
       transform: translateX(-20%);
-      opacity: 0.75;
-      animation: slide-layers-out-backwards var(--layer-transition);
+
+      opacity: calc(1 - var(--layer-blackout-opacity));
+
+      animation: slide-layers-out-backwards var(--layer-transition-behind);
+      animation-duration: 450ms;
     }
 
     > .Transition_slide-from {
@@ -277,7 +354,9 @@
     > .Transition_slide-from {
       transform: scale(1);
       transform-origin: center;
+
       opacity: 1;
+
       animation: push-out 0.25s ease-in-out;
 
       .custom-scroll {
@@ -291,6 +370,7 @@
 
     > .Transition_slide-to {
       transform: translateX(100%);
+
       animation: slide-in-200 0.25s ease-in-out;
     }
   }
@@ -302,7 +382,9 @@
 
     > .Transition_slide-to {
       transform: scale(0.7);
+
       opacity: 0;
+
       animation: push-out-backwards 0.25s ease-in-out;
     }
 
@@ -314,6 +396,7 @@
   &-reveal {
     > .Transition_slide-to {
       clip-path: inset(0 100% 0 0);
+
       animation: reveal-in 350ms ease-in;
     }
   }
@@ -321,11 +404,13 @@
   &-revealBackwards {
     > .Transition_slide-from {
       clip-path: inset(0 0 0 0);
+
       animation: reveal-in-backwards 350ms ease-out;
     }
 
     > .Transition_slide-to {
       clip-path: none;
+
       animation: none;
     }
   }
@@ -527,7 +612,25 @@
   }
 }
 
-@keyframes zoomFade-in-move {
+@keyframes slide-fade-in-move-android {
+  0% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-fade-in-backwards-move-android {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(15%);
+  }
+}
+
+@keyframes zoom-fade-in-move {
   0% {
     transform: scale(1.1);
   }
@@ -536,7 +639,7 @@
   }
 }
 
-@keyframes zoomFade-in-backwards-move {
+@keyframes zoom-fade-in-backwards-move {
   0% {
     transform: scale(1);
   }
@@ -545,7 +648,7 @@
   }
 }
 
-@keyframes zoomFade-out-backwards-move {
+@keyframes zoom-fade-out-backwards-move {
   0% {
     transform: scale(0.95);
   }

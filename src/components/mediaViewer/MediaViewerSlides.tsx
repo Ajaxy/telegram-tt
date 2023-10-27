@@ -422,6 +422,7 @@ const MediaViewerSlides: FC<OwnProps> = ({
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
       doubleTapZoom: DOUBLE_TAP_ZOOM,
+      withWheelDrag: true,
       onCapture: (e) => {
         if (checkIfControlTarget(e)) return;
         const { x, y, scale } = transformRef.current;
