@@ -47,9 +47,6 @@ interface StateProps {
 
 const ANIMATION_DURATION_MS = 350 + (IS_SAFARI || IS_FIREFOX ? ANIMATION_END_DELAY : 20);
 const ACTIVE_SLIDE_VERTICAL_CORRECTION_REM = 1.75;
-const FROM_ACTIVE_SCALE_VALUE = 0.333;
-const ANIMATION_TO_ACTIVE_SCALE = '3';
-const ANIMATION_FROM_ACTIVE_SCALE = `${FROM_ACTIVE_SCALE_VALUE}`;
 
 function StorySlides({
   peerIds,
@@ -228,13 +225,12 @@ function StorySlides({
         return;
       }
 
-      const scale = currentPeerId === peerId
-        ? ANIMATION_TO_ACTIVE_SCALE
-        : peerId === renderingPeerId ? ANIMATION_FROM_ACTIVE_SCALE : '1';
+      const scale = String(currentPeerId === peerId ? slideSizes.toActiveScale
+        : peerId === renderingPeerId ? slideSizes.fromActiveScale : 1);
 
       let offsetY = 0;
       if (peerId === renderingPeerId) {
-        offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * FROM_ACTIVE_SCALE_VALUE;
+        offsetY = -ACTIVE_SLIDE_VERTICAL_CORRECTION_REM * slideSizes.fromActiveScale;
         current.classList.add(styles.slideAnimationFromActive);
       }
       if (peerId === currentPeerId) {
@@ -247,7 +243,7 @@ function StorySlides({
       current.style.setProperty('--slide-translate-y', `${offsetY}rem`);
       current.style.setProperty('--slide-translate-scale', scale);
     });
-  }, [currentPeerId, getIsAnimating, renderingPeerId]);
+  }, [currentPeerId, getIsAnimating, renderingPeerId, slideSizes]);
 
   function renderStoryPreview(peerId: string, index: number, position: number) {
     const style = buildStyle(

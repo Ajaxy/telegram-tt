@@ -47,6 +47,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
 
   const peerId = story && story.peerId;
   const isFullyLoaded = story && 'content' in story;
+  const isOwn = isFullyLoaded && story.isOut;
   const isDeleted = story && 'isDeleted' in story;
   const video = isFullyLoaded ? (story as ApiStory).content.video : undefined;
   const imageHash = isFullyLoaded ? getStoryMediaHash(story as ApiStory) : undefined;
@@ -63,7 +64,7 @@ function MediaStory({ story, isProtected, isArchive }: OwnProps) {
     isContextMenuOpen, contextMenuPosition,
     handleBeforeContextMenu, handleContextMenu,
     handleContextMenuClose, handleContextMenuHide,
-  } = useContextMenuHandlers(containerRef);
+  } = useContextMenuHandlers(containerRef, !isOwn);
   const {
     positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
   } = useMenuPosition(
