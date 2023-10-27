@@ -14,6 +14,7 @@
     padding: 1rem 0.75rem 0.5rem 1rem;
     position: sticky;
     top: 0;
+    z-index: 1;
     background: var(--color-background);
 
     @media (max-width: 600px) {
