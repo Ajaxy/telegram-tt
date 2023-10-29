@@ -147,6 +147,7 @@ const LeftSideMenuItems = ({
 
   return (
     <>
+      {/*
       {archiveSettings.isHidden && (
         <MenuItem
           icon="archive"
@@ -158,6 +159,7 @@ const LeftSideMenuItems = ({
           )}
         </MenuItem>
       )}
+      */}
       <MenuItem
         icon="user"
         onClick={onSelectContacts}
@@ -165,22 +167,22 @@ const LeftSideMenuItems = ({
         {lang('Contacts')}
       </MenuItem>
       {/*
-      bots.map((bot) => (
-        <AttachBotItem
-          bot={bot}
-          theme={theme}
-          isInSideMenu
-          onMenuOpened={onBotMenuOpened}
-          onMenuClosed={onBotMenuClosed}
-        />
-      ))
-      <MenuItem
-        icon="play-story"
-        onClick={handleOpenMyStories}
-      >
-        {lang('Settings.MyStories')}
-      </MenuItem>
-      */}
+    bots.map((bot) => (
+      <AttachBotItem
+        bot={bot}
+        theme={theme}
+        isInSideMenu
+        onMenuOpened={onBotMenuOpened}
+        onMenuClosed={onBotMenuClosed}
+      />
+    ))
+    <MenuItem
+      icon="play-story"
+      onClick={handleOpenMyStories}
+    >
+      {lang('Settings.MyStories')}
+    </MenuItem>
+    */}
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}
