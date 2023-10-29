@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -146,6 +147,7 @@ const LeftSideMenuItems = ({
 
   return (
     <>
+      {/*
       {archiveSettings.isHidden && (
         <MenuItem
           icon="archive"
@@ -157,27 +159,30 @@ const LeftSideMenuItems = ({
           )}
         </MenuItem>
       )}
+      */}
       <MenuItem
         icon="user"
         onClick={onSelectContacts}
       >
         {lang('Contacts')}
       </MenuItem>
-      {bots.map((bot) => (
-        <AttachBotItem
-          bot={bot}
-          theme={theme}
-          isInSideMenu
-          onMenuOpened={onBotMenuOpened}
-          onMenuClosed={onBotMenuClosed}
-        />
-      ))}
-      <MenuItem
-        icon="play-story"
-        onClick={handleOpenMyStories}
-      >
-        {lang('Settings.MyStories')}
-      </MenuItem>
+      {/*
+    bots.map((bot) => (
+      <AttachBotItem
+        bot={bot}
+        theme={theme}
+        isInSideMenu
+        onMenuOpened={onBotMenuOpened}
+        onMenuClosed={onBotMenuClosed}
+      />
+    ))
+    <MenuItem
+      icon="play-story"
+      onClick={handleOpenMyStories}
+    >
+      {lang('Settings.MyStories')}
+    </MenuItem>
+    */}
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}
@@ -197,7 +202,6 @@ const LeftSideMenuItems = ({
           noAnimation
         />
       </MenuItem>
-      */}
       <MenuItem
         icon="animations"
         onClick={handleAnimationLevelChange}
@@ -243,6 +247,7 @@ const LeftSideMenuItems = ({
           Install App
         </MenuItem>
       )}
+      */}
     </>
   );
 };
