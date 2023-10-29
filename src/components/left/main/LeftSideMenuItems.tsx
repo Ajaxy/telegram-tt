@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -163,7 +164,8 @@ const LeftSideMenuItems = ({
       >
         {lang('Contacts')}
       </MenuItem>
-      {bots.map((bot) => (
+      {/*
+      bots.map((bot) => (
         <AttachBotItem
           bot={bot}
           theme={theme}
@@ -171,13 +173,14 @@ const LeftSideMenuItems = ({
           onMenuOpened={onBotMenuOpened}
           onMenuClosed={onBotMenuClosed}
         />
-      ))}
+      ))
       <MenuItem
         icon="play-story"
         onClick={handleOpenMyStories}
       >
         {lang('Settings.MyStories')}
       </MenuItem>
+      */}
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}
@@ -197,7 +200,6 @@ const LeftSideMenuItems = ({
           noAnimation
         />
       </MenuItem>
-      */}
       <MenuItem
         icon="animations"
         onClick={handleAnimationLevelChange}
@@ -243,6 +245,7 @@ const LeftSideMenuItems = ({
           Install App
         </MenuItem>
       )}
+      */}
     </>
   );
 };
