@@ -3,7 +3,7 @@ import { useEffect, useState } from '../lib/teact/teact';
 
 const APP_ENV = process.env.APP_ENV;
 
-export function useJune() {
+export function useJune({ currentUserId }: { currentUserId?: string }) {
   const [analytics, setAnalytics] = useState<AnalyticsBrowser | undefined>(undefined);
   type TTrack = (eventName: string) => void;
   const [track, setTrack] = useState<undefined | TTrack>(undefined);
@@ -28,5 +28,12 @@ export function useJune() {
     }
   }, []);
 
+  useEffect(() => {
+    if (analytics && currentUserId) {
+      analytics.identify(currentUserId, {
+        email: `user${currentUserId}@ulu.so`,
+      });
+    }
+  }, [analytics, currentUserId]);
   return { analytics, track };
 }
