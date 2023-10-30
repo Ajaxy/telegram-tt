@@ -5,7 +5,7 @@ import { getActions, withGlobal } from '../../../../global';
 import type { ISettings } from '../../../../types';
 import { LeftColumnContent } from '../../../../types';
 
-import { ARCHIVED_FOLDER_ID } from '../../../../config';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
 import { selectIsChatWithSelf } from '../../../../global/selectors';
 import { uluGetTranslatedString } from '../../../../util/fallbackLangPackInitial';
 
@@ -50,6 +50,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.chatsCount;
   const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
+  const inboxUnreadCount = unreadCounters[ALL_FOLDER_ID]?.chatsCount;
 
   return (
     <div className={styles.wrapper}>
@@ -58,7 +59,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
         shouldStressUnreadMessages={false}
         type="inbox"
         title={titleInbox}
-        messagesUnreadCount={0}
+        messagesUnreadCount={inboxUnreadCount}
         onClick={NONE_TO_VOID}
       />
       <UluChatFolder
