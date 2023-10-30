@@ -48,7 +48,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   }, [onLeftColumnContentChange]);
 
   const unreadCounters = useFolderManagerForUnreadCounters();
-  const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.chatsCount;
+  const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.activeChatsCount;
   const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
   const inboxUnreadCount = unreadCounters[ALL_FOLDER_ID]?.chatsCount;
 
