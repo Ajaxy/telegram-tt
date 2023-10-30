@@ -79,6 +79,7 @@ let results: {
   pinnedCountByFolderId: Record<string, number | undefined>; // Also watched by `callbacks.orderedIdsByFolderId`
   chatsCountByFolderId: Record<string, number | undefined>;
   unreadCountersByFolderId: Record<string, {
+    activeChatsCount: number;
     chatsCount: number;
     notificationsCount: number;
   } | undefined>;
@@ -698,6 +699,8 @@ function buildFolderUnreadCounters(folderId: number) {
       }
 
       if (!chatSummary.isMuted) {
+        newUnreadCounters.activeChatsCount++;
+
         if (chatSummary.unreadCount) {
           newUnreadCounters.notificationsCount += chatSummary.unreadCount;
         } else if (!chatSummary.unreadMentionsCount) {
@@ -709,6 +712,7 @@ function buildFolderUnreadCounters(folderId: number) {
     return newUnreadCounters;
   }, {
     chatsCount: 0,
+    activeChatsCount: 0,
     notificationsCount: 0,
   });
 }
