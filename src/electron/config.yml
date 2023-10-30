@@ -1,9 +1,9 @@
-productName: Telegram A
+productName: Ulu
 artifactName: ${productName}-${arch}.${ext}
-appId: org.telegram.TelegramA
+appId: org.telegram.Ulu
 extraMetadata:
   main: ./dist/electron.js
-  productName: Telegram A
+  productName: Ulu
 files:
   - "dist"
   - "package.json"
@@ -23,8 +23,8 @@ protocols:
       - tg
 publish:
   provider: github
-  owner: Ajaxy
-  repo: telegram-tt
+  owner: ulu-telegram
+  repo: app
   releaseType: draft
 win:
   target: nsis
@@ -44,7 +44,7 @@ mac:
   notarize:
     teamId: Y54Z4K69Z9
 dmg:
-  title: Telegram A installer
+  title: Ulu installer
   background: public/background-electron-dmg.tiff
   iconSize: 100
   contents:
