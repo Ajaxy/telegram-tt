@@ -148,6 +148,7 @@ type StateProps = {
   requestedAttachBotInChat?: TabState['requestedAttachBotInChat'];
   requestedDraft?: TabState['requestedDraft'];
   currentUserName?: string;
+  currentUserId?: string;
   urlAuth?: TabState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
   deleteFolderDialog?: ApiChatFolder;
@@ -207,6 +208,7 @@ const Main: FC<OwnProps & StateProps> = ({
   requestedDraft,
   webApp,
   currentUserName,
+  currentUserId,
   urlAuth,
   isPremiumModalOpen,
   isPaymentModalOpen,
@@ -269,7 +271,7 @@ const Main: FC<OwnProps & StateProps> = ({
   }
 
   const [isAppOpen, setIsAppOpen] = useState(false);
-  const { track } = useJune();
+  const { track } = useJune({ currentUserId });
   useEffect(() => {
     if (!isAppOpen && track) {
       setIsAppOpen(true);
@@ -686,6 +688,7 @@ export default memo(withGlobal<OwnProps>(
       requestedAttachBotInChat,
       webApp,
       currentUserName: getUserFullName(currentUser),
+      currentUserId: currentUser?.id,
       urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,
