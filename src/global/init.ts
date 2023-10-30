@@ -1,8 +1,8 @@
 import './intervals';
 
-import type { ActionReturnType, GlobalState } from './types';
+import type { ActionReturnType, GlobalState, RequiredGlobalState } from './types';
 
-import { IS_MOCKED_CLIENT } from '../config';
+import { IS_MOCKED_CLIENT, ULU_APP } from '../config';
 import { isCacheApiSupported } from '../util/cacheApi';
 import { getCurrentTabId, reestablishMasterToSelf } from '../util/establishMultitabRole';
 import { cloneDeep } from '../util/iteratees';
@@ -10,6 +10,7 @@ import { Bundles, loadBundle } from '../util/moduleLoader';
 import { parseLocationHash } from '../util/routing';
 import { clearStoredSession } from '../util/sessions';
 import { IS_MULTITAB_SUPPORTED } from '../util/windowEnvironment';
+import { callApi } from '../api/gramjs';
 import { updateTabState } from './reducers/tabs';
 import { initCache, loadCache } from './cache';
 import { isLocalMessageId } from './helpers';
@@ -18,7 +19,7 @@ import {
 } from './index';
 import { INITIAL_GLOBAL_STATE, INITIAL_TAB_STATE } from './initialState';
 import { replaceTabThreadParam, replaceThreadParam, updatePasscodeSettings } from './reducers';
-import { selectTabState, selectThreadParam } from './selectors';
+import { selectChat, selectTabState, selectThreadParam } from './selectors';
 
 initCache();
 
@@ -46,7 +47,22 @@ addActionHandler('initShared', (prevGlobal, actions, payload): ActionReturnType 
   return global;
 });
 
+function subscribeToUluClientNewsChannel(global: RequiredGlobalState) {
+  const channel = selectChat(global, ULU_APP.CLIENT_NEWS_CHANNEL_ID);
+  if (channel && channel.accessHash) {
+    callApi('joinChannel', { channelId: channel.id, accessHash: channel.accessHash });
+  } else {
+    callApi('getChatByUsername', ULU_APP.CLIENT_NEWS_CHANNEL_USERNAME).then((response) => {
+      if (!response?.chat?.accessHash) return;
+
+      callApi('joinChannel', { channelId: response.chat.id, accessHash: response.chat.accessHash });
+    });
+  }
+}
+
 addActionHandler('init', (global, actions, payload): ActionReturnType => {
+  subscribeToUluClientNewsChannel(global);
+
   const { tabId = getCurrentTabId(), isMasterTab } = payload || {};
 
   const initialTabState = cloneDeep(INITIAL_TAB_STATE);
