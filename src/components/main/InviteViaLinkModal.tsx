@@ -4,10 +4,12 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiUser } from '../../api/types';
 
 import { getUserFullName } from '../../global/helpers';
-import { selectCurrentChat, selectUser } from '../../global/selectors';
+import { selectChatFullInfo, selectCurrentChat, selectUser } from '../../global/selectors';
+
+import useLastCallback from '../../hooks/useLastCallback';
 
 import Picker from '../common/Picker';
 import Button from '../ui/Button';
@@ -22,26 +24,28 @@ export type OwnProps = {
 type StateProps = {
   userIds: string[];
   users: ApiUser[];
-  chat?: ApiChat;
+  chatInviteLink?: string;
 };
 
-const InviteViaLinkModal: FC<OwnProps & StateProps> = ({ isOpen, users, userIds }) => {
-  const { closeInviteViaLinkModal } = getActions();
+const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
+  isOpen, users, userIds, chatInviteLink,
+}) => {
+  const { closeInviteViaLinkModal, sendMessage } = getActions();
 
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>(userIds);
 
-  const handleClose = useCallback(() => {
+  const handleClose = useLastCallback(() => {
     closeInviteViaLinkModal();
-  }, []);
+  });
 
-  const handleClickSkip = useCallback(() => {
+  const handleClickSkip = useLastCallback(() => {
     closeInviteViaLinkModal();
-  }, []);
+  });
 
   const handleClickSendInviteLink = useCallback(() => {
-    return selectedMemberIds;
+    selectedMemberIds.map((userId) => sendMessage({ chatId: userId, text: chatInviteLink }));
     closeInviteViaLinkModal();
-  }, [selectedMemberIds]);
+  }, [selectedMemberIds, chatInviteLink]);
 
   const userNames = useMemo(() => {
     return users.map((user) => getUserFullName(user)).join(', ');
@@ -67,7 +71,6 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({ isOpen, users, userIds 
       <div className="dialog-buttons">
         <Button
           className="confirm-dialog-button"
-          type="submit"
           isText
           onClick={handleClickSendInviteLink}
           disabled={!selectedMemberIds.length}
@@ -88,10 +91,12 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({ isOpen, users, userIds 
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const chat = selectCurrentChat(global);
+    const chatFullInfo = selectChatFullInfo(global, chat!.id);
     return {
       userIds: global.restrictedInviteUserIds,
       users: global.restrictedInviteUserIds.map((userId) => selectUser(global, userId)).filter(Boolean),
-      chat: selectCurrentChat(global),
+      chatInviteLink: chatFullInfo?.inviteLink,
     };
   },
 )(InviteViaLinkModal));

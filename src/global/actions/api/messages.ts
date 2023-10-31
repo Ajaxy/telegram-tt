@@ -243,16 +243,16 @@ addActionHandler('loadMessage', async (global, actions, payload): Promise<void> 
 });
 
 addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => {
-  const { messageList, tabId = getCurrentTabId() } = payload;
+  const { messageList, tabId = getCurrentTabId(), chatId: payloadChatId } = payload;
 
   const { storyId, peerId: storyPeerId } = selectCurrentViewedStory(global, tabId);
   const isStoryReply = Boolean(storyId && storyPeerId);
 
-  if (!messageList && !isStoryReply) {
+  if (!payloadChatId && !messageList && !isStoryReply) {
     return undefined;
   }
 
-  let { chatId, threadId, type } = messageList || {};
+  let { chatId = payloadChatId, threadId, type } = messageList || {};
   if (isStoryReply) {
     chatId = storyPeerId!;
     threadId = MAIN_THREAD_ID;

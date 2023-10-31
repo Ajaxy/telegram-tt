@@ -1255,6 +1255,7 @@ export interface ActionPayloads {
     shouldForceRender?: boolean;
   } & WithTabId;
   sendMessage: {
+    chatId?: string;
     text?: string;
     entities?: ApiMessageEntity[];
     attachments?: ApiAttachment[];
