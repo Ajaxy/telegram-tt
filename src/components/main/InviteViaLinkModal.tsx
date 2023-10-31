@@ -70,10 +70,17 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({ isOpen, users, userIds 
           type="submit"
           isText
           onClick={handleClickSendInviteLink}
+          disabled={!selectedMemberIds.length}
         >
           Send Invite Link
         </Button>
-        <Button className="confirm-dialog-button" isText onClick={handleClickSkip}>Skip</Button>
+        <Button
+          className="confirm-dialog-button"
+          isText
+          onClick={handleClickSkip}
+        >
+          Skip
+        </Button>
       </div>
     </Modal>
   );
