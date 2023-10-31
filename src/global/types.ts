@@ -927,6 +927,8 @@ export type GlobalState = {
   translations: {
     byChatId: Record<string, ChatTranslatedMessages>;
   };
+
+  restrictedInviteUserIds: string[];
 };
 
 export type CallSound = (
@@ -2190,6 +2192,7 @@ export interface ActionPayloads {
   openAddContactDialog: { userId?: string } & WithTabId;
   openNewContactDialog: WithTabId | undefined;
   closeNewContactDialog: WithTabId | undefined;
+  closeInviteViaLinkModal: undefined;
   importContact: {
     phoneNumber: string;
     firstName: string;

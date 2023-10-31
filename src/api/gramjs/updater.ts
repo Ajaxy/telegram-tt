@@ -1117,6 +1117,11 @@ export function updater(update: Update) {
       location: update.location,
       isUnconfirmed: update.unconfirmed,
     });
+  } else if (update instanceof GramJs.UpdateGroupInvitePrivacyForbidden) {
+    onUpdate({
+      '@type': 'updateGroupInvitePrivacyForbidden',
+      userId: buildApiPeerId(update.userId, 'user'),
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

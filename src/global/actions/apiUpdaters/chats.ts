@@ -9,6 +9,7 @@ import {
   addActionHandler, getGlobal, setGlobal,
 } from '../../index';
 import {
+  addUserToRestrictedInviteList,
   leaveChat,
   replaceThreadParam,
   updateChat,
@@ -469,6 +470,13 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       actions.loadTopics({ chatId, force: true });
 
       return undefined;
+    }
+
+    case 'updateGroupInvitePrivacyForbidden': {
+      const { userId } = update;
+      global = addUserToRestrictedInviteList(global, userId);
+      setGlobal(global);
+      break;
     }
   }
 

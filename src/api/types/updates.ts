@@ -674,6 +674,11 @@ export type ApiUpdateNewAuthorization = {
   location?: string;
 };
 
+export type ApiUpdateGroupInvitePrivacyForbidden = {
+  '@type': 'updateGroupInvitePrivacyForbidden';
+  userId: string;
+};
+
 export type ApiUpdate = (
   ApiUpdateReady | ApiUpdateSession | ApiUpdateWebAuthTokenFailed | ApiUpdateRequestUserUpdate |
   ApiUpdateAuthorizationState | ApiUpdateAuthorizationError | ApiUpdateConnectionState | ApiUpdateCurrentUser |
@@ -702,7 +707,7 @@ export type ApiUpdate = (
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
-  ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization
+  ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;

@@ -22,6 +22,7 @@ import { getAllowedAttachmentOptions, getChatTitle } from '../../helpers';
 import {
   addActionHandler, getActions, getGlobal, setGlobal,
 } from '../../index';
+import { resetRestrictedInviteList } from '../../reducers';
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectCanAnimateInterface,
@@ -723,6 +724,10 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   }
 
   setPageTitleInstant(IS_ELECTRON ? '' : PAGE_TITLE);
+});
+
+addActionHandler('closeInviteViaLinkModal', (global): ActionReturnType => {
+  return resetRestrictedInviteList(global);
 });
 
 let prevIsScreenLocked: boolean | undefined;

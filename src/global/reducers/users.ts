@@ -263,3 +263,17 @@ export function closeNewContactDialog<T extends GlobalState>(
     newContact: undefined,
   }, tabId);
 }
+
+export function addUserToRestrictedInviteList<T extends GlobalState>(global: T, userId: string): T {
+  return {
+    ...global,
+    restrictedInviteUserIds: [...new Set([...global.restrictedInviteUserIds, userId])],
+  };
+}
+
+export function resetRestrictedInviteList<T extends GlobalState>(global: T): T {
+  return {
+    ...global,
+    restrictedInviteUserIds: [],
+  };
+}

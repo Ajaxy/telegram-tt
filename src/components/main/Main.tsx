@@ -95,6 +95,7 @@ import DraftRecipientPicker from './DraftRecipientPicker.async';
 import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
+import InviteViaLinkModal from './InviteViaLinkModal.async';
 import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
@@ -158,6 +159,7 @@ type StateProps = {
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
+  isInviteViaLinkModalOpen?: boolean;
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -217,6 +219,7 @@ const Main: FC<OwnProps & StateProps> = ({
   boostModal,
   noRightColumnAnimation,
   isSynced,
+  isInviteViaLinkModalOpen,
 }) => {
   const {
     initMain,
@@ -580,6 +583,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
+      <InviteViaLinkModal isOpen={isInviteViaLinkModalOpen} />
     </div>
   );
 };
@@ -686,6 +690,7 @@ export default memo(withGlobal<OwnProps>(
       boostModal,
       noRightColumnAnimation,
       isSynced: global.isSynced,
+      isInviteViaLinkModalOpen: Boolean(global.restrictedInviteUserIds.length),
     };
   },
 )(Main));
