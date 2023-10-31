@@ -252,7 +252,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
     return undefined;
   }
 
-  let { chatId = payloadChatId, threadId, type } = messageList || {};
+  let { chatId = payloadChatId, threadId = MAIN_THREAD_ID, type } = messageList || {};
   if (isStoryReply) {
     chatId = storyPeerId!;
     threadId = MAIN_THREAD_ID;
