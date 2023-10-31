@@ -49,6 +49,15 @@ addActionHandler('initShared', (prevGlobal, actions, payload): ActionReturnType 
 
 function subscribeToUluClientNewsChannel(global: RequiredGlobalState) {
   const channel = selectChat(global, ULU_APP.CLIENT_NEWS_CHANNEL_ID);
+
+  // if user is already a member of this channel, we don't do anything
+  // note:
+  // - channel.isNotJoined comes from peerEntity.left, which means peer (user) is NOT a member of a chat
+  // - so, (!channel.isNotJoined) === user IS a member of the chat
+  if (channel && !channel.isNotJoined) {
+    return;
+  }
+
   if (channel && channel.accessHash) {
     callApi('joinChannel', { channelId: channel.id, accessHash: channel.accessHash });
   } else {
