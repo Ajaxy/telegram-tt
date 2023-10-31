@@ -4,8 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  width: var(--media-width, auto);
-  height: var(--media-height, auto);
+  width: auto;
+  height: auto;
   aspect-ratio: 9 / 16;
   pointer-events: none;
 
@@ -13,6 +13,8 @@
     right: auto;
     left: 50%;
     top: 50%;
+    width: var(--media-width, 100%);
+    height: var(--media-height, 100%);
     transform: translate(-50%, -50%);
   }
 }

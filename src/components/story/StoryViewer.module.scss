@@ -238,9 +238,13 @@
   overflow: hidden;
 
   @media (max-width: 600px) {
-    width: calc(100% - 1rem) !important; // Update `MOBILE_MEDIA_OFFSET_X` in MediaAreaOverlay on change
-    height: calc(100% - 4.5rem) !important; // Update `MOBILE_MEDIA_OFFSET_Y` in MediaAreaOverlay on change
+    width: calc(100% - 1rem) !important;
+    height: auto !important;
     margin: 0.5rem;
+    bottom: 3.5rem;
+    @supports (bottom: calc(3.5rem + env(safe-area-inset-bottom))) {
+      bottom: calc(3.5rem + env(safe-area-inset-bottom));
+    }
   }
 
   :global(body.ghost-animating) & {
