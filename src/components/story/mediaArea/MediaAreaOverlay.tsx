@@ -7,7 +7,6 @@ import { MOBILE_SCREEN_MAX_WIDTH } from '../../../config';
 import { requestMutation } from '../../../lib/fasterdom/fasterdom';
 import buildClassName from '../../../util/buildClassName';
 import buildStyle from '../../../util/buildStyle';
-import { REM } from '../../common/helpers/mediaDimensions';
 
 import useWindowSize from '../../../hooks/useWindowSize';
 
@@ -22,8 +21,6 @@ type OwnProps = {
 };
 
 const STORY_ASPECT_RATIO = 9 / 16;
-const MOBILE_MEDIA_OFFSET_X = Number(REM);
-const MOBILE_MEDIA_OFFSET_Y = 4.5 * REM;
 
 const MediaAreaOverlay = ({
   story, isActive, className,
@@ -47,13 +44,12 @@ const MediaAreaOverlay = ({
       return;
     }
 
-    const adaptedHeight = windowSize.height - MOBILE_MEDIA_OFFSET_Y;
-    const adoptedWidth = windowSize.width - MOBILE_MEDIA_OFFSET_X;
-
     const screenAspectRatio = windowSize.width / windowSize.height;
 
-    const width = screenAspectRatio < STORY_ASPECT_RATIO ? adaptedHeight * STORY_ASPECT_RATIO : adoptedWidth;
-    const height = screenAspectRatio < STORY_ASPECT_RATIO ? adaptedHeight : adoptedWidth / STORY_ASPECT_RATIO;
+    const width = screenAspectRatio < STORY_ASPECT_RATIO
+      ? element.clientHeight * STORY_ASPECT_RATIO : element.clientWidth;
+    const height = screenAspectRatio < STORY_ASPECT_RATIO
+      ? element.clientHeight : element.clientWidth / STORY_ASPECT_RATIO;
 
     requestMutation(() => {
       element.style.setProperty('--media-width', `${width}px`);
