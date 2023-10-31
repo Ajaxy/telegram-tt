@@ -8,6 +8,7 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatReactions,
+  ApiError,
   ApiFormattedText,
   ApiGroupCall,
   ApiMessage,
@@ -646,7 +647,7 @@ export async function createChannel({
   title, about = '', users,
 }: {
   title: string; about?: string; users?: ApiUser[];
-}, noErrorUpdate = false): Promise<ApiChat | undefined> {
+}): Promise<ApiChat | undefined> {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
     broadcast: true,
     title,
@@ -683,8 +684,8 @@ export async function createChannel({
         channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
         users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
       }), {
-        shouldThrow: noErrorUpdate,
-      });
+        shouldThrow: true,
+      }).catch((err) => handleUserPrivacyRestricted(err, { users }));
     } catch (err) {
       // `noErrorUpdate` will cause an exception which we don't want either
     }
@@ -1285,7 +1286,7 @@ export async function openChatByInvite(hash: string) {
   return { chatId: chat.id };
 }
 
-export async function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
+export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
   try {
     if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
       return await invokeRequest(new GramJs.channels.InviteToChannel({
@@ -1293,19 +1294,19 @@ export async function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpd
         users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
       }), {
         shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
+        shouldThrow: true,
+      }).catch((err) => handleUserPrivacyRestricted(err, { users }));
     }
 
-    return await Promise.all(users.map((user) => {
-      return invokeRequest(new GramJs.messages.AddChatUser({
+    return await Promise.all(
+      users.map((user) => invokeRequest(new GramJs.messages.AddChatUser({
         chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
         userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
       }), {
         shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
-    }));
+        shouldThrow: true,
+      }).catch((err) => handleUserPrivacyRestricted(err, { users: [user] }))),
+    );
   } catch (err) {
     // `noErrorUpdate` will cause an exception which we don't want either
     return undefined;
@@ -1838,4 +1839,15 @@ export function togglePeerTranslations({
     disabled: isEnabled ? undefined : true,
     peer: buildInputPeer(chat.id, chat.accessHash),
   }));
+}
+
+function handleUserPrivacyRestricted(err: ApiError, { users }: { users: ApiUser[] }) {
+  if (err.message === 'USER_PRIVACY_RESTRICTED') {
+    users.forEach((user) => onUpdate({
+      '@type': 'updateGroupInvitePrivacyForbidden',
+      userId: user.id,
+    }));
+    return undefined;
+  }
+  return err;
 }
