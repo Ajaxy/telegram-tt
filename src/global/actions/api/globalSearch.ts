@@ -1,7 +1,9 @@
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
-import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+import type {
+  ActionReturnType, GlobalState, RequiredGlobalState, TabArgs,
+} from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
 import { timestampPlusDay } from '../../../util/dateFormat';
@@ -19,7 +21,9 @@ import {
   updateGlobalSearchResults,
   updateTopics,
 } from '../../reducers';
-import { selectChat, selectCurrentGlobalSearchQuery, selectTabState } from '../../selectors';
+import {
+  selectChat, selectCurrentGlobalSearchQuery, selectTabState,
+} from '../../selectors';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
@@ -42,6 +46,11 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
       const {
         localChats, localUsers, globalChats, globalUsers,
       } = result;
+
+      const localSerachResult = searchLocalChats(global, query);
+      if (localSerachResult) {
+        localChats.push(...localSerachResult);
+      }
 
       if (localChats.length || globalChats.length) {
         global = addChats(global, buildCollectionByKey([...localChats, ...globalChats], 'id'));
@@ -209,4 +218,10 @@ async function searchMessagesGlobal<T extends GlobalState>(
   }, tabId);
 
   setGlobal(global);
+}
+
+function searchLocalChats(global: RequiredGlobalState, query: string) {
+  return Object.values(global.chats.byId).filter(
+    (chat) => chat.title.toLowerCase().includes(query.toLowerCase()),
+  );
 }
