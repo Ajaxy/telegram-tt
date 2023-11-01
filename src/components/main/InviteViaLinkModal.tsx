@@ -43,7 +43,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
   });
 
   const handleClickSendInviteLink = useCallback(() => {
-    selectedMemberIds.map((userId) => sendMessage({ chatId: userId, text: chatInviteLink }));
+    selectedMemberIds.forEach((userId) => sendMessage({ chatId: userId, text: chatInviteLink }));
     closeInviteViaLinkModal();
   }, [selectedMemberIds, chatInviteLink]);
 
@@ -67,6 +67,7 @@ const InviteViaLinkModal: FC<OwnProps & StateProps> = ({
         itemIds={userIds}
         selectedIds={selectedMemberIds}
         onSelectedIdsChange={setSelectedMemberIds}
+        isRoundCheckbox
       />
       <div className="dialog-buttons">
         <Button
