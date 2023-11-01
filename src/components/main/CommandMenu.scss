@@ -33,7 +33,7 @@
   border-radius: 0;
 
   &::placeholder {
-    color: var(--gray9);
+    color: var(--color-placeholders);
   }
 }
 
@@ -70,18 +70,17 @@
   transition-property: none;
 
   &[data-selected='true'] {
-    background: var(--grayA3);
-    color: var(--gray12);
+    background: var(--color-chat-active);
   }
 
   &[data-disabled='true'] {
-    color: var(--gray8);
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   &:active {
     transition-property: background;
-    background: var(--gray4);
+    background: var(--color-chat-active);
   }
 
   & + [cmdk-item] {
