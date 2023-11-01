@@ -1,6 +1,28 @@
 import React from 'react';
+// eslint-disable-next-line react/no-deprecated
+import { render } from 'react-dom';
 import { Command } from 'cmdk';
-import { useEffect, useState } from '../../lib/teact/teact';
+import { memo, useEffect, useState } from '../../lib/teact/teact';
+
+import './CommandMenu.scss';
+
+const CommandMenuInner = (
+  <Command label="Command Menu">
+    <Command.Input />
+    <Command.List>
+      <Command.Empty>No results found.</Command.Empty>
+      <Command.Group heading="Letters">
+        <Command.Item>a</Command.Item>
+        <Command.Item>b</Command.Item>
+        <Command.Separator />
+        <Command.Item>c</Command.Item>
+      </Command.Group>
+      <Command.Item>Apple2</Command.Item>
+    </Command.List>
+  </Command>
+);
+
+const cmdkRoot = document.getElementById('cmdk-root');
 
 const CommandMenu = () => {
   const [open, setOpen] = useState(false);
@@ -19,23 +41,8 @@ const CommandMenu = () => {
     return () => document.removeEventListener('keydown', down);
   }, [open]);
 
-  return (
-    <Command.Dialog open={true || open} onOpenChange={setOpen} label="Global Command Menu">
-      <Command.Input />
-      <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
-
-        <Command.Group heading="Letters">
-          <Command.Item>a</Command.Item>
-          <Command.Item>b</Command.Item>
-          <Command.Separator />
-          <Command.Item>c</Command.Item>
-        </Command.Group>
-
-        <Command.Item>Apple</Command.Item>
-      </Command.List>
-    </Command.Dialog>
-  );
+  render(CommandMenuInner, cmdkRoot);
+  return <div />;
 };
 
-export default CommandMenu;
+export default memo(CommandMenu);
