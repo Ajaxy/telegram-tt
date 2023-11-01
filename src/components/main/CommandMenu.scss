@@ -1,9 +1,28 @@
 #cmdk-root {
-  z-index: 10;
+  z-index: var(--z-portal-menu);
   position: fixed;
   top: 10%;
   left: 50%;
   transform: translateX(-50%);
+
+  * {
+    --scrollbarBG: transparent;
+    --thumbBG: #fff4;
+    scrollbar-width: thin;
+    scrollbar-color: var(--thumbBG) var(--scrollbarBG);
+  }
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbarBG);
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--thumbBG);
+    border-radius: 2px;
+    border: 2px solid var(--scrollbarBG);
+  }
 }
 
 [cmdk-root] {

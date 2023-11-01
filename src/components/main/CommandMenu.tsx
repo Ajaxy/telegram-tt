@@ -5,49 +5,16 @@ import { Command } from 'cmdk';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
+import { getActions } from '../../global';
 
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
 
 const CommandMenu = () => {
+  const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
-
-  const close = useCallback(() => {
-    setOpen(false);
-  }, []);
-
-  const toggleArchiver = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log('toggleArchiver');
-    close();
-  }, [close]);
-
-  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.code === 'Escape') {
-      e.stopPropagation();
-      e.preventDefault();
-      close();
-    }
-  }, [close]);
-
-  const CommandMenuInner = open ? (
-    <Command label="Command Menu">
-      <Command.Input
-        placeholder="Search for command..."
-        autoFocus
-        onBlur={close}
-        onKeyDown={onKeyDown}
-      />
-      <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
-        <Command.Group heading="Archiver">
-          <Command.Item onSelect={toggleArchiver}>Toggle auto-archiver</Command.Item>
-          <Command.Item onSelect={toggleArchiver}>Archive all older than 24 hours</Command.Item>
-        </Command.Group>
-      </Command.List>
-    </Command>
-  ) : <div />;
+  const [isArchiverEnabled, setIsArchiverEnabled] = useState(false);
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -62,6 +29,51 @@ const CommandMenu = () => {
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
   }, [open]);
+
+  const close = useCallback(() => {
+    setOpen(false);
+  }, []);
+
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.code === 'Escape') {
+      e.stopPropagation();
+      e.preventDefault();
+      close();
+    }
+  }, [close]);
+
+  const commandToggleArchiver = useCallback(() => {
+    showNotification({ message: isArchiverEnabled ? 'Archiver disabled!' : 'Archiver enabled!' });
+    setIsArchiverEnabled(!isArchiverEnabled);
+    close();
+  }, [close, isArchiverEnabled]);
+
+  const commandArchiveAll = useCallback(() => {
+    showNotification({ message: 'All older than 24 hours will be archived!' });
+    close();
+  }, [close]);
+
+  const CommandMenuInner = open ? (
+    <Command label="Command Menu">
+      <Command.Input
+        placeholder="Search for command..."
+        autoFocus
+        onBlur={close}
+        onKeyDown={onKeyDown}
+      />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        <Command.Group heading="Archiver">
+          <Command.Item onSelect={commandToggleArchiver}>
+            {isArchiverEnabled
+              ? 'Disable Archiver'
+              : 'Enable Archiver'}
+          </Command.Item>
+          <Command.Item onSelect={commandArchiveAll}>Archive all older than 24 hours</Command.Item>
+        </Command.Group>
+      </Command.List>
+    </Command>
+  ) : <div />;
 
   render(CommandMenuInner, cmdkRoot);
   return <div />;
