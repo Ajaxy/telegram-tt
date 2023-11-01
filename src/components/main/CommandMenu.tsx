@@ -11,13 +11,10 @@ const CommandMenuInner = (
     <Command.Input />
     <Command.List>
       <Command.Empty>No results found.</Command.Empty>
-      <Command.Group heading="Letters">
-        <Command.Item>a</Command.Item>
-        <Command.Item>b</Command.Item>
-        <Command.Separator />
-        <Command.Item>c</Command.Item>
+      <Command.Group heading="Archiver">
+        <Command.Item>Toggle archiver</Command.Item>
+        <Command.Item>Archive all</Command.Item>
       </Command.Group>
-      <Command.Item>Apple2</Command.Item>
     </Command.List>
   </Command>
 );
