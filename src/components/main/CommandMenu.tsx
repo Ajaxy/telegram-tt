@@ -8,17 +8,16 @@ const CommandMenu = () => {
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      // eslint-disable-next-line no-console
-      console.log(e);
       if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') {
-        // eslint-disable-next-line @typescript-eslint/no-shadow
-        setOpen((open: boolean) => !open);
+        setOpen(!open);
+        e.preventDefault();
+        e.stopPropagation();
       }
     };
 
     document.addEventListener('keydown', down);
     return () => document.removeEventListener('keydown', down);
-  }, []);
+  }, [open]);
 
   return (
     <Command.Dialog open={true || open} onOpenChange={setOpen} label="Global Command Menu">

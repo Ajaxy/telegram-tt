@@ -171,7 +171,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
+    // document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
