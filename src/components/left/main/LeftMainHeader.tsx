@@ -158,10 +158,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
-  // Cmd+K to open search
+  // Cmd+Shift+K to open search
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.key === 'k') {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.shiftKey && e.code === 'KeyK') {
         if (hasMenu) {
           handleSearchFocus();
           return;
@@ -171,7 +171,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       }
     }
 
-    // document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);

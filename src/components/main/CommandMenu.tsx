@@ -21,7 +21,7 @@ const CommandMenu = () => {
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyK') {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK') {
         setOpen(!open);
         e.preventDefault();
         e.stopPropagation();
