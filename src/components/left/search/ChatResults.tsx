@@ -8,6 +8,7 @@ import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
+  filterChatsByName,
   filterUsersByName,
   sortChatIds,
 } from '../../../global/helpers';
@@ -130,10 +131,12 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     const foundContactIds = filterUsersByName(
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
+    const foundChatsIds = filterChatsByName(lang, Object.keys(chatsById), chatsById, searchQuery, currentUserId);
 
     return [
       ...sortChatIds(unique([
         ...(foundContactIds || []),
+        ...(foundChatsIds || []),
         ...(localChatIds || []),
         ...(localUserIds || []),
       ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),

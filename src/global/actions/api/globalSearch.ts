@@ -2,7 +2,7 @@ import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
 import type {
-  ActionReturnType, GlobalState, RequiredGlobalState, TabArgs,
+  ActionReturnType, GlobalState, TabArgs,
 } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
@@ -46,11 +46,6 @@ addActionHandler('setGlobalSearchQuery', (global, actions, payload): ActionRetur
       const {
         localChats, localUsers, globalChats, globalUsers,
       } = result;
-
-      const localSerachResult = searchLocalChats(global, query);
-      if (localSerachResult) {
-        localChats.push(...localSerachResult);
-      }
 
       if (localChats.length || globalChats.length) {
         global = addChats(global, buildCollectionByKey([...localChats, ...globalChats], 'id'));
@@ -218,10 +213,4 @@ async function searchMessagesGlobal<T extends GlobalState>(
   }, tabId);
 
   setGlobal(global);
-}
-
-function searchLocalChats(global: RequiredGlobalState, query: string) {
-  return Object.values(global.chats.byId).filter(
-    (chat) => chat.title.toLowerCase().includes(query.toLowerCase()),
-  );
 }
