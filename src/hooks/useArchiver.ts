@@ -8,7 +8,7 @@ import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
 
-import { SERVICE_NOTIFICATIONS_USER_ID, ULU_APP } from '../config';
+import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import useInterval from './useInterval';
 
 const UPDATE_TIME_SEC = 5;
@@ -79,7 +79,7 @@ export default function useArchiver() {
   };
 
   useInterval(() => {
-    if (ULU_APP.IS_AUTOARCHIVER_ENABLED) {
+    if (JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled')))) {
       process();
     }
   }, UPDATE_TIME_SEC * 1000);

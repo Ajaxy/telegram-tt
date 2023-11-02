@@ -14,7 +14,9 @@ const cmdkRoot = document.getElementById('cmdk-root');
 const CommandMenu = () => {
   const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
-  const [isArchiverEnabled, setIsArchiverEnabled] = useState(false);
+  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
+    !!JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled'))),
+  );
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -43,8 +45,10 @@ const CommandMenu = () => {
   }, [close]);
 
   const commandToggleArchiver = useCallback(() => {
-    showNotification({ message: isArchiverEnabled ? 'Archiver disabled!' : 'Archiver enabled!' });
-    setIsArchiverEnabled(!isArchiverEnabled);
+    const updIsArchiverEnabled = !isArchiverEnabled;
+    showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
+    localStorage.setItem('ulu_is_archiver_enabled', JSON.stringify(updIsArchiverEnabled));
+    setIsArchiverEnabled(updIsArchiverEnabled);
     close();
   }, [close, isArchiverEnabled]);
 
