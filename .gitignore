@@ -11,3 +11,8 @@ dev/perf/screenshot*
 .DS_store
 .github/workflows/*
 !.github/workflows/package-and-publish.yml
+
+## Ulu ignores
+dist/*
+public/build-stats.json
+public/statoscope-report.html
