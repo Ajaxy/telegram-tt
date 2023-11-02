@@ -6,7 +6,7 @@ import type { ISettings } from '../../../../types';
 import { LeftColumnContent } from '../../../../types';
 
 import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
-import { selectIsChatWithSelf } from '../../../../global/selectors';
+import { selectIsChatWithSelf, selectTabState } from '../../../../global/selectors';
 import { uluGetTranslatedString } from '../../../../util/fallbackLangPackInitial';
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager';
@@ -24,19 +24,17 @@ type OwnProps = {
 
 type StateProps = {
   isSavedMessages: boolean;
+  isInbox: boolean;
 } & Pick<ISettings, 'language'>;
 
-const INBOX_IS_ACTIVE = false; // TODO catch up with Niko
-const NONE_TO_VOID: NoneToVoidFunction = () => void 0;
-
 const UluSystemFolders: FC<OwnProps & StateProps> = ({
-  userId, language, content, isSavedMessages, onLeftColumnContentChange,
+  userId, language, content, isSavedMessages, onLeftColumnContentChange, isInbox,
 }) => {
   const titleInbox = uluGetTranslatedString('Sidebar.SystemFolders.Inbox', language);
   const titleSavedMessages = uluGetTranslatedString('Sidebar.SystemFolders.SavedMessages', language);
   const titleArchivedChats = uluGetTranslatedString('Sidebar.SystemFolders.ArchivedChats', language);
 
-  const { focusLastMessage, openChat } = getActions();
+  const { focusLastMessage, openChat, setActiveChatFolder } = getActions();
 
   const handleOpenSavedMessages = useCallback(() => {
     openChat({ id: userId, shouldReplaceHistory: true });
@@ -47,6 +45,10 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
     onLeftColumnContentChange(LeftColumnContent.Archived);
   }, [onLeftColumnContentChange]);
 
+  const handleOpenInbox = useCallback(() => {
+    setActiveChatFolder({ activeChatFolder: ALL_FOLDER_ID });
+  }, [setActiveChatFolder]);
+
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.activeChatsCount;
   const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
@@ -55,12 +57,12 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   return (
     <div className={styles.wrapper}>
       <UluChatFolder
-        active={INBOX_IS_ACTIVE}
+        active={isInbox}
         shouldStressUnreadMessages={false}
         type="inbox"
         title={titleInbox}
         messagesUnreadCount={inboxUnreadCount}
-        onClick={NONE_TO_VOID}
+        onClick={handleOpenInbox}
       />
       <UluChatFolder
         active={isSavedMessages}
@@ -84,11 +86,13 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
+    const { activeChatFolder } = selectTabState(global);
     const isChatWithSelf = chatId ? selectIsChatWithSelf(global, chatId) : false;
 
     return ({
       language: global.settings.byKey.language,
       isSavedMessages: isChatWithSelf,
+      isInbox: activeChatFolder === ALL_FOLDER_ID && chatId === undefined,
     });
   },
 )(UluSystemFolders));
