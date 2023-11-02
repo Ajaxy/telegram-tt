@@ -136,6 +136,10 @@ export function captureEvents(element: HTMLElement, options: CaptureOptions) {
       return;
     }
 
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+      return;
+    }
+
     if (
       excludedClosestSelector && (target.matches(excludedClosestSelector) || target.closest(excludedClosestSelector))
     ) {
