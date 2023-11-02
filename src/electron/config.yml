@@ -42,7 +42,7 @@ mac:
   entitlements: public/electron-entitlements.mac.plist
   icon: public/icon-electron-macos.icns
   notarize:
-    teamId: Y54Z4K69Z9
+    teamId: 6CXX2R277K
 dmg:
   title: Ulu installer
   background: public/background-electron-dmg.tiff
