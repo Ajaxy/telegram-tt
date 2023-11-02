@@ -1,9 +1,7 @@
 import type {
   ApiChat, ApiGlobalMessageSearchType, ApiMessage, ApiTopic, ApiUser,
 } from '../../../api/types';
-import type {
-  ActionReturnType, GlobalState, TabArgs,
-} from '../../types';
+import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
 import { timestampPlusDay } from '../../../util/dateFormat';
@@ -21,9 +19,7 @@ import {
   updateGlobalSearchResults,
   updateTopics,
 } from '../../reducers';
-import {
-  selectChat, selectCurrentGlobalSearchQuery, selectTabState,
-} from '../../selectors';
+import { selectChat, selectCurrentGlobalSearchQuery, selectTabState } from '../../selectors';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
