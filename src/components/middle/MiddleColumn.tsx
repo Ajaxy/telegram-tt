@@ -217,6 +217,7 @@ function MiddleColumn({
     setLeftColumnWidth,
     resetLeftColumnWidth,
     unblockUser,
+    toggleChatArchived,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -292,10 +293,13 @@ function MiddleColumn({
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
-      openChat({ id: undefined });
       e.preventDefault();
+      if (chatId) {
+        toggleChatArchived({ id: chatId });
+        openChat({ id: undefined });
+      }
     }
-  }, [openChat]);
+  }, [chatId, openChat]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
