@@ -7,7 +7,8 @@ ulu brings productivity boosts:
 - inbox
 - snooze
 - hotkeys
-- CMD K menu
+- CMD+K menu
+- auto-archiver
 - workspaces (soon)
 - ... (a lot of features in the design process, will be announced soon)
 
