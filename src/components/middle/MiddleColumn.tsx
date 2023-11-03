@@ -1,5 +1,5 @@
 import React, {
-  memo, useEffect, useMemo,
+  memo, useCallback, useEffect, useMemo,
   useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -59,7 +59,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/windowEnvironment';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
@@ -289,6 +289,18 @@ function MiddleColumn({
       })
       : undefined;
   }, [chatId, openChat]);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
+      openChat({ id: undefined });
+      e.preventDefault();
+    }
+  }, [openChat]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
