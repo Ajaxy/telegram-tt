@@ -11,7 +11,7 @@ name: Package and publish
 on:
   workflow_dispatch:
   push:
-    branches: master
+    branches: deploy
 
 env:
   APP_NAME: Ulu
@@ -72,7 +72,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           PUBLISH_REPO: ${{ vars.PUBLISH_REPO }}
           BASE_URL: ${{ vars.BASE_URL }}
-          IS_PREVIEW: ${{ steps.branch-name.outputs.current_branch != 'master' }}
+          IS_PREVIEW: ${{ steps.branch-name.outputs.current_branch != 'deploy' }}
         run: |
           if [ -z "$PUBLISH_REPO" ]; then
             npm run electron:package:staging
