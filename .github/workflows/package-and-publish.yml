@@ -113,10 +113,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup certificate
+        if: ${{ false }}  # disable for now
         shell: bash
         run: echo "${{ secrets.SM_CLIENT_CERT_FILE_B64 }}" | base64 --decode > /d/Certificate_pkcs12.p12
 
       - name: Set environment variables
+        if: ${{ false }}  # disable for now
         id: variables
         shell: bash
         run: |
@@ -131,6 +133,7 @@ jobs:
           echo "C:\Program Files\DigiCert\DigiCert One Signing Manager Tools" >> $GITHUB_PATH
 
       - name: Setup SSM KSP
+        if: ${{ false }}  # disable for now
         env:
           SM_API_KEY: ${{ secrets.SM_API_KEY }}
         shell: cmd
@@ -143,12 +146,14 @@ jobs:
           smksp_cert_sync.exe
 
       - name: Download Windows package
+        if: ${{ false }}  # disable for now
         id: download-artifact
         uses: actions/download-artifact@v3
         with:
           name: ${{ env.FILE_NAME }}
 
       - name: Sign package
+        if: ${{ false }}  # disable for now
         env:
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           FILE_PATH: ${{ steps.download-artifact.outputs.download-path }}
@@ -156,6 +161,7 @@ jobs:
         run: smctl.exe sign --keypair-alias=%KEYPAIR_ALIAS% --input "%FILE_PATH%\%FILE_NAME%"
 
       - uses: actions/upload-artifact@v3
+        if: ${{ false }}  # disable for now
         with:
           name: ${{ env.FILE_NAME }}
           path: ${{ env.FILE_NAME }}
@@ -168,6 +174,7 @@ jobs:
           echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
 
       - name: Delete existing asset
+        if: ${{ false }}  # disable for now
         env:
           RELEASE_ID: ${{ steps.release-id.outputs.release_id }}
         shell: bash
@@ -177,6 +184,7 @@ jobs:
           curl -X DELETE -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/$PUBLISH_REPO/releases/assets/$ASSET_ID"
 
       - name: Push new asset
+        if: ${{ false }}  # disable for now
         env:
           FILE_PATH: ${{ steps.download-artifact.outputs.download-path }}
           RELEASE_ID: ${{ steps.release-id.outputs.release_id }}
