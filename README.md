@@ -1,14 +1,17 @@
-# ulu — Telegram client for teams
+# ulu — productivity-first telegram client
 
-ulu is aimed at improving the communication workflow for teams of developers, programmers, designers, startupers and creators.
+ulu is aimed at improving the communication workflow for developers, designers, founders and PMs.
 
 ulu brings productivity boosts:
 - no stories
-- inbox (soon)
+- inbox
+- snooze
+- hotkeys
+- CMD K menu
 - workspaces (soon)
 - ... (a lot of features in the design process, will be announced soon)
 
-## [Ulu Developers Area] How to...
+## [ulu Developers Area] How to...
 ### 1) Get updates from [upstream](https://github.com/Ajaxy/telegram-tt/network) (if needed)
 ```sh
 git remote add upstream git@github.com:Ajaxy/telegram-tt.git
