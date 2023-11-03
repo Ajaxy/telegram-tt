@@ -158,10 +158,10 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     }
   });
 
-  // Cmd+Shift+K to open search
+  // Cmd+/ to open search
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.code === 'Slash') {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'Slash') {
         if (hasMenu) {
           handleSearchFocus();
           return;
