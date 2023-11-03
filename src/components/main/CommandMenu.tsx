@@ -1,6 +1,7 @@
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
+// eslint-disable-next-line react/no-deprecated
 import { Command } from 'cmdk';
 import {
   memo, useCallback, useEffect, useState,
@@ -70,10 +71,10 @@ const CommandMenu = () => {
         <Command.Group heading="Archiver">
           <Command.Item onSelect={commandToggleArchiver}>
             {isArchiverEnabled
-              ? 'Disable Archiver'
-              : 'Enable Archiver'}
+              ? 'Disable auto-mark as &quot;Done&quot; after reading'
+              : 'Enable auto-mark as &quot;Done&quot; after reading'}
           </Command.Item>
-          <Command.Item onSelect={commandArchiveAll}>Archive all older than 24 hours</Command.Item>
+          <Command.Item onSelect={commandArchiveAll}>Mark read chats as &quot;Done&quot; (Over 24h Old)</Command.Item>
         </Command.Group>
       </Command.List>
     </Command>
