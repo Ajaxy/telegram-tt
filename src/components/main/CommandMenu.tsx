@@ -71,8 +71,8 @@ const CommandMenu = () => {
         <Command.Group heading="Archiver">
           <Command.Item onSelect={commandToggleArchiver}>
             {isArchiverEnabled
-              ? 'Disable auto-mark as &quot;Done&quot; after reading'
-              : 'Enable auto-mark as &quot;Done&quot; after reading'}
+              ? 'Disable auto-mark as "Done" after reading'
+              : 'Enable auto-mark as "Done" after reading'}
           </Command.Item>
           <Command.Item onSelect={commandArchiveAll}>Mark read chats as &quot;Done&quot; (Over 24h Old)</Command.Item>
         </Command.Group>
