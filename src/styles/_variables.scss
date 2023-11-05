@@ -298,6 +298,11 @@ $color-message-story-mention-to: #74bcff;
   --slide-transition: 300ms cubic-bezier(0.25, 1, 0.5, 1);
   --select-transition: 200ms ease-out;
 
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-right: env(safe-area-inset-right);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+
   body.is-ios {
     --layer-transition: 650ms cubic-bezier(0.22, 1, 0.36, 1);
     --layer-transition-behind: 650ms cubic-bezier(0.33, 1, 0.68, 1);

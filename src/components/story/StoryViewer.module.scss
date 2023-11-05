@@ -11,10 +11,6 @@
   z-index: var(--z-story-viewer);
   transform-origin: 50% 50%;
 
-  @media (max-width: 600px) {
-    background: rgba(0, 0, 0, 1);
-  }
-
   // Potential perf improvement
   &:not(:global(.shown)) {
     display: block !important;
@@ -51,6 +47,10 @@
 .backdrop {
   background-color: rgba(0, 0, 0, 0.9);
   z-index: 0;
+
+  @media (max-width: 600px) {
+    background: rgba(0, 0, 0, 1);
+  }
 }
 
 .backdropNonInteractive {
