@@ -1,12 +1,12 @@
-@import "reboot";
-@import "variables";
-@import "mixins";
-@import "spacing";
-@import "forms";
-@import "icons";
-@import "common";
-@import "../assets/fonts/roboto.css";
-@import "./print";
+@use "reboot";
+@use "variables";
+@use "mixins";
+@use "spacing";
+@use "forms";
+@use "icons";
+@use "common";
+@use "print";
+@use "fonts";
 
 html,
 body {
@@ -335,6 +335,7 @@ body:not(.is-ios) {
   --color-chat-active-greyed: rgb(146, 136, 211);
   --color-item-active: rgb(41, 41, 41);
   --color-text: rgb(255, 255, 255);
+  --color-text-rgb: 255, 255, 255;
   --color-text-secondary: rgb(170, 170, 170);
   --color-text-secondary-rgb: 170, 170, 170;
   --color-icon-secondary: rgb(170, 170, 170);
@@ -357,6 +358,7 @@ body:not(.is-ios) {
   --color-reply-own-active: rgb(145, 125, 234);
   --color-reply-own-active-apple: rgb(145, 125, 234);
   --color-accent-own: rgb(255, 255, 255);
+  --color-accent-own-rgb: 255, 255, 255;
   --color-message-meta-own: rgb(255, 255, 255, 0.533);
   --color-own-links: rgb(255, 255, 255);
   --color-code: rgb(135, 116, 225);

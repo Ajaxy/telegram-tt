@@ -1,7 +1,7 @@
 @use "sass:color";
 
 @function toRGB($color) {
-  @return red($color) + ", " + green($color) + ", " + blue($color);
+  @return color.red($color) + ", " + color.green($color) + ", " + color.blue($color);
 }
 
 @function blend-normal($foreground, $background) {
@@ -47,18 +47,6 @@ $color-chat-hover: #f4f4f5;
 $color-chat-active: #3390ec;
 $color-selection: #3993fb;
 
-// https://github.com/telegramdesktop/tdesktop/wiki/Theme-Reference#user-content-standard-color-constants
-// Colors borrowed from https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/Resources/day-blue.tdesktop-theme
-// historyPeer[1-8]UserpicBg
-$color-user-1: #e17076;
-$color-user-2: #7bc862;
-//$color-user-3: #E5CA77;
-$color-user-4: #65aadd;
-$color-user-5: #a695e7;
-$color-user-6: #ee7aae;
-$color-user-7: #6ec9cb;
-$color-user-8: #faa774;
-
 $color-message-reaction: #ebf3fd;
 $color-message-reaction-hover: #c5def9;
 $color-message-reaction-own: #cef0ba;
@@ -80,6 +68,7 @@ $color-message-story-mention-to: #74bcff;
   --color-background-own: #{$color-light-green};
   --color-background-own-selected: color.adjust($color-light-green, -10%);
   --color-text: #{$color-black};
+  --color-text-rgb: #{toRGB($color-black)};
   --color-text-lighter: #{$color-dark-gray};
   --color-text-secondary: #{$color-text-secondary};
   --color-icon-secondary: #{$color-text-secondary};
@@ -138,6 +127,7 @@ $color-message-story-mention-to: #74bcff;
   --color-code-own-bg: #{rgba($color-text-secondary, 0.08)};
 
   --color-accent-own: #{$color-text-green};
+  --color-accent-own-rgb: #{toRGB($color-text-green)};
   --color-message-meta-own: #{$color-text-green};
 
   --color-message-reaction: $color-message-reaction;
@@ -169,14 +159,6 @@ $color-message-story-mention-to: #74bcff;
 
   --color-selection-highlight: #{$color-selection};
   --color-selection-highlight-emoji: rgba(#{toRGB($color-selection)}, 0.7);
-
-  --color-user-1: #{$color-user-1};
-  --color-user-2: #{$color-user-2};
-  --color-user-4: #{$color-user-4};
-  --color-user-5: #{$color-user-5};
-  --color-user-6: #{$color-user-6};
-  --color-user-7: #{$color-user-7};
-  --color-user-8: #{$color-user-8};
 
   --color-avatar-story-unread-from: #34c76f;
   --color-avatar-story-unread-to: #3da1fd;

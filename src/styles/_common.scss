@@ -1,3 +1,5 @@
+@use "mixins";
+
 // Common styles for all media-type components across the app.
 .media-inner {
   position: relative;
@@ -100,7 +102,7 @@
   background: var(--color-background);
   height: 100%;
   padding: 0.5rem 0.4375rem 0.5rem 0.4375rem;
-  @include adapt-padding-to-scrollbar(0.4375rem);
+  @include mixins.adapt-padding-to-scrollbar(0.4375rem);
 
   overflow-x: hidden;
   overflow-y: scroll;
@@ -175,33 +177,7 @@
 
 // Used by Avatar and ProfilePhoto components
 .Avatar, .ProfilePhoto {
-  &.color-bg-1 {
-    --color-user: var(--color-user-1);
-  }
-
-  &.color-bg-2 {
-    --color-user: var(--color-user-2);
-  }
-
-  &.color-bg-4 {
-    --color-user: var(--color-user-4);
-  }
-
-  &.color-bg-5 {
-    --color-user: var(--color-user-5);
-  }
-
-  &.color-bg-6 {
-    --color-user: var(--color-user-6);
-  }
-
-  &.color-bg-7 {
-    --color-user: var(--color-user-7);
-  }
-
-  &.color-bg-8 {
-    --color-user: var(--color-user-8);
-  }
+  --color-user: var(--accent-color);
 
   &.replies-bot-account,
   &.saved-messages {
@@ -230,4 +206,27 @@
   &.open {
     transform: translateY(0);
   }
+}
+
+// Update this value when new server colors are added
+@for $i from 0 through 25 {
+  .peer-color-#{$i} {
+    --accent-color: var(--color-peer-#{$i}, var(--color-text));
+    --bar-gradient: var(--color-peer-gradient-#{$i});
+    --accent-background-color: var(--color-peer-bg-#{$i}, var(--hover-color));
+    --accent-background-active-color: var(--color-peer-bg-active-#{$i}, var(--active-color));
+  }
+}
+
+.peer-color-count-2, .peer-color-count-3 {
+  --accent-background-color: var(--hover-color);
+  --accent-background-active-color: var(--active-color);
+}
+
+.peer-color-count-2 {
+  @include mixins.peer-gradient(--bar-gradient, 2);
+}
+
+.peer-color-count-3 {
+  @include mixins.peer-gradient(--bar-gradient, 3);
 }

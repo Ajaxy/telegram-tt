@@ -6,12 +6,13 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiInputMessageReplyInfo } from '../../../api/types';
 import type { IAnchorPosition, ISettings } from '../../../types';
 import type { Signal } from '../../../util/signals';
 
 import { EDITABLE_INPUT_ID } from '../../../config';
 import { requestForcedReflow, requestMutation } from '../../../lib/fasterdom/fasterdom';
-import { selectCanPlayAnimatedEmojis, selectIsInSelectMode, selectReplyingToId } from '../../../global/selectors';
+import { selectCanPlayAnimatedEmojis, selectDraft, selectIsInSelectMode } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 import { getIsDirectTextInputDisabled } from '../../../util/directInputManager';
@@ -74,7 +75,7 @@ type OwnProps = {
 };
 
 type StateProps = {
-  replyingToId?: number;
+  replyInfo?: ApiInputMessageReplyInfo;
   isSelectModeActive?: boolean;
   messageSendKeyCombo?: ISettings['messageSendKeyCombo'];
   canPlayAnimatedEmojis: boolean;
@@ -126,7 +127,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   noFocusInterception,
   shouldSuppressFocus,
   shouldSuppressTextFormatter,
-  replyingToId,
+  replyInfo,
   isSelectModeActive,
   canPlayAnimatedEmojis,
   messageSendKeyCombo,
@@ -461,7 +462,7 @@ const MessageInput: FC<OwnProps & StateProps> = ({
     if (canAutoFocus) {
       focusInput();
     }
-  }, [chatId, focusInput, replyingToId, canAutoFocus]);
+  }, [chatId, focusInput, replyInfo, canAutoFocus]);
 
   useEffect(() => {
     if (
@@ -626,7 +627,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       messageSendKeyCombo,
-      replyingToId: chatId && threadId ? selectReplyingToId(global, chatId, threadId) : undefined,
+      replyInfo: chatId && threadId ? selectDraft(global, chatId, threadId)?.replyInfo : undefined,
       isSelectModeActive: selectIsInSelectMode(global),
       canPlayAnimatedEmojis: selectCanPlayAnimatedEmojis(global),
     };

@@ -1,18 +1,17 @@
-import { Api as GramJs, errors } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiApplyBoostInfo,
   ApiBoostsStatus,
   ApiMediaArea,
   ApiMediaAreaCoordinates,
-  ApiMessage,
+  ApiMyBoost,
   ApiStealthMode,
   ApiStoryView,
   ApiTypeStory,
+  MediaContent,
 } from '../../types';
 
 import { buildCollectionByCallback } from '../../../util/iteratees';
-import { getServerTime } from '../../../util/serverTime';
 import { buildPrivacyRules } from './common';
 import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
@@ -49,7 +48,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     mediaAreas, sentReaction, out,
   } = story;
 
-  const content: ApiMessage['content'] = {
+  const content: MediaContent = {
     ...buildMessageMediaContent(media),
   };
 
@@ -171,45 +170,7 @@ export function buildApiPeerStories(peerStories: GramJs.PeerStories) {
   return buildCollectionByCallback(peerStories.stories, (story) => [story.id, buildApiStory(peerId, story)]);
 }
 
-export function buildApiApplyBoostInfo(
-  applyBoostInfo: GramJs.stories.TypeCanApplyBoostResult,
-): ApiApplyBoostInfo | undefined {
-  if (applyBoostInfo instanceof GramJs.stories.CanApplyBoostOk) {
-    return { type: 'ok' };
-  }
-
-  if (applyBoostInfo instanceof GramJs.stories.CanApplyBoostReplace) {
-    return {
-      type: 'replace',
-      boostedChatId: getApiChatIdFromMtpPeer(applyBoostInfo.currentBoost),
-    };
-  }
-
-  return undefined;
-}
-
-export function buildApiApplyBoostInfoFromError(
-  error: unknown,
-): ApiApplyBoostInfo | undefined {
-  if (error instanceof errors.FloodWaitError) {
-    return {
-      type: 'wait',
-      waitUntil: getServerTime() + error.seconds,
-    };
-  }
-
-  if (error instanceof Error) {
-    if (error.message === 'BOOST_NOT_MODIFIED') {
-      return {
-        type: 'already',
-      };
-    }
-  }
-
-  return undefined;
-}
-
-export function buildApiBoostsStatus(boostStatus: GramJs.stories.BoostsStatus): ApiBoostsStatus {
+export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): ApiBoostsStatus {
   const {
     level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience,
   } = boostStatus;
@@ -221,5 +182,19 @@ export function buildApiBoostsStatus(boostStatus: GramJs.stories.BoostsStatus): 
     boostUrl,
     nextLevelBoosts,
     ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
+  };
+}
+
+export function buildApiMyBoost(myBoost: GramJs.MyBoost): ApiMyBoost {
+  const {
+    date, expires, slot, cooldownUntilDate, peer,
+  } = myBoost;
+
+  return {
+    date,
+    expires,
+    slot,
+    cooldownUntil: cooldownUntilDate,
+    chatId: peer && getApiChatIdFromMtpPeer(peer),
   };
 }

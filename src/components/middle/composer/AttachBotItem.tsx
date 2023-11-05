@@ -21,6 +21,7 @@ type OwnProps = {
   isInSideMenu?: true;
   chatId?: string;
   threadId?: number;
+  canShowNew?: boolean;
   onMenuOpened: VoidFunction;
   onMenuClosed: VoidFunction;
 };
@@ -31,6 +32,7 @@ const AttachBotItem: FC<OwnProps> = ({
   chatId,
   threadId,
   isInSideMenu,
+  canShowNew,
   onMenuOpened,
   onMenuClosed,
 }) => {
@@ -93,6 +95,7 @@ const AttachBotItem: FC<OwnProps> = ({
       onContextMenu={handleContextMenu}
     >
       {bot.shortName}
+      {canShowNew && bot.isDisclaimerNeeded && <span className="menu-item-badge">{lang('New')}</span>}
       {menuPosition && (
         <Menu
           isOpen={isMenuOpen}

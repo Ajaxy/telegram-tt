@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@use '../../styles/mixins';
 
 .Profile {
   height: 100%;
@@ -18,7 +18,7 @@
 
   > .profile-info > .ChatExtra {
     padding: 0.875rem 0.5rem 0.5rem;
-    @include side-panel-section;
+    @include mixins.side-panel-section;
 
     .narrow {
       margin-bottom: 0;

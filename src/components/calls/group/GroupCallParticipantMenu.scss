@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@use '../../../styles/mixins';
 
 .participant-menu {
   --color-text: white;
@@ -84,7 +84,7 @@
       transition: 0.25s ease-in-out background-color, 0.25s ease-in-out box-shadow;
     }
 
-    @include reset-range();
+    @include mixins.reset-range();
 
     // Apply custom styles
     input[type="range"] {

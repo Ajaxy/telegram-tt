@@ -1,21 +1,22 @@
+@use "sass:map";
+@use "../../../styles/mixins";
+@use "../../../styles/icons";
+
 .EmbeddedMessage {
   display: flex;
   align-items: center;
   font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   line-height: 1.125rem;
-  margin: 0 -0.25rem 0.0625rem;
-  padding: 0.1875rem 0.25rem 0.1875rem 0.4375rem;
+  margin-bottom: 0.0625rem;
+  padding: 0.1875rem 0.375rem 0.1875rem 0.1875rem;
   border-radius: var(--border-radius-messages-small);
   position: relative;
   overflow: hidden;
   cursor: var(--custom-cursor, pointer);
-  direction: ltr;
 
-  @for $i from 1 through 8 {
-    &.color-#{$i} {
-      --accent-color: var(--color-user-#{$i});
-    }
-  }
+  background-color: var(--accent-background-color);
+
+  transition: background-color 0.2s ease-in;
 
   body.no-page-transitions & {
     .ripple-container {
@@ -25,16 +26,9 @@
 
   .custom-shape & {
     max-width: 15rem;
-    padding: 0.5rem;
     margin: 0;
-    background-color: var(--background-color);
+    background-color: var(--color-reply-active);
     box-shadow: 0 1px 2px var(--color-default-shadow);
-
-    &::before {
-      left: 0.625rem;
-      top: 0.625rem;
-      bottom: 0.625rem;
-    }
 
     .embedded-thumb {
       margin-inline-start: 0.5rem;
@@ -49,38 +43,62 @@
     content: "";
     display: block;
     position: absolute;
-    top: 0.3125rem;
-    bottom: 0.3125rem;
-    left: 0.375rem;
-    width: 2px;
-    background: var(--accent-color);
-    border-radius: 2px;
-  }
-
-  &:hover {
-    background-color: var(--hover-color);
+    top: 0;
+    bottom: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: var(--bar-gradient, var(--accent-color));
   }
 
   &:active {
-    background-color: var(--active-color);
+    background-color: var(--background-active-color);
+  }
+
+  &.is-quote {
+    .message-title {
+      padding-inline-end: 0.75rem;
+    }
+
+    .message-text .embedded-text-wrapper {
+      white-space: normal;
+    }
+
+    &::after {
+      @include icons.icon;
+      content: map.get(icons.$icons-map, "quote");
+
+      color: var(--accent-color);
+      position: absolute;
+      top: 0.25rem;
+      inset-inline-end: 0.25rem;
+
+      font-size: 0.625rem;
+    }
+  }
+
+  &.with-thumb {
+    .message-title {
+      padding-inline-start: 2.25rem;
+    }
+
+    .embedded-text-wrapper {
+      text-indent: 2.25rem;
+    }
   }
 
   .message-title {
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   }
 
-  .embedded-more {
-    font-size: 1.125rem;
-    margin-inline-end: 0.125rem;
-    line-height: 0.9375rem;
-    vertical-align: -0.1875rem;
+  .embedded-origin-icon {
+    margin-inline: 0.125rem;
+    vertical-align: middle;
+    line-height: 1.25;
   }
 
-  .embedded-origin-icon {
-    display: inline-block;
+  .embedded-chat-icon {
     font-size: 0.75rem;
-    margin-inline: 0.125rem;
-    transform: translateY(1px);
+    vertical-align: middle;
   }
 
   .message-text {
@@ -90,15 +108,20 @@
     flex-direction: column-reverse;
 
     .message-title {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      flex: 1;
+      column-gap: 0.25rem;
+    }
+
+    .message-title, .embedded-sender {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 0.125rem;
-      flex: 1;
-      display: block;
     }
 
-    p {
+    .embedded-text-wrapper {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -139,7 +162,9 @@
   }
 
   .embedded-thumb {
-    position: relative;
+    position: absolute;
+    top: 0.375rem;
+    inset-inline-start: 0.375rem;
     width: 2rem;
     height: 2rem;
     border-radius: 0.25rem;
@@ -159,16 +184,13 @@
     object-fit: cover;
   }
 
+  &--background-icons {
+    color: var(--accent-color);
+  }
+
   &.inside-input {
     padding-inline-start: 0.5625rem;
     width: 100%;
-    --accent-color: var(--color-primary);
-    --hover-color: var(--color-interactive-element-hover);
-    --active-color: var(--color-reply-active);
-
-    &::before {
-      bottom: 0.3125rem;
-    }
 
     .embedded-thumb {
       margin-left: 0.125rem;
@@ -182,12 +204,6 @@
     .message-title {
       font-weight: 500;
       color: var(--accent-color);
-    }
-
-    .embedded-more {
-      font-size: 1.5rem;
-      opacity: 0.8;
-      color: var(--color-text-secondary);
     }
   }
 }

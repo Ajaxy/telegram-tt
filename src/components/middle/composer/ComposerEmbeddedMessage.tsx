@@ -4,13 +4,14 @@ import React, {
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiMessage, ApiPeer } from '../../../api/types';
+import type { ApiInputMessageReplyInfo, ApiMessage, ApiPeer } from '../../../api/types';
 
 import { stripCustomEmoji } from '../../../global/helpers';
 import {
   selectCanAnimateInterface,
   selectChatMessage,
   selectCurrentMessageList,
+  selectDraft,
   selectEditingId,
   selectEditingMessage,
   selectEditingScheduledId,
@@ -18,12 +19,12 @@ import {
   selectIsChatWithSelf,
   selectIsCurrentUserPremium,
   selectPeer,
-  selectReplyingToId,
   selectSender,
   selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
+import { getPeerColorClass } from '../../common/helpers/peerColor';
 
 import useContextMenuHandlers from '../../../hooks/useContextMenuHandlers';
 import useLang from '../../../hooks/useLang';
@@ -32,7 +33,7 @@ import useMenuPosition from '../../../hooks/useMenuPosition';
 import useShowTransition from '../../../hooks/useShowTransition';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
-import EmbeddedMessage from '../../common/EmbeddedMessage';
+import EmbeddedMessage from '../../common/embedded/EmbeddedMessage';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -41,7 +42,7 @@ import MenuSeparator from '../../ui/MenuSeparator';
 import './ComposerEmbeddedMessage.scss';
 
 type StateProps = {
-  replyingToId?: number;
+  replyInfo?: ApiInputMessageReplyInfo;
   editingId?: number;
   message?: ApiMessage;
   sender?: ApiPeer;
@@ -62,7 +63,7 @@ type OwnProps = {
 const FORWARD_RENDERING_DELAY = 300;
 
 const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
-  replyingToId,
+  replyInfo,
   editingId,
   message,
   sender,
@@ -77,7 +78,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   onClear,
 }) => {
   const {
-    setReplyingToId,
+    resetDraftReplyInfo,
     setEditingId,
     focusMessage,
     changeForwardRecipient,
@@ -89,23 +90,31 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
   const lang = useLang();
 
+  const isReplyToTopicStart = message?.content.action?.type === 'topicCreate';
+
   const isForwarding = Boolean(forwardedMessagesCount);
   const isShown = Boolean(
-    ((replyingToId || editingId) && message)
+    ((replyInfo || editingId) && message)
     || (sender && forwardedMessagesCount),
   );
   const canAnimate = useAsyncRendering(
-    [forwardedMessagesCount],
-    forwardedMessagesCount ? FORWARD_RENDERING_DELAY : undefined,
+    [isShown],
+    isShown ? FORWARD_RENDERING_DELAY : undefined,
   );
 
   const {
     shouldRender, transitionClassNames,
-  } = useShowTransition(canAnimate && isShown, undefined, !shouldAnimate, undefined, !shouldAnimate);
+  } = useShowTransition(
+    canAnimate && isShown && !isReplyToTopicStart,
+    undefined,
+    !shouldAnimate,
+    undefined,
+    !shouldAnimate,
+  );
 
   const clearEmbedded = useLastCallback(() => {
-    if (replyingToId && !shouldForceShowEditing) {
-      setReplyingToId({ messageId: undefined });
+    if (replyInfo && !shouldForceShowEditing) {
+      resetDraftReplyInfo();
     } else if (editingId) {
       setEditingId({ messageId: undefined });
     } else if (forwardedMessagesCount) {
@@ -153,9 +162,13 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   }, [handleContextMenuClose, shouldRender]);
 
   const className = buildClassName('ComposerEmbeddedMessage', transitionClassNames);
+  const innerClassName = buildClassName(
+    'ComposerEmbeddedMessage_inner',
+    getPeerColorClass(sender),
+  );
 
   const leftIcon = useMemo(() => {
-    if (replyingToId && !shouldForceShowEditing) {
+    if (replyInfo && !shouldForceShowEditing) {
       return 'icon-reply';
     }
     if (editingId) {
@@ -166,7 +179,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     }
 
     return undefined;
-  }, [editingId, isForwarding, replyingToId, shouldForceShowEditing]);
+  }, [editingId, isForwarding, replyInfo, shouldForceShowEditing]);
 
   const customText = forwardedMessagesCount && forwardedMessagesCount > 1
     ? lang('ForwardedMessageCount', forwardedMessagesCount)
@@ -191,18 +204,18 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   return (
     <div className={className} ref={ref} onContextMenu={handleContextMenu} onClick={handleContextMenu}>
-      <div className="ComposerEmbeddedMessage_inner">
+      <div className={innerClassName}>
         <div className="embedded-left-icon">
           <i className={buildClassName('icon', leftIcon)} />
         </div>
         <EmbeddedMessage
           className="inside-input"
+          replyInfo={replyInfo}
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
           customText={customText}
           title={editingId ? lang('EditMessage') : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
-          hasContextMenu={isForwarding && !isContextMenuDisabled}
         />
         <Button
           className="embedded-cancel"
@@ -295,7 +308,6 @@ export default memo(withGlobal<OwnProps>(
       },
     } = selectTabState(global);
 
-    const replyingToId = selectReplyingToId(global, chatId, threadId);
     const editingId = messageListType === 'scheduled'
       ? selectEditingScheduledId(global, chatId)
       : selectEditingId(global, chatId, threadId);
@@ -303,9 +315,11 @@ export default memo(withGlobal<OwnProps>(
     const isForwarding = toChatId === chatId;
     const forwardedMessages = forwardMessageIds?.map((id) => selectChatMessage(global, fromChatId!, id)!);
 
+    const draft = selectDraft(global, chatId, threadId);
+    const replyInfo = draft?.replyInfo;
     let message: ApiMessage | undefined;
-    if (replyingToId && !shouldForceShowEditing) {
-      message = selectChatMessage(global, chatId, replyingToId);
+    if (replyInfo && !shouldForceShowEditing) {
+      message = selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);
     } else if (editingId) {
       message = selectEditingMessage(global, chatId, threadId, messageListType);
     } else if (isForwarding && forwardMessageIds!.length === 1) {
@@ -313,7 +327,7 @@ export default memo(withGlobal<OwnProps>(
     }
 
     let sender: ApiPeer | undefined;
-    if (replyingToId && message && !shouldForceShowEditing) {
+    if (replyInfo && message && !shouldForceShowEditing) {
       const { forwardInfo } = message;
       const isChatWithSelf = selectIsChatWithSelf(global, chatId);
       if (forwardInfo && (forwardInfo.isChannelPost || isChatWithSelf)) {
@@ -343,7 +357,7 @@ export default memo(withGlobal<OwnProps>(
       && Boolean(message?.content.storyData);
 
     return {
-      replyingToId,
+      replyInfo,
       editingId,
       message,
       sender,

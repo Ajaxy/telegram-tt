@@ -52,7 +52,7 @@ export const CUSTOM_EMOJI_PREVIEW_CACHE_DISABLED = false;
 export const CUSTOM_EMOJI_PREVIEW_CACHE_NAME = 'tt-custom-emoji-preview';
 export const MEDIA_CACHE_MAX_BYTES = 512 * 1024; // 512 KB
 export const CUSTOM_BG_CACHE_NAME = 'tt-custom-bg';
-export const LANG_CACHE_NAME = 'tt-lang-packs-v24';
+export const LANG_CACHE_NAME = 'tt-lang-packs-v25';
 export const ASSET_CACHE_NAME = 'tt-assets';
 export const AUTODOWNLOAD_FILESIZE_MB_LIMITS = [1, 5, 10, 50, 100, 500];
 export const DATA_BROADCAST_CHANNEL_NAME = 'tt-global';
@@ -311,6 +311,9 @@ export const LIGHT_THEME_BG_COLOR = '#99BA92';
 export const DARK_THEME_BG_COLOR = '#0F0F0F';
 export const DEFAULT_PATTERN_COLOR = '#4A8E3A8C';
 export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
+export const PEER_COLOR_BG_OPACITY = '1a';
+export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
+export const PEER_COLOR_GRADIENT_STEP = 5; // px
 export const MAX_UPLOAD_FILEPART_SIZE = 524288;
 
 // Group calls

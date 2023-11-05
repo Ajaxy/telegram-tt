@@ -14,7 +14,6 @@ import { IS_TEST } from '../../config';
 import {
   getChatAvatarHash,
   getChatTitle,
-  getPeerColorKey,
   getPeerStoryHtmlId,
   getUserFullName,
   isChatWithRepliesBot,
@@ -23,6 +22,7 @@ import {
 } from '../../global/helpers';
 import buildClassName, { createClassNameBuilder } from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
+import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import { useFastClick } from '../../hooks/useFastClick';
@@ -210,7 +210,7 @@ const Avatar: FC<OwnProps> = ({
   const fullClassName = buildClassName(
     `Avatar size-${size}`,
     className,
-    `color-bg-${getPeerColorKey(peer)}`,
+    getPeerColorClass(peer),
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isReplies && 'replies-bot-account',

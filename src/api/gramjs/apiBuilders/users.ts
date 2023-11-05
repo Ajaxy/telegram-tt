@@ -85,6 +85,8 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     hasStories: Boolean(storiesMaxId) && !storiesUnavailable,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
     ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
+    color: mtpUser.color,
+    backgroundEmojiId: mtpUser.backgroundEmojiId?.toString(),
   };
 }
 

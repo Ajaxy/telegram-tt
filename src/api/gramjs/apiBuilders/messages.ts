@@ -1,11 +1,14 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
+import type { ApiDraft } from '../../../global/types';
 import type {
   ApiAction,
   ApiAttachment,
   ApiChat,
   ApiContact,
   ApiGroupCall,
+  ApiInputMessageReplyInfo,
+  ApiInputReplyInfo,
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageEntity,
@@ -13,14 +16,15 @@ import type {
   ApiNewPoll,
   ApiPeer,
   ApiPhoto,
+  ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
   ApiThreadInfo,
-  ApiTypeReplyTo,
   ApiVideo,
+  MediaContent,
   PhoneCallAction,
 } from '../../types';
 import {
@@ -49,7 +53,7 @@ import { buildApiCallDiscardReason } from './calls';
 import {
   buildApiPhoto,
 } from './common';
-import { buildMessageContent, buildMessageTextContent } from './messageContent';
+import { buildMessageContent, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer, isPeerUser } from './peers';
 import { buildMessageReactions } from './reactions';
 
@@ -171,23 +175,6 @@ export function buildApiMessageWithChatId(
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
 
-  let replyToMsgId: number | undefined;
-  let replyToTopId: number | undefined;
-  let replyToStoryUserId: string | undefined;
-  let replyToStoryId: number | undefined;
-  let forumTopic: boolean | undefined;
-  let replyToPeerId: GramJs.TypePeer | undefined;
-  if (mtpMessage.replyTo instanceof GramJs.MessageReplyHeader) {
-    replyToMsgId = mtpMessage.replyTo.replyToMsgId;
-    replyToTopId = mtpMessage.replyTo.replyToTopId;
-    forumTopic = mtpMessage.replyTo.forumTopic;
-    replyToPeerId = mtpMessage.replyTo.replyToPeerId;
-  }
-  if (mtpMessage.replyTo instanceof GramJs.MessageReplyStoryHeader) {
-    replyToStoryUserId = buildApiPeerId(mtpMessage.replyTo.userId, 'user');
-    replyToStoryId = mtpMessage.replyTo.storyId;
-  }
-
   const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
@@ -218,12 +205,8 @@ export function buildApiMessageWithChatId(
     isPinned: mtpMessage.pinned,
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     emojiOnlyCount,
-    ...(replyToMsgId && { replyToMessageId: replyToMsgId }),
-    ...(forumTopic && { isTopicReply: true }),
-    ...(replyToPeerId && { replyToChatId: getApiChatIdFromMtpPeer(replyToPeerId) }),
-    ...(replyToTopId && { replyToTopMessageId: replyToTopId }),
+    ...(mtpMessage.replyTo && { replyInfo: buildApiReplyInfo(mtpMessage.replyTo) }),
     ...(forwardInfo && { forwardInfo }),
-    ...(replyToStoryUserId && { replyToStoryUserId, replyToStoryId }),
     ...(isEdited && { isEdited }),
     ...(mtpMessage.editDate && { editDate: mtpMessage.editDate }),
     ...(isMediaUnread && { isMediaUnread }),
@@ -246,18 +229,26 @@ export function buildApiMessageWithChatId(
   };
 }
 
-export function buildMessageDraft(draft: GramJs.TypeDraftMessage) {
+export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {
   if (draft instanceof GramJs.DraftMessageEmpty) {
     return undefined;
   }
 
   const {
-    message, entities, replyToMsgId, date,
+    message, entities, replyTo, date,
   } = draft;
 
+  const replyInfo = replyTo instanceof GramJs.InputReplyToMessage ? {
+    type: 'message',
+    replyToMsgId: replyTo.replyToMsgId,
+    replyToTopId: replyTo.topMsgId,
+    replyToPeerId: replyTo.replyToPeerId && getApiChatIdFromMtpPeer(replyTo.replyToPeerId),
+    quoteText: replyTo.quoteText ? buildMessageTextContent(replyTo.quoteText, replyTo.quoteEntities) : undefined,
+  } satisfies ApiInputMessageReplyInfo : undefined;
+
   return {
-    formattedText: message ? buildMessageTextContent(message, entities) : undefined,
-    replyingToId: replyToMsgId,
+    text: message ? buildMessageTextContent(message, entities) : undefined,
+    replyInfo,
     date,
   };
 }
@@ -278,6 +269,44 @@ function buildApiMessageForwardInfo(fwdFrom: GramJs.MessageFwdHeader, isChatWith
     hiddenUserName: fwdFrom.fromName,
     postAuthorTitle: fwdFrom.postAuthor,
   };
+}
+
+function buildApiReplyInfo(replyHeader: GramJs.TypeMessageReplyHeader): ApiReplyInfo | undefined {
+  if (replyHeader instanceof GramJs.MessageReplyStoryHeader) {
+    return {
+      type: 'story',
+      userId: replyHeader.userId.toString(),
+      storyId: replyHeader.storyId,
+    };
+  }
+
+  if (replyHeader instanceof GramJs.MessageReplyHeader) {
+    const {
+      replyFrom,
+      replyToMsgId,
+      replyToTopId,
+      replyMedia,
+      replyToPeerId,
+      forumTopic,
+      quote,
+      quoteText,
+      quoteEntities,
+    } = replyHeader;
+
+    return {
+      type: 'message',
+      replyToMsgId,
+      replyToTopId,
+      isForumTopic: forumTopic,
+      replyFrom: replyFrom && buildApiMessageForwardInfo(replyFrom),
+      replyToPeerId: replyToPeerId && getApiChatIdFromMtpPeer(replyToPeerId),
+      replyMedia: replyMedia && buildMessageMediaContent(replyMedia),
+      isQuote: quote,
+      quoteText: quoteText ? buildMessageTextContent(quoteText, quoteEntities) : undefined,
+    };
+  }
+
+  return undefined;
 }
 
 function buildAction(
@@ -682,7 +711,7 @@ export function buildLocalMessage(
   chat: ApiChat,
   text?: string,
   entities?: ApiMessageEntity[],
-  replyingTo?: ApiTypeReplyTo,
+  replyInfo?: ApiInputReplyInfo,
   attachment?: ApiAttachment,
   sticker?: ApiSticker,
   gif?: ApiVideo,
@@ -696,21 +725,8 @@ export function buildLocalMessage(
   const localId = getNextLocalMessageId(chat.lastMessage?.id);
   const media = attachment && buildUploadingMedia(attachment);
   const isChannel = chat.type === 'chatTypeChannel';
-  const isForum = chat.isForum;
 
-  let replyToMessageId: number | undefined;
-  let replyingToTopId: number | undefined;
-  let replyToStoryUserId: string | undefined;
-  let replyToStoryId: number | undefined;
-  if (replyingTo) {
-    if ('replyingTo' in replyingTo) {
-      replyToMessageId = replyingTo.replyingTo;
-      replyingToTopId = replyingTo.replyingToTopId;
-    } else {
-      replyToStoryUserId = replyingTo.userId;
-      replyToStoryId = replyingTo.storyId;
-    }
-  }
+  const resultReplyInfo = replyInfo && buildReplyInfo(replyInfo, chat.isForum);
 
   const message = {
     id: localId,
@@ -732,10 +748,7 @@ export function buildLocalMessage(
     date: scheduledAt || Math.round(Date.now() / 1000) + getServerTimeOffset(),
     isOutgoing: !isChannel,
     senderId: sendAs?.id || currentUserId,
-    ...(replyToMessageId && { replyToMessageId }),
-    ...(replyingToTopId && { replyToTopMessageId: replyingToTopId }),
-    ...((replyToMessageId || replyingToTopId) && isForum && { isTopicReply: true }),
-    ...(replyToStoryUserId && { replyToStoryUserId, replyToStoryId }),
+    replyInfo: resultReplyInfo,
     ...(groupedId && {
       groupedId,
       ...(media && (media.photo || media.video) && { isInAlbum: true }),
@@ -796,6 +809,12 @@ export function buildLocalForwardedMessage({
     text: !shouldHideText ? strippedText : undefined,
   };
 
+  const replyInfo: ApiReplyInfo | undefined = toThreadId ? {
+    type: 'message',
+    replyToTopId: toThreadId,
+    isForumTopic: toChat.isForum || undefined,
+  } : undefined;
+
   return {
     id: localId,
     chatId: toChat.id,
@@ -807,7 +826,7 @@ export function buildLocalForwardedMessage({
     groupedId,
     isInAlbum,
     isForwardingAllowed: true,
-    replyToTopMessageId: toThreadId,
+    replyInfo,
     ...(toThreadId && toChat?.isForum && { isTopicReply: true }),
 
     ...(emojiOnlyCount && { emojiOnlyCount }),
@@ -826,9 +845,28 @@ export function buildLocalForwardedMessage({
   };
 }
 
+function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiReplyInfo {
+  if (inputInfo.type === 'story') {
+    return {
+      type: 'story',
+      userId: inputInfo.userId,
+      storyId: inputInfo.storyId,
+    };
+  }
+
+  return {
+    type: 'message',
+    replyToMsgId: inputInfo.replyToMsgId,
+    replyToTopId: inputInfo.replyToTopId,
+    replyToPeerId: inputInfo.replyToPeerId,
+    quoteText: inputInfo.quoteText,
+    isForumTopic: isForum && inputInfo.replyToTopId ? true : undefined,
+  };
+}
+
 function buildUploadingMedia(
   attachment: ApiAttachment,
-): ApiMessage['content'] {
+): MediaContent {
   const {
     filename: fileName,
     blobUrl,

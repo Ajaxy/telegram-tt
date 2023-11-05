@@ -56,7 +56,7 @@ const useDraft = ({
   useEffect(() => {
     const html = getHtml();
     const isLocalDraft = draft?.isLocal !== undefined;
-    if (getTextWithEntitiesAsHtml(draft) === html && !isLocalDraft) {
+    if (getTextWithEntitiesAsHtml(draft?.text) === html && !isLocalDraft) {
       isTouchedRef.current = false;
     } else {
       isTouchedRef.current = true;
@@ -77,12 +77,13 @@ const useDraft = ({
       saveDraft({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
-        draft: parseMessageInput(html),
+        text: parseMessageInput(html),
       });
     } else {
       clearDraft({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
+        shouldKeepReply: true,
       });
     }
   });
@@ -109,9 +110,9 @@ const useDraft = ({
       return;
     }
 
-    setHtml(getTextWithEntitiesAsHtml(draft));
+    setHtml(getTextWithEntitiesAsHtml(draft.text));
 
-    const customEmojiIds = draft.entities
+    const customEmojiIds = draft.text?.entities
       ?.map((entity) => entity.type === ApiMessageEntityTypes.CustomEmoji && entity.documentId)
       .filter(Boolean) || [];
     if (customEmojiIds.length) loadCustomEmojis({ ids: customEmojiIds });

@@ -294,7 +294,7 @@ addActionHandler('loadAllChats', async (global, actions, payload): Promise<void>
   let i = 0;
 
   const getOrderDate = (chat: ApiChat) => {
-    return chat.lastMessage?.date || chat.joinDate;
+    return chat.lastMessage?.date || chat.creationDate;
   };
 
   while (shouldReplace || !global.chats.isFullyLoaded[listType]) {
@@ -1831,8 +1831,7 @@ addActionHandler('loadTopics', async (global, actions, payload): Promise<void> =
   global = updateTopics(global, chatId, result.count, result.topics);
   global = updateListedTopicIds(global, chatId, result.topics.map((topic) => topic.id));
   Object.entries(result.draftsById || {}).forEach(([threadId, draft]) => {
-    global = replaceThreadParam(global, chatId, Number(threadId), 'draft', draft?.formattedText);
-    global = replaceThreadParam(global, chatId, Number(threadId), 'replyingToId', draft?.replyingToId);
+    global = replaceThreadParam(global, chatId, Number(threadId), 'draft', draft);
   });
   Object.entries(result.readInboxMessageIdByTopicId || {}).forEach(([topicId, messageId]) => {
     global = updateThreadInfo(global, chatId, Number(topicId), { lastReadInboxMessageId: messageId });
@@ -2417,18 +2416,6 @@ async function loadChats(
         global, chatId, MAIN_THREAD_ID, 'draft', draft,
       );
     }
-  });
-
-  const idsToUpdateReplyingToId = isFullDraftSync ? result.chatIds : Object.keys(result.replyingToById);
-  idsToUpdateReplyingToId.forEach((chatId) => {
-    const replyingToById = result.replyingToById[chatId];
-    const thread = selectThread(global, chatId, MAIN_THREAD_ID);
-
-    if (!replyingToById && !thread) return;
-
-    global = replaceThreadParam(
-      global, chatId, MAIN_THREAD_ID, 'replyingToId', replyingToById,
-    );
   });
 
   if (chatIds.length === 0 && !global.chats.isFullyLoaded[listType]) {

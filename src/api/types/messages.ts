@@ -298,17 +298,41 @@ export interface ApiWebPage {
   story?: ApiWebPageStoryData;
 }
 
-export type ApiTypeReplyTo = ApiMessageReplyTo | ApiStoryReplyTo;
+export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
 
-export interface ApiMessageReplyTo {
-  replyingTo: number;
-  replyingToTopId?: number;
+export interface ApiMessageReplyInfo {
+  type: 'message';
+  replyToMsgId?: number;
+  replyToPeerId?: string;
+  replyFrom?: ApiMessageForwardInfo;
+  replyMedia?: MediaContent;
+  replyToTopId?: number;
+  isForumTopic?: true;
+  isQuote?: true;
+  quoteText?: ApiFormattedText;
 }
 
-export interface ApiStoryReplyTo {
+export interface ApiStoryReplyInfo {
+  type: 'story';
   userId: string;
   storyId: number;
 }
+
+export interface ApiInputMessageReplyInfo {
+  type: 'message';
+  replyToMsgId: number;
+  replyToTopId?: number;
+  replyToPeerId?: string;
+  quoteText?: ApiFormattedText;
+}
+
+export interface ApiInputStoryReplyInfo {
+  type: 'story';
+  userId: string;
+  storyId: number;
+}
+
+export type ApiInputReplyInfo = ApiInputMessageReplyInfo | ApiInputStoryReplyInfo;
 
 export interface ApiMessageForwardInfo {
   date: number;
@@ -391,36 +415,33 @@ export interface ApiFormattedText {
   entities?: ApiMessageEntity[];
 }
 
+export type MediaContent = {
+  text?: ApiFormattedText;
+  photo?: ApiPhoto;
+  video?: ApiVideo;
+  altVideo?: ApiVideo;
+  document?: ApiDocument;
+  sticker?: ApiSticker;
+  contact?: ApiContact;
+  poll?: ApiPoll;
+  action?: ApiAction;
+  webPage?: ApiWebPage;
+  audio?: ApiAudio;
+  voice?: ApiVoice;
+  invoice?: ApiInvoice;
+  location?: ApiLocation;
+  game?: ApiGame;
+  storyData?: ApiMessageStoryData;
+};
+
 export interface ApiMessage {
   id: number;
   chatId: string;
-  content: {
-    text?: ApiFormattedText;
-    photo?: ApiPhoto;
-    video?: ApiVideo;
-    altVideo?: ApiVideo;
-    document?: ApiDocument;
-    sticker?: ApiSticker;
-    contact?: ApiContact;
-    poll?: ApiPoll;
-    action?: ApiAction;
-    webPage?: ApiWebPage;
-    audio?: ApiAudio;
-    voice?: ApiVoice;
-    invoice?: ApiInvoice;
-    location?: ApiLocation;
-    game?: ApiGame;
-    storyData?: ApiMessageStoryData;
-  };
+  content: MediaContent;
   date: number;
   isOutgoing: boolean;
   senderId?: string;
-  replyToChatId?: string;
-  replyToMessageId?: number;
-  replyToTopMessageId?: number;
-  isTopicReply?: true;
-  replyToStoryUserId?: string;
-  replyToStoryId?: number;
+  replyInfo?: ApiReplyInfo;
   sendingState?: 'messageSendingStatePending' | 'messageSendingStateFailed';
   forwardInfo?: ApiMessageForwardInfo;
   isDeleting?: boolean;
@@ -657,6 +678,12 @@ export type ApiThemeParameters = {
   button_color: string;
   button_text_color: string;
   secondary_bg_color: string;
+  header_bg_color: string;
+  accent_text_color: string;
+  section_bg_color: string;
+  section_header_text_color: string;
+  subtitle_text_color: string;
+  destructive_text_color: string;
 };
 
 export type ApiBotApp = {

@@ -164,8 +164,8 @@ export function isOwnMessage(message: ApiMessage) {
   return message.isOutgoing;
 }
 
-export function isReplyMessage(message: ApiMessage) {
-  return Boolean(message.replyToMessageId);
+export function isReplyToMessage(message: ApiMessage) {
+  return Boolean(message.replyInfo?.type === 'message');
 }
 
 export function isForwardedMessage(message: ApiMessage) {

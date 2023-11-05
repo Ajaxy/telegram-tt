@@ -9,6 +9,8 @@ import type { IAlbum } from '../../../../types';
 import { MAIN_THREAD_ID } from '../../../../api/types';
 import { MediaViewerOrigin } from '../../../../types';
 
+import { getMessageReplyInfo } from '../../../../global/helpers/replies';
+
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 export default function useInnerHandlers(
@@ -20,7 +22,6 @@ export default function useInnerHandlers(
   isInDocumentGroup: boolean,
   asForwarded?: boolean,
   isScheduled?: boolean,
-  isChatWithRepliesBot?: boolean,
   album?: IAlbum,
   avatarPeer?: ApiPeer,
   senderPeer?: ApiPeer,
@@ -28,6 +29,7 @@ export default function useInnerHandlers(
   messageTopic?: ApiTopic,
   isTranslatingChat?: boolean,
   story?: ApiStory,
+  isReplyPrivate?: boolean,
 ) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
@@ -36,8 +38,12 @@ export default function useInnerHandlers(
   } = getActions();
 
   const {
-    id: messageId, forwardInfo, replyToMessageId, replyToChatId, replyToTopMessageId, groupedId,
+    id: messageId, forwardInfo, groupedId,
   } = message;
+
+  const {
+    replyToMsgId, replyToPeerId, replyToTopId, isQuote,
+  } = getMessageReplyInfo(message) || {};
 
   const handleAvatarClick = useLastCallback(() => {
     if (!avatarPeer) {
@@ -70,12 +76,19 @@ export default function useInnerHandlers(
   });
 
   const handleReplyClick = useLastCallback((): void => {
+    if (!replyToMsgId || isReplyPrivate) {
+      showNotification({
+        message: isQuote ? lang('QuotePrivate') : lang('ReplyPrivate'),
+      });
+      return;
+    }
+
     focusMessage({
-      chatId: isChatWithRepliesBot && replyToChatId ? replyToChatId : chatId,
+      chatId: replyToPeerId || chatId,
       threadId,
-      messageId: replyToMessageId!,
-      replyMessageId: isChatWithRepliesBot && replyToChatId ? undefined : messageId,
-      noForumTopicPanel: true,
+      messageId: replyToMsgId,
+      replyMessageId: replyToPeerId ? undefined : messageId,
+      noForumTopicPanel: !replyToPeerId ? true : undefined, // Open topic panel for cross-chat replies
     });
   });
 
@@ -140,10 +153,10 @@ export default function useInnerHandlers(
       return;
     }
 
-    if (isChatWithRepliesBot && replyToChatId) {
+    if (replyToPeerId && replyToTopId) {
       focusMessageInComments({
-        chatId: replyToChatId,
-        threadId: replyToTopMessageId!,
+        chatId: replyToPeerId,
+        threadId: replyToTopId,
         messageId: forwardInfo!.fromMessageId!,
       });
     } else {
@@ -175,7 +188,7 @@ export default function useInnerHandlers(
   const handleTopicChipClick = useLastCallback(() => {
     if (!messageTopic) return;
     focusMessage({
-      chatId: isChatWithRepliesBot && replyToChatId ? replyToChatId : chatId,
+      chatId: replyToPeerId || chatId,
       threadId: messageTopic.id,
       messageId,
     });

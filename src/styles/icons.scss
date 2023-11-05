@@ -1,14 +1,4 @@
 @use "sass:map";
-$icons-font: "icons";
-
-@font-face {
-  font-family: $icons-font;
-  src: url("./icons.woff2?aa9c231863df4bab22759fc9f141c077") format("woff2"),
-url("./icons.woff?aa9c231863df4bab22759fc9f141c077") format("woff");
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-}
 
 .icon-char::before {
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -18,7 +8,7 @@ url("./icons.woff?aa9c231863df4bab22759fc9f141c077") format("woff");
   display: block;
 }
 
-.icon {
+@mixin icon {
   /* use !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
   font-family: "icons" !important;
@@ -32,6 +22,10 @@ url("./icons.woff?aa9c231863df4bab22759fc9f141c077") format("woff");
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon {
+  @include icon;
 }
 
 $icons-map: (
@@ -181,79 +175,80 @@ $icons-map: (
   "premium": "\f190",
   "previous": "\f191",
   "privacy-policy": "\f192",
-  "readchats": "\f193",
-  "recent": "\f194",
-  "reload": "\f195",
-  "remove": "\f196",
-  "reopen-topic": "\f197",
-  "replace": "\f198",
-  "replies": "\f199",
-  "reply-filled": "\f19a",
-  "reply": "\f19b",
-  "revote": "\f19c",
-  "save-story": "\f19d",
-  "saved-messages": "\f19e",
-  "schedule": "\f19f",
-  "search": "\f1a0",
-  "select": "\f1a1",
-  "send-outline": "\f1a2",
-  "send": "\f1a3",
-  "settings-filled": "\f1a4",
-  "settings": "\f1a5",
-  "share-filled": "\f1a6",
-  "share-screen-outlined": "\f1a7",
-  "share-screen-stop": "\f1a8",
-  "share-screen": "\f1a9",
-  "sidebar": "\f1aa",
-  "skip-next": "\f1ab",
-  "skip-previous": "\f1ac",
-  "smallscreen": "\f1ad",
-  "smile": "\f1ae",
-  "sort": "\f1af",
-  "speaker-muted-story": "\f1b0",
-  "speaker-outline": "\f1b1",
-  "speaker-story": "\f1b2",
-  "speaker": "\f1b3",
-  "spoiler-disable": "\f1b4",
-  "spoiler": "\f1b5",
-  "sport": "\f1b6",
-  "stats": "\f1b7",
-  "stealth-future": "\f1b8",
-  "stealth-past": "\f1b9",
-  "stickers": "\f1ba",
-  "stop-raising-hand": "\f1bb",
-  "stop": "\f1bc",
-  "story-caption": "\f1bd",
-  "story-expired": "\f1be",
-  "story-priority": "\f1bf",
-  "story-reply": "\f1c0",
-  "strikethrough": "\f1c1",
-  "timer": "\f1c2",
-  "transcribe": "\f1c3",
-  "truck": "\f1c4",
-  "unarchive": "\f1c5",
-  "underlined": "\f1c6",
-  "unlock-badge": "\f1c7",
-  "unlock": "\f1c8",
-  "unmute": "\f1c9",
-  "unpin": "\f1ca",
-  "unread": "\f1cb",
-  "up": "\f1cc",
-  "user-filled": "\f1cd",
-  "user-online": "\f1ce",
-  "user": "\f1cf",
-  "video-outlined": "\f1d0",
-  "video-stop": "\f1d1",
-  "video": "\f1d2",
-  "voice-chat": "\f1d3",
-  "volume-1": "\f1d4",
-  "volume-2": "\f1d5",
-  "volume-3": "\f1d6",
-  "web": "\f1d7",
-  "webapp": "\f1d8",
-  "word-wrap": "\f1d9",
-  "zoom-in": "\f1da",
-  "zoom-out": "\f1db",
+  "quote": "\f193",
+  "readchats": "\f194",
+  "recent": "\f195",
+  "reload": "\f196",
+  "remove": "\f197",
+  "reopen-topic": "\f198",
+  "replace": "\f199",
+  "replies": "\f19a",
+  "reply-filled": "\f19b",
+  "reply": "\f19c",
+  "revote": "\f19d",
+  "save-story": "\f19e",
+  "saved-messages": "\f19f",
+  "schedule": "\f1a0",
+  "search": "\f1a1",
+  "select": "\f1a2",
+  "send-outline": "\f1a3",
+  "send": "\f1a4",
+  "settings-filled": "\f1a5",
+  "settings": "\f1a6",
+  "share-filled": "\f1a7",
+  "share-screen-outlined": "\f1a8",
+  "share-screen-stop": "\f1a9",
+  "share-screen": "\f1aa",
+  "sidebar": "\f1ab",
+  "skip-next": "\f1ac",
+  "skip-previous": "\f1ad",
+  "smallscreen": "\f1ae",
+  "smile": "\f1af",
+  "sort": "\f1b0",
+  "speaker-muted-story": "\f1b1",
+  "speaker-outline": "\f1b2",
+  "speaker-story": "\f1b3",
+  "speaker": "\f1b4",
+  "spoiler-disable": "\f1b5",
+  "spoiler": "\f1b6",
+  "sport": "\f1b7",
+  "stats": "\f1b8",
+  "stealth-future": "\f1b9",
+  "stealth-past": "\f1ba",
+  "stickers": "\f1bb",
+  "stop-raising-hand": "\f1bc",
+  "stop": "\f1bd",
+  "story-caption": "\f1be",
+  "story-expired": "\f1bf",
+  "story-priority": "\f1c0",
+  "story-reply": "\f1c1",
+  "strikethrough": "\f1c2",
+  "timer": "\f1c3",
+  "transcribe": "\f1c4",
+  "truck": "\f1c5",
+  "unarchive": "\f1c6",
+  "underlined": "\f1c7",
+  "unlock-badge": "\f1c8",
+  "unlock": "\f1c9",
+  "unmute": "\f1ca",
+  "unpin": "\f1cb",
+  "unread": "\f1cc",
+  "up": "\f1cd",
+  "user-filled": "\f1ce",
+  "user-online": "\f1cf",
+  "user": "\f1d0",
+  "video-outlined": "\f1d1",
+  "video-stop": "\f1d2",
+  "video": "\f1d3",
+  "voice-chat": "\f1d4",
+  "volume-1": "\f1d5",
+  "volume-2": "\f1d6",
+  "volume-3": "\f1d7",
+  "web": "\f1d8",
+  "webapp": "\f1d9",
+  "word-wrap": "\f1da",
+  "zoom-in": "\f1db",
+  "zoom-out": "\f1dc",
 );
 
 .icon-active-sessions::before {
@@ -693,6 +688,9 @@ $icons-map: (
 }
 .icon-privacy-policy::before {
   content: map.get($icons-map, "privacy-policy");
+}
+.icon-quote::before {
+  content: map.get($icons-map, "quote");
 }
 .icon-readchats::before {
   content: map.get($icons-map, "readchats");

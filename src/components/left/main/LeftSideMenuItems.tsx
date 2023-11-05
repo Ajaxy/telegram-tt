@@ -158,6 +158,7 @@ const LeftSideMenuItems = ({
           bot={bot}
           theme={theme}
           isInSideMenu
+          canShowNew
           onMenuOpened={onBotMenuOpened}
           onMenuClosed={onBotMenuClosed}
         />

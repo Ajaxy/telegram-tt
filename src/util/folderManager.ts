@@ -434,7 +434,7 @@ function buildChatSummary(
   const {
     id, type, lastMessage, isRestricted, isNotJoined, migratedTo, folderId,
     unreadCount: chatUnreadCount, unreadMentionsCount: chatUnreadMentionsCount, hasUnreadMark,
-    joinDate, draftDate, isForum, topics,
+    creationDate, draftDate, isForum, topics,
   } = chat;
 
   const { unreadCount, unreadMentionsCount } = isForum
@@ -460,7 +460,7 @@ function buildChatSummary(
     isUnread: Boolean(unreadCount || unreadMentionsCount || hasUnreadMark),
     unreadCount,
     unreadMentionsCount,
-    order: Math.max(joinDate || 0, draftDate || 0, lastMessage?.date || 0),
+    order: Math.max(creationDate || 0, draftDate || 0, lastMessage?.date || 0),
     isUserBot: userInfo ? userInfo.type === 'userTypeBot' : undefined,
     isUserContact: userInfo ? userInfo.isContact : undefined,
   };

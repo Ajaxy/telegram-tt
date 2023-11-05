@@ -28,7 +28,7 @@ import {
   selectCurrentMessageList,
   selectDraft,
   selectEditingDraft,
-  selectEditingId, selectReplyingToId,
+  selectEditingId,
   selectTabState,
   selectThreadInfo,
 } from '../../selectors';
@@ -111,7 +111,6 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
           draft: selectDraft(global, chatId, Number(threadId)),
           editingId: selectEditingId(global, chatId, Number(threadId)),
           editingDraft: selectEditingDraft(global, chatId, Number(threadId)),
-          replyingToId: selectReplyingToId(global, chatId, Number(threadId)),
         };
 
         return acc2;

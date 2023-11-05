@@ -535,23 +535,20 @@ addActionHandler('openBoostModal', async (global, actions, payload): Promise<voi
   }, tabId);
   setGlobal(global);
 
-  const applyInfoResult = await callApi('fetchCanApplyBoost', {
-    chat,
-  });
+  const myBoosts = await callApi('fetchMyBoosts');
 
-  if (!applyInfoResult?.info) return;
-
-  const applyInfo = applyInfoResult.info;
+  if (!myBoosts) return;
 
   global = getGlobal();
   const tabState = selectTabState(global, tabId);
   if (!tabState.boostModal) return;
 
-  global = addChats(global, buildCollectionByKey(applyInfoResult.chats, 'id'));
+  global = addChats(global, buildCollectionByKey(myBoosts.chats, 'id'));
+  global = addUsers(global, buildCollectionByKey(myBoosts.users, 'id'));
   global = updateTabState(global, {
     boostModal: {
       ...tabState.boostModal,
-      applyInfo,
+      myBoosts: myBoosts.boosts,
     },
   }, tabId);
   setGlobal(global);
@@ -643,12 +640,13 @@ addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<v
 });
 
 addActionHandler('applyBoost', async (global, actions, payload): Promise<void> => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
+  const { chatId, slots, tabId = getCurrentTabId() } = payload;
 
   const chat = selectChat(global, chatId);
   if (!chat) return;
 
   const result = await callApi('applyBoost', {
+    slots,
     chat,
   });
 

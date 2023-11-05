@@ -1,6 +1,7 @@
 import BigInt from 'big-integer';
 import { Api as GramJs } from '../../../lib/gramjs';
 
+import type { ApiDraft } from '../../../global/types';
 import type {
   ApiChat,
   ApiChatAdminRights,
@@ -8,10 +9,8 @@ import type {
   ApiChatFolder,
   ApiChatFullInfo,
   ApiChatReactions,
-  ApiFormattedText,
   ApiGroupCall,
   ApiMessage,
-  ApiMessageEntity,
   ApiPeer,
   ApiPhoto,
   ApiTopic,
@@ -58,6 +57,7 @@ import {
   buildInputEntity,
   buildInputPeer,
   buildInputPhoto,
+  buildInputReplyTo,
   buildMtpMessageEntity,
   generateRandomBigInt,
   isMessageWithMedia,
@@ -135,7 +135,7 @@ export async function fetchChats({
   }
 
   const chats: ApiChat[] = [];
-  const draftsById: Record<string, ApiFormattedText> = {};
+  const draftsById: Record<string, ApiDraft> = {};
   const replyingToById: Record<string, number> = {};
 
   const dialogs = (resultPinned ? resultPinned.dialogs : []).concat(result.dialogs);
@@ -180,12 +180,9 @@ export async function fetchChats({
     }
 
     if (dialog.draft) {
-      const { formattedText, replyingToId } = buildMessageDraft(dialog.draft) || {};
-      if (formattedText) {
-        draftsById[chat.id] = formattedText;
-      }
-      if (replyingToId) {
-        replyingToById[chat.id] = replyingToId;
+      const draft = buildMessageDraft(dialog.draft);
+      if (draft) {
+        draftsById[chat.id] = draft;
       }
     }
   });
@@ -364,33 +361,16 @@ export async function requestChatUpdate({
 
 export function saveDraft({
   chat,
-  text,
-  entities,
-  threadId,
-  replyToMsgId,
+  draft,
 }: {
   chat: ApiChat;
-  text: string;
-  entities?: ApiMessageEntity[];
-  threadId?: number;
-  replyToMsgId?: number;
+  draft?: ApiDraft;
 }) {
   return invokeRequest(new GramJs.messages.SaveDraft({
     peer: buildInputPeer(chat.id, chat.accessHash),
-    message: text,
-    ...(entities && {
-      entities: entities.map(buildMtpMessageEntity),
-    }),
-    replyToMsgId,
-    topMsgId: threadId,
-  }));
-}
-
-export function clearDraft(chat: ApiChat, threadId?: number) {
-  return invokeRequest(new GramJs.messages.SaveDraft({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    message: '',
-    ...(threadId && { topMsgId: threadId }),
+    message: draft?.text?.text || '',
+    entities: draft?.text?.entities?.map(buildMtpMessageEntity),
+    replyTo: draft?.replyInfo && buildInputReplyTo(draft.replyInfo),
   }));
 }
 

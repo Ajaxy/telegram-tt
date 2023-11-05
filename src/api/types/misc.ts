@@ -195,6 +195,8 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
+  peerColors: Record<string, string[]>;
+  darkPeerColors: Record<string, string[]>;
 }
 
 export interface ApiConfig {

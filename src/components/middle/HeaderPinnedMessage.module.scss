@@ -1,4 +1,4 @@
-@import "../../styles/mixins";
+@use "../../styles/mixins";
 
 .root {
   display: flex;
@@ -247,7 +247,7 @@
   }
 
   .root {
-    @include header-mobile();
+    @include mixins.header-mobile();
   }
 }
 

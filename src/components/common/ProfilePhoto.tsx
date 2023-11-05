@@ -6,7 +6,6 @@ import type { ApiChat, ApiPhoto, ApiUser } from '../../api/types';
 import {
   getChatAvatarHash,
   getChatTitle,
-  getPeerColorKey,
   getUserFullName,
   getVideoAvatarMediaHash,
   isChatWithRepliesBot,
@@ -16,6 +15,7 @@ import {
 import buildClassName from '../../util/buildClassName';
 import { getFirstLetters } from '../../util/textFormat';
 import { IS_CANVAS_FILTER_SUPPORTED } from '../../util/windowEnvironment';
+import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 
 import useAppLayout from '../../hooks/useAppLayout';
@@ -55,11 +55,11 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const isDeleted = user && isDeletedUser(user);
   const isRepliesChat = chat && isChatWithRepliesBot(chat.id);
-  const userOrChat = user || chat;
-  const canHaveMedia = userOrChat && !isSavedMessages && !isDeleted && !isRepliesChat;
+  const peer = user || chat;
+  const canHaveMedia = peer && !isSavedMessages && !isDeleted && !isRepliesChat;
   const { isVideo } = photo || {};
 
-  const avatarHash = canHaveMedia && getChatAvatarHash(userOrChat, 'normal');
+  const avatarHash = canHaveMedia && getChatAvatarHash(peer, 'normal');
   const avatarBlobUrl = useMedia(avatarHash);
 
   const photoHash = canHaveMedia && photo && !isVideo && `photo${photo.id}?size=c`;
@@ -139,7 +139,7 @@ const ProfilePhoto: FC<OwnProps> = ({
 
   const fullClassName = buildClassName(
     'ProfilePhoto',
-    `color-bg-${getPeerColorKey(user || chat)}`,
+    getPeerColorClass(peer),
     isSavedMessages && 'saved-messages',
     isDeleted && 'deleted-account',
     isRepliesChat && 'replies-bot-account',

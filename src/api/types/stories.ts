@@ -1,6 +1,6 @@
 import type { ApiPrivacySettings } from '../../types';
 import type {
-  ApiGeoPoint, ApiMessage, ApiReaction, ApiReactionCount,
+  ApiGeoPoint, ApiReaction, ApiReactionCount, MediaContent,
 } from './messages';
 import type { StatisticsOverviewPercentage } from './statistics';
 
@@ -10,7 +10,7 @@ export interface ApiStory {
   peerId: string;
   date: number;
   expireDate: number;
-  content: ApiMessage['content'];
+  content: MediaContent;
   isPinned?: boolean;
   isEdited?: boolean;
   isForCloseFriends?: boolean;
@@ -110,26 +110,6 @@ export type ApiMediaAreaSuggestedReaction = {
 
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction;
 
-export type ApiApplyBoostOk = {
-  type: 'ok';
-};
-
-export type ApiApplyBoostReplace = {
-  type: 'replace';
-  boostedChatId: string;
-};
-
-export type ApiApplyBoostWait = {
-  type: 'wait';
-  waitUntil: number;
-};
-
-export type ApiApplyBoostAlready = {
-  type: 'already';
-};
-
-export type ApiApplyBoostInfo = ApiApplyBoostOk | ApiApplyBoostReplace | ApiApplyBoostWait | ApiApplyBoostAlready;
-
 export type ApiBoostsStatus = {
   level: number;
   currentLevelBoosts: number;
@@ -138,4 +118,12 @@ export type ApiBoostsStatus = {
   hasMyBoost?: boolean;
   boostUrl: string;
   premiumSubscribers?: StatisticsOverviewPercentage;
+};
+
+export type ApiMyBoost = {
+  slot: number;
+  chatId?: string;
+  date: number;
+  expires: number;
+  cooldownUntil?: number;
 };

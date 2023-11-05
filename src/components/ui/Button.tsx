@@ -43,6 +43,7 @@ export type OwnProps = {
   tabIndex?: number;
   isRtl?: boolean;
   isShiny?: boolean;
+  isRectangular?: boolean;
   withPremiumGradient?: boolean;
   noPreventDefault?: boolean;
   shouldStopPropagation?: boolean;
@@ -96,6 +97,7 @@ const Button: FC<OwnProps> = ({
   faded,
   tabIndex,
   isRtl,
+  isRectangular,
   noPreventDefault,
   shouldStopPropagation,
   style,
@@ -126,6 +128,7 @@ const Button: FC<OwnProps> = ({
     backgroundImage && 'with-image',
     isShiny && 'shiny',
     withPremiumGradient && 'premium',
+    isRectangular && 'rectangular',
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {

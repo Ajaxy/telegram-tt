@@ -3,7 +3,7 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBotApp,
-  ApiChat, ApiPeer, ApiThemeParameters, ApiUser, OnApiUpdate,
+  ApiChat, ApiInputMessageReplyInfo, ApiPeer, ApiThemeParameters, ApiUser, OnApiUpdate,
 } from '../../types';
 
 import { WEB_APP_PLATFORM } from '../../../config';
@@ -24,7 +24,7 @@ import {
   buildInputBotApp,
   buildInputEntity,
   buildInputPeer,
-  buildInputReplyToMessage,
+  buildInputReplyTo,
   buildInputThemeParams,
   generateRandomBigInt,
 } from '../gramjsBuilders';
@@ -124,13 +124,12 @@ export async function fetchInlineBotResults({
 }
 
 export async function sendInlineBotResult({
-  chat, replyingToTopId, resultId, queryId, replyingTo, sendAs, isSilent, scheduleDate,
+  chat, replyInfo, resultId, queryId, sendAs, isSilent, scheduleDate,
 }: {
   chat: ApiChat;
-  replyingToTopId?: number;
+  replyInfo?: ApiInputMessageReplyInfo;
   resultId: string;
   queryId: string;
-  replyingTo?: number;
   sendAs?: ApiPeer;
   isSilent?: boolean;
   scheduleDate?: number;
@@ -144,9 +143,8 @@ export async function sendInlineBotResult({
     peer: buildInputPeer(chat.id, chat.accessHash),
     id: resultId,
     scheduleDate,
-    ...(replyingToTopId && { topMsgId: replyingToTopId }),
+    replyTo: replyInfo && buildInputReplyTo(replyInfo),
     ...(isSilent && { silent: true }),
-    ...(replyingTo && { replyToMsgId: replyingTo }),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 }
@@ -173,8 +171,7 @@ export async function requestWebView({
   bot,
   url,
   startParam,
-  replyToMessageId,
-  threadId,
+  replyInfo,
   theme,
   sendAs,
   isFromBotMenu,
@@ -184,8 +181,7 @@ export async function requestWebView({
   bot: ApiUser;
   url?: string;
   startParam?: string;
-  replyToMessageId?: number;
-  threadId?: number;
+  replyInfo?: ApiInputMessageReplyInfo;
   theme?: ApiThemeParameters;
   sendAs?: ApiPeer;
   isFromBotMenu?: boolean;
@@ -199,7 +195,7 @@ export async function requestWebView({
     themeParams: theme ? buildInputThemeParams(theme) : undefined,
     fromBotMenu: isFromBotMenu || undefined,
     platform: WEB_APP_PLATFORM,
-    ...(replyToMessageId && { replyTo: buildInputReplyToMessage(replyToMessageId, threadId) }),
+    replyTo: replyInfo && buildInputReplyTo(replyInfo),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 
@@ -292,16 +288,14 @@ export function prolongWebView({
   peer,
   bot,
   queryId,
-  replyToMessageId,
-  threadId,
+  replyInfo,
   sendAs,
 }: {
   isSilent?: boolean;
   peer: ApiPeer;
   bot: ApiUser;
   queryId: string;
-  replyToMessageId?: number;
-  threadId?: number;
+  replyInfo?: ApiInputMessageReplyInfo;
   sendAs?: ApiPeer;
 }) {
   return invokeRequest(new GramJs.messages.ProlongWebView({
@@ -309,7 +303,7 @@ export function prolongWebView({
     peer: buildInputPeer(peer.id, peer.accessHash),
     bot: buildInputPeer(bot.id, bot.accessHash),
     queryId: BigInt(queryId),
-    ...(replyToMessageId && { replyTo: buildInputReplyToMessage(replyToMessageId, threadId) }),
+    replyTo: replyInfo && buildInputReplyTo(replyInfo),
     ...(sendAs && { sendAs: buildInputPeer(sendAs.id, sendAs.accessHash) }),
   }));
 }
