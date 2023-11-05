@@ -38,6 +38,14 @@ export function reloadWindows(isAutoUpdateEnabled = true): void {
   });
 }
 
+export function focusLastWindow(): void {
+  if (BrowserWindow.getAllWindows().every((window) => !window.isVisible())) {
+    BrowserWindow.getAllWindows().forEach((window) => window.show());
+  } else {
+    getLastWindow()?.focus();
+  }
+}
+
 export function getAppTitle(chatTitle?: string): string {
   const appName = app.getName();
 
