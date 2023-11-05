@@ -14,6 +14,17 @@ import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
 
+interface Container {
+  mapStateToProps: MapStateToProps<any>;
+  activationFn?: ActivationFn<any>;
+  stuckTo?: any;
+  ownProps: Props;
+  mappedProps?: Props;
+  forceUpdate: Function;
+  DEBUG_updates: number;
+  DEBUG_componentName: string;
+}
+
 type GlobalState =
   AnyLiteral
   & { DEBUG_capturedId?: number };
@@ -36,7 +47,10 @@ type ActionHandler = (
 ) => GlobalState | void | Promise<void>;
 
 type MapStateToProps<OwnProps = undefined> = (global: GlobalState, ownProps: OwnProps) => AnyLiteral;
-type ActivationFn<OwnProps = undefined> = (global: GlobalState, ownProps: OwnProps) => boolean;
+type StickToFirstFn = (value: any) => boolean;
+type ActivationFn<OwnProps = undefined> = (
+  global: GlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn,
+) => boolean;
 
 let currentGlobal = {} as GlobalState;
 
@@ -50,15 +64,7 @@ const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
 const actionHandlers: Record<string, ActionHandler[]> = {};
 const callbacks: Function[] = [updateContainers];
 const actions = {} as Actions;
-const containers = new Map<string, {
-  mapStateToProps: MapStateToProps<any>;
-  activationFn?: ActivationFn<any>;
-  ownProps: Props;
-  mappedProps?: Props;
-  forceUpdate: Function;
-  DEBUG_updates: number;
-  DEBUG_componentName: string;
-}>();
+const containers = new Map<string, Container>();
 
 const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
@@ -161,10 +167,10 @@ function updateContainers() {
   // eslint-disable-next-line no-restricted-syntax
   for (const container of containers.values()) {
     const {
-      mapStateToProps, activationFn, ownProps, mappedProps, forceUpdate,
+      mapStateToProps, ownProps, mappedProps, forceUpdate,
     } = container;
 
-    if (activationFn && !activationFn(currentGlobal, ownProps)) {
+    if (!activateContainer(container, currentGlobal, ownProps)) {
       continue;
     }
 
@@ -266,8 +272,7 @@ export function withGlobal<OwnProps extends AnyLiteral>(
       }
 
       if (!container.mappedProps || (
-        !arePropsShallowEqual(container.ownProps, props)
-        && (!activationFn || activationFn(currentGlobal, props))
+        !arePropsShallowEqual(container.ownProps, props) && activateContainer(container, currentGlobal, props)
       )) {
         try {
           container.mappedProps = mapStateToProps(currentGlobal, props);
@@ -286,6 +291,21 @@ export function withGlobal<OwnProps extends AnyLiteral>(
 
     return TeactNContainer;
   };
+}
+
+function activateContainer(container: Container, global: GlobalState, props: Props) {
+  const { activationFn, stuckTo } = container;
+  if (!activationFn) {
+    return true;
+  }
+
+  return activationFn(global, props, (stickTo: any) => {
+    if (stickTo && !stuckTo) {
+      container.stuckTo = stickTo;
+    }
+
+    return stickTo && (!stuckTo || stuckTo === stickTo);
+  });
 }
 
 export function typify<
@@ -322,7 +342,7 @@ export function typify<
     ) => void,
     withGlobal: withGlobal as <OwnProps extends AnyLiteral>(
       mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
-      activationFn?: (global: ProjectGlobalState, ownProps: OwnProps) => boolean,
+      activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
     ) => (Component: FC) => FC<OwnProps>,
   };
 }
