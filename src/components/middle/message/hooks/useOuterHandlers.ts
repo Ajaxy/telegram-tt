@@ -38,7 +38,7 @@ export default function useOuterHandlers(
   shouldHandleMouseLeave: boolean,
   getIsMessageListReady: Signal<boolean>,
 ) {
-  const { setReplyingToId, sendDefaultReaction } = getActions();
+  const { updateDraftReplyInfo, sendDefaultReaction } = getActions();
 
   const [isQuickReactionVisible, markQuickReactionVisible, unmarkQuickReactionVisible] = useFlag();
   const [isSwiped, markSwiped, unmarkSwiped] = useFlag();
@@ -138,7 +138,7 @@ export default function useOuterHandlers(
   function handleContainerDoubleClick() {
     if (IS_TOUCH_ENV || !canReply) return;
 
-    setReplyingToId({ messageId });
+    updateDraftReplyInfo({ replyToMsgId: messageId });
   }
 
   function stopPropagation(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -172,14 +172,14 @@ export default function useOuterHandlers(
           return;
         }
 
-        setReplyingToId({ messageId });
+        updateDraftReplyInfo({ replyToMsgId: messageId });
 
         setTimeout(unmarkSwiped, Math.max(0, SWIPE_ANIMATION_DURATION - (Date.now() - startedAt)));
         startedAt = undefined;
       },
     });
   }, [
-    containerRef, isInSelectMode, messageId, setReplyingToId, markSwiped, unmarkSwiped, canReply, isContextMenuShown,
+    containerRef, isInSelectMode, messageId, markSwiped, unmarkSwiped, canReply, isContextMenuShown,
     getIsMessageListReady,
   ]);
 

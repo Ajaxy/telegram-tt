@@ -17,6 +17,7 @@ import {
   checkIfHasUnreadReactions, getMessageContent, getMessageText, isActionMessage,
   isMessageLocal, isUserId,
 } from '../../helpers';
+import { getMessageReplyInfo } from '../../helpers/replies';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addViewportId,
@@ -84,18 +85,19 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       }
 
       const newMessage = selectChatMessage(global, chatId, id)!;
+      const replyInfo = getMessageReplyInfo(newMessage);
       const chat = selectChat(global, chatId);
       if (chat?.isForum
-        && newMessage.isTopicReply
+        && replyInfo?.isForumTopic
         && !selectTopicFromMessage(global, newMessage)
-        && newMessage.replyToMessageId) {
-        actions.loadTopicById({ chatId, topicId: newMessage.replyToMessageId });
+        && replyInfo.replyToMsgId) {
+        actions.loadTopicById({ chatId, topicId: replyInfo.replyToMsgId });
       }
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const isLocal = isMessageLocal(message as ApiMessage);
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
-          if (isLocal && message.isOutgoing && !(message.content?.action) && !message.replyToStoryId
+          if (isLocal && message.isOutgoing && !(message.content?.action) && !replyInfo?.replyToMsgId
             && !message.content?.storyData) {
             const currentMessageList = selectCurrentMessageList(global, tabId);
             if (currentMessageList) {
@@ -122,7 +124,10 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
             setTimeout(() => {
               global = getGlobal();
               if (shouldForceReply) {
-                global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'replyingToId', id);
+                actions.updateDraftReplyInfo({
+                  replyToMsgId: id,
+                  tabId,
+                });
               }
               global = updateChatLastMessage(global, chatId, newMessage);
               setGlobal(global);
@@ -773,16 +778,18 @@ function updateThreadUnread<T extends GlobalState>(
 ) {
   const { chatId } = message;
 
+  const replyInfo = getMessageReplyInfo(message);
+
   const { threadInfo } = selectThreadByMessage(global, message) || {};
 
-  if (!threadInfo && message.replyToMessageId) {
-    const originMessage = selectChatMessage(global, chatId, message.replyToMessageId);
+  if (!threadInfo && replyInfo?.replyToMsgId) {
+    const originMessage = selectChatMessage(global, chatId, replyInfo.replyToMsgId);
     if (originMessage) {
       global = updateThreadUnreadFromForwardedMessage(global, originMessage, chatId, message.id, isDeleting);
     } else {
       actions.loadMessage({
         chatId,
-        messageId: message.replyToMessageId,
+        messageId: replyInfo.replyToMsgId,
         threadUpdate: {
           isDeleting,
           lastMessageId: message.id,

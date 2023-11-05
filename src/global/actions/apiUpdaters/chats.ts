@@ -379,16 +379,15 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
     case 'draftMessage': {
       const {
-        chatId, formattedText, date, replyingToId, threadId,
+        chatId, threadId, draft,
       } = update;
       const chat = global.chats.byId[chatId];
       if (!chat) {
         return undefined;
       }
 
-      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', formattedText);
-      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'replyingToId', replyingToId);
-      global = updateChat(global, chatId, { draftDate: date });
+      global = replaceThreadParam(global, chatId, threadId || MAIN_THREAD_ID, 'draft', draft);
+      global = updateChat(global, chatId, { draftDate: draft?.date });
       return global;
     }
 

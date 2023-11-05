@@ -11,6 +11,7 @@ import type {
   ApiChatReactions,
   ApiFormattedText,
   ApiGroupCall,
+  ApiInputReplyInfo,
   ApiMessageEntity,
   ApiNewPoll,
   ApiPhoneCall,
@@ -24,7 +25,6 @@ import type {
   ApiStory,
   ApiStorySkipped,
   ApiThemeParameters,
-  ApiTypeReplyTo,
   ApiVideo,
 } from '../../types';
 import {
@@ -643,24 +643,28 @@ export function buildInputBotApp(app: ApiBotApp) {
   });
 }
 
-export function buildInputReplyToMessage(replyToMsgId: number, topMsgId?: number) {
-  return new GramJs.InputReplyToMessage({
-    replyToMsgId,
-    topMsgId,
-  });
-}
+export function buildInputReplyTo(replyInfo: ApiInputReplyInfo) {
+  if (replyInfo.type === 'story') {
+    return new GramJs.InputReplyToStory({
+      userId: buildInputPeerFromLocalDb(replyInfo.userId)!,
+      storyId: replyInfo.storyId,
+    });
+  }
 
-export function buildInputReplyToStory(userId: string, storyId: number) {
-  return new GramJs.InputReplyToStory({
-    userId: buildInputPeerFromLocalDb(userId)!,
-    storyId,
-  });
-}
+  if (replyInfo.type === 'message') {
+    const {
+      replyToMsgId, replyToTopId, replyToPeerId, quoteText,
+    } = replyInfo;
+    return new GramJs.InputReplyToMessage({
+      replyToMsgId,
+      topMsgId: replyToTopId,
+      replyToPeerId: replyToPeerId ? buildInputPeerFromLocalDb(replyToPeerId)! : undefined,
+      quoteText: quoteText?.text,
+      quoteEntities: quoteText?.entities?.map(buildMtpMessageEntity),
+    });
+  }
 
-export function buildInputReplyTo(replyingTo: ApiTypeReplyTo) {
-  return 'replyingTo' in replyingTo
-    ? buildInputReplyToMessage(replyingTo.replyingTo, replyingTo.replyingToTopId)
-    : buildInputReplyToStory(replyingTo.userId, replyingTo.storyId);
+  return undefined;
 }
 
 export function buildInputPrivacyRules(

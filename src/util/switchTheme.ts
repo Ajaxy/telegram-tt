@@ -19,8 +19,10 @@ const HEX_COLOR_REGEX = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i
 const DURATION_MS = 200;
 const ENABLE_ANIMATION_DELAY_MS = 500;
 const RGB_VARIABLES = new Set([
+  '--color-text',
   '--color-primary-shade',
   '--color-text-secondary',
+  '--color-accent-own',
 ]);
 
 const DISABLE_ANIMATION_CSS = `

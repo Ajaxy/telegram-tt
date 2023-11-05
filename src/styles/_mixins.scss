@@ -25,6 +25,34 @@
   mask-image: linear-gradient(transparent 0%, black $top, black calc(100% - $bottom), transparent 100%);
 }
 
+@mixin peer-gradient($property, $colorCount) {
+  --_accent-color-rgb: var(--color-accent-own-rgb);
+
+  html.theme-dark {
+    --_accent-color-rgb: var(--color-text-rgb);
+  }
+
+  @if $colorCount == 2 {
+    #{$property}: repeating-linear-gradient(
+      -45deg,
+      rgb(var(--_accent-color-rgb), 100%),
+      rgb(var(--_accent-color-rgb), 100%) 5px,
+      rgb(var(--_accent-color-rgb), 35%) 5px,
+      rgb(var(--_accent-color-rgb), 35%) 10px
+    );
+  } @else {
+    #{$property}: repeating-linear-gradient(
+      -45deg,
+      rgb(var(--_accent-color-rgb), 100%),
+      rgb(var(--_accent-color-rgb), 100%) 5px,
+      rgb(var(--_accent-color-rgb), 60%) 5px,
+      rgb(var(--_accent-color-rgb), 60%) 10px,
+      rgb(var(--_accent-color-rgb), 20%) 10px,
+      rgb(var(--_accent-color-rgb), 20%) 15px
+    );
+  }
+}
+
 @mixin reset-range() {
   input[type="range"] {
     -webkit-appearance: none;

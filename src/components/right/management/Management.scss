@@ -1,4 +1,4 @@
-@import "../../../styles/mixins";
+@use "../../../styles/mixins";
 
 .Management {
   position: relative;
@@ -17,7 +17,7 @@
 
   .section {
     padding: 1rem 1.5rem;
-    @include side-panel-section;
+    @include mixins.side-panel-section;
 
     &.wide {
       padding: 1.5rem;
@@ -165,7 +165,7 @@
     padding: 0 1rem 0.25rem 0.75rem;
     margin-bottom: 0.625rem;
 
-    @include side-panel-section;
+    @include mixins.side-panel-section;
 
     display: flex;
     flex-flow: row wrap;
@@ -339,7 +339,7 @@
     margin: 0 -1.5rem;
     padding: 0 1.5rem 1rem;
 
-    @include side-panel-section;
+    @include mixins.side-panel-section;
   }
 
   .section, .part {

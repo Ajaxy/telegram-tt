@@ -9,6 +9,7 @@ import type {
   ApiPhoto,
   ApiVideo,
   ApiWebDocument,
+  MediaContent,
 } from '../../api/types';
 import { ApiMediaFormat } from '../../api/types';
 
@@ -22,6 +23,10 @@ import {
 import { getDocumentHasPreview } from '../../components/common/helpers/documentInfo';
 import { getMessageKey, isMessageLocal, matchLinkInMessageText } from './messages';
 
+type MediaContainer = {
+  content: MediaContent;
+};
+
 type Target =
   'micro'
   | 'pictogram'
@@ -30,11 +35,11 @@ type Target =
   | 'full'
   | 'download';
 
-export function getMessageContent(message: ApiMessage) {
+export function getMessageContent(message: MediaContainer) {
   return message.content;
 }
 
-export function hasMessageMedia(message: ApiMessage) {
+export function hasMessageMedia(message: MediaContainer) {
   return Boolean((
     getMessagePhoto(message)
     || getMessageVideo(message)
@@ -48,91 +53,91 @@ export function hasMessageMedia(message: ApiMessage) {
   ));
 }
 
-export function getMessagePhoto(message: ApiMessage) {
+export function getMessagePhoto(message: MediaContainer) {
   return message.content.photo;
 }
 
-export function getMessageActionPhoto(message: ApiMessage) {
+export function getMessageActionPhoto(message: MediaContainer) {
   return message.content.action?.type === 'suggestProfilePhoto' ? message.content.action.photo : undefined;
 }
 
-export function getMessageVideo(message: ApiMessage) {
+export function getMessageVideo(message: MediaContainer) {
   return message.content.video;
 }
 
-export function getMessageRoundVideo(message: ApiMessage) {
+export function getMessageRoundVideo(message: MediaContainer) {
   const { video } = message.content;
 
   return video?.isRound ? video : undefined;
 }
 
-export function getMessageAction(message: ApiMessage) {
+export function getMessageAction(message: MediaContainer) {
   return message.content.action;
 }
 
-export function getMessageAudio(message: ApiMessage) {
+export function getMessageAudio(message: MediaContainer) {
   return message.content.audio;
 }
 
-export function getMessageVoice(message: ApiMessage) {
+export function getMessageVoice(message: MediaContainer) {
   return message.content.voice;
 }
 
-export function getMessageSticker(message: ApiMessage) {
+export function getMessageSticker(message: MediaContainer) {
   return message.content.sticker;
 }
 
-export function getMessageDocument(message: ApiMessage) {
+export function getMessageDocument(message: MediaContainer) {
   return message.content.document;
 }
 
-export function isMessageDocumentPhoto(message: ApiMessage) {
+export function isMessageDocumentPhoto(message: MediaContainer) {
   const document = getMessageDocument(message);
   return document ? document.mediaType === 'photo' : undefined;
 }
 
-export function isMessageDocumentVideo(message: ApiMessage) {
+export function isMessageDocumentVideo(message: MediaContainer) {
   const document = getMessageDocument(message);
   return document ? document.mediaType === 'video' : undefined;
 }
 
-export function getMessageContact(message: ApiMessage) {
+export function getMessageContact(message: MediaContainer) {
   return message.content.contact;
 }
 
-export function getMessagePoll(message: ApiMessage) {
+export function getMessagePoll(message: MediaContainer) {
   return message.content.poll;
 }
 
-export function getMessageInvoice(message: ApiMessage) {
+export function getMessageInvoice(message: MediaContainer) {
   return message.content.invoice;
 }
 
-export function getMessageLocation(message: ApiMessage) {
+export function getMessageLocation(message: MediaContainer) {
   return message.content.location;
 }
 
-export function getMessageWebPage(message: ApiMessage) {
+export function getMessageWebPage(message: MediaContainer) {
   return message.content.webPage;
 }
 
-export function getMessageWebPagePhoto(message: ApiMessage) {
+export function getMessageWebPagePhoto(message: MediaContainer) {
   return getMessageWebPage(message)?.photo;
 }
 
-export function getMessageDocumentPhoto(message: ApiMessage) {
+export function getMessageDocumentPhoto(message: MediaContainer) {
   return isMessageDocumentPhoto(message) ? getMessageDocument(message) : undefined;
 }
 
-export function getMessageWebPageVideo(message: ApiMessage) {
+export function getMessageWebPageVideo(message: MediaContainer) {
   return getMessageWebPage(message)?.video;
 }
 
-export function getMessageDocumentVideo(message: ApiMessage) {
+export function getMessageDocumentVideo(message: MediaContainer) {
   return isMessageDocumentVideo(message) ? getMessageDocument(message) : undefined;
 }
 
-export function getMessageMediaThumbnail(message: ApiMessage) {
+export function getMessageMediaThumbnail(message: MediaContainer) {
   const media = getMessagePhoto(message)
     || getMessageVideo(message)
     || getMessageDocument(message)
@@ -148,11 +153,11 @@ export function getMessageMediaThumbnail(message: ApiMessage) {
   return media.thumbnail;
 }
 
-export function getMessageMediaThumbDataUri(message: ApiMessage) {
+export function getMessageMediaThumbDataUri(message: MediaContainer) {
   return getMessageMediaThumbnail(message)?.dataUri;
 }
 
-export function getMessageIsSpoiler(message: ApiMessage) {
+export function getMessageIsSpoiler(message: MediaContainer) {
   const media = getMessagePhoto(message)
     || getMessageVideo(message);
 

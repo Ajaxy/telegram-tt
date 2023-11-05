@@ -1,4 +1,4 @@
-@import "../../styles/mixins";
+@use "../../styles/mixins";
 
 .root {
   --color-story-meta: rgb(242, 242, 242);
@@ -532,7 +532,7 @@
   overflow-y: scroll;
   scrollbar-gutter: stable;
 
-  @include adapt-padding-to-scrollbar(2rem);
+  @include mixins.adapt-padding-to-scrollbar(2rem);
 }
 
 .captionContent {
@@ -552,7 +552,7 @@
 .expanded {
   transition: transform 400ms;
 
-  @include gradient-border-top(2rem);
+  @include mixins.gradient-border-top(2rem);
 
   &::before {
     opacity: 1;

@@ -1,24 +1,26 @@
-import type { FC } from '../../lib/teact/teact';
-import React, { useRef } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import type { FC } from '../../../lib/teact/teact';
+import React, { useRef } from '../../../lib/teact/teact';
+import { getActions } from '../../../global';
 
-import type { ApiPeer, ApiTypeStory } from '../../api/types';
-import type { ObserveFn } from '../../hooks/useIntersectionObserver';
+import type { ApiPeer, ApiTypeStory } from '../../../api/types';
+import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 
 import {
-  getPeerColorKey,
   getSenderTitle,
   getStoryMediaHash,
-} from '../../global/helpers';
-import buildClassName from '../../util/buildClassName';
-import { getPictogramDimensions } from './helpers/mediaDimensions';
-import renderText from './helpers/renderText';
+} from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
+import { getPictogramDimensions } from '../helpers/mediaDimensions';
+import { getPeerColorClass } from '../helpers/peerColor';
+import renderText from '../helpers/renderText';
 
-import { useFastClick } from '../../hooks/useFastClick';
-import { useIsIntersecting } from '../../hooks/useIntersectionObserver';
-import useLang from '../../hooks/useLang';
-import useLastCallback from '../../hooks/useLastCallback';
-import useMedia from '../../hooks/useMedia';
+import { useFastClick } from '../../../hooks/useFastClick';
+import { useIsIntersecting } from '../../../hooks/useIntersectionObserver';
+import useLang from '../../../hooks/useLang';
+import useLastCallback from '../../../hooks/useLastCallback';
+import useMedia from '../../../hooks/useMedia';
+
+import Icon from '../Icon';
 
 import './EmbeddedMessage.scss';
 
@@ -75,23 +77,24 @@ const EmbeddedStory: FC<OwnProps> = ({
       ref={ref}
       className={buildClassName(
         'EmbeddedMessage',
-        sender && !noUserColors && `color-${getPeerColorKey(sender)}`,
+        getPeerColorClass(sender, noUserColors, true),
+        pictogramUrl && 'with-thumb',
       )}
       onClick={handleClick}
       onMouseDown={handleMouseDown}
     >
       {pictogramUrl && renderPictogram(pictogramUrl, isProtected)}
       <div className="message-text with-message-color">
-        <p dir="auto">
+        <p className="embedded-text-wrapper">
           {isExpiredStory && (
-            <i className="icon icon-story-expired" aria-hidden />
+            <Icon name="story-expired" className="embedded-origin-icon" />
           )}
           {isFullStory && (
-            <i className="icon icon-story-reply" aria-hidden />
+            <Icon name="story-reply" className="embedded-origin-icon" />
           )}
           {lang(title)}
         </p>
-        <div className="message-title" dir="auto">{renderText(senderTitle || NBSP)}</div>
+        <div className="message-title">{renderText(senderTitle || NBSP)}</div>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import type { FocusDirection } from '../../types';
 import type { PinnedIntersectionChangedCallback } from './hooks/usePinnedMessage';
 
 import { getMessageHtmlId, isChatChannel } from '../../global/helpers';
+import { getMessageReplyInfo } from '../../global/helpers/replies';
 import {
   selectCanPlayAnimatedEmojis,
   selectChat,
@@ -102,7 +103,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
   const ref = useRef<HTMLDivElement>(null);
 
   useOnIntersect(ref, observeIntersectionForReading);
-  useEnsureMessage(message.chatId, message.replyToMessageId, targetMessage);
+  useEnsureMessage(
+    message.chatId,
+    message.replyInfo?.type === 'message' ? message.replyInfo.replyToMsgId : undefined,
+    targetMessage,
+  );
   useFocusMessage(ref, message.chatId, isFocused, focusDirection, noFocusHighlight, isJustAdded);
 
   useEffect(() => {
@@ -263,12 +268,12 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, { message, threadId }): StateProps => {
     const {
-      chatId, senderId, replyToMessageId, content,
+      chatId, senderId, content,
     } = message;
 
     const userId = senderId;
     const { targetUserIds, targetChatId } = content.action || {};
-    const targetMessageId = replyToMessageId;
+    const targetMessageId = getMessageReplyInfo(message)?.replyToMsgId;
     const targetMessage = targetMessageId
       ? selectChatMessage(global, chatId, targetMessageId)
       : undefined;

@@ -8,7 +8,6 @@ import type {
   ApiGame,
   ApiInvoice,
   ApiLocation,
-  ApiMessage,
   ApiMessageExtendedMediaPreview,
   ApiMessageStoryData,
   ApiPhoto,
@@ -19,6 +18,7 @@ import type {
   ApiWebDocument,
   ApiWebPage,
   ApiWebPageStoryData,
+  MediaContent,
 } from '../../types';
 import type { UniversalMessage } from './messages';
 
@@ -38,7 +38,7 @@ import { buildStickerFromDocument } from './symbols';
 export function buildMessageContent(
   mtpMessage: UniversalMessage | GramJs.UpdateServiceNotification,
 ) {
-  let content: ApiMessage['content'] = {};
+  let content: MediaContent = {};
 
   if (mtpMessage.media) {
     content = {
@@ -69,7 +69,7 @@ export function buildMessageTextContent(
   };
 }
 
-export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): ApiMessage['content'] | undefined {
+export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaContent | undefined {
   if ('ttlSeconds' in media && media.ttlSeconds) {
     return undefined;
   }

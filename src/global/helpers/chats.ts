@@ -19,13 +19,13 @@ import {
 import { formatDateToString, formatTime } from '../../util/dateFormat';
 import { orderBy } from '../../util/iteratees';
 import { prepareSearchWordsForNeedle } from '../../util/searchWords';
+import { getGlobal } from '..';
 import { getMainUsername, getUserFirstOrLastName } from './users';
 
 const FOREVER_BANNED_DATE = Date.now() / 1000 + 31622400; // 366 days
 
 const VERIFIED_PRIORITY_BASE = 3e9;
 const PINNED_PRIORITY_BASE = 3e8;
-const USER_COLOR_KEYS = [1, 8, 5, 2, 7, 4, 6];
 
 export function isUserId(entityId: string) {
   return !entityId.startsWith('-');
@@ -37,6 +37,10 @@ export function isChannelId(entityId: string) {
 
 export function toChannelId(mtpId: string) {
   return `-100${mtpId}`;
+}
+
+export function isApiPeerChat(peer: ApiPeer): peer is ApiChat {
+  return 'title' in peer;
 }
 
 export function isChatGroup(chat: ApiChat) {
@@ -467,9 +471,14 @@ export function getPeerIdDividend(peerId: string) {
   return Math.abs(Number(getCleanPeerId(peerId)));
 }
 
-// https://github.com/telegramdesktop/tdesktop/blob/371510cfe23b0bd226de8c076bc49248fbe40c26/Telegram/SourceFiles/data/data_peer.cpp#L53
 export function getPeerColorKey(peer: ApiPeer | undefined) {
-  const index = peer ? getPeerIdDividend(peer.id) % 7 : 0;
+  if (peer?.color) return peer.color;
 
-  return USER_COLOR_KEYS[index];
+  const index = peer ? getPeerIdDividend(peer.id) % 7 : 0;
+  return index;
+}
+
+export function getPeerColorCount(peer: ApiPeer) {
+  const key = getPeerColorKey(peer);
+  return getGlobal().appConfig?.peerColors?.[key]?.length || 1;
 }

@@ -1,4 +1,4 @@
-@import '../../styles/mixins';
+@use '../../styles/mixins';
 
 .root {
   position: relative;
@@ -19,7 +19,7 @@
   justify-content: center;
   flex-direction: column;
 
-  @include side-panel-section;
+  @include mixins.side-panel-section;
 }
 
 .general {

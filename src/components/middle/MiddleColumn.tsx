@@ -4,7 +4,7 @@ import React, {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiChatBannedRights } from '../../api/types';
+import type { ApiChat, ApiChatBannedRights, ApiInputMessageReplyInfo } from '../../api/types';
 import type {
   ActiveEmojiInteraction,
   MessageListType,
@@ -44,12 +44,12 @@ import {
   selectChatMessage,
   selectCurrentMessageList,
   selectCurrentTextSearch,
+  selectDraft,
   selectIsChatBotNotStarted,
   selectIsInSelectMode,
   selectIsRightColumnShown,
   selectIsUserBlocked,
   selectPinnedIds,
-  selectReplyingToId,
   selectTabState,
   selectTheme,
   selectThreadInfo,
@@ -105,7 +105,7 @@ type StateProps = {
   threadId?: number;
   messageListType?: MessageListType;
   chat?: ApiChat;
-  replyingToId?: number;
+  draftReplyInfo?: ApiInputMessageReplyInfo;
   isPrivate?: boolean;
   isPinnedMessageList?: boolean;
   canPost?: boolean;
@@ -160,7 +160,7 @@ function MiddleColumn({
   messageListType,
   isMobile,
   chat,
-  replyingToId,
+  draftReplyInfo,
   isPrivate,
   isPinnedMessageList,
   canPost,
@@ -433,7 +433,7 @@ function MiddleColumn({
   const messageSendingRestrictionReason = getMessageSendingRestrictionReason(
     lang, currentUserBannedRights, defaultBannedRights,
   );
-  const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(replyingToId));
+  const forumComposerPlaceholder = getForumComposerPlaceholder(lang, chat, threadId, Boolean(draftReplyInfo));
 
   const composerRestrictionMessage = messageSendingRestrictionReason || forumComposerPlaceholder;
 
@@ -752,9 +752,9 @@ export default memo(withGlobal<OwnProps>(
     const shouldLoadFullChat = Boolean(
       chat && isChatGroup(chat) && !selectChatFullInfo(global, chat.id),
     );
-    const replyingToId = selectReplyingToId(global, chatId, threadId);
+    const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
     const shouldBlockSendInForum = chat?.isForum
-      ? threadId === MAIN_THREAD_ID && !replyingToId && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)
+      ? threadId === MAIN_THREAD_ID && !draftReplyInfo && (chat.topics?.[GENERAL_TOPIC_ID]?.isClosed)
       : false;
     const audioMessage = audioChatId && audioMessageId
       ? selectChatMessage(global, audioChatId, audioMessageId)
@@ -776,7 +776,7 @@ export default memo(withGlobal<OwnProps>(
       threadId,
       messageListType,
       chat,
-      replyingToId,
+      draftReplyInfo,
       isPrivate,
       areChatSettingsLoaded: Boolean(chat?.settings),
       canPost: !isPinnedMessageList

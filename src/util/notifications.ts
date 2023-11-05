@@ -21,6 +21,7 @@ import {
   selectIsChatMuted,
   selectShouldShowMessagePreview,
 } from '../global/helpers';
+import { getMessageReplyInfo } from '../global/helpers/replies';
 import { addNotifyExceptions, replaceSettings } from '../global/reducers';
 import {
   selectChat,
@@ -314,9 +315,6 @@ function checkIfShouldNotify(chat: ApiChat, message: Partial<ApiMessage>) {
 
 function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: ApiPeerReaction) {
   const global = getGlobal();
-  const {
-    replyToMessageId,
-  } = message;
   let {
     senderId,
   } = message;
@@ -328,8 +326,9 @@ function getNotificationContent(chat: ApiChat, message: ApiMessage, reaction?: A
   const messageSenderUser = senderId ? selectUser(global, senderId) : undefined;
   const messageAction = getMessageAction(message as ApiMessage);
 
-  const actionTargetMessage = messageAction && replyToMessageId
-    ? selectChatMessage(global, chat.id, replyToMessageId)
+  const replyInfo = getMessageReplyInfo(message);
+  const actionTargetMessage = messageAction && replyInfo?.replyToMsgId
+    ? selectChatMessage(global, replyInfo?.replyFrom?.fromChatId || chat.id, replyInfo.replyToMsgId)
     : undefined;
   const {
     targetUserIds: actionTargetUserIds,

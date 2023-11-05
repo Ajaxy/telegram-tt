@@ -1,10 +1,9 @@
 import type {
-  ApiChat, ApiChatType, ApiContact, ApiPeer, ApiUrlAuthResult,
+  ApiChat, ApiChatType, ApiContact, ApiInputMessageReplyInfo, ApiPeer, ApiUrlAuthResult,
 } from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { MAIN_THREAD_ID } from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -23,8 +22,8 @@ import { addChats, addUsers, removeBlockedUser } from '../../reducers';
 import { replaceInlineBotSettings, replaceInlineBotsIsLoading } from '../../reducers/bots';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectBot, selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectIsTrustedBot,
-  selectReplyingToId, selectSendAs, selectTabState, selectThreadTopMessageId, selectUser, selectUserFullInfo,
+  selectBot, selectChat, selectChatMessage, selectCurrentChat, selectCurrentMessageList, selectDraft,
+  selectIsTrustedBot, selectMessageReplyInfo, selectSendAs, selectTabState, selectUser, selectUserFullInfo,
 } from '../../selectors';
 
 const GAMEE_URL = 'https://prizes.gamee.com/';
@@ -185,11 +184,11 @@ addActionHandler('sendBotCommand', (global, actions, payload): ActionReturnType 
   }
 
   const { threadId } = currentMessageList;
-  actions.setReplyingToId({ messageId: undefined, tabId });
+  actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
   void sendBotCommand(
-    chat, threadId, command, selectReplyingToId(global, chat.id, threadId), selectSendAs(global, chat.id),
+    chat, command, selectDraft(global, chat.id, threadId)?.replyInfo, selectSendAs(global, chat.id),
   );
 });
 
@@ -210,7 +209,7 @@ addActionHandler('restartBot', async (global, actions, payload): Promise<void> =
   global = getGlobal();
   global = removeBlockedUser(global, bot.id);
   setGlobal(global);
-  void sendBotCommand(chat, MAIN_THREAD_ID, '/start', undefined, selectSendAs(global, chatId));
+  void sendBotCommand(chat, '/start', undefined, selectSendAs(global, chatId));
 });
 
 addActionHandler('loadTopInlineBots', async (global): Promise<void> => {
@@ -339,21 +338,18 @@ addActionHandler('sendInlineBotResult', (global, actions, payload): ActionReturn
 
   const { chatId, threadId } = messageList;
   const chat = selectChat(global, chatId)!;
-  const replyingToId = selectReplyingToId(global, chatId, threadId);
-  const replyingToMessage = replyingToId ? selectChatMessage(global, chatId, replyingToId) : undefined;
-  const replyingToTopId = (chat.isForum || threadId !== MAIN_THREAD_ID)
-    ? selectThreadTopMessageId(global, chatId, threadId)
-    : replyingToMessage?.replyToTopMessageId || replyingToMessage?.replyToMessageId;
+  const draftReplyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
 
-  actions.setReplyingToId({ messageId: undefined, tabId });
+  const replyInfo = selectMessageReplyInfo(global, chatId, threadId, draftReplyInfo);
+
+  actions.resetDraftReplyInfo({ tabId });
   actions.clearWebPagePreview({ tabId });
 
   void callApi('sendInlineBotResult', {
     chat,
     resultId: id,
     queryId,
-    replyingTo: replyingToId || replyingToTopId,
-    replyingToTopId,
+    replyInfo,
     sendAs: selectSendAs(global, chatId),
     isSilent,
     scheduleDate: scheduledAt,
@@ -531,7 +527,9 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
   }
 
   const { chatId, threadId } = currentMessageList;
-  const reply = chatId && selectReplyingToId(global, chatId, threadId);
+  const draftReplyInfo = chatId ? selectDraft(global, chatId, threadId)?.replyInfo : undefined;
+  const replyInfo = selectMessageReplyInfo(global, chatId, threadId, draftReplyInfo);
+
   const sendAs = selectSendAs(global, chatId);
   const result = await callApi('requestWebView', {
     url,
@@ -539,8 +537,7 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
     peer,
     theme,
     isSilent,
-    replyToMessageId: reply || undefined,
-    threadId,
+    replyInfo,
     isFromBotMenu,
     startParam,
     sendAs,
@@ -557,8 +554,7 @@ addActionHandler('requestWebView', async (global, actions, payload): Promise<voi
       url: webViewUrl,
       botId,
       queryId,
-      replyToMessageId: reply || undefined,
-      threadId,
+      replyInfo,
       buttonText,
     },
   }, tabId);
@@ -626,8 +622,7 @@ addActionHandler('requestAppWebView', async (global, actions, payload): Promise<
 
 addActionHandler('prolongWebView', async (global, actions, payload): Promise<void> => {
   const {
-    botId, peerId, isSilent, replyToMessageId, queryId, threadId,
-    tabId = getCurrentTabId(),
+    botId, peerId, isSilent, replyInfo, queryId, tabId = getCurrentTabId(),
   } = payload;
 
   const bot = selectUser(global, botId);
@@ -641,8 +636,7 @@ addActionHandler('prolongWebView', async (global, actions, payload): Promise<voi
     bot,
     peer,
     isSilent,
-    replyToMessageId,
-    threadId,
+    replyInfo,
     queryId,
     sendAs,
   });
@@ -769,7 +763,8 @@ addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType =
 
   const isFromBotMenu = !bot;
   const shouldDisplayDisclaimer = (!isFromBotMenu && !global.attachMenu.bots[bot.id])
-    || (isFromSideMenu && (bot?.isInactive || bot?.isDisclaimerNeeded));
+    || bot?.isInactive || bot?.isDisclaimerNeeded;
+
   if (!isFromConfirm && shouldDisplayDisclaimer) {
     return updateTabState(global, {
       requestedAttachBotInstall: {
@@ -1068,14 +1063,11 @@ async function searchInlineBot<T extends GlobalState>(global: T, {
 }
 
 async function sendBotCommand(
-  chat: ApiChat, threadId = MAIN_THREAD_ID, command: string, replyingTo?: number, sendAs?: ApiPeer,
+  chat: ApiChat, command: string, replyInfo?: ApiInputMessageReplyInfo, sendAs?: ApiPeer,
 ) {
   await callApi('sendMessage', {
     chat,
-    replyingTo: replyingTo ? {
-      replyingTo,
-      replyingToTopId: threadId,
-    } : undefined,
+    replyInfo,
     text: command,
     sendAs,
   });

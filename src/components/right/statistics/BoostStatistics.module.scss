@@ -1,4 +1,4 @@
-@import '../../../styles/mixins';
+@use '../../../styles/mixins';
 
 .root {
   overflow-y: scroll;
@@ -18,7 +18,7 @@
 
 .section {
   padding: 1rem;
-  @include side-panel-section;
+  @include mixins.side-panel-section;
 }
 
 .user :global(.status) {

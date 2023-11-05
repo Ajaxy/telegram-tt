@@ -29,6 +29,11 @@ export type WebAppInboundEvent = {
     is_visible: boolean;
   };
 } | {
+  eventType: 'web_app_setup_settings_button';
+  eventData: {
+    is_visible: boolean;
+  };
+} | {
   eventType: 'web_app_open_link';
   eventData: {
     url: string;

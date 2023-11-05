@@ -397,4 +397,8 @@
   &.premium {
     background: var(--premium-gradient);
   }
+
+  &.rectangular {
+    border-radius: 0;
+  }
 }

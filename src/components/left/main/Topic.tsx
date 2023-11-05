@@ -3,13 +3,15 @@ import React, { memo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiChat, ApiFormattedText, ApiMessage, ApiMessageOutgoingStatus,
+  ApiChat, ApiMessage, ApiMessageOutgoingStatus,
   ApiPeer, ApiTopic, ApiTypingStatus,
 } from '../../../api/types';
+import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 
 import { getMessageAction } from '../../../global/helpers';
+import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
   selectCanDeleteTopic,
@@ -48,7 +50,6 @@ type OwnProps = {
   isSelected: boolean;
   style: string;
   observeIntersection?: ObserveFn;
-
   orderDiff: number;
   animationType: ChatAnimationTypes;
 };
@@ -63,7 +64,7 @@ type StateProps = {
   lastMessageSender?: ApiPeer;
   actionTargetChatId?: string;
   typingStatus?: ApiTypingStatus;
-  draft?: ApiFormattedText;
+  draft?: ApiDraft;
   canScrollDown?: boolean;
   wasTopicOpened?: boolean;
   withInterfaceAnimations?: boolean;
@@ -232,8 +233,9 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId, topic, isSelected }) => {
     const chat = selectChat(global, chatId);
 
-    const lastMessage = selectChatMessage(global, chatId, topic.lastMessageId)!;
-    const { senderId, replyToMessageId, isOutgoing } = lastMessage || {};
+    const lastMessage = selectChatMessage(global, chatId, topic.lastMessageId);
+    const { senderId, isOutgoing } = lastMessage || {};
+    const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
     const lastMessageSender = senderId
       ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
     const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;

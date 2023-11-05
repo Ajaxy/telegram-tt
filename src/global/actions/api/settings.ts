@@ -15,6 +15,7 @@ import { setTimeFormat } from '../../../util/langProvider';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
+import { updatePeerColors } from '../../../util/theme';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -622,6 +623,10 @@ addActionHandler('loadAppConfig', async (global, actions, payload): Promise<void
     appConfig,
   };
   setGlobal(global);
+
+  if (appConfig.peerColors) {
+    updatePeerColors(appConfig.peerColors, appConfig.darkPeerColors);
+  }
 });
 
 addActionHandler('loadConfig', async (global): Promise<void> => {

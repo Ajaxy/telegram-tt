@@ -1,13 +1,4 @@
 @use "sass:map";
-${{ name }}-font: "{{ name }}";
-
-@font-face {
-  font-family: ${{ name }}-font;
-  src: {{{ fontSrc }}};
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-}
 
 .icon-char::before {
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -17,9 +8,7 @@ ${{ name }}-font: "{{ name }}";
   display: block;
 }
 
-{{# if selector }}{{ selector }}::before {
-{{ else }}{{ tag }}.{{prefix}} {
-{{/ if }}
+@mixin icon {
   /* use !important to prevent issues with browser extensions that change fonts */
   /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
   font-family: "{{ name }}" !important;
@@ -33,6 +22,12 @@ ${{ name }}-font: "{{ name }}";
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+{{# if selector }}{{ selector }}::before {
+{{ else }}{{ tag }}.{{prefix}} {
+{{/ if }}
+  @include icon;
 }
 
 ${{ name }}-map: (

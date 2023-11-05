@@ -17,6 +17,7 @@ export function buildContentClassName(
     hasReactions,
     isGeoLiveActive,
     withVoiceTranscription,
+    peerColorClass,
   }: {
     hasSubheader?: boolean;
     isCustomShape?: boolean | number;
@@ -29,6 +30,7 @@ export function buildContentClassName(
     hasReactions?: boolean;
     isGeoLiveActive?: boolean;
     withVoiceTranscription?: boolean;
+    peerColorClass?: string;
   } = {},
 ) {
   const {
@@ -40,6 +42,10 @@ export function buildContentClassName(
   const hasText = text || location?.type === 'venue' || isGeoLiveActive;
   const isMediaWithNoText = isMedia && !hasText;
   const isViaBot = Boolean(message.viaBotId);
+
+  if (peerColorClass) {
+    classNames.push(peerColorClass);
+  }
 
   if (!isMedia && message.emojiOnlyCount) {
     classNames.push('emoji-only');
