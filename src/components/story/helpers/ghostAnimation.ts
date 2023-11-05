@@ -38,6 +38,11 @@ export function animateOpening(
   if (isMobile) {
     toWidth = windowWidth - 2 * MOBILE_OFFSET;
     toHeight = windowHeight - OFFSET_BOTTOM - 2 * MOBILE_OFFSET;
+
+    const safeAreaBottom = getComputedStyle(document.documentElement).getPropertyValue('--safe-area-bottom');
+    if (safeAreaBottom) {
+      toHeight -= parseFloat(safeAreaBottom);
+    }
   }
 
   const toLeft = isMobile ? MOBILE_OFFSET : (windowWidth - toWidth) / 2;
