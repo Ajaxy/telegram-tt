@@ -53,17 +53,13 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     // eslint-disable-next-line no-console
     console.log('>>> archive chatsToArchive', chatsToArchive);
 
-    const timer = setInterval(() => {
-      if (Object.keys(chatsToArchive).length <= BATCH_SIZE) {
-        clearInterval(timer);
-        // eslint-disable-next-line no-console
-        console.log('archiver: clear timer');
-      }
-      for (const id of Object.keys(chatsToArchive).slice(0, BATCH_SIZE)) {
-        toggleChatArchived({ id });
-        remove(id);
-      }
-    }, UPDATE_TIME_SEC * 1000);
+    if (Object.keys(chatsToArchive).length > BATCH_SIZE) {
+      setTimeout(archive, UPDATE_TIME_SEC * 1000);
+    }
+    for (const id of Object.keys(chatsToArchive).slice(0, BATCH_SIZE)) {
+      toggleChatArchived({ id });
+      remove(id);
+    }
   };
 
   const autoarchive = () => {
