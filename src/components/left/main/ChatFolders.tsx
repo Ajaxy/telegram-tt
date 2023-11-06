@@ -1,15 +1,16 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useEffect, useMemo, useRef,
+  memo, useCallback, useEffect, useMemo, useRef,
 } from '../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { LeftColumnContent, SettingsScreens } from '../../../types';
+import type { LeftColumnContent } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { TabWithProperties } from '../../ui/TabList';
+import { SettingsScreens } from '../../../types';
 
 import { ALL_FOLDER_ID, IS_STORIES_ENABLED } from '../../../config';
 import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
@@ -30,7 +31,9 @@ import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
 import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
-import UluSystemFolders from './UluSystemFolders';
+import UluChatFoldersDivider from './UluChatFoldersDivider';
+import UluNewChatFolderButton from './UluNewChatFolderButton';
+import UluSystemFolders from './UluSystemChatFolders';
 
 type OwnProps = {
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -41,6 +44,8 @@ type OwnProps = {
   content: LeftColumnContent;
   chatId?: string;
   userId?: string;
+  dispatch: FolderEditDispatch;
+  onScreenSelect: (screen: SettingsScreens) => void;
 };
 
 type StateProps = {
@@ -86,6 +91,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   content,
   chatId,
   userId,
+  dispatch,
+  onScreenSelect,
 }) => {
   const {
     loadChatFolders,
@@ -211,6 +218,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     maxFolderInvites,
   ]);
 
+  const handleCreateFolder = useCallback(() => {
+    dispatch({ type: 'reset' });
+    onScreenSelect(SettingsScreens.FoldersCreateFolder);
+  }, [onScreenSelect, dispatch]);
+
   const handleSwitchTab = useLastCallback((index: number) => {
     setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
   });
@@ -331,6 +343,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
         content={content}
         onLeftColumnContentChange={onLeftColumnContentChange}
       />
+      <UluChatFoldersDivider />
+      <UluNewChatFolderButton onCreateFolder={handleCreateFolder} />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
         <TabList

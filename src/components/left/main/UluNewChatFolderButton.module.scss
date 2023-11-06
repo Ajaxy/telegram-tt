@@ -1,0 +1,84 @@
+$color: var(--color-borders-input);
+$colorHover: var(--color-gray);
+
+.btn {
+  height: unset;
+  pointer-events: all;
+  padding: 0.375rem 0.5rem 0 0.375rem;
+  text-transform: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  border-radius: var(--border-radius-default-tiny);
+  border: none;
+  background-color: transparent !important;
+  color: $color !important;
+
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.5rem;
+
+  &:hover {
+    color: $colorHover !important;
+
+    .plus-icon {
+      color: $colorHover;
+
+      &::before,
+      &::after {
+        background-color: $colorHover;
+      }
+    }
+  }
+
+  .plus-icon {
+    $icon-size: 1.125rem;
+
+    height: $icon-size;
+    width: $icon-size;
+    color: $color;
+
+    &::before,
+    &::after {
+      background-color: $color;
+    }
+
+    &::before {
+      font-size: $icon-size;
+    }
+  }
+
+  gap: 0.625rem;
+}
+
+.plus-icon-wrapper {
+  padding-right: 0.125rem;
+}
+
+.plus-icon {
+  width: 1.125rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before,
+  &::after {
+    transition: background-color 0.15s, color 0.15s;
+    width: 1rem;
+    height: 0.125rem;
+    border-radius: 0.125rem;
+    content: "";
+    background-color: $color;
+  }
+
+  &::after {
+    position: absolute;
+  }
+
+  &::before {
+    transform: rotate(90deg);
+  }
+}

@@ -292,13 +292,15 @@ function unmountChildren(parentEl: DOMElement, $element: VirtualElementComponent
   }
 }
 
+const ELEMENT_VALUES_TO_HIDE = ['[object Object]'];
 function createNode($element: VirtualElementReal, isSvg?: true): Node {
   if ($element.type === VirtualType.Empty) {
     return document.createTextNode('');
   }
 
   if ($element.type === VirtualType.Text) {
-    return document.createTextNode($element.value);
+    const value = ELEMENT_VALUES_TO_HIDE.includes($element.value) ? '' : $element.value;
+    return document.createTextNode(value);
   }
 
   const { tag, props, children } = $element;

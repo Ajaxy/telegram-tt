@@ -34,7 +34,7 @@ const useEditing = (
   type: MessageListType,
   draft?: ApiDraft,
   editingDraft?: ApiFormattedText,
-): [VoidFunction, VoidFunction, boolean, number?] => {
+): [VoidFunction, VoidFunction, boolean] => {
   const { editMessage, setEditingDraft, toggleMessageWebPage } = getActions();
   const [shouldForceShowEditing, setShouldForceShowEditing] = useState(false);
 
@@ -178,7 +178,7 @@ const useEditing = (
   useBackgroundMode(handleBlur);
   useBeforeUnload(handleBlur);
 
-  return [handleEditComplete, handleEditCancel, shouldForceShowEditing, replyingToId];
+  return [handleEditComplete, handleEditCancel, shouldForceShowEditing];
 };
 
 export default useEditing;

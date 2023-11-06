@@ -58,6 +58,8 @@ $color-message-story-mention-from: #4ef390;
 $color-message-story-mention-to: #74bcff;
 
 :root {
+  --ulu-sidebar-component-padding: 0.5rem;
+
   --color-background: #{$color-white};
   --color-background-compact-menu: #FFFFFFBB;
   --color-background-compact-menu-reactions: #FFFFFFEB;

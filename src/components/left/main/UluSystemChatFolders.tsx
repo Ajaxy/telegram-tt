@@ -1,19 +1,18 @@
-import type { FC } from '../../../../lib/teact/teact';
-import React, { memo, useCallback } from '../../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../../global';
+import type { FC } from '../../../lib/teact/teact';
+import React, { memo, useCallback } from '../../../lib/teact/teact';
+import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings } from '../../../../types';
-import { LeftColumnContent } from '../../../../types';
+import type { ISettings } from '../../../types';
+import { LeftColumnContent } from '../../../types';
 
-import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../../config';
-import { selectIsChatWithSelf, selectTabState } from '../../../../global/selectors';
-import { uluGetTranslatedString } from '../../../../util/fallbackLangPackInitial';
+import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../config';
+import { selectIsChatWithSelf, selectTabState } from '../../../global/selectors';
+import { uluGetTranslatedString } from '../../../util/fallbackLangPackInitial';
 
-import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager';
+import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
-import UluChatFolder from '../UluChatFolder';
-
-import styles from './UluSystemFolders.module.scss';
+import UluChatFolder from './UluChatFolder';
+import UluChatFoldersWrapper from './UluChatFoldersWrapper';
 
 type OwnProps = {
   content: LeftColumnContent;
@@ -55,7 +54,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const inboxUnreadCount = unreadCounters[ALL_FOLDER_ID]?.chatsCount;
 
   return (
-    <div className={styles.wrapper}>
+    <UluChatFoldersWrapper>
       <UluChatFolder
         active={isInbox}
         shouldStressUnreadMessages={false}
@@ -80,7 +79,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
         messagesUnreadCount={archiveUnreadCount}
         onClick={handleOpenArchivedChats}
       />
-    </div>
+    </UluChatFoldersWrapper>
   );
 };
 

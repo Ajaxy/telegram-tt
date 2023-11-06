@@ -190,7 +190,6 @@ type StateProps =
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
-    replyingToId?: number;
     isForCurrentMessageList: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
@@ -396,6 +395,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
   const customEmojiNotificationNumber = useRef(0);
+
+  const replyingToMsgId = draft?.replyInfo?.replyToMsgId;
 
   const [requestCalendar, calendar] = useSchedule(
     isInMessageList && canScheduleUntilOnline,
@@ -685,7 +686,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const [handleEditComplete, handleEditCancel, shouldForceShowEditing, replyingToId] = useEditing(
+  const [handleEditComplete, handleEditCancel, shouldForceShowEditing] = useEditing(
     getHtml,
     setHtml,
     editingMessage,
@@ -919,13 +920,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     const shouldOpenRepliesChat = (
-      replyingToId
+      replyingToMsgId
       && ULU_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
       && ULU_APP_UTILS.doesChatSupportThreads(chat)
     );
     const repliesChatToOpen = {
       id: chatId,
-      threadId: isMainThread(threadId) ? replyingToId : threadId,
+      threadId: isMainThread(threadId) ? replyingToMsgId : threadId,
     };
     let currentAttachments = attachments;
 
