@@ -72,7 +72,7 @@ const DropArea: FC<OwnProps> = ({
 
     // Esc button pressed during drag event
     if (
-      (fromTarget as HTMLDivElement).matches('.DropTarget, .DropArea') && !toTarget ||
+      ((fromTarget as HTMLDivElement).matches('.DropTarget, .DropArea') && !toTarget) ||
       !(toTarget as HTMLDivElement)?.matches('.DropTarget, .DropArea')
     ) {
       hideTimeoutRef.current = window.setTimeout(() => {
