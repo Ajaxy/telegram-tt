@@ -303,7 +303,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 
-  useArchiver({ isAutoarchiverMode: true });
+  useArchiver({ isManual: false });
 
   useEffect(() => {
     if (!IS_ELECTRON) {

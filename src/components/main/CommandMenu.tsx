@@ -20,7 +20,7 @@ const CommandMenu = () => {
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled'))),
   );
-  const { archive24hMessages } = useArchiver({ isAutoarchiverMode: false });
+  const { archiveMessages } = useArchiver({ isManual: true });
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -58,9 +58,9 @@ const CommandMenu = () => {
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
-    archive24hMessages();
+    archiveMessages();
     close();
-  }, [close, archive24hMessages]);
+  }, [close, archiveMessages]);
 
   const CommandMenuInner = open ? (
     <Command label="Command Menu">
