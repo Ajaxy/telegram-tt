@@ -54,7 +54,7 @@ $colorHover: var(--color-gray);
 }
 
 .plus-icon-wrapper {
-  padding-right: 0.125rem;
+  padding-left: 0.125rem;
 }
 
 .plus-icon {
@@ -67,7 +67,7 @@ $colorHover: var(--color-gray);
   &::before,
   &::after {
     transition: background-color 0.15s, color 0.15s;
-    width: 1rem;
+    width: 0.875rem;
     height: 0.125rem;
     border-radius: 0.125rem;
     content: "";
