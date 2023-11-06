@@ -8,6 +8,8 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import useArchiver from '../../hooks/useArchiver';
+
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
@@ -18,6 +20,7 @@ const CommandMenu = () => {
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled'))),
   );
+  const { archive24hMessages } = useArchiver({ isAutoarchiverMode: false });
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -55,8 +58,9 @@ const CommandMenu = () => {
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
+    archive24hMessages();
     close();
-  }, [close]);
+  }, [close, archive24hMessages]);
 
   const CommandMenuInner = open ? (
     <Command label="Command Menu">
