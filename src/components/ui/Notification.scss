@@ -1,9 +1,26 @@
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-100%); /* Старт слева за пределами экрана */
+  }
+  100% {
+    transform: translateX(0); /* Конец в исходном положении */
+  }
+}
+
 .Notification-container {
-  position: relative;
-  width: 22rem;
+  position: fixed;
+  width: auto !important;
   max-width: 100vw;
   margin: 4.25rem auto 0.25rem;
   z-index: var(--z-notification);
+  bottom: 3rem;
+  left: -0.5rem;
+
+    /* Анимация */
+    animation-name: slideInFromLeft;
+    animation-duration: 150ms;
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1); 
+    animation-fill-mode: both;
 
   .has-header-tools & {
     margin-top: 7.375rem;
@@ -23,13 +40,18 @@
 }
 
 .Notification {
-  background: rgba(32, 32, 32, 0.8)
+  background: rgba(22, 22, 22, 0.498)
     url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGZpbGw9IiNGRkYiIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIvPjxjaXJjbGUgZmlsbD0iIzAwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBjeD0iMTIiIGN5PSI2LjUiIHI9IjEuNSIvPjxwYXRoIGQ9Ik0xMiA5LjVjLS41NTIgMC0xIC4zNy0xIC44MjZ2Ny4zNDhjMCAuNDU2LjQ0OC44MjYgMSAuODI2czEtLjM3IDEtLjgyNnYtNy4zNDhjMC0uNDU2LS40NDgtLjgyNi0xLS44MjZ6IiBmaWxsPSIjMDAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48L2c+PC9zdmc+")
     no-repeat 0.9375rem 50%;
   background-size: 1.5rem;
-  border-radius: var(--border-radius-default);
+  border-radius: 0rem 0.5rem 0.5rem 0rem;
+  border-top: 1px solid var(----color-borders, #303030);
+  border-right: 1px solid var(----color-borders, #303030);
+  border-bottom: 1px solid var(----color-borders, #303030);
+  box-shadow: 2px 0px 24px 0px rgba(210, 93, 101, 0.80);
+  backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
   padding: 0.9375rem 0.9375rem 0.9375rem 3.375rem;
-  color: #fff;
+  color: var(--color-text);
   margin: 0 0.5rem;
   display: flex;
   align-items: center;
@@ -37,7 +59,7 @@
   .text-entity-link,
   .text-entity-link:hover,
   .text-entity-link:active {
-    color: #fff !important;
+    color: var(--color-background) !important;
     text-decoration: underline;
   }
 
