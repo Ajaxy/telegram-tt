@@ -107,6 +107,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
   } = getActions();
   const [mainButton, setMainButton] = useState<WebAppButton | undefined>();
   const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
+  const [isSettingsButtonVisible, setIsSettingsButtonVisible] = useState(false);
 
   const [backgroundColor, setBackgroundColor] = useState<string>();
   const [headerColor, setHeaderColor] = useState<string>();
@@ -136,7 +137,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
   const lang = useLang();
   const {
-    url, buttonText, queryId, replyToMessageId, threadId,
+    url, buttonText, queryId, replyInfo,
   } = webApp || {};
   const isOpen = Boolean(url);
   const isSimple = Boolean(buttonText);
@@ -152,8 +153,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       botId: bot!.id,
       queryId: queryId!,
       peerId: chat!.id,
-      replyToMessageId,
-      threadId,
+      replyInfo,
     });
   }, queryId ? PROLONG_INTERVAL : undefined, true);
 
@@ -345,6 +345,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
       setIsRequestingWriteAccess(false);
       setMainButton(undefined);
       setIsBackButtonVisible(false);
+      setIsSettingsButtonVisible(false);
       setBackgroundColor(themeParams.bg_color);
       setHeaderColor(themeParams.bg_color);
       markUnloaded();
@@ -361,6 +362,10 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
 
     if (eventType === 'web_app_setup_back_button') {
       setIsBackButtonVisible(eventData.is_visible);
+    }
+
+    if (eventType === 'web_app_setup_settings_button') {
+      setIsSettingsButtonVisible(eventData.is_visible);
     }
 
     if (eventType === 'web_app_set_background_color') {
@@ -520,7 +525,7 @@ const WebAppModal: FC<OwnProps & StateProps> = ({
             <MenuItem icon="bots" onClick={openBotChat}>{lang('BotWebViewOpenBot')}</MenuItem>
           )}
           <MenuItem icon="reload" onClick={handleRefreshClick}>{lang('WebApp.ReloadPage')}</MenuItem>
-          {attachBot?.hasSettings && (
+          {isSettingsButtonVisible && (
             <MenuItem icon="settings" onClick={handleSettingsButtonClick}>
               {lang('Settings')}
             </MenuItem>

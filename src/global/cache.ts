@@ -34,6 +34,7 @@ import {
   selectChatMessages,
   selectCurrentMessageList,
   selectThreadOriginChat,
+  selectViewportIds,
   selectVisibleUsers,
 } from './selectors';
 
@@ -348,15 +349,24 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
       }),
   ).map(({ chatId }) => chatId);
 
-  const chatStoriesChannelIds = currentChatIds
-    .flatMap((chatId) => Object.values(selectChatMessages(global, chatId) || {}))
-    .map((message) => message.content.storyData?.peerId || message.content.webPage?.story?.peerId)
-    .filter((id): id is string => Boolean(id) && !isUserId(id));
+  const messagesChatIds = compact(Object.values(global.byTabId).flatMap(({ id: tabId }) => {
+    const messageList = selectCurrentMessageList(global, tabId);
+    if (!messageList) return undefined;
+
+    const messages = selectChatMessages(global, messageList.chatId);
+    const viewportIds = selectViewportIds(global, messageList.chatId, messageList.threadId, tabId);
+    return viewportIds?.map((id) => {
+      const message = messages[id];
+      const content = message?.content;
+      const replyPeer = message.replyInfo?.type === 'message' && message.replyInfo.replyToPeerId;
+      return content.storyData?.peerId || content.webPage?.story?.peerId || replyPeer;
+    });
+  }));
 
   const idsToSave = unique([
     ...currentUserId ? [currentUserId] : [],
     ...currentChatIds,
-    ...chatStoriesChannelIds,
+    ...messagesChatIds,
     ...getOrderedIds(ALL_FOLDER_ID) || [],
     ...getOrderedIds(ARCHIVED_FOLDER_ID) || [],
     ...global.recentlyFoundChatIds || [],

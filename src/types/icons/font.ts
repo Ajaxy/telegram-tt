@@ -145,6 +145,7 @@ export type FontIconName =
   | 'premium'
   | 'previous'
   | 'privacy-policy'
+  | 'quote'
   | 'readchats'
   | 'recent'
   | 'reload'

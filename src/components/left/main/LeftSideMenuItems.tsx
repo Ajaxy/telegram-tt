@@ -167,22 +167,23 @@ const LeftSideMenuItems = ({
         {lang('Contacts')}
       </MenuItem>
       {/*
-    bots.map((bot) => (
-      <AttachBotItem
-        bot={bot}
-        theme={theme}
-        isInSideMenu
-        onMenuOpened={onBotMenuOpened}
-        onMenuClosed={onBotMenuClosed}
-      />
-    ))
-    <MenuItem
-      icon="play-story"
-      onClick={handleOpenMyStories}
-    >
-      {lang('Settings.MyStories')}
-    </MenuItem>
-    */}
+      {bots.map((bot) => (
+        <AttachBotItem
+          bot={bot}
+          theme={theme}
+          isInSideMenu
+          canShowNew
+          onMenuOpened={onBotMenuOpened}
+          onMenuClosed={onBotMenuClosed}
+        />
+      ))}
+      <MenuItem
+        icon="play-story"
+        onClick={handleOpenMyStories}
+      >
+        {lang('Settings.MyStories')}
+      </MenuItem>
+      */}
       <MenuItem
         icon="settings"
         onClick={onSelectSettings}

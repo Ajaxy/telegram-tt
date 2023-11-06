@@ -1,3 +1,6 @@
+@use "sass:map";
+@use "../../../styles/icons";
+
 .message-content {
   position: relative;
   max-width: var(--max-width);
@@ -280,24 +283,6 @@
       font-weight: normal;
     }
 
-    @for $i from 1 through 8 {
-      & > .color-#{$i} {
-        color: var(--color-user-#{$i});
-
-        .custom-emoji {
-          color: var(--color-user-#{$i});
-        }
-
-        .PremiumIcon {
-          --color-fill: var(--color-user-#{$i});
-        }
-      }
-    }
-
-    .theme-dark .Message.own & > .color-1 {
-      color: var(--accent-color);
-    }
-
     & + .File {
       margin-top: 0.25rem;
     }
@@ -313,9 +298,11 @@
 
     .custom-emoji {
       margin-left: 0.25rem;
+      color: var(--accent-color);
     }
 
     .PremiumIcon {
+      --color-fill: var(--accent-color);
       vertical-align: middle;
       opacity: 0.5;
       margin-left: 0.25rem;
@@ -709,8 +696,6 @@
     }
 
     .EmbeddedMessage {
-      border-radius: var(--border-radius-messages);
-
       @media (max-width: 600px) {
         max-width: calc(90vw - 13rem);
       }
@@ -948,6 +933,38 @@
   --color-scrollbar: var(--color-scrollbar-code);
   font-family: var(--font-family-monospace);
   font-size: 0.875rem;
+}
+
+blockquote {
+  display: inline-block;
+  position: relative;
+  padding-inline: 0.5rem 1rem;
+  margin-block: 0.125rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: var(--accent-background-color);
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--bar-gradient, var(--accent-color));
+  }
+
+  &::after {
+    @include icons.icon;
+    content: map.get(icons.$icons-map, "quote");
+
+    color: var(--accent-color);
+    position: absolute;
+    top: 0.25rem;
+    inset-inline-end: 0.25rem;
+
+    font-size: 0.625rem;
+  }
 }
 
 @keyframes text-loading {

@@ -2,7 +2,7 @@ import { useEffect, useState } from '../../../../lib/teact/teact';
 import { getActions } from '../../../../global';
 
 import type { ApiFormattedText, ApiMessage } from '../../../../api/types';
-import type { MessageListType } from '../../../../global/types';
+import type { ApiDraft, MessageListType } from '../../../../global/types';
 import type { Signal } from '../../../../util/signals';
 import { ApiMessageEntityTypes } from '../../../../api/types';
 
@@ -32,12 +32,13 @@ const useEditing = (
   chatId: string,
   threadId: number,
   type: MessageListType,
-  draft?: ApiFormattedText,
+  draft?: ApiDraft,
   editingDraft?: ApiFormattedText,
-  replyingToId?: number,
 ): [VoidFunction, VoidFunction, boolean] => {
   const { editMessage, setEditingDraft, toggleMessageWebPage } = getActions();
   const [shouldForceShowEditing, setShouldForceShowEditing] = useState(false);
+
+  const replyingToId = draft?.replyInfo?.replyToMsgId;
 
   useEffectWithPrevDeps(([prevEditedMessage, prevReplyingToId]) => {
     if (!editedMessage) {
@@ -125,7 +126,7 @@ const useEditing = (
 
     // Run one frame after editing draft reset
     requestMeasure(() => {
-      setHtml(getTextWithEntitiesAsHtml(draft));
+      setHtml(getTextWithEntitiesAsHtml(draft.text));
 
       // Wait one more frame until new HTML is rendered
       requestNextMutation(() => {

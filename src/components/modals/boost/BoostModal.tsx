@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ApiApplyBoostInfo, ApiChat } from '../../../api/types';
+import type { ApiChat, ApiMyBoost } from '../../../api/types';
 import type { TabState } from '../../../global/types';
 
 import { getChatTitle } from '../../../global/helpers';
@@ -26,7 +26,7 @@ import Modal from '../../ui/Modal';
 import styles from './BoostModal.module.scss';
 
 type LoadedParams = {
-  applyInfo?: ApiApplyBoostInfo;
+  boost?: ApiMyBoost;
   leftText: string;
   rightText?: string;
   value: string;
@@ -93,7 +93,7 @@ const BoostModal = ({
   const {
     isStatusLoaded,
     isBoosted,
-    applyInfo,
+    boost,
     title,
     leftText,
     rightText,
@@ -112,6 +112,8 @@ const BoostModal = ({
       level, currentLevelBoosts, hasMyBoost,
     } = info.boostStatus;
 
+    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts);
+
     const {
       boosts,
       currentLevel,
@@ -120,7 +122,7 @@ const BoostModal = ({
       remainingBoosts,
     } = getBoostProgressInfo(info.boostStatus, true);
 
-    const hasBoost = hasMyBoost || info.applyInfo?.type === 'already';
+    const hasBoost = hasMyBoost;
     const isJustUpgraded = boosts === currentLevelBoosts && hasBoost;
 
     const left = lang('BoostsLevel', currentLevel);
@@ -159,16 +161,17 @@ const BoostModal = ({
       progress: levelProgress,
       remainingBoosts,
       descriptionText: description,
-      applyInfo: info.applyInfo,
+      boost: firstBoost,
       isBoosted: hasBoost,
     };
   }, [chat, chatTitle, info, lang]);
 
-  const isBoostDisabled = !applyInfo && isCurrentUserPremium;
+  const isBoostDisabled = !boost && isCurrentUserPremium;
+  const isReplacingBoost = boost?.chatId && boost.chatId !== info?.chatId;
 
   const handleApplyBoost = useLastCallback(() => {
     closeReplaceModal();
-    applyBoost({ chatId: chat!.id });
+    applyBoost({ chatId: chat!.id, slots: [boost!.slot] });
     requestConfetti();
   });
 
@@ -179,8 +182,11 @@ const BoostModal = ({
   });
 
   const handleButtonClick = useLastCallback(() => {
-    if (!isCurrentUserPremium) {
-      openPremiumDialog();
+    if (!boost) {
+      if (!isCurrentUserPremium) {
+        openPremiumDialog();
+      }
+
       return;
     }
 
@@ -189,17 +195,17 @@ const BoostModal = ({
       return;
     }
 
-    if (applyInfo?.type === 'ok') {
-      handleApplyBoost();
-    }
-
-    if (applyInfo?.type === 'replace') {
-      openReplaceModal();
-    }
-
-    if (applyInfo?.type === 'wait') {
+    if (boost.cooldownUntil) {
       openWaitDialog();
+      return;
     }
+
+    if (isReplacingBoost) {
+      openReplaceModal();
+      return;
+    }
+
+    handleApplyBoost();
   });
 
   const handleCloseClick = useLastCallback(() => {
@@ -249,7 +255,7 @@ const BoostModal = ({
       onClose={closeBoostModal}
     >
       {renderContent()}
-      {applyInfo?.type === 'replace' && boostedChatTitle && (
+      {isReplacingBoost && boostedChatTitle && (
         <Modal
           isOpen={isReplaceModalOpen}
           className={styles.replaceModal}
@@ -277,7 +283,7 @@ const BoostModal = ({
           </div>
         </Modal>
       )}
-      {applyInfo?.type === 'wait' && (
+      {boost?.cooldownUntil && (
         <ConfirmDialog
           isOpen={isWaitDialogOpen}
           isOnlyConfirm
@@ -289,7 +295,7 @@ const BoostModal = ({
           {renderText(
             lang(
               'ChannelBoost.Error.BoostTooOftenText',
-              formatDateInFuture(lang, getServerTime(), applyInfo.waitUntil),
+              formatDateInFuture(lang, getServerTime(), boost.cooldownUntil),
             ),
             ['simple_markdown', 'emoji'],
           )}
@@ -310,11 +316,15 @@ const BoostModal = ({
   );
 };
 
+function getFirstAvailableBoost(myBoosts: ApiMyBoost[]) {
+  return myBoosts.find((boost) => !boost.chatId) || myBoosts.sort((a, b) => a.date - b.date)[0];
+}
+
 export default memo(withGlobal<OwnProps>(
   (global, { info }): StateProps => {
     const chat = info && selectChat(global, info?.chatId);
-    const boostedChat = info?.applyInfo?.type === 'replace'
-      ? selectChat(global, info.applyInfo.boostedChatId) : undefined;
+    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts);
+    const boostedChat = firstBoost?.chatId ? selectChat(global, firstBoost?.chatId) : undefined;
 
     return {
       chat,

@@ -1,4 +1,4 @@
-@import "../../../styles/mixins";
+@use "../../../styles/mixins";
 
 #LeftMainHeader {
   position: relative;
@@ -123,7 +123,7 @@
   }
 
   // @optimization
-  @include while-transition() {
+  @include mixins.while-transition() {
     .Menu .bubble {
       transition: none !important;
     }

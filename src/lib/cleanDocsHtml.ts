@@ -18,6 +18,7 @@ const ELEMENTS = {
   BOLD: 'strong',
   ITALIC: 'em',
   UNDERLINE: 'u',
+  BLOCKQUOTE: 'blockquote',
   STRIKETHROUGH: 'del',
   SUPERSCRIPT: 'sup',
   SUBSCRIPT: 'sub',

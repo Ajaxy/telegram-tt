@@ -315,8 +315,8 @@
     "stories.getPeerMaxIDs",
     "stories.togglePeerStoriesHidden",
     "stories.getPeerStories",
-    "stories.getBoostsStatus",
-    "stories.getBoostersList",
-    "stories.canApplyBoost",
-    "stories.applyBoost"
+    "premium.getBoostsStatus",
+    "premium.getBoostersList",
+    "premium.applyBoost",
+    "premium.getMyBoosts"
 ]

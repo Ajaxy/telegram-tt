@@ -4,7 +4,7 @@ import {
 import path from 'path';
 
 import {
-  forceQuit, getAppTitle, getLastWindow, store,
+  focusLastWindow, forceQuit, getAppTitle, store,
 } from './utils';
 
 const TRAY_ICON_SETTINGS_KEY = 'trayIcon';
@@ -52,11 +52,7 @@ const tray: TrayHelper = {
     this.instance = new Tray(icon);
 
     const handleOpenFromTray = () => {
-      if (BrowserWindow.getAllWindows().every((window) => !window.isVisible())) {
-        BrowserWindow.getAllWindows().forEach((window) => window.show());
-      } else {
-        getLastWindow()?.focus();
-      }
+      focusLastWindow();
     };
 
     const handleCloseFromTray = () => {

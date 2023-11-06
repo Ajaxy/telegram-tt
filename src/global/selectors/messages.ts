@@ -1,7 +1,9 @@
 import type {
   ApiChat,
+  ApiInputMessageReplyInfo,
   ApiMessage,
   ApiMessageEntityCustomEmoji,
+  ApiMessageForwardInfo,
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiStickerSetInfo,
@@ -49,6 +51,7 @@ import {
   isUserId,
   isUserRightBanned,
 } from '../helpers';
+import { getMessageReplyInfo } from '../helpers/replies';
 import {
   selectChat, selectChatFullInfo, selectIsChatWithSelf, selectPeer, selectRequestedChatTranslationLanguage,
 } from './chats';
@@ -195,10 +198,6 @@ export function selectScrollOffset<T extends GlobalState>(
 
 export function selectLastScrollOffset<T extends GlobalState>(global: T, chatId: string, threadId: number) {
   return selectThreadParam(global, chatId, threadId, 'lastScrollOffset');
-}
-
-export function selectReplyingToId<T extends GlobalState>(global: T, chatId: string, threadId: number) {
-  return selectThreadParam(global, chatId, threadId, 'replyingToId');
 }
 
 export function selectEditingId<T extends GlobalState>(global: T, chatId: string, threadId: number) {
@@ -425,21 +424,27 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
   return selectPeer(global, senderId);
 }
 
-export function selectReplySender<T extends GlobalState>(global: T, message: ApiMessage, isForwarded = false) {
-  if (isForwarded) {
-    const { senderUserId, hiddenUserName } = message.forwardInfo || {};
-    if (senderUserId) {
-      return selectPeer(global, senderUserId);
-    }
-    if (hiddenUserName) return undefined;
-  }
-
+export function selectReplySender<T extends GlobalState>(
+  global: T, message: ApiMessage,
+) {
   const { senderId } = message;
   if (!senderId) {
     return undefined;
   }
 
   return selectPeer(global, senderId);
+}
+
+export function selectSenderFromHeader<T extends GlobalState>(
+  global: T,
+  header: ApiMessageForwardInfo,
+) {
+  const { senderUserId } = header;
+  if (senderUserId) {
+    return selectPeer(global, senderUserId);
+  }
+
+  return undefined;
 }
 
 export function selectForwardedSender<T extends GlobalState>(
@@ -507,9 +512,8 @@ export function selectCanDeleteTopic<T extends GlobalState>(global: T, chatId: s
 
 export function selectThreadIdFromMessage<T extends GlobalState>(global: T, message: ApiMessage): number {
   const chat = selectChat(global, message.chatId);
-  const {
-    replyToMessageId, replyToTopMessageId, isTopicReply, content,
-  } = message;
+  const { content } = message;
+  const { replyToMsgId, replyToTopId, isForumTopic } = getMessageReplyInfo(message) || {};
   if ('action' in content && content.action?.type === 'topicCreate') {
     return message.id;
   }
@@ -518,12 +522,12 @@ export function selectThreadIdFromMessage<T extends GlobalState>(global: T, mess
     if (chat && isChatBasicGroup(chat)) return MAIN_THREAD_ID;
 
     if (chat && isChatSuperGroup(chat)) {
-      return replyToTopMessageId || replyToMessageId || MAIN_THREAD_ID;
+      return replyToTopId || replyToMsgId || MAIN_THREAD_ID;
     }
     return MAIN_THREAD_ID;
   }
-  if (!isTopicReply) return GENERAL_TOPIC_ID;
-  return replyToTopMessageId || replyToMessageId || GENERAL_TOPIC_ID;
+  if (!isForumTopic) return GENERAL_TOPIC_ID;
+  return replyToTopId || replyToMsgId || GENERAL_TOPIC_ID;
 }
 
 export function selectTopicFromMessage<T extends GlobalState>(global: T, message: ApiMessage) {
@@ -985,10 +989,11 @@ function selectShouldHideReplyKeyboard<T extends GlobalState>(global: T, message
   const {
     shouldHideKeyboardButtons,
     isHideKeyboardSelective,
-    replyToMessageId,
     isMentioned,
   } = message;
   if (!shouldHideKeyboardButtons) return false;
+
+  const replyToMessageId = getMessageReplyInfo(message)?.replyToMsgId;
 
   if (isHideKeyboardSelective) {
     if (isMentioned) return true;
@@ -1006,9 +1011,10 @@ function selectShouldDisplayReplyKeyboard<T extends GlobalState>(global: T, mess
     shouldHideKeyboardButtons,
     isKeyboardSelective,
     isMentioned,
-    replyToMessageId,
   } = message;
   if (!keyboardButtons || shouldHideKeyboardButtons) return false;
+
+  const replyToMessageId = getMessageReplyInfo(message)?.replyToMsgId;
 
   if (isKeyboardSelective) {
     if (isMentioned) return true;
@@ -1379,4 +1385,24 @@ export function selectTopicLink<T extends GlobalState>(
   global: T, chatId: string, topicId?: number,
 ) {
   return selectMessageLink(global, chatId, topicId);
+}
+
+export function selectMessageReplyInfo<T extends GlobalState>(
+  global: T, chatId: string, threadId: number = MAIN_THREAD_ID, additionalReplyInfo?: ApiInputMessageReplyInfo,
+) {
+  const chat = selectChat(global, chatId);
+  if (!chat) return undefined;
+
+  const replyingToTopId = selectThreadTopMessageId(global, chatId, threadId);
+
+  if (!additionalReplyInfo && !replyingToTopId) return undefined;
+
+  const replyInfo: ApiInputMessageReplyInfo = {
+    type: 'message',
+    ...additionalReplyInfo,
+    replyToMsgId: additionalReplyInfo?.replyToMsgId || replyingToTopId!,
+    replyToTopId: additionalReplyInfo?.replyToTopId || replyingToTopId,
+  };
+
+  return replyInfo;
 }

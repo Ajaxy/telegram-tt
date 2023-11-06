@@ -4,7 +4,7 @@ import path from 'path';
 import { ElectronEvent } from '../types/electron';
 
 import {
-  getLastWindow, IS_LINUX, IS_MAC_OS, IS_WINDOWS,
+  focusLastWindow, getLastWindow, IS_LINUX, IS_MAC_OS, IS_WINDOWS,
 } from './utils';
 
 const TG_PROTOCOL = 'tg';
@@ -12,8 +12,6 @@ const TG_PROTOCOL = 'tg';
 let deeplinkUrl: string | undefined;
 
 export function initDeeplink() {
-  const window = getLastWindow();
-
   if (process.defaultApp) {
     if (process.argv.length >= 2) {
       app.setAsDefaultProtocolClient(TG_PROTOCOL, process.execPath, [path.resolve(process.argv[1])]);
@@ -35,6 +33,7 @@ export function initDeeplink() {
       event.preventDefault();
       deeplinkUrl = url;
       processDeeplink();
+      focusLastWindow();
     });
   });
 
@@ -50,14 +49,7 @@ export function initDeeplink() {
     }
 
     processDeeplink();
-
-    if (window) {
-      if (window.isMinimized()) {
-        window.restore();
-      }
-
-      window.focus();
-    }
+    focusLastWindow();
   });
 }
 

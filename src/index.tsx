@@ -23,6 +23,7 @@ import { IS_MULTITAB_SUPPORTED } from './util/windowEnvironment';
 
 import App from './components/App';
 
+import './assets/fonts/roboto.css';
 import './styles/index.scss';
 
 if (STRICTERDOM_ENABLED) {

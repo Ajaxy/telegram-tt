@@ -1,6 +1,5 @@
 import type {
   ApiAppConfig,
-  ApiApplyBoostInfo,
   ApiAttachBot,
   ApiAttachment,
   ApiAvailableReaction,
@@ -27,12 +26,14 @@ import type {
   ApiGroupCall,
   ApiGroupStatistics,
   ApiInputInvoice,
+  ApiInputMessageReplyInfo,
   ApiInviteInfo,
   ApiInvoice,
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageEntity,
   ApiMessageStatistics,
+  ApiMyBoost,
   ApiNewPoll,
   ApiNotification,
   ApiPaymentCredentials,
@@ -148,7 +149,6 @@ export interface Thread {
   pinnedIds?: number[];
   scheduledIds?: number[];
   editingId?: number;
-  replyingToId?: number;
   editingScheduledId?: number;
   editingDraft?: ApiFormattedText;
   editingScheduledDraft?: ApiFormattedText;
@@ -525,8 +525,7 @@ export type TabState = {
     buttonText: string;
     queryId?: string;
     slug?: string;
-    replyToMessageId?: number;
-    threadId?: number;
+    replyInfo?: ApiInputMessageReplyInfo;
     canSendMessages?: boolean;
   };
 
@@ -624,7 +623,7 @@ export type TabState = {
   boostModal?: {
     chatId: string;
     boostStatus?: ApiBoostsStatus;
-    applyInfo?: ApiApplyBoostInfo;
+    myBoosts?: ApiMyBoost[];
   };
 
   boostStatistics?: {
@@ -946,7 +945,12 @@ export type CallbackAction = Values<{
   }
 }>;
 
-export type ApiDraft = ApiFormattedText & { isLocal?: boolean };
+export type ApiDraft = {
+  text?: ApiFormattedText;
+  replyInfo?: ApiInputMessageReplyInfo;
+  date?: number;
+  isLocal?: boolean;
+};
 
 type WithTabId = { tabId?: number };
 
@@ -1401,12 +1405,13 @@ export interface ActionPayloads {
   saveDraft: {
     chatId: string;
     threadId: number;
-    draft: ApiDraft;
+    text: ApiDraft['text'];
   };
   clearDraft: {
     chatId: string;
     threadId?: number;
-    localOnly?: boolean;
+    isLocalOnly?: boolean;
+    shouldKeepReply?: boolean;
   };
   loadPinnedMessages: {
     chatId: string;
@@ -1647,9 +1652,8 @@ export interface ActionPayloads {
   } & WithTabId;
 
   focusLastMessage: WithTabId | undefined;
-  setReplyingToId: {
-    messageId?: number;
-  } & WithTabId;
+  updateDraftReplyInfo: Partial<ApiInputMessageReplyInfo> & WithTabId;
+  resetDraftReplyInfo: WithTabId | undefined;
   closeWebApp: WithTabId | undefined;
 
   // Multitab
@@ -2101,6 +2105,7 @@ export interface ActionPayloads {
   closeBoostStatistics: WithTabId | undefined;
   loadMoreBoosters: WithTabId | undefined;
   applyBoost: {
+    slots: number[];
     chatId: string;
   } & WithTabId;
 
@@ -2387,7 +2392,7 @@ export interface ActionPayloads {
     peerId: string;
     queryId: string;
     isSilent?: boolean;
-    replyToMessageId?: number;
+    replyInfo?: ApiInputMessageReplyInfo;
     threadId?: number;
   } & WithTabId;
   requestSimpleWebView: {

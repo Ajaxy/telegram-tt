@@ -2,21 +2,39 @@ import type { ApiThemeParameters } from '../api/types';
 
 export function extractCurrentThemeParams(): ApiThemeParameters {
   const style = getComputedStyle(document.documentElement);
+
   const backgroundColor = getPropertyHexColor(style, '--color-background')!;
+  const secondaryTextColor = getPropertyHexColor(style, '--color-text-secondary')!;
+
+  const bgColor = backgroundColor;
   const textColor = getPropertyHexColor(style, '--color-text')!;
   const buttonColor = getPropertyHexColor(style, '--color-primary')!;
   const buttonTextColor = getPropertyHexColor(style, '--color-white')!;
   const linkColor = getPropertyHexColor(style, '--color-links')!;
-  const hintColor = getPropertyHexColor(style, '--color-text-secondary')!;
+  const hintColor = secondaryTextColor;
   const secondaryBgColor = getPropertyHexColor(style, '--color-background-secondary')!;
+
+  const headerBgColor = backgroundColor;
+  const accentTextColor = getPropertyHexColor(style, '--color-primary')!;
+  const sectionBgColor = backgroundColor;
+  const sectionHeaderTextColor = secondaryTextColor;
+  const subtitleTextColor = hintColor;
+  const destructiveTextColor = getPropertyHexColor(style, '--color-error')!;
+
   return {
-    bg_color: backgroundColor,
+    bg_color: bgColor,
     text_color: textColor,
     hint_color: hintColor,
     link_color: linkColor,
     button_color: buttonColor,
     button_text_color: buttonTextColor,
     secondary_bg_color: secondaryBgColor,
+    header_bg_color: headerBgColor,
+    accent_text_color: accentTextColor,
+    section_bg_color: sectionBgColor,
+    section_header_text_color: sectionHeaderTextColor,
+    subtitle_text_color: subtitleTextColor,
+    destructive_text_color: destructiveTextColor,
   };
 }
 

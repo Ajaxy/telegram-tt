@@ -4,7 +4,6 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChat,
-  ApiFormattedText,
   ApiMessage,
   ApiMessageOutgoingStatus,
   ApiPeer,
@@ -13,6 +12,7 @@ import type {
   ApiUser,
   ApiUserStatus,
 } from '../../../api/types';
+import type { ApiDraft } from '../../../global/types';
 import type { ObserveFn } from '../../../hooks/useIntersectionObserver';
 import type { ChatAnimationTypes } from './hooks';
 import { MAIN_THREAD_ID } from '../../../api/types';
@@ -25,6 +25,7 @@ import {
   isUserOnline,
   selectIsChatMuted,
 } from '../../../global/helpers';
+import { getMessageReplyInfo } from '../../../global/helpers/replies';
 import {
   selectCanAnimateInterface,
   selectChat,
@@ -89,7 +90,7 @@ type StateProps = {
   actionTargetChatId?: string;
   lastMessageSender?: ApiPeer;
   lastMessageOutgoingStatus?: ApiMessageOutgoingStatus;
-  draft?: ApiFormattedText;
+  draft?: ApiDraft;
   isSelected?: boolean;
   isSelectedForum?: boolean;
   isForumPanelOpen?: boolean;
@@ -344,10 +345,12 @@ export default memo(withGlobal<OwnProps>(
       return {};
     }
 
-    const { senderId, replyToMessageId, isOutgoing } = chat.lastMessage || {};
+    const { lastMessage } = chat;
+    const { senderId, isOutgoing } = lastMessage || {};
+    const replyToMessageId = lastMessage && getMessageReplyInfo(lastMessage)?.replyToMsgId;
     const lastMessageSender = senderId
       ? (selectUser(global, senderId) || selectChat(global, senderId)) : undefined;
-    const lastMessageAction = chat.lastMessage ? getMessageAction(chat.lastMessage) : undefined;
+    const lastMessageAction = lastMessage ? getMessageAction(lastMessage) : undefined;
     const actionTargetMessage = lastMessageAction && replyToMessageId
       ? selectChatMessage(global, chat.id, replyToMessageId)
       : undefined;
@@ -364,7 +367,7 @@ export default memo(withGlobal<OwnProps>(
 
     const user = privateChatUserId ? selectUser(global, privateChatUserId) : undefined;
     const userStatus = privateChatUserId ? selectUserStatus(global, privateChatUserId) : undefined;
-    const lastMessageTopic = chat.lastMessage && selectTopicFromMessage(global, chat.lastMessage);
+    const lastMessageTopic = lastMessage && selectTopicFromMessage(global, lastMessage);
 
     const typingStatus = selectThreadParam(global, chatId, MAIN_THREAD_ID, 'typingStatus');
 
@@ -381,8 +384,8 @@ export default memo(withGlobal<OwnProps>(
       isForumPanelOpen: selectIsForumPanelOpen(global),
       canScrollDown: isSelected && messageListType === 'thread',
       canChangeFolder: (global.chatFolders.orderedIds?.length || 0) > 1,
-      ...(isOutgoing && chat.lastMessage && {
-        lastMessageOutgoingStatus: selectOutgoingStatus(global, chat.lastMessage),
+      ...(isOutgoing && lastMessage && {
+        lastMessageOutgoingStatus: selectOutgoingStatus(global, lastMessage),
       }),
       user,
       userStatus,

@@ -167,7 +167,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     openChat,
-    setReplyingToId,
+    updateDraftReplyInfo,
     setEditingId,
     pinMessage,
     openForwardMenu,
@@ -298,7 +298,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleReply = useLastCallback(() => {
-    setReplyingToId({ messageId: message.id });
+    updateDraftReplyInfo({ replyToMsgId: message.id });
     closeMenu();
   });
 

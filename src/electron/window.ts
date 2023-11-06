@@ -93,7 +93,7 @@ export function createWindow(url?: string) {
   });
 
   window.on('close', (event) => {
-    if (IS_MAC_OS || IS_WINDOWS) {
+    if (IS_MAC_OS || (IS_WINDOWS && tray.isEnabled)) {
       if (forceQuit.isEnabled) {
         app.exit(0);
         forceQuit.disable();

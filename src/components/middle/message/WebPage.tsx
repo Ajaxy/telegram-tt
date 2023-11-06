@@ -40,6 +40,7 @@ type OwnProps = {
   isDownloading?: boolean;
   isProtected?: boolean;
   isConnected?: boolean;
+  noUserColors?: boolean;
   theme: ISettings['theme'];
   story?: ApiTypeStory;
   onMediaClick?: () => void;
@@ -124,7 +125,8 @@ const WebPage: FC<OwnProps> = ({
       <Button
         className="WebPage--quick-button"
         size="tiny"
-        color="translucent-bordered"
+        color="translucent"
+        isRectangular
         onClick={handleQuickButtonClick}
       >
         {lang(langKey)}

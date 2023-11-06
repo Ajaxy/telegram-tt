@@ -3,7 +3,7 @@ import { Api as GramJs, connection } from '../../lib/gramjs';
 import type { GroupCallConnectionData } from '../../lib/secret-sauce';
 import type {
   ApiMessage, ApiMessageExtendedMediaPreview, ApiStory, ApiStorySkipped,
-  ApiUpdate, ApiUpdateConnectionStateType, OnApiUpdate,
+  ApiUpdate, ApiUpdateConnectionStateType, MediaContent, OnApiUpdate,
 } from '../types';
 
 import { DEBUG, GENERAL_TOPIC_ID } from '../../config';
@@ -363,7 +363,7 @@ export function updater(update: Update) {
       reactions: buildMessageReactions(update.reactions),
     });
   } else if (update instanceof GramJs.UpdateMessageExtendedMedia) {
-    let media: ApiMessage['content'] | undefined;
+    let media: MediaContent | undefined;
     if (update.extendedMedia instanceof GramJs.MessageExtendedMedia) {
       media = buildMessageMediaContent(update.extendedMedia.media);
     }
@@ -902,7 +902,7 @@ export function updater(update: Update) {
       '@type': 'draftMessage',
       chatId: getApiChatIdFromMtpPeer(update.peer),
       threadId: update.topMsgId,
-      ...buildMessageDraft(update.draft),
+      draft: buildMessageDraft(update.draft),
     });
   } else if (update instanceof GramJs.UpdateContactsReset) {
     onUpdate({ '@type': 'updateResetContactList' });

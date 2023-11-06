@@ -1,4 +1,4 @@
-@import "../../../styles/mixins";
+@use "../../../styles/mixins";
 
 .SymbolMenu {
   &.attachment-modal-symbol-menu {
@@ -277,7 +277,7 @@
     padding: 0;
   }
 
-  @include while-transition() {
+  @include mixins.while-transition() {
     overflow: hidden;
   }
 }

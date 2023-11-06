@@ -54,6 +54,8 @@ function buildApiChatFieldsFromPeerEntity(
   const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
+  const color = 'color' in peerEntity ? peerEntity.color : undefined;
+  const backgroundEmojiId = 'backgroundEmojiId' in peerEntity ? peerEntity.backgroundEmojiId?.toString() : undefined;
 
   return {
     isMin,
@@ -66,7 +68,7 @@ function buildApiChatFieldsFromPeerEntity(
     ...('verified' in peerEntity && { isVerified: peerEntity.verified }),
     ...('callActive' in peerEntity && { isCallActive: peerEntity.callActive }),
     ...('callNotEmpty' in peerEntity && { isCallNotEmpty: peerEntity.callNotEmpty }),
-    ...('date' in peerEntity && { joinDate: peerEntity.date }),
+    ...('date' in peerEntity && { creationDate: peerEntity.date }),
     ...('participantsCount' in peerEntity && peerEntity.participantsCount !== undefined && {
       membersCount: peerEntity.participantsCount,
     }),
@@ -77,6 +79,8 @@ function buildApiChatFieldsFromPeerEntity(
     ...buildApiChatRestrictions(peerEntity),
     ...buildApiChatMigrationInfo(peerEntity),
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
+    color,
+    backgroundEmojiId,
     isJoinToSend,
     isJoinRequest,
     isForum,

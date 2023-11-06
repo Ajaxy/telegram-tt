@@ -1,3 +1,4 @@
+import type { ApiDraft } from '../../global/types';
 import type {
   GroupCallConnectionData,
   GroupCallConnectionState,
@@ -27,6 +28,7 @@ import type {
   ApiReactions,
   ApiStickerSet,
   ApiThreadInfo,
+  MediaContent,
 } from './messages';
 import type {
   ApiEmojiInteraction, ApiError, ApiInviteInfo, ApiNotifyException, ApiSessionData,
@@ -312,9 +314,7 @@ export type ApiUpdateDraftMessage = {
   '@type': 'draftMessage';
   chatId: string;
   threadId?: number;
-  formattedText?: ApiFormattedText;
-  date?: number;
-  replyingToId?: number;
+  draft?: ApiDraft;
 };
 
 export type ApiUpdateMessageReactions = {
@@ -328,7 +328,7 @@ export type ApiUpdateMessageExtendedMedia = {
   '@type': 'updateMessageExtendedMedia';
   id: number;
   chatId: string;
-  media?: ApiMessage['content'];
+  media?: MediaContent;
   preview?: ApiMessageExtendedMediaPreview;
 };
 

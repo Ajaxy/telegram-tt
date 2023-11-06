@@ -1,4 +1,4 @@
-@import "../../styles/mixins";
+@use "../../styles/mixins";
 
 @mixin thumb-styles() {
   background: var(--slider-color);
@@ -86,7 +86,7 @@
   }
 
   // Reset range input browser styles
-  @include reset-range();
+  @include mixins.reset-range();
 
   // Apply custom styles
   input[type="range"] {

@@ -8,12 +8,14 @@ export default function useEnsureMessage(
   messageId?: number,
   message?: ApiMessage,
   replyOriginForId?: number,
+  isDisabled?: boolean,
 ) {
   const { loadMessage } = getActions();
 
   useEffect(() => {
+    if (isDisabled) return;
     if (messageId && !message) {
       loadMessage({ chatId, messageId: messageId!, replyOriginForId: replyOriginForId! });
     }
-  }, [chatId, message, messageId, replyOriginForId]);
+  }, [isDisabled, chatId, message, messageId, replyOriginForId]);
 }

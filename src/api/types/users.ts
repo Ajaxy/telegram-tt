@@ -35,6 +35,8 @@ export interface ApiUser {
   hasStories?: boolean;
   hasUnreadStories?: boolean;
   maxStoryId?: number;
+  color?: number;
+  backgroundEmojiId?: string;
 }
 
 export interface ApiUserFullInfo {
@@ -81,7 +83,6 @@ type ApiAttachBotForMenu = {
 
 type ApiAttachBotBase = {
   id: string;
-  hasSettings?: boolean;
   shouldRequestWriteAccess?: boolean;
   shortName: string;
   isForSideMenu?: true;

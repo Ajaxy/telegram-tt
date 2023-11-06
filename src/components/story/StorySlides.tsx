@@ -286,6 +286,7 @@ function StorySlides({
     return captureEvents(containerRef.current, {
       isNotPassive: true,
       withNativeDrag: true,
+      withWheelDrag: true,
       excludedClosestSelector: '.Composer',
       onDrag: (event, captureEvent, {
         dragOffsetX, dragOffsetY,

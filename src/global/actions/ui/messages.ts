@@ -42,12 +42,12 @@ import {
   selectChatScheduledMessages,
   selectCurrentChat,
   selectCurrentMessageList,
+  selectDraft,
   selectForwardedMessageIdsByGroupId,
   selectIsRightColumnShown,
   selectIsViewportNewest,
   selectMessageIdsByGroupId,
   selectPinnedIds,
-  selectReplyingToId,
   selectReplyStack,
   selectRequestedChatTranslationLanguage,
   selectRequestedMessageTranslationLanguage,
@@ -75,17 +75,6 @@ addActionHandler('setScrollOffset', (global, actions, payload): ActionReturnType
   global = replaceThreadParam(global, chatId, threadId, 'lastScrollOffset', scrollOffset);
 
   return replaceTabThreadParam(global, chatId, threadId, 'scrollOffset', scrollOffset, tabId);
-});
-
-addActionHandler('setReplyingToId', (global, actions, payload): ActionReturnType => {
-  const { messageId, tabId = getCurrentTabId() } = payload;
-  const currentMessageList = selectCurrentMessageList(global, tabId);
-  if (!currentMessageList) {
-    return undefined;
-  }
-  const { chatId, threadId } = currentMessageList;
-
-  return replaceThreadParam(global, chatId, threadId, 'replyingToId', messageId);
 });
 
 addActionHandler('setEditingId', (global, actions, payload): ActionReturnType => {
@@ -148,12 +137,12 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
     return;
   }
 
-  const replyingToId = selectReplyingToId(global, chatId, threadId);
+  const replyInfo = selectDraft(global, chatId, threadId)?.replyInfo;
   const isLatest = selectIsViewportNewest(global, chatId, threadId, tabId);
 
   let messageId: number | undefined;
 
-  if (!isLatest || !replyingToId) {
+  if (!isLatest || !replyInfo) {
     if (threadId === MAIN_THREAD_ID) {
       const chat = selectChat(global, chatId);
 
@@ -165,13 +154,13 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
     }
   } else {
     const chatMessageKeys = Object.keys(chatMessages);
-    const indexOfCurrent = chatMessageKeys.indexOf(replyingToId.toString());
+    const indexOfCurrent = chatMessageKeys.indexOf(replyInfo.toString());
     const newIndex = indexOfCurrent + targetIndexDelta;
     messageId = newIndex <= chatMessageKeys.length + 1 && newIndex >= 0
       ? Number(chatMessageKeys[newIndex])
       : undefined;
   }
-  actions.setReplyingToId({ messageId, tabId });
+  actions.updateDraftReplyInfo({ replyToMsgId: messageId, tabId });
   actions.focusMessage({
     chatId,
     threadId,

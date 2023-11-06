@@ -36,12 +36,14 @@ export interface ApiChat {
   avatarHash?: string;
   usernames?: ApiUsername[];
   membersCount?: number;
-  joinDate?: number;
+  creationDate?: number;
   isSupport?: true;
   photos?: ApiPhoto[];
   draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;
+  color?: number;
+  backgroundEmojiId?: string;
   isForum?: boolean;
   topics?: Record<number, ApiTopic>;
   listedTopicIds?: number[];

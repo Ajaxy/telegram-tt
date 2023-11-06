@@ -1,4 +1,4 @@
-@import "../../../styles/mixins";
+@use "../../../styles/mixins";
 
 #Settings {
   height: 100%;
@@ -82,7 +82,7 @@
   text-align: center;
   margin-bottom: 0.625rem;
 
-  @include side-panel-section;
+  @include mixins.side-panel-section;
 
   &.no-border {
     margin-bottom: 0;
@@ -109,12 +109,12 @@
 
 .settings-main-menu {
   padding: 0.5rem;
-  @include side-panel-section;
+  @include mixins.side-panel-section;
 
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;
     margin: 0 -0.5rem 0.625rem;
-    @include side-panel-section;
+    @include mixins.side-panel-section;
 
     .ListItem.narrow {
       margin-bottom: 0.25rem;
@@ -125,7 +125,7 @@
 .settings-item-simple,
 .settings-item {
   padding: 1.5rem 1.5rem 1rem;
-  @include side-panel-section;
+  @include mixins.side-panel-section;
 }
 
 .settings-item {

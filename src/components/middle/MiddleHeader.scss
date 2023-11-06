@@ -1,8 +1,8 @@
-@import "../../styles/mixins";
+@use "../../styles/mixins";
 
 @mixin mobile-header-styles() {
   .AudioPlayer {
-    @include header-mobile;
+    @include mixins.header-mobile;
 
     flex-direction: row;
     margin-top: 0;

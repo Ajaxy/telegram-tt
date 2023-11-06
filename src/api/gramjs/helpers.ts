@@ -50,34 +50,42 @@ export function addMessageToLocalDb(message: GramJs.Message | GramJs.MessageServ
   localDb.messages[messageFullId] = mockMessage;
 
   if (mockMessage instanceof GramJs.Message) {
-    if (mockMessage.media instanceof GramJs.MessageMediaDocument
-      && mockMessage.media.document instanceof GramJs.Document
-    ) {
-      localDb.documents[String(mockMessage.media.document.id)] = mockMessage.media.document;
-    }
+    if (mockMessage.media) addMediaToLocalDb(mockMessage.media);
 
-    if (mockMessage.media instanceof GramJs.MessageMediaWebPage
-      && mockMessage.media.webpage instanceof GramJs.WebPage
-      && mockMessage.media.webpage.document instanceof GramJs.Document
-    ) {
-      localDb.documents[String(mockMessage.media.webpage.document.id)] = mockMessage.media.webpage.document;
-    }
-
-    if (mockMessage.media instanceof GramJs.MessageMediaGame) {
-      if (mockMessage.media.game.document instanceof GramJs.Document) {
-        localDb.documents[String(mockMessage.media.game.document.id)] = mockMessage.media.game.document;
-      }
-      addPhotoToLocalDb(mockMessage.media.game.photo);
-    }
-
-    if (mockMessage.media instanceof GramJs.MessageMediaInvoice
-      && mockMessage.media.photo) {
-      localDb.webDocuments[String(mockMessage.media.photo.url)] = mockMessage.media.photo;
+    if (mockMessage.replyTo instanceof GramJs.MessageReplyHeader && mockMessage.replyTo.replyMedia) {
+      addMediaToLocalDb(mockMessage.replyTo.replyMedia);
     }
   }
 
   if (mockMessage instanceof GramJs.MessageService && 'photo' in mockMessage.action) {
     addPhotoToLocalDb(mockMessage.action.photo);
+  }
+}
+
+function addMediaToLocalDb(media: GramJs.TypeMessageMedia) {
+  if (media instanceof GramJs.MessageMediaDocument
+    && media.document instanceof GramJs.Document
+  ) {
+    localDb.documents[String(media.document.id)] = media.document;
+  }
+
+  if (media instanceof GramJs.MessageMediaWebPage
+    && media.webpage instanceof GramJs.WebPage
+    && media.webpage.document instanceof GramJs.Document
+  ) {
+    localDb.documents[String(media.webpage.document.id)] = media.webpage.document;
+  }
+
+  if (media instanceof GramJs.MessageMediaGame) {
+    if (media.game.document instanceof GramJs.Document) {
+      localDb.documents[String(media.game.document.id)] = media.game.document;
+    }
+    addPhotoToLocalDb(media.game.photo);
+  }
+
+  if (media instanceof GramJs.MessageMediaInvoice
+    && media.photo) {
+    localDb.webDocuments[String(media.photo.url)] = media.photo;
   }
 }
 

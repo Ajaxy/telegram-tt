@@ -73,7 +73,6 @@ import {
   selectIsRightColumnShown,
   selectNewestMessageWithBotKeyboardButtons,
   selectPeerStory,
-  selectReplyingToId,
   selectRequestedDraftFiles,
   selectRequestedDraftText,
   selectScheduledIds,
@@ -191,7 +190,6 @@ type StateProps =
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
-    replyingToId?: number;
     isForCurrentMessageList: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
@@ -321,7 +319,6 @@ const Composer: FC<OwnProps & StateProps> = ({
   sendAsChat,
   sendAsId,
   editingDraft,
-  replyingToId,
   requestedDraftText,
   requestedDraftFiles,
   botMenuButton,
@@ -698,7 +695,6 @@ const Composer: FC<OwnProps & StateProps> = ({
     messageListType,
     draft,
     editingDraft,
-    replyingToId,
   );
 
   // Handle chat change (should be placed after `useDraft` and `useEditing`)
@@ -893,7 +889,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
-    clearDraft({ chatId, localOnly: true });
+    clearDraft({ chatId, isLocalOnly: true });
 
     // Wait until message animation starts
     requestMeasure(() => {
@@ -984,8 +980,9 @@ const Composer: FC<OwnProps & StateProps> = ({
 
     lastMessageSendTimeSeconds.current = getServerTime();
 
-    clearDraft({ chatId, localOnly: true });
+    clearDraft({ chatId, isLocalOnly: true });
     if (shouldOpenRepliesChat) openChat(repliesChatToOpen);
+
     if (IS_IOS && messageInput && messageInput === document.activeElement) {
       applyIosAutoCapitalizationFix(messageInput);
     }
@@ -1171,14 +1168,14 @@ const Composer: FC<OwnProps & StateProps> = ({
       applyIosAutoCapitalizationFix(messageInput);
     }
 
-    clearDraft({ chatId, localOnly: true });
+    clearDraft({ chatId, isLocalOnly: true });
     requestMeasure(() => {
       resetComposer();
     });
   });
 
   const handleBotCommandSelect = useLastCallback(() => {
-    clearDraft({ chatId, localOnly: true });
+    clearDraft({ chatId, isLocalOnly: true });
     requestMeasure(() => {
       resetComposer();
     });
@@ -1943,8 +1940,6 @@ export default memo(withGlobal<OwnProps>(
       ? selectEditingScheduledDraft(global, chatId)
       : selectEditingDraft(global, chatId, threadId);
 
-    const replyingToId = selectReplyingToId(global, chatId, threadId);
-
     const story = storyId && selectPeerStory(global, chatId, storyId);
     const sentStoryReaction = story && 'sentReaction' in story ? story.sentReaction : undefined;
 
@@ -1953,7 +1948,6 @@ export default memo(withGlobal<OwnProps>(
       topReactions: type === 'story' ? global.topReactions : undefined,
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
-      replyingToId,
       draft: selectDraft(global, chatId, threadId),
       chat,
       isChatWithBot,

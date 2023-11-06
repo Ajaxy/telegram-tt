@@ -31,7 +31,7 @@ section {
   display: block;
 }
 
-body {
+body, blockquote {
   margin: 0;
 }
 
@@ -90,7 +90,6 @@ dd {
   margin-left: 0;
 }
 
-blockquote,
 figure {
   margin: 0 0 1rem;
 }
