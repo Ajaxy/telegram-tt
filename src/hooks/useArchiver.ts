@@ -7,6 +7,7 @@ See original code here: https://github.com/rebryk/supertelega/blob/master/archiv
 import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
+import type { GlobalState } from '../global/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import useInterval from './useInterval';
@@ -20,7 +21,9 @@ export default function useArchiver() {
 
   const chatsToArchive: { [key: string]: Date } = {};
 
-  const shouldArchive = (chat: ApiChat, isPinnedInAllFolder: boolean) => {
+  const shouldArchive = (chat: ApiChat, global: GlobalState) => {
+    const pinnedChatIds = global.chats.orderedPinnedIds.active;
+    const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chat.id));
     return chat && !isPinnedInAllFolder && (chat.isMuted || !(
       chat.id === SERVICE_NOTIFICATIONS_USER_ID // impossible to archive
       || chat.hasUnreadMark
@@ -60,14 +63,12 @@ export default function useArchiver() {
   const process = () => {
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
-    const pinnedChatIds = global.chats.orderedPinnedIds.active;
     if (notArchivedChatsIds) {
       for (const chatId of notArchivedChatsIds) {
         const chatsById = global.chats.byId;
         const chat = chatsById[chatId];
         if (chat && chat.id) {
-          const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chatId));
-          if (shouldArchive(chat, isPinnedInAllFolder)) {
+          if (shouldArchive(chat, global)) {
             add(chat.id);
           } else {
             remove(chat.id);
