@@ -1,5 +1,5 @@
 import type {
-  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiPeer, ApiStory, ApiUser,
+  ApiChat, ApiMessage, ApiMessageEntityTextUrl, ApiMessageReplyInfo, ApiPeer, ApiStory, ApiUser,
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import { ApiMessageEntityTypes, MAIN_THREAD_ID } from '../../api/types';
@@ -173,7 +173,11 @@ export function isReplyToMessage(message: ApiMessage) {
 }
 
 export function isReplyToUserThreadMessage(message: ApiMessage) {
-  return isReplyMessage(message) && !isMainThread(message.replyToMessageId!);
+  return (
+    Boolean(message.replyInfo?.type === 'message')
+    && Boolean((message.replyInfo as ApiMessageReplyInfo)?.replyToMsgId)
+    && !isMainThread((message.replyInfo as ApiMessageReplyInfo).replyToMsgId!)
+  );
 }
 
 export function isForwardedMessage(message: ApiMessage) {
