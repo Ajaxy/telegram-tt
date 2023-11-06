@@ -40,7 +40,7 @@
 }
 
 .Notification {
-  background: rgba(20, 21, 21, 0.80)
+  background: rgba(22, 22, 22, 0.498)
     url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48Y2lyY2xlIGZpbGw9IiNGRkYiIGN4PSIxMiIgY3k9IjEyIiByPSIxMiIvPjxjaXJjbGUgZmlsbD0iIzAwMCIgZmlsbC1ydWxlPSJub256ZXJvIiBjeD0iMTIiIGN5PSI2LjUiIHI9IjEuNSIvPjxwYXRoIGQ9Ik0xMiA5LjVjLS41NTIgMC0xIC4zNy0xIC44MjZ2Ny4zNDhjMCAuNDU2LjQ0OC44MjYgMSAuODI2czEtLjM3IDEtLjgyNnYtNy4zNDhjMC0uNDU2LS40NDgtLjgyNi0xLS44MjZ6IiBmaWxsPSIjMDAwIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48L2c+PC9zdmc+")
     no-repeat 0.9375rem 50%;
   background-size: 1.5rem;
@@ -49,7 +49,7 @@
   border-right: 1px solid var(----color-borders, #303030);
   border-bottom: 1px solid var(----color-borders, #303030);
   box-shadow: 2px 0px 24px 0px rgba(210, 93, 101, 0.80);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
   padding: 0.9375rem 0.9375rem 0.9375rem 3.375rem;
   color: var(--color-text);
   margin: 0 0.5rem;
