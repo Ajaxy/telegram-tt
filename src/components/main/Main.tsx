@@ -76,6 +76,7 @@ import CustomEmojiSetsModal from '../common/CustomEmojiSetsModal.async';
 import StickerSetModal from '../common/StickerSetModal.async';
 import UnreadCount from '../common/UnreadCounter';
 import LeftColumn from '../left/LeftColumn';
+import UluChatFolders from '../left/main/UluChatFolders';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
@@ -328,6 +329,8 @@ const Main: FC<OwnProps & StateProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const leftColumnRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const chatFoldersPortalRef = useRef<HTMLDivElement>(null);
 
   const { isDesktop } = useAppLayout();
   useEffect(() => {
@@ -585,7 +588,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
-      <LeftColumn ref={leftColumnRef} />
+      <LeftColumn ref={leftColumnRef} chatFoldersPortalRef={chatFoldersPortalRef} />
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />
       <MediaViewer isOpen={isMediaViewerOpen} />
@@ -640,6 +643,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
       <CommandMenu />
+      <UluChatFolders portalRef={chatFoldersPortalRef} />
     </div>
   );
 };

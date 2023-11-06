@@ -31,6 +31,7 @@ import './LeftColumn.scss';
 
 interface OwnProps {
   ref: RefObject<HTMLDivElement>;
+  chatFoldersPortalRef: RefObject<HTMLDivElement>;
 }
 
 type StateProps = {
@@ -86,6 +87,7 @@ function LeftColumn({
   isClosingSearch,
   archiveSettings,
   isArchivedStoryRibbonShown,
+  chatFoldersPortalRef,
 }: OwnProps & StateProps) {
   const {
     setGlobalSearchQuery,
@@ -511,6 +513,7 @@ function LeftColumn({
       default:
         return (
           <LeftMain
+            chatFoldersPortalRef={chatFoldersPortalRef}
             content={content}
             chatId={currentChatId}
             userId={currentUserId}

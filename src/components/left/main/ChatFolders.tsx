@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef,
@@ -42,6 +43,7 @@ type OwnProps = {
   shouldHideFolderTabs?: boolean;
   isForumPanelOpen?: boolean;
   content: LeftColumnContent;
+  chatFoldersPortalRef: RefObject<HTMLDivElement>;
   chatId?: string;
   userId?: string;
   dispatch: FolderEditDispatch;
@@ -91,6 +93,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   content,
   chatId,
   userId,
+  chatFoldersPortalRef,
   dispatch,
   onScreenSelect,
 }) => {
@@ -345,6 +348,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       />
       <UluChatFoldersDivider />
       <UluNewChatFolderButton onCreateFolder={handleCreateFolder} />
+      <div ref={chatFoldersPortalRef} id="ulu-chat-folders-portal" />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
         <TabList

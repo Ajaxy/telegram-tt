@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -41,6 +42,7 @@ type OwnProps = {
   isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
+  chatFoldersPortalRef: RefObject<HTMLDivElement>;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -66,6 +68,7 @@ const LeftMain: FC<OwnProps> = ({
   isAppUpdateAvailable,
   isElectronUpdateAvailable,
   isForumPanelOpen,
+  chatFoldersPortalRef,
   onSearchQuery,
   onContentChange,
   onSettingsScreenSelect,
@@ -213,6 +216,7 @@ const LeftMain: FC<OwnProps> = ({
               return (
                 <ChatFolders
                   content={content}
+                  chatFoldersPortalRef={chatFoldersPortalRef}
                   chatId={chatId}
                   userId={userId}
                   shouldHideFolderTabs={isForumPanelVisible}
