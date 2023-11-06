@@ -190,7 +190,6 @@ type StateProps =
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
     isChannel?: boolean;
-    replyingToId?: number;
     isForCurrentMessageList: boolean;
     isRightColumnShown?: boolean;
     isSelectModeActive?: boolean;
@@ -687,7 +686,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
   });
 
-  const [handleEditComplete, handleEditCancel, shouldForceShowEditing, replyingToId] = useEditing(
+  const [handleEditComplete, handleEditCancel, shouldForceShowEditing] = useEditing(
     getHtml,
     setHtml,
     editingMessage,
