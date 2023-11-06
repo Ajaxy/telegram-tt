@@ -397,6 +397,8 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const customEmojiNotificationNumber = useRef(0);
 
+  const replyingToMsgId = draft?.replyInfo?.replyToMsgId;
+
   const [requestCalendar, calendar] = useSchedule(
     isInMessageList && canScheduleUntilOnline,
     cancelForceShowSymbolMenu,
@@ -919,13 +921,13 @@ const Composer: FC<OwnProps & StateProps> = ({
     }
 
     const shouldOpenRepliesChat = (
-      replyingToId
+      replyingToMsgId
       && ULU_APP_CONSTANTS.SHOULD_OPEN_REPLIES_CHAT_ON_REPLY
       && ULU_APP_UTILS.doesChatSupportThreads(chat)
     );
     const repliesChatToOpen = {
       id: chatId,
-      threadId: isMainThread(threadId) ? replyingToId : threadId,
+      threadId: isMainThread(threadId) ? replyingToMsgId : threadId,
     };
     let currentAttachments = attachments;
 

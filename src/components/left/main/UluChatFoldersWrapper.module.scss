@@ -1,0 +1,6 @@
+.wrapper {
+	$padding: var(--ulu-sidebar-component-padding);
+	display: flex;
+	flex-direction: column;
+	padding: 0 #{$padding} #{$padding} #{$padding};
+}

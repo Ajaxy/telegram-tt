@@ -173,11 +173,11 @@ export function isReplyToMessage(message: ApiMessage) {
 }
 
 export function isReplyToUserThreadMessage(message: ApiMessage) {
-  return (
-    Boolean(message.replyInfo?.type === 'message')
-    && Boolean((message.replyInfo as ApiMessageReplyInfo)?.replyToMsgId)
-    && !isMainThread((message.replyInfo as ApiMessageReplyInfo).replyToMsgId!)
-  );
+  if (message.replyInfo && message.replyInfo.type === 'message' && message.replyInfo.replyToMsgId) {
+    return isReplyToMessage(message) && !isMainThread(message.replyInfo.replyToMsgId);
+  }
+
+  return false;
 }
 
 export function isForwardedMessage(message: ApiMessage) {

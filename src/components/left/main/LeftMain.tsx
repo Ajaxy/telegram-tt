@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -41,6 +42,7 @@ type OwnProps = {
   isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
+  chatFoldersPortalRef: RefObject<HTMLDivElement>;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -68,6 +70,7 @@ const LeftMain: FC<OwnProps> = ({
   isForumPanelOpen,
   onSearchQuery,
   onContentChange,
+  chatFoldersPortalRef,
   onSettingsScreenSelect,
   onReset,
   onTopicSearch,
@@ -199,6 +202,7 @@ const LeftMain: FC<OwnProps> = ({
             case LeftColumnContent.ChatList:
               return (
                 <ChatFolders
+                  chatFoldersPortalRef={chatFoldersPortalRef}
                   content={content}
                   chatId={chatId}
                   userId={userId}
@@ -207,6 +211,8 @@ const LeftMain: FC<OwnProps> = ({
                   onLeftColumnContentChange={onContentChange}
                   foldersDispatch={foldersDispatch}
                   isForumPanelOpen={isForumPanelVisible}
+                  onScreenSelect={onSettingsScreenSelect}
+                  dispatch={foldersDispatch}
                 />
               );
             case LeftColumnContent.GlobalSearch:
