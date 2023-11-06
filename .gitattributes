@@ -23,3 +23,8 @@
 *.jpg binary
 *.png binary
 *.wav binary
+
+## ulu ignores
+dist/ merge=ours
+public/build-stats.json merge=ours
+public/statoscope-report.html merge=ours

@@ -12,7 +12,7 @@ dev/perf/screenshot*
 .github/workflows/*
 !.github/workflows/package-and-publish.yml
 
-## Ulu ignores
-dist/*
+## ulu ignores
+dist/
 public/build-stats.json
 public/statoscope-report.html
