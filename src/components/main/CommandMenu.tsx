@@ -8,6 +8,8 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import useArchiver from '../../hooks/useArchiver';
+
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
@@ -16,8 +18,9 @@ const CommandMenu = () => {
   const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
-    !!JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled'))),
+    !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
+  const { archiveMessages } = useArchiver({ isManual: true });
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -48,15 +51,16 @@ const CommandMenu = () => {
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    localStorage.setItem('ulu_is_archiver_enabled', JSON.stringify(updIsArchiverEnabled));
+    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
   }, [close, isArchiverEnabled]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
+    archiveMessages();
     close();
-  }, [close]);
+  }, [close, archiveMessages]);
 
   const CommandMenuInner = open ? (
     <Command label="Command Menu">
