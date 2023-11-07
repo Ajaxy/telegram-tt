@@ -18,7 +18,7 @@ const CommandMenu = () => {
   const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
-    !!JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled'))),
+    !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
   const { archiveMessages } = useArchiver({ isManual: true });
 
@@ -51,7 +51,7 @@ const CommandMenu = () => {
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    localStorage.setItem('ulu_is_archiver_enabled', JSON.stringify(updIsArchiverEnabled));
+    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
   }, [close, isArchiverEnabled]);

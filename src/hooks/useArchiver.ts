@@ -50,9 +50,6 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
   };
 
   const archive = () => {
-    // eslint-disable-next-line no-console
-    console.log('>>> archive chatsToArchive', chatsToArchive);
-
     if (Object.keys(chatsToArchive).length > BATCH_SIZE) {
       setTimeout(archive, UPDATE_TIME_SEC * 1000);
     }
@@ -78,8 +75,6 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
   };
 
   const processArchiver = () => {
-    // eslint-disable-next-line no-console
-    console.log('>>> processArchiver', isManual);
     const global = getGlobal();
     const notArchivedChatsIds = global.chats.listIds.active;
     if (!notArchivedChatsIds) {
@@ -98,7 +93,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
     if (isManual) {
       archive();
-    } else if (JSON.parse(String(localStorage.getItem('ulu_is_archiver_enabled')))) {
+    } else if (JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled')))) {
       autoarchive();
     }
   };
