@@ -115,8 +115,8 @@ const TreeUluChatFolder: FC<{
           {title}
         </div>
       </div>
-      {/* { !!messagesUnreadCount && (<div className={styles.unread}>{ messagesUnreadCount }</div>) }
-      {contextActions && contextMenuPosition !== undefined && (
+      { !!messagesUnreadCount && (<div className={styles.unread}>{ messagesUnreadCount }</div>) }
+      {/* {contextActions && contextMenuPosition !== undefined && (
         // <Menu
         //   isOpen={isContextMenuOpen}
         //   transformOriginX={transformOriginX}
