@@ -935,7 +935,7 @@
   font-size: 0.875rem;
 }
 
-blockquote {
+blockquote, .blockquote {
   display: inline-block;
   position: relative;
   padding-inline: 0.5rem 1rem;
@@ -943,6 +943,7 @@ blockquote {
   border-radius: 0.25rem;
   overflow: hidden;
   background-color: var(--accent-background-color);
+  white-space: pre-wrap;
 
   &::before {
     content: "";
@@ -965,6 +966,12 @@ blockquote {
 
     font-size: 0.625rem;
   }
+}
+
+// Input specific styles
+.blockquote {
+  display: block;
+  width: fit-content;
 }
 
 @keyframes text-loading {

@@ -347,6 +347,8 @@ export default memo(withGlobal<OwnProps>(
       if (!sender) {
         sender = selectPeer(global, fromChatId!);
       }
+    } else if (editingId) {
+      sender = selectSender(global, message!);
     }
 
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (

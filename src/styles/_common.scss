@@ -218,7 +218,9 @@
   }
 }
 
-.peer-color-count-2, .peer-color-count-3 {
+.peer-color-count-1,
+.peer-color-count-2,
+.peer-color-count-3 {
   --accent-background-color: var(--hover-color);
   --accent-background-active-color: var(--active-color);
 }
