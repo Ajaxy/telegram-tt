@@ -425,8 +425,10 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
     return;
   }
 
-  const newDraft: ApiDraft | undefined = shouldKeepReply ? {
-    replyInfo: currentDraft.replyInfo,
+  const currentReplyInfo = currentDraft.replyInfo;
+
+  const newDraft: ApiDraft | undefined = shouldKeepReply && currentReplyInfo ? {
+    replyInfo: currentReplyInfo,
   } : undefined;
 
   if (!isLocalOnly) {

@@ -189,8 +189,7 @@
   }
 
   &.inside-input {
-    padding-inline-start: 0.5625rem;
-    width: 100%;
+    flex-grow: 1;
 
     .embedded-thumb {
       margin-left: 0.125rem;

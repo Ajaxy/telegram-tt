@@ -17,7 +17,7 @@ import {
   checkIfHasUnreadReactions, getMessageContent, getMessageText, isActionMessage,
   isMessageLocal, isUserId,
 } from '../../helpers';
-import { getMessageReplyInfo } from '../../helpers/replies';
+import { getMessageReplyInfo, getStoryReplyInfo } from '../../helpers/replies';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addViewportId,
@@ -86,6 +86,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       const newMessage = selectChatMessage(global, chatId, id)!;
       const replyInfo = getMessageReplyInfo(newMessage);
+      const storyReplyInfo = getStoryReplyInfo(newMessage);
       const chat = selectChat(global, chatId);
       if (chat?.isForum
         && replyInfo?.isForumTopic
@@ -97,7 +98,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const isLocal = isMessageLocal(message as ApiMessage);
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
-          if (isLocal && message.isOutgoing && !(message.content?.action) && !replyInfo?.replyToMsgId
+          if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId
             && !message.content?.storyData) {
             const currentMessageList = selectCurrentMessageList(global, tabId);
             if (currentMessageList) {
