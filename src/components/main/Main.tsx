@@ -47,7 +47,9 @@ import { processDeepLink } from '../../util/deeplink';
 import { Bundles, loadBundle } from '../../util/moduleLoader';
 import { parseInitialLocationHash, parseLocationHash } from '../../util/routing';
 import updateIcon from '../../util/updateIcon';
-import { IS_ANDROID, IS_ELECTRON } from '../../util/windowEnvironment';
+import {
+  IS_ANDROID, IS_ELECTRON, IS_FIREFOX, IS_IOS, IS_LINUX, IS_MAC_OS, IS_SAFARI, IS_WINDOWS, IS_YA_BROWSER,
+} from '../../util/windowEnvironment';
 
 import useAppLayout from '../../hooks/useAppLayout';
 import useArchiver from '../../hooks/useArchiver';
@@ -271,12 +273,28 @@ const Main: FC<OwnProps & StateProps> = ({
     console.log('>>> RENDER MAIN');
   }
 
+  const getPlatform = () => {
+    if (IS_ELECTRON) return 'Electron';
+    if (IS_MAC_OS) return 'macOS';
+    if (IS_WINDOWS) return 'Windows';
+    if (IS_LINUX) return 'Linux';
+    if (IS_IOS) return 'iOS';
+    if (IS_ANDROID) return 'Android';
+    if (IS_SAFARI) return 'Safari';
+    if (IS_YA_BROWSER) return 'YaBrowser';
+    if (IS_FIREFOX) return 'Firefox';
+    return 'Other'; // или некоторое другое стандартное значение
+  };
+
   const [isAppOpen, setIsAppOpen] = useState(false);
   const { track } = useJune({ currentUserId });
   useEffect(() => {
     if (!isAppOpen && track) {
       setIsAppOpen(true);
-      track('App: open');
+      track('App: open',
+        {
+          platform: getPlatform(),
+        });
     }
   }, [isAppOpen, setIsAppOpen, track]);
 
