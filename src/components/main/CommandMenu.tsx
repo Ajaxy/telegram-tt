@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
@@ -78,7 +79,7 @@ const CommandMenu = () => {
               ? 'Disable auto-mark as "Done" after reading'
               : 'Enable auto-mark as "Done" after reading'}
           </Command.Item>
-          <Command.Item onSelect={commandArchiveAll}>Mark read chats as &quot;Done&quot; (Over 24h Old)</Command.Item>
+          <Command.Item onSelect={commandArchiveAll}>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</Command.Item>
         </Command.Group>
       </Command.List>
     </Command>
