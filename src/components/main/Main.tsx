@@ -287,7 +287,7 @@ const Main: FC<OwnProps & StateProps> = ({
   };
 
   const [isAppOpen, setIsAppOpen] = useState(false);
-  const { track } = useJune({ currentUserId });
+  const { analytics, track } = useJune({ currentUserId });
   useEffect(() => {
     if (!isAppOpen && track) {
       setIsAppOpen(true);
@@ -297,6 +297,15 @@ const Main: FC<OwnProps & StateProps> = ({
         });
     }
   }, [isAppOpen, setIsAppOpen, track]);
+
+  useEffect(() => {
+    if (analytics && currentUserId && currentUserName) {
+      analytics.identify(currentUserId, {
+        email: `user${currentUserId}@ulu.so`,
+        name: currentUserName,
+      });
+    }
+  }, [analytics, currentUserId, currentUserName]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
