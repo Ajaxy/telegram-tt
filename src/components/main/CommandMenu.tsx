@@ -10,12 +10,18 @@ import {
 import { getActions } from '../../global';
 
 import useArchiver from '../../hooks/useArchiver';
+import { useJune } from '../../hooks/useJune';
 
 import './CommandMenu.scss';
 
+interface CommandMenuProps {
+  currentUserId?: string;
+}
+
 const cmdkRoot = document.getElementById('cmdk-root');
 
-const CommandMenu = () => {
+const CommandMenu: React.FC<CommandMenuProps> = ({ currentUserId }) => {
+  const { track } = useJune({ currentUserId });
   const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
@@ -61,7 +67,10 @@ const CommandMenu = () => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
     archiveMessages();
     close();
-  }, [close, archiveMessages]);
+    if (track) {
+      track('commandArchiveAll');
+    }
+  }, [close, archiveMessages, track]);
 
   const CommandMenuInner = open ? (
     <Command label="Command Menu">
