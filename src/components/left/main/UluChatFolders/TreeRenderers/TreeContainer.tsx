@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import type { HTMLProps, ReactNode } from 'react';
 import React from 'react';
 import type { TreeInformation } from 'react-complex-tree';
@@ -11,9 +12,9 @@ type OwnProps = {
   info: TreeInformation;
 };
 
-const TreeContainer: FC<OwnProps> = ({ children }) => {
+const TreeContainer: FC<OwnProps> = ({ children, containerProps }) => {
   return (
-    <div className={chatFoldersWrapperStyles.wrapper}>
+    <div className={chatFoldersWrapperStyles.wrapper} {...containerProps}>
       {children}
     </div>
   );

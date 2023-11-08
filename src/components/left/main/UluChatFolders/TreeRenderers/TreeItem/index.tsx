@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import type { ReactNode, RefObject } from 'react';
 import React from 'react';
 import type { TreeInformation, TreeItemRenderContext } from 'react-complex-tree';
@@ -23,7 +24,7 @@ import SvgFolderOpen from './SvgFolderOpen';
 import styles from '../../../UluChatFolder/UluChatFolder.module.scss';
 
 // const NONE_TO_VOID: NoneToVoidFunction = () => void 0;
-
+// TODO clean up
 type OwnProps = {
   ref: RefObject<HTMLDivElement>;
   item: TreeItemChat<any>;
@@ -36,7 +37,9 @@ type OwnProps = {
 };
 
 const TreeUluChatFolder: FC<{
+  children: React.ReactNode;
   item: TreeItemChat<any>;
+  context: TreeItemRenderContext<never>;
   title: string | ReactNode;
   active: boolean | undefined;
   expanded?: boolean;
@@ -44,7 +47,7 @@ const TreeUluChatFolder: FC<{
   contextRootElementSelector?: string;
   onClick?: (arg: string | number) => void;
 }> = ({
-  active, expanded, title, shouldStressUnreadMessages, item, onClick,
+  children, active, expanded, title, shouldStressUnreadMessages, item, context, onClick,
 }) => {
   const {
     contextActions, index, unreadCount: messagesUnreadCount, ref,
@@ -96,27 +99,30 @@ const TreeUluChatFolder: FC<{
 
   // TODO use <ListItem/> with <Ripple/>
   return (
-    <div
-      className={classNameWrapper}
-      ref={ref}
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
-      onContextMenu={handleContextMenu}
-    >
-      <div className={styles.info}>
-        <div className={styles.iconWrapper}>
-          <SvgComponent
-            height="1.25rem"
-            width="1.25rem"
-            fill={svgFill}
-          />
+    <>
+      <div
+        className={classNameWrapper}
+        ref={ref}
+        onClick={handleClick}
+        onMouseDown={handleMouseDown}
+        onContextMenu={handleContextMenu}
+        {...context.itemContainerWithChildrenProps}
+        {...context.interactiveElementProps}
+      >
+        <div className={styles.info}>
+          <div className={styles.iconWrapper}>
+            <SvgComponent
+              height="1.25rem"
+              width="1.25rem"
+              fill={svgFill}
+            />
+          </div>
+          <div className={styles.title}>
+            {title}
+          </div>
         </div>
-        <div className={styles.title}>
-          {title}
-        </div>
-      </div>
-      { !!messagesUnreadCount && (<div className={styles.unread}>{ messagesUnreadCount }</div>) }
-      {/* {contextActions && contextMenuPosition !== undefined && (
+        { !!messagesUnreadCount && (<div className={styles.unread}>{ messagesUnreadCount }</div>) }
+        {/* {contextActions && contextMenuPosition !== undefined && (
         // <Menu
         //   isOpen={isContextMenuOpen}
         //   transformOriginX={transformOriginX}
@@ -147,11 +153,15 @@ const TreeUluChatFolder: FC<{
         //   ))}
         // </Menu>
       )} */}
-    </div>
+      </div>
+      {children}
+    </>
   );
 };
 
-const TreeItemComponent: FC<OwnProps> = ({ title, item, context }) => {
+const TreeItemComponent: FC<OwnProps> = ({
+  title, item, context, children,
+}) => {
   const {
     setActiveChatFolder,
   } = getActions();
@@ -164,11 +174,14 @@ const TreeItemComponent: FC<OwnProps> = ({ title, item, context }) => {
     <TreeUluChatFolder
       onClick={handleSwitchFolder}
       item={item}
+      context={context}
       active={context.isSelected}
       expanded={context.isExpanded}
       shouldStressUnreadMessages={false}
       title={title}
-    />
+    >
+      {children}
+    </TreeUluChatFolder>
   );
 };
 

@@ -6,9 +6,9 @@ import type { FC } from '../../../../lib/teact/teact';
 import { useState } from '../../../../lib/teact/teact';
 import { getActions, getGlobal, withGlobal } from '../../../../global';
 
-import type { ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
+import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
-import type { TabWithProperties } from '../../../ui/TabList';
+import type { TreeItemFolder } from './types';
 
 import { ALL_FOLDER_ID } from '../../../../config';
 import { selectCanShareFolder } from '../../../../global/selectors';
@@ -35,13 +35,21 @@ type StateProps = {
   orderedFolderIds?: number[];
   folderInvitesById: Record<number, ApiChatlistExportedInvite[]>;
   chatFoldersById: Record<number, ApiChatFolder>;
+  chatsById: Record<number, ApiChat>;
   maxFolderInvites: number;
   maxChatLists: number;
   maxFolders: number;
 };
 
 const UluChatFolders: FC<OwnProps & StateProps> = ({
-  chatFoldersById, folderInvitesById, orderedFolderIds, maxChatLists, maxFolders, maxFolderInvites, portalRef,
+  chatsById,
+  chatFoldersById,
+  folderInvitesById,
+  orderedFolderIds,
+  maxChatLists,
+  maxFolders,
+  maxFolderInvites,
+  portalRef,
 }) => {
   const lang = useLang();
 
@@ -71,7 +79,7 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
     }
 
     return displayedFolders.map((folder, i) => {
-      const { id, title } = folder;
+      const { id, title, includedChatIds = [] } = folder;
       const isBlocked = i > maxFolders - 1;
       const canShareFolder = selectCanShareFolder(getGlobal(), id);
       const contextActions: MenuItemContextAction[] = [];
@@ -130,7 +138,14 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
         contextActions: contextActions?.length ? contextActions : undefined,
-      } satisfies TabWithProperties;
+        chatIds: includedChatIds,
+        chats: Object.values(chatsById)
+          .filter((chat) => includedChatIds.includes(chat.id))
+          .reduce((p, c) => {
+            p[c.id] = c;
+            return p;
+          }, {} as Record<string, ApiChat>),
+      } satisfies TreeItemFolder;
     }).filter((folder) => typeof folder.id === 'number');
   })();
 
@@ -160,11 +175,9 @@ export default withGlobal<OwnProps>(
         orderedIds: orderedFolderIds,
         invites: folderInvitesById,
       },
-      // chats: {
-      //   listIds: {
-      //     archived,
-      //   },
-      // },
+      chats: {
+        byId: chatsById,
+      },
       // activeSessions: {
       //   byHash: sessions,
       // },
@@ -175,6 +188,7 @@ export default withGlobal<OwnProps>(
 
     return {
       chatFoldersById,
+      chatsById,
       folderInvitesById,
       orderedFolderIds,
       // activeChatFolder,

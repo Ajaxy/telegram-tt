@@ -4,34 +4,65 @@ import React, { createRef } from 'react';
 import type {
   TreeEnvironmentRef, TreeItem, TreeItemIndex, TreeRef,
 } from 'react-complex-tree';
-import { StaticTreeDataProvider, Tree, UncontrolledTreeEnvironment } from 'react-complex-tree';
+import { Tree, UncontrolledTreeEnvironment } from 'react-complex-tree';
 import type { FC } from '../../../../lib/teact/teact';
-import { useMemo, useRef } from '../../../../lib/teact/teact';
+import { useCallback, useMemo, useRef } from '../../../../lib/teact/teact';
 
-import type { TabWithProperties } from '../../../ui/TabList';
-import type { TreeItemChat } from './types';
+import type { TreeItemChat, TreeItemFolder } from './types';
 
+// import { isChatSuperGroupWithTopics } from '../../../../global/helpers';
 import TreeRenders from './TreeRenderers';
 
 const getItemTitle = (item: TreeItem<any>) => item.data;
-const spreadItem = (item: TreeItem<any>, data: string) => ({ ...item, data });
+
+type OwnProps = {
+  folders: TreeItemFolder[];
+};
 
 // TODO clean-up
-const ChatFoldersTree: FC<{ folders: TabWithProperties[] }> = ({ folders }) => {
+const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
   // eslint-disable-next-line no-null/no-null
   const treeEnvironmentRef = useRef<TreeEnvironmentRef>(null);
   // eslint-disable-next-line no-null/no-null
   const treeRef = useRef<TreeRef>(null);
 
   const foldersToDisplay = useMemo(() => {
+    const chatsLength = folders.reduce((length, folder) => length + folder.chatIds.length, 0);
     const items = folders.reduce((record, folder, index) => {
       const adjustedIndex = index + 1; // "inbox" (all chats) is not here
+
+      const { chats, chatIds } = folder;
+      const chatIndexes: number[] = [];
+
+      chatIds.forEach((id, i) => {
+        const chat = chats[id];
+        if (!chat) {
+          return;
+        }
+
+        const chatAdjustedIndex = (folders.length + 1) * (adjustedIndex + 1) + chatsLength * (i + 1) + i + 1;
+        record[chatAdjustedIndex] = {
+          index: chatAdjustedIndex,
+          type: 'chat',
+          contextActions: [], // TODO
+          isFolder: false,
+          // isFolder: isChatSuperGroupWithTopics(chat),
+          canRename: false,
+          children: undefined, // TODO threads for supergroups
+          data: chat.title,
+          unreadCount: chat.unreadCount,
+          ref: createRef<HTMLDivElement>(),
+        };
+        chatIndexes.push(chatAdjustedIndex);
+      });
+
       record[adjustedIndex] = {
         index: adjustedIndex,
+        type: 'folder',
         contextActions: folder.contextActions,
         isFolder: true,
         canRename: false,
-        children: undefined,
+        children: chatIndexes,
         data: folder.title,
         unreadCount: folder.badgeCount,
         ref: createRef<HTMLDivElement>(),
@@ -47,29 +78,37 @@ const ChatFoldersTree: FC<{ folders: TabWithProperties[] }> = ({ folders }) => {
           index: 'root',
           canMove: true,
           isFolder: true,
-          children: Object.values(items).map((item) => item.index),
+          children: Object.values(items)
+            .filter((item) => item.type === 'folder')
+            .map((item) => item.index),
           data: 'root',
           canRename: true,
-        },
-      },
+        } as TreeItemChat<any>,
+      } as Record<TreeItemIndex, TreeItemChat<any>>,
     };
   }, [folders]);
+
+  const getTreeItem = useCallback(async (itemId: TreeItemIndex) => {
+    return foldersToDisplay.items[itemId] as TreeItemChat<any>;
+  }, [foldersToDisplay]);
 
   return (
     <div>
       <UncontrolledTreeEnvironment
         ref={treeEnvironmentRef}
-        dataProvider={new StaticTreeDataProvider(foldersToDisplay.items, spreadItem)}
+        dataProvider={{
+          getTreeItem,
+        }}
         getItemTitle={getItemTitle}
         viewState={{}}
         renderTreeContainer={TreeRenders.renderTreeContainer}
         renderLiveDescriptorContainer={TreeRenders.renderLiveDescriptorContainer}
-        // renderItemsContainer={TreeRenders.renderItemsContainer}
+        renderItemsContainer={TreeRenders.renderItemsContainer}
         // @ts-ignore
         renderItem={TreeRenders.renderItem}
-        renderItemArrow={TreeRenders.renderItemArrow}
+        // renderItemArrow={TreeRenders.renderItemArrow}
         // renderDepthOffset={1}
-        renderDragBetweenLine={TreeRenders.renderDragBetweenLine}
+        // renderDragBetweenLine={TreeRenders.renderDragBetweenLine}
         renderItemTitle={TreeRenders.renderItemTitle}
         // renderRenameInput={() => <>renameInput</>}
         // renderSearchInput={() => <>searchInput</>}
