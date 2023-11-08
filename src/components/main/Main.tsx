@@ -151,7 +151,7 @@ type StateProps = {
   requestedAttachBotInChat?: TabState['requestedAttachBotInChat'];
   requestedDraft?: TabState['requestedDraft'];
   currentUserName?: string;
-  currentUserId?: string;
+  currentUser?: ApiUser;
   urlAuth?: TabState['urlAuth'];
   limitReached?: ApiLimitTypeWithModal;
   deleteFolderDialog?: ApiChatFolder;
@@ -211,7 +211,7 @@ const Main: FC<OwnProps & StateProps> = ({
   requestedDraft,
   webApp,
   currentUserName,
-  currentUserId,
+  currentUser,
   urlAuth,
   isPremiumModalOpen,
   isPaymentModalOpen,
@@ -287,7 +287,7 @@ const Main: FC<OwnProps & StateProps> = ({
   };
 
   const [isAppOpen, setIsAppOpen] = useState(false);
-  const { analytics, track } = useJune({ currentUserId });
+  const { analytics, track } = useJune();
   useEffect(() => {
     if (!isAppOpen && track) {
       setIsAppOpen(true);
@@ -299,13 +299,16 @@ const Main: FC<OwnProps & StateProps> = ({
   }, [isAppOpen, setIsAppOpen, track]);
 
   useEffect(() => {
-    if (analytics && currentUserId && currentUserName) {
-      analytics.identify(currentUserId, {
-        email: `user${currentUserId}@ulu.so`,
-        name: currentUserName,
+    if (analytics && currentUser && currentUserName) {
+      analytics.identify(currentUser.id, {
+        email: `user${currentUser.id}@ulu.so`,
+        fullName: currentUserName,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        usernames: (currentUser.usernames || []).map((u) => u.username).join(', '),
       });
     }
-  }, [analytics, currentUserId, currentUserName]);
+  }, [analytics, currentUser, currentUserName]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
@@ -623,7 +626,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
-      <CommandMenu currentUserId={currentUserId} />
+      <CommandMenu />
     </div>
   );
 };
@@ -717,7 +720,7 @@ export default memo(withGlobal<OwnProps>(
       requestedAttachBotInChat,
       webApp,
       currentUserName: getUserFullName(currentUser),
-      currentUserId: currentUser?.id,
+      currentUser,
       urlAuth,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isPremiumModalOpen: premiumModal?.isOpen,

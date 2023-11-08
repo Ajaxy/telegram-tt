@@ -14,14 +14,10 @@ import { useJune } from '../../hooks/useJune';
 
 import './CommandMenu.scss';
 
-interface CommandMenuProps {
-  currentUserId?: string;
-}
-
 const cmdkRoot = document.getElementById('cmdk-root');
 
-const CommandMenu: React.FC<CommandMenuProps> = ({ currentUserId }) => {
-  const { track } = useJune({ currentUserId });
+const CommandMenu = () => {
+  const { track } = useJune();
   const { showNotification } = getActions();
   const [open, setOpen] = useState(false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
