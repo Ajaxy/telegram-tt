@@ -596,7 +596,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
-      <CommandMenu />
+      <CommandMenu currentUserId={currentUserId} />
     </div>
   );
 };
