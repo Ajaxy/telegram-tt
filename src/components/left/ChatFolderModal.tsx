@@ -90,8 +90,11 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
         round
       />
       <div className="dialog-buttons">
-        <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+        <Button color="primary" className="confirm-dialog-button" onClick={handleSubmit}>
           {lang('FilterAddTo')}
+          <div className="hotkey-frame">
+            <div className="hotkey-text">⏎</div>
+          </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>

@@ -81,7 +81,7 @@ const MuteChatModal: FC<OwnProps> = ({
         onChange={setMuteUntilOption as any}
       />
       <div className="dialog-buttons">
-        <Button color="primary" className="confirm-dialog-button" isText onClick={handleSubmit}>
+        <Button color="primary" className="confirm-dialog-button" onClick={handleSubmit}>
           {lang('Common.Done')}
           <div className="hotkey-frame">
             <div className="hotkey-text">⏎</div>

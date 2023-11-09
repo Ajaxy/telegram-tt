@@ -110,6 +110,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         )}
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
           {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
+          <div className="hotkey-frame">
+            <div className="hotkey-text">⏎</div>
+          </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>

@@ -71,16 +71,20 @@
   }
 
   &.primary {
-    background-color: var(--color-primary);
-    color: var(--color-white);
+    box-shadow: var(--button-shadow);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0) 100%), var(--color-primary);
+    color: var(--color-text);
     --ripple-color: rgba(0, 0, 0, 0.08);
 
+
     @include active-styles() {
-      background-color: var(--color-primary-shade);
+      box-shadow: var(--button-shadow);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.125) 0%, rgba(255, 255, 255, 0.00) 100%), var(--color-primary);
     }
 
     @include no-ripple-styles() {
-      background-color: var(--color-primary-shade-darker);
+      box-shadow: var(--button-shadow);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.125) 0%, rgba(255, 255, 255, 0.00) 100%), var(--color-primary);
     }
   }
 
@@ -114,26 +118,29 @@
   }
 
   &.danger {
-    background-color: var(--color-background);
-    color: var(--color-error);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0) 100%) ,var(--color-error);
+    color: var(--color-text);
     --ripple-color: rgba(var(--color-error-rgb), 0.16);
+    box-shadow: var(--button-shadow);
 
     @include active-styles() {
-      background-color: var(--color-error);
-      color: var(--color-white);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
+      color: var(--color-text);
+      box-shadow: var(--button-shadow);
     }
 
     @include no-ripple-styles() {
-      background-color: var(--color-error-shade);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
+      box-shadow: var(--button-shadow);
     }
   }
 
   &.text {
-    background-color: transparent;
+    // background-color: transparent;
 
     &.primary {
       color: var(--color-text);
-      background-color: transparent;
+      background-color: rgb(255 255 255 / 4%);
 
       @include active-styles() {
         background-color: rgba(var(--color-primary-shade-rgb), 0.08);
@@ -151,12 +158,13 @@
 
     &.danger {
       @include active-styles() {
-        background-color: rgba(var(--color-error-rgb), 0.08);
-        color: var(--color-error);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
+        color: var(--color-text);
+        box-shadow: var(--button-shadow);
       }
 
       @include no-ripple-styles() {
-        background-color: rgba(var(--color-error-rgb), 0.16);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
       }
     }
   }
@@ -404,7 +412,7 @@
 
 .hotkey-frame {
   align-items: flex-start;
-  background-color: #ffffff0a;
+  background-color: rgb(0 0 0 / 12%);
   border: 1px solid;
   border-color: #ffffff0a;
   border-radius: 2px;
@@ -413,11 +421,11 @@
   gap: 10px;
   padding: 0px 3px;
   position: relative;
-  margin-left: 4px;
+  margin-left: 6px;
   box-shadow: 1px 1px 0px 0px rgba(27, 26, 29, 0.25);
 
   .hotkey-text {
-    color: #ffffff66;
+    color: var(--color-text);
     font-size: 12px;
     font-weight: 400;
     letter-spacing: 0;
