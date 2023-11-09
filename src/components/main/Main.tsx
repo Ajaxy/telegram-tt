@@ -286,8 +286,8 @@ const Main: FC<OwnProps & StateProps> = ({
     return 'Other'; // или некоторое другое стандартное значение
   };
 
-  const [isAppOpen, setIsAppOpen] = useState(false);
   const { analytics, track } = useJune();
+  const [isAppOpen, setIsAppOpen] = useState(false);
   useEffect(() => {
     if (!isAppOpen && track) {
       setIsAppOpen(true);
@@ -298,8 +298,10 @@ const Main: FC<OwnProps & StateProps> = ({
     }
   }, [isAppOpen, setIsAppOpen, track]);
 
+  const [isIdentify, setIsIdentify] = useState(false);
   useEffect(() => {
-    if (analytics && currentUser && currentUserName) {
+    if (analytics && currentUser && currentUserName && !isIdentify) {
+      setIsIdentify(true);
       analytics.identify(currentUser.id, {
         email: `user${currentUser.id}@ulu.so`,
         fullName: currentUserName,
@@ -308,7 +310,7 @@ const Main: FC<OwnProps & StateProps> = ({
         usernames: (currentUser.usernames || []).map((u) => u.username).join(', '),
       });
     }
-  }, [analytics, currentUser, currentUserName]);
+  }, [analytics, currentUser, currentUserName, isIdentify, setIsIdentify]);
 
   // Preload Calls bundle to initialize sounds for iOS
   useTimeout(() => {
