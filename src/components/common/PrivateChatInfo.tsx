@@ -26,7 +26,7 @@ import TypingStatus from './TypingStatus';
 type OwnProps = {
   userId: string;
   typingStatus?: ApiTypingStatus;
-  avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
+  avatarSize?: 'nano' | 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   forceShowSelf?: boolean;
   status?: string;
   statusIcon?: IconName;

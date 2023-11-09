@@ -55,6 +55,17 @@
     }
   }
 
+  &.size-nano {
+    width: 1.3125rem;
+    height: 1.3125rem;
+    font-size: 0.625rem;
+
+    .emoji {
+      width: 0.5625rem;
+      height: 0.5625rem;
+    }
+  }
+
   &.size-tiny {
     width: 2rem;
     height: 2rem;
