@@ -305,7 +305,7 @@ const Main: FC<OwnProps & StateProps> = ({
         fullName: currentUserName,
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
-        username: (currentUser.usernames || []).map((u) => u.username).join(', '),
+        usernames: (currentUser.usernames || []).map((u) => u.username).join(', '),
       });
     }
   }, [analytics, currentUser, currentUserName]);
