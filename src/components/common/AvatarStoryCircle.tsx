@@ -28,6 +28,7 @@ interface StateProps {
 
 const SIZES: Record<AvatarSize, number> = {
   micro: 1.125 * DPR * REM,
+  nano: 1.425 * DPR * REM,
   tiny: 2.125 * DPR * REM,
   mini: 1.625 * DPR * REM,
   small: 2.25 * DPR * REM,
