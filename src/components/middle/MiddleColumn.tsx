@@ -219,6 +219,7 @@ function MiddleColumn({
     resetLeftColumnWidth,
     unblockUser,
     toggleChatArchived,
+    closeForumPanel,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -299,12 +300,13 @@ function MiddleColumn({
       if (chatId) {
         toggleChatArchived({ id: chatId });
         openChat({ id: undefined });
+        closeForumPanel();
         if (track) {
           track('toggleChatArchived');
         }
       }
     }
-  }, [chatId, openChat, track]);
+  }, [chatId, openChat, closeForumPanel, track]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
