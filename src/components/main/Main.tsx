@@ -62,6 +62,7 @@ import useInterval from '../../hooks/useInterval';
 import { useJune } from '../../hooks/useJune';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
+import useShortcutCmdE from '../../hooks/useShortcutCmdE';
 import useShowTransition from '../../hooks/useShowTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useTimeout from '../../hooks/useTimeout';
@@ -336,6 +337,8 @@ const Main: FC<OwnProps & StateProps> = ({
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 
   useArchiver({ isManual: false });
+
+  useShortcutCmdE();
 
   useEffect(() => {
     if (!IS_ELECTRON) {

@@ -1,5 +1,5 @@
 import React, {
-  memo, useCallback, useEffect, useMemo,
+  memo, useEffect, useMemo,
   useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -59,7 +59,7 @@ import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 import {
-  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_MAC_OS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
+  IS_ANDROID, IS_ELECTRON, IS_IOS, IS_TRANSLATION_SUPPORTED, MASK_IMAGE_DISABLED,
 } from '../../util/windowEnvironment';
 import calculateMiddleFooterTransforms from './helpers/calculateMiddleFooterTransforms';
 
@@ -67,7 +67,6 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
-import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -218,8 +217,6 @@ function MiddleColumn({
     setLeftColumnWidth,
     resetLeftColumnWidth,
     unblockUser,
-    toggleChatArchived,
-    closeForumPanel,
   } = getActions();
 
   const { width: windowWidth } = useWindowSize();
@@ -292,26 +289,6 @@ function MiddleColumn({
       })
       : undefined;
   }, [chatId, openChat]);
-
-  const { track } = useJune();
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
-      e.preventDefault();
-      if (chatId) {
-        toggleChatArchived({ id: chatId });
-        openChat({ id: undefined });
-        closeForumPanel();
-        if (track) {
-          track('toggleChatArchived');
-        }
-      }
-    }
-  }, [chatId, openChat, closeForumPanel, track]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
 
   useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
