@@ -14,7 +14,8 @@ type OwnProps = {
 
 const TreeContainer: FC<OwnProps> = ({ children, containerProps }) => {
   return (
-    <div className={chatFoldersWrapperStyles.wrapper} {...containerProps}>
+    // @ts-ignore
+    <div className={chatFoldersWrapperStyles.wrapper} {...containerProps} style={{ maxHeight: '100%' }}>
       {children}
     </div>
   );

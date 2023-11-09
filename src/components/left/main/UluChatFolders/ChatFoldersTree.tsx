@@ -10,8 +10,13 @@ import { useCallback, useMemo, useRef } from '../../../../lib/teact/teact';
 
 import type { TreeItemChat, TreeItemFolder } from './types';
 
+import buildClassName from '../../../../util/buildClassName';
+
+import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 // import { isChatSuperGroupWithTopics } from '../../../../global/helpers';
 import TreeRenders from './TreeRenderers';
+
+import styles from './ChatFoldersTree.module.scss';
 
 const getItemTitle = (item: TreeItem<any>) => item.data;
 
@@ -88,12 +93,18 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
     };
   }, [folders]);
 
+  // eslint-disable-next-line no-async-without-await/no-async-without-await
   const getTreeItem = useCallback(async (itemId: TreeItemIndex) => {
     return foldersToDisplay.items[itemId] as TreeItemChat<any>;
   }, [foldersToDisplay]);
 
+  const classNameInfiniteScroll = buildClassName(
+    'custom-scroll',
+    styles['infinite-scroll'],
+  );
+
   return (
-    <div>
+    <InfiniteScroll className={classNameInfiniteScroll}>
       <UncontrolledTreeEnvironment
         ref={treeEnvironmentRef}
         dataProvider={{
@@ -110,12 +121,10 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
         // renderDepthOffset={1}
         // renderDragBetweenLine={TreeRenders.renderDragBetweenLine}
         renderItemTitle={TreeRenders.renderItemTitle}
-        // renderRenameInput={() => <>renameInput</>}
-        // renderSearchInput={() => <>searchInput</>}
       >
         <Tree ref={treeRef} treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
       </UncontrolledTreeEnvironment>
-    </div>
+    </InfiniteScroll>
   );
 };
 

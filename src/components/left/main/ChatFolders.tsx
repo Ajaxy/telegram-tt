@@ -1,4 +1,5 @@
-import type { RefObject } from 'react';
+/* eslint-disable no-null/no-null */
+import type { CSSProperties, RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useMemo, useRef,
@@ -37,6 +38,7 @@ import UluNewChatFolderButton from './UluNewChatFolderButton';
 import UluSystemFolders from './UluSystemChatFolders';
 
 type OwnProps = {
+  leftMainHeaderRef: RefObject<HTMLDivElement>;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
   foldersDispatch: FolderEditDispatch;
   onLeftColumnContentChange: (content: LeftColumnContent) => void;
@@ -69,8 +71,10 @@ type StateProps = {
 
 const SAVED_MESSAGES_HOTKEY = '0';
 const FIRST_FOLDER_INDEX = 0;
+const INVISIBLE_CHAT_TREE_STYLES = 'max-height: 0' as CSSProperties;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
+  leftMainHeaderRef,
   foldersDispatch,
   onSettingsScreenSelect,
   onLeftColumnContentChange,
@@ -331,6 +335,28 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const shouldRenderFolders = folderTabs && folderTabs.length > 1;
 
+  const uluSystemFoldersRef = useRef<HTMLDivElement>(null);
+
+  const chatFoldersTreeStyles = (() => {
+    // if no refs are initialized, we hide the tree
+    // because otherwise it would be too tall
+    if (!leftMainHeaderRef.current || !uluSystemFoldersRef.current) {
+      return INVISIBLE_CHAT_TREE_STYLES;
+    }
+
+    let heightSubtractionPx = 0;
+    heightSubtractionPx += leftMainHeaderRef.current.getBoundingClientRect().height;
+    heightSubtractionPx += uluSystemFoldersRef.current.getBoundingClientRect().height;
+
+    // if for some reason modifier is still 0 we also hide the tree
+    // for the same reasons as above
+    if (!heightSubtractionPx) {
+      return INVISIBLE_CHAT_TREE_STYLES;
+    }
+
+    return `max-height: calc(100% - ${heightSubtractionPx}px`;
+  })();
+
   return (
     <div
       className={buildClassName(
@@ -341,6 +367,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       )}
     >
       <UluSystemFolders
+        ref={uluSystemFoldersRef}
         chatId={chatId}
         userId={userId}
         content={content}
@@ -348,7 +375,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       />
       <UluChatFoldersDivider />
       <UluNewChatFolderButton onCreateFolder={handleCreateFolder} />
-      <div ref={chatFoldersPortalRef} id="ulu-chat-folders-portal" />
+      <div
+        ref={chatFoldersPortalRef}
+        id="ulu-chat-folders-portal"
+        style={chatFoldersTreeStyles}
+      />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
       {shouldRenderFolders ? (
         <TabList

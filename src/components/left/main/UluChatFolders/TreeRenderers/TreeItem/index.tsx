@@ -7,6 +7,7 @@ import { getActions } from '../../../../../../lib/teact/teactn';
 
 import type { TreeItemChat } from '../../types';
 
+import { ULU_APP } from '../../../../../../config';
 import buildClassName from '../../../../../../util/buildClassName';
 import { MouseButton } from '../../../../../../util/windowEnvironment';
 
@@ -108,6 +109,8 @@ const TreeUluChatFolder: FC<{
         onContextMenu={handleContextMenu}
         {...context.itemContainerWithChildrenProps}
         {...context.interactiveElementProps}
+        // @ts-ignore
+        style={{ maxHeight: `${ULU_APP.SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM}rem` }}
       >
         <div className={styles.info}>
           <div className={styles.iconWrapper}>
