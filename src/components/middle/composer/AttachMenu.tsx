@@ -121,17 +121,16 @@ const AttachMenu: FC<OwnProps> = ({
   });
 
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
+    function handleKey(e: KeyboardEvent) {
       if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyU') {
         e.preventDefault();
         handleQuickSelect();
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown);
-
+    document.addEventListener('keyup', handleKey);
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKey);
     };
   }, []);
 
