@@ -392,11 +392,9 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <div className="message-entity-blockquote-wrapper">
-          <blockquote data-entity-type={entity.type}>
-            {renderNestedMessagePart()}
-          </blockquote>
-        </div>
+        <blockquote data-entity-type={entity.type}>
+          {renderNestedMessagePart()}
+        </blockquote>
       );
     case ApiMessageEntityTypes.BotCommand:
       return (
@@ -574,6 +572,11 @@ function processEntityAsHtml(
         >${renderedContent}</span>`;
     case ApiMessageEntityTypes.CustomEmoji:
       return buildCustomEmojiHtmlFromEntity(rawEntityText, entity);
+    case ApiMessageEntityTypes.Blockquote:
+      return `<span
+        class="blockquote"
+        data-entity-type="${ApiMessageEntityTypes.Blockquote}"
+        >${renderedContent}</span>`;
     default:
       return renderedContent;
   }

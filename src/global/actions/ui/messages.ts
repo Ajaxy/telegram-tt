@@ -142,7 +142,7 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
 
   let messageId: number | undefined;
 
-  if (!isLatest || !replyInfo) {
+  if (!isLatest || !replyInfo?.replyToMsgId) {
     if (threadId === MAIN_THREAD_ID) {
       const chat = selectChat(global, chatId);
 
@@ -154,7 +154,7 @@ addActionHandler('replyToNextMessage', (global, actions, payload): ActionReturnT
     }
   } else {
     const chatMessageKeys = Object.keys(chatMessages);
-    const indexOfCurrent = chatMessageKeys.indexOf(replyInfo.toString());
+    const indexOfCurrent = chatMessageKeys.indexOf(replyInfo.replyToMsgId.toString());
     const newIndex = indexOfCurrent + targetIndexDelta;
     messageId = newIndex <= chatMessageKeys.length + 1 && newIndex >= 0
       ? Number(chatMessageKeys[newIndex])

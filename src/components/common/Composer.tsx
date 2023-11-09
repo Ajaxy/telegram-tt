@@ -98,6 +98,7 @@ import buildAttachment, { prepareAttachmentsToSend } from '../middle/composer/he
 import { escapeHtml } from '../middle/composer/helpers/cleanHtml';
 import { buildCustomEmojiHtml } from '../middle/composer/helpers/customEmoji';
 import { isSelectionInsideInput } from '../middle/composer/helpers/selection';
+import { getPeerColorClass } from './helpers/peerColor';
 import renderText from './helpers/renderText';
 import { getTextWithEntitiesAsHtml } from './helpers/renderTextWithEntities';
 
@@ -169,12 +170,12 @@ type OwnProps = {
   dropAreaState?: string;
   isReady: boolean;
   isMobile?: boolean;
-  onDropHide?: NoneToVoidFunction;
   inputId: string;
   editableInputCssSelector: string;
   editableInputId: string;
   className?: string;
   inputPlaceholder?: string;
+  onDropHide?: NoneToVoidFunction;
   onForward?: NoneToVoidFunction;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
@@ -205,6 +206,7 @@ type StateProps =
     customEmojiForEmoji?: ApiSticker[];
     groupChatMembers?: ApiChatMember[];
     currentUserId?: string;
+    currentUser?: ApiUser;
     recentEmojis: string[];
     contentToBeScheduled?: TabState['contentToBeScheduled'];
     shouldSuggestStickers?: boolean;
@@ -304,6 +306,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   groupChatMembers,
   topInlineBotIds,
   currentUserId,
+  currentUser,
   captionLimit,
   contentToBeScheduled,
   shouldSuggestStickers,
@@ -1609,7 +1612,7 @@ const Composer: FC<OwnProps & StateProps> = ({
             />
           </>
         )}
-        <div className="message-input-wrapper">
+        <div className={buildClassName('message-input-wrapper', getPeerColorClass(currentUser))}>
           {isInMessageList && (
             <>
               {withBotMenuButton && (
@@ -1914,6 +1917,7 @@ export default memo(withGlobal<OwnProps>(
     const botKeyboardMessageId = messageWithActualBotKeyboard ? messageWithActualBotKeyboard.id : undefined;
     const keyboardMessage = botKeyboardMessageId ? selectChatMessage(global, chatId, botKeyboardMessageId) : undefined;
     const { currentUserId } = global;
+    const currentUser = selectUser(global, currentUserId!)!;
     const defaultSendAsId = chatFullInfo ? chatFullInfo?.sendAsId || currentUserId : undefined;
     const sendAsId = chat?.sendAsPeerIds && defaultSendAsId && (
       chat.sendAsPeerIds.some((peer) => peer.id === defaultSendAsId)
@@ -1973,6 +1977,7 @@ export default memo(withGlobal<OwnProps>(
       groupChatMembers: chatFullInfo?.members,
       topInlineBotIds: global.topInlineBots?.userIds,
       currentUserId,
+      currentUser,
       contentToBeScheduled: tabState.contentToBeScheduled,
       shouldSuggestStickers,
       shouldSuggestCustomEmoji,
