@@ -11,9 +11,9 @@ import { ULU_APP } from '../../../../../../config';
 import buildClassName from '../../../../../../util/buildClassName';
 import { MouseButton } from '../../../../../../util/windowEnvironment';
 
-import useContextMenuHandlers from '../../../../../../hooks/useContextMenuHandlers';
-import { useFastClick } from '../../../../../../hooks/useFastClick';
-import useLastCallback from '../../../../../../hooks/useLastCallback';
+import useContextMenuHandlers from '../../../../../../hooks/useContextMenuHandlers.react';
+import { useFastClick } from '../../../../../../hooks/useFastClick.react';
+import useLastCallbackTeact from '../../../../../../hooks/useLastCallback';
 
 // import useMenuPosition from '../../../../../../hooks/useMenuPosition';
 // import Menu from './ContextMenu/Menu';
@@ -169,7 +169,7 @@ const TreeItemComponent: FC<OwnProps> = ({
     setActiveChatFolder,
   } = getActions();
 
-  const handleSwitchFolder = useLastCallback((index: number | string) => {
+  const handleSwitchFolder = useLastCallbackTeact((index: number | string) => {
     setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
   });
 
