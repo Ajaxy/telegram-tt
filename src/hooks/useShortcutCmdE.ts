@@ -2,7 +2,7 @@ import { useCallback, useEffect } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import { selectCurrentChat, selectTabState } from '../global/selectors';
-import { IS_MAC_OS } from '../util/windowEnvironment';
+import { IS_LINUX, IS_MAC_OS } from '../util/windowEnvironment';
 import { useJune } from './useJune';
 
 function useShortcutCmdE() {
@@ -20,8 +20,8 @@ function useShortcutCmdE() {
 
       const togglingChatId = currentChatId || forumPanelChatId;
       if (togglingChatId) {
-        // Cmd+Shift+e - unarchive
-        if ((global.chats.listIds.archived || []).includes(togglingChatId) !== e.shiftKey) {
+        // Cmd+Shift+e - unarchive (Doesn't work on Linux)
+        if (!IS_LINUX && ((global.chats.listIds.archived || []).includes(togglingChatId) !== e.shiftKey)) {
           return;
         }
         toggleChatArchived({ id: togglingChatId });
