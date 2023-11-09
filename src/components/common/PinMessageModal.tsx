@@ -84,11 +84,11 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
     >
       <p>{renderMessage()}</p>
       <div className="dialog-buttons-column">
-        <Button className="confirm-dialog-button" isText onClick={handlePinMessage}>
+        <Button className="confirm-dialog-button" onClick={handlePinMessage}>
           {lang('DialogPin')}
         </Button>
         {canPinForAll && (
-          <Button className="confirm-dialog-button" isText onClick={handlePinMessageForAll}>
+          <Button className="confirm-dialog-button" onClick={handlePinMessageForAll}>
             {contactName
               ? renderText(lang('Conversation.PinMessagesFor', contactName))
               : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
