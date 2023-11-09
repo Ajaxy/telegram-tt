@@ -235,7 +235,6 @@ const Chat: FC<OwnProps & StateProps> = ({
 
   const isOnline = user && userStatus && isUserOnline(user, userStatus);
   const { hasShownClass: isAvatarOnlineShown } = useShowTransition(isOnline);
-
   if (!chat) {
     return undefined;
   }

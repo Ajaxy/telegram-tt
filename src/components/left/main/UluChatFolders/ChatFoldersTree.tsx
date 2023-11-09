@@ -10,6 +10,7 @@ import { useCallback, useMemo, useRef } from '../../../../lib/teact/teact';
 
 import type { TreeItemChat, TreeItemFolder } from './types';
 
+// import { isChatSuperGroupWithTopics } from '../../../../global/helpers';
 import buildClassName from '../../../../util/buildClassName';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
@@ -50,6 +51,8 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
           index: chatAdjustedIndex,
           type: 'chat',
           contextActions: [], // TODO
+          id: chat.id,
+          chat,
           isFolder: false,
           // isFolder: isChatSuperGroupWithTopics(chat),
           canRename: false,
@@ -63,6 +66,7 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
 
       record[adjustedIndex] = {
         index: adjustedIndex,
+        id: folder.id!,
         type: 'folder',
         contextActions: folder.contextActions,
         isFolder: true,
