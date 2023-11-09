@@ -20,6 +20,10 @@ function useShortcutCmdE() {
 
       const togglingChatId = currentChatId || forumPanelChatId;
       if (togglingChatId) {
+        // Cmd+Shift+e - unarchive
+        if ((global.chats.listIds.archived || []).includes(togglingChatId) !== e.shiftKey) {
+          return;
+        }
         toggleChatArchived({ id: togglingChatId });
         openChat({ id: undefined });
         if (togglingChatId === forumPanelChatId) {
