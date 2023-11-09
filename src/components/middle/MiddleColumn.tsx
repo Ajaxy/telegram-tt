@@ -67,6 +67,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useCustomBackground from '../../hooks/useCustomBackground';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
+import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -291,15 +292,19 @@ function MiddleColumn({
       : undefined;
   }, [chatId, openChat]);
 
+  const { track } = useJune();
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
       e.preventDefault();
       if (chatId) {
         toggleChatArchived({ id: chatId });
         openChat({ id: undefined });
+        if (track) {
+          track('toggleChatArchived');
+        }
       }
     }
-  }, [chatId, openChat]);
+  }, [chatId, openChat, track]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
