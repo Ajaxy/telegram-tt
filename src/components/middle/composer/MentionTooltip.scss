@@ -40,11 +40,11 @@
       font-size: 0.9375rem;
     }
 
-    /* &[dir="rtl"] {
+    &[dir="rtl"] {
       .status {
         width: auto;
       }
-    } */
+    }
   }
 
   .ChatInfo {
