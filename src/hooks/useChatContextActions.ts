@@ -11,7 +11,7 @@ import {
 } from '../global/helpers';
 import { compact } from '../util/iteratees';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
-import { useJune } from './useJune';
+import useArchiver from './useArchiver';
 import useLang from './useLang';
 
 const useChatContextActions = ({
@@ -38,10 +38,11 @@ const useChatContextActions = ({
   handleReport?: NoneToVoidFunction;
 }, isInSearch = false) => {
   const lang = useLang();
-  const { track } = useJune();
 
   const { isSelf } = user || {};
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
+
+  const { archiveChat } = useArchiver({ isManual: true });
 
   return useMemo(() => {
     if (!chat) {
@@ -51,7 +52,6 @@ const useChatContextActions = ({
     const {
       toggleChatPinned,
       updateChatMutedState,
-      toggleChatArchived,
       toggleChatUnread,
       openChatInNewTab,
     } = getActions();
@@ -106,17 +106,14 @@ const useChatContextActions = ({
         title: lang('MarkNotDone'),
         icon: 'unarchive',
         handler: () => {
-          toggleChatArchived({ id: chat.id });
+          archiveChat({ id: chat.id, value: false });
         },
       }
       : {
         title: lang('MarkDone'),
         icon: 'archive',
         handler: () => {
-          toggleChatArchived({ id: chat.id });
-          if (track) {
-            track('toggleChatArchived');
-          }
+          archiveChat({ id: chat.id, value: true });
         },
       };
 
@@ -150,7 +147,7 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, track,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat,
   ]);
 };
 

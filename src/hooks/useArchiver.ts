@@ -3,14 +3,16 @@ It archives all read or muted chats.
 Inspired by https://github.com/rebryk/supertelega
 See original code here: https://github.com/rebryk/supertelega/blob/master/archive.py
 */
-
+import { useCallback } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
 import type { GlobalState } from '../global/types';
 
 import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
+import { selectCurrentChat, selectTabState } from '../global/selectors';
 import useInterval from './useInterval';
+import { useJune } from './useJune';
 
 const UPDATE_TIME_SEC = 3;
 const MESSAGE_DISPLAY_TIME_SEC = 60;
@@ -18,7 +20,10 @@ const BATCH_SIZE = 5;
 const SEC_24H = 60 * 60 * 24;
 
 export default function useArchiver({ isManual }: { isManual: boolean }) {
-  const { toggleChatArchived } = getActions();
+  const {
+    openChat, toggleChatArchived, closeForumPanel, showNotification,
+  } = getActions();
+  const { track } = useJune();
 
   const chatsToArchive: { [key: string]: Date } = {};
 
@@ -104,5 +109,28 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
   }, UPDATE_TIME_SEC * 1000);
 
-  return { archiveMessages: processArchiver };
+  const archiveChat = useCallback(({ id, value }: { id?: string; value?: boolean }) => {
+    const global = getGlobal();
+    const currentChatId = selectCurrentChat(global)?.id;
+    const forumPanelChatId = selectTabState(global).forumPanelChatId;
+
+    const togglingChatId = id || currentChatId || forumPanelChatId;
+    if (togglingChatId) {
+      const isArchived = (global.chats.listIds.archived || []).includes(togglingChatId);
+      if (value !== undefined && (isArchived === value)) {
+        return;
+      }
+      toggleChatArchived({ id: togglingChatId });
+      openChat({ id: undefined });
+      if (togglingChatId === forumPanelChatId) {
+        closeForumPanel();
+      }
+      showNotification({
+        message: `The chat marked as ${isArchived ? '"Not done"' : '"Done"'}`,
+      });
+      track?.(isArchived ? 'toggleChatUnarchived' : 'toggleChatArchived');
+    }
+  }, [openChat, closeForumPanel, track]);
+
+  return { archiveMessages: processArchiver, archiveChat };
 }
