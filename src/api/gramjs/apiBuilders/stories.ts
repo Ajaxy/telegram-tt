@@ -1,10 +1,8 @@
 import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
-  ApiBoostsStatus,
   ApiMediaArea,
   ApiMediaAreaCoordinates,
-  ApiMyBoost,
   ApiStealthMode,
   ApiStoryView,
   ApiTypeStory,
@@ -16,7 +14,6 @@ import { buildPrivacyRules } from './common';
 import { buildGeoPoint, buildMessageMediaContent, buildMessageTextContent } from './messageContent';
 import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 import { buildApiReaction, buildReactionCount } from './reactions';
-import { buildStatisticsPercentage } from './statistics';
 
 export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiTypeStory {
   if (story instanceof GramJs.StoryItemDeleted) {
@@ -168,33 +165,4 @@ export function buildApiPeerStories(peerStories: GramJs.PeerStories) {
   const peerId = getApiChatIdFromMtpPeer(peerStories.peer);
 
   return buildCollectionByCallback(peerStories.stories, (story) => [story.id, buildApiStory(peerId, story)]);
-}
-
-export function buildApiBoostsStatus(boostStatus: GramJs.premium.BoostsStatus): ApiBoostsStatus {
-  const {
-    level, boostUrl, boosts, myBoost, currentLevelBoosts, nextLevelBoosts, premiumAudience,
-  } = boostStatus;
-  return {
-    level,
-    currentLevelBoosts,
-    boosts,
-    hasMyBoost: Boolean(myBoost),
-    boostUrl,
-    nextLevelBoosts,
-    ...(premiumAudience && { premiumSubscribers: buildStatisticsPercentage(premiumAudience) }),
-  };
-}
-
-export function buildApiMyBoost(myBoost: GramJs.MyBoost): ApiMyBoost {
-  const {
-    date, expires, slot, cooldownUntilDate, peer,
-  } = myBoost;
-
-  return {
-    date,
-    expires,
-    slot,
-    cooldownUntil: cooldownUntilDate,
-    chatId: peer && getApiChatIdFromMtpPeer(peer),
-  };
 }

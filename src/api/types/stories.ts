@@ -2,7 +2,6 @@ import type { ApiPrivacySettings } from '../../types';
 import type {
   ApiGeoPoint, ApiReaction, ApiReactionCount, MediaContent,
 } from './messages';
-import type { StatisticsOverviewPercentage } from './statistics';
 
 export interface ApiStory {
   '@type'?: 'story';
@@ -109,21 +108,3 @@ export type ApiMediaAreaSuggestedReaction = {
 };
 
 export type ApiMediaArea = ApiMediaAreaVenue | ApiMediaAreaGeoPoint | ApiMediaAreaSuggestedReaction;
-
-export type ApiBoostsStatus = {
-  level: number;
-  currentLevelBoosts: number;
-  boosts: number;
-  nextLevelBoosts?: number;
-  hasMyBoost?: boolean;
-  boostUrl: string;
-  premiumSubscribers?: StatisticsOverviewPercentage;
-};
-
-export type ApiMyBoost = {
-  slot: number;
-  chatId?: string;
-  date: number;
-  expires: number;
-  cooldownUntil?: number;
-};

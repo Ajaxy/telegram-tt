@@ -21,7 +21,7 @@ import useLang from '../../../../hooks/useLang';
 import useLastCallback from '../../../../hooks/useLastCallback';
 
 import AnimatedIcon from '../../../common/AnimatedIcon';
-import InviteLink from '../../../common/InviteLink';
+import LinkField from '../../../common/LinkField';
 import Picker from '../../../common/Picker';
 import FloatingActionButton from '../../../ui/FloatingActionButton';
 import Spinner from '../../../ui/Spinner';
@@ -159,9 +159,10 @@ const SettingsShareChatlist: FC<OwnProps & StateProps> = ({
         </p>
       </div>
 
-      <InviteLink
+      <LinkField
         className="settings-item"
-        inviteLink={!url ? lang('Loading') : url}
+        link={!url ? lang('Loading') : url}
+        withShare
         onRevoke={handleRevoke}
         isDisabled={!chatsCount || isTouched}
       />

@@ -31,3 +31,11 @@ addActionHandler('addPaymentError', (global, actions, payload): ActionReturnType
     },
   }, tabId);
 });
+
+addActionHandler('closeGiftCodeModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload || {};
+
+  return updateTabState(global, {
+    giftCodeModal: undefined,
+  }, tabId);
+});

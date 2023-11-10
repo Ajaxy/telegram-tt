@@ -2,11 +2,11 @@ import type { ActionReturnType } from '../../types';
 
 import { DEBUG, PREVIEW_AVATAR_COUNT } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey, unique } from '../../../util/iteratees';
+import { buildCollectionByKey } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
 import { getServerTime } from '../../../util/serverTime';
 import { callApi } from '../../../api/gramjs';
-import { buildApiInputPrivacyRules, isChatChannel } from '../../helpers';
+import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
@@ -26,10 +26,8 @@ import {
   updateStoryViews,
   updateStoryViewsLoading,
 } from '../../reducers';
-import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat,
-  selectPeer, selectPeerStories, selectPeerStory, selectTabState,
+  selectPeer, selectPeerStories, selectPeerStory,
 } from '../../selectors';
 
 const INFINITE_LOOP_MARKER = 100;
@@ -503,173 +501,4 @@ addActionHandler('activateStealthMode', (global, actions, payload): ActionReturn
   const { isForPast = true, isForFuture = true } = payload || {};
 
   callApi('activateStealthMode', { isForPast: isForPast || true, isForFuture: isForFuture || true });
-});
-
-addActionHandler('openBoostModal', async (global, actions, payload): Promise<void> => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
-  const chat = selectChat(global, chatId);
-  if (!chat || !isChatChannel(chat)) return;
-
-  global = updateTabState(global, {
-    boostModal: {
-      chatId,
-    },
-  }, tabId);
-  setGlobal(global);
-
-  const result = await callApi('fetchBoostsStatus', {
-    chat,
-  });
-
-  if (!result) {
-    actions.closeBoostModal({ tabId });
-    return;
-  }
-
-  global = getGlobal();
-  global = updateTabState(global, {
-    boostModal: {
-      chatId,
-      boostStatus: result,
-    },
-  }, tabId);
-  setGlobal(global);
-
-  const myBoosts = await callApi('fetchMyBoosts');
-
-  if (!myBoosts) return;
-
-  global = getGlobal();
-  const tabState = selectTabState(global, tabId);
-  if (!tabState.boostModal) return;
-
-  global = addChats(global, buildCollectionByKey(myBoosts.chats, 'id'));
-  global = addUsers(global, buildCollectionByKey(myBoosts.users, 'id'));
-  global = updateTabState(global, {
-    boostModal: {
-      ...tabState.boostModal,
-      myBoosts: myBoosts.boosts,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
-addActionHandler('openBoostStatistics', async (global, actions, payload): Promise<void> => {
-  const { chatId, tabId = getCurrentTabId() } = payload;
-
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-
-  global = updateTabState(global, {
-    boostStatistics: {
-      chatId,
-    },
-  }, tabId);
-  setGlobal(global);
-
-  const [boostersListResult, boostStatusResult] = await Promise.all([
-    callApi('fetchBoostersList', { chat }),
-    callApi('fetchBoostsStatus', { chat }),
-  ]);
-
-  global = getGlobal();
-  if (!boostersListResult || !boostStatusResult) {
-    global = updateTabState(global, {
-      boostStatistics: undefined,
-    }, tabId);
-    setGlobal(global);
-    return;
-  }
-
-  global = addUsers(global, buildCollectionByKey(boostersListResult.users, 'id'));
-  global = updateTabState(global, {
-    boostStatistics: {
-      chatId,
-      boostStatus: boostStatusResult,
-      boosters: boostersListResult.boosters,
-      boosterIds: boostersListResult.boosterIds,
-      count: boostersListResult.count,
-      nextOffset: boostersListResult.nextOffset,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
-addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<void> => {
-  const { tabId = getCurrentTabId() } = payload || {};
-  let tabState = selectTabState(global, tabId);
-  if (!tabState.boostStatistics) return;
-
-  const chat = selectChat(global, tabState.boostStatistics.chatId);
-  if (!chat) return;
-
-  global = updateTabState(global, {
-    boostStatistics: {
-      ...tabState.boostStatistics,
-      isLoadingBoosters: true,
-    },
-  }, tabId);
-  setGlobal(global);
-
-  const result = await callApi('fetchBoostersList', {
-    chat,
-    offset: tabState.boostStatistics.nextOffset,
-  });
-  if (!result) return;
-
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-
-  tabState = selectTabState(global, tabId);
-  if (!tabState.boostStatistics) return;
-
-  global = updateTabState(global, {
-    boostStatistics: {
-      ...tabState.boostStatistics,
-      boosters: {
-        ...tabState.boostStatistics.boosters,
-        ...result.boosters,
-      },
-      boosterIds: unique([...tabState.boostStatistics.boosterIds || [], ...result.boosterIds]),
-      count: result.count,
-      nextOffset: result.nextOffset,
-      isLoadingBoosters: false,
-    },
-  }, tabId);
-  setGlobal(global);
-});
-
-addActionHandler('applyBoost', async (global, actions, payload): Promise<void> => {
-  const { chatId, slots, tabId = getCurrentTabId() } = payload;
-
-  const chat = selectChat(global, chatId);
-  if (!chat) return;
-
-  const result = await callApi('applyBoost', {
-    slots,
-    chat,
-  });
-
-  if (!result) {
-    return;
-  }
-
-  const newStatusResult = await callApi('fetchBoostsStatus', {
-    chat,
-  });
-
-  if (!newStatusResult) {
-    return;
-  }
-
-  global = getGlobal();
-  const tabState = selectTabState(global, tabId);
-  if (!tabState.boostModal?.boostStatus) return;
-  global = updateTabState(global, {
-    boostModal: {
-      ...tabState.boostModal,
-      boostStatus: newStatusResult,
-    },
-  }, tabId);
-  setGlobal(global);
 });

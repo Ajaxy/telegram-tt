@@ -12,22 +12,25 @@ import useLastCallback from '../../hooks/useLastCallback';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
+import Icon from './Icon';
 
-import styles from './InviteLink.module.scss';
+import styles from './LinkField.module.scss';
 
 type OwnProps = {
   title?: string;
-  inviteLink: string;
+  link: string;
   isDisabled?: boolean;
   className?: string;
+  withShare?: boolean;
   onRevoke?: VoidFunction;
 };
 
 const InviteLink: FC<OwnProps> = ({
   title,
-  inviteLink,
+  link,
   isDisabled,
   className,
+  withShare,
   onRevoke,
 }) => {
   const lang = useLang();
@@ -35,20 +38,22 @@ const InviteLink: FC<OwnProps> = ({
 
   const { isMobile } = useAppLayout();
 
-  const copyLink = useLastCallback((link: string) => {
+  const isOnlyCopy = !onRevoke;
+
+  const copyLink = useLastCallback(() => {
     copyTextToClipboard(link);
     showNotification({
       message: lang('LinkCopied'),
     });
   });
 
-  const handleCopyPrimaryClicked = useLastCallback(() => {
+  const handleCopyClick = useLastCallback(() => {
     if (isDisabled) return;
-    copyLink(inviteLink);
+    copyLink();
   });
 
   const handleShare = useLastCallback(() => {
-    openChatWithDraft({ text: inviteLink });
+    openChatWithDraft({ text: link });
   });
 
   const PrimaryLinkMenuButton: FC<{ onTrigger: () => void; isOpen?: boolean }> = useMemo(() => {
@@ -75,28 +80,43 @@ const InviteLink: FC<OwnProps> = ({
       <div className={styles.primaryLink}>
         <input
           className={buildClassName('form-control', styles.input)}
-          value={inviteLink}
+          value={link}
           readOnly
-          onClick={handleCopyPrimaryClicked}
+          onClick={handleCopyClick}
         />
-        <DropdownMenu
-          className={styles.moreMenu}
-          trigger={PrimaryLinkMenuButton}
-          positionX="right"
-        >
-          <MenuItem icon="copy" onClick={handleCopyPrimaryClicked} disabled={isDisabled}>{lang('Copy')}</MenuItem>
-          {onRevoke && (
-            <MenuItem icon="delete" onClick={onRevoke} destructive>{lang('RevokeButton')}</MenuItem>
-          )}
-        </DropdownMenu>
+        {isOnlyCopy ? (
+          <Button
+            color="translucent"
+            className={styles.copy}
+            size="smaller"
+            round
+            disabled={isDisabled}
+            onClick={handleCopyClick}
+          >
+            <Icon name="copy" />
+          </Button>
+        ) : (
+          <DropdownMenu
+            className={styles.moreMenu}
+            trigger={PrimaryLinkMenuButton}
+            positionX="right"
+          >
+            <MenuItem icon="copy" onClick={handleCopyClick} disabled={isDisabled}>{lang('Copy')}</MenuItem>
+            {onRevoke && (
+              <MenuItem icon="delete" onClick={onRevoke} destructive>{lang('RevokeButton')}</MenuItem>
+            )}
+          </DropdownMenu>
+        )}
       </div>
-      <Button
-        size="smaller"
-        disabled={isDisabled}
-        onClick={handleShare}
-      >
-        {lang('FolderLinkScreen.LinkActionShare')}
-      </Button>
+      {withShare && (
+        <Button
+          size="smaller"
+          disabled={isDisabled}
+          onClick={handleShare}
+        >
+          {lang('FolderLinkScreen.LinkActionShare')}
+        </Button>
+      )}
     </div>
   );
 };

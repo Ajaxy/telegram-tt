@@ -1,0 +1,38 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: min(92vh, 40rem) !important;
+  overflow-x: hidden;
+}
+
+.clickable {
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.title {
+  background-color: var(--color-background-secondary);
+}
+
+.table td {
+  border: 1px solid var(--color-borders);
+  padding: 0.25rem 0.5rem;
+}
+
+.chat-item {
+  margin: 0;
+  width: fit-content;
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}
+
+.logo {
+  width: 6.25rem;
+  height: 6.25rem;
+  align-self: center;
+}
+
+.centered {
+  text-align: center !important;
+}

@@ -22,7 +22,7 @@ import useInterval from '../../../hooks/useInterval';
 import useLang from '../../../hooks/useLang';
 
 import AnimatedIcon from '../../common/AnimatedIcon';
-import InviteLink from '../../common/InviteLink';
+import LinkField from '../../common/LinkField';
 import NothingFound from '../../common/NothingFound';
 import Button from '../../ui/Button';
 import ConfirmDialog from '../../ui/ConfirmDialog';
@@ -283,9 +283,10 @@ const ManageInvites: FC<OwnProps & StateProps> = ({
           <p className="text-muted">{isChannel ? lang('PrimaryLinkHelpChannel') : lang('PrimaryLinkHelp')}</p>
         </div>
         {primaryInviteLink && (
-          <InviteLink
+          <LinkField
             className="section"
-            inviteLink={primaryInviteLink}
+            link={primaryInviteLink}
+            withShare
             onRevoke={!chat?.usernames ? handlePrimaryRevoke : undefined}
             title={chat?.usernames ? lang('PublicLink') : lang('lng_create_permanent_link_title')}
           />

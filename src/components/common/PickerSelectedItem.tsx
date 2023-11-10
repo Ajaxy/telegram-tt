@@ -25,6 +25,7 @@ type OwnProps = {
   forceShowSelf?: boolean;
   clickArg?: any;
   className?: string;
+  fluid?: boolean;
   onClick: (arg: any) => void;
 };
 
@@ -43,6 +44,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
   chat,
   user,
   className,
+  fluid,
   isSavedMessages,
   onClick,
 }) => {
@@ -81,6 +83,7 @@ const PickerSelectedItem: FC<OwnProps & StateProps> = ({
     chat?.isForum && 'forum-avatar',
     isMinimized && 'minimized',
     canClose && 'closeable',
+    fluid && 'fluid',
   );
 
   return (

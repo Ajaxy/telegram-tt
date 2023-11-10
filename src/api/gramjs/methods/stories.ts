@@ -17,8 +17,6 @@ import { buildCollectionByCallback } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { getApiChatIdFromMtpPeer } from '../apiBuilders/peers';
 import {
-  buildApiBoostsStatus,
-  buildApiMyBoost,
   buildApiPeerStories,
   buildApiStealthMode,
   buildApiStory,
@@ -427,92 +425,4 @@ export function activateStealthMode({
   }), {
     shouldReturnTrue: true,
   });
-}
-
-export async function fetchMyBoosts() {
-  const result = await invokeRequest(new GramJs.premium.GetMyBoosts());
-
-  if (!result) return undefined;
-
-  addEntitiesToLocalDb(result.users);
-  addEntitiesToLocalDb(result.chats);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const boosts = result.myBoosts.map(buildApiMyBoost);
-
-  return {
-    users,
-    chats,
-    boosts,
-  };
-}
-
-export function applyBoost({
-  chat,
-  slots,
-} : {
-  chat: ApiChat;
-  slots: number[];
-}) {
-  return invokeRequest(new GramJs.premium.ApplyBoost({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    slots,
-  }), {
-    shouldReturnTrue: true,
-  });
-}
-
-export async function fetchBoostsStatus({
-  chat,
-}: {
-  chat: ApiChat;
-}) {
-  const result = await invokeRequest(new GramJs.premium.GetBoostsStatus({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  return buildApiBoostsStatus(result);
-}
-
-export async function fetchBoostersList({
-  chat,
-  offset = '',
-  limit,
-}: {
-  chat: ApiChat;
-  offset?: string;
-  limit?: number;
-}) {
-  const result = await invokeRequest(new GramJs.premium.GetBoostsList({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    offset,
-    limit,
-  }));
-
-  if (!result) {
-    return undefined;
-  }
-
-  addEntitiesToLocalDb(result.users);
-
-  const users = result.users.map(buildApiUser).filter(Boolean);
-
-  const userBoosts = result.boosts.filter((boost) => boost.userId);
-  const boosterIds = userBoosts.map((boost) => boost.userId!.toString());
-  const boosters = buildCollectionByCallback(userBoosts, (boost) => (
-    [boost.userId!.toString(), boost.expires]
-  ));
-
-  return {
-    count: result.count,
-    users,
-    boosters,
-    boosterIds,
-    nextOffset: result.nextOffset,
-  };
 }

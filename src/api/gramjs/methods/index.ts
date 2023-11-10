@@ -81,10 +81,6 @@ export {
 } from './bots';
 
 export {
-  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
-} from './payments';
-
-export {
   getGroupCall, joinGroupCall, discardGroupCall, createGroupCall,
   editGroupCallTitle, editGroupCallParticipant, exportGroupCallInvite, fetchGroupCallParticipants,
   joinGroupCallPresentation, leaveGroupCall, leaveGroupCallPresentation, toggleGroupCallStartSubscription,
@@ -111,3 +107,8 @@ export {
 } from '../localDb';
 
 export * from './stories';
+
+export {
+  validateRequestedInfo, sendPaymentForm, getPaymentForm, getReceipt, fetchPremiumPromo, fetchTemporaryPaymentPassword,
+  applyBoost, fetchBoostsList, fetchBoostsStatus, fetchGiveawayInfo, fetchMyBoosts, applyGiftCode, checkGiftCode,
+} from './payments';
