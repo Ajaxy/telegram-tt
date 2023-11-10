@@ -3,22 +3,34 @@ import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
 // eslint-disable-next-line react/no-deprecated
-import { Command } from 'cmdk';
+import { Command, CommandSeparator } from 'cmdk';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
+
+import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
+import type { LeftColumnContent } from '../../types';
+import { SettingsScreens } from '../../types';
 
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useArchiver from '../../hooks/useArchiver';
 import { useJune } from '../../hooks/useJune';
 
+import { selectNewChannel, selectNewGroup } from '../left/main/LeftMainHendlers';
+
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
 
-const CommandMenu = () => {
+interface CommandMenuProps {
+  onContentChange: (content: LeftColumnContent) => void;
+  onScreenSelect: (screen: SettingsScreens) => void;
+  dispatch: FolderEditDispatch;
+}
+
+const CommandMenu: React.FC<CommandMenuProps> = ({ onContentChange, dispatch, onScreenSelect }) => {
   const { track } = useJune();
   const { showNotification } = getActions();
   const [isOpen, setOpen] = useState(false);
@@ -49,6 +61,22 @@ const CommandMenu = () => {
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
 
+  const handleSelectNewChannel = useCallback(() => {
+    selectNewChannel(onContentChange)();
+    close();
+  }, [onContentChange, close]);
+
+  const handleSelectNewGroup = useCallback(() => {
+    selectNewGroup(onContentChange)();
+    close();
+  }, [onContentChange, close]);
+
+  const handleCreateFolder = useCallback(() => {
+    dispatch({ type: 'reset' });
+    onScreenSelect(SettingsScreens.FoldersCreateFolder);
+    close();
+  }, [onScreenSelect, dispatch, close]);
+
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -74,7 +102,13 @@ const CommandMenu = () => {
       />
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
-        <Command.Group heading="Archiver">
+        <Command.Group heading="Create new...">
+          <Command.Item onSelect={handleSelectNewChannel}>Create new channel</Command.Item>
+          <Command.Item onSelect={handleSelectNewGroup}>Create new group</Command.Item>
+          <Command.Item onSelect={handleCreateFolder}>Create new folder</Command.Item>
+        </Command.Group>
+        <CommandSeparator />
+        <Command.Group heading="Settings">
           <Command.Item onSelect={commandToggleArchiver}>
             {isArchiverEnabled
               ? 'Disable auto-mark as "Done" after reading'

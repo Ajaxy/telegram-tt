@@ -17,6 +17,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 
+import CommandMenu from '../../main/CommandMenu';
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
 import NewChatButton from '../NewChatButton';
@@ -25,6 +26,7 @@ import ChatFolders from './ChatFolders';
 import ContactList from './ContactList.async';
 import ForumPanel from './ForumPanel';
 import LeftMainHeader from './LeftMainHeader';
+import { selectNewChannel, selectNewGroup } from './LeftMainHendlers';
 
 import './LeftMain.scss';
 
@@ -140,13 +142,8 @@ const LeftMain: FC<OwnProps> = ({
     }
   });
 
-  const handleSelectNewChannel = useLastCallback(() => {
-    onContentChange(LeftColumnContent.NewChannelStep1);
-  });
-
-  const handleSelectNewGroup = useLastCallback(() => {
-    onContentChange(LeftColumnContent.NewGroupStep1);
-  });
+  const handleSelectNewChannel = selectNewChannel(onContentChange);
+  const handleSelectNewGroup = selectNewGroup(onContentChange);
 
   useEffect(() => {
     let autoCloseTimeout: number | undefined;
@@ -246,6 +243,11 @@ const LeftMain: FC<OwnProps> = ({
           onCloseAnimationEnd={handleForumPanelAnimationEnd}
         />
       )}
+      <CommandMenu
+        onContentChange={onContentChange}
+        dispatch={foldersDispatch}
+        onScreenSelect={onSettingsScreenSelect}
+      />
       <NewChatButton
         isShown={isNewChatButtonShown}
         onNewPrivateChat={handleSelectContacts}
