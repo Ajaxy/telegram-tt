@@ -35,7 +35,7 @@ function useShortcutCmdE() {
         showNotification({
           message: `The chat marked as ${isArchived ? '"Not done"' : '"Done"'}`,
         });
-        track?.('toggleChatArchived');
+        track?.(isArchived ? 'toggleChatUnarchived' : 'toggleChatArchived');
       }
     }
   }, [openChat, closeForumPanel, track]);
