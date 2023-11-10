@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable max-len */
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
@@ -109,7 +110,7 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDelete}>
           {lang('Delete')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>

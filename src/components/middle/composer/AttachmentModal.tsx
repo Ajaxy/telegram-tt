@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useMemo, useRef, useState,
@@ -623,7 +624,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               >
                 {shouldSchedule ? lang('Next') : lang('Send')}
                 <div className="hotkey-frame">
-                  <div className="hotkey-text">⏎</div>
+                  <div className="hotkey-icon"></div>
                 </div>
               </Button>
               {canShowCustomSendMenu && (

@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -114,7 +115,7 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
         >
           {lang('PinMessageAlertTitle')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
         <Button
