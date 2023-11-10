@@ -42,6 +42,7 @@ export { default as NewChat } from '../components/left/newChat/NewChat';
 export { default as NewChatStep1 } from '../components/left/newChat/NewChatStep1';
 export { default as NewChatStep2 } from '../components/left/newChat/NewChatStep2';
 export { default as ArchivedChats } from '../components/left/ArchivedChats';
+export { default as UluInboxChats } from '../components/left/UluInboxChats';
 export { default as ChatFolderModal } from '../components/left/ChatFolderModal';
 export { default as MuteChatModal } from '../components/left/MuteChatModal';
 

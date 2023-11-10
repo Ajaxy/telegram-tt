@@ -36,7 +36,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const titleSavedMessages = uluGetTranslatedString('Sidebar.SystemFolders.SavedMessages', language);
   const titleArchivedChats = uluGetTranslatedString('Sidebar.SystemFolders.ArchivedChats', language);
 
-  const { focusLastMessage, openChat, setActiveChatFolder } = getActions();
+  const { focusLastMessage, openChat } = getActions();
 
   const handleOpenSavedMessages = useCallback(() => {
     openChat({ id: userId, shouldReplaceHistory: true });
@@ -48,8 +48,8 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   }, [onLeftColumnContentChange]);
 
   const handleOpenInbox = useCallback(() => {
-    setActiveChatFolder({ activeChatFolder: ALL_FOLDER_ID });
-  }, [setActiveChatFolder]);
+    onLeftColumnContentChange(LeftColumnContent.UluInbox);
+  }, [onLeftColumnContentChange]);
 
   const { useCommand } = useCommands();
   useCommand('OPEN_INBOX', handleOpenInbox);

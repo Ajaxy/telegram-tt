@@ -4,7 +4,9 @@ import React from 'react';
 import { createPortal, render } from 'react-dom';
 import type { FC } from '../../../../lib/teact/teact';
 import { useState } from '../../../../lib/teact/teact';
-import { getActions, getGlobal, withGlobal } from '../../../../global';
+import {
+  getActions, getGlobal, withGlobal,
+} from '../../../../global';
 
 import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';

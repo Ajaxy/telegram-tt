@@ -26,6 +26,7 @@ import ArchivedChats from './ArchivedChats.async';
 import LeftMain from './main/LeftMain';
 import NewChat from './newChat/NewChat.async';
 import Settings from './settings/Settings.async';
+import UluInboxChats from './UluInboxChats';
 
 import './LeftColumn.scss';
 
@@ -63,6 +64,7 @@ enum ContentType {
   NewGroup,
   // eslint-disable-next-line no-shadow
   NewChannel,
+  UluInbox,
 }
 
 const RENDER_COUNT = Object.keys(ContentType).length / 2;
@@ -111,6 +113,9 @@ function LeftColumn({
 
   let contentType: ContentType = ContentType.Main;
   switch (content) {
+    case LeftColumnContent.UluInbox:
+      contentType = ContentType.UluInbox;
+      break;
     case LeftColumnContent.Archived:
       contentType = ContentType.Archived;
       break;
@@ -463,6 +468,20 @@ function LeftColumn({
 
   function renderContent(isActive: boolean) {
     switch (contentType) {
+      case ContentType.UluInbox:
+        return (
+          <UluInboxChats
+            isActive={isActive}
+            onReset={handleReset}
+            onTopicSearch={handleTopicSearch}
+            foldersDispatch={foldersDispatch}
+            onSettingsScreenSelect={handleSettingsScreenSelect}
+            onLeftColumnContentChange={setContent}
+            isForumPanelOpen={isForumPanelOpen}
+            archiveSettings={archiveSettings}
+            isStoryRibbonShown={isArchivedStoryRibbonShown}
+          />
+        );
       case ContentType.Archived:
         return (
           <ArchivedChats
