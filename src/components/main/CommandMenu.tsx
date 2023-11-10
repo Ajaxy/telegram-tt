@@ -68,12 +68,11 @@ const CommandMenu = () => {
     }
   }, [close, archiveMessages, track]);
 
-  const CommandMenuInner = open ? (
-    <Command label="Command Menu">
+  const CommandMenuInner = (
+    <Command.Dialog label="Command Menu" open={open} onOpenChange={setOpen}>
       <Command.Input
         placeholder="Search for command..."
         autoFocus
-        onBlur={close}
         onKeyDown={onKeyDown}
       />
       <Command.List>
@@ -84,11 +83,13 @@ const CommandMenu = () => {
               ? 'Disable auto-mark as "Done" after reading'
               : 'Enable auto-mark as "Done" after reading'}
           </Command.Item>
-          <Command.Item onSelect={commandArchiveAll}>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</Command.Item>
+          <Command.Item onSelect={commandArchiveAll}>
+            Mark read chats as &quot;Done&quot; (May take ~1-3 min)
+          </Command.Item>
         </Command.Group>
       </Command.List>
-    </Command>
-  ) : <div />;
+    </Command.Dialog>
+  );
 
   render(CommandMenuInner, cmdkRoot);
   return <div />;
