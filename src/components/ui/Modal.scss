@@ -72,7 +72,9 @@
     max-width: 35rem;
     min-width: 17.5rem;
     margin: 2rem auto;
-    background-color: var(--color-background);
+    background: rgba(22, 22, 22, 0.6);
+    border: 1px solid var(--color-borders);
+    backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-modal);
     transform: translate3d(0, -1rem, 0);
@@ -127,8 +129,8 @@
       width: auto;
       line-height: 1.625rem;
       margin-left: auto;
-      padding-left: 1.25rem;
-      padding-right: 1.25rem;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
       min-width: 5rem;
 
       &.danger {
@@ -185,7 +187,7 @@
     flex-wrap: wrap;
 
     .confirm-dialog-button + .confirm-dialog-button {
-      margin-right: 1rem;
+      margin-right: 0.75rem;
     }
   }
 
@@ -201,6 +203,7 @@
 
   .confirm-dialog-button {
     width: auto;
+    margin-top: 0.5rem;
     height: auto;
     text-align: right;
     font-weight: 500;

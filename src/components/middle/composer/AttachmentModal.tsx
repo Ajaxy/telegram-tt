@@ -622,6 +622,9 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
                 onContextMenu={canShowCustomSendMenu ? handleContextMenu : undefined}
               >
                 {shouldSchedule ? lang('Next') : lang('Send')}
+                <div className="hotkey-frame">
+                  <div className="hotkey-text">⏎</div>
+                </div>
               </Button>
               {canShowCustomSendMenu && (
                 <CustomSendMenu
