@@ -9,6 +9,8 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+
 import useArchiver from '../../hooks/useArchiver';
 import { useJune } from '../../hooks/useJune';
 
@@ -19,7 +21,7 @@ const cmdkRoot = document.getElementById('cmdk-root');
 const CommandMenu = () => {
   const { track } = useJune();
   const { showNotification } = getActions();
-  const [open, setOpen] = useState(false);
+  const [isOpen, setOpen] = useState(false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
@@ -29,7 +31,7 @@ const CommandMenu = () => {
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK') {
-        setOpen(!open);
+        setOpen(!isOpen);
         e.preventDefault();
         e.stopPropagation();
       }
@@ -37,19 +39,15 @@ const CommandMenu = () => {
 
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
-  }, [open]);
+  }, [isOpen]);
 
   const close = useCallback(() => {
     setOpen(false);
   }, []);
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.code === 'Escape') {
-      e.stopPropagation();
-      e.preventDefault();
-      close();
-    }
-  }, [close]);
+  useEffect(() => (
+    isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
+  ), [isOpen, close]);
 
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
@@ -69,11 +67,10 @@ const CommandMenu = () => {
   }, [close, archiveMessages, track]);
 
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={open} onOpenChange={setOpen}>
+    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen}>
       <Command.Input
         placeholder="Search for command..."
         autoFocus
-        onKeyDown={onKeyDown}
       />
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
