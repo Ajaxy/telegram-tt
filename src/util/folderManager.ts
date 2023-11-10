@@ -90,6 +90,13 @@ let callbacks: {
   unreadCountersByFolderId: CallbackManager;
 } = initials.callbacks;
 
+if (DEBUG) {
+  (window as any).DEBUG_getFolderManager = () => ({
+    prepared,
+    results,
+  });
+}
+
 const updateFolderManagerThrottled = throttle(() => {
   onIdle(() => {
     updateFolderManager(getGlobal());
