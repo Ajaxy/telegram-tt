@@ -6,7 +6,9 @@ import { IS_LINUX, IS_MAC_OS } from '../util/windowEnvironment';
 import { useJune } from './useJune';
 
 function useShortcutCmdE() {
-  const { openChat, toggleChatArchived, closeForumPanel } = getActions();
+  const {
+    openChat, toggleChatArchived, closeForumPanel, showNotification,
+  } = getActions();
 
   const { track } = useJune();
 
@@ -20,8 +22,9 @@ function useShortcutCmdE() {
 
       const togglingChatId = currentChatId || forumPanelChatId;
       if (togglingChatId) {
+        const isArchived = (global.chats.listIds.archived || []).includes(togglingChatId);
         // Cmd+Shift+e - unarchive (Doesn't work on Linux)
-        if (!IS_LINUX && ((global.chats.listIds.archived || []).includes(togglingChatId) !== e.shiftKey)) {
+        if (!IS_LINUX && (isArchived !== e.shiftKey)) {
           return;
         }
         toggleChatArchived({ id: togglingChatId });
@@ -29,9 +32,10 @@ function useShortcutCmdE() {
         if (togglingChatId === forumPanelChatId) {
           closeForumPanel();
         }
-        if (track) {
-          track('toggleChatArchived');
-        }
+        showNotification({
+          message: `The chat marked as ${isArchived ? '"Not done"' : '"Done"'}`,
+        });
+        track?.('toggleChatArchived');
       }
     }
   }, [openChat, closeForumPanel, track]);
