@@ -1,40 +1,18 @@
 import { useCallback, useEffect } from '../lib/teact/teact';
-import { getActions, getGlobal } from '../global';
 
-import { selectCurrentChat, selectTabState } from '../global/selectors';
 import { IS_LINUX, IS_MAC_OS } from '../util/windowEnvironment';
-import { useJune } from './useJune';
+import useArchiver from './useArchiver';
 
 function useShortcutCmdE() {
-  const { openChat, toggleChatArchived, closeForumPanel } = getActions();
-
-  const { track } = useJune();
+  const { archiveChat } = useArchiver({ isManual: true });
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
       e.preventDefault();
-
-      const global = getGlobal();
-      const currentChatId = selectCurrentChat(global)?.id;
-      const forumPanelChatId = selectTabState(global).forumPanelChatId;
-
-      const togglingChatId = currentChatId || forumPanelChatId;
-      if (togglingChatId) {
-        // Cmd+Shift+e - unarchive (Doesn't work on Linux)
-        if (!IS_LINUX && ((global.chats.listIds.archived || []).includes(togglingChatId) !== e.shiftKey)) {
-          return;
-        }
-        toggleChatArchived({ id: togglingChatId });
-        openChat({ id: undefined });
-        if (togglingChatId === forumPanelChatId) {
-          closeForumPanel();
-        }
-        if (track) {
-          track('toggleChatArchived');
-        }
-      }
+      // Cmd+Shift+e - unarchive (Doesn't work on Linux)
+      archiveChat({ value: !IS_LINUX ? e.shiftKey : undefined });
     }
-  }, [openChat, closeForumPanel, track]);
+  }, [archiveChat]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);

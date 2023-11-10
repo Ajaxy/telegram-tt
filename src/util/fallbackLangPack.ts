@@ -2,7 +2,7 @@
 
 import type { ApiLangPack } from '../api/types';
 
-import { IS_MAC_OS } from './windowEnvironment';
+import { IS_LINUX, IS_MAC_OS } from './windowEnvironment';
 
 export default {
   Search: 'Search',
@@ -26,8 +26,8 @@ export default {
   UnpinFromTop: 'Unpin from top',
   'ChatList.Mute': 'Mute',
   Archive: 'Archive',
-  MarkDone: 'Mark as done',
-  MarkNotDone: 'Mark as not done',
+  MarkDone: `Mark as done ${IS_MAC_OS ? '[⌘+E]' : '[Ctrl+E]'}`,
+  MarkNotDone: `Mark as not done ${IS_MAC_OS ? '[⌘+⇧+E]' : IS_LINUX ? '[Ctrl+E]' : '[Ctrl+Shift+E]'}`,
   Delete: 'Delete',
   DeleteChat: 'Delete and exit',
   FromYou: 'You',
