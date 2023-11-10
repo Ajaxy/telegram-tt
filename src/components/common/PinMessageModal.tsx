@@ -1,5 +1,6 @@
+/* eslint-disable react/self-closing-comp */
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import {
@@ -17,6 +18,7 @@ import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import RadioGroup from '../ui/RadioGroup';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -47,21 +49,31 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
 }) => {
   const { pinMessage } = getActions();
 
-  const handlePinMessageForAll = useCallback(() => {
-    pinMessage({
-      messageId, isUnpin: false,
-    });
-    onClose();
-  }, [pinMessage, messageId, onClose]);
-
-  const handlePinMessage = useCallback(() => {
-    pinMessage({
-      messageId, isUnpin: false, isOneSide: true, isSilent: true,
-    });
-    onClose();
-  }, [messageId, onClose, pinMessage]);
+  const [pinForAll, setPinForAll] = useState<string>(canPinForAll ? 'everyone' : 'me');
 
   const lang = useLang();
+
+  const pinOptions = [
+    {
+      label: lang('PinMessageForMe'),
+      value: 'me',
+    },
+    {
+      // eslint-disable-next-line max-len
+      label: contactName ? renderText(lang('Conversation.PinMessagesFor', contactName)) : lang('Conversation.PinMessageAlert.PinAndNotifyMembers'),
+      value: 'everyone',
+    },
+  ];
+
+  const handlePin = useCallback(() => {
+    pinMessage({
+      messageId,
+      isUnpin: false,
+      isOneSide: pinForAll === 'me',
+      isSilent: pinForAll === 'me',
+    });
+    onClose();
+  }, [pinMessage, messageId, onClose, pinForAll]);
 
   function renderMessage() {
     if (isChannel) {
@@ -75,26 +87,44 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
     return lang('PinMessageAlertChat');
   }
 
+  const handleRadioChange = (value: string) => {
+    setPinForAll(value);
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
+      onEnter={handlePin}
       className="pin"
       title={lang('PinMessageAlertTitle')}
     >
       <p>{renderMessage()}</p>
-      <div className="dialog-buttons-column">
-        <Button className="confirm-dialog-button" onClick={handlePinMessage}>
-          {lang('DialogPin')}
+      <RadioGroup
+        name="pinFor"
+        options={pinOptions}
+        selected={pinForAll}
+        // eslint-disable-next-line react/jsx-no-bind
+        onChange={(value) => handleRadioChange(value)}
+      />
+      <div className="dialog-buttons">
+        <Button
+          color="primary"
+          className="confirm-dialog-button"
+          onClick={handlePin}
+        >
+          {lang('PinMessageAlertTitle')}
+          <div className="hotkey-frame">
+            <div className="hotkey-icon"></div>
+          </div>
         </Button>
-        {canPinForAll && (
-          <Button className="confirm-dialog-button" onClick={handlePinMessageForAll}>
-            {contactName
-              ? renderText(lang('Conversation.PinMessagesFor', contactName))
-              : lang('Conversation.PinMessageAlert.PinAndNotifyMembers')}
-          </Button>
-        )}
-        <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
+        <Button
+          className="confirm-dialog-button"
+          isText
+          onClick={onClose}
+        >
+          {lang('Cancel')}
+        </Button>
       </div>
     </Modal>
   );

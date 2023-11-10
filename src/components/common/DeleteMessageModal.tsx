@@ -1,5 +1,7 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable max-len */
 import type { FC } from '../../lib/teact/teact';
-import React, { memo, useCallback } from '../../lib/teact/teact';
+import React, { memo, useCallback, useState } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiMessage } from '../../api/types';
@@ -25,6 +27,7 @@ import useLang from '../../hooks/useLang';
 
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+import RadioGroup from '../ui/RadioGroup';
 
 export type OwnProps = {
   isOpen: boolean;
@@ -49,8 +52,6 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
   album,
   canDeleteForAll,
   contactName,
-  willDeleteForCurrentUserOnly,
-  willDeleteForAll,
   onConfirm,
   onClose,
 }) => {
@@ -59,59 +60,57 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
     deleteScheduledMessages,
   } = getActions();
 
-  const handleDeleteMessageForAll = useCallback(() => {
-    onConfirm?.();
-    const messageIds = album?.messages
-      ? album.messages.map(({ id }) => id)
-      : [message.id];
-    deleteMessages({ messageIds, shouldDeleteForAll: true });
-    onClose();
-  }, [onConfirm, album, message.id, deleteMessages, onClose]);
+  const [shouldDeleteForAll, setShouldDeleteForAll] = useState(canDeleteForAll ? 'everyone' : 'me');
+  const lang = useLang();
+  const deleteOptions = [
+    {
+      label: lang('ChatList.DeleteForCurrentUser'),
+      value: 'me',
+    },
+    {
+      label: contactName ? renderText(lang('Conversation.DeleteMessagesFor', contactName)) : lang('Conversation.DeleteMessagesForEveryone'),
+      value: 'everyone',
+    },
+  ];
 
-  const handleDeleteMessageForSelf = useCallback(() => {
+  const handleDelete = useCallback(() => {
     onConfirm?.();
-    const messageIds = album?.messages
-      ? album.messages.map(({ id }) => id)
-      : [message.id];
+    const messageIds = album?.messages ? album.messages.map(({ id }) => id) : [message.id];
     if (isSchedule) {
       deleteScheduledMessages({ messageIds });
     } else {
-      deleteMessages({
-        messageIds,
-        shouldDeleteForAll: false,
-      });
+      deleteMessages({ messageIds, shouldDeleteForAll: shouldDeleteForAll === 'everyone' });
     }
     onClose();
-  }, [onConfirm, album, message.id, isSchedule, onClose, deleteScheduledMessages, deleteMessages]);
+  }, [onConfirm, album, message.id, isSchedule, deleteMessages, deleteScheduledMessages, onClose, shouldDeleteForAll]);
 
-  const lang = useLang();
+  const handleRadioChange = useCallback((value: string) => {
+    setShouldDeleteForAll(value);
+  }, []);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      onEnter={isOpen && !canDeleteForAll ? handleDeleteMessageForSelf : undefined}
+      onEnter={handleDelete}
       className="delete"
       title={lang('DeleteSingleMessagesTitle')}
     >
       <p>{lang('AreYouSureDeleteSingleMessage')}</p>
-      {willDeleteForCurrentUserOnly && (
-        <p>{lang('lng_delete_for_me_chat_hint', 1, 'i')}</p>
+      {canDeleteForAll && (
+        <RadioGroup
+          name="deleteFor"
+          options={deleteOptions}
+          selected={shouldDeleteForAll ? 'everyone' : 'me'}
+          // eslint-disable-next-line react/jsx-no-bind
+          onChange={(value) => handleRadioChange(value)}
+        />
       )}
-      {willDeleteForAll && (
-        <p>{lang('lng_delete_for_everyone_hint', 1, 'i')}</p>
-      )}
-      <div className={canDeleteForAll ? 'dialog-buttons-column' : 'dialog-buttons'}>
-        {canDeleteForAll && (
-          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForAll}>
-            {contactName && renderText(lang('Conversation.DeleteMessagesFor', contactName))}
-            {!contactName && lang('Conversation.DeleteMessagesForEveryone')}
-          </Button>
-        )}
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteMessageForSelf}>
-          {lang(canDeleteForAll ? 'ChatList.DeleteForCurrentUser' : 'Delete')}
+      <div className="dialog-buttons">
+        <Button color="danger" className="confirm-dialog-button" isText onClick={handleDelete}>
+          {lang('Delete')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>

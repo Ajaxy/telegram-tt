@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 import type { ChangeEvent, RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
@@ -243,7 +244,7 @@ const PollModal: FC<OwnProps> = ({
         >
           {lang('Create')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
       </div>

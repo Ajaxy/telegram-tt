@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 import type { ChangeEvent } from 'react';
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useMemo, useState } from '../../lib/teact/teact';
@@ -127,7 +128,7 @@ const ReportModal: FC<OwnProps> = ({
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
           {lang('lng_report_button')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>

@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useCallback, useMemo, useState,
@@ -93,7 +94,7 @@ const ChatFolderModal: FC<OwnProps & StateProps> = ({
         <Button color="primary" className="confirm-dialog-button" onClick={handleSubmit}>
           {lang('FilterAddTo')}
           <div className="hotkey-frame">
-            <div className="hotkey-text">⏎</div>
+            <div className="hotkey-icon"></div>
           </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
