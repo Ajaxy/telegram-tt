@@ -242,6 +242,9 @@ const PollModal: FC<OwnProps> = ({
           onClick={handleCreate}
         >
           {lang('Create')}
+          <div className="hotkey-frame">
+            <div className="hotkey-text">⏎</div>
+          </div>
         </Button>
       </div>
     );
