@@ -315,6 +315,7 @@ export default {
   DeleteSingleMessagesTitle: 'Delete message',
   AreYouSureDeleteSingleMessage: 'Are you sure you want to delete this message?',
   PinMessageAlertTitle: 'Pin message',
+  PinMessageForMe: 'Pin for me only',
   PinMessageAlertChat: 'Do you want to pin this message at the top of the chat?',
   Close: 'Close',
   ForwardTo: 'Forward to...',

@@ -108,6 +108,9 @@ const DeleteMessageModal: FC<OwnProps & StateProps> = ({
       <div className="dialog-buttons">
         <Button color="danger" className="confirm-dialog-button" isText onClick={handleDelete}>
           {lang('Delete')}
+          <div className="hotkey-frame">
+            <div className="hotkey-text">⏎</div>
+          </div>
         </Button>
         <Button className="confirm-dialog-button" isText onClick={onClose}>{lang('Cancel')}</Button>
       </div>
