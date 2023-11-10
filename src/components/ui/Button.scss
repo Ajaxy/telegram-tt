@@ -64,6 +64,7 @@
   &.round {
     width: 3.5rem;
     border-radius: 6px;
+    cursor: pointer;
 
     .icon {
       font-size: 1.5rem;
@@ -75,16 +76,19 @@
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0) 100%), var(--color-primary);
     color: var(--color-text);
     --ripple-color: rgba(0, 0, 0, 0.08);
+    cursor: pointer;
 
 
     @include active-styles() {
       box-shadow: var(--button-shadow);
       background: linear-gradient(180deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 5%) 100%), var(--color-primary);
+      cursor: pointer;
     }
 
     @include no-ripple-styles() {
       box-shadow: var(--button-shadow);
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.125) 0%, rgba(255, 255, 255, 0.00) 100%), var(--color-primary);
+      cursor: pointer;
     }
   }
 
@@ -92,14 +96,17 @@
     background-color: var(--color-background);
     color: rgba(var(--color-text-secondary-rgb), 0.75);
     --ripple-color: rgba(0, 0, 0, 0.08);
+    cursor: pointer;
 
     @include active-styles() {
       background-color: var(--color-primary);
       color: white;
+      cursor: pointer;
     }
 
     @include no-ripple-styles() {
       background-color: var(--color-primary-shade);
+      cursor: pointer;
     }
   }
 
@@ -122,16 +129,19 @@
     color: var(--color-text);
     --ripple-color: rgba(var(--color-error-rgb), 0.16);
     box-shadow: var(--button-shadow);
+    cursor: pointer;
 
     @include active-styles() {
       background: linear-gradient(180deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 5%) 100%),var(--color-error);
       color: var(--color-text);
       box-shadow: var(--button-shadow);
+      cursor: pointer;
     }
 
     @include no-ripple-styles() {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
       box-shadow: var(--button-shadow);
+      cursor: pointer;
     }
   }
 
@@ -141,19 +151,23 @@
     &.primary {
       color: var(--color-text);
       background-color: rgb(255 255 255 / 4%);
+      cursor: pointer;
 
       @include active-styles() {
         background-color: rgba(255,255,255,0.04);
+        cursor: pointer;
       }
 
       @include no-ripple-styles() {
         background-color: rgba(var(--color-primary-shade-rgb), 0.16);
+        cursor: pointer;
       }
     }
 
     &.secondary {
       background-color: transparent;
       color: var(--color-text-secondary);
+      cursor: pointer;
     }
 
     &.danger {
@@ -161,10 +175,12 @@
         background: linear-gradient(180deg, rgb(255 255 255 / 20%), rgb(255 255 255 / 5%) 100%),var(--color-error);
         color: var(--color-text);
         box-shadow: var(--button-shadow);
+        cursor: pointer;
       }
 
       @include no-ripple-styles() {
         background: linear-gradient(180deg, rgba(255, 255, 255, 0.125), rgba(255, 255, 255, 0) 100%), var(--color-error);
+        cursor: pointer;
       }
     }
   }
@@ -331,6 +347,7 @@
 
     .icon {
       font-size: 1.25rem;
+      
     }
 
     &.pill {

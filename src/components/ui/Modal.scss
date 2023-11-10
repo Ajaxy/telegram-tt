@@ -75,7 +75,7 @@
     background: rgba(22, 22, 22, 0.6);
     border: 1px solid var(--color-borders);
     backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
-    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 16px 70px;
     border-radius: var(--border-radius-modal);
     transform: translate3d(0, -1rem, 0);
 
