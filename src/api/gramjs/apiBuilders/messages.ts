@@ -336,6 +336,8 @@ function buildAction(
   let months: number | undefined;
   let topicEmojiIconId: string | undefined;
   let isTopicAction: boolean | undefined;
+  let slug: string | undefined;
+  let isGiveaway: boolean | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -523,6 +525,17 @@ function buildAction(
     translationValues.push('%target_user%');
 
     if (targetPeerId) targetUserIds.push(targetPeerId);
+  } else if (action instanceof GramJs.MessageActionGiveawayLaunch) {
+    text = 'BoostingGiveawayJustStarted';
+    translationValues.push('%action_origin%');
+  } else if (action instanceof GramJs.MessageActionGiftCode) {
+    text = 'BoostingReceivedGiftNoName';
+    slug = action.slug;
+    months = action.months;
+    isGiveaway = Boolean(action.viaGiveaway);
+    if (action.boostPeer) {
+      targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
+    }
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -541,6 +554,8 @@ function buildAction(
     amount,
     currency,
     giftCryptoInfo,
+    isGiveaway,
+    slug,
     translationValues,
     call,
     phoneCall,

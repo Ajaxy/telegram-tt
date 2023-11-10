@@ -318,5 +318,8 @@
     "premium.getBoostsStatus",
     "premium.getBoostersList",
     "premium.applyBoost",
-    "premium.getMyBoosts"
+    "premium.getMyBoosts",
+    "payments.checkGiftCode",
+    "payments.applyGiftCode",
+    "payments.getGiveawayInfo"
 ]

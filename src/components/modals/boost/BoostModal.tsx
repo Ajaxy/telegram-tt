@@ -172,7 +172,7 @@ const BoostModal = ({
   const handleApplyBoost = useLastCallback(() => {
     closeReplaceModal();
     applyBoost({ chatId: chat!.id, slots: [boost!.slot] });
-    requestConfetti();
+    requestConfetti({});
   });
 
   const handleProceedPremium = useLastCallback(() => {

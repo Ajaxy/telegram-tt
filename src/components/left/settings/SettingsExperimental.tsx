@@ -78,7 +78,7 @@ const SettingsExperimental: FC<OwnProps & StateProps> = ({
       <div className="settings-item">
         <ListItem
           // eslint-disable-next-line react/jsx-no-bind
-          onClick={() => requestConfetti()}
+          onClick={() => requestConfetti({})}
           icon="animations"
         >
           <div className="title">Launch some confetti!</div>

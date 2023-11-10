@@ -7,7 +7,7 @@ import { IS_SAFARI } from './windowEnvironment';
 
 type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
 'setlanguage' | 'addtheme' | 'confirmphone' | 'socks' | 'proxy' | 'privatepost' | 'bg' | 'share' | 'msg' | 'msg_url' |
-'invoice' | 'addlist' | 'boost';
+'invoice' | 'addlist' | 'boost' | 'giftcode';
 
 export const processDeepLink = (url: string) => {
   const {
@@ -29,6 +29,7 @@ export const processDeepLink = (url: string) => {
     checkChatlistInvite,
     openStoryViewerByUsername,
     processBoostParameters,
+    checkGiftCode,
   } = getActions();
 
   // Safari thinks the path in tg://path links is hostname for some reason
@@ -155,6 +156,12 @@ export const processDeepLink = (url: string) => {
       const isPrivate = Boolean(channel);
 
       processBoostParameters({ usernameOrId: channel || domain, isPrivate });
+      break;
+    }
+
+    case 'giftcode': {
+      const { slug } = params;
+      checkGiftCode({ slug });
       break;
     }
     default:

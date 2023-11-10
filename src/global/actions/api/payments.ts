@@ -5,12 +5,14 @@ import { PaymentStep } from '../../../types';
 
 import { DEBUG_PAYMENT_SMART_GLOCAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
-import { buildCollectionByKey } from '../../../util/iteratees';
+import { buildCollectionByKey, unique } from '../../../util/iteratees';
+import * as langProvider from '../../../util/langProvider';
 import { buildQueryString } from '../../../util/requestQuery';
 import { callApi } from '../../../api/gramjs';
-import { getStripeError } from '../../helpers';
+import { getStripeError, isChatChannel } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
+  addChats,
   addUsers, closeInvoice,
   setInvoiceInfo, setPaymentForm,
   setPaymentStep,
@@ -459,3 +461,213 @@ async function validateRequestedInfo<T extends GlobalState>(
   }
   setGlobal(global);
 }
+
+addActionHandler('openBoostModal', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+  const chat = selectChat(global, chatId);
+  if (!chat || !isChatChannel(chat)) return;
+
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!result) {
+    actions.closeBoostModal({ tabId });
+    return;
+  }
+
+  global = getGlobal();
+  global = updateTabState(global, {
+    boostModal: {
+      chatId,
+      boostStatus: result,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const myBoosts = await callApi('fetchMyBoosts');
+
+  if (!myBoosts) return;
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal) return;
+
+  global = addChats(global, buildCollectionByKey(myBoosts.chats, 'id'));
+  global = addUsers(global, buildCollectionByKey(myBoosts.users, 'id'));
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      myBoosts: myBoosts.boosts,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('openBoostStatistics', async (global, actions, payload): Promise<void> => {
+  const { chatId, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      chatId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const [boostsListResult, boostStatusResult] = await Promise.all([
+    callApi('fetchBoostsList', { chat }),
+    callApi('fetchBoostsStatus', { chat }),
+  ]);
+
+  global = getGlobal();
+  if (!boostsListResult || !boostStatusResult) {
+    global = updateTabState(global, {
+      boostStatistics: undefined,
+    }, tabId);
+    setGlobal(global);
+    return;
+  }
+
+  global = addUsers(global, buildCollectionByKey(boostsListResult.users, 'id'));
+  global = updateTabState(global, {
+    boostStatistics: {
+      chatId,
+      boostStatus: boostStatusResult,
+      boosters: boostsListResult.boosters,
+      boosterIds: boostsListResult.boosterIds,
+      count: boostsListResult.count,
+      nextOffset: boostsListResult.nextOffset,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('loadMoreBoosters', async (global, actions, payload): Promise<void> => {
+  const { tabId = getCurrentTabId() } = payload || {};
+  let tabState = selectTabState(global, tabId);
+  if (!tabState.boostStatistics) return;
+
+  const chat = selectChat(global, tabState.boostStatistics.chatId);
+  if (!chat) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      ...tabState.boostStatistics,
+      isLoadingBoosters: true,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const result = await callApi('fetchBoostsList', {
+    chat,
+    offset: tabState.boostStatistics.nextOffset,
+  });
+  if (!result) return;
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+
+  tabState = selectTabState(global, tabId);
+  if (!tabState.boostStatistics) return;
+
+  global = updateTabState(global, {
+    boostStatistics: {
+      ...tabState.boostStatistics,
+      boosters: {
+        ...tabState.boostStatistics.boosters,
+        ...result.boosters,
+      },
+      boosterIds: unique([...tabState.boostStatistics.boosterIds || [], ...result.boosterIds]),
+      count: result.count,
+      nextOffset: result.nextOffset,
+      isLoadingBoosters: false,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('applyBoost', async (global, actions, payload): Promise<void> => {
+  const { chatId, slots, tabId = getCurrentTabId() } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat) return;
+
+  const result = await callApi('applyBoost', {
+    slots,
+    chat,
+  });
+
+  if (!result) {
+    return;
+  }
+
+  const newStatusResult = await callApi('fetchBoostsStatus', {
+    chat,
+  });
+
+  if (!newStatusResult) {
+    return;
+  }
+
+  global = getGlobal();
+  const tabState = selectTabState(global, tabId);
+  if (!tabState.boostModal?.boostStatus) return;
+  global = updateTabState(global, {
+    boostModal: {
+      ...tabState.boostModal,
+      boostStatus: newStatusResult,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('checkGiftCode', async (global, actions, payload): Promise<void> => {
+  const { slug, tabId = getCurrentTabId() } = payload;
+
+  const result = await callApi('checkGiftCode', {
+    slug,
+  });
+
+  if (!result) {
+    actions.showNotification({
+      message: langProvider.translate('lng_gift_link_expired'),
+      tabId,
+    });
+    return;
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = updateTabState(global, {
+    giftCodeModal: {
+      slug,
+      info: result.code,
+    },
+  }, tabId);
+  setGlobal(global);
+});
+
+addActionHandler('applyGiftCode', async (global, actions, payload): Promise<void> => {
+  const { slug, tabId = getCurrentTabId() } = payload;
+
+  const result = await callApi('applyGiftCode', {
+    slug,
+  });
+
+  if (!result) {
+    return;
+  }
+  actions.requestConfetti({ tabId });
+  actions.closeGiftCodeModal({ tabId });
+});

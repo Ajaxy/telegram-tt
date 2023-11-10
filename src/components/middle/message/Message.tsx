@@ -152,6 +152,7 @@ import CommentButton from './CommentButton';
 import Contact from './Contact';
 import ContextMenuContainer from './ContextMenuContainer.async';
 import Game from './Game';
+import Giveaway from './Giveaway';
 import InlineButtons from './InlineButtons';
 import Invoice from './Invoice';
 import InvoiceMediaPreview from './InvoiceMediaPreview';
@@ -630,7 +631,7 @@ const Message: FC<OwnProps & StateProps> = ({
     text, photo, video, audio,
     voice, document, sticker, contact,
     poll, webPage, invoice, location,
-    action, game, storyData,
+    action, game, storyData, giveaway,
   } = getMessageContent(message);
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
@@ -1136,6 +1137,9 @@ const Message: FC<OwnProps & StateProps> = ({
         )}
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
+        )}
+        {giveaway && (
+          <Giveaway message={message} />
         )}
         {game && (
           <Game

@@ -237,6 +237,20 @@
     }
   }
 
+  &.adaptive {
+    --ripple-color: var(--accent-background-active-color);
+    background-color: var(--accent-background-color);
+    color: var(--accent-color);
+
+    @include active-styles() {
+      background-color: var(--accent-background-active-color);
+    }
+
+    @include no-ripple-styles() {
+      background-color: var(--accent-background-active-color);
+    }
+  }
+
   &.dark {
     background-color: rgba(0, 0, 0, 0.75);
     color: white;

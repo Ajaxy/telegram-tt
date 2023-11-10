@@ -975,6 +975,7 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
     openChatByUsername: openChatByUsernameAction,
     openStoryViewerByUsername,
     processBoostParameters,
+    checkGiftCode,
   } = actions;
 
   if (url.match(RE_TG_LINK)) {
@@ -1054,6 +1055,12 @@ addActionHandler('openTelegramLink', (global, actions, payload): ActionReturnTyp
   if (part1 === 'addlist') {
     const slug = part2;
     checkChatlistInvite({ slug, tabId });
+    return;
+  }
+
+  if (part1 === 'giftcode') {
+    const slug = part2;
+    checkGiftCode({ slug, tabId });
     return;
   }
 

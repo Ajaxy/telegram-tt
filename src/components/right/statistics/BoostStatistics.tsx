@@ -13,7 +13,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Icon from '../../common/Icon';
-import InviteLink from '../../common/InviteLink';
+import LinkField from '../../common/LinkField';
 import PremiumProgress from '../../common/PremiumProgress';
 import PrivateChatInfo from '../../common/PrivateChatInfo';
 import ListItem from '../../ui/ListItem';
@@ -135,7 +135,7 @@ const BoostStatistics = ({
               </ListItem>
             )}
           </div>
-          <InviteLink className={styles.section} inviteLink={status!.boostUrl} title={lang('LinkForBoosting')} />
+          <LinkField className={styles.section} link={status!.boostUrl} withShare title={lang('LinkForBoosting')} />
         </>
       )}
     </div>

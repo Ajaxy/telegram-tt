@@ -14,6 +14,7 @@ import type {
   ApiChatlistInvite,
   ApiChatReactions,
   ApiChatType,
+  ApiCheckedGiftCode,
   ApiConfig,
   ApiContact,
   ApiCountry,
@@ -633,6 +634,11 @@ export type TabState = {
     isLoadingBoosters?: boolean;
     nextOffset?: string;
     count?: number;
+  };
+
+  giftCodeModal?: {
+    slug: string;
+    info: ApiCheckedGiftCode;
   };
 };
 
@@ -1805,6 +1811,14 @@ export interface ActionPayloads {
     isEnabled: boolean;
   };
 
+  checkGiftCode: {
+    slug: string;
+  } & WithTabId;
+  applyGiftCode: {
+    slug: string;
+  } & WithTabId;
+  closeGiftCodeModal: WithTabId | undefined;
+
   checkChatlistInvite: {
     slug: string;
   } & WithTabId;
@@ -2522,7 +2536,7 @@ export interface ActionPayloads {
     left: number;
     width: number;
     height: number;
-  } & WithTabId) | undefined;
+  } & WithTabId) | WithTabId;
 
   updateAttachmentSettings: {
     shouldCompress?: boolean;
