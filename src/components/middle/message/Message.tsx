@@ -1486,11 +1486,11 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId)
       : undefined;
     const forwardHeader = forwardInfo || replyFrom;
-    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader
+    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader && !isRepliesChat
       ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
-    const isReplyPrivate = replyMessageChat && !isChatPublic(replyMessageChat)
+    const isReplyPrivate = !isRepliesChat && replyMessageChat && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyUserId

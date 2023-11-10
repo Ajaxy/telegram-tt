@@ -85,7 +85,7 @@ export default function useInnerHandlers(
 
     focusMessage({
       chatId: replyToPeerId || chatId,
-      threadId,
+      threadId: replyToTopId || threadId,
       messageId: replyToMsgId,
       replyMessageId: replyToPeerId ? undefined : messageId,
       noForumTopicPanel: !replyToPeerId ? true : undefined, // Open topic panel for cross-chat replies
