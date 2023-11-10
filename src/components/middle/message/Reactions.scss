@@ -86,6 +86,7 @@
     }
 
     &:hover {
+      box-shadow: none;
       --reaction-background: var(--reaction-background-hover) !important;
 
       backdrop-filter: var(--reaction-background-hover-filter);
