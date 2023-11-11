@@ -1,12 +1,11 @@
+/* eslint-disable react/jsx-no-bind */
 import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/dateFormat';
 import { getServerTimeOffset } from '../util/serverTime';
-import useLang from './useLang';
 import useLastCallback from './useLastCallback';
 
-import CalendarModal from '../components/common/CalendarModal.async';
+import CommandMenuCalendar from '../components/common/CommandMenuCalendar';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 
@@ -15,7 +14,6 @@ const useSchedule = (
   onCancel?: () => void,
   openAt?: number,
 ) => {
-  const lang = useLang();
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
@@ -47,16 +45,15 @@ const useSchedule = (
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   const calendar = (
-    <CalendarModal
+    <CommandMenuCalendar
       isOpen={Boolean(onScheduled)}
-      withTimePicker
-      selectedAt={scheduledDefaultDate.getTime()}
-      maxAt={getDayStartAt(scheduledMaxDate)}
-      isFutureMode
-      secondButtonLabel={canScheduleUntilOnline ? lang('Schedule.SendWhenOnline') : undefined}
       onClose={handleCloseCalendar}
-      onSubmit={handleMessageSchedule}
-      onSecondButtonClick={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
+      onSubmit={(date) => {
+        const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
+          + getServerTimeOffset();
+        handleMessageSchedule(new Date(scheduledAt * 1000));
+      }}
+      onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
     />
   );
 
