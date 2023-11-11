@@ -31,7 +31,7 @@ const useSchedule = (
   });
 
   const handleCloseCalendar = useLastCallback(() => {
-    console.log('Закрытие меню');
+    console.log('Закрытие меню через handleCloseCalendar');
     setIsOpen(false);
     if (onCancel) {
       onCancel();

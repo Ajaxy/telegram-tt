@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import type { FC } from '../../lib/teact/teact';
 import React from '../../lib/teact/teact';
 
@@ -11,8 +12,8 @@ const CommandMenuCalendarAsync: FC<OwnProps> = (props) => {
   const { isOpen } = props;
   const CommandMenuCalendar = useModuleLoader(Bundles.Extra, 'CommandMenuCalendar', !isOpen);
 
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return CommandMenuCalendar ? <CommandMenuCalendar {...props} /> : undefined;
+  // Если CommandMenuCalendar не загружен, возвращаем null или запасной компонент
+  return CommandMenuCalendar ? <CommandMenuCalendar {...props} isOpen={isOpen} /> : undefined;
 };
 
 export default CommandMenuCalendarAsync;

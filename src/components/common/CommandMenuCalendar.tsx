@@ -7,10 +7,9 @@ import { render } from 'react-dom';
 import { Chrono } from 'chrono-node';
 import { Command } from 'cmdk';
 import {
-  useCallback, useEffect, useMemo, useState,
+  useCallback, useEffect, useMemo,
+  useState,
 } from '../../lib/teact/teact';
-
-import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import '../main/CommandMenu.scss';
 
@@ -41,6 +40,7 @@ const CommandMenuCalendar = ({
   useEffect(() => {
     console.log('Изменение isOpen в CommandMenuCalendar:', isOpen);
     if (!isOpen) {
+      console.log('Меню закрыто');
       setInputValue('');
       setSelectedDate(undefined);
     }
@@ -63,14 +63,27 @@ const CommandMenuCalendar = ({
     }
   }, [inputValue, chrono]);
 
-  useEffect(() => (
-    isOpen ? captureKeyboardListeners({ onEsc: onClose }) : undefined
-  ), [isOpen, onClose]);
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleEsc);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmission = useCallback((date: Date) => {
     console.log('handleSubmission вызвана с датой:', date);
     onSubmit(date); // Передаем date напрямую
-    onClose();
+    console.log('Попытка закрыть меню из handleSubmission');
+    onClose(); // Вызов для закрытия меню
   }, [onSubmit, onClose]);
 
   const handleTomorrowAt9amSelect = useCallback(() => {
@@ -90,13 +103,8 @@ const CommandMenuCalendar = ({
     setInputValue(value);
   }, []);
 
-  if (!isOpen) {
-    console.log('Меню закрыто');
-    return undefined;
-  }
-
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen}>
+    <Command.Dialog label="Calendar Command Mune" open={isOpen}>
       <Command.Input
         placeholder="Remind me at..."
         autoFocus
