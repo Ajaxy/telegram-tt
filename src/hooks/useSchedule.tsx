@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 import React, { useState } from '../lib/teact/teact';
 
@@ -5,7 +6,7 @@ import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getServerTimeOffset } from '../util/serverTime';
 import useLastCallback from './useLastCallback';
 
-import CommandMenuCalendar from '../components/common/CommandMenuCalendar';
+import CommandMenuCalendarAsync from '../components/common/CommandMenuCalendarAsync';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 
@@ -14,14 +15,15 @@ const useSchedule = (
   onCancel?: () => void,
   openAt?: number,
 ) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
-    // Scheduled time can not be less than 10 seconds in future
-    const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
-      + (isWhenOnline ? 0 : getServerTimeOffset());
+    console.log('Вызов handleMessageSchedule с датой:', date);
+    // Преобразование даты в таймстамп
+    const scheduledAt = Math.round(date.getTime() / 1000) + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
-    setOnScheduled(undefined);
+    setIsOpen(false);
   });
 
   const handleMessageScheduleUntilOnline = useLastCallback(() => {
@@ -29,11 +31,16 @@ const useSchedule = (
   });
 
   const handleCloseCalendar = useLastCallback(() => {
-    setOnScheduled(undefined);
-    onCancel?.();
+    console.log('Закрытие меню');
+    setIsOpen(false);
+    if (onCancel) {
+      onCancel();
+    }
   });
 
   const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
+    console.log('Открытие меню');
+    setIsOpen(true);
     setOnScheduled(() => whenScheduled);
   });
 
@@ -44,15 +51,11 @@ const useSchedule = (
   const scheduledMaxDate = new Date();
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
-  const calendar = (
-    <CommandMenuCalendar
-      isOpen={Boolean(onScheduled)}
+  const calendar = isOpen && (
+    <CommandMenuCalendarAsync
+      isOpen={isOpen}
       onClose={handleCloseCalendar}
-      onSubmit={(date) => {
-        const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
-          + getServerTimeOffset();
-        handleMessageSchedule(new Date(scheduledAt * 1000));
-      }}
+      onSubmit={handleMessageSchedule}
       onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
     />
   );
