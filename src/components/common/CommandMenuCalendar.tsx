@@ -37,31 +37,23 @@ const CommandMenuCalendar = ({
     return undefined;
   }, [chrono]);
 
+  // Логируем изменения inputValue и selectedDate
   useEffect(() => {
-    console.log('Изменение isOpen в CommandMenuCalendar:', isOpen);
-    if (!isOpen) {
-      console.log('Меню закрыто');
-      setInputValue('');
-      setSelectedDate(undefined);
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    try {
-      console.log('Обработка ввода пользователя:', inputValue);
-      const results = chrono.parse(inputValue, new Date());
-      if (results.length > 0) {
-        const date = results[0].start.date();
-        console.log('Распознанная дата:', date);
-        setSelectedDate(date);
-      } else {
-        setSelectedDate(undefined);
-      }
-    } catch (error) {
-      console.error('Ошибка при анализе даты: ', error);
-      setSelectedDate(undefined);
+    console.log('Обработка ввода пользователя:', inputValue);
+    const results = chrono.parse(inputValue, new Date());
+    if (results.length > 0) {
+      const date = results[0].start.date();
+      console.log('Распознанная дата:', date);
+      setSelectedDate(date); // Устанавливаем распознанную дату
+    } else {
+      setSelectedDate(undefined); // Сбрасываем дату
     }
   }, [inputValue, chrono]);
+
+  // Логируем изменения selectedDate
+  useEffect(() => {
+    console.log('Текущая выбранная дата:', selectedDate);
+  }, [selectedDate]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -79,6 +71,10 @@ const CommandMenuCalendar = ({
     };
   }, [isOpen, onClose]);
 
+  const onValueChange = useCallback((value: string) => {
+    setInputValue(value);
+  }, []);
+
   const handleSubmission = useCallback((date: Date) => {
     console.log('handleSubmission вызвана с датой:', date);
     onSubmit(date); // Передаем date напрямую
@@ -95,21 +91,14 @@ const CommandMenuCalendar = ({
     }
   }, [tomorrowAt9am, handleSubmission]);
 
-  useEffect(() => {
-    console.log('Значение tomorrowAt9am:', tomorrowAt9am);
-  }, [tomorrowAt9am]);
-
-  const onValueChange = useCallback((value: string) => {
-    setInputValue(value);
-  }, []);
+  // Если меню не открыто, не рендерим его содержимое
+  if (!isOpen) {
+    return undefined;
+  }
 
   const CommandMenuInner = (
-    <Command.Dialog label="Calendar Command Mune" open={isOpen}>
-      <Command.Input
-        placeholder="Remind me at..."
-        autoFocus
-        onValueChange={onValueChange}
-      />
+    <Command.Dialog label="Calendar Command Menu" open={isOpen}>
+      <Command.Input placeholder="Remind me at..." autoFocus onValueChange={onValueChange} />
       <Command.List>
         {tomorrowAt9am && (
           <Command.Item onSelect={handleTomorrowAt9amSelect}>
@@ -123,7 +112,7 @@ const CommandMenuCalendar = ({
         )}
         {onSendWhenOnline && (
           <Command.Item onSelect={onSendWhenOnline}>
-            Отправить, когда онлайн
+            Send when online
           </Command.Item>
         )}
       </Command.List>
@@ -131,7 +120,7 @@ const CommandMenuCalendar = ({
   );
 
   render(CommandMenuInner, cmdkRoot);
-  return <div />;
+  return undefined;
 };
 
 export default CommandMenuCalendar;
