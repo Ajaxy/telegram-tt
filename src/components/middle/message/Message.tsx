@@ -585,6 +585,7 @@ const Message: FC<OwnProps & StateProps> = ({
     Boolean(requestedChatTranslationLanguage),
     replyStory && 'content' in replyStory ? replyStory : undefined,
     isReplyPrivate,
+    isRepliesChat,
   );
 
   useEffect(() => {

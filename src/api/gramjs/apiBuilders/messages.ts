@@ -338,6 +338,7 @@ function buildAction(
   let isTopicAction: boolean | undefined;
   let slug: string | undefined;
   let isGiveaway: boolean | undefined;
+  let isUnclaimed: boolean | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -533,6 +534,7 @@ function buildAction(
     slug = action.slug;
     months = action.months;
     isGiveaway = Boolean(action.viaGiveaway);
+    isUnclaimed = Boolean(action.unclaimed);
     if (action.boostPeer) {
       targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
     }
@@ -563,6 +565,7 @@ function buildAction(
     months,
     topicEmojiIconId,
     isTopicAction,
+    isUnclaimed,
   };
 }
 

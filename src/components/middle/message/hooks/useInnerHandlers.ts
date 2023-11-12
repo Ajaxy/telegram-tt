@@ -30,6 +30,7 @@ export default function useInnerHandlers(
   isTranslatingChat?: boolean,
   story?: ApiStory,
   isReplyPrivate?: boolean,
+  isRepliesChat?: boolean,
 ) {
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
@@ -85,10 +86,10 @@ export default function useInnerHandlers(
 
     focusMessage({
       chatId: replyToPeerId || chatId,
-      threadId: replyToTopId || threadId,
+      threadId: isRepliesChat ? replyToTopId : threadId, // Open comments from Replies bot, otherwise, keep current thread
       messageId: replyToMsgId,
       replyMessageId: replyToPeerId ? undefined : messageId,
-      noForumTopicPanel: !replyToPeerId ? true : undefined, // Open topic panel for cross-chat replies
+      noForumTopicPanel: !replyToPeerId, // Open topic panel for cross-chat replies
     });
   });
 

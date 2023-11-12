@@ -292,6 +292,7 @@ export interface ApiAction {
   isTopicAction?: boolean;
   slug?: string;
   isGiveaway?: boolean;
+  isUnclaimed?: boolean;
 }
 
 export interface ApiWebPage {

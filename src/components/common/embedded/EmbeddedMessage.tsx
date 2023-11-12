@@ -148,15 +148,6 @@ const EmbeddedMessage: FC<OwnProps> = ({
   }
 
   function renderSender() {
-    if (forwardSenderTitle && !areSendersSame) {
-      return (
-        <>
-          <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
-          {renderText(forwardSenderTitle)}
-        </>
-      );
-    }
-
     if (title) {
       return renderText(title);
     }
@@ -165,11 +156,9 @@ const EmbeddedMessage: FC<OwnProps> = ({
       return NBSP;
     }
 
-    let shouldIgnoreSender = false;
     let icon: IconName | undefined;
     if (senderChat) {
       if (isChatChannel(senderChat)) {
-        shouldIgnoreSender = true;
         icon = 'channel-filled';
       }
 
@@ -178,11 +167,13 @@ const EmbeddedMessage: FC<OwnProps> = ({
       }
     }
 
+    const isChatSender = senderChat?.id === sender?.id;
+
     return (
       <>
-        {!shouldIgnoreSender && <span className="embedded-sender">{renderText(senderTitle)}</span>}
+        {!isChatSender && <span className="embedded-sender">{renderText(senderTitle)}</span>}
         {icon && <Icon name={icon} className="embedded-chat-icon" />}
-        {senderChatTitle && renderText(senderChatTitle)}
+        {icon && senderChatTitle && renderText(senderChatTitle)}
       </>
     );
   }
@@ -211,6 +202,12 @@ const EmbeddedMessage: FC<OwnProps> = ({
         </p>
         <div className="message-title">
           {renderSender()}
+          {forwardSenderTitle && !areSendersSame && (
+            <>
+              <Icon name={forwardSender ? 'share-filled' : 'forward'} className="embedded-origin-icon" />
+              {renderText(forwardSenderTitle)}
+            </>
+          )}
         </div>
       </div>
     </div>
