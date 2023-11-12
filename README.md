@@ -8,6 +8,7 @@ ulu brings productivity boosts:
 - snooze
 - hotkeys
 - CMD+K menu
+- CMD+E mark chat as done
 - auto-archiver
 - workspaces (soon)
 - ... (a lot of features in the design process, will be announced soon)
