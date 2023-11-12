@@ -33,6 +33,7 @@ type LoadedParams = {
   progress: number;
   descriptionText: string;
   isBoosted?: boolean;
+  canBoostMore?: boolean;
 };
 
 type BoostInfo = ({
@@ -100,6 +101,7 @@ const BoostModal = ({
     value,
     progress,
     descriptionText,
+    canBoostMore,
   }: BoostInfo = useMemo(() => {
     if (!info?.boostStatus || !chat) {
       return {
@@ -112,7 +114,8 @@ const BoostModal = ({
       level, currentLevelBoosts, hasMyBoost,
     } = info.boostStatus;
 
-    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts);
+    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, chat.id);
+    const areBoostsInDifferentChannels = info?.myBoosts && !areAllBoostsInChannel(info.myBoosts, chat.id);
 
     const {
       boosts,
@@ -163,10 +166,11 @@ const BoostModal = ({
       descriptionText: description,
       boost: firstBoost,
       isBoosted: hasBoost,
+      canBoostMore: areBoostsInDifferentChannels,
     };
   }, [chat, chatTitle, info, lang]);
 
-  const isBoostDisabled = !boost && isCurrentUserPremium;
+  const isBoostDisabled = !info?.myBoosts?.length && isCurrentUserPremium;
   const isReplacingBoost = boost?.chatId && boost.chatId !== info?.chatId;
 
   const handleApplyBoost = useLastCallback(() => {
@@ -187,10 +191,11 @@ const BoostModal = ({
         openPremiumDialog();
       }
 
+      closeBoostModal();
       return;
     }
 
-    if (isBoosted) {
+    if (!canBoostMore) {
       closeBoostModal();
       return;
     }
@@ -231,10 +236,10 @@ const BoostModal = ({
         </div>
         <div className="dialog-buttons">
           <Button isText className="confirm-dialog-button" disabled={isBoostDisabled} onClick={handleButtonClick}>
-            {!isBoosted ? (
+            {canBoostMore ? (
               <>
                 <Icon name="boost" />
-                {lang('ChannelBoost.BoostChannel')}
+                {lang(isBoosted && canBoostMore ? 'BoostingBoostAgain' : 'ChannelBoost.BoostChannel')}
               </>
             ) : lang('OK')}
           </Button>
@@ -316,14 +321,20 @@ const BoostModal = ({
   );
 };
 
-function getFirstAvailableBoost(myBoosts: ApiMyBoost[]) {
-  return myBoosts.find((boost) => !boost.chatId) || myBoosts.sort((a, b) => a.date - b.date)[0];
+function getFirstAvailableBoost(myBoosts: ApiMyBoost[], chatId?: string) {
+  return myBoosts.find((boost) => !boost.chatId)
+    || myBoosts.filter((b) => chatId && b.chatId !== chatId)
+      .sort((a, b) => a.date - b.date)[0];
+}
+
+function areAllBoostsInChannel(myBoosts: ApiMyBoost[], chatId: string) {
+  return myBoosts.every((boost) => boost.chatId === chatId);
 }
 
 export default memo(withGlobal<OwnProps>(
   (global, { info }): StateProps => {
     const chat = info && selectChat(global, info?.chatId);
-    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts);
+    const firstBoost = info?.myBoosts && getFirstAvailableBoost(info.myBoosts, info.chatId);
     const boostedChat = firstBoost?.chatId ? selectChat(global, firstBoost?.chatId) : undefined;
 
     return {

@@ -5,10 +5,10 @@ export function getBoostProgressInfo(boostInfo: ApiBoostsStatus, freezeOnLevelUp
     level, boosts, currentLevelBoosts, nextLevelBoosts, hasMyBoost,
   } = boostInfo;
 
-  const currentLevel = level;
-  const hasNextLevel = Boolean(nextLevelBoosts);
-
   const isJustUpgraded = freezeOnLevelUp && boosts === currentLevelBoosts && hasMyBoost;
+
+  const currentLevel = isJustUpgraded ? level - 1 : level;
+  const hasNextLevel = Boolean(nextLevelBoosts);
 
   const levelProgress = (!nextLevelBoosts || isJustUpgraded) ? 1
     : (boosts - currentLevelBoosts) / (nextLevelBoosts - currentLevelBoosts);

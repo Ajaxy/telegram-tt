@@ -212,19 +212,32 @@ export async function fetchMyBoosts() {
   };
 }
 
-export function applyBoost({
+export async function applyBoost({
   chat,
   slots,
 } : {
   chat: ApiChat;
   slots: number[];
 }) {
-  return invokeRequest(new GramJs.premium.ApplyBoost({
+  const result = await invokeRequest(new GramJs.premium.ApplyBoost({
     peer: buildInputPeer(chat.id, chat.accessHash),
     slots,
-  }), {
-    shouldReturnTrue: true,
-  });
+  }));
+
+  if (!result) return undefined;
+
+  addEntitiesToLocalDb(result.users);
+  addEntitiesToLocalDb(result.chats);
+
+  const users = result.users.map(buildApiUser).filter(Boolean);
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
+  const boosts = result.myBoosts.map(buildApiMyBoost);
+
+  return {
+    users,
+    chats,
+    boosts,
+  };
 }
 
 export async function fetchBoostsStatus({

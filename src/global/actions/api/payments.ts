@@ -611,6 +611,20 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
     return;
   }
 
+  global = getGlobal();
+  let tabState = selectTabState(global, tabId);
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  if (tabState.boostModal) {
+    global = updateTabState(global, {
+      boostModal: {
+        ...tabState.boostModal,
+        myBoosts: result.boosts,
+      },
+    }, tabId);
+  }
+  setGlobal(global);
+
   const newStatusResult = await callApi('fetchBoostsStatus', {
     chat,
   });
@@ -620,7 +634,7 @@ addActionHandler('applyBoost', async (global, actions, payload): Promise<void> =
   }
 
   global = getGlobal();
-  const tabState = selectTabState(global, tabId);
+  tabState = selectTabState(global, tabId);
   if (!tabState.boostModal?.boostStatus) return;
   global = updateTabState(global, {
     boostModal: {
