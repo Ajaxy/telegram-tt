@@ -392,9 +392,11 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <blockquote data-entity-type={entity.type}>
-          {renderNestedMessagePart()}
-        </blockquote>
+        <div className="text-entity-blockquote-wrapper">
+          <blockquote data-entity-type={entity.type}>
+            {renderNestedMessagePart()}
+          </blockquote>
+        </div>
       );
     case ApiMessageEntityTypes.BotCommand:
       return (

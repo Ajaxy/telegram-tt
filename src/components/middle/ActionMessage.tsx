@@ -236,6 +236,7 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
 
   function renderGiftCode() {
     const isFromGiveaway = message.content.action?.isGiveaway;
+    const isUnclaimed = message.content.action?.isUnclaimed;
     return (
       <span
         className="action-message-gift action-message-gift-code"
@@ -250,10 +251,11 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
           noLoop
           nonInteractive
         />
-        <strong>{lang('BoostingUnclaimedPrize')}</strong>
+        <strong>{lang(isUnclaimed ? 'BoostingUnclaimedPrize' : 'BoostingCongratulations')}</strong>
         <span className="action-message-subtitle">
-          {renderText(lang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : 'BoostingYouHaveUnclaimedPrize',
-            getChatTitle(lang, targetChat!)),
+          {renderText(lang(isFromGiveaway ? 'BoostingReceivedGiftFrom' : isUnclaimed
+            ? 'BoostingReceivedPrizeFrom' : 'BoostingYouHaveUnclaimedPrize',
+          getChatTitle(lang, targetChat!)),
           ['simple_markdown'])}
         </span>
         <span className="action-message-subtitle">

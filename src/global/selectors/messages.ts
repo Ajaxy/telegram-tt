@@ -421,6 +421,9 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
     return undefined;
   }
 
+  const chat = selectChat(global, message.chatId);
+  if (chat && isChatChannel(chat)) return chat;
+
   return selectPeer(global, senderId);
 }
 
