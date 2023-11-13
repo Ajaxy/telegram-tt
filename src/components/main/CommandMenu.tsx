@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
@@ -9,28 +8,17 @@ import {
 } from '../../lib/teact/teact';
 import { getActions } from '../../global';
 
-import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
-import type { LeftColumnContent } from '../../types';
-import { SettingsScreens } from '../../types';
-
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useArchiver from '../../hooks/useArchiver';
+import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
-
-import { selectNewChannel, selectNewGroup } from '../left/main/LeftMainHendlers';
 
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
 
-interface CommandMenuProps {
-  onContentChange: (content: LeftColumnContent) => void;
-  onScreenSelect: (screen: SettingsScreens) => void;
-  dispatch: FolderEditDispatch;
-}
-
-const CommandMenu: React.FC<CommandMenuProps> = ({ onContentChange, dispatch, onScreenSelect }) => {
+const CommandMenu = () => {
   const { track } = useJune();
   const { showNotification } = getActions();
   const [isOpen, setOpen] = useState(false);
@@ -38,6 +26,7 @@ const CommandMenu: React.FC<CommandMenuProps> = ({ onContentChange, dispatch, on
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
   const { archiveMessages } = useArchiver({ isManual: true });
+  const { runCommand } = useCommands();
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -62,20 +51,19 @@ const CommandMenu: React.FC<CommandMenuProps> = ({ onContentChange, dispatch, on
   ), [isOpen, close]);
 
   const handleSelectNewChannel = useCallback(() => {
-    selectNewChannel(onContentChange)();
+    runCommand('NEW_CHANNEL');
     close();
-  }, [onContentChange, close]);
+  }, [runCommand, close]);
 
   const handleSelectNewGroup = useCallback(() => {
-    selectNewGroup(onContentChange)();
+    runCommand('NEW_GROUP');
     close();
-  }, [onContentChange, close]);
+  }, [runCommand, close]);
 
   const handleCreateFolder = useCallback(() => {
-    dispatch({ type: 'reset' });
-    onScreenSelect(SettingsScreens.FoldersCreateFolder);
+    runCommand('NEW_FOLDER');
     close();
-  }, [onScreenSelect, dispatch, close]);
+  }, [runCommand, close]);
 
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
