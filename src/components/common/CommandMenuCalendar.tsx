@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-useless-fragment */
+/* eslint-disable no-null/no-null */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-async-without-await/no-async-without-await */
 /* eslint-disable react/jsx-no-bind */
@@ -5,7 +7,7 @@
 /* eslint-disable no-console */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { Chrono } from 'chrono-node';
 import { Command } from 'cmdk';
 import {
@@ -17,19 +19,18 @@ import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import '../main/CommandMenu.scss';
 
-const cmdkRoot = document.getElementById('cmdk-root');
-
 export type OwnProps = {
   isOpen: boolean;
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
   onSubmit: (date: Date) => void;
   onSendWhenOnline?: () => void;
   isReminder?: boolean;
 };
 
 const CommandMenuCalendar = ({
-  isOpen, setOpen, onSubmit, onSendWhenOnline, isReminder,
+  isOpen, onSubmit, onClose, onSendWhenOnline, isReminder,
 }: OwnProps) => {
+  console.log('Статус isOpen в CommandMenuCalendar:', isOpen);
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string; date: Date | undefined }>>();
@@ -41,13 +42,10 @@ const CommandMenuCalendar = ({
 
   const placeholderText = isReminder ? 'Remind me at...' : 'Send at...';
 
-  const close = useCallback(() => {
-    setOpen(false);
-  }, [setOpen]);
-
-  useEffect(() => (
-    isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
-  ), [isOpen, close]);
+  useEffect(() => {
+    console.log('Попытка закрыть по ESC:', isOpen);
+    return isOpen ? captureKeyboardListeners({ onEsc: onClose }) : undefined;
+  }, [isOpen, onClose]);
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -58,7 +56,7 @@ const CommandMenuCalendar = ({
   }, [chrono]);
 
   const mondayAt9am = useMemo(() => {
-    const parsedResults = chrono.parse('Monday at 9am', new Date());
+    const parsedResults = chrono.parse('Next monday at 9am', new Date());
     if (parsedResults.length > 0) {
       return parsedResults[0].start.date();
     }
@@ -101,9 +99,9 @@ const CommandMenuCalendar = ({
   const handleSubmission = useCallback((date: Date) => {
     console.log('handleSubmission вызвана с датой:', date);
     onSubmit(date); // Передаем date напрямую
-    console.log('Попытка закрыть меню из handleSubmission');
-    close(); // Вызов для закрытия меню
-  }, [onSubmit, close]);
+    console.log('Попытка закрыть меню из handleSubmission', isOpen);
+    onClose(); // Вызов для закрытия меню
+  }, [onSubmit, onClose, isOpen]);
 
   const handleTomorrowAt9amSelect = useCallback(() => {
     if (tomorrowAt9am) {
@@ -123,47 +121,53 @@ const CommandMenuCalendar = ({
     }
   }, [mondayAt9am, handleSubmission]);
 
-  // Если меню не открыто, не рендерим его содержимое
-  if (!isOpen) {
-    return undefined;
+  const cmdkRoot = document.getElementById('cmdk-root');
+
+  if (cmdkRoot) {
+    if (!isOpen) {
+      console.log('Попытка удалить CommandMenuCalendar из DOM');
+      unmountComponentAtNode(cmdkRoot);
+      return null;
+    }
+
+    const CommandMenuInner = (
+      <Command.Dialog
+        label="Calendar Command Menu"
+        open={isOpen}
+        shouldFilter
+        filter={customFilter}
+      >
+        <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
+        <Command.List>
+          {loading && <Command.Loading>Processing input...</Command.Loading>}
+          {menuItems?.map((item, index) => (
+            <Command.Item
+              key={index}
+              value={`${inputValue} ${item.label}`}
+              onSelect={() => item.date && handleSubmission(item.date)}
+            >
+              {item.label}
+            </Command.Item>
+          ))}
+          <Command.Item onSelect={handleTomorrowAt9amSelect}>
+            Tomorrow at 9 AM
+          </Command.Item>
+          <Command.Item onSelect={handleMondayAt9amSelect}>
+            On Monday at 9 AM
+          </Command.Item>
+          {onSendWhenOnline && (
+            <Command.Item onSelect={onSendWhenOnline}>
+              Send when online
+            </Command.Item>
+          )}
+        </Command.List>
+      </Command.Dialog>
+    );
+
+    render(CommandMenuInner, cmdkRoot);
   }
 
-  const CommandMenuInner = (
-    <Command.Dialog
-      label="Calendar Command Menu"
-      open={isOpen}
-      shouldFilter
-      filter={customFilter}
-    >
-      <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
-      <Command.List>
-        {loading && <Command.Loading>Processing input...</Command.Loading>}
-        {menuItems?.map((item, index) => (
-          <Command.Item
-            key={index}
-            value={`${inputValue} ${item.label}`}
-            onSelect={() => item.date && handleSubmission(item.date)}
-          >
-            {item.label}
-          </Command.Item>
-        ))}
-        <Command.Item onSelect={handleTomorrowAt9amSelect}>
-          Tomorrow at 9 AM
-        </Command.Item>
-        <Command.Item onSelect={handleMondayAt9amSelect}>
-          On Monday at 9 AM
-        </Command.Item>
-        {onSendWhenOnline && (
-          <Command.Item onSelect={onSendWhenOnline}>
-            Send when online
-          </Command.Item>
-        )}
-      </Command.List>
-    </Command.Dialog>
-  );
-
-  render(CommandMenuInner, cmdkRoot);
-  return undefined;
+  return null;
 };
 
 export default CommandMenuCalendar;

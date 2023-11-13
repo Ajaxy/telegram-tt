@@ -205,7 +205,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
   const [isClosePollDialogOpen, openClosePollDialog, closeClosePollDialog] = useFlag();
 
-  const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline, undefined, message.date);
+  const [requestCalendar, calendar] = useSchedule(canScheduleUntilOnline, undefined, onClose, message.date);
 
   // `undefined` indicates that emoji are present and loading
   const hasCustomEmoji = customEmojiSetsInfo === undefined || Boolean(customEmojiSetsInfo.length);

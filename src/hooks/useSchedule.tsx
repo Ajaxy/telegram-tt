@@ -1,6 +1,9 @@
+/* eslint-disable react/no-deprecated */
+/* eslint-disable no-null/no-null */
 /* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
-import React, { useState } from '../lib/teact/teact';
+import { unmountComponentAtNode } from 'react-dom';
+import React, { useEffect, useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getServerTimeOffset } from '../util/serverTime';
@@ -13,6 +16,7 @@ type OnScheduledCallback = (scheduledAt: number) => void;
 const useSchedule = (
   canScheduleUntilOnline?: boolean,
   isChatWithSelf?: boolean,
+  onCancel?: () => void,
   openAt?: number,
 ) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -29,11 +33,27 @@ const useSchedule = (
     handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
   });
 
+  const cmdkRoot = document.getElementById('cmdk-root');
+  const handleCloseCalendar = useLastCallback(() => {
+    console.log('Попытка закрыть меню из handleCloseCalendar', isMenuOpen);
+    setOnScheduled(undefined);
+    onCancel?.();
+    setMenuOpen(false);
+    if (cmdkRoot) {
+      unmountComponentAtNode(cmdkRoot);
+    }
+    return null;
+  });
+
   const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
     console.log('Открытие меню');
     setMenuOpen(true);
     setOnScheduled(() => whenScheduled);
   });
+
+  useEffect(() => {
+    console.log('Изменение isMenuOpen:', isMenuOpen);
+  }, [isMenuOpen]);
 
   const scheduledDefaultDate = openAt ? new Date(openAt * 1000) : new Date();
   scheduledDefaultDate.setSeconds(0);
@@ -45,7 +65,7 @@ const useSchedule = (
   const calendar = isMenuOpen && (
     <CommandMenuCalendarAsync
       isOpen={isMenuOpen}
-      setOpen={setMenuOpen}
+      onClose={handleCloseCalendar}
       onSubmit={handleMessageSchedule}
       onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
       isReminder={isChatWithSelf}
