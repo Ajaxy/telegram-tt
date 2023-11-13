@@ -4,5 +4,10 @@ export default function useSnooze() {
     console.log('snoozeCurrentChat');
   };
 
-  return { snoozeCurrentChat };
+  const snoozeChat = ({ id }: { id: string }) => {
+    // eslint-disable-next-line no-console
+    console.log('snoozeChat', id);
+  };
+
+  return { snoozeCurrentChat, snoozeChat };
 }

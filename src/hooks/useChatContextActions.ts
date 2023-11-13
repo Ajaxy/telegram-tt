@@ -13,6 +13,7 @@ import { compact } from '../util/iteratees';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import useArchiver from './useArchiver';
 import useLang from './useLang';
+import useSnooze from './useSnooze';
 
 const useChatContextActions = ({
   chat,
@@ -43,6 +44,7 @@ const useChatContextActions = ({
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
 
   const { archiveChat } = useArchiver({ isManual: true });
+  const { snoozeChat } = useSnooze();
 
   return useMemo(() => {
     if (!chat) {
@@ -55,6 +57,14 @@ const useChatContextActions = ({
       toggleChatUnread,
       openChatInNewTab,
     } = getActions();
+
+    const actionNotifyMe = {
+      title: lang('NotifyMeHotkey'),
+      icon: 'schedule',
+      handler: () => {
+        snoozeChat({ id: chat.id });
+      },
+    };
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
       title: IS_ELECTRON ? 'Open in new window' : 'Open in new tab',
@@ -136,6 +146,7 @@ const useChatContextActions = ({
     const isInFolder = folderId !== undefined;
 
     return compact([
+      actionNotifyMe,
       !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       actionMaskAsRead,
       actionMarkAsUnread,
@@ -147,7 +158,7 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat, snoozeChat,
   ]);
 };
 
