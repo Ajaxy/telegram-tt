@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-async-without-await/no-async-without-await */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/no-deprecated */
@@ -26,10 +27,15 @@ export type OwnProps = {
 const CommandMenuCalendar = ({
   isOpen, onClose, onSubmit, onSendWhenOnline,
 }: OwnProps) => {
-  const [inputValue, setInputValue] = useState('');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const chrono = useMemo(() => new Chrono(), []);
+  const [inputValue, setInputValue] = useState('');
+  const [menuItems, setMenuItems] = useState<Array<{ label: string; date: Date | undefined }>>();
   const [loading, setLoading] = useState(false);
+
+  const filterItems = (item: { label: string; date: Date | undefined }) => {
+    const inputLower = inputValue.toLowerCase();
+    return item.label.toLowerCase().includes(inputLower);
+  };
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -40,28 +46,19 @@ const CommandMenuCalendar = ({
   }, [chrono]);
 
   useEffect(() => {
-    setLoading(true); // Начало загрузки
-    try {
-      console.log('Обработка ввода пользователя:', inputValue);
-      const results = chrono.parse(inputValue, new Date());
-      if (results.length > 0) {
-        const date = results[0].start.date();
-        console.log('Распознанная дата:', date);
-        setSelectedDate(date); // Устанавливаем распознанную дату
-      } else {
-        setSelectedDate(undefined); // Сбрасываем дату
-      }
-    } catch (error) {
-      console.error('Ошибка при анализе даты: ', error);
-      setSelectedDate(undefined); // Сбрасываем дату в случае ошибки
+    setLoading(true);
+    const parsedResults = chrono.parse(inputValue, new Date());
+    if (parsedResults.length > 0) {
+      const date = parsedResults[0].start.date();
+      const newItem = { label: `Remind me at ${date.toDateString()}`, date };
+      setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
     }
-    setLoading(false); // Завершение загрузки
+    setLoading(false);
   }, [inputValue, chrono]);
 
-  // Логируем изменения selectedDate
-  useEffect(() => {
-    console.log('Текущая выбранная дата:', selectedDate);
-  }, [selectedDate]);
+  const onValueChange = useCallback((value: string) => {
+    setInputValue(value);
+  }, []);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -78,10 +75,6 @@ const CommandMenuCalendar = ({
       window.removeEventListener('keydown', handleEsc);
     };
   }, [isOpen, onClose]);
-
-  const onValueChange = useCallback((value: string) => {
-    setInputValue(value);
-  }, []);
 
   const handleSubmission = useCallback((date: Date) => {
     console.log('handleSubmission вызвана с датой:', date);
@@ -104,22 +97,19 @@ const CommandMenuCalendar = ({
     return undefined;
   }
 
-  console.log('Проверка перед рендерингом:', { isOpen, selectedDate, tomorrowAt9am });
   const CommandMenuInner = (
     <Command.Dialog label="Calendar Command Menu" open={isOpen}>
       <Command.Input placeholder="Remind me at..." autoFocus onValueChange={onValueChange} />
       <Command.List>
         {loading && <Command.Loading>Processing input...</Command.Loading>}
-        {tomorrowAt9am && (
-          <Command.Item onSelect={handleTomorrowAt9amSelect}>
-            Tomorrow at 9 am
+        {menuItems?.filter(filterItems).map((item, index) => (
+          <Command.Item key={index} value={inputValue} onSelect={() => item.date && handleSubmission(item.date)}>
+            {item.label}
           </Command.Item>
-        )}
-        {selectedDate && (
-          <Command.Item onSelect={() => handleSubmission(selectedDate)}>
-            Remind me at {selectedDate.toDateString()}
-          </Command.Item>
-        )}
+        ))}
+        <Command.Item onSelect={handleTomorrowAt9amSelect}>
+          Tomorrow at 9 am
+        </Command.Item>
         {onSendWhenOnline && (
           <Command.Item onSelect={onSendWhenOnline}>
             Send when online
