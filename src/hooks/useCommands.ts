@@ -1,18 +1,26 @@
-export default function useCommands() {
-  const commandNewChannel = () => {};
-  const commandNewGroup = () => {};
-  const commandNewFolder = () => {};
+import { useEffect } from '../lib/teact/teact';
 
-  const onCommandNewChannel = (f: Function) => { f(); };
-  const onCommandNewGroup = (f: Function) => { f(); };
-  const onCommandNewFolder = (f: Function) => { f(); };
+type TCommand = (
+  | 'NEW_CHANNEL'
+  | 'NEW_GROUP'
+  | 'NEW_FOLDER'
+);
+
+export default function useCommands() {
+  const runCommand = (command: TCommand) => {
+    document.dispatchEvent(new Event(command));
+  };
+
+  const useCommand = (command: TCommand, f: Function) => {
+    useEffect(() => {
+      const listener = () => { f(); };
+      document.addEventListener(command, listener);
+      return () => document.removeEventListener(command, listener);
+    }, [command, f]);
+  };
 
   return {
-    commandNewChannel,
-    commandNewGroup,
-    commandNewFolder,
-    onCommandNewChannel,
-    onCommandNewGroup,
-    onCommandNewFolder,
+    useCommand,
+    runCommand,
   };
 }

@@ -26,7 +26,7 @@ const CommandMenu = () => {
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
   const { archiveMessages } = useArchiver({ isManual: true });
-  const { commandNewChannel, commandNewGroup, commandNewFolder } = useCommands();
+  const { runCommand } = useCommands();
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -51,19 +51,19 @@ const CommandMenu = () => {
   ), [isOpen, close]);
 
   const handleSelectNewChannel = useCallback(() => {
-    commandNewChannel();
+    runCommand('NEW_CHANNEL');
     close();
-  }, [commandNewChannel, close]);
+  }, [runCommand, close]);
 
   const handleSelectNewGroup = useCallback(() => {
-    commandNewGroup();
+    runCommand('NEW_GROUP');
     close();
-  }, [commandNewGroup, close]);
+  }, [runCommand, close]);
 
   const handleCreateFolder = useCallback(() => {
-    commandNewFolder();
+    runCommand('NEW_FOLDER');
     close();
-  }, [commandNewFolder, close]);
+  }, [runCommand, close]);
 
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;

@@ -75,7 +75,7 @@ const LeftMain: FC<OwnProps> = ({
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
-  const { onCommandNewChannel, onCommandNewGroup, onCommandNewFolder } = useCommands();
+  const { useCommand } = useCommands();
 
   useEffect(() => {
     window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
@@ -154,9 +154,9 @@ const LeftMain: FC<OwnProps> = ({
     onSettingsScreenSelect(SettingsScreens.FoldersCreateFolder);
   });
 
-  onCommandNewChannel(handleSelectNewChannel);
-  onCommandNewGroup(handleSelectNewGroup);
-  onCommandNewFolder(handleCreateFolder);
+  useCommand('NEW_CHANNEL', handleSelectNewChannel);
+  useCommand('NEW_GROUP', handleSelectNewGroup);
+  useCommand('NEW_FOLDER', handleCreateFolder);
 
   useEffect(() => {
     let autoCloseTimeout: number | undefined;
