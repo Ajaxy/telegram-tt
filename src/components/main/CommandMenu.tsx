@@ -95,7 +95,7 @@ const CommandMenu: React.FC<CommandMenuProps> = ({ onContentChange, dispatch, on
   }, [close, archiveMessages, track]);
 
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen}>
+    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
       <Command.Input
         placeholder="Search for command..."
         autoFocus
