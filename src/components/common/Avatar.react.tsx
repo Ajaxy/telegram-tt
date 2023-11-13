@@ -27,8 +27,8 @@ import { useFastClick } from '../../hooks/useFastClick.react';
 import useLang from '../../hooks/useLang.react';
 import useLastCallback from '../../hooks/useLastCallback.react';
 import useMedia from '../../hooks/useMedia.react';
-import useMediaTransition from '../../hooks/useMediaTransition.react';
 
+// import useMediaTransition from '../../hooks/useMediaTransition.react';
 import OptimizedVideo from '../ui/OptimizedVideo.react';
 
 // import AvatarStoryCircle from './AvatarStoryCircle';
@@ -113,7 +113,13 @@ const Avatar: FC<OwnProps> = ({
   // `videoBlobUrl` can be taken from memory cache, so we need to check `shouldLoadVideo` again
   const shouldPlayVideo = Boolean(videoBlobUrl && shouldLoadVideo);
 
-  const transitionClassNames = useMediaTransition(hasBlobUrl);
+  // const transitionClassNames = useMediaTransition(hasBlobUrl);
+  const classNameImg = buildClassName(
+    cn.media,
+    'avatar-media',
+    // transitionClassNames,
+    videoBlobUrl && 'poster',
+  );
 
   const handleVideoEnded = useLastCallback((e) => {
     const video = e.currentTarget;
@@ -173,7 +179,7 @@ const Avatar: FC<OwnProps> = ({
       <>
         <img
           src={imgBlobUrl}
-          className={buildClassName(cn.media, 'avatar-media', transitionClassNames, videoBlobUrl && 'poster')}
+          className={classNameImg}
           alt={author}
           decoding="async"
           draggable={false}
