@@ -22,10 +22,11 @@ export type OwnProps = {
   onClose: () => void;
   onSubmit: (date: Date) => void;
   onSendWhenOnline?: () => void;
+  isReminder?: boolean;
 };
 
 const CommandMenuCalendar = ({
-  isOpen, onClose, onSubmit, onSendWhenOnline,
+  isOpen, onClose, onSubmit, onSendWhenOnline, isReminder,
 }: OwnProps) => {
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
@@ -35,6 +36,8 @@ const CommandMenuCalendar = ({
   const customFilter = (value: string, search: string) => {
     return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
   };
+
+  const placeholderText = isReminder ? 'Remind me at...' : 'Send at...';
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -138,7 +141,7 @@ const CommandMenuCalendar = ({
       shouldFilter
       filter={customFilter}
     >
-      <Command.Input placeholder="Remind me at..." autoFocus onValueChange={onValueChange} />
+      <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
       <Command.List>
         {loading && <Command.Loading>Processing input...</Command.Loading>}
         {menuItems?.map((item, index) => (
@@ -151,14 +154,14 @@ const CommandMenuCalendar = ({
           </Command.Item>
         ))}
         <Command.Item onSelect={handleTomorrowAt9amSelect}>
-          Tomorrow at 9 AM.
+          Tomorrow at 9 AM
         </Command.Item>
         <Command.Item onSelect={handleMondayAt9amSelect}>
-          On Monday at 9 AM.
+          On Monday at 9 AM
         </Command.Item>
         {onSendWhenOnline && (
           <Command.Item onSelect={onSendWhenOnline}>
-            Send when online.
+            Send when online
           </Command.Item>
         )}
       </Command.List>

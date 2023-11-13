@@ -12,6 +12,7 @@ type OnScheduledCallback = (scheduledAt: number) => void;
 
 const useSchedule = (
   canScheduleUntilOnline?: boolean,
+  isChatWithSelf?: boolean,
   onCancel?: () => void,
   openAt?: number,
 ) => {
@@ -57,6 +58,7 @@ const useSchedule = (
       onClose={handleCloseCalendar}
       onSubmit={handleMessageSchedule}
       onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
+      isReminder={isChatWithSelf}
     />
   );
 
