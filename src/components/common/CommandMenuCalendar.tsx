@@ -29,19 +29,23 @@ const CommandMenuCalendar = ({
 }: OwnProps) => {
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
-  const [menuItems, setMenuItems] = useState<Array<{ label: string; date: Date | undefined }>>();
+  const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string; date: Date | undefined }>>();
   const [loading, setLoading] = useState(false);
 
-  const filterItems = (item: { label: string; date: Date | undefined }) => {
-    const inputLower = inputValue.toLowerCase();
-
-    // Преобразуем дату обратно в строку для сравнения
-    const dateString = item.date ? item.date.toDateString().toLowerCase() : '';
-
-    return item.label.toLowerCase().includes(inputLower) || dateString.includes(inputLower);
+  const customFilter = (value: string, search: string) => {
+    return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
   };
+
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
+    if (parsedResults.length > 0) {
+      return parsedResults[0].start.date();
+    }
+    return undefined;
+  }, [chrono]);
+
+  const mondayAt9am = useMemo(() => {
+    const parsedResults = chrono.parse('Monday at 9am', new Date());
     if (parsedResults.length > 0) {
       return parsedResults[0].start.date();
     }
@@ -56,9 +60,12 @@ const CommandMenuCalendar = ({
         const date = parsedResults[0].start.date();
         const newLabel = `Remind me at ${date.toDateString()}`;
 
+        console.log('Добавление нового элемента: ', inputValue, date, newLabel);
+
         // Проверяем, существует ли уже такой элемент в меню
         if (!menuItems?.some((item) => item.label === newLabel)) {
-          const newItem = { label: newLabel, date };
+          // Установка value в соответствии с исходным вводом пользователя
+          const newItem = { label: newLabel, date, value: inputValue };
           setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
         }
       }
@@ -110,27 +117,48 @@ const CommandMenuCalendar = ({
     }
   }, [tomorrowAt9am, handleSubmission]);
 
+  const handleMondayAt9amSelect = useCallback(() => {
+    if (mondayAt9am) {
+      handleSubmission(mondayAt9am);
+    } else {
+      console.error("Ошибка: Дата 'В понедельник в 9 утра' не определена");
+      // Обработка ошибки или альтернативное действие
+    }
+  }, [mondayAt9am, handleSubmission]);
+
   // Если меню не открыто, не рендерим его содержимое
   if (!isOpen) {
     return undefined;
   }
 
   const CommandMenuInner = (
-    <Command.Dialog label="Calendar Command Menu" open={isOpen}>
+    <Command.Dialog
+      label="Calendar Command Menu"
+      open={isOpen}
+      shouldFilter
+      filter={customFilter}
+    >
       <Command.Input placeholder="Remind me at..." autoFocus onValueChange={onValueChange} />
       <Command.List>
         {loading && <Command.Loading>Processing input...</Command.Loading>}
-        {menuItems?.filter(filterItems).map((item, index) => (
-          <Command.Item key={index} value={item.label} onSelect={() => item.date && handleSubmission(item.date)}>
+        {menuItems?.map((item, index) => (
+          <Command.Item
+            key={index}
+            value={`${inputValue} ${item.label}`}
+            onSelect={() => item.date && handleSubmission(item.date)}
+          >
             {item.label}
           </Command.Item>
         ))}
         <Command.Item onSelect={handleTomorrowAt9amSelect}>
-          Tomorrow at 9 am
+          Tomorrow at 9 AM.
+        </Command.Item>
+        <Command.Item onSelect={handleMondayAt9amSelect}>
+          On Monday at 9 AM.
         </Command.Item>
         {onSendWhenOnline && (
           <Command.Item onSelect={onSendWhenOnline}>
-            Send when online
+            Send when online.
           </Command.Item>
         )}
       </Command.List>
