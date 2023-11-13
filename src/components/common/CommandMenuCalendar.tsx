@@ -13,20 +13,22 @@ import {
   useState,
 } from '../../lib/teact/teact';
 
+import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+
 import '../main/CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
 
 export type OwnProps = {
   isOpen: boolean;
-  onClose: () => void;
+  setOpen: (open: boolean) => void;
   onSubmit: (date: Date) => void;
   onSendWhenOnline?: () => void;
   isReminder?: boolean;
 };
 
 const CommandMenuCalendar = ({
-  isOpen, onClose, onSubmit, onSendWhenOnline, isReminder,
+  isOpen, setOpen, onSubmit, onSendWhenOnline, isReminder,
 }: OwnProps) => {
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
@@ -38,6 +40,14 @@ const CommandMenuCalendar = ({
   };
 
   const placeholderText = isReminder ? 'Remind me at...' : 'Send at...';
+
+  const close = useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
+
+  useEffect(() => (
+    isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
+  ), [isOpen, close]);
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -88,28 +98,12 @@ const CommandMenuCalendar = ({
     setInputValue(value);
   }, []);
 
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      window.addEventListener('keydown', handleEsc);
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [isOpen, onClose]);
-
   const handleSubmission = useCallback((date: Date) => {
     console.log('handleSubmission вызвана с датой:', date);
     onSubmit(date); // Передаем date напрямую
     console.log('Попытка закрыть меню из handleSubmission');
-    onClose(); // Вызов для закрытия меню
-  }, [onSubmit, onClose]);
+    close(); // Вызов для закрытия меню
+  }, [onSubmit, close]);
 
   const handleTomorrowAt9amSelect = useCallback(() => {
     if (tomorrowAt9am) {

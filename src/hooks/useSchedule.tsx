@@ -13,10 +13,9 @@ type OnScheduledCallback = (scheduledAt: number) => void;
 const useSchedule = (
   canScheduleUntilOnline?: boolean,
   isChatWithSelf?: boolean,
-  onCancel?: () => void,
   openAt?: number,
 ) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setMenuOpen] = useState(false);
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
@@ -24,24 +23,15 @@ const useSchedule = (
     // Преобразование даты в таймстамп
     const scheduledAt = Math.round(date.getTime() / 1000) + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
-    setIsOpen(false);
   });
 
   const handleMessageScheduleUntilOnline = useLastCallback(() => {
     handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
   });
 
-  const handleCloseCalendar = useLastCallback(() => {
-    console.log('Закрытие меню через handleCloseCalendar');
-    setIsOpen(false);
-    if (onCancel) {
-      onCancel();
-    }
-  });
-
   const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
     console.log('Открытие меню');
-    setIsOpen(true);
+    setMenuOpen(true);
     setOnScheduled(() => whenScheduled);
   });
 
@@ -52,10 +42,10 @@ const useSchedule = (
   const scheduledMaxDate = new Date();
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
-  const calendar = isOpen && (
+  const calendar = isMenuOpen && (
     <CommandMenuCalendarAsync
-      isOpen={isOpen}
-      onClose={handleCloseCalendar}
+      isOpen={isMenuOpen}
+      setOpen={setMenuOpen}
       onSubmit={handleMessageSchedule}
       onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
       isReminder={isChatWithSelf}
