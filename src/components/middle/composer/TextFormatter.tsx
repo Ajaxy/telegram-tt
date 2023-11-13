@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -115,6 +117,10 @@ const TextFormatter: FC<OwnProps> = ({
     setSelectedTextFormats(selectedFormats);
   }, [isOpen, selectedRange, openLinkControl]);
 
+  const [openAIKey] = useState(
+    !!JSON.parse(String(localStorage.getItem('openai_api_key'))),
+  );
+
   const restoreSelection = useLastCallback(() => {
     if (!selectedRange) {
       return;
@@ -153,6 +159,53 @@ const TextFormatter: FC<OwnProps> = ({
     }
 
     return selectedRange.commonAncestorContainer.parentElement;
+  });
+
+  const handleAIImprover = useLastCallback(() => {
+    const text = getSelectedText();
+    if (!text) {
+      console.log('Нет выделенного текста для улучшения');
+      return;
+    }
+
+    // Предполагаем, что ваш API ключ хранится в openAIKey
+    const apiKey = openAIKey;
+    if (!apiKey) {
+      console.log('API ключ OpenAI не найден');
+      return;
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4', // или другая модель по вашему выбору
+        prompt: `You are an assistant. Act as a spelling corrector and improver. 
+        Reply to each message with rewritten text using the following instructions to rewrite it. 
+        Fix spelling, grammar, and punctuation. Improve clarity and conciseness. 
+        Break up overly long sentences. Reduce repetition. Prefer active voice. 
+        Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. 
+        Use the English language. ${text}`,
+        max_tokens: 100, // или другое значение по вашему выбору
+      }),
+    };
+
+    fetch('https://api.openai.com/v1/engines/gpt-4/completions', requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Ошибка API: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Обработка данных
+      })
+      .catch((error) => {
+        console.error('Ошибка при обращении к OpenAI API:', error);
+      });
   });
 
   function updateInputStyles() {
@@ -467,6 +520,9 @@ const TextFormatter: FC<OwnProps> = ({
         <div className="TextFormatter-divider" />
         <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
           <i className="icon icon-link" />
+        </Button>
+        <Button color="translucent" ariaLabel="Fix Spelling and Grammar" onClick={handleAIImprover}>
+          <i className="icon icon-star" />
         </Button>
       </div>
 
