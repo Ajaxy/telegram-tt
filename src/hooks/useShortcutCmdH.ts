@@ -4,14 +4,14 @@ import { IS_MAC_OS } from '../util/windowEnvironment';
 import useSnooze from './useSnooze';
 
 function useShortcutCmdH() {
-  const { snoozeCurrentChat } = useSnooze();
+  const { snooze } = useSnooze();
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyH') {
       e.preventDefault();
-      snoozeCurrentChat();
+      snooze();
     }
-  }, [snoozeCurrentChat]);
+  }, [snooze]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);

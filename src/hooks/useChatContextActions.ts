@@ -44,7 +44,7 @@ const useChatContextActions = ({
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
 
   const { archiveChat } = useArchiver({ isManual: true });
-  const { snoozeChat } = useSnooze();
+  const { snooze } = useSnooze();
 
   return useMemo(() => {
     if (!chat) {
@@ -62,7 +62,7 @@ const useChatContextActions = ({
       title: lang('NotifyMeHotkey'),
       icon: 'schedule',
       handler: () => {
-        snoozeChat({ id: chat.id });
+        snooze({ chatId: chat.id });
       },
     };
 
@@ -158,7 +158,7 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat, snoozeChat,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat, snooze,
   ]);
 };
 

@@ -1,13 +1,14 @@
+type TSnoozeProps = {
+  chatId: string;
+  topicId?: number;
+};
+
 export default function useSnooze() {
-  const snoozeCurrentChat = () => {
+  const snooze = (props?: TSnoozeProps) => {
+    const { chatId, topicId } = props || {};
     // eslint-disable-next-line no-console
-    console.log('snoozeCurrentChat');
+    console.log('snooze', chatId, topicId);
   };
 
-  const snoozeChat = ({ id }: { id: string }) => {
-    // eslint-disable-next-line no-console
-    console.log('snoozeChat', id);
-  };
-
-  return { snoozeCurrentChat, snoozeChat };
+  return { snooze };
 }
