@@ -34,9 +34,12 @@ const CommandMenuCalendar = ({
 
   const filterItems = (item: { label: string; date: Date | undefined }) => {
     const inputLower = inputValue.toLowerCase();
-    return item.label.toLowerCase().includes(inputLower);
-  };
 
+    // Преобразуем дату обратно в строку для сравнения
+    const dateString = item.date ? item.date.toDateString().toLowerCase() : '';
+
+    return item.label.toLowerCase().includes(inputLower) || dateString.includes(inputLower);
+  };
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
     if (parsedResults.length > 0) {
@@ -46,15 +49,30 @@ const CommandMenuCalendar = ({
   }, [chrono]);
 
   useEffect(() => {
-    setLoading(true);
-    const parsedResults = chrono.parse(inputValue, new Date());
-    if (parsedResults.length > 0) {
-      const date = parsedResults[0].start.date();
-      const newItem = { label: `Remind me at ${date.toDateString()}`, date };
-      setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
-    }
-    setLoading(false);
-  }, [inputValue, chrono]);
+    const processInput = async () => {
+      setLoading(true);
+      const parsedResults = chrono.parse(inputValue, new Date());
+      if (parsedResults.length > 0) {
+        const date = parsedResults[0].start.date();
+        const newLabel = `Remind me at ${date.toDateString()}`;
+
+        // Проверяем, существует ли уже такой элемент в меню
+        if (!menuItems?.some((item) => item.label === newLabel)) {
+          const newItem = { label: newLabel, date };
+          setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
+        }
+      }
+      setLoading(false);
+    };
+
+    const debounceTimer = setTimeout(() => {
+      processInput();
+    }, 500);
+
+    return () => {
+      clearTimeout(debounceTimer);
+    };
+  }, [inputValue, chrono, menuItems]);
 
   const onValueChange = useCallback((value: string) => {
     setInputValue(value);
@@ -103,7 +121,7 @@ const CommandMenuCalendar = ({
       <Command.List>
         {loading && <Command.Loading>Processing input...</Command.Loading>}
         {menuItems?.filter(filterItems).map((item, index) => (
-          <Command.Item key={index} value={inputValue} onSelect={() => item.date && handleSubmission(item.date)}>
+          <Command.Item key={index} value={item.label} onSelect={() => item.date && handleSubmission(item.date)}>
             {item.label}
           </Command.Item>
         ))}
