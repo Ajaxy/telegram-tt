@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { TreeItemRenderContext } from 'react-complex-tree';
 import type { FC } from '../../../../../../../lib/teact/teact';
 import { getActions } from '../../../../../../../global';
@@ -13,7 +13,6 @@ import { MouseButton } from '../../../../../../../util/windowEnvironment';
 
 import useContextMenuHandlers from '../../../../../../../hooks/useContextMenuHandlers.react';
 import { useFastClick } from '../../../../../../../hooks/useFastClick.react';
-import useLastCallbackTeact from '../../../../../../../hooks/useLastCallback';
 
 import ChatAvatar from './ChatAvatar';
 
@@ -56,7 +55,7 @@ const Chat: FC<{
   const isSelected = true;
   const canScrollDown = true;
 
-  const handleClickChat = useLastCallbackTeact(() => {
+  const handleClickChat = useCallback(() => {
     const chatId = item.id as string;
     if (item.isFolder) {
       if (isForumPanelOpen) {
@@ -73,7 +72,7 @@ const Chat: FC<{
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
-  });
+  }, [canScrollDown, isForumPanelOpen, isSelected, item.id, item.isFolder]);
 
   const { handleClick, handleMouseDown } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
     if (contextActions && (e.button === MouseButton.Secondary)) {

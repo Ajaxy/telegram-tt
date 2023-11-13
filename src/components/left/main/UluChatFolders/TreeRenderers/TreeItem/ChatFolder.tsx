@@ -1,8 +1,9 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { TreeItemRenderContext } from 'react-complex-tree';
 import type { FC } from '../../../../../../lib/teact/teact';
+import { getActions } from '../../../../../../global';
 
 import type { TreeItemChat } from '../../types';
 
@@ -49,6 +50,14 @@ const ChatFolder: FC<{
     // contextMenuPosition, handleContextMenuClose, handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(ref!, !contextActions);
 
+  const {
+    setActiveChatFolder,
+  } = getActions();
+
+  const handleClickFolder = useCallback(() => {
+    setActiveChatFolder({ activeChatFolder: index as number }, { forceOnHeavyAnimation: true });
+  }, [index]);
+
   const { handleClick, handleMouseDown } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
     if (contextActions && (e.button === MouseButton.Secondary || !onClick)) {
       handleBeforeContextMenu(e);
@@ -58,7 +67,7 @@ const ChatFolder: FC<{
       return;
     }
 
-    onClick?.(index);
+    handleClickFolder();
   });
 
   // const getTriggerElement = useLastCallback(() => ref!.current);

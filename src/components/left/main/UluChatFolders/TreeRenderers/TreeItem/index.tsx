@@ -3,11 +3,8 @@ import type { RefObject } from 'react';
 import React from 'react';
 import type { TreeInformation, TreeItemRenderContext } from 'react-complex-tree';
 import type { FC } from '../../../../../../lib/teact/teact';
-import { getActions } from '../../../../../../lib/teact/teactn';
 
 import type { TreeItemChat } from '../../types';
-
-import useLastCallbackTeact from '../../../../../../hooks/useLastCallback';
 
 import Chat from './Chat';
 import ChatFolder from './ChatFolder';
@@ -33,14 +30,6 @@ type OwnProps = {
 const TreeItemComponent: FC<OwnProps> = ({
   title, item, context, children,
 }) => {
-  const {
-    setActiveChatFolder,
-  } = getActions();
-
-  const handleClickFolder = useLastCallbackTeact((index: number | string) => {
-    setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
-  });
-
   if (item.type === 'chat') {
     return (
       <Chat
@@ -58,7 +47,6 @@ const TreeItemComponent: FC<OwnProps> = ({
 
   return (
     <ChatFolder
-      onClick={handleClickFolder}
       item={item}
       context={context}
       active={context.isSelected}
