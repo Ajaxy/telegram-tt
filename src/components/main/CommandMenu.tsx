@@ -1,9 +1,8 @@
-/* eslint-disable max-len */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
 // eslint-disable-next-line react/no-deprecated
-import { Command } from 'cmdk';
+import { Command, CommandSeparator } from 'cmdk';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
@@ -12,6 +11,7 @@ import { getActions } from '../../global';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 
 import useArchiver from '../../hooks/useArchiver';
+import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
 
 import './CommandMenu.scss';
@@ -26,6 +26,7 @@ const CommandMenu = () => {
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   );
   const { archiveMessages } = useArchiver({ isManual: true });
+  const { runCommand } = useCommands();
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -49,6 +50,21 @@ const CommandMenu = () => {
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
 
+  const handleSelectNewChannel = useCallback(() => {
+    runCommand('NEW_CHANNEL');
+    close();
+  }, [runCommand, close]);
+
+  const handleSelectNewGroup = useCallback(() => {
+    runCommand('NEW_GROUP');
+    close();
+  }, [runCommand, close]);
+
+  const handleCreateFolder = useCallback(() => {
+    runCommand('NEW_FOLDER');
+    close();
+  }, [runCommand, close]);
+
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -67,14 +83,20 @@ const CommandMenu = () => {
   }, [close, archiveMessages, track]);
 
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen}>
+    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
       <Command.Input
         placeholder="Search for command..."
         autoFocus
       />
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
-        <Command.Group heading="Archiver">
+        <Command.Group heading="Create new...">
+          <Command.Item onSelect={handleSelectNewChannel}>Create new channel</Command.Item>
+          <Command.Item onSelect={handleSelectNewGroup}>Create new group</Command.Item>
+          <Command.Item onSelect={handleCreateFolder}>Create new folder</Command.Item>
+        </Command.Group>
+        <CommandSeparator />
+        <Command.Group heading="Settings">
           <Command.Item onSelect={commandToggleArchiver}>
             {isArchiverEnabled
               ? 'Disable auto-mark as "Done" after reading'
