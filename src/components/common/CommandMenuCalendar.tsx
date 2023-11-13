@@ -30,7 +30,6 @@ const CommandMenuCalendar = ({
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string; date: Date | undefined }>>();
-  const [loading, setLoading] = useState(false);
 
   const customFilter = (value: string, search: string) => {
     return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
@@ -61,8 +60,6 @@ const CommandMenuCalendar = ({
   useEffect(() => {
     const processInput = async () => {
       try {
-        setLoading(true);
-
         const format12HourTime = (date: Date) => {
           let hours = date.getHours();
           const minutes = date.getMinutes();
@@ -98,7 +95,7 @@ const CommandMenuCalendar = ({
           }
         }
       } catch (error) {
-        setLoading(false);
+        //
       }
     };
 
@@ -155,7 +152,6 @@ const CommandMenuCalendar = ({
         <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
         <Command.List>
           <Command.Empty>Can not parse data</Command.Empty>
-          {loading && <Command.Loading>Processing time...</Command.Loading>}
           {menuItems?.map((item, index) => (
             <Command.Item
               key={index}
