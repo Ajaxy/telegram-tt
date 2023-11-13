@@ -5,19 +5,18 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { SettingsScreens } from '../../../types';
-import { LeftColumnContent } from '../../../types';
+import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import { PRODUCTION_URL } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useCommands from '../../../hooks/useCommands';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 
-import CommandMenu from '../../main/CommandMenu';
 import Button from '../../ui/Button';
 import Transition from '../../ui/Transition';
 import NewChatButton from '../NewChatButton';
@@ -26,7 +25,6 @@ import ChatFolders from './ChatFolders';
 import ContactList from './ContactList.async';
 import ForumPanel from './ForumPanel';
 import LeftMainHeader from './LeftMainHeader';
-import { selectNewChannel, selectNewGroup } from './LeftMainHendlers';
 
 import './LeftMain.scss';
 
@@ -77,6 +75,7 @@ const LeftMain: FC<OwnProps> = ({
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
+  const { onCommandNewChannel, onCommandNewGroup, onCommandNewFolder } = useCommands();
 
   useEffect(() => {
     window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
@@ -142,8 +141,22 @@ const LeftMain: FC<OwnProps> = ({
     }
   });
 
-  const handleSelectNewChannel = selectNewChannel(onContentChange);
-  const handleSelectNewGroup = selectNewGroup(onContentChange);
+  const handleSelectNewChannel = useLastCallback(() => {
+    onContentChange(LeftColumnContent.NewChannelStep1);
+  });
+
+  const handleSelectNewGroup = useLastCallback(() => {
+    onContentChange(LeftColumnContent.NewGroupStep1);
+  });
+
+  const handleCreateFolder = useLastCallback(() => {
+    foldersDispatch({ type: 'reset' });
+    onSettingsScreenSelect(SettingsScreens.FoldersCreateFolder);
+  });
+
+  onCommandNewChannel(handleSelectNewChannel);
+  onCommandNewGroup(handleSelectNewGroup);
+  onCommandNewFolder(handleCreateFolder);
 
   useEffect(() => {
     let autoCloseTimeout: number | undefined;
@@ -243,11 +256,6 @@ const LeftMain: FC<OwnProps> = ({
           onCloseAnimationEnd={handleForumPanelAnimationEnd}
         />
       )}
-      <CommandMenu
-        onContentChange={onContentChange}
-        dispatch={foldersDispatch}
-        onScreenSelect={onSettingsScreenSelect}
-      />
       <NewChatButton
         isShown={isNewChatButtonShown}
         onNewPrivateChat={handleSelectContacts}
