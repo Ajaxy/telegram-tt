@@ -339,7 +339,7 @@ export const DEFAULT_LIMITS: Record<ApiLimitType, readonly [number, number]> = {
 export const IS_STORIES_ENABLED = false;
 
 export const ULU_APP = {
-  SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: true,
+  SHOULD_OPEN_REPLIES_CHAT_ON_REPLY: false,
   CLIENT_NEWS_CHANNEL_USERNAME: 'uludotso',
   CLIENT_NEWS_CHANNEL_ID: '-1001916758340',
 };
