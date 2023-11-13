@@ -72,7 +72,7 @@ const CommandMenu = () => {
   ), [isOpen, close]);
 
   const saveAPIKey = useCallback(() => {
-    localStorage.setItem('openai_api_key', JSON.stringify(inputValue));
+    localStorage.setItem('openai_api_key', inputValue);
     showNotification({ message: 'The OpenAI API key has been saved.' });
     setOpen(false);
   }, [inputValue]);

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import type { FC } from '../../../lib/teact/teact';
@@ -117,9 +118,7 @@ const TextFormatter: FC<OwnProps> = ({
     setSelectedTextFormats(selectedFormats);
   }, [isOpen, selectedRange, openLinkControl]);
 
-  const [openAIKey] = useState(
-    !!JSON.parse(String(localStorage.getItem('openai_api_key'))),
-  );
+  const [openAIKey] = useState(localStorage.getItem('openai_api_key'));
 
   const restoreSelection = useLastCallback(() => {
     if (!selectedRange) {
@@ -182,18 +181,21 @@ const TextFormatter: FC<OwnProps> = ({
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4', // или другая модель по вашему выбору
-        prompt: `You are an assistant. Act as a spelling corrector and improver. 
-        Reply to each message with rewritten text using the following instructions to rewrite it. 
-        Fix spelling, grammar, and punctuation. Improve clarity and conciseness. 
-        Break up overly long sentences. Reduce repetition. Prefer active voice. 
-        Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. 
-        Use the English language. ${text}`,
-        max_tokens: 100, // или другое значение по вашему выбору
+        model: 'gpt-3.5-turbo', // Использование модели чата
+        messages: [
+          {
+            role: 'assistant',
+            content: 'You are an assistant. Act as a spelling corrector and improver. Reply to each message with rewritten text using the following instructions to rewrite it. Fix spelling, grammar, and punctuation. Improve clarity and conciseness. Break up overly long sentences. Reduce repetition. Prefer active voice. Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. Use the English language.',
+          },
+          {
+            role: 'user',
+            content: text, // Ваш входной текст
+          },
+        ],
       }),
     };
 
-    fetch('https://api.openai.com/v1/engines/gpt-4/completions', requestOptions)
+    fetch('https://api.openai.com/v1/chat/completions', requestOptions)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Ошибка API: ${response.status}`);
@@ -201,7 +203,8 @@ const TextFormatter: FC<OwnProps> = ({
         return response.json();
       })
       .then((data) => {
-        // Обработка данных
+      // Обработка ответа
+      // Здесь можно получить последнее сообщение от assistant для отображения результата
       })
       .catch((error) => {
         console.error('Ошибка при обращении к OpenAI API:', error);
