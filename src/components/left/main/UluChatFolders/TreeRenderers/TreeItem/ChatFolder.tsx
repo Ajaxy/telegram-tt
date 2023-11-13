@@ -43,7 +43,9 @@ const ChatFolder: FC<{
     !!messagesUnreadCount && shouldStressUnreadMessages && stylesUluChatFolder['has-unread-messages'],
   );
   const svgFill = active ? 'var(--color-white)' : 'var(--color-gray)';
-  const SvgComponent = expanded ? SvgFolderOpen : SvgFolderClosed;
+  const [SvgComponent, svgComponentProps] = expanded
+    ? [SvgFolderOpen, { height: 17, width: 20 }]
+    : [SvgFolderClosed, { height: 17, width: 18 }];
 
   const {
     handleContextMenu, handleBeforeContextMenu,
@@ -106,8 +108,7 @@ const ChatFolder: FC<{
         <div className={buildClassName(stylesUluChatFolder.info, styles.info)}>
           <div className={stylesUluChatFolder.iconWrapper}>
             <SvgComponent
-              height="1.25rem"
-              width="1.25rem"
+              {...svgComponentProps}
               fill={svgFill}
             />
           </div>

@@ -2,8 +2,8 @@ import React, { memo } from 'react';
 import type { FC } from '../../../../../../lib/teact/teact';
 
 const SvgFolderClosed: FC<{
-  height: string | number;
-  width: string | number;
+  height: number;
+  width: number;
   fill?: string;
 }> = ({ height, width, fill = 'none' }) => {
   return (
