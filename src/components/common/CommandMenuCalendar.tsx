@@ -35,7 +35,8 @@ const CommandMenuCalendar = ({
     return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
   };
 
-  const placeholderText = isReminder ? 'Remind me at...' : 'Send at...';
+  const placeholderText = isReminder ? 'Remind me at...' : 'Schedule at...';
+  const labelPrefix = isReminder ? 'Remind me at' : 'Schedule at';
 
   useEffect(() => {
     return isOpen ? captureKeyboardListeners({ onEsc: onClose }) : undefined;
@@ -71,9 +72,30 @@ const CommandMenuCalendar = ({
           return `${hours}:${minutesStr} ${ampm}`;
         };
 
+        const isToday = (date: Date) => {
+          const today = new Date();
+          return date.getDate() === today.getDate()
+                 && date.getMonth() === today.getMonth()
+                 && date.getFullYear() === today.getFullYear();
+        };
+
+        const isTomorrow = (date: Date) => {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          return date.getDate() === tomorrow.getDate()
+                 && date.getMonth() === tomorrow.getMonth()
+                 && date.getFullYear() === tomorrow.getFullYear();
+        };
+
         const formatDate = (date: Date) => {
-          // eslint-disable-next-line max-len
-          const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+          if (isToday(date)) {
+            return 'Today';
+          }
+
+          const months = [
+            'January', 'February', 'March', 'April', 'May',
+            'June', 'July', 'August', 'September', 'October', 'November', 'December',
+          ];
           const day = date.getDate();
           const monthIndex = date.getMonth();
           const year = date.getFullYear();
@@ -86,13 +108,23 @@ const CommandMenuCalendar = ({
         if (parsedResults.length > 0) {
           const date = parsedResults[0].start.date();
           const timeString = format12HourTime(date);
-          const dateString = formatDate(date);
-          const newLabel = `Notify me at ${timeString} on ${dateString}`;
 
-          if (!menuItems?.some((item) => item.label === newLabel)) {
-            const newItem = { label: newLabel, date, value: inputValue };
-            setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
+          const labels = [];
+          if (isToday(date)) {
+            labels.push(`${labelPrefix} ${timeString} Today`);
+          } else if (isTomorrow(date)) {
+            labels.push(`${labelPrefix} ${timeString} Tomorrow`);
+          } else {
+            const dateString = formatDate(date);
+            labels.push(`${labelPrefix} ${timeString} on ${dateString}`);
           }
+
+          labels.forEach((label) => {
+            if (!menuItems?.some((item) => item.label === label)) {
+              const newItem = { label, date, value: inputValue };
+              setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
+            }
+          });
         }
       } catch (error) {
         //
@@ -106,7 +138,7 @@ const CommandMenuCalendar = ({
     return () => {
       clearTimeout(debounceTimer);
     };
-  }, [inputValue, chrono, menuItems]);
+  }, [inputValue, chrono, menuItems, labelPrefix]);
 
   const onValueChange = useCallback((value: string) => {
     setInputValue(value);
