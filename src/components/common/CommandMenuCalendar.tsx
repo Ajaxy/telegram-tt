@@ -65,22 +65,52 @@ const CommandMenuCalendar = ({
 
   useEffect(() => {
     const processInput = async () => {
-      setLoading(true);
-      const parsedResults = chrono.parse(inputValue, new Date());
-      if (parsedResults.length > 0) {
-        const date = parsedResults[0].start.date();
-        const newLabel = `Remind me at ${date.toDateString()}`;
+      try {
+        console.log('Начало обработки ввода');
+        setLoading(true);
 
-        console.log('Добавление нового элемента: ', inputValue, date, newLabel);
+        const format12HourTime = (date: Date) => {
+          let hours = date.getHours();
+          const minutes = date.getMinutes();
+          const ampm = hours >= 12 ? 'PM' : 'AM';
+          hours %= 12;
+          hours = hours || 12; // Если '0', то делаем '12'
+          const minutesStr = minutes < 10 ? `0${minutes}` : minutes;
 
-        // Проверяем, существует ли уже такой элемент в меню
-        if (!menuItems?.some((item) => item.label === newLabel)) {
-          // Установка value в соответствии с исходным вводом пользователя
-          const newItem = { label: newLabel, date, value: inputValue };
-          setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
+          return `${hours}:${minutesStr} ${ampm}`;
+        };
+
+        const formatDate = (date: Date) => {
+          // eslint-disable-next-line max-len
+          const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+          const day = date.getDate();
+          const monthIndex = date.getMonth();
+          const year = date.getFullYear();
+
+          return `${day} ${months[monthIndex]} ${year}`;
+        };
+
+        // В вашем useEffect
+        const parsedResults = chrono.parse(inputValue, new Date());
+        if (parsedResults.length > 0) {
+          const date = parsedResults[0].start.date();
+          const timeString = format12HourTime(date);
+          const dateString = formatDate(date);
+          const newLabel = `Notify me at ${timeString} on ${dateString}`;
+
+          console.log('Добавление нового элемента: ', inputValue, date, newLabel);
+
+          if (!menuItems?.some((item) => item.label === newLabel)) {
+            const newItem = { label: newLabel, date, value: inputValue };
+            setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
+          }
         }
+      } catch (error) {
+        console.error('Ошибка при обработке ввода:', error);
+      } finally {
+        console.log('Завершение обработки ввода');
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     const debounceTimer = setTimeout(() => {
@@ -94,6 +124,7 @@ const CommandMenuCalendar = ({
 
   const onValueChange = useCallback((value: string) => {
     setInputValue(value);
+    setMenuItems([]);
   }, []);
 
   const handleSubmission = useCallback((date: Date) => {
@@ -139,7 +170,8 @@ const CommandMenuCalendar = ({
       >
         <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
         <Command.List>
-          {loading && <Command.Loading>Processing input...</Command.Loading>}
+          <Command.Empty>Can not parse data</Command.Empty>
+          {loading && <Command.Loading>Processing time...</Command.Loading>}
           {menuItems?.map((item, index) => (
             <Command.Item
               key={index}
