@@ -1,10 +1,7 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-null/no-null */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable no-async-without-await/no-async-without-await */
 /* eslint-disable react/jsx-no-bind */
-/* eslint-disable react/no-deprecated */
-/* eslint-disable no-console */
+/* eslint-disable no-async-without-await/no-async-without-await */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -30,7 +27,6 @@ export type OwnProps = {
 const CommandMenuCalendar = ({
   isOpen, onSubmit, onClose, onSendWhenOnline, isReminder,
 }: OwnProps) => {
-  console.log('Статус isOpen в CommandMenuCalendar:', isOpen);
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string; date: Date | undefined }>>();
@@ -43,7 +39,6 @@ const CommandMenuCalendar = ({
   const placeholderText = isReminder ? 'Remind me at...' : 'Send at...';
 
   useEffect(() => {
-    console.log('Попытка закрыть по ESC:', isOpen);
     return isOpen ? captureKeyboardListeners({ onEsc: onClose }) : undefined;
   }, [isOpen, onClose]);
 
@@ -66,7 +61,6 @@ const CommandMenuCalendar = ({
   useEffect(() => {
     const processInput = async () => {
       try {
-        console.log('Начало обработки ввода');
         setLoading(true);
 
         const format12HourTime = (date: Date) => {
@@ -98,17 +92,12 @@ const CommandMenuCalendar = ({
           const dateString = formatDate(date);
           const newLabel = `Notify me at ${timeString} on ${dateString}`;
 
-          console.log('Добавление нового элемента: ', inputValue, date, newLabel);
-
           if (!menuItems?.some((item) => item.label === newLabel)) {
             const newItem = { label: newLabel, date, value: inputValue };
             setMenuItems((prevItems) => [...(prevItems ?? []), newItem]);
           }
         }
       } catch (error) {
-        console.error('Ошибка при обработке ввода:', error);
-      } finally {
-        console.log('Завершение обработки ввода');
         setLoading(false);
       }
     };
@@ -128,17 +117,14 @@ const CommandMenuCalendar = ({
   }, []);
 
   const handleSubmission = useCallback((date: Date) => {
-    console.log('handleSubmission вызвана с датой:', date);
     onSubmit(date); // Передаем date напрямую
-    console.log('Попытка закрыть меню из handleSubmission', isOpen);
     onClose(); // Вызов для закрытия меню
-  }, [onSubmit, onClose, isOpen]);
+  }, [onSubmit, onClose]);
 
   const handleTomorrowAt9amSelect = useCallback(() => {
     if (tomorrowAt9am) {
       handleSubmission(tomorrowAt9am);
     } else {
-      console.error("Ошибка: Дата 'Завтра в 9 утра' не определена");
       // Обработка ошибки или альтернативное действие
     }
   }, [tomorrowAt9am, handleSubmission]);
@@ -147,7 +133,6 @@ const CommandMenuCalendar = ({
     if (mondayAt9am) {
       handleSubmission(mondayAt9am);
     } else {
-      console.error("Ошибка: Дата 'В понедельник в 9 утра' не определена");
       // Обработка ошибки или альтернативное действие
     }
   }, [mondayAt9am, handleSubmission]);
@@ -156,7 +141,6 @@ const CommandMenuCalendar = ({
 
   if (cmdkRoot) {
     if (!isOpen) {
-      console.log('Попытка удалить CommandMenuCalendar из DOM');
       unmountComponentAtNode(cmdkRoot);
       return null;
     }

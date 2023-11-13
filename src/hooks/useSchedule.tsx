@@ -1,6 +1,5 @@
 /* eslint-disable react/no-deprecated */
 /* eslint-disable no-null/no-null */
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 import { unmountComponentAtNode } from 'react-dom';
 import React, { useEffect, useState } from '../lib/teact/teact';
@@ -23,7 +22,6 @@ const useSchedule = (
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
-    console.log('Вызов handleMessageSchedule с датой:', date);
     // Преобразование даты в таймстамп
     const scheduledAt = Math.round(date.getTime() / 1000) + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
@@ -35,7 +33,6 @@ const useSchedule = (
 
   const cmdkRoot = document.getElementById('cmdk-root');
   const handleCloseCalendar = useLastCallback(() => {
-    console.log('Попытка закрыть меню из handleCloseCalendar', isMenuOpen);
     setOnScheduled(undefined);
     onCancel?.();
     setMenuOpen(false);
@@ -46,13 +43,11 @@ const useSchedule = (
   });
 
   const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
-    console.log('Открытие меню');
     setMenuOpen(true);
     setOnScheduled(() => whenScheduled);
   });
 
   useEffect(() => {
-    console.log('Изменение isMenuOpen:', isMenuOpen);
   }, [isMenuOpen]);
 
   const scheduledDefaultDate = openAt ? new Date(openAt * 1000) : new Date();
