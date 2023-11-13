@@ -1,3 +1,4 @@
+/* eslint-disable no-async-without-await/no-async-without-await */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable react/no-deprecated */
 /* eslint-disable no-console */
@@ -28,6 +29,7 @@ const CommandMenuCalendar = ({
   const [inputValue, setInputValue] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const chrono = useMemo(() => new Chrono(), []);
+  const [loading, setLoading] = useState(false);
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -37,17 +39,23 @@ const CommandMenuCalendar = ({
     return undefined;
   }, [chrono]);
 
-  // Логируем изменения inputValue и selectedDate
   useEffect(() => {
-    console.log('Обработка ввода пользователя:', inputValue);
-    const results = chrono.parse(inputValue, new Date());
-    if (results.length > 0) {
-      const date = results[0].start.date();
-      console.log('Распознанная дата:', date);
-      setSelectedDate(date); // Устанавливаем распознанную дату
-    } else {
-      setSelectedDate(undefined); // Сбрасываем дату
+    setLoading(true); // Начало загрузки
+    try {
+      console.log('Обработка ввода пользователя:', inputValue);
+      const results = chrono.parse(inputValue, new Date());
+      if (results.length > 0) {
+        const date = results[0].start.date();
+        console.log('Распознанная дата:', date);
+        setSelectedDate(date); // Устанавливаем распознанную дату
+      } else {
+        setSelectedDate(undefined); // Сбрасываем дату
+      }
+    } catch (error) {
+      console.error('Ошибка при анализе даты: ', error);
+      setSelectedDate(undefined); // Сбрасываем дату в случае ошибки
     }
+    setLoading(false); // Завершение загрузки
   }, [inputValue, chrono]);
 
   // Логируем изменения selectedDate
@@ -96,10 +104,12 @@ const CommandMenuCalendar = ({
     return undefined;
   }
 
+  console.log('Проверка перед рендерингом:', { isOpen, selectedDate, tomorrowAt9am });
   const CommandMenuInner = (
     <Command.Dialog label="Calendar Command Menu" open={isOpen}>
       <Command.Input placeholder="Remind me at..." autoFocus onValueChange={onValueChange} />
       <Command.List>
+        {loading && <Command.Loading>Processing input...</Command.Loading>}
         {tomorrowAt9am && (
           <Command.Item onSelect={handleTomorrowAt9amSelect}>
             Tomorrow at 9 am
