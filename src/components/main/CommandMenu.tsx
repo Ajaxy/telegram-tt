@@ -140,7 +140,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       return (
         <span>
           <span className="user-name">{name}</span>
-          <span className="user-handle">@{handle}</span>
+          <span className="user-handle">
+            {((handle === NBSP) ? '' : '@')}
+            {handle}
+          </span>
         </span>
       );
     };
