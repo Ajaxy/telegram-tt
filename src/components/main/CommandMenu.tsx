@@ -37,6 +37,65 @@ interface CommandMenuProps {
   usersById: Record<string, ApiUser>;
 }
 
+function convertLayout(input: string): string {
+  const engToRus: { [key: string]: string } = {
+    q: 'й',
+    w: 'ц',
+    e: 'у',
+    r: 'к',
+    t: 'е',
+    y: 'н',
+    u: 'г',
+    i: 'ш',
+    o: 'щ',
+    p: 'з',
+    '[': 'х',
+    ']': 'ъ',
+    a: 'ф',
+    s: 'ы',
+    d: 'в',
+    f: 'а',
+    g: 'п',
+    h: 'р',
+    j: 'о',
+    k: 'л',
+    l: 'д',
+    ';': 'ж',
+    '\'': 'э',
+    z: 'я',
+    x: 'ч',
+    c: 'с',
+    v: 'м',
+    b: 'и',
+    n: 'т',
+    m: 'ь',
+    ',': 'б',
+    '.': 'ю',
+    '/': '.',
+  };
+
+  const rusToEng: { [key: string]: string } = Object.fromEntries(
+    Object.entries(engToRus).map(([eng, rus]) => [rus, eng]),
+  );
+
+  return input.split('').map((char) => {
+    const lowerChar = char.toLowerCase();
+    const isUpperCase = char !== lowerChar;
+    const convertedChar = engToRus[lowerChar] || rusToEng[lowerChar] || char;
+
+    return isUpperCase ? convertedChar.toUpperCase() : convertedChar;
+  }).join('');
+}
+
+function customFilter(value: string, search: string): number {
+  const convertedSearch = convertLayout(search);
+  if (value.toLowerCase().includes(search.toLowerCase())
+  || value.toLowerCase().includes(convertedSearch.toLowerCase())) {
+    return 1; // полное соответствие
+  }
+  return 0; // нет соответствия
+}
+
 const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
   const { showNotification } = getActions();
@@ -235,7 +294,14 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   };
 
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
+    <Command.Dialog
+      label="Command Menu"
+      open={isOpen}
+      onOpenChange={setOpen}
+      loop
+      shouldFilter
+      filter={customFilter}
+    >
       <Command.Input
         placeholder="Search for command..."
         autoFocus
