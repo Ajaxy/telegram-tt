@@ -1,3 +1,7 @@
+/* eslint-disable react/no-unstable-nested-components */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable react/jsx-no-bind */
+/* eslint-disable react/jsx-no-undef */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
@@ -27,6 +31,8 @@ const CommandMenu = () => {
   ); */
   const { archiveMessages } = useArchiver({ isManual: true });
   const { runCommand } = useCommands();
+  const [pages, setPages] = useState(['home']);
+  const activePage = pages[pages.length - 1];
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -42,8 +48,16 @@ const CommandMenu = () => {
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
 
+  const handleBack = useCallback(() => {
+    if (pages.length > 1) {
+      const newPages = pages.slice(0, -1);
+      setPages(newPages);
+    }
+  }, [pages]);
+
   const close = useCallback(() => {
     setOpen(false);
+    setPages(['home']);
   }, []);
 
   useEffect(() => (
@@ -82,23 +96,23 @@ const CommandMenu = () => {
     }
   }, [close, archiveMessages, track]);
 
-  const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
-      <Command.Input
-        placeholder="Search for command..."
-        autoFocus
-      />
-      <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
+  interface HomePageProps {
+    setPages: (pages: string[]) => void;
+    commandArchiveAll: () => void;
+  }
+
+  interface CreateNewPageProps {
+    handleSelectNewGroup: () => void;
+    handleSelectNewChannel: () => void;
+    handleCreateFolder: () => void;
+  }
+
+  const HomePage: React.FC<HomePageProps> = ({ setPages, commandArchiveAll }) => {
+    return (
+      <>
         <Command.Group heading="Create new...">
-          <Command.Item onSelect={handleSelectNewChannel}>
-            <i className="icon icon-channel" /><span>Create new channel</span>
-          </Command.Item>
-          <Command.Item onSelect={handleSelectNewGroup}>
-            <i className="icon icon-group" /><span>Create new group</span>
-          </Command.Item>
-          <Command.Item onSelect={handleCreateFolder}>
-            <i className="icon icon-folder" /><span>Create new folder</span>
+          <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
+            <i className="icon icon-add" /><span>Create new...</span>
           </Command.Item>
         </Command.Group>
         <CommandSeparator />
@@ -107,6 +121,59 @@ const CommandMenu = () => {
             <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
           </Command.Item>
         </Command.Group>
+      </>
+    );
+  };
+
+  const CreateNewPage: React.FC<CreateNewPageProps> = (
+    { handleSelectNewGroup, handleSelectNewChannel, handleCreateFolder },
+  ) => {
+    return (
+      <>
+        <Command.Item onSelect={handleSelectNewGroup}>
+          <i className="icon icon-group" /><span>Create new group</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectNewChannel}>
+          <i className="icon icon-channel" /><span>Create new channel</span>
+        </Command.Item>
+        <Command.Item onSelect={handleCreateFolder}>
+          <i className="icon icon-folder" /><span>Create new folder</span>
+        </Command.Item>
+      </>
+    );
+  };
+
+  const renderPageContent = () => {
+    switch (activePage) {
+      case 'home':
+        return <HomePage setPages={setPages} commandArchiveAll={commandArchiveAll} />;
+      case 'createNew':
+        return (
+          <CreateNewPage
+            handleSelectNewGroup={handleSelectNewGroup}
+            handleSelectNewChannel={handleSelectNewChannel}
+            handleCreateFolder={handleCreateFolder}
+          />
+        );
+      default:
+        return undefined;
+    }
+  };
+
+  const CommandMenuInner = (
+    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
+      <Command.Input
+        placeholder="Search for command..."
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key === 'Backspace') {
+            handleBack();
+          }
+        }}
+      />
+      <Command.List>
+        <Command.Empty>No results found.</Command.Empty>
+        {renderPageContent()}
       </Command.List>
     </Command.Dialog>
   );
