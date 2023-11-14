@@ -30,7 +30,6 @@ import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
-const NBSP = '\u00A0';
 
 interface CommandMenuProps {
   topUserIds: string[];
@@ -118,7 +117,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     setPages(['home']);
   }, []);
 
-  const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds /* , usersById */ }) => {
+  const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds }) => {
     const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
     const runThrottled = throttle(() => loadTopUsers(), 60000, true);
 
@@ -127,8 +126,13 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     }, [loadTopUsers]);
 
     const renderName = (userId: string) => {
-      const name = getUserFirstOrLastName(usersById[userId]) || NBSP;
-      const handle = getMainUsername(usersById[userId]) || NBSP;
+      const NBSP = '\u00A0';
+      const user = usersById[userId];
+      if (!user) {
+        return undefined;
+      }
+      const name = getUserFirstOrLastName(user) || NBSP;
+      const handle = getMainUsername(user) || NBSP;
       const renderedText = renderText(name);
       if (React.isValidElement(renderedText)) {
         return renderedText;
@@ -136,7 +140,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       return (
         <span>
           <span className="user-name">{name}</span>
-          <span className="user-handle">{handle}</span>
+          <span className="user-handle">@{handle}</span>
         </span>
       );
     };
