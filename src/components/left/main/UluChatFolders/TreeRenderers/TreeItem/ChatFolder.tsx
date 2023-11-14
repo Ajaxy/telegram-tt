@@ -13,7 +13,12 @@ import { MouseButton } from '../../../../../../util/windowEnvironment';
 
 import useContextMenuHandlers from '../../../../../../hooks/useContextMenuHandlers.react';
 import { useFastClick } from '../../../../../../hooks/useFastClick.react';
+import useLastCallback from '../../../../../../hooks/useLastCallback.react';
+import useMenuPosition from '../../../../../../hooks/useMenuPosition.react';
 
+import Menu from '../../../../../ui/Menu.react';
+import MenuItem from '../../../../../ui/MenuItem.react';
+import MenuSeparator from '../../../../../ui/MenuSeparator.react';
 import SvgFolderClosed from './SvgFolderClosed';
 import SvgFolderOpen from './SvgFolderOpen';
 
@@ -31,7 +36,7 @@ const ChatFolder: FC<{
   contextRootElementSelector?: string;
   onClick?: (arg: string | number) => void;
 }> = ({
-  children, active, expanded, title, shouldStressUnreadMessages, item, context, onClick,
+  children, active, expanded, title, shouldStressUnreadMessages, item, context, onClick, contextRootElementSelector,
 }) => {
   const {
     contextActions, index, unreadCount: messagesUnreadCount, ref,
@@ -49,7 +54,7 @@ const ChatFolder: FC<{
 
   const {
     handleContextMenu, handleBeforeContextMenu,
-    // contextMenuPosition, handleContextMenuClose, handleContextMenuHide, isContextMenuOpen,
+    contextMenuPosition, handleContextMenuClose, handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(ref!, !contextActions);
 
   const {
@@ -72,24 +77,24 @@ const ChatFolder: FC<{
     handleClickFolder();
   });
 
-  // const getTriggerElement = useLastCallback(() => ref!.current);
-  // const getRootElement = useLastCallback(
-  //   () => (contextRootElementSelector ? ref!.current!.closest(contextRootElementSelector) : document.body),
-  // );
-  // const getMenuElement = useLastCallback(
-  //   () => document.querySelector('#portals')!.querySelector('.Tab-context-menu .bubble'),
-  // );
-  // const getLayout = useLastCallback(() => ({ withPortal: true }));
+  const getTriggerElement = useLastCallback(() => ref!.current);
+  const getRootElement = useLastCallback(
+    () => (contextRootElementSelector ? ref!.current!.closest(contextRootElementSelector) : document.body),
+  );
+  const getMenuElement = useLastCallback(
+    () => document.querySelector('#portals')!.querySelector('.Tab-context-menu .bubble'),
+  );
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
-  // const {
-  //   positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  // } = useMenuPosition(
-  //   contextMenuPosition,
-  //   getTriggerElement,
-  //   getRootElement,
-  //   getMenuElement,
-  //   getLayout,
-  // );
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  );
 
   // TODO use <ListItem/> with <Ripple/>
   return (
@@ -117,37 +122,37 @@ const ChatFolder: FC<{
           </div>
         </div>
         { !!messagesUnreadCount && (<div className={stylesUluChatFolder.unread}>{ messagesUnreadCount }</div>) }
-        {/* {contextActions && contextMenuPosition !== undefined && (
-        // <Menu
-        //   isOpen={isContextMenuOpen}
-        //   transformOriginX={transformOriginX}
-        //   transformOriginY={transformOriginY}
-        //   positionX={positionX}
-        //   positionY={positionY}
-        //   // style={menuStyle}
-        //   className="Tab-context-menu"
-        //   autoClose
-        //   onClose={handleContextMenuClose}
-        //   onCloseAnimationEnd={handleContextMenuHide}
-        //   withPortal
-        // >
-        //   {contextActions.map((action) => (
-        //     ('isSeparator' in action) ? (
-        //       <MenuSeparator key={action.key || 'separator'} />
-        //     ) : (
-        //       <MenuItem
-        //         key={action.title}
-        //         icon={action.icon}
-        //         destructive={action.destructive}
-        //         disabled={!action.handler}
-        //         onClick={action.handler}
-        //       >
-        //         {action.title}
-        //       </MenuItem>
-        //     )
-        //   ))}
-        // </Menu>
-      )} */}
+        {contextActions && contextMenuPosition !== undefined && (
+          <Menu
+            isOpen={isContextMenuOpen}
+            transformOriginX={transformOriginX}
+            transformOriginY={transformOriginY}
+            positionX={positionX}
+            positionY={positionY}
+            style={menuStyle}
+            className="Tab-context-menu"
+            autoClose
+            onClose={handleContextMenuClose}
+            onCloseAnimationEnd={handleContextMenuHide}
+            withPortal
+          >
+            {contextActions.map((action) => (
+              ('isSeparator' in action) ? (
+                <MenuSeparator key={action.key || 'separator'} />
+              ) : (
+                <MenuItem
+                  key={action.title}
+                  icon={action.icon}
+                  destructive={action.destructive}
+                  disabled={!action.handler}
+                  onClick={action.handler}
+                >
+                  {action.title}
+                </MenuItem>
+              )
+            ))}
+          </Menu>
+        )}
       </div>
       {children}
     </>
