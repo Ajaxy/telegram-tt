@@ -26,8 +26,6 @@ import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
 
-import Avatar from '../common/Avatar';
-
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
@@ -89,7 +87,6 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         {topUserIds.map((userId) => {
           return (
             <Command.Item key={userId} onSelect={() => handleClick(userId)}>
-              <Avatar peer={usersById[userId]} />
               <span>{renderName(userId)}</span>
             </Command.Item>
           );
