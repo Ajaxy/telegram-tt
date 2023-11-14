@@ -63,6 +63,7 @@ import { useJune } from '../../hooks/useJune';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePreventPinchZoomGesture from '../../hooks/usePreventPinchZoomGesture';
 import useShortcutCmdE from '../../hooks/useShortcutCmdE';
+import useShortcutCmdU from '../../hooks/useShortcutCmdU';
 import useShowTransition from '../../hooks/useShowTransition';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useTimeout from '../../hooks/useTimeout';
@@ -338,6 +339,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   useArchiver({ isManual: false });
 
+  useShortcutCmdU();
   useShortcutCmdE();
 
   useEffect(() => {

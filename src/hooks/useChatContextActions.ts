@@ -95,10 +95,10 @@ const useChatContextActions = ({
     }
 
     const actionMaskAsRead = (chat.unreadCount || chat.hasUnreadMark)
-      ? { title: lang('MarkAsRead'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
+      ? { title: lang('MarkAsReadHotkey'), icon: 'readchats', handler: () => toggleChatUnread({ id: chat.id }) }
       : undefined;
     const actionMarkAsUnread = !(chat.unreadCount || chat.hasUnreadMark) && !chat.isForum
-      ? { title: lang('MarkAsUnread'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
+      ? { title: lang('MarkAsUnreadHotkey'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
       : undefined;
 
     const actionArchive = isChatArchived(chat)
