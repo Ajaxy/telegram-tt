@@ -1,18 +1,24 @@
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
-/* eslint-disable react/jsx-no-undef */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
 // eslint-disable-next-line react/no-deprecated
 import { Command, CommandSeparator } from 'cmdk';
+import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
+import type { ApiUser } from '../../api/types';
+
+import { getMainUsername, getUserFirstOrLastName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { convertLayout } from '../../util/convertLayout';
+import { throttle } from '../../util/schedulers';
+import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -21,8 +27,23 @@ import { useJune } from '../../hooks/useJune';
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
+const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
-const CommandMenu = () => {
+interface CommandMenuProps {
+  topUserIds: string[];
+  usersById: Record<string, ApiUser>;
+}
+
+function customFilter(value: string, search: string): number {
+  const convertedSearch = convertLayout(search);
+  if (value.toLowerCase().includes(search.toLowerCase())
+  || value.toLowerCase().includes(convertedSearch.toLowerCase())) {
+    return 1; // полное соответствие
+  }
+  return 0; // нет соответствия
+}
+
+const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
   const { showNotification } = getActions();
   const [isOpen, setOpen] = useState(false);
@@ -33,6 +54,62 @@ const CommandMenu = () => {
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
+
+  interface SuggestedContactsProps {
+    topUserIds: string[];
+    usersById: Record<string, ApiUser>;
+  }
+
+  const close = useCallback(() => {
+    setOpen(false);
+    setPages(['home']);
+  }, []);
+
+  const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds }) => {
+    const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
+    const runThrottled = throttle(() => loadTopUsers(), 60000, true);
+
+    useEffect(() => {
+      runThrottled();
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+    }, [loadTopUsers]);
+
+    const renderName = (userId: string) => {
+      const NBSP = '\u00A0';
+      const user = usersById[userId];
+      const name = Boolean(user) && (getUserFirstOrLastName(user) || NBSP);
+      const handle = Boolean(user) && (getMainUsername(user) || NBSP);
+      const renderedName = renderText(name);
+      const displayedName = React.isValidElement(renderedName) ? renderedName : name;
+      return (
+        <span>
+          <span className="user-name">{displayedName}</span>
+          <span className="user-handle">
+            {((handle === NBSP) ? '' : '@')}
+            {handle}
+          </span>
+        </span>
+      );
+    };
+
+    const handleClick = useCallback((id: string) => {
+      openChat({ id, shouldReplaceHistory: true });
+      setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
+      close();
+    }, [openChat, addRecentlyFoundChatId]);
+
+    return (
+      <Command.Group heading="Suggested contacts">
+        {topUserIds.map((userId) => {
+          return (
+            <Command.Item key={userId} onSelect={() => handleClick(userId)}>
+              <span>{renderName(userId)}</span>
+            </Command.Item>
+          );
+        })}
+      </Command.Group>
+    );
+  };
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -54,11 +131,6 @@ const CommandMenu = () => {
       setPages(newPages);
     }
   }, [pages]);
-
-  const close = useCallback(() => {
-    setOpen(false);
-    setPages(['home']);
-  }, []);
 
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
@@ -99,6 +171,8 @@ const CommandMenu = () => {
   interface HomePageProps {
     setPages: (pages: string[]) => void;
     commandArchiveAll: () => void;
+    topUserIds: string[];
+    usersById: Record<string, ApiUser>;
   }
 
   interface CreateNewPageProps {
@@ -107,9 +181,12 @@ const CommandMenu = () => {
     handleCreateFolder: () => void;
   }
 
-  const HomePage: React.FC<HomePageProps> = ({ setPages, commandArchiveAll }) => {
+  const HomePage: React.FC<HomePageProps> = ({
+    setPages, commandArchiveAll, topUserIds, usersById,
+  }) => {
     return (
       <>
+        {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} />}
         <Command.Group heading="Create new...">
           <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
             <i className="icon icon-add" /><span>Create new...</span>
@@ -143,25 +220,15 @@ const CommandMenu = () => {
     );
   };
 
-  const renderPageContent = () => {
-    switch (activePage) {
-      case 'home':
-        return <HomePage setPages={setPages} commandArchiveAll={commandArchiveAll} />;
-      case 'createNew':
-        return (
-          <CreateNewPage
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-          />
-        );
-      default:
-        return undefined;
-    }
-  };
-
   const CommandMenuInner = (
-    <Command.Dialog label="Command Menu" open={isOpen} onOpenChange={setOpen} loop>
+    <Command.Dialog
+      label="Command Menu"
+      open={isOpen}
+      onOpenChange={setOpen}
+      loop
+      shouldFilter
+      filter={customFilter}
+    >
       <Command.Input
         placeholder="Search for command..."
         autoFocus
@@ -173,7 +240,21 @@ const CommandMenu = () => {
       />
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
-        {renderPageContent()}
+        {activePage === 'home' && (
+          <HomePage
+            setPages={setPages}
+            commandArchiveAll={commandArchiveAll}
+            topUserIds={topUserIds}
+            usersById={usersById}
+          />
+        )}
+        {activePage === 'createNew' && (
+          <CreateNewPage
+            handleSelectNewGroup={handleSelectNewGroup}
+            handleSelectNewChannel={handleSelectNewChannel}
+            handleCreateFolder={handleCreateFolder}
+          />
+        )}
       </Command.List>
     </Command.Dialog>
   );
@@ -182,4 +263,11 @@ const CommandMenu = () => {
   return <div />;
 };
 
-export default memo(CommandMenu);
+export default memo(withGlobal(
+  (global): { topUserIds?: string[]; usersById: Record<string, ApiUser> } => {
+    const { userIds: topUserIds } = global.topPeers;
+    const usersById = global.users.byId;
+
+    return { topUserIds, usersById };
+  },
+)(CommandMenu));
