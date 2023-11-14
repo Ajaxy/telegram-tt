@@ -273,30 +273,6 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     );
   };
 
-  const renderPageContent = () => {
-    switch (activePage) {
-      case 'home':
-        return (
-          <HomePage
-            setPages={setPages}
-            commandArchiveAll={commandArchiveAll}
-            topUserIds={topUserIds}
-            usersById={usersById}
-          />
-        );
-      case 'createNew':
-        return (
-          <CreateNewPage
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-          />
-        );
-      default:
-        return undefined;
-    }
-  };
-
   const CommandMenuInner = (
     <Command.Dialog
       label="Command Menu"
@@ -317,7 +293,21 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       />
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
-        {renderPageContent()}
+        {activePage === 'home' && (
+          <HomePage
+            setPages={setPages}
+            commandArchiveAll={commandArchiveAll}
+            topUserIds={topUserIds}
+            usersById={usersById}
+          />
+        )}
+        {activePage === 'createNew' && (
+          <CreateNewPage
+            handleSelectNewGroup={handleSelectNewGroup}
+            handleSelectNewChannel={handleSelectNewChannel}
+            handleCreateFolder={handleCreateFolder}
+          />
+        )}
       </Command.List>
     </Command.Dialog>
   );
