@@ -122,7 +122,7 @@ const AttachMenu: FC<OwnProps> = ({
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyU') {
+      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.shiftKey && e.code === 'KeyU') {
         e.preventDefault();
         handleQuickSelect();
       }
