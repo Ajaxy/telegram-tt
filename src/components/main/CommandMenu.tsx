@@ -1,9 +1,6 @@
-/* eslint-disable no-console */
-/* eslint-disable react-hooks-static-deps/exhaustive-deps */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
-/* eslint-disable react/jsx-no-undef */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { render } from 'react-dom';
@@ -123,7 +120,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 
     useEffect(() => {
       runThrottled();
-    }, [loadTopUsers]);
+    }, [loadTopUsers, runThrottled]);
 
     const renderName = (userId: string) => {
       const NBSP = '\u00A0';
