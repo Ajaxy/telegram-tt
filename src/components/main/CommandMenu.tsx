@@ -17,7 +17,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { getUserFirstOrLastName } from '../../global/helpers';
+import { getMainUsername, getUserFirstOrLastName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { throttle } from '../../util/schedulers';
 import renderText from '../common/helpers/renderText';
@@ -69,11 +69,17 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 
     const renderName = (userId: string) => {
       const name = getUserFirstOrLastName(usersById[userId]) || NBSP;
+      const handle = getMainUsername(usersById[userId]) || NBSP;
       const renderedText = renderText(name);
       if (React.isValidElement(renderedText)) {
         return renderedText;
       }
-      return <span>{name}</span>;
+      return (
+        <span>
+          <span className="user-name">{name}</span>
+          <span className="user-handle">{handle}</span>
+        </span>
+      );
     };
 
     const handleClick = useCallback((id: string) => {
