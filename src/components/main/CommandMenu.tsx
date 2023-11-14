@@ -22,9 +22,9 @@ const CommandMenu = () => {
   const { track } = useJune();
   const { showNotification } = getActions();
   const [isOpen, setOpen] = useState(false);
-  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
+  /* const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
-  );
+  ); */
   const { archiveMessages } = useArchiver({ isManual: true });
   const { runCommand } = useCommands();
 
@@ -65,13 +65,13 @@ const CommandMenu = () => {
     close();
   }, [runCommand, close]);
 
-  const commandToggleArchiver = useCallback(() => {
+  /* const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
     localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
-  }, [close, isArchiverEnabled]);
+  }, [close, isArchiverEnabled]); */
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
@@ -91,19 +91,20 @@ const CommandMenu = () => {
       <Command.List>
         <Command.Empty>No results found.</Command.Empty>
         <Command.Group heading="Create new...">
-          <Command.Item onSelect={handleSelectNewChannel}>Create new channel</Command.Item>
-          <Command.Item onSelect={handleSelectNewGroup}>Create new group</Command.Item>
-          <Command.Item onSelect={handleCreateFolder}>Create new folder</Command.Item>
+          <Command.Item onSelect={handleSelectNewChannel}>
+            <i className="icon icon-channel" /><span>Create new channel</span>
+          </Command.Item>
+          <Command.Item onSelect={handleSelectNewGroup}>
+            <i className="icon icon-group" /><span>Create new group</span>
+          </Command.Item>
+          <Command.Item onSelect={handleCreateFolder}>
+            <i className="icon icon-folder" /><span>Create new folder</span>
+          </Command.Item>
         </Command.Group>
         <CommandSeparator />
         <Command.Group heading="Settings">
-          <Command.Item onSelect={commandToggleArchiver}>
-            {isArchiverEnabled
-              ? 'Disable auto-mark as "Done" after reading'
-              : 'Enable auto-mark as "Done" after reading'}
-          </Command.Item>
           <Command.Item onSelect={commandArchiveAll}>
-            Mark read chats as &quot;Done&quot; (May take ~1-3 min)
+            <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
           </Command.Item>
         </Command.Group>
       </Command.List>
