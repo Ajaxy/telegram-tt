@@ -166,7 +166,11 @@ const PollModal: FC<OwnProps> = ({
 
   const removeOption = useLastCallback((index: number) => {
     const newOptions = [...options];
-    newOptions.splice(index, 1);
+    if (index === MAX_OPTIONS_COUNT - 1) {
+      newOptions[index] = '';
+    } else {
+      newOptions.splice(index, 1);
+    }
     setOptions(newOptions);
 
     if (correctOption !== undefined) {
@@ -260,7 +264,7 @@ const PollModal: FC<OwnProps> = ({
           onChange={(e) => updateOption(index, e.currentTarget.value)}
           onKeyPress={handleKeyPress}
         />
-        {index !== options.length - 1 && (
+        {(index !== options.length - 1 || options[options.length - 1].trim().length > 0) && (
           <Button
             className="option-remove-button"
             round
@@ -279,7 +283,13 @@ const PollModal: FC<OwnProps> = ({
 
   function renderRadioOptions() {
     return renderOptions()
-      .map((label, index) => ({ value: String(index), label, hidden: index === options.length - 1 }));
+      .map((label, index) => ({
+        value: String(index),
+        label,
+        hidden: index < MAX_OPTIONS_COUNT - 1
+          ? index === options.length - 1
+          : options[options.length - 1].trim().length === 0,
+      }));
   }
 
   function renderQuizNoOptionError() {
