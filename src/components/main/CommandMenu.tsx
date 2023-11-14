@@ -16,6 +16,7 @@ import type { ApiUser } from '../../api/types';
 
 import { getMainUsername, getUserFirstOrLastName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
 import renderText from '../common/helpers/renderText';
 
@@ -31,56 +32,6 @@ const SEARCH_CLOSE_TIMEOUT_MS = 250;
 interface CommandMenuProps {
   topUserIds: string[];
   usersById: Record<string, ApiUser>;
-}
-
-function convertLayout(input: string): string {
-  const engToRus: { [key: string]: string } = {
-    q: 'й',
-    w: 'ц',
-    e: 'у',
-    r: 'к',
-    t: 'е',
-    y: 'н',
-    u: 'г',
-    i: 'ш',
-    o: 'щ',
-    p: 'з',
-    '[': 'х',
-    ']': 'ъ',
-    a: 'ф',
-    s: 'ы',
-    d: 'в',
-    f: 'а',
-    g: 'п',
-    h: 'р',
-    j: 'о',
-    k: 'л',
-    l: 'д',
-    ';': 'ж',
-    '\'': 'э',
-    z: 'я',
-    x: 'ч',
-    c: 'с',
-    v: 'м',
-    b: 'и',
-    n: 'т',
-    m: 'ь',
-    ',': 'б',
-    '.': 'ю',
-    '/': '.',
-  };
-
-  const rusToEng: { [key: string]: string } = Object.fromEntries(
-    Object.entries(engToRus).map(([eng, rus]) => [rus, eng]),
-  );
-
-  return input.split('').map((char) => {
-    const lowerChar = char.toLowerCase();
-    const isUpperCase = char !== lowerChar;
-    const convertedChar = engToRus[lowerChar] || rusToEng[lowerChar] || char;
-
-    return isUpperCase ? convertedChar.toUpperCase() : convertedChar;
-  }).join('');
 }
 
 function customFilter(value: string, search: string): number {
