@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable react-hooks-static-deps/exhaustive-deps */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
@@ -7,22 +9,37 @@ import React from 'react';
 import { render } from 'react-dom';
 // eslint-disable-next-line react/no-deprecated
 import { Command, CommandSeparator } from 'cmdk';
+import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import { getActions, withGlobal } from '../../global';
 
+import type { ApiUser } from '../../api/types';
+
+import { getUserFirstOrLastName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import { throttle } from '../../util/schedulers';
+import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
 
+import Avatar from '../common/Avatar';
+
 import './CommandMenu.scss';
 
 const cmdkRoot = document.getElementById('cmdk-root');
+const SEARCH_CLOSE_TIMEOUT_MS = 250;
+const NBSP = '\u00A0';
 
-const CommandMenu = () => {
+interface CommandMenuProps {
+  topUserIds: string[];
+  usersById: Record<string, ApiUser>;
+}
+
+const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
   const { showNotification } = getActions();
   const [isOpen, setOpen] = useState(false);
@@ -33,6 +50,53 @@ const CommandMenu = () => {
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
+
+  interface SuggestedContactsProps {
+    topUserIds: string[];
+    usersById: Record<string, ApiUser>;
+  }
+
+  const close = useCallback(() => {
+    setOpen(false);
+    setPages(['home']);
+  }, []);
+
+  const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds /* , usersById */ }) => {
+    const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
+    const runThrottled = throttle(() => loadTopUsers(), 60000, true);
+
+    useEffect(() => {
+      runThrottled();
+    }, [loadTopUsers]);
+
+    const renderName = (userId: string) => {
+      const name = getUserFirstOrLastName(usersById[userId]) || NBSP;
+      const renderedText = renderText(name);
+      if (React.isValidElement(renderedText)) {
+        return renderedText;
+      }
+      return <span>{name}</span>;
+    };
+
+    const handleClick = useCallback((id: string) => {
+      openChat({ id, shouldReplaceHistory: true });
+      setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
+      close();
+    }, [openChat, addRecentlyFoundChatId]);
+
+    return (
+      <Command.Group heading="Suggested contacts">
+        {topUserIds.map((userId) => {
+          return (
+            <Command.Item key={userId} onSelect={() => handleClick(userId)}>
+              <Avatar peer={usersById[userId]} />
+              <span>{renderName(userId)}</span>
+            </Command.Item>
+          );
+        })}
+      </Command.Group>
+    );
+  };
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -54,11 +118,6 @@ const CommandMenu = () => {
       setPages(newPages);
     }
   }, [pages]);
-
-  const close = useCallback(() => {
-    setOpen(false);
-    setPages(['home']);
-  }, []);
 
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
@@ -99,6 +158,8 @@ const CommandMenu = () => {
   interface HomePageProps {
     setPages: (pages: string[]) => void;
     commandArchiveAll: () => void;
+    topUserIds: string[];
+    usersById: Record<string, ApiUser>;
   }
 
   interface CreateNewPageProps {
@@ -107,9 +168,12 @@ const CommandMenu = () => {
     handleCreateFolder: () => void;
   }
 
-  const HomePage: React.FC<HomePageProps> = ({ setPages, commandArchiveAll }) => {
+  const HomePage: React.FC<HomePageProps> = ({
+    setPages, commandArchiveAll, topUserIds, usersById,
+  }) => {
     return (
       <>
+        {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} />}
         <Command.Group heading="Create new...">
           <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
             <i className="icon icon-add" /><span>Create new...</span>
@@ -146,7 +210,14 @@ const CommandMenu = () => {
   const renderPageContent = () => {
     switch (activePage) {
       case 'home':
-        return <HomePage setPages={setPages} commandArchiveAll={commandArchiveAll} />;
+        return (
+          <HomePage
+            setPages={setPages}
+            commandArchiveAll={commandArchiveAll}
+            topUserIds={topUserIds}
+            usersById={usersById}
+          />
+        );
       case 'createNew':
         return (
           <CreateNewPage
@@ -182,4 +253,11 @@ const CommandMenu = () => {
   return <div />;
 };
 
-export default memo(CommandMenu);
+export default memo(withGlobal(
+  (global): { topUserIds?: string[]; usersById: Record<string, ApiUser> } => {
+    const { userIds: topUserIds } = global.topPeers;
+    const usersById = global.users.byId;
+
+    return { topUserIds, usersById };
+  },
+)(CommandMenu));
