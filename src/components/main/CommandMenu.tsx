@@ -71,23 +71,19 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 
     useEffect(() => {
       runThrottled();
-    }, [loadTopUsers, runThrottled]);
+    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+    }, [loadTopUsers]);
 
     const renderName = (userId: string) => {
       const NBSP = '\u00A0';
       const user = usersById[userId];
-      if (!user) {
-        return undefined;
-      }
-      const name = getUserFirstOrLastName(user) || NBSP;
-      const handle = getMainUsername(user) || NBSP;
-      const renderedText = renderText(name);
-      if (React.isValidElement(renderedText)) {
-        return renderedText;
-      }
+      const name = Boolean(user) && (getUserFirstOrLastName(user) || NBSP);
+      const handle = Boolean(user) && (getMainUsername(user) || NBSP);
+      const renderedName = renderText(name);
+      const displayedName = React.isValidElement(renderedName) ? renderedName : name;
       return (
         <span>
-          <span className="user-name">{name}</span>
+          <span className="user-name">{displayedName}</span>
           <span className="user-handle">
             {((handle === NBSP) ? '' : '@')}
             {handle}
