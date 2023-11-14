@@ -11,10 +11,10 @@ function useShortcutCmdU() {
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && !e.shiftKey && e.code === 'KeyU') {
+      e.preventDefault();
       const global = getGlobal();
       const chat = selectCurrentChat(global);
       if (chat && !chat.isForum) {
-        e.preventDefault();
         showNotification({
           message: lang((chat.unreadCount || chat.hasUnreadMark) ? 'MarkedAsRead' : 'MarkedAsUnread'),
         });
