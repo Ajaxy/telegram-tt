@@ -94,7 +94,7 @@
   transition-property: none;
 
   &[data-selected='true'] {
-    background: var(--color-chat-active);
+    background: #ffffff14;
   }
 
   &[data-disabled='true'] {
@@ -185,3 +185,8 @@
   bottom: -100vh;
   z-index: var(--z-menu-backdrop);
 }
+
+.user-handle {
+margin-left: 0.625rem;
+color: #aaaaaa
+ }

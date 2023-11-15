@@ -44,7 +44,7 @@ const UluNewChatFolderButton: FC<OwnProps & StateProps> = ({ onCreateFolder, fol
         <div className={styles['plus-icon-wrapper']}>
           <div className={styles['plus-icon']} />
         </div>
-        <div className={styles.text}>New folder</div>
+        <div className={styles.text}>Create new...</div>
       </Button>
     </UluChatFoldersWrapper>
   );

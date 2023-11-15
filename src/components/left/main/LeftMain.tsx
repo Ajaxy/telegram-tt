@@ -5,13 +5,13 @@ import React, {
 import { getActions } from '../../../global';
 
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { SettingsScreens } from '../../../types';
-import { LeftColumnContent } from '../../../types';
+import { LeftColumnContent, SettingsScreens } from '../../../types';
 
 import { PRODUCTION_URL } from '../../../config';
 import buildClassName from '../../../util/buildClassName';
 import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
+import useCommands from '../../../hooks/useCommands';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -75,6 +75,7 @@ const LeftMain: FC<OwnProps> = ({
   const { closeForumPanel } = getActions();
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
+  const { useCommand } = useCommands();
 
   useEffect(() => {
     window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
@@ -147,6 +148,15 @@ const LeftMain: FC<OwnProps> = ({
   const handleSelectNewGroup = useLastCallback(() => {
     onContentChange(LeftColumnContent.NewGroupStep1);
   });
+
+  const handleCreateFolder = useLastCallback(() => {
+    foldersDispatch({ type: 'reset' });
+    onSettingsScreenSelect(SettingsScreens.FoldersCreateFolder);
+  });
+
+  useCommand('NEW_CHANNEL', handleSelectNewChannel);
+  useCommand('NEW_GROUP', handleSelectNewGroup);
+  useCommand('NEW_FOLDER', handleCreateFolder);
 
   useEffect(() => {
     let autoCloseTimeout: number | undefined;

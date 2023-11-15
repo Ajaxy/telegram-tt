@@ -10,7 +10,7 @@ function useShortcutCmdE() {
     if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'KeyE') {
       e.preventDefault();
       // Cmd+Shift+e - unarchive (Doesn't work on Linux)
-      archiveChat({ value: !IS_LINUX ? e.shiftKey : undefined });
+      archiveChat({ value: !IS_LINUX ? !e.shiftKey : undefined });
     }
   }, [archiveChat]);
 
