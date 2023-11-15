@@ -164,7 +164,7 @@ const CommandMenuCalendar = ({
     }
   }, [mondayAt9am, handleSubmission]);
 
-  const cmdkRoot = document.getElementById('cmdk-root');
+  const calendarRoot = document.getElementById('calendar-root');
 
   const CommandMenuInner = (
     <Command.Dialog
@@ -200,7 +200,7 @@ const CommandMenuCalendar = ({
     </Command.Dialog>
   );
 
-  render(CommandMenuInner, cmdkRoot!);
+  render(CommandMenuInner, calendarRoot!);
   return <div />;
 };
 
