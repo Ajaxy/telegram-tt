@@ -128,9 +128,9 @@ const AttachMenu: FC<OwnProps> = ({
       }
     }
 
-    document.addEventListener('keyup', handleKey);
+    document.addEventListener('keydown', handleKey);
     return () => {
-      document.removeEventListener('keyup', handleKey);
+      document.removeEventListener('keydown', handleKey);
     };
   }, []);
 
