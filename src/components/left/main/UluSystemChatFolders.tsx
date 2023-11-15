@@ -9,6 +9,7 @@ import { ALL_FOLDER_ID, ARCHIVED_FOLDER_ID } from '../../../config';
 import { selectIsChatWithSelf, selectTabState } from '../../../global/selectors';
 import { uluGetTranslatedString } from '../../../util/fallbackLangPackInitial';
 
+import useCommands from '../../../hooks/useCommands';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 
 import UluChatFolder from './UluChatFolder';
@@ -47,6 +48,9 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const handleOpenInbox = useCallback(() => {
     setActiveChatFolder({ activeChatFolder: ALL_FOLDER_ID });
   }, [setActiveChatFolder]);
+
+  const { useCommand } = useCommands();
+  useCommand('OPEN_INBOX', handleOpenInbox);
 
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.activeChatsCount;

@@ -7,6 +7,7 @@ type TCommand = (
   | 'OPEN_SEARCH'
   | 'OPEN_SETTINGS'
   | 'OPEN_ARCHIVED'
+  | 'OPEN_INBOX'
 );
 
 export default function useCommands() {

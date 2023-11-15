@@ -170,6 +170,11 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
+  const handleOpenInbox = useCallback(() => {
+    runCommand('OPEN_INBOX');
+    close();
+  }, [runCommand, close]);
+
   /* const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -230,6 +235,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
           </Command.Item>
           <Command.Item onSelect={handleSelectArchived}>
             <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          </Command.Item>
+          <Command.Item onSelect={handleOpenInbox}>
+            <i className="icon icon-unread" /><span>Go to inbox</span>
           </Command.Item>
           <Command.Item onSelect={handleSelectSettings}>
             <i className="icon icon-settings" /><span>Go to settings</span>
