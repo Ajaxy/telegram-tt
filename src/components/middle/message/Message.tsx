@@ -152,6 +152,7 @@ import CommentButton from './CommentButton';
 import Contact from './Contact';
 import ContextMenuContainer from './ContextMenuContainer.async';
 import Game from './Game';
+import Giveaway from './Giveaway';
 import InlineButtons from './InlineButtons';
 import Invoice from './Invoice';
 import InvoiceMediaPreview from './InvoiceMediaPreview';
@@ -584,6 +585,7 @@ const Message: FC<OwnProps & StateProps> = ({
     Boolean(requestedChatTranslationLanguage),
     replyStory && 'content' in replyStory ? replyStory : undefined,
     isReplyPrivate,
+    isRepliesChat,
   );
 
   useEffect(() => {
@@ -630,7 +632,7 @@ const Message: FC<OwnProps & StateProps> = ({
     text, photo, video, audio,
     voice, document, sticker, contact,
     poll, webPage, invoice, location,
-    action, game, storyData,
+    action, game, storyData, giveaway,
   } = getMessageContent(message);
 
   const { replyToMsgId, replyToPeerId, isQuote } = messageReplyInfo || {};
@@ -1137,6 +1139,9 @@ const Message: FC<OwnProps & StateProps> = ({
         {poll && (
           <Poll message={message} poll={poll} onSendVote={handleVoteSend} />
         )}
+        {giveaway && (
+          <Giveaway message={message} />
+        )}
         {game && (
           <Game
             message={message}
@@ -1486,11 +1491,11 @@ export default memo(withGlobal<OwnProps>(
       ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId)
       : undefined;
     const forwardHeader = forwardInfo || replyFrom;
-    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader
+    const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader && !isRepliesChat
       ? selectSenderFromHeader(global, forwardHeader) : undefined;
     const replyMessageForwardSender = replyMessage && selectForwardedSender(global, replyMessage);
     const replyMessageChat = replyToPeerId ? selectChat(global, replyToPeerId) : undefined;
-    const isReplyPrivate = replyMessageChat && !isChatPublic(replyMessageChat)
+    const isReplyPrivate = !isRepliesChat && replyMessageChat && !isChatPublic(replyMessageChat)
       && (replyMessageChat.isNotJoined || replyMessageChat.isRestricted);
     const isReplyToTopicStart = replyMessage?.content.action?.type === 'topicCreate';
     const replyStory = storyReplyId && storyReplyUserId

@@ -455,17 +455,15 @@ addActionHandler('closeGame', (global, actions, payload): ActionReturnType => {
 
 addActionHandler('requestConfetti', (global, actions, payload): ActionReturnType => {
   const {
-    top, left, width, height, tabId = getCurrentTabId(),
-  } = payload || {};
+    tabId = getCurrentTabId(), ...rest
+  } = payload;
+
   if (!selectCanAnimateInterface(global)) return undefined;
 
   return updateTabState(global, {
     confetti: {
       lastConfettiTime: Date.now(),
-      top,
-      left,
-      width,
-      height,
+      ...rest,
     },
   }, tabId);
 });

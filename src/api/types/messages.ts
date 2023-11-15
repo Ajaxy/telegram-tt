@@ -253,6 +253,15 @@ export type ApiGame = {
   document?: ApiDocument;
 };
 
+export type ApiGiveaway = {
+  quantity: number;
+  months: number;
+  untilDate: number;
+  isOnlyForNewSubscribers?: true;
+  countries?: string[];
+  channelIds: string[];
+};
+
 export type ApiNewPoll = {
   summary: ApiPoll['summary'];
   quiz?: {
@@ -281,6 +290,9 @@ export interface ApiAction {
   months?: number;
   topicEmojiIconId?: string;
   isTopicAction?: boolean;
+  slug?: string;
+  isGiveaway?: boolean;
+  isUnclaimed?: boolean;
 }
 
 export interface ApiWebPage {
@@ -432,6 +444,7 @@ export type MediaContent = {
   location?: ApiLocation;
   game?: ApiGame;
   storyData?: ApiMessageStoryData;
+  giveaway?: ApiGiveaway;
 };
 
 export interface ApiMessage {

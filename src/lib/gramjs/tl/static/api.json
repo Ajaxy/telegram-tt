@@ -318,5 +318,9 @@
     "premium.getBoostsStatus",
     "premium.getBoostersList",
     "premium.applyBoost",
-    "premium.getMyBoosts"
+    "premium.getMyBoosts",
+    "premium.getBoostsList",
+    "payments.checkGiftCode",
+    "payments.applyGiftCode",
+    "payments.getGiveawayInfo"
 ]

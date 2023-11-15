@@ -421,6 +421,9 @@ export function selectSender<T extends GlobalState>(global: T, message: ApiMessa
     return undefined;
   }
 
+  const chat = selectChat(global, message.chatId);
+  if (chat && isChatChannel(chat)) return chat;
+
   return selectPeer(global, senderId);
 }
 
@@ -569,7 +572,7 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
       || getServerTime() - message.date < MESSAGE_EDIT_ALLOWED_TIME
     ) && !(
       content.sticker || content.contact || content.poll || content.action || content.audio
-      || (content.video?.isRound) || content.location || content.invoice
+      || (content.video?.isRound) || content.location || content.invoice || content.giveaway
     )
     && !isForwarded
     && !message.viaBotId

@@ -90,7 +90,7 @@ const Poll: FC<OwnProps & StateProps> = ({
     const chosen = poll.results.results?.find((result) => result.isChosen);
     if (isSubmitting && chosen) {
       if (chosen.isCorrect) {
-        requestConfetti();
+        requestConfetti({});
       }
       setIsSubmitting(false);
     }

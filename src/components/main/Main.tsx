@@ -84,6 +84,7 @@ import MiddleColumn from '../middle/MiddleColumn';
 import AttachBotInstallModal from '../modals/attachBotInstall/AttachBotInstallModal.async';
 import BoostModal from '../modals/boost/BoostModal.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
+import GiftCodeModal from '../modals/giftcode/GiftCodeModal.async';
 import MapModal from '../modals/map/MapModal.async';
 import UrlAuthModal from '../modals/urlAuth/UrlAuthModal.async';
 import WebAppModal from '../modals/webApp/WebAppModal.async';
@@ -117,6 +118,7 @@ export interface OwnProps {
 type StateProps = {
   isMasterTab?: boolean;
   chat?: ApiChat;
+  currentUserId?: string;
   isLeftColumnOpen: boolean;
   isMiddleColumnOpen: boolean;
   isRightColumnOpen: boolean;
@@ -163,6 +165,7 @@ type StateProps = {
   isCurrentUserPremium?: boolean;
   chatlistModal?: TabState['chatlistModal'];
   boostModal?: TabState['boostModal'];
+  giftCodeModal?: TabState['giftCodeModal'];
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
@@ -182,6 +185,7 @@ const Main: FC<OwnProps & StateProps> = ({
   isMediaViewerOpen,
   isStoryViewerOpen,
   isForwardModalOpen,
+  currentUserId,
   hasNotifications,
   hasDialogs,
   audioMessage,
@@ -223,6 +227,7 @@ const Main: FC<OwnProps & StateProps> = ({
   deleteFolderDialog,
   isMasterTab,
   chatlistModal,
+  giftCodeModal,
   boostModal,
   noRightColumnAnimation,
   isSynced,
@@ -611,6 +616,7 @@ const Main: FC<OwnProps & StateProps> = ({
         isByPhoneNumber={newContactByPhoneNumber}
       />
       <BoostModal info={boostModal} />
+      <GiftCodeModal modal={giftCodeModal} currentUserId={currentUserId} />
       <ChatlistModal info={chatlistModal} />
       <GameModal openedGame={openedGame} gameTitle={gameTitle} />
       <WebAppModal webApp={webApp} />
@@ -646,6 +652,7 @@ export default memo(withGlobal<OwnProps>(
           language, wasTimeFormatSetManually,
         },
       },
+      currentUserId,
     } = global;
 
     const {
@@ -675,6 +682,7 @@ export default memo(withGlobal<OwnProps>(
       deleteFolderDialogModal,
       chatlistModal,
       boostModal,
+      giftCodeModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -691,6 +699,7 @@ export default memo(withGlobal<OwnProps>(
     const deleteFolderDialog = deleteFolderDialogModal ? selectChatFolder(global, deleteFolderDialogModal) : undefined;
 
     return {
+      currentUserId,
       isLeftColumnOpen: isLeftColumnShown,
       isMiddleColumnOpen: Boolean(chatId),
       isRightColumnOpen: selectIsRightColumnShown(global, isMobile),
@@ -739,6 +748,7 @@ export default memo(withGlobal<OwnProps>(
       requestedDraft,
       chatlistModal,
       boostModal,
+      giftCodeModal,
       noRightColumnAnimation,
       isSynced: global.isSynced,
     };

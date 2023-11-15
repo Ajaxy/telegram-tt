@@ -1433,6 +1433,9 @@ payments.getPaymentReceipt#2478d1cc peer:InputPeer msg_id:int = payments.Payment
 payments.validateRequestedInfo#b6c8f12b flags:# save:flags.0?true invoice:InputInvoice info:PaymentRequestedInfo = payments.ValidatedRequestedInfo;
 payments.sendPaymentForm#2d03522f flags:# form_id:long invoice:InputInvoice requested_info_id:flags.0?string shipping_option_id:flags.1?string credentials:InputPaymentCredentials tip_amount:flags.2?long = payments.PaymentResult;
 payments.getSavedInfo#227d824b = payments.SavedInfo;
+payments.checkGiftCode#8e51b4c1 slug:string = payments.CheckedGiftCode;
+payments.applyGiftCode#f6e26854 slug:string = Updates;
+payments.getGiveawayInfo#f4239425 peer:InputPeer msg_id:int = payments.GiveawayInfo;
 phone.requestCall#42ff96ed flags:# video:flags.0?true user_id:InputUser random_id:int g_a_hash:bytes protocol:PhoneCallProtocol = phone.PhoneCall;
 phone.acceptCall#3bd2b4a0 peer:InputPhoneCall g_b:bytes protocol:PhoneCallProtocol = phone.PhoneCall;
 phone.confirmCall#2efe1722 peer:InputPhoneCall g_a:bytes key_fingerprint:long protocol:PhoneCallProtocol = phone.PhoneCall;
@@ -1486,6 +1489,7 @@ stories.sendReaction#7fd736b2 flags:# add_to_recent:flags.0?true peer:InputPeer 
 stories.getPeerStories#2c4ada50 peer:InputPeer = stories.PeerStories;
 stories.getPeerMaxIDs#535983c3 id:Vector<InputPeer> = Vector<int>;
 stories.togglePeerStoriesHidden#bd0415c4 peer:InputPeer hidden:Bool = Bool;
+premium.getBoostsList#60f67660 flags:# gifts:flags.0?true peer:InputPeer offset:string limit:int = premium.BoostsList;
 premium.getMyBoosts#be77b4a = premium.MyBoosts;
 premium.applyBoost#6b7da746 flags:# slots:flags.0?Vector<int> peer:InputPeer = premium.MyBoosts;
 premium.getBoostsStatus#42f1f61 peer:InputPeer = premium.BoostsStatus;`;

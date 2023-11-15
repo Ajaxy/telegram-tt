@@ -6,6 +6,15 @@ import { getCurrentTabId } from '../../util/establishMultitabRole';
 import { selectTabState } from './tabs';
 import { selectIsCurrentUserPremium } from './users';
 
+// https://github.com/DrKLO/Telegram/blob/c319639e9a4dff2f22da6762dcebd12d49f5afa1/TMessagesProj/src/main/java/org/telegram/ui/Components/Premium/boosts/cells/msg/GiveawayMessageCell.java#L59
+const MONTH_EMOTICON: Record<number, string> = {
+  1: `${1}\u{FE0F}\u20E3`,
+  3: `${2}\u{FE0F}\u20E3`,
+  6: `${3}\u{FE0F}\u20E3`,
+  12: `${4}\u{FE0F}\u20E3`,
+  24: `${5}\u{FE0F}\u20E3`,
+};
+
 export function selectIsStickerFavorite<T extends GlobalState>(global: T, sticker: ApiSticker) {
   const { stickers } = global.stickers.favorite;
   return stickers && stickers.some(({ id }) => id === sticker.id);
@@ -139,4 +148,11 @@ export function selectIsAlwaysHighPriorityEmoji<T extends GlobalState>(
   if (!('id' in stickerSet)) return false;
   return stickerSet.id === global.appConfig?.defaultEmojiStatusesStickerSetId
     || stickerSet.id === RESTRICTED_EMOJI_SET_ID;
+}
+
+export function selectGiftStickerForDuration<T extends GlobalState>(global: T, duration = 1) {
+  const stickers = global.premiumGifts?.stickers;
+  if (!stickers) return undefined;
+  const emoji = MONTH_EMOTICON[duration];
+  return stickers.find((sticker) => sticker.emoji === emoji) || stickers[0];
 }

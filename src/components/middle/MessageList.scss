@@ -278,6 +278,17 @@
     outline: none;
   }
 
+  .action-message-gift-code {
+    width: 20rem;
+    margin-inline: auto;
+  }
+
+  .action-message-subtitle {
+    margin-top: 1rem;
+    font-weight: normal;
+    text-wrap: balance;
+  }
+
   .action-message-suggested-avatar {
     max-width: 16rem;
     display: flex !important;

@@ -6,6 +6,7 @@ import type {
   ApiDocument,
   ApiFormattedText,
   ApiGame,
+  ApiGiveaway,
   ApiInvoice,
   ApiLocation,
   ApiMessageExtendedMediaPreview,
@@ -49,7 +50,7 @@ export function buildMessageContent(
   const hasUnsupportedMedia = mtpMessage.media instanceof GramJs.MessageMediaUnsupported;
 
   if (mtpMessage.message && !hasUnsupportedMedia
-    && !content.sticker && !content.poll && !content.contact && !(content.video?.isRound)) {
+    && !content.sticker && !content.poll && !content.contact && !content.video?.isRound) {
     content = {
       ...content,
       text: buildMessageTextContent(mtpMessage.message, mtpMessage.entities),
@@ -117,6 +118,9 @@ export function buildMessageMediaContent(media: GramJs.TypeMessageMedia): MediaC
 
   const storyData = buildMessageStoryData(media);
   if (storyData) return { storyData };
+
+  const giveaway = buildGiweawayFromMedia(media);
+  if (giveaway) return { giveaway };
 
   return undefined;
 }
@@ -463,6 +467,31 @@ function buildGame(media: GramJs.MessageMediaGame): ApiGame | undefined {
     description,
     photo,
     document,
+  };
+}
+
+function buildGiweawayFromMedia(media: GramJs.TypeMessageMedia): ApiGiveaway | undefined {
+  if (!(media instanceof GramJs.MessageMediaGiveaway)) {
+    return undefined;
+  }
+
+  return buildGiveaway(media);
+}
+
+function buildGiveaway(media: GramJs.MessageMediaGiveaway): ApiGiveaway | undefined {
+  const {
+    channels, months, quantity, untilDate, countriesIso2, onlyNewSubscribers,
+  } = media;
+
+  const channelIds = channels.map((channel) => buildApiPeerId(channel, 'channel'));
+
+  return {
+    channelIds,
+    months,
+    quantity,
+    untilDate,
+    countries: countriesIso2,
+    isOnlyForNewSubscribers: onlyNewSubscribers,
   };
 }
 
