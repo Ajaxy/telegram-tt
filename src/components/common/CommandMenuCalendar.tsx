@@ -16,6 +16,7 @@ import '../main/CommandMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
+  setOpen: (value: boolean) => void;
   onClose: () => void;
   onSubmit: (date: Date) => void;
   onSendWhenOnline?: () => void;
@@ -23,7 +24,12 @@ export type OwnProps = {
 };
 
 const CommandMenuCalendar = ({
-  isOpen, onSubmit, onClose, onSendWhenOnline, isReminder,
+  isOpen,
+  setOpen,
+  onClose,
+  onSubmit,
+  onSendWhenOnline,
+  isReminder,
 }: OwnProps) => {
   const chrono = useMemo(() => new Chrono(), []);
   const [inputValue, setInputValue] = useState('');
@@ -164,14 +170,14 @@ const CommandMenuCalendar = ({
     }
   }, [mondayAt9am, handleSubmission]);
 
-  const calendarRoot = document.getElementById('calendar-root');
-
   const CommandMenuInner = (
     <Command.Dialog
       label="Calendar Command Menu"
       open={isOpen}
+      onOpenChange={setOpen}
       shouldFilter
       filter={customFilter}
+      loop
     >
       <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
       <Command.List>
@@ -200,7 +206,8 @@ const CommandMenuCalendar = ({
     </Command.Dialog>
   );
 
-  render(CommandMenuInner, calendarRoot!);
+  const calendarRoot = document.getElementById('calendar-root');
+  render(CommandMenuInner, calendarRoot);
   return <div />;
 };
 
