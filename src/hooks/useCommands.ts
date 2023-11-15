@@ -4,6 +4,9 @@ type TCommand = (
   | 'NEW_CHANNEL'
   | 'NEW_GROUP'
   | 'NEW_FOLDER'
+  | 'OPEN_SEARCH'
+  | 'OPEN_SETTINGS'
+  | 'OPEN_ARCHIVED'
 );
 
 export default function useCommands() {

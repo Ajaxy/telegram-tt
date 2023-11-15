@@ -186,6 +186,31 @@
   z-index: var(--z-menu-backdrop);
 }
 
+.shortcuts {
+  display: flex;
+  margin-left: auto;
+  gap: 0.1875rem;
+
+  .kbd {
+    font-family: var(--font-sans);
+    display: inline-block;
+    text-align: center;
+    color: #e3e3eb;
+    background-color: rgb(0 0 0 / 12%);
+    border: 1px solid;
+    border-color: #ffffff0a;
+    border-radius: 3px;
+    position: relative;
+    box-shadow: 1px 1px 0px 0px rgba(27, 26, 29, 0.25);
+    padding: 4px 3px 4px 4px;
+    vertical-align: baseline;
+    text-transform: capitalize;
+    font-size: 11px;
+    line-height: 110%;
+    min-width: 20px;
+  }
+}
+
 .user-handle {
 margin-left: 0.625rem;
 color: #aaaaaa

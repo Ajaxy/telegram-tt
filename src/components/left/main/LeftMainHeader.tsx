@@ -27,6 +27,7 @@ import { formatDateToString } from '../../../util/dateFormat';
 import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
+import useCommands from '../../../hooks/useCommands';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useElectronDrag from '../../../hooks/useElectronDrag';
 import useFlag from '../../../hooks/useFlag';
@@ -119,6 +120,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const [isBotMenuOpen, markBotMenuOpen, unmarkBotMenuOpen] = useFlag();
 
+  const { useCommand } = useCommands();
   const hasMenu = content === LeftColumnContent.ChatList;
   const selectedSearchDate = useMemo(() => {
     return searchDate
@@ -157,6 +159,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
       onSearchQuery('');
     }
   });
+
+  useCommand('OPEN_SEARCH', handleSearchFocus);
 
   // Cmd+/ to open search
   useEffect(() => {

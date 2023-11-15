@@ -157,6 +157,9 @@ const LeftMain: FC<OwnProps> = ({
   useCommand('NEW_CHANNEL', handleSelectNewChannel);
   useCommand('NEW_GROUP', handleSelectNewGroup);
   useCommand('NEW_FOLDER', handleCreateFolder);
+  useCommand('NEW_FOLDER', handleCreateFolder);
+  useCommand('OPEN_SETTINGS', handleSelectSettings);
+  useCommand('OPEN_ARCHIVED', handleSelectArchived);
 
   useEffect(() => {
     let autoCloseTimeout: number | undefined;

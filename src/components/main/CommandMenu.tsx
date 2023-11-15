@@ -155,6 +155,21 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
+  const handleSearchFocus = useCallback(() => {
+    runCommand('OPEN_SEARCH');
+    close();
+  }, [runCommand, close]);
+
+  const handleSelectSettings = useCallback(() => {
+    runCommand('OPEN_SETTINGS');
+    close();
+  }, [runCommand, close]);
+
+  const handleSelectArchived = useCallback(() => {
+    runCommand('OPEN_ARCHIVED');
+    close();
+  }, [runCommand, close]);
+
   /* const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -177,12 +192,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     commandArchiveAll: () => void;
     topUserIds: string[];
     usersById: Record<string, ApiUser>;
+    handleSearchFocus: () => void;
   }
 
   interface CreateNewPageProps {
     handleSelectNewGroup: () => void;
     handleSelectNewChannel: () => void;
     handleCreateFolder: () => void;
+    handleSelectSettings: () => void;
+    handleSelectArchived: () => void;
   }
 
   const HomePage: React.FC<HomePageProps> = ({
@@ -200,6 +218,25 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         <Command.Group heading="Settings">
           <Command.Item onSelect={commandArchiveAll}>
             <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+          </Command.Item>
+        </Command.Group>
+        <Command.Group heading="Navigation">
+          <Command.Item value="$find $search" onSelect={handleSearchFocus}>
+            <i className="icon icon-search" /><span>Find chat or contact</span>
+            <span className="shortcuts">
+              <span className="kbd">⌘</span>
+              <span className="kbd">/</span>
+            </span>
+          </Command.Item>
+          <Command.Item onSelect={handleSelectArchived}>
+            <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          </Command.Item>
+          <Command.Item onSelect={handleSelectSettings}>
+            <i className="icon icon-settings" /><span>Go to settings</span>
+            <span className="shortcuts">
+              <span className="kbd">⌘</span>
+              <span className="kbd">,</span>
+            </span>
           </Command.Item>
         </Command.Group>
       </>
@@ -250,6 +287,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             commandArchiveAll={commandArchiveAll}
             topUserIds={topUserIds}
             usersById={usersById}
+            handleSearchFocus={handleSearchFocus}
           />
         )}
         {activePage === 'createNew' && (
@@ -257,6 +295,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleSelectNewGroup={handleSelectNewGroup}
             handleSelectNewChannel={handleSelectNewChannel}
             handleCreateFolder={handleCreateFolder}
+            handleSelectSettings={handleSelectSettings}
+            handleSelectArchived={handleSelectArchived}
           />
         )}
       </Command.List>
