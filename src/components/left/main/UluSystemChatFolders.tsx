@@ -51,6 +51,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
 
   const { useCommand } = useCommands();
   useCommand('OPEN_INBOX', handleOpenInbox);
+  useCommand('OPEN_SAVED', handleOpenSavedMessages);
 
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.activeChatsCount;

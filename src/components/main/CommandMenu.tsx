@@ -175,6 +175,11 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
+  const handleOpenSavedMessages = useCallback(() => {
+    runCommand('OPEN_SAVED');
+    close();
+  }, [runCommand, close]);
+
   /* const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -198,14 +203,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     topUserIds: string[];
     usersById: Record<string, ApiUser>;
     handleSearchFocus: () => void;
+    handleOpenSavedMessages: () => void;
+    handleSelectSettings: () => void;
+    handleSelectArchived: () => void;
   }
 
   interface CreateNewPageProps {
     handleSelectNewGroup: () => void;
     handleSelectNewChannel: () => void;
     handleCreateFolder: () => void;
-    handleSelectSettings: () => void;
-    handleSelectArchived: () => void;
   }
 
   const HomePage: React.FC<HomePageProps> = ({
@@ -233,11 +239,14 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
               <span className="kbd">/</span>
             </span>
           </Command.Item>
-          <Command.Item onSelect={handleSelectArchived}>
-            <i className="icon icon-archive-from-main" /><span>Go to archive</span>
-          </Command.Item>
           <Command.Item onSelect={handleOpenInbox}>
             <i className="icon icon-unread" /><span>Go to inbox</span>
+          </Command.Item>
+          <Command.Item onSelect={handleOpenSavedMessages}>
+            <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+          </Command.Item>
+          <Command.Item onSelect={handleSelectArchived}>
+            <i className="icon icon-archive-from-main" /><span>Go to archive</span>
           </Command.Item>
           <Command.Item onSelect={handleSelectSettings}>
             <i className="icon icon-settings" /><span>Go to settings</span>
@@ -296,6 +305,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             topUserIds={topUserIds}
             usersById={usersById}
             handleSearchFocus={handleSearchFocus}
+            handleSelectSettings={handleSelectSettings}
+            handleSelectArchived={handleSelectArchived}
+            handleOpenSavedMessages={handleOpenSavedMessages}
           />
         )}
         {activePage === 'createNew' && (
@@ -303,8 +315,6 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleSelectNewGroup={handleSelectNewGroup}
             handleSelectNewChannel={handleSelectNewChannel}
             handleCreateFolder={handleCreateFolder}
-            handleSelectSettings={handleSelectSettings}
-            handleSelectArchived={handleSelectArchived}
           />
         )}
       </Command.List>
