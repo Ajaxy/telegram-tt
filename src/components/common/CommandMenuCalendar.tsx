@@ -1,10 +1,8 @@
-/* eslint-disable no-null/no-null */
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable no-async-without-await/no-async-without-await */
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render } from 'react-dom';
 import { Chrono } from 'chrono-node';
 import { Command } from 'cmdk';
 import {
@@ -168,50 +166,42 @@ const CommandMenuCalendar = ({
 
   const cmdkRoot = document.getElementById('cmdk-root');
 
-  if (cmdkRoot) {
-    if (!isOpen) {
-      unmountComponentAtNode(cmdkRoot);
-      return null;
-    }
-
-    const CommandMenuInner = (
-      <Command.Dialog
-        label="Calendar Command Menu"
-        open={isOpen}
-        shouldFilter
-        filter={customFilter}
-      >
-        <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
-        <Command.List>
-          <Command.Empty>Can not parse data</Command.Empty>
-          {menuItems?.map((item, index) => (
-            <Command.Item
-              key={index}
-              value={`${inputValue} ${item.label}`}
-              onSelect={() => item.date && handleSubmission(item.date)}
-            >
-              {item.label}
-            </Command.Item>
-          ))}
-          <Command.Item onSelect={handleTomorrowAt9amSelect}>
-            Tomorrow at 9 AM
+  const CommandMenuInner = (
+    <Command.Dialog
+      label="Calendar Command Menu"
+      open={isOpen}
+      shouldFilter
+      filter={customFilter}
+    >
+      <Command.Input placeholder={placeholderText} autoFocus onValueChange={onValueChange} />
+      <Command.List>
+        <Command.Empty>Can not parse data</Command.Empty>
+        {menuItems?.map((item) => (
+          <Command.Item
+            key={`${inputValue} ${item.label}`}
+            value={`${inputValue} ${item.label}`}
+            onSelect={() => item.date && handleSubmission(item.date)}
+          >
+            {item.label}
           </Command.Item>
-          <Command.Item onSelect={handleMondayAt9amSelect}>
-            On Monday at 9 AM
+        ))}
+        <Command.Item onSelect={handleTomorrowAt9amSelect}>
+          Tomorrow at 9 AM
+        </Command.Item>
+        <Command.Item onSelect={handleMondayAt9amSelect}>
+          On Monday at 9 AM
+        </Command.Item>
+        {onSendWhenOnline && (
+          <Command.Item onSelect={onSendWhenOnline}>
+            Send when online
           </Command.Item>
-          {onSendWhenOnline && (
-            <Command.Item onSelect={onSendWhenOnline}>
-              Send when online
-            </Command.Item>
-          )}
-        </Command.List>
-      </Command.Dialog>
-    );
+        )}
+      </Command.List>
+    </Command.Dialog>
+  );
 
-    render(CommandMenuInner, cmdkRoot);
-  }
-
-  return null;
+  render(CommandMenuInner, cmdkRoot!);
+  return <div />;
 };
 
 export default CommandMenuCalendar;
