@@ -14,7 +14,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { getMainUsername, getUserFirstOrLastName } from '../../global/helpers';
+import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
@@ -77,7 +77,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     const renderName = (userId: string) => {
       const NBSP = '\u00A0';
       const user = usersById[userId];
-      const name = Boolean(user) && (getUserFirstOrLastName(user) || NBSP);
+      const name = Boolean(user) && (getUserFullName(user) || NBSP);
       const handle = Boolean(user) && (getMainUsername(user) || NBSP);
       const renderedName = renderText(name);
       const displayedName = React.isValidElement(renderedName) ? renderedName : name;
