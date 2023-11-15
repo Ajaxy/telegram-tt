@@ -81,15 +81,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       const handle = Boolean(user) && (getMainUsername(user) || NBSP);
       const renderedName = renderText(name);
       const displayedName = React.isValidElement(renderedName) ? renderedName : name;
-      return (
-        <span>
-          <span className="user-name">{displayedName}</span>
-          <span className="user-handle">
-            {((handle === NBSP) ? '' : '@')}
-            {handle}
+      return {
+        displayedName: (
+          <span>
+            <span className="user-name">{displayedName}</span>
+            <span className="user-handle">
+              {((handle === NBSP) ? '' : '@')}
+              {handle}
+            </span>
           </span>
-        </span>
-      );
+        ),
+        valueString: `${name} ${handle}`,
+      };
     };
 
     const handleClick = useCallback((id: string) => {
@@ -101,9 +104,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     return (
       <Command.Group heading="Suggested contacts">
         {topUserIds.map((userId) => {
+          const { displayedName, valueString } = renderName(userId);
           return (
-            <Command.Item key={userId} onSelect={() => handleClick(userId)}>
-              <span>{renderName(userId)}</span>
+            <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
+              <span>{displayedName}</span>
             </Command.Item>
           );
         })}
