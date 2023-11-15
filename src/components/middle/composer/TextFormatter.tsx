@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-console */
 import type { FC } from '../../../lib/teact/teact';
@@ -196,7 +195,8 @@ const TextFormatter: FC<OwnProps> = ({
         messages: [
           {
             role: 'assistant',
-            content: 'You are an assistant. Act as a spelling corrector and improver. Reply to each message with rewritten text using the following instructions to rewrite it. Fix spelling, grammar, and punctuation. Improve clarity and conciseness. Break up overly long sentences. Reduce repetition. Prefer active voice. Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. Use the English language.',
+            // eslint-disable-next-line max-len
+            content: 'You are an assistant. Act as a spelling corrector and improver. Reply to each message with rewritten text using the following instructions to rewrite it. Fix spelling, grammar, and punctuation. Improve clarity and conciseness. Break up overly long sentences. Reduce repetition. Prefer active voice. Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. Use the same language.',
           },
           {
             role: 'user',
