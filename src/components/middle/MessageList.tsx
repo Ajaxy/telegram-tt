@@ -180,7 +180,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
 }) => {
   const {
     loadViewportMessages, setScrollOffset, loadSponsoredMessages, loadMessageReactions, copyMessagesByIds,
-    loadMessageViews, loadPeerStoriesByIds,
+    loadMessageViews, loadPeerStoriesByIds, openChat,
   } = getActions();
 
   // eslint-disable-next-line no-null/no-null
@@ -220,6 +220,29 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useSyncEffect(() => {
     memoFirstUnreadIdRef.current = firstUnreadId;
   }, [firstUnreadId]);
+
+  useEffect(() => {
+    const minDeltaX = 50; // Минимальное расстояние прокрутки для активации свайпа
+
+    const handleScroll = (e: WheelEvent) => {
+      // Проверяем, находится ли элемент, на котором произошло событие, внутри контейнера
+      if (containerRef.current && containerRef.current.contains(e.target as Node)) {
+        // Проверяем, был ли совершен горизонтальный свайп
+        if (Math.abs(e.deltaX) > minDeltaX) {
+          // Вызываем функцию для обработки свайпа
+          openChat({ id: undefined });
+        }
+      }
+    };
+
+    // Добавляем обработчик событий к window
+    window.addEventListener('wheel', handleScroll, { passive: true });
+
+    // Удаляем обработчик событий при размонтировании компонента
+    return () => {
+      window.removeEventListener('wheel', handleScroll);
+    };
+  }, [containerRef]);
 
   useEffect(() => {
     if (!isCurrentUserPremium && isChannelChat && isReady) {

@@ -1,5 +1,6 @@
 import React, {
   memo, useEffect, useMemo,
+  /* useRef, */
   useState,
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
@@ -69,7 +70,7 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-/* import useMultitouchBackSwipe from '../../hooks/useMultitouchBackSwipe'; */
+/* import useMultitouchBackSwipe2 from '../../hooks/useMultitouchBackSwipe2'; */
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePrevious from '../../hooks/usePrevious';
 import { useResize } from '../../hooks/useResize';
@@ -269,6 +270,13 @@ function MiddleColumn({
     closeAnimationDuration,
   );
 
+  /* // eslint-disable-next-line no-null/no-null
+  const middleColumnRef = useRef<HTMLDivElement>(null);
+
+  useMultitouchBackSwipe2(middleColumnRef, () => {
+    openChat({ id: undefined });
+  }); */
+
   const prevTransitionKey = usePrevious(currentTransitionKey);
 
   const cleanupExceptionKey = (
@@ -290,11 +298,6 @@ function MiddleColumn({
       })
       : undefined;
   }, [chatId, openChat]);
-
-  /*   useMultitouchBackSwipe(() => {
-    // Действие, выполняемое при свайпе слева направо
-    openChat({ id: undefined });
-  }); */
 
   useSyncEffect(() => {
     setDropAreaState(DropAreaState.None);
@@ -482,6 +485,7 @@ function MiddleColumn({
   return (
     <div
       id="MiddleColumn"
+      /* ref={middleColumnRef} */
       className={className}
       onTransitionEnd={handleCssTransitionEnd}
       style={buildStyle(
