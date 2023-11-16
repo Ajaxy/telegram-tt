@@ -22,7 +22,7 @@ export type OwnProps = {
   onSendWhenOnline?: () => void;
   isReminder?: boolean;
 };
-
+const calendarRoot = document.getElementById('calendar-root');
 const CommandMenuCalendar = ({
   isOpen,
   setOpen,
@@ -259,7 +259,6 @@ const CommandMenuCalendar = ({
     </Command.Dialog>
   );
 
-  const calendarRoot = document.getElementById('calendar-root');
   render(CommandMenuInner, calendarRoot);
   return <div />;
 };

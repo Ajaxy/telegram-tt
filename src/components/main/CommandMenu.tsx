@@ -1,6 +1,5 @@
 /* eslint-disable arrow-parens */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
@@ -45,6 +44,154 @@ const customFilter = (value: string, search: string) => {
   return 0; // нет соответствия
 };
 
+interface SuggestedContactsProps {
+  topUserIds: string[];
+  usersById: Record<string, ApiUser>;
+  close: () => void; // Добавляем пропс close
+}
+
+const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, close }) => {
+  const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
+  const runThrottled = throttle(() => loadTopUsers(), 60000, true);
+
+  useEffect(() => {
+    runThrottled();
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [loadTopUsers]);
+
+  const renderName = (userId: string) => {
+    const NBSP = '\u00A0';
+    const user = usersById[userId];
+    const name = Boolean(user) && (getUserFullName(user) || NBSP);
+    const handle = Boolean(user) && (getMainUsername(user) || NBSP);
+    const renderedName = renderText(name);
+    const displayedName = React.isValidElement(renderedName) ? renderedName : name;
+    return {
+      displayedName: (
+        <span>
+          <span className="user-name">{displayedName}</span>
+          <span className="user-handle">
+            {((handle === NBSP) ? '' : '@')}
+            {handle}
+          </span>
+        </span>
+      ),
+      valueString: `${name} ${handle}`,
+    };
+  };
+
+  const handleClick = useCallback((id: string) => {
+    openChat({ id, shouldReplaceHistory: true });
+    setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
+    close();
+  }, [openChat, addRecentlyFoundChatId, close]);
+
+  return (
+    <Command.Group heading="Suggested contacts">
+      {topUserIds.map((userId) => {
+        const { displayedName, valueString } = renderName(userId);
+        return (
+          <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
+            <span>{displayedName}</span>
+          </Command.Item>
+        );
+      })}
+    </Command.Group>
+  );
+};
+
+interface HomePageProps {
+  setPages: (pages: string[]) => void;
+  commandArchiveAll: () => void;
+  topUserIds: string[];
+  usersById: Record<string, ApiUser>;
+  handleSearchFocus: () => void;
+  handleOpenSavedMessages: () => void;
+  handleSelectSettings: () => void;
+  handleSelectArchived: () => void;
+  handleOpenInbox: () => void;
+  menuItems: Array<{ label: string; value: string }>;
+  saveAPIKey: () => void;
+  close: () => void;
+}
+
+interface CreateNewPageProps {
+  handleSelectNewGroup: () => void;
+  handleSelectNewChannel: () => void;
+  handleCreateFolder: () => void;
+}
+
+const HomePage: React.FC<HomePageProps> = ({
+  setPages, commandArchiveAll, topUserIds, usersById, close,
+  handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
+  handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
+}) => {
+  return (
+    <>
+      {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} close={close} />}
+      <Command.Group heading="Create new...">
+        <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
+          <i className="icon icon-add" /><span>Create new...</span>
+        </Command.Item>
+      </Command.Group>
+      <CommandSeparator />
+      <Command.Group heading="Settings">
+        <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+        </Command.Item>
+        {menuItems.map((item, index) => (
+          <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
+            {item.label}
+          </Command.Item>
+        ))}
+      </Command.Group>
+      <Command.Group heading="Navigation">
+        <Command.Item value="$find $search" onSelect={handleSearchFocus}>
+          <i className="icon icon-search" /><span>Find chat or contact</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">/</span>
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={handleOpenInbox}>
+          <i className="icon icon-unread" /><span>Go to inbox</span>
+        </Command.Item>
+        <Command.Item onSelect={handleOpenSavedMessages}>
+          <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectArchived}>
+          <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectSettings}>
+          <i className="icon icon-settings" /><span>Go to settings</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">,</span>
+          </span>
+        </Command.Item>
+      </Command.Group>
+    </>
+  );
+};
+
+const CreateNewPage: React.FC<CreateNewPageProps> = (
+  { handleSelectNewGroup, handleSelectNewChannel, handleCreateFolder },
+) => {
+  return (
+    <>
+      <Command.Item onSelect={handleSelectNewGroup}>
+        <i className="icon icon-group" /><span>Create new group</span>
+      </Command.Item>
+      <Command.Item onSelect={handleSelectNewChannel}>
+        <i className="icon icon-channel" /><span>Create new channel</span>
+      </Command.Item>
+      <Command.Item onSelect={handleCreateFolder}>
+        <i className="icon icon-folder" /><span>Create new folder</span>
+      </Command.Item>
+    </>
+  );
+};
+
 const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
   const { showNotification } = getActions();
@@ -59,65 +206,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
 
-  interface SuggestedContactsProps {
-    topUserIds: string[];
-    usersById: Record<string, ApiUser>;
-  }
-
   const close = useCallback(() => {
     setOpen(false);
     setPages(['home']);
   }, []);
-
-  const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds }) => {
-    const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
-    const runThrottled = throttle(() => loadTopUsers(), 60000, true);
-
-    useEffect(() => {
-      runThrottled();
-    // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
-    }, [loadTopUsers]);
-
-    const renderName = (userId: string) => {
-      const NBSP = '\u00A0';
-      const user = usersById[userId];
-      const name = Boolean(user) && (getUserFullName(user) || NBSP);
-      const handle = Boolean(user) && (getMainUsername(user) || NBSP);
-      const renderedName = renderText(name);
-      const displayedName = React.isValidElement(renderedName) ? renderedName : name;
-      return {
-        displayedName: (
-          <span>
-            <span className="user-name">{displayedName}</span>
-            <span className="user-handle">
-              {((handle === NBSP) ? '' : '@')}
-              {handle}
-            </span>
-          </span>
-        ),
-        valueString: `${name} ${handle}`,
-      };
-    };
-
-    const handleClick = useCallback((id: string) => {
-      openChat({ id, shouldReplaceHistory: true });
-      setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
-      close();
-    }, [openChat, addRecentlyFoundChatId]);
-
-    return (
-      <Command.Group heading="Suggested contacts">
-        {topUserIds.map((userId) => {
-          const { displayedName, valueString } = renderName(userId);
-          return (
-            <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
-              <span>{displayedName}</span>
-            </Command.Item>
-          );
-        })}
-      </Command.Group>
-    );
-  };
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -225,92 +317,6 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     }
   }, [close, archiveMessages, track]);
 
-  interface HomePageProps {
-    setPages: (pages: string[]) => void;
-    commandArchiveAll: () => void;
-    topUserIds: string[];
-    usersById: Record<string, ApiUser>;
-    handleSearchFocus: () => void;
-    handleOpenSavedMessages: () => void;
-    handleSelectSettings: () => void;
-    handleSelectArchived: () => void;
-  }
-
-  interface CreateNewPageProps {
-    handleSelectNewGroup: () => void;
-    handleSelectNewChannel: () => void;
-    handleCreateFolder: () => void;
-  }
-
-  const HomePage: React.FC<HomePageProps> = ({
-    setPages, commandArchiveAll, topUserIds, usersById,
-  }) => {
-    return (
-      <>
-        {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} />}
-        <Command.Group heading="Create new...">
-          <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
-            <i className="icon icon-add" /><span>Create new...</span>
-          </Command.Item>
-        </Command.Group>
-        <CommandSeparator />
-        <Command.Group heading="Settings">
-          <Command.Item onSelect={commandArchiveAll}>
-            <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
-          </Command.Item>
-          {menuItems.map((item, index) => (
-            <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
-              {item.label}
-            </Command.Item>
-          ))}
-        </Command.Group>
-        <Command.Group heading="Navigation">
-          <Command.Item value="$find $search" onSelect={handleSearchFocus}>
-            <i className="icon icon-search" /><span>Find chat or contact</span>
-            <span className="shortcuts">
-              <span className="kbd">⌘</span>
-              <span className="kbd">/</span>
-            </span>
-          </Command.Item>
-          <Command.Item onSelect={handleOpenInbox}>
-            <i className="icon icon-unread" /><span>Go to inbox</span>
-          </Command.Item>
-          <Command.Item onSelect={handleOpenSavedMessages}>
-            <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
-          </Command.Item>
-          <Command.Item onSelect={handleSelectArchived}>
-            <i className="icon icon-archive-from-main" /><span>Go to archive</span>
-          </Command.Item>
-          <Command.Item onSelect={handleSelectSettings}>
-            <i className="icon icon-settings" /><span>Go to settings</span>
-            <span className="shortcuts">
-              <span className="kbd">⌘</span>
-              <span className="kbd">,</span>
-            </span>
-          </Command.Item>
-        </Command.Group>
-      </>
-    );
-  };
-
-  const CreateNewPage: React.FC<CreateNewPageProps> = (
-    { handleSelectNewGroup, handleSelectNewChannel, handleCreateFolder },
-  ) => {
-    return (
-      <>
-        <Command.Item onSelect={handleSelectNewGroup}>
-          <i className="icon icon-group" /><span>Create new group</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSelectNewChannel}>
-          <i className="icon icon-channel" /><span>Create new channel</span>
-        </Command.Item>
-        <Command.Item onSelect={handleCreateFolder}>
-          <i className="icon icon-folder" /><span>Create new folder</span>
-        </Command.Item>
-      </>
-    );
-  };
-
   const CommandMenuInner = (
     <Command.Dialog
       label="Command Menu"
@@ -341,8 +347,12 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             usersById={usersById}
             handleSearchFocus={handleSearchFocus}
             handleSelectSettings={handleSelectSettings}
+            handleOpenInbox={handleOpenInbox}
             handleSelectArchived={handleSelectArchived}
             handleOpenSavedMessages={handleOpenSavedMessages}
+            saveAPIKey={saveAPIKey}
+            menuItems={menuItems}
+            close={close}
           />
         )}
         {activePage === 'createNew' && (
