@@ -105,7 +105,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 };
 
 interface HomePageProps {
-  setPages: (pages: string[]) => void;
+  /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
   topUserIds: string[];
   usersById: Record<string, ApiUser>;
@@ -120,6 +120,9 @@ interface HomePageProps {
   handleSupport: () => void;
   handleFAQ: () => void;
   handleChangelog: () => void;
+  handleSelectNewGroup: () => void;
+  handleSelectNewChannel: () => void;
+  handleCreateFolder: () => void;
 }
 
 interface CreateNewPageProps {
@@ -129,17 +132,38 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  setPages, commandArchiveAll, topUserIds, usersById, close,
+  /* setPages,  */commandArchiveAll, topUserIds, usersById, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
-  handleSupport, handleFAQ, handleChangelog,
+  handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
 }) => {
   return (
     <>
       {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} close={close} />}
       <Command.Group heading="Create new...">
-        <Command.Item onSelect={() => setPages(['home', 'createNew'])}>
-          <i className="icon icon-add" /><span>Create new...</span>
+        <Command.Item onSelect={handleSelectNewGroup}>
+          <i className="icon icon-group" /><span>Create new group</span>
+          <span className="shortcuts">
+            {IS_ARC_BROWSER ? (
+              <>
+                <span className="kbd">⌃</span>
+                <span className="kbd">⇧</span>
+                <span className="kbd">C</span>
+              </>
+            ) : (
+              <>
+                <span className="kbd">⌘</span>
+                <span className="kbd">⇧</span>
+                <span className="kbd">C</span>
+              </>
+            )}
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectNewChannel}>
+          <i className="icon icon-channel" /><span>Create new channel</span>
+        </Command.Item>
+        <Command.Item onSelect={handleCreateFolder}>
+          <i className="icon icon-folder" /><span>Create new folder</span>
         </Command.Item>
       </Command.Group>
       <CommandSeparator />
@@ -417,7 +441,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         <Command.Empty>No results found.</Command.Empty>
         {activePage === 'home' && (
           <HomePage
-            setPages={setPages}
+            /* setPages={setPages} */
             commandArchiveAll={commandArchiveAll}
             topUserIds={topUserIds}
             usersById={usersById}
@@ -432,6 +456,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleFAQ={handleFAQ}
             handleChangelog={handleChangelog}
             close={close}
+            handleSelectNewGroup={handleSelectNewGroup}
+            handleSelectNewChannel={handleSelectNewChannel}
+            handleCreateFolder={handleCreateFolder}
           />
         )}
         {activePage === 'createNew' && (
