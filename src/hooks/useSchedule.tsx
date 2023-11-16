@@ -2,13 +2,13 @@
 /* eslint-disable no-null/no-null */
 /* eslint-disable react/jsx-no-bind */
 import { unmountComponentAtNode } from 'react-dom';
-import React, { useEffect, useState } from '../lib/teact/teact';
+import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getServerTimeOffset } from '../util/serverTime';
 import useLastCallback from './useLastCallback';
 
-import CommandMenuCalendarAsync from '../components/common/CommandMenuCalendarAsync';
+import CommandMenuCalendar from '../components/common/CommandMenuCalendar';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 
@@ -47,9 +47,6 @@ const useSchedule = (
     setOnScheduled(() => whenScheduled);
   });
 
-  useEffect(() => {
-  }, [isMenuOpen]);
-
   const scheduledDefaultDate = openAt ? new Date(openAt * 1000) : new Date();
   scheduledDefaultDate.setSeconds(0);
   scheduledDefaultDate.setMilliseconds(0);
@@ -57,9 +54,10 @@ const useSchedule = (
   const scheduledMaxDate = new Date();
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
-  const calendar = isMenuOpen && (
-    <CommandMenuCalendarAsync
+  const calendar = (
+    <CommandMenuCalendar
       isOpen={isMenuOpen}
+      setOpen={setMenuOpen}
       onClose={handleCloseCalendar}
       onSubmit={handleMessageSchedule}
       onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
