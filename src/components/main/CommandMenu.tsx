@@ -25,6 +25,7 @@ import renderText from '../common/helpers/renderText';
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
+import { useStorage } from '../../hooks/useStorage';
 
 import './CommandMenu.scss';
 
@@ -274,9 +275,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     showNotification, openUrl, openChatByUsername,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
-  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
-    !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
-  );
+  const { isArchiverEnabled, setIsArchiverEnabled } = useStorage();
+
   const { archiveMessages } = useArchiver({ isManual: true });
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
@@ -396,10 +396,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
-  }, [close, isArchiverEnabled]);
+  }, [close, isArchiverEnabled, setIsArchiverEnabled]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });

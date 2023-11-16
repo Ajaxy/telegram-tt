@@ -13,6 +13,7 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import { selectCurrentChat, selectTabState } from '../global/selectors';
 import useInterval from './useInterval';
 import { useJune } from './useJune';
+import { useStorage } from './useStorage';
 
 const UPDATE_TIME_SEC = 3;
 const MESSAGE_DISPLAY_TIME_SEC = 60;
@@ -24,6 +25,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     openChat, toggleChatArchived, closeForumPanel, showNotification,
   } = getActions();
   const { track } = useJune();
+  const { isArchiverEnabled } = useStorage();
 
   const chatsToArchive: { [key: string]: Date } = {};
 
@@ -98,7 +100,9 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
     if (isManual) {
       archive();
-    } else if (JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled')))) {
+    } else if (isArchiverEnabled) {
+      // eslint-disable-next-line no-console
+      console.log('>>> autoarchive');
       autoarchive();
     }
   };
