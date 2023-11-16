@@ -1,7 +1,8 @@
 import type { RefObject } from 'react';
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
-import { createPortal, render } from 'react-dom';
+import { createPortal } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { FC } from '../../../../lib/teact/teact';
 import { useState } from '../../../../lib/teact/teact';
 import {
@@ -25,7 +26,8 @@ import 'react-complex-tree/lib/style-modern.css';
 
 const uluChatFoldersRootId = 'chat-folders-root';
 
-const uluChatFoldersRoot = document.getElementById(uluChatFoldersRootId);
+const uluChatFoldersElement = document.getElementById(uluChatFoldersRootId);
+const uluChatFoldersRoot = createRoot(uluChatFoldersElement!);
 
 // TODO clean-up
 
@@ -160,9 +162,8 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
   }, 0);
 
   if (hookedToPortalRefState) {
-    render(
+    uluChatFoldersRoot.render(
       createPortal(<ChatFoldersTree folders={folderTabs} />, portalRef.current!),
-      uluChatFoldersRoot,
     );
   }
 
