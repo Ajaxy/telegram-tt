@@ -25,7 +25,6 @@ import renderText from '../common/helpers/renderText';
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
-import useLang from '../../hooks/useLang';
 
 import './CommandMenu.scss';
 
@@ -132,7 +131,6 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog,
 }) => {
-  const lang = useLang();
   return (
     <>
       {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} close={close} />}
@@ -154,15 +152,21 @@ const HomePage: React.FC<HomePageProps> = ({
       </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-help" /><span>Open ulu FAQ</span>
+          <i className="icon icon-document" /><span>Open FAQ</span>
+        </Command.Item>
+        <Command.Item onSelect={handleFAQ}>
+          <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
         </Command.Item>
         <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-ask-support" /><span>{lang('AskAQuestion')}</span>
+          <i className="icon icon-help" /><span>Contact support</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-ask-support" /><span>Send feedback</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="What's new">
         <Command.Item onSelect={handleChangelog}>
-          <i className="icon icon-help" /><span>Help → Changelog</span>
+          <i className="icon icon-calendar" /><span>Changelog</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Navigation">
