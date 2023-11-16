@@ -224,21 +224,26 @@ const MessageList: FC<OwnProps & StateProps> = ({
   useEffect(() => {
     const minDeltaX = 50; // Минимальное расстояние прокрутки для активации свайпа
 
+    const handleSwipeLeftToRight = () => {
+      // TODO
+    };
+
+    const handleSwipeRightToLeft = () => {
+      openChat({ id: undefined });
+    };
+
     const handleScroll = (e: WheelEvent) => {
-      // Проверяем, находится ли элемент, на котором произошло событие, внутри контейнера
       if (containerRef.current && containerRef.current.contains(e.target as Node)) {
-        // Проверяем, был ли совершен горизонтальный свайп
-        if (Math.abs(e.deltaX) > minDeltaX) {
-          // Вызываем функцию для обработки свайпа
-          openChat({ id: undefined });
+        if (e.deltaX > minDeltaX) {
+          handleSwipeLeftToRight();
+        } else if (e.deltaX < -minDeltaX) {
+          handleSwipeRightToLeft();
         }
       }
     };
 
-    // Добавляем обработчик событий к window
     window.addEventListener('wheel', handleScroll, { passive: true });
 
-    // Удаляем обработчик событий при размонтировании компонента
     return () => {
       window.removeEventListener('wheel', handleScroll);
     };
