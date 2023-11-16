@@ -2,6 +2,7 @@ import type { ApiFormattedText, ApiMessageEntity } from '../api/types';
 import { ApiMessageEntityTypes } from '../api/types';
 
 import { RE_LINK_TEMPLATE } from '../config';
+import generateUniqueId from './generateUniqueId';
 import { IS_EMOJI_SUPPORTED } from './windowEnvironment';
 
 export const ENTITY_CLASS_BY_NODE_NAME: Record<string, ApiMessageEntityTypes> = {
@@ -113,6 +114,14 @@ function parseMarkdown(html: string) {
     '<img alt="$1" data-document-id="$2">',
   );
 
+  // Prevent URLs from being incorrectly parsed as markdown.
+  const urls: string[] = [];
+  const URL_PLACEHOLDER = `URL-PLACEHOLDER-${generateUniqueId()}`;
+  parsedHtml = parsedHtml.replace(new RegExp(`${RE_LINK_TEMPLATE}+?`, 'g'), (match) => {
+    urls.push(match);
+    return URL_PLACEHOLDER;
+  });
+
   // Other simple markdown
   parsedHtml = parsedHtml.replace(
     /(?!<(code|pre)[^<]*|<\/)[*]{2}([^*\n]+)[*]{2}(?![^<]*<\/(code|pre)>)/g,
@@ -130,6 +139,10 @@ function parseMarkdown(html: string) {
     /(?!<(code|pre)[^<]*|<\/)[|]{2}([^|\n]+)[|]{2}(?![^<]*<\/(code|pre)>)/g,
     `<span data-entity-type="${ApiMessageEntityTypes.Spoiler}">$2</span>`,
   );
+
+  urls.forEach((url) => {
+    parsedHtml = parsedHtml.replace(URL_PLACEHOLDER, url);
+  });
 
   return parsedHtml;
 }
