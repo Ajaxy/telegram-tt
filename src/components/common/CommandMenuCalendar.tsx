@@ -1,8 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable no-async-without-await/no-async-without-await */
 import React from 'react';
-// eslint-disable-next-line react/no-deprecated
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Chrono } from 'chrono-node';
 import { Command } from 'cmdk';
 import {
@@ -22,7 +21,10 @@ export type OwnProps = {
   onSendWhenOnline?: () => void;
   isReminder?: boolean;
 };
-const calendarRoot = document.getElementById('calendar-root');
+
+const calendarElement = document.getElementById('calendar-root');
+const calendarRoot = createRoot(calendarElement!);
+
 const CommandMenuCalendar = ({
   isOpen,
   setOpen,
@@ -259,7 +261,7 @@ const CommandMenuCalendar = ({
     </Command.Dialog>
   );
 
-  render(CommandMenuInner, calendarRoot);
+  calendarRoot.render(CommandMenuInner);
   return <div />;
 };
 
