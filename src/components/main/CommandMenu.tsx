@@ -175,6 +175,10 @@ const HomePage: React.FC<HomePageProps> = ({
       <Command.Group heading="Navigation">
         <Command.Item value="$find $search" onSelect={handleSearchFocus}>
           <i className="icon icon-search" /><span>Find chat or contact</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">/</span>
+          </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenInbox}>
           <i className="icon icon-unread" /><span>Go to inbox</span>

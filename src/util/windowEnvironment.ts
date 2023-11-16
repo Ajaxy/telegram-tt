@@ -42,7 +42,8 @@ export const IS_ARC_BROWSER = navigator.userAgent.includes('Chrome')
   && !navigator.userAgent.includes('Edg')
   && !IS_FIREFOX
   && !IS_YA_BROWSER
-  && !IS_SAFARI;
+  && !IS_SAFARI
+  && !IS_ELECTRON;
 
 export enum MouseButton {
   Main = 0,
