@@ -5,6 +5,14 @@
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
 
+  &.select-mode {
+    margin-bottom: 5.625rem;
+
+    @media (max-width: 600px) {
+      margin-bottom: 4.25rem;
+    }
+  }
+
   &::before {
     display: none;
   }

@@ -22,6 +22,7 @@ export default function useFocusMessage(
   isResizingContainer?: boolean,
   isJustAdded?: boolean,
   isQuote?: boolean,
+  focusMargin = FOCUS_MARGIN,
 ) {
   const isRelocatedRef = useRef(!isJustAdded);
 
@@ -39,7 +40,7 @@ export default function useFocusMessage(
           messagesContainer,
           elementRef.current!,
           isToBottom ? 'end' : 'centerOrTop',
-          FOCUS_MARGIN,
+          focusMargin,
           focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
           focusDirection,
           undefined,
@@ -69,6 +70,6 @@ export default function useFocusMessage(
       }
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote, focusMargin,
   ]);
 }

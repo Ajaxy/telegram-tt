@@ -2,12 +2,14 @@ import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
+import type { ApiSponsoredMessage } from '../../api/types';
 import type { MessageListType } from '../../global/types';
 import { MAIN_THREAD_ID } from '../../api/types';
 
-import { selectChat, selectCurrentMessageList } from '../../global/selectors';
+import { selectChat, selectCurrentMessageList, selectSponsoredMessage } from '../../global/selectors';
 import animateScroll from '../../util/animateScroll';
 import buildClassName from '../../util/buildClassName';
+import { REM } from '../common/helpers/mediaDimensions';
 
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -27,9 +29,17 @@ type StateProps = {
   unreadCount?: number;
   reactionsCount?: number;
   mentionsCount?: number;
+  sponsoredMessage?: ApiSponsoredMessage;
 };
 
-const FOCUS_MARGIN = 20;
+const FOCUS_MARGIN = 5.625 * REM;
+const FOCUS_SPONSORED_MARGIN = 10 * REM + FOCUS_MARGIN;
+
+const getLastMessageElement = (container: HTMLDivElement): HTMLDivElement | undefined => {
+  const messageElements = container.querySelectorAll<HTMLDivElement>('.message-list-item');
+
+  return messageElements[messageElements.length - 1];
+};
 
 const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   isShown,
@@ -40,6 +50,7 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   reactionsCount,
   mentionsCount,
   withExtraShift,
+  sponsoredMessage,
 }) => {
   const {
     focusNextReply, focusNextReaction, focusNextMention, fetchUnreadReactions,
@@ -65,21 +76,28 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
   }, [chatId, fetchUnreadMentions, hasUnreadMentions]);
 
   const handleClick = useLastCallback(() => {
-    if (!isShown) {
-      return;
+    if (!isShown) return;
+
+    if (messageListType === 'thread') focusNextReply();
+
+    if (messageListType === 'pinned') {
+      const container = elementRef.current?.parentElement?.querySelector<HTMLDivElement>('.MessageList.type-pinned');
+
+      if (!container) return;
+      const lastMessageElement = getLastMessageElement(container);
+
+      if (!lastMessageElement) return;
+      animateScroll(container, lastMessageElement, 'end', sponsoredMessage ? FOCUS_SPONSORED_MARGIN : FOCUS_MARGIN);
     }
 
-    if (messageListType === 'thread') {
-      focusNextReply();
-    } else {
-      const messagesContainer = elementRef.current!.parentElement!.querySelector<HTMLDivElement>('.MessageList')!;
-      const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
-      const lastMessageElement = messageElements[messageElements.length - 1];
-      if (!lastMessageElement) {
-        return;
-      }
+    if (messageListType === 'scheduled') {
+      const container = elementRef.current?.parentElement?.querySelector<HTMLDivElement>('.MessageList.type-scheduled');
 
-      animateScroll(messagesContainer, lastMessageElement, 'end', FOCUS_MARGIN);
+      if (!container) return;
+      const lastMessageElement = getLastMessageElement(container);
+
+      if (!lastMessageElement) return;
+      animateScroll(container, lastMessageElement, 'end', FOCUS_MARGIN);
     }
   });
 
@@ -144,6 +162,7 @@ export default memo(withGlobal<OwnProps>(
       reactionsCount: shouldShowCount ? chat.unreadReactionsCount : undefined,
       mentionsCount: shouldShowCount ? chat.unreadMentionsCount : undefined,
       unreadCount: shouldShowCount ? chat.unreadCount : undefined,
+      sponsoredMessage: selectSponsoredMessage(global, chatId),
     };
   },
 )(FloatingActionButtons));
