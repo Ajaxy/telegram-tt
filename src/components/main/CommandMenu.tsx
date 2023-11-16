@@ -15,6 +15,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
+import { FAQ_URL } from '../../config';
 import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
@@ -24,6 +25,7 @@ import renderText from '../common/helpers/renderText';
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
+import useLang from '../../hooks/useLang';
 
 import './CommandMenu.scss';
 
@@ -113,6 +115,9 @@ interface HomePageProps {
   menuItems: Array<{ label: string; value: string }>;
   saveAPIKey: () => void;
   close: () => void;
+  handleSupport: () => void;
+  handleFAQ: () => void;
+  handleChangelog: () => void;
 }
 
 interface CreateNewPageProps {
@@ -125,7 +130,9 @@ const HomePage: React.FC<HomePageProps> = ({
   setPages, commandArchiveAll, topUserIds, usersById, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
+  handleSupport, handleFAQ, handleChangelog,
 }) => {
+  const lang = useLang();
   return (
     <>
       {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} close={close} />}
@@ -144,6 +151,19 @@ const HomePage: React.FC<HomePageProps> = ({
             {item.label}
           </Command.Item>
         ))}
+      </Command.Group>
+      <Command.Group heading="Help">
+        <Command.Item onSelect={handleFAQ}>
+          <i className="icon icon-help" /><span>Open ulu FAQ</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-ask-support" /><span>{lang('AskAQuestion')}</span>
+        </Command.Item>
+      </Command.Group>
+      <Command.Group heading="What's new">
+        <Command.Item onSelect={handleChangelog}>
+          <i className="icon icon-help" /><span>Help → Changelog</span>
+        </Command.Item>
       </Command.Group>
       <Command.Group heading="Navigation">
         <Command.Item value="$find $search" onSelect={handleSearchFocus}>
@@ -194,7 +214,7 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 
 const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
-  const { showNotification } = getActions();
+  const { showNotification, openChat, openUrl } = getActions();
   const [isOpen, setOpen] = useState(false);
   /* const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
@@ -259,6 +279,21 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     showNotification({ message: 'The OpenAI API key has been saved.' });
     setOpen(false);
   }, [inputValue]);
+
+  const handleSupport = useCallback(() => {
+    openChat({ id: `${6091980431}` });
+    close();
+  }, [openChat, close]);
+
+  const handleFAQ = useCallback(() => {
+    openUrl({ url: FAQ_URL });
+    close();
+  }, [openUrl, close]);
+
+  const handleChangelog = useCallback(() => {
+    openChat({ id: `${-1001916758340}` });
+    close();
+  }, [openChat, close]);
 
   const handleSelectNewChannel = useCallback(() => {
     runCommand('NEW_CHANNEL');
@@ -352,6 +387,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleOpenSavedMessages={handleOpenSavedMessages}
             saveAPIKey={saveAPIKey}
             menuItems={menuItems}
+            handleSupport={handleSupport}
+            handleFAQ={handleFAQ}
+            handleChangelog={handleChangelog}
             close={close}
           />
         )}
