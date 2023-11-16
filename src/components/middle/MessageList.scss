@@ -401,7 +401,7 @@
     transition: transform var(--layer-transition);
 
     .messages-container {
-      width: calc(100% - var(--right-column-width));
+      width: 100%;
     }
 
     body.no-right-column-animations & {
