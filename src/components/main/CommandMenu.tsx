@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
-// eslint-disable-next-line react/no-deprecated
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 // eslint-disable-next-line react/no-deprecated
 import { Command, CommandSeparator } from 'cmdk';
 import type { FC } from '../../lib/teact/teact';
@@ -29,7 +28,8 @@ import { useJune } from '../../hooks/useJune';
 
 import './CommandMenu.scss';
 
-const cmdkRoot = document.getElementById('cmdk-root');
+const cmdkElement = document.getElementById('cmdk-root');
+const cmdkRoot = createRoot(cmdkElement!);
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
 interface CommandMenuProps {
@@ -445,7 +445,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     </Command.Dialog>
   );
 
-  render(CommandMenuInner, cmdkRoot);
+  cmdkRoot.render(CommandMenuInner);
   return <div />;
 };
 
