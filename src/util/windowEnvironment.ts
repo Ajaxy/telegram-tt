@@ -37,6 +37,12 @@ export const IS_FIREFOX = navigator.userAgent.toLowerCase().includes('firefox')
   || navigator.userAgent.toLowerCase().includes('iceweasel')
   || navigator.userAgent.toLowerCase().includes('icecat');
 export const IS_ELECTRON = Boolean(window.electron);
+export const IS_ARC_BROWSER = navigator.userAgent.includes('Chrome')
+  && navigator.userAgent.includes('Safari')
+  && !navigator.userAgent.includes('Edg')
+  && !IS_FIREFOX
+  && !IS_YA_BROWSER
+  && !IS_SAFARI;
 
 export enum MouseButton {
   Main = 0,
