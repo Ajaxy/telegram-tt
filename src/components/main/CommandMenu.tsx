@@ -20,7 +20,7 @@ import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
-import { IS_FIREFOX } from '../../util/windowEnvironment';
+import { IS_ELECTRON } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
@@ -363,7 +363,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
-      if (IS_FIREFOX && e.metaKey && e.ctrlKey && e.code === 'KeyC') {
+      if (!IS_ELECTRON && e.metaKey && e.ctrlKey && e.code === 'KeyC') {
         handleSelectNewGroup();
         e.preventDefault();
         e.stopPropagation();
