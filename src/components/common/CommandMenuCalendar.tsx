@@ -39,12 +39,29 @@ const CommandMenuCalendar = ({
     return value.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
   };
 
-  const placeholderText = isReminder ? 'Remind me at...' : 'Schedule at...';
+  const placeholderText = isReminder
+    ? 'Remind me at... [Try: 8 am, 3 days, aug 7]' : 'Schedule at... [Try: 8 am, 3 days, aug 7]';
   const labelPrefix = isReminder ? 'Remind me at' : 'Schedule at';
 
   useEffect(() => {
     return isOpen ? captureKeyboardListeners({ onEsc: onClose }) : undefined;
   }, [isOpen, onClose]);
+
+  const in10Minutes = useMemo(() => {
+    const parsedResults = chrono.parse('In 10 minutes', new Date());
+    if (parsedResults.length > 0) {
+      return parsedResults[0].start.date();
+    }
+    return undefined;
+  }, [chrono]);
+
+  const in1Hour = useMemo(() => {
+    const parsedResults = chrono.parse('In 1 hour', new Date());
+    if (parsedResults.length > 0) {
+      return parsedResults[0].start.date();
+    }
+    return undefined;
+  }, [chrono]);
 
   const tomorrowAt9am = useMemo(() => {
     const parsedResults = chrono.parse('Tomorrow at 9am', new Date());
@@ -107,12 +124,26 @@ const CommandMenuCalendar = ({
           return `${day} ${months[monthIndex]} ${year}`;
         };
 
-        // В вашем useEffect
+        const isTimeOnlyInput = (input: string) => {
+          return /^\s*\d{1,2}\s*(am|pm)\s*$/i.test(input);
+        };
+        const now = new Date();
         const parsedResults = chrono.parse(inputValue, new Date());
         if (parsedResults.length > 0) {
           const date = parsedResults[0].start.date();
-          const timeString = format12HourTime(date);
 
+          if (date < now) {
+            if (isTimeOnlyInput(inputValue)) {
+              // Установить на завтра, если введено только время и оно уже прошло
+              date.setDate(now.getDate() + 1);
+              date.setHours(date.getHours(), date.getMinutes(), 0, 0);
+            } else {
+              // Установить на следующий год, если дата (с годом) в прошлом
+              date.setFullYear(now.getFullYear() + 1);
+            }
+          }
+
+          const timeString = format12HourTime(date);
           const labels = [];
           if (isToday(date)) {
             labels.push(`${labelPrefix} ${timeString} Today`);
@@ -154,6 +185,22 @@ const CommandMenuCalendar = ({
     onClose(); // Вызов для закрытия меню
   }, [onSubmit, onClose]);
 
+  const handleIn10Minutes = useCallback(() => {
+    if (in10Minutes) {
+      handleSubmission(in10Minutes);
+    } else {
+      // Обработка ошибки или альтернативное действие
+    }
+  }, [in10Minutes, handleSubmission]);
+
+  const handleIn1Hour = useCallback(() => {
+    if (in1Hour) {
+      handleSubmission(in1Hour);
+    } else {
+      // Обработка ошибки или альтернативное действие
+    }
+  }, [in1Hour, handleSubmission]);
+
   const handleTomorrowAt9amSelect = useCallback(() => {
     if (tomorrowAt9am) {
       handleSubmission(tomorrowAt9am);
@@ -191,6 +238,12 @@ const CommandMenuCalendar = ({
             {item.label}
           </Command.Item>
         ))}
+        <Command.Item onSelect={handleIn10Minutes}>
+          In 10 minutes
+        </Command.Item>
+        <Command.Item onSelect={handleIn1Hour}>
+          In 1 hour
+        </Command.Item>
         <Command.Item onSelect={handleTomorrowAt9amSelect}>
           Tomorrow at 9 AM
         </Command.Item>

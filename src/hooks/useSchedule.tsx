@@ -25,6 +25,7 @@ const useSchedule = (
     // Преобразование даты в таймстамп
     const scheduledAt = Math.round(date.getTime() / 1000) + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
+    setOnScheduled(undefined);
   });
 
   const handleMessageScheduleUntilOnline = useLastCallback(() => {
