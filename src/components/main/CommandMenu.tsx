@@ -1,3 +1,5 @@
+/* eslint-disable arrow-parens */
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
@@ -34,14 +36,14 @@ interface CommandMenuProps {
   usersById: Record<string, ApiUser>;
 }
 
-function customFilter(value: string, search: string): number {
+const customFilter = (value: string, search: string) => {
   const convertedSearch = convertLayout(search);
   if (value.toLowerCase().includes(search.toLowerCase())
-  || value.toLowerCase().includes(convertedSearch.toLowerCase())) {
+      || value.toLowerCase().includes(convertedSearch.toLowerCase())) {
     return 1; // полное соответствие
   }
   return 0; // нет соответствия
-}
+};
 
 const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
@@ -51,6 +53,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
   ); */
   const { archiveMessages } = useArchiver({ isManual: true });
+  const [inputValue, setInputValue] = useState('');
+  const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
@@ -129,6 +133,24 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
 
+  const handleInputChange = (newValue: string) => {
+    setInputValue(newValue);
+  };
+
+  useEffect(() => {
+    if (inputValue.length === 51) {
+      // Создаем пункт меню для сохранения ключа
+      const newLabel = `Save/update OpenAI key: ${inputValue}`;
+      const newItem = { label: newLabel, value: 'save_api_key' };
+
+      if (!menuItems.some(item => item.label === newLabel)) {
+        setMenuItems(prevItems => [...prevItems, newItem]);
+      }
+    } else {
+      setMenuItems([]); // Очищаем пункты меню, если ключ невалиден
+    }
+  }, [inputValue, menuItems]);
+
   const handleBack = useCallback(() => {
     if (pages.length > 1) {
       const newPages = pages.slice(0, -1);
@@ -139,6 +161,12 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
+
+  const saveAPIKey = useCallback(() => {
+    localStorage.setItem('openai_api_key', inputValue);
+    showNotification({ message: 'The OpenAI API key has been saved.' });
+    setOpen(false);
+  }, [inputValue]);
 
   const handleSelectNewChannel = useCallback(() => {
     runCommand('NEW_CHANNEL');
@@ -230,6 +258,11 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
           <Command.Item onSelect={commandArchiveAll}>
             <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
           </Command.Item>
+          {menuItems.map((item, index) => (
+            <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
+              {item.label}
+            </Command.Item>
+          ))}
         </Command.Group>
         <Command.Group heading="Navigation">
           <Command.Item value="$find $search" onSelect={handleSearchFocus}>
@@ -290,6 +323,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       <Command.Input
         placeholder="Search for command..."
         autoFocus
+        onValueChange={handleInputChange}
+        value={inputValue}
         onKeyDown={(e) => {
           if (e.key === 'Backspace') {
             handleBack();

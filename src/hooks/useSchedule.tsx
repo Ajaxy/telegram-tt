@@ -1,27 +1,29 @@
+/* eslint-disable react/no-deprecated */
+/* eslint-disable no-null/no-null */
+/* eslint-disable react/jsx-no-bind */
+import { unmountComponentAtNode } from 'react-dom';
 import React, { useState } from '../lib/teact/teact';
 
 import { SCHEDULED_WHEN_ONLINE } from '../config';
-import { getDayStartAt } from '../util/dateFormat';
 import { getServerTimeOffset } from '../util/serverTime';
-import useLang from './useLang';
 import useLastCallback from './useLastCallback';
 
-import CalendarModal from '../components/common/CalendarModal.async';
+import CommandMenuCalendar from '../components/common/CommandMenuCalendar';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 
 const useSchedule = (
   canScheduleUntilOnline?: boolean,
+  isChatWithSelf?: boolean,
   onCancel?: () => void,
   openAt?: number,
 ) => {
-  const lang = useLang();
+  const [isMenuOpen, setMenuOpen] = useState(false);
   const [onScheduled, setOnScheduled] = useState<OnScheduledCallback | undefined>();
 
   const handleMessageSchedule = useLastCallback((date: Date, isWhenOnline = false) => {
-    // Scheduled time can not be less than 10 seconds in future
-    const scheduledAt = Math.round(Math.max(date.getTime(), Date.now() + 60 * 1000) / 1000)
-      + (isWhenOnline ? 0 : getServerTimeOffset());
+    // Преобразование даты в таймстамп
+    const scheduledAt = Math.round(date.getTime() / 1000) + (isWhenOnline ? 0 : getServerTimeOffset());
     onScheduled?.(scheduledAt);
     setOnScheduled(undefined);
   });
@@ -30,12 +32,19 @@ const useSchedule = (
     handleMessageSchedule(new Date(SCHEDULED_WHEN_ONLINE * 1000), true);
   });
 
+  const cmdkRoot = document.getElementById('cmdk-root');
   const handleCloseCalendar = useLastCallback(() => {
     setOnScheduled(undefined);
     onCancel?.();
+    setMenuOpen(false);
+    if (cmdkRoot) {
+      unmountComponentAtNode(cmdkRoot);
+    }
+    return null;
   });
 
   const requestCalendar = useLastCallback((whenScheduled: OnScheduledCallback) => {
+    setMenuOpen(true);
     setOnScheduled(() => whenScheduled);
   });
 
@@ -47,16 +56,13 @@ const useSchedule = (
   scheduledMaxDate.setFullYear(scheduledMaxDate.getFullYear() + 1);
 
   const calendar = (
-    <CalendarModal
-      isOpen={Boolean(onScheduled)}
-      withTimePicker
-      selectedAt={scheduledDefaultDate.getTime()}
-      maxAt={getDayStartAt(scheduledMaxDate)}
-      isFutureMode
-      secondButtonLabel={canScheduleUntilOnline ? lang('Schedule.SendWhenOnline') : undefined}
+    <CommandMenuCalendar
+      isOpen={isMenuOpen}
+      setOpen={setMenuOpen}
       onClose={handleCloseCalendar}
       onSubmit={handleMessageSchedule}
-      onSecondButtonClick={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
+      onSendWhenOnline={canScheduleUntilOnline ? handleMessageScheduleUntilOnline : undefined}
+      isReminder={isChatWithSelf}
     />
   );
 

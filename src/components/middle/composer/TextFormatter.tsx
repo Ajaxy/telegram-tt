@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-console */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -115,6 +117,8 @@ const TextFormatter: FC<OwnProps> = ({
     setSelectedTextFormats(selectedFormats);
   }, [isOpen, selectedRange, openLinkControl]);
 
+  const [openAIKey] = useState(localStorage.getItem('openai_api_key'));
+
   const restoreSelection = useLastCallback(() => {
     if (!selectedRange) {
       return;
@@ -153,6 +157,71 @@ const TextFormatter: FC<OwnProps> = ({
     }
 
     return selectedRange.commonAncestorContainer.parentElement;
+  });
+
+  const handleAIImprover = useLastCallback(() => {
+    const text = getSelectedText();
+    if (!text) {
+      console.log('Нет выделенного текста для улучшения');
+      return;
+    }
+
+    // Предполагаем, что ваш API ключ хранится в openAIKey
+    const apiKey = openAIKey;
+    if (!apiKey) {
+      console.log('API ключ OpenAI не найден');
+      return;
+    }
+
+    const replaceSelectedText = (newText: string): void => {
+      const selection = window.getSelection();
+      if (!selection || !selection.rangeCount) return;
+
+      selection.deleteFromDocument();
+      selection.getRangeAt(0).insertNode(document.createTextNode(newText));
+
+      // Снимаем выделение
+      selection.removeAllRanges();
+    };
+
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo', // Использование модели чата
+        messages: [
+          {
+            role: 'assistant',
+            // eslint-disable-next-line max-len
+            content: 'You are an assistant. Act as a spelling corrector and improver. Reply to each message with rewritten text using the following instructions to rewrite it. Fix spelling, grammar, and punctuation. Improve clarity and conciseness. Break up overly long sentences. Reduce repetition. Prefer active voice. Prefer simple words. Keep the meaning the same. Keep the tone of voice the same. Use the same language.',
+          },
+          {
+            role: 'user',
+            content: text, // Ваш входной текст
+          },
+        ],
+      }),
+    };
+
+    fetch('https://api.openai.com/v1/chat/completions', requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Ошибка API: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.choices && data.choices.length > 0 && data.choices[0].message) {
+          const newText = data.choices[0].message.content;
+          replaceSelectedText(newText);
+        }
+      })
+      .catch((error) => {
+        console.error('Ошибка при обращении к OpenAI API:', error);
+      });
   });
 
   function updateInputStyles() {
@@ -352,6 +421,7 @@ const TextFormatter: FC<OwnProps> = ({
       m: handleMonospaceText,
       s: handleStrikethroughText,
       p: handleSpoilerText,
+      j: handleAIImprover,
     };
 
     const handler = HANDLERS_BY_KEY[getKeyFromEvent(e)];
@@ -468,6 +538,16 @@ const TextFormatter: FC<OwnProps> = ({
         <Button color="translucent" ariaLabel={lang('TextFormat.AddLinkTitle')} onClick={openLinkControl}>
           <i className="icon icon-link" />
         </Button>
+        {openAIKey && (
+          <Button color="translucent" ariaLabel="Improve writing [⌘+J]" onClick={handleAIImprover}>
+            <i className="icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.96429 3L11.0474 5.92709C11.5538 7.29569 12.6329 8.37474 14.0015 8.88117L16.9286 9.96429L14.0015 11.0474C12.6329 11.5538 11.5538 12.6329 11.0474 14.0015L9.96429 16.9286L8.88117 14.0015C8.37474 12.6329 7.29569 11.5538 5.92709 11.0474L3 9.96429L5.92709 8.88117C7.29569 8.37474 8.37474 7.29569 8.88117 5.92709L9.96429 3Z" fill="#AAAAAA" />
+                <path d="M16.8211 12.6426L17.1519 13.5363C17.6583 14.9049 18.7374 15.984 20.1059 16.4904L20.9997 16.8211L20.1059 17.1519C18.7374 17.6583 17.6583 18.7374 17.1519 20.1059L16.8211 20.9997L16.4904 20.1059C15.984 18.7374 14.9049 17.6583 13.5363 17.1519L12.6426 16.8211L13.5363 16.4904C14.9049 15.984 15.984 14.9049 16.4904 13.5363L16.8211 12.6426Z" fill="#AAAAAA" />
+              </svg>
+            </i>
+          </Button>
+        )}
       </div>
 
       <div className="TextFormatter-link-control">

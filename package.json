@@ -139,6 +139,7 @@
     "@june-so/analytics-next": "^2.0.0",
     "async-mutex": "^0.4.0",
     "big-integer": "github:painor/BigInteger.js",
+    "chrono-node": "^2.7.0",
     "cmdk": "^0.2.0",
     "croppie": "^2.6.5",
     "emoji-data-ios": "git+https://github.com/korenskoy/emoji-data-ios#2886b318eae174527c4bc9fcd321940ef3a85527",

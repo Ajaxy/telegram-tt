@@ -403,7 +403,7 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const [requestCalendar, calendar] = useSchedule(
     isInMessageList && canScheduleUntilOnline,
-    cancelForceShowSymbolMenu,
+    isChatWithSelf,
   );
 
   useTimeout(() => {
