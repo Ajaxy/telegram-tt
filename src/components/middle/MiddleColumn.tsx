@@ -70,7 +70,6 @@ import useForceUpdate from '../../hooks/useForceUpdate';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
-/* import useMultitouchBackSwipe2 from '../../hooks/useMultitouchBackSwipe2'; */
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import usePrevious from '../../hooks/usePrevious';
 import { useResize } from '../../hooks/useResize';
@@ -269,13 +268,6 @@ function MiddleColumn({
     chatId ? onIntersectionChanged : undefined,
     closeAnimationDuration,
   );
-
-  /* // eslint-disable-next-line no-null/no-null
-  const middleColumnRef = useRef<HTMLDivElement>(null);
-
-  useMultitouchBackSwipe2(middleColumnRef, () => {
-    openChat({ id: undefined });
-  }); */
 
   const prevTransitionKey = usePrevious(currentTransitionKey);
 
@@ -485,7 +477,6 @@ function MiddleColumn({
   return (
     <div
       id="MiddleColumn"
-      /* ref={middleColumnRef} */
       className={className}
       onTransitionEnd={handleCssTransitionEnd}
       style={buildStyle(
