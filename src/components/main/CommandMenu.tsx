@@ -146,9 +146,8 @@ const HomePage: React.FC<HomePageProps> = ({
           <span className="shortcuts">
             {IS_ARC_BROWSER ? (
               <>
-                <span className="kbd">⌃</span>
-                <span className="kbd">⇧</span>
-                <span className="kbd">C</span>
+                <span className="kbd">⌘</span>
+                <span className="kbd">G</span>
               </>
             ) : (
               <>
@@ -402,7 +401,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
-      if (IS_ARC_BROWSER && e.metaKey && e.ctrlKey && e.code === 'KeyC') {
+      if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
         handleSelectNewGroup();
         e.preventDefault();
         e.stopPropagation();
