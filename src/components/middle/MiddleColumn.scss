@@ -172,7 +172,7 @@
     }
 
     @media (min-width: 1276px) {
-      width: calc(100% - var(--right-column-width));
+      width: 100%;
 
       #Main.right-column-open & {
         transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
