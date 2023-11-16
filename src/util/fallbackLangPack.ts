@@ -503,7 +503,7 @@ export default {
   QuizPoll: 'Quiz',
   PollViewResults: 'VIEW RESULTS',
   'Chat.Quiz.TotalVotesEmpty': 'No answers yet',
-  lng_update_telegram: 'Update Telegram',
+  lng_update_telegram: 'ulu is ready to update ✨',
   AutoDownloadPhotosTitle: 'Auto-download photos',
   AutoDownloadVideosTitle: 'Auto-download videos and GIFs',
   AutoDownloadFilesTitle: 'Auto-download files and music',
