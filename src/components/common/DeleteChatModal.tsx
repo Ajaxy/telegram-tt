@@ -190,7 +190,7 @@ const DeleteChatModal: FC<OwnProps & StateProps> = ({
       {renderContent()}
       <div className="dialog-buttons-column">
         {isBot && (
-          <Button color="danger" className="confirm-dialog-button" isText onClick={handleDeleteAndStop}>
+          <Button color="danger" className="confirm-dialog-button" onClick={handleDeleteAndStop}>
             {lang('DeleteAndStop')}
           </Button>
         )}

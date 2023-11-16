@@ -125,7 +125,7 @@ const ReportModal: FC<OwnProps> = ({
         onChange={handleDescriptionChange}
       />
       <div className="dialog-buttons">
-        <Button color="danger" className="confirm-dialog-button" isText onClick={handleReport}>
+        <Button color="danger" className="confirm-dialog-button" onClick={handleReport}>
           {lang('lng_report_button')}
           <div className="hotkey-frame">
             <div className="hotkey-icon"></div>
