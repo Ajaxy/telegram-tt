@@ -37,4 +37,7 @@
   font-weight: 600;
   font-size: 0.875rem;
   line-height: 1.5rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 250px;
 }
