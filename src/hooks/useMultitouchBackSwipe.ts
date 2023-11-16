@@ -1,32 +1,34 @@
 import { useEffect, useState } from 'react';
-import { ipcRenderer } from 'electron';
 
-const useMultitouchBackSwipe = (onSwipeBack: () => void) => {
-  const [scrollStart, setScrollStart] = useState(0);
-  const [scrollEnd, setScrollEnd] = useState(0);
+const useMultitouchBackSwipe = (onSwipeBack: () => void, threshold = 100) => {
+  const [lastScrollLeft, setLastScrollLeft] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   useEffect(() => {
-    const handleGestureScrollBegin = (event: any) => {
-      setScrollStart(event.scrollLeft); // Запомнить начальное положение прокрутки
-    };
+    const handleScroll = (event: { target: any }) => {
+      const target = event.target;
+      const currentScrollLeft = target.scrollLeft;
 
-    const handleGestureScrollEnd = (event: any) => {
-      setScrollEnd(event.scrollLeft); // Запомнить конечное положение прокрутки
-
-      // Проверить, был ли свайп слева направо
-      if (scrollEnd > scrollStart) {
-        onSwipeBack();
+      if (currentScrollLeft > lastScrollLeft && currentScrollLeft > threshold) {
+        if (!isSwiping) {
+          setIsSwiping(true);
+          onSwipeBack();
+        }
+      } else {
+        setIsSwiping(false);
       }
+
+      setLastScrollLeft(currentScrollLeft);
     };
 
-    ipcRenderer.on('gesture-scroll-begin', handleGestureScrollBegin);
-    ipcRenderer.on('gesture-scroll-end', handleGestureScrollEnd);
+    window.addEventListener('scroll', handleScroll, true);
 
     return () => {
-      ipcRenderer.removeListener('gesture-scroll-begin', handleGestureScrollBegin);
-      ipcRenderer.removeListener('gesture-scroll-end', handleGestureScrollEnd);
+      window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [scrollStart, scrollEnd, onSwipeBack]);
+  }, [onSwipeBack, threshold, lastScrollLeft, isSwiping]);
+
+  return isSwiping;
 };
 
 export default useMultitouchBackSwipe;
