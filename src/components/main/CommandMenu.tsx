@@ -52,7 +52,9 @@ interface SuggestedContactsProps {
 }
 
 const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, close }) => {
-  const { loadTopUsers, openChat, addRecentlyFoundChatId } = getActions();
+  const {
+    loadTopUsers, openChat, addRecentlyFoundChatId,
+  } = getActions();
   const runThrottled = throttle(() => loadTopUsers(), 60000, true);
 
   useEffect(() => {
@@ -218,7 +220,9 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 
 const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { track } = useJune();
-  const { showNotification, openChat, openUrl } = getActions();
+  const {
+    showNotification, openUrl, openChatByUsername,
+  } = getActions();
   const [isOpen, setOpen] = useState(false);
   /* const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
@@ -285,9 +289,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   }, [inputValue]);
 
   const handleSupport = useCallback(() => {
-    openChat({ id: `${6091980431}` });
+    openChatByUsername({ username: 'ulugmer' });
     close();
-  }, [openChat, close]);
+  }, [openChatByUsername, close]);
 
   const handleFAQ = useCallback(() => {
     openUrl({ url: FAQ_URL });
@@ -295,9 +299,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   }, [openUrl, close]);
 
   const handleChangelog = useCallback(() => {
-    openChat({ id: `${-1001916758340}` });
+    openChatByUsername({ username: 'uludotso' });
     close();
-  }, [openChat, close]);
+  }, [openChatByUsername, close]);
 
   const handleSelectNewChannel = useCallback(() => {
     runCommand('NEW_CHANNEL');
