@@ -360,6 +360,19 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     }
   }, [close, archiveMessages, track]);
 
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyC') {
+        handleSelectNewGroup();
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', listener);
+    return () => document.removeEventListener('keydown', listener);
+  }, [handleSelectNewGroup]);
+
   const CommandMenuInner = (
     <Command.Dialog
       label="Command Menu"
