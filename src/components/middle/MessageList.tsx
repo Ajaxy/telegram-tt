@@ -222,7 +222,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
-    const minDeltaX = 50; // Минимальное расстояние прокрутки для активации свайпа
+    const minDeltaX = 75; // Минимальное расстояние прокрутки для активации свайпа
 
     const handleSwipeLeftToRight = () => {
       // TODO
