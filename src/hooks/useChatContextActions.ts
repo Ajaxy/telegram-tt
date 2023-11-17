@@ -12,6 +12,7 @@ import {
 import { compact } from '../util/iteratees';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import useArchiver from './useArchiver';
+import useDone from './useDone';
 import useLang from './useLang';
 
 const useChatContextActions = ({
@@ -43,6 +44,7 @@ const useChatContextActions = ({
   const isServiceNotifications = user?.id === SERVICE_NOTIFICATIONS_USER_ID;
 
   const { archiveChat } = useArchiver({ isManual: true });
+  const { doneChat, isChatDone } = useDone();
 
   return useMemo(() => {
     if (!chat) {
@@ -101,7 +103,23 @@ const useChatContextActions = ({
       ? { title: lang('MarkAsUnreadHotkey'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
       : undefined;
 
-    const actionArchive = isChatArchived(chat)
+    const actionDone = isChatArchived(chat)
+      ? {
+        title: lang('MarkNotDone'),
+        icon: 'unarchive',
+        handler: () => {
+          doneChat({ id: chat.id, value: false });
+        },
+      }
+      : {
+        title: lang('MarkDone'),
+        icon: 'archive',
+        handler: () => {
+          doneChat({ id: chat.id, value: true });
+        },
+      };
+
+    const actionArchive = isChatDone(chat)
       ? {
         title: lang('MarkNotDone'),
         icon: 'unarchive',
@@ -137,6 +155,8 @@ const useChatContextActions = ({
 
     return compact([
       !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
+      // todo: ?
+      !isSelf && !isServiceNotifications && !isInFolder && actionDone,
       actionMaskAsRead,
       actionMarkAsUnread,
       !isSelf && actionMute,
@@ -147,7 +167,8 @@ const useChatContextActions = ({
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications, archiveChat,
+    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications,
+    isChatDone, doneChat, archiveChat,
   ]);
 };
 
