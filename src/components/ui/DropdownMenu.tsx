@@ -14,7 +14,6 @@ type OwnProps = {
   trigger?: FC<{ onTrigger: () => void; isOpen?: boolean }>;
   transformOriginX?: number;
   transformOriginY?: number;
-  transformMarginTop?: number;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   footer?: string;
@@ -111,7 +110,6 @@ const DropdownMenu: FC<OwnProps> = ({
         className={className || ''}
         transformOriginX={transformOriginX}
         transformOriginY={transformOriginY}
-        transformMarginTop={transformOriginY}
         positionX={positionX}
         positionY={positionY}
         footer={footer}

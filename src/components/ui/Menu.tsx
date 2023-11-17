@@ -67,9 +67,8 @@ const Menu: FC<OwnProps> = ({
   bubbleStyle,
   ariaLabelledBy,
   children,
-  /*   transformOriginX,
-  transformOriginY, */
-  transformMarginTop,
+  transformOriginX,
+  transformOriginY,
   positionX = 'left',
   positionY = 'top',
   autoClose = false,
@@ -140,9 +139,8 @@ const Menu: FC<OwnProps> = ({
     shouldCloseFast && 'close-fast',
   );
 
-  /* const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
-  const transformOriginXStyle = transformOriginX !== undefined ? `${transformOriginX}px` : undefined; */
-  const transformMarginTopStyle = transformMarginTop !== undefined ? `${transformMarginTop}rem` : undefined;
+  const transformOriginYStyle = transformOriginY !== undefined ? `${transformOriginY}px` : undefined;
+  const transformOriginXStyle = transformOriginX !== undefined ? `${transformOriginX}px` : undefined;
 
   const menu = (
     <div
@@ -174,8 +172,7 @@ const Menu: FC<OwnProps> = ({
         ref={menuRef}
         className={bubbleFullClassName}
         style={buildStyle(
-          /* `transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY}`, */
-          `margin-top: ${transformMarginTopStyle}`,
+          `transform-origin: ${transformOriginXStyle || positionX} ${transformOriginYStyle || positionY}`,
           bubbleStyle,
         )}
         onClick={autoClose ? onClose : undefined}
