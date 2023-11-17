@@ -106,14 +106,14 @@ const useChatContextActions = ({
     const actionDone = isChatDone(chat)
       ? {
         title: lang('MarkNotDone'),
-        icon: 'unarchive',
+        icon: 'select',
         handler: () => {
           doneChat({ id: chat.id, value: false });
         },
       }
       : {
         title: lang('MarkDone'),
-        icon: 'archive',
+        icon: 'select',
         handler: () => {
           doneChat({ id: chat.id, value: true });
         },
