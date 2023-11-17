@@ -9,6 +9,7 @@
   align-items: center;
   flex-shrink: 0;
   background-color: var(--color-background);
+  margin-top: 2rem;
 
   h3 {
     margin-bottom: 0;
@@ -54,7 +55,7 @@
 
   body.is-electron.is-macos #Main:not(.is-fullscreen) {
     justify-content: space-between;
-    padding: 2rem 0.5rem 0.5rem 0.5rem;
+    padding: 4.5rem 0.5rem 0.5rem 0.5rem;
 
     .SearchInput {
       margin-left: 0.5rem;
