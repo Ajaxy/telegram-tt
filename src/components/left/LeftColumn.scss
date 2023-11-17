@@ -52,9 +52,9 @@
     }
   }
 
-  body.is-electron.is-macos #Main:not(.is-fullscreen) &:not(#TopicListHeader) {
+  body.is-electron.is-macos #Main:not(.is-fullscreen) {
     justify-content: space-between;
-    padding: 0.5rem 0.5rem 0.5rem 4.5rem;
+    padding: 2rem 0.5rem 0.5rem 0.5rem;
 
     .SearchInput {
       margin-left: 0.5rem;

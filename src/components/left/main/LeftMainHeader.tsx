@@ -24,7 +24,7 @@ import {
 import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { formatDateToString } from '../../../util/dateFormat';
-import { IS_APP, IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
+import { IS_APP, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import useCommands from '../../../hooks/useCommands';
@@ -303,7 +303,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               forceOpen={isBotMenuOpen}
               positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
               /* transformOriginY={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 50 : undefined} */
-              transformMarginTop={IS_ELECTRON && IS_MAC_OS ? 2 : undefined}
+              /* transformMarginTop={IS_ELECTRON && IS_MAC_OS ? 2 : undefined} */
               onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
             >
               <LeftSideMenuItems
