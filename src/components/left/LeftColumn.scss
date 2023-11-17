@@ -68,7 +68,7 @@
   }
 }
 
-body.is-macos.is-electron .left-header {
+body.is-macos.is-electron #Main:not(.is-fullscreen) .left-header {
   margin-top: 2.5rem;
 }
 
