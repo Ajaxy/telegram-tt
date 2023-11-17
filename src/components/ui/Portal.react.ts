@@ -7,14 +7,20 @@ import type { FC } from '../../lib/teact/teact';
 
 type OwnProps = {
   containerId?: string;
+  elementId?: string;
   className?: string;
   children: any;
 };
 
-const Portal: FC<OwnProps> = ({ containerId, className, children }) => {
+const Portal: FC<OwnProps> = ({
+  containerId, elementId, className, children,
+}) => {
   const elementRef = useRef<HTMLDivElement>();
   if (!elementRef.current) {
     elementRef.current = document.createElement('div');
+    if (elementId) {
+      elementRef.current.setAttribute('id', elementId);
+    }
   }
 
   useLayoutEffect(() => {

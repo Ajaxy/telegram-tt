@@ -24,7 +24,7 @@ import ChatFoldersTree from './ChatFoldersTree';
 
 import 'react-complex-tree/lib/style-modern.css';
 
-const uluChatFoldersRootId = 'chat-folders-root';
+const uluChatFoldersRootId = 'chat-folders-tree-root';
 
 const uluChatFoldersElement = document.getElementById(uluChatFoldersRootId);
 const uluChatFoldersRoot = createRoot(uluChatFoldersElement!);

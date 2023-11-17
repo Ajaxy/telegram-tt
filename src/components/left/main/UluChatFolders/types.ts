@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { TreeItem } from 'react-complex-tree';
 
-import type { ApiChat } from '../../../../api/types';
+import type { ApiChat, ApiUser } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TabWithProperties } from '../../../ui/TabList';
 
@@ -13,6 +13,9 @@ export type TreeItemChat<T extends any> = TreeItem<T> & {
   unreadCount: number | undefined;
   contextActions: MenuItemContextAction[] | undefined;
   ref?: RefObject<HTMLDivElement>;
+  user?: ApiUser;
+  isPinned?: boolean;
+  canChangeFolder?: boolean;
 };
 
 export type TreeItemFolder = TabWithProperties & {

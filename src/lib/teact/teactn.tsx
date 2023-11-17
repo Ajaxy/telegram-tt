@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import type { FC, FC_withDebug, Props } from './teact';
 
 import { DEBUG, DEBUG_MORE } from '../../config';
@@ -6,6 +7,8 @@ import { handleError } from '../../util/handleError';
 import { orderBy } from '../../util/iteratees';
 import { throttleWithTickEnd } from '../../util/schedulers';
 import { requestMeasure } from '../fasterdom/fasterdom';
+// eslint-disable-next-line import/no-cycle
+import { withGlobal as withGlobalReact } from '../react/reactn';
 import React, { DEBUG_resolveComponentName, useEffect } from './teact';
 
 import useForceUpdate from '../../hooks/useForceUpdate';
@@ -14,7 +17,7 @@ import useUniqueId from '../../hooks/useUniqueId';
 
 export default React;
 
-interface Container {
+export interface Container {
   mapStateToProps: MapStateToProps<any>;
   activationFn?: ActivationFn<any>;
   stuckTo?: any;
@@ -46,13 +49,14 @@ type ActionHandler = (
   payload: any,
 ) => GlobalState | void | Promise<void>;
 
-type MapStateToProps<OwnProps = undefined> = (global: GlobalState, ownProps: OwnProps) => AnyLiteral;
+export type MapStateToProps<OwnProps = undefined> = (global: GlobalState, ownProps: OwnProps) => AnyLiteral;
 type StickToFirstFn = (value: any) => boolean;
-type ActivationFn<OwnProps = undefined> = (
+export type ActivationFn<OwnProps = undefined> = (
   global: GlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn,
 ) => boolean;
 
-let currentGlobal = {} as GlobalState;
+// eslint-disable-next-line import/no-mutable-exports
+export let currentGlobal = {} as GlobalState;
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let DEBUG_currentCapturedId: number | undefined;
@@ -64,7 +68,7 @@ const DEBUG_releaseCapturedIdThrottled = throttleWithTickEnd(() => {
 const actionHandlers: Record<string, ActionHandler[]> = {};
 const callbacks: Function[] = [updateContainers];
 const actions = {} as Actions;
-const containers = new Map<string, Container>();
+export const containers = new Map<string, Container>();
 
 const runCallbacksThrottled = throttleWithTickEnd(runCallbacks);
 
@@ -293,7 +297,7 @@ export function withGlobal<OwnProps extends AnyLiteral>(
   };
 }
 
-function activateContainer(container: Container, global: GlobalState, props: Props) {
+export function activateContainer(container: Container, global: GlobalState, props: Props) {
   const { activationFn, stuckTo } = container;
   if (!activationFn) {
     return true;
@@ -341,6 +345,10 @@ export function typify<
       handler: ActionHandlers[ActionName],
     ) => void,
     withGlobal: withGlobal as <OwnProps extends AnyLiteral>(
+      mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
+      activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
+    ) => (Component: FC) => FC<OwnProps>,
+    withGlobalReact: withGlobalReact as <OwnProps extends AnyLiteral>(
       mapStateToProps: (global: ProjectGlobalState, ownProps: OwnProps) => AnyLiteral,
       activationFn?: (global: ProjectGlobalState, ownProps: OwnProps, stickToFirst: StickToFirstFn) => boolean,
     ) => (Component: FC) => FC<OwnProps>,

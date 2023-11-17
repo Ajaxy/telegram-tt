@@ -10,10 +10,23 @@ import type { TreeItemChat } from '../../../types';
 import { ULU_APP } from '../../../../../../../config';
 import buildClassName from '../../../../../../../util/buildClassName';
 import { MouseButton } from '../../../../../../../util/windowEnvironment';
+import renderText from '../../../../../../common/helpers/renderText.react';
 
+import useChatContextActions from '../../../../../../../hooks/useChatContextActions.react';
+// import useAppLayout from '../../../../../../../hooks/useAppLayout.react';
 import useContextMenuHandlers from '../../../../../../../hooks/useContextMenuHandlers.react';
 import { useFastClick } from '../../../../../../../hooks/useFastClick.react';
+import useFlag from '../../../../../../../hooks/useFlag.react';
+import useLastCallback from '../../../../../../../hooks/useLastCallback.react';
+import useMenuPosition from '../../../../../../../hooks/useMenuPosition.react';
 
+import DeleteChatModal from '../../../../../../common/DeleteChatModal.react';
+import ReportModal from '../../../../../../common/ReportModal.react';
+import Menu from '../../../../../../ui/Menu.react';
+import MenuItem from '../../../../../../ui/MenuItem.react';
+import MenuSeparator from '../../../../../../ui/MenuSeparator.react';
+import ChatFolderModal from '../../../../../ChatFolderModal.react';
+import MuteChatModal from '../../../../../MuteChatModal.react';
 import ChatAvatar from './ChatAvatar';
 
 import stylesUluChatFolder from '../../../../UluChatFolder/UluChatFolder.module.scss';
@@ -32,7 +45,7 @@ const Chat: FC<{
   children, active, title, shouldStressUnreadMessages, item, context,
 }) => {
   const {
-    contextActions, unreadCount: messagesUnreadCount, ref,
+    unreadCount: messagesUnreadCount, ref,
   } = item;
 
   const classNameWrapper = buildClassName(
@@ -41,9 +54,52 @@ const Chat: FC<{
     !!messagesUnreadCount && shouldStressUnreadMessages && stylesUluChatFolder['has-unread-messages'],
   );
 
+  // const { isMobile } = useAppLayout(); TODO use this
+  const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useFlag();
+  const [isMuteModalOpen, openMuteModal, closeMuteModal] = useFlag();
+  const [isChatFolderModalOpen, openChatFolderModal, closeChatFolderModal] = useFlag();
+  const [isReportModalOpen, openReportModal, closeReportModal] = useFlag();
+  const [shouldRenderDeleteModal, markRenderDeleteModal, unmarkRenderDeleteModal] = useFlag();
+  const [shouldRenderMuteModal, markRenderMuteModal, unmarkRenderMuteModal] = useFlag();
+  const [shouldRenderChatFolderModal, markRenderChatFolderModal, unmarkRenderChatFolderModal] = useFlag();
+  const [shouldRenderReportModal, markRenderReportModal, unmarkRenderReportModal] = useFlag();
+
+  const handleDelete = useLastCallback(() => {
+    markRenderDeleteModal();
+    openDeleteModal();
+  });
+
+  const handleMute = useLastCallback(() => {
+    markRenderMuteModal();
+    openMuteModal();
+  });
+
+  const handleChatFolderChange = useLastCallback(() => {
+    markRenderChatFolderModal();
+    openChatFolderModal();
+  });
+
+  const handleReport = useLastCallback(() => {
+    markRenderReportModal();
+    openReportModal();
+  });
+
+  const contextActions = useChatContextActions({
+    chat: item.chat,
+    user: item.user, // TODO
+    handleDelete,
+    handleMute,
+    handleChatFolderChange,
+    handleReport,
+    folderId: item.chat?.folderId,
+    isPinned: item.isPinned, // TODO
+    isMuted: item.chat?.isMuted,
+    canChangeFolder: item.canChangeFolder, // TODO
+  });
+
   const {
     handleContextMenu, handleBeforeContextMenu,
-    // contextMenuPosition, handleContextMenuClose, handleContextMenuHide, isContextMenuOpen,
+    contextMenuPosition, handleContextMenuClose, handleContextMenuHide, isContextMenuOpen,
   } = useContextMenuHandlers(ref!, !contextActions);
 
   const {
@@ -86,24 +142,23 @@ const Chat: FC<{
     handleClickChat();
   });
 
-  // const getTriggerElement = useLastCallback(() => ref!.current);
-  // const getRootElement = useLastCallback(
-  //   () => (contextRootElementSelector ? ref!.current!.closest(contextRootElementSelector) : document.body),
-  // );
-  // const getMenuElement = useLastCallback(
-  //   () => document.querySelector('#portals')!.querySelector('.Tab-context-menu .bubble'),
-  // );
-  // const getLayout = useLastCallback(() => ({ withPortal: true }));
+  const getTriggerElement = useLastCallback(() => ref!.current);
+  const getRootElement = useLastCallback(() => ref!.current!.closest('.custom-scroll'));
+  const getMenuElement = useLastCallback(() => {
+    return (document.querySelector('#chat-folders-tree-context-menu-root'))!
+      .querySelector('.ListItem-context-menu .bubble');
+  });
+  const getLayout = useLastCallback(() => ({ withPortal: true }));
 
-  // const {
-  //   positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
-  // } = useMenuPosition(
-  //   contextMenuPosition,
-  //   getTriggerElement,
-  //   getRootElement,
-  //   getMenuElement,
-  //   getLayout,
-  // );
+  const {
+    positionX, positionY, transformOriginX, transformOriginY, style: menuStyle,
+  } = useMenuPosition(
+    contextMenuPosition,
+    getTriggerElement,
+    getRootElement,
+    getMenuElement,
+    getLayout,
+  );
 
   // TODO use <ListItem/> with <Ripple/>
   return (
@@ -128,37 +183,73 @@ const Chat: FC<{
           </div>
         </div>
         { !!messagesUnreadCount && (<div className={stylesUluChatFolder.unread}>{ messagesUnreadCount }</div>) }
-        {/* {contextActions && contextMenuPosition !== undefined && (
-        // <Menu
-        //   isOpen={isContextMenuOpen}
-        //   transformOriginX={transformOriginX}
-        //   transformOriginY={transformOriginY}
-        //   positionX={positionX}
-        //   positionY={positionY}
-        //   // style={menuStyle}
-        //   className="Tab-context-menu"
-        //   autoClose
-        //   onClose={handleContextMenuClose}
-        //   onCloseAnimationEnd={handleContextMenuHide}
-        //   withPortal
-        // >
-        //   {contextActions.map((action) => (
-        //     ('isSeparator' in action) ? (
-        //       <MenuSeparator key={action.key || 'separator'} />
-        //     ) : (
-        //       <MenuItem
-        //         key={action.title}
-        //         icon={action.icon}
-        //         destructive={action.destructive}
-        //         disabled={!action.handler}
-        //         onClick={action.handler}
-        //       >
-        //         {action.title}
-        //       </MenuItem>
-        //     )
-        //   ))}
-        // </Menu>
-      )} */}
+        {contextActions && contextMenuPosition !== undefined && (
+          <Menu
+            isOpen={isContextMenuOpen}
+            transformOriginX={transformOriginX}
+            transformOriginY={transformOriginY}
+            positionX={positionX}
+            positionY={positionY}
+            style={menuStyle}
+            className="ListItem-context-menu with-menu-transitions"
+            autoClose
+            onClose={handleContextMenuClose}
+            onCloseAnimationEnd={handleContextMenuHide}
+            withPortal
+            // bubbleClassName={menuBubbleClassName}
+          >
+            {contextActions.map((action) => (
+              ('isSeparator' in action) ? (
+                <MenuSeparator key={action.key || 'separator'} />
+              ) : (
+                <MenuItem
+                  key={action.title}
+                  icon={action.icon}
+                  destructive={action.destructive}
+                  disabled={!action.handler}
+                  onClick={action.handler}
+                >
+                  <span className="list-item-ellipsis">
+                    {renderText(action.title)}
+                  </span>
+                </MenuItem>
+              )
+            ))}
+          </Menu>
+        )}
+        {shouldRenderDeleteModal && (
+          <DeleteChatModal
+            isOpen={isDeleteModalOpen}
+            onClose={closeDeleteModal}
+            onCloseAnimationEnd={unmarkRenderDeleteModal}
+            chat={item.chat!}
+          />
+        )}
+        {shouldRenderMuteModal && (
+          <MuteChatModal
+            isOpen={isMuteModalOpen}
+            onClose={closeMuteModal}
+            onCloseAnimationEnd={unmarkRenderMuteModal}
+            chatId={item.chat!.id}
+          />
+        )}
+        {shouldRenderChatFolderModal && (
+          <ChatFolderModal
+            isOpen={isChatFolderModalOpen}
+            onClose={closeChatFolderModal}
+            onCloseAnimationEnd={unmarkRenderChatFolderModal}
+            chatId={item.chat!.id}
+          />
+        )}
+        {shouldRenderReportModal && (
+          <ReportModal
+            isOpen={isReportModalOpen}
+            onClose={closeReportModal}
+            onCloseAnimationEnd={unmarkRenderReportModal}
+            peerId={item.chat!.id}
+            subject="peer"
+          />
+        )}
       </div>
       {children}
     </>

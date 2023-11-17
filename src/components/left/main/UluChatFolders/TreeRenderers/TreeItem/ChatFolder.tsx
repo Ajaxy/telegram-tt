@@ -82,7 +82,7 @@ const ChatFolder: FC<{
     () => (contextRootElementSelector ? ref!.current!.closest(contextRootElementSelector) : document.body),
   );
   const getMenuElement = useLastCallback(
-    () => document.querySelector('#portals')!.querySelector('.Tab-context-menu .bubble'),
+    () => document.querySelector('#chat-folders-tree-context-menu-root')!.querySelector('.Tab-context-menu .bubble'),
   );
   const getLayout = useLastCallback(() => ({ withPortal: true }));
 
@@ -135,6 +135,8 @@ const ChatFolder: FC<{
             onClose={handleContextMenuClose}
             onCloseAnimationEnd={handleContextMenuHide}
             withPortal
+            portalElementId={`portal-context-menu-${item.id}`}
+            portalContainerId="#chat-folders-tree-context-menu-root"
           >
             {contextActions.map((action) => (
               ('isSeparator' in action) ? (

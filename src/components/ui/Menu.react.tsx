@@ -7,7 +7,7 @@ import type { FC } from '../../lib/teact/teact';
 
 import buildClassName from '../../util/buildClassName';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
-import freezeWhenClosed from '../../util/hoc/freezeWhenClosed';
+import freezeWhenClosed from '../../util/hoc/freezeWhenClosed.react';
 import { IS_BACKDROP_BLUR_SUPPORTED } from '../../util/windowEnvironment';
 import { preventMessageInputBlurWithBubbling } from '../middle/helpers/preventMessageInputBlur';
 
@@ -51,6 +51,8 @@ type OwnProps = {
   onMouseEnterBackdrop?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   onMouseLeave?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
   withPortal?: boolean;
+  portalContainerId?: string;
+  portalElementId?: string;
   children: React.ReactNode;
 };
 
@@ -83,6 +85,8 @@ const Menu: FC<OwnProps> = ({
   onMouseLeave,
   shouldSkipTransition,
   withPortal,
+  portalContainerId,
+  portalElementId,
   onMouseEnterBackdrop,
 }) => {
   // eslint-disable-next-line no-null/no-null
@@ -129,6 +133,18 @@ const Menu: FC<OwnProps> = ({
     undefined,
     backdropExcludedSelector,
   );
+
+  // TODO this is a clutch
+  // upstream doesn't require this
+  // figure out later if this becomes a problem
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setTimeout(() => {
+      // @ts-ignore
+      menuRef.current?.childNodes?.[0]?.focus();
+    }, 10);
+  }, [isOpen]);
 
   const bubbleFullClassName = buildClassName(
     'bubble menu-container custom-scroll',
@@ -188,7 +204,7 @@ const Menu: FC<OwnProps> = ({
   );
 
   if (withPortal) {
-    return <Portal><MenuComponent /></Portal>;
+    return <Portal elementId={portalElementId} containerId={portalContainerId}><MenuComponent /></Portal>;
   }
 
   return MenuComponent;

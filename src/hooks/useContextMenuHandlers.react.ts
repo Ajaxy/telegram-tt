@@ -50,9 +50,12 @@ const useContextMenuHandlers = (
     }
     e.preventDefault();
 
-    if (contextMenuPosition) {
-      return;
-    }
+    // TODO i commented this out to "fix" a bug
+    // TODO leading to CM's lacking 'open', 'shown' classnames
+    // TODO resulting in CM's being invisible
+    // if (contextMenuPosition) {
+    //   return;
+    // }
 
     setIsContextMenuOpen(true);
     setContextMenuPosition({ x: e.clientX, y: e.clientY });
