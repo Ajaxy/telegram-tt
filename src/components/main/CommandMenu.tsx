@@ -175,7 +175,7 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
-          <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+          <i className="icon icon-readchats" /><span>Auto-Done After Reading</span>
         </Command.Item>
         {menuItems.map((item, index) => (
           <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
