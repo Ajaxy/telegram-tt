@@ -215,11 +215,6 @@ const HomePage: React.FC<HomePageProps> = ({
         }
         <Command.Item onSelect={handleOpenInbox}>
           <i className="icon icon-unread" /><span>Go to inbox</span>
-          <span className="shortcuts">
-            <span className="kbd">⌃</span>
-            <span className="kbd">⇧</span>
-            <span className="kbd">1</span>
-          </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenSavedMessages}>
           <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
