@@ -125,6 +125,7 @@ interface HomePageProps {
   handleSelectNewChannel: () => void;
   handleCreateFolder: () => void;
   handleLockScreenHotkey: () => void;
+  commandToggleArchiver: () => void;
 }
 
 interface CreateNewPageProps {
@@ -138,7 +139,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey,
+  handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver,
 }) => {
   return (
     <>
@@ -171,6 +172,9 @@ const HomePage: React.FC<HomePageProps> = ({
       <CommandSeparator />
       <Command.Group heading="Settings">
         <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+        </Command.Item>
+        <Command.Item onSelect={commandToggleArchiver}>
           <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
         </Command.Item>
         {menuItems.map((item, index) => (
@@ -281,9 +285,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     showNotification, openUrl, openChatByUsername,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
-  /* const [isArchiverEnabled, setIsArchiverEnabled] = useState(
+  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
     !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
-  ); */
+  );
   const { archiveMessages } = useArchiver({ isManual: true });
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
@@ -416,13 +420,13 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
-  /* const commandToggleArchiver = useCallback(() => {
+  const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
     localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
-  }, [close, isArchiverEnabled]); */
+  }, [close, isArchiverEnabled]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
@@ -494,6 +498,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleSelectNewChannel={handleSelectNewChannel}
             handleCreateFolder={handleCreateFolder}
             handleLockScreenHotkey={handleLockScreenHotkey}
+            commandToggleArchiver={commandToggleArchiver}
           />
         )}
         {activePage === 'createNew' && (
