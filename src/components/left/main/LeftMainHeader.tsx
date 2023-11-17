@@ -293,31 +293,35 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             {isCurrentUserPremium && <StatusButton />}
           </>
         ) : (
-          <div className={styles.profileWrapper}>
-            <DropdownMenu
-              trigger={MainButton}
-              footer={`${APP_NAME} ${versionString}`}
-              className={buildClassName(
-                'main-menu',
-                lang.isRtl && 'rtl',
-                shouldHideSearch && lang.isRtl && 'right-aligned',
-                shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
-              )}
-              forceOpen={isBotMenuOpen}
-              positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-              transformOriginY={IS_ELECTRON && IS_MAC_OS ? 50 : undefined}
-              onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
-            >
-              <LeftSideMenuItems
-                onSelectArchived={onSelectArchived}
-                onSelectContacts={onSelectContacts}
-                onSelectSettings={onSelectSettings}
-                onBotMenuOpened={markBotMenuOpen}
-                onBotMenuClosed={unmarkBotMenuOpen}
-              />
-            </DropdownMenu>
-            <UluSearchButton onClick={handleSearchFocus} />
-          </div>
+          <>
+            {IS_ELECTRON && (
+              <div className="electron-top-block" />
+            )}
+            <div className={styles.profileWrapper}>
+              <DropdownMenu
+                trigger={MainButton}
+                footer={`${APP_NAME} ${versionString}`}
+                className={buildClassName(
+                  'main-menu',
+                  lang.isRtl && 'rtl',
+                  shouldHideSearch && lang.isRtl && 'right-aligned',
+                  shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+                )}
+                forceOpen={isBotMenuOpen}
+                positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+                onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+              >
+                <LeftSideMenuItems
+                  onSelectArchived={onSelectArchived}
+                  onSelectContacts={onSelectContacts}
+                  onSelectSettings={onSelectSettings}
+                  onBotMenuOpened={markBotMenuOpen}
+                  onBotMenuClosed={unmarkBotMenuOpen}
+                />
+              </DropdownMenu>
+              <UluSearchButton onClick={handleSearchFocus} />
+            </div>
+          </>
         ) }
         {hasPasscode && (
           <Button

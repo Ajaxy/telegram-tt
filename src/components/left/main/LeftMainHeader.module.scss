@@ -144,8 +144,10 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+}
 
-  .electron-header {
-    transform: translateY(50px); /* Пример перемещения шапки вниз */
-  }
+.electron-top-block {
+  display: block;
+  width: 100%;
+  height: 50px;
 }
