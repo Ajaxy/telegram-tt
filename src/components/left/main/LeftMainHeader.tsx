@@ -183,10 +183,15 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const MainButton: FC<{ onTrigger: () => void }> = useMemo(() => {
     return ({ onTrigger }) => (
-      <UluHeaderProfile
+      <>
+        {IS_ELECTRON && (
+          <div className="electron-top-block" />
+        )}
+        <UluHeaderProfile
         // eslint-disable-next-line react/jsx-no-bind
-        onClick={hasMenu ? onTrigger : () => onReset()}
-      />
+          onClick={hasMenu ? onTrigger : () => onReset()}
+        />
+      </>
     );
   }, [hasMenu, onReset]);
 
@@ -293,35 +298,30 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             {isCurrentUserPremium && <StatusButton />}
           </>
         ) : (
-          <>
-            {IS_ELECTRON && (
-              <div className="electron-top-block" />
-            )}
-            <div className={styles.profileWrapper}>
-              <DropdownMenu
-                trigger={MainButton}
-                footer={`${APP_NAME} ${versionString}`}
-                className={buildClassName(
-                  'main-menu',
-                  lang.isRtl && 'rtl',
-                  shouldHideSearch && lang.isRtl && 'right-aligned',
-                  shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
-                )}
-                forceOpen={isBotMenuOpen}
-                positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-                onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
-              >
-                <LeftSideMenuItems
-                  onSelectArchived={onSelectArchived}
-                  onSelectContacts={onSelectContacts}
-                  onSelectSettings={onSelectSettings}
-                  onBotMenuOpened={markBotMenuOpen}
-                  onBotMenuClosed={unmarkBotMenuOpen}
-                />
-              </DropdownMenu>
-              <UluSearchButton onClick={handleSearchFocus} />
-            </div>
-          </>
+          <div className={styles.profileWrapper}>
+            <DropdownMenu
+              trigger={MainButton}
+              footer={`${APP_NAME} ${versionString}`}
+              className={buildClassName(
+                'main-menu',
+                lang.isRtl && 'rtl',
+                shouldHideSearch && lang.isRtl && 'right-aligned',
+                shouldDisableDropdownMenuTransitionRef.current && lang.isRtl && 'disable-transition',
+              )}
+              forceOpen={isBotMenuOpen}
+              positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
+              onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
+            >
+              <LeftSideMenuItems
+                onSelectArchived={onSelectArchived}
+                onSelectContacts={onSelectContacts}
+                onSelectSettings={onSelectSettings}
+                onBotMenuOpened={markBotMenuOpen}
+                onBotMenuClosed={unmarkBotMenuOpen}
+              />
+            </DropdownMenu>
+            <UluSearchButton onClick={handleSearchFocus} />
+          </div>
         ) }
         {hasPasscode && (
           <Button

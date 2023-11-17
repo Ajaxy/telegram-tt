@@ -20,7 +20,9 @@ import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
 import { createLocationHash } from '../../../util/routing';
-import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
+import {
+  IS_ELECTRON, IS_MAC_OS, IS_TOUCH_ENV,
+} from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
 import { dispatchHeavyAnimationEvent } from '../../../hooks/useHeavyAnimationCheck';
@@ -216,6 +218,9 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
       )}
       onTransitionEnd={!isOpen ? onCloseAnimationEnd : undefined}
     >
+      {IS_ELECTRON && IS_MAC_OS && (
+        <div className="electron-top-block" />
+      )}
       <div id="TopicListHeader" className="left-header">
         <Button
           round
