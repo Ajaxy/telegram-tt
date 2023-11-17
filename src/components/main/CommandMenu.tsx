@@ -19,7 +19,7 @@ import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
-import { IS_ARC_BROWSER } from '../../util/windowEnvironment';
+import { IS_APP, IS_ARC_BROWSER } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
@@ -207,7 +207,7 @@ const HomePage: React.FC<HomePageProps> = ({
           </span>
         </Command.Item>
         {
-          IS_ARC_BROWSER && (
+          IS_APP && (
             <Command.Item onSelect={handleLockScreenHotkey}>
               <i className="icon icon-lock" /><span>Lock screen</span>
             </Command.Item>
