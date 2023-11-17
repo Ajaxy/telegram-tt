@@ -321,7 +321,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
         ) }
         {hasPasscode && (
           <Button
-            round
             ripple={!isMobile}
             size="tiny"
             color="translucent"
