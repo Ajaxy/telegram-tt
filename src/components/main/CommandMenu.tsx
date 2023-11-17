@@ -124,6 +124,7 @@ interface HomePageProps {
   handleSelectNewGroup: () => void;
   handleSelectNewChannel: () => void;
   handleCreateFolder: () => void;
+  handleLockScreenHotkey: () => void;
 }
 
 interface CreateNewPageProps {
@@ -137,7 +138,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts,
+  handleOpenShortcuts, handleLockScreenHotkey,
 }) => {
   return (
     <>
@@ -205,6 +206,13 @@ const HomePage: React.FC<HomePageProps> = ({
             <span className="kbd">/</span>
           </span>
         </Command.Item>
+        {
+          IS_ARC_BROWSER && (
+            <Command.Item onSelect={handleLockScreenHotkey}>
+              <i className="icon icon-lock" /><span>Lock screen</span>
+            </Command.Item>
+          )
+        }
         <Command.Item onSelect={handleOpenInbox}>
           <i className="icon icon-unread" /><span>Go to inbox</span>
         </Command.Item>
@@ -395,6 +403,11 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
+  const handleLockScreenHotkey = useCallback(() => {
+    runCommand('LOCK_SCREEN');
+    close();
+  }, [runCommand, close]);
+
   /* const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
@@ -472,6 +485,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleSelectNewGroup={handleSelectNewGroup}
             handleSelectNewChannel={handleSelectNewChannel}
             handleCreateFolder={handleCreateFolder}
+            handleLockScreenHotkey={handleLockScreenHotkey}
           />
         )}
         {activePage === 'createNew' && (
