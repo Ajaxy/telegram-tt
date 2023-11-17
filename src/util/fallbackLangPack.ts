@@ -8,7 +8,6 @@ export default {
   Search: 'Search',
   SavedMessages: 'Saved Messages',
   ArchivedChats: 'Archived Chats',
-  DoneChats: 'Archive',
   Contacts: 'Contacts',
   Settings: 'Settings',
   lng_menu_night_mode: 'Night Mode',
