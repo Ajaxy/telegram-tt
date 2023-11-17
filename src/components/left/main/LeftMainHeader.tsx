@@ -31,7 +31,6 @@ import useCommands from '../../../hooks/useCommands';
 import useConnectionStatus from '../../../hooks/useConnectionStatus';
 import useElectronDrag from '../../../hooks/useElectronDrag';
 import useFlag from '../../../hooks/useFlag';
-import { useFullscreenStatus } from '../../../hooks/useFullscreen';
 import { useHotkeys } from '../../../hooks/useHotkeys';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -212,8 +211,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const versionString = IS_BETA ? `${APP_VERSION} Beta (${APP_REVISION})` : (DEBUG ? APP_REVISION : APP_VERSION);
 
-  const isFullscreen = useFullscreenStatus();
-
   // Disable dropdown menu RTL animation for resize
   const {
     shouldDisableDropdownMenuTransitionRef,
@@ -305,7 +302,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               )}
               forceOpen={isBotMenuOpen}
               positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-              transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
+              transformOriginX={IS_ELECTRON ? 50 : undefined}
               onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
             >
               <LeftSideMenuItems

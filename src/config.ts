@@ -2,7 +2,7 @@ import type { ApiReactionEmoji } from './api/types';
 import type { ApiLimitType } from './global/types';
 
 export const APP_CODE_NAME = 'A';
-export const APP_NAME = process.env.APP_NAME || 'Ulu';
+export const APP_NAME = process.env.APP_NAME || 'ulu';
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
