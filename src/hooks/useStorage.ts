@@ -8,42 +8,42 @@ export function useStorage() {
   };
 }
 
-const EVENT = 'ULU_UPDATE_STORAGE';
-
 function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (val: T) => void] {
+  const eventName = `update_storage_${key}`;
+
   const [state, setState] = useState<T>((() => {
     const value = localStorage.getItem(key);
     // eslint-disable-next-line no-null/no-null
-    if (value !== null && value !== undefined) {
+    if (value !== null) {
       return JSON.parse(value);
     }
 
     localStorage.setItem(key, JSON.stringify(initValue));
-    window.dispatchEvent(new Event(EVENT));
+    window.dispatchEvent(new Event(eventName));
     return initValue;
   })());
 
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify(state));
-    window.dispatchEvent(new Event(EVENT));
-  }, [key, state]);
+    window.dispatchEvent(new Event(eventName));
+  }, [key, state, eventName]);
 
   useEffect(() => {
     const listenStorageChange = () => {
       setState(() => {
         const value = localStorage.getItem(key);
         // eslint-disable-next-line no-null/no-null
-        if (value !== null && value !== undefined) {
+        if (value !== null) {
           return JSON.parse(value);
         }
 
         localStorage.setItem(key, JSON.stringify(initValue));
-        window.dispatchEvent(new Event(EVENT));
+        window.dispatchEvent(new Event(eventName));
         return initValue;
       });
     };
-    window.addEventListener(EVENT, listenStorageChange);
-    return () => window.removeEventListener(EVENT, listenStorageChange);
+    window.addEventListener(eventName, listenStorageChange);
+    return () => window.removeEventListener(eventName, listenStorageChange);
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, []);
 
