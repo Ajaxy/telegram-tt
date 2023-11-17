@@ -181,7 +181,7 @@ const HomePage: React.FC<HomePageProps> = ({
       </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-document" /><span>Open FAQ</span>
+          <i className="icon icon-document" /><span>Help center</span>
         </Command.Item>
         <Command.Item onSelect={handleOpenShortcuts}>
           <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
