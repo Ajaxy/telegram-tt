@@ -9,7 +9,6 @@
   align-items: center;
   flex-shrink: 0;
   background-color: var(--color-background);
-  margin-top: 2.5rem;
 
   h3 {
     margin-bottom: 0;
@@ -53,10 +52,9 @@
     }
   }
 
-  body.is-electron.is-macos #Main:not(.is-fullscreen) {
+  body.is-electron.is-macos {
     justify-content: space-between;
     padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-    margin-top: 2.5rem;
 
     .SearchInput {
       margin-left: 0.5rem;
@@ -68,4 +66,8 @@
       --offset-x: -4.125rem;
     }
   }
+}
+
+body.is-macos.is-electron .left-header {
+  margin-top: 2.5rem;
 }
