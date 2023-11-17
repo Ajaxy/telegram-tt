@@ -290,7 +290,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
             {isCurrentUserPremium && <StatusButton />}
           </>
         ) : (
-          <div className={styles.profileWrapper}>
+          <div className={`${styles.profileWrapper} ${IS_ELECTRON ? 'electron-header' : ''}`}>
             <DropdownMenu
               trigger={MainButton}
               footer={`${APP_NAME} ${versionString}`}
@@ -302,7 +302,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               )}
               forceOpen={isBotMenuOpen}
               positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-              transformOriginX={IS_ELECTRON ? 50 : undefined}
               onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
             >
               <LeftSideMenuItems

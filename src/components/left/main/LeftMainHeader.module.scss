@@ -144,4 +144,8 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
+
+  .electron-header {
+    transform: translateY(50px); /* Пример перемещения шапки вниз */
+  }
 }
