@@ -14,7 +14,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { FAQ_URL } from '../../config';
+import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
@@ -119,6 +119,7 @@ interface HomePageProps {
   close: () => void;
   handleSupport: () => void;
   handleFAQ: () => void;
+  handleOpenShortcuts: () => void;
   handleChangelog: () => void;
   handleSelectNewGroup: () => void;
   handleSelectNewChannel: () => void;
@@ -136,6 +137,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
+  handleOpenShortcuts,
 }) => {
   return (
     <>
@@ -180,7 +182,7 @@ const HomePage: React.FC<HomePageProps> = ({
         <Command.Item onSelect={handleFAQ}>
           <i className="icon icon-document" /><span>Open FAQ</span>
         </Command.Item>
-        <Command.Item onSelect={handleFAQ}>
+        <Command.Item onSelect={handleOpenShortcuts}>
           <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
         </Command.Item>
         <Command.Item onSelect={handleSupport}>
@@ -333,7 +335,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   }, [openChatByUsername, close]);
 
   const handleFAQ = useCallback(() => {
-    openUrl({ url: FAQ_URL });
+    openUrl({
+      url: FAQ_URL,
+      shouldSkipModal: true,
+    });
+    close();
+  }, [openUrl, close]);
+
+  const handleOpenShortcts = useCallback(() => {
+    openUrl({
+      url: SHORTCUTS_URL,
+      shouldSkipModal: true,
+    });
     close();
   }, [openUrl, close]);
 
@@ -453,6 +466,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             menuItems={menuItems}
             handleSupport={handleSupport}
             handleFAQ={handleFAQ}
+            handleOpenShortcuts={handleOpenShortcts}
             handleChangelog={handleChangelog}
             close={close}
             handleSelectNewGroup={handleSelectNewGroup}
