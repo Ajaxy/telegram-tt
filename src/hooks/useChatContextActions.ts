@@ -103,7 +103,7 @@ const useChatContextActions = ({
       ? { title: lang('MarkAsUnreadHotkey'), icon: 'unread', handler: () => toggleChatUnread({ id: chat.id }) }
       : undefined;
 
-    const actionDone = isChatArchived(chat)
+    const actionDone = isChatDone(chat)
       ? {
         title: lang('MarkNotDone'),
         icon: 'unarchive',
@@ -119,16 +119,16 @@ const useChatContextActions = ({
         },
       };
 
-    const actionArchive = isChatDone(chat)
+    const actionArchive = isChatArchived(chat)
       ? {
-        title: lang('MarkNotDone'),
+        title: lang('Unarchive'),
         icon: 'unarchive',
         handler: () => {
           archiveChat({ id: chat.id, value: false });
         },
       }
       : {
-        title: lang('MarkDone'),
+        title: lang('Archive'),
         icon: 'archive',
         handler: () => {
           archiveChat({ id: chat.id, value: true });
@@ -154,11 +154,11 @@ const useChatContextActions = ({
     const isInFolder = folderId !== undefined;
 
     return compact([
-      !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       // todo: ?
       !isSelf && !isServiceNotifications && !isInFolder && actionDone,
       actionMaskAsRead,
       actionMarkAsUnread,
+      !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       !isSelf && actionMute,
       actionPin,
       actionAddToFolder,
