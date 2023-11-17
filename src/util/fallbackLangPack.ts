@@ -20,7 +20,7 @@ export default {
   NewChannel: 'New Channel',
   NewGroup: 'New Group',
   'Common.Close': 'Close',
-  FilterAllChats: 'Inbox',
+  FilterAllChats: 'All Chats',
   Inbox: 'Inbox',
   MarkAsUnread: 'Mark as unread',
   MarkAsUnreadHotkey: `Mark as unread ${IS_MAC_OS ? '[⌘+U]' : '[Ctrl+U]'}`,
