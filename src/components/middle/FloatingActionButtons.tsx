@@ -75,6 +75,14 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
     }
   }, [chatId, fetchUnreadMentions, hasUnreadMentions]);
 
+  const animateScrollToLastMessage = (container?: HTMLDivElement | null) => {
+    if (!container) return;
+    const lastMessageElement = getLastMessageElement(container);
+
+    if (!lastMessageElement) return;
+    animateScroll(container, lastMessageElement, 'end', sponsoredMessage ? FOCUS_SPONSORED_MARGIN : FOCUS_MARGIN);
+  };
+
   const handleClick = useLastCallback(() => {
     if (!isShown) return;
 
@@ -83,21 +91,13 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
     if (messageListType === 'pinned') {
       const container = elementRef.current?.parentElement?.querySelector<HTMLDivElement>('.MessageList.type-pinned');
 
-      if (!container) return;
-      const lastMessageElement = getLastMessageElement(container);
-
-      if (!lastMessageElement) return;
-      animateScroll(container, lastMessageElement, 'end', sponsoredMessage ? FOCUS_SPONSORED_MARGIN : FOCUS_MARGIN);
+      animateScrollToLastMessage(container);
     }
 
     if (messageListType === 'scheduled') {
       const container = elementRef.current?.parentElement?.querySelector<HTMLDivElement>('.MessageList.type-scheduled');
 
-      if (!container) return;
-      const lastMessageElement = getLastMessageElement(container);
-
-      if (!lastMessageElement) return;
-      animateScroll(container, lastMessageElement, 'end', FOCUS_MARGIN);
+      animateScrollToLastMessage(container);
     }
   });
 
