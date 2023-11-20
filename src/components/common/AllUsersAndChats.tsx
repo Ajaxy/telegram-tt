@@ -18,7 +18,8 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 
-const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = ({ close, searchQuery }) => {
+const AllUsersAndChats: React.FC<
+{ close: () => void; searchQuery: string; topUserIds: string[] }> = ({ close, searchQuery, topUserIds }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
   const chatsById: Record<string, ApiChat> = global.chats.byId;
@@ -92,6 +93,9 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
     const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
     const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);
     return userAndChatIds.filter((id) => {
+      if (topUserIds && topUserIds.slice(0, 3).includes(id)) {
+        return false;
+      }
       const isUser = usersById.hasOwnProperty(id);
       if (isUser) {
         const user = usersById[id];
@@ -106,7 +110,7 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
         || title.toLowerCase().includes(convertedSearchQuery);
       }
     });
-  }, [usersById, chatsById, searchQuery, lang]);
+  }, [usersById, chatsById, searchQuery, lang, topUserIds]);
 
   if (!searchQuery) {
     // eslint-disable-next-line no-null/no-null

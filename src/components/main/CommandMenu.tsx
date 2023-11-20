@@ -518,6 +518,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         <AllUsersAndChats
           close={close}
           searchQuery={inputValue}
+          topUserIds={topUserIds}
         />
       </Command.List>
       <Command.Empty></Command.Empty>
