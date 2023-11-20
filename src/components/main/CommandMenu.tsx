@@ -214,6 +214,10 @@ const HomePage: React.FC<HomePageProps> = ({
           IS_APP && (
             <Command.Item onSelect={handleLockScreenHotkey}>
               <i className="icon icon-lock" /><span>Lock screen</span>
+              <span className="shortcuts">
+                <span className="kbd">⌘</span>
+                <span className="kbd">L</span>
+              </span>
             </Command.Item>
           )
         }
