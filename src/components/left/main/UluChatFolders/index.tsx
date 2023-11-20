@@ -39,6 +39,7 @@ type StateProps = {
   orderedFolderIds?: number[];
   folderInvitesById: Record<number, ApiChatlistExportedInvite[]>;
   chatFoldersById: Record<number, ApiChatFolder>;
+  orderedPinnedChatIds: string[] | undefined;
   chatsById: Record<number, ApiChat>;
   maxFolderInvites: number;
   maxChatLists: number;
@@ -83,7 +84,9 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
     }
 
     return displayedFolders.map((folder, i) => {
-      const { id, title, includedChatIds = [] } = folder;
+      const {
+        id, title, includedChatIds = [], pinnedChatIds = [],
+      } = folder;
       const isBlocked = i > maxFolders - 1;
       const canShareFolder = selectCanShareFolder(getGlobal(), id);
       const contextActions: MenuItemContextAction[] = [];
@@ -135,6 +138,8 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
         });
       }
 
+      const chatIds = pinnedChatIds.concat(includedChatIds);
+
       return {
         id,
         title,
@@ -142,11 +147,11 @@ const UluChatFolders: FC<OwnProps & StateProps> = ({
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
         contextActions: contextActions?.length ? contextActions : undefined,
-        chatIds: includedChatIds,
+        chatIds,
         chats: Object.values(chatsById)
-          .filter((chat) => includedChatIds.includes(chat.id))
+          .filter((chat) => chatIds.includes(chat.id))
           .reduce((p, c) => {
-            p[c.id] = c;
+            p[c.id] = { ...c, isPinned: pinnedChatIds.includes(c.id), folderId: id } as ApiChat;
             return p;
           }, {} as Record<string, ApiChat>),
       } satisfies TreeItemFolder;
@@ -180,6 +185,7 @@ export default withGlobal<OwnProps>(
       },
       chats: {
         byId: chatsById,
+        orderedPinnedIds: { active: orderedPinnedChatIds },
       },
       // activeSessions: {
       //   byHash: sessions,
@@ -192,6 +198,7 @@ export default withGlobal<OwnProps>(
     return {
       chatFoldersById,
       chatsById,
+      orderedPinnedChatIds,
       folderInvitesById,
       orderedFolderIds,
       // activeChatFolder,

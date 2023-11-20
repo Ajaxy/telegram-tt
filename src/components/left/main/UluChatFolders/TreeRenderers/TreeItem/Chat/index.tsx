@@ -28,9 +28,11 @@ import MenuSeparator from '../../../../../../ui/MenuSeparator.react';
 import ChatFolderModal from '../../../../../ChatFolderModal.react';
 import MuteChatModal from '../../../../../MuteChatModal.react';
 import ChatAvatar from './ChatAvatar';
+import SvgPin from './SvgPin';
 
 import stylesUluChatFolder from '../../../../UluChatFolder/UluChatFolder.module.scss';
-import styles from '../ChatFolder.module.scss';
+import stylesTreeFolder from '../ChatFolder.module.scss';
+import styles from './Chat.module.scss';
 
 const Chat: FC<{
   children: ReactNode;
@@ -39,10 +41,12 @@ const Chat: FC<{
   title: string | ReactNode;
   active: boolean | undefined;
   expanded?: boolean;
+  isPinned?: boolean;
+  folderId?: number;
   shouldStressUnreadMessages: boolean;
   contextRootElementSelector?: string;
 }> = ({
-  children, active, title, shouldStressUnreadMessages, item, context,
+  children, active, title, shouldStressUnreadMessages, item, context, isPinned, folderId,
 }) => {
   const {
     unreadCount: messagesUnreadCount, ref,
@@ -91,8 +95,8 @@ const Chat: FC<{
     handleMute,
     handleChatFolderChange,
     handleReport,
-    folderId: item.chat?.folderId,
-    isPinned: item.isPinned, // TODO
+    folderId,
+    isPinned,
     isMuted: item.chat?.isMuted,
     canChangeFolder: item.canChangeFolder, // TODO
   });
@@ -160,6 +164,9 @@ const Chat: FC<{
     getLayout,
   );
 
+  const shouldRenderPin = isPinned;
+  const shouldRenderControl = shouldRenderPin;
+
   // TODO use <ListItem/> with <Ripple/>
   return (
     <>
@@ -174,13 +181,20 @@ const Chat: FC<{
         // @ts-ignore
         style={{ maxHeight: `${ULU_APP.SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM}rem` }}
       >
-        <div className={buildClassName(stylesUluChatFolder.info, styles.info)}>
+        <div className={buildClassName(stylesUluChatFolder.info, stylesTreeFolder.info)}>
           <div className={stylesUluChatFolder.iconWrapper}>
             <ChatAvatar chat={item.chat!} />
           </div>
-          <div className={buildClassName(styles.title, styles.dots)}>
+          <div className={buildClassName(stylesTreeFolder.title, stylesTreeFolder.dots)}>
             {title}
           </div>
+          { shouldRenderControl && (
+            <div className={styles.control}>
+              { shouldRenderPin && (
+                <SvgPin className={styles.pin} width={13} height={13} fill="var(--color-text-secondary)" />
+              ) }
+            </div>
+          ) }
         </div>
         { !!messagesUnreadCount && (<div className={stylesUluChatFolder.unread}>{ messagesUnreadCount }</div>) }
         {contextActions && contextMenuPosition !== undefined && (

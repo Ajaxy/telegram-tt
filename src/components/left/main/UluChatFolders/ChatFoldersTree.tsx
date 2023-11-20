@@ -53,6 +53,8 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
           contextActions: [], // TODO
           id: chat.id,
           chat,
+          isPinned: chat.isPinned,
+          folderId: chat.folderId,
           isFolder: false,
           // isFolder: isChatSuperGroupWithTopics(chat),
           canRename: false,

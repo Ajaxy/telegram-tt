@@ -14,8 +14,9 @@ export type TreeItemChat<T extends any> = TreeItem<T> & {
   contextActions: MenuItemContextAction[] | undefined;
   ref?: RefObject<HTMLDivElement>;
   user?: ApiUser;
-  isPinned?: boolean;
   canChangeFolder?: boolean;
+  isPinned?: boolean;
+  folderId?: number;
 };
 
 export type TreeItemFolder = TabWithProperties & {

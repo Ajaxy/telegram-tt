@@ -1,0 +1,10 @@
+.control {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.pin {
+		position: relative;
+		top: 1px;
+	}
+}
