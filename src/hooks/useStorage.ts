@@ -28,8 +28,10 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
   })());
 
   useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-    window.dispatchEvent(new Event(eventName));
+    if (JSON.stringify(state) !== localStorage.getItem(key)) { // can be optimized
+      localStorage.setItem(key, JSON.stringify(state));
+      window.dispatchEvent(new Event(eventName));
+    }
   }, [key, state, eventName]);
 
   useEffect(() => {

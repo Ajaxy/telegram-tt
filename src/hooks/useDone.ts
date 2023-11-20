@@ -16,9 +16,10 @@ export default function useDone() {
   */
 
   const doneChat = useCallback(({ id, value }: { id/* ? */: string; value/* ? */: boolean }) => {
-    setDoneChatIds(value
-      ? doneChatIds.filter((chatId: string) => chatId !== id)
-      : [...doneChatIds, id]);
+    const updDoneChatIds = value
+      ? [...doneChatIds, id]
+      : doneChatIds.filter((chatId: string) => chatId !== id);
+    setDoneChatIds(updDoneChatIds);
   }, [doneChatIds, setDoneChatIds]);
 
   const isChatDone = (chat: ApiChat) => {
