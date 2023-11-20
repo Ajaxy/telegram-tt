@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-bind */
+/* eslint-disable no-console */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
@@ -15,6 +17,8 @@ import { unique } from '../../util/iteratees';
 import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
+
+import FolderListConnected from './FolderList';
 
 const AllUsersAndChats: React.FC<
 { close: () => void; searchQuery: string; topUserIds: string[] }> = ({ close, searchQuery, topUserIds }) => {
@@ -42,6 +46,11 @@ const AllUsersAndChats: React.FC<
       ? lang('Subscribers', membersCount, 'i')
       : lang('Members', membersCount, 'i');
   }
+
+  const handleSelectFolder = (folderId: number) => {
+    // Логика для обработки выбора папки
+    console.log(`Folder selected: ${folderId}`);
+  };
 
   const renderName = (id: string, isUser: boolean): { content: React.ReactNode; value: string } => {
     const NBSP = '\u00A0';
@@ -116,24 +125,29 @@ const AllUsersAndChats: React.FC<
   }
 
   return (
-    <Command.Group heading={`Search for "${searchQuery}"`}>
-      {ids.map((id) => {
-        const isUser = usersById.hasOwnProperty(id);
-        const { content, value } = renderName(id, isUser);
-        // eslint-disable-next-line no-null/no-null
-        if (!content) return null;
+    <>
+      <Command.Group heading={`Search for "${searchQuery}"`}>
+        {ids.map((id) => {
+          const isUser = usersById.hasOwnProperty(id);
+          const { content, value } = renderName(id, isUser);
+          // eslint-disable-next-line no-null/no-null
+          if (!content) return null;
 
-        return (
-          <Command.Item
-            key={id}
-            value={value}
-            onSelect={handeSelect(id)}
-          >
-            {content}
-          </Command.Item>
-        );
-      })}
-    </Command.Group>
+          return (
+            <Command.Item
+              key={id}
+              value={value}
+              onSelect={handeSelect(id)}
+            >
+              {content}
+            </Command.Item>
+          );
+        })}
+      </Command.Group>
+      <Command.Group heading="Folders">
+        <FolderListConnected onSelectFolder={handleSelectFolder} />
+      </Command.Group>
+    </>
   );
 };
 
