@@ -172,9 +172,59 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 48px;
+  height: 0px;
   white-space: pre-wrap;
   color: var(--gray11);
+}
+
+.global-search {
+  display: none;
+}
+
+/* Показать элемент глобального поиска, когда нет результатов */
+[cmdk-empty] + .global-search {
+  content-visibility: auto;
+
+  cursor: pointer;
+  background: none;
+  width: 100%;
+  border: none;
+  margin: 0;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px !important;
+  color: var(--gray11);
+  user-select: none;
+  will-change: background, color;
+  transition: background 150ms ease, color 150ms ease;
+  transition-property: none;
+
+  &[data-selected='true'] {
+    background: #ffffff14;
+  }
+
+  &[data-disabled='true'] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:active {
+    transition-property: background;
+    background: var(--color-chat-active);
+  }
+
+  & + [cmdk-item] {
+    margin-top: 4px;
+  }
+}
+
+.global-search:hover, .global-search[data-selected='true'] {
+  /* Ваши стили для hover, например изменение фона */
+  background: #ffffff14; /* Пример фона при наведении */
 }
 
 .cmdk-backdrop {
@@ -216,7 +266,7 @@ margin-left: 0.625rem;
 color: #aaaaaa
  }
 
- .chat-status {
-  margin-left: 0.625rem;
-  color: #aaaaaa
-   }
+.chat-status {
+margin-left: 0.625rem;
+color: #aaaaaa
+  }

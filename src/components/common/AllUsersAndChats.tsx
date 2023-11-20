@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { Command } from 'cmdk';
@@ -85,10 +84,18 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
     const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);
     return userAndChatIds.filter((id) => {
       const isUser = usersById.hasOwnProperty(id);
-      if (isUser && isDeletedUser(usersById[id])) return false;
-      return true;
+      if (isUser) {
+        const user = usersById[id];
+        if (isDeletedUser(user)) return false;
+        const name = getUserFullName(user) || ''; // Запасной вариант для 'undefined'
+        return name.toLowerCase().includes(searchQuery.toLowerCase());
+      } else {
+        const chat = chatsById[id];
+        const title = getChatTitle(lang, chat) || ''; // Запасной вариант для 'undefined'
+        return title.toLowerCase().includes(searchQuery.toLowerCase());
+      }
     });
-  }, [usersById, chatsById]);
+  }, [usersById, chatsById, searchQuery, lang]);
 
   if (!searchQuery) {
     // eslint-disable-next-line no-null/no-null

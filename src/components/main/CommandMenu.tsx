@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable arrow-parens */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -476,13 +477,12 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         onValueChange={handleInputChange}
         value={inputValue}
         onKeyDown={(e) => {
-          if (e.key === 'Backspace') {
+          if (e.key === 'Backspace' && inputValue === '') {
             handleBack();
           }
         }}
       />
       <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
         {activePage === 'home' && (
           <HomePage
             /* setPages={setPages} */
@@ -520,6 +520,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
           searchQuery={inputValue}
         />
       </Command.List>
+      <Command.Empty></Command.Empty>
+      <button className="global-search" onClick={handleSearchFocus}>
+        <i className="icon icon-search" />
+        <span>
+          <span>No results found</span>
+          <span className="user-handle">Go to advanced search</span>
+        </span>
+        <span className="shortcuts">
+          <span className="kbd">⌘</span>
+          <span className="kbd">/</span>
+        </span>
+      </button>
     </Command.Dialog>
   );
 
