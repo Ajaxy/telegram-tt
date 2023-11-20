@@ -17,7 +17,7 @@ import renderText from './helpers/renderText';
 import useLang from '../../hooks/useLang';
 
 const AllUsersAndChats: React.FC<
-{ close: () => void; searchQuery: string; topUserIds: string[] }> = ({ close, searchQuery, topUserIds }) => {
+{ close: () => void; searchQuery: string; topUserIds?: string[] }> = ({ close, searchQuery, topUserIds }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
   const chatsById: Record<string, ApiChat> = global.chats.byId;
