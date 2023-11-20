@@ -1,7 +1,8 @@
-/* eslint-disable react/jsx-no-bind */
+/* eslint-disable no-console */
 import React from 'react';
 import { Command } from 'cmdk';
 import type { FC } from '../../lib/teact/teact';
+import { useMemo } from '../../lib/teact/teact';
 import { withGlobal } from '../../global';
 
 import type { ApiChatFolder } from '../../api/types';
@@ -27,13 +28,19 @@ type StateProps = {
 type OwnProps = {
   onSelectFolder: (folderId: number) => void;
 };
-const FolderList: FC<OwnProps & StateProps> = ({ chatFoldersById, orderedFolderIds, onSelectFolder }) => {
-  const folders = orderedFolderIds?.map((id) => chatFoldersById[id]) || [];
+
+const FolderList: FC<OwnProps & StateProps> = ({ chatFoldersById, orderedFolderIds = []/* , onSelectFolder */ }) => {
+  const folders = useMemo(() => orderedFolderIds.map((folderId) => chatFoldersById[folderId]),
+    [orderedFolderIds, chatFoldersById]);
+
+  /*   const handleSelectFolder = useCallback((folderId: number) => {
+    onSelectFolder(folderId);
+  }, [onSelectFolder]); */
 
   return (
     <>
       {folders.map((folder) => (
-        <Command.Item key={folder.id} onSelect={() => onSelectFolder(folder.id)}>
+        <Command.Item key={folder.id}>
           {`Folder ${folder.id}`}
         </Command.Item>
       ))}
@@ -49,6 +56,9 @@ const FolderListConnected = withGlobal<OwnProps>(
         orderedIds: orderedFolderIds = [],
       },
     } = global;
+
+    console.log('Ordered Folder IDs:', orderedFolderIds);
+    console.log('Chat Folders By ID:', chatFoldersById);
 
     return {
       chatFoldersById,

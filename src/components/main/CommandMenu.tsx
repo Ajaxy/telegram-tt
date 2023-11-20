@@ -13,7 +13,7 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiChatFolder, ApiUser } from '../../api/types';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import { getMainUsername, getUserFullName } from '../../global/helpers';
@@ -36,8 +36,9 @@ const cmdkRoot = createRoot(cmdkElement!);
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
 interface CommandMenuProps {
-  topUserIds: string[];
+  topUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  folders: ApiChatFolder[];
 }
 
 const customFilter = (value: string, search: string) => {
@@ -110,7 +111,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 interface HomePageProps {
   /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
-  topUserIds: string[];
+  topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   handleSearchFocus: () => void;
   handleOpenSavedMessages: () => void;
@@ -286,7 +287,7 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
   );
 };
 
-const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
+const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) => {
   const { track } = useJune();
   const {
     showNotification, openUrl, openChatByUsername,
@@ -519,6 +520,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
           close={close}
           searchQuery={inputValue}
           topUserIds={topUserIds}
+          folders={folders}
         />
       </Command.List>
       <Command.Empty></Command.Empty>
@@ -541,10 +543,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 };
 
 export default memo(withGlobal(
-  (global): { topUserIds?: string[]; usersById: Record<string, ApiUser> } => {
+  (global): CommandMenuProps => { // Используем CommandMenuProps здесь
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
+    const chatFoldersById = global.chatFolders.byId;
+    const orderedFolderIds = global.chatFolders.orderedIds;
+    const folders = orderedFolderIds
+      ? orderedFolderIds.map(folderId => chatFoldersById[folderId]).filter(Boolean)
+      : [];
 
-    return { topUserIds, usersById };
+    return { topUserIds, usersById, folders };
   },
 )(CommandMenu));

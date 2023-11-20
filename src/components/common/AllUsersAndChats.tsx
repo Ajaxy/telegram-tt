@@ -5,7 +5,7 @@ import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 
 import {
   getChatTitle,
@@ -18,10 +18,14 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 
-import FolderListConnected from './FolderList';
-
-const AllUsersAndChats: React.FC<
-{ close: () => void; searchQuery: string; topUserIds: string[] }> = ({ close, searchQuery, topUserIds }) => {
+const AllUsersAndChats: React.FC<{
+  close: () => void;
+  searchQuery: string;
+  topUserIds?: string[];
+  folders: ApiChatFolder[];
+}> = ({
+  close, searchQuery, topUserIds, folders,
+}) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
   const chatsById: Record<string, ApiChat> = global.chats.byId;
@@ -29,6 +33,11 @@ const AllUsersAndChats: React.FC<
   const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
   const lang = useLang();
+
+  const handleSelectFolder = useCallback((folderId: number) => {
+    console.log(`Folder selected: ${folderId}`);
+    // Здесь ваша логика обработки выбора папки
+  }, []);
 
   function getGroupStatus(chat: ApiChat) {
     const chatTypeString = lang(getChatTypeString(chat));
@@ -46,11 +55,6 @@ const AllUsersAndChats: React.FC<
       ? lang('Subscribers', membersCount, 'i')
       : lang('Members', membersCount, 'i');
   }
-
-  const handleSelectFolder = (folderId: number) => {
-    // Логика для обработки выбора папки
-    console.log(`Folder selected: ${folderId}`);
-  };
 
   const renderName = (id: string, isUser: boolean): { content: React.ReactNode; value: string } => {
     const NBSP = '\u00A0';
@@ -145,7 +149,14 @@ const AllUsersAndChats: React.FC<
         })}
       </Command.Group>
       <Command.Group heading="Folders">
-        <FolderListConnected onSelectFolder={handleSelectFolder} />
+        {folders.map((folder) => (
+          <Command.Item
+            key={folder.id}
+            onSelect={() => folder && handleSelectFolder(folder.id)}
+          >
+            {folder?.title || `Folder ${folder?.id}`}
+          </Command.Item>
+        ))}
       </Command.Group>
     </>
   );
