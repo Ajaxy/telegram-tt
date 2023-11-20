@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
@@ -129,7 +127,7 @@ const AllUsersAndChats: React.FC<
           <Command.Item
             key={id}
             value={value}
-            onSelect={() => handleClick(id)}
+            onSelect={handeSelect(id)}
           >
             {content}
           </Command.Item>
