@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
-/* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
@@ -81,6 +78,8 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
     close();
   }, [openChat, addRecentlyFoundChatId, close]);
 
+  const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
+
   const ids = useMemo(() => {
     const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);
     return userAndChatIds.filter((id) => {
@@ -104,7 +103,7 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
         if (!content) return null;
 
         return (
-          <Command.Item key={id} onSelect={() => handleClick(id)}>
+          <Command.Item key={id} onSelect={handeSelect(id)}>
             {content}
           </Command.Item>
         );
