@@ -1,3 +1,4 @@
+/* eslint-disable react/self-closing-comp */
 /* eslint-disable arrow-parens */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-shadow */
@@ -25,6 +26,8 @@ import renderText from '../common/helpers/renderText';
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
+
+import AllUsersAndChats from '../common/AllUsersAndChats';
 
 import './CommandMenu.scss';
 
@@ -92,7 +95,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 
   return (
     <Command.Group heading="Suggested contacts">
-      {topUserIds.map((userId) => {
+      {topUserIds.slice(0, 3).map((userId) => { // take the first 3 elements
         const { displayedName, valueString } = renderName(userId);
         return (
           <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
@@ -302,6 +305,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const close = useCallback(() => {
     setOpen(false);
     setPages(['home']);
+    setInputValue('');
   }, []);
 
   // Toggle the menu when ⌘K is pressed
@@ -473,13 +477,12 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         onValueChange={handleInputChange}
         value={inputValue}
         onKeyDown={(e) => {
-          if (e.key === 'Backspace') {
+          if (e.key === 'Backspace' && inputValue === '') {
             handleBack();
           }
         }}
       />
       <Command.List>
-        <Command.Empty>No results found.</Command.Empty>
         {activePage === 'home' && (
           <HomePage
             /* setPages={setPages} */
@@ -512,7 +515,24 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleCreateFolder={handleCreateFolder}
           />
         )}
+        <AllUsersAndChats
+          close={close}
+          searchQuery={inputValue}
+          topUserIds={topUserIds}
+        />
       </Command.List>
+      <Command.Empty></Command.Empty>
+      <button className="global-search" onClick={handleSearchFocus}>
+        <i className="icon icon-search" />
+        <span>
+          <span>No results found</span>
+          <span className="user-handle">Go to advanced search</span>
+        </span>
+        <span className="shortcuts">
+          <span className="kbd">⌘</span>
+          <span className="kbd">/</span>
+        </span>
+      </button>
     </Command.Dialog>
   );
 
