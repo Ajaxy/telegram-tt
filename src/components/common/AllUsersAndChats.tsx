@@ -12,6 +12,7 @@ import {
   getChatTypeString,
   getMainUsername, getUserFullName, isDeletedUser,
 } from '../../global/helpers';
+import { convertLayout } from '../../util/convertLayout';
 import { unique } from '../../util/iteratees';
 import renderText from './helpers/renderText';
 
@@ -43,12 +44,16 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
       : lang('Members', membersCount, 'i');
   }
 
-  const renderName = (id: string, isUser: boolean) => {
+  const renderName = (id: string, isUser: boolean): { content: React.ReactNode; value: string } => {
     const NBSP = '\u00A0';
-    let content;
+    let content: React.ReactNode;
+    let value: string;
+
     if (isUser) {
       const user = usersById[id] as ApiUser;
-      if (isDeletedUser(user)) return undefined; // Фильтрация удаленных аккаунтов
+      if (isDeletedUser(user)) {
+        return { content: undefined, value: '' };
+      }
       const name = getUserFullName(user) || NBSP;
       const handle = getMainUsername(user) || NBSP;
       const renderedName = renderText(name);
@@ -58,20 +63,21 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
           <span className="user-handle">{handle !== NBSP ? `@${handle}` : ''}</span>
         </span>
       );
+      value = `${name} ${handle !== NBSP ? handle : ''}`.trim();
     } else {
       const chat = chatsById[id] as ApiChat;
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
       const groupStatus = getGroupStatus(chat);
-
-      return (
+      content = (
         <span>
           <span className="chat-title">{title}</span>
           <span className="chat-status">{groupStatus}</span>
         </span>
       );
+      value = title;
     }
 
-    return content;
+    return { content, value };
   };
 
   const handleClick = useCallback((id: string) => {
@@ -81,6 +87,7 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
   }, [openChat, addRecentlyFoundChatId, close]);
 
   const ids = useMemo(() => {
+    const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
     const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);
     return userAndChatIds.filter((id) => {
       const isUser = usersById.hasOwnProperty(id);
@@ -88,11 +95,13 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
         const user = usersById[id];
         if (isDeletedUser(user)) return false;
         const name = getUserFullName(user) || ''; // Запасной вариант для 'undefined'
-        return name.toLowerCase().includes(searchQuery.toLowerCase());
+        return name.toLowerCase().includes(searchQuery.toLowerCase())
+        || name.toLowerCase().includes(convertedSearchQuery);
       } else {
         const chat = chatsById[id];
         const title = getChatTitle(lang, chat) || ''; // Запасной вариант для 'undefined'
-        return title.toLowerCase().includes(searchQuery.toLowerCase());
+        return title.toLowerCase().includes(searchQuery.toLowerCase())
+        || title.toLowerCase().includes(convertedSearchQuery);
       }
     });
   }, [usersById, chatsById, searchQuery, lang]);
@@ -106,12 +115,16 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
     <Command.Group heading={`Search for "${searchQuery}"`}>
       {ids.map((id) => {
         const isUser = usersById.hasOwnProperty(id);
-        const content = renderName(id, isUser);
+        const { content, value } = renderName(id, isUser);
         // eslint-disable-next-line no-null/no-null
         if (!content) return null;
 
         return (
-          <Command.Item key={id} onSelect={() => handleClick(id)}>
+          <Command.Item
+            key={id}
+            value={value}
+            onSelect={() => handleClick(id)}
+          >
             {content}
           </Command.Item>
         );
