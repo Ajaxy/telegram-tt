@@ -26,6 +26,8 @@ import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
 
+import AllUsersAndChats from '../common/AllUsersAndChats';
+
 import './CommandMenu.scss';
 
 const cmdkElement = document.getElementById('cmdk-root');
@@ -92,7 +94,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 
   return (
     <Command.Group heading="Suggested contacts">
-      {topUserIds.map((userId) => {
+      {topUserIds.slice(0, 3).map((userId) => { // Взять первые 5 элементов
         const { displayedName, valueString } = renderName(userId);
         return (
           <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
@@ -302,6 +304,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const close = useCallback(() => {
     setOpen(false);
     setPages(['home']);
+    setInputValue('');
   }, []);
 
   // Toggle the menu when ⌘K is pressed
@@ -512,6 +515,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             handleCreateFolder={handleCreateFolder}
           />
         )}
+        <AllUsersAndChats
+          close={close}
+          searchQuery={inputValue}
+        />
       </Command.List>
     </Command.Dialog>
   );
