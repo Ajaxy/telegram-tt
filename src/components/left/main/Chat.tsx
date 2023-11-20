@@ -75,6 +75,7 @@ type OwnProps = {
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
+  isDone?: boolean;
   offsetTop: number;
   observeIntersection?: ObserveFn;
   onDragEnter?: (chatId: string) => void;
@@ -107,6 +108,7 @@ const Chat: FC<OwnProps & StateProps> = ({
   orderDiff,
   animationType,
   isPinned,
+  isDone,
   observeIntersection,
   chat,
   isMuted,
@@ -288,6 +290,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersection}
           />
           {isMuted && <i className="icon icon-muted" />}
+          {isDone && <i className="icon icon-done icon-select" />}
           <div className="separator" />
           {chat.lastMessage && (
             <LastMessageMeta
