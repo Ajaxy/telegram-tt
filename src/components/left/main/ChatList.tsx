@@ -31,6 +31,7 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useStorage } from '../../../hooks/useStorage';
 import useOrderDiff from './hooks/useOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -75,6 +76,8 @@ const ChatList: FC<OwnProps> = ({
     closeForumPanel,
     toggleStoryRibbon,
   } = getActions();
+
+  const { doneChatIds } = useStorage();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldIgnoreDragRef = useRef(false);
@@ -209,6 +212,7 @@ const ChatList: FC<OwnProps> = ({
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
       const offsetTop = unconfirmedSessionHeight + archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const isDone = doneChatIds.includes(id);
 
       return (
         <Chat
@@ -216,6 +220,7 @@ const ChatList: FC<OwnProps> = ({
           teactOrderKey={isPinned ? i : getOrderKey(id)}
           chatId={id}
           isPinned={isPinned}
+          isDone={isDone}
           folderId={folderId}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}

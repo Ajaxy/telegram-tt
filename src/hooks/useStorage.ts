@@ -2,9 +2,13 @@ import { useEffect, useState } from '../lib/teact/teact';
 
 export function useStorage() {
   const [isArchiverEnabled, setIsArchiverEnabled] = useLocalStorage<boolean>('ulu_is_autoarchiver_enabled', false);
+  const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>('ulu_done_chat_ids', []);
 
   return {
-    isArchiverEnabled, setIsArchiverEnabled,
+    isArchiverEnabled,
+    setIsArchiverEnabled,
+    doneChatIds,
+    setDoneChatIds,
   };
 }
 
