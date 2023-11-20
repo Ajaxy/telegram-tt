@@ -86,6 +86,8 @@ const AllUsersAndChats: React.FC<{ close: () => void; searchQuery: string }> = (
     close();
   }, [openChat, addRecentlyFoundChatId, close]);
 
+  const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
+
   const ids = useMemo(() => {
     const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
     const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);

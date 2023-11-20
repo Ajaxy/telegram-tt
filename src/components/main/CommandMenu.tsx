@@ -95,7 +95,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 
   return (
     <Command.Group heading="Suggested contacts">
-      {topUserIds.slice(0, 3).map((userId) => { // Взять первые 5 элементов
+      {topUserIds.slice(0, 3).map((userId) => { // take the first 3 elements
         const { displayedName, valueString } = renderName(userId);
         return (
           <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
