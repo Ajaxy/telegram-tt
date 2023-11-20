@@ -34,6 +34,7 @@ type OwnProps = {
   ariaLabelledBy?: string;
   transformOriginX?: number;
   transformOriginY?: number;
+  transformMarginTop?: number;
   positionX?: 'left' | 'right';
   positionY?: 'top' | 'bottom';
   autoClose?: boolean;

@@ -1,9 +1,9 @@
-productName: Ulu
+productName: ulu
 artifactName: ${productName}-${arch}.${ext}
-appId: org.telegram.Ulu
+appId: org.telegram.ulu
 extraMetadata:
   main: ./dist/electron.js
-  productName: Ulu
+  productName: ulu
 files:
   - "dist"
   - "package.json"
@@ -44,7 +44,7 @@ mac:
   notarize:
     teamId: 6CXX2R277K
 dmg:
-  title: Ulu installer
+  title: ulu installer
   background: public/background-electron-dmg.tiff
   iconSize: 100
   contents:

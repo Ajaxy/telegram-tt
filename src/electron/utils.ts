@@ -57,7 +57,7 @@ export function getAppTitle(chatTitle?: string): string {
 }
 
 export const TRAFFIC_LIGHT_POSITION: Record<TrafficLightPosition, Point> = {
-  standard: { x: 10, y: 20 },
+  standard: { x: 14, y: 14 },
   lowered: { x: 10, y: 52 },
 };
 

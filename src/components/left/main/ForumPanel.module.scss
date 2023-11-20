@@ -2,7 +2,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  left: 4.75rem;
+  left: 0rem;
   z-index: var(--z-forum-panel);
   height: 100%;
   background-color: var(--color-background);
@@ -103,4 +103,8 @@
     text-overflow: ellipsis;
     display: inline-block;
   }
+}
+
+.left-header {
+  margin-top: 2rem;
 }

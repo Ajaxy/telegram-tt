@@ -14,7 +14,7 @@ on:
     branches: deploy
 
 env:
-  APP_NAME: Ulu
+  APP_NAME: ulu
 
 jobs:
   electron-release:

@@ -366,7 +366,7 @@
 
     &.pill {
       height: 2rem;
-      border-radius: 1rem;
+      border-radius: var(--border-radius-default-small);
       padding: 0.3125rem 1rem;
       font-size: 1rem;
     }

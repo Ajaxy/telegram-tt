@@ -9,6 +9,7 @@ type TCommand = (
   | 'OPEN_ARCHIVED'
   | 'OPEN_INBOX'
   | 'OPEN_SAVED'
+  | 'LOCK_SCREEN'
 );
 
 export default function useCommands() {

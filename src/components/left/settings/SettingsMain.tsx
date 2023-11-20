@@ -171,7 +171,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => openUrl({ url: FAQ_URL })}
         >
-          {lang('TelegramFaq')}
+          {lang('UluFaq')}
         </ListItem>
         <ListItem
           icon="privacy-policy"

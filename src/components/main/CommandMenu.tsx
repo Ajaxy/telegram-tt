@@ -14,18 +14,17 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiUser } from '../../api/types';
 
-import { FAQ_URL } from '../../config';
+import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import { getMainUsername, getUserFullName } from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
-import { IS_ARC_BROWSER } from '../../util/windowEnvironment';
+import { IS_APP, IS_ARC_BROWSER } from '../../util/windowEnvironment';
 import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
-import { useStorage } from '../../hooks/useStorage';
 
 import './CommandMenu.scss';
 
@@ -108,8 +107,6 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 interface HomePageProps {
   /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
-  commandToggleArchiver: () => void;
-  isArchiverEnabled: boolean;
   topUserIds: string[];
   usersById: Record<string, ApiUser>;
   handleSearchFocus: () => void;
@@ -122,10 +119,13 @@ interface HomePageProps {
   close: () => void;
   handleSupport: () => void;
   handleFAQ: () => void;
+  handleOpenShortcuts: () => void;
   handleChangelog: () => void;
   handleSelectNewGroup: () => void;
   handleSelectNewChannel: () => void;
   handleCreateFolder: () => void;
+  handleLockScreenHotkey: () => void;
+  commandToggleArchiver: () => void;
 }
 
 interface CreateNewPageProps {
@@ -135,11 +135,11 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
-  topUserIds, usersById, close,
+  /* setPages,  */commandArchiveAll, topUserIds, usersById, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
+  handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver,
 }) => {
   return (
     <>
@@ -175,12 +175,7 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
-          <i className="icon icon-archive" />
-          <span>
-            {isArchiverEnabled
-              ? 'Disable auto-mark as "Done" after reading'
-              : 'Enable auto-mark as "Done" after reading'}
-          </span>
+          <i className="icon icon-readchats" /><span>Auto-Done After Reading</span>
         </Command.Item>
         {menuItems.map((item, index) => (
           <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
@@ -190,9 +185,9 @@ const HomePage: React.FC<HomePageProps> = ({
       </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-document" /><span>Open FAQ</span>
+          <i className="icon icon-document" /><span>Help center</span>
         </Command.Item>
-        <Command.Item onSelect={handleFAQ}>
+        <Command.Item onSelect={handleOpenShortcuts}>
           <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
         </Command.Item>
         <Command.Item onSelect={handleSupport}>
@@ -215,14 +210,33 @@ const HomePage: React.FC<HomePageProps> = ({
             <span className="kbd">/</span>
           </span>
         </Command.Item>
+        {
+          IS_APP && (
+            <Command.Item onSelect={handleLockScreenHotkey}>
+              <i className="icon icon-lock" /><span>Lock screen</span>
+              <span className="shortcuts">
+                <span className="kbd">⌘</span>
+                <span className="kbd">L</span>
+              </span>
+            </Command.Item>
+          )
+        }
         <Command.Item onSelect={handleOpenInbox}>
           <i className="icon icon-unread" /><span>Go to inbox</span>
         </Command.Item>
         <Command.Item onSelect={handleOpenSavedMessages}>
           <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">0</span>
+          </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectArchived}>
           <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">9</span>
+          </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectSettings}>
           <i className="icon icon-settings" /><span>Go to settings</span>
@@ -275,8 +289,9 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     showNotification, openUrl, openChatByUsername,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
-  const { isArchiverEnabled, setIsArchiverEnabled } = useStorage();
-
+  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
+    !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
+  );
   const { archiveMessages } = useArchiver({ isManual: true });
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
@@ -344,7 +359,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   }, [openChatByUsername, close]);
 
   const handleFAQ = useCallback(() => {
-    openUrl({ url: FAQ_URL });
+    openUrl({
+      url: FAQ_URL,
+      shouldSkipModal: true,
+    });
+    close();
+  }, [openUrl, close]);
+
+  const handleOpenShortcts = useCallback(() => {
+    openUrl({
+      url: SHORTCUTS_URL,
+      shouldSkipModal: true,
+    });
     close();
   }, [openUrl, close]);
 
@@ -393,12 +419,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
     close();
   }, [runCommand, close]);
 
+  const handleLockScreenHotkey = useCallback(() => {
+    runCommand('LOCK_SCREEN');
+    close();
+  }, [runCommand, close]);
+
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
+    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
-  }, [close, isArchiverEnabled, setIsArchiverEnabled]);
+  }, [close, isArchiverEnabled]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
@@ -450,9 +482,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         <Command.Empty>No results found.</Command.Empty>
         {activePage === 'home' && (
           <HomePage
+            /* setPages={setPages} */
             commandArchiveAll={commandArchiveAll}
-            commandToggleArchiver={commandToggleArchiver}
-            isArchiverEnabled={isArchiverEnabled}
             topUserIds={topUserIds}
             usersById={usersById}
             handleSearchFocus={handleSearchFocus}
@@ -464,11 +495,14 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
             menuItems={menuItems}
             handleSupport={handleSupport}
             handleFAQ={handleFAQ}
+            handleOpenShortcuts={handleOpenShortcts}
             handleChangelog={handleChangelog}
             close={close}
             handleSelectNewGroup={handleSelectNewGroup}
             handleSelectNewChannel={handleSelectNewChannel}
             handleCreateFolder={handleCreateFolder}
+            handleLockScreenHotkey={handleLockScreenHotkey}
+            commandToggleArchiver={commandToggleArchiver}
           />
         )}
         {activePage === 'createNew' && (

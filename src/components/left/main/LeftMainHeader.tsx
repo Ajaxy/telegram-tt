@@ -148,8 +148,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   });
 
   useHotkeys(canSetPasscode ? {
-    'Ctrl+Shift+L': handleLockScreenHotkey,
-    'Alt+Shift+L': handleLockScreenHotkey,
     'Meta+Shift+L': handleLockScreenHotkey,
     ...(IS_APP && { 'Mod+L': handleLockScreenHotkey }),
   } : undefined);
@@ -161,6 +159,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   });
 
   useCommand('OPEN_SEARCH', handleSearchFocus);
+  useCommand('LOCK_SCREEN', handleLockScreenHotkey);
 
   // Cmd+/ to open search
   useEffect(() => {
@@ -306,7 +305,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
               )}
               forceOpen={isBotMenuOpen}
               positionX={shouldHideSearch && lang.isRtl ? 'right' : 'left'}
-              transformOriginX={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 90 : undefined}
+              transformOriginY={IS_ELECTRON && IS_MAC_OS && !isFullscreen ? 0 : undefined}
               onTransitionEnd={lang.isRtl ? handleDropdownMenuTransitionEnd : undefined}
             >
               <LeftSideMenuItems
@@ -324,9 +323,9 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
           <Button
             round
             ripple={!isMobile}
-            size="smaller"
+            size="tiny"
             color="translucent"
-            ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} (Ctrl+Shift+L)`}
+            ariaLabel={`${lang('ShortcutsController.Others.LockByPasscode')} '⌘+L')`}
             onClick={handleLockScreen}
             className={buildClassName(!isCurrentUserPremium && 'extra-spacing')}
           >

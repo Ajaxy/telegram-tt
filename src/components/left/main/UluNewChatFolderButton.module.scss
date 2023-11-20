@@ -2,11 +2,11 @@ $color: var(--color-borders-input);
 $colorHover: var(--color-gray);
 
 .btn {
+  display: none;
   height: unset;
   pointer-events: all;
   padding: 0.375rem 0.5rem 0 0.375rem;
   text-transform: none;
-  display: flex;
   align-items: center;
   justify-content: flex-start;
   cursor: pointer;
