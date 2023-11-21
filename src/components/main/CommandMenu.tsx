@@ -26,6 +26,7 @@ import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
+import useDone from '../../hooks/useDone';
 import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
@@ -167,6 +168,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
 };
 
 interface HomePageProps {
+  commandDoneAll: () => void;
   commandArchiveAll: () => void;
   commandToggleArchiver: () => void;
   isArchiverEnabled: boolean;
@@ -198,7 +200,7 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
+  commandDoneAll, commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
@@ -241,9 +243,12 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <CommandSeparator />
-      <Command.Group heading="Settings">
+      <Command.Group heading="Done and Archive">
+        <Command.Item onSelect={commandDoneAll}>
+          <i className="icon icon-select" /><span>Mark read chats as &quot;Done&quot;</span>
+        </Command.Item>
         <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
           <i className="icon icon-archive" />
@@ -369,6 +374,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const [isOpen, setOpen] = useState(false);
   const { isArchiverEnabled, setIsArchiverEnabled } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
+  const { doneAllReadChats } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
@@ -514,6 +520,15 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [close, isArchiverEnabled, setIsArchiverEnabled]);
 
+  const commandDoneAll = useCallback(() => {
+    showNotification({ message: 'All read chats are marked as done!' });
+    doneAllReadChats();
+    close();
+    if (track) {
+      track('commandDoneAll');
+    }
+  }, [close, doneAllReadChats, track]);
+
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
     archiveMessages();
@@ -586,6 +601,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
           {activePage === 'home' && (
             <>
               <HomePage
+                commandDoneAll={commandDoneAll}
                 commandArchiveAll={commandArchiveAll}
                 commandToggleArchiver={commandToggleArchiver}
                 isArchiverEnabled={isArchiverEnabled}

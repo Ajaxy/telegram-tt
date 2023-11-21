@@ -66,5 +66,9 @@ export default function useDone() {
     return doneChatIds.includes(chat.id);
   };
 
-  return { doneChat, isChatDone };
+  const doneAllReadChats = () => {
+
+  };
+
+  return { doneChat, isChatDone, doneAllReadChats };
 }
