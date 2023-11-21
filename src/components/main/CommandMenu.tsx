@@ -11,9 +11,9 @@ import {
 import { getGlobal } from '../../lib/teact/teactn';
 import { getActions, withGlobal } from '../../global';
 
-
-import type { ApiChatFolder, ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
+
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
@@ -351,8 +351,9 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
   );
 };
 
-
-const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoundChatIds, folders }) => {
+const CommandMenu: FC<CommandMenuProps> = ({
+  topUserIds, usersById, recentlyFoundChatIds, folders,
+}) => {
   const { track } = useJune();
   const {
     showNotification, openUrl, openChatByUsername,
@@ -419,8 +420,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
 
-  const openFolderPage = useCallback((folderId) => {
-    setPages([...pages, `folderPage:${folderId}`]);
+  const openFolderPage = useCallback((id) => { // Замена folderId на id
+    setPages([...pages, `folderPage:${id}`]);
   }, [pages]);
 
   const saveAPIKey = useCallback(() => {
@@ -517,13 +518,13 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
     }
   }, [close, archiveMessages, track]);
 
-  const getFolderName = (folderId: number | null) => {
+  const getFolderName = (id: number | null) => {
     // eslint-disable-next-line no-null/no-null
-    if (folderId === null) return 'Unknown Folder';
+    if (id === null) return 'Unknown Folder';
 
     const global = getGlobal() as GlobalState;
-    const folder = global.chatFolders.byId[folderId];
-    return folder ? folder.title : `Folder ${folderId}`;
+    const folder = global.chatFolders.byId[id];
+    return folder ? folder.title : `Folder ${id}`;
   };
 
   useEffect(() => {
@@ -600,6 +601,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
                 handleCreateFolder={handleCreateFolder}
                 handleLockScreenHotkey={handleLockScreenHotkey}
                 commandToggleArchiver={commandToggleArchiver}
+                recentlyFoundChatIds={recentlyFoundChatIds}
               />
               <AllUsersAndChats
                 close={close}
@@ -646,18 +648,19 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
 };
 
 export default memo(withGlobal(
-  (global): CommandMenuProps => { // Используем CommandMenuProps здесь
+  (global): CommandMenuProps => {
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
+    const chatsById = global.chats.byId;
     const chatFoldersById = global.chatFolders.byId;
     const orderedFolderIds = global.chatFolders.orderedIds;
     const recentlyFoundChatIds = global.recentlyFoundChatIds;
     const folders = orderedFolderIds
-      ? orderedFolderIds.map(folderId => chatFoldersById[folderId]).filter(Boolean)
+      ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
       : [];
 
-    return { 
-      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds
+    return {
+      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
     };
   },
 )(CommandMenu));
