@@ -9,13 +9,6 @@ import type { TreeItemChat } from '../../types';
 import Chat from './Chat';
 import ChatFolder from './ChatFolder';
 
-// import useMenuPosition from '../../../../../../hooks/useMenuPosition';
-// import Menu from './ContextMenu/Menu';
-// import MenuItem from './ContextMenu/MenuItem';
-// import MenuSeparator from './ContextMenu/MenuSeparator';
-
-// const NONE_TO_VOID: NoneToVoidFunction = () => void 0;
-// TODO clean up
 type OwnProps = {
   ref: RefObject<HTMLDivElement>;
   item: TreeItemChat<any>;
