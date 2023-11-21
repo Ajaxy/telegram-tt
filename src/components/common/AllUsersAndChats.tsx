@@ -23,8 +23,9 @@ const AllUsersAndChats: React.FC<{
   searchQuery: string;
   topUserIds?: string[];
   folders: ApiChatFolder[];
+  openFolderPage: (folderId: number) => void;
 }> = ({
-  close, searchQuery, topUserIds, folders,
+  close, searchQuery, topUserIds, folders, openFolderPage,
 }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
@@ -34,10 +35,10 @@ const AllUsersAndChats: React.FC<{
 
   const lang = useLang();
 
-  const handleSelectFolder = useCallback((folderId: number) => {
-    console.log(`Folder selected: ${folderId}`);
-    // Здесь ваша логика обработки выбора папки
-  }, []);
+  const handleSelectFolder = useCallback((folderId) => {
+    console.log('Selected folder ID:', folderId);
+    openFolderPage(folderId);
+  }, [openFolderPage]);
 
   function getGroupStatus(chat: ApiChat) {
     const chatTypeString = lang(getChatTypeString(chat));
@@ -154,7 +155,7 @@ const AllUsersAndChats: React.FC<{
             key={folder.id}
             onSelect={() => folder && handleSelectFolder(folder.id)}
           >
-            {folder?.title || `Folder ${folder?.id}`}
+            <i className="icon icon-search" /><span>{folder?.title || `Folder ${folder?.id}`}</span>
           </Command.Item>
         ))}
       </Command.Group>

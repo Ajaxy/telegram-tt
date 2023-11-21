@@ -28,6 +28,7 @@ import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
+import FolderPage from '../common/FolderPage';
 
 import './CommandMenu.scss';
 
@@ -109,7 +110,6 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 };
 
 interface HomePageProps {
-  /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
@@ -139,7 +139,7 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  /* setPages,  */commandArchiveAll, topUserIds, usersById, close,
+  commandArchiveAll, topUserIds, usersById, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
@@ -302,6 +302,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
+  // eslint-disable-next-line no-null/no-null
+  const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
 
   const close = useCallback(() => {
     setOpen(false);
@@ -351,6 +353,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
+
+  const openFolderPage = useCallback((folderId) => {
+    setPages([...pages, `folderPage:${folderId}`]);
+  }, [pages]);
 
   const saveAPIKey = useCallback(() => {
     localStorage.setItem('openai_api_key', inputValue);
@@ -484,44 +490,54 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
         }}
       />
       <Command.List>
-        {activePage === 'home' && (
-          <HomePage
-            /* setPages={setPages} */
-            commandArchiveAll={commandArchiveAll}
-            topUserIds={topUserIds}
-            usersById={usersById}
-            handleSearchFocus={handleSearchFocus}
-            handleSelectSettings={handleSelectSettings}
-            handleOpenInbox={handleOpenInbox}
-            handleSelectArchived={handleSelectArchived}
-            handleOpenSavedMessages={handleOpenSavedMessages}
-            saveAPIKey={saveAPIKey}
-            menuItems={menuItems}
-            handleSupport={handleSupport}
-            handleFAQ={handleFAQ}
-            handleOpenShortcuts={handleOpenShortcts}
-            handleChangelog={handleChangelog}
-            close={close}
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-            handleLockScreenHotkey={handleLockScreenHotkey}
-            commandToggleArchiver={commandToggleArchiver}
-          />
-        )}
-        {activePage === 'createNew' && (
-          <CreateNewPage
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-          />
-        )}
-        <AllUsersAndChats
-          close={close}
-          searchQuery={inputValue}
-          topUserIds={topUserIds}
-          folders={folders}
-        />
+        <>
+          {activePage === 'home' && (
+            <>
+              <HomePage
+                commandArchiveAll={commandArchiveAll}
+                topUserIds={topUserIds}
+                usersById={usersById}
+                handleSearchFocus={handleSearchFocus}
+                handleSelectSettings={handleSelectSettings}
+                handleOpenInbox={handleOpenInbox}
+                handleSelectArchived={handleSelectArchived}
+                handleOpenSavedMessages={handleOpenSavedMessages}
+                saveAPIKey={saveAPIKey}
+                menuItems={menuItems}
+                handleSupport={handleSupport}
+                handleFAQ={handleFAQ}
+                handleOpenShortcuts={handleOpenShortcts}
+                handleChangelog={handleChangelog}
+                close={close}
+                handleSelectNewGroup={handleSelectNewGroup}
+                handleSelectNewChannel={handleSelectNewChannel}
+                handleCreateFolder={handleCreateFolder}
+                handleLockScreenHotkey={handleLockScreenHotkey}
+                commandToggleArchiver={commandToggleArchiver}
+              />
+              <AllUsersAndChats
+                close={close}
+                searchQuery={inputValue}
+                topUserIds={topUserIds}
+                folders={folders}
+                openFolderPage={openFolderPage}
+              />
+            </>
+          )}
+          {activePage === 'createNew' && (
+            <CreateNewPage
+              handleSelectNewGroup={handleSelectNewGroup}
+              handleSelectNewChannel={handleSelectNewChannel}
+              handleCreateFolder={handleCreateFolder}
+            />
+          )}
+          {activePage.includes('folderPage') && folderId && (
+            <FolderPage
+              folderId={Number(folderId)}
+              close={close}
+            />
+          )}
+        </>
       </Command.List>
       <Command.Empty></Command.Empty>
       <button className="global-search" onClick={handleSearchFocus}>
