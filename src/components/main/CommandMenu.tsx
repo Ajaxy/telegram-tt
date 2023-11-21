@@ -479,7 +479,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
       filter={customFilter}
     >
       <Command.Input
-        placeholder="Search for command..."
+        placeholder="Type a command or search..."
         autoFocus
         onValueChange={handleInputChange}
         value={inputValue}
@@ -521,6 +521,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
                 topUserIds={topUserIds}
                 folders={folders}
                 openFolderPage={openFolderPage}
+                setInputValue={setInputValue}
               />
             </>
           )}

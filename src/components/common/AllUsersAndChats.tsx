@@ -8,6 +8,7 @@ import { getActions, getGlobal } from '../../global';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 
 import {
+  getChatLink,
   getChatTitle,
   getChatTypeString,
   getMainUsername, getUserFullName, isDeletedUser,
@@ -24,8 +25,9 @@ const AllUsersAndChats: React.FC<{
   topUserIds?: string[];
   folders: ApiChatFolder[];
   openFolderPage: (folderId: number) => void;
+  setInputValue: (value: string) => void;
 }> = ({
-  close, searchQuery, topUserIds, folders, openFolderPage,
+  close, searchQuery, topUserIds, folders, openFolderPage, setInputValue,
 }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
@@ -38,7 +40,8 @@ const AllUsersAndChats: React.FC<{
   const handleSelectFolder = useCallback((folderId) => {
     console.log('Selected folder ID:', folderId);
     openFolderPage(folderId);
-  }, [openFolderPage]);
+    setInputValue('');
+  }, [openFolderPage, setInputValue]);
 
   function getGroupStatus(chat: ApiChat) {
     const chatTypeString = lang(getChatTypeString(chat));
@@ -80,6 +83,7 @@ const AllUsersAndChats: React.FC<{
     } else {
       const chat = chatsById[id] as ApiChat;
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
+      const link = getChatLink(chat);
       const groupStatus = getGroupStatus(chat);
       content = (
         <span>
@@ -87,7 +91,7 @@ const AllUsersAndChats: React.FC<{
           <span className="chat-status">{groupStatus}</span>
         </span>
       );
-      value = title;
+      value = `${title} ${link !== NBSP ? link : ''}`.trim();
     }
 
     return { content, value };
@@ -154,8 +158,9 @@ const AllUsersAndChats: React.FC<{
           <Command.Item
             key={folder.id}
             onSelect={() => folder && handleSelectFolder(folder.id)}
+            value={`${folder?.title} ${folder?.id}`}
           >
-            <i className="icon icon-search" /><span>{folder?.title || `Folder ${folder?.id}`}</span>
+            <i className="icon icon-folder" /><span>{folder?.title || `Folder ${folder?.id}`}</span>
           </Command.Item>
         ))}
       </Command.Group>

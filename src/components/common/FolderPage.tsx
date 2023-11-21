@@ -8,8 +8,8 @@ import { getActions, getGlobal } from '../../global';
 import type { ApiChat, ApiUser } from '../../api/types';
 
 import {
-  getChatTitle,
-  getChatTypeString,
+  getChatLink,
+  getChatTitle, getChatTypeString,
   getMainUsername, getUserFullName, isDeletedUser,
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
@@ -34,6 +34,9 @@ const FolderPage: React.FC<FolderPageProps> = ({
   const { openChat } = getActions();
 
   const lang = useLang();
+
+  const folder = chatFoldersById[folderId];
+  const folderName = folder ? folder.title : `Folder ${folderId}`;
 
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });
@@ -82,6 +85,7 @@ const FolderPage: React.FC<FolderPageProps> = ({
     } else {
       const chat = chatsById[id] as ApiChat;
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
+      const link = getChatLink(chat);
       const groupStatus = getGroupStatus(chat);
       content = (
         <span>
@@ -89,14 +93,13 @@ const FolderPage: React.FC<FolderPageProps> = ({
           <span className="chat-status">{groupStatus}</span>
         </span>
       );
-      value = title;
+      value = `${title} ${link !== NBSP ? link : ''}`.trim();
     }
 
     return { content, value };
   };
 
   const chatsInFolder = useMemo(() => {
-    const folder = chatFoldersById[folderId];
     if (!folder) {
       console.error(`Folder with ID ${folderId} not found`);
     }
@@ -104,10 +107,10 @@ const FolderPage: React.FC<FolderPageProps> = ({
     const includedChatIds = folder?.includedChatIds || [];
     console.log('Included chat IDs:', includedChatIds);
     return includedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean);
-  }, [folderId, chatFoldersById, chatsById]);
+  }, [folderId, chatsById, folder]);
 
   return (
-    <Command.Group heading={`Chats in folder ${folderId}`}>
+    <Command.Group heading={`Chats in "${folderName}"`}>
       {chatsInFolder.map((chat) => {
         const isUser = usersById.hasOwnProperty(chat.id);
         const { content, value } = renderName(chat.id, isUser);
