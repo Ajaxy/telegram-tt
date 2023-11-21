@@ -272,6 +272,7 @@ const ChatList: FC<OwnProps> = ({
           <EmptyFolder
             folderId={folderId}
             folderType={folderType}
+            isInbox={isInbox}
             foldersDispatch={foldersDispatch}
             onSettingsScreenSelect={onSettingsScreenSelect}
           />
