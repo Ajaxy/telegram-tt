@@ -67,6 +67,7 @@
       transform: scale(1);
       transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
       color 0.15s;
+      box-shadow: var(--button-shadow);
 
       body.no-message-composer-animations & {
         transition: none !important;

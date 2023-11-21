@@ -1,7 +1,4 @@
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable arrow-parens */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -11,12 +8,16 @@ import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
+import { getGlobal } from '../../lib/teact/teactn';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
-import { getMainUsername, getUserFullName } from '../../global/helpers';
+import {
+  getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
+} from '../../global/helpers';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
@@ -26,9 +27,11 @@ import renderText from '../common/helpers/renderText';
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
 import { useJune } from '../../hooks/useJune';
+import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
+import FolderPage from '../common/FolderPage';
 
 import './CommandMenu.scss';
 
@@ -37,8 +40,11 @@ const cmdkRoot = createRoot(cmdkElement!);
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
 interface CommandMenuProps {
-  topUserIds: string[];
+  topUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  folders: ApiChatFolder[];
+  chatsById?: Record<string, ApiChat>;
+  recentlyFoundChatIds?: string[];
 }
 
 const customFilter = (value: string, search: string) => {
@@ -51,41 +57,80 @@ const customFilter = (value: string, search: string) => {
 };
 
 interface SuggestedContactsProps {
-  topUserIds: string[];
+  topUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  chatsById?: Record<string, ApiChat>;
+  recentlyFoundChatIds?: string[];
   close: () => void; // Добавляем пропс close
 }
 
-const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, close }) => {
+const SuggestedContacts: FC<SuggestedContactsProps> = ({
+  topUserIds, usersById, chatsById, recentlyFoundChatIds, close,
+}) => {
   const {
     loadTopUsers, openChat, addRecentlyFoundChatId,
   } = getActions();
   const runThrottled = throttle(() => loadTopUsers(), 60000, true);
+  const lang = useLang();
+  const uniqueTopUserIds = topUserIds?.filter((id) => !recentlyFoundChatIds?.slice(0, 2).includes(id)) || [];
+  function getGroupStatus(chat: ApiChat) {
+    const chatTypeString = lang(getChatTypeString(chat));
+    const { membersCount } = chat;
+
+    if (chat.isRestricted) {
+      return chatTypeString === 'Channel' ? 'channel is inaccessible' : 'group is inaccessible';
+    }
+
+    if (!membersCount) {
+      return chatTypeString;
+    }
+
+    return chatTypeString === 'Channel'
+      ? lang('Subscribers', membersCount, 'i')
+      : lang('Members', membersCount, 'i');
+  }
 
   useEffect(() => {
     runThrottled();
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, [loadTopUsers]);
 
-  const renderName = (userId: string) => {
+  const renderName = (id: string, isUser: boolean, isChat: boolean): { content: React.ReactNode; value: string } => {
     const NBSP = '\u00A0';
-    const user = usersById[userId];
-    const name = Boolean(user) && (getUserFullName(user) || NBSP);
-    const handle = Boolean(user) && (getMainUsername(user) || NBSP);
-    const renderedName = renderText(name);
-    const displayedName = React.isValidElement(renderedName) ? renderedName : name;
-    return {
-      displayedName: (
+    let content: React.ReactNode;
+    let value = '';
+
+    if (isUser) {
+      const user = usersById[id] as ApiUser;
+      if (isDeletedUser(user)) {
+        return { content: undefined, value: '' };
+      }
+      const name = getUserFullName(user) || NBSP;
+      const handle = getMainUsername(user) || NBSP;
+      const renderedName = renderText(name);
+      content = React.isValidElement(renderedName) ? renderedName : (
         <span>
-          <span className="user-name">{displayedName}</span>
-          <span className="user-handle">
-            {((handle === NBSP) ? '' : '@')}
-            {handle}
-          </span>
+          <span className="entity-name">{name}</span>
+          <span className="user-handle">{handle !== NBSP ? `@${handle}` : ''}</span>
         </span>
-      ),
-      valueString: `${name} ${handle}`,
-    };
+      );
+      value = `${name} ${handle !== NBSP ? handle : ''}`.trim();
+    } else if (isChat && chatsById) {
+      const chat = chatsById[id] as ApiChat;
+      if (chat) {
+        const title = getChatTitle(lang, chat) || 'Unknown Chat';
+        const groupStatus = getGroupStatus(chat);
+        content = (
+          <span>
+            <span className="chat-title">{title}</span>
+            <span className="chat-status">{groupStatus}</span>
+          </span>
+        );
+        value = title;
+      }
+    }
+
+    return { content, value };
   };
 
   const handleClick = useCallback((id: string) => {
@@ -95,12 +140,25 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
   }, [openChat, addRecentlyFoundChatId, close]);
 
   return (
-    <Command.Group heading="Suggested contacts">
-      {topUserIds.slice(0, 3).map((userId) => { // take the first 3 elements
-        const { displayedName, valueString } = renderName(userId);
-        return (
-          <Command.Item key={userId} value={valueString} onSelect={() => handleClick(userId)}>
-            <span>{displayedName}</span>
+    <Command.Group heading="Suggestions">
+      {recentlyFoundChatIds && recentlyFoundChatIds.slice(0, 2).map((id) => {
+        const isUser = usersById.hasOwnProperty(id);
+        const isChat = !!chatsById && chatsById.hasOwnProperty(id); // Используйте !! для приведения к boolean
+        const { content, value } = renderName(id, isUser, isChat);
+
+        return content && (
+          <Command.Item key={id} value={value} onSelect={() => handleClick(id)}>
+            {content}
+          </Command.Item>
+        );
+      })}
+      {uniqueTopUserIds && uniqueTopUserIds.slice(0, 3).map((id) => {
+        const isUser = usersById.hasOwnProperty(id);
+        const isChat = !!chatsById && chatsById.hasOwnProperty(id); // Используйте !! для приведения к boolean
+        const { content, value } = renderName(id, isUser, isChat);
+        return content && (
+          <Command.Item key={id} value={value} onSelect={() => handleClick(id)}>
+            {content}
           </Command.Item>
         );
       })}
@@ -109,12 +167,12 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({ topUserIds, usersById, 
 };
 
 interface HomePageProps {
-  /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
   commandToggleArchiver: () => void;
   isArchiverEnabled: boolean;
-  topUserIds: string[];
+  topUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  recentlyFoundChatIds?: string[];
   handleSearchFocus: () => void;
   handleOpenSavedMessages: () => void;
   handleSelectSettings: () => void;
@@ -141,7 +199,7 @@ interface CreateNewPageProps {
 
 const HomePage: React.FC<HomePageProps> = ({
   commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
-  topUserIds, usersById, close,
+  topUserIds, usersById, recentlyFoundChatIds, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
@@ -149,7 +207,14 @@ const HomePage: React.FC<HomePageProps> = ({
 }) => {
   return (
     <>
-      {topUserIds && usersById && <SuggestedContacts topUserIds={topUserIds} usersById={usersById} close={close} />}
+      {topUserIds && usersById && (
+        <SuggestedContacts
+          topUserIds={topUserIds}
+          usersById={usersById}
+          recentlyFoundChatIds={recentlyFoundChatIds}
+          close={close}
+        />
+      )}
       <Command.Group heading="Create new...">
         <Command.Item onSelect={handleSelectNewGroup}>
           <i className="icon icon-group" /><span>Create new group</span>
@@ -294,7 +359,9 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
   );
 };
 
-const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
+const CommandMenu: FC<CommandMenuProps> = ({
+  topUserIds, usersById, recentlyFoundChatIds, folders,
+}) => {
   const { track } = useJune();
   const {
     showNotification, openUrl, openChatByUsername,
@@ -307,6 +374,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
+  // eslint-disable-next-line no-null/no-null
+  const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
 
   const close = useCallback(() => {
     setOpen(false);
@@ -338,8 +407,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       const newLabel = `Save/update OpenAI key: ${inputValue}`;
       const newItem = { label: newLabel, value: 'save_api_key' };
 
-      if (!menuItems.some(item => item.label === newLabel)) {
-        setMenuItems(prevItems => [...prevItems, newItem]);
+      if (!menuItems.some((item) => item.label === newLabel)) {
+        setMenuItems((prevItems) => [...prevItems, newItem]);
       }
     } else {
       setMenuItems([]); // Очищаем пункты меню, если ключ невалиден
@@ -356,6 +425,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
+
+  const openFolderPage = useCallback((id) => { // Замена folderId на id
+    setPages([...pages, `folderPage:${id}`]);
+  }, [pages]);
 
   const saveAPIKey = useCallback(() => {
     localStorage.setItem('openai_api_key', inputValue);
@@ -437,7 +510,6 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
   }, [close, isArchiverEnabled, setIsArchiverEnabled]);
@@ -450,6 +522,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       track('commandArchiveAll');
     }
   }, [close, archiveMessages, track]);
+
+  const getFolderName = (id: number | null) => {
+    // eslint-disable-next-line no-null/no-null
+    if (id === null) return 'Unknown Folder';
+
+    const global = getGlobal() as GlobalState;
+    const folder = global.chatFolders.byId[id];
+    return folder ? folder.title : `Folder ${id}`;
+  };
 
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
@@ -477,8 +558,20 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
       shouldFilter
       filter={customFilter}
     >
+      {pages.map((page) => {
+        // Показываем бейдж только если страница не 'home'
+        if (page !== 'home') {
+          return (
+            <div key={page} cmdk-vercel-badge="">
+              {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
+            </div>
+          );
+        }
+        // eslint-disable-next-line no-null/no-null
+        return null; // Ничего не рендерим для 'home'
+      })}
       <Command.Input
-        placeholder="Search for command..."
+        placeholder="Type a command or search..."
         autoFocus
         onValueChange={handleInputChange}
         value={inputValue}
@@ -489,45 +582,59 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
         }}
       />
       <Command.List>
-        {activePage === 'home' && (
-          <HomePage
-            commandArchiveAll={commandArchiveAll}
-            commandToggleArchiver={commandToggleArchiver}
-            isArchiverEnabled={isArchiverEnabled}
-            topUserIds={topUserIds}
-            usersById={usersById}
-            handleSearchFocus={handleSearchFocus}
-            handleSelectSettings={handleSelectSettings}
-            handleOpenInbox={handleOpenInbox}
-            handleSelectArchived={handleSelectArchived}
-            handleOpenSavedMessages={handleOpenSavedMessages}
-            saveAPIKey={saveAPIKey}
-            menuItems={menuItems}
-            handleSupport={handleSupport}
-            handleFAQ={handleFAQ}
-            handleOpenShortcuts={handleOpenShortcts}
-            handleChangelog={handleChangelog}
-            close={close}
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-            handleLockScreenHotkey={handleLockScreenHotkey}
-          />
-        )}
-        {activePage === 'createNew' && (
-          <CreateNewPage
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-          />
-        )}
-        <AllUsersAndChats
-          close={close}
-          searchQuery={inputValue}
-          topUserIds={topUserIds}
-        />
+        <>
+          {activePage === 'home' && (
+            <>
+              <HomePage
+                commandArchiveAll={commandArchiveAll}
+                commandToggleArchiver={commandToggleArchiver}
+                isArchiverEnabled={isArchiverEnabled}
+                topUserIds={topUserIds}
+                usersById={usersById}
+                handleSearchFocus={handleSearchFocus}
+                handleSelectSettings={handleSelectSettings}
+                handleOpenInbox={handleOpenInbox}
+                handleSelectArchived={handleSelectArchived}
+                handleOpenSavedMessages={handleOpenSavedMessages}
+                saveAPIKey={saveAPIKey}
+                menuItems={menuItems}
+                handleSupport={handleSupport}
+                handleFAQ={handleFAQ}
+                handleOpenShortcuts={handleOpenShortcts}
+                handleChangelog={handleChangelog}
+                close={close}
+                handleSelectNewGroup={handleSelectNewGroup}
+                handleSelectNewChannel={handleSelectNewChannel}
+                handleCreateFolder={handleCreateFolder}
+                handleLockScreenHotkey={handleLockScreenHotkey}
+                recentlyFoundChatIds={recentlyFoundChatIds}
+              />
+              <AllUsersAndChats
+                close={close}
+                searchQuery={inputValue}
+                topUserIds={topUserIds}
+                folders={folders}
+                openFolderPage={openFolderPage}
+                setInputValue={setInputValue}
+              />
+            </>
+          )}
+          {activePage === 'createNew' && (
+            <CreateNewPage
+              handleSelectNewGroup={handleSelectNewGroup}
+              handleSelectNewChannel={handleSelectNewChannel}
+              handleCreateFolder={handleCreateFolder}
+            />
+          )}
+          {activePage.includes('folderPage') && folderId && (
+            <FolderPage
+              folderId={Number(folderId)}
+              close={close}
+            />
+          )}
+        </>
       </Command.List>
-      <Command.Empty></Command.Empty>
+      <Command.Empty />
       <button className="global-search" onClick={handleSearchFocus}>
         <i className="icon icon-search" />
         <span>
@@ -547,10 +654,19 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById }) => {
 };
 
 export default memo(withGlobal(
-  (global): { topUserIds?: string[]; usersById: Record<string, ApiUser> } => {
+  (global): CommandMenuProps => {
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
+    const chatsById = global.chats.byId;
+    const chatFoldersById = global.chatFolders.byId;
+    const orderedFolderIds = global.chatFolders.orderedIds;
+    const recentlyFoundChatIds = global.recentlyFoundChatIds;
+    const folders = orderedFolderIds
+      ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
+      : [];
 
-    return { topUserIds, usersById };
+    return {
+      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
+    };
   },
 )(CommandMenu));
