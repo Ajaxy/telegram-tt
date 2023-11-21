@@ -1,11 +1,14 @@
+/* eslint-disable react/jsx-no-bind */
+/* eslint-disable no-console */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 
 import {
+  getChatLink,
   getChatTitle,
   getChatTypeString,
   getMainUsername, getUserFullName, isDeletedUser,
@@ -16,8 +19,16 @@ import renderText from './helpers/renderText';
 
 import useLang from '../../hooks/useLang';
 
-const AllUsersAndChats: React.FC<
-{ close: () => void; searchQuery: string; topUserIds: string[] }> = ({ close, searchQuery, topUserIds }) => {
+const AllUsersAndChats: React.FC<{
+  close: () => void;
+  searchQuery: string;
+  topUserIds?: string[];
+  folders: ApiChatFolder[];
+  openFolderPage: (folderId: number) => void;
+  setInputValue: (value: string) => void;
+}> = ({
+  close, searchQuery, topUserIds, folders, openFolderPage, setInputValue,
+}) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
   const chatsById: Record<string, ApiChat> = global.chats.byId;
@@ -25,6 +36,12 @@ const AllUsersAndChats: React.FC<
   const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
   const lang = useLang();
+
+  const handleSelectFolder = useCallback((folderId) => {
+    console.log('Selected folder ID:', folderId);
+    openFolderPage(folderId);
+    setInputValue('');
+  }, [openFolderPage, setInputValue]);
 
   function getGroupStatus(chat: ApiChat) {
     const chatTypeString = lang(getChatTypeString(chat));
@@ -66,6 +83,7 @@ const AllUsersAndChats: React.FC<
     } else {
       const chat = chatsById[id] as ApiChat;
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
+      const link = getChatLink(chat);
       const groupStatus = getGroupStatus(chat);
       content = (
         <span>
@@ -73,7 +91,7 @@ const AllUsersAndChats: React.FC<
           <span className="chat-status">{groupStatus}</span>
         </span>
       );
-      value = title;
+      value = `${title} ${link !== NBSP ? link : ''}`.trim();
     }
 
     return { content, value };
@@ -116,24 +134,37 @@ const AllUsersAndChats: React.FC<
   }
 
   return (
-    <Command.Group heading={`Search for "${searchQuery}"`}>
-      {ids.map((id) => {
-        const isUser = usersById.hasOwnProperty(id);
-        const { content, value } = renderName(id, isUser);
-        // eslint-disable-next-line no-null/no-null
-        if (!content) return null;
+    <>
+      <Command.Group heading={`Search for "${searchQuery}"`}>
+        {ids.map((id) => {
+          const isUser = usersById.hasOwnProperty(id);
+          const { content, value } = renderName(id, isUser);
+          // eslint-disable-next-line no-null/no-null
+          if (!content) return null;
 
-        return (
+          return (
+            <Command.Item
+              key={id}
+              value={value}
+              onSelect={handeSelect(id)}
+            >
+              {content}
+            </Command.Item>
+          );
+        })}
+      </Command.Group>
+      <Command.Group heading="Folders">
+        {folders.map((folder) => (
           <Command.Item
-            key={id}
-            value={value}
-            onSelect={handeSelect(id)}
+            key={folder.id}
+            onSelect={() => folder && handleSelectFolder(folder.id)}
+            value={`${folder?.title} ${folder?.id}`}
           >
-            {content}
+            <i className="icon icon-folder" /><span>{folder?.title || `Folder ${folder?.id}`}</span>
           </Command.Item>
-        );
-      })}
-    </Command.Group>
+        ))}
+      </Command.Group>
+    </>
   );
 };
 

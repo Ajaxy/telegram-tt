@@ -8,9 +8,11 @@ import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
+import { getGlobal } from '../../lib/teact/teactn';
 import { getActions, withGlobal } from '../../global';
 
-import type { ApiChat, ApiUser } from '../../api/types';
+import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
@@ -28,6 +30,7 @@ import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
+import FolderPage from '../common/FolderPage';
 
 import './CommandMenu.scss';
 
@@ -38,6 +41,7 @@ const SEARCH_CLOSE_TIMEOUT_MS = 250;
 interface CommandMenuProps {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
 }
@@ -162,7 +166,6 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
 };
 
 interface HomePageProps {
-  /* setPages: (pages: string[]) => void; */
   commandArchiveAll: () => void;
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
@@ -193,7 +196,7 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  /* setPages,  */commandArchiveAll, topUserIds, usersById, recentlyFoundChatIds, close,
+  commandArchiveAll, topUserIds, usersById, recentlyFoundChatIds, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
@@ -348,7 +351,9 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
   );
 };
 
-const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoundChatIds }) => {
+const CommandMenu: FC<CommandMenuProps> = ({
+  topUserIds, usersById, recentlyFoundChatIds, folders,
+}) => {
   const { track } = useJune();
   const {
     showNotification, openUrl, openChatByUsername,
@@ -363,6 +368,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
   const { runCommand } = useCommands();
   const [pages, setPages] = useState(['home']);
   const activePage = pages[pages.length - 1];
+  // eslint-disable-next-line no-null/no-null
+  const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
 
   const close = useCallback(() => {
     setOpen(false);
@@ -412,6 +419,10 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
   useEffect(() => (
     isOpen ? captureKeyboardListeners({ onEsc: close }) : undefined
   ), [isOpen, close]);
+
+  const openFolderPage = useCallback((id) => { // Замена folderId на id
+    setPages([...pages, `folderPage:${id}`]);
+  }, [pages]);
 
   const saveAPIKey = useCallback(() => {
     localStorage.setItem('openai_api_key', inputValue);
@@ -507,6 +518,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
     }
   }, [close, archiveMessages, track]);
 
+  const getFolderName = (id: number | null) => {
+    // eslint-disable-next-line no-null/no-null
+    if (id === null) return 'Unknown Folder';
+
+    const global = getGlobal() as GlobalState;
+    const folder = global.chatFolders.byId[id];
+    return folder ? folder.title : `Folder ${id}`;
+  };
+
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
@@ -533,8 +553,20 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
       shouldFilter
       filter={customFilter}
     >
+      {pages.map((page) => {
+        // Показываем бейдж только если страница не 'home'
+        if (page !== 'home') {
+          return (
+            <div key={page} cmdk-vercel-badge="">
+              {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
+            </div>
+          );
+        }
+        // eslint-disable-next-line no-null/no-null
+        return null; // Ничего не рендерим для 'home'
+      })}
       <Command.Input
-        placeholder="Search for command..."
+        placeholder="Type a command or search..."
         autoFocus
         onValueChange={handleInputChange}
         value={inputValue}
@@ -545,44 +577,56 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
         }}
       />
       <Command.List>
-        {activePage === 'home' && (
-          <HomePage
-            /* setPages={setPages} */
-            commandArchiveAll={commandArchiveAll}
-            topUserIds={topUserIds}
-            usersById={usersById}
-            handleSearchFocus={handleSearchFocus}
-            handleSelectSettings={handleSelectSettings}
-            handleOpenInbox={handleOpenInbox}
-            handleSelectArchived={handleSelectArchived}
-            handleOpenSavedMessages={handleOpenSavedMessages}
-            saveAPIKey={saveAPIKey}
-            menuItems={menuItems}
-            handleSupport={handleSupport}
-            handleFAQ={handleFAQ}
-            handleOpenShortcuts={handleOpenShortcts}
-            handleChangelog={handleChangelog}
-            close={close}
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-            handleLockScreenHotkey={handleLockScreenHotkey}
-            commandToggleArchiver={commandToggleArchiver}
-            recentlyFoundChatIds={recentlyFoundChatIds}
-          />
-        )}
-        {activePage === 'createNew' && (
-          <CreateNewPage
-            handleSelectNewGroup={handleSelectNewGroup}
-            handleSelectNewChannel={handleSelectNewChannel}
-            handleCreateFolder={handleCreateFolder}
-          />
-        )}
-        <AllUsersAndChats
-          close={close}
-          searchQuery={inputValue}
-          topUserIds={topUserIds || []}
-        />
+        <>
+          {activePage === 'home' && (
+            <>
+              <HomePage
+                commandArchiveAll={commandArchiveAll}
+                topUserIds={topUserIds}
+                usersById={usersById}
+                handleSearchFocus={handleSearchFocus}
+                handleSelectSettings={handleSelectSettings}
+                handleOpenInbox={handleOpenInbox}
+                handleSelectArchived={handleSelectArchived}
+                handleOpenSavedMessages={handleOpenSavedMessages}
+                saveAPIKey={saveAPIKey}
+                menuItems={menuItems}
+                handleSupport={handleSupport}
+                handleFAQ={handleFAQ}
+                handleOpenShortcuts={handleOpenShortcts}
+                handleChangelog={handleChangelog}
+                close={close}
+                handleSelectNewGroup={handleSelectNewGroup}
+                handleSelectNewChannel={handleSelectNewChannel}
+                handleCreateFolder={handleCreateFolder}
+                handleLockScreenHotkey={handleLockScreenHotkey}
+                commandToggleArchiver={commandToggleArchiver}
+                recentlyFoundChatIds={recentlyFoundChatIds}
+              />
+              <AllUsersAndChats
+                close={close}
+                searchQuery={inputValue}
+                topUserIds={topUserIds}
+                folders={folders}
+                openFolderPage={openFolderPage}
+                setInputValue={setInputValue}
+              />
+            </>
+          )}
+          {activePage === 'createNew' && (
+            <CreateNewPage
+              handleSelectNewGroup={handleSelectNewGroup}
+              handleSelectNewChannel={handleSelectNewChannel}
+              handleCreateFolder={handleCreateFolder}
+            />
+          )}
+          {activePage.includes('folderPage') && folderId && (
+            <FolderPage
+              folderId={Number(folderId)}
+              close={close}
+            />
+          )}
+        </>
       </Command.List>
       <Command.Empty />
       <button className="global-search" onClick={handleSearchFocus}>
@@ -607,11 +651,16 @@ export default memo(withGlobal(
   (global): CommandMenuProps => {
     const { userIds: topUserIds } = global.topPeers;
     const usersById = global.users.byId;
-    const chatsById: Record<string, ApiChat> = global.chats.byId;
+    const chatsById = global.chats.byId;
+    const chatFoldersById = global.chatFolders.byId;
+    const orderedFolderIds = global.chatFolders.orderedIds;
     const recentlyFoundChatIds = global.recentlyFoundChatIds;
+    const folders = orderedFolderIds
+      ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
+      : [];
 
     return {
-      topUserIds, usersById, chatsById, recentlyFoundChatIds,
+      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
     };
   },
 )(CommandMenu));
