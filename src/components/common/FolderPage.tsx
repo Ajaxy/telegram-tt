@@ -108,8 +108,31 @@ const FolderPage: React.FC<FolderPageProps> = ({
     return includedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean);
   }, [folderId, chatsById, folder]);
 
+  const pinnedChats = useMemo(() => {
+    if (!folder) {
+      return [];
+    }
+    const pinnedChatIds = folder.pinnedChatIds || [];
+    return pinnedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean);
+  }, [chatsById, folder]);
+
   return (
     <Command.Group>
+      {pinnedChats.map((chat) => {
+        const isUser = usersById.hasOwnProperty(chat.id);
+        const { content, value } = renderName(chat.id, isUser);
+        if (!content) return null;
+
+        return (
+          <Command.Item
+            key={chat.id} // Используйте chat.id как ключ
+            value={value}
+            onSelect={handeSelect(chat.id)}
+          >
+            <span>{content}</span><i className="icon icon-pinned-chat" cmdk-pinned="" />
+          </Command.Item>
+        );
+      })}
       {chatsInFolder.map((chat) => {
         const isUser = usersById.hasOwnProperty(chat.id);
         const { content, value } = renderName(chat.id, isUser);
