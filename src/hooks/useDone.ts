@@ -67,7 +67,7 @@ export default function useDone() {
   };
 
   const doneAllReadChats = () => {
-
+    // todo
   };
 
   return { doneChat, isChatDone, doneAllReadChats };

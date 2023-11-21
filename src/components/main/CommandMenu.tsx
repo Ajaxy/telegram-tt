@@ -170,8 +170,10 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
 interface HomePageProps {
   commandDoneAll: () => void;
   commandArchiveAll: () => void;
+  commandToggleAutoDone: () => void;
   commandToggleArchiver: () => void;
   isArchiverEnabled: boolean;
+  isAutoDoneEnabled: boolean;
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
@@ -200,7 +202,8 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  commandDoneAll, commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
+  commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled,
+  commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
@@ -243,20 +246,28 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <CommandSeparator />
-      <Command.Group heading="Done and Archive">
+      <Command.Group heading="Settings">
         <Command.Item onSelect={commandDoneAll}>
           <i className="icon icon-select" /><span>Mark read chats as &quot;Done&quot;</span>
         </Command.Item>
-        <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
+        <Command.Item onSelect={commandToggleAutoDone}>
+          <i className="icon icon-select" />
+          <span>
+            {isAutoDoneEnabled
+              ? 'Disable "Auto-Done after reading"'
+              : 'Enable: "Auto-Done after reading"'}
+          </span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
           <i className="icon icon-archive" />
           <span>
             {isArchiverEnabled
-              ? 'Disable Auto-Done after reading'
-              : 'Enable Auto-Done after reading'}
+              ? 'Disable "Аrchive chats when mark as done"'
+              : 'Enable "Аrchive chats when mark as done"'}
           </span>
+        </Command.Item>
+        <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
         </Command.Item>
         {menuItems.map((item, index) => (
           <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
@@ -372,7 +383,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
     showNotification, openUrl, openChatByUsername,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
-  const { isArchiverEnabled, setIsArchiverEnabled } = useStorage();
+  const {
+    isAutoDoneEnabled, setIsAutoDoneEnabled,
+    isArchiverEnabled, setIsArchiverEnabled,
+  } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
   const { doneAllReadChats } = useDone();
   const [inputValue, setInputValue] = useState('');
@@ -520,6 +534,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [close, isArchiverEnabled, setIsArchiverEnabled]);
 
+  const commandToggleAutoDone = useCallback(() => {
+    const updIsAutoDoneEnabled = !isAutoDoneEnabled;
+    showNotification({ message: updIsAutoDoneEnabled ? 'Auto-Done enabled!' : 'Auto-Done disabled!' });
+    setIsAutoDoneEnabled(updIsAutoDoneEnabled);
+    close();
+  }, [close, isAutoDoneEnabled, setIsAutoDoneEnabled]);
+
   const commandDoneAll = useCallback(() => {
     showNotification({ message: 'All read chats are marked as done!' });
     doneAllReadChats();
@@ -603,7 +624,9 @@ const CommandMenu: FC<CommandMenuProps> = ({
               <HomePage
                 commandDoneAll={commandDoneAll}
                 commandArchiveAll={commandArchiveAll}
+                commandToggleAutoDone={commandToggleAutoDone}
                 commandToggleArchiver={commandToggleArchiver}
+                isAutoDoneEnabled={isAutoDoneEnabled}
                 isArchiverEnabled={isArchiverEnabled}
                 topUserIds={topUserIds}
                 usersById={usersById}
