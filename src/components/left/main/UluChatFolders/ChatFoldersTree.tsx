@@ -1,36 +1,161 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/jsx-no-bind */
-import React, { createRef } from 'react';
+import React, {
+  createRef, useMemo, useRef,
+} from 'react';
 import type {
-  TreeEnvironmentRef, TreeItem, TreeItemIndex, TreeRef,
+  TreeEnvironmentRef, TreeItemIndex,
 } from 'react-complex-tree';
-import { Tree, UncontrolledTreeEnvironment } from 'react-complex-tree';
 import type { FC } from '../../../../lib/teact/teact';
-import { useCallback, useMemo, useRef } from '../../../../lib/teact/teact';
+import {
+  getActions, getGlobal,
+  withGlobalReact as withGlobal,
+} from '../../../../global';
 
+import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
+import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
-// import { isChatSuperGroupWithTopics } from '../../../../global/helpers';
+import { ALL_FOLDER_ID } from '../../../../config';
+import { selectCanShareFolder } from '../../../../global/selectors';
+import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
 
+import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
+import useLang from '../../../../hooks/useLang.react';
+
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
-// import { isChatSuperGroupWithTopics } from '../../../../global/helpers';
 import TreeRenders from './TreeRenderers';
+import UluControlledTreeEnvironment from './UluControlledTreeEnvironment';
 
 import styles from './ChatFoldersTree.module.scss';
 
-const getItemTitle = (item: TreeItem<any>) => item.data;
-
-type OwnProps = {
-  folders: TreeItemFolder[];
+type OwnProps = {};
+type StateProps = {
+  orderedFolderIds?: number[];
+  folderInvitesById: Record<number, ApiChatlistExportedInvite[]>;
+  chatFoldersById: Record<number, ApiChatFolder>;
+  orderedPinnedChatIds: string[] | undefined;
+  chatsById: Record<number, ApiChat>;
+  maxFolderInvites: number;
+  maxChatLists: number;
+  maxFolders: number;
 };
 
 // TODO clean-up
-const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
+const ChatFoldersTree: FC<OwnProps & StateProps> = ({
+  chatsById,
+  chatFoldersById,
+  folderInvitesById,
+  orderedFolderIds,
+  maxChatLists,
+  maxFolders,
+  maxFolderInvites,
+}) => {
+  const lang = useLang();
+
+  const folderCountersById = useFolderManagerForUnreadCounters();
+
+  const {
+    // loadChatFolders,
+    // setActiveChatFolder,
+    // openChat,
+    openShareChatFolderModal,
+    openDeleteChatFolderModal,
+    openEditChatFolder,
+    openLimitReachedModal,
+  } = getActions();
+
+  const displayedFolders = (() => {
+    return orderedFolderIds
+      ? orderedFolderIds.map((id) => {
+        return chatFoldersById[id] || {};
+      }).filter(Boolean)
+      : undefined;
+  })();
+
+  const folders = (() => {
+    if (!displayedFolders || !displayedFolders.length) {
+      return [];
+    }
+
+    return displayedFolders.map((folder, i) => {
+      const {
+        id, title, includedChatIds = [], pinnedChatIds = [],
+      } = folder;
+      const isBlocked = i > maxFolders - 1;
+      const canShareFolder = selectCanShareFolder(getGlobal(), id);
+      const contextActions: MenuItemContextAction[] = [];
+
+      if (canShareFolder) {
+        contextActions.push({
+          title: lang('ChatList.ContextMenuShare'),
+          icon: 'link',
+          handler: () => {
+            const chatListCount = Object.values(chatFoldersById).reduce((acc, el) => acc + (el.isChatList ? 1 : 0), 0);
+            if (chatListCount >= maxChatLists && !folder.isChatList) {
+              openLimitReachedModal({
+                limit: 'chatlistJoined',
+              });
+              return;
+            }
+
+            // Greater amount can be after premium downgrade
+            if (folderInvitesById[id]?.length >= maxFolderInvites) {
+              openLimitReachedModal({
+                limit: 'chatlistInvites',
+              });
+              return;
+            }
+
+            openShareChatFolderModal({
+              folderId: id,
+            });
+          },
+        });
+      }
+
+      if (id !== ALL_FOLDER_ID) {
+        contextActions.push({
+          title: lang('FilterEdit'),
+          icon: 'edit',
+          handler: () => {
+            openEditChatFolder({ folderId: id });
+          },
+        });
+
+        contextActions.push({
+          title: lang('FilterDeleteItem'),
+          icon: 'delete',
+          destructive: true,
+          handler: () => {
+            openDeleteChatFolderModal({ folderId: id });
+          },
+        });
+      }
+
+      const chatIds = [...new Set(pinnedChatIds.concat(includedChatIds))];
+
+      return {
+        id,
+        title,
+        badgeCount: folderCountersById[id]?.chatsCount,
+        isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
+        isBlocked,
+        contextActions: contextActions?.length ? contextActions : undefined,
+        chatIds,
+        chats: Object.values(chatsById)
+          .filter((chat) => chatIds.includes(chat.id))
+          .reduce((p, c) => {
+            p[c.id] = { ...c, isPinned: pinnedChatIds.includes(c.id), folderId: id } as ApiChat;
+            return p;
+          }, {} as Record<string, ApiChat>),
+      } satisfies TreeItemFolder;
+    }).filter((folder) => typeof folder.id === 'number');
+  })();
+
   // eslint-disable-next-line no-null/no-null
   const treeEnvironmentRef = useRef<TreeEnvironmentRef>(null);
-  // eslint-disable-next-line no-null/no-null
-  const treeRef = useRef<TreeRef>(null);
 
   const foldersToDisplay = useMemo(() => {
     const chatsLength = folders.reduce((length, folder) => length + folder.chatIds.length, 0);
@@ -99,11 +224,6 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
     };
   }, [folders]);
 
-  // eslint-disable-next-line no-async-without-await/no-async-without-await
-  const getTreeItem = useCallback(async (itemId: TreeItemIndex) => {
-    return foldersToDisplay.items[itemId] as TreeItemChat<any>;
-  }, [foldersToDisplay]);
-
   const classNameInfiniteScroll = buildClassName(
     'custom-scroll',
     styles['infinite-scroll'],
@@ -111,27 +231,58 @@ const ChatFoldersTree: FC<OwnProps> = ({ folders }) => {
 
   return (
     <InfiniteScroll className={classNameInfiniteScroll}>
-      <UncontrolledTreeEnvironment
+      <UluControlledTreeEnvironment
         ref={treeEnvironmentRef}
-        dataProvider={{
-          getTreeItem,
-        }}
-        getItemTitle={getItemTitle}
-        viewState={{}}
+        id="chat-folders-tree"
+        items={foldersToDisplay.items}
         renderTreeContainer={TreeRenders.renderTreeContainer}
         renderLiveDescriptorContainer={TreeRenders.renderLiveDescriptorContainer}
         renderItemsContainer={TreeRenders.renderItemsContainer}
-        // @ts-ignore
         renderItem={TreeRenders.renderItem}
         // renderItemArrow={TreeRenders.renderItemArrow}
         // renderDepthOffset={1}
         // renderDragBetweenLine={TreeRenders.renderDragBetweenLine}
         renderItemTitle={TreeRenders.renderItemTitle}
-      >
-        <Tree ref={treeRef} treeId="tree-1" rootItem="root" treeLabel="Tree Example" />
-      </UncontrolledTreeEnvironment>
+      />
     </InfiniteScroll>
   );
 };
 
-export default ChatFoldersTree;
+export default withGlobal(
+  (global): StateProps => {
+    const {
+      chatFolders: {
+        byId: chatFoldersById,
+        orderedIds: orderedFolderIds,
+        invites: folderInvitesById,
+      },
+      chats: {
+        byId: chatsById,
+        orderedPinnedIds: { active: orderedPinnedChatIds },
+      },
+      // activeSessions: {
+      //   byHash: sessions,
+      // },
+      // currentUserId,
+      // archiveSettings,
+    } = global;
+    // const { shouldSkipHistoryAnimations, activeChatFolder } = selectTabState(global);
+
+    return {
+      chatFoldersById,
+      chatsById,
+      orderedPinnedChatIds,
+      folderInvitesById,
+      orderedFolderIds,
+      // activeChatFolder,
+      // currentUserId,
+      // shouldSkipHistoryAnimations,
+      // hasArchivedChats: Boolean(archived?.length),
+      maxFolders: selectCurrentLimit(global, 'dialogFilters'),
+      maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
+      maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
+      // archiveSettings,
+      // sessions,
+    };
+  },
+)(ChatFoldersTree);

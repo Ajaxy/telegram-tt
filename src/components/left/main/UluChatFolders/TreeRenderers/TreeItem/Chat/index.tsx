@@ -41,12 +41,10 @@ const Chat: FC<{
   title: string | ReactNode;
   active: boolean | undefined;
   expanded?: boolean;
-  isPinned?: boolean;
-  folderId?: number;
   shouldStressUnreadMessages: boolean;
   contextRootElementSelector?: string;
 }> = ({
-  children, active, title, shouldStressUnreadMessages, item, context, isPinned, folderId,
+  children, active, title, shouldStressUnreadMessages, item, context,
 }) => {
   const {
     unreadCount: messagesUnreadCount, ref,
@@ -95,8 +93,8 @@ const Chat: FC<{
     handleMute,
     handleChatFolderChange,
     handleReport,
-    folderId,
-    isPinned,
+    folderId: item.folderId,
+    isPinned: item.isPinned,
     isMuted: item.chat?.isMuted,
     canChangeFolder: item.canChangeFolder, // TODO
   });
@@ -164,7 +162,7 @@ const Chat: FC<{
     getLayout,
   );
 
-  const shouldRenderPin = isPinned;
+  const shouldRenderPin = item.isPinned;
   const shouldRenderControl = shouldRenderPin;
 
   // TODO use <ListItem/> with <Ripple/>

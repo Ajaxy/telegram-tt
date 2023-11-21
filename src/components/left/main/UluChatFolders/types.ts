@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import type { TreeItem } from 'react-complex-tree';
+import type {
+  TreeInformation, TreeItem, TreeItemRenderContext, TreeRenderProps,
+} from 'react-complex-tree';
 
 import type { ApiChat, ApiUser } from '../../../../api/types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
@@ -23,3 +25,25 @@ export type TreeItemFolder = TabWithProperties & {
   chatIds: string[];
   chats: Record<string, ApiChat>;
 };
+
+type OmittedTreeRenderProps<T = any, C extends string = never> = Omit<
+TreeRenderProps<T, C>,
+'renderItem'
+>;
+
+export type ChatFoldersTreeRenderProps<T = any, C extends string = never> = OmittedTreeRenderProps<T, C> & {
+  renderItem: (props: {
+    ref: RefObject<HTMLDivElement>;
+    item: TreeItemChat<T>;
+    depth: number;
+    children: React.ReactNode;
+    title: React.ReactNode;
+    arrow: React.ReactNode;
+    context: TreeItemRenderContext<never>;
+    info: TreeInformation;
+  }) => React.ReactElement<any> | null;
+};
+
+export type AllChatFoldersTreeRenderProps<T = any, C extends string = never> = Required<
+ChatFoldersTreeRenderProps<T, C>
+>;
