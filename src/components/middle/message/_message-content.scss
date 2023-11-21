@@ -343,6 +343,7 @@
   &.has-background,
   .is-album & {
     background: var(--background-color);
+    box-shadow: var(--button-shadow);
   }
 
   &.has-solid-background {
@@ -382,12 +383,12 @@
 
     .Message.own & {
       /* stylelint-disable-next-line plugin/whole-pixel */
-      right: -0.551rem; // This value is correct. Safari fix
+      right: -0.541rem; // This value is correct. Safari fix
     }
 
     .Message:not(.own) & {
       /* stylelint-disable-next-line plugin/whole-pixel */
-      left: -0.562rem; // This value is correct. Safari fix
+      left: -0.522rem; // This value is correct. Safari fix
     }
   }
 
