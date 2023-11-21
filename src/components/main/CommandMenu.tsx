@@ -1,8 +1,4 @@
-/* eslint-disable no-null/no-null */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable arrow-parens */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -71,7 +67,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
   } = getActions();
   const runThrottled = throttle(() => loadTopUsers(), 60000, true);
   const lang = useLang();
-  const uniqueTopUserIds = topUserIds?.filter(id => !recentlyFoundChatIds?.slice(0, 2).includes(id)) || [];
+  const uniqueTopUserIds = topUserIds?.filter((id) => !recentlyFoundChatIds?.slice(0, 2).includes(id)) || [];
   function getGroupStatus(chat: ApiChat) {
     const chatTypeString = lang(getChatTypeString(chat));
     const { membersCount } = chat;
@@ -398,8 +394,8 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
       const newLabel = `Save/update OpenAI key: ${inputValue}`;
       const newItem = { label: newLabel, value: 'save_api_key' };
 
-      if (!menuItems.some(item => item.label === newLabel)) {
-        setMenuItems(prevItems => [...prevItems, newItem]);
+      if (!menuItems.some((item) => item.label === newLabel)) {
+        setMenuItems((prevItems) => [...prevItems, newItem]);
       }
     } else {
       setMenuItems([]); // Очищаем пункты меню, если ключ невалиден
@@ -588,7 +584,7 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, recentlyFoun
           topUserIds={topUserIds || []}
         />
       </Command.List>
-      <Command.Empty></Command.Empty>
+      <Command.Empty />
       <button className="global-search" onClick={handleSearchFocus}>
         <i className="icon icon-search" />
         <span>
