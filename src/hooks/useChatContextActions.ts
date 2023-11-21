@@ -124,14 +124,20 @@ const useChatContextActions = ({
         title: lang('Unarchive'),
         icon: 'unarchive',
         handler: () => {
-          archiveChat({ id: chat.id, value: false });
+          archiveChat({
+            id: chat.id,
+            value: false,
+          });
         },
       }
       : {
         title: lang('Archive'),
         icon: 'archive',
         handler: () => {
-          archiveChat({ id: chat.id, value: true });
+          archiveChat({
+            id: chat.id,
+            value: true,
+          });
         },
       };
 
