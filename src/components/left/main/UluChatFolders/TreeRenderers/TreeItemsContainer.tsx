@@ -20,10 +20,13 @@ const TreeItemsContainer: FC<OwnProps> = ({
   children, containerProps, depth,
 }) => {
   const className = buildClassName(styles.container, !!depth && styles.padding);
+  const classNameInner = buildClassName(styles['inner-container'], !!depth && styles.margin);
 
   return (
-    <div className={className} {...containerProps}>
-      {children}
+    <div className={className}>
+      <div className={classNameInner} {...containerProps}>
+        {children}
+      </div>
     </div>
   );
 };
