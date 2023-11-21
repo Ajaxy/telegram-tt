@@ -63,12 +63,12 @@
 
 [cmdk-vercel-badge] {
   height: 20px;
-  background: var(--grayA3);
+  background: rgba(255,255,255, 0.1);
   display: inline-flex;
   align-items: center;
   padding: 0 8px;
   font-size: 12px;
-  color: var(--grayA11);
+  color: #aaa;
   border-radius: 4px;
   margin: 4px 0 4px 4px;
   user-select: none;
@@ -270,3 +270,11 @@ color: #aaaaaa
 margin-left: 0.625rem;
 color: #aaaaaa
   }
+
+.yourClassNameForAnimation {
+  transition: transform 100ms ease;
+}
+
+.yourClassNameForAnimation-active {
+  transform: scale(1.1);
+}

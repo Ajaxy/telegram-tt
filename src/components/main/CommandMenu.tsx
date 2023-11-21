@@ -11,9 +11,11 @@ import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
+import { getGlobal } from '../../lib/teact/teactn';
 import { getActions, withGlobal } from '../../global';
 
 import type { ApiChatFolder, ApiUser } from '../../api/types';
+import type { GlobalState } from '../../global/types';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import { getMainUsername, getUserFullName } from '../../global/helpers';
@@ -452,6 +454,15 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
     }
   }, [close, archiveMessages, track]);
 
+  const getFolderName = (folderId: number | null) => {
+    // eslint-disable-next-line no-null/no-null
+    if (folderId === null) return 'Unknown Folder';
+
+    const global = getGlobal() as GlobalState;
+    const folder = global.chatFolders.byId[folderId];
+    return folder ? folder.title : `Folder ${folderId}`;
+  };
+
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
@@ -478,6 +489,18 @@ const CommandMenu: FC<CommandMenuProps> = ({ topUserIds, usersById, folders }) =
       shouldFilter
       filter={customFilter}
     >
+      {pages.map((page) => {
+        // Показываем бейдж только если страница не 'home'
+        if (page !== 'home') {
+          return (
+            <div key={page} cmdk-vercel-badge="">
+              {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
+            </div>
+          );
+        }
+        // eslint-disable-next-line no-null/no-null
+        return null; // Ничего не рендерим для 'home'
+      })}
       <Command.Input
         placeholder="Type a command or search..."
         autoFocus

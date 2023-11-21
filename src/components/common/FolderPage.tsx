@@ -36,7 +36,6 @@ const FolderPage: React.FC<FolderPageProps> = ({
   const lang = useLang();
 
   const folder = chatFoldersById[folderId];
-  const folderName = folder ? folder.title : `Folder ${folderId}`;
 
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });
@@ -110,7 +109,7 @@ const FolderPage: React.FC<FolderPageProps> = ({
   }, [folderId, chatsById, folder]);
 
   return (
-    <Command.Group heading={`Chats in "${folderName}"`}>
+    <Command.Group>
       {chatsInFolder.map((chat) => {
         const isUser = usersById.hasOwnProperty(chat.id);
         const { content, value } = renderName(chat.id, isUser);
