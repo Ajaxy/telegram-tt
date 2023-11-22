@@ -46,6 +46,7 @@ const useKeywordFolderRule = () => {
 
   return {
     keyword,
+    setRules,
     setKeyword,
     rules,
     addRule,
