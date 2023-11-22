@@ -163,7 +163,8 @@ const Chat: FC<{
   );
 
   const shouldRenderPin = item.isPinned;
-  const shouldRenderControl = shouldRenderPin;
+  const shouldRenderMute = item.chat?.isMuted;
+  const shouldRenderControl = shouldRenderPin || shouldRenderMute;
 
   // TODO use <ListItem/> with <Ripple/>
   return (
@@ -188,6 +189,7 @@ const Chat: FC<{
           </div>
           { shouldRenderControl && (
             <div className={styles.control}>
+              { shouldRenderMute && <i className="icon icon-muted" /> }
               { shouldRenderPin && (
                 <SvgPin className={styles.pin} width={13} height={13} fill="var(--color-text-secondary)" />
               ) }
