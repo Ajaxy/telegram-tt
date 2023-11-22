@@ -17,18 +17,21 @@ const useKeywordFolderRule = () => {
 
   // Сохраняем правила в localStorage каждый раз, когда они обновляются
   useEffect(() => {
-    localStorage.setItem('keywordRules', JSON.stringify(rules));
+    // Сохраняем в localStorage только если есть валидные правила
+    if (rules.every((rule) => rule.keyword && rule.folderId)) {
+      localStorage.setItem('keywordRules', JSON.stringify(rules));
+    }
   }, [rules]);
 
   // Функция для добавления нового правила
   const addRule = useCallback((newKeyword: string, newFolderId: number) => {
+    // Проверка, что ключевое слово задано и не пустое, а также что ID папки задан
+    if (typeof newKeyword !== 'string' || !newKeyword.trim() || !newFolderId) {
+      console.log('Invalid rule data');
+      return;
+    }
     const newRule = { keyword: newKeyword, folderId: newFolderId };
-    console.log('Добавление нового правила:', newRule); // Логирование добавленного правила
-    setRules((prevRules) => {
-      const updatedRules = [...prevRules, newRule];
-      console.log('Обновленный список правил:', updatedRules); // Логирование обновленного списка правил
-      return updatedRules;
-    });
+    setRules((prevRules) => [...prevRules, newRule]);
   }, []);
 
   // Функция для обработки правил

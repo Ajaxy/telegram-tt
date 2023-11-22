@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-console */
 import React, { useRef } from 'react';
@@ -18,6 +19,11 @@ interface AutomationSettingsProps {
   onClose: () => void; // тип для функции, которая ничего не возвращает
 }
 
+type Rule = {
+  keyword: string;
+  folderId: number;
+};
+
 const cmdkElement = document.getElementById('automation-settings-root');
 const cmdkRoot = createRoot(cmdkElement!);
 
@@ -34,10 +40,31 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
   const [isActive, setIsActive] = useState(false);
   const [canSave, setCanSave] = useState(false);
+  const [isDuplicateError, setIsDuplicateError] = useState(false);
+
+  // Функция для проверки на дубликаты
+  const checkForDuplicates = useCallback((currentKeyword: string, currentFolderId: number) => {
+    return rules.some((rule) => rule.keyword === currentKeyword && rule.folderId === currentFolderId);
+  }, [rules]);
+
+  // eslint-disable-next-line no-null/no-null
+  const selectRef = useRef<HTMLSelectElement>(null);
+
+  const handleFolderSelectorClick = () => {
+    if (selectRef.current) {
+      selectRef.current.focus();
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setKeyword(e.target.value);
-    console.log('Input Changed:', e.target.value); // Лог изменения значения
+    const newKeyword = e.target.value;
+    setKeyword(newKeyword);
+    // Обновление проверки дубликата
+    if (newKeyword.trim() && selectedFolderId) {
+      setIsDuplicateError(checkForDuplicates(newKeyword, selectedFolderId));
+    } else {
+      setIsDuplicateError(false);
+    }
   };
 
   // eslint-disable-next-line no-null/no-null
@@ -58,26 +85,46 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   };
 
   const handleSelectFolder = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
-    const folderId = Number(event.target.value);
-    setSelectedFolderId(folderId);
-  }, []);
+    const newFolderId = Number(event.target.value);
+    setSelectedFolderId(newFolderId);
+    // Обновление проверки дубликата
+    if (keyword && keyword.trim() && newFolderId) {
+      setIsDuplicateError(checkForDuplicates(keyword, newFolderId));
+    } else {
+      setIsDuplicateError(false);
+    }
+  }, [keyword, checkForDuplicates]);
 
   useEffect(() => {
     setCanSave(selectedFolderId !== undefined && selectedFolderId !== 0 && keyword.trim() !== '');
   }, [selectedFolderId, keyword]);
 
-  const handleSave = useCallback(() => {
-    if (selectedFolderId !== undefined && keyword.trim() !== '') {
-      console.log('Сохранение правила. Keyword:', keyword, 'Folder ID:', selectedFolderId);
-      showNotification({ message: 'Rules was updated' });
-      addRule(keyword, selectedFolderId);
-    } else {
-      console.log('Ошибка сохранения: Keyword пуст или Folder ID не выбран');
-    }
-  }, [keyword, selectedFolderId, addRule]);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
 
-  const handleRemove = useCallback((index: number) => {
-    const updatedRules = rules.filter((_, ruleIndex) => ruleIndex !== index);
+  const handleRuleUpdate = (index: number, updatedRule: Rule) => {
+    const updatedRules = [...rules];
+    updatedRules[index] = updatedRule;
+    setRules(updatedRules);
+    setUnsavedChanges(true); // Установка флага несохраненных изменений
+  };
+
+  const handleSave = useCallback(() => {
+    if (unsavedChanges) {
+      setUnsavedChanges(false);
+      showNotification({ message: 'Changes saved' });
+    } else if (selectedFolderId && keyword.trim() && !isDuplicateError) {
+      addRule(keyword, selectedFolderId);
+      showNotification({ message: 'Rule added' });
+      setKeyword('');
+      setSelectedFolderId(undefined);
+      setIsDuplicateError(false);
+    } else {
+      console.log('Ошибка сохранения: Keyword пуст, Folder ID не выбран или существует дубликат');
+    }
+  }, [selectedFolderId, keyword, isDuplicateError, addRule, setKeyword, unsavedChanges]);
+
+  const handleRemove = useCallback((ruleIndex: number) => {
+    const updatedRules = rules.filter((_, index) => index !== ruleIndex);
     setRules(updatedRules);
     showNotification({ message: 'Rule removed' });
   }, [rules, setRules, showNotification]);
@@ -115,6 +162,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
                 key={`rule-${rule.keyword}-${rule.folderId}`}
                 rule={rule}
                 index={index}
+                onUpdate={handleRuleUpdate}
                 onRemove={handleRemove}
               />
             ))}
@@ -142,9 +190,10 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
                   <div className="ruleBlockText">
                     then add it to the folder
                   </div>
-                  <div className="folderSelector">
+                  <div className="folderSelector" onClick={handleFolderSelectorClick}>
                     <i className={`icon icon-folder ${selectedFolderId ? 'active' : ''}`} />
                     <select
+                      ref={selectRef}
                       value={selectedFolderId}
                       onChange={handleSelectFolder}
                       className={`folderSelect ${selectedFolderId ? 'active' : ''}`}
@@ -158,6 +207,9 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
                     </select>
                   </div>
                 </div>
+                {isDuplicateError && (
+                  <div className="error-duplicate">This rule already exists</div>
+                )}
               </div>
             </div>
           </div>

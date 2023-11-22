@@ -13,18 +13,29 @@ type Rule = {
 interface RuleCardProps {
   rule: Rule;
   index: number;
+  onUpdate: (index: number, updatedRule: Rule) => void;
   onRemove: (index: number) => void;
 }
 
 // Компонент для отображения правил
 const RuleCard: React.FC<RuleCardProps> = ({
-  rule, index, onRemove,
+  rule, index, onUpdate, onRemove,
 }) => {
   const global = getGlobal();
 
   const orderedFolderIds = global.chatFolders.orderedIds;
   const chatFoldersById = global.chatFolders.byId;
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
+
+  const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onUpdate(index, { ...rule, keyword: e.target.value });
+  };
+
+  const handleFolderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onUpdate(index, { ...rule, folderId: Number(e.target.value) });
+  };
+
+  const isFolderSelected = rule.folderId > 0;
 
   return (
     <div className="ruleCard">
@@ -37,7 +48,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
             type="text"
             className="keywordInput"
             value={rule.keyword}
-            readOnly
+            onChange={handleKeywordChange}
           />
           <div className="icon-wrapper" onClick={() => onRemove(index)}>
             <i className="icon icon-delete" />
@@ -48,8 +59,12 @@ const RuleCard: React.FC<RuleCardProps> = ({
             then add it to the folder
           </div>
           <div className="folderSelector">
-            <i className="icon icon-folder" />
-            <select className="folderSelect" value={rule.folderId} disabled>
+            <i className={`icon icon-folder ${isFolderSelected ? 'active' : ''}`} />
+            <select
+              className={`folderSelect ${isFolderSelected ? 'active' : ''}`}
+              value={rule.folderId}
+              onChange={handleFolderChange}
+            >
               {folders.map((folder) => (
                 <option key={folder.id} value={folder.id}>
                   {folder.title}
