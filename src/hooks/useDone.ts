@@ -2,6 +2,7 @@ import { useCallback } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
+import type { GlobalState } from '../global/types';
 
 import { selectCurrentChat, selectTabState } from '../global/selectors';
 import { useJune } from './useJune';
@@ -15,6 +16,17 @@ export default function useDone() {
   } = getActions();
   const { track } = useJune();
   const { doneChatIds, setDoneChatIds } = useStorage();
+
+  const shouldBeDone = (chat: ApiChat, global: GlobalState) => {
+    const pinnedChatIds = global.chats.orderedPinnedIds.active;
+    const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chat.id));
+    return chat && !isPinnedInAllFolder && (chat.isMuted || !(
+      chat.hasUnreadMark
+      || chat.unreadCount
+      || chat.unreadMentionsCount
+      || chat.unreadReactionsCount
+    ));
+  };
 
   const doneChat = useCallback(({
     id, value, isClose = true, isNotification = true,
@@ -42,9 +54,7 @@ export default function useDone() {
       setDoneChatIds(updDoneChatIds);
 
       /*
-      const doneChat = useCallback(({ id, value }: { id?: string; value?: boolean }) => {
         archiveChat({ id, value });
-      }, [archiveChat]);
       */
 
       if (isClose) {
@@ -67,7 +77,26 @@ export default function useDone() {
   };
 
   const doneAllReadChats = () => {
-    // todo
+    const global = getGlobal();
+    const allChatsIds = [
+      ...(global.chats.listIds.active || []),
+      ...(global.chats.listIds.archived || []),
+    ];
+    if (!allChatsIds) {
+      return;
+    }
+    const chatIdsToBeDone = [];
+    for (const chatId of allChatsIds) {
+      const chatsById = global.chats.byId;
+      const chat = chatsById[chatId];
+      if (chat && chat.id) {
+        if (shouldBeDone(chat, global)) {
+          chatIdsToBeDone.push(chat.id);
+        }
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.log('>>> doneAllReadChats', chatIdsToBeDone);
   };
 
   return { doneChat, isChatDone, doneAllReadChats };
