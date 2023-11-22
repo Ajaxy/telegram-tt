@@ -17,10 +17,14 @@ export default function useDone() {
   const { track } = useJune();
   const { doneChatIds, setDoneChatIds } = useStorage();
 
+  const isChatDone = (chat: ApiChat) => {
+    return doneChatIds.includes(chat.id);
+  };
+
   const shouldBeDone = (chat: ApiChat, global: GlobalState) => {
     const pinnedChatIds = global.chats.orderedPinnedIds.active;
     const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chat.id));
-    return chat && !isPinnedInAllFolder && (chat.isMuted || !(
+    return chat && !isPinnedInAllFolder && !isChatDone(chat) && (chat.isMuted || !(
       chat.hasUnreadMark
       || chat.unreadCount
       || chat.unreadMentionsCount
@@ -72,10 +76,6 @@ export default function useDone() {
     }
   }, [doneChatIds, setDoneChatIds, track]);
 
-  const isChatDone = (chat: ApiChat) => {
-    return doneChatIds.includes(chat.id);
-  };
-
   const doneAllReadChats = () => {
     const global = getGlobal();
     const allChatsIds = [
@@ -97,6 +97,9 @@ export default function useDone() {
     }
     // eslint-disable-next-line no-console
     console.log('>>> doneAllReadChats', chatIdsToBeDone);
+    if (chatIdsToBeDone.length) {
+      setDoneChatIds([...doneChatIds, ...chatIdsToBeDone]);
+    }
   };
 
   return { doneChat, isChatDone, doneAllReadChats };
