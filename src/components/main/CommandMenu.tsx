@@ -488,6 +488,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 
   const handleOpenAutomationSettings = () => {
     console.log('Handle open Automation Settings called');
+    close();
     openAutomationSettings();
   };
 

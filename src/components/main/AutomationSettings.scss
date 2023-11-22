@@ -9,7 +9,6 @@
   height: 100%;
   background-color: #0D0D0F;
   z-index: var(--z-portal-menu); /* Высокий z-index, чтобы быть поверх всего */
-  pointer-events: none;
 }
 
 .back-button {

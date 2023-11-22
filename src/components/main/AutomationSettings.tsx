@@ -77,69 +77,71 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   }, [selectedFolderId, keyword]);
 
   const AutemationSettingInner = (
-    <div
-      className="fullScreenKeywordCreator"
-      onClick={(e) => {
-        const nativeEvent = e.nativeEvent as Event;
-        nativeEvent.stopImmediatePropagation();
-        e.preventDefault();
-        e.stopPropagation();
-      }}
-    >
-      <span className="back-button">
-        <i className="icon icon-arrow-left" onClick={close} />
-        <div className="closeButton" onClick={close}>Back to app</div>
-      </span>
-      <div className="keywordCreator">
-        <div className="keywordCreatorHeader">
-          <div>Automation</div>
-        </div>
-        <div className="keywordCreatorDesc">
-          <div>Add a rule for automatic group addition in the folder and workspace.</div>
-        </div>
-        <div className="ruleCard">
-          <div className="ruleCardContent">
-            <div className="ruleBlockKeyword">
-              <div className="ruleBlockText">
-                If a group name contains
+    <div>
+      <div
+        className="fullScreenKeywordCreator "
+        onClick={(e) => {
+          const nativeEvent = e.nativeEvent as Event;
+          nativeEvent.stopImmediatePropagation();
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <span className="back-button">
+          <i className="icon icon-arrow-left" onClick={close} />
+          <div className="closeButton" onClick={close}>Back to app</div>
+        </span>
+        <div className="keywordCreator">
+          <div className="keywordCreatorHeader">
+            <div>Automation</div>
+          </div>
+          <div className="keywordCreatorDesc">
+            <div>Add a rule for automatic group addition in the folder and workspace.</div>
+          </div>
+          <div className="ruleCard">
+            <div className="ruleCardContent">
+              <div className="ruleBlockKeyword">
+                <div className="ruleBlockText">
+                  If a group name contains
+                </div>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className={`keywordInput ${isActive ? 'active' : ''}`}
+                  value={keyword}
+                  onChange={handleInputChange}
+                  onFocus={() => setIsActive(true)}
+                  onBlur={() => setIsActive(false)}
+                  placeholder="Enter keyword"
+                />
               </div>
-              <input
-                ref={inputRef}
-                type="text"
-                className={`keywordInput ${isActive ? 'active' : ''}`}
-                value={keyword}
-                onChange={handleInputChange}
-                onFocus={() => setIsActive(true)}
-                onBlur={() => setIsActive(false)}
-                placeholder="Enter keyword"
-              />
-            </div>
-            <div className="ruleBlockFolder">
-              <div className="ruleBlockText">
-                then add it to the folder
-              </div>
-              <div className="folderSelector">
-                <i className={`icon icon-folder ${folderActive ? 'active' : ''}`} />
-                <select value={selectedFolderId} onChange={handleSelectFolder} className="folderSelect">
-                  <option value="">Select folder</option>
-                  {folders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>
-                      {folder.title}
-                    </option>
-                  ))}
-                </select>
+              <div className="ruleBlockFolder">
+                <div className="ruleBlockText">
+                  then add it to the folder
+                </div>
+                <div className="folderSelector">
+                  <i className={`icon icon-folder ${folderActive ? 'active' : ''}`} />
+                  <select value={selectedFolderId} onChange={handleSelectFolder} className="folderSelect">
+                    <option value="">Select folder</option>
+                    {folders.map((folder) => (
+                      <option key={folder.id} value={folder.id}>
+                        {folder.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </div>
+          <button className="saveButton" disabled={!canSave}>
+            <span
+              className={`saveButtonText ${canSave ? 'active' : 'inactive'}`}
+              onClick={handleSave}
+            >
+              Save
+            </span>
+          </button>
         </div>
-        <button className="saveButton" disabled={!canSave}>
-          <span
-            className={`saveButtonText ${canSave ? 'active' : 'inactive'}`}
-            onClick={handleSave}
-          >
-            Save
-          </span>
-        </button>
       </div>
     </div>
   );
