@@ -146,7 +146,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
     </div>
   );
 
-  cmdkRoot.render(AutemationSettingInner);
+  cmdkRoot.render(isOpen ? AutemationSettingInner : <div />);
   return <div />;
 };
 

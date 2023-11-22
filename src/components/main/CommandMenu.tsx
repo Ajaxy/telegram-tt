@@ -659,12 +659,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
           </span>
         </button>
       </Command.Dialog>
-      {isAutomationSettingsOpen && (
-        <AutomationSettings
-          isOpen={isAutomationSettingsOpen}
-          onClose={closeAutomationSettings}
-        />
-      )}
+      <AutomationSettings
+        isOpen={isAutomationSettingsOpen}
+        onClose={closeAutomationSettings}
+      />
     </div>
 
   );
