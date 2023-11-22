@@ -11,6 +11,8 @@ import {
 import { selectChat, selectChatFullInfo } from '../selectors';
 import { updateThread, updateThreadInfo } from './messages';
 
+import { updateChatDone } from '../../hooks/useDone';
+
 export function replaceChatListIds<T extends GlobalState>(
   global: T,
   type: 'active' | 'archived',
@@ -66,6 +68,8 @@ export function updateChat<T extends GlobalState>(
   if (!updatedChat) {
     return global;
   }
+
+  updateChatDone(updatedChat);
 
   return replaceChats(global, {
     ...byId,

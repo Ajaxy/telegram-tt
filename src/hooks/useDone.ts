@@ -1,13 +1,23 @@
-import { useCallback } from '../lib/teact/teact';
+import { useCallback, useEffect } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
 import type { ApiChat } from '../api/types';
-import type { GlobalState } from '../global/types';
 
 import { selectCurrentChat, selectTabState } from '../global/selectors';
 import { useJune } from './useJune';
 import { useStorage } from './useStorage';
 // import useArchiver from './useArchiver';
+
+const EVENT_NAME = 'update_chat_done';
+
+const shouldBeDone = (chat: ApiChat) => {
+  return chat.isMuted || !(
+    chat.hasUnreadMark
+    || chat.unreadCount
+    || chat.unreadMentionsCount
+    || chat.unreadReactionsCount
+  );
+};
 
 export default function useDone() {
   // const { archiveChat } = useArchiver({ isManual: true });
@@ -19,17 +29,6 @@ export default function useDone() {
 
   const isChatDone = (chat: ApiChat) => {
     return doneChatIds.includes(chat.id);
-  };
-
-  const shouldBeDone = (chat: ApiChat, global: GlobalState) => {
-    const pinnedChatIds = global.chats.orderedPinnedIds.active;
-    const isPinnedInAllFolder = Boolean(pinnedChatIds?.includes(chat.id));
-    return chat && !isPinnedInAllFolder && !isChatDone(chat) && (chat.isMuted || !(
-      chat.hasUnreadMark
-      || chat.unreadCount
-      || chat.unreadMentionsCount
-      || chat.unreadReactionsCount
-    ));
   };
 
   const doneChat = useCallback(({
@@ -82,25 +81,39 @@ export default function useDone() {
       ...(global.chats.listIds.active || []),
       ...(global.chats.listIds.archived || []),
     ];
-    if (!allChatsIds) {
-      return;
-    }
     const chatIdsToBeDone = [];
     for (const chatId of allChatsIds) {
       const chatsById = global.chats.byId;
       const chat = chatsById[chatId];
-      if (chat && chat.id) {
-        if (shouldBeDone(chat, global)) {
-          chatIdsToBeDone.push(chat.id);
-        }
+      if (chat && chat.id && !isChatDone(chat) && shouldBeDone(chat)) {
+        chatIdsToBeDone.push(chat.id);
       }
     }
-    // eslint-disable-next-line no-console
-    console.log('>>> doneAllReadChats', chatIdsToBeDone);
     if (chatIdsToBeDone.length) {
       setDoneChatIds([...doneChatIds, ...chatIdsToBeDone]);
     }
   };
 
   return { doneChat, isChatDone, doneAllReadChats };
+}
+
+export function useUpdateChatDone() {
+  const { doneChatIds, setDoneChatIds } = useStorage();
+
+  useEffect(() => {
+    const listener = (e: any) => {
+      const chat = e.detail.chat as ApiChat;
+      if (chat && chat.id && doneChatIds.includes(chat.id) && !shouldBeDone(chat)) {
+        setDoneChatIds(doneChatIds.filter((chatId: string) => chatId !== chat.id));
+      }
+    };
+    window.addEventListener(EVENT_NAME, listener);
+    return () => window.removeEventListener(EVENT_NAME, listener);
+  }, [doneChatIds, setDoneChatIds]);
+}
+
+export function updateChatDone(chat: ApiChat) {
+  window.dispatchEvent(new CustomEvent<{ chat: ApiChat }>(EVENT_NAME, {
+    detail: { chat },
+  }));
 }
