@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import { useState } from 'react';
 import { useCallback, useEffect } from '../lib/teact/teact';
+import { getActions, getGlobal } from '../global';
 
 export type Rule = {
   keyword: string;
@@ -34,12 +35,29 @@ const useKeywordFolderRule = () => {
     setRules((prevRules) => [...prevRules, newRule]);
   }, []);
 
+  const { editChatFolders } = getActions();
+
   // Функция для обработки правил
   const processRules = useCallback(() => {
-    // eslint-disable-next-line no-console
     console.log('Обработка правил...');
-    // Здесь логика для обработки правил, например, добавление чатов в папки
-  }, []);
+
+    const global = getGlobal();
+    const chatsById = global.chats.byId;
+
+    rules.forEach((rule) => {
+      // Для чатов
+      Object.values(chatsById).forEach((chat) => {
+        if (chat.title.includes(rule.keyword) /* && проверка на принадлежность чата к папке */) {
+          editChatFolders({
+            chatId: chat.id,
+            idsToAdd: [rule.folderId],
+            idsToRemove: [],
+          });
+          console.log(`Чат с ID ${chat.id} и названием '${chat.title}' добавлен в папку с ID ${rule.folderId}`);
+        }
+      });
+    });
+  }, [rules]);
 
   useEffect(() => {
     const interval = setInterval(processRules, 60000); // Устанавливаем интервал в 1 минуту
