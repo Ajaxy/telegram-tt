@@ -141,7 +141,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
       }
       if (isNotification) {
         showNotification({
-          message: isArchived ? 'Chat archived' : 'Chat unarchived',
+          message: isArchived ? 'Chat unarchived' : 'Chat archived',
         });
       }
       track?.(isArchived ? 'toggleChatUnarchived' : 'toggleChatArchived');

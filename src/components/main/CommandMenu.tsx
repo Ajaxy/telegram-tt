@@ -255,7 +255,7 @@ const HomePage: React.FC<HomePageProps> = ({
           <span>
             {isAutoDoneEnabled
               ? 'Disable "Auto-Done after reading"'
-              : 'Enable: "Auto-Done after reading"'}
+              : 'Enable "Auto-Done after reading"'}
           </span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
