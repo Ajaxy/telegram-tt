@@ -46,11 +46,13 @@ const useKeywordFolderRule = () => {
     const chatFoldersById = global.chatFolders.byId;
 
     rules.forEach((rule) => {
+      const ruleKeywordLowercase = rule.keyword.toLowerCase();
       const currentFolder = chatFoldersById[rule.folderId];
       const chatIdsInCurrentFolder = new Set(currentFolder?.includedChatIds || []);
 
       Object.values(chatsById).forEach((chat) => {
-        if (chat.title.includes(rule.keyword) && !chatIdsInCurrentFolder.has(chat.id)) {
+        const chatTitleLowercase = chat.title.toLowerCase();
+        if (chatTitleLowercase.includes(ruleKeywordLowercase) && !chatIdsInCurrentFolder.has(chat.id)) {
           editChatFolders({
             chatId: chat.id,
             idsToAdd: [rule.folderId],
