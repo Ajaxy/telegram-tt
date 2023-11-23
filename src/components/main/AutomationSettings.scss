@@ -55,6 +55,8 @@
   position: absolute;
   width: 30rem;
   top: 4.25rem;
+  max-height: 85vh;
+  overflow-y: auto; 
 
   .keywordCreatorHeader {
     color: var(----color-white, #FFF);
