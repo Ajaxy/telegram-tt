@@ -1,3 +1,5 @@
+/* eslint-disable no-null/no-null */
+import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -41,6 +43,7 @@ type OwnProps = {
   isElectronUpdateAvailable?: boolean;
   isForumPanelOpen?: boolean;
   isClosingSearch?: boolean;
+  chatFoldersPortalRef: RefObject<HTMLDivElement>;
   onSearchQuery: (query: string) => void;
   onContentChange: (content: LeftColumnContent) => void;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -66,6 +69,7 @@ const LeftMain: FC<OwnProps> = ({
   isAppUpdateAvailable,
   isElectronUpdateAvailable,
   isForumPanelOpen,
+  chatFoldersPortalRef,
   onSearchQuery,
   onContentChange,
   onSettingsScreenSelect,
@@ -181,6 +185,8 @@ const LeftMain: FC<OwnProps> = ({
 
   const lang = useLang();
 
+  const leftMainHeaderRef = useRef<HTMLDivElement>(null);
+
   return (
     <div
       id="LeftColumn-main"
@@ -188,6 +194,7 @@ const LeftMain: FC<OwnProps> = ({
       onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
     >
       <LeftMainHeader
+        leftMainHeaderRef={leftMainHeaderRef}
         shouldHideSearch={isForumPanelVisible}
         content={content}
         contactsFilter={contactsFilter}
@@ -212,7 +219,9 @@ const LeftMain: FC<OwnProps> = ({
             case LeftColumnContent.ChatList:
               return (
                 <ChatFolders
+                  leftMainHeaderRef={leftMainHeaderRef}
                   content={content}
+                  chatFoldersPortalRef={chatFoldersPortalRef}
                   chatId={chatId}
                   userId={userId}
                   shouldHideFolderTabs={isForumPanelVisible}

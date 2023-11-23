@@ -1,0 +1,18 @@
+.container {
+	display: flex;
+	flex-direction: column;
+
+	.padding {
+		padding-left: 0.25rem;
+	}
+}
+
+.inner-container {
+	margin-top: 0.0625rem;
+
+	&.margin {
+		border-left: 1px solid var(--color-chat-hover);
+		margin-left: 0.75rem;
+		padding-left: 0.75rem;
+	}
+}

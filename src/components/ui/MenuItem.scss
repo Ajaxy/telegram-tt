@@ -43,8 +43,9 @@
   }
 
   @media (hover: hover) {
-    &:hover,
-    &:focus {
+    // &:focus 
+    &:hover
+    {
       background-color: var(--color-chat-hover);
       text-decoration: none;
       color: inherit;
@@ -52,7 +53,7 @@
   }
 
   @media (max-width: 600px) {
-    &:focus,
+    // &:focus,
     &:hover,
     &:active {
       text-decoration: none;
@@ -148,7 +149,7 @@
 
     @media (hover: hover) {
       &:hover,
-      &:focus,
+      // &:focus,
       &:active {
         background: var(--color-background-compact-menu-hover);
         text-decoration: none;
