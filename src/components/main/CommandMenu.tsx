@@ -19,7 +19,6 @@ import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
 } from '../../global/helpers';
-import { selectCurrentLimit } from '../../global/selectors/limits';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
@@ -47,7 +46,6 @@ interface CommandMenuProps {
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
-  maxChatsinFolder: number;
 }
 
 const customFilter = (value: string, search: string) => {
@@ -360,7 +358,7 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 };
 
 const CommandMenu: FC<CommandMenuProps> = ({
-  topUserIds, usersById, recentlyFoundChatIds, folders, maxChatsinFolder,
+  topUserIds, usersById, recentlyFoundChatIds, folders,
 }) => {
   const { track } = useJune();
   const {
@@ -664,7 +662,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
       <AutomationSettings
         isOpen={isAutomationSettingsOpen}
         onClose={closeAutomationSettings}
-        maxChatsinFolder={maxChatsinFolder}
       />
     </div>
 
@@ -682,13 +679,12 @@ export default memo(withGlobal(
     const chatFoldersById = global.chatFolders.byId;
     const orderedFolderIds = global.chatFolders.orderedIds;
     const recentlyFoundChatIds = global.recentlyFoundChatIds;
-    const maxChatsinFolder = selectCurrentLimit(global, 'dialogFiltersChats');
     const folders = orderedFolderIds
       ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
       : [];
 
     return {
-      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds, maxChatsinFolder,
+      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
     };
   },
 )(CommandMenu));
