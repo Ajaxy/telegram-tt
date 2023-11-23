@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-console */
 import React from 'react';
+import { useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';
 
 import './AutomationSettings.scss';
@@ -26,6 +27,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
   const orderedFolderIds = global.chatFolders.orderedIds;
   const chatFoldersById = global.chatFolders.byId;
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
+  const [isActive, setIsActive] = useState(false);
 
   const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onUpdate(index, { ...rule, keyword: e.target.value });
@@ -46,9 +48,11 @@ const RuleCard: React.FC<RuleCardProps> = ({
           </div>
           <input
             type="text"
-            className="keywordInput"
+            className={`keywordInput ${isActive ? 'active' : ''}`}
             value={rule.keyword}
             onChange={handleKeywordChange}
+            onFocus={() => setIsActive(true)}
+            onBlur={() => setIsActive(false)}
           />
           <div className="icon-wrapper" onClick={() => onRemove(index)}>
             <i className="icon icon-delete" />

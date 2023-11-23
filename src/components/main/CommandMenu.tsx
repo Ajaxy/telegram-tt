@@ -254,7 +254,7 @@ const HomePage: React.FC<HomePageProps> = ({
           </Command.Item>
         ))}
         <Command.Item onSelect={handleOpenAutomationSettings}>
-          <span>Open Automation Settings</span>
+          <i className="icon icon-bots" /><span>Open Automation Settings</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Help">

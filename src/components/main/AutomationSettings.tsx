@@ -8,6 +8,8 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
+import captureEscKeyListener from '../../util/captureEscKeyListener';
+
 import useKeywordFolderRule from '../../hooks/useKeywordFolderRule';
 
 import RuleCard from './RuleCard';
@@ -78,11 +80,16 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   }, [isOpen]);
 
   // Функция для закрытия окна, вызывает пропс onClose
-  const close = () => {
+  const close = useCallback(() => {
     if (onClose) {
       onClose();
     }
-  };
+  }, [onClose]);
+
+  useEffect(() => {
+  // Если окно видимо, подписываемся на событие нажатия клавиши Esc
+    return isOpen ? captureEscKeyListener(close) : undefined;
+  }, [close, isOpen]);
 
   const handleSelectFolder = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
     const newFolderId = Number(event.target.value);
@@ -130,6 +137,10 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   }, [rules, setRules, showNotification]);
 
   useEffect(() => {
+    setIsDuplicateError(checkForDuplicates(keyword, selectedFolderId || 0));
+  }, [keyword, selectedFolderId, checkForDuplicates, rules]);
+
+  useEffect(() => {
     setCanSave(selectedFolderId !== undefined && selectedFolderId !== 0 && keyword.trim() !== '');
   }, [selectedFolderId, keyword]);
 
@@ -145,8 +156,9 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
         }}
       >
         <span className="back-button">
-          <i className="icon icon-arrow-left" onClick={close} />
-          <div className="closeButton" onClick={close}>Back to app</div>
+          <div className="icon-wrapper">
+            <i className="icon icon-arrow-left" onClick={close} />
+          </div>
         </span>
         <div className="keywordCreator">
           <div className="keywordCreatorHeader">
