@@ -15,6 +15,7 @@ const useKeywordFolderRule = () => {
     return savedRules ? JSON.parse(savedRules) as Rule[] : [];
   });
   const [keyword, setKeyword] = useState('');
+  const [isRulesUpdated, setIsRulesUpdated] = useState(false);
 
   // Сохраняем правила в localStorage каждый раз, когда они обновляются
   useEffect(() => {
@@ -33,6 +34,7 @@ const useKeywordFolderRule = () => {
     }
     const newRule = { keyword: newKeyword, folderId: newFolderId };
     setRules((prevRules) => [...prevRules, newRule]);
+    setIsRulesUpdated(true);
   }, []);
 
   const { editChatFolders } = getActions();
@@ -62,7 +64,12 @@ const useKeywordFolderRule = () => {
         }
       });
     });
-  }, [rules, editChatFolders]);
+
+    // Сброс флага обновления правил
+    if (isRulesUpdated) {
+      setIsRulesUpdated(false);
+    }
+  }, [rules, editChatFolders, isRulesUpdated]);
 
   useEffect(() => {
     const interval = setInterval(processRules, 60000); // Устанавливаем интервал в 1 минуту
