@@ -97,7 +97,7 @@ export default function useDone() {
   return { doneChat, isChatDone, doneAllReadChats };
 }
 
-export function useUpdateChatDone() {
+export function useDoneUpdates() {
   const { doneChatIds, setDoneChatIds } = useStorage();
 
   useEffect(() => {
