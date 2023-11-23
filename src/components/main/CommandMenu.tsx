@@ -35,6 +35,7 @@ import { useStorage } from '../../hooks/useStorage';
 import AllUsersAndChats from '../common/AllUsersAndChats';
 import FolderPage from '../common/FolderPage';
 import AutomationSettings from './AutomationSettings';
+// eslint-disable-next-line import/no-named-as-default
 import WorkspaceSettings from './WorkspaceSettings';
 
 import './CommandMenu.scss';

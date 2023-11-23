@@ -43,8 +43,8 @@ const CSP = `
   connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss:' : ''};
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/
-  ${IS_ELECTRON_BUILD ? `${BASE_URL}/` : ''};
+  img-src https://upcdn.io/ 
+  'self' data: blob: https://ss3.4sqi.net/img/categories_v2/ ${IS_ELECTRON_BUILD ? `${BASE_URL}/` : ''};
   media-src 'self' blob: data: ${IS_ELECTRON_BUILD ? [`${BASE_URL}/`, ELECTRON_HOST_URL].join(' ') : ''};
   object-src 'none';
   frame-src http: https:;

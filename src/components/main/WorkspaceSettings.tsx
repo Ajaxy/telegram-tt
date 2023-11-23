@@ -11,6 +11,7 @@ import { getGlobal } from '../../global';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
+// eslint-disable-next-line import/no-named-as-default
 import FolderSelector from './WorkspaceSettingsFoldersList';
 
 import './WorkspaceSettings.scss';
