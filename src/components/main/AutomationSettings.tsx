@@ -76,6 +76,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
     console.log('AutomationSettings isOpen:', isOpen);
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+      setIsActive(true);
     }
   }, [isOpen]);
 
@@ -225,10 +226,13 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
               </div>
             </div>
           </div>
-          <button className={`saveButton ${canSave ? 'active' : ''}`} disabled={!canSave}>
+          <button
+            className={`saveButton ${canSave ? 'active' : ''}`}
+            disabled={!canSave}
+            onClick={canSave ? handleSave : undefined}
+          >
             <span
-              className={`saveButtonText ${canSave ? 'active' : 'inactive'}`}
-              onClick={canSave ? handleSave : undefined}
+              className={`saveButtonText ${canSave ? 'active' : ''}`}
             >
               Save
             </span>

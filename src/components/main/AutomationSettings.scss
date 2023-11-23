@@ -303,8 +303,9 @@
       font-weight: 500;
       line-height: 1.5rem; 
     }
-
-    .saveButton.active, .saveButtonText.active {
+    
+    
+    .saveButtonText.active {
       color: var(--color-primary); /* Укажите ваш активный цвет */
       cursor: pointer;
     }
@@ -312,6 +313,9 @@
     .saveButton:not(:disabled) {
       cursor: pointer;
     }
+  }
+  .saveButton.active {
+    cursor: pointer;
   }
 
 }
