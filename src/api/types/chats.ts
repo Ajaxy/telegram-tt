@@ -27,6 +27,7 @@ export interface ApiChat {
   unreadReactionsCount?: number;
   isVerified?: true;
   isMuted?: boolean;
+  isPinned?: boolean;
   muteUntil?: number;
   isSignaturesShown?: boolean;
   hasPrivateLink?: boolean;

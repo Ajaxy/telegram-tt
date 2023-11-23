@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
@@ -16,6 +17,7 @@ import UluChatFolder from './UluChatFolder';
 import UluChatFoldersWrapper from './UluChatFoldersWrapper';
 
 type OwnProps = {
+  ref: RefObject<HTMLDivElement>;
   content: LeftColumnContent;
   chatId: string | undefined;
   userId: string | undefined;
@@ -28,7 +30,7 @@ type StateProps = {
 } & Pick<ISettings, 'language'>;
 
 const UluSystemFolders: FC<OwnProps & StateProps> = ({
-  userId, language, content, isSavedMessages, onLeftColumnContentChange, isInbox,
+  userId, language, content, isSavedMessages, onLeftColumnContentChange, isInbox, ref,
 }) => {
   const titleInbox = uluGetTranslatedString('Sidebar.SystemFolders.Inbox', language);
   const titleSavedMessages = uluGetTranslatedString('Sidebar.SystemFolders.SavedMessages', language);
@@ -59,7 +61,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const inboxUnreadCount = unreadCounters[ALL_FOLDER_ID]?.chatsCount;
 
   return (
-    <UluChatFoldersWrapper>
+    <UluChatFoldersWrapper ref={ref}>
       <UluChatFolder
         active={isInbox}
         shouldStressUnreadMessages={false}

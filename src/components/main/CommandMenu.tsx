@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
@@ -33,6 +34,7 @@ import { useStorage } from '../../hooks/useStorage';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
 import FolderPage from '../common/FolderPage';
+import AutomationSettings from './AutomationSettings';
 
 import './CommandMenu.scss';
 
@@ -193,6 +195,7 @@ interface HomePageProps {
   handleSelectNewChannel: () => void;
   handleCreateFolder: () => void;
   handleLockScreenHotkey: () => void;
+  handleOpenAutomationSettings: () => void;
 }
 
 interface CreateNewPageProps {
@@ -208,7 +211,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey,
+  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
 }) => {
   return (
     <>
@@ -274,6 +277,9 @@ const HomePage: React.FC<HomePageProps> = ({
             {item.label}
           </Command.Item>
         ))}
+        <Command.Item onSelect={handleOpenAutomationSettings}>
+          <i className="icon icon-bots" /><span>Open Automation Settings</span>
+        </Command.Item>
       </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
@@ -396,6 +402,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const activePage = pages[pages.length - 1];
   // eslint-disable-next-line no-null/no-null
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
+  const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
+
+  const openAutomationSettings = () => setAutomationSettingsOpen(true);
+  const closeAutomationSettings = () => setAutomationSettingsOpen(false);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -502,6 +512,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
+  const handleOpenAutomationSettings = () => {
+    console.log('Handle open Automation Settings called');
+    close();
+    openAutomationSettings();
+  };
+
   const handleSelectSettings = useCallback(() => {
     runCommand('OPEN_SETTINGS');
     close();
@@ -586,106 +602,114 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, [handleSelectNewGroup]);
 
   const CommandMenuInner = (
-    <Command.Dialog
-      label="Command Menu"
-      open={isOpen}
-      onOpenChange={setOpen}
-      loop
-      shouldFilter
-      filter={customFilter}
-    >
-      {pages.map((page) => {
+    <div>
+      <Command.Dialog
+        label="Command Menu"
+        open={isOpen}
+        onOpenChange={setOpen}
+        loop
+        shouldFilter
+        filter={customFilter}
+      >
+        {pages.map((page) => {
         // Показываем бейдж только если страница не 'home'
-        if (page !== 'home') {
-          return (
-            <div key={page} cmdk-vercel-badge="">
-              {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
-            </div>
-          );
-        }
-        // eslint-disable-next-line no-null/no-null
-        return null; // Ничего не рендерим для 'home'
-      })}
-      <Command.Input
-        placeholder="Type a command or search..."
-        autoFocus
-        onValueChange={handleInputChange}
-        value={inputValue}
-        onKeyDown={(e) => {
-          if (e.key === 'Backspace' && inputValue === '') {
-            handleBack();
+          if (page !== 'home') {
+            return (
+              <div key={page} cmdk-vercel-badge="">
+                {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
+              </div>
+            );
           }
-        }}
-      />
-      <Command.List>
-        <>
-          {activePage === 'home' && (
-            <>
-              <HomePage
-                commandDoneAll={commandDoneAll}
-                commandArchiveAll={commandArchiveAll}
-                commandToggleAutoDone={commandToggleAutoDone}
-                commandToggleArchiver={commandToggleArchiver}
-                isAutoDoneEnabled={isAutoDoneEnabled}
-                isArchiverEnabled={isArchiverEnabled}
-                topUserIds={topUserIds}
-                usersById={usersById}
-                handleSearchFocus={handleSearchFocus}
-                handleSelectSettings={handleSelectSettings}
-                handleOpenInbox={handleOpenInbox}
-                handleSelectArchived={handleSelectArchived}
-                handleOpenSavedMessages={handleOpenSavedMessages}
-                saveAPIKey={saveAPIKey}
-                menuItems={menuItems}
-                handleSupport={handleSupport}
-                handleFAQ={handleFAQ}
-                handleOpenShortcuts={handleOpenShortcts}
-                handleChangelog={handleChangelog}
-                close={close}
+          // eslint-disable-next-line no-null/no-null
+          return null; // Ничего не рендерим для 'home'
+        })}
+        <Command.Input
+          placeholder="Type a command or search..."
+          autoFocus
+          onValueChange={handleInputChange}
+          value={inputValue}
+          onKeyDown={(e) => {
+            if (e.key === 'Backspace' && inputValue === '') {
+              handleBack();
+            }
+          }}
+        />
+        <Command.List>
+          <>
+            {activePage === 'home' && (
+              <>
+                <HomePage
+                  commandDoneAll={commandDoneAll}
+                  commandArchiveAll={commandArchiveAll}
+                  commandToggleAutoDone={commandToggleAutoDone}
+                  commandToggleArchiver={commandToggleArchiver}
+                  isAutoDoneEnabled={isAutoDoneEnabled}
+                  isArchiverEnabled={isArchiverEnabled}
+                  topUserIds={topUserIds}
+                  usersById={usersById}
+                  handleSearchFocus={handleSearchFocus}
+                  handleSelectSettings={handleSelectSettings}
+                  handleOpenInbox={handleOpenInbox}
+                  handleSelectArchived={handleSelectArchived}
+                  handleOpenSavedMessages={handleOpenSavedMessages}
+                  saveAPIKey={saveAPIKey}
+                  menuItems={menuItems}
+                  handleSupport={handleSupport}
+                  handleFAQ={handleFAQ}
+                  handleOpenShortcuts={handleOpenShortcts}
+                  handleChangelog={handleChangelog}
+                  close={close}
+                  handleSelectNewGroup={handleSelectNewGroup}
+                  handleSelectNewChannel={handleSelectNewChannel}
+                  handleCreateFolder={handleCreateFolder}
+                  handleLockScreenHotkey={handleLockScreenHotkey}
+                  recentlyFoundChatIds={recentlyFoundChatIds}
+                  handleOpenAutomationSettings={handleOpenAutomationSettings}
+                />
+                <AllUsersAndChats
+                  close={close}
+                  searchQuery={inputValue}
+                  topUserIds={topUserIds}
+                  folders={folders}
+                  openFolderPage={openFolderPage}
+                  setInputValue={setInputValue}
+                />
+              </>
+            )}
+            {activePage === 'createNew' && (
+              <CreateNewPage
                 handleSelectNewGroup={handleSelectNewGroup}
                 handleSelectNewChannel={handleSelectNewChannel}
                 handleCreateFolder={handleCreateFolder}
-                handleLockScreenHotkey={handleLockScreenHotkey}
-                recentlyFoundChatIds={recentlyFoundChatIds}
               />
-              <AllUsersAndChats
+            )}
+            {activePage.includes('folderPage') && folderId && (
+              <FolderPage
+                folderId={Number(folderId)}
                 close={close}
-                searchQuery={inputValue}
-                topUserIds={topUserIds}
-                folders={folders}
-                openFolderPage={openFolderPage}
-                setInputValue={setInputValue}
               />
-            </>
-          )}
-          {activePage === 'createNew' && (
-            <CreateNewPage
-              handleSelectNewGroup={handleSelectNewGroup}
-              handleSelectNewChannel={handleSelectNewChannel}
-              handleCreateFolder={handleCreateFolder}
-            />
-          )}
-          {activePage.includes('folderPage') && folderId && (
-            <FolderPage
-              folderId={Number(folderId)}
-              close={close}
-            />
-          )}
-        </>
-      </Command.List>
-      <Command.Empty />
-      <button className="global-search" onClick={handleSearchFocus}>
-        <i className="icon icon-search" />
-        <span>
-          <span>No results found</span>
-          <span className="user-handle">Go to advanced search</span>
-        </span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">/</span>
-        </span>
-      </button>
-    </Command.Dialog>
+            )}
+          </>
+        </Command.List>
+        <Command.Empty />
+        <button className="global-search" onClick={handleSearchFocus}>
+          <i className="icon icon-search" />
+          <span>
+            <span>No results found</span>
+            <span className="user-handle">Go to advanced search</span>
+          </span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">/</span>
+          </span>
+        </button>
+      </Command.Dialog>
+      <AutomationSettings
+        isOpen={isAutomationSettingsOpen}
+        onClose={closeAutomationSettings}
+      />
+    </div>
+
   );
 
   cmdkRoot.render(CommandMenuInner);
