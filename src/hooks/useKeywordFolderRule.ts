@@ -47,20 +47,16 @@ const useKeywordFolderRule = () => {
 
     rules.forEach((rule) => {
       const currentFolder = chatFoldersById[rule.folderId];
-      const chatIdsInCurrentFolder = currentFolder ? currentFolder.includedChatIds : [];
-      Object.values(chatsById).forEach((chat) => {
-        if (chat.title.includes(rule.keyword)) {
-          // Проверяем, не находится ли чат уже в папке
-          const isAlreadyInFolder = chatIdsInCurrentFolder.includes(chat.id);
+      const chatIdsInCurrentFolder = new Set(currentFolder?.includedChatIds || []);
 
-          if (!isAlreadyInFolder) {
-            editChatFolders({
-              chatId: chat.id,
-              idsToAdd: [rule.folderId],
-              idsToRemove: [],
-            });
-            console.log(`Чат с ID ${chat.id} и названием '${chat.title}' добавлен в папку с ID ${rule.folderId}`);
-          }
+      Object.values(chatsById).forEach((chat) => {
+        if (chat.title.includes(rule.keyword) && !chatIdsInCurrentFolder.has(chat.id)) {
+          editChatFolders({
+            chatId: chat.id,
+            idsToAdd: [rule.folderId],
+            idsToRemove: [],
+          });
+          console.log(`Чат с ID ${chat.id} добавлен в папку с ID ${rule.folderId}`);
         }
       });
     });
