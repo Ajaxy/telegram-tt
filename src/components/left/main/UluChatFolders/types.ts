@@ -13,7 +13,7 @@ export type TreeItemChat<T extends any> = TreeItem<T> & {
   id: number | string;
   chat?: ApiChat;
   unreadCount: number | undefined;
-  contextActions: MenuItemContextAction[] | undefined;
+  contextActions?: MenuItemContextAction[];
   ref?: RefObject<HTMLDivElement>;
   user?: ApiUser;
   canChangeFolder?: boolean;
