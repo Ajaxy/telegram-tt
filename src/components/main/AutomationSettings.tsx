@@ -1,13 +1,14 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-console */
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   useCallback, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions, getGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
+import { selectCurrentLimit } from '../../global/selectors/limits';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import useKeywordFolderRule from '../../hooks/useKeywordFolderRule';
@@ -19,6 +20,7 @@ import './AutomationSettings.scss';
 interface AutomationSettingsProps {
   isOpen: boolean;
   onClose: () => void; // тип для функции, которая ничего не возвращает
+  maxChatsinFolder: number;
 }
 
 type Rule = {
@@ -29,12 +31,12 @@ type Rule = {
 const cmdkElement = document.getElementById('automation-settings-root');
 const cmdkRoot = createRoot(cmdkElement!);
 
-const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose }) => {
+const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose, maxChatsinFolder }) => {
   const global = getGlobal();
   const { showNotification } = getActions();
   const {
     rules, setRules, keyword, setKeyword, addRule,
-  } = useKeywordFolderRule();
+  } = useKeywordFolderRule(maxChatsinFolder);
   const [selectedFolderId, setSelectedFolderId] = useState<number | undefined>();
 
   const orderedFolderIds = global.chatFolders.orderedIds;
@@ -145,7 +147,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
     setCanSave(selectedFolderId !== undefined && selectedFolderId !== 0 && keyword.trim() !== '');
   }, [selectedFolderId, keyword]);
 
-  const AutemationSettingInner = (
+  const AutomationSettingsInner = (
     <div>
       <div
         className="fullScreenKeywordCreator "
@@ -242,8 +244,14 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
     </div>
   );
 
-  cmdkRoot.render(isOpen ? AutemationSettingInner : <div />);
+  cmdkRoot.render(isOpen ? AutomationSettingsInner : <div />);
   return <div />;
 };
 
-export default AutomationSettings;
+export default memo(withGlobal<AutomationSettingsProps>(
+  (global) => {
+    return {
+      maxChatsinFolder: selectCurrentLimit(global, 'dialogFiltersChats'),
+    };
+  },
+)(AutomationSettings));

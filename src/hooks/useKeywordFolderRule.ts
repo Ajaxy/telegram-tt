@@ -8,7 +8,7 @@ export type Rule = {
   folderId: number;
 };
 
-const useKeywordFolderRule = () => {
+const useKeywordFolderRule = (maxChatsInFolder: number) => {
   const [rules, setRules] = useState<Rule[]>(() => {
     // Получаем правила из localStorage при инициализации
     const savedRules = localStorage.getItem('keywordRules');
@@ -46,11 +46,17 @@ const useKeywordFolderRule = () => {
     const chatFoldersById = global.chatFolders.byId;
 
     rules.forEach((rule) => {
+      const ruleKeywordLowercase = rule.keyword.toLowerCase();
       const currentFolder = chatFoldersById[rule.folderId];
       const chatIdsInCurrentFolder = new Set(currentFolder?.includedChatIds || []);
+      if (chatIdsInCurrentFolder.size >= maxChatsInFolder) {
+        console.log(`Лимит чатов в папке с ID ${rule.folderId} достигнут. Правило пропущено.`);
+        return; // Пропускаем правило, если достигнут лимит чатов в папке
+      }
 
       Object.values(chatsById).forEach((chat) => {
-        if (chat.title.includes(rule.keyword) && !chatIdsInCurrentFolder.has(chat.id)) {
+        const chatTitleLowercase = chat.title.toLowerCase();
+        if (chatTitleLowercase.includes(ruleKeywordLowercase) && !chatIdsInCurrentFolder.has(chat.id)) {
           editChatFolders({
             chatId: chat.id,
             idsToAdd: [rule.folderId],
@@ -60,7 +66,7 @@ const useKeywordFolderRule = () => {
         }
       });
     });
-  }, [rules, editChatFolders]);
+  }, [rules, editChatFolders, maxChatsInFolder]);
 
   useEffect(() => {
     const interval = setInterval(processRules, 60000); // Устанавливаем интервал в 1 минуту
@@ -77,4 +83,4 @@ const useKeywordFolderRule = () => {
   };
 };
 
-export default useKeywordFolderRule;
+export default (useKeywordFolderRule);
