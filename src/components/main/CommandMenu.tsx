@@ -340,7 +340,7 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Workspaces">
-        <Command.Item onSelect={handleOpenWorkspaceSettings}>
+        <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
           <i className="icon icon-add" /><span>Create workspace</span>
         </Command.Item>
       </Command.Group>
@@ -431,11 +431,20 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
 
-  const openAutomationSettings = () => setAutomationSettingsOpen(true);
-  const closeAutomationSettings = () => setAutomationSettingsOpen(false);
+  const openAutomationSettings = useCallback(() => {
+    setAutomationSettingsOpen(true);
+  }, []);
+  const closeAutomationSettings = useCallback(() => {
+    setAutomationSettingsOpen(false);
+  }, []);
 
-  const openWorkspaceSettings = () => setWorkspaceSettingsOpen(true);
-  const closeWorkspaceSettings = () => setWorkspaceSettingsOpen(false);
+  const openWorkspaceSettings = useCallback((workspaceId?: string) => {
+    console.log('Opening workspace settings for:', workspaceId || 'new workspace');
+    setWorkspaceSettingsOpen(true);
+  }, []);
+  const closeWorkspaceSettings = useCallback(() => {
+    setWorkspaceSettingsOpen(false);
+  }, []);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -542,17 +551,29 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
+  const { useCommand } = useCommands();
+
   const handleOpenAutomationSettings = () => {
     console.log('Handle open Automation Settings called');
     close();
     openAutomationSettings();
   };
 
-  const handleOpenWorkspaceSettings = () => {
-    console.log('Handle open Automation Settings called');
+  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+
+  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
+    console.log('Handle open Workspace Settings called with ID:', workspaceId);
     close();
-    openWorkspaceSettings();
-  };
+    if (workspaceId) {
+      // Логика для редактирования воркспейса
+      openWorkspaceSettings(workspaceId);
+    } else {
+      // Логика для создания нового воркспейса
+      openWorkspaceSettings();
+    }
+  }, [close, openWorkspaceSettings]);
+
+  useCommand('OPEN_WORKSPACE_SETTINGS', handleOpenWorkspaceSettings);
 
   const handleSelectSettings = useCallback(() => {
     runCommand('OPEN_SETTINGS');

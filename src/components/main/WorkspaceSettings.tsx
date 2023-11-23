@@ -19,12 +19,13 @@ import './WorkspaceSettings.scss';
 interface WorkspaceSettingsProps {
   isOpen: boolean;
   onClose: () => void; // тип для функции, которая ничего не возвращает
+  workspaceId?: string;
 }
 
 const cmdkElement = document.getElementById('workspace-settings-root');
 const cmdkRoot = createRoot(cmdkElement!);
 
-const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }) => {
+const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, workspaceId }) => {
   const global = getGlobal();
   const chatFoldersById = global.chatFolders.byId;
   const orderedFolderIds = global.chatFolders.orderedIds;
@@ -54,6 +55,19 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
   const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
   const [isCreating, setIsCreating] = useState(false);
 
+  useEffect(() => {
+    if (workspaceId) {
+      // Здесь логика для загрузки данных существующего воркспейса из localStorage
+      const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+      const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceId);
+      if (currentWorkspace) {
+        setWorkspaceName(currentWorkspace.name);
+        setLogoUrl(currentWorkspace.logoUrl);
+        setSelectedFolderIds(currentWorkspace.folders);
+      }
+    }
+  }, [workspaceId]);
+
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -62,25 +76,37 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
     setLogoUrl(URL.createObjectURL(file)); // Создаем временный URL для предпросмотра
   };
 
-  const createWorkspace = async () => {
+  const handleWorkspaceAction = async () => {
     setIsCreating(true);
     try {
       let finalLogoUrl = logoUrl;
       if (selectedFile) {
         const { fileUrl } = await uploadManager.upload({ data: selectedFile });
-        // Преобразование URL для обработки изображения
         finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
         setLogoUrl(finalLogoUrl); // Сохраняем URL после загрузки на сервер
         URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
       }
-      // Сохраняем данные воркспейса в localStorage
-      localStorage.setItem('workspace', JSON.stringify(
-        {
-          name: workspaceName, logoUrl: finalLogoUrl, folders: selectedFolderIds,
-        },
-      ));
+
+      const newWorkspaceData = {
+        id: workspaceId || Date.now().toString(), // Генерируем уникальный ID для нового воркспейса
+        name: workspaceName,
+        logoUrl: finalLogoUrl,
+        folders: selectedFolderIds,
+      };
+
+      const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+      if (workspaceId) {
+        // Обновляем существующий воркспейс
+        const updatedWorkspaces = savedWorkspaces.map((ws: {
+          id: string;
+        }) => (ws.id === workspaceId ? newWorkspaceData : ws));
+        localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+      } else {
+        // Создаем новый воркспейс
+        localStorage.setItem('workspaces', JSON.stringify([...savedWorkspaces, newWorkspaceData]));
+      }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('Error:', error);
     }
     setIsCreating(false);
   };
@@ -151,14 +177,14 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
           onSelectedFoldersChange={handleSelectedFoldersChange}
         />
         <button
-          className="saveButton"
-          onClick={createWorkspace}
+          className={`saveButton ${workspaceName && selectedFolderIds.length > 0 ? 'active' : ''}`}
+          onClick={handleWorkspaceAction}
           disabled={!workspaceName || selectedFolderIds.length === 0}
         >
           <span
-            className="saveButtonText"
+            className={`saveButtonText ${workspaceName && selectedFolderIds.length > 0 ? 'active' : ''}`}
           >
-            {isCreating ? 'Creating...' : 'Create workspace'}
+            {isCreating ? 'Processing...' : (workspaceId ? 'Update workspace' : 'Create workspace')}
           </span>
         </button>
       </div>

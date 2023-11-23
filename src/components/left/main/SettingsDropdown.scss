@@ -1,0 +1,63 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-compact-menu);
+  border-radius: var(--border-radius-default);
+  box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
+  padding: 10px; /* Внутренний отступ */
+  max-width: 300px; /* Максимальная ширина */
+  z-index: var(--z-menu-bubble);
+  backdrop-filter: blur(10px);
+}
+
+.workspace-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.workspace-item:hover {
+  background-color: #f0f0f0; /* Цвет фона при наведении */
+}
+
+.workspace-name {
+  flex-grow: 1;
+  font-size: 16px;
+  color: #333; /* Цвет текста */
+}
+
+.create-workspace {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e0e0e0; /* Цвет фона кнопки создания */
+  text-align: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-workspace:hover {
+  background-color: #d0d0d0; /* Цвет фона при наведении */
+}
+
+.automation-settings,
+.settings {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.automation-settings:hover,
+.settings div:hover {
+  background-color: #f0f0f0; /* Цвет фона при наведении */
+}
+
+.personal-settings,
+.workspace-settings {
+  padding: 5px 0; /* Внутренний отступ */
+}
