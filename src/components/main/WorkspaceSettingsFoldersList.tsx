@@ -9,9 +9,10 @@ interface Folder {
 
 interface FolderSelectorProps {
   folders: Folder[];
+  onSelectedFoldersChange: (selectedIds: number[]) => void; // Добавьте эту строку
 }
 
-const FolderSelector: React.FC<FolderSelectorProps> = ({ folders }) => {
+const FolderSelector: React.FC<FolderSelectorProps> = ({ folders, onSelectedFoldersChange }) => {
   const [selectedFolders, setSelectedFolders] = useState<Set<number>>(new Set());
 
   const toggleFolder = (id: number) => {
@@ -22,6 +23,10 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({ folders }) => {
       } else {
         newSelected.add(id);
       }
+
+      // Вызов функции обратного вызова с новым массивом ID
+      onSelectedFoldersChange(Array.from(newSelected));
+
       return newSelected;
     });
   };

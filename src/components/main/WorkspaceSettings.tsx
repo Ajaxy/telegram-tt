@@ -49,16 +49,39 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
     apiKey: 'public_kW15bndTdL4cidRTCc1sS8rNYQsu',
   });
 
-  const handleFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
+  const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setSelectedFile(file);
+    setLogoUrl(URL.createObjectURL(file)); // Создаем временный URL для предпросмотра
+  };
+
+  const createWorkspace = async () => {
+    setIsCreating(true);
     try {
-      const { fileUrl } = await uploadManager.upload({ data: file });
-      setLogoUrl(fileUrl);
+      let finalLogoUrl = logoUrl;
+      if (selectedFile) {
+        const { fileUrl } = await uploadManager.upload({ data: selectedFile });
+        // Преобразование URL для обработки изображения
+        finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
+        setLogoUrl(finalLogoUrl); // Сохраняем URL после загрузки на сервер
+        URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
+      }
+      // Сохраняем данные воркспейса в localStorage
+      localStorage.setItem('workspace', JSON.stringify(
+        {
+          name: workspaceName, logoUrl: finalLogoUrl, folders: selectedFolderIds,
+        },
+      ));
     } catch (error) {
       console.error('Upload error:', error);
     }
+    setIsCreating(false);
   };
 
   const triggerFileSelect = () => {
@@ -67,6 +90,10 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setWorkspaceName(e.target.value);
+  };
+
+  const handleSelectedFoldersChange = (selectedIds: number[]) => {
+    setSelectedFolderIds(selectedIds);
   };
 
   const WorkspaceSettingsInner = (
@@ -118,14 +145,19 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose }
         <div className="header">
           <div>Folders</div>
         </div>
-        <FolderSelector folders={folders} />
+        <FolderSelector
+          folders={folders}
+          onSelectedFoldersChange={handleSelectedFoldersChange}
+        />
         <button
           className="saveButton"
+          onClick={createWorkspace}
+          disabled={!workspaceName || selectedFolderIds.length === 0}
         >
           <span
             className="saveButtonText"
           >
-            Create workspace
+            {isCreating ? 'Creating...' : 'Create workspace'}
           </span>
         </button>
       </div>
