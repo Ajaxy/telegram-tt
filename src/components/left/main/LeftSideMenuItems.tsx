@@ -153,7 +153,7 @@ const LeftSideMenuItems = ({
           icon="archive"
           onClick={onSelectArchived}
         >
-          <span className="menu-item-name">{lang('DoneChats')}</span>
+          <span className="menu-item-name">{lang('Archive')}</span>
           {archivedUnreadChatsCount > 0 && (
             <div className="right-badge">{archivedUnreadChatsCount}</div>
           )}

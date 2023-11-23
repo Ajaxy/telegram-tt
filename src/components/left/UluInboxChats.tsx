@@ -113,6 +113,7 @@ const UluInboxChats: FC<OwnProps> = ({
         )}
         <ChatList
           folderType="all"
+          isInbox
           isActive={isActive}
           isForumPanelOpen={isForumPanelVisible}
           onSettingsScreenSelect={onSettingsScreenSelect}

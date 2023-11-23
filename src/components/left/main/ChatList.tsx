@@ -31,6 +31,7 @@ import { useHotkeys } from '../../../hooks/useHotkeys';
 import useInfiniteScroll from '../../../hooks/useInfiniteScroll';
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useStorage } from '../../../hooks/useStorage';
 import useOrderDiff from './hooks/useOrderDiff';
 
 import InfiniteScroll from '../../ui/InfiniteScroll';
@@ -42,6 +43,7 @@ import UnconfirmedSession from './UnconfirmedSession';
 
 type OwnProps = {
   folderType: 'all' | 'archived' | 'folder';
+  isInbox?: boolean;
   folderId?: number;
   isActive: boolean;
   canDisplayArchive?: boolean;
@@ -60,6 +62,7 @@ const RESERVED_HOTKEYS = new Set(['9', '0']);
 const ChatList: FC<OwnProps> = ({
   folderType,
   folderId,
+  isInbox,
   isActive,
   isForumPanelOpen,
   canDisplayArchive,
@@ -75,6 +78,8 @@ const ChatList: FC<OwnProps> = ({
     closeForumPanel,
     toggleStoryRibbon,
   } = getActions();
+
+  const { doneChatIds } = useStorage();
   // eslint-disable-next-line no-null/no-null
   const containerRef = useRef<HTMLDivElement>(null);
   const shouldIgnoreDragRef = useRef(false);
@@ -88,8 +93,11 @@ const ChatList: FC<OwnProps> = ({
 
   const shouldDisplayArchive = isAllFolder && canDisplayArchive;
 
-  const orderedIds = useFolderManagerForOrderedIds(resolvedFolderId);
-  usePeerStoriesPolling(orderedIds);
+  const orderedIdsAll = useFolderManagerForOrderedIds(resolvedFolderId);
+  usePeerStoriesPolling(orderedIdsAll);
+  const orderedIds = isInbox
+    ? orderedIdsAll?.filter((orderedId) => !doneChatIds.includes(orderedId))
+    : orderedIdsAll;
 
   const chatsHeight = (orderedIds?.length || 0) * CHAT_HEIGHT_PX;
   const archiveHeight = shouldDisplayArchive
@@ -209,6 +217,7 @@ const ChatList: FC<OwnProps> = ({
     return viewportIds!.map((id, i) => {
       const isPinned = viewportOffset + i < pinnedCount;
       const offsetTop = unconfirmedSessionHeight + archiveHeight + (viewportOffset + i) * CHAT_HEIGHT_PX;
+      const isDone = doneChatIds.includes(id);
 
       return (
         <Chat
@@ -216,6 +225,7 @@ const ChatList: FC<OwnProps> = ({
           teactOrderKey={isPinned ? i : getOrderKey(id)}
           chatId={id}
           isPinned={isPinned}
+          isDone={isDone}
           folderId={folderId}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
@@ -262,6 +272,7 @@ const ChatList: FC<OwnProps> = ({
           <EmptyFolder
             folderId={folderId}
             folderType={folderType}
+            isInbox={isInbox}
             foldersDispatch={foldersDispatch}
             onSettingsScreenSelect={onSettingsScreenSelect}
           />

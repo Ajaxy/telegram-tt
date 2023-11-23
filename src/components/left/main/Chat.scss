@@ -107,7 +107,8 @@
         --color-chat-username: var(--color-white);
       }
 
-      .icon-muted {
+      .icon-muted,
+      .icon-done {
         color: var(--color-white) !important;
       }
 
@@ -264,7 +265,8 @@
       color: var(--color-primary);
     }
 
-    .icon-muted {
+    .icon-muted,
+    .icon-done {
       font-size: 1.125rem;
       margin-left: 0.25rem;
       color: var(--color-list-icon);
@@ -390,7 +392,8 @@
         padding-right: 0;
       }
 
-      .icon-muted {
+      .icon-muted,
+      .icon-done {
         margin-left: 0;
         margin-right: 0.25rem;
       }

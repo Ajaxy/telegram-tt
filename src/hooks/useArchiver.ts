@@ -13,6 +13,7 @@ import { SERVICE_NOTIFICATIONS_USER_ID } from '../config';
 import { selectCurrentChat, selectTabState } from '../global/selectors';
 import useInterval from './useInterval';
 import { useJune } from './useJune';
+import { useStorage } from './useStorage';
 
 const UPDATE_TIME_SEC = 3;
 const MESSAGE_DISPLAY_TIME_SEC = 60;
@@ -24,6 +25,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     openChat, toggleChatArchived, closeForumPanel, showNotification,
   } = getActions();
   const { track } = useJune();
+  const { isArchiverEnabled } = useStorage();
 
   const chatsToArchive: { [key: string]: Date } = {};
 
@@ -98,7 +100,9 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
     if (isManual) {
       archive();
-    } else if (JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled')))) {
+    } else if (isArchiverEnabled) {
+      // eslint-disable-next-line no-console
+      console.log('>>> autoarchive');
       autoarchive();
     }
   };
@@ -109,25 +113,37 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
   }, UPDATE_TIME_SEC * 1000);
 
-  const archiveChat = useCallback(({ id, value }: { id?: string; value?: boolean }) => {
+  const archiveChat = useCallback(({
+    id, value, isClose = true, isNotification = true,
+  }: {
+    id?: string;
+    value?: boolean;
+    isClose?: boolean;
+    isNotification?: boolean;
+  }) => {
     const global = getGlobal();
     const currentChatId = selectCurrentChat(global)?.id;
     const forumPanelChatId = selectTabState(global).forumPanelChatId;
+    const openedChatId = currentChatId || forumPanelChatId;
+    const togglingChatId = id || openedChatId;
 
-    const togglingChatId = id || currentChatId || forumPanelChatId;
     if (togglingChatId) {
       const isArchived = (global.chats.listIds.archived || []).includes(togglingChatId);
       if (value !== undefined && (isArchived === value)) {
         return;
       }
       toggleChatArchived({ id: togglingChatId });
-      openChat({ id: undefined });
-      if (togglingChatId === forumPanelChatId) {
-        closeForumPanel();
+      if (isClose) {
+        openChat({ id: undefined });
+        if (togglingChatId === forumPanelChatId) {
+          closeForumPanel();
+        }
       }
-      showNotification({
-        message: `The chat marked as ${isArchived ? '"Not done"' : '"Done"'}`,
-      });
+      if (isNotification) {
+        showNotification({
+          message: isArchived ? 'Chat unarchived' : 'Chat archived',
+        });
+      }
       track?.(isArchived ? 'toggleChatUnarchived' : 'toggleChatArchived');
     }
   }, [openChat, closeForumPanel, track]);

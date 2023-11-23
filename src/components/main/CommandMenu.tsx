@@ -27,8 +27,10 @@ import renderText from '../common/helpers/renderText';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
+import useDone from '../../hooks/useDone';
 import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
+import { useStorage } from '../../hooks/useStorage';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
 import FolderPage from '../common/FolderPage';
@@ -168,7 +170,12 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
 };
 
 interface HomePageProps {
+  commandDoneAll: () => void;
   commandArchiveAll: () => void;
+  commandToggleAutoDone: () => void;
+  commandToggleArchiver: () => void;
+  isArchiverEnabled: boolean;
+  isAutoDoneEnabled: boolean;
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
@@ -188,7 +195,6 @@ interface HomePageProps {
   handleSelectNewChannel: () => void;
   handleCreateFolder: () => void;
   handleLockScreenHotkey: () => void;
-  commandToggleArchiver: () => void;
   handleOpenAutomationSettings: () => void;
 }
 
@@ -199,11 +205,13 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  commandArchiveAll, topUserIds, usersById, recentlyFoundChatIds, close,
+  commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled,
+  commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
+  topUserIds, usersById, recentlyFoundChatIds, close,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver, handleOpenAutomationSettings,
+  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
 }) => {
   return (
     <>
@@ -242,11 +250,27 @@ const HomePage: React.FC<HomePageProps> = ({
       </Command.Group>
       <CommandSeparator />
       <Command.Group heading="Settings">
-        <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Mark read chats as &quot;Done&quot; (May take ~1-3 min)</span>
+        <Command.Item onSelect={commandDoneAll}>
+          <i className="icon icon-select" /><span>Mark read chats as &quot;Done&quot;</span>
+        </Command.Item>
+        <Command.Item onSelect={commandToggleAutoDone}>
+          <i className="icon icon-select" />
+          <span>
+            {isAutoDoneEnabled
+              ? 'Disable "Auto-Done after reading"'
+              : 'Enable "Auto-Done after reading"'}
+          </span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
-          <i className="icon icon-readchats" /><span>Auto-Done After Reading</span>
+          <i className="icon icon-archive" />
+          <span>
+            {isArchiverEnabled
+              ? 'Disable "Аrchive chats when mark as done"'
+              : 'Enable "Аrchive chats when mark as done"'}
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
         </Command.Item>
         {menuItems.map((item, index) => (
           <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
@@ -365,10 +389,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
     showNotification, openUrl, openChatByUsername,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
-  const [isArchiverEnabled, setIsArchiverEnabled] = useState(
-    !!JSON.parse(String(localStorage.getItem('ulu_is_autoarchiver_enabled'))),
-  );
+  const {
+    isAutoDoneEnabled, setIsAutoDoneEnabled,
+    isArchiverEnabled, setIsArchiverEnabled,
+  } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
+  const { doneAllReadChats } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
@@ -520,10 +546,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const commandToggleArchiver = useCallback(() => {
     const updIsArchiverEnabled = !isArchiverEnabled;
     showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    localStorage.setItem('ulu_is_autoarchiver_enabled', JSON.stringify(updIsArchiverEnabled));
     setIsArchiverEnabled(updIsArchiverEnabled);
     close();
-  }, [close, isArchiverEnabled]);
+  }, [close, isArchiverEnabled, setIsArchiverEnabled]);
+
+  const commandToggleAutoDone = useCallback(() => {
+    const updIsAutoDoneEnabled = !isAutoDoneEnabled;
+    showNotification({ message: updIsAutoDoneEnabled ? 'Auto-Done enabled!' : 'Auto-Done disabled!' });
+    setIsAutoDoneEnabled(updIsAutoDoneEnabled);
+    close();
+  }, [close, isAutoDoneEnabled, setIsAutoDoneEnabled]);
+
+  const commandDoneAll = useCallback(() => {
+    showNotification({ message: 'All read chats are marked as done!' });
+    doneAllReadChats();
+    close();
+    if (track) {
+      track('commandDoneAll');
+    }
+  }, [close, doneAllReadChats, track]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
@@ -598,7 +639,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
             {activePage === 'home' && (
               <>
                 <HomePage
+                  commandDoneAll={commandDoneAll}
                   commandArchiveAll={commandArchiveAll}
+                  commandToggleAutoDone={commandToggleAutoDone}
+                  commandToggleArchiver={commandToggleArchiver}
+                  isAutoDoneEnabled={isAutoDoneEnabled}
+                  isArchiverEnabled={isArchiverEnabled}
                   topUserIds={topUserIds}
                   usersById={usersById}
                   handleSearchFocus={handleSearchFocus}
@@ -617,7 +663,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleSelectNewChannel={handleSelectNewChannel}
                   handleCreateFolder={handleCreateFolder}
                   handleLockScreenHotkey={handleLockScreenHotkey}
-                  commandToggleArchiver={commandToggleArchiver}
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
                 />

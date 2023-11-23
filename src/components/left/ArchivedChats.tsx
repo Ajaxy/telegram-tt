@@ -103,7 +103,7 @@ const ArchivedChats: FC<OwnProps> = ({
         >
           <i className="icon icon-arrow-left" />
         </Button>
-        {shouldRenderTitle && <h3 className={titleClassNames}>{lang('DoneChats')}</h3>}
+        {shouldRenderTitle && <h3 className={titleClassNames}>{lang('Archive')}</h3>}
         {IS_STORIES_ENABLED && (
           <div className="story-toggler-wrapper">
             <StoryToggler canShow isArchived />

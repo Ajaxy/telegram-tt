@@ -21,6 +21,7 @@ type FolderType = 'all' | 'archived' | 'folder';
 type OwnProps = {
   folderId?: number;
   folderType: FolderType;
+  isInbox?: boolean;
   foldersDispatch: FolderEditDispatch;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
 };
@@ -28,13 +29,14 @@ type OwnProps = {
 type StateProps = {
   chatFolder?: ApiChatFolder;
   folderType?: FolderType;
+  isInbox?: boolean;
   animatedEmoji?: ApiSticker;
 };
 
 const ICON_SIZE = 96;
 
 const EmptyFolder: FC<OwnProps & StateProps> = ({
-  chatFolder, folderType, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
+  chatFolder, isInbox, animatedEmoji, foldersDispatch, onSettingsScreenSelect,
 }) => {
   const lang = useLang();
   const { isMobile } = useAppLayout();
@@ -43,8 +45,6 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
     foldersDispatch({ type: 'editFolder', payload: chatFolder });
     onSettingsScreenSelect(SettingsScreens.FoldersEditFolderFromChatList);
   }, [chatFolder, foldersDispatch, onSettingsScreenSelect]);
-
-  const isInbox = folderType === 'all';
 
   return (
     <div className={styles.root}>
@@ -74,12 +74,12 @@ const EmptyFolder: FC<OwnProps & StateProps> = ({
   );
 };
 
-export default memo(withGlobal<OwnProps>((global, { folderId, folderType }): StateProps => {
+export default memo(withGlobal<OwnProps>((global, { folderId, folderType, isInbox }): StateProps => {
   const chatFolder = folderId && folderType === 'folder' ? selectChatFolder(global, folderId) : undefined;
 
   return {
     chatFolder,
-    folderType,
+    isInbox,
     animatedEmoji: selectAnimatedEmoji(global, '📂'),
   };
 })(EmptyFolder));

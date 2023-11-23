@@ -130,8 +130,7 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const allChatsFolder: ApiChatFolder = useMemo(() => {
     return {
       id: ALL_FOLDER_ID,
-      // title: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('FilterAllChatsShort') : lang('FilterAllChats'),
-      title: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('Inbox') : lang('FilterAllChats'),
+      title: orderedFolderIds?.[0] === ALL_FOLDER_ID ? lang('FilterAllChatsShort') : lang('FilterAllChats'),
       includedChatIds: MEMO_EMPTY_ARRAY,
       excludedChatIds: MEMO_EMPTY_ARRAY,
     } satisfies ApiChatFolder;
