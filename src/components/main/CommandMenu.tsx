@@ -174,8 +174,10 @@ interface HomePageProps {
   commandArchiveAll: () => void;
   commandToggleAutoDone: () => void;
   commandToggleArchiver: () => void;
+  commandToggleFoldersTree: () => void;
   isArchiverEnabled: boolean;
   isAutoDoneEnabled: boolean;
+  isFoldersTreeEnabled: boolean;
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
@@ -205,9 +207,9 @@ interface CreateNewPageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({
-  commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled,
+  commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled, commandToggleFoldersTree,
   commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
-  topUserIds, usersById, recentlyFoundChatIds, close,
+  topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
@@ -259,6 +261,14 @@ const HomePage: React.FC<HomePageProps> = ({
             {isAutoDoneEnabled
               ? 'Disable "Auto-Done after reading"'
               : 'Enable "Auto-Done after reading"'}
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={commandToggleFoldersTree}>
+          <i className="icon icon-select" />
+          <span>
+            {isFoldersTreeEnabled
+              ? 'Switch to Telegram Folders UI'
+              : 'Try new Ulu Tree Folders UI (Beta)'}
           </span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
@@ -392,6 +402,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const {
     isAutoDoneEnabled, setIsAutoDoneEnabled,
     isArchiverEnabled, setIsArchiverEnabled,
+    isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
   const { doneAllReadChats } = useDone();
@@ -557,6 +568,18 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [close, isAutoDoneEnabled, setIsAutoDoneEnabled]);
 
+  const commandToggleFoldersTree = useCallback(() => {
+    const updIsFoldersTreeEnabled = !isFoldersTreeEnabled;
+    showNotification({
+      message: updIsFoldersTreeEnabled
+        ? 'Folders Tree (Beta) enabled!'
+        : 'Telegram Default Folders enabled!',
+    });
+    setIsFoldersTreeEnabled(updIsFoldersTreeEnabled);
+    close();
+    window.location.reload();
+  }, [close, isFoldersTreeEnabled, setIsFoldersTreeEnabled]);
+
   const commandDoneAll = useCallback(() => {
     showNotification({ message: 'All read chats are marked as done!' });
     doneAllReadChats();
@@ -643,8 +666,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   commandArchiveAll={commandArchiveAll}
                   commandToggleAutoDone={commandToggleAutoDone}
                   commandToggleArchiver={commandToggleArchiver}
+                  commandToggleFoldersTree={commandToggleFoldersTree}
                   isAutoDoneEnabled={isAutoDoneEnabled}
                   isArchiverEnabled={isArchiverEnabled}
+                  isFoldersTreeEnabled={isFoldersTreeEnabled}
                   topUserIds={topUserIds}
                   usersById={usersById}
                   handleSearchFocus={handleSearchFocus}

@@ -26,13 +26,14 @@ import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useHistoryBack from '../../../hooks/useHistoryBack';
 import useLang from '../../../hooks/useLang';
-// import useLastCallback from '../../../hooks/useLastCallback';
+import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
+import { useStorage } from '../../../hooks/useStorage';
 
 import StoryRibbon from '../../story/StoryRibbon';
-// import TabList from '../../ui/TabList';
-// import Transition from '../../ui/Transition';
-// import ChatList from './ChatList';
+import TabList from '../../ui/TabList';
+import Transition from '../../ui/Transition';
+import ChatList from './ChatList';
 import UluChatFoldersDivider from './UluChatFoldersDivider';
 import UluNewChatFolderButton from './UluNewChatFolderButton';
 import UluSystemFolders from './UluSystemChatFolders';
@@ -76,25 +77,25 @@ const RECALCULATE_TREE_HEIGHT_INTERVAL_MS = 300;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   leftMainHeaderRef,
-  // foldersDispatch,
-  // onSettingsScreenSelect,
+  foldersDispatch,
+  onSettingsScreenSelect,
   onLeftColumnContentChange,
   chatFoldersById,
   orderedFolderIds,
   activeChatFolder,
   currentUserId,
   isForumPanelOpen,
-  // shouldSkipHistoryAnimations,
+  shouldSkipHistoryAnimations,
   maxFolders,
   maxChatLists,
   shouldHideFolderTabs,
   folderInvitesById,
   maxFolderInvites,
-  // hasArchivedChats,
-  // hasArchivedStories,
-  // archiveSettings,
+  hasArchivedChats,
+  hasArchivedStories,
+  archiveSettings,
   isStoryRibbonShown,
-  // sessions,
+  sessions,
   content,
   chatId,
   userId,
@@ -148,8 +149,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       : undefined;
   }, [chatFoldersById, allChatsFolder, orderedFolderIds]);
 
-  // const allChatsFolderIndex = displayedFolders?.findIndex((folder) => folder.id === ALL_FOLDER_ID);
-  // const isInAllChatsFolder = allChatsFolderIndex === activeChatFolder;
+  const allChatsFolderIndex = displayedFolders?.findIndex((folder) => folder.id === ALL_FOLDER_ID);
+  const isInAllChatsFolder = allChatsFolderIndex === activeChatFolder;
   const isInFirstFolder = FIRST_FOLDER_INDEX === activeChatFolder;
 
   const folderCountersById = useFolderManagerForUnreadCounters();
@@ -230,9 +231,9 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     onScreenSelect(SettingsScreens.FoldersCreateFolder);
   }, [onScreenSelect, dispatch]);
 
-  // const handleSwitchTab = useLastCallback((index: number) => {
-  //   setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
-  // });
+  const handleSwitchTab = useLastCallback((index: number) => {
+    setActiveChatFolder({ activeChatFolder: index }, { forceOnHeavyAnimation: true });
+  });
 
   // Prevent `activeTab` pointing at non-existing folder after update
   useEffect(() => {
@@ -308,30 +309,30 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     };
   }, [currentUserId, folderTabs, openChat, setActiveChatFolder]);
 
-  // const {
-  //   shouldRender: shouldRenderPlaceholder, transitionClassNames,
-  // } = useShowTransition(!orderedFolderIds, undefined, true);
+  const {
+    shouldRender: shouldRenderPlaceholder, transitionClassNames,
+  } = useShowTransition(!orderedFolderIds, undefined, true);
 
-  // function renderCurrentTab(isActive: boolean) {
-  //   const activeFolder = Object.values(chatFoldersById)
-  //     .find(({ id }) => id === folderTabs![activeChatFolder].id);
-  //   const isFolder = activeFolder && !isInAllChatsFolder;
+  function renderCurrentTab(isActive: boolean) {
+    const activeFolder = Object.values(chatFoldersById)
+      .find(({ id }) => id === folderTabs![activeChatFolder].id);
+    const isFolder = activeFolder && !isInAllChatsFolder;
 
-  //   return (
-  //     <ChatList
-  //       folderType={isFolder ? 'folder' : 'all'}
-  //       folderId={isFolder ? activeFolder.id : undefined}
-  //       isActive={isActive}
-  //       isForumPanelOpen={isForumPanelOpen}
-  //       foldersDispatch={foldersDispatch}
-  //       onSettingsScreenSelect={onSettingsScreenSelect}
-  //       onLeftColumnContentChange={onLeftColumnContentChange}
-  //       canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
-  //       archiveSettings={archiveSettings}
-  //       sessions={sessions}
-  //     />
-  //   );
-  // }
+    return (
+      <ChatList
+        folderType={isFolder ? 'folder' : 'all'}
+        folderId={isFolder ? activeFolder.id : undefined}
+        isActive={isActive}
+        isForumPanelOpen={isForumPanelOpen}
+        foldersDispatch={foldersDispatch}
+        onSettingsScreenSelect={onSettingsScreenSelect}
+        onLeftColumnContentChange={onLeftColumnContentChange}
+        canDisplayArchive={(hasArchivedChats || hasArchivedStories) && !archiveSettings.isHidden}
+        archiveSettings={archiveSettings}
+        sessions={sessions}
+      />
+    );
+  }
 
   const shouldRenderFolders = folderTabs && folderTabs.length > 1;
 
@@ -359,6 +360,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
   const [chatFoldersTreeStyles, setChatFoldersTreeStyles] = useState(recalculateFoldersTreeStyles());
   const recalculateHeightIntervalRef = useRef<NodeJS.Timeout | null>();
+
+  const { isFoldersTreeEnabled } = useStorage();
 
   useEffect(() => {
     recalculateHeightIntervalRef.current = setInterval(() => {
@@ -394,31 +397,37 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
       />
       <UluChatFoldersDivider />
       <UluNewChatFolderButton onCreateFolder={handleCreateFolder} />
-      <div
-        ref={chatFoldersPortalRef}
-        id="ulu-chat-folders-portal"
-        style={chatFoldersTreeStyles}
-      />
       {IS_STORIES_ENABLED && shouldRenderStoryRibbon && <StoryRibbon isClosing={isStoryRibbonClosing} />}
-      {/* {shouldRenderFolders ? (
-        <TabList
-          contextRootElementSelector="#LeftColumn"
-          tabs={folderTabs}
-          activeTab={activeChatFolder}
-          onSwitchTab={handleSwitchTab}
-          areFolders
+      { isFoldersTreeEnabled && (
+        <div
+          ref={chatFoldersPortalRef}
+          id="ulu-chat-folders-portal"
+          style={chatFoldersTreeStyles}
         />
-      ) : shouldRenderPlaceholder ? (
-        <div className={buildClassName('tabs-placeholder', transitionClassNames)} />
-      ) : undefined}
-      <Transition
-        ref={transitionRef}
-        name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
-        activeKey={activeChatFolder}
-        renderCount={shouldRenderFolders ? folderTabs.length : undefined}
-      >
-        {renderCurrentTab}
-      </Transition> */}
+      ) }
+      { !isFoldersTreeEnabled && (
+        <>
+          {shouldRenderFolders ? (
+            <TabList
+              contextRootElementSelector="#LeftColumn"
+              tabs={folderTabs}
+              activeTab={activeChatFolder}
+              onSwitchTab={handleSwitchTab}
+              areFolders
+            />
+          ) : shouldRenderPlaceholder ? (
+            <div className={buildClassName('tabs-placeholder', transitionClassNames)} />
+          ) : undefined}
+          <Transition
+            ref={transitionRef}
+            name={shouldSkipHistoryAnimations ? 'none' : lang.isRtl ? 'slideOptimizedRtl' : 'slideOptimized'}
+            activeKey={activeChatFolder}
+            renderCount={shouldRenderFolders ? folderTabs.length : undefined}
+          >
+            {renderCurrentTab}
+          </Transition>
+        </>
+      ) }
     </div>
   );
 };

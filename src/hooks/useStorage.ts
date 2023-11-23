@@ -3,6 +3,10 @@ import { useEffect, useState } from '../lib/teact/teact';
 export function useStorage() {
   const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>('ulu_is_autodone_enabled', false);
   const [isArchiverEnabled, setIsArchiverEnabled] = useLocalStorage<boolean>('ulu_is_autoarchiver_enabled', false);
+  const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>(
+    'ulu_is_folders_tree_enabled',
+    false,
+  );
 
   const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>('ulu_done_chat_ids', []);
 
@@ -11,6 +15,8 @@ export function useStorage() {
     setIsAutoDoneEnabled,
     isArchiverEnabled,
     setIsArchiverEnabled,
+    isFoldersTreeEnabled,
+    setIsFoldersTreeEnabled,
     doneChatIds,
     setDoneChatIds,
   };
