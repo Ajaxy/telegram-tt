@@ -35,6 +35,7 @@ import { useStorage } from '../../hooks/useStorage';
 import AllUsersAndChats from '../common/AllUsersAndChats';
 import FolderPage from '../common/FolderPage';
 import AutomationSettings from './AutomationSettings';
+import WorkspaceSettings from './WorkspaceSettings';
 
 import './CommandMenu.scss';
 
@@ -198,6 +199,7 @@ interface HomePageProps {
   handleCreateFolder: () => void;
   handleLockScreenHotkey: () => void;
   handleOpenAutomationSettings: () => void;
+  handleOpenWorkspaceSettings: () => void;
 }
 
 interface CreateNewPageProps {
@@ -208,12 +210,13 @@ interface CreateNewPageProps {
 
 const HomePage: React.FC<HomePageProps> = ({
   commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled, commandToggleFoldersTree,
-  commandArchiveAll, commandToggleArchiver, isArchiverEnabled,
+  commandArchiveAll, isArchiverEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
+  handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver, handleOpenAutomationSettings,
+  handleOpenWorkspaceSettings,
 }) => {
   return (
     <>
@@ -335,6 +338,11 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-bots" /><span>Open Automation Settings</span>
         </Command.Item>
       </Command.Group>
+      <Command.Group heading="Workspaces">
+        <Command.Item onSelect={handleOpenWorkspaceSettings}>
+          <i className="icon icon-add" /><span>Create workspace</span>
+        </Command.Item>
+      </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
           <i className="icon icon-document" /><span>Help center</span>
@@ -420,9 +428,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // eslint-disable-next-line no-null/no-null
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
+  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
 
   const openAutomationSettings = () => setAutomationSettingsOpen(true);
   const closeAutomationSettings = () => setAutomationSettingsOpen(false);
+
+  const openWorkspaceSettings = () => setWorkspaceSettingsOpen(true);
+  const closeWorkspaceSettings = () => setWorkspaceSettingsOpen(false);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -533,6 +545,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
     console.log('Handle open Automation Settings called');
     close();
     openAutomationSettings();
+  };
+
+  const handleOpenWorkspaceSettings = () => {
+    console.log('Handle open Automation Settings called');
+    close();
+    openWorkspaceSettings();
   };
 
   const handleSelectSettings = useCallback(() => {
@@ -696,6 +714,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleLockScreenHotkey={handleLockScreenHotkey}
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
+                  handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
                 />
                 <AllUsersAndChats
                   close={close}
@@ -738,6 +757,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
       <AutomationSettings
         isOpen={isAutomationSettingsOpen}
         onClose={closeAutomationSettings}
+      />
+      <WorkspaceSettings
+        isOpen={isWorkspaceSettingsOpen}
+        onClose={closeWorkspaceSettings}
       />
     </div>
 
