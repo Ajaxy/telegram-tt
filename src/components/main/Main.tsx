@@ -55,6 +55,7 @@ import useAppLayout from '../../hooks/useAppLayout';
 import useArchiver from '../../hooks/useArchiver';
 import useBackgroundMode from '../../hooks/useBackgroundMode';
 import useBeforeUnload from '../../hooks/useBeforeUnload';
+import { useDoneUpdates } from '../../hooks/useDone';
 import useForceUpdate from '../../hooks/useForceUpdate';
 import { useFullscreenStatus } from '../../hooks/useFullscreen';
 import { dispatchHeavyAnimationEvent } from '../../hooks/useHeavyAnimationCheck';
@@ -346,6 +347,7 @@ const Main: FC<OwnProps & StateProps> = ({
   useInterval(checkAppVersion, isMasterTab ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 
   useArchiver({ isManual: false });
+  useDoneUpdates();
 
   useShortcutCmdU();
   useShortcutCmdE();
