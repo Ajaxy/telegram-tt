@@ -43,21 +43,28 @@ const useKeywordFolderRule = () => {
 
     const global = getGlobal();
     const chatsById = global.chats.byId;
+    const chatFoldersById = global.chatFolders.byId;
 
     rules.forEach((rule) => {
-      // Для чатов
+      const currentFolder = chatFoldersById[rule.folderId];
+      const chatIdsInCurrentFolder = currentFolder ? currentFolder.includedChatIds : [];
       Object.values(chatsById).forEach((chat) => {
-        if (chat.title.includes(rule.keyword) /* && проверка на принадлежность чата к папке */) {
-          editChatFolders({
-            chatId: chat.id,
-            idsToAdd: [rule.folderId],
-            idsToRemove: [],
-          });
-          console.log(`Чат с ID ${chat.id} и названием '${chat.title}' добавлен в папку с ID ${rule.folderId}`);
+        if (chat.title.includes(rule.keyword)) {
+          // Проверяем, не находится ли чат уже в папке
+          const isAlreadyInFolder = chatIdsInCurrentFolder.includes(chat.id);
+
+          if (!isAlreadyInFolder) {
+            editChatFolders({
+              chatId: chat.id,
+              idsToAdd: [rule.folderId],
+              idsToRemove: [],
+            });
+            console.log(`Чат с ID ${chat.id} и названием '${chat.title}' добавлен в папку с ID ${rule.folderId}`);
+          }
         }
       });
     });
-  }, [rules]);
+  }, [rules, editChatFolders]);
 
   useEffect(() => {
     const interval = setInterval(processRules, 60000); // Устанавливаем интервал в 1 минуту

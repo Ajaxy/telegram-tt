@@ -91,6 +91,20 @@ const FloatingActionButtons: FC<OwnProps & StateProps> = ({
     !withExtraShift && styles.noExtraShift,
   );
 
+  useEffect(() => {
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+      if (event.key === 'ArrowDown' && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+        handleClick();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown as unknown as EventListener);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown as unknown as EventListener);
+    };
+  }, [handleClick]);
+
   return (
     <div ref={elementRef} className={fabClassName}>
       <ScrollDownButton

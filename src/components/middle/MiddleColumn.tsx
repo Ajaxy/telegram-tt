@@ -275,6 +275,33 @@ function MiddleColumn({
     prevTransitionKey !== undefined && prevTransitionKey < currentTransitionKey ? prevTransitionKey : undefined
   );
 
+  // Функция для прокрутки к последнему сообщению
+  const scrollToLastMessage = () => {
+    const messagesContainer = document.querySelector<HTMLDivElement>('.MessageList');
+    if (messagesContainer) {
+      const messageElements = messagesContainer.querySelectorAll<HTMLDivElement>('.message-list-item');
+      const lastMessageElement = messageElements[messageElements.length - 1];
+      if (lastMessageElement) {
+        lastMessageElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowDown' && !event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+        scrollToLastMessage();
+        setTimeout(scrollToLastMessage, 100);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const { isReady, handleCssTransitionEnd, handleSlideTransitionStop } = useIsReady(
     !shouldSkipHistoryAnimations && withInterfaceAnimations,
     currentTransitionKey,
