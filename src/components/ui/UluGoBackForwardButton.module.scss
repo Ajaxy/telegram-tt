@@ -1,0 +1,33 @@
+.wrapper {
+	padding: 0.5625rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border-radius: var(--border-radius-default-tiny);
+	border: none;
+	background-color: transparent;
+	height: 2.25rem;
+	width: 2.25rem;
+  
+	:global(.icon-arrow-right), :global(.icon-arrow-left) {
+	  $icon-size: 1.125rem;
+  
+	  height: $icon-size;
+	  width: $icon-size;
+	  color: var(--color-text-secondary);
+  
+	  &::before {
+		font-size: $icon-size;
+	  }
+	}
+  
+	&:hover {
+	  background-color: var(--color-chat-hover);
+  
+	  :global(.icon-arrow-right), :global(.icon-arrow-left) {
+		color: var(--color-text);
+	  }
+	}
+  }
+  

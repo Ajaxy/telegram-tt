@@ -68,8 +68,22 @@
   }
 }
 
-body.is-macos.is-electron #Main:not(.is-fullscreen) .left-header {
-  margin-top: 2.5rem;
+.electron-header {
+  display: flex;
+  height: auto;
+  padding: 8px;
+  right: auto;
+  justify-content: flex-end;
+  background: var(--color-background);
+}
+
+body.is-macos.is-electron .electron-header {
+  height: auto;
+  display: flex;
+  padding: 8px;
+  right: auto;
+  justify-content: flex-end;
+  background: var(--color-background);
 }
 
 .extra-spacing {
