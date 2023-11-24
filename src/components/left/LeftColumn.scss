@@ -69,12 +69,7 @@
 }
 
 .electron-header {
-  display: flex;
-  height: auto;
-  padding: 8px;
-  right: auto;
-  justify-content: flex-end;
-  background: var(--color-background);
+  display: none;
 }
 
 body.is-macos.is-electron .electron-header {
