@@ -120,7 +120,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     value?: boolean;
     isClose?: boolean;
     isNotification?: boolean;
-  }) => {
+  }): boolean => {
     const global = getGlobal();
     const currentChatId = selectCurrentChat(global)?.id;
     const forumPanelChatId = selectTabState(global).forumPanelChatId;
@@ -130,7 +130,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     if (togglingChatId) {
       const isArchived = (global.chats.listIds.archived || []).includes(togglingChatId);
       if (value !== undefined && (isArchived === value)) {
-        return;
+        return false;
       }
       toggleChatArchived({ id: togglingChatId });
       if (isClose) {
@@ -145,7 +145,9 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
         });
       }
       track?.(isArchived ? 'toggleChatUnarchived' : 'toggleChatArchived');
+      return true;
     }
+    return false;
   }, [openChat, closeForumPanel, track]);
 
   return { archiveMessages: processArchiver, archiveChat };
