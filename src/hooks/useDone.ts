@@ -98,18 +98,23 @@ export default function useDone() {
 }
 
 export function useDoneUpdates() {
-  const { doneChatIds, setDoneChatIds } = useStorage();
+  const { doneChatIds, setDoneChatIds, isAutoDoneEnabled } = useStorage();
 
   useEffect(() => {
     const listener = (e: any) => {
       const chat = e.detail.chat as ApiChat;
-      if (chat && chat.id && doneChatIds.includes(chat.id) && !shouldBeDone(chat)) {
-        setDoneChatIds(doneChatIds.filter((chatId: string) => chatId !== chat.id));
+      if (chat && chat.id) {
+        if (doneChatIds.includes(chat.id) && !shouldBeDone(chat)) {
+          setDoneChatIds(doneChatIds.filter((chatId: string) => chatId !== chat.id));
+        }
+        if (isAutoDoneEnabled && !doneChatIds.includes(chat.id) && shouldBeDone(chat)) {
+          setDoneChatIds([...doneChatIds, chat.id]);
+        }
       }
     };
     window.addEventListener(EVENT_NAME, listener);
     return () => window.removeEventListener(EVENT_NAME, listener);
-  }, [doneChatIds, setDoneChatIds]);
+  }, [doneChatIds, setDoneChatIds, isAutoDoneEnabled]);
 }
 
 export function updateChatDone(chat: ApiChat) {
