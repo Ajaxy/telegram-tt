@@ -4,9 +4,9 @@ import { getActions, getGlobal } from '../global';
 import type { ApiChat } from '../api/types';
 
 import { selectCurrentChat, selectTabState } from '../global/selectors';
+import useArchiver from './useArchiver';
 import { useJune } from './useJune';
 import { useStorage } from './useStorage';
-// import useArchiver from './useArchiver';
 
 const EVENT_NAME = 'update_chat_done';
 
@@ -20,12 +20,12 @@ const shouldBeDone = (chat: ApiChat) => {
 };
 
 export default function useDone() {
-  // const { archiveChat } = useArchiver({ isManual: true });
+  const { archiveChat } = useArchiver({ isManual: true });
   const {
     openChat, closeForumPanel, showNotification,
   } = getActions();
   const { track } = useJune();
-  const { doneChatIds, setDoneChatIds } = useStorage();
+  const { doneChatIds, setDoneChatIds, isArchiverEnabled } = useStorage();
 
   const isChatDone = (chat: ApiChat) => {
     return doneChatIds.includes(chat.id);
@@ -46,19 +46,25 @@ export default function useDone() {
     const togglingChatId = id || openedChatId;
 
     if (togglingChatId) {
-      const isDone = doneChatIds.includes(togglingChatId);
-      if (value !== undefined && (isDone === value)) {
+      const updDone = !doneChatIds.includes(togglingChatId);
+      if (value !== undefined && (updDone !== value)) {
         return;
       }
 
-      const updDoneChatIds = !isDone
+      const updDoneChatIds = updDone
         ? [...doneChatIds, togglingChatId]
         : doneChatIds.filter((chatId: string) => chatId !== togglingChatId);
       setDoneChatIds(updDoneChatIds);
 
-      /*
-        archiveChat({ id, value });
-      */
+      let isArchiveAction: boolean = false;
+      if (isArchiverEnabled && updDone) {
+        isArchiveAction = archiveChat({
+          id: togglingChatId,
+          value: updDone,
+          isClose: false,
+          isNotification: false,
+        });
+      }
 
       if (isClose) {
         openChat({ id: undefined });
@@ -68,12 +74,16 @@ export default function useDone() {
       }
       if (isNotification) {
         showNotification({
-          message: `The chat marked as ${isDone ? '"Not done"' : '"Done"'}`,
+          message: `The chat marked as ${
+            updDone ? '"Done"' : '"Not done"'
+          }${
+            isArchiveAction ? (` and ${updDone ? 'archived' : 'unachived'}`) : ''
+          }`,
         });
       }
-      track?.(isDone ? 'toggleChatUndone' : 'toggleChatDone');
+      track?.(updDone ? 'toggleChatDone' : 'toggleChatUndone');
     }
-  }, [doneChatIds, setDoneChatIds, track]);
+  }, [archiveChat, doneChatIds, isArchiverEnabled, setDoneChatIds, track]);
 
   const doneAllReadChats = () => {
     const global = getGlobal();
