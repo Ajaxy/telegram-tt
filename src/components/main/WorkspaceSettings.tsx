@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 import type { ChangeEvent } from 'react';
 import React, { useRef, useState } from 'react';
@@ -31,18 +30,6 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const orderedFolderIds = global.chatFolders.orderedIds;
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
 
-  // Функция для закрытия окна, вызывает пропс onClose
-  const close = useCallback(() => {
-    if (onClose) {
-      onClose();
-    }
-  }, [onClose]);
-
-  useEffect(() => {
-    // Если окно видимо, подписываемся на событие нажатия клавиши Esc
-    return isOpen ? captureEscKeyListener(close) : undefined;
-  }, [close, isOpen]);
-
   const [workspaceName, setWorkspaceName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   // eslint-disable-next-line no-null/no-null
@@ -56,15 +43,17 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
-    if (workspaceId) {
-      // Здесь логика для загрузки данных существующего воркспейса из localStorage
-      const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
-      const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceId);
-      if (currentWorkspace) {
-        setWorkspaceName(currentWorkspace.name);
-        setLogoUrl(currentWorkspace.logoUrl);
-        setSelectedFolderIds(currentWorkspace.folders);
-      }
+    const workspaceIdStr = String(workspaceId);
+
+    const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+    const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceIdStr);
+
+    if (currentWorkspace) {
+      setWorkspaceName(currentWorkspace.name);
+      setLogoUrl(currentWorkspace.logoUrl);
+      setSelectedFolderIds(currentWorkspace.folders.map(Number));
+    } else {
+      //
     }
   }, [workspaceId]);
 
@@ -73,7 +62,8 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     if (!file) return;
 
     setSelectedFile(file);
-    setLogoUrl(URL.createObjectURL(file)); // Создаем временный URL для предпросмотра
+    const tempUrl = URL.createObjectURL(file);
+    setLogoUrl(tempUrl); // Устанавливаем временный URL для предпросмотра
   };
 
   const handleWorkspaceAction = async () => {
@@ -83,7 +73,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
       if (selectedFile) {
         const { fileUrl } = await uploadManager.upload({ data: selectedFile });
         finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
-        setLogoUrl(finalLogoUrl); // Сохраняем URL после загрузки на сервер
+        setLogoUrl(finalLogoUrl); // Обновляем URL после загрузки на сервер
         URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
       }
 
@@ -106,7 +96,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         localStorage.setItem('workspaces', JSON.stringify([...savedWorkspaces, newWorkspaceData]));
       }
     } catch (error) {
-      console.error('Error:', error);
+      //
     }
     setIsCreating(false);
   };
@@ -123,11 +113,43 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     setSelectedFolderIds(selectedIds);
   };
 
+  const resetState = useCallback(() => {
+    if (!workspaceId) {
+      setWorkspaceName('');
+      setLogoUrl('');
+      setSelectedFolderIds([]);
+      setIsCreating(false);
+      setSelectedFile(undefined);
+    }
+  }, [workspaceId]);
+
+  // useEffect для отслеживания состояния модального окна
+  useEffect(() => {
+  // Функция очистки, которая будет вызываться при закрытии модального окна
+    return () => {
+      if (!isOpen) {
+        resetState();
+      }
+    };
+  }, [isOpen, resetState]);
+
+  // Функция close теперь не вызывает resetState
+  const close = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    // Если окно видимо, подписываемся на событие нажатия клавиши Esc
+    return isOpen ? captureEscKeyListener(close) : undefined;
+  }, [close, isOpen]);
+
   const WorkspaceSettingsInner = (
     <div
       className="background"
     >
-      <span className="back-button">
+      <span className="back-button-settins">
         <div className="icon-wrapper">
           <i className="icon icon-arrow-left" onClick={close} />
         </div>
@@ -174,6 +196,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         </div>
         <FolderSelector
           folders={folders}
+          selectedFolderIds={selectedFolderIds}
           onSelectedFoldersChange={handleSelectedFoldersChange}
         />
         <button

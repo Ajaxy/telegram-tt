@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from '../../lib/teact/teact';
 
 import './FolderSelector.scss';
 
@@ -10,10 +11,15 @@ interface Folder {
 interface FolderSelectorProps {
   folders: Folder[];
   onSelectedFoldersChange: (selectedIds: number[]) => void; // Добавьте эту строку
+  selectedFolderIds: number[];
 }
 
-const FolderSelector: React.FC<FolderSelectorProps> = ({ folders, onSelectedFoldersChange }) => {
-  const [selectedFolders, setSelectedFolders] = useState<Set<number>>(new Set());
+const FolderSelector: React.FC<FolderSelectorProps> = ({ folders, onSelectedFoldersChange, selectedFolderIds }) => {
+  const [selectedFolders, setSelectedFolders] = useState<Set<number>>(new Set(selectedFolderIds));
+
+  useEffect(() => {
+    setSelectedFolders(new Set(selectedFolderIds));
+  }, [selectedFolderIds]);
 
   const toggleFolder = (id: number) => {
     setSelectedFolders((prevSelected) => {
@@ -24,9 +30,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({ folders, onSelectedFold
         newSelected.add(id);
       }
 
-      // Вызов функции обратного вызова с новым массивом ID
       onSelectedFoldersChange(Array.from(newSelected));
-
       return newSelected;
     });
   };

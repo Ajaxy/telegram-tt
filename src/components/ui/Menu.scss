@@ -88,7 +88,8 @@
     .bubble {
       background: var(--color-background-compact-menu);
       backdrop-filter: blur(10px);
-      padding: 0.25rem 0;
+      padding: 0.25rem;
+      width: 17rem;
 
       body.no-menu-blur & {
         background: var(--color-background);

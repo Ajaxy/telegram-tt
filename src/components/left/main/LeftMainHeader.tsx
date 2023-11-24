@@ -1,7 +1,7 @@
 import type { RefObject } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useMemo, useRef, useState,
+  memo, /*  useCallback, */ useEffect, useMemo, useRef, /* useState, */
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
@@ -47,7 +47,7 @@ import ShowTransition from '../../ui/ShowTransition';
 import UluSearchButton from '../../ui/UluSearchButton';
 import ConnectionStatusOverlay from '../ConnectionStatusOverlay';
 import LeftSideMenuItems from './LeftSideMenuItems';
-import WorkspaceDropdown from './SettingsDropdown';
+/* import WorkspaceDropdown from './SettingsDropdown'; */
 import StatusButton from './StatusButton';
 import UluHeaderProfile from './UluHeaderProfile';
 
@@ -185,7 +185,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     };
   }, [hasMenu, onReset]);
 
-  const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
+  /* const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
 
   const openWorkspaceDropdown = useCallback(() => {
     // eslint-disable-next-line no-console
@@ -195,16 +195,25 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
 
   const closeWorkspaceDropdown = useCallback(() => {
     setIsWorkspaceDropdownOpen(false);
-  }, []);
+  }, []); */
 
-  const MainButton: FC = useMemo(() => {
+  const MainButton: FC<{ onTrigger: () => void }> = useMemo(() => {
+    return ({ onTrigger }) => (
+      <UluHeaderProfile
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={hasMenu ? onTrigger : () => onReset()}
+      />
+    );
+  }, [hasMenu, onReset]);
+
+  /* const MainButton: FC = useMemo(() => {
     return () => (
       <UluHeaderProfile
         // eslint-disable-next-line react/jsx-no-bind
         onClick={hasMenu ? openWorkspaceDropdown : () => onReset()}
       />
     );
-  }, [hasMenu, openWorkspaceDropdown, onReset]);
+  }, [hasMenu, openWorkspaceDropdown, onReset]); */
 
   const toggleConnectionStatus = useLastCallback(() => {
     setSettingOption({ isConnectionStatusMinimized: !isConnectionStatusMinimized });
@@ -332,7 +341,8 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
                 onBotMenuClosed={unmarkBotMenuOpen}
               />
             </DropdownMenu>
-            {/* Показываем WorkspaceDropdown, если isWorkspaceDropdownOpen равно true */}
+            {/*
+             Показываем WorkspaceDropdown, если isWorkspaceDropdownOpen равно true
             {isWorkspaceDropdownOpen && (
               <WorkspaceDropdown
                 isOpen={isWorkspaceDropdownOpen}
@@ -340,6 +350,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
                 onClose={closeWorkspaceDropdown}
               />
             )}
+            */}
             <UluSearchButton onClick={handleSearchFocus} />
           </div>
         ) }

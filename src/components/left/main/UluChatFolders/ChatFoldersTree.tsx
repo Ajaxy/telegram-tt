@@ -66,10 +66,38 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
   } = getActions();
 
+  const getCurrentWorkspaceId = (): string | undefined => {
+    const workspaceId = localStorage.getItem('currentWorkspace');
+    return workspaceId || undefined;
+  };
+
+  const currentWorkspaceId = getCurrentWorkspaceId(); // Получаем текущий активный воркспейс
+
+  const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+  const allFolderIdsInWorkspaces = savedWorkspaces
+    .filter((ws: { id: string; folders: number[] }) => ws.id !== currentWorkspaceId)
+    .reduce((acc: number[], ws: { id: string; folders: number[] }) => [...acc, ...ws.folders], []);
+
   const displayedFolders = (() => {
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
-        return chatFoldersById[id] || {};
+        // Пропускаем папки, которые уже назначены другим воркспейсам, если выбран Personal Workspace
+        if (currentWorkspaceId === 'personal' && allFolderIdsInWorkspaces.includes(id)) {
+          return undefined;
+        }
+
+        const folder = chatFoldersById[id];
+
+        // Показываем папку только если она принадлежит текущему воркспейсу
+        if (currentWorkspaceId !== 'personal'
+        && !savedWorkspaces.find((
+          ws: { id: string; folders: number[];
+          },
+        ) => ws.id === currentWorkspaceId)?.folders.includes(id)) {
+          return undefined;
+        }
+
+        return folder || undefined;
       }).filter(Boolean)
       : undefined;
   })();

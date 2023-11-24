@@ -1,6 +1,5 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable import/no-cycle */
-/* eslint-disable no-console */
 import React, { useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
@@ -73,7 +72,6 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   const inputRef = useRef<HTMLInputElement>(null); // Создаем ref для инпута
 
   useEffect(() => {
-    console.log('AutomationSettings isOpen:', isOpen);
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
       setIsActive(true);
@@ -127,7 +125,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
       setSelectedFolderId(undefined);
       setIsDuplicateError(false);
     } else {
-      console.log('Ошибка сохранения: Keyword пуст, Folder ID не выбран или существует дубликат');
+      //
     }
   }, [selectedFolderId, keyword, isDuplicateError, addRule, setKeyword, unsavedChanges]);
 
@@ -156,7 +154,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
           e.stopPropagation();
         }}
       >
-        <span className="back-button">
+        <span className="ack-button-setting">
           <div className="icon-wrapper">
             <i className="icon icon-arrow-left" onClick={close} />
           </div>

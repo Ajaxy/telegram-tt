@@ -1,5 +1,4 @@
 /* eslint-disable no-null/no-null */
-/* eslint-disable no-console */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
@@ -25,9 +24,7 @@ const FolderPage: React.FC<FolderPageProps> = ({
   folderId,
   close,
 }) => {
-  console.log('FolderPage opened with folderId:', folderId);
   const global = getGlobal();
-  console.log('Global state:', global);
   const chatFoldersById = global.chatFolders.byId;
   const chatsById = global.chats.byId;
   const usersById: Record<string, ApiUser> = global.users.byId;
@@ -100,13 +97,11 @@ const FolderPage: React.FC<FolderPageProps> = ({
 
   const chatsInFolder = useMemo(() => {
     if (!folder) {
-      console.error(`Folder with ID ${folderId} not found`);
+      //
     }
-    console.log('Current folder:', folder);
     const includedChatIds = folder?.includedChatIds || [];
-    console.log('Included chat IDs:', includedChatIds);
     return includedChatIds.map((chatId) => chatsById[chatId]).filter(Boolean);
-  }, [folderId, chatsById, folder]);
+  }, [chatsById, folder]);
 
   const pinnedChats = useMemo(() => {
     if (!folder) {

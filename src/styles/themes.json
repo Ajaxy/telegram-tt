@@ -6,7 +6,7 @@
   "--color-background": ["#141515", "#141515"],
   "--color-background-compact-menu": ["#212121DD", "#212121DD"],
   "--color-background-compact-menu-reactions": ["#212121DD", "#212121DD"],
-  "--color-background-compact-menu-hover": ["#00000066", "#00000066"],
+  "--color-background-compact-menu-hover": ["#FFFFFF0D", "#FFFFFF0D"],
   "--color-background-secondary": ["#0F0F0F", "#0F0F0F"],
   "--color-background-secondary-accent": ["#100f10", "#100f10"],
   "--color-background-own": ["#191A1C", "#191A1C"],
