@@ -11,7 +11,8 @@ import { selectIsChatWithSelf, selectTabState } from '../../../global/selectors'
 import { uluGetTranslatedString } from '../../../util/fallbackLangPackInitial';
 
 import useCommands from '../../../hooks/useCommands';
-import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import { useStorage } from '../../../hooks/useStorage';
 
 import UluChatFolder from './UluChatFolder';
 import UluChatFoldersWrapper from './UluChatFoldersWrapper';
@@ -55,10 +56,15 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   useCommand('OPEN_INBOX', handleOpenInbox);
   useCommand('OPEN_SAVED', handleOpenSavedMessages);
 
+  const { doneChatIds } = useStorage();
+
   const unreadCounters = useFolderManagerForUnreadCounters();
   const archiveUnreadCount = unreadCounters[ARCHIVED_FOLDER_ID]?.activeChatsCount;
   const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
-  const inboxUnreadCount = unreadCounters[ALL_FOLDER_ID]?.chatsCount;
+
+  const orderedIdsAll = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
+  const orderedIdsInbox = orderedIdsAll?.filter((orderedId) => !doneChatIds.includes(orderedId));
+  const inboxUnreadCount = (orderedIdsInbox || []).length;
 
   return (
     <UluChatFoldersWrapper ref={ref}>
