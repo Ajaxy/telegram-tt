@@ -33,6 +33,10 @@ export interface ElectronApi {
   setIsTrayIconEnabled: (value: boolean) => Promise<void>;
   getIsTrayIconEnabled: () => Promise<boolean>;
   restoreLocalStorage: () => Promise<void>;
+  canGoBack: () => Promise<boolean>;
+  canGoForward: () => Promise<boolean>;
+  goBack: () => void;
+  goForward: () => void;
   on: (eventName: ElectronEvent, callback: any) => VoidFunction;
 }
 

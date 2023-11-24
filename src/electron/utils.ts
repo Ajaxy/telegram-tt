@@ -1,4 +1,4 @@
-import type { Point } from 'electron';
+import type { Point, WebContents } from 'electron';
 import { app, BrowserWindow } from 'electron';
 import Store from 'electron-store';
 import fs from 'fs';
@@ -43,6 +43,41 @@ export function focusLastWindow(): void {
     BrowserWindow.getAllWindows().forEach((window) => window.show());
   } else {
     getLastWindow()?.focus();
+  }
+}
+
+// Возвращает текущий webContents или null
+export function getCurrentWebContents(): WebContents | null {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  // eslint-disable-next-line no-null/no-null
+  return currentWindow ? currentWindow.webContents : null;
+}
+
+// Проверяет, можно ли перейти назад
+export function canGoBack(): boolean {
+  const contents = getCurrentWebContents();
+  return contents ? contents.canGoBack() : false;
+}
+
+// Проверяет, можно ли перейти вперед
+export function canGoForward(): boolean {
+  const contents = getCurrentWebContents();
+  return contents ? contents.canGoForward() : false;
+}
+
+// Переходит на предыдущую страницу, если это возможно
+export function goBack(): void {
+  const contents = getCurrentWebContents();
+  if (contents && contents.canGoBack()) {
+    contents.goBack();
+  }
+}
+
+// Переходит на следующую страницу, если это возможно
+export function goForward(): void {
+  const contents = getCurrentWebContents();
+  if (contents && contents.canGoForward()) {
+    contents.goForward();
   }
 }
 
