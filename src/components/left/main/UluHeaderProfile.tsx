@@ -50,19 +50,29 @@ const UluHeaderProfile: FC<OwnProps & StateProps> = ({
   console.log('User:', user); // Debugging
   const isPersonalWorkspace = currentWorkspace?.id === 'personal';
   console.log('Is Personal Workspace:', isPersonalWorkspace); // Debugging
-  function renderPhoto() {
-    if (!isPersonalWorkspace && currentWorkspace?.logoUrl) {
-      return <img className="ProfilePhoto" src={currentWorkspace.logoUrl} alt={`${currentWorkspace.name} logo`} />;
-    }
-    const profilePhoto = userPersonalPhoto || userProfilePhoto || userFallbackPhoto;
 
-    return (
-      <ProfilePhoto
-        user={user}
-        photo={profilePhoto}
-        canPlayVideo
-      />
-    );
+  function renderPhoto() {
+    if (isPersonalWorkspace) {
+      const profilePhoto = userPersonalPhoto || userProfilePhoto || userFallbackPhoto;
+      return (
+        <ProfilePhoto
+          user={user}
+          photo={profilePhoto}
+          canPlayVideo
+        />
+      );
+    } else {
+      if (currentWorkspace?.logoUrl) {
+        return <img className="ProfilePhoto" src={currentWorkspace.logoUrl} alt={`${currentWorkspace.name} logo`} />;
+      }
+      // Рендер заглушки, если нет logoUrl
+      const firstLetter = currentWorkspace?.name?.[0] || '';
+      return (
+        <div className="placeholder">
+          {firstLetter}
+        </div>
+      );
+    }
   }
 
   return (
