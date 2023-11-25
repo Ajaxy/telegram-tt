@@ -6,7 +6,7 @@ import { UploadManager } from '@bytescale/sdk';
 import {
   useCallback, useEffect,
 } from '../../lib/teact/teact';
-import { getGlobal } from '../../global';
+import { getActions, getGlobal } from '../../global';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
@@ -41,6 +41,9 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const {
+    showNotification,
+  } = getActions();
 
   useEffect(() => {
     const workspaceIdStr = String(workspaceId);
@@ -65,6 +68,13 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     const tempUrl = URL.createObjectURL(file);
     setLogoUrl(tempUrl); // Устанавливаем временный URL для предпросмотра
   };
+
+  // Функция close теперь не вызывает resetState
+  const close = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
 
   const handleWorkspaceAction = async () => {
     setIsCreating(true);
@@ -91,9 +101,13 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
           id: string;
         }) => (ws.id === workspaceId ? newWorkspaceData : ws));
         localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+        showNotification({ message: 'Workspace updated successfully.' });
       } else {
         // Создаем новый воркспейс
         localStorage.setItem('workspaces', JSON.stringify([...savedWorkspaces, newWorkspaceData]));
+        localStorage.setItem('currentWorkspace', newWorkspaceData.id); // Устанавливаем новый воркспейс как текущий
+        showNotification({ message: 'Workspace created successfully.' }); // Уведомление о создании
+        close(); // Закрываем модальное окно
       }
     } catch (error) {
       //
@@ -132,13 +146,6 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
       }
     };
   }, [isOpen, resetState]);
-
-  // Функция close теперь не вызывает resetState
-  const close = useCallback(() => {
-    if (onClose) {
-      onClose();
-    }
-  }, [onClose]);
 
   useEffect(() => {
     // Если окно видимо, подписываемся на событие нажатия клавиши Esc
