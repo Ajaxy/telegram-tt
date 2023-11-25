@@ -60,6 +60,8 @@ type StateProps = {
   theme: ThemeKey;
   canInstall?: boolean;
   attachBots: GlobalState['attachMenu']['bots'];
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
 } & Pick<GlobalState, 'currentUserId' | 'archiveSettings'>;
 
 const LeftSideMenuItems = ({
@@ -74,6 +76,8 @@ const LeftSideMenuItems = ({
   onSelectSettings,
   onBotMenuOpened,
   onBotMenuClosed,
+  currentWorkspace,
+  savedWorkspaces,
 }: OwnProps & StateProps) => {
   const {
     setSettingOption,
@@ -115,8 +119,6 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
-  const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-  const savedWorkspaces: Workspace[] = JSON.parse(savedWorkspacesString) as Workspace[];
   const allWorkspaces = [personalWorkspace, ...savedWorkspaces];
   const { runCommand } = useCommands();
 
@@ -252,15 +254,14 @@ const LeftSideMenuItems = ({
           className="workspace-item"
           onClick={() => handleSelectWorkspace(workspace.id)}
           userProfile={workspace.id === 'personal'}
-          isSelected={getCurrentWorkspaceId() === workspace.id} // Обновлено здесь
-          customImage={workspace.id !== 'personal' && workspace.logoUrl
-            ? (
-              <img
-                className="ProfilePhoto"
-                src={workspace.logoUrl}
-                alt={`${workspace.name} logo`}
-              />
-            ) : undefined}
+          isSelected={currentWorkspace.id === workspace.id} // Updated
+          customImage={workspace.id !== 'personal' && workspace.logoUrl ? (
+            <img
+              className="ProfilePhoto"
+              src={workspace.logoUrl}
+              alt={`${workspace.name} logo`}
+            />
+          ) : undefined}
         >
           {workspace.name}
         </MenuItem>
@@ -364,6 +365,19 @@ export default memo(withGlobal<OwnProps>(
     const { animationLevel } = global.settings.byKey;
     const attachBots = global.attachMenu.bots;
 
+    // Получение идентификатора текущего воркспейса
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+
+    // Получение списка сохраненных воркспейсов
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    // Определение текущего воркспейса
+    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+    }
+
     return {
       currentUserId,
       theme: selectTheme(global),
@@ -371,6 +385,8 @@ export default memo(withGlobal<OwnProps>(
       canInstall: Boolean(tabState.canInstall),
       archiveSettings,
       attachBots,
+      currentWorkspace,
+      savedWorkspaces,
     };
   },
 )(LeftSideMenuItems));
