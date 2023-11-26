@@ -21,7 +21,8 @@ export type MenuItemProps = {
   icon?: IconName | 'A' | 'K';
   isCharIcon?: boolean;
   customIcon?: React.ReactNode;
-  customImage?: React.ReactNode;
+  customImageUrl?: string;
+  customPlaceholderText?: string;
   userProfile?: boolean;
   className?: string;
   isSelected?: boolean;
@@ -63,7 +64,8 @@ const MenuItem: FC<MenuItemProps> = ({
   icon,
   isCharIcon,
   customIcon,
-  customImage,
+  customImageUrl,
+  customPlaceholderText,
   userProfile,
   className,
   isSelected,
@@ -96,6 +98,17 @@ const MenuItem: FC<MenuItemProps> = ({
     onClick(e, clickArg);
   });
 
+  function renderCustomContent() {
+    if (customImageUrl) {
+      return <img className="ProfilePhoto" src={customImageUrl} alt="Workspace Logo" />;
+    }
+    if (customPlaceholderText) {
+      return <div className="placeholder">{customPlaceholderText}</div>;
+    }
+    // Возвращаем null, если нет customImageUrl и customPlaceholderText
+    return undefined;
+  }
+
   const handleKeyDown = useLastCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode !== 13 && e.keyCode !== 32) {
       return;
@@ -125,12 +138,13 @@ const MenuItem: FC<MenuItemProps> = ({
       {userProfile && user && (
         renderPhoto(user, userPersonalPhoto, userProfilePhoto, userFallbackPhoto)
       )}
-      {customImage || (!customIcon && icon && !userProfile && (
+      {!customIcon && icon && !userProfile && (
         <i
           className={isCharIcon ? 'icon icon-char' : `icon icon-${icon}`}
           data-char={isCharIcon ? icon : undefined}
         />
-      ))}
+      )}
+      {renderCustomContent()}
       {customIcon}
       {children}
       {isSelected && <i className="icon icon-check" id="icon-check" />}

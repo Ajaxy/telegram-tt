@@ -4,6 +4,29 @@
     width: auto;
   }
 
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
+    width: 1.5rem;
+    height: 1.5rem;
+    background: rgba(255, 255, 255, 0.094);; /* Серый фон */
+    color: rgba(255, 255, 255, 0.443); /* Цвет текста */
+    font-size: 1rem; /* Размер шрифта для первой буквы */
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+
+  .ProfilePhoto {
+    height: 1.25rem;
+    width: 1.25rem;
+    background-size: cover;
+    border-radius: 6px;
+    margin-right: 0.5rem;
+    overflow: hidden;
+  }
+
   .backdrop {
     position: fixed;
     left: -100vw;

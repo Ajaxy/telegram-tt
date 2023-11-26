@@ -255,13 +255,9 @@ const LeftSideMenuItems = ({
           onClick={() => handleSelectWorkspace(workspace.id)}
           userProfile={workspace.id === 'personal'}
           isSelected={currentWorkspace.id === workspace.id} // Updated
-          customImage={workspace.id !== 'personal' && workspace.logoUrl ? (
-            <img
-              className="ProfilePhoto"
-              src={workspace.logoUrl}
-              alt={`${workspace.name} logo`}
-            />
-          ) : undefined}
+          customImageUrl={workspace.logoUrl}
+          customPlaceholderText={workspace.id
+            !== 'personal' && !workspace.logoUrl ? workspace.name[0].toUpperCase() : undefined}
         >
           {workspace.name}
         </MenuItem>

@@ -14,17 +14,18 @@
     }
   }
 
-  .placeholder {
+
+  .UluHeaderProfile-module__photoWrapper.placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
     width: 1.5rem;
     height: 1.5rem;
-    background: rgba(0, 0, 0, 0.1); /* Серый фон */
+    background: rgba(255, 255, 255, 0.094);; /* Серый фон */
     color: rgba(255, 255, 255, 0.443); /* Цвет текста */
-    font-size: 22px; /* Размер шрифта для первой буквы */
-    font-weight: 700;
+    font-size: 1rem; /* Размер шрифта для первой буквы */
+    font-weight: bold;
   }
 }
 

@@ -3,17 +3,22 @@
 
   .ProfilePhoto {
     border-radius: 0.5rem;
-  }
-
-  .placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
-    width: 1.5rem;
     height: 1.5rem;
-    background: rgba(255, 255, 255, 0.094);; /* Серый фон */
-    color: rgba(255, 255, 255, 0.443); /* Цвет текста */
-    font-size: 1rem; /* Размер шрифта для первой буквы */
-  }
+    width: 1.5rem;
+    }
+    .ProfilePhoto .placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
+      width: 24px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.094);; /* Серый фон */
+      color: rgba(255, 255, 255, 0.443); /* Цвет текста */
+      font-size: 1rem; /* Размер шрифта для первой буквы */
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
 }
+
