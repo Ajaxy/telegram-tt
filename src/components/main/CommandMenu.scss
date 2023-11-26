@@ -51,13 +51,13 @@
   outline: none;
   background: var(--bg);
 
-  color: var(--gray12);
+  color: var(--color-text);
   border-bottom: 1px solid var(--color-borders);
   margin-bottom: 16px;
   border-radius: 0;
 
   &::placeholder {
-    color: var(--color-placeholders);
+    color: var(--color-text-secondary);
   }
 }
 
