@@ -14,7 +14,7 @@
   "--color-background-selected": ["#2C2C2C", "#2C2C2C"],
   "--color-background-own-selected": ["#606ACB", "#606ACB"],
   "--color-chat-hover": ["#24232380", "#24232380"],
-  "--color-chat-active": ["#242323", "#242323"],
+  "--color-chat-active": ["#ffffff14", "#ffffff14"],
   "--color-chat-active-greyed": ["#9288d3", "#9288d3"],
   "--color-item-active": ["#292929", "#292929"],
   "--color-text": ["#e3e3eb", "#e3e3eb"],
