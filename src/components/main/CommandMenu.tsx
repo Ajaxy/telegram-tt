@@ -251,9 +251,53 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <CommandSeparator />
+      <Command.Group heading="Navigation">
+        <Command.Item value="$find $search" onSelect={handleSearchFocus}>
+          <i className="icon icon-search" /><span>Find chat or contact</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">/</span>
+          </span>
+        </Command.Item>
+        {
+          IS_APP && (
+            <Command.Item onSelect={handleLockScreenHotkey}>
+              <i className="icon icon-lock" /><span>Lock screen</span>
+              <span className="shortcuts">
+                <span className="kbd">⌘</span>
+                <span className="kbd">L</span>
+              </span>
+            </Command.Item>
+          )
+        }
+        <Command.Item onSelect={handleOpenInbox}>
+          <i className="icon icon-unread" /><span>Go to inbox</span>
+        </Command.Item>
+        <Command.Item onSelect={handleOpenSavedMessages}>
+          <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">0</span>
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectArchived}>
+          <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">9</span>
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={handleSelectSettings}>
+          <i className="icon icon-settings" /><span>Go to settings</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">,</span>
+          </span>
+        </Command.Item>
+      </Command.Group>
       <Command.Group heading="Settings">
         <Command.Item onSelect={commandDoneAll}>
-          <i className="icon icon-select" /><span>Mark read chats as &quot;Done&quot;</span>
+          <i className="icon icon-readchats" /><span>Mark read chats as &quot;Done&quot;</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleAutoDone}>
           <i className="icon icon-select" />
@@ -299,59 +343,21 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
         </Command.Item>
         <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-help" /><span>Contact support</span>
+          <i className="icon icon-ask-support" /><span>Send feedback</span>
         </Command.Item>
         <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-ask-support" /><span>Send feedback</span>
+          <i className="icon icon-animations" /><span>Request feature</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-bug" /><span>Report bug</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-help" /><span>Contact support</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="What's new">
         <Command.Item onSelect={handleChangelog}>
           <i className="icon icon-calendar" /><span>Changelog</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Navigation">
-        <Command.Item value="$find $search" onSelect={handleSearchFocus}>
-          <i className="icon icon-search" /><span>Find chat or contact</span>
-          <span className="shortcuts">
-            <span className="kbd">⌘</span>
-            <span className="kbd">/</span>
-          </span>
-        </Command.Item>
-        {
-          IS_APP && (
-            <Command.Item onSelect={handleLockScreenHotkey}>
-              <i className="icon icon-lock" /><span>Lock screen</span>
-              <span className="shortcuts">
-                <span className="kbd">⌘</span>
-                <span className="kbd">L</span>
-              </span>
-            </Command.Item>
-          )
-        }
-        <Command.Item onSelect={handleOpenInbox}>
-          <i className="icon icon-unread" /><span>Go to inbox</span>
-        </Command.Item>
-        <Command.Item onSelect={handleOpenSavedMessages}>
-          <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
-          <span className="shortcuts">
-            <span className="kbd">⌘</span>
-            <span className="kbd">0</span>
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={handleSelectArchived}>
-          <i className="icon icon-archive-from-main" /><span>Go to archive</span>
-          <span className="shortcuts">
-            <span className="kbd">⌘</span>
-            <span className="kbd">9</span>
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={handleSelectSettings}>
-          <i className="icon icon-settings" /><span>Go to settings</span>
-          <span className="shortcuts">
-            <span className="kbd">⌘</span>
-            <span className="kbd">,</span>
-          </span>
         </Command.Item>
       </Command.Group>
     </>
