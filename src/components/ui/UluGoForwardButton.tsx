@@ -2,20 +2,36 @@
 import type { FC } from '../../lib/teact/teact';
 import React, { memo, useEffect, useState } from '../../lib/teact/teact';
 
+import { ElectronEvent } from '../../types/electron';
+
 import Button from './Button';
 
 import styles from './UluGoBackForwardButton.module.scss';
 
-const UluGoBackButton: FC = () => {
+const UluGoForwardButton: FC = () => {
   const [canGoForward, setCanGoForward] = useState(false);
 
   useEffect(() => {
-    window.electron?.canGoForward().then(setCanGoForward);
+    const updateCanGoForward = async () => {
+      const canForward = await window.electron?.canGoForward() ?? false;
+      setCanGoForward(canForward);
+    };
+
+    updateCanGoForward();
+
+    // Подписка на событие изменения навигации
+    const unsubscribe = window.electron?.on(ElectronEvent.NAVIGATION_CHANGED, updateCanGoForward);
+
+    return () => {
+      // Отписка от события при размонтировании компонента
+      unsubscribe?.();
+    };
   }, []);
 
   const handleClick = () => {
     window.electron?.goForward();
   };
+
   return (
     <Button
       color="gray"
@@ -29,4 +45,4 @@ const UluGoBackButton: FC = () => {
   );
 };
 
-export default memo(UluGoBackButton);
+export default memo(UluGoForwardButton);

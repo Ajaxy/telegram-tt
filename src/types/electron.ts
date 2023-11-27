@@ -3,6 +3,7 @@ export enum ElectronEvent {
   UPDATE_ERROR = 'update-error',
   UPDATE_AVAILABLE = 'update-available',
   DEEPLINK = 'deeplink',
+  NAVIGATION_CHANGED = 'navigation-changed',
 }
 
 export enum ElectronAction {

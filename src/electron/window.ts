@@ -71,6 +71,11 @@ export function createWindow(url?: string) {
 
   windowState.manage(window);
 
+  // Подписываемся на событие did-navigate
+  window.webContents.on('did-navigate', () => {
+    window.webContents.send('navigation-changed', window.webContents.canGoBack(), window.webContents.canGoForward());
+  });
+
   window.webContents.setWindowOpenHandler((details: HandlerDetails) => {
     shell.openExternal(details.url);
     return { action: 'deny' };

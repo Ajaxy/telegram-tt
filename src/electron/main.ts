@@ -35,6 +35,10 @@ ipcMain.on('go-forward', () => {
   }
 });
 
+ipcMain.on('navigation-changed', (event, canGoBack, canGoForward) => {
+  event.sender.send('navigation-changed', canGoBack, canGoForward);
+});
+
 initDeeplink();
 
 contextMenu({
