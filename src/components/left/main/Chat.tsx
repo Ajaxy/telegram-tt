@@ -289,7 +289,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             observeIntersection={observeIntersection}
           />
           {isMuted && <i className="icon icon-muted" />}
-          {isDone && <i className="icon icon-done icon-select" />}
+          {false && isDone && <i className="icon icon-done icon-select" />}
           <div className="separator" />
           {chat.lastMessage && (
             <LastMessageMeta
