@@ -13,26 +13,21 @@
       color: var(--color-text);
     }
   }
-
-
-  .UluHeaderProfile-module__photoWrapper.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
-    width: 1.5rem;
-    height: 1.5rem;
-    background: rgba(255, 255, 255, 0.094);; /* Серый фон */
-    color: rgba(255, 255, 255, 0.443); /* Цвет текста */
-    font-size: 1rem; /* Размер шрифта для первой буквы */
-    font-weight: bold;
-  }
 }
 
 .photoWrapper {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 0.5rem;
+
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    width: 20px;
+    background-color: red !important; /* Пример использования !important */
+  }
   
   :global(.avatar-media) {
     border-radius: 0.5rem;
@@ -44,18 +39,6 @@
     font-size: 0.6875rem;
     white-space: nowrap;
   }
-}
-
-.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
-  width: 1.5rem;
-  height: 1.5rem;
-  background: rgba(0, 0, 0, 0.1); /* Серый фон */
-  color: rgba(255, 255, 255, 0.443); /* Цвет текста */
-  font-size: 22px; /* Размер шрифта для первой буквы */
 }
 
 .userName {

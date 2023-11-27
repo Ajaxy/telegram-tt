@@ -496,7 +496,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
       // Проверяем, есть ли выделенный текст
       const hasSelection = selection && selection.toString() !== '';
 
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK' && !hasSelection) {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyK' && !hasSelection) {
         setOpen(!isOpen);
         e.preventDefault();
         e.stopPropagation();
@@ -736,7 +736,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
       // Проверяем, есть ли выделенный текст
       const hasSelection = selection && selection.toString() !== '';
 
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyI' && !hasSelection) {
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyI' && !hasSelection) {
         handleOpenInbox();
         e.preventDefault();
         e.stopPropagation();

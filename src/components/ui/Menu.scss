@@ -8,12 +8,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0.5rem; /* или используйте var(--border-radius-default-tiny) если это уместно */
-    width: 1.5rem;
-    height: 1.5rem;
+    border-radius: 6px; /* или используйте var(--border-radius-default-tiny) если это уместно */
+    width: 1.25rem;
+    height: 1.25rem;
     background: rgba(255, 255, 255, 0.094);; /* Серый фон */
     color: rgba(255, 255, 255, 0.443); /* Цвет текста */
-    font-size: 1rem; /* Размер шрифта для первой буквы */
+    font-size: 0.8125rem; /* Размер шрифта для первой буквы */
     font-weight: bold;
     margin-right: 0.5rem;
   }

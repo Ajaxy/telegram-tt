@@ -63,12 +63,18 @@ const UluHeaderProfile: FC<OwnProps & StateProps> = ({
       );
     } else {
       if (currentWorkspace?.logoUrl) {
-        return <img className="ProfilePhoto" src={currentWorkspace.logoUrl} alt={`${currentWorkspace.name} logo`} />;
+        return (
+          <img
+            className="ProfilePhoto-UluHeaderProfile"
+            src={currentWorkspace.logoUrl}
+            alt={`${currentWorkspace.name} logo`}
+          />
+        );
       }
       // Рендер заглушки, если нет logoUrl
-      const firstLetter = currentWorkspace?.name?.[0] || '';
+      const firstLetter = currentWorkspace?.name?.[0]?.toUpperCase() || '';
       return (
-        <div className="placeholder">
+        <div className="Placeholder-UluHeaderProfile">
           {firstLetter}
         </div>
       );
