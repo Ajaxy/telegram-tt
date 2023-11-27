@@ -114,7 +114,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
     return displayedFolders.map((folder, i) => {
       const {
-        id, title, includedChatIds = [], pinnedChatIds = [],
+        id, title, pinnedChatIds = [],
       } = folder;
       const isBlocked = i > maxFolders - 1;
       const canShareFolder = selectCanShareFolder(getGlobal(), id);
@@ -168,7 +168,6 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
       }
 
       const orderedChatIds = getOrderedChatIds(id) || [];
-      const chatIds = [...new Set(pinnedChatIds.concat(orderedChatIds.concat(includedChatIds)))];
 
       return {
         id,
@@ -177,9 +176,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
         contextActions: contextActions?.length ? contextActions : undefined,
-        chatIds,
+        chatIds: orderedChatIds,
         chats: Object.values(chatsById)
-          .filter((chat) => chatIds.includes(chat.id))
+          .filter((chat) => orderedChatIds.includes(chat.id))
           .reduce((p, c) => {
             p[c.id] = { ...c, isPinned: pinnedChatIds.includes(c.id), folderId: id } as ApiChat;
             return p;
