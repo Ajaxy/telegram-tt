@@ -25,7 +25,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     openChat, toggleChatArchived, closeForumPanel, showNotification,
   } = getActions();
   const { track } = useJune();
-  const { isArchiverEnabled } = useStorage();
+  const { isAutoArchiverEnabled } = useStorage();
 
   const chatsToArchive: { [key: string]: Date } = {};
 
@@ -100,7 +100,7 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
     if (isManual) {
       archive();
-    } else if (isArchiverEnabled) {
+    } else if (isAutoArchiverEnabled) {
       // eslint-disable-next-line no-console
       console.log('>>> autoarchive');
       autoarchive();
