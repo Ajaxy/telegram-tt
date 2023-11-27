@@ -3,7 +3,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 // eslint-disable-next-line react/no-deprecated
-import { Command, CommandSeparator } from 'cmdk';
+import { Command } from 'cmdk';
 import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
@@ -259,80 +259,6 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-bots" /><span>Create folder rule</span>
         </Command.Item>
       </Command.Group>
-      <CommandSeparator />
-      <Command.Group heading="Settings">
-        <Command.Item onSelect={commandDoneAll}>
-          <i className="icon icon-readchats" /><span>Mark read chats as &quot;Done&quot;</span>
-        </Command.Item>
-        <Command.Item onSelect={commandToggleAutoDone}>
-          <i className="icon icon-select" />
-          <span>
-            {isAutoDoneEnabled
-              ? 'Disable "Auto-Done after reading"'
-              : 'Enable "Auto-Done after reading"'}
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={commandToggleFoldersTree}>
-          <i className="icon icon-select" />
-          <span>
-            {isFoldersTreeEnabled
-              ? 'Switch to Telegram Folders UI'
-              : 'Try new Ulu Tree Folders UI (Beta)'}
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={commandToggleArchiver}>
-          <i className="icon icon-archive" />
-          <span>
-            {isArchiverEnabled
-              ? 'Disable "Аrchive chats when mark as done"'
-              : 'Enable "Аrchive chats when mark as done"'}
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
-        </Command.Item>
-        {menuItems.map((item, index) => (
-          <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
-            {item.label}
-          </Command.Item>
-        ))}
-        <Command.Item onSelect={handleOpenAutomationSettings}>
-          <i className="icon icon-bots" /><span>Create folder rule</span>
-        </Command.Item>
-        <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
-          <i className="icon icon-add" /><span>Create workspace</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Workspaces">
-        <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
-          <i className="icon icon-add" /><span>Create workspace</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Help">
-        <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-document" /><span>Help center</span>
-        </Command.Item>
-        <Command.Item onSelect={handleOpenShortcuts}>
-          <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-ask-support" /><span>Send feedback</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-animations" /><span>Request feature</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-bug" /><span>Report bug</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-help" /><span>Contact support</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="What's new">
-        <Command.Item onSelect={handleChangelog}>
-          <i className="icon icon-calendar" /><span>Changelog</span>
-        </Command.Item>
-      </Command.Group>
       <Command.Group heading="Navigation">
         <Command.Item value="$find $search" onSelect={handleSearchFocus}>
           <i className="icon icon-search" /><span>Find chat or contact</span>
@@ -377,7 +303,32 @@ const HomePage: React.FC<HomePageProps> = ({
           </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenAutomationSettings}>
-          <i className="icon icon-bot" /><span>Go to folder-automations</span>
+          <i className="icon icon-bots" /><span>Go to folder-automations</span>
+        </Command.Item>
+      </Command.Group>
+      <Command.Group heading="What's new">
+        <Command.Item onSelect={handleChangelog}>
+          <i className="icon icon-calendar" /><span>Changelog</span>
+        </Command.Item>
+      </Command.Group>
+      <Command.Group heading="Help">
+        <Command.Item onSelect={handleFAQ}>
+          <i className="icon icon-document" /><span>Help center</span>
+        </Command.Item>
+        <Command.Item onSelect={handleOpenShortcuts}>
+          <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-ask-support" /><span>Send feedback</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-animations" /><span>Request feature</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-bug" /><span>Report bug</span>
+        </Command.Item>
+        <Command.Item onSelect={handleSupport}>
+          <i className="icon icon-help" /><span>Contact support</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Settings">
@@ -418,36 +369,6 @@ const HomePage: React.FC<HomePageProps> = ({
         ))}
         <Command.Item onSelect={handleOpenAutomationSettings}>
           <i className="icon icon-bots" /><span>Create folder rule</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Workspaces">
-        <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
-          <i className="icon icon-add" /><span>Create workspace</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Help">
-        <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-document" /><span>Help center</span>
-        </Command.Item>
-        <Command.Item onSelect={handleOpenShortcuts}>
-          <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-ask-support" /><span>Send feedback</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-animations" /><span>Request feature</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-bug" /><span>Report bug</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-help" /><span>Contact support</span>
-        </Command.Item>
-      </Command.Group>
-      <Command.Group heading="What's new">
-        <Command.Item onSelect={handleChangelog}>
-          <i className="icon icon-calendar" /><span>Changelog</span>
         </Command.Item>
       </Command.Group>
     </>
