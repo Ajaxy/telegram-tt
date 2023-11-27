@@ -18,6 +18,7 @@ import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
 } from '../../global/helpers';
+import { selectCurrentChat } from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
@@ -51,6 +52,7 @@ export type Workspace = {
 
 interface CommandMenuProps {
   topUserIds?: string[];
+  currentChatId?: string;
   usersById: Record<string, ApiUser>;
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
@@ -438,7 +440,9 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 
 const CommandMenu: FC<CommandMenuProps> = ({
   topUserIds,
+  currentChatId,
   usersById,
+  chatsById,
   recentlyFoundChatIds,
   folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
@@ -486,6 +490,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setPages(['home']);
     setInputValue('');
   }, []);
+
+  const lang = useLang();
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -751,6 +757,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [handleOpenInbox]);
 
+  // Функция для получения названия чата
+  const getCurrentChatName = () => {
+    if (!currentChatId) return undefined;
+
+    // Проверка на существование usersById и chatsById перед их использованием
+    if (usersById && usersById[currentChatId]) {
+      return getUserFullName(usersById[currentChatId]);
+    }
+
+    if (chatsById && chatsById[currentChatId]) {
+      return getChatTitle(lang, chatsById[currentChatId]);
+    }
+
+    return undefined;
+  };
+
+  // Использование функции для получения названия чата
+  const currentChatName = getCurrentChatName();
+
   const CommandMenuInner = (
     <div>
       <Command.Dialog
@@ -762,7 +787,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
         filter={customFilter}
       >
         {pages.map((page) => {
-        // Показываем бейдж только если страница не 'home'
           if (page !== 'home') {
             return (
               <div key={page} cmdk-vercel-badge="">
@@ -770,8 +794,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
               </div>
             );
           }
-          // eslint-disable-next-line no-null/no-null
-          return null; // Ничего не рендерим для 'home'
+          // Отображение бейджа с названием текущего чата на главной странице
+          return currentChatId && (
+            <div key="chat-badge" cmdk-vercel-badge="">
+              {`Chat: ${currentChatName}`}
+            </div>
+          );
         })}
         <Command.Input
           placeholder="Type a command or search..."
@@ -881,6 +909,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 export default memo(withGlobal(
   (global): CommandMenuProps => {
     const { userIds: topUserIds } = global.topPeers;
+    const currentChatId = selectCurrentChat(global)?.id;
     const usersById = global.users.byId;
     const chatsById = global.chats.byId;
     const chatFoldersById = global.chatFolders.byId;
@@ -911,6 +940,7 @@ export default memo(withGlobal(
 
     return {
       topUserIds,
+      currentChatId,
       usersById,
       chatsById,
       folders,
