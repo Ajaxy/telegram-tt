@@ -18,6 +18,7 @@ import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
 } from '../../global/helpers';
+import { selectCurrentChat } from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { throttle } from '../../util/schedulers';
@@ -51,6 +52,8 @@ export type Workspace = {
 
 interface CommandMenuProps {
   topUserIds?: string[];
+  currentChat?: ApiChat;
+  currentChatId?: string;
   usersById: Record<string, ApiUser>;
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
@@ -213,6 +216,11 @@ interface HomePageProps {
   savedWorkspaces: Workspace[];
   currentWorkspace: Workspace;
   renderWorkspaceIcon: (workspace: Workspace) => JSX.Element | undefined;
+  currentChatId?: string;
+  handleToggleChatUnread: () => void;
+  handleDoneChat: () => void;
+  isChatUnread?: boolean;
+  isCurrentChatDone?: boolean;
 }
 
 interface CreateNewPageProps {
@@ -230,9 +238,36 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
   handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
+  currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone,
 }) => {
+  const lang = useLang();
   return (
     <>
+      {
+        currentChatId && (
+          <Command.Group>
+            <Command.Item onSelect={handleToggleChatUnread}>
+              <i className={`icon ${isChatUnread ? 'icon-unread' : 'icon-readchats'}`} />
+              <span>{lang(isChatUnread ? 'MarkAsRead' : 'MarkAsUnread')}</span>
+              <span className="shortcuts">
+                <span className="kbd">⌘</span>
+                <span className="kbd">U</span>
+              </span>
+            </Command.Item>
+            {
+              !isCurrentChatDone && (
+                <Command.Item onSelect={handleDoneChat}>
+                  <i className="icon icon-select" /><span>Mark as Done</span>
+                  <span className="shortcuts">
+                    <span className="kbd">⌘</span>
+                    <span className="kbd">E</span>
+                  </span>
+                </Command.Item>
+              )
+            }
+          </Command.Group>
+        )
+      }
       {topUserIds && usersById && (
         <SuggestedContacts
           topUserIds={topUserIds}
@@ -438,13 +473,16 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 
 const CommandMenu: FC<CommandMenuProps> = ({
   topUserIds,
+  currentChat,
+  currentChatId,
   usersById,
+  chatsById,
   recentlyFoundChatIds,
   folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
   const { track } = useJune();
   const {
-    showNotification, openUrl, openChatByUsername,
+    showNotification, openUrl, openChatByUsername, toggleChatUnread,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
   const {
@@ -453,7 +491,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
-  const { doneAllReadChats } = useDone();
+  const { doneAllReadChats, doneChat, isChatDone } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
@@ -463,6 +501,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
+  const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
+  const isCurrentChatDone = currentChat && isChatDone(currentChat);
 
   const openAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(true);
@@ -486,6 +526,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setPages(['home']);
     setInputValue('');
   }, []);
+
+  const lang = useLang();
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -697,6 +739,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [close, doneAllReadChats, track]);
 
+  // Функция для отметки чата как непрочитанного/прочитанного
+  const handleToggleChatUnread = useCallback(() => {
+    if (currentChatId && currentChat) {
+      toggleChatUnread({ id: currentChatId });
+      const action = isChatUnread ? 'MarkedAsRead' : 'MarkedAsUnread';
+      showNotification({ message: lang(action) });
+      close();
+    }
+  }, [currentChatId, currentChat, toggleChatUnread, close, lang, isChatUnread]);
+
+  // Функция для отметки чата как выполненного
+  const handleDoneChat = useCallback(() => {
+    if (currentChatId) {
+      doneChat({ id: currentChatId });
+      showNotification({ message: 'Chat marked as done' });
+      close();
+    }
+  }, [currentChatId, doneChat, close]);
+
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
     archiveMessages();
@@ -751,6 +812,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [handleOpenInbox]);
 
+  // Функция для получения названия чата
+  const getCurrentChatName = () => {
+    if (!currentChatId) return undefined;
+
+    // Проверка на существование usersById и chatsById перед их использованием
+    if (usersById && usersById[currentChatId]) {
+      return getUserFullName(usersById[currentChatId]);
+    }
+
+    if (chatsById && chatsById[currentChatId]) {
+      return getChatTitle(lang, chatsById[currentChatId]);
+    }
+
+    return undefined;
+  };
+
+  // Использование функции для получения названия чата
+  const currentChatName = getCurrentChatName();
+
   const CommandMenuInner = (
     <div>
       <Command.Dialog
@@ -762,7 +842,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
         filter={customFilter}
       >
         {pages.map((page) => {
-        // Показываем бейдж только если страница не 'home'
           if (page !== 'home') {
             return (
               <div key={page} cmdk-vercel-badge="">
@@ -770,8 +849,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
               </div>
             );
           }
-          // eslint-disable-next-line no-null/no-null
-          return null; // Ничего не рендерим для 'home'
+          // Отображение бейджа с названием текущего чата на главной странице
+          return currentChatId && (
+            <div key="chat-badge" cmdk-vercel-badge="">
+              {`Chat: ${currentChatName}`}
+            </div>
+          );
         })}
         <Command.Input
           placeholder="Type a command or search..."
@@ -822,6 +905,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   savedWorkspaces={savedWorkspaces}
                   currentWorkspace={currentWorkspace}
                   renderWorkspaceIcon={renderWorkspaceIcon}
+                  currentChatId={currentChatId}
+                  handleToggleChatUnread={handleToggleChatUnread}
+                  handleDoneChat={handleDoneChat}
+                  isChatUnread={isChatUnread}
+                  isCurrentChatDone={isCurrentChatDone}
                 />
                 <AllUsersAndChats
                   close={close}
@@ -881,6 +969,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
 export default memo(withGlobal(
   (global): CommandMenuProps => {
     const { userIds: topUserIds } = global.topPeers;
+    const currentChat = selectCurrentChat(global);
+    const currentChatId = selectCurrentChat(global)?.id;
     const usersById = global.users.byId;
     const chatsById = global.chats.byId;
     const chatFoldersById = global.chatFolders.byId;
@@ -911,6 +1001,8 @@ export default memo(withGlobal(
 
     return {
       topUserIds,
+      currentChat,
+      currentChatId,
       usersById,
       chatsById,
       folders,

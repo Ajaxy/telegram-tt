@@ -9,6 +9,7 @@ import { compact } from '../../../../util/iteratees';
 import { IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../../../../util/windowEnvironment';
 
 import useLang from '../../../../hooks/useLang';
+import useSnooze from '../../../../hooks/useSnooze';
 
 export default function useTopicContextActions({
   topic,
@@ -26,6 +27,7 @@ export default function useTopicContextActions({
   handleMute?: NoneToVoidFunction;
 }) {
   const lang = useLang();
+  const { snooze } = useSnooze();
 
   return useMemo(() => {
     const {
@@ -44,6 +46,14 @@ export default function useTopicContextActions({
 
     const canToggleClosed = getCanManageTopic(chat, topic);
     const canTogglePinned = chat.isCreator || getHasAdminRight(chat, 'manageTopics');
+
+    const actionNotifyMe = {
+      title: lang('NotifyMeHotkey'),
+      icon: 'schedule',
+      handler: () => {
+        snooze({ chatId, topicId });
+      },
+    };
 
     const actionOpenInNewTab = IS_OPEN_IN_NEW_TAB_SUPPORTED && {
       title: 'Open in new tab',
@@ -107,6 +117,7 @@ export default function useTopicContextActions({
     } : undefined;
 
     return compact([
+      actionNotifyMe,
       actionOpenInNewTab,
       actionPin,
       actionUnreadMark,
@@ -114,5 +125,5 @@ export default function useTopicContextActions({
       actionCloseTopic,
       actionDelete,
     ]) as MenuItemContextAction[];
-  }, [topic, chat, wasOpened, lang, canDelete, handleDelete, handleMute]);
+  }, [topic, chat, wasOpened, lang, canDelete, handleDelete, handleMute, snooze]);
 }
