@@ -20,6 +20,7 @@ import { ALL_FOLDER_ID } from '../../../../config';
 import { selectCanShareFolder } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
+import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManager';
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
@@ -95,8 +96,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         const folder = chatFoldersById[id];
 
         // Показываем папку только если она принадлежит текущему воркспейсу
-        if (currentWorkspace.id !== 'personal'
-    && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
+        if (
+          currentWorkspace.id !== 'personal'
+          && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
           return undefined;
         }
 
@@ -165,7 +167,8 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         });
       }
 
-      const chatIds = [...new Set(pinnedChatIds.concat(includedChatIds))];
+      const orderedChatIds = getOrderedChatIds(id) || [];
+      const chatIds = [...new Set(pinnedChatIds.concat(orderedChatIds.concat(includedChatIds)))];
 
       return {
         id,
