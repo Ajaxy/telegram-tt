@@ -281,7 +281,7 @@ const HomePage: React.FC<HomePageProps> = ({
                 onSelect={() => handleSelectWorkspace(workspace.id)}
               >
                 {renderWorkspaceIcon(workspace)}
-                <span>Go to {workspace.name}</span>
+                <span>Go to {workspace.name} workspace</span>
               </Command.Item>
             );
           }
@@ -306,35 +306,35 @@ const HomePage: React.FC<HomePageProps> = ({
           )
         }
         <Command.Item onSelect={handleOpenInbox}>
-          <i className="icon icon-unread" /><span>Go to inbox</span>
+          <i className="icon icon-arrow-right" /><span>Go to inbox</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">I</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenSavedMessages}>
-          <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+          <i className="icon icon-arrow-right" /><span>Go to saved messages</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">0</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectArchived}>
-          <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          <i className="icon icon-arrow-right" /><span>Go to archive</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">9</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectSettings}>
-          <i className="icon icon-settings" /><span>Go to settings</span>
+          <i className="icon icon-arrow-right" /><span>Go to settings</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">,</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenAutomationSettings}>
-          <i className="icon icon-bots" /><span>Go to folder-automations</span>
+          <i className="icon icon-arrow-right" /><span>Go to folder-automations</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="What's new">

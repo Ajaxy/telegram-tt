@@ -90,7 +90,7 @@ const LeftSideMenuItems = ({
 
   const personalWorkspace : Workspace = {
     id: 'personal',
-    name: 'Personal Workspace',
+    name: 'Personal',
   };
 
   useEffect(() => {
@@ -394,7 +394,7 @@ export default memo(withGlobal<OwnProps>(
     // Определение текущего воркспейса
     let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
     if (!currentWorkspace) {
-      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+      currentWorkspace = { id: 'personal', name: 'Personal', logoUrl: undefined };
     }
 
     return {
