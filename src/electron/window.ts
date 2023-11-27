@@ -12,7 +12,8 @@ import { processDeeplink } from './deeplink';
 import { captureLocalStorage, restoreLocalStorage } from './localStorage';
 import tray from './tray';
 import {
-  forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS,
+  forceQuit, getAppTitle, getCurrentWebContents,
+  getCurrentWindow, getLastWindow, hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS,
   IS_PREVIEW, IS_WINDOWS, reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
@@ -71,13 +72,6 @@ export function createWindow(url?: string) {
 
   windowState.manage(window);
 
-  // В функции createWindow
-  window.webContents.on('did-navigate', () => {
-    window.webContents.send(
-      ElectronEvent.NAVIGATION_CHANGED, window.webContents.canGoBack(), window.webContents.canGoForward(),
-    );
-  });
-
   window.webContents.setWindowOpenHandler((details: HandlerDetails) => {
     shell.openExternal(details.url);
     return { action: 'deny' };
@@ -97,6 +91,12 @@ export function createWindow(url?: string) {
 
   window.on('leave-full-screen', () => {
     window.webContents.send(ElectronEvent.FULLSCREEN_CHANGE, false);
+  });
+
+  window.webContents.on('did-navigate', () => {
+    window.webContents.send(
+      ElectronEvent.NAVIGATION_CHANGED, window.webContents.canGoBack(), window.webContents.canGoForward(),
+    );
   });
 
   window.on('close', (event) => {
@@ -172,6 +172,30 @@ export function setupElectronActionHandlers() {
 
   ipcMain.handle(ElectronAction.GET_IS_FULLSCREEN, () => {
     getCurrentWindow()?.isFullScreen();
+  });
+
+  ipcMain.handle(ElectronAction.CAN_GO_BACK, () => {
+    const webContents = getCurrentWebContents();
+    return webContents ? webContents.canGoBack() : false;
+  });
+
+  ipcMain.handle(ElectronAction.CAN_GO_FORWARD, () => {
+    const webContents = getCurrentWebContents();
+    return webContents ? webContents.canGoForward() : false;
+  });
+
+  ipcMain.on(ElectronAction.GO_BACK, () => {
+    const webContents = getCurrentWebContents();
+    if (webContents && webContents.canGoBack()) {
+      webContents.goBack();
+    }
+  });
+
+  ipcMain.on(ElectronAction.GO_FORWARD, () => {
+    const webContents = getCurrentWebContents();
+    if (webContents && webContents.canGoForward()) {
+      webContents.goForward();
+    }
   });
 
   ipcMain.handle(ElectronAction.HANDLE_DOUBLE_CLICK, () => {

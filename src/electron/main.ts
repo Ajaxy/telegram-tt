@@ -10,7 +10,6 @@ import { initDeeplink } from './deeplink';
 import { IS_MAC_OS, IS_WINDOWS } from './utils';
 import { createWindow, setupCloseHandlers, setupElectronActionHandlers } from './window';
 
-// Добавляем обработчики IPC для навигации
 ipcMain.handle('can-go-back', () => {
   const webContents = BrowserWindow.getFocusedWindow()?.webContents;
   return webContents && !webContents.isDestroyed() ? webContents.canGoBack() : false;

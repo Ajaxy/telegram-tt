@@ -23,7 +23,6 @@ const UluGoBackButton: FC = () => {
     const unsubscribe = window.electron?.on(ElectronEvent.NAVIGATION_CHANGED, updateCanGoBack);
 
     return () => {
-      // Отписка от события при размонтировании компонента
       unsubscribe?.();
     };
   }, []);
