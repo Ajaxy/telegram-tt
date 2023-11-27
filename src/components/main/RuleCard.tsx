@@ -61,7 +61,7 @@ const RuleCard: React.FC<RuleCardProps> = ({
           <div className="ruleBlockText">
             then add it to the folder
           </div>
-          <div className="folderSelector">
+          <div className="folder-selector">
             <i className={`icon icon-folder ${isFolderSelected ? 'active' : ''}`} />
             <select
               className={`folderSelect ${isFolderSelected ? 'active' : ''}`}
