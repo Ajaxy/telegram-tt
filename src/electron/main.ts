@@ -13,12 +13,12 @@ import { createWindow, setupCloseHandlers, setupElectronActionHandlers } from '.
 // Добавляем обработчики IPC для навигации
 ipcMain.handle('can-go-back', () => {
   const webContents = BrowserWindow.getFocusedWindow()?.webContents;
-  return webContents?.canGoBack() || false;
+  return webContents && !webContents.isDestroyed() ? webContents.canGoBack() : false;
 });
 
 ipcMain.handle('can-go-forward', () => {
   const webContents = BrowserWindow.getFocusedWindow()?.webContents;
-  return webContents?.canGoForward() || false;
+  return webContents && !webContents.isDestroyed() ? webContents.canGoForward() : false;
 });
 
 ipcMain.on('go-back', () => {
@@ -33,10 +33,6 @@ ipcMain.on('go-forward', () => {
   if (webContents?.canGoForward()) {
     webContents.goForward();
   }
-});
-
-ipcMain.on('navigation-changed', (event, canGoBack, canGoForward) => {
-  event.sender.send('navigation-changed', canGoBack, canGoForward);
 });
 
 initDeeplink();
