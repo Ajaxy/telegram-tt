@@ -176,7 +176,8 @@
       width: 100%;
 
       #Main.right-column-open & {
-        transform: translate3d(calc(var(--right-column-width) / -2), 0, 0);
+        width: 70%;
+        margin-right: var(--right-column-width);
       }
     }
 
