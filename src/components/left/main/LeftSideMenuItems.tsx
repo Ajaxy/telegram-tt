@@ -135,9 +135,10 @@ const LeftSideMenuItems = ({
   };
 
   const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
-
+  const { showNotification } = getActions();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
     saveCurrentWorkspaceToLocalStorage(workspaceId);
+    showNotification({ message: 'Workspace is changing...' });
     setWorkspaceHistory((prevHistory) => {
       if (prevHistory[prevHistory.length - 1] !== workspaceId) {
         return [...prevHistory, workspaceId];
