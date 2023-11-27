@@ -25,6 +25,8 @@ import SvgFolderOpen from './SvgFolderOpen';
 import stylesUluChatFolder from '../../../UluChatFolder/UluChatFolder.module.scss';
 import styles from './ChatFolder.module.scss';
 
+const svgFill = 'var(--color-gray)';
+
 const ChatFolder: FC<{
   children: ReactNode;
   item: TreeItemChat<any>;
@@ -36,7 +38,7 @@ const ChatFolder: FC<{
   contextRootElementSelector?: string;
   onClick?: (arg: string | number) => void;
 }> = ({
-  children, active, expanded, title, shouldStressUnreadMessages, item, context, onClick, contextRootElementSelector,
+  children, expanded, title, shouldStressUnreadMessages, item, context, onClick, contextRootElementSelector,
 }) => {
   const {
     contextActions, index, unreadCount: messagesUnreadCount, ref,
@@ -44,10 +46,8 @@ const ChatFolder: FC<{
 
   const classNameWrapper = buildClassName(
     stylesUluChatFolder.wrapper,
-    active && stylesUluChatFolder.active,
     !!messagesUnreadCount && shouldStressUnreadMessages && stylesUluChatFolder['has-unread-messages'],
   );
-  const svgFill = active ? 'var(--color-white)' : 'var(--color-gray)';
   const [SvgComponent, svgComponentProps] = expanded
     ? [SvgFolderOpen, { height: 17, width: 20 }]
     : [SvgFolderClosed, { height: 17, width: 18 }];

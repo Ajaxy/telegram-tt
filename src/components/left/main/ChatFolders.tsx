@@ -74,6 +74,7 @@ const SAVED_MESSAGES_HOTKEY = '0';
 const FIRST_FOLDER_INDEX = 0;
 const INVISIBLE_CHAT_TREE_STYLES = 'max-height: 0' as CSSProperties;
 const RECALCULATE_TREE_HEIGHT_INTERVAL_MS = 300;
+const COMMON_PADDING = 16;
 
 const ChatFolders: FC<OwnProps & StateProps> = ({
   leftMainHeaderRef,
@@ -348,10 +349,11 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     let heightSubtractionPx = 0;
     heightSubtractionPx += leftMainHeaderRef.current.getBoundingClientRect().height;
     heightSubtractionPx += uluSystemFoldersRef.current.getBoundingClientRect().height;
+    heightSubtractionPx -= 2 * COMMON_PADDING;
 
-    // if for some reason modifier is still 0 we also hide the tree
+    // if for some reason modifier is still 0 or less we also hide the tree
     // for the same reasons as above
-    if (!heightSubtractionPx) {
+    if (heightSubtractionPx <= 0) {
       return INVISIBLE_CHAT_TREE_STYLES;
     }
 
