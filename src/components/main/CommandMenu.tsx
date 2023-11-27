@@ -266,7 +266,7 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-folder" /><span>Create new folder</span>
         </Command.Item>
         <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
-          <i className="icon icon-add" /><span>Create workspace</span>
+          <i className="icon icon-forums" /><span>Create workspace</span>
         </Command.Item>
         <Command.Item onSelect={handleOpenAutomationSettings}>
           <i className="icon icon-bots" /><span>Create folder rule</span>
