@@ -57,7 +57,7 @@ interface CommandMenuProps {
   recentlyFoundChatIds?: string[];
   currentWorkspace: Workspace;
   savedWorkspaces: Workspace[];
-  handleSelectWorkspace: (workspaceId: string) => void;
+  handleSelectWorkspace: (workspaceId: string, closeFunc: () => void) => void;
 }
 
 const customFilter = (value: string, search: string) => {
@@ -437,7 +437,10 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 };
 
 const CommandMenu: FC<CommandMenuProps> = ({
-  topUserIds, usersById, recentlyFoundChatIds, folders, handleSelectWorkspace, savedWorkspaces, currentWorkspace,
+  topUserIds,
+  usersById,
+  recentlyFoundChatIds,
+  folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
   const { track } = useJune();
   const {
@@ -503,6 +506,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
+
+  const handleSelectWorkspace = (workspaceId: string) => {
+    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
+  };
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
@@ -893,8 +900,9 @@ export default memo(withGlobal(
       localStorage.setItem('currentWorkspace', workspaceId);
     };
 
-    const handleSelectWorkspace = (workspaceId: string) => {
+    const handleSelectWorkspace = (workspaceId: string, closeFunc: () => void) => {
       saveCurrentWorkspaceToLocalStorage(workspaceId);
+      closeFunc(); // вызов close
     };
 
     return {
