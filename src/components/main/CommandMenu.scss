@@ -95,6 +95,10 @@
 
   &[data-selected='true'] {
     background: #ffffff14;
+
+    .icon {
+      color: var(--color-text)
+    }
   }
 
   &[data-disabled='true'] {
@@ -109,6 +113,10 @@
 
   & + [cmdk-item] {
     margin-top: 4px;
+  }
+
+  .icon {
+    color: var(--color-text-secondary)
   }
 
   // svg {

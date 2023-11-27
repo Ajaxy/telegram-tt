@@ -310,6 +310,14 @@ const HomePage: React.FC<HomePageProps> = ({
         <Command.Item onSelect={handleChangelog}>
           <i className="icon icon-calendar" /><span>Changelog</span>
         </Command.Item>
+        <Command.Item onSelect={commandToggleFoldersTree}>
+          <i className="icon icon-folder" />
+          <span>
+            {isFoldersTreeEnabled
+              ? 'Switch back to the Telegram folders UI'
+              : 'Enable the new folders UI (Beta)'}
+          </span>
+        </Command.Item>
       </Command.Group>
       <Command.Group heading="Help">
         <Command.Item onSelect={handleFAQ}>
@@ -333,43 +341,32 @@ const HomePage: React.FC<HomePageProps> = ({
       </Command.Group>
       <Command.Group heading="Settings">
         <Command.Item onSelect={commandDoneAll}>
-          <i className="icon icon-readchats" /><span>Mark read chats as &quot;Done&quot;</span>
+          <i className="icon icon-readchats" /><span>Mark All Read Chats as Done</span>
+        </Command.Item>
+        <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive-from-main" /><span>Archive All Read Chats (May take ~1-3 min)</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleAutoDone}>
           <i className="icon icon-select" />
           <span>
             {isAutoDoneEnabled
-              ? 'Disable "Auto-Done after reading"'
-              : 'Enable "Auto-Done after reading"'}
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={commandToggleFoldersTree}>
-          <i className="icon icon-select" />
-          <span>
-            {isFoldersTreeEnabled
-              ? 'Switch to Telegram Folders UI'
-              : 'Try new Ulu Tree Folders UI (Beta)'}
+              ? 'Disable Auto-Done for Read Chats'
+              : 'Enable Auto-Done for Read Chats'}
           </span>
         </Command.Item>
         <Command.Item onSelect={commandToggleArchiver}>
           <i className="icon icon-archive" />
           <span>
             {isArchiverEnabled
-              ? 'Disable "Аrchive chats when mark as done"'
-              : 'Enable "Аrchive chats when mark as done"'}
+              ? 'Disable Auto-Archive for Done Chats'
+              : 'Enable Auto-Archive for Done Chats'}
           </span>
-        </Command.Item>
-        <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
         </Command.Item>
         {menuItems.map((item, index) => (
           <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
             {item.label}
           </Command.Item>
         ))}
-        <Command.Item onSelect={handleOpenAutomationSettings}>
-          <i className="icon icon-bots" /><span>Create folder rule</span>
-        </Command.Item>
       </Command.Group>
     </>
   );
