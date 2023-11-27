@@ -25,7 +25,7 @@ export default function useDone() {
     openChat, closeForumPanel, showNotification,
   } = getActions();
   const { track } = useJune();
-  const { doneChatIds, setDoneChatIds, isArchiverEnabled } = useStorage();
+  const { doneChatIds, setDoneChatIds, isArchiveWhenDoneEnabled } = useStorage();
 
   const isChatDone = (chat: ApiChat) => {
     return doneChatIds.includes(chat.id);
@@ -57,7 +57,7 @@ export default function useDone() {
       setDoneChatIds(updDoneChatIds);
 
       let isArchiveAction: boolean = false;
-      if (isArchiverEnabled && updDone) {
+      if (isArchiveWhenDoneEnabled && updDone) {
         isArchiveAction = archiveChat({
           id: togglingChatId,
           value: updDone,
@@ -83,7 +83,7 @@ export default function useDone() {
       }
       track?.(updDone ? 'toggleChatDone' : 'toggleChatUndone');
     }
-  }, [archiveChat, doneChatIds, isArchiverEnabled, setDoneChatIds, track]);
+  }, [archiveChat, doneChatIds, isArchiveWhenDoneEnabled, setDoneChatIds, track]);
 
   const doneAllReadChats = () => {
     const global = getGlobal();

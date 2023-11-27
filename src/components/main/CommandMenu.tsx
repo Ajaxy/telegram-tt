@@ -183,9 +183,9 @@ interface HomePageProps {
   commandDoneAll: () => void;
   commandArchiveAll: () => void;
   commandToggleAutoDone: () => void;
-  commandToggleArchiver: () => void;
+  commandToggleArchiveWhenDone: () => void;
   commandToggleFoldersTree: () => void;
-  isArchiverEnabled: boolean;
+  isArchiveWhenDoneEnabled: boolean;
   isAutoDoneEnabled: boolean;
   isFoldersTreeEnabled: boolean;
   topUserIds?: string[];
@@ -223,12 +223,12 @@ interface CreateNewPageProps {
 
 const HomePage: React.FC<HomePageProps> = ({
   commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled, commandToggleFoldersTree,
-  commandArchiveAll, isArchiverEnabled,
+  commandArchiveAll, commandToggleArchiveWhenDone, isArchiveWhenDoneEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver, handleOpenAutomationSettings,
+  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
   handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
 }) => {
   return (
@@ -385,12 +385,12 @@ const HomePage: React.FC<HomePageProps> = ({
               : 'Enable Auto-Done for Read Chats'}
           </span>
         </Command.Item>
-        <Command.Item onSelect={commandToggleArchiver}>
+        <Command.Item onSelect={commandToggleArchiveWhenDone}>
           <i className="icon icon-archive" />
           <span>
-            {isArchiverEnabled
-              ? 'Disable Auto-Archive for Done Chats'
-              : 'Enable Auto-Archive for Done Chats'}
+            {isArchiveWhenDoneEnabled
+              ? 'Disable "Аrchive chats when mark as done"'
+              : 'Enable "Аrchive chats when mark as done"'}
           </span>
         </Command.Item>
         {menuItems.map((item, index) => (
@@ -449,7 +449,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const [isOpen, setOpen] = useState(false);
   const {
     isAutoDoneEnabled, setIsAutoDoneEnabled,
-    isArchiverEnabled, setIsArchiverEnabled,
+    isArchiveWhenDoneEnabled, setIsArchiveWhenDoneEnabled,
     isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
   const { archiveMessages } = useArchiver({ isManual: true });
@@ -658,12 +658,16 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
-  const commandToggleArchiver = useCallback(() => {
-    const updIsArchiverEnabled = !isArchiverEnabled;
-    showNotification({ message: updIsArchiverEnabled ? 'Archiver enabled!' : 'Archiver disabled!' });
-    setIsArchiverEnabled(updIsArchiverEnabled);
+  const commandToggleArchiveWhenDone = useCallback(() => {
+    const updIsArchiveWhenDoneEnabled = !isArchiveWhenDoneEnabled;
+    showNotification({
+      message: updIsArchiveWhenDoneEnabled
+        ? 'Enabled "Аrchive chats when mark as done"'
+        : 'Disabled "Аrchive chats when mark as done"',
+    });
+    setIsArchiveWhenDoneEnabled(updIsArchiveWhenDoneEnabled);
     close();
-  }, [close, isArchiverEnabled, setIsArchiverEnabled]);
+  }, [close, isArchiveWhenDoneEnabled, setIsArchiveWhenDoneEnabled]);
 
   const commandToggleAutoDone = useCallback(() => {
     const updIsAutoDoneEnabled = !isAutoDoneEnabled;
@@ -788,10 +792,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   commandDoneAll={commandDoneAll}
                   commandArchiveAll={commandArchiveAll}
                   commandToggleAutoDone={commandToggleAutoDone}
-                  commandToggleArchiver={commandToggleArchiver}
+                  commandToggleArchiveWhenDone={commandToggleArchiveWhenDone}
                   commandToggleFoldersTree={commandToggleFoldersTree}
                   isAutoDoneEnabled={isAutoDoneEnabled}
-                  isArchiverEnabled={isArchiverEnabled}
+                  isArchiveWhenDoneEnabled={isArchiveWhenDoneEnabled}
                   isFoldersTreeEnabled={isFoldersTreeEnabled}
                   topUserIds={topUserIds}
                   usersById={usersById}
