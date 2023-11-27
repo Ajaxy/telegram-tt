@@ -29,6 +29,7 @@ export default {
   Archive: 'Archive',
   MarkDone: `Mark as done ${IS_MAC_OS ? '[⌘+E]' : '[Ctrl+E]'}`,
   MarkNotDone: `Mark as not done ${IS_MAC_OS ? '[⌘+⇧+E]' : IS_LINUX ? '[Ctrl+E]' : '[Ctrl+Shift+E]'}`,
+  NotifyMeHotkey: `Notify me... ${IS_MAC_OS ? '[⌘+H]' : '[Ctrl+H]'}`,
   Delete: 'Delete',
   DeleteChat: 'Delete and exit',
   FromYou: 'You',
