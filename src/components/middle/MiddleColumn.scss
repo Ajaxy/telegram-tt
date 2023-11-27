@@ -176,7 +176,7 @@
       width: 100%;
 
       #Main.right-column-open & {
-        width: 70%;
+        width: calc(100% - var(--right-column-width));
         margin-right: var(--right-column-width);
       }
     }
