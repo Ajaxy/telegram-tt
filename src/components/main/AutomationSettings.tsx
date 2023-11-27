@@ -154,7 +154,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
           e.stopPropagation();
         }}
       >
-        <span className="ack-button-setting">
+        <span className="back-button-settins">
           <div className="icon-wrapper">
             <i className="icon icon-arrow-left" onClick={close} />
           </div>
@@ -201,7 +201,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
                   <div className="ruleBlockText">
                     then add it to the folder
                   </div>
-                  <div className="folderSelector" onClick={handleFolderSelectorClick}>
+                  <div className="folder-selector" onClick={handleFolderSelectorClick}>
                     <i className={`icon icon-folder ${selectedFolderId ? 'active' : ''}`} />
                     <select
                       ref={selectRef}

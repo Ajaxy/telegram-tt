@@ -34,6 +34,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const [logoUrl, setLogoUrl] = useState('');
   // eslint-disable-next-line no-null/no-null
   const fileInputRef = useRef<HTMLInputElement>(null);
+
   const uploadManager = new UploadManager({
     apiKey: 'public_kW15bndTdL4cidRTCc1sS8rNYQsu',
   });
@@ -69,7 +70,6 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     setLogoUrl(tempUrl); // Устанавливаем временный URL для предпросмотра
   };
 
-  // Функция close теперь не вызывает resetState
   const close = useCallback(() => {
     if (onClose) {
       onClose();
@@ -79,16 +79,20 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const handleWorkspaceAction = async () => {
     setIsCreating(true);
     try {
+      const newWorkspaceId = workspaceId || Date.now().toString();
       let finalLogoUrl = logoUrl;
       if (selectedFile) {
-        const { fileUrl } = await uploadManager.upload({ data: selectedFile });
+        const newFileName = `${workspaceName}_${newWorkspaceId}.${selectedFile.type.split('/')[1]}`;
+        const fileWithNewName = new File([selectedFile], newFileName, { type: selectedFile.type });
+        const { fileUrl } = await uploadManager.upload({ data: fileWithNewName });
+
         finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
         setLogoUrl(finalLogoUrl); // Обновляем URL после загрузки на сервер
         URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
       }
 
       const newWorkspaceData = {
-        id: workspaceId || Date.now().toString(), // Генерируем уникальный ID для нового воркспейса
+        id: newWorkspaceId,
         name: workspaceName,
         logoUrl: finalLogoUrl,
         folders: selectedFolderIds,
@@ -128,14 +132,12 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   };
 
   const resetState = useCallback(() => {
-    if (!workspaceId) {
-      setWorkspaceName('');
-      setLogoUrl('');
-      setSelectedFolderIds([]);
-      setIsCreating(false);
-      setSelectedFile(undefined);
-    }
-  }, [workspaceId]);
+    setWorkspaceName('');
+    setLogoUrl('');
+    setSelectedFolderIds([]);
+    setIsCreating(false);
+    setSelectedFile(undefined);
+  }, []);
 
   // useEffect для отслеживания состояния модального окна
   useEffect(() => {
@@ -151,6 +153,17 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     // Если окно видимо, подписываемся на событие нажатия клавиши Esc
     return isOpen ? captureEscKeyListener(close) : undefined;
   }, [close, isOpen]);
+
+  const handleDeleteWorkspace = () => {
+    const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+    const updatedWorkspaces = savedWorkspaces.filter((ws: {
+      id: string;
+    }) => ws.id !== workspaceId);
+    localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+    localStorage.setItem('currentWorkspace', 'Personal'); // Устанавливаем активный воркспейс на "Personal"
+    showNotification({ message: 'Workspace deleted successfully.' });
+    close(); // Закрываем модальное окно
+  };
 
   const WorkspaceSettingsInner = (
     <div
@@ -214,9 +227,19 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
           <span
             className={`saveButtonText ${workspaceName && selectedFolderIds.length > 0 ? 'active' : ''}`}
           >
-            {isCreating ? 'Processing...' : (workspaceId ? 'Update workspace' : 'Create workspace')}
+            {isCreating ? 'Saving...' : (workspaceId ? 'Update workspace' : 'Create workspace')}
           </span>
         </button>
+        {workspaceId && (
+          <button
+            className="deleteButton"
+            onClick={handleDeleteWorkspace}
+          >
+            <span className="deleteButtonText">
+              Delete workspace
+            </span>
+          </button>
+        )}
       </div>
     </div>
   );

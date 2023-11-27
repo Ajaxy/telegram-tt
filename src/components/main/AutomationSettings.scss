@@ -213,7 +213,7 @@
             line-height: 1.5rem; /* 150% */
           }
           
-          .folderSelector {
+          .folder-selector {
             display: flex;
             padding: 0.25rem;
             align-items: center;
@@ -231,7 +231,7 @@
           }
           
 
-          .folderSelector:hover {
+          .folder-selector:hover {
             border-radius: 0.25rem;
             background: var(--color-chat-hover);
             
