@@ -1,5 +1,8 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { memo, useEffect, useMemo } from '../../../lib/teact/teact';
+import React, {
+  memo, useCallback, useEffect, useMemo, useState,
+} from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
@@ -26,12 +29,14 @@ import { getPromptInstall } from '../../../util/installPrompt';
 import { switchPermanentWebVersion } from '../../../util/permanentWebVersion';
 import { IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
+import useCommands from '../../../hooks/useCommands';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
+import MenuSeparator from '../../ui/MenuSeparator';
 import Toggle from '../../ui/Toggle';
 
 /* import Switcher from '../../ui/Switcher'; */ // for hiding dark mode switcher
@@ -44,11 +49,19 @@ type OwnProps = {
   onBotMenuClosed: NoneToVoidFunction;
 };
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+};
+
 type StateProps = {
   animationLevel: AnimationLevel;
   theme: ThemeKey;
   canInstall?: boolean;
   attachBots: GlobalState['attachMenu']['bots'];
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
 } & Pick<GlobalState, 'currentUserId' | 'archiveSettings'>;
 
 const LeftSideMenuItems = ({
@@ -63,6 +76,8 @@ const LeftSideMenuItems = ({
   onSelectSettings,
   onBotMenuOpened,
   onBotMenuClosed,
+  currentWorkspace,
+  savedWorkspaces,
 }: OwnProps & StateProps) => {
   const {
     setSettingOption,
@@ -72,6 +87,11 @@ const LeftSideMenuItems = ({
     openChatWithInfo,
   } = getActions();
   const lang = useLang();
+
+  const personalWorkspace : Workspace = {
+    id: 'personal',
+    name: 'Personal',
+  };
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) { // Shortcut: settings
@@ -99,6 +119,54 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
+  const allWorkspaces = [personalWorkspace, ...savedWorkspaces];
+  const { runCommand } = useCommands();
+
+  const handleOpenWorkspaceSettings = (workspaceId?: string) => {
+    runCommand('OPEN_WORKSPACE_SETTINGS', workspaceId);
+  };
+
+  const handleOpenAutomationSettings = () => {
+    runCommand('OPEN_AUTOMATION_SETTINGS');
+  };
+
+  const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {
+    localStorage.setItem('currentWorkspace', workspaceId);
+  };
+
+  const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
+
+  const handleSelectWorkspace = useCallback((workspaceId: string) => {
+    saveCurrentWorkspaceToLocalStorage(workspaceId);
+    setWorkspaceHistory((prevHistory) => {
+      if (prevHistory[prevHistory.length - 1] !== workspaceId) {
+        return [...prevHistory, workspaceId];
+      }
+      return prevHistory;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Tab') {
+        e.preventDefault();
+        const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2]; // Получаем предпоследний воркспейс
+        if (lastWorkspaceId) {
+          handleSelectWorkspace(lastWorkspaceId);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [workspaceHistory, handleSelectWorkspace]);
+
+  const getCurrentWorkspaceId = (): string | undefined => {
+    const workspaceId = localStorage.getItem('currentWorkspace');
+    return workspaceId || undefined;
+  };
+
+  const currentWorkspaceId = getCurrentWorkspaceId();
 
   /*
   const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
@@ -109,6 +177,25 @@ const LeftSideMenuItems = ({
     setSettingOption({ shouldUseSystemTheme: false });
   });
 */
+  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | undefined>();
+
+  // Функция для обновления текущего рабочего пространства
+  const updateCurrentWorkspace = useCallback(() => {
+    const workspaceId = getCurrentWorkspaceId();
+    setSelectedWorkspaceId(workspaceId);
+  }, []);
+
+  // Использование useEffect для отслеживания изменений
+  useEffect(() => {
+  // Подписка на событие изменения localStorage
+    window.addEventListener('storage', updateCurrentWorkspace);
+
+    // Вызов функции при первом рендеринге компонента
+    updateCurrentWorkspace();
+
+    // Отписка от события при размонтировании компонента
+    return () => window.removeEventListener('storage', updateCurrentWorkspace);
+  }, [updateCurrentWorkspace]);
 
   const handleAnimationLevelChange = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -160,12 +247,12 @@ const LeftSideMenuItems = ({
         </MenuItem>
       )}
       */}
-      <MenuItem
+      {/* <MenuItem
         icon="user"
         onClick={onSelectContacts}
       >
         {lang('Contacts')}
-      </MenuItem>
+      </MenuItem> */}
       {/*
       {bots.map((bot) => (
         <AttachBotItem
@@ -184,12 +271,47 @@ const LeftSideMenuItems = ({
         {lang('Settings.MyStories')}
       </MenuItem>
       */}
+      {allWorkspaces.map((workspace) => (
+        <MenuItem
+          key={workspace.id}
+          className="workspace-item"
+          onClick={() => handleSelectWorkspace(workspace.id)}
+          userProfile={workspace.id === 'personal'}
+          isSelected={currentWorkspace.id === workspace.id} // Updated
+          customImageUrl={workspace.logoUrl}
+          customPlaceholderText={workspace.id
+            !== 'personal' && !workspace.logoUrl ? workspace.name[0].toUpperCase() : undefined}
+        >
+          {workspace.name}
+        </MenuItem>
+      ))}
       <MenuItem
-        icon="settings"
-        onClick={onSelectSettings}
+        icon="add"
+        onClick={() => handleOpenWorkspaceSettings()}
+        className="secondary"
       >
-        {lang('Settings')}
+        Create workspace
       </MenuItem>
+      <MenuSeparator />
+      <MenuItem
+        onClick={handleOpenAutomationSettings}
+      >
+        Automations
+      </MenuItem>
+      <MenuSeparator />
+      <MenuItem
+        onClick={onSelectSettings}
+        shortcut="⌘ ,"
+      >
+        Personal settings
+      </MenuItem>
+      {currentWorkspaceId !== 'personal' && (
+        <MenuItem
+          onClick={() => handleOpenWorkspaceSettings(currentWorkspaceId)}
+        >
+          Workspace settings
+        </MenuItem>
+      )}
       {/*
       <MenuItem
         icon="darkmode"
@@ -262,6 +384,19 @@ export default memo(withGlobal<OwnProps>(
     const { animationLevel } = global.settings.byKey;
     const attachBots = global.attachMenu.bots;
 
+    // Получение идентификатора текущего воркспейса
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+
+    // Получение списка сохраненных воркспейсов
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    // Определение текущего воркспейса
+    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = { id: 'personal', name: 'Personal', logoUrl: undefined };
+    }
+
     return {
       currentUserId,
       theme: selectTheme(global),
@@ -269,6 +404,8 @@ export default memo(withGlobal<OwnProps>(
       canInstall: Boolean(tabState.canInstall),
       archiveSettings,
       attachBots,
+      currentWorkspace,
+      savedWorkspaces,
     };
   },
 )(LeftSideMenuItems));

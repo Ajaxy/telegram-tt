@@ -30,6 +30,13 @@ import UluControlledTreeEnvironment from './UluControlledTreeEnvironment';
 
 import styles from './ChatFoldersTree.module.scss';
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  folders?: number[];
+};
+
 type OwnProps = {};
 type StateProps = {
   orderedFolderIds?: number[];
@@ -40,6 +47,9 @@ type StateProps = {
   maxFolderInvites: number;
   maxChatLists: number;
   maxFolders: number;
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
+
 };
 
 // TODO clean-up
@@ -51,6 +61,8 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
   maxChatLists,
   maxFolders,
   maxFolderInvites,
+  currentWorkspace,
+  savedWorkspaces,
 }) => {
   const lang = useLang();
 
@@ -66,10 +78,29 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
   } = getActions();
 
+  const allFolderIdsInWorkspaces = savedWorkspaces
+    .filter((ws) => ws.id !== currentWorkspace.id)
+    .reduce((acc, ws) => {
+      return [...acc, ...(ws.folders || [])];
+    }, [] as number[]); // Указываем явно тип начального значения как number[]
+
   const displayedFolders = (() => {
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
-        return chatFoldersById[id] || {};
+        // Пропускаем папки, которые уже назначены другим воркспейсам, если выбран Personal Workspace
+        if (currentWorkspace.id === 'personal' && allFolderIdsInWorkspaces.includes(id)) {
+          return undefined;
+        }
+
+        const folder = chatFoldersById[id];
+
+        // Показываем папку только если она принадлежит текущему воркспейсу
+        if (currentWorkspace.id !== 'personal'
+    && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
+          return undefined;
+        }
+
+        return folder || undefined;
       }).filter(Boolean)
       : undefined;
   })();
@@ -250,6 +281,17 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
 export default withGlobal(
   (global): StateProps => {
+    // Получение текущего воркспейса и списка сохраненных воркспейсов
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    let currentWorkspace = savedWorkspaces.find((ws: {
+      id: string;
+    }) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+    }
     const {
       chatFolders: {
         byId: chatFoldersById,
@@ -281,6 +323,8 @@ export default withGlobal(
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
+      currentWorkspace,
+      savedWorkspaces,
       // archiveSettings,
       // sessions,
     };

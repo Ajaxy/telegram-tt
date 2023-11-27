@@ -95,6 +95,10 @@
 
   &[data-selected='true'] {
     background: #ffffff14;
+
+    .icon {
+      color: var(--color-text)
+    }
   }
 
   &[data-disabled='true'] {
@@ -110,6 +114,32 @@
   & + [cmdk-item] {
     margin-top: 4px;
   }
+
+  .icon {
+    color: var(--color-text-secondary)
+  }
+
+  .image {
+    height: 1.25rem;
+    width: 1.25rem;
+    background-size: cover;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  
+  .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.094);
+    color: rgba(255, 255, 255, 0.443);
+    font-size: 0.8125rem;
+    font-weight: bold;
+  }
+  
 
   // svg {
   //   width: 18px;

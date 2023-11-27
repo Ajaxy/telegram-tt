@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { FC } from '../../../lib/teact/teact';
 import React, { memo } from '../../../lib/teact/teact';
@@ -15,8 +16,15 @@ type OwnProps = {
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+};
+
 type StateProps = {
   user?: ApiUser;
+  currentWorkspace?: Workspace;
   userPersonalPhoto?: ApiPhoto;
   userProfilePhoto?: ApiPhoto;
   userFallbackPhoto?: ApiPhoto;
@@ -36,18 +44,41 @@ const getUserFullName = (user?: ApiUser) => {
 };
 
 const UluHeaderProfile: FC<OwnProps & StateProps> = ({
-  user, userFallbackPhoto, userPersonalPhoto, userProfilePhoto, onClick,
+  user, currentWorkspace, userFallbackPhoto, userPersonalPhoto, userProfilePhoto, onClick,
 }) => {
-  function renderPhoto() {
-    const profilePhoto = userPersonalPhoto || userProfilePhoto || userFallbackPhoto;
+  console.log('Current Workspace:', currentWorkspace); // Debugging
+  console.log('User:', user); // Debugging
+  const isPersonalWorkspace = currentWorkspace?.id === 'personal';
+  console.log('Is Personal Workspace:', isPersonalWorkspace); // Debugging
 
-    return (
-      <ProfilePhoto
-        user={user}
-        photo={profilePhoto}
-        canPlayVideo
-      />
-    );
+  function renderPhoto() {
+    if (isPersonalWorkspace) {
+      const profilePhoto = userPersonalPhoto || userProfilePhoto || userFallbackPhoto;
+      return (
+        <ProfilePhoto
+          user={user}
+          photo={profilePhoto}
+          canPlayVideo
+        />
+      );
+    } else {
+      if (currentWorkspace?.logoUrl) {
+        return (
+          <img
+            className="ProfilePhoto-UluHeaderProfile"
+            src={currentWorkspace.logoUrl}
+            alt={`${currentWorkspace.name} logo`}
+          />
+        );
+      }
+      // Рендер заглушки, если нет logoUrl
+      const firstLetter = currentWorkspace?.name?.[0]?.toUpperCase() || '';
+      return (
+        <div className="Placeholder-UluHeaderProfile">
+          {firstLetter}
+        </div>
+      );
+    }
   }
 
   return (
@@ -56,7 +87,7 @@ const UluHeaderProfile: FC<OwnProps & StateProps> = ({
         {renderPhoto()}
       </div>
       <div className={styles.userName}>
-        { getUserFullName(user) }
+        {isPersonalWorkspace ? getUserFullName(user) : currentWorkspace?.name}
       </div>
     </div>
   );
@@ -67,8 +98,23 @@ export default memo(withGlobal<OwnProps>((global) => {
   const user = selectUser(global, currentUserId!);
   const userFullInfo = selectUserFullInfo(global, currentUserId!);
 
+  // Retrieve the current workspace ID from localStorage
+  const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+  const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+  const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+  // Find the current workspace or default to personal if not found
+  let currentWorkspace = savedWorkspaces.find((ws: {
+    id: string;
+  }) => ws.id === currentWorkspaceId);
+  if (!currentWorkspaceId || !currentWorkspace) {
+    // Define a default personal workspace object
+    currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+  }
+
   return {
     user,
+    currentWorkspace,
     userPersonalPhoto: userFullInfo?.personalPhoto,
     userProfilePhoto: userFullInfo?.profilePhoto,
     userFallbackPhoto: userFullInfo?.fallbackPhoto,

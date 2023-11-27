@@ -1,5 +1,4 @@
 /* eslint-disable react/jsx-no-bind */
-/* eslint-disable no-console */
 import React from 'react';
 import { Command } from 'cmdk';
 import { useCallback, useMemo } from '../../lib/teact/teact';
@@ -38,7 +37,6 @@ const AllUsersAndChats: React.FC<{
   const lang = useLang();
 
   const handleSelectFolder = useCallback((folderId) => {
-    console.log('Selected folder ID:', folderId);
     openFolderPage(folderId);
     setInputValue('');
   }, [openFolderPage, setInputValue]);

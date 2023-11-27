@@ -15,7 +15,7 @@
   }
 
   &.compact &_items {
-    padding: 0.25rem 0;
+    padding: 0.25rem;
   }
 
   .bubble {
@@ -35,7 +35,7 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
-    padding: 0.25rem 0;
+    padding: 0.25rem;
 
     body.no-menu-blur & {
       background: var(--color-background);
