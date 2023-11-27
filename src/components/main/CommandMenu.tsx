@@ -43,12 +43,21 @@ const cmdkElement = document.getElementById('cmdk-root');
 const cmdkRoot = createRoot(cmdkElement!);
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+};
+
 interface CommandMenuProps {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
+  handleSelectWorkspace: (workspaceId: string) => void;
 }
 
 const customFilter = (value: string, search: string) => {
@@ -200,6 +209,10 @@ interface HomePageProps {
   handleLockScreenHotkey: () => void;
   handleOpenAutomationSettings: () => void;
   handleOpenWorkspaceSettings: () => void;
+  handleSelectWorkspace: (workspaceId: string) => void;
+  savedWorkspaces: Workspace[];
+  currentWorkspace: Workspace;
+  renderWorkspaceIcon: (workspace: Workspace) => JSX.Element | undefined;
 }
 
 interface CreateNewPageProps {
@@ -216,7 +229,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, commandToggleArchiver, handleOpenAutomationSettings,
-  handleOpenWorkspaceSettings,
+  handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
 }) => {
   return (
     <>
@@ -260,6 +273,20 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Navigation">
+        {savedWorkspaces.map((workspace) => {
+          if (workspace.id !== currentWorkspace.id) {
+            return (
+              <Command.Item
+                key={workspace.id}
+                onSelect={() => handleSelectWorkspace(workspace.id)}
+              >
+                {renderWorkspaceIcon(workspace)}
+                <span>Go to {workspace.name}</span>
+              </Command.Item>
+            );
+          }
+          return undefined;
+        })}
         <Command.Item value="$find $search" onSelect={handleSearchFocus}>
           <i className="icon icon-search" /><span>Find chat or contact</span>
           <span className="shortcuts">
@@ -410,7 +437,7 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 };
 
 const CommandMenu: FC<CommandMenuProps> = ({
-  topUserIds, usersById, recentlyFoundChatIds, folders,
+  topUserIds, usersById, recentlyFoundChatIds, folders, handleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
   const { track } = useJune();
   const {
@@ -583,6 +610,15 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, [close, openWorkspaceSettings]);
 
   const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+
+  const renderWorkspaceIcon = (workspace: Workspace) => {
+    if (workspace.logoUrl) {
+      return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
+    } else if (workspace.id !== 'personal') {
+      return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
+    }
+    return undefined;
+  };
 
   useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
     setReceivedWorkspaceId(workspaceId);
@@ -771,6 +807,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
                   handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
+                  handleSelectWorkspace={handleSelectWorkspace}
+                  savedWorkspaces={savedWorkspaces}
+                  currentWorkspace={currentWorkspace}
+                  renderWorkspaceIcon={renderWorkspaceIcon}
                 />
                 <AllUsersAndChats
                   close={close}
@@ -839,8 +879,33 @@ export default memo(withGlobal(
       ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
       : [];
 
+    // Получение информации о воркспейсах из localStorage
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+    }
+
+    const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {
+      localStorage.setItem('currentWorkspace', workspaceId);
+    };
+
+    const handleSelectWorkspace = (workspaceId: string) => {
+      saveCurrentWorkspaceToLocalStorage(workspaceId);
+    };
+
     return {
-      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
+      topUserIds,
+      usersById,
+      chatsById,
+      folders,
+      recentlyFoundChatIds,
+      currentWorkspace,
+      savedWorkspaces,
+      handleSelectWorkspace,
     };
   },
 )(CommandMenu));

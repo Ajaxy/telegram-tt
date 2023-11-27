@@ -134,9 +134,32 @@ const LeftSideMenuItems = ({
     localStorage.setItem('currentWorkspace', workspaceId);
   };
 
-  const handleSelectWorkspace = (workspaceId: string) => {
+  const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
+
+  const handleSelectWorkspace = useCallback((workspaceId: string) => {
     saveCurrentWorkspaceToLocalStorage(workspaceId);
-  };
+    setWorkspaceHistory((prevHistory) => {
+      if (prevHistory[prevHistory.length - 1] !== workspaceId) {
+        return [...prevHistory, workspaceId];
+      }
+      return prevHistory;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'Tab') {
+        e.preventDefault();
+        const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2]; // Получаем предпоследний воркспейс
+        if (lastWorkspaceId) {
+          handleSelectWorkspace(lastWorkspaceId);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [workspaceHistory, handleSelectWorkspace]);
 
   const getCurrentWorkspaceId = (): string | undefined => {
     const workspaceId = localStorage.getItem('currentWorkspace');
