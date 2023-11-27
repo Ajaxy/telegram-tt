@@ -135,6 +135,8 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
+    "@bytescale/sdk": "^3.10.0",
+    "@bytescale/upload-widget-react": "^4.12.0",
     "@cryptography/aes": "^0.1.1",
     "@june-so/analytics-next": "^2.0.0",
     "async-mutex": "^0.4.0",

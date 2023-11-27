@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState } from 'react';
 import { useCallback, useEffect } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
@@ -29,7 +28,6 @@ const useKeywordFolderRule = () => {
   const addRule = useCallback((newKeyword: string, newFolderId: number) => {
     // Проверка, что ключевое слово задано и не пустое, а также что ID папки задан
     if (typeof newKeyword !== 'string' || !newKeyword.trim() || !newFolderId) {
-      console.log('Invalid rule data');
       return;
     }
     const newRule = { keyword: newKeyword, folderId: newFolderId };
@@ -41,6 +39,7 @@ const useKeywordFolderRule = () => {
 
   // Функция для обработки правил
   const processRules = useCallback(() => {
+    // eslint-disable-next-line no-console
     console.log('Обработка правил...');
 
     const global = getGlobal();
@@ -60,6 +59,7 @@ const useKeywordFolderRule = () => {
             idsToAdd: [rule.folderId],
             idsToRemove: [],
           });
+          // eslint-disable-next-line no-console
           console.log(`Чат с ID ${chat.id} добавлен в папку с ID ${rule.folderId}`);
         }
       });

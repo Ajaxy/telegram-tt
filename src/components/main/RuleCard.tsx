@@ -1,5 +1,4 @@
 /* eslint-disable import/no-cycle */
-/* eslint-disable no-console */
 import React from 'react';
 import { useState } from '../../lib/teact/teact';
 import { getGlobal } from '../../global';

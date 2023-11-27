@@ -1,10 +1,9 @@
-/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 // eslint-disable-next-line react/no-deprecated
-import { Command, CommandSeparator } from 'cmdk';
+import { Command } from 'cmdk';
 import type { FC } from '../../lib/teact/teact';
 import {
   memo, useCallback, useEffect, useState,
@@ -35,6 +34,8 @@ import { useStorage } from '../../hooks/useStorage';
 import AllUsersAndChats from '../common/AllUsersAndChats';
 import FolderPage from '../common/FolderPage';
 import AutomationSettings from './AutomationSettings';
+// eslint-disable-next-line import/no-named-as-default
+import WorkspaceSettings from './WorkspaceSettings';
 
 import './CommandMenu.scss';
 
@@ -42,12 +43,21 @@ const cmdkElement = document.getElementById('cmdk-root');
 const cmdkRoot = createRoot(cmdkElement!);
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+};
+
 interface CommandMenuProps {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
+  handleSelectWorkspace: (workspaceId: string, closeFunc: () => void) => void;
 }
 
 const customFilter = (value: string, search: string) => {
@@ -198,6 +208,11 @@ interface HomePageProps {
   handleCreateFolder: () => void;
   handleLockScreenHotkey: () => void;
   handleOpenAutomationSettings: () => void;
+  handleOpenWorkspaceSettings: () => void;
+  handleSelectWorkspace: (workspaceId: string) => void;
+  savedWorkspaces: Workspace[];
+  currentWorkspace: Workspace;
+  renderWorkspaceIcon: (workspace: Workspace) => JSX.Element | undefined;
 }
 
 interface CreateNewPageProps {
@@ -214,6 +229,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
+  handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
 }) => {
   return (
     <>
@@ -249,9 +265,28 @@ const HomePage: React.FC<HomePageProps> = ({
         <Command.Item onSelect={handleCreateFolder}>
           <i className="icon icon-folder" /><span>Create new folder</span>
         </Command.Item>
+        <Command.Item onSelect={() => handleOpenWorkspaceSettings()}>
+          <i className="icon icon-forums" /><span>Create workspace</span>
+        </Command.Item>
+        <Command.Item onSelect={handleOpenAutomationSettings}>
+          <i className="icon icon-bots" /><span>Create folder rule</span>
+        </Command.Item>
       </Command.Group>
-      <CommandSeparator />
       <Command.Group heading="Navigation">
+        {savedWorkspaces.map((workspace) => {
+          if (workspace.id !== currentWorkspace.id) {
+            return (
+              <Command.Item
+                key={workspace.id}
+                onSelect={() => handleSelectWorkspace(workspace.id)}
+              >
+                {renderWorkspaceIcon(workspace)}
+                <span>Go to {workspace.name} workspace</span>
+              </Command.Item>
+            );
+          }
+          return undefined;
+        })}
         <Command.Item value="$find $search" onSelect={handleSearchFocus}>
           <i className="icon icon-search" /><span>Find chat or contact</span>
           <span className="shortcuts">
@@ -271,68 +306,48 @@ const HomePage: React.FC<HomePageProps> = ({
           )
         }
         <Command.Item onSelect={handleOpenInbox}>
-          <i className="icon icon-unread" /><span>Go to inbox</span>
+          <i className="icon icon-arrow-right" /><span>Go to inbox</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">I</span>
+          </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenSavedMessages}>
-          <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
+          <i className="icon icon-arrow-right" /><span>Go to saved messages</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">0</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectArchived}>
-          <i className="icon icon-archive-from-main" /><span>Go to archive</span>
+          <i className="icon icon-arrow-right" /><span>Go to archive</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">9</span>
           </span>
         </Command.Item>
         <Command.Item onSelect={handleSelectSettings}>
-          <i className="icon icon-settings" /><span>Go to settings</span>
+          <i className="icon icon-arrow-right" /><span>Go to settings</span>
           <span className="shortcuts">
             <span className="kbd">⌘</span>
             <span className="kbd">,</span>
           </span>
         </Command.Item>
-      </Command.Group>
-      <Command.Group heading="Settings">
-        <Command.Item onSelect={commandDoneAll}>
-          <i className="icon icon-readchats" /><span>Mark read chats as &quot;Done&quot;</span>
+        <Command.Item onSelect={handleOpenAutomationSettings}>
+          <i className="icon icon-arrow-right" /><span>Go to folder-automations</span>
         </Command.Item>
-        <Command.Item onSelect={commandToggleAutoDone}>
-          <i className="icon icon-select" />
-          <span>
-            {isAutoDoneEnabled
-              ? 'Disable "Auto-Done after reading"'
-              : 'Enable "Auto-Done after reading"'}
-          </span>
+      </Command.Group>
+      <Command.Group heading="What's new">
+        <Command.Item onSelect={handleChangelog}>
+          <i className="icon icon-calendar" /><span>Changelog</span>
         </Command.Item>
         <Command.Item onSelect={commandToggleFoldersTree}>
-          <i className="icon icon-select" />
+          <i className="icon icon-folder" />
           <span>
             {isFoldersTreeEnabled
-              ? 'Switch to Telegram Folders UI'
-              : 'Try new Ulu Tree Folders UI (Beta)'}
+              ? 'Switch back to the Telegram folders UI'
+              : 'Enable the new folders UI (Beta)'}
           </span>
-        </Command.Item>
-        <Command.Item onSelect={commandToggleArchiveWhenDone}>
-          <i className="icon icon-archive" />
-          <span>
-            {isArchiveWhenDoneEnabled
-              ? 'Disable "Аrchive chats when mark as done"'
-              : 'Enable "Аrchive chats when mark as done"'}
-          </span>
-        </Command.Item>
-        <Command.Item onSelect={commandArchiveAll}>
-          <i className="icon icon-archive" /><span>Archive read chats (May take ~1-3 min)</span>
-        </Command.Item>
-        {menuItems.map((item, index) => (
-          <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
-            {item.label}
-          </Command.Item>
-        ))}
-        <Command.Item onSelect={handleOpenAutomationSettings}>
-          <i className="icon icon-bots" /><span>Open Automation Settings</span>
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Help">
@@ -355,10 +370,34 @@ const HomePage: React.FC<HomePageProps> = ({
           <i className="icon icon-help" /><span>Contact support</span>
         </Command.Item>
       </Command.Group>
-      <Command.Group heading="What's new">
-        <Command.Item onSelect={handleChangelog}>
-          <i className="icon icon-calendar" /><span>Changelog</span>
+      <Command.Group heading="Settings">
+        <Command.Item onSelect={commandDoneAll}>
+          <i className="icon icon-readchats" /><span>Mark All Read Chats as Done</span>
         </Command.Item>
+        <Command.Item onSelect={commandArchiveAll}>
+          <i className="icon icon-archive-from-main" /><span>Archive All Read Chats (May take ~1-3 min)</span>
+        </Command.Item>
+        <Command.Item onSelect={commandToggleAutoDone}>
+          <i className="icon icon-select" />
+          <span>
+            {isAutoDoneEnabled
+              ? 'Disable Auto-Done for Read Chats'
+              : 'Enable Auto-Done for Read Chats'}
+          </span>
+        </Command.Item>
+        <Command.Item onSelect={commandToggleArchiveWhenDone}>
+          <i className="icon icon-archive" />
+          <span>
+            {isArchiveWhenDoneEnabled
+              ? 'Disable "Аrchive chats when mark as done"'
+              : 'Enable "Аrchive chats when mark as done"'}
+          </span>
+        </Command.Item>
+        {menuItems.map((item, index) => (
+          <Command.Item key={index} onSelect={item.value === 'save_api_key' ? saveAPIKey : undefined}>
+            {item.label}
+          </Command.Item>
+        ))}
       </Command.Group>
     </>
   );
@@ -398,7 +437,10 @@ const CreateNewPage: React.FC<CreateNewPageProps> = (
 };
 
 const CommandMenu: FC<CommandMenuProps> = ({
-  topUserIds, usersById, recentlyFoundChatIds, folders,
+  topUserIds,
+  usersById,
+  recentlyFoundChatIds,
+  folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
   const { track } = useJune();
   const {
@@ -420,9 +462,24 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // eslint-disable-next-line no-null/no-null
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
+  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
 
-  const openAutomationSettings = () => setAutomationSettingsOpen(true);
-  const closeAutomationSettings = () => setAutomationSettingsOpen(false);
+  const openAutomationSettings = useCallback(() => {
+    setAutomationSettingsOpen(true);
+  }, []);
+  const closeAutomationSettings = useCallback(() => {
+    setAutomationSettingsOpen(false);
+  }, []);
+
+  const openWorkspaceSettings = useCallback((workspaceId?: string) => {
+    // eslint-disable-next-line no-console
+    console.log('Opening workspace settings for:', workspaceId || '');
+    setWorkspaceSettingsOpen(true);
+  }, []);
+
+  const closeWorkspaceSettings = useCallback(() => {
+    setWorkspaceSettingsOpen(false);
+  }, []);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -433,7 +490,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK') {
+      // Получаем текущее выделение
+      const selection = window.getSelection();
+
+      // Проверяем, есть ли выделенный текст
+      const hasSelection = selection && selection.toString() !== '';
+
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyK' && !hasSelection) {
         setOpen(!isOpen);
         e.preventDefault();
         e.stopPropagation();
@@ -443,6 +506,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
+
+  const handleSelectWorkspace = (workspaceId: string) => {
+    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
+  };
 
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
@@ -529,11 +596,42 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
+  const { useCommand } = useCommands();
+
   const handleOpenAutomationSettings = () => {
-    console.log('Handle open Automation Settings called');
     close();
     openAutomationSettings();
   };
+
+  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+
+  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
+    close();
+    if (workspaceId) {
+      // Логика для редактирования воркспейса
+      openWorkspaceSettings(workspaceId);
+    } else {
+      // Логика для создания нового воркспейса
+      openWorkspaceSettings();
+    }
+  }, [close, openWorkspaceSettings]);
+
+  const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+
+  const renderWorkspaceIcon = (workspace: Workspace) => {
+    if (workspace.logoUrl) {
+      return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
+    } else if (workspace.id !== 'personal') {
+      return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
+    }
+    return undefined;
+  };
+
+  useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
+    setReceivedWorkspaceId(workspaceId);
+    openWorkspaceSettings(workspaceId);
+  // Откройте WorkspaceSettings здесь или установите состояние, которое приведет к его открытию
+  });
 
   const handleSelectSettings = useCallback(() => {
     runCommand('OPEN_SETTINGS');
@@ -634,6 +732,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [handleSelectNewGroup]);
 
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      // Получаем текущее выделение
+      const selection = window.getSelection();
+
+      // Проверяем, есть ли выделенный текст
+      const hasSelection = selection && selection.toString() !== '';
+
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyI' && !hasSelection) {
+        handleOpenInbox();
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', listener);
+    return () => document.removeEventListener('keydown', listener);
+  }, [handleOpenInbox]);
+
   const CommandMenuInner = (
     <div>
       <Command.Dialog
@@ -700,6 +817,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleLockScreenHotkey={handleLockScreenHotkey}
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
+                  handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
+                  handleSelectWorkspace={handleSelectWorkspace}
+                  savedWorkspaces={savedWorkspaces}
+                  currentWorkspace={currentWorkspace}
+                  renderWorkspaceIcon={renderWorkspaceIcon}
                 />
                 <AllUsersAndChats
                   close={close}
@@ -743,6 +865,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
         isOpen={isAutomationSettingsOpen}
         onClose={closeAutomationSettings}
       />
+      <WorkspaceSettings
+        isOpen={isWorkspaceSettingsOpen}
+        onClose={closeWorkspaceSettings}
+        workspaceId={receivedWorkspaceId}
+      />
     </div>
 
   );
@@ -763,8 +890,34 @@ export default memo(withGlobal(
       ? orderedFolderIds.map((folderId) => chatFoldersById[folderId]).filter(Boolean)
       : [];
 
+    // Получение информации о воркспейсах из localStorage
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+    }
+
+    const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {
+      localStorage.setItem('currentWorkspace', workspaceId);
+    };
+
+    const handleSelectWorkspace = (workspaceId: string, closeFunc: () => void) => {
+      saveCurrentWorkspaceToLocalStorage(workspaceId);
+      closeFunc(); // вызов close
+    };
+
     return {
-      topUserIds, usersById, chatsById, folders, recentlyFoundChatIds,
+      topUserIds,
+      usersById,
+      chatsById,
+      folders,
+      recentlyFoundChatIds,
+      currentWorkspace,
+      savedWorkspaces,
+      handleSelectWorkspace,
     };
   },
 )(CommandMenu));

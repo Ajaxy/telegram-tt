@@ -26,7 +26,7 @@
 
 		.unread {
 			background-color: $active-text-color;
-			color: $active-background-color !important;
+			color: var(--color-forum-hover-unread-topic-hover) !important;
 		}
 	}
 

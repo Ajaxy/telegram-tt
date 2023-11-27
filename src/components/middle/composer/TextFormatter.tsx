@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-console */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect, useRef, useState,
@@ -162,14 +161,12 @@ const TextFormatter: FC<OwnProps> = ({
   const handleAIImprover = useLastCallback(() => {
     const text = getSelectedText();
     if (!text) {
-      console.log('Нет выделенного текста для улучшения');
       return;
     }
 
     // Предполагаем, что ваш API ключ хранится в openAIKey
     const apiKey = openAIKey;
     if (!apiKey) {
-      console.log('API ключ OpenAI не найден');
       return;
     }
 
@@ -220,6 +217,7 @@ const TextFormatter: FC<OwnProps> = ({
         }
       })
       .catch((error) => {
+        // eslint-disable-next-line no-console
         console.error('Ошибка при обращении к OpenAI API:', error);
       });
   });
