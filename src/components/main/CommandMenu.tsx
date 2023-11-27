@@ -280,6 +280,10 @@ const HomePage: React.FC<HomePageProps> = ({
         }
         <Command.Item onSelect={handleOpenInbox}>
           <i className="icon icon-unread" /><span>Go to inbox</span>
+          <span className="shortcuts">
+            <span className="kbd">⌘</span>
+            <span className="kbd">I</span>
+          </span>
         </Command.Item>
         <Command.Item onSelect={handleOpenSavedMessages}>
           <i className="icon icon-saved-messages" /><span>Go to saved messages</span>
@@ -456,7 +460,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK') {
+      // Получаем текущее выделение
+      const selection = window.getSelection();
+
+      // Проверяем, есть ли выделенный текст
+      const hasSelection = selection && selection.toString() !== '';
+
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyK' && !hasSelection) {
         setOpen(!isOpen);
         e.preventDefault();
         e.stopPropagation();
@@ -674,6 +684,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     document.addEventListener('keydown', listener);
     return () => document.removeEventListener('keydown', listener);
   }, [handleSelectNewGroup]);
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      // Получаем текущее выделение
+      const selection = window.getSelection();
+
+      // Проверяем, есть ли выделенный текст
+      const hasSelection = selection && selection.toString() !== '';
+
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.code === 'KeyI' && !hasSelection) {
+        handleOpenInbox();
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', listener);
+    return () => document.removeEventListener('keydown', listener);
+  }, [handleOpenInbox]);
 
   const CommandMenuInner = (
     <div>
