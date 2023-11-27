@@ -20,6 +20,7 @@ import { ALL_FOLDER_ID } from '../../../../config';
 import { selectCanShareFolder } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
+import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManager';
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
@@ -95,8 +96,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         const folder = chatFoldersById[id];
 
         // Показываем папку только если она принадлежит текущему воркспейсу
-        if (currentWorkspace.id !== 'personal'
-    && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
+        if (
+          currentWorkspace.id !== 'personal'
+          && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
           return undefined;
         }
 
@@ -112,7 +114,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
     return displayedFolders.map((folder, i) => {
       const {
-        id, title, includedChatIds = [], pinnedChatIds = [],
+        id, title, pinnedChatIds = [],
       } = folder;
       const isBlocked = i > maxFolders - 1;
       const canShareFolder = selectCanShareFolder(getGlobal(), id);
@@ -165,7 +167,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         });
       }
 
-      const chatIds = [...new Set(pinnedChatIds.concat(includedChatIds))];
+      const orderedChatIds = getOrderedChatIds(id) || [];
 
       return {
         id,
@@ -174,9 +176,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         isBadgeActive: Boolean(folderCountersById[id]?.notificationsCount),
         isBlocked,
         contextActions: contextActions?.length ? contextActions : undefined,
-        chatIds,
+        chatIds: orderedChatIds,
         chats: Object.values(chatsById)
-          .filter((chat) => chatIds.includes(chat.id))
+          .filter((chat) => orderedChatIds.includes(chat.id))
           .reduce((p, c) => {
             p[c.id] = { ...c, isPinned: pinnedChatIds.includes(c.id), folderId: id } as ApiChat;
             return p;
