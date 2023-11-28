@@ -446,9 +446,8 @@ function processEntity({
     case ApiMessageEntityTypes.Email:
       return (
         <a
-          href={`mailto:${entityText}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={entityText}
+          onClick={handleEmailClick}
           className="text-entity-link"
           dir="auto"
           data-entity-type={entity.type}
@@ -603,4 +602,14 @@ function handleCodeClick(e: React.MouseEvent<HTMLElement>) {
   getActions().showNotification({
     message: translate('TextCopied'),
   });
+}
+function handleEmailClick(e: React.MouseEvent<HTMLAnchorElement>) {
+  e.preventDefault(); // Предотвращаем переход по ссылке
+  const url = e.currentTarget.getAttribute('href');
+  if (url) {
+    copyTextToClipboard(url);
+    getActions().showNotification({
+      message: translate('EmailCopied'),
+    });
+  }
 }

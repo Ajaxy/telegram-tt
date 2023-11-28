@@ -521,4 +521,5 @@ export default {
   SlowModeWait: 'Slow Mode — %d',
   OpenMapWith: 'Open map with...',
   YouWillBeNotified: 'You will be notified!',
+  EmailCopied: 'Email address copied!',
 } as ApiLangPack;
