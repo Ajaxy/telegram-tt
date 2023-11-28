@@ -97,7 +97,8 @@
     background: #ffffff14;
 
     .icon {
-      color: var(--color-text)
+      color: var(--color-text);
+      font-size: 16px;
     }
   }
 
@@ -195,6 +196,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 8px;
+  margin-top: 8px;
 }
 
 [cmdk-empty] {
