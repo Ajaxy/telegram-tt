@@ -225,6 +225,7 @@ interface HomePageProps {
   handleDoneChat: () => void;
   isChatUnread?: boolean;
   isCurrentChatDone?: boolean;
+  showNotification: (params: { message: string }) => void;
 }
 
 interface CreateNewPageProps {
@@ -242,7 +243,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
   handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
-  currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone,
+  currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone, showNotification,
 }) => {
   const lang = useLang();
   return (
@@ -317,7 +318,10 @@ const HomePage: React.FC<HomePageProps> = ({
             return (
               <Command.Item
                 key={workspace.id}
-                onSelect={() => handleSelectWorkspace(workspace.id)}
+                onSelect={() => {
+                  handleSelectWorkspace(workspace.id);
+                  showNotification({ message: 'Workspace is changing...' });
+                }}
               >
                 {renderWorkspaceIcon(workspace)}
                 <span>Go to {workspace.name} workspace</span>
@@ -939,6 +943,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleDoneChat={handleDoneChat}
                   isChatUnread={isChatUnread}
                   isCurrentChatDone={isCurrentChatDone}
+                  showNotification={showNotification}
                 />
                 <AllUsersAndChats
                   close={close}
