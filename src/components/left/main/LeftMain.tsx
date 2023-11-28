@@ -15,6 +15,7 @@ import { IS_ELECTRON, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useCommands from '../../../hooks/useCommands';
 import useForumPanelRender from '../../../hooks/useForumPanelRender';
+import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
@@ -80,7 +81,7 @@ const LeftMain: FC<OwnProps> = ({
   const [isNewChatButtonShown, setIsNewChatButtonShown] = useState(IS_TOUCH_ENV);
   const [isElectronAutoUpdateEnabled, setIsElectronAutoUpdateEnabled] = useState(false);
   const { useCommand } = useCommands();
-
+  const { track } = useJune();
   useEffect(() => {
     window.electron?.getIsAutoUpdateEnabled().then(setIsElectronAutoUpdateEnabled);
   }, []);
@@ -143,6 +144,7 @@ const LeftMain: FC<OwnProps> = ({
     } else {
       window.location.reload();
     }
+    track?.('Click on Update app button');
   });
 
   const handleSelectNewChannel = useLastCallback(() => {
