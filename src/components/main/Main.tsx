@@ -313,7 +313,7 @@ const Main: FC<OwnProps & StateProps> = ({
       setIsIdentify(true);
       analytics.identify(currentUser.id, {
         email: `user${currentUser.id}@ulu.so`,
-        fullName: currentUserName,
+        name: currentUserName,
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         usernames: (currentUser.usernames || []).map((u) => u.username).join(', '),
