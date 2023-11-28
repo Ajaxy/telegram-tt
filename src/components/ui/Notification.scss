@@ -7,6 +7,24 @@
   }
 }
 
+@keyframes gradient-border {
+  0% {
+    border-image: linear-gradient(to right, var(--color-primary), var(--color-borders)) 1;
+  }
+  25% {
+    border-image: linear-gradient(to bottom, var(--color-primary), var(--color-borders)) 1;
+  }
+  50% {
+    border-image: linear-gradient(to left, var(--color-primary), var(--color-borders)) 1;
+  }
+  75% {
+    border-image: linear-gradient(to top, var(--color-primary), var(--color-borders)) 1;
+  }
+  100% {
+    border-image: linear-gradient(to right, var(--color-primary), var(--color-borders)) 1;
+  }
+}
+
 .Notification-container {
   position: fixed;
   width: auto !important;
@@ -55,7 +73,8 @@
   margin: 0 0.5rem;
   display: flex;
   align-items: center;
-  border-image: linear-gradient(to right, var(--color-primary),  var(--color-borders)) 1;
+  animation: gradient-border 5s linear infinite;
+  position: relative; 
 
   .text-entity-link,
   .text-entity-link:hover,
