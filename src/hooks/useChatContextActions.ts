@@ -201,7 +201,7 @@ const useChatContextActions = ({
     const isInFolder = folderId !== undefined;
 
     return compact([
-      actionNotifyMe,
+      ...([] || [actionNotifyMe]), // todo: undo temphide
       !isSelf && !isServiceNotifications && !isInFolder && actionDone,
       actionMaskAsRead,
       actionMarkAsUnread,
