@@ -215,7 +215,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
           </div>
         </div>
         <div className="desc">
-          <div>Name your workspace in such a way that it&apos;s easy to remember and understand.</div>
+          <div>Please name your workspace and select a logo. The recommended logo size is 256x256px.</div>
         </div>
         <div className="header">
           <div>Folders</div>
