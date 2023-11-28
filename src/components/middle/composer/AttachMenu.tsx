@@ -120,19 +120,37 @@ const AttachMenu: FC<OwnProps> = ({
     );
   });
 
+  // Функция debounce с типами для TypeScript
+  function debounce(func: Function, wait: number): Function {
+    // eslint-disable-next-line no-null/no-null
+    let timeout: NodeJS.Timeout | null = null;
+
+    return function executedFunction(...args: any[]) {
+      const later = () => {
+        clearTimeout(timeout!);
+        func(...args);
+      };
+
+      clearTimeout(timeout!);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  const debouncedHandleQuickSelect = debounce(handleQuickSelect, 300);
+
   useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
+    const handleKey = (e: KeyboardEvent) => {
       if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.shiftKey && e.code === 'KeyU') {
         e.preventDefault();
-        handleQuickSelect();
+        debouncedHandleQuickSelect();
       }
-    }
+    };
 
     document.addEventListener('keydown', handleKey);
     return () => {
       document.removeEventListener('keydown', handleKey);
     };
-  }, []);
+  }, [debouncedHandleQuickSelect]); // добавлены зависимости для useEffect
 
   const handleDocumentSelect = useLastCallback(() => {
     openSystemFilesDialog(!canSendDocuments && canSendAudios
