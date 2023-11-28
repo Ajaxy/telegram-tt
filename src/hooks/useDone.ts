@@ -5,7 +5,6 @@ import type { ApiChat } from '../api/types';
 
 import { selectCurrentChat, selectTabState } from '../global/selectors';
 import useArchiver from './useArchiver';
-import { useJune } from './useJune';
 import { useStorage } from './useStorage';
 
 const EVENT_NAME = 'update_chat_done';
@@ -24,7 +23,6 @@ export default function useDone() {
   const {
     openChat, closeForumPanel, showNotification,
   } = getActions();
-  const { track } = useJune();
   const { doneChatIds, setDoneChatIds, isArchiveWhenDoneEnabled } = useStorage();
 
   const isChatDone = (chat: ApiChat) => {
@@ -81,9 +79,8 @@ export default function useDone() {
           }`,
         });
       }
-      track?.(updDone ? 'toggleChatDone' : 'toggleChatUndone');
     }
-  }, [archiveChat, doneChatIds, isArchiveWhenDoneEnabled, setDoneChatIds, track]);
+  }, [archiveChat, doneChatIds, isArchiveWhenDoneEnabled, setDoneChatIds]);
 
   const doneAllReadChats = () => {
     const global = getGlobal();

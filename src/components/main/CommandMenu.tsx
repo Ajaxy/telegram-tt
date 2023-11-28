@@ -770,7 +770,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
       showNotification({ message: lang(action) });
       close();
       if (track) {
-        track('Mark as Unread / Read', { source: 'Сommand Menu', action });
+        track(isChatUnread ? 'Mark as Read' : 'Mark as Unread', { source: 'Сommand Menu' });
       }
     }
   }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
