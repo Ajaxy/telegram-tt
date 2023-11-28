@@ -13,6 +13,7 @@ import { compact } from '../util/iteratees';
 import { IS_ELECTRON, IS_OPEN_IN_NEW_TAB_SUPPORTED } from '../util/windowEnvironment';
 import useArchiver from './useArchiver';
 import useDone from './useDone';
+/* import { useJune } from './useJune'; */
 import useLang from './useLang';
 import useSnooze from './useSnooze';
 
@@ -47,6 +48,7 @@ const useChatContextActions = ({
   const { archiveChat } = useArchiver({ isManual: true });
   const { doneChat, isChatDone } = useDone();
   const { snooze } = useSnooze();
+  /* const { track } = useJune(); */
 
   return useMemo(() => {
     if (!chat) {
