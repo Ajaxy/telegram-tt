@@ -168,13 +168,21 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
   // Cmd+/ to open search
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (((IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey)) && e.code === 'Slash') {
-        if (hasMenu) {
+      // Проверяем, что нажата клавиша Slash
+      if (e.code === 'Slash') {
+        // Для Mac: CMD (Meta) + Slash, для остальных: Ctrl + Slash
+        const isCmdOrCtrlPressed = (IS_MAC_OS && e.metaKey) || (!IS_MAC_OS && e.ctrlKey);
+
+        // Для открытой средней колонки требуется нажатие Cmd или Ctrl вместе со Slash
+        if (isMessageListOpen && isCmdOrCtrlPressed) {
           handleSearchFocus();
           return;
         }
 
-        onReset();
+        // Для закрытой средней колонки достаточно простого нажатия Slash
+        if (!isMessageListOpen) {
+          handleSearchFocus();
+        }
       }
     }
 
@@ -183,7 +191,7 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasMenu, onReset]);
+  }, [isMessageListOpen, handleSearchFocus]);
 
   /* const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
 
