@@ -217,8 +217,8 @@ interface HomePageProps {
   handleOpenAutomationSettings: () => void;
   handleOpenWorkspaceSettings: () => void;
   handleSelectWorkspace: (workspaceId: string) => void;
-  savedWorkspaces: Workspace[];
   currentWorkspace: Workspace;
+  allWorkspaces: Workspace[];
   renderWorkspaceIcon: (workspace: Workspace) => JSX.Element | undefined;
   currentChatId?: string;
   handleToggleChatUnread: () => void;
@@ -241,8 +241,8 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
-  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings,
-  handleOpenWorkspaceSettings, handleSelectWorkspace, savedWorkspaces, currentWorkspace, renderWorkspaceIcon,
+  handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings, allWorkspaces,
+  handleOpenWorkspaceSettings, handleSelectWorkspace, currentWorkspace, renderWorkspaceIcon,
   currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone, showNotification,
 }) => {
   const lang = useLang();
@@ -313,7 +313,7 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Navigation">
-        {savedWorkspaces.map((workspace) => {
+        {allWorkspaces.map((workspace) => {
           if (workspace.id !== currentWorkspace.id) {
             return (
               <Command.Item
@@ -512,6 +512,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
   const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
   const isCurrentChatDone = currentChat && isChatDone(currentChat);
+  const allWorkspaces = [
+    ...savedWorkspaces,
+    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
+  ];
 
   const openAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(true);
@@ -678,7 +682,9 @@ const CommandMenu: FC<CommandMenuProps> = ({
       return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
     } else if (workspace.id !== 'personal') {
       return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
-    }
+    } else if (workspace.id === 'personal') {
+      return <div className="placeholder">P</div>;
+    } // Placeholder для персонал воркспейса
     return undefined;
   };
 
@@ -935,7 +941,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
                   handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
                   handleSelectWorkspace={handleSelectWorkspace}
-                  savedWorkspaces={savedWorkspaces}
                   currentWorkspace={currentWorkspace}
                   renderWorkspaceIcon={renderWorkspaceIcon}
                   currentChatId={currentChatId}
@@ -944,6 +949,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   isChatUnread={isChatUnread}
                   isCurrentChatDone={isCurrentChatDone}
                   showNotification={showNotification}
+                  allWorkspaces={allWorkspaces}
                 />
                 <AllUsersAndChats
                   close={close}
