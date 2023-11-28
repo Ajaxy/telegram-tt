@@ -145,7 +145,7 @@ const useChatContextActions = ({
         handler: () => {
           doneChat({ id: chat.id, value: false });
           if (track) {
-            track('Mark as not done', { source: 'Chat Context Menu' });
+            track('Mark as not Done', { source: 'Chat Context Menu' });
           }
         },
       }
@@ -155,7 +155,7 @@ const useChatContextActions = ({
         handler: () => {
           doneChat({ id: chat.id, value: true });
           if (track) {
-            track('Mark as done', { source: 'Chat Context Menu' });
+            track('Mark as Done', { source: 'Chat Context Menu' });
           }
         },
       };
