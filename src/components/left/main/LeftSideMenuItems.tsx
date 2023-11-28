@@ -31,6 +31,7 @@ import { IS_ELECTRON, IS_MAC_OS } from '../../../util/windowEnvironment';
 
 import useCommands from '../../../hooks/useCommands';
 import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
@@ -136,6 +137,7 @@ const LeftSideMenuItems = ({
 
   const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
   const { showNotification } = getActions();
+  const { track } = useJune();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
     saveCurrentWorkspaceToLocalStorage(workspaceId);
     showNotification({ message: 'Workspace is changing...' });
@@ -145,7 +147,8 @@ const LeftSideMenuItems = ({
       }
       return prevHistory;
     });
-  }, []);
+    if (track) { track('Switch workspace', { source: 'Left Side Menu' }); }
+  }, [track]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

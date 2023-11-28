@@ -13,6 +13,7 @@ import {
 } from '../../global/helpers';
 import renderText from './helpers/renderText';
 
+import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 
 interface FolderPageProps {
@@ -29,6 +30,7 @@ const FolderPage: React.FC<FolderPageProps> = ({
   const chatsById = global.chats.byId;
   const usersById: Record<string, ApiUser> = global.users.byId;
   const { openChat } = getActions();
+  const { track } = useJune();
 
   const lang = useLang();
 
@@ -37,7 +39,10 @@ const FolderPage: React.FC<FolderPageProps> = ({
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });
     close();
-  }, [openChat, close]);
+    if (track) {
+      track('Use folder search in Сommand Menu');
+    }
+  }, [close, track]);
 
   const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
 

@@ -16,6 +16,7 @@ import { convertLayout } from '../../util/convertLayout';
 import { unique } from '../../util/iteratees';
 import renderText from './helpers/renderText';
 
+import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 
 const AllUsersAndChats: React.FC<{
@@ -33,6 +34,7 @@ const AllUsersAndChats: React.FC<{
   const chatsById: Record<string, ApiChat> = global.chats.byId;
   const { openChat, addRecentlyFoundChatId } = getActions();
   const SEARCH_CLOSE_TIMEOUT_MS = 250;
+  const { track } = useJune();
 
   const lang = useLang();
 
@@ -99,7 +101,10 @@ const AllUsersAndChats: React.FC<{
     openChat({ id, shouldReplaceHistory: true });
     setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
     close();
-  }, [openChat, addRecentlyFoundChatId, close]);
+    if (track) {
+      track('Use global search in Сommand Menu');
+    }
+  }, [close, track]);
 
   const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
 

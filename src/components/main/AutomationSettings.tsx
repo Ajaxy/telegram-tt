@@ -9,6 +9,7 @@ import { getActions, getGlobal } from '../../global';
 
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
+import { useJune } from '../../hooks/useJune';
 import useKeywordFolderRule from '../../hooks/useKeywordFolderRule';
 
 import RuleCard from './RuleCard';
@@ -42,6 +43,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
   const [isActive, setIsActive] = useState(false);
   const [canSave, setCanSave] = useState(false);
   const [isDuplicateError, setIsDuplicateError] = useState(false);
+  const { track } = useJune();
 
   // Функция для проверки на дубликаты
   const checkForDuplicates = useCallback((currentKeyword: string, currentFolderId: number) => {
@@ -124,10 +126,13 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
       setKeyword('');
       setSelectedFolderId(undefined);
       setIsDuplicateError(false);
+      if (track) {
+        track('Create folder automation rule');
+      }
     } else {
       //
     }
-  }, [selectedFolderId, keyword, isDuplicateError, addRule, setKeyword, unsavedChanges]);
+  }, [unsavedChanges, selectedFolderId, keyword, isDuplicateError, addRule, setKeyword, track]);
 
   const handleRemove = useCallback((ruleIndex: number) => {
     const updatedRules = rules.filter((_, index) => index !== ruleIndex);
