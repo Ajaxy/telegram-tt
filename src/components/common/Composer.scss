@@ -678,6 +678,7 @@
     padding: calc((var(--base-height, 3.5rem) - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
     white-space: pre-wrap;
     height: auto;
+    caret-color: var(--color-primary);
 
     @media (max-width: 600px) {
       padding: calc((2.875rem - var(--composer-text-size, 1rem) * 1.3125) / 2) 0;
