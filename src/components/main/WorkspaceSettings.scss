@@ -47,6 +47,10 @@
     }
 
   }
+
+  body.is-macos.is-electron .back-button-settins {
+    margin-top: 2.5rem;
+  }
 }
 
 .workspaceCreator {
