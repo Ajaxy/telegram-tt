@@ -7,8 +7,6 @@ import { selectCurrentChat, selectTabState } from '../global/selectors';
 import useArchiver from './useArchiver';
 import { useStorage } from './useStorage';
 
-const EVENT_NAME = 'update_chat_done';
-
 const shouldBeDone = (chat: ApiChat) => {
   return chat.isMuted || !(
     chat.hasUnreadMark
@@ -19,15 +17,15 @@ const shouldBeDone = (chat: ApiChat) => {
 };
 
 export default function useDone() {
-  const { archiveChat } = useArchiver({ isManual: true });
+  const { archiveChat, archiveChats } = useArchiver({ isManual: true });
   const {
     openChat, closeForumPanel, showNotification,
   } = getActions();
   const { doneChatIds, setDoneChatIds, isArchiveWhenDoneEnabled } = useStorage();
 
-  const isChatDone = (chat: ApiChat) => {
+  const isChatDone = useCallback((chat: ApiChat) => {
     return doneChatIds.includes(chat.id);
-  };
+  }, [doneChatIds]);
 
   const doneChat = useCallback(({
     id, value, isClose = true, isNotification = true,
@@ -82,7 +80,7 @@ export default function useDone() {
     }
   }, [archiveChat, doneChatIds, isArchiveWhenDoneEnabled, setDoneChatIds]);
 
-  const doneAllReadChats = () => {
+  const doneAllReadChats = useCallback(() => {
     const global = getGlobal();
     const allChatsIds = [
       ...(global.chats.listIds.active || []),
@@ -98,14 +96,23 @@ export default function useDone() {
     }
     if (chatIdsToBeDone.length) {
       setDoneChatIds([...doneChatIds, ...chatIdsToBeDone]);
+
+      if (isArchiveWhenDoneEnabled) {
+        archiveChats(chatIdsToBeDone);
+      }
     }
-  };
+  }, [archiveChats, doneChatIds, isArchiveWhenDoneEnabled, isChatDone, setDoneChatIds]);
 
   return { doneChat, isChatDone, doneAllReadChats };
 }
 
+const EVENT_NAME = 'update_chat_done';
+
 export function useDoneUpdates() {
-  const { doneChatIds, setDoneChatIds, isAutoDoneEnabled } = useStorage();
+  const {
+    doneChatIds, setDoneChatIds, isAutoDoneEnabled, isArchiveWhenDoneEnabled,
+  } = useStorage();
+  const { archiveChat } = useArchiver({ isManual: true });
 
   useEffect(() => {
     const listener = (e: any) => {
@@ -115,13 +122,24 @@ export function useDoneUpdates() {
           setDoneChatIds(doneChatIds.filter((chatId: string) => chatId !== chat.id));
         }
         if (isAutoDoneEnabled && !doneChatIds.includes(chat.id) && shouldBeDone(chat)) {
+          // may be rewritten to `doneChat`
           setDoneChatIds([...doneChatIds, chat.id]);
+          if (isArchiveWhenDoneEnabled) {
+            setTimeout(() => {
+              archiveChat({
+                id: chat.id,
+                value: true,
+                isClose: false,
+                isNotification: false,
+              });
+            }, 200);
+          }
         }
       }
     };
     window.addEventListener(EVENT_NAME, listener);
     return () => window.removeEventListener(EVENT_NAME, listener);
-  }, [doneChatIds, setDoneChatIds, isAutoDoneEnabled]);
+  }, [doneChatIds, setDoneChatIds, isAutoDoneEnabled, archiveChat, isArchiveWhenDoneEnabled]);
 }
 
 export function updateChatDone(chat: ApiChat) {

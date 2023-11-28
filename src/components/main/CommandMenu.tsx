@@ -499,7 +499,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     isArchiveWhenDoneEnabled, setIsArchiveWhenDoneEnabled,
     isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
-  const { archiveMessages } = useArchiver({ isManual: true });
+  const { archiveChats } = useArchiver({ isManual: true });
   const { doneAllReadChats, doneChat, isChatDone } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
@@ -792,13 +792,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, [currentChatId, doneChat, close, track]);
 
   const commandArchiveAll = useCallback(() => {
-    showNotification({ message: 'All read chats will be archived!' });
-    archiveMessages();
+    showNotification({ message: 'All older than 24 hours will be archived!' });
+    archiveChats();
     close();
     if (track) {
       track('Use "Archive all read chats" command');
     }
-  }, [close, archiveMessages, track]);
+  }, [close, archiveChats, track]);
 
   const getFolderName = (id: number | null) => {
     // eslint-disable-next-line no-null/no-null

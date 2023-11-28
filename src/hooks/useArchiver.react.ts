@@ -132,5 +132,5 @@ export default function useArchiver({ isManual }: { isManual: boolean }) {
     }
   }, [openChat, closeForumPanel, track]);
 
-  return { archiveMessages: processArchiver, archiveChat };
+  return { archiveChats: processArchiver, archiveChat };
 }
