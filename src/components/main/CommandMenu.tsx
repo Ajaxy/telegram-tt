@@ -251,14 +251,6 @@ const HomePage: React.FC<HomePageProps> = ({
       {
         currentChatId && (
           <Command.Group>
-            <Command.Item onSelect={handleToggleChatUnread}>
-              <i className={`icon ${isChatUnread ? 'icon-unread' : 'icon-readchats'}`} />
-              <span>{lang(isChatUnread ? 'MarkAsRead' : 'MarkAsUnread')}</span>
-              <span className="shortcuts">
-                <span className="kbd">⌘</span>
-                <span className="kbd">U</span>
-              </span>
-            </Command.Item>
             {
               !isCurrentChatDone && (
                 <Command.Item onSelect={handleDoneChat}>
@@ -270,6 +262,14 @@ const HomePage: React.FC<HomePageProps> = ({
                 </Command.Item>
               )
             }
+            <Command.Item onSelect={handleToggleChatUnread}>
+              <i className={`icon ${isChatUnread ? 'icon-unread' : 'icon-readchats'}`} />
+              <span>{lang(isChatUnread ? 'MarkAsRead' : 'MarkAsUnread')}</span>
+              <span className="shortcuts">
+                <span className="kbd">⌘</span>
+                <span className="kbd">U</span>
+              </span>
+            </Command.Item>
           </Command.Group>
         )
       }
