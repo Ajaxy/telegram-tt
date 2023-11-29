@@ -10,7 +10,7 @@
   "--color-background-secondary": ["#e0e2e5", "#0F0F0F"],
   "--color-background-secondary-accent": ["#cdcfd1", "#100f10"],
   "--color-background-own": ["#ECEEF2", "#191A1C"],
-  "--color-background-own-apple": ["#191A1C", "#191A1C"],
+  "--color-background-own-apple": ["#ECEEF2", "#191A1C"],
   "--color-background-selected": ["#2C2C2C", "#2C2C2C"],
   "--color-background-own-selected": ["#606ACB", "#606ACB"],
   "--color-chat-hover": ["#FBFCFF", "#24232380"],
