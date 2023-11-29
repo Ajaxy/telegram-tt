@@ -11,7 +11,8 @@
   }
 
   :global(html.theme-light) & {
-    background-image: url('../assets/chat-bg-br.png');
+     // background-image: url('../assets/chat-bg-br.png');
+     background-color: #ECEEF2;
   }
 
   &::before {

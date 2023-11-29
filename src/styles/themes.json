@@ -39,7 +39,7 @@
   "--color-reply-own-hover-apple": ["#ffffff1a", "#ffffff1a"],
   "--color-reply-own-active": ["#ffffff33", "#ffffff33"],
   "--color-reply-own-active-apple": ["#ffffff33", "#ffffff33"],
-  "--color-accent-own": ["#e3e3eb", "#e3e3eb"],
+  "--color-accent-own": ["#878C92", "#e3e3eb"],
   "--color-message-meta-own": ["#878C92", "#FFFFFF88"],
   "--color-own-links": ["#475aa0", "#d15e64"],
   "--color-code": ["#475aa0", "#d15e64"],
@@ -64,7 +64,7 @@
   "--color-topic-grey": ["#6b6b6b", "#999999"],
   "--color-forum-unread-topic-hover": ["#C6C7CB", "#363636"],
   "--color-forum-hover-unread-topic-hover": ["#C6C7CB", "#3f3f3f"],
-  "--color-chat-username": ["#E9EEF4", "#E9EEF4"],
+  "--color-chat-username": ["#475aa0", "#E9EEF4"],
   "--color-borders-read-story": ["#737373", "#737373"],
   "--color-cmdk": ["#fefffe7f", "#16161699"]
 }
