@@ -48,6 +48,7 @@ export type OwnProps = {
   noPreventDefault?: boolean;
   shouldStopPropagation?: boolean;
   style?: string;
+  hotkey?: string;
   onClick?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onMouseDown?: (e: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -101,6 +102,7 @@ const Button: FC<OwnProps> = ({
   noPreventDefault,
   shouldStopPropagation,
   style,
+  hotkey,
 }) => {
   // eslint-disable-next-line no-null/no-null
   let elementRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
@@ -208,6 +210,11 @@ const Button: FC<OwnProps> = ({
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       ) : children}
+      {hotkey && (
+        <div className="hotkey-frame">
+          <div className="hotkey-text">{hotkey}</div>
+        </div>
+      )}
       {!disabled && ripple && (
         <RippleEffect />
       )}

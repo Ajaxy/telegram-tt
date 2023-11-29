@@ -244,7 +244,7 @@ const PollModal: FC<OwnProps> = ({
         >
           {lang('Create')}
           <div className="hotkey-frame">
-            <div className="hotkey-icon"></div>
+            <div className="enter-hotkey-icon"></div>
           </div>
         </Button>
       </div>
