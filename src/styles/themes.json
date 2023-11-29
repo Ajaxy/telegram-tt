@@ -66,10 +66,10 @@
   "--color-forum-hover-unread-topic-hover": ["#FBFCFF", "#3f3f3f"],
   "--color-chat-username": ["#E9EEF4", "#E9EEF4"],
   "--color-borders-read-story": ["#737373", "#737373"],
-  "--color-box-shadow-1": ["#00000066", "#00000066"],
-  "--color-box-shadow-2": ["#0000001f", "#0000001f"],
-  "--color-box-shadow-3": ["#0000001f", "#0000001f"],
-  "--color-box-shadow-4": ["#ffffff0f", "#ffffff0f"],
-  "--color-box-shadow-5": ["#ffffff29", "#ffffff29"],
-  "--color-box-shadow-6": ["#00000029", "#00000029"]
+  "--color-box-shadow-1": ["#00000014", "#00000066"],
+  "--color-box-shadow-2": ["#00000014", "#0000001f"],
+  "--color-box-shadow-3": ["#0000000f", "#0000001f"],
+  "--color-box-shadow-4": ["#fff", "#ffffff0f"],
+  "--color-box-shadow-5": ["#fff", "#ffffff29"],
+  "--color-box-shadow-6": ["#0000000f", "#00000029"]
 }
