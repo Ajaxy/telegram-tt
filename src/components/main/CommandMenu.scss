@@ -32,14 +32,23 @@
   max-width: 640px;
   width: 100%;
   padding: 8px;
-  background: rgba(22, 22, 22, 0.6);
+  background: var(--color-cmdk);
   border-radius: 8px;
-  backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
+  /* backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%); */
   overflow: hidden;
   font-family: var(--font-sans);
   border: 1px solid var(--color-borders);
   box-shadow: var(--cmdk-shadow);
   transition: transform 100ms ease;
+}
+
+
+.theme-light [cmdk-root] {
+  backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
+}
+
+.theme-dark [cmdk-root] {
+  backdrop-filter: blur(23px) saturate(190%) contrast(70%) brightness(80%);
 }
 
 [cmdk-input] {
@@ -63,12 +72,12 @@
 
 [cmdk-vercel-badge] {
   height: 20px;
-  background: rgba(255,255,255, 0.1);
+  background: var(--color-interactive-element-hover);
   display: inline-flex;
   align-items: center;
   padding: 0 8px;
   font-size: 12px;
-  color: var(--gray11);
+  color: var(--color-gray);
   border-radius: 4px;
   margin: 4px 0 4px 4px;
   user-select: none;
@@ -94,7 +103,7 @@
   transition-property: none;
 
   &[data-selected='true'] {
-    background: #ffffff14;
+    background: var(--color-interactive-element-hover);
 
     .icon {
       color: var(--color-text);
@@ -109,7 +118,7 @@
 
   &:active {
     transition-property: background;
-    background: var(--color-chat-active);
+    background: var(--color-interactive-element-hover);
   }
 
   & + [cmdk-item] {
@@ -136,8 +145,8 @@
     border-radius: 0.375rem;
     width: 20px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.094);
-    color: rgba(255, 255, 255, 0.443);
+    background: var(--color-interactive-element-hover);
+    color: var(--color-text);
     font-size: 0.8125rem;
     font-weight: bold;
   }
@@ -192,7 +201,7 @@
 [cmdk-group-heading] {
   user-select: none;
   font-size: 12px;
-  color: #aaa;
+  color: var(--color-text-secondary);
   padding: 0 8px;
   display: flex;
   align-items: center;
@@ -237,7 +246,7 @@
   transition-property: none;
 
   &[data-selected='true'] {
-    background: #ffffff14;
+    background: var(--color-interactive-element-hover);
   }
 
   &[data-disabled='true'] {
@@ -247,7 +256,7 @@
 
   &:active {
     transition-property: background;
-    background: var(--color-chat-active);
+    background: var(--color-interactive-element-hover);
   }
 
   & + [cmdk-item] {
@@ -257,7 +266,7 @@
 
 .global-search:hover, .global-search[data-selected='true'] {
   /* Ваши стили для hover, например изменение фона */
-  background: #ffffff14; /* Пример фона при наведении */
+  background: var(--color-interactive-element-hover); /* Пример фона при наведении */
 }
 
 .cmdk-backdrop {
@@ -278,13 +287,13 @@
     font-family: var(--font-sans);
     display: inline-block;
     text-align: center;
-    color: #e3e3eb;
-    background-color: rgb(0 0 0 / 12%);
+    color: var(--color-text);
+    background-color: var(--color-chat-active);
     border: 1px solid;
-    border-color: #ffffff0a;
+    border-color: var(--color-borders);
     border-radius: 3px;
     position: relative;
-    box-shadow: 1px 1px 0px 0px rgba(27, 26, 29, 0.25);
+    box-shadow: 1px 1px 0px 0px var(--color-default-shadow);
     padding: 4px 3px 4px 4px;
     vertical-align: baseline;
     text-transform: capitalize;
@@ -296,12 +305,12 @@
 
 .user-handle {
 margin-left: 0.625rem;
-color: #aaaaaa
+color: var(--color-text-secondary);
  }
 
 .chat-status {
 margin-left: 0.625rem;
-color: #aaaaaa
+color: var(--color-text-secondary);
   }
 
 

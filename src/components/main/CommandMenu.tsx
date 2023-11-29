@@ -789,7 +789,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const handleDoneChat = useCallback(() => {
     if (currentChatId) {
       doneChat({ id: currentChatId });
-      showNotification({ message: 'Chat marked as done' });
       close();
       if (track) {
         track('Mark as Done', { source: 'Сommand Menu' });

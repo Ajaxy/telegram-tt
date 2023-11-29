@@ -11,8 +11,8 @@
     border-radius: 6px; /* или используйте var(--border-radius-default-tiny) если это уместно */
     width: 1.25rem;
     height: 1.25rem;
-    background: rgba(255, 255, 255, 0.094);; /* Серый фон */
-    color: rgba(255, 255, 255, 0.443); /* Цвет текста */
+    background: var(--color-interactive-element-hover); /* Серый фон */
+    color: var(--color-text); /* Цвет текста */
     font-size: 0.8125rem; /* Размер шрифта для первой буквы */
     font-weight: bold;
     margin-right: 0.5rem;
@@ -121,7 +121,7 @@
   &.compact {
     .bubble {
       background: var(--color-background-compact-menu);
-      backdrop-filter: blur(10px);
+      /* backdrop-filter: blur(10px) saturate(190%) contrast(70%) brightness(80%); */
       padding: 0.25rem;
       width: 15rem;
 
@@ -129,6 +129,7 @@
         background: var(--color-background);
         backdrop-filter: none;
       }
+
     }
 
     .footer {
@@ -138,6 +139,14 @@
     &.no-blur .bubble {
       background: var(--color-background);
     }
+  }
+
+  .theme-light &.compact .bubble {
+    backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
+  }
+  
+  .theme-dark &.compact .bubble {
+    backdrop-filter: blur(23px) saturate(190%) contrast(70%) brightness(80%);
   }
 
   .menu-loading-row {

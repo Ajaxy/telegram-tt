@@ -167,7 +167,8 @@ $color-message-story-mention-to: #74bcff;
 
   --color-default-shadow: #72727240;
   --color-light-shadow: #7272722b;
-  --button-shadow: 0px 0px 0px 1px rgba(0,0,0,0.4),0px 1px 1px -1px rgba(0,0,0,0.12),0px 2px 2px -1px rgba(0,0,0,0.12),inset 0px 1px 0px hsla(0,0%,100%,0.06),inset 0px 0px 1px 0px hsla(0,0%,100%,0.16),inset 0px -6px 12px -4px rgba(0,0,0,0.16);
+  --button-shadow-light: 0px 1px 1px -1px #00000014,0px 2px 2px -1px #00000014,0px 0px 0px 1px #0000000f,inset 0px 1px 0px rgb(236 236 236 / 40%),inset 0px 1px 2px 1px rgb(255 255 255 / 40%),inset 0px 1px 2px rgba(0,0,0,0.06);
+  --button-shadow-dark: 0px 0px 0px 1px rgba(0,0,0,0.4),0px 1px 1px -1px rgba(0,0,0,0.12),0px 2px 2px -1px rgba(0,0,0,0.12),inset 0px 1px 0px hsla(0,0%,100%,0.06),inset 0px 0px 1px 0px hsla(0,0%,100%,0.16),inset 0px -6px 12px -4px rgba(0,0,0,0.16);
 
   --color-skeleton-background: rgba(33, 33, 33, 0.15);
   --color-skeleton-foreground: rgba(232, 232, 232, 0.2);

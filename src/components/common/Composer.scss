@@ -305,7 +305,6 @@
   z-index: 1;
   border-radius: var(--border-radius-messages);
   border-bottom-right-radius: 0;
-  box-shadow: var(--button-shadow);
 
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);
@@ -784,4 +783,12 @@
   to {
     opacity: 0.3;
   }
+}
+
+html.theme-light div.composer-wrapper  {
+  box-shadow: var(--button-shadow-light);
+}
+
+html.theme-dark div.composer-wrapper  {
+  box-shadow: var(--button-shadow-dark);
 }

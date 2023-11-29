@@ -25,7 +25,7 @@ import SvgFolderOpen from './SvgFolderOpen';
 import stylesUluChatFolder from '../../../UluChatFolder/UluChatFolder.module.scss';
 import styles from './ChatFolder.module.scss';
 
-const svgFill = 'var(--color-gray)';
+const svgFill = 'var(--color-text-secondary)';
 
 const ChatFolder: FC<{
   children: ReactNode;

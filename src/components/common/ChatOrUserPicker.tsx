@@ -213,6 +213,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             round
             color="translucent"
             size="smaller"
+            className="close-button"
             ariaLabel={lang('Close')}
             onClick={onClose}
           >

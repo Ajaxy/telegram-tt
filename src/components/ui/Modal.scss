@@ -1,3 +1,11 @@
+.theme-light {
+  --backdrop-filter: blur(12px) saturate(190%) contrast(50%) brightness(130%);
+}
+
+.theme-dark {
+  --backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
+}
+
 .Modal {
   position: relative;
   z-index: var(--z-modal);
@@ -72,10 +80,10 @@
     max-width: 35rem;
     min-width: 17.5rem;
     margin: 2rem auto;
-    background: rgba(22, 22, 22, 0.6);
+    background: var(--color-cmdk);
     border: 1px solid var(--color-borders);
-    backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
-    box-shadow: rgba(0, 0, 0, 0.5) 0px 16px 70px;
+    backdrop-filter: var(--backdrop-filter);
+    box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-modal);
     transform: translate3d(0, -1rem, 0);
 
@@ -213,4 +221,8 @@
   .dialog-button-spacer {
     flex-grow: 1;
   }
+}
+
+html.theme-light div.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.15);
 }

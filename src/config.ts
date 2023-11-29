@@ -309,8 +309,8 @@ export const STORY_EXPIRE_PERIOD = 86400; // 1 day
 export const STORY_VIEWERS_EXPIRE_PERIOD = 86400; // 1 day
 export const FRESH_AUTH_PERIOD = 86400; // 1 day
 
-export const LIGHT_THEME_BG_COLOR = '#0F0F0F';
-export const DARK_THEME_BG_COLOR = '#0F0F0F';
+export const LIGHT_THEME_BG_COLOR = '#fefffe';
+export const DARK_THEME_BG_COLOR = '#0E0F0F';
 export const DEFAULT_PATTERN_COLOR = '#0F0F0F';
 export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
 export const PEER_COLOR_BG_OPACITY = '1a';

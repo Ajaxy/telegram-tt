@@ -32,7 +32,7 @@
 
   &.with-reactions &_items {
     background: var(--color-background-compact-menu);
-    backdrop-filter: blur(10px);
+    /* backdrop-filter: blur(10px); */
     box-shadow: 0 0.25rem 0.5rem 0.125rem var(--color-default-shadow);
     border-radius: var(--border-radius-default);
     padding: 0.25rem;
@@ -41,6 +41,14 @@
       background: var(--color-background);
       backdrop-filter: none;
     }
+  }
+
+  .theme-light &.with-reactions &_items {
+    backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
+  }
+  
+  .theme-dark &.with-reactions &_items {
+    backdrop-filter: blur(23px) saturate(190%) contrast(70%) brightness(80%);
   }
 
   .backdrop {
