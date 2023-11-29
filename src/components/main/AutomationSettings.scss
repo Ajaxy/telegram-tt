@@ -7,7 +7,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #0D0D0F;
+  background-color: var(--color-background);
   z-index: var(--z-portal-menu); /* Высокий z-index, чтобы быть поверх всего */
 }
 
@@ -63,7 +63,7 @@ body.is-macos.is-electron .back-button-settins {
   overflow-y: auto; 
 
   .keywordCreatorHeader {
-    color: var(----color-white, #FFF);
+    color: var(--color-text);
     font-size: 1.25rem;
     font-style: normal;
     font-weight: 600;
@@ -73,7 +73,7 @@ body.is-macos.is-electron .back-button-settins {
   }
 
   .keywordCreatorDesc {
-    color: rgba(255, 255, 255, 0.24);
+    color: var(--color-text-secondary);
     font-size: 1rem;
     font-style: normal;
     font-weight: 500;
@@ -95,7 +95,7 @@ body.is-macos.is-electron .back-button-settins {
       padding: 0.5rem 0.75rem 0.5rem 0.75rem;
       align-items: flex-start;
       gap: 0.75rem;
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--color-chat-hover);
       border-radius: 0.375rem;
   
       .ruleCardContent {
@@ -104,7 +104,7 @@ body.is-macos.is-electron .back-button-settins {
         align-items: flex-start;
         gap: 0.125rem;
         flex: 1 0 0;
-        border-left: 1px dashed rgba(255, 255, 255, 0.12);
+        border-left: 1px dashed var(--color-borders);
         padding-left: 0.75rem;
   
   
@@ -115,7 +115,7 @@ body.is-macos.is-electron .back-button-settins {
           align-self: stretch;
   
           .ruleBlockText {
-            color: rgba(255, 255, 255, 0.50);
+            color: var(--color-text-secondary);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -146,7 +146,7 @@ body.is-macos.is-electron .back-button-settins {
           }
   
           .icon {
-            color: rgba(255, 255, 255, 0.24); /* Серый цвет по умолчанию */
+            color: var(-color-gray); /* Серый цвет по умолчанию */
             font-size: 1.5rem;
           }
   
@@ -164,7 +164,7 @@ body.is-macos.is-electron .back-button-settins {
             flex: 1 0 0;
             border-radius: 0.25rem;
             border: none !important;
-            color: rgba(255, 255, 255, 0.80);
+            color: var(--color-text);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -175,18 +175,18 @@ body.is-macos.is-electron .back-button-settins {
 
           .keywordInput:hover {
             border-radius: 0.25rem;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--color-interactive-element-hover);
           
           }
   
           /* Стили для инпута при активном состоянии (пользователь вводит текст) */
           .keywordInput.active {
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--color-interactive-element-hover);
           }
   
           /* Стили для текста в инпуте */
           .keywordInputText {
-            color: rgba(255, 255, 255, 0.80);
+            color: var(--color-text);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -195,7 +195,7 @@ body.is-macos.is-electron .back-button-settins {
   
           /* Стили для плейсхолдера */
           .keywordInput::placeholder {
-            color: rgba(255, 255, 255, 0.24);
+            color: var(--color-text-secondary);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -210,7 +210,7 @@ body.is-macos.is-electron .back-button-settins {
           align-self: stretch;
   
           .ruleBlockText {
-            color: rgba(255, 255, 255, 0.50);
+            color: var(--color-text-secondary);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -226,7 +226,7 @@ body.is-macos.is-electron .back-button-settins {
             cursor: pointer;
 
             .icon {
-              color: rgba(255, 255, 255, 0.24); /* Серый цвет по умолчанию */
+              color: var(--color-gray); /* Серый цвет по умолчанию */
             }
   
             .icon.active {
@@ -237,7 +237,7 @@ body.is-macos.is-electron .back-button-settins {
 
           .folder-selector:hover {
             border-radius: 0.25rem;
-            background: var(--color-chat-hover);
+            background: var(--color-interactive-element-hover);
             
             .icon {
               color: var(--color-text); /* Яркий цвет для активного состояния */
@@ -253,7 +253,7 @@ body.is-macos.is-electron .back-button-settins {
           }
   
           .folderSelect {
-            color: rgba(255, 255, 255, 0.24);
+            color: var(--color-text);
             font-size: 1rem;
             font-style: normal;
             font-weight: 500;
@@ -295,13 +295,13 @@ body.is-macos.is-electron .back-button-settins {
     align-items: center;
     gap: 0.75rem;
     border-radius: 0.375rem;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-interactive-element-hover);
     border: none !important;
     outline: none;
   
 
     .saveButtonText {
-      color: rgba(255, 255, 255, 0.24);
+      color: var(--color-text-secondary);
       font-size: 1rem;
       font-style: normal;
       font-weight: 500;

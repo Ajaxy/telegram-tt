@@ -1,7 +1,7 @@
 /* FolderSelector.css */
 .folderSelector {
   width: 480px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-interactive-element-hover);
   border-radius: 6px;
   margin-top: 1rem;
 }
@@ -16,7 +16,7 @@
 }
 
 .folderItem:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-background-compact-menu-hover);
 }
 
 .icon-wrapper {
@@ -34,7 +34,7 @@
 
 .folderTitle {
   flex-grow: 1;
-  color: white;
+  color:var(--color-text);
   font-size: 16px;
   line-height: 24px;
 }
@@ -50,7 +50,7 @@
 }
 
 .selectedCheckmark i {
-  color: white;
+  color: var(--color-white);
 }
 
 .unselectedCheckmark {
@@ -59,9 +59,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.12) /* Серый цвет галочки */
 }
 
 .unselectedCheckmark i {
-  color: inherit; /* Наследует цвет от .unselectedCheckmark */
+  color: var(--color-gray);
 }
