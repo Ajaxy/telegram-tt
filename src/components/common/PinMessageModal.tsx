@@ -120,6 +120,7 @@ const PinMessageModal: FC<OwnProps & StateProps> = ({
         </Button>
         <Button
           className="confirm-dialog-button"
+          color="secondary"
           isText
           onClick={onClose}
         >
