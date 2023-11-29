@@ -13,7 +13,7 @@
   "--color-background-own-apple": ["#ECEEF2", "#191A1C"],
   "--color-background-selected": ["#2C2C2C", "#2C2C2C"],
   "--color-background-own-selected": ["#606ACB", "#606ACB"],
-  "--color-chat-hover": ["#fbfcff80", "#24232380"],
+  "--color-chat-hover": ["#fbfcff80", "##ffffff0a"],
   "--color-chat-active": ["#FBFCFF", "#ffffff14"],
   "--color-chat-active-greyed": ["#9288d3", "#9288d3"],
   "--color-item-active": ["#fbfcff80", "#292929"],
