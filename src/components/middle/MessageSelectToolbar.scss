@@ -97,7 +97,7 @@
     }
 
     > .Button {
-      width: 3rem;
+      width: auto;
       height: 3rem;
 
       @media (max-width: 600px) {
@@ -124,7 +124,7 @@
     display: flex;
 
     .item {
-      width: 100%;
+      width: auto;
       background: none;
       border: none !important;
       box-shadow: none !important;
@@ -140,7 +140,7 @@
       unicode-bidi: plaintext;
 
       padding: 0.6875rem;
-      border-radius: 50%;
+      border-radius: var(--border-radius-default);
 
       .icon {
         font-size: 1.5rem;

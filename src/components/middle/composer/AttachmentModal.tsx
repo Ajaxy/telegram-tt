@@ -624,7 +624,7 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               >
                 {shouldSchedule ? lang('Next') : lang('Send')}
                 <div className="hotkey-frame">
-                  <div className="hotkey-icon"></div>
+                  <div className="enter-hotkey-icon"></div>
                 </div>
               </Button>
               {canShowCustomSendMenu && (
