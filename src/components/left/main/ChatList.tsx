@@ -227,6 +227,7 @@ const ChatList: FC<OwnProps> = ({
           isPinned={isPinned}
           isDone={isDone}
           folderId={folderId}
+          isInbox={isInbox}
           animationType={getAnimationType(id)}
           orderDiff={orderDiffById[id]}
           offsetTop={offsetTop}

@@ -72,6 +72,7 @@ import './Chat.scss';
 type OwnProps = {
   chatId: string;
   folderId?: number;
+  isInbox?: boolean;
   orderDiff: number;
   animationType: ChatAnimationTypes;
   isPinned?: boolean;
@@ -105,6 +106,7 @@ type StateProps = {
 const Chat: FC<OwnProps & StateProps> = ({
   chatId,
   folderId,
+  isInbox,
   orderDiff,
   animationType,
   isPinned,
@@ -221,6 +223,7 @@ const Chat: FC<OwnProps & StateProps> = ({
     handleChatFolderChange,
     handleReport,
     folderId,
+    isInbox,
     isPinned,
     isMuted,
     canChangeFolder,
