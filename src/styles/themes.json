@@ -28,7 +28,7 @@
   "--color-links": ["#d15e64", "#d15e64"],
   "--color-gray": ["#717579", "#717579"],
   "--color-list-icon": ["#A2A2A2", "#A2A2A2"],
-  "--color-default-shadow": ["#1010109c", "#1010109c"],
+  "--color-default-shadow": ["#00000016", "#1010109c"],
   "--color-light-shadow": ["#00000040", "#00000040"],
   "--color-green": ["#606ACB", "#606ACB"],
   "--color-green-darker": ["#606ACB", "#606ACB"],
