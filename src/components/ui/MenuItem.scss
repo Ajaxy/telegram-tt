@@ -136,10 +136,10 @@
     transition: 0.15s ease-in-out transform;
 
     &.compact.secondary {
-      color: rgba(255, 255, 255, 0.24);
+      color: var(--color-text-secondary);
 
       &:hover {
-        color: rgba(255, 255, 255, 0.64);
+        color: var(--color-text);
       }
 
       .icon {

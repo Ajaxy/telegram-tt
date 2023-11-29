@@ -343,7 +343,6 @@
   &.has-background,
   .is-album & {
     background: var(--background-color);
-    box-shadow: var(--button-shadow);
   }
 
   &.has-solid-background {
@@ -990,4 +989,12 @@ blockquote, .blockquote {
     background-position-x: var(--background-gradient-size);
     opacity: 1;
   }
+}
+
+html.theme-light div.message-content  {
+  box-shadow: var(--button-shadow-light);
+}
+
+html.theme-dark div.message-content  {
+  box-shadow: var(--button-shadow-dark);
 }

@@ -1,3 +1,12 @@
+.theme-light {
+  --button-shadow: var(--button-shadow-light);
+}
+
+.theme-dark {
+  --button-shadow: var(--button-shadow-dark);
+}
+
+
 @mixin active-styles() {
   &:not(.disabled):not(:disabled) {
     &:active,
@@ -150,7 +159,7 @@
 
     &.primary {
       color: var(--color-text);
-      background-color: rgb(255 255 255 / 4%);
+      background-color: rgb(255 255 255 / 34%);
       cursor: pointer;
 
       @include active-styles() {

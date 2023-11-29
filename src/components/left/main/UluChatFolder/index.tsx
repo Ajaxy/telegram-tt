@@ -34,7 +34,7 @@ const UluChatFolder: FC<OwnProps> = ({
     active && styles.active,
     !!messagesUnreadCount && shouldStressUnreadMessages && styles['has-unread-messages'],
   );
-  const svgFill = active ? 'var(--color-white)' : 'var(--color-gray)';
+  const svgFill = active ? 'var(--color-text)' : 'var(--color-text-secondary)';
 
   // TODO use <ListItem/> with <Ripple/>
   return (

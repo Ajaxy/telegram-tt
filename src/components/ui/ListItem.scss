@@ -143,13 +143,13 @@
       @media (hover: hover) {
         &:hover,
         &:focus {
-          --background-color: #ffffff0a;
+          --background-color: var(--color-chat-hover);
         }
       }
 
       @media (max-width: 600px) {
         &.active {
-          --background-color: var(--color-chat-hover);
+          --background-color: var(--color-chat-active);
         }
       }
     }
