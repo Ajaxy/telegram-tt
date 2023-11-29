@@ -21,7 +21,7 @@
   "--color-text-secondary": ["#5c5e63", "#AAAAAA"],
   "--color-icon-secondary": ["#5c5e63", "#AAAAAA"],
   "--color-text-secondary-apple": ["#5c5e63", "#AAAAAA"],
-  "--color-borders": ["#303030", "#303030"],
+  "--color-borders": ["#e3e3e3", "#303030"],
   "--color-borders-input": ["#5B5B5A", "#5B5B5A"],
   "--color-dividers": ["#3B3B3D", "#3B3B3D"],
   "--color-dividers-android": ["#0F0F0F", "#0F0F0F"],
