@@ -17,9 +17,14 @@
     display: flex;
     align-items: center;
     padding: 0.25rem 0.5rem;
+    border-bottom: 2px solid var(--color-borders);
 
     .Button {
       margin-right: 0.5rem;
+    }
+
+    .close-button {
+      display: none;
     }
 
     .input-group {
@@ -30,7 +35,7 @@
     .form-control {
       border: none;
       box-shadow: none !important;
-
+      background: transparent;
       height: 2.75rem;
       padding: 0.5rem;
       font-size: 1.25rem;
@@ -55,6 +60,7 @@
       overflow-x: hidden;
       overflow-y: auto;
       padding: 0 0.5rem;
+      margin-top: 0.5rem;
 
       body.is-ios &,
       body.is-android & {
