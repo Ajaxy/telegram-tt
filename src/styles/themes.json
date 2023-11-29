@@ -4,9 +4,9 @@
   "--color-primary-opacity-hover": ["#8378DBA0", "#8378DBA0"],
   "--color-primary-shade": ["#E9666F", "#E9666F"],
   "--color-background": ["#ECEEF2", "#141515"],
-  "--color-background-compact-menu": ["#212121DD", "#212121DD"],
-  "--color-background-compact-menu-reactions": ["#212121DD", "#212121DD"],
-  "--color-background-compact-menu-hover": ["#FFFFFF0D", "#FFFFFF0D"],
+  "--color-background-compact-menu": ["#fefffe7f", "#212121DD"],
+  "--color-background-compact-menu-reactions": ["#fefffe7f", "#212121DD"],
+  "--color-background-compact-menu-hover": ["#5c5e6314", "#FFFFFF0D"],
   "--color-background-secondary": ["#e0e2e5", "#0F0F0F"],
   "--color-background-secondary-accent": ["#cdcfd1", "#100f10"],
   "--color-background-own": ["#ECEEF2", "#191A1C"],
@@ -65,5 +65,11 @@
   "--color-forum-unread-topic-hover": ["#363636", "#363636"],
   "--color-forum-hover-unread-topic-hover": ["#FBFCFF", "#3f3f3f"],
   "--color-chat-username": ["#E9EEF4", "#E9EEF4"],
-  "--color-borders-read-story": ["#737373", "#737373"]
+  "--color-borders-read-story": ["#737373", "#737373"],
+  "--color-box-shadow-1": ["#00000066", "#00000066"],
+  "--color-box-shadow-2": ["#0000001f", "#0000001f"],
+  "--color-box-shadow-3": ["#0000001f", "#0000001f"],
+  "--color-box-shadow-4": ["#ffffff0f", "#ffffff0f"],
+  "--color-box-shadow-5": ["#ffffff29", "#ffffff29"],
+  "--color-box-shadow-6": ["#00000029", "#00000029"]
 }

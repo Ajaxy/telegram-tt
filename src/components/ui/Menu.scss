@@ -121,7 +121,7 @@
   &.compact {
     .bubble {
       background: var(--color-background-compact-menu);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px) saturate(190%) contrast(70%) brightness(80%);
       padding: 0.25rem;
       width: 15rem;
 
