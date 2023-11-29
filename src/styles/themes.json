@@ -69,7 +69,7 @@
   "--color-box-shadow-1": ["#00000014", "#00000066"],
   "--color-box-shadow-2": ["#00000014", "#0000001f"],
   "--color-box-shadow-3": ["#0000000f", "#0000001f"],
-  "--color-box-shadow-4": ["#fff", "#ffffff0f"],
-  "--color-box-shadow-5": ["#fff", "#ffffff29"],
+  "--color-box-shadow-4": ["#ffffff", "#ffffff0f"],
+  "--color-box-shadow-5": ["#ffffff", "#ffffff29"],
   "--color-box-shadow-6": ["#0000000f", "#00000029"]
 }
