@@ -21,6 +21,7 @@ const useChatContextActions = ({
   chat,
   user,
   folderId,
+  isInbox,
   isPinned,
   isMuted,
   canChangeFolder,
@@ -32,6 +33,7 @@ const useChatContextActions = ({
   chat: ApiChat | undefined;
   user: ApiUser | undefined;
   folderId?: number;
+  isInbox?: boolean;
   isPinned?: boolean;
   isMuted?: boolean;
   canChangeFolder?: boolean;
@@ -205,16 +207,16 @@ const useChatContextActions = ({
       !isSelf && !isServiceNotifications && !isInFolder && actionDone,
       actionMaskAsRead,
       actionMarkAsUnread,
-      !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
+      !isInbox && !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       !isSelf && actionMute,
-      actionPin,
-      actionAddToFolder,
+      !isInbox && actionPin,
+      !isInbox && actionAddToFolder,
       actionReport,
-      actionDelete,
+      !isInbox && actionDelete,
     ]) as MenuItemContextAction[];
   }, [
     chat, user, canChangeFolder, lang, handleChatFolderChange, isPinned, isInSearch, isMuted,
-    handleDelete, handleMute, handleReport, folderId, isSelf, isServiceNotifications,
+    handleDelete, handleMute, handleReport, folderId, isInbox, isSelf, isServiceNotifications,
     isChatDone, doneChat, archiveChat, snooze, track,
   ]);
 };
