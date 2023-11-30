@@ -17,7 +17,7 @@ import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
 import { ALL_FOLDER_ID } from '../../../../config';
-import { selectCanShareFolder } from '../../../../global/selectors';
+import { selectCanShareFolder, selectCurrentChat } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
 import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManager';
@@ -50,7 +50,7 @@ type StateProps = {
   maxFolders: number;
   currentWorkspace: Workspace;
   savedWorkspaces: Workspace[];
-
+  currentChat: ApiChat | undefined;
 };
 
 // TODO clean-up
@@ -64,6 +64,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
   maxFolderInvites,
   currentWorkspace,
   savedWorkspaces,
+  currentChat,
 }) => {
   const lang = useLang();
 
@@ -214,6 +215,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           isPinned: chat.isPinned,
           folderId: chat.folderId,
           isFolder: false,
+          isCurrentChat: currentChat && chat.id === currentChat.id,
           // isFolder: isChatSuperGroupWithTopics(chat),
           canRename: false,
           children: undefined, // TODO threads for supergroups
@@ -255,7 +257,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         } as TreeItemChat<any>,
       } as Record<TreeItemIndex, TreeItemChat<any>>,
     };
-  }, [folders]);
+  }, [folders, currentChat]);
 
   const classNameInfiniteScroll = buildClassName(
     'custom-scroll',
@@ -285,6 +287,8 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
 export default withGlobal(
   (global): StateProps => {
+    const currentChat = selectCurrentChat(global);
+
     // Получение текущего воркспейса и списка сохраненных воркспейсов
     const currentWorkspaceId = localStorage.getItem('currentWorkspace');
     const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
@@ -329,6 +333,7 @@ export default withGlobal(
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
       currentWorkspace,
       savedWorkspaces,
+      currentChat,
       // archiveSettings,
       // sessions,
     };
