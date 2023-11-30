@@ -193,18 +193,6 @@ const LeftMainHeader: FC<OwnProps & StateProps> = ({
     };
   }, [isMessageListOpen, handleSearchFocus]);
 
-  /* const [isWorkspaceDropdownOpen, setIsWorkspaceDropdownOpen] = useState(false);
-
-  const openWorkspaceDropdown = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log(isWorkspaceDropdownOpen);
-    setIsWorkspaceDropdownOpen(true);
-  }, [isWorkspaceDropdownOpen]);
-
-  const closeWorkspaceDropdown = useCallback(() => {
-    setIsWorkspaceDropdownOpen(false);
-  }, []); */
-
   const MainButton: FC<{ onTrigger: () => void }> = useMemo(() => {
     return ({ onTrigger }) => (
       <UluHeaderProfile

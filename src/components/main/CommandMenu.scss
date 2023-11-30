@@ -206,7 +206,6 @@
   display: flex;
   align-items: center;
   margin-bottom: 8px;
-  margin-top: 8px;
 }
 
 [cmdk-empty] {
@@ -315,6 +314,15 @@ color: var(--color-text-secondary);
 
 
 [cmdk-pinned] {
+  margin-left: auto;
+  font-size: 20px;
+
+  .icon {
+    font-size: 20px;
+  }
+}
+
+[cmdk-selected] {
   margin-left: auto;
   font-size: 20px;
 

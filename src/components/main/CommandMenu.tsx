@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
@@ -33,6 +34,7 @@ import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
 
 import AllUsersAndChats from '../common/AllUsersAndChats';
+import ChangeThemePage from '../common/ChangeThemePage';
 import FolderPage from '../common/FolderPage';
 import AutomationSettings from './AutomationSettings';
 // eslint-disable-next-line import/no-named-as-default
@@ -226,6 +228,7 @@ interface HomePageProps {
   isChatUnread?: boolean;
   isCurrentChatDone?: boolean;
   showNotification: (params: { message: string }) => void;
+  openChangeThemePage: () => void;
 }
 
 interface CreateNewPageProps {
@@ -237,7 +240,7 @@ interface CreateNewPageProps {
 const HomePage: React.FC<HomePageProps> = ({
   commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled, commandToggleFoldersTree,
   commandArchiveAll, commandToggleArchiveWhenDone, isArchiveWhenDoneEnabled,
-  topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled,
+  topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled, openChangeThemePage,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
   handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
@@ -414,6 +417,9 @@ const HomePage: React.FC<HomePageProps> = ({
         </Command.Item>
       </Command.Group>
       <Command.Group heading="Settings">
+        <Command.Item onSelect={openChangeThemePage}>
+          <i className="icon icon-darkmode" /><span>Change interface theme</span>
+        </Command.Item>
         <Command.Item onSelect={commandDoneAll}>
           <i className="icon icon-readchats" /><span>Mark All Read Chats as Done</span>
         </Command.Item>
@@ -526,7 +532,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 
   const openWorkspaceSettings = useCallback((workspaceId?: string) => {
     // eslint-disable-next-line no-console
-    console.log('Opening workspace settings for:', workspaceId || '');
+    console.log(workspaceId || '');
     setWorkspaceSettingsOpen(true);
   }, []);
 
@@ -599,6 +605,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const openFolderPage = useCallback((id) => { // Замена folderId на id
     setPages([...pages, `folderPage:${id}`]);
   }, [pages]);
+
+  const openChangeThemePage = useCallback(() => {
+    console.log('Opening changeTheme page');
+    setPages(['changeTheme']); // Заменяем массив pages только текущей страницей
+  }, []);
 
   const saveAPIKey = useCallback(() => {
     localStorage.setItem('openai_api_key', inputValue);
@@ -815,6 +826,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
   };
 
   useEffect(() => {
+    console.log('Current pages:', pages);
+  }, [pages]);
+
+  useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
         handleSelectNewGroup();
@@ -866,7 +881,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return undefined;
   };
 
-  // Использование функции для получения названия чата
   const currentChatName = getCurrentChatName();
 
   const CommandMenuInner = (
@@ -880,7 +894,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
         filter={customFilter}
       >
         {pages.map((page) => {
-          if (page !== 'home') {
+          if (page !== 'home' && page !== 'changeTheme') {
             return (
               <div key={page} cmdk-vercel-badge="">
                 {page.startsWith('folderPage') ? `Folder: ${getFolderName(Number(folderId))}` : page}
@@ -949,6 +963,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   isCurrentChatDone={isCurrentChatDone}
                   showNotification={showNotification}
                   allWorkspaces={allWorkspaces}
+                  openChangeThemePage={openChangeThemePage}
                 />
                 <AllUsersAndChats
                   close={close}
@@ -971,6 +986,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
               <FolderPage
                 folderId={Number(folderId)}
                 close={close}
+              />
+            )}
+            {activePage === 'changeTheme' && (
+              <ChangeThemePage
+                close={close}
+                setInputValue={setInputValue}
               />
             )}
           </>

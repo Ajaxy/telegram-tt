@@ -46,10 +46,7 @@ const getUserFullName = (user?: ApiUser) => {
 const UluHeaderProfile: FC<OwnProps & StateProps> = ({
   user, currentWorkspace, userFallbackPhoto, userPersonalPhoto, userProfilePhoto, onClick,
 }) => {
-  console.log('Current Workspace:', currentWorkspace); // Debugging
-  console.log('User:', user); // Debugging
   const isPersonalWorkspace = currentWorkspace?.id === 'personal';
-  console.log('Is Personal Workspace:', isPersonalWorkspace); // Debugging
 
   function renderPhoto() {
     if (isPersonalWorkspace) {
