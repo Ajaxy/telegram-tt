@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useCallback, useEffect } from '../lib/teact/teact';
 import { getActions, getGlobal } from '../global';
 
-import { DEFAULT_LIMITS } from '../config';
-import { selectIsCurrentUserPremium } from '../global/selectors';
+import { selectCurrentLimit } from '../global/selectors/limits';
 
 export type Rule = {
   keyword: string;
@@ -44,8 +43,7 @@ const useKeywordFolderRule = () => {
   const global = getGlobal();
   const chatsById = global.chats.byId;
   const chatFoldersById = global.chatFolders.byId;
-  const isPremium = selectIsCurrentUserPremium(global);
-  const chatsInFolderLimit = DEFAULT_LIMITS.dialogFiltersChats[isPremium ? 1 : 0];
+  const chatsInFolderLimit = selectCurrentLimit(global, 'dialogFiltersChats');
 
   // Функция для обработки правил
   const processRules = useCallback(() => {
