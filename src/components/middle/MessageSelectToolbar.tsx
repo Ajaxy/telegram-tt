@@ -127,11 +127,6 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
             handleDownload();
           }
           break;
-        case 'KeyC':
-          if (!hasProtectedMessage) {
-            handleCopy();
-          }
-          break;
         default:
           break;
       }
@@ -218,7 +213,7 @@ const MessageSelectToolbar: FC<OwnProps & StateProps> = ({
               renderButton('download', lang('lng_media_download'), handleDownload, 'D')
             )}
             {!hasProtectedMessage && (
-              renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy, 'C')
+              renderButton('copy', lang('lng_context_copy_selected_items'), handleCopy)
             )}
             {canDeleteMessages && (
               renderButton('delete', lang('EditAdminGroupDeleteMessages'), openDeleteModal, '⌫', true)
