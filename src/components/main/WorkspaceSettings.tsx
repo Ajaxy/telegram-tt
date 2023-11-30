@@ -31,17 +31,18 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const chatFoldersById = global.chatFolders.byId;
   const orderedFolderIds = global.chatFolders.orderedIds;
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
-
+  const [isInitialized, setIsInitialized] = useState(false); // Новое состояние для отслеживания инициализации
   const [workspaceName, setWorkspaceName] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   // eslint-disable-next-line no-null/no-null
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [hasChanges, setHasChanges] = useState(false);
   const { track } = useJune();
 
   const uploadManager = new UploadManager({
     apiKey: 'public_kW15bndTdL4cidRTCc1sS8rNYQsu',
   });
-
+  const [mode, setMode] = useState<'create' | 'edit'>('create'); // Новая переменная состояния для режима
   const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
   const [selectedFolderIds, setSelectedFolderIds] = useState<number[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -49,20 +50,31 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     showNotification,
   } = getActions();
 
+  const resetState = useCallback(() => {
+    setWorkspaceName('');
+    setLogoUrl('');
+    setSelectedFolderIds([]);
+    setIsCreating(false);
+    setSelectedFile(undefined);
+  }, []);
+
   useEffect(() => {
-    const workspaceIdStr = String(workspaceId);
-
-    const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
-    const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceIdStr);
-
-    if (currentWorkspace) {
-      setWorkspaceName(currentWorkspace.name);
-      setLogoUrl(currentWorkspace.logoUrl);
-      setSelectedFolderIds(currentWorkspace.folders.map(Number));
-    } else {
-      //
+    if (workspaceId) {
+      if (!isInitialized) {
+        const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+        const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceId);
+        if (currentWorkspace) {
+          setWorkspaceName(currentWorkspace.name);
+          setLogoUrl(currentWorkspace.logoUrl);
+          setSelectedFolderIds(currentWorkspace.folders.map(Number));
+        }
+        setIsInitialized(true);
+      }
+    } else if (isInitialized) {
+      resetState();
+      setIsInitialized(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, isInitialized, resetState]);
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -70,7 +82,8 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
 
     setSelectedFile(file);
     const tempUrl = URL.createObjectURL(file);
-    setLogoUrl(tempUrl); // Устанавливаем временный URL для предпросмотра
+    setLogoUrl(tempUrl);
+    setHasChanges(true); // Устанавливаем временный URL для предпросмотра
   };
 
   const close = useCallback(() => {
@@ -92,6 +105,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
         setLogoUrl(finalLogoUrl); // Обновляем URL после загрузки на сервер
         URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
+        setHasChanges(false);
       }
 
       const newWorkspaceData = {
@@ -104,25 +118,30 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
       const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
       if (workspaceId) {
         // Обновляем существующий воркспейс
+        setMode('edit');
         const updatedWorkspaces = savedWorkspaces.map((ws: {
           id: string;
         }) => (ws.id === workspaceId ? newWorkspaceData : ws));
         localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+        close();
         showNotification({ message: 'Workspace updated successfully.' });
       } else {
         // Создаем новый воркспейс
+        setMode('create');
+        resetState();
         localStorage.setItem('workspaces', JSON.stringify([...savedWorkspaces, newWorkspaceData]));
         localStorage.setItem('currentWorkspace', newWorkspaceData.id); // Устанавливаем новый воркспейс как текущий
+        close();
         showNotification({ message: 'Workspace created successfully.' }); // Уведомление о создании
-        close(); // Закрываем модальное окно
         if (track) {
           track('Create new workspace');
         }
       }
     } catch (error) {
       //
+    } finally {
+      setIsCreating(false);
     }
-    setIsCreating(false);
   };
 
   const triggerFileSelect = () => {
@@ -131,29 +150,22 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setWorkspaceName(e.target.value);
+    setHasChanges(true);
   };
 
   const handleSelectedFoldersChange = (selectedIds: number[]) => {
     setSelectedFolderIds(selectedIds);
+    setHasChanges(true);
   };
 
-  const resetState = useCallback(() => {
-    setWorkspaceName('');
-    setLogoUrl('');
-    setSelectedFolderIds([]);
-    setIsCreating(false);
-    setSelectedFile(undefined);
-  }, []);
-
-  // useEffect для отслеживания состояния модального окна
   useEffect(() => {
-  // Функция очистки, которая будет вызываться при закрытии модального окна
     return () => {
-      if (!isOpen) {
+      if (!isOpen && mode === 'create') {
         resetState();
+        setIsInitialized(false);
       }
     };
-  }, [isOpen, resetState]);
+  }, [isOpen, mode, resetState]);
 
   useEffect(() => {
     // Если окно видимо, подписываемся на событие нажатия клавиши Esc
@@ -170,7 +182,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     showNotification({ message: 'Workspace deleted successfully.' });
     close(); // Закрываем модальное окно
   };
-
+  const isSaveButtonActive = workspaceName && selectedFolderIds.length > 0 && hasChanges;
   const WorkspaceSettingsInner = (
     <div
       className="background"
@@ -215,7 +227,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
           </div>
         </div>
         <div className="desc">
-          <div>Please name your workspace and select a logo. The recommended logo size is 256x256px.</div>
+          <div>The recommended logo size is 256x256px.</div>
         </div>
         <div className="header">
           <div>Folders</div>
@@ -226,13 +238,11 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
           onSelectedFoldersChange={handleSelectedFoldersChange}
         />
         <button
-          className={`saveButton ${workspaceName && selectedFolderIds.length > 0 ? 'active' : ''}`}
+          className={`saveButton ${isSaveButtonActive ? 'active' : ''}`}
           onClick={handleWorkspaceAction}
           disabled={!workspaceName || selectedFolderIds.length === 0}
         >
-          <span
-            className={`saveButtonText ${workspaceName && selectedFolderIds.length > 0 ? 'active' : ''}`}
-          >
+          <span className={`saveButtonText ${isSaveButtonActive ? 'active' : ''}`}>
             {isCreating ? 'Saving...' : (workspaceId ? 'Update workspace' : 'Create workspace')}
           </span>
         </button>
