@@ -267,7 +267,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
       <UluControlledTreeEnvironment
         ref={treeEnvironmentRef}
         id="chat-folders-tree"
+        currentWorkspaceId={currentWorkspace.id}
         items={foldersToDisplay.items}
+        totalFolders={folders.length}
         renderTreeContainer={TreeRenders.renderTreeContainer}
         renderLiveDescriptorContainer={TreeRenders.renderLiveDescriptorContainer}
         renderItemsContainer={TreeRenders.renderItemsContainer}

@@ -1,6 +1,6 @@
 import React, {
   forwardRef,
-  useCallback, useRef, useState,
+  useCallback, useEffect, useRef, useState,
 } from 'react';
 import type {
   ControlledTreeEnvironmentProps,
@@ -9,28 +9,46 @@ import type {
 } from 'react-complex-tree';
 import { ControlledTreeEnvironment, Tree } from 'react-complex-tree';
 
-import type { ChatFoldersTreeRenderProps } from './types';
+import type { ChatFoldersTreeRenderProps, TreeItemChat } from './types';
 
 type OwnProps = (
   Pick<
   ControlledTreeEnvironmentProps,
-  'items' | 'renderTreeContainer' | 'renderItemsContainer' | 'renderItemTitle' | 'renderLiveDescriptorContainer'
+  'renderTreeContainer' | 'renderItemsContainer' | 'renderItemTitle' | 'renderLiveDescriptorContainer'
   >
   & Pick<ChatFoldersTreeRenderProps, 'renderItem'>
   & {
     id: string;
+    items: Record<TreeItemIndex, TreeItemChat<string>>;
+    totalFolders: number;
+    currentWorkspaceId: string;
   });
 
 const getItemTitle = (item: TreeItem<any>) => item.data;
 
+const buildInitialExpandedItems = (
+  { items, totalFolders }: { items: Record<TreeItemIndex, TreeItemChat<string>>; totalFolders: number },
+) => {
+  if (totalFolders !== 1) { return []; }
+
+  const folder = Object.values(items).find((item) => item.type === 'folder');
+  if (!folder) { return []; } // insanity check
+
+  return [folder.index];
+};
+
 const UluControlledTreeEnvironment = forwardRef<TreeEnvironmentRef, OwnProps>(({
-  items: propsItems, id, renderItem, renderItemTitle, renderItemsContainer, renderTreeContainer,
+  items, id, renderItem, renderItemTitle, renderItemsContainer, renderTreeContainer, totalFolders, currentWorkspaceId,
 }, ref) => {
   // eslint-disable-next-line no-null/no-null
   const treeRef = useRef<TreeRef>(null);
 
+  const currentWorkspaceIdRef = useRef<string>(currentWorkspaceId);
+
   const [focusedItem, setFocusedItem] = useState<TreeItemIndex>();
-  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>([]);
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>(
+    buildInitialExpandedItems({ items, totalFolders }),
+  );
   const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([]);
 
   const handleFocusItem = useCallback((item: TreeItem<any>) => setFocusedItem(item.index), []);
@@ -45,13 +63,23 @@ const UluControlledTreeEnvironment = forwardRef<TreeEnvironmentRef, OwnProps>(({
     [expandedItems],
   );
   const handleSelectItems = useCallback(
-    (items: TreeItemIndex[]) => setSelectedItems(items),
+    (newSelectedItems: TreeItemIndex[]) => setSelectedItems(newSelectedItems),
     [],
   );
 
+  useEffect(() => {
+    if (currentWorkspaceId === currentWorkspaceIdRef.current) {
+      return;
+    }
+
+    currentWorkspaceIdRef.current = currentWorkspaceId;
+    const newExpandedItems = buildInitialExpandedItems({ items, totalFolders });
+    setExpandedItems(newExpandedItems);
+  }, [totalFolders, items, currentWorkspaceId]);
+
   return (
     <ControlledTreeEnvironment
-      items={propsItems}
+      items={items}
       getItemTitle={getItemTitle}
       viewState={{
         [id]: {
