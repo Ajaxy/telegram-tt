@@ -9,10 +9,10 @@ html.theme-dark {
 }
 
 
-.MentionTooltip {
+.AttachTooltip {
   padding: 0.25rem !important;
   width: calc(100% - 4rem);
-  max-width: 20rem;
+  max-width: 16rem;
   flex-direction: column;
   background: var(--color-cmdk);
   backdrop-filter: var( --backdrop-filter);
@@ -41,6 +41,10 @@ html.theme-dark {
       background-color: var(--color-background-compact-menu-hover);
     }
 
+    .icon {
+      font-size: 1.25rem;
+      margin-inline-end: 0.8125rem;
+    }
 
     .info {
       display: flex;
@@ -72,23 +76,9 @@ html.theme-dark {
     .title h3 {
       line-height: normal;
     }
-
-    .Avatar {
-      margin-right: 0.5rem;
-    }
-
-    .handle {
-      &::before {
-        content: "@";
-      }
-    }
-
-    .user-status {
-      display: none !important;
-    }
-
-    .custom-emoji {
-      display: none !important;
-    }
   }
+}
+
+.html.theme-light .AttachTooltip {
+  --backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
 }

@@ -61,6 +61,7 @@ export { default as SymbolMenu } from '../components/middle/composer/SymbolMenu'
 export { default as BotCommandTooltip } from '../components/middle/composer/BotCommandTooltip';
 export { default as BotCommandMenu } from '../components/middle/composer/BotCommandMenu';
 export { default as MentionTooltip } from '../components/middle/composer/MentionTooltip';
+export { default as AttachTooltip } from '../components/middle/composer/AttachTooltip';
 export { default as StickerTooltip } from '../components/middle/composer/StickerTooltip';
 export { default as CustomEmojiTooltip } from '../components/middle/composer/CustomEmojiTooltip';
 export { default as CustomSendMenu } from '../components/middle/composer/CustomSendMenu';
