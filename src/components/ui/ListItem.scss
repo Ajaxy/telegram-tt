@@ -497,3 +497,18 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.shortcut {
+  display: flex;
+  height: 1.125rem;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 0.9375rem; /* 125% */
+  margin-left: auto;
+  padding: 0.375rem;
+}

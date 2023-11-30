@@ -50,6 +50,7 @@ interface OwnProps {
   rightElement?: TeactNode;
   buttonClassName?: string;
   className?: string;
+  shortcut?: string;
   style?: string;
   children: React.ReactNode;
   disabled?: boolean;
@@ -84,6 +85,7 @@ const ListItem: FC<OwnProps> = ({
   secondaryIcon,
   rightElement,
   className,
+  shortcut,
   style,
   children,
   disabled,
@@ -257,6 +259,7 @@ const ListItem: FC<OwnProps> = ({
             <i className={`icon icon-${secondaryIcon}`} />
           </Button>
         )}
+        {shortcut && <span className="shortcut">{shortcut}</span>}
         {rightElement}
       </ButtonElementTag>
       {contextActions && contextMenuPosition !== undefined && (

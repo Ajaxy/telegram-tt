@@ -72,6 +72,8 @@ type OwnProps = {
   captionLimit?: number;
   onFocus?: NoneToVoidFunction;
   onBlur?: NoneToVoidFunction;
+  removeSlashSymbol?: () => void;
+  removeSlashSymbolAttachmentModal?: () => void;
 };
 
 type StateProps = {
@@ -137,6 +139,8 @@ const MessageInput: FC<OwnProps & StateProps> = ({
   onScroll,
   onFocus,
   onBlur,
+  removeSlashSymbolAttachmentModal,
+  removeSlashSymbol,
 }) => {
   const {
     editLastMessage,
@@ -253,6 +257,13 @@ const MessageInput: FC<OwnProps & StateProps> = ({
       updateInputHeight(!html);
     }
   }, [getHtml, isActive, updateInputHeight]);
+
+  useEffect(() => {
+    if (isActive && removeSlashSymbolAttachmentModal && removeSlashSymbol) {
+      removeSlashSymbolAttachmentModal();
+      removeSlashSymbol();
+    }
+  }, [isActive, removeSlashSymbol, removeSlashSymbolAttachmentModal]);
 
   const chatIdRef = useRef(chatId);
   chatIdRef.current = chatId;

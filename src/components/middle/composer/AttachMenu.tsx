@@ -120,7 +120,6 @@ const AttachMenu: FC<OwnProps> = ({
     );
   });
 
-  // Функция debounce с типами для TypeScript
   function debounce(func: Function, wait: number): Function {
     // eslint-disable-next-line no-null/no-null
     let timeout: NodeJS.Timeout | null = null;

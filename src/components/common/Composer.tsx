@@ -119,6 +119,7 @@ import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 import useTimeout from '../../hooks/useTimeout';
 import useAttachmentModal from '../middle/composer/hooks/useAttachmentModal';
+import useAttachTooltip from '../middle/composer/hooks/useAttachTooltip';
 import useBotCommandTooltip from '../middle/composer/hooks/useBotCommandTooltip';
 import useClipboardPaste from '../middle/composer/hooks/useClipboardPaste';
 import useCustomEmojiTooltip from '../middle/composer/hooks/useCustomEmojiTooltip';
@@ -132,6 +133,7 @@ import useVoiceRecording from '../middle/composer/hooks/useVoiceRecording';
 
 import AttachmentModal from '../middle/composer/AttachmentModal.async';
 import AttachMenu from '../middle/composer/AttachMenu';
+import AttachTooltip from '../middle/composer/AttachTooltip.async';
 import BotCommandMenu from '../middle/composer/BotCommandMenu.async';
 import BotCommandTooltip from '../middle/composer/BotCommandTooltip.async';
 import BotKeyboardMenu from '../middle/composer/BotKeyboardMenu';
@@ -1261,6 +1263,42 @@ const Composer: FC<OwnProps & StateProps> = ({
     removeSymbol(EDITABLE_INPUT_MODAL_ID);
   });
 
+  const removeSlashSymbol = useLastCallback((inInputId = editableInputId) => {
+    const inputElement = document.getElementById(inInputId) || inInputId; // Получаем элемент по ID
+    if (inputElement) {
+      const currentText = inputElement.textContent || '';
+      if (currentText.endsWith('/')) {
+        // Удаление последнего символа
+        inputElement.textContent = currentText.slice(0, -1);
+      }
+    }
+  });
+
+  const removeSlashSymbolAttachmentModal = useLastCallback(() => {
+    removeSlashSymbol(EDITABLE_INPUT_MODAL_ID);
+  });
+
+  const {
+    filteredOptions,
+    isTooltipOpen,
+    closeTooltip,
+  } = useAttachTooltip(
+    Boolean(isInMessageList && isReady && isForCurrentMessageList && !hasAttachments),
+    inputRef,
+    getHtml,
+    getSelectionRange,
+    canAttachMedia,
+    canAttachPolls,
+    canSendPhotos,
+    canSendVideos,
+    canSendAudios,
+    canSendDocuments,
+    handleFileSelect,
+    openPollModal,
+    removeSlashSymbol,
+    removeSlashSymbolAttachmentModal,
+  );
+
   const handleAllScheduledClick = useLastCallback(() => {
     openChat({
       id: chatId, threadId, type: 'scheduled', noForumTopicPanel: true,
@@ -1522,6 +1560,8 @@ const Composer: FC<OwnProps & StateProps> = ({
         onCustomEmojiSelect={handleCustomEmojiSelectAttachmentModal}
         onRemoveSymbol={removeSymbolAttachmentModal}
         onEmojiSelect={insertTextAndUpdateCursorAttachmentModal}
+        removeSlashSymbol={removeSlashSymbol}
+        removeSlashSymbolAttachmentModal={removeSlashSymbolAttachmentModal}
       />
       <PollModal
         isOpen={pollModal.isOpen}
@@ -1551,6 +1591,11 @@ const Composer: FC<OwnProps & StateProps> = ({
         filteredUsers={mentionFilteredUsers}
         onInsertUserName={insertMention}
         onClose={closeMentionTooltip}
+      />
+      <AttachTooltip
+        isOpen={isTooltipOpen}
+        filteredOptions={filteredOptions}
+        onClose={closeTooltip}
       />
       <BotCommandTooltip
         isOpen={isBotCommandTooltipOpen}

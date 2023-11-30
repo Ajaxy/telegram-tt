@@ -9,13 +9,13 @@ html.theme-dark {
 }
 
 
-.MentionTooltip {
+.AttachTooltip {
   padding: 0.25rem !important;
   width: calc(100% - 4rem);
-  max-width: 20rem;
+  max-width: 16rem;
   flex-direction: column;
-  background: rgba(22, 22, 22, 0.6);
-  backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
+  background: var(--color-cmdk);
+  backdrop-filter: var( --backdrop-filter);
   border-radius: 0.5rem;
   border: var(--border);
 
@@ -25,12 +25,25 @@ html.theme-dark {
     width: calc(100% - 3rem);
   }
 
+  .ListItem.focus {
+    background-color: var(--color-background-compact-menu-hover);
+  }
+
   .ListItem.chat-item-clickable {
     margin: 0;
     border-radius: 0.375rem;
 
     .ListItem-button {
       border-radius: 0.375rem;
+    }
+
+    .ListItem-button:hover {
+      background-color: var(--color-background-compact-menu-hover);
+    }
+
+    .icon {
+      font-size: 1.25rem;
+      margin-inline-end: 0.8125rem;
     }
 
     .info {
@@ -63,23 +76,9 @@ html.theme-dark {
     .title h3 {
       line-height: normal;
     }
-
-    .Avatar {
-      margin-right: 0.5rem;
-    }
-
-    .handle {
-      &::before {
-        content: "@";
-      }
-    }
-
-    .user-status {
-      display: none !important;
-    }
-
-    .custom-emoji {
-      display: none !important;
-    }
   }
+}
+
+.html.theme-light .AttachTooltip {
+  --backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
 }

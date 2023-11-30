@@ -82,6 +82,8 @@ export type OwnProps = {
   onCustomEmojiSelect: (emoji: ApiSticker) => void;
   onRemoveSymbol: VoidFunction;
   onEmojiSelect: (emoji: string) => void;
+  removeSlashSymbol: VoidFunction;
+  removeSlashSymbolAttachmentModal: VoidFunction;
 };
 
 type StateProps = {
@@ -135,6 +137,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
   onCustomEmojiSelect,
   onRemoveSymbol,
   onEmojiSelect,
+  removeSlashSymbol,
+  removeSlashSymbolAttachmentModal,
 }) => {
   const { addRecentCustomEmoji, addRecentEmoji, updateAttachmentSettings } = getActions();
 
@@ -324,12 +328,33 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
     }
   }
 
+  const simulateBackspacePress = () => {
+    const inputEl = inputRef.current;
+    if (!inputEl) return;
+
+    // Создаем и инициируем событие keydown для backspace
+    const event = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'Backspace',
+    });
+
+    inputEl.dispatchEvent(event);
+  };
+
   const handleFileSelect = useLastCallback((e: Event) => {
     const { files } = e.target as HTMLInputElement;
     const validatedFiles = validateFiles(files);
 
     if (validatedFiles?.length) {
       onFileAppend(validatedFiles, isEverySpoiler);
+      setTimeout(() => {
+        const editableInput = document.getElementById('editable-message-text-modal');
+        if (editableInput && editableInput.textContent === '/') {
+          editableInput.textContent = ''; // Удаляем '/'
+          simulateBackspacePress();
+        }
+      }, 2000); // Можно настроить время задержки
     }
   });
 
@@ -614,6 +639,8 @@ const AttachmentModal: FC<OwnProps & StateProps> = ({
               captionLimit={leftChars}
               shouldSuppressFocus={isMobile && isSymbolMenuOpen}
               onSuppressedFocus={closeSymbolMenu}
+              removeSlashSymbol={removeSlashSymbol}
+              removeSlashSymbolAttachmentModal={removeSlashSymbolAttachmentModal}
             />
             <div className={styles.sendWrapper}>
               <Button
