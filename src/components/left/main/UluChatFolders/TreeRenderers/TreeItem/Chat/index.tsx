@@ -44,15 +44,15 @@ const Chat: FC<{
   shouldStressUnreadMessages: boolean;
   contextRootElementSelector?: string;
 }> = ({
-  children, active, title, shouldStressUnreadMessages, item, context,
+  children, title, shouldStressUnreadMessages, item, context,
 }) => {
   const {
-    unreadCount: messagesUnreadCount, ref,
+    unreadCount: messagesUnreadCount, ref, isCurrentChat,
   } = item;
 
   const classNameWrapper = buildClassName(
     stylesUluChatFolder.wrapper,
-    active && stylesUluChatFolder.active,
+    isCurrentChat && stylesUluChatFolder.active,
     !!messagesUnreadCount && shouldStressUnreadMessages && stylesUluChatFolder['has-unread-messages'],
   );
 
