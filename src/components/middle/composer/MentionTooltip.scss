@@ -1,10 +1,19 @@
+html.theme-light {
+  --backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
+}
+
+html.theme-dark {
+  --backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
+}
+
+
 .MentionTooltip {
   padding: 0.25rem !important;
   width: calc(100% - 4rem);
   max-width: 20rem;
   flex-direction: column;
-  background: rgba(22, 22, 22, 0.6);
-  backdrop-filter: blur(20px) saturate(190%) contrast(70%) brightness(80%);
+  background: var(--color-cmdk);
+  backdrop-filter: var( --backdrop-filter);
   border-radius: 0.5rem;
 
   z-index: 0;
@@ -13,12 +22,21 @@
     width: calc(100% - 3rem);
   }
 
+  .ListItem.focus {
+    background-color: var(--color-background-compact-menu-hover);
+  }
+
   .ListItem.chat-item-clickable {
     margin: 0;
 
     .ListItem-button {
       border-radius: 0.375rem;
     }
+
+    .ListItem-button:hover {
+      background-color: var(--color-background-compact-menu-hover);
+    }
+
 
     .info {
       display: flex;
