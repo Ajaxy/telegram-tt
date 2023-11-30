@@ -36,7 +36,11 @@ const ChangeThemePage: FC<FolderPageProps> = ({
     <Command.Group>
       {(['auto', 'light', 'dark'] as (ThemeKey | 'auto')[]).map((themeOption) => (
         <Command.Item key={themeOption} onSelect={handleThemeChange(themeOption)}>
-          <span>{themeOption.charAt(0).toUpperCase() + themeOption.slice(1)} theme</span>
+          <span>
+            {
+              themeOption === 'auto' ? 'System preference' : themeOption.charAt(0).toUpperCase() + themeOption.slice(1)
+            } {themeOption !== 'auto' && 'theme'}
+          </span>
           {selectedTheme === themeOption && <i className="icon icon-check" cmdk-selected="" />}
         </Command.Item>
       ))}
