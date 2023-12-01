@@ -64,7 +64,7 @@ const UluHeaderProfile: FC<OwnProps & StateProps> = ({
           <img
             className="ProfilePhoto-UluHeaderProfile"
             src={currentWorkspace.logoUrl}
-            alt={`${currentWorkspace.name} logo`}
+            alt="logo"
           />
         );
       }
