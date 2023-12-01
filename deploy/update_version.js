@@ -5,6 +5,7 @@ const ROOT_PATH = `${path.dirname(__filename)}/..`;
 const PATCH_VERSION_PATH = `${ROOT_PATH}/.patch-version`;
 const PACKAGE_JSON_PATH = `${ROOT_PATH}/package.json`;
 const VERSION_TXT_PATH = `${ROOT_PATH}/public/version.txt`;
+
 const ULU_VERSION_PATH = `${ROOT_PATH}/.ulu-version`;
 
 // This patch value is used to override the one from package.json
@@ -29,4 +30,5 @@ const newPackageJsonContent = packageJsonContent.replace(`"version": "${currentV
 fs.writeFileSync(PATCH_VERSION_PATH, String(newPatch), 'utf-8');
 fs.writeFileSync(PACKAGE_JSON_PATH, newPackageJsonContent, 'utf-8');
 fs.writeFileSync(VERSION_TXT_PATH, newVersion, 'utf-8');
+
 fs.writeFileSync(ULU_VERSION_PATH, String(newUluVersion), 'utf-8');
