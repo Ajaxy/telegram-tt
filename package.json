@@ -32,7 +32,8 @@
     "statoscope:validate-diff": "statoscope validate --input input.json --reference reference.json",
     "prepare": "husky install",
     "postinstall": "(cd dev/eslint-multitab && npm i)",
-    "postversion": "rm -rf .patch-version && npm run update_version"
+    "postversion": "rm -rf .patch-version && npm run update_version",
+    "deploy": "echo 'Deploy ulu' && git checkout master && git reset && npm run update_version && git add .ulu-version package.json public/version.txt && git commit -m 'Upd version' --no-verify && git push && git checkout deploy && git reset --hard master && git push -f && git checkout master"
   },
   "engines": {
     "node": "^18 || ^20",
