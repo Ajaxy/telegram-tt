@@ -8,7 +8,7 @@ import { SCHEDULED_WHEN_ONLINE } from '../config';
 import { getServerTimeOffset } from '../util/serverTime';
 import useLastCallback from './useLastCallback';
 
-import CommandMenuCalendar from '../components/common/CommandMenuCalendar';
+import CommandMenuCalendar from '../components/common/commandmenu/CommandMenuCalendar';
 
 type OnScheduledCallback = (scheduledAt: number) => void;
 

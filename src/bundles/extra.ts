@@ -25,7 +25,7 @@ export { default as ChatlistModal } from '../components/modals/chatlist/Chatlist
 
 export { default as AboutAdsModal } from '../components/common/AboutAdsModal';
 export { default as CalendarModal } from '../components/common/CalendarModal';
-export { default as CommandMenuCalendar } from '../components/common/CommandMenuCalendar';
+export { default as CommandMenuCalendar } from '../components/common/commandmenu/CommandMenuCalendar';
 export { default as DeleteMessageModal } from '../components/common/DeleteMessageModal';
 export { default as PinMessageModal } from '../components/common/PinMessageModal';
 export { default as UnpinAllMessagesModal } from '../components/common/UnpinAllMessagesModal';

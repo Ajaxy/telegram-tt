@@ -7,11 +7,11 @@ import { Command } from 'cmdk';
 import {
   useCallback, useEffect, useMemo,
   useState,
-} from '../../lib/teact/teact';
+} from '../../../lib/teact/teact';
 
-import captureKeyboardListeners from '../../util/captureKeyboardListeners';
+import captureKeyboardListeners from '../../../util/captureKeyboardListeners';
 
-import '../main/CommandMenu.scss';
+import '../../main/CommandMenu.scss';
 
 export type OwnProps = {
   isOpen: boolean;
