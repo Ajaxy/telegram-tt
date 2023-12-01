@@ -969,6 +969,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   close={close}
                   searchQuery={inputValue}
                   topUserIds={topUserIds}
+                  recentlyFoundChatIds={recentlyFoundChatIds}
                   folders={folders}
                   openFolderPage={openFolderPage}
                   setInputValue={setInputValue}

@@ -7,10 +7,10 @@ import { getActions, getGlobal } from '../../global';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 
 import {
-  getChatLink,
-  getChatTitle,
+  getChatLink, getChatTitle,
   getChatTypeString,
   getMainUsername, getUserFullName, isDeletedUser,
+  sortChatIds,
 } from '../../global/helpers';
 import { convertLayout } from '../../util/convertLayout';
 import { unique } from '../../util/iteratees';
@@ -23,11 +23,12 @@ const AllUsersAndChats: React.FC<{
   close: () => void;
   searchQuery: string;
   topUserIds?: string[];
+  recentlyFoundChatIds?: string[];
   folders: ApiChatFolder[];
   openFolderPage: (folderId: number) => void;
   setInputValue: (value: string) => void;
 }> = ({
-  close, searchQuery, topUserIds, folders, openFolderPage, setInputValue,
+  close, searchQuery, topUserIds, folders, openFolderPage, setInputValue, recentlyFoundChatIds,
 }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
@@ -91,7 +92,7 @@ const AllUsersAndChats: React.FC<{
           <span className="chat-status">{groupStatus}</span>
         </span>
       );
-      value = `${title} ${link !== NBSP ? link : ''}`.trim();
+      value = `${title} ${groupStatus} ${link !== NBSP ? link : ''}`.trim();
     }
 
     return { content, value };
@@ -110,26 +111,33 @@ const AllUsersAndChats: React.FC<{
 
   const ids = useMemo(() => {
     const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
-    const userAndChatIds = unique([...Object.keys(usersById), ...Object.keys(chatsById)]);
-    return userAndChatIds.filter((id) => {
-      if (topUserIds && topUserIds.slice(0, 3).includes(id)) {
+
+    // Отдельные списки для чатов и пользователей
+    const chatIds = Object.keys(chatsById).filter((id) => {
+      const chat = chatsById[id];
+      const title = getChatTitle(lang, chat) || '';
+      return title.toLowerCase().includes(searchQuery.toLowerCase())
+      || title.toLowerCase().includes(convertedSearchQuery);
+    });
+
+    const userIds = Object.keys(usersById).filter((id) => {
+      if (topUserIds && topUserIds.slice(0, 3).includes(id)
+      && recentlyFoundChatIds && recentlyFoundChatIds.slice(0, 2).includes(id)) {
         return false;
       }
-      const isUser = usersById.hasOwnProperty(id);
-      if (isUser) {
-        const user = usersById[id];
-        if (isDeletedUser(user)) return false;
-        const name = getUserFullName(user) || ''; // Запасной вариант для 'undefined'
-        return name.toLowerCase().includes(searchQuery.toLowerCase())
-        || name.toLowerCase().includes(convertedSearchQuery);
-      } else {
-        const chat = chatsById[id];
-        const title = getChatTitle(lang, chat) || ''; // Запасной вариант для 'undefined'
-        return title.toLowerCase().includes(searchQuery.toLowerCase())
-        || title.toLowerCase().includes(convertedSearchQuery);
-      }
+      const user = usersById[id];
+      if (isDeletedUser(user)) return false;
+      const name = getUserFullName(user) || '';
+      return name.toLowerCase().includes(searchQuery.toLowerCase())
+      || name.toLowerCase().includes(convertedSearchQuery);
     });
-  }, [usersById, chatsById, searchQuery, lang, topUserIds]);
+
+    // Сортировка и объединение ID чатов и пользователей
+    const sortedChatIds = sortChatIds(chatIds, chatsById);
+    const combinedIds = unique([...userIds, ...sortedChatIds]);
+
+    return combinedIds;
+  }, [searchQuery, chatsById, usersById, lang, topUserIds, recentlyFoundChatIds]);
 
   if (!searchQuery) {
     // eslint-disable-next-line no-null/no-null
