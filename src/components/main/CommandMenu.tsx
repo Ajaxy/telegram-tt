@@ -7,7 +7,8 @@ import { createRoot } from 'react-dom/client';
 import { Command } from 'cmdk';
 import type { FC } from '../../lib/teact/teact';
 import {
-  memo, useCallback, useEffect, useState,
+  memo, useCallback, useEffect, useRef,
+  useState,
 } from '../../lib/teact/teact';
 import { getGlobal } from '../../lib/teact/teactn';
 import { getActions, withGlobal } from '../../global';
@@ -118,6 +119,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
     ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
   ];
 
+  // eslint-disable-next-line no-null/no-null
+  const commandListRef = useRef<HTMLDivElement>(null);
+  const [prevInputValue, setPrevInputValue] = useState('');
+
   const openAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(true);
   }, []);
@@ -169,8 +174,16 @@ const CommandMenu: FC<CommandMenuProps> = ({
   };
 
   const handleInputChange = (newValue: string) => {
+    setPrevInputValue(inputValue);
     setInputValue(newValue);
   };
+
+  useEffect(() => {
+    // Проверяем, уменьшилась ли длина строки
+    if (inputValue.length < prevInputValue.length && commandListRef.current) {
+      commandListRef.current.scrollTop = 0; // Прокрутка наверх
+    }
+  }, [inputValue, prevInputValue]);
 
   useEffect(() => {
     if (inputValue.length === 51) {
@@ -514,7 +527,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
             }
           }}
         />
-        <Command.List>
+        <Command.List ref={commandListRef}>
           <>
             {activePage === 'home' && (
               <>
@@ -559,15 +572,14 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   showNotification={showNotification}
                   allWorkspaces={allWorkspaces}
                   openChangeThemePage={openChangeThemePage}
+                  inputValue={inputValue}
                 />
                 <CommanMenuChatSearch
                   close={close}
                   searchQuery={inputValue}
-                  recentlyFoundChatIds={recentlyFoundChatIds}
                   folders={folders}
                   openFolderPage={openFolderPage}
                   setInputValue={setInputValue}
-                  topUserIds={topUserIds}
                 />
               </>
             )}

@@ -62,6 +62,7 @@ interface HomePageProps {
   isCurrentChatDone?: boolean;
   showNotification: (params: { message: string }) => void;
   openChangeThemePage: () => void;
+  inputValue: string;
 }
 
 const HomePage: React.FC<HomePageProps> = ({
@@ -69,7 +70,7 @@ const HomePage: React.FC<HomePageProps> = ({
   commandArchiveAll, commandToggleArchiveWhenDone, isArchiveWhenDoneEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled, openChangeThemePage,
   handleSearchFocus, handleOpenSavedMessages, handleSelectSettings,
-  handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey,
+  handleSelectArchived, handleOpenInbox, menuItems, saveAPIKey, inputValue,
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings, allWorkspaces,
   handleOpenWorkspaceSettings, handleSelectWorkspace, currentWorkspace, renderWorkspaceIcon,
@@ -103,7 +104,7 @@ const HomePage: React.FC<HomePageProps> = ({
           </Command.Group>
         )
       }
-      {topUserIds && usersById && (
+      {inputValue === '' && topUserIds && usersById && (
         <SuggestedContacts
           topUserIds={topUserIds}
           usersById={usersById}
