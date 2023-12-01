@@ -1,5 +1,5 @@
 // const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?$/;
-// ulu-custom-
+// ulu-custom-versioning
 const APP_VERSION_REGEX = /^\d+\.\d+(\.\d+)?(-\d+)?$/;
 
 export default function getIsAppUpdateNeeded(remoteVersion: string, appVersion: string) {
