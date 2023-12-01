@@ -234,6 +234,11 @@ const MessageList: FC<OwnProps & StateProps> = ({
 
     const handleScroll = (e: WheelEvent) => {
       if (containerRef.current && containerRef.current.contains(e.target as Node)) {
+        // Проверка на вертикальный скролл
+        if (Math.abs(e.deltaY) > 50) {
+          return; // Прекращаем выполнение, если был вертикальный скролл более 50 пикселей
+        }
+
         if (e.deltaX > minDeltaX) {
           handleSwipeLeftToRight();
         } else if (e.deltaX < -minDeltaX) {
