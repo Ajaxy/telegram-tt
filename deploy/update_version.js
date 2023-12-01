@@ -9,8 +9,8 @@ const VERSION_TXT_PATH = `${ROOT_PATH}/public/version.txt`;
 const ULU_VERSION_PATH = `${ROOT_PATH}/.ulu-version`;
 
 // This patch value is used to override the one from package.json
-// ulu: custom versioning
 // const currentPatch = fs.existsSync(PATCH_VERSION_PATH) ? Number(fs.readFileSync(PATCH_VERSION_PATH, 'utf-8')) : -1;
+// ulu-custom-versioning
 const currentPatch = fs.existsSync(PATCH_VERSION_PATH) ? Number(fs.readFileSync(PATCH_VERSION_PATH, 'utf-8')) : 0;
 const packageJsonContent = fs.readFileSync(PACKAGE_JSON_PATH, 'utf-8');
 const currentVersion = JSON.parse(packageJsonContent).version;
@@ -19,12 +19,12 @@ const [major, minor] = currentVersion.split('.');
 const uluVersion = fs.existsSync(ULU_VERSION_PATH) ? Number(fs.readFileSync(ULU_VERSION_PATH, 'utf-8')) : 0;
 const newUluVersion = uluVersion + 1;
 
-// ulu: custom versioning
 // const newPatch = currentPatch + 1;
-const newPatch = currentPatch;
 // const newVersion = [major, minor, newPatch].join('.');
+// ulu-custom-versioning
+const newPatch = currentPatch;
 const newVersion = [major, minor, newPatch].join('.') + '-' + newUluVersion;
-// ulu: custom versioning
+
 const newPackageJsonContent = packageJsonContent.replace(`"version": "${currentVersion}"`, `"version": "${newVersion}"`);
 
 fs.writeFileSync(PATCH_VERSION_PATH, String(newPatch), 'utf-8');
