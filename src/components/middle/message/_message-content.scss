@@ -991,10 +991,10 @@ blockquote, .blockquote {
   }
 }
 
-html.theme-light div.message-content  {
+html.theme-light div.message-content:not(.emoji-only , .no-text)  {
   box-shadow: var(--button-shadow-light);
 }
 
-html.theme-dark div.message-content  {
+html.theme-dark div.message-content:not(.emoji-only , .no-text)  {
   box-shadow: var(--button-shadow-dark);
 }
