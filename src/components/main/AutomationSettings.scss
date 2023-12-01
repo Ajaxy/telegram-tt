@@ -263,6 +263,10 @@ body.is-macos.is-electron .back-button-settins {
             outline: none;
             cursor: pointer;
           }
+
+          body.is-linux .folderSelect {
+            background: var(--color-background);
+          }
   
           .folderSelect.active {
             color: var(--color-text);
