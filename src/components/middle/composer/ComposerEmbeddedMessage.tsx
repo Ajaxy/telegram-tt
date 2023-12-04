@@ -53,6 +53,7 @@ type StateProps = {
   forwardsHaveCaptions?: boolean;
   isCurrentUserPremium?: boolean;
   isContextMenuDisabled?: boolean;
+  isReplyToDiscussion?: boolean;
 };
 
 type OwnProps = {
@@ -75,6 +76,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   shouldForceShowEditing,
   isCurrentUserPremium,
   isContextMenuDisabled,
+  isReplyToDiscussion,
   onClear,
 }) => {
   const {
@@ -105,7 +107,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
   const {
     shouldRender, transitionClassNames,
   } = useShowTransition(
-    canAnimate && isShown && !isReplyToTopicStart,
+    canAnimate && isShown && !isReplyToTopicStart && !isReplyToDiscussion,
     undefined,
     !shouldAnimate,
     undefined,
@@ -167,8 +169,10 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     getPeerColorClass(sender),
   );
 
+  const isShowingReply = replyInfo && !shouldForceShowEditing;
+
   const leftIcon = useMemo(() => {
-    if (replyInfo && !shouldForceShowEditing) {
+    if (isShowingReply) {
       return 'icon-reply';
     }
     if (editingId) {
@@ -179,7 +183,7 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     }
 
     return undefined;
-  }, [editingId, isForwarding, replyInfo, shouldForceShowEditing]);
+  }, [editingId, isForwarding, isShowingReply]);
 
   const customText = forwardedMessagesCount && forwardedMessagesCount > 1
     ? lang('ForwardedMessageCount', forwardedMessagesCount)
@@ -214,7 +218,8 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
           customText={customText}
-          title={editingId ? lang('EditMessage') : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
+          title={(editingId && !isShowingReply) ? lang('EditMessage')
+            : noAuthors ? lang('HiddenSendersNameDescription') : undefined}
           onClick={handleMessageClick}
         />
         <Button
@@ -358,6 +363,8 @@ export default memo(withGlobal<OwnProps>(
     const isContextMenuDisabled = isForwarding && forwardMessageIds!.length === 1
       && Boolean(message?.content.storyData);
 
+    const isReplyToDiscussion = replyInfo?.replyToMsgId === threadId && !replyInfo.replyToPeerId;
+
     return {
       replyInfo,
       editingId,
@@ -370,6 +377,7 @@ export default memo(withGlobal<OwnProps>(
       forwardsHaveCaptions,
       isCurrentUserPremium: selectIsCurrentUserPremium(global),
       isContextMenuDisabled,
+      isReplyToDiscussion,
     };
   },
 )(ComposerEmbeddedMessage));

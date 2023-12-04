@@ -71,7 +71,7 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
   switch (update['@type']) {
     case 'newMessage': {
       const {
-        chatId, id, message, shouldForceReply,
+        chatId, id, message, shouldForceReply, wasDrafted,
       } = update;
       global = updateWithLocalMedia(global, chatId, id, message);
       global = updateListedAndViewportIds(global, actions, message as ApiMessage);
@@ -89,6 +89,11 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       Object.values(global.byTabId).forEach(({ id: tabId }) => {
         const isLocal = isMessageLocal(message as ApiMessage);
+        // Force update for last message on drafted messages to prevent flickering
+        if (isLocal && wasDrafted) {
+          global = updateChatLastMessage(global, chatId, newMessage);
+        }
+
         if (selectIsMessageInCurrentMessageList(global, chatId, message as ApiMessage, tabId)) {
           if (isLocal && message.isOutgoing && !(message.content?.action) && !storyReplyInfo?.storyId
             && !message.content?.storyData) {
