@@ -217,7 +217,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     addChatMembers({ chatId: chatId!, memberIds });
   });
 
-  useEffect(() => (isOpen ? captureEscKeyListener(close) : undefined), [isOpen, close]);
+  useEffect(() => (isOpen && chatId ? captureEscKeyListener(close) : undefined), [isOpen, close, chatId]);
 
   useEffect(() => {
     setTimeout(() => {
