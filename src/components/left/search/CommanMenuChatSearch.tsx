@@ -81,6 +81,9 @@ const CommanMenuChatSearch: React.FC<{
       value = `${name} ${handle !== NBSP ? handle : ''} @${handle !== NBSP ? handle : ''}`.trim();
     } else {
       const chat = chatsById[id] as ApiChat;
+      if (!chat) {
+        return { content: undefined, value: '' };
+      }
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
       const link = getChatLink(chat);
       const groupStatus = getGroupStatus(chat);
@@ -115,14 +118,14 @@ const CommanMenuChatSearch: React.FC<{
     // Фильтрация ID для чатов и пользователей
     const chatIds = Object.keys(chatsById).filter((id) => {
       const chat = chatsById[id];
-      if (!chat) return false;
-      const title = getChatTitle(lang, chat);
-      return !priorityIds.includes(id) && (title.toLowerCase().includes(convertedSearchQuery));
+      if (!chat || priorityIds.includes(id)) return false;
+      const title = getChatTitle(lang, chat) || '';
+      return title.toLowerCase().includes(convertedSearchQuery);
     });
 
     const userIds = Object.keys(usersById).filter((id) => {
       const user = usersById[id];
-      if (isDeletedUser(user) || priorityIds.includes(id)) return false;
+      if (!user || isDeletedUser(user) || priorityIds.includes(id)) return false;
       const name = getUserFullName(user) || '';
       return name.toLowerCase().includes(convertedSearchQuery);
     });
