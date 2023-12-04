@@ -6,7 +6,7 @@ export const APP_NAME = process.env.APP_NAME || 'ulu';
 export const RELEASE_DATETIME = process.env.RELEASE_DATETIME;
 
 export const PRODUCTION_HOSTNAME = 'web.telegram.org';
-export const PRODUCTION_URL = 'https://web.telegram.org/a';
+export const PRODUCTION_URL = 'https://ulu.so';
 export const WEB_VERSION_BASE = 'https://web.telegram.org/'; // Used to redirect to other versions
 export const BASE_URL = process.env.BASE_URL;
 
@@ -345,5 +345,4 @@ export const ULU_APP = {
   CLIENT_NEWS_CHANNEL_USERNAME: 'uludotso',
   CLIENT_NEWS_CHANNEL_ID: '-1001916758340',
   SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM: 2.25,
-  PRODUCTION_URL: 'https://ulu.so',
 };

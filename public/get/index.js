@@ -1,4 +1,4 @@
-const REPO = 'Ajaxy/telegram-tt';
+const REPO = 'ulu-telegram/app';
 const LATEST_RELEASE_API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
 const LATEST_RELEASE_WEB_URL = `https://github.com/${REPO}/releases/latest`;
 const WEB_APP_URL = location.pathname.startsWith('/a/') ? '/a/' : '/';
