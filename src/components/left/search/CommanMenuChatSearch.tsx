@@ -20,6 +20,8 @@ import renderText from '../../common/helpers/renderText';
 import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 
+import CommandMenuListItem from './CommanMenuListItem';
+
 import '../../main/CommandMenu.scss';
 
 const CommanMenuChatSearch: React.FC<{
@@ -133,6 +135,10 @@ const CommanMenuChatSearch: React.FC<{
     // Сортировка оставшихся чатов
     const sortedChatIds = sortChatIds([...chatIds, ...userIds], chatsById);
 
+    if (searchQuery.length < 2) {
+      return [];
+    }
+
     // Объединение приоритетных и отсортированных остальных чатов
     return unique([...priorityIds, ...sortedChatIds]);
   }, [searchQuery, chatsById, usersById, pinnedIds, recentlyFoundChatIds, topUserIds, currentUserId, lang]);
@@ -145,19 +151,12 @@ const CommanMenuChatSearch: React.FC<{
   return (
     <>
       <Command.Group heading={`Search for "${searchQuery}"`}>
-        {ids.slice(0, 500).map((id) => {
+        {ids.map((id) => {
           const isUser = usersById.hasOwnProperty(id);
           const { content, value } = renderName(id, isUser);
-          // eslint-disable-next-line no-null/no-null
-          if (!content) return null;
+          if (!content) return undefined;
           return (
-            <Command.Item
-              key={id}
-              value={value}
-              onSelect={handeSelect(id)}
-            >
-              {content}
-            </Command.Item>
+            <CommandMenuListItem key={id} value={value} onSelect={handeSelect(id)} content={content} />
           );
         })}
       </Command.Group>
