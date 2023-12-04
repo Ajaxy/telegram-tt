@@ -5,42 +5,47 @@ ulu is aimed at improving the communication workflow for developers, designers, 
 ulu brings productivity boosts:
 - no stories
 - inbox
-- snooze
+- redesigned folders
 - hotkeys
 - CMD+K menu
 - CMD+E mark chat as done
 - auto-archiver
+- snooze - notify about message later
 - workspaces (soon)
-- ... (a lot of features in the design process, will be announced soon)
+- ... (a lot of features in development, will be announced soon)
 
 ## [ulu Developers Area] How to...
-### 1) Get updates from [upstream](https://github.com/Ajaxy/telegram-tt/network) (if needed)
+### Get updates from [upstream](https://github.com/Ajaxy/telegram-tt/network)
 ```sh
 git remote add upstream git@github.com:Ajaxy/telegram-tt.git
 git fetch upstream
 git checkout master
 git merge upstream/master
-git commit -m "Upstream updates"
+git commit -m "Upstream"
 git push
 ```
 
-### 2) Rebuild before deploy
+### Deploy: increment version, rebuild binaries, release
 ```sh
-git checkout master
-npm run build:production
-git add .
-git commit -m "Build"
-git push
+npm run deploy
 ```
 
-### 3) Deploy the build
+- Updates https://ulu.so
+- Updates [releases](https://github.com/ulu-telegram/app/releases)
+- Updates the latest binaries:
+  - Mac ARM: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-arm64.dmg
+  - Mac x64: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-x64.dmg
+  - Linux: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-x86_64.AppImage
+  - Windows: soon
+
+### Manual deploy: no version increment, no binaries rebuild, no release
 ```sh
 git checkout deploy
 git reset --hard master
 git push --force
 ```
 
--> https://ulu.so
+- Updates https://ulu.so
 
 ## ulu is the foͦrͬᴋⷦ of the official Telegram Web A
 Great respect to the creators of the original project!
