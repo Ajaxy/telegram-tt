@@ -165,7 +165,7 @@ function Transition({
               transform: 'translate3d(0, 0, 0)',
             });
           }
-        } else {
+        } else if (!isSlideOptimized) {
           addExtraClass(childElement, CLASSES.inactive);
         }
       });
