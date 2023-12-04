@@ -38,6 +38,13 @@ import UluChatFoldersDivider from './UluChatFoldersDivider';
 import UluNewChatFolderButton from './UluNewChatFolderButton';
 import UluSystemFolders from './UluSystemChatFolders';
 
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  folders?: number[];
+};
+
 type OwnProps = {
   leftMainHeaderRef: RefObject<HTMLDivElement>;
   onSettingsScreenSelect: (screen: SettingsScreens) => void;
@@ -68,6 +75,10 @@ type StateProps = {
   archiveSettings: GlobalState['archiveSettings'];
   isStoryRibbonShown?: boolean;
   sessions?: Record<string, ApiSession>;
+  currentWorkspaceId?: string;
+  currentFolders?: number[];
+  currentWorkspace: Workspace;
+  savedWorkspaces: Workspace[];
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
@@ -103,6 +114,8 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   chatFoldersPortalRef,
   dispatch,
   onScreenSelect,
+  currentWorkspace,
+  savedWorkspaces,
 }) => {
   const {
     loadChatFolders,
@@ -139,22 +152,32 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   }, [orderedFolderIds, lang]);
 
   const displayedFolders = useMemo(() => {
+    // Собираем все ID папок, которые принадлежат другим воркспейсам, кроме personal
+    const allFolderIdsInOtherWorkspaces = savedWorkspaces
+      .filter((ws) => ws.id !== 'personal' && ws.folders)
+      .reduce((acc: number[], ws) => [...acc, ...(ws.folders || [])], [] as number[]);
+
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
-        if (id === ALL_FOLDER_ID) {
-          return allChatsFolder;
+        // Для personal воркспейса добавляем All Chats и папки, которые не входят в другие воркспейсы
+        if (currentWorkspace.id === 'personal') {
+          if (id === ALL_FOLDER_ID || !allFolderIdsInOtherWorkspaces.includes(id)) {
+            return id === ALL_FOLDER_ID ? allChatsFolder : chatFoldersById[id];
+          }
+        } else if (currentWorkspace.folders && currentWorkspace.folders.includes(id)) {
+          return chatFoldersById[id];
         }
-
-        return chatFoldersById[id] || {};
+        return undefined;
       }).filter(Boolean)
       : undefined;
-  }, [chatFoldersById, allChatsFolder, orderedFolderIds]);
+  }, [chatFoldersById, allChatsFolder, orderedFolderIds, currentWorkspace, savedWorkspaces]);
 
   const allChatsFolderIndex = displayedFolders?.findIndex((folder) => folder.id === ALL_FOLDER_ID);
   const isInAllChatsFolder = allChatsFolderIndex === activeChatFolder;
   const isInFirstFolder = FIRST_FOLDER_INDEX === activeChatFolder;
 
   const folderCountersById = useFolderManagerForUnreadCounters();
+
   const folderTabs = useMemo(() => {
     if (!displayedFolders || !displayedFolders.length) {
       return undefined;
@@ -436,6 +459,17 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
+    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
+    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
+    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
+
+    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
+    if (!currentWorkspace) {
+      currentWorkspace = {
+        id: 'personal', name: 'Personal Workspace', logoUrl: undefined, folders: [],
+      };
+    }
+    const { folders: currentFolders } = currentWorkspace;
     const {
       chatFolders: {
         byId: chatFoldersById,
@@ -476,6 +510,9 @@ export default memo(withGlobal<OwnProps>(
       archiveSettings,
       isStoryRibbonShown,
       sessions,
+      currentFolders,
+      currentWorkspace,
+      savedWorkspaces,
     };
   },
 )(ChatFolders));
