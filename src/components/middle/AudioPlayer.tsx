@@ -56,6 +56,8 @@ const PLAYBACK_RATES: Record<number, number> = {
   1: 1,
   1.5: 1.4,
   2: 1.8,
+  2.5: 2.3,
+  3: 2.7,
 };
 const PLAYBACK_RATE_VALUES = Object.keys(PLAYBACK_RATES).sort().map(Number);
 

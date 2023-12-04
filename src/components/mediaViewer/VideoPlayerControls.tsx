@@ -65,6 +65,8 @@ const PLAYBACK_RATES = [
   1,
   1.5,
   2,
+  2.5,
+  3,
 ];
 
 const HIDE_CONTROLS_TIMEOUT_MS = 3000;
