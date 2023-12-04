@@ -63,6 +63,16 @@ export function omit<T extends object, K extends keyof T>(object: T, keys: K[]):
   return pick(object, savedKeys);
 }
 
+export function omitUndefined<T extends object>(object: T): T {
+  return Object.keys(object).reduce((result, stringKey) => {
+    const key = stringKey as keyof T;
+    if (object[key] !== undefined) {
+      result[key as keyof T] = object[key];
+    }
+    return result;
+  }, {} as T);
+}
+
 export function orderBy<T>(
   collection: T[],
   orderRule: (keyof T) | OrderCallback<T> | ((keyof T) | OrderCallback<T>)[],
@@ -118,6 +128,29 @@ export function areSortedArraysIntersecting(array1: any[], array2: any[]) {
 
 export function findIntersectionWithSet<T>(array: T[], set: Set<T>): T[] {
   return array.filter((a) => set.has(a));
+}
+/**
+ * Exlude elements from base array. Both arrays should be sorted in same order
+ * @param base
+ * @param toExclude
+ * @returns New array without excluded elements
+ */
+export function excludeSortedArray<T extends any>(base: T[], toExclude: T[]) {
+  if (!base?.length) return base;
+
+  const result: T[] = [];
+
+  let excludeIndex = 0;
+
+  for (let i = 0; i < base.length; i++) {
+    if (toExclude[excludeIndex] === base[i]) {
+      excludeIndex += 1;
+    } else {
+      result.push(base[i]);
+    }
+  }
+
+  return result;
 }
 
 export function split<T extends any>(array: T[], chunkSize: number) {

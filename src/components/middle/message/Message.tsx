@@ -88,7 +88,6 @@ import {
   selectTabState,
   selectTheme,
   selectThreadInfo,
-  selectThreadTopMessageId,
   selectTopicFromMessage,
   selectUploadProgress,
   selectUser,
@@ -271,6 +270,7 @@ type StateProps = {
   withStickerEffects?: boolean;
   webPageStory?: ApiTypeStory;
   isConnected: boolean;
+  isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
 };
 
@@ -334,6 +334,7 @@ const Message: FC<OwnProps & StateProps> = ({
   outgoingStatus,
   uploadProgress,
   isInDocumentGroup,
+  isLoadingComments,
   isProtected,
   isChatProtected,
   isFocused,
@@ -663,7 +664,8 @@ const Message: FC<OwnProps & StateProps> = ({
     && !isInDocumentGroupNotLast
     && messageListType === 'thread'
     && !noComments;
-  const withCommentButton = repliesThreadInfo && !isInDocumentGroupNotLast && messageListType === 'thread'
+  const withCommentButton = repliesThreadInfo?.isCommentsInfo
+    && !isInDocumentGroupNotLast && messageListType === 'thread'
     && !noComments;
   const withQuickReactionButton = !isTouchScreen && !phoneCall && !isInSelectMode && defaultReaction
     && !isInDocumentGroupNotLast && !isStoryMention;
@@ -719,7 +721,7 @@ const Message: FC<OwnProps & StateProps> = ({
     replyToMsgId,
     replyMessage,
     message.id,
-    isQuote || isReplyPrivate,
+    shouldHideReply || isQuote || isReplyPrivate,
   );
 
   useEnsureStory(
@@ -1370,7 +1372,9 @@ const Message: FC<OwnProps & StateProps> = ({
           {!isInDocumentGroupNotLast && metaPosition === 'standalone' && !isStoryMention && renderReactionsAndMeta()}
           {canShowActionButton && canForward ? (
             <Button
-              className="message-action-button"
+              className={buildClassName(
+                'message-action-button', isLoadingComments && 'message-action-button-shown',
+              )}
               color="translucent-white"
               round
               size="tiny"
@@ -1381,7 +1385,9 @@ const Message: FC<OwnProps & StateProps> = ({
             </Button>
           ) : canShowActionButton && canFocus ? (
             <Button
-              className="message-action-button"
+              className={buildClassName(
+                'message-action-button', isLoadingComments && 'message-action-button-shown',
+              )}
               color="translucent-white"
               round
               size="tiny"
@@ -1391,7 +1397,14 @@ const Message: FC<OwnProps & StateProps> = ({
               <i className="icon icon-arrow-right" />
             </Button>
           ) : undefined}
-          {withCommentButton && <CommentButton threadInfo={repliesThreadInfo!} disabled={noComments} />}
+          {withCommentButton && (
+            <CommentButton
+              threadInfo={repliesThreadInfo}
+              disabled={noComments}
+              isLoading={isLoadingComments}
+              isCustomShape={isCustomShape}
+            />
+          )}
           {withAppendix && <MessageAppendix isOwn={isOwn} />}
           {withQuickReactionButton && quickReactionPosition === 'in-content' && renderQuickReactionButton()}
         </div>
@@ -1430,13 +1443,14 @@ const Message: FC<OwnProps & StateProps> = ({
 export default memo(withGlobal<OwnProps>(
   (global, ownProps): StateProps => {
     const {
-      focusedMessage, forwardMessages, activeEmojiInteractions, activeReactions,
+      focusedMessage, forwardMessages, activeReactions, activeEmojiInteractions,
+      loadingThread,
     } = selectTabState(global);
     const {
       message, album, withSenderName, withAvatar, threadId, messageListType, isLastInDocumentGroup, isFirstInGroup,
     } = ownProps;
     const {
-      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned, repliesThreadInfo,
+      id, chatId, viaBotId, isOutgoing, forwardInfo, transcriptionId, isPinned,
     } = message;
 
     const chat = selectChat(global, chatId);
@@ -1460,16 +1474,13 @@ export default memo(withGlobal<OwnProps>(
       ? chatFullInfo?.adminMembersById?.[sender?.id]
       : undefined;
 
-    const threadTopMessageId = threadId ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
-    const isThreadTop = message.id === threadTopMessageId;
+    const isThreadTop = message.id === threadId;
 
     const { replyToMsgId, replyToPeerId, replyFrom } = getMessageReplyInfo(message) || {};
     const { userId: storyReplyUserId, storyId: storyReplyId } = getStoryReplyInfo(message) || {};
 
-    const shouldHideReply = replyToMsgId && replyToMsgId === threadTopMessageId;
-    const replyMessage = replyToMsgId && !shouldHideReply
-      ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId)
-      : undefined;
+    const shouldHideReply = replyToMsgId && replyToMsgId === threadId;
+    const replyMessage = replyToMsgId ? selectChatMessage(global, replyToPeerId || chatId, replyToMsgId) : undefined;
     const forwardHeader = forwardInfo || replyFrom;
     const replyMessageSender = replyMessage ? selectReplySender(global, replyMessage) : forwardHeader && !isRepliesChat
       ? selectSenderFromHeader(global, forwardHeader) : undefined;
@@ -1509,9 +1520,8 @@ export default memo(withGlobal<OwnProps>(
 
     const { canReply } = (messageListType === 'thread' && selectAllowedMessageActions(global, message, threadId)) || {};
     const isDownloading = selectIsDownloading(global, message);
-    const actualRepliesThreadInfo = repliesThreadInfo
-      ? selectThreadInfo(global, repliesThreadInfo.chatId, repliesThreadInfo.threadId) || repliesThreadInfo
-      : undefined;
+
+    const repliesThreadInfo = selectThreadInfo(global, chatId, album?.mainMessage.id || id);
 
     const isInDocumentGroup = Boolean(message.groupedId) && !message.isInAlbum;
     const documentGroupFirstMessageId = isInDocumentGroup
@@ -1584,7 +1594,7 @@ export default memo(withGlobal<OwnProps>(
       canAutoPlayMedia: selectCanAutoPlayMedia(global, message),
       autoLoadFileMaxSizeMb: global.settings.byKey.autoLoadFileMaxSizeMb,
       shouldLoopStickers: selectShouldLoopStickers(global),
-      repliesThreadInfo: actualRepliesThreadInfo,
+      repliesThreadInfo,
       availableReactions: global.availableReactions,
       defaultReaction: isMessageLocal(message) || messageListType === 'scheduled'
         ? undefined : selectDefaultReaction(global, chatId),
@@ -1606,6 +1616,9 @@ export default memo(withGlobal<OwnProps>(
       withStickerEffects: selectPerformanceSettingsValue(global, 'stickerEffects'),
       webPageStory,
       isConnected,
+      isLoadingComments: repliesThreadInfo?.isCommentsInfo
+        && loadingThread?.loadingChatId === repliesThreadInfo?.originChannelId
+        && loadingThread?.loadingMessageId === repliesThreadInfo?.originMessageId,
       shouldWarnAboutSvg: global.settings.byKey.shouldWarnAboutSvg,
       ...(isOutgoing && { outgoingStatus: selectOutgoingStatus(global, message, messageListType === 'scheduled') }),
       ...(typeof uploadProgress === 'number' && { uploadProgress }),

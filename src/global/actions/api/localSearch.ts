@@ -1,6 +1,6 @@
+import type { ApiChat } from '../../../api/types';
 import type { SharedMediaType } from '../../../types';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
-import { type ApiChat, MAIN_THREAD_ID } from '../../../api/types';
 
 import { MESSAGE_SEARCH_SLICE, SHARED_MEDIA_SLICE } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -21,7 +21,6 @@ import {
   selectCurrentMediaSearch,
   selectCurrentMessageList,
   selectCurrentTextSearch,
-  selectThreadInfo,
 } from '../../selectors';
 
 addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Promise<void> => {
@@ -36,12 +35,6 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
   const { query, results } = currentSearch;
   const offsetId = results?.nextOffsetId;
 
-  let topMessageId: number | undefined;
-  if (threadId !== MAIN_THREAD_ID) {
-    const threadInfo = selectThreadInfo(global, chatId!, threadId);
-    topMessageId = threadInfo?.topMessageId;
-  }
-
   if (!query) {
     return;
   }
@@ -50,7 +43,7 @@ addActionHandler('searchTextMessagesLocal', async (global, actions, payload): Pr
     chat,
     type: 'text',
     query,
-    topMessageId,
+    threadId,
     limit: MESSAGE_SEARCH_SLICE,
     offsetId,
   });
@@ -147,7 +140,7 @@ async function searchSharedMedia<T extends GlobalState>(
     chat,
     type,
     limit: SHARED_MEDIA_SLICE * 2,
-    topMessageId: threadId === MAIN_THREAD_ID ? undefined : threadId,
+    threadId,
     offsetId,
   });
 

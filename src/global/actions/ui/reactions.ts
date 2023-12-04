@@ -5,16 +5,16 @@ import { addActionHandler } from '../../index';
 import { updateTabState } from '../../reducers/tabs';
 import { selectTabState } from '../../selectors';
 
-addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
+addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
-    id,
+    chatId,
     tabId = getCurrentTabId(),
   } = payload;
 
-  if (id) {
+  if (chatId) {
     return updateTabState(global, {
       reactionPicker: {
-        chatId: id,
+        chatId,
         messageId: undefined,
         position: undefined,
       },

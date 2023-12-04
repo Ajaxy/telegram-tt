@@ -181,7 +181,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     toggleStatistics,
     openBoostStatistics,
     openGiftPremiumModal,
-    openChatWithInfo,
+    openThreadWithInfo,
     openCreateTopicPanel,
     openEditTopicPanel,
     openChat,
@@ -231,7 +231,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleViewGroupInfo = useLastCallback(() => {
-    openChatWithInfo({ id: chatId, threadId });
+    openThreadWithInfo({ chatId, threadId });
     setShouldCloseFast(!isRightColumnShown);
     closeMenu();
   });

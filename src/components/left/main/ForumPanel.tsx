@@ -19,7 +19,6 @@ import buildClassName from '../../../util/buildClassName';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
 import { captureEvents, SwipeDirection } from '../../../util/captureEvents';
 import { waitForTransitionEnd } from '../../../util/cssAnimationEndListeners';
-import { createLocationHash } from '../../../util/routing';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 
 import useAppLayout from '../../../hooks/useAppLayout';
@@ -139,7 +138,6 @@ const ForumPanel: FC<OwnProps & StateProps> = ({
   useHistoryBack({
     isActive: isVisible,
     onBack: handleClose,
-    hash: chat ? createLocationHash(chat.id, 'thread', MAIN_THREAD_ID) : undefined,
   });
 
   useEffect(() => (isVisible ? captureEscKeyListener(handleClose) : undefined), [handleClose, isVisible]);

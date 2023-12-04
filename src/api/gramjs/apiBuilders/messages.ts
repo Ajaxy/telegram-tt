@@ -29,7 +29,7 @@ import type {
   PhoneCallAction,
 } from '../../types';
 import {
-  ApiMessageEntityTypes,
+  ApiMessageEntityTypes, MAIN_THREAD_ID,
 } from '../../types';
 
 import {
@@ -41,7 +41,7 @@ import {
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
-import { pick } from '../../../util/iteratees';
+import { omitUndefined, pick } from '../../../util/iteratees';
 import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildPeer } from '../gramjsBuilders';
@@ -178,12 +178,12 @@ export function buildApiMessageWithChatId(
   const isInvoiceMedia = mtpMessage.media instanceof GramJs.MessageMediaInvoice
     && Boolean(mtpMessage.media.extendedMedia);
 
-  const isEdited = mtpMessage.editDate && !mtpMessage.editHide;
+  const isEdited = Boolean(mtpMessage.editDate) && !mtpMessage.editHide;
   const {
     inlineButtons, keyboardButtons, keyboardPlaceholder, isKeyboardSingleUse, isKeyboardSelective,
   } = buildReplyButtons(mtpMessage, isInvoiceMedia) || {};
   const forwardInfo = mtpMessage.fwdFrom && buildApiMessageForwardInfo(mtpMessage.fwdFrom, isChatWithSelf);
-  const { replies, mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
+  const { mediaUnread: isMediaUnread, postAuthor } = mtpMessage;
   const groupedId = mtpMessage.groupedId && String(mtpMessage.groupedId);
   const isInAlbum = Boolean(groupedId) && !(content.document || content.audio || content.sticker);
   const shouldHideKeyboardButtons = mtpMessage.replyMarkup instanceof GramJs.ReplyKeyboardHide;
@@ -192,8 +192,9 @@ export function buildApiMessageWithChatId(
   const isProtected = mtpMessage.noforwards || isInvoiceMedia;
   const isForwardingAllowed = !mtpMessage.noforwards;
   const emojiOnlyCount = getEmojiOnlyCountForMessage(content, groupedId);
+  const hasComments = mtpMessage.replies?.comments;
 
-  return {
+  return omitUndefined({
     id: mtpMessage.id,
     chatId,
     isOutgoing,
@@ -209,12 +210,12 @@ export function buildApiMessageWithChatId(
     reactions: mtpMessage.reactions && buildMessageReactions(mtpMessage.reactions),
     emojiOnlyCount,
     ...(mtpMessage.replyTo && { replyInfo: buildApiReplyInfo(mtpMessage.replyTo) }),
-    ...(forwardInfo && { forwardInfo }),
-    ...(isEdited && { isEdited }),
-    ...(mtpMessage.editDate && { editDate: mtpMessage.editDate }),
-    ...(isMediaUnread && { isMediaUnread }),
-    ...(mtpMessage.mentioned && isMediaUnread && { hasUnreadMention: true }),
-    ...(mtpMessage.mentioned && { isMentioned: true }),
+    forwardInfo,
+    isEdited,
+    editDate: mtpMessage.editDate,
+    isMediaUnread,
+    hasUnreadMention: mtpMessage.mentioned && isMediaUnread,
+    isMentioned: mtpMessage.mentioned,
     ...(groupedId && {
       groupedId,
       isInAlbum,
@@ -225,11 +226,11 @@ export function buildApiMessageWithChatId(
     }),
     ...(shouldHideKeyboardButtons && { shouldHideKeyboardButtons, isHideKeyboardSelective }),
     ...(mtpMessage.viaBotId && { viaBotId: buildApiPeerId(mtpMessage.viaBotId, 'user') }),
-    ...(replies && { repliesThreadInfo: buildThreadInfo(replies, mtpMessage.id, chatId) }),
-    ...(postAuthor && { postAuthorTitle: postAuthor }),
+    postAuthorTitle: postAuthor,
     isProtected,
     isForwardingAllowed,
-  };
+    hasComments,
+  } satisfies ApiMessage);
 }
 
 export function buildMessageDraft(draft: GramJs.TypeDraftMessage): ApiDraft | undefined {
@@ -830,8 +831,11 @@ export function buildLocalForwardedMessage({
     text: !shouldHideText ? strippedText : undefined,
   };
 
-  const replyInfo: ApiReplyInfo | undefined = toThreadId ? {
+  // TODO Prepare reply info between forwarded messages locally, to prevent height jumps
+  const isToMainThread = toThreadId === MAIN_THREAD_ID;
+  const replyInfo: ApiReplyInfo | undefined = toThreadId && !isToMainThread ? {
     type: 'message',
+    replyToMsgId: toThreadId,
     replyToTopId: toThreadId,
     isForumTopic: toChat.isForum || undefined,
   } : undefined;
@@ -968,7 +972,21 @@ function buildUploadingMedia(
   };
 }
 
-function buildThreadInfo(
+export function buildApiThreadInfoFromMessage(
+  mtpMessage: GramJs.TypeMessage,
+): ApiThreadInfo | undefined {
+  const chatId = resolveMessageApiChatId(mtpMessage);
+  if (
+    !chatId
+    || !(mtpMessage instanceof GramJs.Message)
+    || !mtpMessage.replies) {
+    return undefined;
+  }
+
+  return buildApiThreadInfo(mtpMessage.replies, mtpMessage.id, chatId);
+}
+
+export function buildApiThreadInfo(
   messageReplies: GramJs.TypeMessageReplies, messageId: number, chatId: string,
 ): ApiThreadInfo | undefined {
   const {
@@ -980,21 +998,28 @@ function buildThreadInfo(
     return undefined;
   }
 
-  const isPostThread = apiChannelId && chatId !== apiChannelId;
+  const baseThreadInfo = {
+    messagesCount: replies,
+    ...(maxId && { lastMessageId: maxId }),
+    ...(readMaxId && { lastReadMessageId: readMaxId }),
+    ...(recentRepliers && { recentReplierIds: recentRepliers.map(getApiChatIdFromMtpPeer) }),
+  };
+
+  if (comments) {
+    return {
+      ...baseThreadInfo,
+      isCommentsInfo: true,
+      chatId: apiChannelId!,
+      originChannelId: chatId,
+      originMessageId: messageId,
+    };
+  }
 
   return {
-    isComments: comments,
+    ...baseThreadInfo,
+    isCommentsInfo: false,
+    chatId,
     threadId: messageId,
-    ...(isPostThread ? {
-      chatId: apiChannelId,
-      originChannelId: chatId,
-    } : {
-      chatId,
-    }),
-    messagesCount: replies,
-    lastMessageId: maxId,
-    lastReadInboxMessageId: readMaxId,
-    ...(recentRepliers && { recentReplierIds: recentRepliers.map(getApiChatIdFromMtpPeer) }),
   };
 }
 

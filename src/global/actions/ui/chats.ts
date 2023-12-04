@@ -14,9 +14,9 @@ import {
 } from '../../selectors';
 import { closeLocalTextSearch } from './localSearch';
 
-addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
+addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
   const {
-    id,
+    chatId,
     threadId = MAIN_THREAD_ID,
     type = 'thread',
     shouldReplaceHistory = false,
@@ -38,12 +38,12 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
   }
 
   if (!currentMessageList || (
-    currentMessageList.chatId !== id
+    currentMessageList.chatId !== chatId
     || currentMessageList.threadId !== threadId
     || currentMessageList.type !== type
   )) {
-    if (id) {
-      global = replaceTabThreadParam(global, id, threadId, 'replyStack', [], tabId);
+    if (chatId) {
+      global = replaceTabThreadParam(global, chatId, threadId, 'replyStack', [], tabId);
 
       global = updateTabState(global, {
         activeReactions: {},
@@ -57,25 +57,25 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
       isStatisticsShown: false,
       boostStatistics: undefined,
       contentToBeScheduled: undefined,
-      ...(id !== selectTabState(global, tabId).forwardMessages.toChatId && {
+      ...(chatId !== selectTabState(global, tabId).forwardMessages.toChatId && {
         forwardMessages: {},
       }),
     }, tabId);
   }
 
-  if (id) {
-    const chat = selectChat(global, id);
+  if (chatId) {
+    const chat = selectChat(global, chatId);
 
     if (chat?.isForum && !noForumTopicPanel) {
-      actions.openForumPanel({ chatId: id!, tabId });
-    } else if (id !== selectTabState(global, tabId).forumPanelChatId) {
+      actions.openForumPanel({ chatId, tabId });
+    } else if (chatId !== selectTabState(global, tabId).forumPanelChatId) {
       actions.closeForumPanel({ tabId });
     }
   }
 
   actions.updatePageTitle({ tabId });
 
-  return updateCurrentMessageList(global, id, threadId, type, shouldReplaceHistory, shouldReplaceLast, tabId);
+  return updateCurrentMessageList(global, chatId, threadId, type, shouldReplaceHistory, shouldReplaceLast, tabId);
 });
 
 addActionHandler('openChatInNewTab', (global, actions, payload): ActionReturnType => {
@@ -110,13 +110,26 @@ addActionHandler('openChatWithInfo', (global, actions, payload): ActionReturnTyp
   actions.openChat({ ...payload, tabId });
 });
 
+addActionHandler('openThreadWithInfo', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload;
+
+  global = updateTabState(global, {
+    ...selectTabState(global, tabId),
+    isChatInfoShown: true,
+  }, tabId);
+  global = { ...global, lastIsChatInfoShown: true };
+  setGlobal(global);
+
+  actions.openThread({ ...payload, tabId });
+});
+
 addActionHandler('openChatWithDraft', (global, actions, payload): ActionReturnType => {
   const {
-    chatId, text, threadId, files, filter, tabId = getCurrentTabId(),
+    chatId, text, threadId = MAIN_THREAD_ID, files, filter, tabId = getCurrentTabId(),
   } = payload;
 
   if (chatId) {
-    actions.openChat({ id: chatId, threadId, tabId });
+    actions.openThread({ chatId, threadId, tabId });
   }
 
   return updateTabState(global, {

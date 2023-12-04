@@ -248,34 +248,6 @@ export function selectThreadMessagesCount(global: GlobalState, chatId: string, t
   return threadInfo.messagesCount;
 }
 
-export function selectThreadOriginChat<T extends GlobalState>(global: T, chatId: string, threadId: number) {
-  if (threadId === MAIN_THREAD_ID) {
-    return selectChat(global, chatId);
-  }
-
-  const threadInfo = selectThreadInfo(global, chatId, threadId);
-
-  return selectChat(global, threadInfo?.originChannelId || chatId);
-}
-
-export function selectThreadTopMessageId<T extends GlobalState>(global: T, chatId: string, threadId: number) {
-  if (threadId === MAIN_THREAD_ID) {
-    return undefined;
-  }
-
-  const chat = selectChat(global, chatId);
-  if (chat?.isForum) {
-    return threadId;
-  }
-
-  const threadInfo = selectThreadInfo(global, chatId, threadId);
-  if (!threadInfo) {
-    return undefined;
-  }
-
-  return threadInfo.topMessageId;
-}
-
 export function selectThreadByMessage<T extends GlobalState>(global: T, message: ApiMessage) {
   const threadId = selectThreadIdFromMessage(global, message);
   if (!threadId || threadId === MAIN_THREAD_ID) {
@@ -325,10 +297,12 @@ export function selectIsViewportNewest<T extends GlobalState>(
   } else {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
     if (!threadInfo || !threadInfo.lastMessageId) {
-      return undefined;
+      if (!threadInfo?.threadId) return undefined;
+      // No messages in thread, except for the thread message itself
+      lastMessageId = threadInfo?.threadId;
+    } else {
+      lastMessageId = threadInfo.lastMessageId;
     }
-
-    lastMessageId = threadInfo.lastMessageId;
   }
 
   // Edge case: outgoing `lastMessage` is updated with a delay to optimize animation
@@ -580,9 +554,9 @@ export function selectAllowedMessageActions<T extends GlobalState>(global: T, me
   );
 
   const threadInfo = selectThreadInfo(global, message.chatId, threadId);
-  const isComments = Boolean(threadInfo?.originChannelId);
+  const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
   const canReply = !isLocal && !isServiceNotification && !chat.isForbidden
-    && getCanPostInChat(chat, threadId, isComments)
+    && getCanPostInChat(chat, threadId, isMessageThread)
     && (!messageTopic || !messageTopic.isClosed || messageTopic.isOwner || getHasAdminRight(chat, 'manageTopics'));
 
   const hasPinPermission = isPrivate || (
@@ -799,7 +773,7 @@ export function selectRealLastReadId<T extends GlobalState>(global: T, chatId: s
     }
 
     if (!threadInfo.lastReadInboxMessageId) {
-      return threadInfo.topMessageId;
+      return threadInfo.threadId;
     }
 
     // Some previously read messages may be deleted
@@ -977,9 +951,15 @@ export function selectNewestMessageWithBotKeyboardButtons<T extends GlobalState>
     return undefined;
   }
 
-  const messageId = findLast(viewportIds, (id) => selectShouldDisplayReplyKeyboard(global, chatMessages[id]));
+  const messageId = findLast(viewportIds, (id) => {
+    const message = chatMessages[id];
+    return message && selectShouldDisplayReplyKeyboard(global, message);
+  });
 
-  const replyHideMessageId = findLast(viewportIds, (id) => selectShouldHideReplyKeyboard(global, chatMessages[id]));
+  const replyHideMessageId = findLast(viewportIds, (id) => {
+    const message = chatMessages[id];
+    return message && selectShouldHideReplyKeyboard(global, message);
+  });
 
   if (messageId && replyHideMessageId && replyHideMessageId > messageId) {
     return undefined;
@@ -1391,20 +1371,18 @@ export function selectTopicLink<T extends GlobalState>(
 }
 
 export function selectMessageReplyInfo<T extends GlobalState>(
-  global: T, chatId: string, threadId: number = MAIN_THREAD_ID, additionalReplyInfo?: ApiInputMessageReplyInfo,
+  global: T, chatId: string, threadId: number, additionalReplyInfo?: ApiInputMessageReplyInfo,
 ) {
   const chat = selectChat(global, chatId);
   if (!chat) return undefined;
-
-  const replyingToTopId = selectThreadTopMessageId(global, chatId, threadId);
-
-  if (!additionalReplyInfo && !replyingToTopId) return undefined;
+  const isMainThread = threadId === MAIN_THREAD_ID;
+  if (!additionalReplyInfo && isMainThread) return undefined;
 
   const replyInfo: ApiInputMessageReplyInfo = {
     type: 'message',
     ...additionalReplyInfo,
-    replyToMsgId: additionalReplyInfo?.replyToMsgId || replyingToTopId!,
-    replyToTopId: additionalReplyInfo?.replyToTopId || replyingToTopId,
+    replyToMsgId: additionalReplyInfo?.replyToMsgId || threadId,
+    replyToTopId: additionalReplyInfo?.replyToTopId || (!isMainThread ? threadId : undefined),
   };
 
   return replyInfo;

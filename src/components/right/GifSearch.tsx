@@ -169,8 +169,8 @@ export default memo(withGlobal(
     const isChatWithBot = chat ? selectIsChatWithBot(global, chat) : undefined;
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
     const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
-    const isComments = Boolean(threadInfo?.originChannelId);
-    const canPostInChat = Boolean(chat) && Boolean(threadId) && getCanPostInChat(chat, threadId, isComments);
+    const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+    const canPostInChat = Boolean(chat) && Boolean(threadId) && getCanPostInChat(chat, threadId, isMessageThread);
 
     return {
       query,
