@@ -35,7 +35,7 @@ export default function useInnerHandlers(
   const {
     openChat, showNotification, focusMessage, openMediaViewer, openAudioPlayer,
     markMessagesRead, cancelSendingMessage, sendPollVote, openForwardMenu,
-    openChatLanguageModal, openStoryViewer, focusMessageInComments,
+    openChatLanguageModal, openThread, openStoryViewer,
   } = getActions();
 
   const {
@@ -156,7 +156,7 @@ export default function useInnerHandlers(
     }
 
     if (replyToPeerId && replyToTopId) {
-      focusMessageInComments({
+      focusMessage({
         chatId: replyToPeerId,
         threadId: replyToTopId,
         messageId: forwardInfo!.fromMessageId!,
@@ -181,8 +181,8 @@ export default function useInnerHandlers(
   });
 
   const handleOpenThread = useLastCallback(() => {
-    openChat({
-      id: message.chatId,
+    openThread({
+      chatId: message.chatId,
       threadId: message.id,
     });
   });

@@ -92,7 +92,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   draft,
   wasTopicOpened,
 }) => {
-  const { openChat, deleteTopic, focusLastMessage } = getActions();
+  const { openThread, deleteTopic, focusLastMessage } = getActions();
 
   const lang = useLang();
 
@@ -140,7 +140,7 @@ const Topic: FC<OwnProps & StateProps> = ({
   });
 
   const handleOpenTopic = useLastCallback(() => {
-    openChat({ id: chatId, threadId: topic.id, shouldReplaceHistory: true });
+    openThread({ chatId, threadId: topic.id, shouldReplaceHistory: true });
 
     if (canScrollDown) {
       focusLastMessage();

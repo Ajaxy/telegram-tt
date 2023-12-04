@@ -33,7 +33,6 @@ import {
   selectChat,
   selectChatMessages,
   selectCurrentMessageList,
-  selectThreadOriginChat,
   selectViewportIds,
   selectVisibleUsers,
 } from './selectors';
@@ -335,17 +334,8 @@ function reduceChats<T extends GlobalState>(global: T): GlobalState['chats'] {
   const { chats: { byId }, currentUserId } = global;
   const currentChatIds = compact(
     Object.values(global.byTabId)
-      .flatMap(({ id: tabId }): MessageList[] | undefined => {
-        const messageList = selectCurrentMessageList(global, tabId);
-        if (!messageList) return undefined;
-
-        const { chatId, threadId } = messageList;
-        const origin = selectThreadOriginChat(global, chatId, threadId);
-        return origin ? [{
-          chatId: origin.id,
-          threadId: MAIN_THREAD_ID,
-          type: 'thread',
-        }, messageList] : [messageList];
+      .map(({ id: tabId }): MessageList | undefined => {
+        return selectCurrentMessageList(global, tabId);
       }),
   ).map(({ chatId }) => chatId);
 
@@ -407,14 +397,17 @@ function reduceMessages<T extends GlobalState>(global: T): GlobalState['messages
 
     const chat = selectChat(global, chatId);
 
-    const threadIds = compact(Object.values(global.byTabId).map(({ id: tabId }) => {
+    const threadIds = unique(compact(Object.values(global.byTabId).map(({ id: tabId }) => {
       const { chatId: tabChatId, threadId } = selectCurrentMessageList(global, tabId) || {};
       if (!tabChatId || tabChatId !== chatId || !threadId || threadId === MAIN_THREAD_ID) {
         return undefined;
       }
 
       return threadId;
-    }));
+    }).concat(
+      Object.values(global.messages.byChatId[chatId].threadsById || {})
+        .map(({ threadInfo }) => (threadInfo?.isCommentsInfo ? threadInfo?.originMessageId : undefined)),
+    )));
 
     const threadIdsToSave = threadIds.length ? [MAIN_THREAD_ID, ...threadIds] : [MAIN_THREAD_ID];
     const threadsToSave = pickTruthy(current.threadsById, threadIdsToSave);

@@ -72,6 +72,7 @@ import {
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
 import { applyState, processUpdate, updateChannelState } from '../updateManager';
+import { dispatchThreadInfoUpdates } from '../updater';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -129,6 +130,8 @@ export async function fetchChats({
       .filter(Boolean),
     'chatId',
   );
+
+  dispatchThreadInfoUpdates(result.messages);
 
   const peersByKey = preparePeers(result);
   if (resultPinned) {
@@ -340,6 +343,8 @@ export async function requestChatUpdate({
   updateLocalDb(result);
 
   const lastRemoteMessage = buildApiMessage(result.messages[0]);
+  dispatchThreadInfoUpdates(result.messages);
+
   const lastMessage = lastLocalMessage && (!lastRemoteMessage || (lastLocalMessage.date > lastRemoteMessage.date))
     ? lastLocalMessage
     : lastRemoteMessage;
@@ -542,7 +547,7 @@ async function getFullChannelInfo(
       kickedMembers,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       groupCallId: call ? String(call.id) : undefined,
-      linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'chat') : undefined,
+      linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'channel') : undefined,
       botCommands,
       enabledReactions: buildApiChatReactions(availableReactions),
       sendAsId: defaultSendAs ? getApiChatIdFromMtpPeer(defaultSendAs) : undefined,
@@ -1584,6 +1589,7 @@ export async function fetchTopics({
 
   const topics = result.topics.map(buildApiTopic).filter(Boolean);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const draftsById = result.topics.reduce((acc, topic) => {
@@ -1637,6 +1643,7 @@ export async function fetchTopicById({
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 

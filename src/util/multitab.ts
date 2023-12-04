@@ -7,7 +7,7 @@ import type { MethodArgs, Methods } from '../api/gramjs/methods/types';
 import type { ApiInitialArgs } from '../api/types';
 import type { GlobalState } from '../global/types';
 
-import { DATA_BROADCAST_CHANNEL_NAME, DEBUG, MULTITAB_LOCALSTORAGE_KEY } from '../config';
+import { DATA_BROADCAST_CHANNEL_NAME, MULTITAB_LOCALSTORAGE_KEY } from '../config';
 import { selectTabState } from '../global/selectors';
 import {
   callApiLocal,

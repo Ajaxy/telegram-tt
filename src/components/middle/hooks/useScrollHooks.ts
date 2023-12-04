@@ -7,7 +7,6 @@ import type { Signal } from '../../../util/signals';
 import { LoadMoreDirection } from '../../../types';
 
 import { requestMeasure } from '../../../lib/fasterdom/fasterdom';
-import { isLocalMessageId } from '../../../global/helpers';
 import { debounce } from '../../../util/schedulers';
 import { MESSAGE_LIST_SENSITIVE_AREA } from '../../../util/windowEnvironment';
 
@@ -89,12 +88,6 @@ export default function useScrollHooks(
     margin: MESSAGE_LIST_SENSITIVE_AREA,
   }, (entries) => {
     if (!loadMoreForwards || !loadMoreBackwards) {
-      return;
-    }
-
-    // Loading history while sending a message can return the same message and cause ambiguity
-    const isFirstMessageLocal = isLocalMessageId(messageIds[0]);
-    if (isFirstMessageLocal) {
       return;
     }
 

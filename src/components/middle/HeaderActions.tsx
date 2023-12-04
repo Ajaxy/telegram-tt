@@ -208,7 +208,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
   });
 
   const handleAsMessagesClick = useLastCallback(() => {
-    openChat({ id: chatId, threadId: MAIN_THREAD_ID });
+    openChat({ id: chatId });
   });
 
   function handleRequestCall() {

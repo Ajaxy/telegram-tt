@@ -256,7 +256,7 @@ const Main: FC<OwnProps & StateProps> = ({
     closePaymentModal,
     clearReceipt,
     checkAppVersion,
-    openChat,
+    openThread,
     toggleLeftColumn,
     loadRecentEmojiStatuses,
     updatePageTitle,
@@ -419,8 +419,8 @@ const Main: FC<OwnProps & StateProps> = ({
     const parsedLocationHash = parseLocationHash();
     if (!parsedLocationHash) return;
 
-    openChat({
-      id: parsedLocationHash.chatId,
+    openThread({
+      chatId: parsedLocationHash.chatId,
       threadId: parsedLocationHash.threadId,
       type: parsedLocationHash.type,
     });

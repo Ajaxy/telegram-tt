@@ -47,7 +47,6 @@ import {
   selectTabState,
   selectThreadInfo,
   selectThreadParam,
-  selectThreadTopMessageId,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import cycleRestrict from '../../util/cycleRestrict';
@@ -86,6 +85,7 @@ type OwnProps = {
   chatId: string;
   threadId: number;
   messageListType: MessageListType;
+  isComments?: boolean;
   isReady?: boolean;
   isMobile?: boolean;
   getCurrentPinnedIndexes: Signal<Record<string, number>>;
@@ -105,7 +105,6 @@ type StateProps = {
   isRightColumnShown?: boolean;
   audioMessage?: ApiMessage;
   messagesCount?: number;
-  isComments?: boolean;
   isChatWithSelf?: boolean;
   hasButtonInHeader?: boolean;
   shouldSkipHistoryAnimations?: boolean;
@@ -147,7 +146,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   onFocusPinnedMessage,
 }) => {
   const {
-    openChatWithInfo,
+    openThreadWithInfo,
     pinMessage,
     focusMessage,
     openChat,
@@ -156,6 +155,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
     toggleLeftColumn,
     exitMessageSelectMode,
     openPremiumModal,
+    openThread,
   } = getActions();
 
   const lang = useLang();
@@ -197,7 +197,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   } = useFastClick((e: React.MouseEvent<HTMLDivElement | HTMLButtonElement>) => {
     if (e.type === 'mousedown' && (e.target as Element).closest('.title > .custom-emoji')) return;
 
-    openChatWithInfo({ id: chatId, threadId });
+    openThreadWithInfo({ chatId, threadId });
   });
 
   const handleUnpinMessage = useLastCallback((messageId: number) => {
@@ -217,7 +217,7 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
   });
 
   const handleAllPinnedClick = useLastCallback(() => {
-    openChat({ id: chatId, threadId, type: 'pinned' });
+    openThread({ chatId, threadId, type: 'pinned' });
   });
 
   const setBackButtonActive = useLastCallback(() => {
@@ -354,7 +354,9 @@ const MiddleHeader: FC<OwnProps & StateProps> = ({
         <h3>
           {messagesCount !== undefined ? (
             messageListType === 'thread' ? (
-              lang(isComments ? 'CommentsCount' : 'Replies', messagesCount, 'i'))
+              (messagesCount
+                ? lang(isComments ? 'Comments' : 'Replies', messagesCount, 'i')
+                : lang(isComments ? 'CommentsTitle' : 'RepliesTitle')))
               : messageListType === 'pinned' ? (lang('PinnedMessagesCount', messagesCount, 'i'))
                 : messageListType === 'scheduled' ? (
                   isChatWithSelf ? lang('Reminders') : lang('messages', messagesCount, 'i')
@@ -560,10 +562,9 @@ export default memo(withGlobal<OwnProps>(
     }
 
     if (threadId !== MAIN_THREAD_ID && !chat?.isForum) {
-      const pinnedMessageId = selectThreadTopMessageId(global, chatId, threadId);
+      const pinnedMessageId = threadId;
       const message = pinnedMessageId ? selectChatMessage(global, chatId, pinnedMessageId) : undefined;
       const topMessageSender = message ? selectForwardedSender(global, message) : undefined;
-      const threadInfo = selectThreadInfo(global, chatId, threadId);
 
       return {
         ...state,
@@ -571,7 +572,6 @@ export default memo(withGlobal<OwnProps>(
         messagesById,
         canUnpin: false,
         topMessageSender,
-        isComments: Boolean(threadInfo?.originChannelId),
       };
     }
 

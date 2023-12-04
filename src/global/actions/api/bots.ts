@@ -1,9 +1,10 @@
-import type {
-  ApiChat, ApiChatType, ApiContact, ApiInputMessageReplyInfo, ApiPeer, ApiUrlAuthResult,
-} from '../../../api/types';
 import type { InlineBotSettings } from '../../../types';
 import type { RequiredGlobalActions } from '../../index';
 import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
+import {
+  type ApiChat, type ApiChatType, type ApiContact, type ApiInputMessageReplyInfo, type ApiPeer, type ApiUrlAuthResult,
+  MAIN_THREAD_ID,
+} from '../../../api/types';
 
 import { GENERAL_REFETCH_INTERVAL } from '../../../config';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
@@ -793,8 +794,8 @@ addActionHandler('callAttachBot', (global, actions, payload): ActionReturnType =
   }
 
   if ('chatId' in payload) {
-    const { chatId, threadId, url } = payload;
-    actions.openChat({ id: chatId, threadId, tabId });
+    const { chatId, threadId = MAIN_THREAD_ID, url } = payload;
+    actions.openThread({ chatId, threadId, tabId });
     actions.requestWebView({
       url,
       peerId: chatId!,

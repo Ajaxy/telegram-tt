@@ -440,8 +440,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   const viewportIds = selectViewportIds(global, chatId, threadId, tabId);
   if (viewportIds && viewportIds.includes(messageId)) {
     setGlobal(global, { forceOnHeavyAnimation: true });
-    actions.openChat({
-      id: chatId,
+    actions.openThread({
+      chatId,
       threadId,
       type: messageListType,
       shouldReplaceHistory,
@@ -462,8 +462,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
 
   setGlobal(global, { forceOnHeavyAnimation: true });
 
-  actions.openChat({
-    id: chatId,
+  actions.openThread({
+    chatId,
     threadId,
     type: messageListType,
     shouldReplaceHistory,
@@ -471,6 +471,8 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
     tabId,
   });
   actions.loadViewportMessages({
+    chatId,
+    threadId,
     tabId,
     shouldForceRender: true,
   });

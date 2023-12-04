@@ -222,12 +222,9 @@ export type ApiUpdatePinnedMessageIds = {
   messageIds: number[];
 };
 
-export type ApiUpdateThreadInfo = {
-  '@type': 'updateThreadInfo';
-  chatId: string;
-  threadId: number;
-  threadInfo: Partial<ApiThreadInfo>;
-  firstMessageId?: number;
+export type ApiUpdateThreadInfos = {
+  '@type': 'updateThreadInfos';
+  threadInfoUpdates: Partial<ApiThreadInfo>[];
 };
 
 export type ApiUpdateScheduledMessageSendSucceeded = {
@@ -685,7 +682,7 @@ export type ApiUpdate = (
   ApiUpdateChat | ApiUpdateChatInbox | ApiUpdateChatTypingStatus | ApiUpdateChatFullInfo | ApiUpdatePinnedChatIds |
   ApiUpdateChatMembers | ApiUpdateChatJoin | ApiUpdateChatLeave | ApiUpdateChatPinned | ApiUpdatePinnedMessageIds |
   ApiUpdateChatListType | ApiUpdateChatFolder | ApiUpdateChatFoldersOrder | ApiUpdateRecommendedChatFolders |
-  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfo | ApiUpdateCommonBoxMessages | ApiUpdateChannelMessages |
+  ApiUpdateNewMessage | ApiUpdateMessage | ApiUpdateThreadInfos | ApiUpdateCommonBoxMessages |
   ApiUpdateDeleteMessages | ApiUpdateMessagePoll | ApiUpdateMessagePollVote | ApiUpdateDeleteHistory |
   ApiUpdateMessageSendSucceeded | ApiUpdateMessageSendFailed | ApiUpdateServiceNotification |
   ApiDeleteContact | ApiUpdateUser | ApiUpdateUserStatus | ApiUpdateUserFullInfo | ApiUpdateDeleteProfilePhotos |

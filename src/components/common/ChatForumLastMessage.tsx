@@ -38,7 +38,7 @@ const ChatForumLastMessage: FC<OwnProps> = ({
   renderLastMessage,
   observeIntersection,
 }) => {
-  const { openChat } = getActions();
+  const { openThread } = getActions();
 
   // eslint-disable-next-line no-null/no-null
   const lastMessageRef = useRef<HTMLDivElement>(null);
@@ -67,8 +67,8 @@ const ChatForumLastMessage: FC<OwnProps> = ({
     e.stopPropagation();
     e.preventDefault();
 
-    openChat({
-      id: chat.id,
+    openThread({
+      chatId: chat.id,
       threadId: lastActiveTopic.id,
       shouldReplaceHistory: true,
       noForumTopicPanel: getIsMobile(),
