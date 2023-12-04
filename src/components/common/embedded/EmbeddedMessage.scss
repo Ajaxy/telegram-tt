@@ -190,6 +190,8 @@
 
   &.inside-input {
     flex-grow: 1;
+    margin: 0;
+    border-radius: 0.25rem;
 
     .embedded-thumb {
       margin-left: 0.125rem;
