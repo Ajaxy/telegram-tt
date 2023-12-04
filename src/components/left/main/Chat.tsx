@@ -293,6 +293,7 @@ const Chat: FC<OwnProps & StateProps> = ({
             <LastMessageMeta
               message={chat.lastMessage}
               outgoingStatus={lastMessageOutgoingStatus}
+              draftDate={draft?.date}
             />
           )}
         </div>

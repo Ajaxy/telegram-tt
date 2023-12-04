@@ -256,6 +256,7 @@ export function sendMessage(
     noWebPage,
     sendAs,
     shouldUpdateStickerSetOrder,
+    wasDrafted,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -274,6 +275,7 @@ export function sendMessage(
     noWebPage?: boolean;
     sendAs?: ApiPeer;
     shouldUpdateStickerSetOrder?: boolean;
+    wasDrafted?: boolean;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -298,6 +300,7 @@ export function sendMessage(
     id: localMessage.id,
     chatId: chat.id,
     message: localMessage,
+    wasDrafted,
   });
 
   // This is expected to arrive after `updateMessageSendSucceeded` which replaces the local ID,
@@ -1284,6 +1287,7 @@ export async function forwardMessages({
   noAuthors,
   noCaptions,
   isCurrentUserPremium,
+  wasDrafted,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
@@ -1296,6 +1300,7 @@ export async function forwardMessages({
   noAuthors?: boolean;
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
+  wasDrafted?: boolean;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
@@ -1318,6 +1323,7 @@ export async function forwardMessages({
       id: localMessage.id,
       chatId: toChat.id,
       message: localMessage,
+      wasDrafted,
     });
   });
 

@@ -39,7 +39,9 @@ import {
   areSortedArraysIntersecting, buildCollectionByKey, omit, partition, split, unique,
 } from '../../../util/iteratees';
 import { translate } from '../../../util/langProvider';
-import { debounce, onTickEnd, rafPromise } from '../../../util/schedulers';
+import {
+  debounce, onTickEnd, rafPromise,
+} from '../../../util/schedulers';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, cancelApiProgress } from '../../../api/gramjs';
 import {
@@ -292,7 +294,8 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   }
 
   const chat = selectChat(global, chatId!)!;
-  const draftReplyInfo = !isStoryReply ? selectDraft(global, chatId!, threadId!)?.replyInfo : undefined;
+  const draft = selectDraft(global, chatId!, threadId!);
+  const draftReplyInfo = !isStoryReply ? draft?.replyInfo : undefined;
 
   const storyReplyInfo = isStoryReply ? {
     type: 'story',
@@ -313,7 +316,6 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   };
 
   if (!isStoryReply) {
-    actions.resetDraftReplyInfo({ tabId });
     actions.clearWebPagePreview({ tabId });
   }
 
@@ -325,6 +327,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
     sendMessage(global, {
       ...restParams,
       attachment: attachments ? attachments[0] : undefined,
+      wasDrafted: Boolean(draft),
     });
   } else if (isGrouped) {
     const {
@@ -346,6 +349,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
           entities: isFirst ? entities : undefined,
           attachment: firstAttachment,
           groupedId: restAttachments.length > 0 ? groupedId : undefined,
+          wasDrafted: Boolean(draft),
         });
 
         restAttachments.forEach((attachment: ApiAttachment) => {
@@ -368,6 +372,7 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
         text,
         entities,
         replyInfo: replyToForFirstMessage,
+        wasDrafted: Boolean(draft),
       });
     }
 
@@ -462,7 +467,9 @@ addActionHandler('saveDraft', (global, actions, payload): ActionReturnType => {
     replyInfo: currentDraft?.replyInfo,
   };
 
-  saveDraft(global, chatId, threadId, newDraft);
+  saveDraft({
+    global, chatId, threadId, draft: newDraft,
+  });
 });
 
 addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
@@ -480,9 +487,9 @@ addActionHandler('clearDraft', (global, actions, payload): ActionReturnType => {
     replyInfo: currentReplyInfo,
   } : undefined;
 
-  if (!isLocalOnly) {
-    saveDraft(global, chatId, threadId, newDraft);
-  }
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly,
+  });
 });
 
 addActionHandler('updateDraftReplyInfo', (global, actions, payload): ActionReturnType => {
@@ -509,7 +516,9 @@ addActionHandler('updateDraftReplyInfo', (global, actions, payload): ActionRetur
     replyInfo: updatedReplyInfo,
   };
 
-  saveDraft(global, chatId, threadId, newDraft);
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly: true, noLocalTimeUpdate: true,
+  });
 });
 
 addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturnType => {
@@ -526,10 +535,16 @@ addActionHandler('resetDraftReplyInfo', (global, actions, payload): ActionReturn
     replyInfo: undefined,
   };
 
-  saveDraft(global, chatId, threadId, newDraft);
+  saveDraft({
+    global, chatId, threadId, draft: newDraft, isLocalOnly: Boolean(newDraft),
+  });
 });
 
-async function saveDraft<T extends GlobalState>(global: T, chatId: string, threadId: number, draft?: ApiDraft) {
+async function saveDraft<T extends GlobalState>({
+  global, chatId, threadId, draft, isLocalOnly, noLocalTimeUpdate,
+} : {
+  global: T; chatId: string; threadId: number; draft?: ApiDraft; isLocalOnly?: boolean; noLocalTimeUpdate?: boolean;
+}) {
   const chat = selectChat(global, chatId);
   const user = selectUser(global, chatId);
   if (!chat || (user && isDeletedUser(user))) return;
@@ -544,9 +559,13 @@ async function saveDraft<T extends GlobalState>(global: T, chatId: string, threa
   } : undefined;
 
   global = replaceThreadParam(global, chatId, threadId, 'draft', newDraft);
-  global = updateChat(global, chatId, { draftDate: newDraft?.date });
+  if (!noLocalTimeUpdate) {
+    global = updateChat(global, chatId, { draftDate: newDraft?.date });
+  }
 
   setGlobal(global);
+
+  if (isLocalOnly) return;
 
   const result = await callApi('saveDraft', {
     chat,
@@ -929,6 +948,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
   }
 
   const sendAs = selectSendAs(global, toChatId!);
+  const draft = selectDraft(global, toChatId!, toThreadId || MAIN_THREAD_ID);
 
   const [realMessages, serviceMessages] = partition(messages, (m) => !isServiceNotificationMessage(m));
   if (realMessages.length) {
@@ -946,6 +966,7 @@ addActionHandler('forwardMessages', (global, actions, payload): ActionReturnType
         noAuthors,
         noCaptions,
         isCurrentUserPremium,
+        wasDrafted: Boolean(draft),
       });
     })();
   }
@@ -1290,6 +1311,7 @@ async function sendMessage<T extends GlobalState>(global: T, params: {
   scheduledAt?: number;
   sendAs?: ApiPeer;
   groupedId?: string;
+  wasDrafted?: boolean;
 }) {
   let localId: number | undefined;
   const progressCallback = params.attachment ? (progress: number, messageLocalId: number) => {
