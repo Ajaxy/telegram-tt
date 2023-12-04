@@ -56,7 +56,7 @@ type AnimateNumberProps<T extends number | number[]> = {
   duration: number;
   onUpdate: (value: T) => void;
   timing?: TimingFn;
-  onEnd?: () => void;
+  onEnd?: (isCanceled?: boolean) => void;
 };
 
 export const timingFunctions = {
@@ -87,13 +87,15 @@ export function animateNumber<T extends number | number[]>({
   to,
 }: AnimateNumberProps<T>) {
   const t0 = Date.now();
-  let canceled = false;
+
+  let isCanceled = false;
 
   animateInstantly(() => {
-    if (canceled) return false;
+    if (isCanceled) return false;
+
     const t1 = Date.now();
-    let t = (t1 - t0) / duration;
-    if (t > 1) t = 1;
+    const t = Math.min((t1 - t0) / duration, 1);
+
     const progress = timing(t);
     if (typeof from === 'number' && typeof to === 'number') {
       onUpdate((from + ((to - from) * progress)) as T);
@@ -101,13 +103,17 @@ export function animateNumber<T extends number | number[]>({
       const result = from.map((f, i) => f + ((to[i] - f) * progress));
       onUpdate(result as T);
     }
-    if (t === 1 && onEnd) onEnd();
+
+    if (t === 1) {
+      onEnd?.();
+    }
+
     return t < 1;
   }, requestMeasure);
 
   return () => {
-    canceled = true;
-    if (onEnd) onEnd();
+    isCanceled = true;
+    onEnd?.(true);
   };
 }
 

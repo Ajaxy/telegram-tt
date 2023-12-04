@@ -14,6 +14,7 @@ let isSwipeActive = false;
 let swipeOffsets: MoveOffsets | undefined;
 let onDrag: ((offsets: MoveOffsets) => void) | undefined;
 let onRelease: ((onCancel: NoneToVoidFunction) => void) | undefined;
+let cancelCurrentReleaseAnimation: NoneToVoidFunction | undefined;
 
 export function captureControlledSwipe(
   element: HTMLElement, options: {
@@ -70,6 +71,8 @@ export function allowSwipeControlForTransition(
   nextSlide: HTMLElement,
   onCancelForTransition: NoneToVoidFunction,
 ) {
+  cancelCurrentReleaseAnimation?.();
+
   if (!isSwipeActive) return;
 
   const targetPosition = extractAnimationEndPosition(currentSlide);
@@ -108,7 +111,7 @@ export function allowSwipeControlForTransition(
     };
 
     onRelease = (onCancelForClient: NoneToVoidFunction) => {
-      const isCanceled = currentDirection === -1;
+      const isRevertSwipe = currentDirection === -1;
 
       function cleanup() {
         currentSlide.getAnimations().forEach((a) => a.cancel());
@@ -120,21 +123,23 @@ export function allowSwipeControlForTransition(
         });
       }
 
-      if (!isCanceled) {
+      if (!isRevertSwipe) {
         // For some reason animations are not cleared when CSS class is removed
         waitForAnimationEnd(currentSlide, cleanup);
       }
 
-      animateNumber({
+      cancelCurrentReleaseAnimation = animateNumber({
         from: progress,
-        to: isCanceled ? 0 : 1,
+        to: isRevertSwipe ? 0 : 1,
         duration: INERTIA_DURATION,
         timing: INERTIA_EASING,
         onUpdate(releaseProgress) {
           updateAnimationProgress([currentSlide, nextSlide], releaseProgress);
         },
-        onEnd() {
-          if (isCanceled) {
+        onEnd(isCanceled = false) {
+          cancelCurrentReleaseAnimation = undefined;
+
+          if (isCanceled || isRevertSwipe) {
             cleanup();
             onCancelForTransition();
             onCancelForClient();
