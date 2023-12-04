@@ -1,6 +1,6 @@
 import type { FC } from '../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 
 import type { ApiPremiumPromo } from '../../../api/types';
@@ -127,21 +127,23 @@ const LIMITS_DESCRIPTIONS: Record<ApiLimitTypeWithoutUpload, string> = {
 const BORDER_THRESHOLD = 20;
 
 type OwnProps = {
-  onBack: VoidFunction;
   initialSection: string;
   promo: ApiPremiumPromo;
-  onClickSubscribe: (startParam?: string) => void;
   isPremium?: boolean;
   limits?: NonNullable<GlobalState['appConfig']>['limits'];
+  premiumPromoOrder?: string[];
+  onBack: VoidFunction;
+  onClickSubscribe: (startParam?: string) => void;
 };
 
 const PremiumFeatureModal: FC<OwnProps> = ({
   promo,
   initialSection,
-  onBack,
-  onClickSubscribe,
   isPremium,
   limits,
+  premiumPromoOrder,
+  onBack,
+  onClickSubscribe,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -154,6 +156,11 @@ const PremiumFeatureModal: FC<OwnProps> = ({
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false);
 
   const prevInitialSection = usePrevious(initialSection);
+
+  const filteredSections = useMemo(() => {
+    if (!premiumPromoOrder) return PREMIUM_FEATURE_SECTIONS;
+    return premiumPromoOrder.filter((section) => PREMIUM_FEATURE_SECTIONS.includes(section));
+  }, [premiumPromoOrder]);
 
   function handleClick() {
     onClickSubscribe(initialSection);
@@ -192,12 +199,12 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer || (prevInitialSection === initialSection)) return;
 
-    const index = PREMIUM_FEATURE_SECTIONS.indexOf(initialSection);
+    const index = filteredSections.indexOf(initialSection);
     setCurrentSlideIndex(index);
     startScrolling();
     animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 0)
       .then(stopScrolling);
-  }, [currentSlideIndex, initialSection, prevInitialSection, startScrolling, stopScrolling]);
+  }, [currentSlideIndex, filteredSections, initialSection, prevInitialSection]);
 
   const handleSelectSlide = useCallback(async (index: number) => {
     const scrollContainer = scrollContainerRef.current;
@@ -208,7 +215,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
     startScrolling();
     await animateHorizontalScroll(scrollContainer, scrollContainer.clientWidth * index, 800);
     stopScrolling();
-  }, [startScrolling, stopScrolling]);
+  }, []);
 
   // TODO Support all subscription options
   const month = promo.options.find((option) => option.months === 1)!;
@@ -230,7 +237,7 @@ const PremiumFeatureModal: FC<OwnProps> = ({
 
       <div className={buildClassName(styles.content, 'no-scrollbar')} onScroll={handleScroll} ref={scrollContainerRef}>
 
-        {PREMIUM_FEATURE_SECTIONS.map((section, index) => {
+        {filteredSections.map((section, index) => {
           if (section === 'double_limits') {
             return (
               <div className={buildClassName(styles.slide, styles.limits)}>

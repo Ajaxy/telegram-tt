@@ -372,6 +372,7 @@ const PremiumMainModal: FC<OwnProps & StateProps> = ({
             onClickSubscribe={handleClickWithStartParam}
             isPremium={isPremium}
             limits={limits}
+            premiumPromoOrder={premiumPromoOrder}
           />
         )}
       </Transition>

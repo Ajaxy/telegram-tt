@@ -1,6 +1,6 @@
 import type { FC } from '../../../../lib/teact/teact';
 import React, {
-  memo, useCallback, useEffect, useRef, useState,
+  memo, useEffect, useRef, useState,
 } from '../../../../lib/teact/teact';
 import { withGlobal } from '../../../../global';
 
@@ -10,6 +10,7 @@ import type { GlobalState } from '../../../../global/types';
 import cycleRestrict from '../../../../util/cycleRestrict';
 
 import useFlag from '../../../../hooks/useFlag';
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useMedia from '../../../../hooks/useMedia';
 
 import AnimatedSticker from '../../../common/AnimatedSticker';
@@ -36,7 +37,7 @@ const AnimatedCircleSticker: FC<{
   index: number;
   maxLength: number;
   onClick: (index: number) => void;
-  onEnded: NoneToVoidFunction;
+  onEnded: (index: number) => void;
   canPlay: boolean;
 }> = ({
   size, realIndex, canPlay,
@@ -60,14 +61,14 @@ const AnimatedCircleSticker: FC<{
   const x = Math.cos(angle) * width - circleSize * 2.8;
   const y = Math.sin(angle) * height;
 
-  const handleClick = useCallback(() => {
+  const handleClick = useLastCallback(() => {
     onClick(realIndex);
-  }, [onClick, realIndex]);
+  });
 
-  const handleEnded = useCallback(() => {
+  const handleEnded = useLastCallback(() => {
     inanimate();
-    onEnded();
-  }, [inanimate, onEnded]);
+    onEnded(realIndex);
+  });
 
   useEffect(() => {
     if (isActivated) {
@@ -112,15 +113,20 @@ const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
 
   const renderedStickers = stickers?.slice(0, MAX_EMOJIS);
 
-  const handleClick = useCallback((i: number) => {
+  const handleClick = useLastCallback((i: number) => {
     setOffset(-i);
-  }, []);
+  });
 
-  const handleEnded = useCallback(() => {
+  const handleEnded = useLastCallback((i: number) => {
+    const displayIndex = cycleRestrict(renderedStickers.length, i + offset);
+    if (displayIndex !== 0) return;
+
     setTimeout(() => {
-      setOffset((current) => cycleRestrict(renderedStickers.length, current + 1));
+      setOffset((current) => {
+        return cycleRestrict(renderedStickers.length, current + 1);
+      });
     }, ENDED_DELAY);
-  }, [renderedStickers.length]);
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -134,11 +140,11 @@ const PremiumFeaturePreviewStickers: FC<OwnProps & StateProps> = ({
       className={styles.root}
       ref={containerRef}
     >
-      {Boolean(size) && renderedStickers?.map((l, i) => {
+      {Boolean(size) && renderedStickers?.map((sticker, i) => {
         return (
           <AnimatedCircleSticker
             size={size}
-            sticker={l}
+            sticker={sticker}
             realIndex={i}
             index={(i + offset + renderedStickers.length) % renderedStickers.length}
             maxLength={renderedStickers.length}
