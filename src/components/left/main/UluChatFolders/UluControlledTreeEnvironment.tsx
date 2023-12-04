@@ -77,6 +77,19 @@ const UluControlledTreeEnvironment = forwardRef<TreeEnvironmentRef, OwnProps>(({
     setExpandedItems(newExpandedItems);
   }, [totalFolders, items, currentWorkspaceId]);
 
+  // Чтение сохраненного состояния при монтировании
+  useEffect(() => {
+    const savedExpandedItems = localStorage.getItem(`expandedItems-${id}`);
+    if (savedExpandedItems) {
+      setExpandedItems(JSON.parse(savedExpandedItems));
+    }
+  }, [id]);
+
+  // Сохранение состояния при его изменении
+  useEffect(() => {
+    localStorage.setItem(`expandedItems-${id}`, JSON.stringify(expandedItems));
+  }, [expandedItems, id]);
+
   return (
     <ControlledTreeEnvironment
       items={items}
