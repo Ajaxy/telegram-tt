@@ -641,6 +641,11 @@ export type TabState = {
     slug: string;
     info: ApiCheckedGiftCode;
   };
+
+  inviteViaLinkModal?: {
+    restrictedUserIds: string[];
+    chatId: string;
+  };
 };
 
 export type GlobalState = {
@@ -1277,6 +1282,10 @@ export interface ActionPayloads {
     shouldGroupMessages?: boolean;
     messageList?: MessageList;
     isReaction?: true; // Reaction to the story are sent in the form of a message
+  } & WithTabId;
+  sendInviteMessages: {
+    chatId: string;
+    userIds: string[];
   } & WithTabId;
   cancelSendingMessage: {
     chatId: string;
@@ -2578,6 +2587,7 @@ export interface ActionPayloads {
   dismissNotification: { localId: string } & WithTabId;
 
   updatePageTitle: WithTabId | undefined;
+  closeInviteViaLinkModal: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {

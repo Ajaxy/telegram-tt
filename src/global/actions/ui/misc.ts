@@ -723,6 +723,13 @@ addActionHandler('updatePageTitle', (global, actions, payload): ActionReturnType
   setPageTitleInstant(IS_ELECTRON ? '' : PAGE_TITLE);
 });
 
+addActionHandler('closeInviteViaLinkModal', (global, actions, payload): ActionReturnType => {
+  const { tabId = getCurrentTabId() } = payload ?? {};
+  return updateTabState(global, {
+    inviteViaLinkModal: undefined,
+  }, tabId);
+});
+
 let prevIsScreenLocked: boolean | undefined;
 let prevBlurredTabsCount: number = 0;
 let onlineTimeout: number | undefined;

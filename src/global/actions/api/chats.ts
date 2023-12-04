@@ -53,6 +53,7 @@ import {
   addMessages,
   addUsers,
   addUserStatuses,
+  addUsersToRestrictedInviteList,
   deleteTopic,
   leaveChat,
   replaceChatFullInfo,
@@ -436,9 +437,11 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   let createdChannel: ApiChat | undefined;
-
+  let restrictedUserIds: string[] | undefined;
   try {
-    createdChannel = await callApi('createChannel', { title, about, users });
+    const result = await callApi('createChannel', { title, about, users });
+    createdChannel = result?.channel;
+    restrictedUserIds = result?.restrictedUserIds;
   } catch (error) {
     global = getGlobal();
 
@@ -473,6 +476,12 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   }, tabId);
   setGlobal(global);
   actions.openChat({ id: channelId, shouldReplaceHistory: true, tabId });
+
+  if (restrictedUserIds) {
+    global = getGlobal();
+    global = addUsersToRestrictedInviteList(global, restrictedUserIds, channelId, tabId);
+    setGlobal(global);
+  }
 
   if (channelId && accessHash && photo) {
     await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
@@ -593,17 +602,19 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
   }, tabId);
   setGlobal(global);
 
+  let createdChatId: string | undefined;
   try {
-    const createdChat = await callApi('createGroupChat', {
+    const { chat: createdChat, restrictedUserIds } = await callApi('createGroupChat', {
       title,
       users,
-    });
+    }) ?? {};
 
     if (!createdChat) {
       return;
     }
 
     const { id: chatId } = createdChat;
+    createdChatId = chatId;
 
     global = getGlobal();
     global = updateChat(global, chatId, createdChat);
@@ -619,6 +630,11 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
       shouldReplaceHistory: true,
       tabId,
     });
+    if (restrictedUserIds) {
+      global = getGlobal();
+      global = addUsersToRestrictedInviteList(global, restrictedUserIds, chatId, tabId);
+      setGlobal(global);
+    }
 
     if (chatId && photo) {
       await callApi('editChatPhoto', {
@@ -626,8 +642,8 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
         photo,
       });
     }
-  } catch (e: any) {
-    if (e.message === 'USERS_TOO_FEW') {
+  } catch (err) {
+    if ((err as ApiError).message === 'USERS_TOO_FEW') {
       global = getGlobal();
       global = updateTabState(global, {
         chatCreation: {
@@ -636,6 +652,10 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
           error: 'CreateGroupError',
         },
       }, tabId);
+      setGlobal(global);
+    } else if ((err as ApiError).message === 'USER_PRIVACY_RESTRICTED') {
+      global = getGlobal();
+      global = addUsersToRestrictedInviteList(global, users.map(({ id }) => id), createdChatId!, tabId);
       setGlobal(global);
     }
   }
@@ -1645,7 +1665,12 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
   }
 
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Loading, tabId });
-  await callApi('addChatMembers', chat, users);
+  const restrictedUserIds = await callApi('addChatMembers', chat, users);
+  if (restrictedUserIds) {
+    global = getGlobal();
+    global = addUsersToRestrictedInviteList(global, restrictedUserIds, chat.id, tabId);
+    setGlobal(global);
+  }
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed, tabId });
   global = getGlobal();
   loadFullChat(global, actions, chat, tabId);

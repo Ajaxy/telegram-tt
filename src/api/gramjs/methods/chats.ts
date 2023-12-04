@@ -70,7 +70,7 @@ import {
 } from '../helpers';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
-import { applyState, updateChannelState } from '../updateManager';
+import { applyState, processUpdate, updateChannelState } from '../updateManager';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -626,7 +626,7 @@ export async function createChannel({
   title, about = '', users,
 }: {
   title: string; about?: string; users?: ApiUser[];
-}, noErrorUpdate = false): Promise<ApiChat | undefined> {
+}) {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
     broadcast: true,
     title,
@@ -657,20 +657,36 @@ export async function createChannel({
 
   const channel = buildApiChatFromPreview(newChannel)!;
 
+  let restrictedUserIds: string[] | undefined;
+
   if (users?.length) {
     try {
-      await invokeRequest(new GramJs.channels.InviteToChannel({
+      const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
         channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
         users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
       }), {
-        shouldThrow: noErrorUpdate,
+        shouldIgnoreUpdates: true,
+        shouldThrow: true,
       });
+      if (updates) {
+        processUpdate(updates);
+        restrictedUserIds = handleUserPrivacyRestrictedUpdates(updates);
+      }
     } catch (err) {
-      // `noErrorUpdate` will cause an exception which we don't want either
+      if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+        restrictedUserIds = users.map(({ id }) => id);
+      } else {
+        onUpdate({
+          '@type': 'error',
+          error: {
+            message: (err as Error).message,
+          },
+        });
+      }
     }
   }
 
-  return channel;
+  return { channel, restrictedUserIds };
 }
 
 export function joinChannel({
@@ -740,11 +756,12 @@ export async function createGroupChat({
   title, users,
 }: {
   title: string; users: ApiUser[];
-}): Promise<ApiChat | undefined> {
+}) {
   const result = await invokeRequest(new GramJs.messages.CreateChat({
     title,
     users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
   }), {
+    shouldIgnoreUpdates: true,
     shouldThrow: true,
   });
 
@@ -758,6 +775,8 @@ export async function createGroupChat({
     }
     return undefined;
   }
+  processUpdate(result);
+  const restrictedUserIds = handleUserPrivacyRestrictedUpdates(result);
 
   const newChat = result.chats[0];
   if (!newChat || !(newChat instanceof GramJs.Chat)) {
@@ -768,7 +787,7 @@ export async function createGroupChat({
     return undefined;
   }
 
-  return buildApiChatFromPreview(newChat);
+  return { chat: buildApiChatFromPreview(newChat), restrictedUserIds };
 }
 
 export async function editChatPhoto({
@@ -1265,31 +1284,64 @@ export async function openChatByInvite(hash: string) {
   return { chatId: chat.id };
 }
 
-export async function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
+export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
   try {
     if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-      return await invokeRequest(new GramJs.channels.InviteToChannel({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-        users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
-      }), {
-        shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
+      try {
+        const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
+          channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+          users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
+        }), {
+          shouldIgnoreUpdates: true,
+          shouldThrow: true,
+        });
+        if (updates) {
+          processUpdate(updates);
+          return handleUserPrivacyRestrictedUpdates(updates);
+        }
+      } catch (err) {
+        if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+          return users.map(({ id }) => id);
+        }
+        throw err;
+      }
     }
 
-    return await Promise.all(users.map((user) => {
-      return invokeRequest(new GramJs.messages.AddChatUser({
-        chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
-        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
-      }), {
-        shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
-    }));
+    const addChatUsersResult = await Promise.all(
+      users.map(async (user) => {
+        try {
+          const updates = await invokeRequest(new GramJs.messages.AddChatUser({
+            chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
+            userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+          }), {
+            shouldIgnoreUpdates: true,
+            shouldThrow: true,
+          });
+          if (updates) {
+            processUpdate(updates);
+            return handleUserPrivacyRestrictedUpdates(updates);
+          }
+          return undefined;
+        } catch (err) {
+          if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+            return [user.id];
+          }
+          throw err;
+        }
+      }),
+    );
+    if (addChatUsersResult) {
+      return addChatUsersResult.flat().filter(Boolean);
+    }
   } catch (err) {
-    // `noErrorUpdate` will cause an exception which we don't want either
-    return undefined;
+    onUpdate({
+      '@type': 'error',
+      error: {
+        message: (err as Error).message,
+      },
+    });
   }
+  return undefined;
 }
 
 export function deleteChatMember(chat: ApiChat, user: ApiUser) {
@@ -1818,4 +1870,25 @@ export function togglePeerTranslations({
     disabled: isEnabled ? undefined : true,
     peer: buildInputPeer(chat.id, chat.accessHash),
   }));
+}
+
+function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {
+  if (!(updates instanceof GramJs.Updates) && !(updates instanceof GramJs.UpdatesCombined)) {
+    return undefined;
+  }
+
+  const eligibleUpdates = updates
+    .updates
+    .filter(
+      (u): u is GramJs.UpdateGroupInvitePrivacyForbidden => {
+        return u instanceof GramJs.UpdateGroupInvitePrivacyForbidden;
+      },
+    );
+
+  if (eligibleUpdates.length === 0) {
+    return undefined;
+  }
+
+  return eligibleUpdates
+    .map((u) => buildApiPeerId(u.userId, 'user'));
 }
