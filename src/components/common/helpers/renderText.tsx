@@ -22,7 +22,7 @@ import SafeLink from '../SafeLink';
 
 export type TextFilter = (
   'escape_html' | 'hq_emoji' | 'emoji' | 'emoji_html' | 'br' | 'br_html' | 'highlight' | 'links' |
-  'simple_markdown' | 'simple_markdown_html'
+  'simple_markdown' | 'simple_markdown_html' | 'quote'
   );
 
 const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
@@ -30,7 +30,7 @@ const SIMPLE_MARKDOWN_REGEX = /(\*\*|__).+?\1/g;
 export default function renderText(
   part: TextPart,
   filters: Array<TextFilter> = ['emoji'],
-  params?: { highlight: string | undefined },
+  params?: { highlight?: string; quote?: string },
 ): TeactNode[] {
   if (typeof part !== 'string') {
     return [part];
@@ -61,6 +61,9 @@ export default function renderText(
 
       case 'highlight':
         return addHighlight(text, params!.highlight);
+
+      case 'quote':
+        return addHighlight(text, params!.quote, true);
 
       case 'links':
         return addLinks(text);
@@ -183,7 +186,7 @@ function addLineBreaks(textParts: TextPart[], type: 'jsx' | 'html'): TextPart[] 
   }, []);
 }
 
-function addHighlight(textParts: TextPart[], highlight: string | undefined): TextPart[] {
+function addHighlight(textParts: TextPart[], highlight: string | undefined, isQuote?: true): TextPart[] {
   return textParts.reduce<TextPart[]>((result, part) => {
     if (typeof part !== 'string' || !highlight) {
       result.push(part);
@@ -200,7 +203,7 @@ function addHighlight(textParts: TextPart[], highlight: string | undefined): Tex
     const newParts: TextPart[] = [];
     newParts.push(part.substring(0, queryPosition));
     newParts.push(
-      <span className="matching-text-highlight">
+      <span className={buildClassName('matching-text-highlight', isQuote && 'is-quote')}>
         {part.substring(queryPosition, queryPosition + highlight.length)}
       </span>,
     );

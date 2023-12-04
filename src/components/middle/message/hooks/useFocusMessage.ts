@@ -1,8 +1,11 @@
 import { useLayoutEffect, useRef } from '../../../../lib/teact/teact';
+import { addExtraClass } from '../../../../lib/teact/teact-dom';
 
 import type { FocusDirection } from '../../../../types';
 
-import { requestForcedReflow, requestMeasure, requestMutation } from '../../../../lib/fasterdom/fasterdom';
+import {
+  requestForcedReflow, requestMeasure, requestMutation,
+} from '../../../../lib/fasterdom/fasterdom';
 import animateScroll from '../../../../util/animateScroll';
 
 // This is used when the viewport was replaced.
@@ -18,6 +21,7 @@ export default function useFocusMessage(
   noFocusHighlight?: boolean,
   isResizingContainer?: boolean,
   isJustAdded?: boolean,
+  isQuote?: boolean,
 ) {
   const isRelocatedRef = useRef(!isJustAdded);
 
@@ -30,17 +34,30 @@ export default function useFocusMessage(
       // `noFocusHighlight` is always called with “scroll-to-bottom” buttons
       const isToBottom = noFocusHighlight;
 
-      const exec = () => animateScroll(
-        messagesContainer,
-        elementRef.current!,
-        isToBottom ? 'end' : 'centerOrTop',
-        FOCUS_MARGIN,
-        focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
-        focusDirection,
-        undefined,
-        isResizingContainer,
-        true,
-      );
+      const exec = () => {
+        const result = animateScroll(
+          messagesContainer,
+          elementRef.current!,
+          isToBottom ? 'end' : 'centerOrTop',
+          FOCUS_MARGIN,
+          focusDirection !== undefined ? (isToBottom ? BOTTOM_FOCUS_OFFSET : RELOCATED_FOCUS_OFFSET) : undefined,
+          focusDirection,
+          undefined,
+          isResizingContainer,
+          true,
+        );
+
+        if (isQuote) {
+          const firstQuote = elementRef.current!.querySelector<HTMLSpanElement>('.is-quote');
+          if (firstQuote) {
+            requestMutation(() => {
+              addExtraClass(firstQuote, 'animate');
+            });
+          }
+        }
+
+        return result;
+      };
 
       if (isRelocated) {
         // We need this to override scroll setting from Message List layout effect
@@ -52,6 +69,6 @@ export default function useFocusMessage(
       }
     }
   }, [
-    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer,
+    elementRef, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isQuote,
   ]);
 }

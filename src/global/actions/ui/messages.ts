@@ -386,7 +386,7 @@ addActionHandler('focusNextReply', (global, actions, payload): ActionReturnType 
 addActionHandler('focusMessage', (global, actions, payload): ActionReturnType => {
   const {
     chatId, threadId = MAIN_THREAD_ID, messageListType = 'thread', noHighlight, groupedId, groupedChatId,
-    replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel,
+    replyMessageId, isResizingContainer, shouldReplaceHistory, noForumTopicPanel, quote,
     tabId = getCurrentTabId(),
   } = payload;
 
@@ -412,12 +412,20 @@ addActionHandler('focusMessage', (global, actions, payload): ActionReturnType =>
   }
   blurTimeout = window.setTimeout(() => {
     global = getGlobal();
-    global = updateFocusedMessage(global, undefined, undefined, undefined, undefined, undefined, tabId);
+    global = updateFocusedMessage({ global }, tabId);
     global = updateFocusDirection(global, undefined, tabId);
     setGlobal(global);
   }, noHighlight ? FOCUS_NO_HIGHLIGHT_DURATION : FOCUS_DURATION);
 
-  global = updateFocusedMessage(global, chatId, messageId, threadId, noHighlight, isResizingContainer, tabId);
+  global = updateFocusedMessage({
+    global,
+    chatId,
+    messageId,
+    threadId,
+    noHighlight,
+    isResizingContainer,
+    quote,
+  }, tabId);
   global = updateFocusDirection(global, undefined, tabId);
 
   if (replyMessageId) {

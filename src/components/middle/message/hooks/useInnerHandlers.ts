@@ -43,7 +43,7 @@ export default function useInnerHandlers(
   } = message;
 
   const {
-    replyToMsgId, replyToPeerId, replyToTopId, isQuote,
+    replyToMsgId, replyToPeerId, replyToTopId, isQuote, quoteText,
   } = getMessageReplyInfo(message) || {};
 
   const handleAvatarClick = useLastCallback(() => {
@@ -90,6 +90,7 @@ export default function useInnerHandlers(
       messageId: replyToMsgId,
       replyMessageId: replyToPeerId ? undefined : messageId,
       noForumTopicPanel: !replyToPeerId, // Open topic panel for cross-chat replies
+      ...(isQuote && { quote: quoteText?.text }),
     });
   });
 

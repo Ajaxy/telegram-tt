@@ -527,11 +527,24 @@ function updateScheduledMessages<T extends GlobalState>(
   };
 }
 
-export function updateFocusedMessage<T extends GlobalState>(
-  global: T, chatId?: string, messageId?: number, threadId = MAIN_THREAD_ID, noHighlight = false,
+export function updateFocusedMessage<T extends GlobalState>({
+  global,
+  chatId,
+  messageId,
+  threadId = MAIN_THREAD_ID,
+  noHighlight = false,
   isResizingContainer = false,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
+  quote,
+}: {
+  global: T;
+  chatId?: string;
+  messageId?: number;
+  threadId?: number;
+  noHighlight?: boolean;
+  isResizingContainer?: boolean;
+  quote?: string;
+},
+...[tabId = getCurrentTabId()]: TabArgs<T>): T {
   return updateTabState(global, {
     focusedMessage: {
       ...selectTabState(global, tabId).focusedMessage,
@@ -540,6 +553,7 @@ export function updateFocusedMessage<T extends GlobalState>(
       messageId,
       noHighlight,
       isResizingContainer,
+      quote,
     },
   }, tabId);
 }

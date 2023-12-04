@@ -24,6 +24,7 @@ interface IOrganizedEntity {
   organizedIndexes: Set<number>;
   nestedEntities: IOrganizedEntity[];
 }
+type RenderTextParams = Parameters<typeof renderText>[2];
 
 const HQ_EMOJI_THRESHOLD = 64;
 
@@ -43,6 +44,7 @@ export function renderTextWithEntities({
   sharedCanvasHqRef,
   cacheBuster,
   forcePlayback,
+  focusedQuote,
 }: {
   text: string;
   entities?: ApiMessageEntity[];
@@ -59,9 +61,10 @@ export function renderTextWithEntities({
   sharedCanvasHqRef?: React.RefObject<HTMLCanvasElement>;
   cacheBuster?: string;
   forcePlayback?: boolean;
+  focusedQuote?: string;
 }) {
   if (!entities?.length) {
-    return renderMessagePart(text, highlight, emojiSize, shouldRenderAsHtml, isSimple);
+    return renderMessagePart(text, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple);
   }
 
   const result: TextPart[] = [];
@@ -90,7 +93,7 @@ export function renderTextWithEntities({
       }
       if (textBefore) {
         renderResult.push(...renderMessagePart(
-          textBefore, highlight, emojiSize, shouldRenderAsHtml, isSimple,
+          textBefore, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -166,7 +169,7 @@ export function renderTextWithEntities({
       }
       if (textAfter) {
         renderResult.push(...renderMessagePart(
-          textAfter, highlight, emojiSize, shouldRenderAsHtml, isSimple,
+          textAfter, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple,
         ) as TextPart[]);
       }
     }
@@ -217,6 +220,7 @@ export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
 function renderMessagePart(
   content: TextPart | TextPart[],
   highlight?: string,
+  focusedQuote?: string,
   emojiSize?: number,
   shouldRenderAsHtml?: boolean,
   isSimple?: boolean,
@@ -225,7 +229,7 @@ function renderMessagePart(
     const result: TextPart[] = [];
 
     content.forEach((c) => {
-      result.push(...renderMessagePart(c, highlight, emojiSize, shouldRenderAsHtml, isSimple));
+      result.push(...renderMessagePart(c, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple));
     });
 
     return result;
@@ -238,15 +242,21 @@ function renderMessagePart(
   const emojiFilter = emojiSize && emojiSize > HQ_EMOJI_THRESHOLD ? 'hq_emoji' : 'emoji';
 
   const filters: TextFilter[] = [emojiFilter];
+  const params: RenderTextParams = {};
   if (!isSimple) {
     filters.push('br');
   }
 
   if (highlight) {
-    return renderText(content, filters.concat('highlight'), { highlight });
-  } else {
-    return renderText(content, filters);
+    filters.push('highlight');
+    params.highlight = highlight;
   }
+  if (focusedQuote) {
+    filters.push('quote');
+    params.quote = focusedQuote;
+  }
+
+  return renderText(content, filters, params);
 }
 
 // Organize entities in a tree-like structure to better represent how the text will be displayed

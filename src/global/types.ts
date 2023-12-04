@@ -254,6 +254,7 @@ export type TabState = {
     direction?: FocusDirection;
     noHighlight?: boolean;
     isResizingContainer?: boolean;
+    quote?: string;
   };
 
   selectedMessages?: {
@@ -1654,6 +1655,7 @@ export interface ActionPayloads {
     isResizingContainer?: boolean;
     shouldReplaceHistory?: boolean;
     noForumTopicPanel?: boolean;
+    quote?: string;
   } & WithTabId;
 
   focusLastMessage: WithTabId | undefined;

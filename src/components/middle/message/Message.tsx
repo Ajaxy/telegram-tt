@@ -225,6 +225,7 @@ type StateProps = {
   isChatProtected?: boolean;
   isFocused?: boolean;
   focusDirection?: FocusDirection;
+  focusedQuote?: string;
   noFocusHighlight?: boolean;
   isResizingContainer?: boolean;
   isForwarding?: boolean;
@@ -337,6 +338,7 @@ const Message: FC<OwnProps & StateProps> = ({
   isChatProtected,
   isFocused,
   focusDirection,
+  focusedQuote,
   noFocusHighlight,
   isResizingContainer,
   isForwarding,
@@ -727,7 +729,7 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   useFocusMessage(
-    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded,
+    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote),
   );
 
   const signature = (isChannel && message.postAuthorTitle)
@@ -868,6 +870,7 @@ const Message: FC<OwnProps & StateProps> = ({
         messageOrStory={message}
         translatedText={requestedTranslationLanguage ? currentTranslatedText : undefined}
         isForAnimation={isForAnimation}
+        focusedQuote={focusedQuote}
         emojiSize={emojiSize}
         highlight={highlight}
         isProtected={isProtected}
@@ -1488,7 +1491,7 @@ export default memo(withGlobal<OwnProps>(
     );
 
     const {
-      direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer,
+      direction: focusDirection, noHighlight: noFocusHighlight, isResizingContainer, quote: focusedQuote,
     } = (isFocused && focusedMessage) || {};
 
     const { query: highlight } = selectCurrentTextSearch(global) || {};
@@ -1610,6 +1613,7 @@ export default memo(withGlobal<OwnProps>(
         focusDirection,
         noFocusHighlight,
         isResizingContainer,
+        focusedQuote,
       }),
     };
   },
