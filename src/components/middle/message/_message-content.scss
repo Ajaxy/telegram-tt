@@ -237,7 +237,7 @@
     }
   }
 
-  .matching-text-highlight {
+  .matching-text-highlight:not(.is-quote) {
     color: var(--color-text);
     background: #cae3f7;
     border-radius: 0.25rem;
@@ -245,6 +245,23 @@
 
     .theme-dark & {
       --color-text: #000;
+    }
+  }
+
+  .matching-text-highlight.is-quote {
+    background: transparent;
+    border-radius: 0.25rem;
+
+    &.animate {
+      color: var(--color-text);
+      animation: quote-highlight 0.5s;
+      animation-delay: 1.5s;
+      background-color: #cae3f7;
+
+      .theme-dark & {
+        animation-name: quote-highlight-dark;
+        color: #000;
+      }
     }
   }
 
@@ -988,5 +1005,27 @@ blockquote, .blockquote {
   100% {
     background-position-x: var(--background-gradient-size);
     opacity: 1;
+  }
+}
+
+@keyframes quote-highlight {
+  0% {
+    background-color: #cae3f7;
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes quote-highlight-dark {
+  0% {
+    background-color: #cae3f7;
+    color: #000;
+  }
+
+  100% {
+    background-color: transparent;
+    color: var(--color-text);
   }
 }
