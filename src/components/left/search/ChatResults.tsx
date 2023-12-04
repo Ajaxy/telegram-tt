@@ -7,12 +7,14 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { ALL_FOLDER_ID } from '../../../config';
 import {
   filterChatsByName,
   filterUsersByName,
   sortChatIds,
 } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
+import { getOrderedIds } from '../../../util/folderManager';
 import { unique } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -131,7 +133,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     const localContactIds = filterUsersByName(
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
-    const localChatIds = filterChatsByName(lang, Object.keys(chatsById), chatsById, searchQuery, currentUserId);
+    const orderedChatIds = getOrderedIds(ALL_FOLDER_ID) ?? [];
+    const localChatIds = filterChatsByName(lang, orderedChatIds, chatsById, searchQuery, currentUserId);
 
     const localPeerIds = unique([
       ...localContactIds,
