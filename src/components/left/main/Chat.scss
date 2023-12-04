@@ -224,6 +224,7 @@
     }
 
     .ChatBadge-transition {
+      position: relative;      
       transition: opacity var(--layer-transition), transform var(--layer-transition);
 
       body.no-page-transitions & {
