@@ -244,9 +244,9 @@ const MessageList: FC<OwnProps & StateProps> = ({
       : ['id'];
 
     return listedMessages.length
-      ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current)
+      ? groupMessages(orderBy(listedMessages, orderRule), memoUnreadDividerBeforeIdRef.current, isChatWithSelf)
       : undefined;
-  }, [messageIds, messagesById, type, isServiceNotificationsChat]);
+  }, [messageIds, messagesById, type, isServiceNotificationsChat, isChatWithSelf]);
 
   useInterval(() => {
     if (!messageIds || !messagesById || type === 'scheduled') {

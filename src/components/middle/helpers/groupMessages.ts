@@ -18,7 +18,7 @@ export function isAlbum(messageOrAlbum: ApiMessage | IAlbum): messageOrAlbum is 
   return 'albumId' in messageOrAlbum;
 }
 
-export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
+export function groupMessages(messages: ApiMessage[], firstUnreadId?: number, isChatWithSelf = false) {
   let currentSenderGroup: SenderGroup = [];
   let currentDateGroup = {
     originalDate: messages[0].date,
@@ -77,6 +77,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         || message.inlineButtons
         || nextMessage.inlineButtons
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
+        || (isChatWithSelf && message.forwardInfo?.senderUserId !== nextMessage.forwardInfo?.senderUserId)
       ) {
         currentSenderGroup = [];
         currentDateGroup.senderGroups.push(currentSenderGroup);
