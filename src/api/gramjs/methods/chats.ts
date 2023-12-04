@@ -249,17 +249,17 @@ export async function searchChats({ query }: { query: string }) {
 
   updateLocalDb(result);
 
-  const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
+  const accountPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
   const allChats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter(Boolean);
   const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
 
   return {
-    localChats: allChats.filter((r) => localPeerIds.includes(r.id)),
-    localUsers: allUsers.filter((u) => localPeerIds.includes(u.id)),
-    globalChats: allChats.filter((r) => !localPeerIds.includes(r.id)),
-    globalUsers: allUsers.filter((u) => !localPeerIds.includes(u.id)),
+    accountChats: allChats.filter((r) => accountPeerIds.includes(r.id)),
+    accountUsers: allUsers.filter((u) => accountPeerIds.includes(u.id)),
+    globalChats: allChats.filter((r) => !accountPeerIds.includes(r.id)),
+    globalUsers: allUsers.filter((u) => !accountPeerIds.includes(u.id)),
   };
 }
 
