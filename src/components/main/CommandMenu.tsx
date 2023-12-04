@@ -63,6 +63,10 @@ interface CommandMenuProps {
   globalChatIds?: string[];
   globalUserIds?: string[];
   usersById: Record<string, ApiUser>;
+  pinnedIds?: string[];
+  activeListIds?: string[];
+  archivedListIds?: string[];
+  contactIds?: string[];
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
@@ -88,6 +92,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   currentChatId,
   usersById,
   chatsById,
+  pinnedIds,
   recentlyFoundChatIds,
   folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
 }) => {
@@ -580,6 +585,9 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   folders={folders}
                   openFolderPage={openFolderPage}
                   setInputValue={setInputValue}
+                  recentlyFoundChatIds={recentlyFoundChatIds}
+                  topUserIds={topUserIds}
+                  pinnedIds={pinnedIds}
                 />
               </>
             )}
@@ -643,6 +651,7 @@ export default memo(withGlobal(
     const currentChatId = selectCurrentChat(global)?.id;
     const usersById = global.users.byId;
     const chatsById = global.chats.byId;
+    const pinnedIds = global.chats.orderedPinnedIds.active;
     const chatFoldersById = global.chatFolders.byId;
     const orderedFolderIds = global.chatFolders.orderedIds;
     const recentlyFoundChatIds = global.recentlyFoundChatIds;
@@ -685,6 +694,7 @@ export default memo(withGlobal(
       globalChatIds,
       globalUserIds,
       chatsById,
+      pinnedIds,
       fetchingStatus,
       usersById,
       folders,
