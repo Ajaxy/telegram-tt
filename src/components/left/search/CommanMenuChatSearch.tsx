@@ -115,7 +115,8 @@ const CommanMenuChatSearch: React.FC<{
     // Фильтрация ID для чатов и пользователей
     const chatIds = Object.keys(chatsById).filter((id) => {
       const chat = chatsById[id];
-      const title = getChatTitle(lang, chat) || '';
+      if (!chat) return false;
+      const title = getChatTitle(lang, chat);
       return !priorityIds.includes(id) && (title.toLowerCase().includes(convertedSearchQuery));
     });
 
