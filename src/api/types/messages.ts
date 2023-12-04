@@ -310,6 +310,12 @@ export interface ApiWebPage {
   story?: ApiWebPageStoryData;
 }
 
+export interface ApiSponsoredWebPage {
+  url: string;
+  siteName: string;
+  photo?: ApiPhoto;
+}
+
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
 
 export interface ApiMessageReplyInfo {
@@ -571,12 +577,14 @@ export type ApiSponsoredMessage = {
   chatId?: string;
   randomId: string;
   isRecommended?: boolean;
+  isAvatarShown?: boolean;
   isBot?: boolean;
   channelPostId?: number;
   startParam?: string;
   chatInviteHash?: string;
   chatInviteTitle?: string;
   text: ApiFormattedText;
+  webPage?: ApiSponsoredWebPage;
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;
