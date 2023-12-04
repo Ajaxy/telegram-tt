@@ -210,8 +210,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   }
 
   const contentClassName = buildClassName(
-    'message-content has-shadow has-solid-background',
-    withAvatar && 'has-appendix',
+    'message-content has-shadow has-solid-background has-appendix',
     getPeerColorClass(peer || channel, true, true),
   );
 
@@ -241,7 +240,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           </span>
           {renderContent()}
         </div>
-        {withAvatar && <MessageAppendix />}
+        <MessageAppendix />
         <Button
           className="message-action-button"
           color="translucent-white"

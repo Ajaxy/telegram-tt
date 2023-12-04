@@ -1,6 +1,6 @@
 .SponsoredMessage {
   --border-top-left-radius: var(--border-radius-messages) !important;
-  --border-bottom-left-radius: var(--border-radius-messages) !important;
+  --border-bottom-left-radius: 0 !important;
 
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
@@ -35,18 +35,16 @@
   }
 
   &.with-avatar {
-    --border-bottom-left-radius: 0 !important;
-
     padding-left: 2.5rem !important;
 
     & > .Avatar {
       display: flex !important;
     }
 
-    
+
     @media (max-width: 600px) {
       padding-left: 2.875rem !important;
-      
+
       .message-content {
         max-width: min(29rem, calc(100vw - 7.0625rem)) !important;
       }
@@ -60,7 +58,7 @@
 
   .message-content {
     padding: 0.5rem;
-    
+
     @media (max-width: 600px) {
       max-width: min(29rem, calc(100vw - 4.5rem)) !important;
     }
@@ -126,5 +124,9 @@
       right: 0;
       transform: rotate(-45deg);
     }
+  }
+
+  .svg-appendix {
+    transform: translate(0.01875rem, -0.00625rem);
   }
 }
