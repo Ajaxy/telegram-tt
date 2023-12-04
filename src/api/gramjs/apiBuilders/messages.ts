@@ -19,6 +19,7 @@ import type {
   ApiReplyInfo,
   ApiReplyKeyboard,
   ApiSponsoredMessage,
+  ApiSponsoredWebPage,
   ApiSticker,
   ApiStory,
   ApiStorySkipped,
@@ -77,7 +78,7 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
     fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
-    additionalInfo,
+    additionalInfo, showPeerPhoto, webpage,
   } = mtpMessage;
   const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
   const chatInviteTitle = chatInvite
@@ -92,6 +93,8 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     text: buildMessageTextContent(message, entities),
     expiresAt: Math.round(Date.now() / 1000) + SPONSORED_MESSAGE_CACHE_MS,
     isRecommended: Boolean(recommended),
+    ...(webpage && { webPage: buildSponsoredWebPage(webpage) }),
+    ...(showPeerPhoto && { isAvatarShown: true }),
     ...(chatId && { chatId }),
     ...(chatInviteHash && { chatInviteHash }),
     ...(chatInvite && { chatInviteTitle }),
@@ -992,5 +995,21 @@ function buildThreadInfo(
     lastMessageId: maxId,
     lastReadInboxMessageId: readMaxId,
     ...(recentRepliers && { recentReplierIds: recentRepliers.map(getApiChatIdFromMtpPeer) }),
+  };
+}
+
+function buildSponsoredWebPage(webPage: GramJs.TypeSponsoredWebPage): ApiSponsoredWebPage {
+  let photo: ApiPhoto | undefined;
+  if (webPage.photo instanceof GramJs.Photo) {
+    addPhotoToLocalDb(webPage.photo);
+    photo = buildApiPhoto(webPage.photo);
+  }
+
+  return {
+    ...pick(webPage, [
+      'url',
+      'siteName',
+    ]),
+    photo,
   };
 }
