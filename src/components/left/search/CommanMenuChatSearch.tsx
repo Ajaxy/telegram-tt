@@ -117,30 +117,32 @@ const CommanMenuChatSearch: React.FC<{
       priorityIds = unique([currentUserId, ...priorityIds]);
     }
 
-    // Фильтрация ID для чатов и пользователей
     const chatIds = Object.keys(chatsById).filter((id) => {
       const chat = chatsById[id];
-      if (!chat || priorityIds.includes(id)) return false;
       const title = getChatTitle(lang, chat) || '';
-      return title.toLowerCase().includes(convertedSearchQuery);
+      return title.toLowerCase().includes(searchQuery.toLowerCase())
+      || title.toLowerCase().includes(convertedSearchQuery);
     });
 
     const userIds = Object.keys(usersById).filter((id) => {
       const user = usersById[id];
-      if (!user || isDeletedUser(user) || priorityIds.includes(id)) return false;
+      if (!user || isDeletedUser(user)) return false;
       const name = getUserFullName(user) || '';
       return name.toLowerCase().includes(convertedSearchQuery);
     });
 
-    // Сортировка оставшихся чатов
-    const sortedChatIds = sortChatIds([...chatIds, ...userIds], chatsById);
+    const allIds = unique([...chatIds, ...userIds]);
+    const sortedIds = sortChatIds(allIds, chatsById);
+
+    // Удаление приоритетных ID из отсортированных ID
+    const finalIds = sortedIds.filter((id) => !priorityIds.includes(id));
 
     if (searchQuery.length < 2) {
       return [];
     }
 
     // Объединение приоритетных и отсортированных остальных чатов
-    return unique([...priorityIds, ...sortedChatIds]);
+    return unique([...priorityIds, ...finalIds]);
   }, [searchQuery, chatsById, usersById, pinnedIds, recentlyFoundChatIds, topUserIds, currentUserId, lang]);
 
   if (!searchQuery) {
