@@ -133,7 +133,7 @@
           }
         }
 
-        &::after {
+        &.withStatus::after {
           content: ", ";
           color: var(--color-text-secondary);
 

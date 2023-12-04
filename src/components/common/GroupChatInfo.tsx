@@ -170,7 +170,7 @@ const GroupChatInfo: FC<OwnProps & StateProps> = ({
 
     return (
       <span className="status">
-        {mainUsername && <span className="handle">{mainUsername}</span>}
+        {mainUsername && <span className="handle withStatus">{mainUsername}</span>}
         <span className="group-status">{groupStatus}</span>
         {onlineStatus && <span className="online-status">{onlineStatus}</span>}
       </span>
