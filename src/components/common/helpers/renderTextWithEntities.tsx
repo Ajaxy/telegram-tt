@@ -363,7 +363,7 @@ function processEntity({
 
   function renderNestedMessagePart() {
     return renderMessagePart(
-      renderedContent, highlight, undefined, undefined, isSimple,
+      renderedContent, highlight, undefined, emojiSize, undefined, isSimple,
     );
   }
 
