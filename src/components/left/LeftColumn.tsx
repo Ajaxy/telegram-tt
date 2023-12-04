@@ -22,8 +22,6 @@ import { useStateRef } from '../../hooks/useStateRef';
 import useSyncEffect from '../../hooks/useSyncEffect';
 
 import Transition from '../ui/Transition';
-import UluGoBackButton from '../ui/UluGoBackButton';
-import UluGoForwardButton from '../ui/UluGoForwardButton';
 import ArchivedChats from './ArchivedChats.async';
 import LeftMain from './main/LeftMain';
 import NewChat from './newChat/NewChat.async';
@@ -559,10 +557,7 @@ function LeftColumn({
 
   return (
     <div>
-      <div className="electron-header">
-        <UluGoBackButton />
-        <UluGoForwardButton />
-      </div>
+      <div className="electron-header" />
       <Transition
         ref={ref}
         name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}

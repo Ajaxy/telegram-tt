@@ -12,7 +12,7 @@ import { processDeeplink } from './deeplink';
 import { captureLocalStorage, restoreLocalStorage } from './localStorage';
 import tray from './tray';
 import {
-  forceQuit, getAppTitle, getCurrentWebContents,
+  forceQuit, getAppTitle,
   getCurrentWindow, getLastWindow, hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS,
   IS_PREVIEW, IS_WINDOWS, reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
@@ -172,30 +172,6 @@ export function setupElectronActionHandlers() {
 
   ipcMain.handle(ElectronAction.GET_IS_FULLSCREEN, () => {
     getCurrentWindow()?.isFullScreen();
-  });
-
-  ipcMain.handle(ElectronAction.CAN_GO_BACK, () => {
-    const webContents = getCurrentWebContents();
-    return webContents ? webContents.canGoBack() : false;
-  });
-
-  ipcMain.handle(ElectronAction.CAN_GO_FORWARD, () => {
-    const webContents = getCurrentWebContents();
-    return webContents ? webContents.canGoForward() : false;
-  });
-
-  ipcMain.on(ElectronAction.GO_BACK, () => {
-    const webContents = getCurrentWebContents();
-    if (webContents && webContents.canGoBack()) {
-      webContents.goBack();
-    }
-  });
-
-  ipcMain.on(ElectronAction.GO_FORWARD, () => {
-    const webContents = getCurrentWebContents();
-    if (webContents && webContents.canGoForward()) {
-      webContents.goForward();
-    }
   });
 
   ipcMain.handle(ElectronAction.HANDLE_DOUBLE_CLICK, () => {

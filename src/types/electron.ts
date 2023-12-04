@@ -18,10 +18,6 @@ export enum ElectronAction {
   SET_IS_TRAY_ICON_ENABLED = 'set-is-tray-icon-enabled',
   GET_IS_TRAY_ICON_ENABLED = 'get-is-tray-icon-enabled',
   RESTORE_LOCAL_STORAGE = 'restore-local-storage',
-  CAN_GO_BACK = 'can-go-back',
-  CAN_GO_FORWARD = 'can-go-forward',
-  GO_BACK = 'go-back',
-  GO_FORWARD = 'go-forward',
 }
 
 export type TrafficLightPosition = 'standard' | 'lowered';
@@ -38,10 +34,7 @@ export interface ElectronApi {
   setIsTrayIconEnabled: (value: boolean) => Promise<void>;
   getIsTrayIconEnabled: () => Promise<boolean>;
   restoreLocalStorage: () => Promise<void>;
-  canGoBack: () => Promise<boolean>;
-  canGoForward: () => Promise<boolean>;
-  goBack: () => void;
-  goForward: () => void;
+
   on: (eventName: ElectronEvent, callback: any) => VoidFunction;
 }
 
