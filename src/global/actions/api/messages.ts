@@ -79,6 +79,7 @@ import {
 import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat,
+  selectChatFullInfo,
   selectChatMessage,
   selectCurrentChat,
   selectCurrentMessageList,
@@ -358,6 +359,33 @@ addActionHandler('sendMessage', (global, actions, payload): ActionReturnType => 
   }
 
   return undefined;
+});
+
+addActionHandler('sendInviteMessages', async (global, actions, payload): Promise<void> => {
+  const { chatId, userIds, tabId = getCurrentTabId() } = payload;
+  const chatFullInfo = selectChatFullInfo(global, chatId);
+  if (!chatFullInfo?.inviteLink) {
+    return undefined;
+  }
+  const userFullNames: string[] = [];
+  await Promise.all(userIds.map((userId) => {
+    const chat = selectChat(global, userId);
+    if (!chat) {
+      return undefined;
+    }
+    const userFullName = getUserFullName(selectUser(global, userId));
+    if (userFullName) {
+      userFullNames.push(userFullName);
+    }
+    return sendMessage(global, {
+      chat,
+      text: chatFullInfo.inviteLink,
+    });
+  }));
+  return actions.showNotification({
+    message: translate('Conversation.ShareLinkTooltip.Chat.One', userFullNames.join(', ')),
+    tabId,
+  });
 });
 
 addActionHandler('editMessage', (global, actions, payload): ActionReturnType => {
