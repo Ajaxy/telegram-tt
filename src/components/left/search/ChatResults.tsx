@@ -41,8 +41,8 @@ export type OwnProps = {
 type StateProps = {
   currentUserId?: string;
   localContactIds?: string[];
-  localChatIds?: string[];
-  localUserIds?: string[];
+  accountChatIds?: string[];
+  accountUserIds?: string[];
   globalChatIds?: string[];
   globalUserIds?: string[];
   foundIds?: string[];
@@ -62,8 +62,8 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   dateSearchQuery,
   currentUserId,
   localContactIds,
-  localChatIds,
-  localUserIds,
+  accountChatIds,
+  accountUserIds,
   globalChatIds,
   globalUserIds,
   foundIds,
@@ -127,18 +127,18 @@ const ChatResults: FC<OwnProps & StateProps> = ({
     ];
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundContactIds = filterUsersByName(
+    const foundLocalContactIds = filterUsersByName(
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
 
     return [
       ...sortChatIds(unique([
-        ...(foundContactIds || []),
-        ...(localChatIds || []),
-        ...(localUserIds || []),
+        ...(foundLocalContactIds || []),
+        ...(accountChatIds || []),
+        ...(accountUserIds || []),
       ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),
     ];
-  }, [searchQuery, currentUserId, localContactIds, lang, localChatIds, localUserIds, chatsById]);
+  }, [searchQuery, currentUserId, localContactIds, lang, accountChatIds, accountUserIds, chatsById]);
 
   useHorizontalScroll(chatSelectionRef, !localResults.length, true);
 
@@ -317,15 +317,15 @@ export default memo(withGlobal<OwnProps>(
       fetchingStatus, globalResults, localResults, resultsByType,
     } = selectTabState(global).globalSearch;
     const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
-    const { chatIds: localChatIds, userIds: localUserIds } = localResults || {};
+    const { chatIds: accountChatIds, userIds: accountUserIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;
     const foundIds = resultsByType?.text?.foundIds;
 
     return {
       currentUserId,
       localContactIds,
-      localChatIds,
-      localUserIds,
+      accountChatIds,
+      accountUserIds,
       globalChatIds,
       globalUserIds,
       foundIds,

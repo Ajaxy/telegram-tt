@@ -314,13 +314,13 @@ addActionHandler('setUserSearchQuery', (global, actions, payload): ActionReturnT
       return;
     }
 
-    const { localUsers, globalUsers } = result;
+    const { accountUsers, globalUsers } = result;
 
     let localUserIds;
     let globalUserIds;
-    if (localUsers.length) {
-      global = addUsers(global, buildCollectionByKey(localUsers, 'id'));
-      localUserIds = localUsers.map(({ id }) => id);
+    if (accountUsers.length) {
+      global = addUsers(global, buildCollectionByKey(accountUsers, 'id'));
+      localUserIds = accountUsers.map(({ id }) => id);
     }
     if (globalUsers.length) {
       global = addUsers(global, buildCollectionByKey(globalUsers, 'id'));
