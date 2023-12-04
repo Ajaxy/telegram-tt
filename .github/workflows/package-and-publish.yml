@@ -11,7 +11,7 @@ name: Package and publish
 on:
   workflow_dispatch:
   push:
-    branches: incver-deploy
+    branches: deploy
 
 env:
   APP_NAME: ulu
@@ -197,7 +197,6 @@ jobs:
             "https://uploads.github.com/repos/$PUBLISH_REPO/releases/$RELEASE_ID/assets?name=$PUBLISH_FILE_NAME"
 
       - name: Publish release
-        if: ${{ false }}  # disable for now
         env:
           RELEASE_ID: ${{ steps.release-id.outputs.release_id }}
         shell: bash
