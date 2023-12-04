@@ -19,17 +19,14 @@
   &_inner {
     display: flex;
     align-items: center;
-    padding-right: 0.625rem;
-    padding-top: 0.1875rem;
+    margin-top: 0.5rem;
   }
 
   & .embedded-left-icon {
     flex-shrink: 0;
     background: none !important;
-    width: 3.5rem;
-    height: 2.875rem;
-    margin: 0 -0.0625rem 0 0;
-    padding: 0;
+    height: 2.625rem;
+    padding: 0.5625rem 0.75rem 0.5625rem 1rem;
     display: grid;
     place-content: center;
     font-size: 1.5rem;
@@ -43,15 +40,15 @@
   & .embedded-cancel {
     flex-shrink: 0;
     background: none !important;
-    width: 2.25rem;
-    height: 2.875rem;
-    margin: 0 -0.0625rem 0 0.75rem;
+    width: auto;
+    height: 1.5rem;
     padding: 0;
+    margin: 0.5625rem 1rem 0.5625rem 0.75rem;
     align-self: center;
     color: var(--accent-color, var(--color-primary));
 
     @media (max-width: 600px) {
-      width: 1.75rem;
+      margin: 0.5625rem 0.75rem 0.5625rem 0.5rem;
     }
   }
 

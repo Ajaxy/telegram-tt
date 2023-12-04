@@ -102,6 +102,7 @@ $color-message-story-mention-to: #74bcff;
   --color-primary-shade-rgb: #{toRGB(color.mix($color-primary, $color-black, 92%))};
   --color-primary-opacity: rgba(var(--color-primary), 0.25);
   --color-primary-opacity-hover: rgba(var(--color-primary), 0.15);
+  --color-primary-tint: rgba(var(--color-primary), 0.1);
   --color-green: #{$color-green};
   --color-green-darker: #{color.mix($color-green, $color-black, 84%)};
 

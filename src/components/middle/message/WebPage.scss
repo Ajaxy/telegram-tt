@@ -10,6 +10,15 @@
   position: relative;
   overflow: hidden;
 
+  &.in-preview {
+    border-radius: 0.25rem;
+    background-color: var(--color-primary-tint);
+    height: 2.625rem;
+    margin: 0;
+    padding: 0.125rem 0.25rem 0.125rem 0.625rem;
+    transition: background-color 0.2s ease-in;
+  }
+
   &::before {
     content: "";
     display: block;
