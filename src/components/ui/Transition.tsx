@@ -23,7 +23,7 @@ type AnimationName = (
   | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
   | 'slideVertical' | 'slideVerticalFade' | 'slideFadeAndroid'
   );
-export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => React.ReactNode;
+export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number, activeKey: number) => React.ReactNode;
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
@@ -350,7 +350,7 @@ function Transition({
     }
 
     const rendered = typeof render === 'function'
-      ? render(key === activeKey, key === prevActiveKey, activeKey)
+      ? render(key === activeKey, key === prevActiveKey, key, activeKey)
       : render;
 
     return (shouldWrap && key !== wrapExceptionKey) || asFastList
