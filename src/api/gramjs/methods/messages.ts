@@ -30,6 +30,7 @@ import {
 
 import {
   ALL_FOLDER_ID,
+  API_GENERAL_ID_LIMIT,
   DEBUG, GIF_MIME_TYPE, MAX_INT_32, MENTION_UNREAD_SLICE,
   PINNED_MESSAGES_LIMIT, REACTION_UNREAD_SLICE,
   SUPPORTED_IMAGE_CONTENT_TYPES,
@@ -37,7 +38,7 @@ import {
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
-import { compact } from '../../../util/iteratees';
+import { compact, split } from '../../../util/iteratees';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
@@ -901,16 +902,23 @@ export async function fetchMessageViews({
   ids: number[];
   shouldIncrement?: boolean;
 }) {
-  const result = await invokeRequest(new GramJs.messages.GetMessagesViews({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    id: ids,
-    increment: shouldIncrement,
-  }));
+  const chunks = split(ids, API_GENERAL_ID_LIMIT);
+  const results = await Promise.all(chunks.map((chunkIds) => (
+    invokeRequest(new GramJs.messages.GetMessagesViews({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      id: chunkIds,
+      increment: shouldIncrement,
+    }))
+  )));
 
-  if (!result) return undefined;
+  if (!results || results.find((result) => !result)) return undefined;
 
-  return ids.map((id, index) => {
-    const { views, forwards, replies } = result.views[index];
+  const viewsList = results.flatMap((result) => result!.views);
+  const users = results.flatMap((result) => result!.users);
+  const chats = results.flatMap((result) => result!.chats);
+
+  const viewsInfo = ids.map((id, index) => {
+    const { views, forwards, replies } = viewsList[index];
     return {
       id,
       views,
@@ -921,6 +929,12 @@ export async function fetchMessageViews({
       readMaxId: replies?.readMaxId,
     };
   });
+
+  return {
+    viewsInfo,
+    users: users.map(buildApiUser).filter(Boolean),
+    chats: chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+  };
 }
 
 export async function requestThreadInfoUpdate({
