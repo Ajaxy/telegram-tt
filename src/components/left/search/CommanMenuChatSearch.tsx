@@ -28,8 +28,13 @@ const CommanMenuChatSearch: React.FC<{
   folders: ApiChatFolder[];
   openFolderPage: (folderId: number) => void;
   setInputValue: (value: string) => void;
+  topUserIds?: string[];
+  recentlyFoundChatIds?: string[];
+  pinnedIds?: string[];
+  currentUserId?: string;
 }> = ({
-  close, searchQuery, folders, openFolderPage, setInputValue,
+  close, searchQuery, folders, openFolderPage, setInputValue, topUserIds, recentlyFoundChatIds, pinnedIds,
+  currentUserId,
 }) => {
   const global = getGlobal();
   const usersById: Record<string, ApiUser> = global.users.byId;
@@ -73,7 +78,7 @@ const CommanMenuChatSearch: React.FC<{
           <span className="user-handle">{handle !== NBSP ? `@${handle}` : ''}</span>
         </span>
       );
-      value = `${name} ${handle !== NBSP ? handle : ''}`.trim();
+      value = `${name} ${handle !== NBSP ? handle : ''} @${handle !== NBSP ? handle : ''}`.trim();
     } else {
       const chat = chatsById[id] as ApiChat;
       const title = getChatTitle(lang, chat) || 'Unknown Chat';
@@ -98,31 +103,41 @@ const CommanMenuChatSearch: React.FC<{
     }
   }, [close, track]);
   const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
+
   const ids = useMemo(() => {
     const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
-    // Отдельные списки для чатов и пользователей
+
+    let priorityIds = unique([...(pinnedIds ?? []), ...(recentlyFoundChatIds ?? []), ...(topUserIds ?? [])]);
+    if (currentUserId) {
+      priorityIds = unique([currentUserId, ...priorityIds]);
+    }
+
+    // Фильтрация ID для чатов и пользователей
     const chatIds = Object.keys(chatsById).filter((id) => {
       const chat = chatsById[id];
       const title = getChatTitle(lang, chat) || '';
-      return title.toLowerCase().includes(searchQuery.toLowerCase())
-      || title.toLowerCase().includes(convertedSearchQuery);
+      return !priorityIds.includes(id) && (title.toLowerCase().includes(convertedSearchQuery));
     });
+
     const userIds = Object.keys(usersById).filter((id) => {
       const user = usersById[id];
-      if (isDeletedUser(user)) return false;
+      if (isDeletedUser(user) || priorityIds.includes(id)) return false;
       const name = getUserFullName(user) || '';
-      return name.toLowerCase().includes(searchQuery.toLowerCase())
-      || name.toLowerCase().includes(convertedSearchQuery);
+      return name.toLowerCase().includes(convertedSearchQuery);
     });
-    // Сортировка и объединение ID чатов и пользователей
-    const sortedChatIds = sortChatIds(chatIds, chatsById);
-    const combinedIds = unique([...userIds, ...sortedChatIds]);
-    return combinedIds;
-  }, [searchQuery, chatsById, usersById, lang]);
+
+    // Сортировка оставшихся чатов
+    const sortedChatIds = sortChatIds([...chatIds, ...userIds], chatsById);
+
+    // Объединение приоритетных и отсортированных остальных чатов
+    return unique([...priorityIds, ...sortedChatIds]);
+  }, [searchQuery, chatsById, usersById, pinnedIds, recentlyFoundChatIds, topUserIds, currentUserId, lang]);
+
   if (!searchQuery) {
     // eslint-disable-next-line no-null/no-null
     return null;
   }
+
   return (
     <>
       <Command.Group heading={`Search for "${searchQuery}"`}>
