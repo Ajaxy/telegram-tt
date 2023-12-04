@@ -8,6 +8,7 @@ import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
 import {
+  filterChatsByName,
   filterUsersByName,
   sortChatIds,
 } from '../../../global/helpers';
@@ -40,7 +41,7 @@ export type OwnProps = {
 
 type StateProps = {
   currentUserId?: string;
-  localContactIds?: string[];
+  contactIds?: string[];
   accountChatIds?: string[];
   accountUserIds?: string[];
   globalChatIds?: string[];
@@ -61,7 +62,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   searchDate,
   dateSearchQuery,
   currentUserId,
-  localContactIds,
+  contactIds,
   accountChatIds,
   accountUserIds,
   globalChatIds,
@@ -123,22 +124,30 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
     const contactIdsWithMe = [
       ...(currentUserId ? [currentUserId] : []),
-      ...(localContactIds || []),
+      ...(contactIds || []),
     ];
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundLocalContactIds = filterUsersByName(
+    const localContactIds = filterUsersByName(
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
+    const localChatIds = filterChatsByName(lang, Object.keys(chatsById), chatsById, searchQuery, currentUserId);
+
+    const localPeerIds = unique([
+      ...localContactIds,
+      ...localChatIds,
+    ]);
+
+    const accountPeerIds = unique([
+      ...(accountChatIds ?? []),
+      ...(accountUserIds ?? []),
+    ].filter((accountPeerId) => !localPeerIds.includes(accountPeerId)));
 
     return [
-      ...sortChatIds(unique([
-        ...(foundLocalContactIds || []),
-        ...(accountChatIds || []),
-        ...(accountUserIds || []),
-      ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(localPeerIds, chatsById, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(accountPeerIds, chatsById),
     ];
-  }, [searchQuery, currentUserId, localContactIds, lang, accountChatIds, accountUserIds, chatsById]);
+  }, [searchQuery, currentUserId, contactIds, lang, accountChatIds, accountUserIds, chatsById]);
 
   useHorizontalScroll(chatSelectionRef, !localResults.length, true);
 
@@ -302,12 +311,12 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { byId: chatsById } = global.chats;
 
-    const { userIds: localContactIds } = global.contactList || {};
+    const { userIds: contactIds } = global.contactList || {};
     const {
       currentUserId, messages,
     } = global;
 
-    if (!localContactIds) {
+    if (!contactIds) {
       return {
         chatsById,
       };
@@ -323,7 +332,7 @@ export default memo(withGlobal<OwnProps>(
 
     return {
       currentUserId,
-      localContactIds,
+      contactIds,
       accountChatIds,
       accountUserIds,
       globalChatIds,
