@@ -24,6 +24,7 @@ import {
   ARCHIVED_FOLDER_ID,
   DEBUG,
   GENERAL_TOPIC_ID,
+  GLOBAL_SEARCH_CONTACTS_LIMIT,
   MAX_INT_32,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -242,7 +243,7 @@ export async function fetchChatSettings(chat: ApiChat) {
 }
 
 export async function searchChats({ query }: { query: string }) {
-  const result = await invokeRequest(new GramJs.contacts.Search({ q: query }));
+  const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit: GLOBAL_SEARCH_CONTACTS_LIMIT }));
   if (!result) {
     return undefined;
   }
