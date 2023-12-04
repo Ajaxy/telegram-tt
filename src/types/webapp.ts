@@ -9,6 +9,11 @@ export type PopupOptions = {
 };
 
 export type WebAppInboundEvent = {
+  eventType: 'iframe_ready';
+  eventData: {
+    reload_supported?: boolean;
+  };
+} | {
   eventType: 'web_app_data_send';
   eventData: {
     data: string;
@@ -100,8 +105,8 @@ export type WebAppInboundEvent = {
   };
 } | {
   eventType: 'web_app_request_viewport' | 'web_app_request_theme' | 'web_app_ready' | 'web_app_expand'
-  | 'web_app_request_phone' | 'web_app_close' | 'iframe_ready' | 'web_app_close_scan_qr_popup'
-  | 'web_app_request_write_access' | 'web_app_request_phone';
+  | 'web_app_request_phone' | 'web_app_close' | 'web_app_close_scan_qr_popup'
+  | 'web_app_request_write_access' | 'web_app_request_phone' | 'iframe_will_reload';
   eventData: null;
 };
 
@@ -176,5 +181,6 @@ export type WebAppOutboundEvent = {
     error: string;
   });
 } | {
-  eventType: 'main_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed';
+  eventType: 'main_button_pressed' | 'back_button_pressed' | 'settings_button_pressed' | 'scan_qr_popup_closed'
+  | 'reload_iframe';
 };
