@@ -33,10 +33,10 @@ npm run deploy
 - Updates https://ulu.so
 - Updates [releases](https://github.com/ulu-telegram/app/releases)
 - Updates the latest binaries:
-  - Mac ARM: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-arm64.dmg
-  - Mac x64: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-x64.dmg
-  - Linux: https://github.com/ulu-telegram/app/releases/latest/download/Ulu-x86_64.AppImage
-  - Windows: soon
+  - Mac ARM: https://github.com/ulu-telegram/app/releases/latest/download/ulu-arm64.dmg
+  - Mac x64: https://github.com/ulu-telegram/app/releases/latest/download/ulu-x64.dmg
+  - Linux: https://github.com/ulu-telegram/app/releases/latest/download/ulu-x86_64.AppImage
+  - Windows: https://github.com/ulu-telegram/app/releases/latest/download/ulu-x64.exe
 
 ### Manual deploy: no version increment, no binaries rebuild, no release
 ```sh
