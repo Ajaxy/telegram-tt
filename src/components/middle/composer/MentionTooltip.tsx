@@ -59,6 +59,7 @@ const MentionTooltip: FC<OwnProps> = ({
     isActive: isOpen,
     items: filteredUsers,
     onSelect: handleSelectMention,
+    initialIndex: isOpen ? 0 : undefined,
     shouldSelectOnTab: true,
     shouldSaveSelectionOnUpdateItems: true,
     onClose,

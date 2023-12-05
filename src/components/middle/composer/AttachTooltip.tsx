@@ -47,8 +47,9 @@ const AttachTooltip: FC<OwnProps> = ({
     isActive: isOpen,
     items: filteredOptions,
     onSelect: handleSelectOption,
+    initialIndex: isOpen ? 0 : undefined,
     shouldSelectOnTab: true,
-    shouldSaveSelectionOnUpdateItems: true,
+    shouldRemoveSelectionOnReset: true,
     onClose,
   });
 

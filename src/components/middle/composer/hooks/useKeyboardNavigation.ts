@@ -10,6 +10,7 @@ export function useKeyboardNavigation({
   isHorizontal,
   shouldSaveSelectionOnUpdateItems,
   shouldRemoveSelectionOnReset,
+  initialIndex = -1,
   noArrowNavigation,
   items,
   shouldSelectOnTab,
@@ -20,13 +21,14 @@ export function useKeyboardNavigation({
   isHorizontal?: boolean;
   shouldSaveSelectionOnUpdateItems?: boolean;
   shouldRemoveSelectionOnReset?: boolean;
+  initialIndex?: number;
   noArrowNavigation?: boolean;
   items?: any[];
   shouldSelectOnTab?: boolean;
   onSelect: (item: any) => void | boolean;
   onClose: NoneToVoidFunction;
 }) {
-  const [selectedItemIndex, setSelectedItemIndex] = useState(-1);
+  const [selectedItemIndex, setSelectedItemIndex] = useState(initialIndex);
 
   const getSelectedIndex = useLastCallback((newIndex: number) => {
     if (!items) {
@@ -62,10 +64,12 @@ export function useKeyboardNavigation({
 
   const isSelectionOutOfRange = !items || selectedItemIndex > items.length - 1;
   useEffect(() => {
-    if (!shouldSaveSelectionOnUpdateItems || isSelectionOutOfRange) {
+    if (isActive && initialIndex !== undefined) {
+      setSelectedItemIndex(initialIndex);
+    } else if (!shouldSaveSelectionOnUpdateItems || isSelectionOutOfRange) {
       setSelectedItemIndex(shouldRemoveSelectionOnReset ? -1 : 0);
     }
-  }, [isSelectionOutOfRange, shouldRemoveSelectionOnReset, shouldSaveSelectionOnUpdateItems]);
+  }, [isActive, initialIndex, isSelectionOutOfRange, shouldRemoveSelectionOnReset, shouldSaveSelectionOnUpdateItems]);
 
   useEffect(() => (isActive ? captureKeyboardListeners({
     onEsc: onClose,
