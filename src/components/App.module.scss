@@ -30,7 +30,7 @@
 
     :global(html.theme-dark) & {
       background-image: url('../assets/chat-bg-pattern-dark.png');
-      mix-blend-mode: unset;
+      /* mix-blend-mode: unset; */
     }
 
     @media (max-width: 600px) {

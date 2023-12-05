@@ -2,6 +2,7 @@
   height: 100%;
   text-align: left;
   overflow: hidden;
+  background: var(--color-background);
 
   @media (min-width: 1276px) {
     position: relative;
@@ -9,6 +10,7 @@
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
+    
   }
 
   @media (min-width: 926px) {

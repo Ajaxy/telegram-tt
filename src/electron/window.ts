@@ -60,6 +60,10 @@ export function createWindow(url?: string) {
     width,
     height,
     title: getAppTitle(),
+    transparent: true,
+    backgroundColor: '#00000000',
+    vibrancy: 'sidebar',
+    visualEffectState: 'followWindow', // ...this is needed to make it work on macOS
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       devTools: process.env.APP_ENV !== 'production',
@@ -71,6 +75,10 @@ export function createWindow(url?: string) {
   });
 
   windowState.manage(window);
+
+  if (process.platform === 'darwin') {
+    window.setVibrancy('sidebar');
+  }
 
   window.webContents.setWindowOpenHandler((details: HandlerDetails) => {
     shell.openExternal(details.url);

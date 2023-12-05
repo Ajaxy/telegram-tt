@@ -177,10 +177,10 @@ const AuthCode: FC<StateProps> = ({
           <li><span>{lang('Login.QR.Help3')}</span></li>
         </ol>
         {isAuthReady && (
-          <Button isText onClick={habdleReturnToAuthPhoneNumber}>{lang('Login.QR.Cancel')}</Button>
+          <Button onClick={habdleReturnToAuthPhoneNumber}>{lang('Login.QR.Cancel')}</Button>
         )}
         {suggestedLanguage && suggestedLanguage !== language && continueText && (
-          <Button isText isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
+          <Button isText color="secondary" isLoading={isLoading} onClick={handleLangChange}>{continueText}</Button>
         )}
       </div>
     </div>
