@@ -1,6 +1,5 @@
 .WebPagePreview {
-  height: 2.625rem;
-  margin-top: 0.5rem;
+  height: 3.125rem;
   /* stylelint-disable-next-line plugin/no-low-performance-animation-properties */
   transition: height 150ms ease-out, opacity 150ms ease-out;
 
@@ -18,6 +17,7 @@
 
   // TODO Remove duplication with `.ComposerEmbeddedMessage`
   &_inner {
+    padding-top: 0.5rem;
     display: flex;
     align-items: center;
   }
