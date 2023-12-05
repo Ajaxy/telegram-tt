@@ -148,7 +148,8 @@
     "pako": "^2.1.0",
     "path-browserify": "^1.0.1",
     "qr-code-styling": "github:zubiden/qr-code-styling#dbbfed0",
-    "v8-compile-cache": "^2.4.0"
+    "v8-compile-cache": "^2.4.0",
+    "url": "^0.11.3"
   },
   "optionalDependencies": {
     "dmg-license": "^1.0.11",

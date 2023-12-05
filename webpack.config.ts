@@ -164,6 +164,7 @@ export default function createConfig(
         path: require.resolve('path-browserify'),
         os: require.resolve('os-browserify/browser'),
         buffer: require.resolve('buffer/'),
+        url: require.resolve('url'),
         fs: false,
         crypto: false,
       },
