@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {
@@ -155,7 +154,6 @@ const LeftSideMenuItems = ({
   const { showNotification } = getActions();
   const { track } = useJune();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
-    console.log('handleSelectWorkspace called', workspaceId); // Логирование при вызове функции
     saveCurrentWorkspaceToLocalStorage(workspaceId);
     showNotification({ message: 'Workspace is changing...' });
     setWorkspaceHistory((prevHistory) => {
@@ -176,16 +174,13 @@ const LeftSideMenuItems = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log('Key pressed:', e.key); // Логирование нажатой клавиши
-      if (e.ctrlKey && (IS_ELECTRON ? e.key === 'Tab' : e.code === 'Backquote')) {
+      if (e.ctrlKey && (IS_ELECTRON ? e.code === 'Tab' : e.code === 'Backquote')) {
         e.preventDefault();
-        console.log('Ctrl + ` pressed'); // Логирование комбинации клавиш
         const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2];
-        console.log('Last workspace ID:', lastWorkspaceId); // Логирование ID последнего воркспейса
         if (lastWorkspaceId) {
           handleSelectWorkspace(lastWorkspaceId);
         } else {
-          console.log('No last workspace to switch to'); // Логирование, если нет последнего воркспейса
+          //
         }
       }
     };
