@@ -174,7 +174,7 @@ const LeftSideMenuItems = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && (IS_ELECTRON ? e.code === 'Tab' : e.code === 'Backquote')) {
+      if (e.ctrlKey && (IS_ELECTRON ? (e.code === 'Tab' || e.keyCode === 9) : e.code === 'Backquote')) {
         e.preventDefault();
         const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2];
         if (lastWorkspaceId) {
