@@ -46,9 +46,11 @@ const UluControlledTreeEnvironment = forwardRef<TreeEnvironmentRef, OwnProps>(({
   const currentWorkspaceIdRef = useRef<string>(currentWorkspaceId);
 
   const [focusedItem, setFocusedItem] = useState<TreeItemIndex>();
-  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>(
-    buildInitialExpandedItems({ items, totalFolders }),
-  );
+  const [expandedItems, setExpandedItems] = useState<TreeItemIndex[]>(() => {
+    // Загрузка сохраненного состояния для текущего воркспейса при монтировании компонента
+    const savedExpandedItems = localStorage.getItem(`expandedItems-${currentWorkspaceId}-${id}`);
+    return savedExpandedItems ? JSON.parse(savedExpandedItems) : buildInitialExpandedItems({ items, totalFolders });
+  });
   const [selectedItems, setSelectedItems] = useState<TreeItemIndex[]>([]);
 
   const handleFocusItem = useCallback((item: TreeItem<any>) => setFocusedItem(item.index), []);
@@ -77,18 +79,22 @@ const UluControlledTreeEnvironment = forwardRef<TreeEnvironmentRef, OwnProps>(({
     setExpandedItems(newExpandedItems);
   }, [totalFolders, items, currentWorkspaceId]);
 
-  // Чтение сохраненного состояния при монтировании
+  // Обновление useEffect для отслеживания смены воркспейсов
   useEffect(() => {
-    const savedExpandedItems = localStorage.getItem(`expandedItems-${id}`);
+    // Загрузка сохраненного состояния для нового воркспейса
+    const savedExpandedItems = localStorage.getItem(`expandedItems-${currentWorkspaceId}-${id}`);
     if (savedExpandedItems) {
       setExpandedItems(JSON.parse(savedExpandedItems));
+    } else {
+      // Установка начального состояния раскрытых папок для нового воркспейса
+      setExpandedItems(buildInitialExpandedItems({ items, totalFolders }));
     }
-  }, [id]);
+  }, [currentWorkspaceId, id, items, totalFolders]);
 
   // Сохранение состояния при его изменении
   useEffect(() => {
-    localStorage.setItem(`expandedItems-${id}`, JSON.stringify(expandedItems));
-  }, [expandedItems, id]);
+    localStorage.setItem(`expandedItems-${currentWorkspaceId}-${id}`, JSON.stringify(expandedItems));
+  }, [expandedItems, currentWorkspaceId, id]);
 
   return (
     <ControlledTreeEnvironment
