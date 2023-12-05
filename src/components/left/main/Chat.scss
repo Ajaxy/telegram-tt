@@ -118,7 +118,7 @@
 
       .ChatBadge:not(.pinned):not(.muted) {
         color: var(--color-chat-active);
-        background: var(--color-white);
+        // background: var(--color-white);
       }
 
       .ChatBadge:not(.pinned).muted {
