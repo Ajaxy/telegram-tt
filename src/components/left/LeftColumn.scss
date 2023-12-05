@@ -69,8 +69,11 @@
 }
 
 body.is-macos.is-electron #LeftColumn {
-  padding-top: 3.5rem; /* Сдвиг всего содержимого вниз на 30px */
-  background-color: var(--color-background);
+  margin-top: 3.5rem;
+}
+
+body.is-macos.is-electron .LeftBackground {
+  background: var(--color-background);
 }
 
 .extra-spacing {

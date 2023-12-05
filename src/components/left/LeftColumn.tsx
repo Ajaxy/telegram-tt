@@ -556,7 +556,7 @@ function LeftColumn({
   }
 
   return (
-    <div>
+    <div className="LeftBackground">
       <Transition
         ref={ref}
         name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}
