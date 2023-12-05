@@ -15,6 +15,7 @@ import {
 } from '../../../global/helpers';
 import { convertLayout } from '../../../util/convertLayout';
 import { unique } from '../../../util/iteratees';
+import { transliterate } from '../../../util/transliterate';
 import renderText from '../../common/helpers/renderText';
 
 import { useJune } from '../../../hooks/useJune';
@@ -111,6 +112,7 @@ const CommanMenuChatSearch: React.FC<{
 
   const ids = useMemo(() => {
     const convertedSearchQuery = convertLayout(searchQuery).toLowerCase();
+    const transliteratedSearchQuery = transliterate(searchQuery).toLowerCase();
 
     let priorityIds = unique([...(pinnedIds ?? []), ...(recentlyFoundChatIds ?? []), ...(topUserIds ?? [])]);
     if (currentUserId) {
@@ -121,6 +123,7 @@ const CommanMenuChatSearch: React.FC<{
       const chat = chatsById[id];
       const title = getChatTitle(lang, chat) || '';
       return title.toLowerCase().includes(searchQuery.toLowerCase())
+      || title.toLowerCase().includes(transliteratedSearchQuery)
       || title.toLowerCase().includes(convertedSearchQuery);
     });
 
@@ -128,7 +131,9 @@ const CommanMenuChatSearch: React.FC<{
       const user = usersById[id];
       if (!user || isDeletedUser(user)) return false;
       const name = getUserFullName(user) || '';
-      return name.toLowerCase().includes(convertedSearchQuery);
+      return name.toLowerCase().includes(searchQuery.toLowerCase())
+      || name.toLowerCase().includes(transliteratedSearchQuery)
+      || name.toLowerCase().includes(convertedSearchQuery);
     });
 
     const allIds = unique([...chatIds, ...userIds]);

@@ -23,6 +23,7 @@ import {
 import { selectCurrentChat, selectTabState, selectUser } from '../../global/selectors';
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
+import { transliterate } from '../../util/transliterate';
 import { IS_ARC_BROWSER } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
@@ -78,8 +79,10 @@ interface CommandMenuProps {
 
 const customFilter = (value: string, search: string) => {
   const convertedSearch = convertLayout(search);
+  const transliteratedSearch = transliterate(search).toLowerCase();
   if (value.toLowerCase().includes(search.toLowerCase())
-      || value.toLowerCase().includes(convertedSearch.toLowerCase())) {
+      || value.toLowerCase().includes(convertedSearch.toLowerCase())
+      || value.toLowerCase().includes(transliteratedSearch.toLowerCase())) {
     return 1; // полное соответствие
   }
   return 0; // нет соответствия
