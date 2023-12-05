@@ -3,6 +3,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
+import type { ApiChat } from '../../../api/types';
 import type { ISettings } from '../../../types';
 import { LeftColumnContent } from '../../../types';
 
@@ -28,10 +29,12 @@ type OwnProps = {
 type StateProps = {
   isSavedMessages: boolean;
   isInbox: boolean;
+  chatsById: Record<string, ApiChat>;
 } & Pick<ISettings, 'language'>;
 
 const UluSystemFolders: FC<OwnProps & StateProps> = ({
   userId, language, content, isSavedMessages, onLeftColumnContentChange, isInbox, ref,
+  chatsById,
 }) => {
   const titleInbox = uluGetTranslatedString('Sidebar.SystemFolders.Inbox', language);
   const titleSavedMessages = uluGetTranslatedString('Sidebar.SystemFolders.SavedMessages', language);
@@ -63,8 +66,13 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const savedMessagesUnreadCount = userId ? unreadCounters[userId]?.chatsCount : 0;
 
   const orderedIdsAll = useFolderManagerForOrderedIds(ALL_FOLDER_ID);
-  const orderedIdsInbox = orderedIdsAll?.filter((orderedId) => !doneChatIds.includes(orderedId));
-  const inboxUnreadCount = (orderedIdsInbox || []).length;
+  const inboxChatIds = orderedIdsAll?.filter((orderedId) => !doneChatIds.includes(orderedId)) || [];
+  const inboxUnreadCount = inboxChatIds.reduce((acc, chatId) => {
+    const chat = chatsById[chatId];
+    return chat && !chat.isMuted && Boolean(chat.unreadCount || chat.unreadMentionsCount || chat.hasUnreadMark)
+      ? acc + 1
+      : acc;
+  }, 0);
 
   return (
     <UluChatFoldersWrapper ref={ref}>
@@ -105,6 +113,7 @@ export default memo(withGlobal<OwnProps>(
       language: global.settings.byKey.language,
       isSavedMessages: isChatWithSelf,
       isInbox: activeChatFolder === ALL_FOLDER_ID && chatId === undefined,
+      chatsById: global.chats.byId,
     });
   },
 )(UluSystemFolders));
