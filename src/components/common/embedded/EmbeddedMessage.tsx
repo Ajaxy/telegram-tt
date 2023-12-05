@@ -59,6 +59,7 @@ type OwnProps = {
 };
 
 const NBSP = '\u00A0';
+const EMOJI_SIZE = 17;
 
 const EmbeddedMessage: FC<OwnProps> = ({
   className,
@@ -143,6 +144,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         translatedText={translatedText}
         observeIntersectionForLoading={observeIntersectionForLoading}
         observeIntersectionForPlaying={observeIntersectionForPlaying}
+        emojiSize={EMOJI_SIZE}
       />
     );
   }
