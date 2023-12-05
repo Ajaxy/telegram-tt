@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {
@@ -135,28 +136,56 @@ const LeftSideMenuItems = ({
     localStorage.setItem('currentWorkspace', workspaceId);
   };
 
+  const getCurrentWorkspaceId = (): string | undefined => {
+    const workspaceId = localStorage.getItem('currentWorkspace');
+    return workspaceId || undefined;
+  };
+
   const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | undefined>();
+
+  useEffect(() => {
+    const workspaceId = getCurrentWorkspaceId(); // Получаем текущий идентификатор воркспейса
+    setCurrentWorkspaceId(workspaceId); // Обновляем состояние
+    if (workspaceId) {
+      setWorkspaceHistory([workspaceId]); // Инициализация истории с текущим воркспейсом
+    }
+  }, []);
+
   const { showNotification } = getActions();
   const { track } = useJune();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
+    console.log('handleSelectWorkspace called', workspaceId); // Логирование при вызове функции
     saveCurrentWorkspaceToLocalStorage(workspaceId);
     showNotification({ message: 'Workspace is changing...' });
     setWorkspaceHistory((prevHistory) => {
-      if (prevHistory[prevHistory.length - 1] !== workspaceId) {
-        return [...prevHistory, workspaceId];
+      const newHistory = prevHistory[prevHistory.length - 1] !== workspaceId
+        ? [...prevHistory, workspaceId]
+        : prevHistory;
+      if (newHistory.length > 2) {
+        newHistory.shift(); // Удаляем самую старую запись, если в истории более двух элементов
       }
-      return prevHistory;
+      return newHistory;
     });
-    if (track) { track('Switch workspace', { source: 'Left Side Menu' }); }
-  }, [track]);
+    if (track) {
+      track('Switch workspace', { source: 'Left Side Menu' });
+    }
+  }, [track, showNotification]); // Убедитесь в правильности зависимостей
+
+  const prevWorkspaceShortcut = IS_ELECTRON ? 'Ctrl + Tab' : 'Ctrl + `';
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'Tab') {
+      console.log('Key pressed:', e.key); // Логирование нажатой клавиши
+      if (e.ctrlKey && (IS_ELECTRON ? e.key === 'Tab' : e.code === 'Backquote')) {
         e.preventDefault();
-        const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2]; // Получаем предпоследний воркспейс
+        console.log('Ctrl + ` pressed'); // Логирование комбинации клавиш
+        const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2];
+        console.log('Last workspace ID:', lastWorkspaceId); // Логирование ID последнего воркспейса
         if (lastWorkspaceId) {
           handleSelectWorkspace(lastWorkspaceId);
+        } else {
+          console.log('No last workspace to switch to'); // Логирование, если нет последнего воркспейса
         }
       }
     };
@@ -164,13 +193,6 @@ const LeftSideMenuItems = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [workspaceHistory, handleSelectWorkspace]);
-
-  const getCurrentWorkspaceId = (): string | undefined => {
-    const workspaceId = localStorage.getItem('currentWorkspace');
-    return workspaceId || undefined;
-  };
-
-  const currentWorkspaceId = getCurrentWorkspaceId();
 
   /*
   const handleDarkModeToggle = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
@@ -280,6 +302,7 @@ const LeftSideMenuItems = ({
           key={workspace.id}
           className="workspace-item"
           onClick={() => handleSelectWorkspace(workspace.id)}
+          shortcut={workspace.id === workspaceHistory[workspaceHistory.length - 2] ? prevWorkspaceShortcut : undefined}
           userProfile={workspace.id === 'personal'}
           isSelected={currentWorkspace.id === workspace.id} // Updated
           customImageUrl={workspace.logoUrl}
@@ -305,7 +328,7 @@ const LeftSideMenuItems = ({
       <MenuSeparator />
       <MenuItem
         onClick={onSelectSettings}
-        shortcut="⌘ ,"
+        shortcut="⌘ + ,"
       >
         Personal settings
       </MenuItem>
