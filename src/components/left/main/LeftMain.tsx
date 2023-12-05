@@ -258,7 +258,7 @@ const LeftMain: FC<OwnProps> = ({
           className={buildClassName('btn-update', updateButtonClassNames)}
           onClick={handleUpdateClick}
         >
-          {lang('lng_update_telegram')}
+          {lang('lng_update_ulu')}
         </Button>
       )}
       {shouldRenderForumPanel && (

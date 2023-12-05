@@ -70,13 +70,26 @@
     overflow-y: auto;
   }
 
+  @keyframes buttonShine {
+    0% {
+      background-position: -100% 0;
+    }
+    100% {
+      background-position: 100% 0;
+    }
+  }
+
   .btn-update {
     position: absolute;
     bottom: 1rem;
     left: 50%;
     margin: 0 auto;
     transform: translateX(-50%);
-
+    background-color: var(--color-primary) !important;
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 75%) !important;
+    background-size: 200% 100%  !important;
+    transition: background-color 0.3s ease-in-out, background-position 0.3s ease-in-out;
+    animation: buttonShine 3s linear infinite;
     white-space: nowrap;
   }
 }
