@@ -557,7 +557,6 @@ function LeftColumn({
 
   return (
     <div>
-      <div className="electron-header" />
       <Transition
         ref={ref}
         name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}

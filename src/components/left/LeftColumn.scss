@@ -68,17 +68,9 @@
   }
 }
 
-.electron-header {
-  display: none;
-}
-
-body.is-macos.is-electron .electron-header {
-  height: 3.25rem;
-  display: flex;
-  padding: 8px;
-  right: auto;
-  justify-content: flex-end;
-  background: var(--color-background);
+body.is-macos.is-electron #LeftColumn {
+  padding-top: 3.5rem; /* Сдвиг всего содержимого вниз на 30px */
+  background-color: var(--color-background);
 }
 
 .extra-spacing {
