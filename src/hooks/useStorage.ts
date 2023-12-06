@@ -9,7 +9,7 @@ export function useStorage() {
   const [
     isArchiveWhenDoneEnabled,
     setIsArchiveWhenDoneEnabled,
-  ] = useLocalStorage<boolean>('ulu_is_archive_when_done_enabled', true);
+  ] = useLocalStorage<boolean>('ulu_is_archive_when_done_enabled', false);
   const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>(
     'ulu_is_folders_tree_enabled',
     false,
