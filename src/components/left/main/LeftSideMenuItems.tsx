@@ -155,7 +155,6 @@ const LeftSideMenuItems = ({
   const { track } = useJune();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
     saveCurrentWorkspaceToLocalStorage(workspaceId);
-    showNotification({ message: 'Workspace is changing...' });
     setWorkspaceHistory((prevHistory) => {
       const newHistory = prevHistory[prevHistory.length - 1] !== workspaceId
         ? [...prevHistory, workspaceId]
@@ -168,7 +167,7 @@ const LeftSideMenuItems = ({
     if (track) {
       track('Switch workspace', { source: 'Left Side Menu' });
     }
-  }, [track, showNotification]); // Убедитесь в правильности зависимостей
+  }, [track]); // Убедитесь в правильности зависимостей
 
   const prevWorkspaceShortcut = IS_ELECTRON ? 'Ctrl + Tab' : 'Ctrl + `';
 

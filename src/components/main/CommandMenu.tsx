@@ -577,7 +577,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleDoneChat={handleDoneChat}
                   isChatUnread={isChatUnread}
                   isCurrentChatDone={isCurrentChatDone}
-                  showNotification={showNotification}
                   allWorkspaces={allWorkspaces}
                   openChangeThemePage={openChangeThemePage}
                   inputValue={inputValue}

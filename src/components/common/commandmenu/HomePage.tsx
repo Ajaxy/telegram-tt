@@ -59,7 +59,6 @@ interface HomePageProps {
   handleDoneChat: () => void;
   isChatUnread?: boolean;
   isCurrentChatDone?: boolean;
-  showNotification: (params: { message: string }) => void;
   openChangeThemePage: () => void;
   inputValue: string;
 }
@@ -73,7 +72,7 @@ const HomePage: React.FC<HomePageProps> = ({
   handleSupport, handleFAQ, handleChangelog, handleSelectNewGroup, handleCreateFolder, handleSelectNewChannel,
   handleOpenShortcuts, handleLockScreenHotkey, handleOpenAutomationSettings, allWorkspaces,
   handleOpenWorkspaceSettings, handleSelectWorkspace, currentWorkspace, renderWorkspaceIcon,
-  currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone, showNotification,
+  currentChatId, handleToggleChatUnread, handleDoneChat, isChatUnread, isCurrentChatDone,
 }) => {
   const lang = useLang();
   return (
@@ -150,7 +149,6 @@ const HomePage: React.FC<HomePageProps> = ({
                 key={workspace.id}
                 onSelect={() => {
                   handleSelectWorkspace(workspace.id);
-                  showNotification({ message: 'Workspace is changing...' });
                 }}
               >
                 {renderWorkspaceIcon(workspace)}
