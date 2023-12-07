@@ -30,7 +30,7 @@ import {
 import { formatShareText, parseChooseParameter, processDeepLink } from '../../../util/deeplink';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { getOrderedIds } from '../../../util/folderManager';
-import { buildCollectionByKey, omit } from '../../../util/iteratees';
+import { buildCollectionByKey, omit, pick } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
 import { debounce, pause, throttle } from '../../../util/schedulers';
 import { extractCurrentThemeParams } from '../../../util/themeStyle';
@@ -53,6 +53,7 @@ import {
   addMessages,
   addUsers,
   addUserStatuses,
+  addUsersToRestrictedInviteList,
   deleteTopic,
   leaveChat,
   replaceChatFullInfo,
@@ -69,6 +70,7 @@ import {
   updateListedTopicIds,
   updateManagementProgress,
   updatePeerFullInfo,
+  updateThread,
   updateThreadInfo,
   updateTopic,
   updateTopics,
@@ -77,13 +79,24 @@ import {
 import { updateGroupCall } from '../../reducers/calls';
 import { updateTabState } from '../../reducers/tabs';
 import {
-  selectChat, selectChatByUsername,
-  selectChatFolder, selectChatFullInfo, selectChatListType, selectCurrentChat, selectCurrentMessageList, selectDraft,
+  selectChat,
+  selectChatByUsername,
+  selectChatFolder,
+  selectChatFullInfo,
+  selectChatListType,
+  selectCurrentChat,
+  selectCurrentMessageList,
+  selectDraft,
   selectIsChatPinned,
   selectLastServiceNotification,
   selectStickerSet,
-  selectSupportChat, selectTabState, selectThread, selectThreadInfo, selectThreadOriginChat, selectThreadTopMessageId,
-  selectUser, selectUserByPhoneNumber, selectVisibleUsers,
+  selectSupportChat,
+  selectTabState,
+  selectThread,
+  selectThreadInfo,
+  selectUser,
+  selectUserByPhoneNumber,
+  selectVisibleUsers,
 } from '../../selectors';
 import { selectGroupCall } from '../../selectors/calls';
 import { selectCurrentLimit } from '../../selectors/limits';
@@ -131,16 +144,19 @@ addActionHandler('preloadTopChatMessages', async (global, actions): Promise<void
   }
 });
 
-addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
-  const {
-    id, threadId = MAIN_THREAD_ID, noRequestThreadInfoUpdate, tabId = getCurrentTabId(),
-  } = payload;
+function abortChatRequests(chatId: string, threadId?: number) {
+  callApi('abortChatRequests', { chatId, threadId });
+}
 
+function abortChatRequestsForCurrentChat<T extends GlobalState>(
+  global: T, newChatId?: string, newThreadId?: number,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+) {
   const currentMessageList = selectCurrentMessageList(global, tabId);
   const currentChatId = currentMessageList?.chatId;
   const currentThreadId = currentMessageList?.threadId;
 
-  if (currentChatId && (currentChatId !== id || currentThreadId !== threadId)) {
+  if (currentChatId && (currentChatId !== newChatId || currentThreadId !== newThreadId)) {
     const [isChatOpened, isThreadOpened] = Object.values(global.byTabId)
       .reduce(([accHasChatOpened, accHasThreadOpened], { id: otherTabId }) => {
         if (otherTabId === tabId || (accHasChatOpened && accHasThreadOpened)) {
@@ -152,14 +168,33 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
         const isSameThread = isSameChat && otherMessageList?.threadId === currentThreadId;
 
         return [accHasChatOpened || isSameChat, accHasThreadOpened || isSameThread];
-      }, [currentChatId === id, false]);
+      }, [currentChatId === newChatId, false]);
 
     const shouldAbortChatRequests = !isChatOpened || !isThreadOpened;
 
     if (shouldAbortChatRequests) {
-      callApi('abortChatRequests', { chatId: currentChatId, threadId: isChatOpened ? currentThreadId : undefined });
+      abortChatRequests(currentChatId, isChatOpened ? currentThreadId : undefined);
     }
   }
+}
+
+addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
+  const {
+    id, type, noForumTopicPanel, shouldReplaceHistory, shouldReplaceLast,
+    tabId = getCurrentTabId(),
+  } = payload;
+
+  actions.processOpenChatOrThread({
+    chatId: id,
+    type,
+    threadId: MAIN_THREAD_ID,
+    noForumTopicPanel,
+    shouldReplaceHistory,
+    shouldReplaceLast,
+    tabId,
+  });
+
+  abortChatRequestsForCurrentChat(global, id, MAIN_THREAD_ID, tabId);
 
   if (!id) {
     return;
@@ -185,54 +220,227 @@ addActionHandler('openChat', (global, actions, payload): ActionReturnType => {
     actions.requestChatUpdate({ chatId: id });
   }
   actions.closeStoryViewer({ tabId });
-
-  if (threadId !== MAIN_THREAD_ID && !noRequestThreadInfoUpdate) {
-    actions.requestThreadInfoUpdate({ chatId: id, threadId });
-  }
 });
 
-addActionHandler('openComments', async (global, actions, payload): Promise<void> => {
+addActionHandler('openThread', async (global, actions, payload): Promise<void> => {
   const {
-    id, threadId, originChannelId, tabId = getCurrentTabId(),
+    type, isComments, noForumTopicPanel, shouldReplaceHistory, shouldReplaceLast,
+    focusMessageId,
+    tabId = getCurrentTabId(),
   } = payload;
+  let { chatId } = payload;
+  let threadId: number | undefined;
+  let loadingChatId: string;
+  let loadingThreadId: number;
 
-  if (threadId !== MAIN_THREAD_ID) {
-    const topMessageId = selectThreadTopMessageId(global, id, threadId);
-    if (!topMessageId) {
-      const chat = selectThreadOriginChat(global, id, threadId);
-      if (!chat) {
-        return;
-      }
+  if (!isComments) {
+    loadingChatId = payload.chatId;
+    threadId = payload.threadId;
+    loadingThreadId = threadId;
 
+    const originalChat = selectChat(global, loadingChatId);
+    if (threadId === MAIN_THREAD_ID) {
       actions.openChat({
-        id, threadId, tabId, noRequestThreadInfoUpdate: true,
+        id: chatId,
+        type,
+        noForumTopicPanel,
+        shouldReplaceHistory,
+        shouldReplaceLast,
+        tabId,
       });
+      return;
+    } else if (originalChat?.isForum) {
+      actions.processOpenChatOrThread({
+        chatId,
+        type,
+        threadId,
+        isComments,
+        noForumTopicPanel,
+        shouldReplaceHistory,
+        shouldReplaceLast,
+        tabId,
+      });
+      return;
+    }
+  } else {
+    const { originChannelId, originMessageId } = payload;
 
-      const result = await callApi('requestThreadInfoUpdate', { chat, threadId, originChannelId });
-      if (!result) {
-        actions.openPreviousChat({ tabId });
-        return;
-      }
+    loadingChatId = originChannelId;
+    loadingThreadId = originMessageId;
+  }
+
+  const chat = selectChat(global, loadingChatId);
+  const threadInfo = selectThreadInfo(global, loadingChatId, loadingThreadId);
+  const thread = selectThread(global, loadingChatId, loadingThreadId);
+  if (!chat) return;
+
+  abortChatRequestsForCurrentChat(global, loadingChatId, loadingThreadId, tabId);
+
+  if (chatId
+    && threadInfo?.threadId
+    && (isComments || (thread?.listedIds?.length && thread.listedIds.includes(threadInfo.threadId)))) {
+    global = updateTabState(global, {
+      loadingThread: undefined,
+    }, tabId);
+    setGlobal(global);
+    actions.processOpenChatOrThread({
+      chatId,
+      type,
+      threadId: threadInfo.threadId,
+      isComments,
+      noForumTopicPanel,
+      shouldReplaceHistory,
+      shouldReplaceLast,
+      tabId,
+    });
+    return;
+  }
+
+  let { loadingThread } = selectTabState(global, tabId);
+  if (loadingThread) {
+    abortChatRequests(loadingThread.loadingChatId, loadingThread.loadingMessageId);
+  }
+
+  global = updateTabState(global, {
+    loadingThread: {
+      loadingChatId,
+      loadingMessageId: loadingThreadId,
+    },
+  }, tabId);
+  setGlobal(global);
+
+  const openPreviousChat = () => {
+    // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
+    const currentGlobal = getGlobal();
+    if (isComments
+      || selectCurrentMessageList(currentGlobal, tabId)?.chatId !== loadingChatId
+      || selectCurrentMessageList(currentGlobal, tabId)?.threadId !== loadingThreadId) {
+      return;
+    }
+    actions.openPreviousChat({ tabId });
+  };
+
+  if (!isComments) {
+    actions.processOpenChatOrThread({
+      chatId,
+      type,
+      threadId: threadId!,
+      tabId,
+      isComments,
+      noForumTopicPanel,
+      shouldReplaceHistory,
+      shouldReplaceLast,
+    });
+  }
+
+  const result = await callApi('fetchDiscussionMessage', {
+    chat: selectChat(global, loadingChatId)!,
+    messageId: loadingThreadId,
+  });
+
+  global = getGlobal();
+  loadingThread = selectTabState(global, tabId).loadingThread;
+  if (loadingThread?.loadingChatId !== loadingChatId || loadingThread?.loadingMessageId !== loadingThreadId) {
+    openPreviousChat();
+    return;
+  }
+
+  if (!result) {
+    global = updateTabState(global, {
+      loadingThread: undefined,
+    }, tabId);
+    setGlobal(global);
+
+    actions.showNotification({
+      message: langProvider.translate(isComments ? 'ChannelPostDeleted' : 'lng_message_not_found'),
+      tabId,
+    });
+
+    openPreviousChat();
+    return;
+  }
+
+  threadId ??= result.threadId;
+  chatId ??= result.chatId;
+
+  if (!chatId) {
+    openPreviousChat();
+    return;
+  }
+
+  global = getGlobal();
+  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+  global = addChats(global, buildCollectionByKey(result.chats, 'id'));
+  global = addMessages(global, result.messages);
+  if (isComments) {
+    global = updateThreadInfo(global, loadingChatId, loadingThreadId, {
+      threadId,
+    });
+
+    global = updateThreadInfo(global, chatId, threadId, {
+      isCommentsInfo: false,
+      threadId,
+      chatId,
+      fromChannelId: loadingChatId,
+      fromMessageId: loadingThreadId,
+      ...(threadInfo
+        && pick(threadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId', 'recentReplierIds'])),
+    });
+  }
+  global = updateThread(global, chatId, threadId, {
+    firstMessageId: result.firstMessageId,
+  });
+  setGlobal(global);
+
+  if (focusMessageId) {
+    actions.focusMessage({
+      chatId,
+      threadId: threadId!,
+      messageId: focusMessageId,
+      tabId,
+    });
+  }
+
+  actions.loadViewportMessages({
+    chatId,
+    threadId,
+    tabId,
+    onError: () => {
       global = getGlobal();
-      global = addUsers(global, buildCollectionByKey(result.users, 'id'));
+      global = updateTabState(global, {
+        loadingThread: undefined,
+      }, tabId);
       setGlobal(global);
 
-      actions.openChat({
-        id,
-        threadId: result.topMessageId,
+      actions.showNotification({
+        message: langProvider.translate('Group.ErrorAccessDenied'),
         tabId,
-        shouldReplaceLast: true,
-        noRequestThreadInfoUpdate: true,
       });
-    } else {
-      actions.openChat({
-        id,
-        threadId: topMessageId,
+    },
+    onLoaded: () => {
+      global = getGlobal();
+      loadingThread = selectTabState(global, tabId).loadingThread;
+      if (loadingThread?.loadingChatId !== loadingChatId || loadingThread?.loadingMessageId !== loadingThreadId) {
+        return;
+      }
+
+      global = updateTabState(global, {
+        loadingThread: undefined,
+      }, tabId);
+      setGlobal(global);
+
+      actions.processOpenChatOrThread({
+        chatId,
+        type,
+        threadId: threadId!,
         tabId,
-        noRequestThreadInfoUpdate: true,
+        isComments,
+        noForumTopicPanel,
+        shouldReplaceHistory,
+        shouldReplaceLast,
       });
-    }
-  }
+    },
+  });
 });
 
 addActionHandler('openLinkedChat', async (global, actions, payload): Promise<void> => {
@@ -247,28 +455,6 @@ addActionHandler('openLinkedChat', async (global, actions, payload): Promise<voi
   if (chatFullInfo?.fullInfo?.linkedChatId) {
     actions.openChat({ id: chatFullInfo.fullInfo.linkedChatId, tabId });
   }
-});
-
-addActionHandler('focusMessageInComments', async (global, actions, payload): Promise<void> => {
-  const {
-    chatId, threadId, messageId, tabId = getCurrentTabId(),
-  } = payload!;
-  const chat = selectChat(global, chatId);
-  if (!chat) {
-    return;
-  }
-
-  const result = await callApi('requestThreadInfoUpdate', { chat, threadId });
-  if (!result) {
-    return;
-  }
-  global = getGlobal();
-  global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-  setGlobal(global);
-
-  actions.focusMessage({
-    chatId, threadId, messageId, tabId,
-  });
 });
 
 addActionHandler('openSupportChat', async (global, actions, payload): Promise<void> => {
@@ -436,9 +622,11 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   setGlobal(global);
 
   let createdChannel: ApiChat | undefined;
-
+  let restrictedUserIds: string[] | undefined;
   try {
-    createdChannel = await callApi('createChannel', { title, about, users });
+    const result = await callApi('createChannel', { title, about, users });
+    createdChannel = result?.channel;
+    restrictedUserIds = result?.restrictedUserIds;
   } catch (error) {
     global = getGlobal();
 
@@ -473,6 +661,12 @@ addActionHandler('createChannel', async (global, actions, payload): Promise<void
   }, tabId);
   setGlobal(global);
   actions.openChat({ id: channelId, shouldReplaceHistory: true, tabId });
+
+  if (restrictedUserIds) {
+    global = getGlobal();
+    global = addUsersToRestrictedInviteList(global, restrictedUserIds, channelId, tabId);
+    setGlobal(global);
+  }
 
   if (channelId && accessHash && photo) {
     await callApi('editChatPhoto', { chatId: channelId, accessHash, photo });
@@ -593,17 +787,19 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
   }, tabId);
   setGlobal(global);
 
+  let createdChatId: string | undefined;
   try {
-    const createdChat = await callApi('createGroupChat', {
+    const { chat: createdChat, restrictedUserIds } = await callApi('createGroupChat', {
       title,
       users,
-    });
+    }) ?? {};
 
     if (!createdChat) {
       return;
     }
 
     const { id: chatId } = createdChat;
+    createdChatId = chatId;
 
     global = getGlobal();
     global = updateChat(global, chatId, createdChat);
@@ -619,6 +815,11 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
       shouldReplaceHistory: true,
       tabId,
     });
+    if (restrictedUserIds) {
+      global = getGlobal();
+      global = addUsersToRestrictedInviteList(global, restrictedUserIds, chatId, tabId);
+      setGlobal(global);
+    }
 
     if (chatId && photo) {
       await callApi('editChatPhoto', {
@@ -626,8 +827,8 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
         photo,
       });
     }
-  } catch (e: any) {
-    if (e.message === 'USERS_TOO_FEW') {
+  } catch (err) {
+    if ((err as ApiError).message === 'USERS_TOO_FEW') {
       global = getGlobal();
       global = updateTabState(global, {
         chatCreation: {
@@ -636,6 +837,10 @@ addActionHandler('createGroupChat', async (global, actions, payload): Promise<vo
           error: 'CreateGroupError',
         },
       }, tabId);
+      setGlobal(global);
+    } else if ((err as ApiError).message === 'USER_PRIVACY_RESTRICTED') {
+      global = getGlobal();
+      global = addUsersToRestrictedInviteList(global, users.map(({ id }) => id), createdChatId!, tabId);
       setGlobal(global);
     }
   }
@@ -1207,20 +1412,16 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
     }
   }
 
-  const { chatId, type } = selectCurrentMessageList(global, tabId) || {};
   const usernameChat = selectChatByUsername(global, username);
-  if (chatId && commentId && messageId && usernameChat && type === 'thread') {
-    const threadInfo = selectThreadInfo(global, chatId, messageId);
-
-    if (threadInfo && threadInfo.chatId === chatId) {
-      actions.focusMessage({
-        chatId: threadInfo.chatId,
-        threadId: threadInfo.threadId,
-        messageId: commentId,
-        tabId,
-      });
-      return;
-    }
+  if (commentId && messageId && usernameChat) {
+    actions.openThread({
+      isComments: true,
+      originChannelId: usernameChat.id,
+      originMessageId: messageId,
+      tabId,
+      focusMessageId: commentId,
+    });
+    return;
   }
 
   if (!isWebApp) actions.openChat({ id: TMP_CHAT_ID, tabId });
@@ -1228,8 +1429,6 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
   const chatByUsername = await fetchChatByUsername(global, username);
 
   if (!chatByUsername) return;
-
-  global = getGlobal();
 
   if (isWebApp && chatByUsername) {
     const theme = extractCurrentThemeParams();
@@ -1246,29 +1445,12 @@ addActionHandler('openChatByUsername', async (global, actions, payload): Promise
 
   if (!messageId) return;
 
-  const threadInfo = selectThreadInfo(global, chatByUsername.id, messageId);
-  let discussionChatId: string | undefined;
-
-  if (!threadInfo) {
-    const result = await callApi('requestThreadInfoUpdate', { chat: chatByUsername, threadId: messageId });
-    if (!result) return;
-
-    global = getGlobal();
-    global = addUsers(global, buildCollectionByKey(result.users, 'id'));
-    setGlobal(global);
-
-    discussionChatId = result.discussionChatId;
-  } else {
-    discussionChatId = threadInfo.chatId;
-  }
-
-  if (!discussionChatId) return;
-
-  actions.focusMessage({
-    chatId: discussionChatId,
-    threadId: messageId,
-    messageId: Number(commentId),
+  actions.openThread({
+    isComments: true,
+    originChannelId: chatByUsername.id,
+    originMessageId: messageId,
     tabId,
+    focusMessageId: commentId,
   });
 });
 
@@ -1645,7 +1827,12 @@ addActionHandler('addChatMembers', async (global, actions, payload): Promise<voi
   }
 
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Loading, tabId });
-  await callApi('addChatMembers', chat, users);
+  const restrictedUserIds = await callApi('addChatMembers', chat, users);
+  if (restrictedUserIds) {
+    global = getGlobal();
+    global = addUsersToRestrictedInviteList(global, restrictedUserIds, chat.id, tabId);
+    setGlobal(global);
+  }
   actions.setNewChatMembersDialogState({ newChatMembersProgress: NewChatMembersProgress.Closed, tabId });
   global = getGlobal();
   loadFullChat(global, actions, chat, tabId);
@@ -1946,8 +2133,8 @@ addActionHandler('createTopic', async (global, actions, payload): Promise<void> 
     chat, title, iconColor, iconEmojiId,
   });
   if (topicId) {
-    actions.openChat({
-      id: chatId, threadId: topicId, shouldReplaceHistory: true, tabId,
+    actions.openThread({
+      chatId, threadId: topicId, shouldReplaceHistory: true, tabId,
     });
   }
   actions.closeCreateTopicPanel({ tabId });
@@ -2648,7 +2835,7 @@ async function openChatByUsername<T extends GlobalState>(
       chatId: chat.id, threadId, messageId: channelPostId, tabId,
     });
   } else if (!isCurrentChat) {
-    actions.openChat({ id: chat.id, threadId, tabId });
+    actions.openThread({ chatId: chat.id, threadId: threadId ?? MAIN_THREAD_ID, tabId });
   }
 
   if (startParam) {

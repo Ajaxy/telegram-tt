@@ -5,6 +5,7 @@ import type { WebAppInboundEvent, WebAppOutboundEvent } from '../../../../types/
 
 import { extractCurrentThemeParams } from '../../../../util/themeStyle';
 
+import useLastCallback from '../../../../hooks/useLastCallback';
 import useWindowSize from '../../../../hooks/useWindowSize';
 
 const SCROLLBAR_STYLE = `* {
@@ -27,6 +28,8 @@ const SCROLLBAR_STYLE = `* {
   background-color: transparent;
 }`;
 
+const RELOAD_TIMEOUT = 500;
+
 const useWebAppFrame = (
   ref: React.RefObject<HTMLIFrameElement>,
   isOpen: boolean,
@@ -41,6 +44,8 @@ const useWebAppFrame = (
     closeWebApp,
   } = getActions();
 
+  const isReloadSupported = useRef<boolean>(false);
+  const reloadTimeout = useRef<ReturnType<typeof setTimeout>>();
   const ignoreEventsRef = useRef<boolean>(false);
   const lastFrameSizeRef = useRef<{ width: number; height: number; isResizing?: boolean }>();
   const windowSize = useWindowSize();
@@ -59,19 +64,33 @@ const useWebAppFrame = (
     };
   }, [onLoad, ref, isOpen]);
 
-  const reloadFrame = useCallback((url: string) => {
+  const sendEvent = useCallback((event: WebAppOutboundEvent) => {
+    if (!ref.current?.contentWindow) return;
+    ref.current.contentWindow.postMessage(JSON.stringify(event), '*');
+  }, [ref]);
+
+  const forceReloadFrame = useLastCallback((url: string) => {
     if (!ref.current) return;
     const frame = ref.current;
     frame.src = 'about:blank';
     frame.addEventListener('load', () => {
       frame.src = url;
     }, { once: true });
-  }, [ref]);
+  });
 
-  const sendEvent = useCallback((event: WebAppOutboundEvent) => {
-    if (!ref.current?.contentWindow) return;
-    ref.current.contentWindow.postMessage(JSON.stringify(event), '*');
-  }, [ref]);
+  const reloadFrame = useCallback((url: string) => {
+    if (isReloadSupported.current) {
+      sendEvent({
+        eventType: 'reload_iframe',
+      });
+      reloadTimeout.current = setTimeout(() => {
+        forceReloadFrame(url);
+      }, RELOAD_TIMEOUT);
+      return;
+    }
+
+    forceReloadFrame(url);
+  }, [sendEvent]);
 
   const sendViewport = useCallback((isNonStable?: boolean) => {
     if (!ref.current) {
@@ -133,6 +152,11 @@ const useWebAppFrame = (
       if (eventType === 'iframe_ready') {
         const scrollbarColor = getComputedStyle(document.body).getPropertyValue('--color-scrollbar');
         sendCustomStyle(SCROLLBAR_STYLE.replace(/%SCROLLBAR_COLOR%/g, scrollbarColor));
+        isReloadSupported.current = Boolean(eventData.reload_supported);
+      }
+
+      if (eventType === 'iframe_will_reload') {
+        clearTimeout(reloadTimeout.current);
       }
 
       if (eventType === 'web_app_data_send') {

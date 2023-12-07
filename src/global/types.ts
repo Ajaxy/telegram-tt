@@ -254,6 +254,7 @@ export type TabState = {
     direction?: FocusDirection;
     noHighlight?: boolean;
     isResizingContainer?: boolean;
+    quote?: string;
   };
 
   selectedMessages?: {
@@ -398,6 +399,11 @@ export type TabState = {
   };
 
   webPagePreview?: ApiWebPage;
+
+  loadingThread?: {
+    loadingChatId: string;
+    loadingMessageId: number;
+  };
 
   forwardMessages: {
     isModalShown?: boolean;
@@ -640,6 +646,11 @@ export type TabState = {
   giftCodeModal?: {
     slug: string;
     info: ApiCheckedGiftCode;
+  };
+
+  inviteViaLinkModal?: {
+    restrictedUserIds: string[];
+    chatId: string;
   };
 };
 
@@ -1171,6 +1182,7 @@ export interface ActionPayloads {
     shouldReplace?: boolean;
   };
   openChatWithInfo: ActionPayloads['openChat'] & { profileTab?: ProfileTabType } & WithTabId;
+  openThreadWithInfo: ActionPayloads['openThread'] & WithTabId;
   openLinkedChat: { id: string } & WithTabId;
   loadMoreMembers: WithTabId | undefined;
   setActiveChatFolder: {
@@ -1206,11 +1218,6 @@ export interface ActionPayloads {
     id: number;
   };
   openSupportChat: WithTabId | undefined;
-  focusMessageInComments: {
-    chatId: string;
-    threadId: number;
-    messageId: number;
-  } & WithTabId;
   openChatByPhoneNumber: {
     phoneNumber: string;
     startAttach?: string | boolean;
@@ -1262,6 +1269,8 @@ export interface ActionPayloads {
     chatId?: string;
     threadId?: number;
     shouldForceRender?: boolean;
+    onLoaded?: NoneToVoidFunction;
+    onError?: NoneToVoidFunction;
   } & WithTabId;
   sendMessage: {
     text?: string;
@@ -1277,6 +1286,10 @@ export interface ActionPayloads {
     shouldGroupMessages?: boolean;
     messageList?: MessageList;
     isReaction?: true; // Reaction to the story are sent in the form of a message
+  } & WithTabId;
+  sendInviteMessages: {
+    chatId: string;
+    userIds: string[];
   } & WithTabId;
   cancelSendingMessage: {
     chatId: string;
@@ -1391,10 +1404,6 @@ export interface ActionPayloads {
     usernameOrId: string;
     isPrivate?: boolean;
   } & WithTabId;
-  requestThreadInfoUpdate: {
-    chatId: string;
-    threadId: number;
-  };
   setScrollOffset: {
     chatId: string;
     threadId: number;
@@ -1655,6 +1664,7 @@ export interface ActionPayloads {
     isResizingContainer?: boolean;
     shouldReplaceHistory?: boolean;
     noForumTopicPanel?: boolean;
+    quote?: string;
   } & WithTabId;
 
   focusLastMessage: WithTabId | undefined;
@@ -1759,17 +1769,36 @@ export interface ActionPayloads {
 
   openChat: {
     id: string | undefined;
-    threadId?: number;
     type?: MessageListType;
     shouldReplaceHistory?: boolean;
     shouldReplaceLast?: boolean;
     noForumTopicPanel?: boolean;
-    noRequestThreadInfoUpdate?: boolean;
   } & WithTabId;
-  openComments: {
-    id: string;
+  openThread: {
+    type?: MessageListType;
+    shouldReplaceHistory?: boolean;
+    shouldReplaceLast?: boolean;
+    noForumTopicPanel?: boolean;
+    focusMessageId?: number;
+  } & ({
+    isComments: true;
+    chatId?: string;
+    originMessageId: number;
+    originChannelId: string;
+  } | {
+    isComments?: false;
+    chatId: string;
     threadId: number;
-    originChannelId?: string;
+  }) & WithTabId;
+  // Used by both openThread & openChat
+  processOpenChatOrThread: {
+    chatId: string | undefined;
+    threadId: number;
+    type?: MessageListType;
+    shouldReplaceHistory?: boolean;
+    shouldReplaceLast?: boolean;
+    noForumTopicPanel?: boolean;
+    isComments?: boolean;
   } & WithTabId;
   loadFullChat: {
     chatId: string;
@@ -2578,6 +2607,7 @@ export interface ActionPayloads {
   dismissNotification: { localId: string } & WithTabId;
 
   updatePageTitle: WithTabId | undefined;
+  closeInviteViaLinkModal: WithTabId | undefined;
 
   // Calls
   joinGroupCall: {

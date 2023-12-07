@@ -3,10 +3,11 @@ import React, {
   memo,
   useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import { ChatCreationProgress } from '../../../types';
 
+import { getUserFirstOrLastName } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
 
 import useHistoryBack from '../../../hooks/useHistoryBack';
@@ -32,6 +33,8 @@ type StateProps = {
   creationError?: string;
   maxGroupSize?: number;
 };
+
+const MAX_MEMBERS_FOR_GENERATE_CHAT_NAME = 4;
 
 const NewChatStep2: FC<OwnProps & StateProps > = ({
   isChannel,
@@ -64,6 +67,25 @@ const NewChatStep2: FC<OwnProps & StateProps > = ({
   const chatTooManyUsersError = 'Sorry, creating supergroups is not yet supported';
 
   const isLoading = creationProgress === ChatCreationProgress.InProgress;
+
+  useEffect(() => {
+    if (isChannel) {
+      return;
+    }
+    if (!memberIds.length || memberIds.length > MAX_MEMBERS_FOR_GENERATE_CHAT_NAME) {
+      setTitle('');
+      return;
+    }
+    const global = getGlobal();
+    const usersById = global.users.byId;
+    const memberFirstNames = [global.currentUserId!, ...memberIds]
+      .map((userId) => getUserFirstOrLastName(usersById[userId]))
+      .filter(Boolean);
+    const generatedChatName = memberFirstNames.slice(0, -1).join(', ')
+      + lang('CreateGroup.PeersTitleLastDelimeter')
+      + memberFirstNames[memberFirstNames.length - 1];
+    setTitle(generatedChatName);
+  }, [isChannel, memberIds, lang]);
 
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.currentTarget;

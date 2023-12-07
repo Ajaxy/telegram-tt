@@ -30,6 +30,7 @@ import {
 
 import {
   ALL_FOLDER_ID,
+  API_GENERAL_ID_LIMIT,
   DEBUG, GIF_MIME_TYPE, MAX_INT_32, MENTION_UNREAD_SLICE,
   PINNED_MESSAGES_LIMIT, REACTION_UNREAD_SLICE,
   SUPPORTED_IMAGE_CONTENT_TYPES,
@@ -37,7 +38,7 @@ import {
 } from '../../../config';
 import { getEmojiOnlyCountForMessage } from '../../../global/helpers/getEmojiOnlyCountForMessage';
 import { fetchFile } from '../../../util/files';
-import { compact } from '../../../util/iteratees';
+import { compact, split } from '../../../util/iteratees';
 import { getServerTimeOffset } from '../../../util/serverTime';
 import { interpolateArray } from '../../../util/waveform';
 import { buildApiChatFromPreview, buildApiSendAsPeerId } from '../apiBuilders/chats';
@@ -48,6 +49,8 @@ import {
 import {
   buildApiMessage,
   buildApiSponsoredMessage,
+  buildApiThreadInfo,
+  buildApiThreadInfoFromMessage,
   buildLocalForwardedMessage,
   buildLocalMessage,
 } from '../apiBuilders/messages';
@@ -75,9 +78,9 @@ import {
   addEntitiesToLocalDb,
   addMessageToLocalDb,
   deserializeBytes,
-  resolveMessageApiChatId,
 } from '../helpers';
 import { updateChannelState } from '../updateManager';
+import { dispatchThreadInfoUpdates } from '../updater';
 import { requestChatUpdate } from './chats';
 import { handleGramJsUpdate, invokeRequest, uploadFile } from './client';
 
@@ -155,13 +158,12 @@ export async function fetchMessages({
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  const repliesThreadInfos = messages.map(({ repliesThreadInfo }) => repliesThreadInfo).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
 
   return {
     messages,
     users,
     chats,
-    repliesThreadInfos,
   };
 }
 
@@ -219,6 +221,8 @@ export async function fetchMessage({ chat, messageId }: { chat: ApiChat; message
   }
 
   const message = mtpMessage && buildApiMessage(mtpMessage);
+  dispatchThreadInfoUpdates([mtpMessage]);
+
   if (!message) {
     return undefined;
   }
@@ -252,6 +256,7 @@ export function sendMessage(
     noWebPage,
     sendAs,
     shouldUpdateStickerSetOrder,
+    wasDrafted,
   }: {
     chat: ApiChat;
     lastMessageId?: number;
@@ -270,6 +275,7 @@ export function sendMessage(
     noWebPage?: boolean;
     sendAs?: ApiPeer;
     shouldUpdateStickerSetOrder?: boolean;
+    wasDrafted?: boolean;
   },
   onProgress?: ApiOnProgress,
 ) {
@@ -294,6 +300,7 @@ export function sendMessage(
     id: localMessage.id,
     chatId: chat.id,
     message: localMessage,
+    wasDrafted,
   });
 
   // This is expected to arrive after `updateMessageSendSucceeded` which replaces the local ID,
@@ -856,8 +863,6 @@ export async function markMessageListRead({
 
   if (threadId === MAIN_THREAD_ID) {
     void requestChatUpdate({ chat, noLastMessage: true });
-  } else {
-    void requestThreadInfoUpdate({ chat, threadId });
   }
 }
 
@@ -901,116 +906,105 @@ export async function fetchMessageViews({
   ids: number[];
   shouldIncrement?: boolean;
 }) {
-  const result = await invokeRequest(new GramJs.messages.GetMessagesViews({
-    peer: buildInputPeer(chat.id, chat.accessHash),
-    id: ids,
-    increment: shouldIncrement,
-  }));
+  const chunks = split(ids, API_GENERAL_ID_LIMIT);
+  const results = await Promise.all(chunks.map((chunkIds) => (
+    invokeRequest(new GramJs.messages.GetMessagesViews({
+      peer: buildInputPeer(chat.id, chat.accessHash),
+      id: chunkIds,
+      increment: shouldIncrement,
+    }))
+  )));
 
-  if (!result) return undefined;
+  if (!results || results.find((result) => !result)) return undefined;
 
-  return ids.map((id, index) => {
-    const { views, forwards, replies } = result.views[index];
+  const viewsList = results.flatMap((result) => result!.views);
+  const users = results.flatMap((result) => result!.users);
+  const chats = results.flatMap((result) => result!.chats);
+
+  const viewsInfo = ids.map((id, index) => {
+    const { views, forwards, replies } = viewsList[index];
     return {
       id,
       views,
       forwards,
-      messagesCount: replies?.replies,
-      recentReplierIds: replies?.recentRepliers?.map(getApiChatIdFromMtpPeer),
-      maxId: replies?.maxId,
-      readMaxId: replies?.readMaxId,
+      threadInfo: replies ? buildApiThreadInfo(replies, id, chat.id) : undefined,
     };
   });
+
+  return {
+    viewsInfo,
+    users: users.map(buildApiUser).filter(Boolean),
+    chats: chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean),
+  };
 }
 
-export async function requestThreadInfoUpdate({
-  chat, threadId, originChannelId,
+export async function fetchDiscussionMessage({
+  chat, messageId,
 }: {
-  chat: ApiChat; threadId: number; originChannelId?: string;
+  chat: ApiChat;
+  messageId: number;
 }) {
-  if (threadId === MAIN_THREAD_ID) {
-    return undefined;
-  }
-
-  const [topMessageResult, repliesResult] = await Promise.all([
+  const [result, replies] = await Promise.all([
     invokeRequest(new GramJs.messages.GetDiscussionMessage({
       peer: buildInputPeer(chat.id, chat.accessHash),
-      msgId: Number(threadId),
-    })),
-    invokeRequest(new GramJs.messages.GetReplies({
-      peer: buildInputPeer(chat.id, chat.accessHash),
-      msgId: Number(threadId),
+      msgId: messageId,
+    }), {
+      abortControllerChatId: chat.id,
+      abortControllerThreadId: messageId,
+    }),
+    fetchMessages({
+      chat,
+      threadId: messageId,
       offsetId: 1,
       addOffset: -1,
       limit: 1,
-    })),
+    }),
   ]);
 
-  if (!topMessageResult || !topMessageResult.messages.length) {
-    return undefined;
-  }
+  if (!result || !replies) return undefined;
 
-  const discussionChatId = resolveMessageApiChatId(topMessageResult.messages[0]);
-  if (!discussionChatId) {
-    return undefined;
-  }
+  updateLocalDb(result);
 
-  const topMessageId = topMessageResult.messages[topMessageResult.messages.length - 1].id;
+  const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean)
+    .concat(replies.chats);
+  const users = result.users.map(buildApiUser).filter(Boolean)
+    .concat(replies.users);
+  const topMessages = result.messages.map(buildApiMessage).filter(Boolean);
+  const messages = topMessages.concat(replies.messages);
+  const threadId = result.messages[result.messages.length - 1]?.id;
 
-  onUpdate({
-    '@type': 'updateThreadInfo',
-    chatId: discussionChatId,
-    threadId: topMessageId,
-    threadInfo: {
-      threadId: topMessageId,
-      topMessageId,
-      lastReadInboxMessageId: topMessageResult.readInboxMaxId,
-      messagesCount: (repliesResult instanceof GramJs.messages.ChannelMessages) ? repliesResult.count : undefined,
-      lastMessageId: topMessageResult.maxId,
-      ...(originChannelId ? { originChannelId } : undefined),
-    },
-    firstMessageId: repliesResult && 'messages' in repliesResult && repliesResult.messages.length
-      ? repliesResult.messages[0].id
-      : undefined,
-  });
+  if (!threadId) return undefined;
 
-  const chats = topMessageResult.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
-  chats.forEach((newChat) => {
-    onUpdate({
-      '@type': 'updateChat',
-      id: newChat.id,
-      chat: newChat,
-      noTopChatsRequest: true,
-    });
-  });
+  dispatchThreadInfoUpdates(result.messages);
+  const threadInfoUpdates = result.messages.map(buildApiThreadInfoFromMessage).filter(Boolean);
 
-  if (chat.isForum) {
-    onUpdate({
-      '@type': 'updateTopic',
-      chatId: chat.id,
-      topicId: threadId,
-    });
-  }
-
-  addEntitiesToLocalDb(topMessageResult.users);
-  addEntitiesToLocalDb(topMessageResult.chats);
-
-  const users = topMessageResult.users.map(buildApiUser).filter(Boolean);
+  const {
+    unreadCount, maxId, readInboxMaxId, readOutboxMaxId,
+  } = result;
 
   return {
-    topMessageId,
-    discussionChatId,
+    chats,
     users,
+    messages,
+    topMessages,
+    unreadCount,
+    threadId,
+    lastReadInboxMessageId: readInboxMaxId,
+    lastReadOutboxMessageId: readOutboxMaxId,
+    lastMessageId: maxId,
+    chatId: topMessages[0]?.chatId,
+    firstMessageId: replies.messages[0]?.id,
+    threadInfoUpdates,
   };
 }
 
 export async function searchMessagesLocal({
-  chat, type, query, topMessageId, minDate, maxDate, ...pagination
+  chat, type, query, threadId, minDate, maxDate, ...pagination
 }: {
   chat: ApiChat;
   type?: ApiMessageSearchType | ApiGlobalMessageSearchType;
   query?: string;
-  topMessageId?: number;
+  threadId?: number;
   offsetId?: number;
   addOffset?: number;
   limit: number;
@@ -1045,7 +1039,7 @@ export async function searchMessagesLocal({
 
   const result = await invokeRequest(new GramJs.messages.Search({
     peer: buildInputPeer(chat.id, chat.accessHash),
-    topMsgId: topMessageId,
+    topMsgId: threadId === MAIN_THREAD_ID ? undefined : threadId,
     filter,
     q: query || '',
     minDate,
@@ -1053,7 +1047,7 @@ export async function searchMessagesLocal({
     ...pagination,
   }), {
     abortControllerChatId: chat.id,
-    abortControllerThreadId: topMessageId,
+    abortControllerThreadId: threadId,
   });
 
   if (
@@ -1069,6 +1063,7 @@ export async function searchMessagesLocal({
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
 
   let totalCount = messages.length;
   let nextOffsetId: number | undefined;
@@ -1154,6 +1149,7 @@ export async function searchMessagesGlobal({
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
 
   let totalCount = messages.length;
   let nextRate: number | undefined;
@@ -1291,6 +1287,7 @@ export async function forwardMessages({
   noAuthors,
   noCaptions,
   isCurrentUserPremium,
+  wasDrafted,
 }: {
   fromChat: ApiChat;
   toChat: ApiChat;
@@ -1303,6 +1300,7 @@ export async function forwardMessages({
   noAuthors?: boolean;
   noCaptions?: boolean;
   isCurrentUserPremium?: boolean;
+  wasDrafted?: boolean;
 }) {
   const messageIds = messages.map(({ id }) => id);
   const randomIds = messages.map(generateRandomBigInt);
@@ -1325,6 +1323,7 @@ export async function forwardMessages({
       id: localMessage.id,
       chatId: toChat.id,
       message: localMessage,
+      wasDrafted,
     });
   });
 
@@ -1403,6 +1402,7 @@ export async function fetchScheduledHistory({ chat }: { chat: ApiChat }) {
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
 
   return {
     messages,
@@ -1461,6 +1461,7 @@ export async function fetchPinnedMessages({ chat, threadId }: { chat: ApiChat; t
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
 
   return {
     messages,
@@ -1603,6 +1604,7 @@ export async function fetchUnreadMentions({
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
@@ -1639,6 +1641,7 @@ export async function fetchUnreadReactions({
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 

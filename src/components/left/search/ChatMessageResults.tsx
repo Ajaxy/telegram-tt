@@ -50,7 +50,7 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
   onSearchDateSelect,
   onReset,
 }) => {
-  const { searchMessagesGlobal, openChat } = getActions();
+  const { searchMessagesGlobal, openThread } = getActions();
 
   const lang = useLang();
   const { isMobile } = useAppLayout();
@@ -68,13 +68,14 @@ const ChatMessageResults: FC<OwnProps & StateProps> = ({
 
   const handleTopicClick = useCallback(
     (id: number) => {
-      openChat({ id: searchChatId, threadId: id, shouldReplaceHistory: true });
+      if (!searchChatId) return;
+      openThread({ chatId: searchChatId, threadId: id, shouldReplaceHistory: true });
 
       if (!isMobile) {
         onReset();
       }
     },
-    [openChat, searchChatId, isMobile, onReset],
+    [searchChatId, isMobile, onReset],
   );
 
   const foundMessages = useMemo(() => {

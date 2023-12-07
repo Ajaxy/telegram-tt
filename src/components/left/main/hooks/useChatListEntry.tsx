@@ -105,8 +105,11 @@ export default function useChatListEntry({
     }
 
     const isDraftReplyToTopic = draft && draft.replyInfo?.replyToMsgId === lastMessageTopic?.id;
+    const isEmptyLocalReply = draft?.replyInfo && !draft.text && draft.isLocal;
 
-    if (draft && (!chat?.isForum || (isTopic && !isDraftReplyToTopic))) {
+    const canDisplayDraft = !chat?.isForum && draft && !isEmptyLocalReply && (!isTopic || !isDraftReplyToTopic);
+
+    if (canDisplayDraft) {
       return (
         <p className="last-message" dir={lang.isRtl ? 'auto' : 'ltr'}>
           <span className="draft">{lang('Draft')}</span>

@@ -105,6 +105,7 @@ import DraftRecipientPicker from './DraftRecipientPicker.async';
 import ForwardRecipientPicker from './ForwardRecipientPicker.async';
 import GameModal from './GameModal';
 import HistoryCalendar from './HistoryCalendar.async';
+import InviteViaLinkModal from './InviteViaLinkModal.async';
 import NewContactModal from './NewContactModal.async';
 import Notifications from './Notifications.async';
 import PremiumLimitReachedModal from './premium/common/PremiumLimitReachedModal.async';
@@ -171,6 +172,7 @@ type StateProps = {
   noRightColumnAnimation?: boolean;
   withInterfaceAnimations?: boolean;
   isSynced?: boolean;
+  inviteViaLinkModal?: TabState['inviteViaLinkModal'];
 };
 
 const APP_OUTDATED_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
@@ -233,6 +235,7 @@ const Main: FC<OwnProps & StateProps> = ({
   boostModal,
   noRightColumnAnimation,
   isSynced,
+  inviteViaLinkModal,
 }) => {
   const {
     initMain,
@@ -264,7 +267,7 @@ const Main: FC<OwnProps & StateProps> = ({
     closePaymentModal,
     clearReceipt,
     checkAppVersion,
-    openChat,
+    openThread,
     toggleLeftColumn,
     loadRecentEmojiStatuses,
     updatePageTitle,
@@ -474,8 +477,8 @@ const Main: FC<OwnProps & StateProps> = ({
     const parsedLocationHash = parseLocationHash();
     if (!parsedLocationHash) return;
 
-    openChat({
-      id: parsedLocationHash.chatId,
+    openThread({
+      chatId: parsedLocationHash.chatId,
       threadId: parsedLocationHash.threadId,
       type: parsedLocationHash.type,
     });
@@ -644,6 +647,7 @@ const Main: FC<OwnProps & StateProps> = ({
       <ReceiptModal isOpen={isReceiptModalOpen} onClose={clearReceipt} />
       <DeleteFolderDialog folder={deleteFolderDialog} />
       <ReactionPicker isOpen={isReactionPickerOpen} />
+      <InviteViaLinkModal userIds={inviteViaLinkModal?.restrictedUserIds} chatId={inviteViaLinkModal?.chatId} />
       <CommandMenu />
       <UluChatFolders portalRef={chatFoldersPortalRef} />
     </div>
@@ -689,6 +693,7 @@ export default memo(withGlobal<OwnProps>(
       chatlistModal,
       boostModal,
       giftCodeModal,
+      inviteViaLinkModal,
     } = selectTabState(global);
 
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
@@ -757,6 +762,7 @@ export default memo(withGlobal<OwnProps>(
       giftCodeModal,
       noRightColumnAnimation,
       isSynced: global.isSynced,
+      inviteViaLinkModal,
     };
   },
 )(Main));

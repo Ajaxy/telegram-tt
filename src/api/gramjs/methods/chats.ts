@@ -24,6 +24,7 @@ import {
   ARCHIVED_FOLDER_ID,
   DEBUG,
   GENERAL_TOPIC_ID,
+  GLOBAL_SEARCH_CONTACTS_LIMIT,
   MAX_INT_32,
   MEMBERS_LOAD_SLICE,
   SERVICE_NOTIFICATIONS_USER_ID,
@@ -70,7 +71,8 @@ import {
 } from '../helpers';
 import localDb from '../localDb';
 import { scheduleMutedChatUpdate } from '../scheduleUnmute';
-import { applyState, updateChannelState } from '../updateManager';
+import { applyState, processUpdate, updateChannelState } from '../updateManager';
+import { dispatchThreadInfoUpdates } from '../updater';
 import { invokeRequest, uploadFile } from './client';
 
 type FullChatData = {
@@ -128,6 +130,8 @@ export async function fetchChats({
       .filter(Boolean),
     'chatId',
   );
+
+  dispatchThreadInfoUpdates(result.messages);
 
   const peersByKey = preparePeers(result);
   if (resultPinned) {
@@ -242,24 +246,24 @@ export async function fetchChatSettings(chat: ApiChat) {
 }
 
 export async function searchChats({ query }: { query: string }) {
-  const result = await invokeRequest(new GramJs.contacts.Search({ q: query }));
+  const result = await invokeRequest(new GramJs.contacts.Search({ q: query, limit: GLOBAL_SEARCH_CONTACTS_LIMIT }));
   if (!result) {
     return undefined;
   }
 
   updateLocalDb(result);
 
-  const localPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
+  const accountPeerIds = result.myResults.map(getApiChatIdFromMtpPeer);
   const allChats = result.chats.concat(result.users)
     .map((user) => buildApiChatFromPreview(user))
     .filter(Boolean);
   const allUsers = result.users.map(buildApiUser).filter((user) => Boolean(user) && !user.isSelf) as ApiUser[];
 
   return {
-    localChats: allChats.filter((r) => localPeerIds.includes(r.id)),
-    localUsers: allUsers.filter((u) => localPeerIds.includes(u.id)),
-    globalChats: allChats.filter((r) => !localPeerIds.includes(r.id)),
-    globalUsers: allUsers.filter((u) => !localPeerIds.includes(u.id)),
+    accountChats: allChats.filter((r) => accountPeerIds.includes(r.id)),
+    accountUsers: allUsers.filter((u) => accountPeerIds.includes(u.id)),
+    globalChats: allChats.filter((r) => !accountPeerIds.includes(r.id)),
+    globalUsers: allUsers.filter((u) => !accountPeerIds.includes(u.id)),
   };
 }
 
@@ -339,6 +343,8 @@ export async function requestChatUpdate({
   updateLocalDb(result);
 
   const lastRemoteMessage = buildApiMessage(result.messages[0]);
+  dispatchThreadInfoUpdates(result.messages);
+
   const lastMessage = lastLocalMessage && (!lastRemoteMessage || (lastLocalMessage.date > lastRemoteMessage.date))
     ? lastLocalMessage
     : lastRemoteMessage;
@@ -541,7 +547,7 @@ async function getFullChannelInfo(
       kickedMembers,
       adminMembersById: adminMembers ? buildCollectionByKey(adminMembers, 'userId') : undefined,
       groupCallId: call ? String(call.id) : undefined,
-      linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'chat') : undefined,
+      linkedChatId: linkedChatId ? buildApiPeerId(linkedChatId, 'channel') : undefined,
       botCommands,
       enabledReactions: buildApiChatReactions(availableReactions),
       sendAsId: defaultSendAs ? getApiChatIdFromMtpPeer(defaultSendAs) : undefined,
@@ -626,7 +632,7 @@ export async function createChannel({
   title, about = '', users,
 }: {
   title: string; about?: string; users?: ApiUser[];
-}, noErrorUpdate = false): Promise<ApiChat | undefined> {
+}) {
   const result = await invokeRequest(new GramJs.channels.CreateChannel({
     broadcast: true,
     title,
@@ -657,20 +663,36 @@ export async function createChannel({
 
   const channel = buildApiChatFromPreview(newChannel)!;
 
+  let restrictedUserIds: string[] | undefined;
+
   if (users?.length) {
     try {
-      await invokeRequest(new GramJs.channels.InviteToChannel({
+      const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
         channel: buildInputEntity(channel.id, channel.accessHash) as GramJs.InputChannel,
         users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
       }), {
-        shouldThrow: noErrorUpdate,
+        shouldIgnoreUpdates: true,
+        shouldThrow: true,
       });
+      if (updates) {
+        processUpdate(updates);
+        restrictedUserIds = handleUserPrivacyRestrictedUpdates(updates);
+      }
     } catch (err) {
-      // `noErrorUpdate` will cause an exception which we don't want either
+      if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+        restrictedUserIds = users.map(({ id }) => id);
+      } else {
+        onUpdate({
+          '@type': 'error',
+          error: {
+            message: (err as Error).message,
+          },
+        });
+      }
     }
   }
 
-  return channel;
+  return { channel, restrictedUserIds };
 }
 
 export function joinChannel({
@@ -740,11 +762,12 @@ export async function createGroupChat({
   title, users,
 }: {
   title: string; users: ApiUser[];
-}): Promise<ApiChat | undefined> {
+}) {
   const result = await invokeRequest(new GramJs.messages.CreateChat({
     title,
     users: users.map(({ id, accessHash }) => buildInputEntity(id, accessHash)) as GramJs.InputUser[],
   }), {
+    shouldIgnoreUpdates: true,
     shouldThrow: true,
   });
 
@@ -758,6 +781,8 @@ export async function createGroupChat({
     }
     return undefined;
   }
+  processUpdate(result);
+  const restrictedUserIds = handleUserPrivacyRestrictedUpdates(result);
 
   const newChat = result.chats[0];
   if (!newChat || !(newChat instanceof GramJs.Chat)) {
@@ -768,7 +793,7 @@ export async function createGroupChat({
     return undefined;
   }
 
-  return buildApiChatFromPreview(newChat);
+  return { chat: buildApiChatFromPreview(newChat), restrictedUserIds };
 }
 
 export async function editChatPhoto({
@@ -1265,31 +1290,64 @@ export async function openChatByInvite(hash: string) {
   return { chatId: chat.id };
 }
 
-export async function addChatMembers(chat: ApiChat, users: ApiUser[], noErrorUpdate = false) {
+export async function addChatMembers(chat: ApiChat, users: ApiUser[]) {
   try {
     if (chat.type === 'chatTypeChannel' || chat.type === 'chatTypeSuperGroup') {
-      return await invokeRequest(new GramJs.channels.InviteToChannel({
-        channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
-        users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
-      }), {
-        shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
+      try {
+        const updates = await invokeRequest(new GramJs.channels.InviteToChannel({
+          channel: buildInputEntity(chat.id, chat.accessHash) as GramJs.InputChannel,
+          users: users.map((user) => buildInputEntity(user.id, user.accessHash)) as GramJs.InputUser[],
+        }), {
+          shouldIgnoreUpdates: true,
+          shouldThrow: true,
+        });
+        if (updates) {
+          processUpdate(updates);
+          return handleUserPrivacyRestrictedUpdates(updates);
+        }
+      } catch (err) {
+        if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+          return users.map(({ id }) => id);
+        }
+        throw err;
+      }
     }
 
-    return await Promise.all(users.map((user) => {
-      return invokeRequest(new GramJs.messages.AddChatUser({
-        chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
-        userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
-      }), {
-        shouldReturnTrue: true,
-        shouldThrow: noErrorUpdate,
-      });
-    }));
+    const addChatUsersResult = await Promise.all(
+      users.map(async (user) => {
+        try {
+          const updates = await invokeRequest(new GramJs.messages.AddChatUser({
+            chatId: buildInputEntity(chat.id) as BigInt.BigInteger,
+            userId: buildInputEntity(user.id, user.accessHash) as GramJs.InputUser,
+          }), {
+            shouldIgnoreUpdates: true,
+            shouldThrow: true,
+          });
+          if (updates) {
+            processUpdate(updates);
+            return handleUserPrivacyRestrictedUpdates(updates);
+          }
+          return undefined;
+        } catch (err) {
+          if ((err as Error).message === 'USER_PRIVACY_RESTRICTED') {
+            return [user.id];
+          }
+          throw err;
+        }
+      }),
+    );
+    if (addChatUsersResult) {
+      return addChatUsersResult.flat().filter(Boolean);
+    }
   } catch (err) {
-    // `noErrorUpdate` will cause an exception which we don't want either
-    return undefined;
+    onUpdate({
+      '@type': 'error',
+      error: {
+        message: (err as Error).message,
+      },
+    });
   }
+  return undefined;
 }
 
 export function deleteChatMember(chat: ApiChat, user: ApiUser) {
@@ -1531,6 +1589,7 @@ export async function fetchTopics({
 
   const topics = result.topics.map(buildApiTopic).filter(Boolean);
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
   const draftsById = result.topics.reduce((acc, topic) => {
@@ -1584,6 +1643,7 @@ export async function fetchTopicById({
   updateLocalDb(result);
 
   const messages = result.messages.map(buildApiMessage).filter(Boolean);
+  dispatchThreadInfoUpdates(result.messages);
   const users = result.users.map(buildApiUser).filter(Boolean);
   const chats = result.chats.map((c) => buildApiChatFromPreview(c)).filter(Boolean);
 
@@ -1818,4 +1878,25 @@ export function togglePeerTranslations({
     disabled: isEnabled ? undefined : true,
     peer: buildInputPeer(chat.id, chat.accessHash),
   }));
+}
+
+function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {
+  if (!(updates instanceof GramJs.Updates) && !(updates instanceof GramJs.UpdatesCombined)) {
+    return undefined;
+  }
+
+  const eligibleUpdates = updates
+    .updates
+    .filter(
+      (u): u is GramJs.UpdateGroupInvitePrivacyForbidden => {
+        return u instanceof GramJs.UpdateGroupInvitePrivacyForbidden;
+      },
+    );
+
+  if (eligibleUpdates.length === 0) {
+    return undefined;
+  }
+
+  return eligibleUpdates
+    .map((u) => buildApiPeerId(u.userId, 'user'));
 }

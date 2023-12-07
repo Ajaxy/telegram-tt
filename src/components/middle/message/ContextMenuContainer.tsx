@@ -166,7 +166,7 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   onCloseAnimationEnd,
 }) => {
   const {
-    openChat,
+    openThread,
     updateDraftReplyInfo,
     setEditingId,
     pinMessage,
@@ -303,8 +303,8 @@ const ContextMenuContainer: FC<OwnProps & StateProps> = ({
   });
 
   const handleOpenThread = useLastCallback(() => {
-    openChat({
-      id: message.chatId,
+    openThread({
+      chatId: message.chatId,
       threadId: message.id,
     });
     closeMenu();

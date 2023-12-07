@@ -191,27 +191,27 @@ const Settings: FC<OwnProps> = ({
     onReset();
   });
 
-  function renderCurrentSectionContent(isScreenActive: boolean, screen: SettingsScreens) {
+  function renderCurrentSectionContent(isScreenActive: boolean, activeScreen: SettingsScreens) {
     const privacyAllowScreens: Record<number, boolean> = {
-      [SettingsScreens.PrivacyPhoneNumber]: PRIVACY_PHONE_NUMBER_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyLastSeen]: PRIVACY_LAST_SEEN_PHONE_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyProfilePhoto]: PRIVACY_PROFILE_PHOTO_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyBio]: PRIVACY_BIO_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyVoiceMessages]: PRIVACY_VOICE_MESSAGES_SCREENS.includes(screen),
-      [SettingsScreens.PrivacyGroupChats]: PRIVACY_GROUP_CHATS_SCREENS.includes(screen),
+      [SettingsScreens.PrivacyPhoneNumber]: PRIVACY_PHONE_NUMBER_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyLastSeen]: PRIVACY_LAST_SEEN_PHONE_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyProfilePhoto]: PRIVACY_PROFILE_PHOTO_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyBio]: PRIVACY_BIO_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyPhoneCall]: PRIVACY_PHONE_CALL_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyPhoneP2P]: PRIVACY_PHONE_P2P_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyForwarding]: PRIVACY_FORWARDING_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyVoiceMessages]: PRIVACY_VOICE_MESSAGES_SCREENS.includes(activeScreen),
+      [SettingsScreens.PrivacyGroupChats]: PRIVACY_GROUP_CHATS_SCREENS.includes(activeScreen),
     };
 
-    const isTwoFaScreen = TWO_FA_SCREENS.includes(screen);
-    const isPasscodeScreen = PASSCODE_SCREENS.includes(screen);
-    const isFoldersScreen = FOLDERS_SCREENS.includes(screen);
-    const isPrivacyScreen = PRIVACY_SCREENS.includes(screen)
+    const isTwoFaScreen = TWO_FA_SCREENS.includes(activeScreen);
+    const isPasscodeScreen = PASSCODE_SCREENS.includes(activeScreen);
+    const isFoldersScreen = FOLDERS_SCREENS.includes(activeScreen);
+    const isPrivacyScreen = PRIVACY_SCREENS.includes(activeScreen)
       || isTwoFaScreen
       || isPasscodeScreen
-      || Object.keys(privacyAllowScreens).includes(screen.toString())
-      || Object.values(privacyAllowScreens).find((key) => key === true);
+      || Object.keys(privacyAllowScreens).map(Number).includes(activeScreen)
+      || Object.values(privacyAllowScreens).includes(true);
 
     switch (currentScreen) {
       case SettingsScreens.Main:
@@ -230,10 +230,10 @@ const Settings: FC<OwnProps> = ({
           <SettingsGeneral
             onScreenSelect={onScreenSelect}
             isActive={isScreenActive
-              || screen === SettingsScreens.GeneralChatBackgroundColor
-              || screen === SettingsScreens.GeneralChatBackground
-              || screen === SettingsScreens.QuickReaction
-              || screen === SettingsScreens.CustomEmoji
+              || activeScreen === SettingsScreens.GeneralChatBackgroundColor
+              || activeScreen === SettingsScreens.GeneralChatBackground
+              || activeScreen === SettingsScreens.QuickReaction
+              || activeScreen === SettingsScreens.CustomEmoji
               || isPrivacyScreen || isFoldersScreen}
             onReset={handleReset}
           />
@@ -265,7 +265,7 @@ const Settings: FC<OwnProps> = ({
       case SettingsScreens.Language:
         return (
           <SettingsLanguage
-            isActive={isScreenActive || screen === SettingsScreens.DoNotTranslate}
+            isActive={isScreenActive || activeScreen === SettingsScreens.DoNotTranslate}
             onReset={handleReset}
             onScreenSelect={onScreenSelect}
           />
@@ -286,7 +286,7 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsGeneralBackground
             onScreenSelect={onScreenSelect}
-            isActive={isScreenActive || screen === SettingsScreens.GeneralChatBackgroundColor}
+            isActive={isScreenActive || activeScreen === SettingsScreens.GeneralChatBackgroundColor}
             onReset={handleReset}
           />
         );
@@ -385,7 +385,7 @@ const Settings: FC<OwnProps> = ({
         return (
           <SettingsFolders
             currentScreen={currentScreen}
-            shownScreen={screen}
+            shownScreen={activeScreen}
             state={foldersState}
             dispatch={foldersDispatch}
             isActive={isScreenActive}
@@ -415,7 +415,7 @@ const Settings: FC<OwnProps> = ({
             currentScreen={currentScreen}
             state={twoFaState}
             dispatch={twoFaDispatch}
-            shownScreen={screen}
+            shownScreen={activeScreen}
             isActive={isScreenActive}
             onScreenSelect={onScreenSelect}
             onReset={handleReset}
@@ -436,7 +436,7 @@ const Settings: FC<OwnProps> = ({
             currentScreen={currentScreen}
             passcode={privacyPasscode}
             onSetPasscode={setPrivacyPasscode}
-            shownScreen={screen}
+            shownScreen={activeScreen}
             isActive={isScreenActive}
             onScreenSelect={onScreenSelect}
             onReset={handleReset}
@@ -456,7 +456,12 @@ const Settings: FC<OwnProps> = ({
     }
   }
 
-  function renderCurrentSection(isScreenActive: boolean, isFrom: boolean, currentKey: SettingsScreens) {
+  function renderCurrentSection(
+    isScreenActive: boolean,
+    _isFrom: boolean,
+    _currentKey: SettingsScreens,
+    activeKey: SettingsScreens,
+  ) {
     return (
       <>
         <SettingsHeader
@@ -465,7 +470,7 @@ const Settings: FC<OwnProps> = ({
           onScreenSelect={onScreenSelect}
           editedFolderId={foldersState.folderId}
         />
-        {renderCurrentSectionContent(isScreenActive, currentKey)}
+        {renderCurrentSectionContent(isScreenActive, activeKey)}
       </>
     );
   }

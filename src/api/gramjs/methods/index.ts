@@ -28,12 +28,12 @@ export {
 
 export {
   fetchMessages, fetchMessage, sendMessage, pinMessage, unpinAllMessages, deleteMessages, deleteHistory,
-  markMessageListRead, markMessagesRead, requestThreadInfoUpdate, searchMessagesLocal, searchMessagesGlobal,
+  markMessageListRead, markMessagesRead, searchMessagesLocal, searchMessagesGlobal,
   fetchWebPagePreview, editMessage, forwardMessages, loadPollOptionResults, sendPollVote, findFirstMessageIdAfterDate,
   fetchPinnedMessages, fetchScheduledHistory, sendScheduledMessages, rescheduleMessage, deleteScheduledMessages,
   reportMessages, sendMessageAction, fetchSeenBy, fetchSponsoredMessages, viewSponsoredMessage, fetchSendAs,
   saveDefaultSendAs, fetchUnreadReactions, readAllReactions, fetchUnreadMentions, readAllMentions, transcribeAudio,
-  closePoll, fetchExtendedMedia, translateText, fetchMessageViews,
+  closePoll, fetchExtendedMedia, translateText, fetchMessageViews, fetchDiscussionMessage,
 } from './messages';
 
 export {

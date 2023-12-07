@@ -150,7 +150,7 @@ const SettingsMain: FC<OwnProps & StateProps> = ({
       <div className="settings-main-menu">
         {canBuyPremium && (
           <ListItem
-            leftElement={<PremiumIcon withGradient big />}
+            leftElement={<PremiumIcon className="icon" withGradient big />}
             className="settings-main-menu-premium"
             // eslint-disable-next-line react/jsx-no-bind
             onClick={() => openPremiumModal()}

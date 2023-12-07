@@ -23,7 +23,7 @@ type AnimationName = (
   | 'fade' | 'pushSlide' | 'reveal' | 'slideOptimized' | 'slideOptimizedRtl' | 'semiFade'
   | 'slideVertical' | 'slideVerticalFade' | 'slideFadeAndroid'
   );
-export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number) => React.ReactNode;
+export type ChildrenFn = (isActive: boolean, isFrom: boolean, currentKey: number, activeKey: number) => React.ReactNode;
 export type TransitionProps = {
   ref?: RefObject<HTMLDivElement>;
   activeKey: number;
@@ -97,11 +97,12 @@ function Transition({
   const rendersRef = useRef<Record<number, React.ReactNode | ChildrenFn>>({});
   const prevActiveKey = usePrevious<any>(activeKey);
   const forceUpdate = useForceUpdate();
+  const isAnimatingRef = useRef(false);
   const isSwipeJustCancelledRef = useRef(false);
 
-  const activeKeyChanged = prevActiveKey !== undefined && activeKey !== prevActiveKey;
+  const hasActiveKeyChanged = prevActiveKey !== undefined && activeKey !== prevActiveKey;
 
-  if (!renderCount && activeKeyChanged) {
+  if (!renderCount && hasActiveKeyChanged) {
     rendersRef.current = { [prevActiveKey]: rendersRef.current[prevActiveKey] };
   }
 
@@ -149,24 +150,25 @@ function Transition({
       }
     });
 
-    if (!activeKeyChanged) {
-      if (childElements.length === 1 || (nextKey !== undefined && childElements.length === 2)) {
-        const firstChild = childNodes[activeIndex] as HTMLElement;
-
-        addExtraClass(firstChild, CLASSES.active);
-
-        if (isSlideOptimized) {
-          setExtraStyles(firstChild, {
-            transition: 'none',
-            transform: 'translate3d(0, 0, 0)',
-          });
-        }
-
-        if (childElements.length === 2) {
-          const nextChild = childElements[0] === firstChild ? childElements[1] : childElements[0];
-          addExtraClass(nextChild, CLASSES.inactive);
-        }
+    if (!hasActiveKeyChanged) {
+      if (isAnimatingRef.current) {
+        return;
       }
+
+      childElements.forEach((childElement) => {
+        if (childElement === childNodes[activeIndex]) {
+          addExtraClass(childElement, CLASSES.active);
+
+          if (isSlideOptimized) {
+            setExtraStyles(childElement, {
+              transition: 'none',
+              transform: 'translate3d(0, 0, 0)',
+            });
+          }
+        } else if (!isSlideOptimized) {
+          addExtraClass(childElement, CLASSES.inactive);
+        }
+      });
 
       return;
     }
@@ -185,6 +187,7 @@ function Transition({
         cleanup,
         activeKey,
         currentKeyRef,
+        isAnimatingRef,
         container,
         childNodes[activeIndex],
         childNodes[prevActiveIndex],
@@ -224,6 +227,7 @@ function Transition({
       }
     });
 
+    isAnimatingRef.current = true;
     const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
     onStart?.();
 
@@ -260,6 +264,7 @@ function Transition({
 
         onStop?.();
         dispatchHeavyAnimationStop();
+        isAnimatingRef.current = false;
 
         cleanup();
       });
@@ -281,6 +286,7 @@ function Transition({
             isSwipeJustCancelledRef.current = true;
             onStop?.();
             dispatchHeavyAnimationStop();
+            isAnimatingRef.current = false;
           },
         );
       } else {
@@ -293,7 +299,7 @@ function Transition({
     activeKey,
     nextKey,
     prevActiveKey,
-    activeKeyChanged,
+    hasActiveKeyChanged,
     isBackwards,
     name,
     onStart,
@@ -344,7 +350,7 @@ function Transition({
     }
 
     const rendered = typeof render === 'function'
-      ? render(key === activeKey, key === prevActiveKey, activeKey)
+      ? render(key === activeKey, key === prevActiveKey, key, activeKey)
       : render;
 
     return (shouldWrap && key !== wrapExceptionKey) || asFastList
@@ -373,6 +379,7 @@ function performSlideOptimized(
   cleanup: NoneToVoidFunction,
   activeKey: number,
   currentKeyRef: { current: number | undefined },
+  isAnimatingRef: { current: boolean | undefined },
   container: HTMLElement,
   toSlide: ChildNode,
   fromSlide?: ChildNode,
@@ -409,8 +416,8 @@ function performSlideOptimized(
     isBackwards = !isBackwards;
   }
 
+  isAnimatingRef.current = true;
   const dispatchHeavyAnimationStop = dispatchHeavyAnimationEvent();
-
   onStart?.();
 
   toggleExtraClass(container, `Transition-${name}`, !isBackwards);
@@ -476,6 +483,8 @@ function performSlideOptimized(
 
       onStop?.();
       dispatchHeavyAnimationStop();
+      isAnimatingRef.current = false;
+
       cleanup();
     });
   });

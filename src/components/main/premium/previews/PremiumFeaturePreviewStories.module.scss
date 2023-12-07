@@ -30,10 +30,11 @@
   overflow-y: scroll;
   border-top: 0.0625rem solid transparent;
   transition: 0.2s ease-in-out border-color;
+  margin-inline: 1rem;
 }
 
 .mobile {
-  padding: 1rem 1rem 1rem 2rem;
+  padding: 1rem 0rem 1rem 1rem;
   color: var(--color-text-secondary);
   font-size: 0.875rem;
 }

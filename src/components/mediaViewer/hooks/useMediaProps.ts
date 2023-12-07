@@ -119,8 +119,9 @@ export const useMediaProps = ({
     bestImageData = previewBlobUrl;
   }
   const bestData = localBlobUrl || fullMediaBlobUrl || (
-    !isVideo ? previewBlobUrl || pictogramBlobUrl || bestImageData : undefined
+    (!isVideoAvatar && !isVideo) ? (previewBlobUrl || pictogramBlobUrl || bestImageData) : undefined
   );
+
   const isLocal = Boolean(localBlobUrl);
   const fileName = message
     ? getMessageFileName(message)

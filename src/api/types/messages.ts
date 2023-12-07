@@ -310,6 +310,12 @@ export interface ApiWebPage {
   story?: ApiWebPageStoryData;
 }
 
+export interface ApiSponsoredWebPage {
+  url: string;
+  siteName: string;
+  photo?: ApiPhoto;
+}
+
 export type ApiReplyInfo = ApiMessageReplyInfo | ApiStoryReplyInfo;
 
 export interface ApiMessageReplyInfo {
@@ -474,7 +480,6 @@ export interface ApiMessage {
   isKeyboardSingleUse?: boolean;
   isKeyboardSelective?: boolean;
   viaBotId?: string;
-  repliesThreadInfo?: ApiThreadInfo;
   postAuthorTitle?: string;
   isScheduled?: boolean;
   shouldHideKeyboardButtons?: boolean;
@@ -494,6 +499,7 @@ export interface ApiMessage {
     reactions: ApiPeerReaction[];
   };
   reactions?: ApiReactions;
+  hasComments?: boolean;
 }
 
 export interface ApiReactions {
@@ -553,17 +559,30 @@ export type ApiReactionCustomEmoji = {
 
 export type ApiReaction = ApiReactionEmoji | ApiReactionCustomEmoji;
 
-export interface ApiThreadInfo {
-  isComments?: boolean;
-  threadId: number;
+interface ApiBaseThreadInfo {
   chatId: string;
-  topMessageId?: number;
-  originChannelId?: string;
   messagesCount: number;
   lastMessageId?: number;
   lastReadInboxMessageId?: number;
   recentReplierIds?: string[];
 }
+
+export interface ApiCommentsInfo extends ApiBaseThreadInfo {
+  isCommentsInfo: true;
+  threadId?: number;
+  originChannelId: string;
+  originMessageId: number;
+}
+
+export interface ApiMessageThreadInfo extends ApiBaseThreadInfo {
+  isCommentsInfo: false;
+  threadId: number;
+  // For linked messages in discussion
+  fromChannelId?: string;
+  fromMessageId?: number;
+}
+
+export type ApiThreadInfo = ApiCommentsInfo | ApiMessageThreadInfo;
 
 export type ApiMessageOutgoingStatus = 'read' | 'succeeded' | 'pending' | 'failed';
 
@@ -571,12 +590,14 @@ export type ApiSponsoredMessage = {
   chatId?: string;
   randomId: string;
   isRecommended?: boolean;
+  isAvatarShown?: boolean;
   isBot?: boolean;
   channelPostId?: number;
   startParam?: string;
   chatInviteHash?: string;
   chatInviteTitle?: string;
   text: ApiFormattedText;
+  webPage?: ApiSponsoredWebPage;
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;

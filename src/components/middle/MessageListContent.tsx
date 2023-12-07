@@ -46,6 +46,7 @@ interface OwnProps {
   isUnread: boolean;
   withUsers: boolean;
   isChannelChat: boolean | undefined;
+  isEmptyThread?: boolean;
   isComments?: boolean;
   noAvatars: boolean;
   containerRef: RefObject<HTMLDivElement>;
@@ -54,7 +55,6 @@ interface OwnProps {
   memoFirstUnreadIdRef: { current: number | undefined };
   type: MessageListType;
   isReady: boolean;
-  threadTopMessageId: number | undefined;
   hasLinkedChat: boolean | undefined;
   isSchedule: boolean;
   shouldRenderBotInfo?: boolean;
@@ -76,6 +76,7 @@ const MessageListContent: FC<OwnProps> = ({
   isViewportNewest,
   isUnread,
   isComments,
+  isEmptyThread,
   withUsers,
   isChannelChat,
   noAvatars,
@@ -85,7 +86,6 @@ const MessageListContent: FC<OwnProps> = ({
   memoFirstUnreadIdRef,
   type,
   isReady,
-  threadTopMessageId,
   hasLinkedChat,
   isSchedule,
   shouldRenderBotInfo,
@@ -198,6 +198,7 @@ const MessageListContent: FC<OwnProps> = ({
 
         const documentGroupId = !isMessageAlbum && message.groupedId ? message.groupedId : undefined;
         const nextDocumentGroupId = nextMessage && !isAlbum(nextMessage) ? nextMessage.groupedId : undefined;
+        const isTopicTopMessage = message.id === threadId;
 
         const position = {
           isFirstInGroup: messageIndex === 0,
@@ -220,7 +221,6 @@ const MessageListContent: FC<OwnProps> = ({
         const isScheduledMessage = type === 'scheduled';
         const noComments = hasLinkedChat === false || !isChannelChat;
         const noReplies = !noComments || isScheduledMessage || !isMainThread(threadId);
-        const isTopicTopMessage = message.id === threadTopMessageId;
 
         return compact([
           message.id === memoUnreadDividerBeforeIdRef.current && unreadDivider,
@@ -249,9 +249,11 @@ const MessageListContent: FC<OwnProps> = ({
             onPinnedIntersectionChange={onPinnedIntersectionChange}
             getIsMessageListReady={getIsReady}
           />,
-          message.id === threadTopMessageId && (
+          message.id === threadId && (
             <div className="local-action-message" key="discussion-started">
-              <span>{lang('DiscussionStarted')}</span>
+              <span>{lang(isEmptyThread
+                ? (isComments ? 'NoComments' : 'NoReplies') : 'DiscussionStarted')}
+              </span>
             </div>
           ),
         ]);

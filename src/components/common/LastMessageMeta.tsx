@@ -14,16 +14,21 @@ import './LastMessageMeta.scss';
 type OwnProps = {
   message: ApiMessage;
   outgoingStatus?: ApiMessageOutgoingStatus;
+  draftDate?: number;
 };
 
-const LastMessageMeta: FC<OwnProps> = ({ message, outgoingStatus }) => {
+const LastMessageMeta: FC<OwnProps> = ({ message, outgoingStatus, draftDate }) => {
   const lang = useLang();
+
+  const shouldUseDraft = draftDate && draftDate > message.date;
   return (
     <div className="LastMessageMeta">
-      {outgoingStatus && (
+      {outgoingStatus && !shouldUseDraft && (
         <MessageOutgoingStatus status={outgoingStatus} />
       )}
-      <span className="time">{formatPastTimeShort(lang, message.date * 1000)}</span>
+      <span className="time">
+        {formatPastTimeShort(lang, (shouldUseDraft ? draftDate : message.date) * 1000)}
+      </span>
     </div>
   );
 };

@@ -14,7 +14,7 @@ import {
 } from '../../config';
 import { getCurrentTabId } from '../../util/establishMultitabRole';
 import {
-  areSortedArraysEqual, omit, pickTruthy, unique,
+  areSortedArraysEqual, excludeSortedArray, omit, pick, pickTruthy, unique,
 } from '../../util/iteratees';
 import {
   isLocalMessageId, mergeIdRanges, orderHistoryIds, orderPinnedIds,
@@ -31,7 +31,7 @@ import {
   selectOutlyingLists,
   selectPinnedIds,
   selectScheduledIds,
-  selectTabState, selectThreadInfo,
+  selectTabState, selectThreadIdFromMessage, selectThreadInfo,
   selectViewportIds,
 } from '../selectors';
 import { updateTabState } from './tabs';
@@ -100,16 +100,15 @@ export function updateTabThread<T extends GlobalState>(
 }
 
 export function updateThread<T extends GlobalState>(
-  global: T, chatId: string, threadId: number, threadUpdate: Partial<Thread>,
+  global: T, chatId: string, threadId: number, threadUpdate: Partial<Thread> | undefined,
 ): T {
-  const current = global.messages.byChatId[chatId];
-
-  if (threadUpdate.listedIds?.length) {
-    const lastListedId = threadUpdate.listedIds[threadUpdate.listedIds.length - 1];
-    if (lastListedId) {
-      global = updateTopicLastMessageId(global, chatId, threadId, lastListedId);
-    }
+  if (!threadUpdate) {
+    return updateMessageStore(global, chatId, {
+      threadsById: omit(global.messages.byChatId[chatId]?.threadsById, [threadId]),
+    });
   }
+
+  const current = global.messages.byChatId[chatId];
 
   return updateMessageStore(global, chatId, {
     threadsById: {
@@ -243,40 +242,49 @@ export function deleteChatMessages<T extends GlobalState>(
   if (!byId) {
     return global;
   }
-  const newById = omit(byId, messageIds);
+
+  orderHistoryIds(messageIds);
+  const updatedThreads = new Map<number, number[]>();
+  updatedThreads.set(MAIN_THREAD_ID, messageIds);
+
+  messageIds.forEach((messageId) => {
+    const message = byId[messageId];
+    if (!message) return;
+    const threadId = selectThreadIdFromMessage(global, message);
+    if (!threadId || threadId === MAIN_THREAD_ID) return;
+    const threadMessages = updatedThreads.get(threadId) || [];
+    threadMessages.push(messageId);
+    updatedThreads.set(threadId, threadMessages);
+  });
+
   const deletedForwardedPosts = Object.values(pickTruthy(byId, messageIds)).filter(
     ({ forwardInfo }) => forwardInfo?.isLinkedChannelPost,
   );
 
-  const threadIds = Object.keys(global.messages.byChatId[chatId].threadsById).map(Number);
-  threadIds.forEach((threadId) => {
+  updatedThreads.forEach((threadMessageIds, threadId) => {
     const threadInfo = selectThreadInfo(global, chatId, threadId);
 
     let listedIds = selectListedIds(global, chatId, threadId);
     let pinnedIds = selectPinnedIds(global, chatId, threadId);
     let outlyingLists = selectOutlyingLists(global, chatId, threadId);
-    let mainPinnedIds = selectPinnedIds(global, chatId, MAIN_THREAD_ID);
     let newMessageCount = threadInfo?.messagesCount;
 
-    messageIds.forEach((messageId) => {
-      if (listedIds?.includes(messageId)) {
-        listedIds = listedIds.filter((id) => id !== messageId);
-        if (newMessageCount !== undefined && !isLocalMessageId(messageId)) newMessageCount -= 1;
-      }
+    if (listedIds) {
+      listedIds = excludeSortedArray(listedIds, threadMessageIds);
+    }
 
-      outlyingLists = outlyingLists?.map((list) => {
-        if (!list.includes(messageId)) return list;
-        return list.filter((id) => id !== messageId);
-      });
+    if (outlyingLists) {
+      outlyingLists = outlyingLists.map((list) => excludeSortedArray(list, threadMessageIds));
+    }
 
-      if (pinnedIds?.includes(messageId)) {
-        pinnedIds = pinnedIds.filter((id) => id !== messageId);
-      }
+    if (pinnedIds) {
+      pinnedIds = excludeSortedArray(pinnedIds, orderPinnedIds(threadMessageIds));
+    }
 
-      if (mainPinnedIds?.includes(messageId)) {
-        mainPinnedIds = mainPinnedIds.filter((id) => id !== messageId);
-      }
-    });
+    const nonLocalMessageCount = threadMessageIds.filter((id) => !isLocalMessageId(id)).length;
+    if (newMessageCount !== undefined) {
+      newMessageCount -= nonLocalMessageCount;
+    }
 
     Object.values(global.byTabId).forEach(({ id: tabId }) => {
       let viewportIds = selectViewportIds(global, chatId, threadId, tabId);
@@ -293,7 +301,6 @@ export function deleteChatMessages<T extends GlobalState>(
     global = replaceThreadParam(global, chatId, threadId, 'listedIds', listedIds);
     global = replaceThreadParam(global, chatId, threadId, 'outlyingLists', outlyingLists);
     global = replaceThreadParam(global, chatId, threadId, 'pinnedIds', pinnedIds);
-    global = replaceThreadParam(global, chatId, MAIN_THREAD_ID, 'pinnedIds', mainPinnedIds);
 
     if (threadInfo && newMessageCount !== undefined) {
       global = updateThreadInfo(global, chatId, threadId, {
@@ -313,16 +320,17 @@ export function deleteChatMessages<T extends GlobalState>(
         const { fromChatId, fromMessageId } = message.forwardInfo!;
         const originalPost = selectChatMessage(global, fromChatId!, fromMessageId!);
 
-        if (canDeleteCurrentThread && currentThreadId === fromMessageId) {
+        if (canDeleteCurrentThread && currentThreadId === message.id) {
           global = updateCurrentMessageList(global, chatId, undefined, undefined, undefined, undefined, tabId);
         }
         if (originalPost) {
-          global = updateChatMessage(global, fromChatId!, fromMessageId!, { repliesThreadInfo: undefined });
+          global = updateThread(global, fromChatId!, fromMessageId!, undefined);
         }
       });
     });
   }
 
+  const newById = omit(byId, messageIds);
   global = replaceChatMessages(global, chatId, newById);
 
   return global;
@@ -477,14 +485,26 @@ export function safeReplacePinnedIds<T extends GlobalState>(
 
 export function updateThreadInfo<T extends GlobalState>(
   global: T, chatId: string, threadId: number, update: Partial<ApiThreadInfo> | undefined,
+  doNotUpdateLinked?: boolean,
 ): T {
   const newThreadInfo = {
     ...(selectThreadInfo(global, chatId, threadId) as ApiThreadInfo),
     ...update,
-  };
+  } as ApiThreadInfo;
 
-  if (!newThreadInfo.threadId) {
-    return global;
+  if (!doNotUpdateLinked) {
+    const linkedUpdate = pick(newThreadInfo, ['messagesCount', 'lastMessageId', 'lastReadInboxMessageId']);
+    if (newThreadInfo.isCommentsInfo) {
+      if (newThreadInfo.threadId) {
+        global = updateThreadInfo(
+          global, newThreadInfo.chatId, newThreadInfo.threadId, linkedUpdate, true,
+        );
+      }
+    } else if (newThreadInfo.fromChannelId && newThreadInfo.fromMessageId) {
+      global = updateThreadInfo(
+        global, newThreadInfo.fromChannelId, newThreadInfo.fromMessageId, linkedUpdate, true,
+      );
+    }
   }
 
   return replaceThreadParam(global, chatId, threadId, 'threadInfo', newThreadInfo);
@@ -494,7 +514,10 @@ export function updateThreadInfos<T extends GlobalState>(
   global: T, updates: Partial<ApiThreadInfo>[],
 ): T {
   updates.forEach((update) => {
-    global = updateThreadInfo(global, update.chatId!, update.threadId!, update);
+    global = updateThreadInfo(global,
+      update.isCommentsInfo ? update.originChannelId! : update.chatId!,
+      update.isCommentsInfo ? update.originMessageId! : update.threadId!,
+      update);
   });
 
   return global;
@@ -527,11 +550,24 @@ function updateScheduledMessages<T extends GlobalState>(
   };
 }
 
-export function updateFocusedMessage<T extends GlobalState>(
-  global: T, chatId?: string, messageId?: number, threadId = MAIN_THREAD_ID, noHighlight = false,
+export function updateFocusedMessage<T extends GlobalState>({
+  global,
+  chatId,
+  messageId,
+  threadId = MAIN_THREAD_ID,
+  noHighlight = false,
   isResizingContainer = false,
-  ...[tabId = getCurrentTabId()]: TabArgs<T>
-): T {
+  quote,
+}: {
+  global: T;
+  chatId?: string;
+  messageId?: number;
+  threadId?: number;
+  noHighlight?: boolean;
+  isResizingContainer?: boolean;
+  quote?: string;
+},
+...[tabId = getCurrentTabId()]: TabArgs<T>): T {
   return updateTabState(global, {
     focusedMessage: {
       ...selectTabState(global, tabId).focusedMessage,
@@ -540,6 +576,7 @@ export function updateFocusedMessage<T extends GlobalState>(
       messageId,
       noHighlight,
       isResizingContainer,
+      quote,
     },
   }, tabId);
 }

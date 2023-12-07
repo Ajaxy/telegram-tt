@@ -88,15 +88,17 @@ const MediaAreaSuggestedReaction = ({
       <div
         className={buildClassName(styles.background, isFlipped && styles.flipped)}
       />
-      <ReactionAnimatedEmoji
-        className={buildClassName(styles.reaction, shouldDisplayCount && styles.withCount)}
-        reaction={reaction}
-        containerId={containerId}
-        size={customEmojiSize}
-        effectSize={customEmojiSize * EFFECT_SIZE_MULTIPLIER}
-        shouldPause={isPreview}
-        shouldLoop={!isPreview}
-      />
+      {Boolean(customEmojiSize) && (
+        <ReactionAnimatedEmoji
+          className={buildClassName(styles.reaction, shouldDisplayCount && styles.withCount)}
+          reaction={reaction}
+          containerId={containerId}
+          size={customEmojiSize}
+          effectSize={customEmojiSize * EFFECT_SIZE_MULTIPLIER}
+          shouldPause={isPreview}
+          shouldLoop={!isPreview}
+        />
+      )}
       {shouldDisplayCount && (
         <span className={styles.reactionCount}>{reactionCount}</span>
       )}

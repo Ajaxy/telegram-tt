@@ -18,7 +18,9 @@ export function isAlbum(messageOrAlbum: ApiMessage | IAlbum): messageOrAlbum is 
   return 'albumId' in messageOrAlbum;
 }
 
-export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
+export function groupMessages(
+  messages: ApiMessage[], firstUnreadId?: number, topMessageId?: number, isChatWithSelf?: boolean,
+) {
   let currentSenderGroup: SenderGroup = [];
   let currentDateGroup = {
     originalDate: messages[0].date,
@@ -39,7 +41,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         };
       } else {
         currentAlbum.messages.push(message);
-        if (message.content.text) {
+        if (message.hasComments || (message.content.text && !currentAlbum.mainMessage.hasComments)) {
           currentAlbum.mainMessage = message;
         }
       }
@@ -56,6 +58,7 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
       currentSenderGroup.push(currentAlbum);
       currentAlbum = undefined;
     }
+    const lastSenderGroupItem = currentSenderGroup[currentSenderGroup.length - 1];
     if (nextMessage) {
       const nextMessageDayStartsAt = getDayStartAt(nextMessage.date * 1000);
       if (currentDateGroup.datetime !== nextMessageDayStartsAt) {
@@ -77,6 +80,12 @@ export function groupMessages(messages: ApiMessage[], firstUnreadId?: number) {
         || message.inlineButtons
         || nextMessage.inlineButtons
         || (nextMessage.date - message.date) > GROUP_INTERVAL_SECONDS
+        || (topMessageId
+          && (message.id === topMessageId
+            || (lastSenderGroupItem
+              && 'mainMessage' in lastSenderGroupItem && lastSenderGroupItem.mainMessage?.id === topMessageId))
+          && nextMessage.id !== topMessageId)
+        || (isChatWithSelf && message.forwardInfo?.senderUserId !== nextMessage.forwardInfo?.senderUserId)
       ) {
         currentSenderGroup = [];
         currentDateGroup.senderGroups.push(currentSenderGroup);

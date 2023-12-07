@@ -54,7 +54,6 @@ import {
   selectTabState,
   selectTheme,
   selectThreadInfo,
-  selectThreadTopMessageId,
 } from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import buildStyle from '../../util/buildStyle';
@@ -104,6 +103,7 @@ interface OwnProps {
 type StateProps = {
   chatId?: string;
   threadId?: number;
+  isComments?: boolean;
   messageListType?: MessageListType;
   chat?: ApiChat;
   draftReplyInfo?: ApiInputMessageReplyInfo;
@@ -158,6 +158,7 @@ function MiddleColumn({
   leftColumnRef,
   chatId,
   threadId,
+  isComments,
   messageListType,
   isMobile,
   chat,
@@ -538,6 +539,7 @@ function MiddleColumn({
               chatId={renderingChatId!}
               threadId={renderingThreadId!}
               messageListType={renderingMessageListType!}
+              isComments={isComments}
               isReady={isReady}
               isMobile={isMobile}
               getCurrentPinnedIndexes={getCurrentPinnedIndexes}
@@ -556,6 +558,7 @@ function MiddleColumn({
                 chatId={renderingChatId!}
                 threadId={renderingThreadId!}
                 type={renderingMessageListType!}
+                isComments={isComments}
                 canPost={renderingCanPost!}
                 hasTools={renderingHasTools}
                 onFabToggle={setIsFabShown}
@@ -762,8 +765,8 @@ export default memo(withGlobal<OwnProps>(
     const { chatId: audioChatId, messageId: audioMessageId } = audioPlayer;
 
     const threadInfo = selectThreadInfo(global, chatId, threadId);
-    const isComments = Boolean(threadInfo?.originChannelId);
-    const canPost = chat && getCanPostInChat(chat, threadId, isComments);
+    const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
+    const canPost = chat && getCanPostInChat(chat, threadId, isMessageThread);
     const isBotNotStarted = selectIsChatBotNotStarted(global, chatId);
     const isPinnedMessageList = messageListType === 'pinned';
     const isMainThread = messageListType === 'thread' && threadId === MAIN_THREAD_ID;
@@ -789,7 +792,7 @@ export default memo(withGlobal<OwnProps>(
       : undefined;
 
     const isCommentThread = threadId !== MAIN_THREAD_ID && !chat?.isForum;
-    const topMessageId = isCommentThread ? selectThreadTopMessageId(global, chatId, threadId) : undefined;
+    const topMessageId = isCommentThread ? threadId : undefined;
 
     const canUnpin = chat && (
       isPrivate || (
@@ -807,6 +810,7 @@ export default memo(withGlobal<OwnProps>(
       draftReplyInfo,
       isPrivate,
       areChatSettingsLoaded: Boolean(chat?.settings),
+      isComments: isMessageThread,
       canPost: !isPinnedMessageList
         && (!chat || canPost)
         && !isBotNotStarted

@@ -260,9 +260,9 @@ export default memo(withGlobal<OwnProps>(
     const chat = chatId && selectChat(global, chatId);
     const sendOptions = chat ? getAllowedAttachmentOptions(chat) : undefined;
     const threadInfo = chatId && threadId ? selectThreadInfo(global, chatId, threadId) : undefined;
-    const isComments = Boolean(threadInfo?.originChannelId);
+    const isMessageThread = Boolean(!threadInfo?.isCommentsInfo && threadInfo?.fromChannelId);
     const canSendStickers = Boolean(
-      chat && threadId && getCanPostInChat(chat, threadId, isComments) && sendOptions?.canSendStickers,
+      chat && threadId && getCanPostInChat(chat, threadId, isMessageThread) && sendOptions?.canSendStickers,
     );
     const isSavedMessages = Boolean(chatId) && selectIsChatWithSelf(global, chatId);
 

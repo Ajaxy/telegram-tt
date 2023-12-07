@@ -78,6 +78,7 @@ export const SHARED_MEDIA_SLICE = 42;
 export const MESSAGE_SEARCH_SLICE = 42;
 export const GLOBAL_SEARCH_SLICE = 20;
 export const GLOBAL_TOPIC_SEARCH_SLICE = 5;
+export const GLOBAL_SEARCH_CONTACTS_LIMIT = 20;
 export const MEMBERS_SLICE = 30;
 export const MEMBERS_LOAD_SLICE = 200;
 export const PINNED_MESSAGES_LIMIT = 50;
@@ -88,6 +89,7 @@ export const TOPIC_LIST_SENSITIVE_AREA = 600;
 export const COMMON_CHATS_LIMIT = 100;
 export const GROUP_CALL_PARTICIPANTS_LIMIT = 100;
 export const STORY_LIST_LIMIT = 100;
+export const API_GENERAL_ID_LIMIT = 100;
 
 export const STORY_VIEWS_MIN_SEARCH = 15;
 export const STORY_MIN_REACTIONS_SORT = 10;

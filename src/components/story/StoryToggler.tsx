@@ -4,7 +4,9 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiUser } from '../../api/types';
 
 import { ANIMATION_END_DELAY, PREVIEW_AVATAR_COUNT } from '../../config';
-import { selectPerformanceSettingsValue, selectTabState } from '../../global/selectors';
+import {
+  selectIsForumPanelOpen, selectPerformanceSettingsValue, selectTabState,
+} from '../../global/selectors';
 import buildClassName from '../../util/buildClassName';
 import { animateClosing, animateOpening, ANIMATION_DURATION } from './helpers/ribbonAnimation';
 
@@ -26,6 +28,7 @@ interface StateProps {
   currentUserId: string;
   orderedPeerIds: string[];
   isShown: boolean;
+  isForumPanelOpen?: boolean;
   withAnimation?: boolean;
   usersById: Record<string, ApiUser>;
   chatsById: Record<string, ApiChat>;
@@ -40,6 +43,7 @@ function StoryToggler({
   chatsById,
   canShow,
   isShown,
+  isForumPanelOpen,
   isArchived,
   withAnimation,
 }: OwnProps & StateProps) {
@@ -69,7 +73,7 @@ function StoryToggler({
   const { shouldRender, transitionClassNames } = useShowTransition(isVisible, undefined, undefined, 'slow');
 
   useEffect(() => {
-    if (!withAnimation) return;
+    if (!withAnimation || isForumPanelOpen) return;
     if (isVisible) {
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateClosing(isArchived);
@@ -77,7 +81,7 @@ function StoryToggler({
       dispatchHeavyAnimationEvent(ANIMATION_DURATION + ANIMATION_END_DELAY);
       animateOpening(isArchived);
     }
-  }, [isArchived, isVisible, withAnimation]);
+  }, [isArchived, isVisible, withAnimation, isForumPanelOpen]);
 
   if (!shouldRender) {
     return undefined;
@@ -108,12 +112,14 @@ function StoryToggler({
 export default memo(withGlobal<OwnProps>((global, { isArchived }): StateProps => {
   const { orderedPeerIds: { archived, active } } = global.stories;
   const { storyViewer: { isRibbonShown, isArchivedRibbonShown } } = selectTabState(global);
+  const isForumPanelOpen = selectIsForumPanelOpen(global);
   const withAnimation = selectPerformanceSettingsValue(global, 'storyRibbonAnimations');
 
   return {
     currentUserId: global.currentUserId!,
     orderedPeerIds: isArchived ? archived : active,
     isShown: isArchived ? !isArchivedRibbonShown : !isRibbonShown,
+    isForumPanelOpen,
     withAnimation,
     usersById: global.users.byId,
     chatsById: global.chats.byId,

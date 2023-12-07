@@ -6,6 +6,9 @@ import { getActions } from '../../global';
 
 import { TME_LINK_PREFIX } from '../../config';
 import { debounce } from '../../util/schedulers';
+import {
+  isUsernameValid, MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH, USERNAME_REGEX,
+} from '../../util/username';
 
 import useLang from '../../hooks/useLang';
 import usePrevious from '../../hooks/usePrevious';
@@ -21,20 +24,9 @@ type OwnProps = {
   onChange: (value: string) => void;
 };
 
-const MIN_USERNAME_LENGTH = 5;
-const MAX_USERNAME_LENGTH = 32;
 const LINK_PREFIX_REGEX = /https:\/\/t\.me\/?/i;
-const USERNAME_REGEX = /^\D([a-zA-Z0-9_]+)$/;
 
 const runDebouncedForCheckUsername = debounce((cb) => cb(), 250, false);
-
-function isUsernameValid(username: string) {
-  return username.length === 0 || (
-    username.length >= MIN_USERNAME_LENGTH
-    && username.length <= MAX_USERNAME_LENGTH
-    && USERNAME_REGEX.test(username)
-  );
-}
 
 const UsernameInput: FC<OwnProps> = ({
   currentUsername,

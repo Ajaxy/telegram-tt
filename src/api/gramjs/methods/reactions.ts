@@ -3,7 +3,13 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type { ApiChat, ApiReaction } from '../../types';
 
-import { REACTION_LIST_LIMIT, RECENT_REACTIONS_LIMIT, TOP_REACTIONS_LIMIT } from '../../../config';
+import {
+  API_GENERAL_ID_LIMIT,
+  REACTION_LIST_LIMIT,
+  RECENT_REACTIONS_LIMIT,
+  TOP_REACTIONS_LIMIT,
+} from '../../../config';
+import { split } from '../../../util/iteratees';
 import { buildApiChatFromPreview } from '../apiBuilders/chats';
 import { buildApiAvailableReaction, buildApiReaction, buildMessagePeerReaction } from '../apiBuilders/reactions';
 import { buildApiUser } from '../apiBuilders/users';
@@ -108,12 +114,15 @@ export function fetchMessageReactions({
 }: {
   ids: number[]; chat: ApiChat;
 }) {
-  return invokeRequest(new GramJs.messages.GetMessagesReactions({
-    id: ids,
-    peer: buildInputPeer(chat.id, chat.accessHash),
-  }), {
-    shouldReturnTrue: true,
-    abortControllerChatId: chat.id,
+  const chunks = split(ids, API_GENERAL_ID_LIMIT);
+  chunks.forEach((chunkIds) => {
+    invokeRequest(new GramJs.messages.GetMessagesReactions({
+      id: chunkIds,
+      peer: buildInputPeer(chat.id, chat.accessHash),
+    }), {
+      shouldReturnTrue: true,
+      abortControllerChatId: chat.id,
+    });
   });
 }
 

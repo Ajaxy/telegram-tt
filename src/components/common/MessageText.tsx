@@ -28,6 +28,7 @@ interface OwnProps {
   shouldRenderAsHtml?: boolean;
   inChatList?: boolean;
   forcePlayback?: boolean;
+  focusedQuote?: string;
 }
 
 const MIN_CUSTOM_EMOJIS_FOR_SHARED_CANVAS = 3;
@@ -47,6 +48,7 @@ function MessageText({
   shouldRenderAsHtml,
   inChatList,
   forcePlayback,
+  focusedQuote,
 }: OwnProps) {
   // eslint-disable-next-line no-null/no-null
   const sharedCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,6 +103,7 @@ function MessageText({
           sharedCanvasHqRef,
           cacheBuster: textCacheBusterRef.current.toString(),
           forcePlayback,
+          focusedQuote,
         }),
       ].flat().filter(Boolean)}
     </>

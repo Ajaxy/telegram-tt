@@ -160,7 +160,7 @@ export function isUserRightBanned(chat: ApiChat, key: keyof ApiChatBannedRights)
   );
 }
 
-export function getCanPostInChat(chat: ApiChat, threadId: number, isComments?: boolean) {
+export function getCanPostInChat(chat: ApiChat, threadId: number, isMessageThread?: boolean) {
   if (threadId !== MAIN_THREAD_ID) {
     if (chat.isForum) {
       if (chat.isNotJoined) {
@@ -175,7 +175,7 @@ export function getCanPostInChat(chat: ApiChat, threadId: number, isComments?: b
   }
 
   if (chat.isRestricted || chat.isForbidden || chat.migratedTo
-    || (!isComments && chat.isNotJoined) || isChatWithRepliesBot(chat.id)) {
+    || (!isMessageThread && chat.isNotJoined) || isChatWithRepliesBot(chat.id)) {
     return false;
   }
 
@@ -498,5 +498,6 @@ export function getPeerColorKey(peer: ApiPeer | undefined) {
 
 export function getPeerColorCount(peer: ApiPeer) {
   const key = getPeerColorKey(peer);
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   return getGlobal().appConfig?.peerColors?.[key]?.length || 1;
 }

@@ -7,11 +7,14 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChat, ApiMessage } from '../../../api/types';
 import { LoadMoreDirection } from '../../../types';
 
+import { ALL_FOLDER_ID } from '../../../config';
 import {
+  filterChatsByName,
   filterUsersByName,
   sortChatIds,
 } from '../../../global/helpers';
 import { selectTabState } from '../../../global/selectors';
+import { getOrderedIds } from '../../../util/folderManager';
 import { unique } from '../../../util/iteratees';
 import { MEMO_EMPTY_ARRAY } from '../../../util/memo';
 import { throttle } from '../../../util/schedulers';
@@ -40,9 +43,9 @@ export type OwnProps = {
 
 type StateProps = {
   currentUserId?: string;
-  localContactIds?: string[];
-  localChatIds?: string[];
-  localUserIds?: string[];
+  contactIds?: string[];
+  accountChatIds?: string[];
+  accountUserIds?: string[];
   globalChatIds?: string[];
   globalUserIds?: string[];
   foundIds?: string[];
@@ -61,9 +64,9 @@ const ChatResults: FC<OwnProps & StateProps> = ({
   searchDate,
   dateSearchQuery,
   currentUserId,
-  localContactIds,
-  localChatIds,
-  localUserIds,
+  contactIds,
+  accountChatIds,
+  accountUserIds,
   globalChatIds,
   globalUserIds,
   foundIds,
@@ -123,22 +126,31 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
     const contactIdsWithMe = [
       ...(currentUserId ? [currentUserId] : []),
-      ...(localContactIds || []),
+      ...(contactIds || []),
     ];
     // No need for expensive global updates on users, so we avoid them
     const usersById = getGlobal().users.byId;
-    const foundContactIds = filterUsersByName(
+    const localContactIds = filterUsersByName(
       contactIdsWithMe, usersById, searchQuery, currentUserId, lang('SavedMessages'),
     );
+    const orderedChatIds = getOrderedIds(ALL_FOLDER_ID) ?? [];
+    const localChatIds = filterChatsByName(lang, orderedChatIds, chatsById, searchQuery, currentUserId);
+
+    const localPeerIds = unique([
+      ...localContactIds,
+      ...localChatIds,
+    ]);
+
+    const accountPeerIds = unique([
+      ...(accountChatIds ?? []),
+      ...(accountUserIds ?? []),
+    ].filter((accountPeerId) => !localPeerIds.includes(accountPeerId)));
 
     return [
-      ...sortChatIds(unique([
-        ...(foundContactIds || []),
-        ...(localChatIds || []),
-        ...(localUserIds || []),
-      ]), chatsById, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(localPeerIds, chatsById, undefined, currentUserId ? [currentUserId] : undefined),
+      ...sortChatIds(accountPeerIds, chatsById),
     ];
-  }, [searchQuery, currentUserId, localContactIds, lang, localChatIds, localUserIds, chatsById]);
+  }, [searchQuery, currentUserId, contactIds, lang, accountChatIds, accountUserIds, chatsById]);
 
   useHorizontalScroll(chatSelectionRef, !localResults.length, true);
 
@@ -302,12 +314,12 @@ export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
     const { byId: chatsById } = global.chats;
 
-    const { userIds: localContactIds } = global.contactList || {};
+    const { userIds: contactIds } = global.contactList || {};
     const {
       currentUserId, messages,
     } = global;
 
-    if (!localContactIds) {
+    if (!contactIds) {
       return {
         chatsById,
       };
@@ -317,15 +329,15 @@ export default memo(withGlobal<OwnProps>(
       fetchingStatus, globalResults, localResults, resultsByType,
     } = selectTabState(global).globalSearch;
     const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
-    const { chatIds: localChatIds, userIds: localUserIds } = localResults || {};
+    const { chatIds: accountChatIds, userIds: accountUserIds } = localResults || {};
     const { byChatId: globalMessagesByChatId } = messages;
     const foundIds = resultsByType?.text?.foundIds;
 
     return {
       currentUserId,
-      localContactIds,
-      localChatIds,
-      localUserIds,
+      contactIds,
+      accountChatIds,
+      accountUserIds,
       globalChatIds,
       globalUserIds,
       foundIds,

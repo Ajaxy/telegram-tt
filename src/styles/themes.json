@@ -2,6 +2,7 @@
   "--color-primary": ["#475aa0", "#d15e64"],
   "--color-primary-opacity": ["#8378DB80", "#8378DB80"],
   "--color-primary-opacity-hover": ["#8378DBA0", "#8378DBA0"],
+  "--color-primary-tint": ["#3390ec1a", "#8774e11a"],
   "--color-primary-shade": ["#475aa0", "#E9666F"],
   "--color-background": ["#ECEEF2", "#141515"],
   "--color-background-compact-menu": ["#fefffe7f", "#212121DD"],

@@ -354,6 +354,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     openPollModal,
     closePollModal,
     loadScheduledHistory,
+    openThread,
     openChat,
     addRecentEmoji,
     sendInlineBotResult,
@@ -1300,8 +1301,8 @@ const Composer: FC<OwnProps & StateProps> = ({
   );
 
   const handleAllScheduledClick = useLastCallback(() => {
-    openChat({
-      id: chatId, threadId, type: 'scheduled', noForumTopicPanel: true,
+    openThread({
+      chatId, threadId, type: 'scheduled', noForumTopicPanel: true,
     });
   });
 

@@ -714,6 +714,10 @@
     }
   }
 
+  .message-action-button-shown {
+    opacity: 1;
+  }
+
   &.own .message-action-button {
     left: -3rem;
   }
