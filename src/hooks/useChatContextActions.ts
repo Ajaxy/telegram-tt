@@ -210,7 +210,7 @@ const useChatContextActions = ({
       !isInbox && !isSelf && !isServiceNotifications && !isInFolder && actionArchive,
       !isSelf && actionMute,
       !isInbox && actionPin,
-      !isInbox && actionAddToFolder,
+      actionAddToFolder,
       actionReport,
       !isInbox && actionDelete,
     ]) as MenuItemContextAction[];
