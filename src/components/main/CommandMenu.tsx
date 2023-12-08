@@ -22,6 +22,7 @@ import { selectCurrentChat, selectTabState, selectUser } from '../../global/sele
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { transliterate } from '../../util/transliterate';
+import { IS_MAC_OS } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -396,6 +397,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
+  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
+
   const CommandMenuInner = (
     <div>
       <Command.Dialog
@@ -499,7 +502,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
             <span className="user-handle">Go to advanced search</span>
           </span>
           <span className="shortcuts">
-            <span className="kbd">⌘</span>
+            <span className="kbd">{cmdKey}</span>
             <span className="kbd">/</span>
           </span>
         </button>

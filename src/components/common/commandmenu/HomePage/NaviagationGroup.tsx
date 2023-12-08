@@ -7,9 +7,11 @@ import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 
-import { IS_APP } from '../../../../util/windowEnvironment';
+import { IS_APP, IS_MAC_OS } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
+
+import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
 
 import '../../../main/CommandMenu.scss';
 
@@ -99,73 +101,75 @@ const NavigationGroup: FC<NavigationGroupProps> = ({
     return undefined;
   };
 
+  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
+
+  const menuItems = [
+    ...allWorkspaces
+      .filter((workspace) => workspace.id !== currentWorkspace.id)
+      .map((workspace) => ({
+        onSelect: () => handleSelectWorkspace(workspace.id),
+        content: (
+          <>
+            {renderWorkspaceIcon(workspace)}
+            <span>Go to {workspace.name} workspace</span>
+          </>
+        ),
+      })),
+    {
+      onSelect: handleSearchFocus,
+      label: 'Find chat or contact',
+      icon: 'search',
+      shortcut: [cmdKey, '/'],
+    },
+    IS_APP && {
+      onSelect: handleLockScreenHotkey,
+      label: 'Lock Screen',
+      icon: 'lock',
+      shortcut: [cmdKey, 'L'],
+    },
+    {
+      onSelect: handleOpenInbox,
+      label: 'Go to inbox',
+      icon: 'arrow-right',
+      shortcut: [cmdKey, 'I'],
+    },
+    {
+      onSelect: handleOpenSavedMessages,
+      label: 'Go to saved messages',
+      icon: 'arrow-right',
+      shortcut: [cmdKey, '0'],
+    },
+    {
+      onSelect: handleSelectArchived,
+      label: 'Go to archive',
+      icon: 'arrow-right',
+      shortcut: [cmdKey, '9'],
+    },
+    {
+      onSelect: handleSelectSettings,
+      label: 'Go to settings',
+      icon: 'arrow-right',
+      shortcut: [cmdKey, ','],
+    },
+    {
+      onSelect: handleOpenAutomationSettings,
+      label: 'Go to folder-automations',
+      icon: 'arrow-right',
+    },
+  ].filter(Boolean);
+
   return (
     <Command.Group heading="Navigation">
-      {allWorkspaces.map((workspace) => {
-        if (workspace.id !== currentWorkspace.id) {
-          return (
-            <Command.Item
-              key={workspace.id}
-              onSelect={() => {
-                handleSelectWorkspace(workspace.id);
-              }}
-            >
-              {renderWorkspaceIcon(workspace)}
-              <span>Go to {workspace.name} workspace</span>
-            </Command.Item>
-          );
-        }
-        return undefined;
-      })}
-      <Command.Item value="$find $search" onSelect={handleSearchFocus}>
-        <i className="icon icon-search" /><span>Find chat or contact</span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">/</span>
-        </span>
-      </Command.Item>
-      {
-        IS_APP && (
-          <Command.Item onSelect={handleLockScreenHotkey}>
-            <i className="icon icon-lock" /><span>Lock screen</span>
-            <span className="shortcuts">
-              <span className="kbd">⌘</span>
-              <span className="kbd">L</span>
-            </span>
-          </Command.Item>
-        )
-      }
-      <Command.Item onSelect={handleOpenInbox}>
-        <i className="icon icon-arrow-right" /><span>Go to inbox</span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">I</span>
-        </span>
-      </Command.Item>
-      <Command.Item onSelect={handleOpenSavedMessages}>
-        <i className="icon icon-arrow-right" /><span>Go to saved messages</span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">0</span>
-        </span>
-      </Command.Item>
-      <Command.Item onSelect={handleSelectArchived}>
-        <i className="icon icon-arrow-right" /><span>Go to archive</span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">9</span>
-        </span>
-      </Command.Item>
-      <Command.Item onSelect={handleSelectSettings}>
-        <i className="icon icon-arrow-right" /><span>Go to settings</span>
-        <span className="shortcuts">
-          <span className="kbd">⌘</span>
-          <span className="kbd">,</span>
-        </span>
-      </Command.Item>
-      <Command.Item onSelect={handleOpenAutomationSettings}>
-        <i className="icon icon-arrow-right" /><span>Go to folder-automations</span>
-      </Command.Item>
+      {menuItems.map((item, index) => (
+        <CommandMenuListItem
+          key={index}
+          onSelect={item.onSelect}
+          content={item.content}
+          icon={item.icon}
+          label={item.label}
+          shortcut={item.shortcut}
+        />
+      ))}
     </Command.Group>
   );
 };
