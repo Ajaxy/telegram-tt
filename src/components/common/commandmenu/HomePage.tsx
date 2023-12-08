@@ -22,11 +22,6 @@ export type Workspace = {
 };
 
 interface HomePageProps {
-  commandDoneAll: () => void;
-  commandArchiveAll: () => void;
-  commandToggleAutoDone: () => void;
-  commandToggleArchiveWhenDone: () => void;
-  commandToggleFoldersTree: () => void;
   isArchiveWhenDoneEnabled: boolean;
   isAutoDoneEnabled: boolean;
   isFoldersTreeEnabled: boolean;
@@ -34,28 +29,33 @@ interface HomePageProps {
   usersById: Record<string, ApiUser>;
   recentlyFoundChatIds?: string[];
   menuItems: Array<{ label: string; value: string }>;
-  saveAPIKey: () => void;
-  close: () => void;
-  handleChangelog: () => void;
-  handleOpenAutomationSettings: () => void;
-  handleOpenWorkspaceSettings: () => void;
-  handleSelectWorkspace: (workspaceId: string) => void;
   currentWorkspace: Workspace;
   allWorkspaces: Workspace[];
   currentChatId?: string;
-  openChangeThemePage: () => void;
   inputValue: string;
   isCurrentChatDone?: boolean;
-  handleDoneChat: () => void;
-  handleToggleChatUnread: () => void;
   isChatUnread?: boolean;
+  saveAPIKey: () => void;
+  commandDoneAll: () => void;
+  handleDoneChat: () => void;
+  commandArchiveAll: () => void;
+  commandToggleAutoDone: () => void;
+  commandToggleArchiveWhenDone: () => void;
+  commandToggleFoldersTree: () => void;
+  handleToggleChatUnread: () => void;
+  handleOpenAutomationSettings: () => void;
+  handleOpenWorkspaceSettings: () => void;
+  handleSelectWorkspace: (workspaceId: string) => void;
+  openChangeThemePage: () => void;
+  handleChangelog: () => void;
+  close: () => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({
   commandDoneAll, commandToggleAutoDone, isAutoDoneEnabled, commandToggleFoldersTree,
   commandArchiveAll, commandToggleArchiveWhenDone, isArchiveWhenDoneEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled, openChangeThemePage,
-  menuItems, saveAPIKey, inputValue,
+  menuItems, inputValue, saveAPIKey,
   handleChangelog,
   handleOpenAutomationSettings, allWorkspaces,
   handleOpenWorkspaceSettings, handleSelectWorkspace, currentWorkspace,
