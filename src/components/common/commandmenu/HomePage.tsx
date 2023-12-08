@@ -10,7 +10,7 @@ import useLang from '../../../hooks/useLang';
 
 import CreateNewGroup from './HomePage/CreateNewGroup';
 import HelpGroup from './HomePage/HelpGroup';
-import NavigationGroup from './HomePage/NaviagationGroup';
+import NavigationGroup from './HomePage/NavigationGroup';
 import SuggestedContacts from './HomePage/SuggestedContactsGroup';
 
 import '../../main/CommandMenu.scss';
