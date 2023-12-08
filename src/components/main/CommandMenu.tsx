@@ -16,7 +16,6 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
-import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getUserFullName,
 } from '../../global/helpers';
@@ -100,7 +99,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 }) => {
   const { track, analytics } = useJune();
   const {
-    showNotification, openUrl, openChatByUsername, toggleChatUnread,
+    showNotification, openChatByUsername, toggleChatUnread,
   } = getActions();
   const [isOpen, setOpen] = useState(false);
   const {
@@ -232,27 +231,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
       track('Add openAI key');
     }
   }, [inputValue, track]);
-
-  const handleSupport = useCallback(() => {
-    openChatByUsername({ username: 'ulugmer' });
-    close();
-  }, [openChatByUsername, close]);
-
-  const handleFAQ = useCallback(() => {
-    openUrl({
-      url: FAQ_URL,
-      shouldSkipModal: true,
-    });
-    close();
-  }, [openUrl, close]);
-
-  const handleOpenShortcts = useCallback(() => {
-    openUrl({
-      url: SHORTCUTS_URL,
-      shouldSkipModal: true,
-    });
-    close();
-  }, [openUrl, close]);
 
   const handleChangelog = useCallback(() => {
     openChatByUsername({ username: 'uludotso' });
@@ -489,9 +467,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   usersById={usersById}
                   saveAPIKey={saveAPIKey}
                   menuItems={menuItems}
-                  handleSupport={handleSupport}
-                  handleFAQ={handleFAQ}
-                  handleOpenShortcuts={handleOpenShortcts}
                   handleChangelog={handleChangelog}
                   close={close}
                   recentlyFoundChatIds={recentlyFoundChatIds}

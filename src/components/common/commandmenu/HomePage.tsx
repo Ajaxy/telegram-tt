@@ -9,6 +9,7 @@ import type { ApiUser } from '../../../api/types';
 import useLang from '../../../hooks/useLang';
 
 import CreateNewGroup from './HomePage/CreateNewGroup';
+import HelpGroup from './HomePage/HelpGroup';
 import NavigationGroup from './HomePage/NaviagationGroup';
 import SuggestedContacts from './HomePage/SuggestedContactsGroup';
 
@@ -35,9 +36,6 @@ interface HomePageProps {
   menuItems: Array<{ label: string; value: string }>;
   saveAPIKey: () => void;
   close: () => void;
-  handleSupport: () => void;
-  handleFAQ: () => void;
-  handleOpenShortcuts: () => void;
   handleChangelog: () => void;
   handleOpenAutomationSettings: () => void;
   handleOpenWorkspaceSettings: () => void;
@@ -58,8 +56,8 @@ const HomePage: React.FC<HomePageProps> = ({
   commandArchiveAll, commandToggleArchiveWhenDone, isArchiveWhenDoneEnabled,
   topUserIds, usersById, recentlyFoundChatIds, close, isFoldersTreeEnabled, openChangeThemePage,
   menuItems, saveAPIKey, inputValue,
-  handleSupport, handleFAQ, handleChangelog,
-  handleOpenShortcuts, handleOpenAutomationSettings, allWorkspaces,
+  handleChangelog,
+  handleOpenAutomationSettings, allWorkspaces,
   handleOpenWorkspaceSettings, handleSelectWorkspace, currentWorkspace,
   currentChatId, isCurrentChatDone, handleDoneChat, handleToggleChatUnread, isChatUnread,
 }) => {
@@ -125,26 +123,9 @@ const HomePage: React.FC<HomePageProps> = ({
           </span>
         </Command.Item>
       </Command.Group>
-      <Command.Group heading="Help">
-        <Command.Item onSelect={handleFAQ}>
-          <i className="icon icon-document" /><span>Help center</span>
-        </Command.Item>
-        <Command.Item onSelect={handleOpenShortcuts}>
-          <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-ask-support" /><span>Send feedback</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-animations" /><span>Request feature</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-bug" /><span>Report bug</span>
-        </Command.Item>
-        <Command.Item onSelect={handleSupport}>
-          <i className="icon icon-help" /><span>Contact support</span>
-        </Command.Item>
-      </Command.Group>
+      <HelpGroup
+        close={close}
+      />
       <Command.Group heading="Settings">
         <Command.Item onSelect={openChangeThemePage}>
           <i className="icon icon-darkmode" /><span>Change interface theme</span>
