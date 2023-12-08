@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
@@ -23,7 +22,6 @@ import { selectCurrentChat, selectTabState, selectUser } from '../../global/sele
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { transliterate } from '../../util/transliterate';
-import { IS_ARC_BROWSER } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -101,6 +99,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const {
     showNotification, openChatByUsername, toggleChatUnread,
   } = getActions();
+  const { useCommand } = useCommands();
+  const lang = useLang();
   const [isOpen, setOpen] = useState(false);
   const {
     isAutoDoneEnabled, setIsAutoDoneEnabled,
@@ -116,16 +116,20 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const activePage = pages[pages.length - 1];
   // eslint-disable-next-line no-null/no-null
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
-  const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
-  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
-  const allWorkspaces = [
-    ...savedWorkspaces,
-    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
-  ];
 
   // eslint-disable-next-line no-null/no-null
   const commandListRef = useRef<HTMLDivElement>(null);
   const [prevInputValue, setPrevInputValue] = useState('');
+
+  // Закрытие всего меню
+  const close = useCallback(() => {
+    setOpen(false);
+    setPages(['home']);
+    setInputValue('');
+  }, []);
+
+  // Настройки автоматизации
+  const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
 
   const openAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(true);
@@ -133,6 +137,20 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const closeAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(false);
   }, []);
+
+  const handleOpenAutomationSettings = () => {
+    close();
+    openAutomationSettings();
+  };
+
+  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+
+  // Настройки воркспейсов
+  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
+  const allWorkspaces = [
+    ...savedWorkspaces,
+    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
+  ];
 
   const openWorkspaceSettings = useCallback((workspaceId?: string) => {
     // eslint-disable-next-line no-console
@@ -144,13 +162,28 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setWorkspaceSettingsOpen(false);
   }, []);
 
-  const close = useCallback(() => {
-    setOpen(false);
-    setPages(['home']);
-    setInputValue('');
-  }, []);
+  const handleSelectWorkspace = (workspaceId: string) => {
+    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
+    if (track) { track('Switch workspace', { source: 'Сommand Menu' }); }
+  };
 
-  const lang = useLang();
+  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
+    close();
+    if (workspaceId) {
+      // Логика для редактирования воркспейса
+      openWorkspaceSettings(workspaceId);
+    } else {
+      // Логика для открытия создания нового воркспейса
+      openWorkspaceSettings();
+    }
+  }, [close, openWorkspaceSettings]);
+
+  const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+
+  useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
+    setReceivedWorkspaceId(workspaceId);
+    openWorkspaceSettings(workspaceId);
+  });
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -172,11 +205,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
 
-  const handleSelectWorkspace = (workspaceId: string) => {
-    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
-    if (track) { track('Switch workspace', { source: 'Сommand Menu' }); }
-  };
-
   const handleInputChange = (newValue: string) => {
     setPrevInputValue(inputValue);
     setInputValue(newValue);
@@ -189,6 +217,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [inputValue, prevInputValue]);
 
+  // для сохранения OpenAI API key
   useEffect(() => {
     if (inputValue.length === 51) {
       // Создаем пункт меню для сохранения ключа
@@ -203,6 +232,18 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [inputValue, menuItems]);
 
+  const saveAPIKey = useCallback(() => {
+    localStorage.setItem('openai_api_key', inputValue);
+    showNotification({ message: 'The OpenAI API key has been saved.' });
+    setOpen(false);
+    if (track) {
+      track('Add openAI key');
+    }
+  }, [inputValue, track]);
+
+  // Настройки переходов между страницами
+
+  // Возврат на прошлую страницу по Backspace
   const handleBack = useCallback(() => {
     if (pages.length > 1) {
       const newPages = pages.slice(0, -1);
@@ -219,61 +260,37 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, [pages]);
 
   const openChangeThemePage = useCallback(() => {
-    console.log('Opening changeTheme page');
     setPages(['changeTheme']); // Заменяем массив pages только текущей страницей
   }, []);
 
-  const saveAPIKey = useCallback(() => {
-    localStorage.setItem('openai_api_key', inputValue);
-    showNotification({ message: 'The OpenAI API key has been saved.' });
-    setOpen(false);
-    if (track) {
-      track('Add openAI key');
-    }
-  }, [inputValue, track]);
+  const getFolderName = (id: number | null) => {
+    // eslint-disable-next-line no-null/no-null
+    if (id === null) return 'Unknown Folder';
 
-  const handleChangelog = useCallback(() => {
-    openChatByUsername({ username: 'uludotso' });
-    close();
-  }, [openChatByUsername, close]);
-
-  const handleSelectNewGroup = useCallback(() => {
-    runCommand('NEW_GROUP');
-    close();
-  }, [runCommand, close]);
-
-  const handleSearchFocus = useCallback(() => {
-    runCommand('OPEN_SEARCH');
-    close();
-  }, [runCommand, close]);
-
-  const { useCommand } = useCommands();
-
-  const handleOpenAutomationSettings = () => {
-    close();
-    openAutomationSettings();
+    const global = getGlobal() as GlobalState;
+    const folder = global.chatFolders.byId[id];
+    return folder ? folder.title : `Folder ${id}`;
   };
 
-  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+  // Функция для получения названия чата
+  const getCurrentChatName = () => {
+    if (!currentChatId) return undefined;
 
-  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
-    close();
-    if (workspaceId) {
-      // Логика для редактирования воркспейса
-      openWorkspaceSettings(workspaceId);
-    } else {
-      // Логика для создания нового воркспейса
-      openWorkspaceSettings();
+    // Проверка на существование usersById и chatsById перед их использованием
+    if (usersById && usersById[currentChatId]) {
+      return getUserFullName(usersById[currentChatId]);
     }
-  }, [close, openWorkspaceSettings]);
 
-  const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+    if (chatsById && chatsById[currentChatId]) {
+      return getChatTitle(lang, chatsById[currentChatId]);
+    }
 
-  useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
-    setReceivedWorkspaceId(workspaceId);
-    openWorkspaceSettings(workspaceId);
-  // Откройте WorkspaceSettings здесь или установите состояние, которое приведет к его открытию
-  });
+    return undefined;
+  };
+
+  const currentChatName = getCurrentChatName();
+
+  // Settings group
 
   const commandToggleArchiveWhenDone = useCallback(() => {
     const updIsArchiveWhenDoneEnabled = !isArchiveWhenDoneEnabled;
@@ -304,21 +321,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [analytics, close, currentUser, isAutoDoneEnabled, setIsAutoDoneEnabled]);
 
-  const commandToggleFoldersTree = useCallback(() => {
-    const updIsFoldersTreeEnabled = !isFoldersTreeEnabled;
-    showNotification({
-      message: updIsFoldersTreeEnabled
-        ? 'Folders Tree (Beta) enabled!'
-        : 'Telegram Default Folders enabled!',
-    });
-    setIsFoldersTreeEnabled(updIsFoldersTreeEnabled);
-    close();
-    window.location.reload();
-    if (track) {
-      track(updIsFoldersTreeEnabled ? 'Turn on new Folder view' : 'Turn off new Folder view');
-    }
-  }, [close, isFoldersTreeEnabled, setIsFoldersTreeEnabled, track]);
-
   const commandDoneAll = useCallback(() => {
     showNotification({ message: 'All read chats are marked as done!' });
     doneAllReadChats();
@@ -337,53 +339,26 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [close, archiveChats, track]);
 
-  const getFolderName = (id: number | null) => {
-    // eslint-disable-next-line no-null/no-null
-    if (id === null) return 'Unknown Folder';
-
-    const global = getGlobal() as GlobalState;
-    const folder = global.chatFolders.byId[id];
-    return folder ? folder.title : `Folder ${id}`;
-  };
-
-  useEffect(() => {
-    console.log('Current pages:', pages);
-  }, [pages]);
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
-        handleSelectNewGroup();
-        e.preventDefault();
-        e.stopPropagation();
-      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyC') {
-        handleSelectNewGroup();
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    document.addEventListener('keydown', listener);
-    return () => document.removeEventListener('keydown', listener);
-  }, [handleSelectNewGroup]);
-
-  // Функция для получения названия чата
-  const getCurrentChatName = () => {
-    if (!currentChatId) return undefined;
-
-    // Проверка на существование usersById и chatsById перед их использованием
-    if (usersById && usersById[currentChatId]) {
-      return getUserFullName(usersById[currentChatId]);
+  // What's new group
+  const commandToggleFoldersTree = useCallback(() => {
+    const updIsFoldersTreeEnabled = !isFoldersTreeEnabled;
+    showNotification({
+      message: updIsFoldersTreeEnabled
+        ? 'Folders Tree (Beta) enabled!'
+        : 'Telegram Default Folders enabled!',
+    });
+    setIsFoldersTreeEnabled(updIsFoldersTreeEnabled);
+    close();
+    window.location.reload();
+    if (track) {
+      track(updIsFoldersTreeEnabled ? 'Turn on new Folder view' : 'Turn off new Folder view');
     }
+  }, [close, isFoldersTreeEnabled, setIsFoldersTreeEnabled, track]);
 
-    if (chatsById && chatsById[currentChatId]) {
-      return getChatTitle(lang, chatsById[currentChatId]);
-    }
-
-    return undefined;
-  };
-
-  const currentChatName = getCurrentChatName();
+  const handleChangelog = useCallback(() => {
+    openChatByUsername({ username: 'uludotso' });
+    close();
+  }, [openChatByUsername, close]);
 
   // ChatRelatedGroup's functions (local starage and mark as done broks if we move it there)
   const { doneChat, isChatDone } = useDone();
@@ -413,6 +388,13 @@ const CommandMenu: FC<CommandMenuProps> = ({
       }
     }
   }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
+
+  // Global search
+
+  const handleSearchFocus = useCallback(() => {
+    runCommand('OPEN_SEARCH');
+    close();
+  }, [runCommand, close]);
 
   const CommandMenuInner = (
     <div>
