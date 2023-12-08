@@ -23,12 +23,6 @@ import '../../main/CommandMenu.scss';
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-};
-
 interface SuggestedContactsProps {
   topUserIds?: string[];
   usersById: Record<string, ApiUser>;

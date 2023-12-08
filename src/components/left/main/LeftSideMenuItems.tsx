@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
-import type { AnimationLevel, ThemeKey } from '../../../types';
+import type { AnimationLevel, ThemeKey, Workspace } from '../../../types';
 
 import {
   ANIMATION_LEVEL_MAX,
@@ -48,12 +48,6 @@ type OwnProps = {
   onSelectArchived: NoneToVoidFunction;
   onBotMenuOpened: NoneToVoidFunction;
   onBotMenuClosed: NoneToVoidFunction;
-};
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
 };
 
 type StateProps = {

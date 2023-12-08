@@ -9,12 +9,6 @@ import { IS_ARC_BROWSER } from '../../../util/windowEnvironment';
 
 import '../../main/CommandMenu.scss';
 
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-};
-
 interface CreateNewPageProps {
   handleSelectNewGroup: () => void;
   handleSelectNewChannel: () => void;

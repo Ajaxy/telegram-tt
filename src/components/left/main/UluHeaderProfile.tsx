@@ -5,6 +5,7 @@ import React, { memo } from '../../../lib/teact/teact';
 import { withGlobal } from '../../../global';
 
 import type { ApiPhoto, ApiUser } from '../../../api/types';
+import type { Workspace } from '../../../types';
 
 import { selectUser, selectUserFullInfo } from '../../../global/selectors';
 
@@ -14,12 +15,6 @@ import styles from './UluHeaderProfile.module.scss';
 
 type OwnProps = {
   onClick?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
-};
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
 };
 
 type StateProps = {

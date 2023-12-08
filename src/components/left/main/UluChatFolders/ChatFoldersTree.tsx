@@ -13,6 +13,7 @@ import {
 } from '../../../../global';
 
 import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
+import type { Workspace } from '../../../../types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
@@ -30,13 +31,6 @@ import TreeRenders from './TreeRenderers';
 import UluControlledTreeEnvironment from './UluControlledTreeEnvironment';
 
 import styles from './ChatFoldersTree.module.scss';
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-  folders?: number[];
-};
 
 type OwnProps = {};
 type StateProps = {

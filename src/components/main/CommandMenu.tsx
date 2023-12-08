@@ -15,6 +15,7 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
+import type { Workspace } from '../../types';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
@@ -46,12 +47,6 @@ import './CommandMenu.scss';
 
 const cmdkElement = document.getElementById('cmdk-root');
 const cmdkRoot = createRoot(cmdkElement!);
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-};
 
 interface CommandMenuProps {
   topUserIds?: string[];

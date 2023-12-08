@@ -432,3 +432,10 @@ export type InlineBotSettings = {
   switchWebview?: ApiBotInlineSwitchWebview;
   cacheTime: number;
 };
+
+export type Workspace = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+  folders?: number[];
+};

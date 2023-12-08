@@ -5,6 +5,7 @@ import React from 'react';
 import { Command } from 'cmdk';
 
 import type { ApiUser } from '../../../api/types';
+import type { Workspace } from '../../../types';
 
 import { IS_APP, IS_ARC_BROWSER } from '../../../util/windowEnvironment';
 
@@ -13,12 +14,6 @@ import useLang from '../../../hooks/useLang';
 import SuggestedContacts from './SuggestedContacts';
 
 import '../../main/CommandMenu.scss';
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-};
 
 interface HomePageProps {
   commandDoneAll: () => void;

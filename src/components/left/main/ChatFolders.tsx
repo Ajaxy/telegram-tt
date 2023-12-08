@@ -9,7 +9,7 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { LeftColumnContent, SettingsScreens } from '../../../types';
+import type { LeftColumnContent, SettingsScreens, Workspace } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { TabWithProperties } from '../../ui/TabList';
 
@@ -35,13 +35,6 @@ import Transition from '../../ui/Transition';
 import ChatList from './ChatList';
 import UluChatFoldersDivider from './UluChatFoldersDivider';
 import UluSystemFolders from './UluSystemChatFolders';
-
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-  folders?: number[];
-};
 
 type OwnProps = {
   leftMainHeaderRef: RefObject<HTMLDivElement>;
