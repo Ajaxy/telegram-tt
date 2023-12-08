@@ -34,7 +34,6 @@ import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
 
 import ChangeThemePage from '../common/ChangeThemePage';
-import CreateNewPage from '../common/commandmenu/CreateNewPage';
 import HomePage from '../common/commandmenu/HomePage';
 import FolderPage from '../common/FolderPage';
 import CommanMenuChatSearch from '../left/search/CommanMenuChatSearch';
@@ -110,7 +109,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
   const { archiveChats } = useArchiver({ isManual: true });
-  const { doneAllReadChats, doneChat, isChatDone } = useDone();
+  const { doneAllReadChats } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
@@ -120,8 +119,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
-  const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
-  const isCurrentChatDone = currentChat && isChatDone(currentChat);
   const allWorkspaces = [
     ...savedWorkspaces,
     ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
@@ -262,18 +259,8 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [openChatByUsername, close]);
 
-  const handleSelectNewChannel = useCallback(() => {
-    runCommand('NEW_CHANNEL');
-    close();
-  }, [runCommand, close]);
-
   const handleSelectNewGroup = useCallback(() => {
     runCommand('NEW_GROUP');
-    close();
-  }, [runCommand, close]);
-
-  const handleCreateFolder = useCallback(() => {
-    runCommand('NEW_FOLDER');
     close();
   }, [runCommand, close]);
 
@@ -304,47 +291,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
 
   const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
 
-  const renderWorkspaceIcon = (workspace: Workspace) => {
-    if (workspace.logoUrl) {
-      return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
-    } else if (workspace.id !== 'personal') {
-      return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
-    } else if (workspace.id === 'personal') {
-      return <div className="placeholder">P</div>;
-    } // Placeholder для персонал воркспейса
-    return undefined;
-  };
-
   useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
     setReceivedWorkspaceId(workspaceId);
     openWorkspaceSettings(workspaceId);
   // Откройте WorkspaceSettings здесь или установите состояние, которое приведет к его открытию
   });
-
-  const handleSelectSettings = useCallback(() => {
-    runCommand('OPEN_SETTINGS');
-    close();
-  }, [runCommand, close]);
-
-  const handleSelectArchived = useCallback(() => {
-    runCommand('OPEN_ARCHIVED');
-    close();
-  }, [runCommand, close]);
-
-  const handleOpenInbox = useCallback(() => {
-    runCommand('OPEN_INBOX');
-    close();
-  }, [runCommand, close]);
-
-  const handleOpenSavedMessages = useCallback(() => {
-    runCommand('OPEN_SAVED');
-    close();
-  }, [runCommand, close]);
-
-  const handleLockScreenHotkey = useCallback(() => {
-    runCommand('LOCK_SCREEN');
-    close();
-  }, [runCommand, close]);
 
   const commandToggleArchiveWhenDone = useCallback(() => {
     const updIsArchiveWhenDoneEnabled = !isArchiveWhenDoneEnabled;
@@ -399,30 +350,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [close, doneAllReadChats, track]);
 
-  // Функция для отметки чата как непрочитанного/прочитанного
-  const handleToggleChatUnread = useCallback(() => {
-    if (currentChatId && currentChat) {
-      toggleChatUnread({ id: currentChatId });
-      const action = isChatUnread ? 'MarkedAsRead' : 'MarkedAsUnread';
-      showNotification({ message: lang(action) });
-      close();
-      if (track) {
-        track(isChatUnread ? 'Mark as Read' : 'Mark as Unread', { source: 'Сommand Menu' });
-      }
-    }
-  }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
-
-  // Функция для отметки чата как выполненного
-  const handleDoneChat = useCallback(() => {
-    if (currentChatId) {
-      doneChat({ id: currentChatId });
-      close();
-      if (track) {
-        track('Mark as Done', { source: 'Сommand Menu' });
-      }
-    }
-  }, [currentChatId, doneChat, close, track]);
-
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
     archiveChats();
@@ -462,25 +389,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [handleSelectNewGroup]);
 
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      // Получаем текущее выделение
-      const selection = window.getSelection();
-
-      // Проверяем, есть ли выделенный текст
-      const hasSelection = selection && selection.toString() !== '';
-
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyI' && !hasSelection) {
-        handleOpenInbox();
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    document.addEventListener('keydown', listener);
-    return () => document.removeEventListener('keydown', listener);
-  }, [handleOpenInbox]);
-
   // Функция для получения названия чата
   const getCurrentChatName = () => {
     if (!currentChatId) return undefined;
@@ -498,6 +406,35 @@ const CommandMenu: FC<CommandMenuProps> = ({
   };
 
   const currentChatName = getCurrentChatName();
+
+  // ChatRelatedGroup's functions (local starage and mark as done broks if we move it there)
+  const { doneChat, isChatDone } = useDone();
+  const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
+  const isCurrentChatDone = currentChat && isChatDone(currentChat);
+
+  // Функция для отметки чата как выполненного
+  const handleDoneChat = useCallback(() => {
+    if (currentChatId) {
+      doneChat({ id: currentChatId });
+      close();
+      if (track) {
+        track('Mark as Done', { source: 'Сommand Menu' });
+      }
+    }
+  }, [currentChatId, doneChat, close, track]);
+
+  // Функция для отметки чата как непрочитанного/прочитанного
+  const handleToggleChatUnread = useCallback(() => {
+    if (currentChatId && currentChat) {
+      toggleChatUnread({ id: currentChatId });
+      const action = isChatUnread ? 'MarkedAsRead' : 'MarkedAsUnread';
+      showNotification({ message: lang(action) });
+      close();
+      if (track) {
+        track(isChatUnread ? 'Mark as Read' : 'Mark as Unread', { source: 'Сommand Menu' });
+      }
+    }
+  }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
 
   const CommandMenuInner = (
     <div>
@@ -550,11 +487,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   isFoldersTreeEnabled={isFoldersTreeEnabled}
                   topUserIds={topUserIds}
                   usersById={usersById}
-                  handleSearchFocus={handleSearchFocus}
-                  handleSelectSettings={handleSelectSettings}
-                  handleOpenInbox={handleOpenInbox}
-                  handleSelectArchived={handleSelectArchived}
-                  handleOpenSavedMessages={handleOpenSavedMessages}
                   saveAPIKey={saveAPIKey}
                   menuItems={menuItems}
                   handleSupport={handleSupport}
@@ -562,24 +494,19 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   handleOpenShortcuts={handleOpenShortcts}
                   handleChangelog={handleChangelog}
                   close={close}
-                  handleSelectNewGroup={handleSelectNewGroup}
-                  handleSelectNewChannel={handleSelectNewChannel}
-                  handleCreateFolder={handleCreateFolder}
-                  handleLockScreenHotkey={handleLockScreenHotkey}
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
                   handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
                   handleSelectWorkspace={handleSelectWorkspace}
                   currentWorkspace={currentWorkspace}
-                  renderWorkspaceIcon={renderWorkspaceIcon}
                   currentChatId={currentChatId}
-                  handleToggleChatUnread={handleToggleChatUnread}
-                  handleDoneChat={handleDoneChat}
-                  isChatUnread={isChatUnread}
-                  isCurrentChatDone={isCurrentChatDone}
                   allWorkspaces={allWorkspaces}
                   openChangeThemePage={openChangeThemePage}
                   inputValue={inputValue}
+                  isCurrentChatDone={isCurrentChatDone}
+                  handleDoneChat={handleDoneChat}
+                  handleToggleChatUnread={handleToggleChatUnread}
+                  isChatUnread={isChatUnread}
                 />
                 <CommanMenuChatSearch
                   close={close}
@@ -592,13 +519,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   pinnedIds={pinnedIds}
                 />
               </>
-            )}
-            {activePage === 'createNew' && (
-              <CreateNewPage
-                handleSelectNewGroup={handleSelectNewGroup}
-                handleSelectNewChannel={handleSelectNewChannel}
-                handleCreateFolder={handleCreateFolder}
-              />
             )}
             {activePage.includes('folderPage') && folderId && (
               <FolderPage
