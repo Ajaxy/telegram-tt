@@ -1,3 +1,7 @@
+.UluHeaderProfile-module__photoWrapper .ProfilePhoto .thumb:not(.shown) {
+  display: none !important;
+}
+
 .wrapper {
   display: flex;
   align-items: center;
@@ -40,6 +44,7 @@
     white-space: nowrap;
   }
 }
+
 
 .userName {
   color: var(--color-text-secondary);

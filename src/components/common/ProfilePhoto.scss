@@ -8,6 +8,7 @@
     width: 100%;
     object-fit: cover;
     position: relative;
+    vertical-align: inherit;
   }
 
   .spinner-wrapper {
@@ -53,4 +54,8 @@
       display: block !important;
     }
   }
+}
+
+.UluHeaderProfile-module__photoWrapper .ProfilePhoto .thumb:not(.shown) {
+  display: none !important; 
 }
