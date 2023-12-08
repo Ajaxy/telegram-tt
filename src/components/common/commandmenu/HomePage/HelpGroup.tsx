@@ -10,6 +10,8 @@ import { getActions } from '../../../../global';
 
 import { FAQ_URL, SHORTCUTS_URL } from '../../../../config';
 
+import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
+
 import '../../../main/CommandMenu.scss';
 
 interface HelpGroupProps {
@@ -44,26 +46,50 @@ const HelpGroup: FC<HelpGroupProps> = ({
     close();
   }, [openChatByUsername, close]);
 
+  const menuItems = [
+    {
+      onSelect: handleFAQ,
+      icon: 'document',
+      label: 'Help center',
+    },
+    {
+      onSelect: handleOpenShortcuts,
+      label: 'Keyboard shortcuts',
+      icon: 'keyboard',
+    },
+    {
+      onSelect: handleSupport,
+      label: 'Send feedback',
+      icon: 'ask-support',
+    },
+    {
+      onSelect: handleSupport,
+      label: 'Request feature',
+      icon: 'animations',
+
+    },
+    {
+      onSelect: handleSupport,
+      label: 'Report bug',
+      icon: 'bug',
+    },
+    {
+      onSelect: handleSupport,
+      label: 'Contact support',
+      icon: 'help',
+    },
+  ];
+
   return (
     <Command.Group heading="Help">
-      <Command.Item onSelect={handleFAQ}>
-        <i className="icon icon-document" /><span>Help center</span>
-      </Command.Item>
-      <Command.Item onSelect={handleOpenShortcuts}>
-        <i className="icon icon-keyboard" /><span>Keyboard shortcuts</span>
-      </Command.Item>
-      <Command.Item onSelect={handleSupport}>
-        <i className="icon icon-ask-support" /><span>Send feedback</span>
-      </Command.Item>
-      <Command.Item onSelect={handleSupport}>
-        <i className="icon icon-animations" /><span>Request feature</span>
-      </Command.Item>
-      <Command.Item onSelect={handleSupport}>
-        <i className="icon icon-bug" /><span>Report bug</span>
-      </Command.Item>
-      <Command.Item onSelect={handleSupport}>
-        <i className="icon icon-help" /><span>Contact support</span>
-      </Command.Item>
+      {menuItems.map((item, index) => (
+        <CommandMenuListItem
+          key={index}
+          onSelect={item.onSelect}
+          label={item.label}
+          icon={item.icon}
+        />
+      ))}
     </Command.Group>
   );
 };
