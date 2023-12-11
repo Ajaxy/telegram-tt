@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-no-bind */
 import React from 'react';
@@ -16,7 +15,6 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
-import { FAQ_URL, SHORTCUTS_URL } from '../../config';
 import {
   getChatTitle, getUserFullName,
 } from '../../global/helpers';
@@ -24,7 +22,7 @@ import { selectCurrentChat, selectTabState, selectUser } from '../../global/sele
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { transliterate } from '../../util/transliterate';
-import { IS_ARC_BROWSER } from '../../util/windowEnvironment';
+import { IS_MAC_OS } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -34,7 +32,6 @@ import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
 
 import ChangeThemePage from '../common/ChangeThemePage';
-import CreateNewPage from '../common/commandmenu/CreateNewPage';
 import HomePage from '../common/commandmenu/HomePage';
 import FolderPage from '../common/FolderPage';
 import CommanMenuChatSearch from '../left/search/CommanMenuChatSearch';
@@ -101,8 +98,10 @@ const CommandMenu: FC<CommandMenuProps> = ({
 }) => {
   const { track, analytics } = useJune();
   const {
-    showNotification, openUrl, openChatByUsername, toggleChatUnread,
+    showNotification, openChatByUsername, toggleChatUnread,
   } = getActions();
+  const { useCommand } = useCommands();
+  const lang = useLang();
   const [isOpen, setOpen] = useState(false);
   const {
     isAutoDoneEnabled, setIsAutoDoneEnabled,
@@ -110,7 +109,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     isFoldersTreeEnabled, setIsFoldersTreeEnabled,
   } = useStorage();
   const { archiveChats } = useArchiver({ isManual: true });
-  const { doneAllReadChats, doneChat, isChatDone } = useDone();
+  const { doneAllReadChats } = useDone();
   const [inputValue, setInputValue] = useState('');
   const [menuItems, setMenuItems] = useState<Array<{ label: string; value: string }>>([]);
   const { runCommand } = useCommands();
@@ -118,18 +117,20 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const activePage = pages[pages.length - 1];
   // eslint-disable-next-line no-null/no-null
   const folderId = activePage.includes('folderPage:') ? activePage.split(':')[1] : null;
-  const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
-  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
-  const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
-  const isCurrentChatDone = currentChat && isChatDone(currentChat);
-  const allWorkspaces = [
-    ...savedWorkspaces,
-    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
-  ];
 
   // eslint-disable-next-line no-null/no-null
   const commandListRef = useRef<HTMLDivElement>(null);
   const [prevInputValue, setPrevInputValue] = useState('');
+
+  // Закрытие всего меню
+  const close = useCallback(() => {
+    setOpen(false);
+    setPages(['home']);
+    setInputValue('');
+  }, []);
+
+  // Настройки автоматизации
+  const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
 
   const openAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(true);
@@ -137,6 +138,20 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const closeAutomationSettings = useCallback(() => {
     setAutomationSettingsOpen(false);
   }, []);
+
+  const handleOpenAutomationSettings = () => {
+    close();
+    openAutomationSettings();
+  };
+
+  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+
+  // Настройки воркспейсов
+  const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
+  const allWorkspaces = [
+    ...savedWorkspaces,
+    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
+  ];
 
   const openWorkspaceSettings = useCallback((workspaceId?: string) => {
     // eslint-disable-next-line no-console
@@ -148,13 +163,28 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setWorkspaceSettingsOpen(false);
   }, []);
 
-  const close = useCallback(() => {
-    setOpen(false);
-    setPages(['home']);
-    setInputValue('');
-  }, []);
+  const handleSelectWorkspace = (workspaceId: string) => {
+    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
+    if (track) { track('Switch workspace', { source: 'Сommand Menu' }); }
+  };
 
-  const lang = useLang();
+  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
+    close();
+    if (workspaceId) {
+      // Логика для редактирования воркспейса
+      openWorkspaceSettings(workspaceId);
+    } else {
+      // Логика для открытия создания нового воркспейса
+      openWorkspaceSettings();
+    }
+  }, [close, openWorkspaceSettings]);
+
+  const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+
+  useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
+    setReceivedWorkspaceId(workspaceId);
+    openWorkspaceSettings(workspaceId);
+  });
 
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
@@ -176,11 +206,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     return () => document.removeEventListener('keydown', listener);
   }, [isOpen]);
 
-  const handleSelectWorkspace = (workspaceId: string) => {
-    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
-    if (track) { track('Switch workspace', { source: 'Сommand Menu' }); }
-  };
-
   const handleInputChange = (newValue: string) => {
     setPrevInputValue(inputValue);
     setInputValue(newValue);
@@ -193,6 +218,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [inputValue, prevInputValue]);
 
+  // для сохранения OpenAI API key
   useEffect(() => {
     if (inputValue.length === 51) {
       // Создаем пункт меню для сохранения ключа
@@ -207,6 +233,18 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [inputValue, menuItems]);
 
+  const saveAPIKey = useCallback(() => {
+    localStorage.setItem('openai_api_key', inputValue);
+    showNotification({ message: 'The OpenAI API key has been saved.' });
+    setOpen(false);
+    if (track) {
+      track('Add openAI key');
+    }
+  }, [inputValue, track]);
+
+  // Настройки переходов между страницами
+
+  // Возврат на прошлую страницу по Backspace
   const handleBack = useCallback(() => {
     if (pages.length > 1) {
       const newPages = pages.slice(0, -1);
@@ -223,128 +261,37 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, [pages]);
 
   const openChangeThemePage = useCallback(() => {
-    console.log('Opening changeTheme page');
     setPages(['changeTheme']); // Заменяем массив pages только текущей страницей
   }, []);
 
-  const saveAPIKey = useCallback(() => {
-    localStorage.setItem('openai_api_key', inputValue);
-    showNotification({ message: 'The OpenAI API key has been saved.' });
-    setOpen(false);
-    if (track) {
-      track('Add openAI key');
-    }
-  }, [inputValue, track]);
+  const getFolderName = (id: number | null) => {
+    // eslint-disable-next-line no-null/no-null
+    if (id === null) return 'Unknown Folder';
 
-  const handleSupport = useCallback(() => {
-    openChatByUsername({ username: 'ulugmer' });
-    close();
-  }, [openChatByUsername, close]);
-
-  const handleFAQ = useCallback(() => {
-    openUrl({
-      url: FAQ_URL,
-      shouldSkipModal: true,
-    });
-    close();
-  }, [openUrl, close]);
-
-  const handleOpenShortcts = useCallback(() => {
-    openUrl({
-      url: SHORTCUTS_URL,
-      shouldSkipModal: true,
-    });
-    close();
-  }, [openUrl, close]);
-
-  const handleChangelog = useCallback(() => {
-    openChatByUsername({ username: 'uludotso' });
-    close();
-  }, [openChatByUsername, close]);
-
-  const handleSelectNewChannel = useCallback(() => {
-    runCommand('NEW_CHANNEL');
-    close();
-  }, [runCommand, close]);
-
-  const handleSelectNewGroup = useCallback(() => {
-    runCommand('NEW_GROUP');
-    close();
-  }, [runCommand, close]);
-
-  const handleCreateFolder = useCallback(() => {
-    runCommand('NEW_FOLDER');
-    close();
-  }, [runCommand, close]);
-
-  const handleSearchFocus = useCallback(() => {
-    runCommand('OPEN_SEARCH');
-    close();
-  }, [runCommand, close]);
-
-  const { useCommand } = useCommands();
-
-  const handleOpenAutomationSettings = () => {
-    close();
-    openAutomationSettings();
+    const global = getGlobal() as GlobalState;
+    const folder = global.chatFolders.byId[id];
+    return folder ? folder.title : `Folder ${id}`;
   };
 
-  useCommand('OPEN_AUTOMATION_SETTINGS', handleOpenAutomationSettings);
+  // Функция для получения названия чата
+  const getCurrentChatName = () => {
+    if (!currentChatId) return undefined;
 
-  const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
-    close();
-    if (workspaceId) {
-      // Логика для редактирования воркспейса
-      openWorkspaceSettings(workspaceId);
-    } else {
-      // Логика для создания нового воркспейса
-      openWorkspaceSettings();
+    // Проверка на существование usersById и chatsById перед их использованием
+    if (usersById && usersById[currentChatId]) {
+      return getUserFullName(usersById[currentChatId]);
     }
-  }, [close, openWorkspaceSettings]);
 
-  const [receivedWorkspaceId, setReceivedWorkspaceId] = useState<string | undefined>();
+    if (chatsById && chatsById[currentChatId]) {
+      return getChatTitle(lang, chatsById[currentChatId]);
+    }
 
-  const renderWorkspaceIcon = (workspace: Workspace) => {
-    if (workspace.logoUrl) {
-      return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
-    } else if (workspace.id !== 'personal') {
-      return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
-    } else if (workspace.id === 'personal') {
-      return <div className="placeholder">P</div>;
-    } // Placeholder для персонал воркспейса
     return undefined;
   };
 
-  useCommand('OPEN_WORKSPACE_SETTINGS', (workspaceId) => {
-    setReceivedWorkspaceId(workspaceId);
-    openWorkspaceSettings(workspaceId);
-  // Откройте WorkspaceSettings здесь или установите состояние, которое приведет к его открытию
-  });
+  const currentChatName = getCurrentChatName();
 
-  const handleSelectSettings = useCallback(() => {
-    runCommand('OPEN_SETTINGS');
-    close();
-  }, [runCommand, close]);
-
-  const handleSelectArchived = useCallback(() => {
-    runCommand('OPEN_ARCHIVED');
-    close();
-  }, [runCommand, close]);
-
-  const handleOpenInbox = useCallback(() => {
-    runCommand('OPEN_INBOX');
-    close();
-  }, [runCommand, close]);
-
-  const handleOpenSavedMessages = useCallback(() => {
-    runCommand('OPEN_SAVED');
-    close();
-  }, [runCommand, close]);
-
-  const handleLockScreenHotkey = useCallback(() => {
-    runCommand('LOCK_SCREEN');
-    close();
-  }, [runCommand, close]);
+  // Settings group
 
   const commandToggleArchiveWhenDone = useCallback(() => {
     const updIsArchiveWhenDoneEnabled = !isArchiveWhenDoneEnabled;
@@ -375,6 +322,25 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [analytics, close, currentUser, isAutoDoneEnabled, setIsAutoDoneEnabled]);
 
+  const commandDoneAll = useCallback(() => {
+    showNotification({ message: 'All read chats are marked as done!' });
+    doneAllReadChats();
+    close();
+    if (track) {
+      track('Use "Mark all read chats as done" command');
+    }
+  }, [close, doneAllReadChats, track]);
+
+  const commandArchiveAll = useCallback(() => {
+    showNotification({ message: 'All older than 24 hours will be archived!' });
+    archiveChats();
+    close();
+    if (track) {
+      track('Use "Archive all read chats" command');
+    }
+  }, [close, archiveChats, track]);
+
+  // What's new group
   const commandToggleFoldersTree = useCallback(() => {
     const updIsFoldersTreeEnabled = !isFoldersTreeEnabled;
     showNotification({
@@ -390,14 +356,26 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [close, isFoldersTreeEnabled, setIsFoldersTreeEnabled, track]);
 
-  const commandDoneAll = useCallback(() => {
-    showNotification({ message: 'All read chats are marked as done!' });
-    doneAllReadChats();
+  const handleChangelog = useCallback(() => {
+    openChatByUsername({ username: 'uludotso' });
     close();
-    if (track) {
-      track('Use "Mark all read chats as done" command');
+  }, [openChatByUsername, close]);
+
+  // ChatRelatedGroup's functions (local starage and mark as done broks if we move it there)
+  const { doneChat, isChatDone } = useDone();
+  const isChatUnread = currentChat && ((currentChat.unreadCount ?? 0) > 0 || currentChat.hasUnreadMark);
+  const isCurrentChatDone = currentChat && isChatDone(currentChat);
+
+  // Функция для отметки чата как выполненного
+  const handleDoneChat = useCallback(() => {
+    if (currentChatId) {
+      doneChat({ id: currentChatId });
+      close();
+      if (track) {
+        track('Mark as Done', { source: 'Сommand Menu' });
+      }
     }
-  }, [close, doneAllReadChats, track]);
+  }, [currentChatId, doneChat, close, track]);
 
   // Функция для отметки чата как непрочитанного/прочитанного
   const handleToggleChatUnread = useCallback(() => {
@@ -412,92 +390,14 @@ const CommandMenu: FC<CommandMenuProps> = ({
     }
   }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
 
-  // Функция для отметки чата как выполненного
-  const handleDoneChat = useCallback(() => {
-    if (currentChatId) {
-      doneChat({ id: currentChatId });
-      close();
-      if (track) {
-        track('Mark as Done', { source: 'Сommand Menu' });
-      }
-    }
-  }, [currentChatId, doneChat, close, track]);
+  // Global search
 
-  const commandArchiveAll = useCallback(() => {
-    showNotification({ message: 'All older than 24 hours will be archived!' });
-    archiveChats();
+  const handleSearchFocus = useCallback(() => {
+    runCommand('OPEN_SEARCH');
     close();
-    if (track) {
-      track('Use "Archive all read chats" command');
-    }
-  }, [close, archiveChats, track]);
+  }, [runCommand, close]);
 
-  const getFolderName = (id: number | null) => {
-    // eslint-disable-next-line no-null/no-null
-    if (id === null) return 'Unknown Folder';
-
-    const global = getGlobal() as GlobalState;
-    const folder = global.chatFolders.byId[id];
-    return folder ? folder.title : `Folder ${id}`;
-  };
-
-  useEffect(() => {
-    console.log('Current pages:', pages);
-  }, [pages]);
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      if (IS_ARC_BROWSER && (e.metaKey || e.ctrlKey) && e.code === 'KeyG') {
-        handleSelectNewGroup();
-        e.preventDefault();
-        e.stopPropagation();
-      } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.code === 'KeyC') {
-        handleSelectNewGroup();
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    document.addEventListener('keydown', listener);
-    return () => document.removeEventListener('keydown', listener);
-  }, [handleSelectNewGroup]);
-
-  useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      // Получаем текущее выделение
-      const selection = window.getSelection();
-
-      // Проверяем, есть ли выделенный текст
-      const hasSelection = selection && selection.toString() !== '';
-
-      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.code === 'KeyI' && !hasSelection) {
-        handleOpenInbox();
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-
-    document.addEventListener('keydown', listener);
-    return () => document.removeEventListener('keydown', listener);
-  }, [handleOpenInbox]);
-
-  // Функция для получения названия чата
-  const getCurrentChatName = () => {
-    if (!currentChatId) return undefined;
-
-    // Проверка на существование usersById и chatsById перед их использованием
-    if (usersById && usersById[currentChatId]) {
-      return getUserFullName(usersById[currentChatId]);
-    }
-
-    if (chatsById && chatsById[currentChatId]) {
-      return getChatTitle(lang, chatsById[currentChatId]);
-    }
-
-    return undefined;
-  };
-
-  const currentChatName = getCurrentChatName();
+  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
 
   const CommandMenuInner = (
     <div>
@@ -550,36 +450,23 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   isFoldersTreeEnabled={isFoldersTreeEnabled}
                   topUserIds={topUserIds}
                   usersById={usersById}
-                  handleSearchFocus={handleSearchFocus}
-                  handleSelectSettings={handleSelectSettings}
-                  handleOpenInbox={handleOpenInbox}
-                  handleSelectArchived={handleSelectArchived}
-                  handleOpenSavedMessages={handleOpenSavedMessages}
                   saveAPIKey={saveAPIKey}
                   menuItems={menuItems}
-                  handleSupport={handleSupport}
-                  handleFAQ={handleFAQ}
-                  handleOpenShortcuts={handleOpenShortcts}
                   handleChangelog={handleChangelog}
                   close={close}
-                  handleSelectNewGroup={handleSelectNewGroup}
-                  handleSelectNewChannel={handleSelectNewChannel}
-                  handleCreateFolder={handleCreateFolder}
-                  handleLockScreenHotkey={handleLockScreenHotkey}
                   recentlyFoundChatIds={recentlyFoundChatIds}
                   handleOpenAutomationSettings={handleOpenAutomationSettings}
                   handleOpenWorkspaceSettings={handleOpenWorkspaceSettings}
                   handleSelectWorkspace={handleSelectWorkspace}
                   currentWorkspace={currentWorkspace}
-                  renderWorkspaceIcon={renderWorkspaceIcon}
                   currentChatId={currentChatId}
-                  handleToggleChatUnread={handleToggleChatUnread}
-                  handleDoneChat={handleDoneChat}
-                  isChatUnread={isChatUnread}
-                  isCurrentChatDone={isCurrentChatDone}
                   allWorkspaces={allWorkspaces}
                   openChangeThemePage={openChangeThemePage}
                   inputValue={inputValue}
+                  isCurrentChatDone={isCurrentChatDone}
+                  handleDoneChat={handleDoneChat}
+                  handleToggleChatUnread={handleToggleChatUnread}
+                  isChatUnread={isChatUnread}
                 />
                 <CommanMenuChatSearch
                   close={close}
@@ -592,13 +479,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
                   pinnedIds={pinnedIds}
                 />
               </>
-            )}
-            {activePage === 'createNew' && (
-              <CreateNewPage
-                handleSelectNewGroup={handleSelectNewGroup}
-                handleSelectNewChannel={handleSelectNewChannel}
-                handleCreateFolder={handleCreateFolder}
-              />
             )}
             {activePage.includes('folderPage') && folderId && (
               <FolderPage
@@ -622,7 +502,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
             <span className="user-handle">Go to advanced search</span>
           </span>
           <span className="shortcuts">
-            <span className="kbd">⌘</span>
+            <span className="kbd">{cmdKey}</span>
             <span className="kbd">/</span>
           </span>
         </button>
