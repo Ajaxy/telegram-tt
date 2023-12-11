@@ -164,9 +164,7 @@ const LeftSideMenuItems = ({
       }
       return newHistory;
     });
-    if (track) {
-      track('Switch workspace', { source: 'Left Side Menu' });
-    }
+    track?.('Switch workspace', { source: 'Left Side Menu' });
   }, [track]); // Убедитесь в правильности зависимостей
 
   const prevWorkspaceShortcut = IS_ELECTRON ? 'Ctrl + Tab' : 'Ctrl + `';

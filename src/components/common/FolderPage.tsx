@@ -39,9 +39,7 @@ const FolderPage: React.FC<FolderPageProps> = ({
   const handleClick = useCallback((id: string) => {
     openChat({ id, shouldReplaceHistory: true });
     close();
-    if (track) {
-      track('Use folder search in Сommand Menu');
-    }
+    track?.('Use folder search in Сommand Menu');
   }, [close, track]);
 
   const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);

@@ -110,9 +110,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
     openChat({ id, shouldReplaceHistory: true });
     setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
     close();
-    if (track) {
-      track('Use suggestions in Сommand Menu', { chatId: id });
-    }
+    track?.('Use suggestions in Сommand Menu', { chatId: id });
   }, [close, track]);
 
   return (

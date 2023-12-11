@@ -165,7 +165,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 
   const handleSelectWorkspace = (workspaceId: string) => {
     originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
-    if (track) { track('Switch workspace', { source: 'Сommand Menu' }); }
+    track?.('Switch workspace', { source: 'Сommand Menu' });
   };
 
   const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
@@ -237,9 +237,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     localStorage.setItem('openai_api_key', inputValue);
     showNotification({ message: 'The OpenAI API key has been saved.' });
     setOpen(false);
-    if (track) {
-      track('Add openAI key');
-    }
+    track?.('Add openAI key');
   }, [inputValue, track]);
 
   // Настройки переходов между страницами
@@ -326,18 +324,14 @@ const CommandMenu: FC<CommandMenuProps> = ({
     showNotification({ message: 'All read chats are marked as done!' });
     doneAllReadChats();
     close();
-    if (track) {
-      track('Use "Mark all read chats as done" command');
-    }
+    track?.('Use "Mark all read chats as done" command');
   }, [close, doneAllReadChats, track]);
 
   const commandArchiveAll = useCallback(() => {
     showNotification({ message: 'All older than 24 hours will be archived!' });
     archiveChats();
     close();
-    if (track) {
-      track('Use "Archive all read chats" command');
-    }
+    track?.('Use "Archive all read chats" command');
   }, [close, archiveChats, track]);
 
   // What's new group
@@ -351,9 +345,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setIsFoldersTreeEnabled(updIsFoldersTreeEnabled);
     close();
     window.location.reload();
-    if (track) {
-      track(updIsFoldersTreeEnabled ? 'Turn on new Folder view' : 'Turn off new Folder view');
-    }
+    track?.(updIsFoldersTreeEnabled ? 'Turn on new Folder view' : 'Turn off new Folder view');
   }, [close, isFoldersTreeEnabled, setIsFoldersTreeEnabled, track]);
 
   const handleChangelog = useCallback(() => {
@@ -371,9 +363,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
     if (currentChatId) {
       doneChat({ id: currentChatId });
       close();
-      if (track) {
-        track('Mark as Done', { source: 'Сommand Menu' });
-      }
+      track?.('Mark as Done', { source: 'Сommand Menu' });
     }
   }, [currentChatId, doneChat, close, track]);
 
@@ -384,9 +374,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
       const action = isChatUnread ? 'MarkedAsRead' : 'MarkedAsUnread';
       showNotification({ message: lang(action) });
       close();
-      if (track) {
-        track(isChatUnread ? 'Mark as Read' : 'Mark as Unread', { source: 'Сommand Menu' });
-      }
+      track?.(isChatUnread ? 'Mark as Read' : 'Mark as Unread', { source: 'Сommand Menu' });
     }
   }, [currentChatId, currentChat, isChatUnread, lang, close, track]);
 
