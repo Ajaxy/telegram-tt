@@ -17,7 +17,7 @@ import type { Workspace } from '../../../../types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
-import { ALL_FOLDER_ID } from '../../../../config';
+import { ALL_FOLDER_ID, DEFAULT_WORKSPACE } from '../../../../config';
 import { selectCanShareFolder, selectCurrentChat } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
@@ -25,7 +25,6 @@ import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManag
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
-import { DEFAULT_WORKSPACE } from '../../../../hooks/useWorkspaces';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 import TreeRenders from './TreeRenderers';

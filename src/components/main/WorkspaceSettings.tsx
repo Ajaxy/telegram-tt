@@ -8,10 +8,10 @@ import {
 } from '../../lib/teact/teact';
 import { getActions, getGlobal } from '../../global';
 
+import { DEFAULT_WORKSPACE } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import { useJune } from '../../hooks/useJune';
-import { DEFAULT_WORKSPACE } from '../../hooks/useWorkspaces';
 
 // eslint-disable-next-line import/no-named-as-default
 import FolderSelector from './WorkspaceSettingsFoldersList';

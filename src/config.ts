@@ -348,3 +348,10 @@ export const ULU_APP = {
   CLIENT_NEWS_CHANNEL_ID: '-1001916758340',
   SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM: 2.25,
 };
+
+export const DEFAULT_WORKSPACE: Workspace = {
+  id: 'personal',
+  name: 'Personal Workspace',
+  logoUrl: undefined,
+  folders: [],
+};

@@ -16,6 +16,7 @@ import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { Workspace } from '../../types';
 
+import { DEFAULT_WORKSPACE } from '../../config';
 import {
   getChatTitle, getUserFullName,
 } from '../../global/helpers';
@@ -31,7 +32,6 @@ import useDone from '../../hooks/useDone';
 import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
-import { DEFAULT_WORKSPACE } from '../../hooks/useWorkspaces';
 
 import ChangeThemePage from '../common/ChangeThemePage';
 import HomePage from '../common/commandmenu/HomePage';

@@ -7,10 +7,10 @@ import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 
+import { DEFAULT_WORKSPACE } from '../../../../config';
 import { IS_APP, IS_MAC_OS } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
-import { DEFAULT_WORKSPACE } from '../../../../hooks/useWorkspaces';
 
 import CommandMenuListItem from '../../../left/search/CommanMenuListItem';
 

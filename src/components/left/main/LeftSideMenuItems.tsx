@@ -13,6 +13,7 @@ import {
   ANIMATION_LEVEL_MIN,
   ARCHIVED_FOLDER_ID,
   BETA_CHANGELOG_URL,
+  DEFAULT_WORKSPACE,
   FEEDBACK_URL,
   IS_BETA,
   IS_TEST,
@@ -34,7 +35,6 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
-import { DEFAULT_WORKSPACE } from '../../../hooks/useWorkspaces';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';

@@ -7,9 +7,8 @@ import { withGlobal } from '../../../global';
 import type { ApiPhoto, ApiUser } from '../../../api/types';
 import type { Workspace } from '../../../types';
 
+import { DEFAULT_WORKSPACE } from '../../../config';
 import { selectUser, selectUserFullInfo } from '../../../global/selectors';
-
-import { DEFAULT_WORKSPACE } from '../../../hooks/useWorkspaces';
 
 import ProfilePhoto from '../../common/ProfilePhoto';
 
