@@ -98,7 +98,7 @@ const Chat: FC<{
     folderId: item.folderId,
     isPinned: item.isPinned,
     isMuted: item.chat?.isMuted,
-    canChangeFolder: item.canChangeFolder, // TODO
+    canChangeFolder: item.canChangeFolder,
   });
 
   const {

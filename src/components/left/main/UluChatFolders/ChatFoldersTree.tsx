@@ -203,7 +203,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         record[chatAdjustedIndex] = {
           index: chatAdjustedIndex,
           type: 'chat',
-          contextActions: [], // TODO
+          contextActions: [],
           id: chat.id,
           chat,
           isPinned: chat.isPinned,
