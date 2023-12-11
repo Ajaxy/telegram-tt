@@ -209,6 +209,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           isPinned: chat.isPinned,
           folderId: chat.folderId,
           isFolder: false,
+          canChangeFolder: folders.length > 1,
           isCurrentChat: currentChat && chat.id === currentChat.id,
           // isFolder: isChatSuperGroupWithTopics(chat),
           canRename: false,
