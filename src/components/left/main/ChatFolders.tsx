@@ -28,6 +28,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useStorage } from '../../../hooks/useStorage';
+import { DEFAULT_WORKSPACE } from '../../../hooks/useWorkspaces';
 
 import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
@@ -143,13 +144,13 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   const displayedFolders = useMemo(() => {
     // Собираем все ID папок, которые принадлежат другим воркспейсам, кроме personal
     const allFolderIdsInOtherWorkspaces = savedWorkspaces
-      .filter((ws) => ws.id !== 'personal' && ws.folders)
+      .filter((ws) => ws.id !== DEFAULT_WORKSPACE.id && ws.folders)
       .reduce((acc: number[], ws) => [...acc, ...(ws.folders || [])], [] as number[]);
 
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
         // Для personal воркспейса добавляем All Chats и папки, которые не входят в другие воркспейсы
-        if (currentWorkspace.id === 'personal') {
+        if (currentWorkspace.id === DEFAULT_WORKSPACE.id) {
           if (id === ALL_FOLDER_ID || !allFolderIdsInOtherWorkspaces.includes(id)) {
             return id === ALL_FOLDER_ID ? allChatsFolder : chatFoldersById[id];
           }
@@ -448,9 +449,7 @@ export default memo(withGlobal<OwnProps>(
 
     let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
     if (!currentWorkspace) {
-      currentWorkspace = {
-        id: 'personal', name: 'Personal Workspace', logoUrl: undefined, folders: [],
-      };
+      currentWorkspace = DEFAULT_WORKSPACE;
     }
     const { folders: currentFolders } = currentWorkspace;
     const {

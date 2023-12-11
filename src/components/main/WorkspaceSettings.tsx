@@ -11,6 +11,7 @@ import { getActions, getGlobal } from '../../global';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import { useJune } from '../../hooks/useJune';
+import { DEFAULT_WORKSPACE } from '../../hooks/useWorkspaces';
 
 // eslint-disable-next-line import/no-named-as-default
 import FolderSelector from './WorkspaceSettingsFoldersList';
@@ -176,7 +177,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
       id: string;
     }) => ws.id !== workspaceId);
     localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
-    localStorage.setItem('currentWorkspace', 'Personal'); // Устанавливаем активный воркспейс на "Personal"
+    localStorage.setItem('currentWorkspace', DEFAULT_WORKSPACE.id); // Устанавливаем активный воркспейс на "Personal"
     showNotification({ message: 'Workspace deleted successfully.' });
     close(); // Закрываем модальное окно
   };

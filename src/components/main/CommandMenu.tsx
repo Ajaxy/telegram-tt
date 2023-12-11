@@ -31,6 +31,7 @@ import useDone from '../../hooks/useDone';
 import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
+import { DEFAULT_WORKSPACE } from '../../hooks/useWorkspaces';
 
 import ChangeThemePage from '../common/ChangeThemePage';
 import HomePage from '../common/commandmenu/HomePage';
@@ -145,7 +146,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
   const allWorkspaces = [
     ...savedWorkspaces,
-    ...(currentWorkspace.id !== 'personal' ? [{ id: 'personal', name: 'Personal', logoUrl: undefined }] : []),
+    ...(currentWorkspace.id !== DEFAULT_WORKSPACE.id ? [DEFAULT_WORKSPACE] : []),
   ];
 
   const openWorkspaceSettings = useCallback((workspaceId?: string) => {
@@ -536,7 +537,7 @@ export default memo(withGlobal(
 
     let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
     if (!currentWorkspace) {
-      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+      currentWorkspace = DEFAULT_WORKSPACE;
     }
 
     const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {

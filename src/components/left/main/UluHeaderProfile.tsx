@@ -9,6 +9,8 @@ import type { Workspace } from '../../../types';
 
 import { selectUser, selectUserFullInfo } from '../../../global/selectors';
 
+import { DEFAULT_WORKSPACE } from '../../../hooks/useWorkspaces';
+
 import ProfilePhoto from '../../common/ProfilePhoto';
 
 import styles from './UluHeaderProfile.module.scss';
@@ -41,7 +43,7 @@ const getUserFullName = (user?: ApiUser) => {
 const UluHeaderProfile: FC<OwnProps & StateProps> = ({
   user, currentWorkspace, userFallbackPhoto, userPersonalPhoto, userProfilePhoto, onClick,
 }) => {
-  const isPersonalWorkspace = currentWorkspace?.id === 'personal';
+  const isPersonalWorkspace = currentWorkspace?.id === DEFAULT_WORKSPACE.id;
 
   function renderPhoto() {
     if (isPersonalWorkspace) {
@@ -101,7 +103,7 @@ export default memo(withGlobal<OwnProps>((global) => {
   }) => ws.id === currentWorkspaceId);
   if (!currentWorkspaceId || !currentWorkspace) {
     // Define a default personal workspace object
-    currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+    currentWorkspace = DEFAULT_WORKSPACE;
   }
 
   return {

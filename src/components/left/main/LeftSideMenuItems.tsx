@@ -34,6 +34,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { DEFAULT_WORKSPACE } from '../../../hooks/useWorkspaces';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
@@ -83,11 +84,6 @@ const LeftSideMenuItems = ({
   } = getActions();
   const lang = useLang();
 
-  const personalWorkspace : Workspace = {
-    id: 'personal',
-    name: 'Personal',
-  };
-
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) { // Shortcut: settings
       if (
@@ -114,7 +110,7 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
-  const allWorkspaces = [personalWorkspace, ...savedWorkspaces];
+  const allWorkspaces = [DEFAULT_WORKSPACE, ...savedWorkspaces];
   const { runCommand } = useCommands();
 
   const handleOpenWorkspaceSettings = (workspaceId?: string) => {
@@ -289,11 +285,11 @@ const LeftSideMenuItems = ({
           className="workspace-item"
           onClick={() => handleSelectWorkspace(workspace.id)}
           shortcut={workspace.id === workspaceHistory[workspaceHistory.length - 2] ? prevWorkspaceShortcut : undefined}
-          userProfile={workspace.id === 'personal'}
+          userProfile={workspace.id === DEFAULT_WORKSPACE.id}
           isSelected={currentWorkspace.id === workspace.id} // Updated
           customImageUrl={workspace.logoUrl}
           customPlaceholderText={workspace.id
-            !== 'personal' && !workspace.logoUrl ? workspace.name[0].toUpperCase() : undefined}
+            !== DEFAULT_WORKSPACE.id && !workspace.logoUrl ? workspace.name[0].toUpperCase() : undefined}
         >
           {workspace.name}
         </MenuItem>
@@ -318,7 +314,7 @@ const LeftSideMenuItems = ({
       >
         Personal settings
       </MenuItem>
-      {currentWorkspaceId !== 'personal' && (
+      {currentWorkspaceId !== DEFAULT_WORKSPACE.id && (
         <MenuItem
           onClick={() => handleOpenWorkspaceSettings(currentWorkspaceId)}
         >
@@ -407,7 +403,7 @@ export default memo(withGlobal<OwnProps>(
     // Определение текущего воркспейса
     let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
     if (!currentWorkspace) {
-      currentWorkspace = { id: 'personal', name: 'Personal', logoUrl: undefined };
+      currentWorkspace = DEFAULT_WORKSPACE;
     }
 
     return {

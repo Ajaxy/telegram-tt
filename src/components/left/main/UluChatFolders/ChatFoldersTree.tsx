@@ -25,6 +25,7 @@ import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManag
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
+import { DEFAULT_WORKSPACE } from '../../../../hooks/useWorkspaces';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 import TreeRenders from './TreeRenderers';
@@ -84,7 +85,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
         // Пропускаем папки, которые уже назначены другим воркспейсам, если выбран Personal Workspace
-        if (currentWorkspace.id === 'personal' && allFolderIdsInWorkspaces.includes(id)) {
+        if (currentWorkspace.id === DEFAULT_WORKSPACE.id && allFolderIdsInWorkspaces.includes(id)) {
           return undefined;
         }
 
@@ -92,7 +93,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
         // Показываем папку только если она принадлежит текущему воркспейсу
         if (
-          currentWorkspace.id !== 'personal'
+          currentWorkspace.id !== DEFAULT_WORKSPACE.id
           && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
           return undefined;
         }
@@ -292,7 +293,7 @@ export default withGlobal(
       id: string;
     }) => ws.id === currentWorkspaceId);
     if (!currentWorkspace) {
-      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
+      currentWorkspace = DEFAULT_WORKSPACE;
     }
     const {
       chatFolders: {

@@ -1,5 +1,9 @@
 import { useEffect, useState } from '../lib/teact/teact';
 
+import type { Workspace } from '../types';
+
+import { DEFAULT_WORKSPACE } from './useWorkspaces';
+
 export function useStorage() {
   const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>('ulu_is_autodone_enabled', false);
   const [
@@ -17,6 +21,12 @@ export function useStorage() {
 
   const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>('ulu_done_chat_ids', []);
 
+  const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>('workspaces', []);
+  const [
+    currentWorkspaceId,
+    setCurrentWorkspaceId,
+  ] = useLocalStorage<string>('currentWorkspace', DEFAULT_WORKSPACE.id);
+
   return {
     isAutoDoneEnabled,
     setIsAutoDoneEnabled,
@@ -28,6 +38,10 @@ export function useStorage() {
     setIsFoldersTreeEnabled,
     doneChatIds,
     setDoneChatIds,
+    savedWorkspaces,
+    setSavedWorkspaces,
+    currentWorkspaceId,
+    setCurrentWorkspaceId,
   };
 }
 
