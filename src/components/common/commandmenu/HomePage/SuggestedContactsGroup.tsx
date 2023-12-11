@@ -4,22 +4,22 @@
 import React from 'react';
 // eslint-disable-next-line react/no-deprecated
 import { Command } from 'cmdk';
-import type { FC } from '../../../lib/teact/teact';
-import { useCallback, useEffect } from '../../../lib/teact/teact';
-import { getActions } from '../../../global';
+import type { FC } from '../../../../lib/teact/teact';
+import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../global';
 
-import type { ApiChat, ApiUser } from '../../../api/types';
+import type { ApiChat, ApiUser } from '../../../../api/types';
 
 import {
   getChatTitle, getChatTypeString, getMainUsername, getUserFullName, isDeletedUser,
-} from '../../../global/helpers';
-import { throttle } from '../../../util/schedulers';
-import renderText from '../helpers/renderText';
+} from '../../../../global/helpers';
+import { throttle } from '../../../../util/schedulers';
+import renderText from '../../helpers/renderText';
 
-import { useJune } from '../../../hooks/useJune';
-import useLang from '../../../hooks/useLang';
+import { useJune } from '../../../../hooks/useJune';
+import useLang from '../../../../hooks/useLang';
 
-import '../../main/CommandMenu.scss';
+import '../../../main/CommandMenu.scss';
 
 const SEARCH_CLOSE_TIMEOUT_MS = 250;
 
@@ -104,9 +104,7 @@ const SuggestedContacts: FC<SuggestedContactsProps> = ({
     openChat({ id, shouldReplaceHistory: true });
     setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
     close();
-    if (track) {
-      track('Use suggestions in Сommand Menu', { chatId: id });
-    }
+    track?.('Use suggestions in Сommand Menu', { chatId: id });
   }, [close, track]);
 
   return (

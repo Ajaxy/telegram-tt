@@ -69,9 +69,7 @@ const useChatContextActions = ({
       icon: 'schedule',
       handler: () => {
         snooze({ chatId: chat.id });
-        if (track) {
-          track('Snooze chat', { source: 'Chat Context Menu' });
-        }
+        track?.('Snooze chat', { source: 'Chat Context Menu' });
       },
     };
 
@@ -120,9 +118,7 @@ const useChatContextActions = ({
         icon: 'readchats',
         handler: () => {
           toggleChatUnread({ id: chat.id });
-          if (track) {
-            track('Mark as read', { source: 'Chat Context Menu' });
-          }
+          track?.('Mark as read', { source: 'Chat Context Menu' });
         },
       }
       : undefined;
@@ -133,9 +129,7 @@ const useChatContextActions = ({
         icon: 'unread',
         handler: () => {
           toggleChatUnread({ id: chat.id });
-          if (track) {
-            track('Mark as unread', { source: 'Chat Context Menu' });
-          }
+          track?.('Mark as unread', { source: 'Chat Context Menu' });
         },
       }
       : undefined;
@@ -146,9 +140,7 @@ const useChatContextActions = ({
         icon: 'select',
         handler: () => {
           doneChat({ id: chat.id, value: false });
-          if (track) {
-            track('Mark as not Done', { source: 'Chat Context Menu' });
-          }
+          track?.('Mark as not Done', { source: 'Chat Context Menu' });
         },
       }
       : {
@@ -156,9 +148,7 @@ const useChatContextActions = ({
         icon: 'select',
         handler: () => {
           doneChat({ id: chat.id, value: true });
-          if (track) {
-            track('Mark as Done', { source: 'Chat Context Menu' });
-          }
+          track?.('Mark as Done', { source: 'Chat Context Menu' });
         },
       };
 

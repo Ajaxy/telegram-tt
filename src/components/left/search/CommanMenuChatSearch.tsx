@@ -104,9 +104,7 @@ const CommanMenuChatSearch: React.FC<{
     openChat({ id, shouldReplaceHistory: true });
     setTimeout(() => addRecentlyFoundChatId({ id }), SEARCH_CLOSE_TIMEOUT_MS);
     close();
-    if (track) {
-      track('Use global search in Сommand Menu');
-    }
+    track?.('Use global search in Сommand Menu');
   }, [close, track]);
   const handeSelect = useCallback((id: string) => () => handleClick(id), [handleClick]);
 

@@ -126,9 +126,7 @@ const AutomationSettings: React.FC<AutomationSettingsProps> = ({ isOpen, onClose
       setKeyword('');
       setSelectedFolderId(undefined);
       setIsDuplicateError(false);
-      if (track) {
-        track('Create folder automation rule');
-      }
+      track?.('Create folder automation rule');
     } else {
       //
     }

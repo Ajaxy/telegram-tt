@@ -133,9 +133,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         localStorage.setItem('currentWorkspace', newWorkspaceData.id); // Устанавливаем новый воркспейс как текущий
         close();
         showNotification({ message: 'Workspace created successfully.' }); // Уведомление о создании
-        if (track) {
-          track('Create new workspace');
-        }
+        track?.('Create new workspace');
       }
     } catch (error) {
       //
