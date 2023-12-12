@@ -2819,6 +2819,10 @@ export interface ActionPayloads {
     isMuted?: boolean;
     muteUntil?: number;
   };
+  setViewForumAsMessages: {
+    chatId: string;
+    isEnabled: boolean;
+  };
 
   openCreateTopicPanel: {
     chatId: string;

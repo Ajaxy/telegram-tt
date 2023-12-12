@@ -22,6 +22,7 @@ import type {
   ApiReaction,
   ApiStealthMode,
   ApiSticker,
+  ApiTopic,
   ApiUser,
   ApiVideo,
 } from '../../api/types';
@@ -30,6 +31,7 @@ import type {
   MessageListType, TabState,
 } from '../../global/types';
 import type { IAnchorPosition, InlineBotSettings, ISettings } from '../../types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   BASE_EMOJI_KEYWORD_LANG,
@@ -75,6 +77,7 @@ import {
   selectScheduledIds,
   selectTabState,
   selectTheme,
+  selectTopicFromMessage,
   selectUser,
   selectUserFullInfo,
 } from '../../global/selectors';
@@ -184,6 +187,7 @@ type StateProps =
     editingMessage?: ApiMessage;
     chat?: ApiChat;
     draft?: ApiDraft;
+    replyToTopic?: ApiTopic;
     currentMessageList?: MessageList;
     isChatWithBot?: boolean;
     isChatWithSelf?: boolean;
@@ -282,6 +286,7 @@ const Composer: FC<OwnProps & StateProps> = ({
   messageListType,
   draft,
   chat,
+  replyToTopic,
   isForCurrentMessageList,
   isCurrentUserPremium,
   canSendVoiceByPrivacy,
@@ -1292,6 +1297,11 @@ const Composer: FC<OwnProps & StateProps> = ({
   || isCustomSendMenuOpen || Boolean(activeVoiceRecording) || attachments.length > 0 || isInputHasFocus;
   const isReactionSelectorOpen = isComposerHasFocus && !isReactionPickerOpen && isInStoryViewer && !isAttachMenuOpen
     && !isSymbolMenuOpen;
+  const placeholderForForumAsMessages = chat?.isForum && chat?.isForumAsMessages && threadId === MAIN_THREAD_ID
+    ? (replyToTopic
+      ? lang('Chat.InputPlaceholderReplyInTopic', replyToTopic.title)
+      : lang('Message.Placeholder.MessageInGeneral'))
+    : undefined;
 
   useEffect(() => {
     if (isComposerHasFocus) {
@@ -1680,7 +1690,7 @@ const Composer: FC<OwnProps & StateProps> = ({
               activeVoiceRecording && windowWidth <= SCREEN_WIDTH_TO_HIDE_PLACEHOLDER
                 ? ''
                 : (!isComposerBlocked
-                  ? (botKeyboardPlaceholder || inputPlaceholder || lang('Message'))
+                  ? (botKeyboardPlaceholder || inputPlaceholder || lang(placeholderForForumAsMessages || 'Message'))
                   : lang('Chat.PlaceholderTextNotAllowed'))
             }
             timedPlaceholderDate={timedPlaceholderDate}
@@ -1932,13 +1942,20 @@ export default memo(withGlobal<OwnProps>(
 
     const story = storyId && selectPeerStory(global, chatId, storyId);
     const sentStoryReaction = story && 'sentReaction' in story ? story.sentReaction : undefined;
+    const draft = selectDraft(global, chatId, threadId);
+    const replyToMessage = draft?.replyInfo
+      ? selectChatMessage(global, chatId, draft.replyInfo.replyToMsgId)
+      : undefined;
+    const replyToTopic = chat?.isForum && chat.isForumAsMessages && threadId === MAIN_THREAD_ID && replyToMessage
+      ? selectTopicFromMessage(global, replyToMessage)
+      : undefined;
 
     return {
       availableReactions: type === 'story' ? global.availableReactions : undefined,
       topReactions: type === 'story' ? global.topReactions : undefined,
       isOnActiveTab: !tabState.isBlurred,
       editingMessage: selectEditingMessage(global, chatId, threadId, messageListType),
-      draft: selectDraft(global, chatId, threadId),
+      draft,
       chat,
       isChatWithBot,
       isChatWithSelf,
@@ -1996,6 +2013,7 @@ export default memo(withGlobal<OwnProps>(
       shouldCollectDebugLogs: global.settings.byKey.shouldCollectDebugLogs,
       sentStoryReaction,
       stealthMode: global.stories.stealthMode,
+      replyToTopic,
     };
   },
 )(Composer));

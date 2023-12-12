@@ -1131,6 +1131,12 @@ export function updater(update: Update) {
       location: update.location,
       isUnconfirmed: update.unconfirmed,
     });
+  } else if (update instanceof GramJs.UpdateChannelViewForumAsMessages) {
+    onUpdate({
+      '@type': 'updateViewForumAsMessages',
+      chatId: buildApiPeerId(update.channelId, 'channel'),
+      isEnabled: update.enabled ? true : undefined,
+    });
   } else if (DEBUG) {
     const params = typeof update === 'object' && 'className' in update ? update.className : update;
     log('UNEXPECTED UPDATE', params);

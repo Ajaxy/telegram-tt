@@ -289,6 +289,7 @@
     "channels.deleteTopicHistory",
     "channels.toggleParticipantsHidden",
     "channels.clickSponsoredMessage",
+    "channels.toggleViewForumAsMessages",
     "photos.uploadContactProfilePhoto",
     "messages.getMessagesViews",
     "chatlists.exportChatlistInvite",

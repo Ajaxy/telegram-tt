@@ -327,6 +327,7 @@ export default memo(withGlobal<OwnProps>(
 
     const draft = selectDraft(global, chatId, threadId);
     const replyInfo = draft?.replyInfo;
+
     let message: ApiMessage | undefined;
     if (replyInfo && !shouldForceShowEditing) {
       message = selectChatMessage(global, replyInfo.replyToPeerId || chatId, replyInfo.replyToMsgId);

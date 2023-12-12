@@ -469,6 +469,18 @@ addActionHandler('apiUpdate', (global, actions, update): ActionReturnType => {
 
       return undefined;
     }
+
+    case 'updateViewForumAsMessages': {
+      const { chatId, isEnabled } = update;
+
+      const chat = selectChat(global, chatId);
+      if (!chat?.isForum) return undefined;
+
+      global = updateChat(global, chatId, {
+        isForumAsMessages: isEnabled,
+      });
+      setGlobal(global);
+    }
   }
 
   return undefined;
