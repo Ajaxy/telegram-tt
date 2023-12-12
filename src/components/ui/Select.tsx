@@ -11,7 +11,6 @@ type OwnProps = {
   error?: string;
   ref?: RefObject<HTMLSelectElement>;
   hasArrow?: boolean;
-  placeholder?: string;
   tabIndex?: number;
   onChange?: (e: ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactNode;
@@ -25,7 +24,6 @@ const Select: FC<OwnProps> = (props) => {
     hasArrow,
     error,
     ref,
-    placeholder,
     tabIndex,
     onChange,
     children,
@@ -47,7 +45,6 @@ const Select: FC<OwnProps> = (props) => {
         id={id}
         value={value || ''}
         onChange={onChange}
-        placeholder={placeholder || label}
         tabIndex={tabIndex}
         ref={ref}
       >

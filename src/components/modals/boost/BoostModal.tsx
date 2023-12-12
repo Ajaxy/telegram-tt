@@ -288,7 +288,7 @@ const BoostModal = ({
           </div>
         </Modal>
       )}
-      {boost?.cooldownUntil && (
+      {Boolean(boost?.cooldownUntil) && (
         <ConfirmDialog
           isOpen={isWaitDialogOpen}
           isOnlyConfirm
@@ -300,7 +300,7 @@ const BoostModal = ({
           {renderText(
             lang(
               'ChannelBoost.Error.BoostTooOftenText',
-              formatDateInFuture(lang, getServerTime(), boost.cooldownUntil),
+              formatDateInFuture(lang, getServerTime(), boost!.cooldownUntil),
             ),
             ['simple_markdown', 'emoji'],
           )}

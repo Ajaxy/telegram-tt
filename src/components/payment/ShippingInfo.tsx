@@ -139,7 +139,6 @@ const ShippingInfo: FC<OwnProps> = ({
             />
             <Select
               label={lang('PaymentShippingCountry')}
-              placeholder={lang('PaymentShippingCountry')}
               onChange={handleCountryChange}
               value={state.countryIso2}
               hasArrow={Boolean(true)}
