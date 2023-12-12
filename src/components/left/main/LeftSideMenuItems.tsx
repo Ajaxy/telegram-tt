@@ -35,6 +35,7 @@ import { useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManag
 import { useJune } from '../../../hooks/useJune';
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
+import { useWorkspaces } from '../../../hooks/useWorkspaces';
 
 import AttachBotItem from '../../middle/composer/AttachBotItem';
 import MenuItem from '../../ui/MenuItem';
@@ -56,8 +57,6 @@ type StateProps = {
   theme: ThemeKey;
   canInstall?: boolean;
   attachBots: GlobalState['attachMenu']['bots'];
-  currentWorkspace: Workspace;
-  savedWorkspaces: Workspace[];
 } & Pick<GlobalState, 'currentUserId' | 'archiveSettings'>;
 
 const LeftSideMenuItems = ({
@@ -72,8 +71,6 @@ const LeftSideMenuItems = ({
   onSelectSettings,
   onBotMenuOpened,
   onBotMenuClosed,
-  currentWorkspace,
-  savedWorkspaces,
 }: OwnProps & StateProps) => {
   const {
     setSettingOption,
@@ -110,7 +107,7 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
-  const allWorkspaces = [DEFAULT_WORKSPACE, ...savedWorkspaces];
+  const { allWorkspaces, currentWorkspace } = useWorkspaces();
   const { runCommand } = useCommands();
 
   const handleOpenWorkspaceSettings = (workspaceId?: string) => {
@@ -393,19 +390,6 @@ export default memo(withGlobal<OwnProps>(
     const { animationLevel } = global.settings.byKey;
     const attachBots = global.attachMenu.bots;
 
-    // Получение идентификатора текущего воркспейса
-    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
-
-    // Получение списка сохраненных воркспейсов
-    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
-
-    // Определение текущего воркспейса
-    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
-    if (!currentWorkspace) {
-      currentWorkspace = DEFAULT_WORKSPACE;
-    }
-
     return {
       currentUserId,
       theme: selectTheme(global),
@@ -413,8 +397,6 @@ export default memo(withGlobal<OwnProps>(
       canInstall: Boolean(tabState.canInstall),
       archiveSettings,
       attachBots,
-      currentWorkspace,
-      savedWorkspaces,
     };
   },
 )(LeftSideMenuItems));

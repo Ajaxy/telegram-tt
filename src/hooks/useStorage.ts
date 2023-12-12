@@ -25,7 +25,7 @@ export function useStorage() {
   const [
     currentWorkspaceId,
     setCurrentWorkspaceId,
-  ] = useLocalStorage<string>('currentWorkspace', DEFAULT_WORKSPACE.id);
+  ] = useLocalStorage<string>('current_workspace_id', DEFAULT_WORKSPACE.id);
 
   return {
     isAutoDoneEnabled,
