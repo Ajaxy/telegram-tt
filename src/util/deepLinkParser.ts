@@ -1,3 +1,4 @@
+import { RE_TG_LINK, RE_TME_LINK } from '../config';
 import { isUsernameValid } from './username';
 
 export type DeepLinkMethod = 'resolve' | 'login' | 'passport' | 'settings' | 'join' | 'addstickers' | 'addemoji' |
@@ -49,6 +50,10 @@ type BuilderParams<T extends DeepLink> = Record<keyof Omit<T, 'type'>, string>;
 type BuilderReturnType<T extends DeepLink> = T | undefined;
 
 const ELIGIBLE_HOSTNAMES = new Set(['t.me', 'telegram.me', 'telegram.dog']);
+
+export function isDeepLink(link: string): boolean {
+  return Boolean(link.match(RE_TME_LINK) || link.match(RE_TG_LINK));
+}
 
 export function tryParseDeepLink(link: string): DeepLink | undefined {
   try {
