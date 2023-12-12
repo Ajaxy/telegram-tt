@@ -5,10 +5,12 @@ import type { ActionReturnType, GlobalState, TabArgs } from '../../types';
 
 import { GLOBAL_SEARCH_SLICE, GLOBAL_TOPIC_SEARCH_SLICE } from '../../../config';
 import { timestampPlusDay } from '../../../util/dateFormat';
+import { DeepLinkType, isDeepLink, tryParseDeepLink } from '../../../util/deepLinkParser';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import { throttle } from '../../../util/schedulers';
 import { callApi } from '../../../api/gramjs';
+import { isChatChannel, isChatGroup, toChannelId } from '../../helpers/chats';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
 import {
   addChats,
@@ -19,7 +21,9 @@ import {
   updateGlobalSearchResults,
   updateTopics,
 } from '../../reducers';
-import { selectChat, selectCurrentGlobalSearchQuery, selectTabState } from '../../selectors';
+import {
+  selectChat, selectChatByUsername, selectChatMessage, selectCurrentGlobalSearchQuery, selectTabState,
+} from '../../selectors';
 
 const searchThrottled = throttle((cb) => cb(), 500, false);
 
@@ -120,6 +124,8 @@ async function searchMessagesGlobal<T extends GlobalState>(
     nextRate: number | undefined;
   } | undefined;
 
+  let messageLink: ApiMessage | undefined;
+
   if (chat) {
     const localResultRequest = callApi('searchMessagesLocal', {
       chat,
@@ -164,6 +170,14 @@ async function searchMessagesGlobal<T extends GlobalState>(
       maxDate,
       minDate,
     });
+    if (isDeepLink(query)) {
+      const link = tryParseDeepLink(query);
+      if (link?.type === DeepLinkType.PublicMessageLink) {
+        messageLink = await getMessageByPublicLink(global, link);
+      } else if (link?.type === DeepLinkType.PrivateMessageLink) {
+        messageLink = await getMessageByPrivateLink(global, link);
+      }
+    }
   }
 
   global = getGlobal();
@@ -172,6 +186,10 @@ async function searchMessagesGlobal<T extends GlobalState>(
     global = updateGlobalSearchFetchingStatus(global, { messages: false }, tabId);
     setGlobal(global);
     return;
+  }
+
+  if (messageLink) {
+    result.totalCount = result.messages.unshift(messageLink);
   }
 
   const {
@@ -209,4 +227,39 @@ async function searchMessagesGlobal<T extends GlobalState>(
   }, tabId);
 
   setGlobal(global);
+}
+
+async function getMessageByPublicLink(global: GlobalState, link: { username: string; messageId: number }) {
+  const { username, messageId } = link;
+  const localChat = selectChatByUsername(global, username);
+  if (localChat) {
+    return getChatGroupOrChannelMessage(global, localChat, messageId);
+  }
+  const { chat } = await callApi('getChatByUsername', username) ?? {};
+  if (!chat) {
+    return undefined;
+  }
+  return getChatGroupOrChannelMessage(global, chat, messageId);
+}
+
+function getMessageByPrivateLink(global: GlobalState, link: { channelId: string; messageId: number }) {
+  const { channelId, messageId } = link;
+  const internalChannelId = toChannelId(channelId);
+  const chat = selectChat(global, internalChannelId);
+  if (!chat) {
+    return undefined;
+  }
+  return getChatGroupOrChannelMessage(global, chat, messageId);
+}
+
+async function getChatGroupOrChannelMessage(global: GlobalState, chat: ApiChat, messageId: number) {
+  if (!isChatGroup(chat) && !isChatChannel(chat)) {
+    return undefined;
+  }
+  const localMessage = selectChatMessage(global, chat.id, messageId);
+  if (localMessage) {
+    return localMessage;
+  }
+  const result = await callApi('fetchMessage', { chat, messageId });
+  return result === 'MESSAGE_DELETED' ? undefined : result?.message;
 }

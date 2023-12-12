@@ -177,8 +177,7 @@ const ChatResults: FC<OwnProps & StateProps> = ({
 
         return globalMessagesByChatId?.[chatId]?.byId[Number(messageId)];
       })
-      .filter(Boolean)
-      .sort((a, b) => b.date - a.date);
+      .filter(Boolean);
   }, [foundIds, globalMessagesByChatId, searchQuery, searchDate]);
 
   const handleClickShowMoreLocal = useCallback(() => {

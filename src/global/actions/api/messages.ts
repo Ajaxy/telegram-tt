@@ -26,13 +26,12 @@ import {
   MAX_MEDIA_FILES_FOR_ALBUM,
   MESSAGE_LIST_SLICE,
   RE_TELEGRAM_LINK,
-  RE_TG_LINK,
-  RE_TME_LINK,
   SERVICE_NOTIFICATIONS_USER_ID,
   SUPPORTED_AUDIO_CONTENT_TYPES,
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_VIDEO_CONTENT_TYPES,
 } from '../../../config';
+import { isDeepLink } from '../../../util/deepLinkParser';
 import { ensureProtocol } from '../../../util/ensureProtocol';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import {
@@ -1542,7 +1541,7 @@ addActionHandler('openUrl', (global, actions, payload): ActionReturnType => {
   const urlWithProtocol = ensureProtocol(url)!;
   const isStoriesViewerOpen = Boolean(selectTabState(global, tabId).storyViewer.peerId);
 
-  if (urlWithProtocol.match(RE_TME_LINK) || urlWithProtocol.match(RE_TG_LINK)) {
+  if (isDeepLink(urlWithProtocol)) {
     if (isStoriesViewerOpen) {
       actions.closeStoryViewer({ tabId });
     }
