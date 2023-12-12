@@ -54,7 +54,7 @@ const ReactionSelectorReaction: FC<OwnProps> = ({
         <img
           className={cn('static-icon')}
           src={staticIconData}
-          alt=""
+          alt={reaction.reaction.emoticon}
           draggable={false}
         />
       )}
