@@ -24,6 +24,8 @@ const newVersion = [major, minor, newPatch].join('.') + '-' + newUluVersion;
 
 const newPackageJsonContent = packageJsonContent.replace(`"version": "${currentVersion}"`, `"version": "${newVersion}"`);
 
+console.log(`[update_version] ${currentVersion} -> ${newVersion}\n`);
+
 fs.writeFileSync(PATCH_VERSION_PATH, String(newPatch), 'utf-8');
 fs.writeFileSync(PACKAGE_JSON_PATH, newPackageJsonContent, 'utf-8');
 fs.writeFileSync(VERSION_TXT_PATH, newVersion, 'utf-8');
