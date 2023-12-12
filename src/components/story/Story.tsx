@@ -25,6 +25,7 @@ import { formatMediaDuration, formatRelativeTime } from '../../util/dateFormat';
 import download from '../../util/download';
 import { getServerTime } from '../../util/serverTime';
 import renderText from '../common/helpers/renderText';
+import { PRIMARY_VIDEO_MIME, SECONDARY_VIDEO_MIME } from './helpers/videoFormats';
 
 import useUnsupportedMedia from '../../hooks/media/useUnsupportedMedia';
 import useAppLayout, { getIsMobile } from '../../hooks/useAppLayout';
@@ -39,6 +40,7 @@ import useLastCallback from '../../hooks/useLastCallback';
 import useLongPress from '../../hooks/useLongPress';
 import useMediaTransition from '../../hooks/useMediaTransition';
 import useShowTransition from '../../hooks/useShowTransition';
+import { useStreaming } from '../../hooks/useStreaming';
 import useStoryPreloader from './hooks/useStoryPreloader';
 import useStoryProps from './hooks/useStoryProps';
 
@@ -91,9 +93,6 @@ interface StateProps {
 
 const VIDEO_MIN_READY_STATE = 4;
 const SPACEBAR_CODE = 32;
-
-const PRIMARY_VIDEO_MIME = 'video/mp4; codecs=hvc1.1.6.L63.00';
-const SECONDARY_VIDEO_MIME = 'video/mp4; codecs=avc1.64001E';
 
 const STEALTH_MODE_NOTIFICATION_DURATION = 4000;
 
@@ -211,6 +210,10 @@ function Story({
     && !isPausedBySpacebar && !isPausedByLongPress,
   );
 
+  const duration = isLoadedStory && story.content.video?.duration
+    ? story.content.video.duration
+    : undefined;
+
   const shouldShowFooter = isLoadedStory && (isOut || isChannel);
 
   const {
@@ -235,6 +238,8 @@ function Story({
   } = useShowTransition(hasText && isCaptionExpanded);
 
   const { transitionClassNames: appearanceAnimationClassNames } = useShowTransition(true);
+
+  useStreaming(videoRef, fullMediaData, PRIMARY_VIDEO_MIME);
 
   useStoryPreloader(peerId, storyId);
 
@@ -378,13 +383,6 @@ function Story({
     }
   }, [isComposerHasFocus, isCaptionExpanded, shouldForcePause, isAppFocused, isPausedByLongPress, isPausedBySpacebar]);
 
-  const handleVideoStoryTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    if (video.readyState >= VIDEO_MIN_READY_STATE) {
-      setCurrentTime(video.currentTime);
-    }
-  });
-
   const handleOpenChat = useLastCallback(() => {
     onClose();
     openChat({ id: peerId });
@@ -403,6 +401,16 @@ function Story({
   const handleOpenNextStory = useLastCallback(() => {
     setCurrentTime(0);
     openNextStory();
+  });
+
+  const handleVideoStoryTimeUpdate = useLastCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.readyState >= VIDEO_MIN_READY_STATE) {
+      setCurrentTime(video.currentTime);
+    }
+    if (duration && video.currentTime >= duration) {
+      handleOpenNextStory();
+    }
   });
 
   useEffect(() => {
@@ -522,10 +530,6 @@ function Story({
   }, [isMobile, lang]);
 
   function renderStoriesTabs() {
-    const duration = isLoadedStory && story.content.video?.duration
-      ? story.content.video.duration
-      : undefined;
-
     return (
       <div className={styles.storyIndicators}>
         {(isSingleStory ? [storyId] : orderedIds ?? []).map((id) => (
@@ -738,8 +742,8 @@ function Story({
             onPlaying={markStoryPlaying}
             onPause={unmarkStoryPlaying}
             onWaiting={unmarkStoryPlaying}
+            disableRemotePlayback
             onTimeUpdate={handleVideoStoryTimeUpdate}
-            onEnded={handleOpenNextStory}
           >
             <source src={fullMediaData} type={PRIMARY_VIDEO_MIME} width="720" />
             {altMediaData && <source src={altMediaData} type={SECONDARY_VIDEO_MIME} width="480" />}

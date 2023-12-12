@@ -115,6 +115,10 @@ export function removeCallback(url: string, callbackUniqueId: string) {
   callbacks.delete(callbackUniqueId);
 }
 
+export function getProgressiveUrl(url: string) {
+  return `${PROGRESSIVE_URL_PREFIX}${url}`;
+}
+
 function getProgressive(url: string) {
   const progressiveUrl = `${PROGRESSIVE_URL_PREFIX}${url}`;
 

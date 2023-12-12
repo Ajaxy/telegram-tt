@@ -66,6 +66,7 @@ function StoryToggler({
   const preloadPeerIds = useMemo(() => {
     return orderedPeerIds.slice(0, PRELOAD_PEERS);
   }, [orderedPeerIds]);
+
   useStoryPreloader(preloadPeerIds);
 
   const isVisible = canShow && isShown;
