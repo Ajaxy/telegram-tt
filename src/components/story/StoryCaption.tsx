@@ -1,13 +1,12 @@
 import React, {
-  memo, useEffect, useRef, useState,
+  memo, useEffect, useLayoutEffect, useRef, useState,
 } from '../../lib/teact/teact';
 import { addExtraClass, removeExtraClass } from '../../lib/teact/teact-dom';
 
 import type { ApiStory } from '../../api/types';
 
-import { requestMutation } from '../../lib/fasterdom/fasterdom';
+import { requestForcedReflow, requestMeasure, requestMutation } from '../../lib/fasterdom/fasterdom';
 import buildClassName from '../../util/buildClassName';
-import { REM } from '../common/helpers/mediaDimensions';
 
 import useLang from '../../hooks/useLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
@@ -27,7 +26,6 @@ interface OwnProps {
 }
 
 const EXPAND_ANIMATION_DURATION_MS = 400;
-const OVERFLOW_THRESHOLD_PX = 5.75 * REM;
 const LINES_TO_SHOW = 3;
 
 function StoryCaption({
@@ -50,15 +48,6 @@ function StoryCaption({
   const isInExpandedState = isExpanded || prevIsExpanded;
 
   useEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-
-    const { clientHeight } = ref.current;
-    setHasOverflow(clientHeight > OVERFLOW_THRESHOLD_PX);
-  }, [caption]);
-
-  useEffect(() => {
     requestMutation(() => {
       if (!contentRef.current) {
         return;
@@ -77,26 +66,46 @@ function StoryCaption({
     canExpand, undefined, true, 'slow', true,
   );
 
-  useEffect(() => {
-    if (!showMoreButtonRef.current || !contentRef.current || !textRef.current) {
-      return;
-    }
+  useLayoutEffect(() => {
+    requestMeasure(() => {
+      if (!showMoreButtonRef.current) {
+        return;
+      }
 
-    const container = contentRef.current;
-    const textContainer = textRef.current;
+      const button = showMoreButtonRef.current;
 
-    const textOffsetTop = textContainer.offsetTop;
-    const lineHeight = parseInt(getComputedStyle(textContainer).lineHeight, 10);
-    const overflowShift = textOffsetTop + lineHeight * LINES_TO_SHOW;
+      const { offsetWidth } = button;
 
-    const button = showMoreButtonRef.current;
-
-    const { offsetWidth } = button;
-    requestMutation(() => {
-      container.style.setProperty('--_overflow-shift', `${overflowShift}px`);
-      container.style.setProperty('--expand-button-width', `${offsetWidth}px`);
+      requestMutation(() => {
+        button.style.setProperty('--expand-button-width', `${offsetWidth}px`);
+      });
     });
-  }, [canExpand]);
+  }, []);
+
+  useLayoutEffect(() => {
+    requestForcedReflow(() => {
+      if (!contentRef.current || !textRef.current) {
+        return undefined;
+      }
+
+      const container = contentRef.current;
+      const textContainer = textRef.current;
+
+      const textOffsetTop = textContainer.offsetTop;
+      const lineHeight = parseInt(getComputedStyle(textContainer).lineHeight, 10);
+      const isOverflowing = textContainer.clientHeight > lineHeight * LINES_TO_SHOW;
+      const overflowShift = textOffsetTop + lineHeight * LINES_TO_SHOW;
+
+      return () => {
+        if (isOverflowing) {
+          addExtraClass(container, styles.hasOverflow);
+          setHasOverflow(true);
+        }
+
+        container.style.setProperty('--_overflow-shift', `${overflowShift}px`);
+      };
+    });
+  }, [caption]);
 
   useEffect(() => {
     if (!isExpanded) {
@@ -106,7 +115,6 @@ function StoryCaption({
 
   const fullClassName = buildClassName(
     styles.captionContent,
-    hasOverflow && !isExpanded && styles.hasOverflow,
     isInExpandedState && styles.expanded,
     shouldRenderShowMore && styles.withShowMore,
   );
