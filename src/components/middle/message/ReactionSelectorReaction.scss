@@ -1,4 +1,6 @@
 .ReactionSelectorReaction {
+  --custom-emoji-size: 2rem;
+
   margin-inline-start: 0.25rem;
   position: relative;
   min-width: 2rem;
@@ -22,11 +24,6 @@
     left: 0;
   }
 
-  &--compact {
-    min-width: 1.5rem;
-    min-height: 1.5rem;
-  }
-
   &--chosen::before {
     content: '';
     position: absolute;
@@ -37,5 +34,29 @@
     height: 2.25rem;
     border-radius: 50%;
     background-color: var(--color-background-compact-menu-hover);
+  }
+
+  &--custom {
+    opacity: 0;
+  }
+
+  &--visible {
+    opacity: 1;
+  }
+
+  &--custom-animated {
+    animation: ReactionSelectorReaction--fade-in 0.2s ease-in-out forwards;
+    animation-delay: var(--_animation-delay);
+  }
+
+  @keyframes ReactionSelectorReaction--fade-in {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 }

@@ -15,13 +15,13 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 
 import Button from '../../ui/Button';
+import ReactionSelectorCustomReaction from './ReactionSelectorCustomReaction';
 import ReactionSelectorReaction from './ReactionSelectorReaction';
 
 import './ReactionSelector.scss';
 
 type OwnProps = {
   enabledReactions?: ApiChatReactions;
-  onToggleReaction: (reaction: ApiReaction) => void;
   isPrivate?: boolean;
   topReactions?: ApiReaction[];
   allAvailableReactions?: ApiAvailableReaction[];
@@ -31,12 +31,14 @@ type OwnProps = {
   canBuyPremium?: boolean;
   isCurrentUserPremium?: boolean;
   canPlayAnimatedEmojis?: boolean;
-  onShowMore: (position: IAnchorPosition) => void;
   className?: string;
+  onToggleReaction: (reaction: ApiReaction) => void;
+  onShowMore: (position: IAnchorPosition) => void;
 };
 
 const cn = createClassNameBuilder('ReactionSelector');
 const REACTIONS_AMOUNT = 6;
+const FADE_IN_DELAY = 20;
 
 const ReactionSelector: FC<OwnProps> = ({
   allAvailableReactions,
@@ -47,31 +49,39 @@ const ReactionSelector: FC<OwnProps> = ({
   isPrivate,
   isReady,
   canPlayAnimatedEmojis,
+  className,
   onToggleReaction,
   onShowMore,
-  className,
 }) => {
   // eslint-disable-next-line no-null/no-null
   const ref = useRef<HTMLDivElement>(null);
   const lang = useLang();
 
   const availableReactions = useMemo(() => {
-    const reactions = allAvailableReactions?.map((availableReaction) => {
-      if (availableReaction.isInactive) return undefined;
-      if (!isPrivate && (!enabledReactions || !canSendReaction(availableReaction.reaction, enabledReactions))) {
+    const reactions = (enabledReactions?.type === 'some' && enabledReactions.allowed)
+      || allAvailableReactions?.map((reaction) => reaction.reaction);
+    const filteredReactions = reactions?.map((reaction) => {
+      const isCustomReaction = 'documentId' in reaction;
+      const availableReaction = allAvailableReactions?.find((r) => isSameReaction(r.reaction, reaction));
+      if ((!isCustomReaction && !availableReaction) || availableReaction?.isInactive) return undefined;
+
+      if (!isPrivate && (!enabledReactions || !canSendReaction(reaction, enabledReactions))) {
         return undefined;
       }
+
       if (maxUniqueReactions && currentReactions && currentReactions.length >= maxUniqueReactions
-        && !currentReactions.some(({ reaction }) => isSameReaction(reaction, availableReaction.reaction))) {
+        && !currentReactions.some(({ reaction: currentReaction }) => isSameReaction(reaction, currentReaction))) {
         return undefined;
       }
-      return availableReaction;
+
+      return isCustomReaction ? reaction : availableReaction;
     }).filter(Boolean) || [];
 
-    return sortReactions(reactions, topReactions);
+    return sortReactions(filteredReactions, topReactions);
   }, [allAvailableReactions, currentReactions, enabledReactions, isPrivate, maxUniqueReactions, topReactions]);
 
   const reactionsToRender = useMemo(() => {
+    // Component can fit one more if we do not need show more button
     return availableReactions.length === REACTIONS_AMOUNT + 1
       ? availableReactions
       : availableReactions.slice(0, REACTIONS_AMOUNT);
@@ -81,7 +91,7 @@ const ReactionSelector: FC<OwnProps> = ({
   const userReactionIndexes = useMemo(() => {
     const chosenReactions = currentReactions?.filter(({ chosenOrder }) => chosenOrder !== undefined) || [];
     return new Set(chosenReactions.map(({ reaction }) => (
-      reactionsToRender.findIndex((r) => r && isSameReaction(r.reaction, reaction))
+      reactionsToRender.findIndex((r) => r && isSameReaction('reaction' in r ? r.reaction : r, reaction))
     )));
   }, [currentReactions, reactionsToRender]);
 
@@ -102,14 +112,26 @@ const ReactionSelector: FC<OwnProps> = ({
         <div className={cn('bubble-big', lang.isRtl && 'isRtl')} />
         <div className={cn('items')} dir={lang.isRtl ? 'rtl' : undefined}>
           {reactionsToRender.map((reaction, i) => (
-            <ReactionSelectorReaction
-              key={getReactionUniqueKey(reaction.reaction)}
-              isReady={isReady}
-              onToggleReaction={onToggleReaction}
-              reaction={reaction}
-              noAppearAnimation={!canPlayAnimatedEmojis}
-              chosen={userReactionIndexes.has(i)}
-            />
+            'reaction' in reaction ? (
+              <ReactionSelectorReaction
+                key={getReactionUniqueKey(reaction.reaction)}
+                isReady={isReady}
+                onToggleReaction={onToggleReaction}
+                reaction={reaction}
+                noAppearAnimation={!canPlayAnimatedEmojis}
+                chosen={userReactionIndexes.has(i)}
+              />
+            ) : (
+              <ReactionSelectorCustomReaction
+                key={getReactionUniqueKey(reaction)}
+                isReady={isReady}
+                onToggleReaction={onToggleReaction}
+                reaction={reaction}
+                noAppearAnimation={!canPlayAnimatedEmojis}
+                chosen={userReactionIndexes.has(i)}
+                style={`--_animation-delay: ${(REACTIONS_AMOUNT - i) * FADE_IN_DELAY}ms`}
+              />
+            )
           ))}
           {withMoreButton && (
             <Button
