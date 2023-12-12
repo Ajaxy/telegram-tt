@@ -32,6 +32,7 @@
 
   .WebPage--content {
     position: relative;
+    margin-inline-start: 0.25rem;
 
     &.is-story {
       display: flex;
@@ -103,7 +104,6 @@
 
     .WebPage-text {
       order: 1;
-      margin-inline-start: 0.25rem;
       padding-inline-end: 1rem;
     }
 
