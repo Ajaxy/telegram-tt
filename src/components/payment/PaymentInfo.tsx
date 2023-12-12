@@ -121,7 +121,6 @@ const PaymentInfo: FC<OwnProps> = ({
         { needCountry && (
           <Select
             label={lang('PaymentShippingCountry')}
-            placeholder={lang('PaymentShippingCountry')}
             onChange={handleCountryChange}
             value={state.billingCountry}
             hasArrow={Boolean(true)}

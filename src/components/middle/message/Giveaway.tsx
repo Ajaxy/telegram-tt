@@ -208,7 +208,7 @@ const Giveaway = ({
             />
           ))}
         </div>
-        {countries?.length && (
+        {Boolean(countries?.length) && (
           <span>{renderText(lang('Chat.Giveaway.Message.CountriesFrom', countryList))}</span>
         )}
       </div>

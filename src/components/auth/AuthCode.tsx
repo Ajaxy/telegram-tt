@@ -105,6 +105,7 @@ const AuthCode: FC<StateProps> = ({
             role="button"
             tabIndex={0}
             title={lang('WrongNumber')}
+            aria-label={lang('WrongNumber')}
           >
             <i className="icon icon-edit" />
           </div>

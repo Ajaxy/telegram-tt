@@ -147,6 +147,7 @@ const PasswordForm: FC<OwnProps> = ({
           role="button"
           tabIndex={0}
           title="Toggle password visibility"
+          aria-label="Toggle password visibility"
         >
           <i className={buildClassName('icon', isPasswordVisible ? 'icon-eye' : 'icon-eye-closed')} />
         </div>
