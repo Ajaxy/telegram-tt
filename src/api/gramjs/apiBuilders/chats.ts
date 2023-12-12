@@ -24,6 +24,7 @@ import { getServerTime, getServerTimeOffset } from '../../../util/serverTime';
 import { buildApiUsernames } from './common';
 import { omitVirtualClassFields } from './helpers';
 import {
+  buildApiPeerColor,
   buildApiPeerId, getApiChatIdFromMtpPeer, isPeerChat, isPeerUser,
 } from './peers';
 import { buildApiReaction } from './reactions';
@@ -54,8 +55,7 @@ function buildApiChatFieldsFromPeerEntity(
   const areStoriesHidden = Boolean('storiesHidden' in peerEntity && peerEntity.storiesHidden);
   const maxStoryId = 'storiesMaxId' in peerEntity ? peerEntity.storiesMaxId : undefined;
   const storiesUnavailable = Boolean('storiesUnavailable' in peerEntity && peerEntity.storiesUnavailable);
-  const color = 'color' in peerEntity ? peerEntity.color : undefined;
-  const backgroundEmojiId = 'backgroundEmojiId' in peerEntity ? peerEntity.backgroundEmojiId?.toString() : undefined;
+  const color = ('color' in peerEntity && peerEntity.color) ? buildApiPeerColor(peerEntity.color) : undefined;
 
   return {
     isMin,
@@ -80,7 +80,6 @@ function buildApiChatFieldsFromPeerEntity(
     ...buildApiChatMigrationInfo(peerEntity),
     fakeType: isScam ? 'scam' : (isFake ? 'fake' : undefined),
     color,
-    backgroundEmojiId,
     isJoinToSend,
     isJoinRequest,
     isForum,

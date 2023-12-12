@@ -139,8 +139,8 @@ addActionHandler('init', (global, actions, payload): ActionReturnType => {
     setGlobal(global);
   });
 
-  if (global.appConfig?.peerColors) {
-    updatePeerColors(global.appConfig.peerColors, global.appConfig.darkPeerColors);
+  if (global.peerColors) {
+    updatePeerColors(global.peerColors.general);
   }
 
   return updateTabState(global, {

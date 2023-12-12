@@ -2,7 +2,7 @@ import type { FC } from '../../../lib/teact/teact';
 import React, { memo, useCallback } from '../../../lib/teact/teact';
 import { getActions } from '../../../global';
 
-import type { ApiMessage, StatisticsRecentMessage as StatisticsRecentMessageType } from '../../../api/types';
+import type { ApiMessage, StatisticsMessageInteractionCounter } from '../../../api/types';
 import type { LangFn } from '../../../hooks/useLang';
 
 import {
@@ -21,7 +21,7 @@ import useMedia from '../../../hooks/useMedia';
 import './StatisticsRecentMessage.scss';
 
 export type OwnProps = {
-  message: ApiMessage & StatisticsRecentMessageType;
+  message: ApiMessage & StatisticsMessageInteractionCounter;
 };
 
 const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {

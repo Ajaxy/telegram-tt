@@ -1,6 +1,7 @@
 import type BigInt from 'big-integer';
 
 import type { Api as GramJs } from '../../../lib/gramjs';
+import type { ApiPeerColor } from '../../types';
 
 export function isPeerUser(peer: GramJs.TypePeer | GramJs.TypeInputPeer): peer is GramJs.PeerUser {
   return peer.hasOwnProperty('userId');
@@ -34,4 +35,12 @@ export function getApiChatIdFromMtpPeer(peer: GramJs.TypePeer | GramJs.TypeInput
   } else {
     return buildApiPeerId((peer as GramJs.InputPeerChannel).channelId, 'channel');
   }
+}
+
+export function buildApiPeerColor(peerColor: GramJs.TypePeerColor): ApiPeerColor {
+  const { color, backgroundEmojiId } = peerColor;
+  return {
+    color,
+    backgroundEmojiId: backgroundEmojiId?.toString(),
+  };
 }

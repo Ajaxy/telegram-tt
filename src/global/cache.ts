@@ -143,6 +143,7 @@ export function migrateCache(cached: GlobalState, initialState: GlobalState) {
 }
 
 function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
+  const untypedCached = cached as any;
   // Pre-fill settings with defaults
   cached.settings.byKey = {
     ...initialState.settings.byKey,
@@ -203,6 +204,12 @@ function unsafeMigrateCache(cached: GlobalState, initialState: GlobalState) {
     cached.stories.byPeerId = initialState.stories.byPeerId;
     cached.stories.orderedPeerIds = initialState.stories.orderedPeerIds;
   }
+
+  // Clear old color storage to optimize cache size
+  if (untypedCached.appConfig.peerColors) {
+    untypedCached.appConfig.peerColors = undefined;
+    untypedCached.appConfig.darkPeerColors = undefined;
+  }
 }
 
 function updateCache() {
@@ -260,6 +267,7 @@ export function serializeGlobal<T extends GlobalState>(global: T) {
       'shouldShowContextMenuHint',
       'trustedBotIds',
       'recentlyFoundChatIds',
+      'peerColors',
     ]),
     lastIsChatInfoShown: !getIsMobile() ? global.lastIsChatInfoShown : undefined,
     customEmojis: reduceCustomEmojis(global),

@@ -255,10 +255,6 @@
 
   .action-message-content {
     max-width: 100%;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .ActionMessage.centered-action {
@@ -366,11 +362,6 @@
   .ActionMessage {
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-  }
-
-  .local-action-message,
-  .ActionMessage.in-one-row {
-    height: 1.5625rem;
   }
 
   .ActionMessage {

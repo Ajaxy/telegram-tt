@@ -9,6 +9,7 @@ import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { setLanguage, setTimeFormat } from '../../../util/langProvider';
 import { applyPerformanceSettings } from '../../../util/perfomanceSettings';
 import switchTheme from '../../../util/switchTheme';
+import { updatePeerColors } from '../../../util/theme';
 import { IS_IOS } from '../../../util/windowEnvironment';
 import { callApi, setShouldEnableDebugLog } from '../../../api/gramjs';
 import {
@@ -33,6 +34,12 @@ addCallback((global: GlobalState) => {
   const prevSettings = oldGlobal.settings.byKey;
   const performance = global.settings.performance;
   const prevPerformance = oldGlobal.settings.performance;
+  const peerColors = global.peerColors;
+  const prevPeerColors = oldGlobal.peerColors;
+
+  if (peerColors && peerColors !== prevPeerColors) {
+    updatePeerColors(peerColors.general);
+  }
 
   if (performance !== prevPerformance) {
     requestMutation(() => {

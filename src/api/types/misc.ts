@@ -195,8 +195,6 @@ export interface ApiAppConfig {
   storyExpirePeriod: number;
   storyViewersExpirePeriod: number;
   storyChangelogUserId: string;
-  peerColors: Record<string, string[]>;
-  darkPeerColors: Record<string, string[]>;
 }
 
 export interface ApiConfig {
@@ -205,6 +203,19 @@ export interface ApiConfig {
   gifSearchUsername?: string;
   maxGroupSize: number;
   autologinToken?: string;
+}
+
+export type ApiPeerColorSet = string[];
+
+export interface ApiPeerColors {
+  general: {
+    [key: number]: {
+      isHidden?: true;
+      colors?: ApiPeerColorSet;
+      darkColors?: ApiPeerColorSet;
+    };
+  };
+  generalHash?: number;
 }
 
 export interface GramJsEmojiInteraction {

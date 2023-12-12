@@ -1,5 +1,6 @@
 import type { API_CHAT_TYPES } from '../../config';
 import type { ApiBotInfo } from './bots';
+import type { ApiPeerColor } from './chats';
 import type { ApiDocument, ApiPhoto } from './messages';
 
 export interface ApiUser {
@@ -35,8 +36,7 @@ export interface ApiUser {
   hasStories?: boolean;
   hasUnreadStories?: boolean;
   maxStoryId?: number;
-  color?: number;
-  backgroundEmojiId?: string;
+  color?: ApiPeerColor;
 }
 
 export interface ApiUserFullInfo {

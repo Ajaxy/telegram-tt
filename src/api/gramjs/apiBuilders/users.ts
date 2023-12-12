@@ -11,7 +11,7 @@ import type {
 
 import { buildApiBotInfo } from './bots';
 import { buildApiPhoto, buildApiUsernames } from './common';
-import { buildApiPeerId } from './peers';
+import { buildApiPeerColor, buildApiPeerId } from './peers';
 
 export function buildApiUserFullInfo(mtpUserFull: GramJs.users.UserFull): ApiUserFullInfo {
   const {
@@ -85,8 +85,7 @@ export function buildApiUser(mtpUser: GramJs.TypeUser): ApiUser | undefined {
     hasStories: Boolean(storiesMaxId) && !storiesUnavailable,
     ...(mtpUser.bot && mtpUser.botInlinePlaceholder && { botPlaceholder: mtpUser.botInlinePlaceholder }),
     ...(mtpUser.bot && mtpUser.botAttachMenu && { isAttachBot: mtpUser.botAttachMenu }),
-    color: mtpUser.color,
-    backgroundEmojiId: mtpUser.backgroundEmojiId?.toString(),
+    color: mtpUser.color && buildApiPeerColor(mtpUser.color),
   };
 }
 
