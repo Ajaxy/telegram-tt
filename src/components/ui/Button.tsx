@@ -36,6 +36,7 @@ export type OwnProps = {
   href?: string;
   download?: string;
   disabled?: boolean;
+  nonInteractive?: boolean;
   allowDisabledClick?: boolean;
   noFastClick?: boolean;
   ripple?: boolean;
@@ -91,6 +92,7 @@ const Button: FC<OwnProps> = ({
   href,
   download,
   disabled,
+  nonInteractive,
   allowDisabledClick,
   noFastClick = color === 'danger',
   ripple,
@@ -110,6 +112,8 @@ const Button: FC<OwnProps> = ({
 
   const [isClicked, setIsClicked] = useState(false);
 
+  const isNotInteractive = disabled || nonInteractive;
+
   const fullClassName = buildClassName(
     'Button',
     className,
@@ -118,7 +122,8 @@ const Button: FC<OwnProps> = ({
     round && 'round',
     pill && 'pill',
     fluid && 'fluid',
-    disabled && 'disabled',
+    isNotInteractive && 'disabled',
+    nonInteractive && 'non-interactive',
     allowDisabledClick && 'click-allowed',
     isText && 'text',
     isLoading && 'loading',
@@ -132,7 +137,7 @@ const Button: FC<OwnProps> = ({
   );
 
   const handleClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if ((allowDisabledClick || !disabled) && onClick) {
+    if ((allowDisabledClick || !isNotInteractive) && onClick) {
       onClick(e);
     }
 
@@ -147,7 +152,7 @@ const Button: FC<OwnProps> = ({
   const handleMouseDown = useLastCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
     if (!noPreventDefault) e.preventDefault();
 
-    if ((allowDisabledClick || !disabled) && onMouseDown) {
+    if ((allowDisabledClick || !isNotInteractive) && onMouseDown) {
       onMouseDown(e);
     }
 
@@ -173,7 +178,7 @@ const Button: FC<OwnProps> = ({
         onTransitionEnd={onTransitionEnd}
       >
         {children}
-        {!disabled && ripple && (
+        {!isNotInteractive && ripple && (
           <RippleEffect />
         )}
       </a>
@@ -190,10 +195,10 @@ const Button: FC<OwnProps> = ({
       onContextMenu={onContextMenu}
       onMouseDown={handleMouseDown}
       onMouseUp={onMouseUp}
-      onMouseEnter={onMouseEnter && !disabled ? onMouseEnter : undefined}
-      onMouseLeave={onMouseLeave && !disabled ? onMouseLeave : undefined}
+      onMouseEnter={onMouseEnter && !isNotInteractive ? onMouseEnter : undefined}
+      onMouseLeave={onMouseLeave && !isNotInteractive ? onMouseLeave : undefined}
       onTransitionEnd={onTransitionEnd}
-      onFocus={onFocus && !disabled ? onFocus : undefined}
+      onFocus={onFocus && !isNotInteractive ? onFocus : undefined}
       aria-label={ariaLabel}
       aria-controls={ariaControls}
       aria-haspopup={hasPopup}
@@ -208,7 +213,7 @@ const Button: FC<OwnProps> = ({
           <Spinner color={isText ? 'blue' : 'white'} />
         </div>
       ) : children}
-      {!disabled && ripple && (
+      {!isNotInteractive && ripple && (
         <RippleEffect />
       )}
     </button>

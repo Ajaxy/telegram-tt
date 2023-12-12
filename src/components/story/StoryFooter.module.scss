@@ -53,10 +53,17 @@
   font-size: 1.25rem;
 }
 
-.channelReaction {
+.footerItem {
   display: flex;
   align-items: center;
-  padding-inline-end: 0.5rem;
+
+  &:last-child {
+    padding-inline-end: 0.5rem;
+  }
+
+  & + & {
+    margin-inline-end: 0.5rem;
+  }
 }
 
 .views {
