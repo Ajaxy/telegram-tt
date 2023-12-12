@@ -602,6 +602,8 @@ export type ApiSponsoredMessage = {
   expiresAt: number;
   sponsorInfo?: string;
   additionalInfo?: string;
+  buttonText?: string;
+  botApp?: ApiBotApp;
 };
 
 // KeyboardButtons
@@ -729,6 +731,9 @@ export type ApiBotApp = {
   description: string;
   photo?: ApiPhoto;
   document?: ApiDocument;
+};
+
+export type ApiMessagesBotApp = ApiBotApp & {
   isInactive?: boolean;
   shouldRequestWriteAccess?: boolean;
 };

@@ -10,6 +10,7 @@ import type {
 import { getChatTitle, getUserFullName } from '../../../global/helpers';
 import { selectChat, selectSponsoredMessage, selectUser } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
+import { extractCurrentThemeParams } from '../../../util/themeStyle';
 import { IS_ANDROID, IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import { getPeerColorClass } from '../../common/helpers/peerColor';
 import renderText from '../../common/helpers/renderText';
@@ -57,10 +58,12 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
     viewSponsoredMessage,
     openChat,
     openChatByInvite,
+    requestAppWebView,
     startBot,
     focusMessage,
     openUrl,
     openPremiumModal,
+    clickSponsoredMessage,
   } = getActions();
 
   const lang = useLang();
@@ -84,6 +87,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
   const [isAboutAdsModalOpen, openAboutAdsModal, closeAboutAdsModal] = useFlag(false);
   const { isMobile } = useAppLayout();
   const withAvatar = Boolean(message?.isAvatarShown && peer);
+  const isBotApp = Boolean(message?.botApp);
 
   useEffect(() => {
     return shouldObserve ? observeIntersection(contentRef.current!, (target) => {
@@ -108,6 +112,8 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
   const handleLinkClick = useLastCallback((e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
+
+    clickSponsoredMessage({ chatId });
     openUrl({ url: message!.webPage!.url, shouldSkipModal: true });
 
     return false;
@@ -119,7 +125,20 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
   const handleClick = useLastCallback(() => {
     if (!message) return;
-    if (message.chatInviteHash) {
+
+    clickSponsoredMessage({ chatId });
+
+    if (isBotApp) {
+      const { shortName } = message.botApp!;
+      const theme = extractCurrentThemeParams();
+
+      requestAppWebView({
+        botId: message.chatId!,
+        appName: shortName,
+        startApp: message.startParam,
+        theme,
+      });
+    } else if (message.chatInviteHash) {
       openChatByInvite({ hash: message.chatInviteHash });
     } else if (message.channelPostId) {
       focusMessage({ chatId: message.chatId!, messageId: message.channelPostId });
@@ -147,6 +166,33 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         onClick={peer ? handleAvatarClick : undefined}
       />
     );
+  }
+
+  function renderPhoto() {
+    if (message?.botApp) {
+      if (!message.botApp.photo) return undefined;
+
+      return (
+        <Avatar
+          size="large"
+          peer={bot}
+          photo={message.botApp.photo}
+          className={buildClassName('channel-avatar', lang.isRtl && 'is-rtl')}
+        />
+      );
+    }
+
+    if (channel) {
+      return (
+        <Avatar
+          size="large"
+          peer={channel}
+          className={buildClassName('channel-avatar', lang.isRtl && 'is-rtl')}
+        />
+      );
+    }
+
+    return undefined;
   }
 
   function renderContent() {
@@ -179,12 +225,23 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
       );
     }
 
+    const buttonText = message?.buttonText ?? (
+      isBotApp
+        ? lang('BotWebAppInstantViewOpen')
+        : (message!.isBot
+          ? lang('Conversation.ViewBot')
+          : lang(message!.channelPostId ? 'Conversation.ViewPost' : 'Conversation.ViewChannel')
+        ));
+    const title = isBotApp
+      ? message!.botApp!.title
+      : (bot
+        ? renderText(getUserFullName(bot) || '')
+        : (channel ? renderText(message!.chatInviteTitle || getChatTitle(lang, channel) || '') : '')
+      );
+
     return (
       <>
-        <div className="message-title message-peer" dir="auto">
-          {bot && renderText(getUserFullName(bot) || '')}
-          {channel && renderText(message!.chatInviteTitle || getChatTitle(lang, channel) || '')}
-        </div>
+        <div className="message-title message-peer" dir="auto">{title}</div>
         <div className="text-content with-meta" dir="auto" ref={contentRef}>
           <span className="text-content-inner" dir="auto">
             {renderTextWithEntities({
@@ -201,9 +258,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
           isRectangular
           onClick={handleClick}
         >
-          {lang(message!.isBot
-            ? 'Conversation.ViewBot'
-            : (message!.channelPostId ? 'Conversation.ViewPost' : 'Conversation.ViewChannel'))}
+          {buttonText}
         </Button>
       </>
     );
@@ -211,7 +266,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
 
   const contentClassName = buildClassName(
     'message-content has-shadow has-solid-background has-appendix',
-    getPeerColorClass(peer || channel, true, true),
+    getPeerColorClass(bot || peer || channel),
   );
 
   return (
@@ -228,13 +283,7 @@ const SponsoredMessage: FC<OwnProps & StateProps> = ({
         onContextMenu={handleContextMenu}
       >
         <div className="content-inner" dir="auto">
-          {channel && (
-            <Avatar
-              size="large"
-              peer={channel}
-              className={buildClassName('channel-avatar', lang.isRtl && 'is-rtl')}
-            />
-          )}
+          {renderPhoto()}
           <span className="message-title message-type">
             {message!.isRecommended ? lang('Message.RecommendedLabel') : lang('SponsoredMessage')}
           </span>

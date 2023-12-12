@@ -3,16 +3,21 @@ import { Api as GramJs } from '../../../lib/gramjs';
 
 import type {
   ApiBotApp,
-  ApiChat, ApiInputMessageReplyInfo, ApiPeer, ApiThemeParameters, ApiUser, OnApiUpdate,
+  ApiChat,
+  ApiInputMessageReplyInfo,
+  ApiPeer,
+  ApiThemeParameters,
+  ApiUser,
+  OnApiUpdate,
 } from '../../types';
 
 import { WEB_APP_PLATFORM } from '../../../config';
 import { buildCollectionByKey } from '../../../util/iteratees';
 import {
   buildApiAttachBot,
-  buildApiBotApp,
   buildApiBotInlineMediaResult,
   buildApiBotInlineResult,
+  buildApiMessagesBotApp,
   buildBotSwitchPm,
   buildBotSwitchWebview,
 } from '../apiBuilders/bots';
@@ -255,7 +260,7 @@ export async function fetchBotApp({
     return undefined;
   }
 
-  return buildApiBotApp(result);
+  return buildApiMessagesBotApp(result);
 }
 
 export async function requestAppWebView({

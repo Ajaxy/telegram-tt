@@ -1336,6 +1336,9 @@ export interface ActionPayloads {
   viewSponsoredMessage: {
     chatId: string;
   };
+  clickSponsoredMessage: {
+    chatId: string;
+  };
   loadSendAs: {
     chatId: string;
   };

@@ -9,9 +9,7 @@ import type {
 } from '../../api/types';
 import type { LangFn } from '../../hooks/useLang';
 import type { NotifyException, NotifySettings } from '../../types';
-import {
-  MAIN_THREAD_ID,
-} from '../../api/types';
+import { MAIN_THREAD_ID } from '../../api/types';
 
 import {
   ARCHIVED_FOLDER_ID, CHANNEL_ID_LENGTH, GENERAL_TOPIC_ID, REPLIES_USER_ID, TME_LINK_PREFIX,
@@ -474,11 +472,11 @@ export function getPeerIdDividend(peerId: string) {
 export function getPeerColorKey(peer: ApiPeer | undefined) {
   if (peer?.color?.color) return peer.color.color;
 
-  const index = peer ? getPeerIdDividend(peer.id) % 7 : 0;
-  return index;
+  return peer ? getPeerIdDividend(peer.id) % 7 : 0;
 }
 
 export function getPeerColorCount(peer: ApiPeer) {
   const key = getPeerColorKey(peer);
+  // eslint-disable-next-line eslint-multitab-tt/no-immediate-global
   return getGlobal().peerColors?.general[key].colors?.length || 1;
 }

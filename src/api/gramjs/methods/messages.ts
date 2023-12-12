@@ -1554,6 +1554,13 @@ export async function viewSponsoredMessage({ chat, random }: { chat: ApiChat; ra
   }));
 }
 
+export function clickSponsoredMessage({ chat, random }: { chat: ApiChat; random: string }) {
+  return invokeRequest(new GramJs.channels.ClickSponsoredMessage({
+    channel: buildInputPeer(chat.id, chat.accessHash),
+    randomId: deserializeBytes(random),
+  }));
+}
+
 export function readAllMentions({
   chat,
 }: {

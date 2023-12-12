@@ -1458,6 +1458,17 @@ addActionHandler('viewSponsoredMessage', (global, actions, payload): ActionRetur
   void callApi('viewSponsoredMessage', { chat, random: message.randomId });
 });
 
+addActionHandler('clickSponsoredMessage', (global, actions, payload): ActionReturnType => {
+  const { chatId } = payload;
+  const chat = selectChat(global, chatId);
+  const message = selectSponsoredMessage(global, chatId);
+  if (!chat || !message) {
+    return;
+  }
+
+  void callApi('clickSponsoredMessage', { chat, random: message.randomId });
+});
+
 addActionHandler('fetchUnreadMentions', async (global, actions, payload): Promise<void> => {
   const { chatId, offsetId } = payload;
   const chat = selectChat(global, chatId);

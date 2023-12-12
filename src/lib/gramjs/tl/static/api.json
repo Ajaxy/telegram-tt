@@ -288,6 +288,7 @@
     "channels.updatePinnedForumTopic",
     "channels.deleteTopicHistory",
     "channels.toggleParticipantsHidden",
+    "channels.clickSponsoredMessage",
     "photos.uploadContactProfilePhoto",
     "messages.getMessagesViews",
     "chatlists.exportChatlistInvite",
