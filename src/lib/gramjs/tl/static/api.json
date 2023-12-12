@@ -253,6 +253,7 @@
     "messages.setDefaultReaction",
     "messages.translateText",
     "help.getAppConfig",
+    "help.getPeerColors",
     "stats.getBroadcastStats",
     "stats.getMegagroupStats",
     "stats.getMessageStats",

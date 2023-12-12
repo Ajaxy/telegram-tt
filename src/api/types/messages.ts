@@ -293,6 +293,7 @@ export interface ApiAction {
   slug?: string;
   isGiveaway?: boolean;
   isUnclaimed?: boolean;
+  pluralValue?: number;
 }
 
 export interface ApiWebPage {

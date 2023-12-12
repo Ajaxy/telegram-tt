@@ -15,7 +15,6 @@ import { setTimeFormat } from '../../../util/langProvider';
 import { requestPermission, subscribe, unsubscribe } from '../../../util/notifications';
 import requestActionTimeout from '../../../util/requestActionTimeout';
 import { getServerTime } from '../../../util/serverTime';
-import { updatePeerColors } from '../../../util/theme';
 import { callApi } from '../../../api/gramjs';
 import { buildApiInputPrivacyRules } from '../../helpers';
 import { addActionHandler, getGlobal, setGlobal } from '../../index';
@@ -623,10 +622,6 @@ addActionHandler('loadAppConfig', async (global, actions, payload): Promise<void
     appConfig,
   };
   setGlobal(global);
-
-  if (appConfig.peerColors) {
-    updatePeerColors(appConfig.peerColors, appConfig.darkPeerColors);
-  }
 });
 
 addActionHandler('loadConfig', async (global): Promise<void> => {
@@ -643,6 +638,23 @@ addActionHandler('loadConfig', async (global): Promise<void> => {
   global = {
     ...global,
     config,
+  };
+  setGlobal(global);
+});
+
+addActionHandler('loadPeerColors', async (global): Promise<void> => {
+  const hash = global.peerColors?.generalHash;
+  const result = await callApi('fetchPeerColors', hash);
+  if (!result) return;
+
+  global = getGlobal();
+  global = {
+    ...global,
+    peerColors: {
+      ...global.peerColors,
+      general: result.colors,
+      generalHash: result.hash,
+    },
   };
   setGlobal(global);
 });

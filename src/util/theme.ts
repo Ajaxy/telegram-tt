@@ -1,4 +1,4 @@
-import type { ApiAppConfig } from '../api/types';
+import type { ApiPeerColors } from '../api/types';
 
 import { PEER_COLOR_BG_ACTIVE_OPACITY, PEER_COLOR_BG_OPACITY, PEER_COLOR_GRADIENT_STEP } from '../config';
 import { fastRaf } from './schedulers';
@@ -58,7 +58,7 @@ function buildVariables(map: Map<string, string>) {
 }
 
 export function updatePeerColors(
-  peerColors: ApiAppConfig['peerColors'], darkPeerColors: ApiAppConfig['darkPeerColors'],
+  peerColors: ApiPeerColors['general'],
 ) {
   setPeerColor('0', ['#e17076']);
   setPeerColor('1', ['#faa774']);
@@ -68,10 +68,9 @@ export function updatePeerColors(
   setPeerColor('5', ['#65aadd']);
   setPeerColor('6', ['#ee7aae']);
 
-  Object.keys(peerColors).forEach((key) => {
-    const lightColors = peerColors[key]?.map((color) => `#${color}`);
-    const darkColors = darkPeerColors[key]?.map((color) => `#${color}`);
-    setPeerColor(key, lightColors, darkColors);
+  Object.entries(peerColors).forEach(([key, value]) => {
+    if (!value.colors) return;
+    setPeerColor(key, value.colors, value.darkColors);
   });
 }
 

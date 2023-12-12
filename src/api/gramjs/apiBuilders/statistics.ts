@@ -1,10 +1,12 @@
-import type { Api as GramJs } from '../../../lib/gramjs';
+import { Api as GramJs } from '../../../lib/gramjs';
+
 import type {
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessagePublicForward,
   ApiMessageStatistics,
   StatisticsGraph,
+  StatisticsMessageInteractionCounter,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
   StatisticsOverviewPeriod,
@@ -34,8 +36,22 @@ export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiC
     enabledNotifications: buildStatisticsPercentage(stats.enabledNotifications),
 
     // Recent posts
-    recentTopMessages: stats.recentMessageInteractions,
+    recentTopMessages: stats.recentPostsInteractions.map(buildApiMessageInteractionCounter).filter(Boolean),
   };
+}
+
+export function buildApiMessageInteractionCounter(
+  interaction: GramJs.TypePostInteractionCounters,
+): StatisticsMessageInteractionCounter | undefined {
+  if (interaction instanceof GramJs.PostInteractionCountersMessage) {
+    return {
+      msgId: interaction.msgId,
+      forwards: interaction.forwards,
+      views: interaction.views,
+    };
+  }
+
+  return undefined;
 }
 
 export function buildGroupStatistics(stats: GramJs.stats.MegagroupStats): ApiGroupStatistics {

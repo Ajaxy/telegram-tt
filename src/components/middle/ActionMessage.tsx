@@ -276,7 +276,6 @@ const ActionMessage: FC<OwnProps & StateProps> = ({
     (isGift || isSuggestedAvatar) && 'centered-action',
     isContextMenuShown && 'has-menu-open',
     isLastInList && 'last-in-list',
-    !isGift && !isSuggestedAvatar && !isGiftCode && 'in-one-row',
     transitionClassNames,
   );
 

@@ -10,7 +10,7 @@ import type {
   ApiGroupStatistics,
   ApiMessage,
   StatisticsGraph,
-  StatisticsRecentMessage as StatisticsRecentMessageType,
+  StatisticsMessageInteractionCounter,
 } from '../../../api/types';
 
 import { selectChat, selectChatFullInfo, selectStatistics } from '../../../global/selectors';
@@ -197,7 +197,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
           <h2 className="Statistics__messages-title">{lang('ChannelStats.Recent.Header')}</h2>
 
           {(statistics as ApiChannelStatistics).recentTopMessages.map((message) => (
-            <StatisticsRecentMessage message={message as ApiMessage & StatisticsRecentMessageType} />
+            <StatisticsRecentMessage message={message as ApiMessage & StatisticsMessageInteractionCounter} />
           ))}
         </div>
       )}

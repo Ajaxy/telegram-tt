@@ -40,6 +40,7 @@ import type {
   ApiPaymentCredentials,
   ApiPaymentFormNativeParams,
   ApiPaymentSavedInfo,
+  ApiPeerColors,
   ApiPeerStories,
   ApiPhoneCall,
   ApiPhoto,
@@ -656,6 +657,7 @@ export type TabState = {
 export type GlobalState = {
   config?: ApiConfig;
   appConfig?: ApiAppConfig;
+  peerColors?: ApiPeerColors;
   hasWebAuthTokenFailed?: boolean;
   hasWebAuthTokenPasswordRequired?: true;
   isCacheApiSupported?: boolean;
@@ -2692,6 +2694,7 @@ export interface ActionPayloads {
   loadAppConfig: {
     hash: number;
   } | undefined;
+  loadPeerColors: undefined;
   requestNextSettingsScreen: {
     screen?: SettingsScreens;
     foldersAction?: ReducerAction<FoldersActions>;

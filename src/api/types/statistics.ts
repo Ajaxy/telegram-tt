@@ -14,7 +14,7 @@ export interface ApiChannelStatistics {
   viewsPerPost: StatisticsOverviewItem;
   sharesPerPost: StatisticsOverviewItem;
   enabledNotifications: StatisticsOverviewPercentage;
-  recentTopMessages: Array<StatisticsRecentMessage | StatisticsRecentMessage & ApiMessage>;
+  recentTopMessages: Array<StatisticsMessageInteractionCounter | StatisticsMessageInteractionCounter & ApiMessage>;
 }
 
 export interface ApiGroupStatistics {
@@ -93,7 +93,7 @@ export interface StatisticsOverviewPeriod {
   minDate: number;
 }
 
-export interface StatisticsRecentMessage {
+export interface StatisticsMessageInteractionCounter {
   msgId: number;
   forwards: number;
   views: number;

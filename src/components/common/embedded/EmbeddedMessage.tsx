@@ -202,8 +202,11 @@ const EmbeddedMessage: FC<OwnProps> = ({
       onMouseDown={handleMouseDown}
     >
       {mediaThumbnail && renderPictogram(mediaThumbnail, mediaBlobUrl, isRoundVideo, isProtected, isSpoiler)}
-      {sender?.backgroundEmojiId && (
-        <EmojiIconBackground emojiDocumentId={sender.backgroundEmojiId} className="EmbeddedMessage--background-icons" />
+      {sender?.color?.backgroundEmojiId && (
+        <EmojiIconBackground
+          emojiDocumentId={sender.color.backgroundEmojiId}
+          className="EmbeddedMessage--background-icons"
+        />
       )}
       <div className="message-text">
         <p className="embedded-text-wrapper">

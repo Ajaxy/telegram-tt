@@ -24,6 +24,7 @@ import {
   buildApiConfig,
   buildApiCountryList,
   buildApiNotifyException,
+  buildApiPeerColors,
   buildApiSession,
   buildApiWallpaper,
   buildApiWebSession, buildLangPack, buildLangPackString,
@@ -251,7 +252,7 @@ export async function fetchBlockedUsers({
 export function blockUser({
   user,
   isOnlyStories,
-} : {
+}: {
   user: ApiUser;
   isOnlyStories?: true;
 }) {
@@ -264,7 +265,7 @@ export function blockUser({
 export function unblockUser({
   user,
   isOnlyStories,
-} : {
+}: {
   user: ApiUser;
   isOnlyStories?: true;
 }) {
@@ -563,6 +564,23 @@ export async function fetchConfig(): Promise<ApiConfig | undefined> {
   return buildApiConfig(result);
 }
 
+export async function fetchPeerColors(hash?: number) {
+  const result = await invokeRequest(new GramJs.help.GetPeerColors({
+    hash,
+  }));
+  if (!result) return undefined;
+
+  const colors = buildApiPeerColors(result);
+  if (!colors) return undefined;
+
+  const newHash = result instanceof GramJs.help.PeerColors ? result.hash : undefined;
+
+  return {
+    colors,
+    hash: newHash,
+  };
+}
+
 function updateLocalDb(
   result: (
     GramJs.account.PrivacyRules | GramJs.contacts.Blocked | GramJs.contacts.BlockedSlice |
@@ -596,7 +614,7 @@ export async function fetchGlobalPrivacySettings() {
   };
 }
 
-export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonContact } : {
+export async function updateGlobalPrivacySettings({ shouldArchiveAndMuteNewNonContact }: {
   shouldArchiveAndMuteNewNonContact: boolean;
 }) {
   const result = await invokeRequest(new GramJs.account.SetGlobalPrivacySettings({

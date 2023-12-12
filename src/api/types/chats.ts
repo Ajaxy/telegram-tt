@@ -42,8 +42,7 @@ export interface ApiChat {
   draftDate?: number;
   isProtected?: boolean;
   fakeType?: ApiFakeType;
-  color?: number;
-  backgroundEmojiId?: string;
+  color?: ApiPeerColor;
   isForum?: boolean;
   topics?: Record<number, ApiTopic>;
   listedTopicIds?: number[];
@@ -264,4 +263,9 @@ export interface ApiChatlistExportedInvite {
   title: string;
   url: string;
   peerIds: string[];
+}
+
+export interface ApiPeerColor {
+  color?: number;
+  backgroundEmojiId?: string;
 }

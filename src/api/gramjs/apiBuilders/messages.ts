@@ -343,6 +343,7 @@ function buildAction(
   let slug: string | undefined;
   let isGiveaway: boolean | undefined;
   let isUnclaimed: boolean | undefined;
+  let pluralValue: number | undefined;
 
   const targetUserIds = 'users' in action
     ? action.users && action.users.map((id) => buildApiPeerId(id, 'user'))
@@ -542,6 +543,17 @@ function buildAction(
     if (action.boostPeer) {
       targetChatId = getApiChatIdFromMtpPeer(action.boostPeer);
     }
+  } else if (action instanceof GramJs.MessageActionGiveawayResults) {
+    if (!action.winnersCount) {
+      text = 'lng_action_giveaway_results_none';
+    } else if (action.unclaimedCount) {
+      text = 'lng_action_giveaway_results_some';
+    } else {
+      text = 'BoostingGiveawayServiceWinnersSelected';
+      translationValues.push('%amount%');
+      amount = action.winnersCount;
+      pluralValue = action.winnersCount;
+    }
   } else {
     text = 'ChatList.UnsupportedMessage';
   }
@@ -570,6 +582,7 @@ function buildAction(
     topicEmojiIconId,
     isTopicAction,
     isUnclaimed,
+    pluralValue,
   };
 }
 

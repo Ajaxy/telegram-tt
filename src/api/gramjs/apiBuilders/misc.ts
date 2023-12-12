@@ -3,10 +3,11 @@ import { Api as GramJs } from '../../../lib/gramjs';
 import type { ApiPrivacyKey } from '../../../types';
 import type {
   ApiConfig, ApiCountry, ApiLangString,
+  ApiPeerColors,
   ApiSession, ApiUrlAuthResult, ApiWallpaper, ApiWebSession,
 } from '../../types';
 
-import { omit, pick } from '../../../util/iteratees';
+import { buildCollectionByCallback, omit, pick } from '../../../util/iteratees';
 import { getServerTime } from '../../../util/serverTime';
 import { addUserToLocalDb } from '../helpers';
 import { omitVirtualClassFields } from './helpers';
@@ -231,4 +232,23 @@ export function buildLangPackString(mtpString: GramJs.TypeLangPackString) {
     : mtpString instanceof GramJs.LangPackStringPluralized
       ? omit(omitVirtualClassFields(mtpString), ['key'])
       : undefined;
+}
+
+function buildApiPeerColorSet(colorSet: GramJs.help.TypePeerColorSet) {
+  if (colorSet instanceof GramJs.help.PeerColorSet) {
+    return colorSet.colors.map((color) => `#${color.toString(16).padStart(6, '0')}`);
+  }
+  return undefined;
+}
+
+export function buildApiPeerColors(wrapper: GramJs.help.TypePeerColors): ApiPeerColors['general'] | undefined {
+  if (!(wrapper instanceof GramJs.help.PeerColors)) return undefined;
+
+  return buildCollectionByCallback(wrapper.colors, (color) => {
+    return [color.colorId, {
+      isHidden: color.hidden,
+      colors: color.colors && buildApiPeerColorSet(color.colors),
+      darkColors: color.darkColors && buildApiPeerColorSet(color.darkColors),
+    }];
+  });
 }
