@@ -248,7 +248,7 @@
   }
 
   :global(body.ghost-animating) & {
-    display: none;
+    visibility: hidden;
   }
 }
 
@@ -262,6 +262,8 @@
   height: inherit;
   border-radius: var(--border-radius-default-small);
 
+  transition: opacity 300ms;
+
   @media (max-width: 600px) {
     bottom: 0;
     width: 100%;
@@ -269,7 +271,7 @@
   }
 
   :global(body.ghost-animating) .activeSlide & {
-    display: none;
+    visibility: hidden;
   }
 }
 
