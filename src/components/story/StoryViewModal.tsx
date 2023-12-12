@@ -69,8 +69,7 @@ function StoryViewModal({
 
   const isOpen = Boolean(story);
   const isExpired = Boolean(story?.date) && (story!.date + viewersExpirePeriod) < getServerTime();
-  const viewsCount = story?.viewsCount || 0;
-  const reactionsCount = story?.reactionsCount || 0;
+  const { viewsCount = 0, reactionsCount = 0 } = story?.views || {};
 
   const shouldShowJustContacts = story?.isPublic && viewsCount > STORY_VIEWS_MIN_CONTACTS_FILTER;
   const shouldShowSortByReactions = reactionsCount > STORY_MIN_REACTIONS_SORT;

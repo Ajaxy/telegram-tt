@@ -1,0 +1,127 @@
+.root {
+  position: relative;
+  cursor: var(--custom-cursor, pointer);
+  padding: 0.5rem 0.75rem;
+
+  &:hover, &:active {
+    background-color: var(--color-chat-hover);
+  }
+}
+
+.withImage {
+  padding-left: 3.5rem;
+}
+
+.imageContainer {
+  width: 2.5rem;
+  height: 2.5rem;
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+
+  &::before {
+    content: "";
+    position: absolute;
+    width: 2.75rem;
+    height: 2.75rem;
+    left: -0.25rem;
+    top: -0.25rem;
+    border-radius: 50%;
+    background: var(--color-borders-read-story);
+    background-image: linear-gradient(215.87deg, var(--color-avatar-story-unread-from) -1.61%, var(--color-avatar-story-unread-to) 97.44%);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 2.5rem;
+    height: 2.5rem;
+    left: -0.125rem;
+    top: -0.125rem;
+    border-radius: 50%;
+    z-index: 0;
+    background: var(--color-background);
+  }
+}
+
+.image {
+  width: 2.5rem;
+  height: 2.5rem;
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  margin-inline-end: 0.25rem;
+
+  &.round {
+    border-radius: 0.625rem;
+  }
+
+  &.circle {
+    border-radius: 50%;
+  }
+
+  &:global(.Avatar) {
+    left: 0.375rem;
+    top: 0.375rem;
+  }
+
+  &.withStoryCircle {
+    top: 0;
+    left: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    z-index: 1;
+  }
+}
+
+.summary {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 0.75rem;
+
+  :global(.icon-play) {
+    position: relative;
+    display: inline-block;
+    font-size: 0.75rem;
+    color: #fff;
+    margin-inline-start: -1.25rem;
+    margin-inline-end: 0.5rem;
+    bottom: 0.0625rem;
+  }
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  line-height: 1.25rem;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  color: var(--color-text-meta);
+}
+
+.meta {
+  font-size: 0.75rem;
+}
+
+.metaWithIcon {
+  margin-inline-start: 0.375rem;
+}
+
+.metaIcon {
+  font-size: 0.875rem;
+  vertical-align: -0.125rem;
+  margin-inline-end: 0.125rem;
+}
+
+.date {
+  flex: 1;
+  font-size: 0.8125rem;
+}

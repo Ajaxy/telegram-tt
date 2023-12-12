@@ -18,15 +18,19 @@ export interface ApiStory {
   isPublic?: boolean;
   isOut?: true;
   noForwards?: boolean;
+  views?: ApiStoryViews;
+  visibility?: ApiPrivacySettings;
+  sentReaction?: ApiReaction;
+  mediaAreas?: ApiMediaArea[];
+  forwardInfo?: ApiStoryForwardInfo;
+}
+
+export interface ApiStoryViews {
   viewsCount?: number;
   forwardsCount?: number;
   reactionsCount?: number;
   reactions?: ApiReactionCount[];
   recentViewerIds?: string[];
-  visibility?: ApiPrivacySettings;
-  sentReaction?: ApiReaction;
-  mediaAreas?: ApiMediaArea[];
-  forwardInfo?: ApiStoryForwardInfo;
 }
 
 export interface ApiStorySkipped {

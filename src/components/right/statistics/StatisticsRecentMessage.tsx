@@ -18,13 +18,17 @@ import { renderMessageSummary } from '../../common/helpers/renderMessageText';
 import useLang from '../../../hooks/useLang';
 import useMedia from '../../../hooks/useMedia';
 
-import './StatisticsRecentMessage.scss';
+import Icon from '../../common/Icon';
+import StatisticsRecentPostMeta from './StatisticsRecentPostMeta';
+
+import styles from './StatisticsRecentPost.module.scss';
 
 export type OwnProps = {
-  message: ApiMessage & StatisticsMessageInteractionCounter;
+  postStatistic: StatisticsMessageInteractionCounter;
+  message: ApiMessage;
 };
 
-const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
+const StatisticsRecentMessage: FC<OwnProps> = ({ postStatistic, message }) => {
   const lang = useLang();
   const { toggleMessageStatistics } = getActions();
 
@@ -39,27 +43,25 @@ const StatisticsRecentMessage: FC<OwnProps> = ({ message }) => {
   return (
     <div
       className={buildClassName(
-        'StatisticsRecentMessage',
-        Boolean(mediaBlobUrl || mediaThumbnail) && 'StatisticsRecentMessage--with-image',
+        styles.root,
+        Boolean(mediaBlobUrl || mediaThumbnail) && styles.withImage,
       )}
       onClick={handleClick}
     >
-      <div className="StatisticsRecentMessage__title">
-        <div className="StatisticsRecentMessage__summary">
+      <div className={styles.title}>
+        <div className={styles.summary}>
           {renderSummary(lang, message, mediaBlobUrl || mediaThumbnail, isRoundVideo)}
         </div>
-        <div className="StatisticsRecentMessage__meta">
-          {lang('ChannelStats.ViewsCount', message.views, 'i')}
+        <div className={styles.meta}>
+          {lang('ChannelStats.ViewsCount', postStatistic.viewsCount, 'i')}
         </div>
       </div>
 
-      <div className="StatisticsRecentMessage__info">
-        <div className="StatisticsRecentMessage__date">
+      <div className={styles.info}>
+        <div className={styles.date}>
           {formatDateTimeToString(message.date * 1000, lang.code)}
         </div>
-        <div className="StatisticsRecentMessage__meta">
-          {message.forwards ? lang('ChannelStats.SharesCount', message.forwards) : 'No shares'}
-        </div>
+        <StatisticsRecentPostMeta postStatistic={postStatistic} />
       </div>
     </div>
   );
@@ -71,14 +73,14 @@ function renderSummary(lang: LangFn, message: ApiMessage, blobUrl?: string, isRo
   }
 
   return (
-    <span className="media-preview">
+    <span>
       <img
         src={blobUrl}
         alt=""
         draggable={false}
-        className={buildClassName('media-preview__image', isRoundVideo && 'round')}
+        className={buildClassName(styles.image, isRoundVideo && styles.round)}
       />
-      {getMessageVideo(message) && <i className="icon icon-play" />}
+      {getMessageVideo(message) && <Icon name="play" />}
       {renderMessageSummary(lang, message, true)}
     </span>
   );

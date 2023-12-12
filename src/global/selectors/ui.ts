@@ -37,6 +37,8 @@ export function selectRightColumnContentKey<T extends GlobalState>(
     RightColumnContent.Management
   ) : tabState.isStatisticsShown && tabState.statistics.currentMessageId ? (
     RightColumnContent.MessageStatistics
+  ) : tabState.isStatisticsShown && tabState.statistics.currentStoryId ? (
+    RightColumnContent.StoryStatistics
   ) : selectIsStatisticsShown(global, tabId) ? (
     RightColumnContent.Statistics
   ) : tabState.boostStatistics ? (

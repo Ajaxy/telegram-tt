@@ -4,16 +4,19 @@ import type {
   ApiChannelStatistics,
   ApiGroupStatistics,
   ApiMessagePublicForward,
-  ApiMessageStatistics,
+  ApiPostStatistics,
+  ApiStoryPublicForward,
   StatisticsGraph,
   StatisticsMessageInteractionCounter,
   StatisticsOverviewItem,
   StatisticsOverviewPercentage,
   StatisticsOverviewPeriod,
+  StatisticsStoryInteractionCounter,
 } from '../../types';
 
 import { buildAvatarHash } from './chats';
-import { buildApiPeerId } from './peers';
+import { buildApiUsernames } from './common';
+import { buildApiPeerId, getApiChatIdFromMtpPeer } from './peers';
 
 export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiChannelStatistics {
   return {
@@ -28,26 +31,43 @@ export function buildChannelStatistics(stats: GramJs.stats.BroadcastStats): ApiC
     viewsBySourceGraph: (stats.viewsBySourceGraph as GramJs.StatsGraphAsync).token,
     newFollowersBySourceGraph: (stats.newFollowersBySourceGraph as GramJs.StatsGraphAsync).token,
     interactionsGraph: (stats.interactionsGraph as GramJs.StatsGraphAsync).token,
+    reactionsByEmotionGraph: (stats.reactionsByEmotionGraph as GramJs.StatsGraphAsync).token,
+    storyInteractionsGraph: (stats.storyInteractionsGraph as GramJs.StatsGraphAsync).token,
+    storyReactionsByEmotionGraph: (stats.storyReactionsByEmotionGraph as GramJs.StatsGraphAsync).token,
 
     // Statistics overview
     followers: buildStatisticsOverview(stats.followers),
     viewsPerPost: buildStatisticsOverview(stats.viewsPerPost),
     sharesPerPost: buildStatisticsOverview(stats.sharesPerPost),
     enabledNotifications: buildStatisticsPercentage(stats.enabledNotifications),
+    reactionsPerPost: buildStatisticsOverview(stats.reactionsPerPost),
+    viewsPerStory: buildStatisticsOverview(stats.viewsPerStory),
+    sharesPerStory: buildStatisticsOverview(stats.sharesPerStory),
+    reactionsPerStory: buildStatisticsOverview(stats.reactionsPerStory),
 
     // Recent posts
-    recentTopMessages: stats.recentPostsInteractions.map(buildApiMessageInteractionCounter).filter(Boolean),
+    recentPosts: stats.recentPostsInteractions.map(buildApiPostInteractionCounter).filter(Boolean),
   };
 }
 
-export function buildApiMessageInteractionCounter(
+export function buildApiPostInteractionCounter(
   interaction: GramJs.TypePostInteractionCounters,
-): StatisticsMessageInteractionCounter | undefined {
+): StatisticsMessageInteractionCounter | StatisticsStoryInteractionCounter | undefined {
   if (interaction instanceof GramJs.PostInteractionCountersMessage) {
     return {
       msgId: interaction.msgId,
-      forwards: interaction.forwards,
-      views: interaction.views,
+      forwardsCount: interaction.forwards,
+      viewsCount: interaction.views,
+      reactionsCount: interaction.reactions,
+    };
+  }
+
+  if (interaction instanceof GramJs.PostInteractionCountersStory) {
+    return {
+      storyId: interaction.storyId,
+      reactionsCount: interaction.reactions,
+      viewsCount: interaction.views,
+      forwardsCount: interaction.forwards,
     };
   }
 
@@ -75,9 +95,10 @@ export function buildGroupStatistics(stats: GramJs.stats.MegagroupStats): ApiGro
   };
 }
 
-export function buildMessageStatistics(stats: GramJs.stats.MessageStats): ApiMessageStatistics {
+export function buildPostsStatistics(stats: GramJs.stats.MessageStats): ApiPostStatistics {
   return {
     viewsGraph: buildGraph(stats.viewsGraph),
+    reactionsGraph: buildGraph(stats.reactionsByEmotionGraph),
   };
 }
 
@@ -88,22 +109,30 @@ export function buildMessagePublicForwards(
     return undefined;
   }
 
-  return result.messages.map((message) => {
-    const peerId = buildApiPeerId((message.peerId as GramJs.PeerChannel).channelId, 'channel');
-    const channel = result.chats.find((p) => buildApiPeerId(p.id, 'channel') === peerId);
+  return result.messages.map((message) => buildApiMessagePublicForward(message, result.chats));
+}
+
+export function buildStoryPublicForwards(
+  result: GramJs.stats.PublicForwards,
+): Array<ApiStoryPublicForward | ApiMessagePublicForward> | undefined {
+  if (!result || !('forwards' in result)) {
+    return undefined;
+  }
+
+  return result.forwards.map((forward) => {
+    if (forward instanceof GramJs.PublicForwardMessage) {
+      return buildApiMessagePublicForward(forward.message, result.chats);
+    }
+
+    const { peer, story } = forward;
+    const peerId = getApiChatIdFromMtpPeer(peer);
 
     return {
-      messageId: message.id,
-      views: (message as GramJs.Message).views,
-      title: (channel as GramJs.Channel).title,
-      chat: {
-        id: peerId,
-        type: 'chatTypeChannel',
-        title: (channel as GramJs.Channel).title,
-        username: (channel as GramJs.Channel).username,
-        avatarHash: buildAvatarHash((channel as GramJs.Channel).photo),
-      },
-    };
+      peerId,
+      storyId: story.id,
+      viewsCount: (story as GramJs.StoryItem).views?.viewsCount || 0,
+      reactionsCount: (story as GramJs.StoryItem).views?.reactionsCount || 0,
+    } as ApiStoryPublicForward;
   });
 }
 
@@ -189,5 +218,25 @@ function getOverviewPeriod(data: GramJs.StatsDateRangeDays): StatisticsOverviewP
   return {
     maxDate: data.maxDate,
     minDate: data.minDate,
+  };
+}
+
+function buildApiMessagePublicForward(message: GramJs.TypeMessage, chats: GramJs.TypeChat[]): ApiMessagePublicForward {
+  const peerId = getApiChatIdFromMtpPeer(message.peerId!);
+  const channel = chats.find((c) => buildApiPeerId(c.id, 'channel') === peerId);
+
+  return {
+    messageId: message.id,
+    views: (message as GramJs.Message).views,
+    title: (channel as GramJs.Channel).title,
+    chat: {
+      id: peerId,
+      type: 'chatTypeChannel',
+      title: (channel as GramJs.Channel).title,
+      usernames: buildApiUsernames(channel as GramJs.Channel),
+      avatarHash: channel && 'photo' in channel
+        ? buildAvatarHash((channel as GramJs.Channel).photo)
+        : undefined,
+    },
   };
 }

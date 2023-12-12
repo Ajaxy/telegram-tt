@@ -6,6 +6,7 @@ import type {
   ApiStoryDeleted,
   ApiStorySkipped,
   ApiStoryView,
+  ApiStoryViews,
   ApiTypeStory,
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
@@ -317,17 +318,21 @@ export function updateSentStoryReaction<T extends GlobalState>(
   const story = selectPeerStory(global, peerId, storyId);
   if (!story || !('content' in story)) return global;
 
-  const reactionsCount = story.reactionsCount || 0;
-  const hasReaction = story.reactions?.some((r) => r.chosenOrder !== undefined);
-  const reactions = updateReactionCount(story.reactions || [], [reaction].filter(Boolean));
+  const { views } = story;
+  const reactionsCount = views?.reactionsCount || 0;
+  const hasReaction = views?.reactions?.some((r) => r.chosenOrder !== undefined);
+  const reactions = updateReactionCount(views?.reactions || [], [reaction].filter(Boolean));
 
   const countDiff = !reaction ? -1 : hasReaction ? 0 : 1;
   const newReactionsCount = reactionsCount + countDiff;
 
   global = updatePeerStory(global, peerId, storyId, {
     sentReaction: reaction,
-    reactionsCount: newReactionsCount,
-    reactions,
+    views: {
+      ...views,
+      reactionsCount: newReactionsCount,
+      reactions,
+    },
   });
 
   return global;
@@ -362,6 +367,25 @@ export function updatePeerStory<T extends GlobalState>(
       },
     },
   };
+}
+
+export function updatePeerStoryViews<T extends GlobalState>(
+  global: T,
+  peerId: string,
+  storyId: number,
+  viewsUpdate: Partial<ApiStoryViews>,
+): T {
+  const story = selectPeerStory(global, peerId, storyId);
+  if (!story || !('content' in story)) return global;
+
+  const { views } = story;
+
+  return updatePeerStory(global, peerId, storyId, {
+    views: {
+      ...views,
+      ...viewsUpdate,
+    },
+  });
 }
 
 export function updatePeerPinnedStory<T extends GlobalState>(

@@ -1776,8 +1776,8 @@ addActionHandler('loadMessageViews', async (global, actions, payload): Promise<v
   global = addChats(global, buildCollectionByKey(result.chats, 'id'));
   result.viewsInfo.forEach((update) => {
     global = updateChatMessage(global, chatId, update.id, {
-      views: update.views,
-      forwards: update.forwards,
+      viewsCount: update.views,
+      forwardsCount: update.forwards,
     });
 
     global = updateThreadInfo(global, chatId, update.id, update.threadInfo);

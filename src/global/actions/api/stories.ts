@@ -20,6 +20,7 @@ import {
   updatePeerPinnedStory,
   updatePeerStoriesHidden,
   updatePeerStory,
+  updatePeerStoryViews,
   updatePeersWithStories,
   updateSentStoryReaction,
   updateStealthMode,
@@ -360,7 +361,7 @@ addActionHandler('loadStoryViews', async (global, actions, payload): Promise<voi
 
   if (isPreload && result.views?.length) {
     const recentViewerIds = result.views.map((view) => view.userId);
-    global = updatePeerStory(global, peerId, storyId, {
+    global = updatePeerStoryViews(global, peerId, storyId, {
       recentViewerIds,
       viewsCount: result.viewsCount,
       reactionsCount: result.reactionsCount,

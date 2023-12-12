@@ -5,36 +5,37 @@ import { getActions } from '../../../global';
 import type { ApiMessagePublicForward } from '../../../api/types';
 
 import { getMainUsername } from '../../../global/helpers';
+import buildClassName from '../../../util/buildClassName';
 
 import useLang from '../../../hooks/useLang';
 
 import Avatar from '../../common/Avatar';
 
-import './StatisticsPublicForward.scss';
+import styles from './StatisticsPublicForward.module.scss';
 
 export type OwnProps = {
   data: ApiMessagePublicForward;
 };
 
-const StatisticsPublicForward: FC<OwnProps> = ({ data }) => {
+const StatisticsMessagePublicForward: FC<OwnProps> = ({ data }) => {
   const lang = useLang();
   const { openChatByUsername } = getActions();
 
-  const username = useMemo(() => getMainUsername(data.chat), [data.chat]);
+  const username = useMemo(() => (data.chat ? getMainUsername(data.chat) : undefined), [data.chat]);
   const handleClick = useCallback(() => {
     openChatByUsername({ username: username!, messageId: data.messageId });
   }, [data.messageId, openChatByUsername, username]);
 
   return (
-    <div className="StatisticsPublicForward" onClick={handleClick}>
+    <div className={buildClassName(styles.root, 'statistic-public-forward')} onClick={handleClick}>
       <Avatar size="medium" peer={data.chat} />
 
-      <div className="StatisticsPublicForward__info">
-        <div className="StatisticsPublicForward__title">
+      <div>
+        <div className={styles.title}>
           {data.title}
         </div>
 
-        <div className="StatisticsPublicForward__views">
+        <div className={styles.views}>
           {lang('ChannelStats.ViewsCount', data.views, 'i')}
         </div>
       </div>
@@ -42,4 +43,4 @@ const StatisticsPublicForward: FC<OwnProps> = ({ data }) => {
   );
 };
 
-export default memo(StatisticsPublicForward);
+export default memo(StatisticsMessagePublicForward);

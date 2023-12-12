@@ -295,7 +295,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
     }
     const global = getGlobal();
     const ids = messageIds.filter((id) => selectThreadInfo(global, chatId, id)?.isCommentsInfo
-      || messagesById[id]?.views !== undefined);
+      || messagesById[id]?.viewsCount !== undefined);
 
     if (!ids.length) return;
 

@@ -94,7 +94,7 @@ export {
 
 export {
   fetchChannelStatistics, fetchGroupStatistics, fetchMessageStatistics,
-  fetchMessagePublicForwards, fetchStatisticsAsyncGraph,
+  fetchMessagePublicForwards, fetchStatisticsAsyncGraph, fetchStoryStatistics, fetchStoryPublicForwards,
 } from './statistics';
 
 export {
