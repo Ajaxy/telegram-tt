@@ -209,7 +209,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
         />
       )}
       <div className="message-text">
-        <p className="embedded-text-wrapper">
+        <p className={buildClassName('embedded-text-wrapper', isQuote && 'multiline')}>
           {renderTextContent()}
         </p>
         <div className="message-title">

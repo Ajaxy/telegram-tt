@@ -16,9 +16,11 @@ const FIRST_PRELOAD_DELAY = 1000;
 const canPreload = pause(FIRST_PRELOAD_DELAY);
 
 function useStoryPreloader(peerIds: string[]): void;
-function useStoryPreloader(peerId: string, aroundStoryId?: number): void;
-function useStoryPreloader(peerId: string | string[], aroundStoryId?: number) {
+function useStoryPreloader(peerId?: string, aroundStoryId?: number): void;
+function useStoryPreloader(peerId?: string | string[], aroundStoryId?: number) {
   useEffect(() => {
+    if (peerId === undefined) return;
+
     const preloadHashes = async (mediaHashes: { hash: string; format: ApiMediaFormat }[]) => {
       await canPreload;
       mediaHashes.forEach(({ hash, format }) => {

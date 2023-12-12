@@ -366,6 +366,12 @@ export interface ApiMessageForwardInfo {
   postAuthorTitle?: string;
 }
 
+export interface ApiStoryForwardInfo {
+  fromPeerId?: string;
+  fromName?: string;
+  storyId?: number;
+}
+
 export type ApiMessageEntityDefault = {
   type: Exclude<
   `${ApiMessageEntityTypes}`,

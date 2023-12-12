@@ -123,12 +123,15 @@
       text-overflow: ellipsis;
       height: 1.125rem;
       margin-bottom: 0;
-      flex: 1;
 
       &::after {
         content: none;
         display: none;
       }
+    }
+
+    .multiline {
+      flex: 1;
     }
 
     .emoji {

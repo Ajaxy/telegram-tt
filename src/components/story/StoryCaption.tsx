@@ -13,6 +13,7 @@ import useLang from '../../hooks/useLang';
 import usePrevDuringAnimation from '../../hooks/usePrevDuringAnimation';
 import useShowTransition from '../../hooks/useShowTransition';
 
+import EmbeddedStoryForward from '../common/embedded/EmbeddedStoryForward';
 import MessageText from '../common/MessageText';
 
 import styles from './StoryViewer.module.scss';
@@ -27,6 +28,7 @@ interface OwnProps {
 
 const EXPAND_ANIMATION_DURATION_MS = 400;
 const OVERFLOW_THRESHOLD_PX = 5.75 * REM;
+const LINES_TO_SHOW = 3;
 
 function StoryCaption({
   story, isExpanded, className, onExpand, onFold,
@@ -36,6 +38,8 @@ function StoryCaption({
   const ref = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const contentRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line no-null/no-null
+  const textRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line no-null/no-null
   const showMoreButtonRef = useRef<HTMLDivElement>(null);
 
@@ -74,15 +78,22 @@ function StoryCaption({
   );
 
   useEffect(() => {
-    if (!showMoreButtonRef.current || !contentRef.current) {
+    if (!showMoreButtonRef.current || !contentRef.current || !textRef.current) {
       return;
     }
 
-    const button = showMoreButtonRef.current;
     const container = contentRef.current;
+    const textContainer = textRef.current;
+
+    const textOffsetTop = textContainer.offsetTop;
+    const lineHeight = parseInt(getComputedStyle(textContainer).lineHeight, 10);
+    const overflowShift = textOffsetTop + lineHeight * LINES_TO_SHOW;
+
+    const button = showMoreButtonRef.current;
 
     const { offsetWidth } = button;
     requestMutation(() => {
+      container.style.setProperty('--_overflow-shift', `${overflowShift}px`);
       container.style.setProperty('--expand-button-width', `${offsetWidth}px`);
     });
   }, [canExpand]);
@@ -112,11 +123,19 @@ function StoryCaption({
           ref={ref}
           className={buildClassName(styles.captionInner, 'allow-selection', 'custom-scroll')}
         >
-          <MessageText
-            messageOrStory={story}
-            withTranslucentThumbs
-            forcePlayback
-          />
+          {story.forwardInfo && (
+            <EmbeddedStoryForward
+              forwardInfo={story.forwardInfo}
+              className={styles.forwardInfo}
+            />
+          )}
+          <div ref={textRef} className={styles.captionText}>
+            <MessageText
+              messageOrStory={story}
+              withTranslucentThumbs
+              forcePlayback
+            />
+          </div>
         </div>
       </div>
       {shouldRenderShowMore && (

@@ -1,6 +1,6 @@
 import type { ApiPrivacySettings } from '../../types';
 import type {
-  ApiGeoPoint, ApiReaction, ApiReactionCount, MediaContent,
+  ApiGeoPoint, ApiReaction, ApiReactionCount, ApiStoryForwardInfo, MediaContent,
 } from './messages';
 
 export interface ApiStory {
@@ -25,6 +25,7 @@ export interface ApiStory {
   visibility?: ApiPrivacySettings;
   sentReaction?: ApiReaction;
   mediaAreas?: ApiMediaArea[];
+  forwardInfo?: ApiStoryForwardInfo;
 }
 
 export interface ApiStorySkipped {
