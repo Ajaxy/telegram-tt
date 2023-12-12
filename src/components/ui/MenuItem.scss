@@ -217,6 +217,12 @@
     overflow: hidden;
     background-repeat: no-repeat;
     vertical-align: inherit;
+
+    :global(.no-photo) {
+      border-radius: inherit;
+      font-size: 10px;
+      white-space: nowrap;
+    }
   }
 }
 
