@@ -96,7 +96,7 @@
   }
 
   .message-content:not(.has-reactions) & {
-    margin-bottom: 1rem !important;
+    margin-bottom: calc(var(--message-meta-height) + 0.375rem) !important;
   }
 
   &.with-square-photo .WebPage--content {
