@@ -23,6 +23,7 @@
   }
 
   & .embedded-left-icon {
+    position: relative;
     flex-shrink: 0;
     background: none !important;
     height: 2.625rem;
@@ -61,6 +62,17 @@
 
     .icon-placeholder {
       width: 1.5rem;
+    }
+  }
+
+  .quote-reply {
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+    font-size: 0.5rem;
+
+    @media (max-width: 600px) {
+      right: 0.625rem;
     }
   }
 }

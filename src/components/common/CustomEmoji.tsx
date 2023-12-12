@@ -127,7 +127,14 @@ const CustomEmoji: FC<OwnProps> = ({
       data-alt={customEmoji?.emoji}
       style={style}
     >
-      <img className={styles.highlightCatch} src={blankImg} alt={customEmoji?.emoji} draggable={false} />
+      <img
+        className={styles.highlightCatch}
+        src={blankImg}
+        alt={customEmoji?.emoji}
+        data-entity-type={ApiMessageEntityTypes.CustomEmoji}
+        data-document-id={documentId}
+        draggable={false}
+      />
       {!customEmoji ? (
         <img className={styles.thumb} src={svgPlaceholder} alt="Emoji" draggable={false} />
       ) : (

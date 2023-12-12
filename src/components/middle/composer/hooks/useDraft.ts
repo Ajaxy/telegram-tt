@@ -11,7 +11,7 @@ import {
   requestMeasure, requestNextMutation,
 } from '../../../../lib/fasterdom/fasterdom';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import parseMessageInput from '../../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import { IS_TOUCH_ENV } from '../../../../util/windowEnvironment';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
@@ -77,7 +77,7 @@ const useDraft = ({
       saveDraft({
         chatId: prevState.chatId ?? chatId,
         threadId: prevState.threadId ?? threadId,
-        text: parseMessageInput(html),
+        text: parseHtmlAsFormattedText(html),
       });
     } else {
       clearDraft({

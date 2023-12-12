@@ -886,6 +886,7 @@ function buildReplyInfo(inputInfo: ApiInputReplyInfo, isForum?: boolean): ApiRep
     replyToPeerId: inputInfo.replyToPeerId,
     quoteText: inputInfo.quoteText,
     isForumTopic: isForum && inputInfo.replyToTopId ? true : undefined,
+    ...(Boolean(inputInfo.quoteText) && { isQuote: true }),
   };
 }
 

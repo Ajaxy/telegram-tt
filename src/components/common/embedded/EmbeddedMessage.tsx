@@ -51,6 +51,7 @@ type OwnProps = {
   customText?: string;
   noUserColors?: boolean;
   isProtected?: boolean;
+  isInComposer?: boolean;
   chatTranslations?: ChatTranslatedMessages;
   requestedChatTranslationLanguage?: string;
   observeIntersectionForLoading?: ObserveFn;
@@ -71,6 +72,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
   title,
   customText,
   isProtected,
+  isInComposer,
   noUserColors,
   chatTranslations,
   requestedChatTranslationLanguage,
@@ -118,6 +120,7 @@ const EmbeddedMessage: FC<OwnProps> = ({
       return renderTextWithEntities({
         text: replyInfo.quoteText.text,
         entities: replyInfo.quoteText.entities,
+        noLineBreaks: isInComposer,
       });
     }
 
@@ -173,7 +176,11 @@ const EmbeddedMessage: FC<OwnProps> = ({
 
     return (
       <>
-        {!isChatSender && <span className="embedded-sender">{renderText(senderTitle)}</span>}
+        {!isChatSender && (
+          <span className="embedded-sender">
+            {renderText(isInComposer ? lang('ReplyToQuote', senderTitle) : senderTitle)}
+          </span>
+        )}
         {icon && <Icon name={icon} className="embedded-chat-icon" />}
         {icon && senderChatTitle && renderText(senderChatTitle)}
       </>

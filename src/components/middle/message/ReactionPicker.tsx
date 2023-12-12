@@ -14,7 +14,7 @@ import {
   selectPeerStory, selectTabState,
 } from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
-import parseMessageInput from '../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { REM } from '../../common/helpers/mediaDimensions';
 import { buildCustomEmojiHtml } from '../composer/helpers/customEmoji';
 
@@ -162,7 +162,7 @@ const ReactionPicker: FC<OwnProps & StateProps> = ({
     if ('emoticon' in item) {
       text = item.emoticon;
     } else {
-      const customEmojiMessage = parseMessageInput(buildCustomEmojiHtml(sticker!));
+      const customEmojiMessage = parseHtmlAsFormattedText(buildCustomEmojiHtml(sticker!));
       text = customEmojiMessage.text;
       entities = customEmojiMessage.entities;
     }

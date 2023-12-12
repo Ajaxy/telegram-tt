@@ -16,7 +16,7 @@ import { copyHtmlToClipboard } from '../../../util/clipboard';
 import { getCurrentTabId } from '../../../util/establishMultitabRole';
 import { compact, findLast } from '../../../util/iteratees';
 import * as langProvider from '../../../util/langProvider';
-import parseMessageInput from '../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 import { getServerTime } from '../../../util/serverTime';
 import { IS_TOUCH_ENV } from '../../../util/windowEnvironment';
 import versionNotification from '../../../versionNotification.txt';
@@ -689,7 +689,7 @@ addActionHandler('checkVersionNotification', (global, actions): ActionReturnType
     chatId: SERVICE_NOTIFICATIONS_USER_ID,
     date: getServerTime(),
     content: {
-      text: parseMessageInput(versionNotification, true),
+      text: parseHtmlAsFormattedText(versionNotification, true),
     },
     isOutgoing: false,
   };

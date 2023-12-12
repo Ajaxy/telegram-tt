@@ -8,7 +8,7 @@ import type { ApiNewPoll } from '../../../api/types';
 
 import { requestNextMutation } from '../../../lib/fasterdom/fasterdom';
 import captureEscKeyListener from '../../../util/captureEscKeyListener';
-import parseMessageInput from '../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../util/parseHtmlAsFormattedText';
 
 import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
@@ -142,7 +142,8 @@ const PollModal: FC<OwnProps> = ({
     };
 
     if (isQuizMode) {
-      const { text, entities } = (solution && parseMessageInput(solution.substring(0, MAX_SOLUTION_LENGTH))) || {};
+      const { text, entities } = (solution && parseHtmlAsFormattedText(solution.substring(0, MAX_SOLUTION_LENGTH)))
+        || {};
 
       payload.quiz = {
         correctAnswers: [String(correctOption)],

@@ -53,6 +53,7 @@ type OwnProps = {
   maxUniqueReactions?: number;
   canReschedule?: boolean;
   canReply?: boolean;
+  canQuote?: boolean;
   repliesThreadInfo?: ApiThreadInfo;
   canPin?: boolean;
   canUnpin?: boolean;
@@ -140,6 +141,7 @@ const MessageContextMenu: FC<OwnProps> = ({
   canReschedule,
   canBuyPremium,
   canReply,
+  canQuote,
   canEdit,
   noReplies,
   canPin,
@@ -361,7 +363,11 @@ const MessageContextMenu: FC<OwnProps> = ({
         {canReschedule && (
           <MenuItem icon="schedule" onClick={onReschedule}>{lang('MessageScheduleEditTime')}</MenuItem>
         )}
-        {canReply && <MenuItem icon="reply" onClick={onReply}>{lang('Reply')}</MenuItem>}
+        {canReply && (
+          <MenuItem icon="reply" onClick={onReply}>
+            {lang(canQuote ? 'lng_context_quote_and_reply' : 'Reply')}
+          </MenuItem>
+        )}
         {!noReplies && Boolean(repliesThreadInfo?.messagesCount) && (
           <MenuItem icon="replies" onClick={onOpenThread}>
             {lang('Conversation.ContextViewReplies', repliesThreadInfo!.messagesCount, 'i')}

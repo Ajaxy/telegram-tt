@@ -85,7 +85,7 @@ import { formatMediaDuration, formatVoiceRecordDuration } from '../../util/dateF
 import deleteLastCharacterOutsideSelection from '../../util/deleteLastCharacterOutsideSelection';
 import focusEditableElement from '../../util/focusEditableElement';
 import { MEMO_EMPTY_ARRAY } from '../../util/memo';
-import parseMessageInput from '../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../util/parseHtmlAsFormattedText';
 import { insertHtmlInSelection } from '../../util/selection';
 import { getServerTime } from '../../util/serverTime';
 import { IS_IOS, IS_VOICE_RECORDING_SUPPORTED } from '../../util/windowEnvironment';
@@ -869,7 +869,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       return;
     }
 
-    const { text, entities } = parseMessageInput(getHtml());
+    const { text, entities } = parseHtmlAsFormattedText(getHtml());
     if (!text && !attachmentsToSend.length) {
       return;
     }
@@ -931,7 +931,7 @@ const Composer: FC<OwnProps & StateProps> = ({
       }
     }
 
-    const { text, entities } = parseMessageInput(getHtml());
+    const { text, entities } = parseHtmlAsFormattedText(getHtml());
 
     if (currentAttachments.length) {
       sendAttachments({
@@ -1398,7 +1398,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         showCustomEmojiPremiumNotification();
         return;
       }
-      const customEmojiMessage = parseMessageInput(buildCustomEmojiHtml(sticker));
+      const customEmojiMessage = parseHtmlAsFormattedText(buildCustomEmojiHtml(sticker));
       text = customEmojiMessage.text;
       entities = customEmojiMessage.entities;
     }

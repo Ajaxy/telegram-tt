@@ -2,7 +2,7 @@ import { ApiMessageEntityTypes } from '../../../../api/types';
 
 import { DEBUG } from '../../../../config';
 import cleanDocsHtml from '../../../../lib/cleanDocsHtml';
-import { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseMessageInput';
+import { ENTITY_CLASS_BY_NODE_NAME } from '../../../../util/parseHtmlAsFormattedText';
 
 const STYLE_TAG_REGEX = /<style>(.*?)<\/style>/gs;
 

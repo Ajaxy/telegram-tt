@@ -10,7 +10,7 @@ import { EDITABLE_INPUT_CSS_SELECTOR } from '../../../../config';
 import { requestMeasure, requestNextMutation } from '../../../../lib/fasterdom/fasterdom';
 import { hasMessageMedia } from '../../../../global/helpers';
 import focusEditableElement from '../../../../util/focusEditableElement';
-import parseMessageInput from '../../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import { getTextWithEntitiesAsHtml } from '../../../common/helpers/renderTextWithEntities';
 
 import { useDebouncedResolver } from '../../../../hooks/useAsyncResolvers';
@@ -87,7 +87,7 @@ const useEditing = (
   useEffect(() => {
     if (!editedMessage) return undefined;
     return () => {
-      const edited = parseMessageInput(getHtml());
+      const edited = parseHtmlAsFormattedText(getHtml());
       const update = edited.text.length ? edited : undefined;
 
       setEditingDraft({
@@ -99,7 +99,7 @@ const useEditing = (
   const detectLinkDebounced = useDebouncedResolver(() => {
     if (!editedMessage) return false;
 
-    const edited = parseMessageInput(getHtml());
+    const edited = parseHtmlAsFormattedText(getHtml());
     return !('webPage' in editedMessage.content)
       && editedMessage.content.text?.entities?.some((entity) => URL_ENTITIES.has(entity.type))
       && !(edited.entities?.some((entity) => URL_ENTITIES.has(entity.type)));
@@ -144,7 +144,7 @@ const useEditing = (
   });
 
   const handleEditComplete = useLastCallback(() => {
-    const { text, entities } = parseMessageInput(getHtml());
+    const { text, entities } = parseHtmlAsFormattedText(getHtml());
 
     if (!editedMessage) {
       return;
@@ -167,7 +167,7 @@ const useEditing = (
 
   const handleBlur = useLastCallback(() => {
     if (!editedMessage) return;
-    const edited = parseMessageInput(getHtml());
+    const edited = parseHtmlAsFormattedText(getHtml());
     const update = edited.text.length ? edited : undefined;
 
     setEditingDraft({

@@ -34,6 +34,7 @@ import useShowTransition from '../../../hooks/useShowTransition';
 import useAsyncRendering from '../../right/hooks/useAsyncRendering';
 
 import EmbeddedMessage from '../../common/embedded/EmbeddedMessage';
+import Icon from '../../common/Icon';
 import Button from '../../ui/Button';
 import Menu from '../../ui/Menu';
 import MenuItem from '../../ui/MenuItem';
@@ -173,13 +174,13 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
 
   const leftIcon = useMemo(() => {
     if (isShowingReply) {
-      return 'icon-reply';
+      return 'reply';
     }
     if (editingId) {
-      return 'icon-edit';
+      return 'edit';
     }
     if (isForwarding) {
-      return 'icon-forward';
+      return 'forward';
     }
 
     return undefined;
@@ -210,11 +211,15 @@ const ComposerEmbeddedMessage: FC<OwnProps & StateProps> = ({
     <div className={className} ref={ref} onContextMenu={handleContextMenu} onClick={handleContextMenu}>
       <div className={innerClassName}>
         <div className="embedded-left-icon">
-          <i className={buildClassName('icon', leftIcon)} />
+          {leftIcon && <Icon name={leftIcon} />}
+          {Boolean(replyInfo?.quoteText) && (
+            <Icon name="quote" className="quote-reply" />
+          )}
         </div>
         <EmbeddedMessage
           className="inside-input"
           replyInfo={replyInfo}
+          isInComposer
           message={strippedMessage}
           sender={!noAuthors ? sender : undefined}
           customText={customText}
@@ -339,7 +344,7 @@ export default memo(withGlobal<OwnProps>(
         sender = selectForwardedSender(global, message);
       }
 
-      if (!sender && !forwardInfo?.hiddenUserName) {
+      if (!sender && (!forwardInfo?.hiddenUserName || Boolean(replyInfo.quoteText))) {
         sender = selectSender(global, message);
       }
     } else if (isForwarding) {
@@ -352,8 +357,8 @@ export default memo(withGlobal<OwnProps>(
       if (!sender) {
         sender = selectPeer(global, fromChatId!);
       }
-    } else if (editingId) {
-      sender = selectSender(global, message!);
+    } else if (editingId && message) {
+      sender = selectSender(global, message);
     }
 
     const forwardsHaveCaptions = forwardedMessages?.some((forward) => (
