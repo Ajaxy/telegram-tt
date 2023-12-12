@@ -68,6 +68,7 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     ...(closeFriends && { isForCloseFriends: true }),
     ...(noforwards && { noForwards: true }),
     ...(views?.viewsCount && { viewsCount: views.viewsCount }),
+    ...(views?.forwardsCount && { forwardsCount: views.forwardsCount }),
     ...(views?.reactionsCount && { reactionsCount: views.reactionsCount }),
     ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount) }),
     ...(views?.recentViewers && {

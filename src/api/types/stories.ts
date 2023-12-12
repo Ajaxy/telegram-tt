@@ -19,6 +19,7 @@ export interface ApiStory {
   isOut?: true;
   noForwards?: boolean;
   viewsCount?: number;
+  forwardsCount?: number;
   reactionsCount?: number;
   reactions?: ApiReactionCount[];
   recentViewerIds?: string[];
