@@ -953,6 +953,12 @@
   font-size: 0.875rem;
 }
 
+// Remove extra bottom padding from `blockquote`
+.text-entity-blockquote-wrapper {
+  display: inline-block;
+  width: 100%
+}
+
 blockquote, .blockquote {
   display: inline-block;
   position: relative;

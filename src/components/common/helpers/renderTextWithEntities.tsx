@@ -37,6 +37,7 @@ export function renderTextWithEntities({
   containerId,
   isSimple,
   isProtected,
+  noLineBreaks,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
   withTranslucentThumbs,
@@ -54,6 +55,7 @@ export function renderTextWithEntities({
   containerId?: string;
   isSimple?: boolean;
   isProtected?: boolean;
+  noLineBreaks?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
   withTranslucentThumbs?: boolean;
@@ -64,7 +66,15 @@ export function renderTextWithEntities({
   focusedQuote?: string;
 }) {
   if (!entities?.length) {
-    return renderMessagePart(text, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple);
+    return renderMessagePart({
+      content: text,
+      highlight,
+      focusedQuote,
+      emojiSize,
+      shouldRenderAsHtml,
+      isSimple,
+      noLineBreaks,
+    });
   }
 
   const result: TextPart[] = [];
@@ -92,9 +102,15 @@ export function renderTextWithEntities({
         deleteLineBreakAfterPre = false;
       }
       if (textBefore) {
-        renderResult.push(...renderMessagePart(
-          textBefore, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple,
-        ) as TextPart[]);
+        renderResult.push(...renderMessagePart({
+          content: textBefore,
+          highlight,
+          focusedQuote,
+          emojiSize,
+          shouldRenderAsHtml,
+          isSimple,
+          noLineBreaks,
+        }) as TextPart[]);
       }
     }
 
@@ -141,8 +157,10 @@ export function renderTextWithEntities({
         entityContent,
         nestedEntityContent,
         highlight,
+        focusedQuote,
         containerId,
         isSimple,
+        noLineBreaks,
         isProtected,
         observeIntersectionForLoading,
         observeIntersectionForPlaying,
@@ -168,9 +186,15 @@ export function renderTextWithEntities({
         textAfter = textAfter.substring(1);
       }
       if (textAfter) {
-        renderResult.push(...renderMessagePart(
-          textAfter, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple,
-        ) as TextPart[]);
+        renderResult.push(...renderMessagePart({
+          content: textAfter,
+          highlight,
+          focusedQuote,
+          emojiSize,
+          shouldRenderAsHtml,
+          isSimple,
+          noLineBreaks,
+        }) as TextPart[]);
       }
     }
 
@@ -217,19 +241,36 @@ export function getTextWithEntitiesAsHtml(formattedText?: ApiFormattedText) {
   return result;
 }
 
-function renderMessagePart(
-  content: TextPart | TextPart[],
-  highlight?: string,
-  focusedQuote?: string,
-  emojiSize?: number,
-  shouldRenderAsHtml?: boolean,
-  isSimple?: boolean,
-) {
+function renderMessagePart({
+  content,
+  highlight,
+  focusedQuote,
+  emojiSize,
+  shouldRenderAsHtml,
+  isSimple,
+  noLineBreaks,
+} : {
+  content: TextPart | TextPart[];
+  highlight?: string;
+  focusedQuote?: string;
+  emojiSize?: number;
+  shouldRenderAsHtml?: boolean;
+  isSimple?: boolean;
+  noLineBreaks?: boolean;
+}) {
   if (Array.isArray(content)) {
     const result: TextPart[] = [];
 
     content.forEach((c) => {
-      result.push(...renderMessagePart(c, highlight, focusedQuote, emojiSize, shouldRenderAsHtml, isSimple));
+      result.push(...renderMessagePart({
+        content: c,
+        highlight,
+        focusedQuote,
+        emojiSize,
+        shouldRenderAsHtml,
+        isSimple,
+        noLineBreaks,
+      }));
     });
 
     return result;
@@ -243,7 +284,7 @@ function renderMessagePart(
 
   const filters: TextFilter[] = [emojiFilter];
   const params: RenderTextParams = {};
-  if (!isSimple) {
+  if (!isSimple && !noLineBreaks) {
     filters.push('br');
   }
 
@@ -330,8 +371,10 @@ function processEntity({
   entityContent,
   nestedEntityContent,
   highlight,
+  focusedQuote,
   containerId,
   isSimple,
+  noLineBreaks,
   isProtected,
   observeIntersectionForLoading,
   observeIntersectionForPlaying,
@@ -346,8 +389,10 @@ function processEntity({
   entityContent: TextPart;
   nestedEntityContent: TextPart[];
   highlight?: string;
+  focusedQuote?: string;
   containerId?: string;
   isSimple?: boolean;
+  noLineBreaks?: boolean;
   isProtected?: boolean;
   observeIntersectionForLoading?: ObserveFn;
   observeIntersectionForPlaying?: ObserveFn;
@@ -362,9 +407,14 @@ function processEntity({
   const renderedContent = nestedEntityContent.length ? nestedEntityContent : entityContent;
 
   function renderNestedMessagePart() {
-    return renderMessagePart(
-      renderedContent, highlight, undefined, emojiSize, undefined, isSimple,
-    );
+    return renderMessagePart({
+      content: renderedContent,
+      highlight,
+      focusedQuote,
+      emojiSize,
+      isSimple,
+      noLineBreaks,
+    });
   }
 
   if (!entityText) {
@@ -402,11 +452,11 @@ function processEntity({
       return <strong data-entity-type={entity.type}>{renderNestedMessagePart()}</strong>;
     case ApiMessageEntityTypes.Blockquote:
       return (
-        <div className="text-entity-blockquote-wrapper">
+        <span className="text-entity-blockquote-wrapper">
           <blockquote data-entity-type={entity.type}>
             {renderNestedMessagePart()}
           </blockquote>
-        </div>
+        </span>
       );
     case ApiMessageEntityTypes.BotCommand:
       return (
@@ -585,10 +635,10 @@ function processEntityAsHtml(
     case ApiMessageEntityTypes.CustomEmoji:
       return buildCustomEmojiHtmlFromEntity(rawEntityText, entity);
     case ApiMessageEntityTypes.Blockquote:
-      return `<span
+      return `<blockquote
         class="blockquote"
         data-entity-type="${ApiMessageEntityTypes.Blockquote}"
-        >${renderedContent}</span>`;
+        >${renderedContent}</blockquote>`;
     default:
       return renderedContent;
   }

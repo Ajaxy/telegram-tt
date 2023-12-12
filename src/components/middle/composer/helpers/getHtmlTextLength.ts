@@ -1,4 +1,4 @@
-import { fixImageContent } from '../../../../util/parseMessageInput';
+import { fixImageContent } from '../../../../util/parseHtmlAsFormattedText';
 
 const div = document.createElement('div');
 

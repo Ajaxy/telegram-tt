@@ -7,7 +7,7 @@ import {
   EDITABLE_INPUT_ID, EDITABLE_INPUT_MODAL_ID, EDITABLE_STORY_INPUT_ID,
 } from '../../../../config';
 import { containsCustomEmoji, stripCustomEmoji } from '../../../../global/helpers/symbols';
-import parseMessageInput from '../../../../util/parseMessageInput';
+import parseHtmlAsFormattedText from '../../../../util/parseHtmlAsFormattedText';
 import buildAttachment from '../helpers/buildAttachment';
 import { preparePastedHtml } from '../helpers/cleanHtml';
 import getFilesFromDataTransferItems from '../helpers/getFilesFromDataTransferItems';
@@ -45,7 +45,7 @@ const useClipboardPaste = (
       const pastedText = e.clipboardData.getData('text').substring(0, MAX_MESSAGE_LENGTH);
       const html = e.clipboardData.getData('text/html');
 
-      let pastedFormattedText = html ? parseMessageInput(
+      let pastedFormattedText = html ? parseHtmlAsFormattedText(
         preparePastedHtml(html), undefined, true,
       ) : undefined;
 
