@@ -6,7 +6,7 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type { GlobalState } from '../../../global/types';
-import type { AnimationLevel, ThemeKey, Workspace } from '../../../types';
+import type { AnimationLevel, ThemeKey } from '../../../types';
 
 import {
   ANIMATION_LEVEL_MAX,
@@ -107,7 +107,12 @@ const LeftSideMenuItems = ({
   const archivedUnreadChatsCount = useFolderManagerForUnreadCounters()[ARCHIVED_FOLDER_ID]?.chatsCount || 0;
 
   const bots = useMemo(() => Object.values(attachBots).filter((bot) => bot.isForSideMenu), [attachBots]);
-  const { allWorkspaces, currentWorkspace } = useWorkspaces();
+
+  const {
+    allWorkspaces, currentWorkspace, currentWorkspaceId, setCurrentWorkspaceId,
+  } = useWorkspaces();
+  const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([currentWorkspaceId]);
+
   const { runCommand } = useCommands();
 
   const handleOpenWorkspaceSettings = (workspaceId?: string) => {
@@ -118,30 +123,10 @@ const LeftSideMenuItems = ({
     runCommand('OPEN_AUTOMATION_SETTINGS');
   };
 
-  const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {
-    localStorage.setItem('currentWorkspace', workspaceId);
-  };
-
-  const getCurrentWorkspaceId = (): string | undefined => {
-    const workspaceId = localStorage.getItem('currentWorkspace');
-    return workspaceId || undefined;
-  };
-
-  const [workspaceHistory, setWorkspaceHistory] = useState<string[]>([]);
-  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | undefined>();
-
-  useEffect(() => {
-    const workspaceId = getCurrentWorkspaceId(); // Получаем текущий идентификатор воркспейса
-    setCurrentWorkspaceId(workspaceId); // Обновляем состояние
-    if (workspaceId) {
-      setWorkspaceHistory([workspaceId]); // Инициализация истории с текущим воркспейсом
-    }
-  }, []);
-
   const { showNotification } = getActions();
   const { track } = useJune();
   const handleSelectWorkspace = useCallback((workspaceId: string) => {
-    saveCurrentWorkspaceToLocalStorage(workspaceId);
+    setCurrentWorkspaceId(workspaceId);
     setWorkspaceHistory((prevHistory) => {
       const newHistory = prevHistory[prevHistory.length - 1] !== workspaceId
         ? [...prevHistory, workspaceId]
@@ -152,7 +137,7 @@ const LeftSideMenuItems = ({
       return newHistory;
     });
     track?.('Switch workspace', { source: 'Left Side Menu' });
-  }, [track]); // Убедитесь в правильности зависимостей
+  }, [track, setCurrentWorkspaceId]); // Убедитесь в правильности зависимостей
 
   const prevWorkspaceShortcut = IS_ELECTRON ? 'Ctrl + Tab' : 'Ctrl + `';
 
@@ -182,25 +167,6 @@ const LeftSideMenuItems = ({
     setSettingOption({ shouldUseSystemTheme: false });
   });
 */
-  const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | undefined>();
-
-  // Функция для обновления текущего рабочего пространства
-  const updateCurrentWorkspace = useCallback(() => {
-    const workspaceId = getCurrentWorkspaceId();
-    setSelectedWorkspaceId(workspaceId);
-  }, []);
-
-  // Использование useEffect для отслеживания изменений
-  useEffect(() => {
-  // Подписка на событие изменения localStorage
-    window.addEventListener('storage', updateCurrentWorkspace);
-
-    // Вызов функции при первом рендеринге компонента
-    updateCurrentWorkspace();
-
-    // Отписка от события при размонтировании компонента
-    return () => window.removeEventListener('storage', updateCurrentWorkspace);
-  }, [updateCurrentWorkspace]);
 
   const handleAnimationLevelChange = useLastCallback((e: React.SyntheticEvent<HTMLElement>) => {
     e.stopPropagation();
