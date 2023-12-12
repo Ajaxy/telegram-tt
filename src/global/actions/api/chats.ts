@@ -2503,6 +2503,20 @@ addActionHandler('togglePeerTranslations', async (global, actions, payload): Pro
   setGlobal(global);
 });
 
+addActionHandler('setViewForumAsMessages', (global, actions, payload): ActionReturnType => {
+  const { chatId, isEnabled } = payload;
+
+  const chat = selectChat(global, chatId);
+  if (!chat?.isForum || chat.isForumAsMessages === isEnabled) {
+    return;
+  }
+
+  global = updateChat(global, chatId, { isForumAsMessages: isEnabled || undefined });
+  setGlobal(global);
+
+  void callApi('setViewForumAsMessages', { chat, isEnabled });
+});
+
 async function loadChats(
   listType: 'active' | 'archived',
   offsetId?: string,
@@ -2638,7 +2652,7 @@ export async function loadFullChat<T extends GlobalState>(
   }
 
   const {
-    users, userStatusesById, fullInfo, groupCall, membersCount,
+    users, userStatusesById, fullInfo, groupCall, membersCount, isForumAsMessages,
   } = result;
 
   global = getGlobal();
@@ -2663,6 +2677,9 @@ export async function loadFullChat<T extends GlobalState>(
 
   if (membersCount !== undefined) {
     global = updateChat(global, chat.id, { membersCount });
+  }
+  if (chat.isForum) {
+    global = updateChat(global, chat.id, { isForumAsMessages });
   }
   global = replaceChatFullInfo(global, chat.id, fullInfo);
   setGlobal(global);

@@ -44,6 +44,7 @@ export interface ApiChat {
   fakeType?: ApiFakeType;
   color?: ApiPeerColor;
   isForum?: boolean;
+  isForumAsMessages?: true;
   topics?: Record<number, ApiTopic>;
   listedTopicIds?: number[];
   topicsCount?: number;

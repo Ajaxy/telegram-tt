@@ -81,6 +81,7 @@ type FullChatData = {
   userStatusesById: { [userId: string]: ApiUserStatus };
   groupCall?: Partial<ApiGroupCall>;
   membersCount?: number;
+  isForumAsMessages?: true;
 };
 
 let onUpdate: OnApiUpdate;
@@ -483,6 +484,7 @@ async function getFullChannelInfo(
     participantsHidden,
     translationsDisabled,
     storiesPinnedAvailable,
+    viewForumAsMessages,
   } = result.fullChat;
 
   if (chatPhoto instanceof GramJs.Photo) {
@@ -572,6 +574,7 @@ async function getFullChannelInfo(
       connectionState: 'disconnected',
     } : undefined,
     membersCount: participantsCount,
+    ...(viewForumAsMessages && { isForumAsMessages: true }),
   };
 }
 
@@ -1878,6 +1881,18 @@ export function togglePeerTranslations({
     disabled: isEnabled ? undefined : true,
     peer: buildInputPeer(chat.id, chat.accessHash),
   }));
+}
+
+export function setViewForumAsMessages({ chat, isEnabled }: { chat: ApiChat; isEnabled: boolean }) {
+  const { id, accessHash } = chat;
+  const channel = buildInputEntity(id, accessHash);
+
+  return invokeRequest(new GramJs.channels.ToggleViewForumAsMessages({
+    channel: channel as GramJs.InputChannel,
+    enabled: Boolean(isEnabled),
+  }), {
+    shouldReturnTrue: true,
+  });
 }
 
 function handleUserPrivacyRestrictedUpdates(updates: GramJs.TypeUpdates) {

@@ -96,7 +96,7 @@ export function buildApiChatFromDialog(
   const {
     peer, folderId, unreadMark, unreadCount, unreadMentionsCount, unreadReactionsCount,
     notifySettings: { silent, muteUntil },
-    readOutboxMaxId, readInboxMaxId, draft,
+    readOutboxMaxId, readInboxMaxId, draft, viewForumAsMessages,
   } = dialog;
   const isMuted = silent || (typeof muteUntil === 'number' && getServerTime() < muteUntil);
 
@@ -114,6 +114,7 @@ export function buildApiChatFromDialog(
     muteUntil,
     ...(unreadMark && { hasUnreadMark: true }),
     ...(draft instanceof GramJs.DraftMessage && { draftDate: draft.date }),
+    ...(viewForumAsMessages && { isForumAsMessages: true }),
     ...buildApiChatFieldsFromPeerEntity(peerEntity),
   };
 }

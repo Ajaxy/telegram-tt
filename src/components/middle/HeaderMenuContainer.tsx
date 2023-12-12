@@ -104,6 +104,7 @@ type StateProps = {
   isMuted?: boolean;
   isTopic?: boolean;
   isForum?: boolean;
+  isForumAsMessages?: true;
   canAddContact?: boolean;
   canReportChat?: boolean;
   canDeleteChat?: boolean;
@@ -133,6 +134,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
   withForumActions,
   isTopic,
   isForum,
+  isForumAsMessages,
   isChatInfoShown,
   canStartBot,
   canSubscribe,
@@ -189,6 +191,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
     togglePeerTranslations,
     blockUser,
     unblockUser,
+    setViewForumAsMessages,
   } = getActions();
 
   const { isMobile } = useAppLayout();
@@ -280,6 +283,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
 
   const handleViewAsTopicsClick = useLastCallback(() => {
     openChat({ id: undefined });
+    setViewForumAsMessages({ chatId, isEnabled: false });
     closeMenu();
   });
 
@@ -469,7 +473,7 @@ const HeaderMenuContainer: FC<OwnProps & StateProps> = ({
               <div className="right-badge">{pendingJoinRequests}</div>
             </MenuItem>
           )}
-          {withForumActions && !isTopic && (
+          {withForumActions && !isTopic && !isForumAsMessages && (
             <MenuItem
               icon="message"
               onClick={handleOpenAsMessages}
@@ -696,6 +700,7 @@ export default memo(withGlobal<OwnProps>(
       isPrivate,
       isTopic: chat?.isForum && !isMainThread,
       isForum: chat?.isForum,
+      isForumAsMessages: chat?.isForumAsMessages,
       canAddContact,
       canReportChat,
       canDeleteChat: getCanDeleteChat(chat),

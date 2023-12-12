@@ -173,12 +173,13 @@ const EmbeddedMessage: FC<OwnProps> = ({
     }
 
     const isChatSender = senderChat?.id === sender?.id;
+    const isReplyToQuote = isInComposer && Boolean(replyInfo && 'quoteText' in replyInfo && replyInfo?.quoteText);
 
     return (
       <>
         {!isChatSender && (
           <span className="embedded-sender">
-            {renderText(isInComposer ? lang('ReplyToQuote', senderTitle) : senderTitle)}
+            {renderText(isReplyToQuote ? lang('ReplyToQuote', senderTitle) : senderTitle)}
           </span>
         )}
         {icon && <Icon name={icon} className="embedded-chat-icon" />}

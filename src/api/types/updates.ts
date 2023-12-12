@@ -609,6 +609,12 @@ export type ApiUpdateTopics = {
   chatId: string;
 };
 
+export type ApiUpdateViewForumAsMessages = {
+  '@type': 'updateViewForumAsMessages';
+  chatId: string;
+  isEnabled?: true;
+};
+
 export type ApiUpdateMessageTranslations = {
   '@type': 'updateMessageTranslations';
   chatId: string;
@@ -706,7 +712,8 @@ export type ApiUpdate = (
   ApiUpdatePinnedTopicsOrder | ApiUpdateTopic | ApiUpdateTopics | ApiUpdateRecentEmojiStatuses |
   ApiUpdateRecentReactions | ApiUpdateStory | ApiUpdateReadStories | ApiUpdateDeleteStory | ApiUpdateSentStoryReaction |
   ApiRequestReconnectApi | ApiRequestSync | ApiUpdateFetchingDifference | ApiUpdateChannelMessages |
-  ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden
+  ApiUpdateStealthMode | ApiUpdateAttachMenuBots | ApiUpdateNewAuthorization | ApiUpdateGroupInvitePrivacyForbidden |
+  ApiUpdateViewForumAsMessages
 );
 
 export type OnApiUpdate = (update: ApiUpdate) => void;
