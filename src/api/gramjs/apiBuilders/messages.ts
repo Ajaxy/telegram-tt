@@ -50,6 +50,7 @@ import {
   resolveMessageApiChatId,
   serializeBytes,
 } from '../helpers';
+import { buildApiBotApp } from './bots';
 import { buildApiCallDiscardReason } from './calls';
 import {
   buildApiPhoto,
@@ -78,7 +79,7 @@ export function setMessageBuilderCurrentUserId(_currentUserId: string) {
 export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): ApiSponsoredMessage | undefined {
   const {
     fromId, message, entities, startParam, channelPost, chatInvite, chatInviteHash, randomId, recommended, sponsorInfo,
-    additionalInfo, showPeerPhoto, webpage,
+    additionalInfo, showPeerPhoto, webpage, buttonText, app,
   } = mtpMessage;
   const chatId = fromId ? getApiChatIdFromMtpPeer(fromId) : undefined;
   const chatInviteTitle = chatInvite
@@ -102,6 +103,8 @@ export function buildApiSponsoredMessage(mtpMessage: GramJs.SponsoredMessage): A
     ...(channelPost && { channelPostId: channelPost }),
     ...(sponsorInfo && { sponsorInfo }),
     ...(additionalInfo && { additionalInfo }),
+    ...(buttonText && { buttonText }),
+    ...(app && { botApp: buildApiBotApp(app) }),
   };
 }
 

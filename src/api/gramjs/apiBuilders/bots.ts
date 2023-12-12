@@ -13,6 +13,7 @@ import type {
   ApiBotInlineSwitchWebview,
   ApiBotMenuButton,
   ApiInlineResultType,
+  ApiMessagesBotApp,
 } from '../../types';
 
 import { pick } from '../../../util/iteratees';
@@ -149,9 +150,9 @@ export function buildApiBotMenuButton(menuButton?: GramJs.TypeBotMenuButton): Ap
   };
 }
 
-export function buildApiBotApp(botApp: GramJs.messages.BotApp): ApiBotApp | undefined {
-  const { app, inactive, requestWriteAccess } = botApp;
+export function buildApiBotApp(app: GramJs.TypeBotApp): ApiBotApp | undefined {
   if (app instanceof GramJs.BotAppNotModified) return undefined;
+
   const {
     id, accessHash, title, description, shortName, photo, document,
   } = app;
@@ -167,6 +168,16 @@ export function buildApiBotApp(botApp: GramJs.messages.BotApp): ApiBotApp | unde
     shortName,
     photo: apiPhoto,
     document: apiDocument,
+  };
+}
+
+export function buildApiMessagesBotApp(botApp: GramJs.messages.BotApp): ApiMessagesBotApp | undefined {
+  const { app, inactive, requestWriteAccess } = botApp;
+  const baseApp = buildApiBotApp(app);
+  if (!baseApp) return undefined;
+
+  return {
+    ...baseApp,
     isInactive: inactive,
     shouldRequestWriteAccess: requestWriteAccess,
   };

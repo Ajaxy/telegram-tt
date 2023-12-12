@@ -103,6 +103,7 @@ type StateProps = {
   isRepliesChat?: boolean;
   isCreator?: boolean;
   isBot?: boolean;
+  isSynced?: boolean;
   messageIds?: number[];
   messagesById?: Record<number, ApiMessage>;
   firstUnreadId?: number;
@@ -147,6 +148,7 @@ const MessageList: FC<OwnProps & StateProps> = ({
   isChannelChat,
   isGroupChat,
   canPost,
+  isSynced,
   isReady,
   isChatWithSelf,
   isRepliesChat,
@@ -214,10 +216,10 @@ const MessageList: FC<OwnProps & StateProps> = ({
   }, [firstUnreadId]);
 
   useEffect(() => {
-    if (!isCurrentUserPremium && isChannelChat && isReady) {
+    if (!isCurrentUserPremium && isChannelChat && isSynced && isReady) {
       loadSponsoredMessages({ chatId });
     }
-  }, [isCurrentUserPremium, chatId, isReady, isChannelChat]);
+  }, [isCurrentUserPremium, chatId, isSynced, isReady, isChannelChat]);
 
   // Updated only once when messages are loaded (as we want the unread divider to keep its position)
   useSyncEffect(() => {
@@ -682,6 +684,7 @@ export default memo(withGlobal<OwnProps>(
       isChatWithSelf: selectIsChatWithSelf(global, chatId),
       isRepliesChat: isChatWithRepliesBot(chatId),
       isBot: Boolean(chatBot),
+      isSynced: global.isSynced,
       messageIds,
       messagesById,
       firstUnreadId: selectFirstUnreadId(global, chatId, threadId),
