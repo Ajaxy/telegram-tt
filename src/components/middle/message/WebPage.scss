@@ -1,7 +1,7 @@
 .WebPage {
   margin-top: 0.25rem;
   margin-bottom: 0.125rem;
-  padding: 0.375rem 0.375rem 0.375rem 0.625rem;
+  padding: 0.375rem;
   font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
   line-height: 1.125rem;
   max-width: 29rem;
@@ -42,8 +42,10 @@
   &--quick-button {
     --riple-color: var(var(--accent-background-active-color));
 
+    width: calc(100% - 0.25rem);
     margin-top: 0.375rem;
     margin-bottom: -0.375rem;
+    margin-inline-start: 0.25rem;
     border-top: 1px solid var(--accent-background-active-color, var(--active-color));
 
     color: var(--accent-color) !important;
@@ -101,7 +103,8 @@
 
     .WebPage-text {
       order: 1;
-      padding-right: 1rem;
+      margin-inline-start: 0.25rem;
+      padding-inline-end: 1rem;
     }
 
     .media-inner {
