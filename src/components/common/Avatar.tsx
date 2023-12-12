@@ -56,6 +56,7 @@ type OwnProps = {
   forPremiumPromo?: boolean;
   withStoryGap?: boolean;
   withStorySolid?: boolean;
+  forceUnreadStorySolid?: boolean;
   storyViewerOrigin?: StoryViewerOrigin;
   storyViewerMode?: 'full' | 'single-peer' | 'disabled';
   loopIndefinitely?: boolean;
@@ -76,6 +77,7 @@ const Avatar: FC<OwnProps> = ({
   forPremiumPromo,
   withStoryGap,
   withStorySolid,
+  forceUnreadStorySolid,
   storyViewerOrigin,
   storyViewerMode = 'single-peer',
   loopIndefinitely,
@@ -217,7 +219,7 @@ const Avatar: FC<OwnProps> = ({
     isForum && 'forum',
     ((withStory && peer?.hasStories) || forPremiumPromo) && 'with-story-circle',
     withStorySolid && peer?.hasStories && 'with-story-solid',
-    withStorySolid && peer?.hasUnreadStories && 'has-unread-story',
+    withStorySolid && (peer?.hasUnreadStories || forceUnreadStorySolid) && 'has-unread-story',
     onClick && 'interactive',
     (!isSavedMessages && !imgBlobUrl) && 'no-photo',
   );

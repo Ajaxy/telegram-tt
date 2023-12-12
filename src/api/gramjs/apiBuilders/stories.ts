@@ -5,7 +5,7 @@ import type {
   ApiMediaAreaCoordinates,
   ApiStealthMode,
   ApiStoryForwardInfo,
-  ApiStoryView,
+  ApiStoryView, ApiStoryViews,
   ApiTypeStory,
   MediaContent,
 } from '../../types';
@@ -67,18 +67,24 @@ export function buildApiStory(peerId: string, story: GramJs.TypeStoryItem): ApiT
     ...(selectedContacts && { isForSelectedContacts: true }),
     ...(closeFriends && { isForCloseFriends: true }),
     ...(noforwards && { noForwards: true }),
-    ...(views?.viewsCount && { viewsCount: views.viewsCount }),
-    ...(views?.forwardsCount && { forwardsCount: views.forwardsCount }),
-    ...(views?.reactionsCount && { reactionsCount: views.reactionsCount }),
-    ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount) }),
-    ...(views?.recentViewers && {
-      recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
-    }),
+    ...(views && { views: buildApiStoryViews(views) }),
     ...(out && { isOut: true }),
     ...(privacy && { visibility: buildPrivacyRules(privacy) }),
     ...(mediaAreas && { mediaAreas: mediaAreas.map(buildApiMediaArea).filter(Boolean) }),
     ...(sentReaction && { sentReaction: buildApiReaction(sentReaction) }),
     ...(fwdFrom && { forwardInfo: buildApiStoryForwardInfo(fwdFrom) }),
+  };
+}
+
+function buildApiStoryViews(views: GramJs.TypeStoryViews): ApiStoryViews | undefined {
+  return {
+    viewsCount: views.viewsCount,
+    forwardsCount: views.forwardsCount,
+    reactionsCount: views.reactionsCount,
+    ...(views?.reactions && { reactions: views.reactions.map(buildReactionCount).filter(Boolean) }),
+    ...(views?.recentViewers && {
+      recentViewerIds: views.recentViewers.map((viewerId) => buildApiPeerId(viewerId, 'user')),
+    }),
   };
 }
 

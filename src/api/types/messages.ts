@@ -472,8 +472,8 @@ export interface ApiMessage {
   forwardInfo?: ApiMessageForwardInfo;
   isDeleting?: boolean;
   previousLocalId?: number;
-  views?: number;
-  forwards?: number;
+  viewsCount?: number;
+  forwardsCount?: number;
   isEdited?: boolean;
   editDate?: number;
   isMentioned?: boolean;

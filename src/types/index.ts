@@ -277,6 +277,7 @@ export enum RightColumnContent {
   Statistics,
   BoostStatistics,
   MessageStatistics,
+  StoryStatistics,
   StickerSearch,
   GifSearch,
   PollResults,

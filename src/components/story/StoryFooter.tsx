@@ -32,8 +32,9 @@ const StoryFooter = ({
   const lang = useLang();
 
   const {
-    viewsCount, forwardsCount, reactionsCount, isOut, peerId, id: storyId, sentReaction,
+    views, isOut, peerId, id: storyId, sentReaction,
   } = story;
+  const { viewsCount, forwardsCount, reactionsCount } = views || {};
   const isChannel = !isUserId(peerId);
 
   const isSentStoryReactionHeart = sentReaction && 'emoticon' in sentReaction
@@ -50,11 +51,11 @@ const StoryFooter = ({
   const recentViewers = useMemo(() => {
     const { users: { byId: usersById } } = getGlobal();
 
-    const recentViewerIds = story && 'recentViewerIds' in story ? story.recentViewerIds : undefined;
+    const recentViewerIds = views && 'recentViewerIds' in views ? views.recentViewerIds : undefined;
     if (!recentViewerIds) return undefined;
 
     return recentViewerIds.map((id) => usersById[id]).filter(Boolean);
-  }, [story]);
+  }, [views]);
 
   const handleOpenStoryViewModal = useLastCallback(() => {
     openStoryViewModal({ storyId });

@@ -44,7 +44,8 @@ const MediaAreaSuggestedReaction = ({
   const ref = useRef<HTMLDivElement>(null);
   const [customEmojiSize, setCustomEmojiSize] = useState(1.5 * REM);
 
-  const { peerId, id, reactions } = story;
+  const { peerId, id, views } = story;
+  const { reactions } = views || {};
   const { reaction, isDark, isFlipped } = mediaArea;
 
   const isChannel = !isUserId(peerId);

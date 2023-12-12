@@ -7,13 +7,20 @@ import { getActions, withGlobal } from '../../../global';
 
 import type {
   ApiChannelStatistics,
+  ApiChat,
   ApiGroupStatistics,
   ApiMessage,
+  ApiTypeStory,
   StatisticsGraph,
-  StatisticsMessageInteractionCounter,
 } from '../../../api/types';
 
-import { selectChat, selectChatFullInfo, selectStatistics } from '../../../global/selectors';
+import {
+  selectChat,
+  selectChatFullInfo,
+  selectChatMessages,
+  selectPeerStories,
+  selectStatistics,
+} from '../../../global/selectors';
 import buildClassName from '../../../util/buildClassName';
 import { callApi } from '../../../api/gramjs';
 
@@ -23,8 +30,9 @@ import useLang from '../../../hooks/useLang';
 import Loading from '../../ui/Loading';
 import StatisticsOverview from './StatisticsOverview';
 import StatisticsRecentMessage from './StatisticsRecentMessage';
+import StatisticsRecentStory from './StatisticsRecentStory';
 
-import './Statistics.scss';
+import styles from './Statistics.module.scss';
 
 type ILovelyChart = { create: Function };
 let lovelyChartPromise: Promise<ILovelyChart>;
@@ -48,6 +56,9 @@ const CHANNEL_GRAPHS_TITLES = {
   newFollowersBySourceGraph: 'ChannelStats.Graph.NewFollowersBySource',
   languagesGraph: 'ChannelStats.Graph.Language',
   interactionsGraph: 'ChannelStats.Graph.Interactions',
+  reactionsByEmotionGraph: 'ChannelStats.Graph.Reactions',
+  storyInteractionsGraph: 'ChannelStats.Graph.Stories',
+  storyReactionsByEmotionGraph: 'ChannelStats.Graph.StoriesReactions',
 };
 const CHANNEL_GRAPHS = Object.keys(CHANNEL_GRAPHS_TITLES) as (keyof ApiChannelStatistics)[];
 
@@ -66,16 +77,22 @@ export type OwnProps = {
 };
 
 export type StateProps = {
+  chat?: ApiChat;
   statistics: ApiChannelStatistics | ApiGroupStatistics;
   dcId?: number;
   isGroup: boolean;
+  messagesById: Record<string, ApiMessage>;
+  storiesById?: Record<string, ApiTypeStory>;
 };
 
 const Statistics: FC<OwnProps & StateProps> = ({
   chatId,
+  chat,
   statistics,
   dcId,
   isGroup,
+  messagesById,
+  storiesById,
 }) => {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -163,7 +180,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
         loadedCharts.current.push(name);
 
-        containerRef.current!.children[index].classList.remove('hidden');
+        containerRef.current!.children[index].classList.remove(styles.hidden);
       });
 
       forceUpdate();
@@ -177,7 +194,7 @@ const Statistics: FC<OwnProps & StateProps> = ({
   }
 
   return (
-    <div className={buildClassName('Statistics custom-scroll', isReady && 'ready')}>
+    <div className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}>
       <StatisticsOverview
         statistics={statistics}
         type={isGroup ? 'group' : 'channel'}
@@ -188,17 +205,43 @@ const Statistics: FC<OwnProps & StateProps> = ({
 
       <div ref={containerRef}>
         {graphs.map((graph) => (
-          <div key={graph} className="Statistics__graph hidden" />
+          <div key={graph} className={buildClassName(styles.graph, styles.hidden)} />
         ))}
       </div>
 
-      {Boolean((statistics as ApiChannelStatistics).recentTopMessages?.length) && (
-        <div className="Statistics__messages">
-          <h2 className="Statistics__messages-title">{lang('ChannelStats.Recent.Header')}</h2>
+      {Boolean((statistics as ApiChannelStatistics).recentPosts?.length) && (
+        <div className={styles.messages}>
+          <h2 className={styles.messagesTitle}>{lang('ChannelStats.Recent.Header')}</h2>
 
-          {(statistics as ApiChannelStatistics).recentTopMessages.map((message) => (
-            <StatisticsRecentMessage message={message as ApiMessage & StatisticsMessageInteractionCounter} />
-          ))}
+          {(statistics as ApiChannelStatistics).recentPosts.map((postStatistic) => {
+            if ('msgId' in postStatistic) {
+              const message = messagesById[postStatistic.msgId];
+              if (!message || !('content' in message)) return undefined;
+
+              return (
+                <StatisticsRecentMessage
+                  key={`statistic_message_${postStatistic.msgId}`}
+                  message={message}
+                  postStatistic={postStatistic}
+                />
+              );
+            }
+
+            if ('storyId' in postStatistic && chat) {
+              const story = storiesById?.[postStatistic.storyId];
+
+              return (
+                <StatisticsRecentStory
+                  key={`statistic_story_${postStatistic.storyId}`}
+                  chat={chat}
+                  story={story}
+                  postStatistic={postStatistic}
+                />
+              );
+            }
+
+            return undefined;
+          })}
         </div>
       )}
     </div>
@@ -211,9 +254,11 @@ export default memo(withGlobal<OwnProps>(
     const chat = selectChat(global, chatId);
     const dcId = selectChatFullInfo(global, chatId)?.statisticsDcId;
     const isGroup = chat?.type === 'chatTypeSuperGroup';
+    const messagesById = selectChatMessages(global, chatId);
+    const storiesById = selectPeerStories(global, chatId)?.byId;
 
     return {
-      statistics, dcId, isGroup,
+      statistics, dcId, isGroup, chat, messagesById, storiesById,
     };
   },
 )(Statistics));

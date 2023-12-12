@@ -3,7 +3,7 @@ import React, { memo } from '../../../lib/teact/teact';
 
 import type {
   ApiBoostStatistics,
-  ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsOverviewItem,
+  ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsOverviewItem,
 } from '../../../api/types';
 
 import buildClassName from '../../../util/buildClassName';
@@ -12,7 +12,7 @@ import { formatInteger, formatIntegerCompact } from '../../../util/textFormat';
 
 import useLang from '../../../hooks/useLang';
 
-import './StatisticsOverview.scss';
+import styles from './StatisticsOverview.module.scss';
 
 type OverviewCell = {
   name: string;
@@ -30,7 +30,15 @@ const CHANNEL_OVERVIEW: OverviewCell[][] = [
   ],
   [
     { name: 'viewsPerPost', title: 'ChannelStats.Overview.ViewsPerPost' },
+    { name: 'viewsPerStory', title: 'ChannelStats.Overview.ViewsPerStory' },
+  ],
+  [
     { name: 'sharesPerPost', title: 'ChannelStats.Overview.SharesPerPost' },
+    { name: 'sharesPerStory', title: 'ChannelStats.Overview.SharesPerStory' },
+  ],
+  [
+    { name: 'reactionsPerPost', title: 'ChannelStats.Overview.ReactionsPerPost' },
+    { name: 'reactionsPerStory', title: 'ChannelStats.Overview.ReactionsPerStory' },
   ],
 ];
 
@@ -47,13 +55,25 @@ const GROUP_OVERVIEW: OverviewCell[][] = [
 
 const MESSAGE_OVERVIEW: OverviewCell[][] = [
   [
-    { name: 'views', title: 'Stats.Message.Views', isPlain: true },
-    {
-      name: 'forwards', title: 'Stats.Message.PrivateShares', isPlain: true, isApproximate: true,
-    },
+    { name: 'viewsCount', title: 'Stats.Message.Views', isPlain: true },
+    { name: 'publicForwards', title: 'Stats.Message.PublicShares', isPlain: true },
   ],
   [
-    { name: 'publicForwards', title: 'Stats.Message.PublicShares', isPlain: true },
+    { name: 'reactionsCount', title: 'Channel.Stats.Overview.Reactions', isPlain: true },
+    {
+      name: 'forwardsCount', title: 'Stats.Message.PrivateShares', isPlain: true, isApproximate: true,
+    },
+  ],
+];
+
+const STORY_OVERVIEW: OverviewCell[][] = [
+  [
+    { name: 'viewsCount', title: 'Channel.Stats.Overview.Views', isPlain: true },
+    { name: 'publicForwards', title: 'PublicShares', isPlain: true },
+  ],
+  [
+    { name: 'reactionsCount', title: 'Channel.Stats.Overview.Reactions', isPlain: true },
+    { name: 'forwardsCount', title: 'PrivateShares', isPlain: true },
   ],
 ];
 
@@ -74,13 +94,13 @@ const BOOST_OVERVIEW: OverviewCell[][] = [
   ],
 ];
 
-type StatisticsType = 'channel' | 'group' | 'message' | 'boost';
+type StatisticsType = 'channel' | 'group' | 'message' | 'boost' | 'story';
 
 export type OwnProps = {
   type: StatisticsType;
   title?: string;
   className?: string;
-  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiMessageStatistics | ApiBoostStatistics;
+  statistics: ApiChannelStatistics | ApiGroupStatistics | ApiPostStatistics | ApiBoostStatistics;
 };
 
 const StatisticsOverview: FC<OwnProps> = ({
@@ -99,7 +119,7 @@ const StatisticsOverview: FC<OwnProps> = ({
     const isChangeNegative = Number(change) < 0;
 
     return (
-      <span className={buildClassName('StatisticsOverview__value', isChangeNegative && 'negative')}>
+      <span className={buildClassName(styles.value, isChangeNegative && styles.negative)}>
         {isChangeNegative ? `-${formatIntegerCompact(Math.abs(change))}` : `+${formatIntegerCompact(change)}`}
         {percentage && (
           <>
@@ -113,26 +133,25 @@ const StatisticsOverview: FC<OwnProps> = ({
 
   const { period } = (statistics as ApiGroupStatistics);
 
-  const schema = type === 'boost' ? BOOST_OVERVIEW : type === 'message' ? MESSAGE_OVERVIEW : type === 'group'
-    ? GROUP_OVERVIEW : CHANNEL_OVERVIEW;
+  const schema = getSchemaByType(type);
 
   return (
-    <div className={buildClassName('StatisticsOverview', className)}>
-      <div className="StatisticsOverview__header">
+    <div className={buildClassName(styles.root, className)}>
+      <div className={styles.header}>
         {title && (
-          <div className="StatisticsOverview__title">
+          <div className={styles.title}>
             {title}
           </div>
         )}
 
         {period && (
-          <div className="StatisticsOverview__caption">
+          <div className={styles.caption}>
             {formatFullDate(lang, period.minDate * 1000)} — {formatFullDate(lang, period.maxDate * 1000)}
           </div>
         )}
       </div>
 
-      <table className="StatisticsOverview__table">
+      <table className={styles.table}>
         {schema.map((row) => (
           <tr>
             {row.map((cell: OverviewCell) => {
@@ -140,39 +159,39 @@ const StatisticsOverview: FC<OwnProps> = ({
 
               if (cell.isPlain) {
                 return (
-                  <td className="StatisticsOverview__table-cell">
-                    <b className="StatisticsOverview__table-value">
+                  <td className={styles.tableCell}>
+                    <b className={styles.tableValue}>
                       {`${cell.isApproximate ? '≈' : ''}${formatInteger(field)}`}
                     </b>
-                    <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
+                    <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
                   </td>
                 );
               }
 
               if (cell.isPercentage) {
                 return (
-                  <td className="StatisticsOverview__table-cell">
+                  <td className={styles.tableCell}>
                     {cell.withAbsoluteValue && (
-                      <span className="StatisticsOverview__table-value">
+                      <span className={styles.tableValue}>
                         {`${cell.isApproximate ? '≈' : ''}${formatInteger(field.part)}`}
                       </span>
                     )}
-                    <span className={`StatisticsOverview__table-${cell.withAbsoluteValue ? 'secondary-' : ''}value`}>
+                    <span className={cell.withAbsoluteValue ? styles.tableSecondaryValue : styles.tableValue}>
                       {field.percentage}%
                     </span>
-                    <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
+                    <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
                   </td>
                 );
               }
 
               return (
-                <td className="StatisticsOverview__table-cell">
-                  <b className="StatisticsOverview__table-value">
+                <td className={styles.tableCell}>
+                  <b className={styles.tableValue}>
                     {formatIntegerCompact(field.current)}
                   </b>
                   {' '}
                   {renderOverviewItemValue(field)}
-                  <h3 className="StatisticsOverview__table-heading">{lang(cell.title)}</h3>
+                  <h3 className={styles.tableHeading}>{lang(cell.title)}</h3>
                 </td>
               );
             })}
@@ -182,5 +201,21 @@ const StatisticsOverview: FC<OwnProps> = ({
     </div>
   );
 };
+
+function getSchemaByType(type: StatisticsType) {
+  switch (type) {
+    case 'group':
+      return GROUP_OVERVIEW;
+    case 'message':
+      return MESSAGE_OVERVIEW;
+    case 'boost':
+      return BOOST_OVERVIEW;
+    case 'story':
+      return STORY_OVERVIEW;
+    case 'channel':
+    default:
+      return CHANNEL_OVERVIEW;
+  }
+}
 
 export default memo(StatisticsOverview);

@@ -214,6 +214,21 @@
       }
     }
 
+    &.size-small-mobile {
+      width: 2.25rem;
+      height: 2.25rem;
+
+      &::before {
+        width: 2.75rem;
+        height: 2.75rem;
+      }
+
+      &::after {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+    }
+
     &.online::after {
       bottom: -0.125rem;
       right: -0.125rem;

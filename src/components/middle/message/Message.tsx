@@ -613,7 +613,7 @@ const Message: FC<OwnProps & StateProps> = ({
     isLastInDocumentGroup && 'last-in-document-group',
     isLastInList && 'last-in-list',
     isOwn && 'own',
-    Boolean(message.views) && 'has-views',
+    Boolean(message.viewsCount) && 'has-views',
     message.isEdited && 'was-edited',
     hasMessageReply && 'has-reply',
     isContextMenuOpen && 'has-menu-open',
@@ -1338,7 +1338,7 @@ const Message: FC<OwnProps & StateProps> = ({
         data-has-unread-mention={message.hasUnreadMention || undefined}
         data-has-unread-reaction={hasUnreadReaction || undefined}
         data-is-pinned={isPinned || undefined}
-        data-should-update-views={message.views !== undefined}
+        data-should-update-views={message.viewsCount !== undefined}
       />
       {!isInDocumentGroup && (
         <div className="message-select-control">

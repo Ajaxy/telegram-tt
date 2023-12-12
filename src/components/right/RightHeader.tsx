@@ -48,6 +48,7 @@ type OwnProps = {
   isStatistics?: boolean;
   isBoostStatistics?: boolean;
   isMessageStatistics?: boolean;
+  isStoryStatistics?: boolean;
   isStickerSearch?: boolean;
   isGifSearch?: boolean;
   isPollResults?: boolean;
@@ -89,6 +90,7 @@ enum HeaderContent {
   Search,
   Statistics,
   MessageStatistics,
+  StoryStatistics,
   BoostStatistics,
   Management,
   ManageInitial,
@@ -128,6 +130,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
   isManagement,
   isStatistics,
   isMessageStatistics,
+  isStoryStatistics,
   isBoostStatistics,
   isStickerSearch,
   isGifSearch,
@@ -291,6 +294,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     HeaderContent.Statistics
   ) : isMessageStatistics ? (
     HeaderContent.MessageStatistics
+  ) : isStoryStatistics ? (
+    HeaderContent.StoryStatistics
   ) : isBoostStatistics ? (
     HeaderContent.BoostStatistics
   ) : isCreatingTopic ? (
@@ -442,6 +447,8 @@ const RightHeader: FC<OwnProps & StateProps> = ({
         return <h3>{lang(isChannel ? 'ChannelStats.Title' : 'GroupStats.Title')}</h3>;
       case HeaderContent.MessageStatistics:
         return <h3>{lang('Stats.MessageTitle')}</h3>;
+      case HeaderContent.StoryStatistics:
+        return <h3>{lang('Stats.StoryTitle')}</h3>;
       case HeaderContent.BoostStatistics:
         return <h3>{lang('Boosts')}</h3>;
       case HeaderContent.SharedMedia:
@@ -522,6 +529,7 @@ const RightHeader: FC<OwnProps & StateProps> = ({
     || contentKey === HeaderContent.StoryList
     || contentKey === HeaderContent.AddingMembers
     || contentKey === HeaderContent.MessageStatistics
+    || contentKey === HeaderContent.StoryStatistics
     || isManagement
   );
 

@@ -522,7 +522,7 @@ export function updater(update: Update) {
       '@type': 'updateMessage',
       chatId: buildApiPeerId(update.channelId, 'channel'),
       id: update.id,
-      message: { views: update.views },
+      message: { viewsCount: update.views },
     });
 
     // Chats

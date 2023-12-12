@@ -33,6 +33,7 @@ import RightSearch from './RightSearch.async';
 import BoostStatistics from './statistics/BoostStatistics';
 import MessageStatistics from './statistics/MessageStatistics.async';
 import Statistics from './statistics/Statistics.async';
+import StoryStatistics from './statistics/StoryStatistics.async';
 import StickerSearch from './StickerSearch.async';
 
 import './RightColumn.scss';
@@ -86,6 +87,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
     setEditingExportedInvite,
     toggleStatistics,
     toggleMessageStatistics,
+    toggleStoryStatistics,
     setOpenedInviteInfo,
     requestNextManagementScreen,
     resetNextProfileTab,
@@ -107,6 +109,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
   const isManagement = contentKey === RightColumnContent.Management;
   const isStatistics = contentKey === RightColumnContent.Statistics;
   const isMessageStatistics = contentKey === RightColumnContent.MessageStatistics;
+  const isStoryStatistics = contentKey === RightColumnContent.StoryStatistics;
   const isBoostStatistics = contentKey === RightColumnContent.BoostStatistics;
   const isStickerSearch = contentKey === RightColumnContent.StickerSearch;
   const isGifSearch = contentKey === RightColumnContent.GifSearch;
@@ -175,6 +178,9 @@ const RightColumn: FC<OwnProps & StateProps> = ({
       }
       case RightColumnContent.MessageStatistics:
         toggleMessageStatistics();
+        break;
+      case RightColumnContent.StoryStatistics:
+        toggleStoryStatistics();
         break;
       case RightColumnContent.Statistics:
         toggleStatistics();
@@ -322,6 +328,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
         return <BoostStatistics />;
       case RightColumnContent.MessageStatistics:
         return <MessageStatistics chatId={chatId!} isActive={isOpen && isActive} />;
+      case RightColumnContent.StoryStatistics:
+        return <StoryStatistics chatId={chatId!} isActive={isOpen && isActive} />;
       case RightColumnContent.StickerSearch:
         return <StickerSearch onClose={close} isActive={isOpen && isActive} />;
       case RightColumnContent.GifSearch:
@@ -356,6 +364,7 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           isStatistics={isStatistics}
           isBoostStatistics={isBoostStatistics}
           isMessageStatistics={isMessageStatistics}
+          isStoryStatistics={isStoryStatistics}
           isStickerSearch={isStickerSearch}
           isGifSearch={isGifSearch}
           isPollResults={isPollResults}
@@ -373,7 +382,8 @@ const RightColumn: FC<OwnProps & StateProps> = ({
           activeKey={isManagement ? MAIN_SCREENS_COUNT + managementScreen : renderingContentKey}
           shouldCleanup
           cleanupExceptionKey={
-            renderingContentKey === RightColumnContent.MessageStatistics
+            (renderingContentKey === RightColumnContent.MessageStatistics
+              || renderingContentKey === RightColumnContent.StoryStatistics)
               ? RightColumnContent.Statistics : undefined
           }
         >

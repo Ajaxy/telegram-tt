@@ -4,11 +4,11 @@ import React, {
 import { getActions, withGlobal } from '../../../global';
 
 import type {
-  ApiMessagePublicForward,
+  ApiChat,
   ApiPostStatistics,
+  ApiUser,
   StatisticsGraph,
 } from '../../../api/types';
-import { LoadMoreDirection } from '../../../types';
 
 import { STATISTICS_PUBLIC_FORWARDS_LIMIT } from '../../../config';
 import { selectChatFullInfo, selectTabState } from '../../../global/selectors';
@@ -23,6 +23,7 @@ import InfiniteScroll from '../../ui/InfiniteScroll';
 import Loading from '../../ui/Loading';
 import StatisticsMessagePublicForward from './StatisticsMessagePublicForward';
 import StatisticsOverview from './StatisticsOverview';
+import StatisticsStoryPublicForward from './StatisticsStoryPublicForward';
 
 import styles from './Statistics.module.scss';
 
@@ -40,7 +41,7 @@ async function ensureLovelyChart() {
 }
 
 const GRAPH_TITLES = {
-  viewsGraph: 'Stats.MessageInteractionsTitle',
+  viewsGraph: 'Stats.StoryInteractionsTitle',
   reactionsGraph: 'ReactionsByEmotionChartTitle',
 };
 const GRAPHS = Object.keys(GRAPH_TITLES) as (keyof ApiPostStatistics)[];
@@ -52,16 +53,20 @@ export type OwnProps = {
 
 export type StateProps = {
   statistics?: ApiPostStatistics;
-  messageId?: number;
+  storyId?: number;
   dcId?: number;
+  chatsById: Record<string, ApiChat>;
+  usersById: Record<string, ApiUser>;
 };
 
-function Statistics({
+function StoryStatistics({
   chatId,
   isActive,
   statistics,
   dcId,
-  messageId,
+  storyId,
+  chatsById,
+  usersById,
 }: OwnProps & StateProps) {
   const lang = useLang();
   // eslint-disable-next-line no-null/no-null
@@ -69,21 +74,21 @@ function Statistics({
   const [isReady, setIsReady] = useState(false);
   const loadedCharts = useRef<string[]>([]);
 
-  const { loadMessageStatistics, loadMessagePublicForwards, loadStatisticsAsyncGraph } = getActions();
+  const { loadStoryStatistics, loadStoryPublicForwards, loadStatisticsAsyncGraph } = getActions();
   const forceUpdate = useForceUpdate();
 
   useEffect(() => {
-    if (messageId) {
-      loadMessageStatistics({ chatId, messageId });
+    if (storyId) {
+      loadStoryStatistics({ chatId, storyId });
     }
-  }, [chatId, loadMessageStatistics, messageId]);
+  }, [chatId, storyId]);
 
   useEffect(() => {
-    if (!isActive || messageId) {
+    if (!isActive || storyId) {
       loadedCharts.current = [];
       setIsReady(false);
     }
-  }, [isActive, messageId]);
+  }, [isActive, storyId]);
 
   // Load async graphs
   useEffect(() => {
@@ -148,22 +153,22 @@ function Statistics({
       forceUpdate();
     })();
   }, [
-    isReady, statistics, lang, chatId, messageId, loadStatisticsAsyncGraph, dcId, forceUpdate,
+    isReady, statistics, lang, chatId, storyId, loadStatisticsAsyncGraph, dcId, forceUpdate,
   ]);
 
-  const handleLoadMore = useLastCallback(({ direction }: { direction: LoadMoreDirection }) => {
-    if (direction === LoadMoreDirection.Backwards && messageId) {
-      loadMessagePublicForwards({ chatId, messageId });
-    }
+  const handleLoadMore = useLastCallback(() => {
+    if (!storyId) return;
+
+    loadStoryPublicForwards({ chatId, storyId });
   });
 
-  if (!isReady || !statistics || !messageId) {
+  if (!isReady || !statistics || !storyId) {
     return <Loading />;
   }
 
   return (
     <div className={buildClassName(styles.root, 'custom-scroll', isReady && styles.ready)}>
-      <StatisticsOverview statistics={statistics} type="message" title={lang('StatisticOverview')} />
+      <StatisticsOverview statistics={statistics} type="story" title={lang('StatisticOverview')} />
 
       {!loadedCharts.current.length && <Loading />}
 
@@ -184,9 +189,22 @@ function Statistics({
             preloadBackwards={STATISTICS_PUBLIC_FORWARDS_LIMIT}
             noFastList
           >
-            {(statistics.publicForwardsData as ApiMessagePublicForward[]).map((item) => (
-              <StatisticsMessagePublicForward key={item.messageId} data={item} />
-            ))}
+            {statistics.publicForwardsData!.map((item) => {
+              if ('messageId' in item) {
+                return (
+                  <StatisticsMessagePublicForward key={`message_${item.messageId}`} data={item} />
+                );
+              }
+
+              return (
+                <StatisticsStoryPublicForward
+                  key={`story_${item.storyId}`}
+                  data={item}
+                  chatsById={chatsById}
+                  usersById={usersById}
+                />
+              );
+            })}
           </InfiniteScroll>
         </div>
       )}
@@ -198,9 +216,13 @@ export default memo(withGlobal<OwnProps>(
   (global, { chatId }): StateProps => {
     const dcId = selectChatFullInfo(global, chatId)?.statisticsDcId;
     const tabState = selectTabState(global);
-    const statistics = tabState.statistics.currentMessage;
-    const messageId = tabState.statistics.currentMessageId;
+    const statistics = tabState.statistics.currentStory;
+    const storyId = tabState.statistics.currentStoryId;
+    const { byId: usersById } = global.users;
+    const { byId: chatsById } = global.chats;
 
-    return { statistics, dcId, messageId };
+    return {
+      statistics, dcId, storyId, usersById, chatsById,
+    };
   },
-)(Statistics));
+)(StoryStatistics));

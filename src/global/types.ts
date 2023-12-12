@@ -33,7 +33,6 @@ import type {
   ApiKeyboardButton,
   ApiMessage,
   ApiMessageEntity,
-  ApiMessageStatistics,
   ApiMyBoost,
   ApiNewPoll,
   ApiNotification,
@@ -44,6 +43,7 @@ import type {
   ApiPeerStories,
   ApiPhoneCall,
   ApiPhoto,
+  ApiPostStatistics,
   ApiPremiumPromo,
   ApiReaction,
   ApiReceipt,
@@ -499,8 +499,10 @@ export type TabState = {
 
   statistics: {
     byChatId: Record<string, ApiChannelStatistics | ApiGroupStatistics>;
-    currentMessage?: ApiMessageStatistics;
+    currentMessage?: ApiPostStatistics;
     currentMessageId?: number;
+    currentStory?: ApiPostStatistics;
+    currentStoryId?: number;
   };
 
   newContact?: {
@@ -1495,6 +1497,9 @@ export interface ActionPayloads {
   toggleMessageStatistics: ({
     messageId?: number;
   } & WithTabId) | undefined;
+  toggleStoryStatistics: ({
+    storyId?: number;
+  } & WithTabId) | undefined;
   loadStatistics: {
     chatId: string;
     isGroup: boolean;
@@ -1502,6 +1507,18 @@ export interface ActionPayloads {
   loadMessageStatistics: {
     chatId: string;
     messageId: number;
+  } & WithTabId;
+  loadMessagePublicForwards: {
+    chatId: string;
+    messageId: number;
+  } & WithTabId;
+  loadStoryStatistics: {
+    chatId: string;
+    storyId: number;
+  } & WithTabId;
+  loadStoryPublicForwards: {
+    chatId: string;
+    storyId: number;
   } & WithTabId;
   loadStatisticsAsyncGraph: {
     chatId: string;

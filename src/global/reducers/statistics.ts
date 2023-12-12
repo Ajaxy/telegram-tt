@@ -1,5 +1,5 @@
 import type {
-  ApiChannelStatistics, ApiGroupStatistics, ApiMessageStatistics, StatisticsGraph,
+  ApiChannelStatistics, ApiGroupStatistics, ApiPostStatistics, StatisticsGraph,
 } from '../../api/types';
 import type { GlobalState, TabArgs } from '../types';
 
@@ -22,13 +22,27 @@ export function updateStatistics<T extends GlobalState>(
 }
 
 export function updateMessageStatistics<T extends GlobalState>(
-  global: T, statistics: ApiMessageStatistics,
+  global: T, statistics: ApiPostStatistics,
   ...[tabId = getCurrentTabId()]: TabArgs<T>
 ): T {
   return updateTabState(global, {
     statistics: {
       ...selectTabState(global, tabId).statistics,
       currentMessage: statistics,
+      currentStory: undefined,
+    },
+  }, tabId);
+}
+
+export function updateStoryStatistics<T extends GlobalState>(
+  global: T, statistics: ApiPostStatistics,
+  ...[tabId = getCurrentTabId()]: TabArgs<T>
+): T {
+  return updateTabState(global, {
+    statistics: {
+      ...selectTabState(global, tabId).statistics,
+      currentStory: statistics,
+      currentMessage: undefined,
     },
   }, tabId);
 }

@@ -105,10 +105,10 @@ const MessageMeta: FC<OwnProps> = ({
       {isTranslated && (
         <i className="icon icon-language message-translated" onClick={onTranslationClick} />
       )}
-      {Boolean(message.views) && (
+      {Boolean(message.viewsCount) && (
         <>
           <span className="message-views">
-            {formatIntegerCompact(message.views!)}
+            {formatIntegerCompact(message.viewsCount!)}
           </span>
           <i className="icon icon-channelviews" />
         </>

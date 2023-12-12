@@ -1,0 +1,64 @@
+.root {
+  padding: 1rem 0.75rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-borders);
+}
+
+.header {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  margin-right: 2em;
+  font-size: 16px;
+  color: var(--text-color);
+  line-height: 30px;
+  text-transform: lowercase;
+
+  &:first-letter {
+    text-transform: uppercase;
+  }
+}
+
+.caption {
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.table {
+  width: 100%;
+}
+
+.tableCell {
+  width: 50%;
+}
+
+.tableHeading {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+
+.tableValue {
+  font-weight: 500;
+  font-size: 1.25rem;
+}
+
+.tableSecondaryValue {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-inline-start: 0.25rem;
+}
+
+.value {
+  font-size: 0.6875rem;
+  color: var(--color-text-green);
+
+  &.negative {
+    color: var(--color-error);
+  }
+}
+
