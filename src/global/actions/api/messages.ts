@@ -186,6 +186,9 @@ addActionHandler('loadViewportMessages', (global, actions, payload): ActionRetur
     // Prevent requests with local offsets
     if (isLocalMessageId(offsetId)) return;
 
+    // Prevent unnecessary requests in threads
+    if (offsetId === threadId && direction === LoadMoreDirection.Backwards) return;
+
     const isOutlying = Boolean(listedIds && !listedIds.includes(offsetId));
     const historyIds = (isOutlying
       ? selectOutlyingListByMessageId(global, chatId, threadId, offsetId) : listedIds)!;

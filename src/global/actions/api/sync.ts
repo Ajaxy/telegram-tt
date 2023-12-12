@@ -154,7 +154,8 @@ async function loadAndReplaceMessages<T extends GlobalState>(global: T, actions:
             .filter(Boolean)
           : [];
 
-        const isDiscussionStartLoaded = result.messages.some(({ id }) => id === resultDiscussion?.firstMessageId);
+        const isDiscussionStartLoaded = !result.messages.length
+          || result.messages.some(({ id }) => id === resultDiscussion?.firstMessageId);
         const threadStartMessages = (isDiscussionStartLoaded && resultDiscussion?.topMessages) || [];
         const allMessages = threadStartMessages.concat(result.messages, localMessages);
         const allMessagesWithTopicLastMessages = allMessages.concat(topicLastMessages);
