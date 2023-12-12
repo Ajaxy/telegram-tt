@@ -12,8 +12,8 @@ import { processDeeplink } from './deeplink';
 import { captureLocalStorage, restoreLocalStorage } from './localStorage';
 import tray from './tray';
 import {
-  forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows, IS_FIRST_RUN, IS_MAC_OS,
-  IS_PREVIEW, IS_WINDOWS, reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
+  checkIsWebContentsUrlAllowed, forceQuit, getAppTitle, getCurrentWindow, getLastWindow, hasExtraWindows,
+  IS_FIRST_RUN, IS_MAC_OS, IS_PREVIEW, IS_WINDOWS, reloadWindows, store, TRAFFIC_LIGHT_POSITION, windows,
 } from './utils';
 import windowStateKeeper from './windowState';
 
@@ -80,6 +80,12 @@ export function createWindow(url?: string) {
     return deviceType === 'hid' && ALLOWED_DEVICE_ORIGINS.includes(origin);
   });
 
+  window.webContents.on('will-navigate', (event, newUrl) => {
+    if (!checkIsWebContentsUrlAllowed(newUrl)) {
+      event.preventDefault();
+    }
+  });
+
   window.on('page-title-updated', (event: Event) => {
     event.preventDefault();
   });
@@ -139,7 +145,7 @@ export function createWindow(url?: string) {
 }
 
 function loadWindowUrl(window: BrowserWindow, url?: string, hash?: string): void {
-  if (url) {
+  if (url && checkIsWebContentsUrlAllowed(url)) {
     window.loadURL(url);
   } else if (!app.isPackaged) {
     window.loadURL(`http://localhost:1234${hash}`);

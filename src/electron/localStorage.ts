@@ -1,17 +1,39 @@
-import { getLastWindow } from './utils';
+import { checkIsWebContentsUrlAllowed, getLastWindow } from './utils';
 
 let localStorage: Record<string, any> | undefined;
 
 export async function captureLocalStorage(): Promise<void> {
-  localStorage = await (getLastWindow())?.webContents.executeJavaScript('({ ...localStorage });');
-}
+  const lastWindow = getLastWindow();
 
-export async function restoreLocalStorage(): Promise<void> {
-  if (!localStorage) {
+  if (!lastWindow) {
     return;
   }
 
-  await getLastWindow()?.webContents.executeJavaScript(
+  const contents = lastWindow.webContents;
+  const contentsUrl = contents.getURL();
+
+  if (!checkIsWebContentsUrlAllowed(contentsUrl)) {
+    return;
+  }
+
+  localStorage = await contents.executeJavaScript('({ ...localStorage });');
+}
+
+export async function restoreLocalStorage(): Promise<void> {
+  const lastWindow = getLastWindow();
+
+  if (!lastWindow || !localStorage) {
+    return;
+  }
+
+  const contents = lastWindow.webContents;
+  const contentsUrl = contents.getURL();
+
+  if (!checkIsWebContentsUrlAllowed(contentsUrl)) {
+    return;
+  }
+
+  await contents.executeJavaScript(
     Object.keys(localStorage).map(
       (key: string) => `localStorage.setItem('${key}', JSON.stringify(${localStorage![key]}))`,
     ).join(';'),
