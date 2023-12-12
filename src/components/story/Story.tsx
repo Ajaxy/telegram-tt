@@ -15,6 +15,7 @@ import { EDITABLE_STORY_INPUT_CSS_SELECTOR, EDITABLE_STORY_INPUT_ID } from '../.
 import { getSenderTitle, isUserId } from '../../global/helpers';
 import {
   selectChat, selectIsCurrentUserPremium,
+  selectPeer,
   selectPeerStories, selectPeerStory,
   selectTabState, selectUser,
 } from '../../global/selectors';
@@ -43,6 +44,7 @@ import useStoryProps from './hooks/useStoryProps';
 
 import Avatar from '../common/Avatar';
 import Composer from '../common/Composer';
+import Icon from '../common/Icon';
 import Button from '../ui/Button';
 import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
@@ -74,6 +76,7 @@ interface OwnProps {
 
 interface StateProps {
   peer: ApiPeer;
+  forwardSender?: ApiPeer;
   story?: ApiTypeStory;
   isMuted: boolean;
   orderedIds?: number[];
@@ -98,6 +101,7 @@ function Story({
   peerId,
   storyId,
   peer,
+  forwardSender,
   isMuted,
   isArchivedStories,
   isPrivateStories,
@@ -152,6 +156,7 @@ function Story({
   const {
     isDeletedStory,
     hasText,
+    hasForwardInfo,
     thumbnail,
     previewBlobUrl,
     isVideo,
@@ -182,6 +187,10 @@ function Story({
   const areViewsExpired = Boolean(
     isOut && (story!.date + viewersExpirePeriod) < getServerTime(),
   );
+
+  const forwardSenderTitle = forwardSender ? getSenderTitle(lang, forwardSender)
+    : (isLoadedStory && story.forwardInfo?.fromName);
+
   const canCopyLink = Boolean(
     isLoadedStory
     && story.isPublic
@@ -379,6 +388,11 @@ function Story({
   const handleOpenChat = useLastCallback(() => {
     onClose();
     openChat({ id: peerId });
+  });
+
+  const handleForwardPeerClick = useLastCallback(() => {
+    onClose();
+    openChat({ id: forwardSender!.id });
   });
 
   const handleOpenPrevStory = useLastCallback(() => {
@@ -591,6 +605,19 @@ function Story({
             {renderText(getSenderTitle(lang, peer) || '')}
           </span>
           <div className={styles.storyMetaRow}>
+            {forwardSenderTitle && (
+              <span
+                className={buildClassName(
+                  styles.storyMeta, styles.forwardHeader, forwardSender && styles.clickable,
+                )}
+                onClick={forwardSender ? handleForwardPeerClick : undefined}
+              >
+                <Icon name="loop" />
+                <span className={styles.forwardHeaderText}>
+                  {renderText(forwardSenderTitle)}
+                </span>
+              </span>
+            )}
             {story && 'date' in story && (
               <span className={styles.storyMeta}>{formatRelativeTime(lang, serverTime, story.date)}</span>
             )}
@@ -753,7 +780,7 @@ function Story({
         />
       )}
       {hasText && <div className={styles.captionGradient} />}
-      {hasText && (
+      {(hasText || hasForwardInfo) && (
         <StoryCaption
           key={`caption-${storyId}-${peerId}`}
           story={story as ApiStory}
@@ -812,9 +839,12 @@ export default memo(withGlobal<OwnProps>((global, {
     viewModal || forwardedStoryId || tabState.reactionPicker?.storyId || isReportModalOpen || isPrivacyModalOpen
     || isPremiumModalOpen || isDeleteModalOpen || safeLinkModalUrl || isStealthModalOpen || mapModal,
   );
+  const forwardSenderId = story && 'forwardInfo' in story ? story.forwardInfo?.fromPeerId : undefined;
+  const forwardSender = forwardSenderId ? selectPeer(global, forwardSenderId) : undefined;
 
   return {
     peer: (user || chat)!,
+    forwardSender,
     story,
     orderedIds: isArchivedStories ? archiveIds : (isPrivateStories ? pinnedIds : orderedIds),
     isMuted,

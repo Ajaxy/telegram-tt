@@ -11,6 +11,7 @@ export default function useStoryProps(
   const isLoadedStory = story && 'content' in story;
   const isDeletedStory = story && 'isDeleted' in story;
   const hasText = isLoadedStory ? hasMessageText(story) : false;
+  const hasForwardInfo = isLoadedStory && Boolean(story.forwardInfo);
 
   let thumbnail: string | undefined;
   if (isLoadedStory) {
@@ -43,6 +44,7 @@ export default function useStoryProps(
     isLoadedStory,
     isDeletedStory,
     hasText,
+    hasForwardInfo,
     thumbnail,
     previewHash,
     previewBlobUrl,

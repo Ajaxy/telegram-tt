@@ -516,7 +516,7 @@
   pointer-events: none;
 
   @supports (bottom: env(safe-area-inset-bottom)) {
-    bottom: calc(5rem + env(safe-area-inset-bottom));
+    bottom: calc(4.25rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -545,8 +545,13 @@
   pointer-events: all;
 }
 
+.captionText :global(.custom-emoji) {
+  vertical-align: middle;
+}
+
 .hasOverflow {
-  transform: translateY(calc(100% - 5.75rem));
+  --_overflow-shift: 5.75rem;
+  transform: translateY(calc(100% - var(--_overflow-shift)));
 }
 
 .expanded {
@@ -570,7 +575,7 @@
     overflow-y: hidden;
 
     mask-image: linear-gradient(to top, black 0%, black 0%), linear-gradient(to left, black 75%, transparent 100%);
-    mask-position: 100% 100%, 100% 4.5rem;
+    mask-position: 100% 100%, 100% calc(var(--_overflow-shift) - 1.25rem);
     mask-size: 100% 100%, calc(var(--expand-button-width, 0%) + 4rem) 1.25em;
     mask-repeat: no-repeat;
     -webkit-mask-composite: xor;
@@ -719,4 +724,34 @@
   user-select: none;
   -webkit-user-select: none;
   object-fit: cover;
+}
+
+.forwardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+
+  &.clickable {
+    cursor: var(--custom-cursor, pointer);
+  }
+}
+
+.forwardHeaderText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  .forwardHeader.clickable:hover & {
+    text-decoration: underline;
+  }
+}
+
+.forwardInfo {
+  --accent-color: var(--color-white);
+  --accent-background-color: rgba(0, 0, 0, 0.5);
+
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 0.5rem;
+  z-index: 1;
 }
