@@ -12,6 +12,7 @@ import { DEFAULT_WORKSPACE } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import { useJune } from '../../hooks/useJune';
+import { useWorkspaces } from '../../hooks/useWorkspaces';
 
 // eslint-disable-next-line import/no-named-as-default
 import FolderSelector from './WorkspaceSettingsFoldersList';
@@ -33,8 +34,8 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   const orderedFolderIds = global.chatFolders.orderedIds;
   const folders = orderedFolderIds ? orderedFolderIds.map((id) => chatFoldersById[id]).filter(Boolean) : [];
   const [isInitialized, setIsInitialized] = useState(false); // Новое состояние для отслеживания инициализации
-  const [workspaceName, setWorkspaceName] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+  const [workspaceName, setWorkspaceName] = useState<string>('');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>('');
   // eslint-disable-next-line no-null/no-null
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [hasChanges, setHasChanges] = useState(false);
@@ -51,6 +52,10 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     showNotification,
   } = getActions();
 
+  const {
+    getWorkspaceById, savedWorkspaces, setSavedWorkspaces, setCurrentWorkspaceId,
+  } = useWorkspaces();
+
   const resetState = useCallback(() => {
     setWorkspaceName('');
     setLogoUrl('');
@@ -62,12 +67,11 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   useEffect(() => {
     if (workspaceId) {
       if (!isInitialized) {
-        const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
-        const currentWorkspace = savedWorkspaces.find((ws: { id: string }) => ws.id === workspaceId);
+        const currentWorkspace = getWorkspaceById(workspaceId);
         if (currentWorkspace) {
           setWorkspaceName(currentWorkspace.name);
           setLogoUrl(currentWorkspace.logoUrl);
-          setSelectedFolderIds(currentWorkspace.folders.map(Number));
+          setSelectedFolderIds(currentWorkspace.folders?.map(Number) || []);
         }
         setIsInitialized(true);
       }
@@ -75,7 +79,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
       resetState();
       setIsInitialized(false);
     }
-  }, [workspaceId, isInitialized, resetState]);
+  }, [workspaceId, isInitialized, resetState, getWorkspaceById]);
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -105,7 +109,9 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
 
         finalLogoUrl = `${fileUrl.replace('/raw/', '/image/')}?w=128&h=128`;
         setLogoUrl(finalLogoUrl); // Обновляем URL после загрузки на сервер
-        URL.revokeObjectURL(logoUrl); // Освобождаем временный URL
+        if (logoUrl) {
+          URL.revokeObjectURL(logoUrl);
+        }
         setHasChanges(false);
       }
 
@@ -116,22 +122,19 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         folders: selectedFolderIds,
       };
 
-      const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
       if (workspaceId) {
         // Обновляем существующий воркспейс
         setMode('edit');
-        const updatedWorkspaces = savedWorkspaces.map((ws: {
-          id: string;
-        }) => (ws.id === workspaceId ? newWorkspaceData : ws));
-        localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
+        const updatedWorkspaces = savedWorkspaces.map((ws) => (ws.id === workspaceId ? newWorkspaceData : ws));
+        setSavedWorkspaces(updatedWorkspaces);
         close();
         showNotification({ message: 'Workspace updated successfully.' });
       } else {
         // Создаем новый воркспейс
         setMode('create');
         resetState();
-        localStorage.setItem('workspaces', JSON.stringify([...savedWorkspaces, newWorkspaceData]));
-        localStorage.setItem('currentWorkspace', newWorkspaceData.id); // Устанавливаем новый воркспейс как текущий
+        setSavedWorkspaces([...savedWorkspaces, newWorkspaceData]);
+        setCurrentWorkspaceId(newWorkspaceData.id);
         close();
         showNotification({ message: 'Workspace created successfully.' }); // Уведомление о создании
         track?.('Create new workspace');
@@ -172,15 +175,18 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
   }, [close, isOpen]);
 
   const handleDeleteWorkspace = () => {
-    const savedWorkspaces = JSON.parse(localStorage.getItem('workspaces') || '[]');
+    if (workspaceId === DEFAULT_WORKSPACE.id) {
+      return;
+    }
     const updatedWorkspaces = savedWorkspaces.filter((ws: {
       id: string;
     }) => ws.id !== workspaceId);
-    localStorage.setItem('workspaces', JSON.stringify(updatedWorkspaces));
-    localStorage.setItem('currentWorkspace', DEFAULT_WORKSPACE.id); // Устанавливаем активный воркспейс на "Personal"
+    setSavedWorkspaces(updatedWorkspaces);
+    setCurrentWorkspaceId(DEFAULT_WORKSPACE.id);
     showNotification({ message: 'Workspace deleted successfully.' });
     close(); // Закрываем модальное окно
   };
+
   const isSaveButtonActive = workspaceName && selectedFolderIds.length > 0 && hasChanges;
   const WorkspaceSettingsInner = (
     <div
