@@ -52,7 +52,9 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
     const value = localStorage.getItem(key);
     // eslint-disable-next-line no-null/no-null
     if (value !== null) {
-      return JSON.parse(value);
+      try {
+        return JSON.parse(value);
+      } catch { /* */ }
     }
 
     localStorage.setItem(key, JSON.stringify(initValue));
@@ -73,7 +75,9 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
         const value = localStorage.getItem(key);
         // eslint-disable-next-line no-null/no-null
         if (value !== null) {
-          return JSON.parse(value);
+          try {
+            return JSON.parse(value);
+          } catch { /* */ }
         }
 
         localStorage.setItem(key, JSON.stringify(initValue));
