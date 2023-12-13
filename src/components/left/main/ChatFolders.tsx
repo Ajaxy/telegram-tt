@@ -9,11 +9,11 @@ import { getActions, getGlobal, withGlobal } from '../../../global';
 import type { ApiChatFolder, ApiChatlistExportedInvite, ApiSession } from '../../../api/types';
 import type { GlobalState } from '../../../global/types';
 import type { FolderEditDispatch } from '../../../hooks/reducers/useFoldersReducer';
-import type { LeftColumnContent, SettingsScreens, Workspace } from '../../../types';
+import type { LeftColumnContent, SettingsScreens } from '../../../types';
 import type { MenuItemContextAction } from '../../ui/ListItem';
 import type { TabWithProperties } from '../../ui/TabList';
 
-import { ALL_FOLDER_ID, IS_STORIES_ENABLED } from '../../../config';
+import { ALL_FOLDER_ID, DEFAULT_WORKSPACE, IS_STORIES_ENABLED } from '../../../config';
 import { selectCanShareFolder, selectTabState } from '../../../global/selectors';
 import { selectCurrentLimit } from '../../../global/selectors/limits';
 import buildClassName from '../../../util/buildClassName';
@@ -28,6 +28,7 @@ import useLang from '../../../hooks/useLang';
 import useLastCallback from '../../../hooks/useLastCallback';
 import useShowTransition from '../../../hooks/useShowTransition';
 import { useStorage } from '../../../hooks/useStorage';
+import { useWorkspaces } from '../../../hooks/useWorkspaces';
 
 import StoryRibbon from '../../story/StoryRibbon';
 import TabList from '../../ui/TabList';
@@ -66,10 +67,6 @@ type StateProps = {
   archiveSettings: GlobalState['archiveSettings'];
   isStoryRibbonShown?: boolean;
   sessions?: Record<string, ApiSession>;
-  currentWorkspaceId?: string;
-  currentFolders?: number[];
-  currentWorkspace: Workspace;
-  savedWorkspaces: Workspace[];
 };
 
 const SAVED_MESSAGES_HOTKEY = '0';
@@ -103,8 +100,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
   chatId,
   userId,
   chatFoldersPortalRef,
-  currentWorkspace,
-  savedWorkspaces,
 }) => {
   const {
     loadChatFolders,
@@ -140,16 +135,18 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
     } satisfies ApiChatFolder;
   }, [orderedFolderIds, lang]);
 
+  const { savedWorkspaces, currentWorkspace } = useWorkspaces();
+
   const displayedFolders = useMemo(() => {
     // Собираем все ID папок, которые принадлежат другим воркспейсам, кроме personal
     const allFolderIdsInOtherWorkspaces = savedWorkspaces
-      .filter((ws) => ws.id !== 'personal' && ws.folders)
+      .filter((ws) => ws.id !== DEFAULT_WORKSPACE.id && ws.folders)
       .reduce((acc: number[], ws) => [...acc, ...(ws.folders || [])], [] as number[]);
 
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
         // Для personal воркспейса добавляем All Chats и папки, которые не входят в другие воркспейсы
-        if (currentWorkspace.id === 'personal') {
+        if (currentWorkspace.id === DEFAULT_WORKSPACE.id) {
           if (id === ALL_FOLDER_ID || !allFolderIdsInOtherWorkspaces.includes(id)) {
             return id === ALL_FOLDER_ID ? allChatsFolder : chatFoldersById[id];
           }
@@ -442,17 +439,6 @@ const ChatFolders: FC<OwnProps & StateProps> = ({
 
 export default memo(withGlobal<OwnProps>(
   (global): StateProps => {
-    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
-    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
-
-    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
-    if (!currentWorkspace) {
-      currentWorkspace = {
-        id: 'personal', name: 'Personal Workspace', logoUrl: undefined, folders: [],
-      };
-    }
-    const { folders: currentFolders } = currentWorkspace;
     const {
       chatFolders: {
         byId: chatFoldersById,
@@ -493,9 +479,6 @@ export default memo(withGlobal<OwnProps>(
       archiveSettings,
       isStoryRibbonShown,
       sessions,
-      currentFolders,
-      currentWorkspace,
-      savedWorkspaces,
     };
   },
 )(ChatFolders));

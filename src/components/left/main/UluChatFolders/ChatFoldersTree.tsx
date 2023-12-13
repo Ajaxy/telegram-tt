@@ -13,11 +13,10 @@ import {
 } from '../../../../global';
 
 import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
-import type { Workspace } from '../../../../types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
-import { ALL_FOLDER_ID } from '../../../../config';
+import { ALL_FOLDER_ID, DEFAULT_WORKSPACE } from '../../../../config';
 import { selectCanShareFolder, selectCurrentChat } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
 import buildClassName from '../../../../util/buildClassName';
@@ -25,6 +24,7 @@ import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManag
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
+import { useWorkspaces } from '../../../../hooks/useWorkspaces';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 import TreeRenders from './TreeRenderers';
@@ -42,8 +42,6 @@ type StateProps = {
   maxFolderInvites: number;
   maxChatLists: number;
   maxFolders: number;
-  currentWorkspace: Workspace;
-  savedWorkspaces: Workspace[];
   currentChat: ApiChat | undefined;
 };
 
@@ -56,8 +54,6 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
   maxChatLists,
   maxFolders,
   maxFolderInvites,
-  currentWorkspace,
-  savedWorkspaces,
   currentChat,
 }) => {
   const lang = useLang();
@@ -74,6 +70,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
   } = getActions();
 
+  const { currentWorkspace, savedWorkspaces } = useWorkspaces();
   const allFolderIdsInWorkspaces = savedWorkspaces
     .filter((ws) => ws.id !== currentWorkspace.id)
     .reduce((acc, ws) => {
@@ -84,7 +81,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     return orderedFolderIds
       ? orderedFolderIds.map((id) => {
         // Пропускаем папки, которые уже назначены другим воркспейсам, если выбран Personal Workspace
-        if (currentWorkspace.id === 'personal' && allFolderIdsInWorkspaces.includes(id)) {
+        if (currentWorkspace.id === DEFAULT_WORKSPACE.id && allFolderIdsInWorkspaces.includes(id)) {
           return undefined;
         }
 
@@ -92,7 +89,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
         // Показываем папку только если она принадлежит текущему воркспейсу
         if (
-          currentWorkspace.id !== 'personal'
+          currentWorkspace.id !== DEFAULT_WORKSPACE.id
           && !savedWorkspaces.find((ws) => ws.id === currentWorkspace.id)?.folders?.includes(id)) {
           return undefined;
         }
@@ -284,17 +281,6 @@ export default withGlobal(
   (global): StateProps => {
     const currentChat = selectCurrentChat(global);
 
-    // Получение текущего воркспейса и списка сохраненных воркспейсов
-    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
-    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
-
-    let currentWorkspace = savedWorkspaces.find((ws: {
-      id: string;
-    }) => ws.id === currentWorkspaceId);
-    if (!currentWorkspace) {
-      currentWorkspace = { id: 'personal', name: 'Personal Workspace', logoUrl: undefined };
-    }
     const {
       chatFolders: {
         byId: chatFoldersById,
@@ -326,8 +312,6 @@ export default withGlobal(
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
-      currentWorkspace,
-      savedWorkspaces,
       currentChat,
       // archiveSettings,
       // sessions,

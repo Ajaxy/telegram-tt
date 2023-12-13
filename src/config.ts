@@ -1,5 +1,6 @@
 import type { ApiReactionEmoji } from './api/types';
 import type { ApiLimitType } from './global/types';
+import type { Workspace } from './types';
 
 export const APP_CODE_NAME = 'A';
 export const APP_NAME = process.env.APP_NAME || 'ulu';
@@ -347,6 +348,13 @@ export const ULU_APP = {
   CLIENT_NEWS_CHANNEL_USERNAME: 'uludotso',
   CLIENT_NEWS_CHANNEL_ID: '-1001916758340',
   SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM: 2.25,
+};
+
+export const DEFAULT_WORKSPACE: Workspace = {
+  id: 'personal',
+  name: 'Personal Workspace',
+  logoUrl: undefined,
+  folders: [],
 };
 
 function determineCmdKey() {

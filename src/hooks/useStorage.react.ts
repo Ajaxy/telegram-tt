@@ -1,4 +1,4 @@
-import { useEffect, useState } from '../lib/teact/teact';
+import { useEffect, useState } from 'react';
 
 import type { Workspace } from '../types';
 

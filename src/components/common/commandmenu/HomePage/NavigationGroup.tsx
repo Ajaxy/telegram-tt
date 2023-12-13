@@ -7,7 +7,7 @@ import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 
-import { cmdKey } from '../../../../config';
+import { cmdKey, DEFAULT_WORKSPACE } from '../../../../config';
 import { IS_APP } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
@@ -94,9 +94,9 @@ const NavigationGroup: FC<NavigationGroupProps> = ({
   const renderWorkspaceIcon = (workspace: Workspace) => {
     if (workspace.logoUrl) {
       return <img className="image" src={workspace.logoUrl} alt={`${workspace.name} logo`} />;
-    } else if (workspace.id !== 'personal') {
+    } else if (workspace.id !== DEFAULT_WORKSPACE.id) {
       return <div className="placeholder">{workspace.name[0].toUpperCase()}</div>;
-    } else if (workspace.id === 'personal') {
+    } else if (workspace.id === DEFAULT_WORKSPACE.id) {
       return <div className="placeholder">P</div>;
     } // Placeholder для персонал воркспейса
     return undefined;
