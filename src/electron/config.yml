@@ -46,13 +46,18 @@ mac:
 dmg:
   title: ulu installer
   background: public/background-electron-dmg.tiff
-  iconSize: 100
+  iconSize: 122
+  window:
+    width: 512
+    height: 352
+    x: 512
+    y: 352
   contents:
     - x: 138
-      y: 225
+      y: 162
       type: file
-    - x: 402
-      y: 225
+    - x: 392
+      y: 162
       type: link
       path: "/Applications"
 linux:
