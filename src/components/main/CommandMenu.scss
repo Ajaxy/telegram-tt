@@ -28,6 +28,22 @@
   }
 }
 
+@keyframes bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bounce-animation {
+  animation: bounce 0.2s ease;
+}
+
 [cmdk-root] {
   max-width: 640px;
   width: 100%;

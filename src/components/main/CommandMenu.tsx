@@ -129,6 +129,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setInputValue('');
   }, []);
 
+  // анимация при выборе страницы
+
+  // eslint-disable-next-line no-null/no-null
+  const [isBouncing, setIsBouncing] = useState(false);
+
   // Настройки автоматизации
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
 
@@ -247,8 +252,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // Возврат на прошлую страницу по Backspace
   const handleBack = useCallback(() => {
     if (pages.length > 1) {
-      const newPages = pages.slice(0, -1);
-      setPages(newPages);
+      setIsBouncing(true);
+      setPages((prevPages) => prevPages.slice(0, -1));
+      setTimeout(() => {
+        setIsBouncing(false);
+      }, 150);
     }
   }, [pages]);
 
@@ -257,11 +265,19 @@ const CommandMenu: FC<CommandMenuProps> = ({
   ), [isOpen, close]);
 
   const openFolderPage = useCallback((id) => { // Замена folderId на id
-    setPages([...pages, `folderPage:${id}`]);
-  }, [pages]);
+    setIsBouncing(true);
+    setPages((prevPages) => [...prevPages, `folderPage:${id}`]);
+    setTimeout(() => {
+      setIsBouncing(false);
+    }, 150);
+  }, []);
 
   const openChangeThemePage = useCallback(() => {
-    setPages(['changeTheme']); // Заменяем массив pages только текущей страницей
+    setIsBouncing(true);
+    setPages((prevPages) => [...prevPages, 'changeTheme']);
+    setTimeout(() => {
+      setIsBouncing(false);
+    }, 150);
   }, []);
 
   const getFolderName = (id: number | null) => {
@@ -406,6 +422,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
         loop
         shouldFilter
         filter={customFilter}
+        className={`command-menu-container ${isBouncing ? 'bounce-animation' : ''}`}
       >
         {pages.map((page) => {
           if (page !== 'home' && page !== 'changeTheme') {
