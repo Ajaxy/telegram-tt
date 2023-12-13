@@ -1,5 +1,5 @@
 import { DEFAULT_WORKSPACE } from '../config';
-import { useStorage } from './useStorage';
+import { useStorage } from './useStorage.react';
 
 export function useWorkspaces() {
   const {

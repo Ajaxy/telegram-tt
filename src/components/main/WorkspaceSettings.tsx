@@ -12,7 +12,7 @@ import { DEFAULT_WORKSPACE } from '../../config';
 import captureEscKeyListener from '../../util/captureEscKeyListener';
 
 import { useJune } from '../../hooks/useJune';
-import { useWorkspaces } from '../../hooks/useWorkspaces';
+import { useWorkspaces } from '../../hooks/useWorkspaces.react';
 
 // eslint-disable-next-line import/no-named-as-default
 import FolderSelector from './WorkspaceSettingsFoldersList';
@@ -97,7 +97,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
     }
   }, [onClose]);
 
-  const handleWorkspaceAction = async () => {
+  const handleSaveWorkspace = async () => {
     setIsCreating(true);
     try {
       const newWorkspaceId = workspaceId || Date.now().toString();
@@ -244,7 +244,7 @@ const WorkspaceSettings: React.FC<WorkspaceSettingsProps> = ({ isOpen, onClose, 
         />
         <button
           className={`saveButton ${isSaveButtonActive ? 'active' : ''}`}
-          onClick={handleWorkspaceAction}
+          onClick={handleSaveWorkspace}
           disabled={!workspaceName || selectedFolderIds.length === 0}
         >
           <span className={`saveButtonText ${isSaveButtonActive ? 'active' : ''}`}>
