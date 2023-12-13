@@ -13,7 +13,6 @@ import {
 } from '../../../../global';
 
 import type { ApiChat, ApiChatFolder, ApiChatlistExportedInvite } from '../../../../api/types';
-import type { Workspace } from '../../../../types';
 import type { MenuItemContextAction } from '../../../ui/ListItem';
 import type { TreeItemChat, TreeItemFolder } from './types';
 
@@ -25,6 +24,7 @@ import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManag
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
+import { useWorkspaces } from '../../../../hooks/useWorkspaces';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 import TreeRenders from './TreeRenderers';
@@ -42,8 +42,6 @@ type StateProps = {
   maxFolderInvites: number;
   maxChatLists: number;
   maxFolders: number;
-  currentWorkspace: Workspace;
-  savedWorkspaces: Workspace[];
   currentChat: ApiChat | undefined;
 };
 
@@ -56,8 +54,6 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
   maxChatLists,
   maxFolders,
   maxFolderInvites,
-  currentWorkspace,
-  savedWorkspaces,
   currentChat,
 }) => {
   const lang = useLang();
@@ -74,6 +70,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
   } = getActions();
 
+  const { currentWorkspace, savedWorkspaces } = useWorkspaces();
   const allFolderIdsInWorkspaces = savedWorkspaces
     .filter((ws) => ws.id !== currentWorkspace.id)
     .reduce((acc, ws) => {
@@ -283,17 +280,6 @@ export default withGlobal(
   (global): StateProps => {
     const currentChat = selectCurrentChat(global);
 
-    // Получение текущего воркспейса и списка сохраненных воркспейсов
-    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
-    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
-
-    let currentWorkspace = savedWorkspaces.find((ws: {
-      id: string;
-    }) => ws.id === currentWorkspaceId);
-    if (!currentWorkspace) {
-      currentWorkspace = DEFAULT_WORKSPACE;
-    }
     const {
       chatFolders: {
         byId: chatFoldersById,
@@ -325,8 +311,6 @@ export default withGlobal(
       maxFolders: selectCurrentLimit(global, 'dialogFilters'),
       maxFolderInvites: selectCurrentLimit(global, 'chatlistInvites'),
       maxChatLists: selectCurrentLimit(global, 'chatlistJoined'),
-      currentWorkspace,
-      savedWorkspaces,
       currentChat,
       // archiveSettings,
       // sessions,
