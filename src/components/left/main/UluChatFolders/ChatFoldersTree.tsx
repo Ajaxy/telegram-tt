@@ -200,12 +200,13 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
         record[chatAdjustedIndex] = {
           index: chatAdjustedIndex,
           type: 'chat',
-          contextActions: [], // TODO
+          contextActions: [],
           id: chat.id,
           chat,
           isPinned: chat.isPinned,
           folderId: chat.folderId,
           isFolder: false,
+          canChangeFolder: folders.length > 1,
           isCurrentChat: currentChat && chat.id === currentChat.id,
           // isFolder: isChatSuperGroupWithTopics(chat),
           canRename: false,

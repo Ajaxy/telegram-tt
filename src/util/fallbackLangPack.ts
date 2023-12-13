@@ -332,6 +332,7 @@ export default {
   Edit: 'Edit',
   'Common.Back': 'Back',
   SharedMedia: 'Shared Media',
+  SearchForMessagesLabelHotkey: `Search for messages ${IS_MAC_OS ? '[⌘+F]' : '[Ctrl+F]'}`,
   lng_dlg_search_for_messages: 'Search for messages',
   JumpToDate: 'Jump to Date',
   lng_search_no_results: 'No messages found',

@@ -16,7 +16,7 @@ import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 import type { Workspace } from '../../types';
 
-import { DEFAULT_WORKSPACE } from '../../config';
+import { cmdKey, DEFAULT_WORKSPACE } from '../../config';
 import {
   getChatTitle, getUserFullName,
 } from '../../global/helpers';
@@ -24,7 +24,6 @@ import { selectCurrentChat, selectTabState, selectUser } from '../../global/sele
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { transliterate } from '../../util/transliterate';
-import { IS_MAC_OS } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -124,6 +123,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
     setPages(['home']);
     setInputValue('');
   }, []);
+
+  // анимация при выборе страницы
+
+  // eslint-disable-next-line no-null/no-null
+  const [isBouncing, setIsBouncing] = useState(false);
 
   // Настройки автоматизации
   const [isAutomationSettingsOpen, setAutomationSettingsOpen] = useState(false);
@@ -241,8 +245,11 @@ const CommandMenu: FC<CommandMenuProps> = ({
   // Возврат на прошлую страницу по Backspace
   const handleBack = useCallback(() => {
     if (pages.length > 1) {
-      const newPages = pages.slice(0, -1);
-      setPages(newPages);
+      setIsBouncing(true);
+      setPages((prevPages) => prevPages.slice(0, -1));
+      setTimeout(() => {
+        setIsBouncing(false);
+      }, 150);
     }
   }, [pages]);
 
@@ -251,11 +258,19 @@ const CommandMenu: FC<CommandMenuProps> = ({
   ), [isOpen, close]);
 
   const openFolderPage = useCallback((id) => { // Замена folderId на id
-    setPages([...pages, `folderPage:${id}`]);
-  }, [pages]);
+    setIsBouncing(true);
+    setPages((prevPages) => [...prevPages, `folderPage:${id}`]);
+    setTimeout(() => {
+      setIsBouncing(false);
+    }, 150);
+  }, []);
 
   const openChangeThemePage = useCallback(() => {
-    setPages(['changeTheme']); // Заменяем массив pages только текущей страницей
+    setIsBouncing(true);
+    setPages((prevPages) => [...prevPages, 'changeTheme']);
+    setTimeout(() => {
+      setIsBouncing(false);
+    }, 150);
   }, []);
 
   const getFolderName = (id: number | null) => {
@@ -381,8 +396,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     close();
   }, [runCommand, close]);
 
-  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
-
   const CommandMenuInner = (
     <div>
       <Command.Dialog
@@ -392,6 +405,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
         loop
         shouldFilter
         filter={customFilter}
+        className={`command-menu-container ${isBouncing ? 'bounce-animation' : ''}`}
       >
         {pages.map((page) => {
           if (page !== 'home' && page !== 'changeTheme') {

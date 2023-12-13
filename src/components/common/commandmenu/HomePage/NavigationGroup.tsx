@@ -7,8 +7,8 @@ import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 
-import { DEFAULT_WORKSPACE } from '../../../../config';
-import { IS_APP, IS_MAC_OS } from '../../../../util/windowEnvironment';
+import { cmdKey, DEFAULT_WORKSPACE } from '../../../../config';
+import { IS_APP } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
 
@@ -101,8 +101,6 @@ const NavigationGroup: FC<NavigationGroupProps> = ({
     } // Placeholder для персонал воркспейса
     return undefined;
   };
-
-  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
 
   const menuItems = [
     ...allWorkspaces

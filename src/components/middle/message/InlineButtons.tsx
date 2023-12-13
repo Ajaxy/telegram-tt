@@ -51,6 +51,7 @@ const InlineButtons: FC<OwnProps> = ({ message, onClick }) => {
             <Button
               size="tiny"
               ripple
+              isText
               disabled={button.type === 'unsupported'}
               // eslint-disable-next-line react/jsx-no-bind
               onClick={() => onClick({ messageId: message.id, button })}

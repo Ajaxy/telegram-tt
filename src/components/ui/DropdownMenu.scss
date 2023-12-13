@@ -19,6 +19,11 @@
     font-weight: bold;
     }
 
-    
+    .ProfilePhoto .thumb:not(.shown) {
+      display: none !important; 
+    }
+}
+.thumb:not(.shown) {
+  display: none !important; 
 }
 

@@ -1,13 +1,15 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import type { ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { TreeItemRenderContext } from 'react-complex-tree';
 import type { FC } from '../../../../../../../lib/teact/teact';
 import { getActions } from '../../../../../../../global';
 
+import type { ApiTopic } from '../../../../../../../api/types';
 import type { TreeItemChat } from '../../../types';
 
 import { ULU_APP } from '../../../../../../../config';
+import { getOrderedTopics } from '../../../../../../../global/helpers';
 import buildClassName from '../../../../../../../util/buildClassName';
 import { MouseButton } from '../../../../../../../util/windowEnvironment';
 import renderText from '../../../../../../common/helpers/renderText.react';
@@ -96,7 +98,7 @@ const Chat: FC<{
     folderId: item.folderId,
     isPinned: item.isPinned,
     isMuted: item.chat?.isMuted,
-    canChangeFolder: item.canChangeFolder, // TODO
+    canChangeFolder: item.canChangeFolder,
   });
 
   const {
@@ -105,8 +107,17 @@ const Chat: FC<{
   } = useContextMenuHandlers(ref!, !contextActions);
 
   const {
-    closeForumPanel, openForumPanel, openChat, focusLastMessage,
+    closeForumPanel, openForumPanel, openChat, openThread, focusLastMessage,
   } = getActions();
+
+  const [lastActiveTopic] = useMemo(() => {
+    if (!item.chat?.topics) {
+      return [] as ApiTopic[];
+    }
+
+    const unreadTopics = Object.values(item.chat.topics).filter((topic) => topic.unreadCount);
+    return getOrderedTopics(unreadTopics, item.chat.orderedPinnedTopicIds, true);
+  }, [item.chat?.orderedPinnedTopicIds, item.chat?.topics]);
 
   // TODO
   const isForumPanelOpen = false;
@@ -125,12 +136,19 @@ const Chat: FC<{
       return;
     }
 
-    openChat({ id: chatId, shouldReplaceHistory: true }, { forceOnHeavyAnimation: true });
+    if (lastActiveTopic) {
+      openThread({ chatId, threadId: lastActiveTopic.id, shouldReplaceHistory: true });
+    } else {
+      openChat(
+        { id: chatId, shouldReplaceHistory: true },
+        { forceOnHeavyAnimation: true },
+      );
+    }
 
     if (isSelected && canScrollDown) {
       focusLastMessage();
     }
-  }, [canScrollDown, isForumPanelOpen, isSelected, item.id, item.isFolder]);
+  }, [canScrollDown, isForumPanelOpen, isSelected, item, lastActiveTopic]);
 
   const { handleClick, handleMouseDown } = useFastClick((e: React.MouseEvent<HTMLDivElement>) => {
     if (contextActions && (e.button === MouseButton.Secondary)) {

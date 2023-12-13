@@ -313,8 +313,8 @@ export const FRESH_AUTH_PERIOD = 86400; // 1 day
 
 export const LIGHT_THEME_BG_COLOR = '#fefffe';
 export const DARK_THEME_BG_COLOR = '#0E0F0F';
-export const DEFAULT_PATTERN_COLOR = '#0F0F0F';
-export const DARK_THEME_PATTERN_COLOR = '#0A0A0A8C';
+export const DEFAULT_PATTERN_COLOR = '#475aa0';
+export const DARK_THEME_PATTERN_COLOR = '#E9666F';
 export const PEER_COLOR_BG_OPACITY = '1a';
 export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
 export const PEER_COLOR_GRADIENT_STEP = 5; // px
@@ -355,3 +355,15 @@ export const DEFAULT_WORKSPACE: Workspace = {
   logoUrl: undefined,
   folders: [],
 };
+
+function determineCmdKey() {
+  if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
+    // Использование navigator только если он доступен
+    return /Mac|iPod|iPhone|iPad/.test(window.navigator.platform) ? '⌘' : 'Ctrl';
+  } else {
+    // Значение по умолчанию, если navigator недоступен
+    return 'Ctrl';
+  }
+}
+
+export const cmdKey = determineCmdKey();

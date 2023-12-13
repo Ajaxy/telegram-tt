@@ -32,6 +32,7 @@ import {
 } from '../../global/selectors';
 import { ARE_CALLS_SUPPORTED, IS_APP } from '../../util/windowEnvironment';
 
+import useCommands from '../../hooks/useCommands';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
@@ -224,6 +225,14 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
     handleSearchClick();
   });
 
+  const { useCommand } = useCommands();
+  useCommand('OPEN_CHAT_SEARCH', () => {
+    if (!canSearch || isForForum) {
+      return;
+    }
+    handleSearchClick();
+  });
+
   const getTextWithLanguage = useLastCallback((langKey: string, langCode: string) => {
     const simplified = langCode.split('-')[0];
     const translationKey = `TranslateLanguage${simplified.toUpperCase()}`;
@@ -368,7 +377,7 @@ const HeaderActions: FC<OwnProps & StateProps> = ({
               color="translucent"
               size="smaller"
               onClick={handleSearchClick}
-              ariaLabel={lang('Conversation.SearchPlaceholder')}
+              ariaLabel={isForForum ? lang('Conversation.SearchPlaceholder') : lang('SearchForMessagesLabelHotkey')}
             >
               <i className="icon icon-search" aria-hidden />
             </Button>

@@ -130,11 +130,34 @@ const CommandMenuCalendar = ({
           return /^\s*\d{1,2}\s*(am|pm)\s*$/i.test(input);
         };
         const now = new Date();
+
+        const adjustDateForNextWeekday = (date: Date, inputDay: string) => {
+          const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+          const currentDayIndex = now.getDay();
+          const inputDayIndex = daysOfWeek.indexOf(inputDay.toLowerCase());
+
+          if (inputDayIndex <= currentDayIndex) {
+            // If the input day has already passed this week, set to next week
+            const daysToAdd = 7 - currentDayIndex + inputDayIndex;
+            date.setDate(now.getDate() + daysToAdd);
+          } else {
+            // Else, set to the same week
+            date.setDate(now.getDate() + inputDayIndex - currentDayIndex);
+          }
+        };
+
+        const isDayOfWeekInput = (input: string) => {
+          return /^(sunday|monday|tuesday|wednesday|thursday|friday|saturday)(\s*\d{1,2}(am|pm))?$/i.test(input);
+        };
+
         const parsedResults = chrono.parse(inputValue, new Date());
         if (parsedResults.length > 0) {
           const date = parsedResults[0].start.date();
 
-          if (date < now) {
+          if (isDayOfWeekInput(inputValue)) {
+            const inputDay = inputValue.split(' ')[0];
+            adjustDateForNextWeekday(date, inputDay);
+          } else if (date < now) {
             if (isTimeOnlyInput(inputValue)) {
               // Установить на завтра, если введено только время и оно уже прошло
               date.setDate(now.getDate() + 1);

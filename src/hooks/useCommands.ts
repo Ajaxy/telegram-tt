@@ -5,6 +5,7 @@ type TCommand = (
   | 'NEW_GROUP'
   | 'NEW_FOLDER'
   | 'OPEN_SEARCH'
+  | 'OPEN_CHAT_SEARCH'
   | 'OPEN_SETTINGS'
   | 'OPEN_ARCHIVED'
   | 'OPEN_INBOX'
