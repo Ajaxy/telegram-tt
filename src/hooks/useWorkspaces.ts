@@ -8,11 +8,11 @@ export function useWorkspaces() {
     currentWorkspaceId, setCurrentWorkspaceId, savedWorkspaces, setSavedWorkspaces,
   } = useStorage();
 
-  const currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId) || DEFAULT_WORKSPACE; // todo
-
   const allWorkspaces = [DEFAULT_WORKSPACE, ...savedWorkspaces];
 
-  const getWorkspaceById = (wsId: string) => allWorkspaces.find((ws) => ws.id === wsId);
+  const getWorkspaceById = (wsId: string) => allWorkspaces.find((ws) => ws.id === wsId) || DEFAULT_WORKSPACE; // todo;
+
+  const currentWorkspace = getWorkspaceById(currentWorkspaceId);
 
   return {
     currentWorkspaceId,

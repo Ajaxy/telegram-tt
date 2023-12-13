@@ -86,5 +86,9 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, []);
 
-  return [state, setState];
+  const setStateFiltered = (val: T) => {
+    setState(val === undefined ? initValue : val);
+  };
+
+  return [state, setStateFiltered];
 }
