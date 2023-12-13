@@ -9,11 +9,11 @@
     grid-auto-flow: column;
   }
 
-  .Button {
+  .Button.text.primary {
     flex: 1;
     width: auto;
     margin: 0.125rem;
-    background: var(--color--primary);
+    background: var(--color-background-own);
     border-radius: var(--border-radius-messages-small);
     font-weight: 500;
     text-transform: none;
@@ -21,8 +21,9 @@
 
     &:hover,
     &:focus {
-      background: var(--color-primary-shade) !important;
+      background: var(--color-background-secondary) !important;
       backdrop-filter: brightness(115%);
+      --ripple-color: rgba(0, 0, 0, 0.08);
 
       @supports not (backdrop-filter: brightness(115%)) {
         filter: brightness(115%);
