@@ -14,7 +14,6 @@ import { getActions, withGlobal } from '../../global';
 
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
-import type { Workspace } from '../../types';
 
 import { cmdKey, DEFAULT_WORKSPACE } from '../../config';
 import {
@@ -31,13 +30,13 @@ import useDone from '../../hooks/useDone';
 import { useJune } from '../../hooks/useJune';
 import useLang from '../../hooks/useLang';
 import { useStorage } from '../../hooks/useStorage';
+import { useWorkspaces } from '../../hooks/useWorkspaces';
 
 import ChangeThemePage from '../common/ChangeThemePage';
 import HomePage from '../common/commandmenu/HomePage';
 import FolderPage from '../common/FolderPage';
 import CommanMenuChatSearch from '../left/search/CommanMenuChatSearch';
 import AutomationSettings from './AutomationSettings';
-// eslint-disable-next-line import/no-named-as-default
 import WorkspaceSettings from './WorkspaceSettings';
 
 import './CommandMenu.scss';
@@ -63,10 +62,7 @@ interface CommandMenuProps {
   folders: ApiChatFolder[];
   chatsById?: Record<string, ApiChat>;
   recentlyFoundChatIds?: string[];
-  currentWorkspace: Workspace;
-  savedWorkspaces: Workspace[];
   fetchingStatus?: { chats?: boolean; messages?: boolean };
-  handleSelectWorkspace: (workspaceId: string, closeFunc: () => void) => void;
 }
 
 const customFilter = (value: string, search: string) => {
@@ -89,7 +85,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
   chatsById,
   pinnedIds,
   recentlyFoundChatIds,
-  folders, handleSelectWorkspace: originalHandleSelectWorkspace, savedWorkspaces, currentWorkspace,
+  folders,
 }) => {
   const { track, analytics } = useJune();
   const {
@@ -148,6 +144,7 @@ const CommandMenu: FC<CommandMenuProps> = ({
 
   // Настройки воркспейсов
   const [isWorkspaceSettingsOpen, setWorkspaceSettingsOpen] = useState(false);
+  const { savedWorkspaces, currentWorkspace, setCurrentWorkspaceId } = useWorkspaces();
   const allWorkspaces = [
     ...savedWorkspaces,
     ...(currentWorkspace.id !== DEFAULT_WORKSPACE.id ? [DEFAULT_WORKSPACE] : []),
@@ -164,8 +161,9 @@ const CommandMenu: FC<CommandMenuProps> = ({
   }, []);
 
   const handleSelectWorkspace = (workspaceId: string) => {
-    originalHandleSelectWorkspace(workspaceId, close); // передаем функцию close
+    setCurrentWorkspaceId(workspaceId);
     track?.('Switch workspace', { source: 'Сommand Menu' });
+    close();
   };
 
   const handleOpenWorkspaceSettings = useCallback((workspaceId?: string) => {
@@ -544,25 +542,6 @@ export default memo(withGlobal(
     const { chatIds: globalChatIds, userIds: globalUserIds } = globalResults || {};
     const { chatIds: localChatIds, userIds: localUserIds } = localResults || {};
 
-    // Получение информации о воркспейсах из localStorage
-    const currentWorkspaceId = localStorage.getItem('currentWorkspace');
-    const savedWorkspacesString = localStorage.getItem('workspaces') || '[]';
-    const savedWorkspaces = JSON.parse(savedWorkspacesString) as Workspace[];
-
-    let currentWorkspace = savedWorkspaces.find((ws) => ws.id === currentWorkspaceId);
-    if (!currentWorkspace) {
-      currentWorkspace = DEFAULT_WORKSPACE;
-    }
-
-    const saveCurrentWorkspaceToLocalStorage = (workspaceId: string) => {
-      localStorage.setItem('currentWorkspace', workspaceId);
-    };
-
-    const handleSelectWorkspace = (workspaceId: string, closeFunc: () => void) => {
-      saveCurrentWorkspaceToLocalStorage(workspaceId);
-      closeFunc(); // вызов close
-    };
-
     return {
       topUserIds,
       currentUser,
@@ -579,9 +558,6 @@ export default memo(withGlobal(
       usersById,
       folders,
       recentlyFoundChatIds,
-      currentWorkspace,
-      savedWorkspaces,
-      handleSelectWorkspace,
     };
   },
 )(CommandMenu));
