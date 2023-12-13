@@ -7,7 +7,8 @@ import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
 
-import { IS_ARC_BROWSER, IS_MAC_OS } from '../../../../util/windowEnvironment';
+import { cmdKey } from '../../../../config';
+import { IS_ARC_BROWSER } from '../../../../util/windowEnvironment';
 
 import useCommands from '../../../../hooks/useCommands';
 
@@ -61,8 +62,6 @@ const CreateNewGroup: FC<CreateNewGroupProps> = ({
     close();
     runCommand('OPEN_AUTOMATION_SETTINGS');
   };
-
-  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
 
   const menuItems = [
     {

@@ -348,3 +348,15 @@ export const ULU_APP = {
   CLIENT_NEWS_CHANNEL_ID: '-1001916758340',
   SIDEBAR_CHAT_FOLDERS_TREE_ITEM_HEIGHT_REM: 2.25,
 };
+
+function determineCmdKey() {
+  if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
+    // Использование navigator только если он доступен
+    return /Mac|iPod|iPhone|iPad/.test(window.navigator.platform) ? '⌘' : 'Ctrl';
+  } else {
+    // Значение по умолчанию, если navigator недоступен
+    return 'Ctrl';
+  }
+}
+
+export const cmdKey = determineCmdKey();

@@ -15,6 +15,7 @@ import { getActions, withGlobal } from '../../global';
 import type { ApiChat, ApiChatFolder, ApiUser } from '../../api/types';
 import type { GlobalState } from '../../global/types';
 
+import { cmdKey } from '../../config';
 import {
   getChatTitle, getUserFullName,
 } from '../../global/helpers';
@@ -22,7 +23,6 @@ import { selectCurrentChat, selectTabState, selectUser } from '../../global/sele
 import captureKeyboardListeners from '../../util/captureKeyboardListeners';
 import { convertLayout } from '../../util/convertLayout';
 import { transliterate } from '../../util/transliterate';
-import { IS_MAC_OS } from '../../util/windowEnvironment';
 
 import useArchiver from '../../hooks/useArchiver';
 import useCommands from '../../hooks/useCommands';
@@ -396,8 +396,6 @@ const CommandMenu: FC<CommandMenuProps> = ({
     runCommand('OPEN_SEARCH');
     close();
   }, [runCommand, close]);
-
-  const cmdKey = IS_MAC_OS ? '⌘' : '⌃';
 
   const CommandMenuInner = (
     <div>
