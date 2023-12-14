@@ -434,10 +434,18 @@ export type InlineBotSettings = {
   cacheTime: number;
 };
 
+export const ChatTimeSnapshotSchema = z.object({
+  id: z.string(),
+  dateAdded: z.number(),
+  dateUpdated: z.number(),
+});
+export type ChatTimeSnapshot = z.infer<typeof ChatTimeSnapshotSchema>;
+
 export const WorkspaceSchema = z.object({
   id: z.string(),
   name: z.string(),
   logoUrl: z.string().optional(),
   folders: z.array(z.number()).optional(),
+  chatSnapshotsTemp: z.array(ChatTimeSnapshotSchema).optional(),
 });
 export type Workspace = z.infer<typeof WorkspaceSchema>;

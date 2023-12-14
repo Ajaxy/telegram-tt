@@ -4,7 +4,7 @@ import { useEffect, useState } from '../lib/teact/teact';
 import type { Workspace } from '../types';
 import { WorkspaceSchema } from '../types';
 
-import { DEFAULT_WORKSPACE } from '../config';
+import { DEFAULT_WORKSPACE, LOCAL_STORAGE_KEYS } from '../config';
 
 export function useStorage() {
   const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>({

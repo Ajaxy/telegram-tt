@@ -357,6 +357,16 @@ export const DEFAULT_WORKSPACE: Workspace = {
   folders: [],
 };
 
+export const LOCAL_STORAGE_KEYS = {
+  WORKSPACES: 'workspaces',
+  CURRENT_WORKSPACE_ID: 'current_workspace_id',
+  IS_AUTO_DONE_ENABLED: 'ulu_is_auto_done_enabled',
+  IS_AUTO_ARCHIVER_ENABLED: 'ulu_is_autoarchiver_enabled',
+  IS_ARCHIVE_WHEN_DONE_ENABLED: 'ulu_is_archive_when_done_enabled',
+  IS_FOLDERS_TREE_ENABLED: 'ulu_is_folders_tree_enabled',
+  DONE_CHAT_IDS: 'ulu_done_chat_ids',
+};
+
 function determineCmdKey() {
   if (typeof window !== 'undefined' && typeof window.navigator !== 'undefined') {
     // Использование navigator только если он доступен

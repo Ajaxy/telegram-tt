@@ -2,30 +2,33 @@ import { useEffect, useState } from 'react';
 
 import type { Workspace } from '../types';
 
-import { DEFAULT_WORKSPACE } from '../config';
+import { DEFAULT_WORKSPACE, LOCAL_STORAGE_KEYS } from '../config';
 
 export function useStorage() {
-  const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>('ulu_is_autodone_enabled', false);
+  const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>(
+    LOCAL_STORAGE_KEYS.IS_AUTO_DONE_ENABLED,
+    false,
+  );
   const [
     isAutoArchiverEnabled,
     setIsAutoArchiverEnabled,
-  ] = useLocalStorage<boolean>('ulu_is_autoarchiver_enabled', false);
+  ] = useLocalStorage<boolean>(LOCAL_STORAGE_KEYS.IS_AUTO_ARCHIVER_ENABLED, false);
   const [
     isArchiveWhenDoneEnabled,
     setIsArchiveWhenDoneEnabled,
-  ] = useLocalStorage<boolean>('ulu_is_archive_when_done_enabled', false);
+  ] = useLocalStorage<boolean>(LOCAL_STORAGE_KEYS.IS_ARCHIVE_WHEN_DONE_ENABLED, false);
   const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>(
-    'ulu_is_folders_tree_enabled',
+    LOCAL_STORAGE_KEYS.IS_FOLDERS_TREE_ENABLED,
     false,
   );
 
-  const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>('ulu_done_chat_ids', []);
+  const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>(LOCAL_STORAGE_KEYS.DONE_CHAT_IDS, []);
 
-  const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>('workspaces', []);
+  const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>(LOCAL_STORAGE_KEYS.WORKSPACES, []);
   const [
     currentWorkspaceId,
     setCurrentWorkspaceId,
-  ] = useLocalStorage<string>('current_workspace_id', DEFAULT_WORKSPACE.id);
+  ] = useLocalStorage<string>(LOCAL_STORAGE_KEYS.CURRENT_WORKSPACE_ID, DEFAULT_WORKSPACE.id);
 
   const [
     isInitialMarkAsDone,

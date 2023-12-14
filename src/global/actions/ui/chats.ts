@@ -12,6 +12,7 @@ import { updateTabState } from '../../reducers/tabs';
 import {
   selectChat, selectCurrentMessageList, selectTabState,
 } from '../../selectors';
+import { processOpenChatOrThread as uluProcessOpenChatOrThread } from '../../ulu/chats';
 import { closeLocalTextSearch } from './localSearch';
 
 addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionReturnType => {
@@ -24,6 +25,8 @@ addActionHandler('processOpenChatOrThread', (global, actions, payload): ActionRe
     noForumTopicPanel,
     tabId = getCurrentTabId(),
   } = payload;
+
+  uluProcessOpenChatOrThread(payload);
 
   const currentMessageList = selectCurrentMessageList(global, tabId);
 
