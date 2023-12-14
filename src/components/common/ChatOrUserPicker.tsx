@@ -149,7 +149,13 @@ const ChatOrUserPicker: FC<OwnProps> = ({
 
     if (e.key === 'Enter' && selectedIndex >= 0) {
       const chatId = viewportIds[selectedIndex];
-      onSelectChatOrUser(chatId);
+      const chat = chatsById?.[chatId];
+      if (chat?.isForum) {
+        if (!chat.topics) loadTopics({ chatId });
+        setForumId(chatId);
+      } else {
+        onSelectChatOrUser(chatId);
+      }
     }
   };
 
