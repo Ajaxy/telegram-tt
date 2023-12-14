@@ -15,7 +15,6 @@ import renderText from './helpers/renderText';
 
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -158,12 +157,35 @@ const ChatOrUserPicker: FC<OwnProps> = ({
       }
     }
   };
-
-  const handleTopicKeyDown = useKeyboardListNavigation(topicContainerRef, isOpen, (index) => {
-    if (topicIds?.length) {
-      onSelectChatOrUser(forumId!, topicIds[index === -1 ? 0 : index]);
+  const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
+  const handleTopicKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (e.key === 'Backspace' && topicSearch === '') {
+      handleHeaderBackClick();
     }
-  }, '.ListItem-button', true);
+    if (!topicIds || topicIds.length === 0) {
+      return;
+    }
+
+    let newIndex = selectedTopicIndex;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      newIndex = selectedTopicIndex < topicIds.length - 1 ? selectedTopicIndex + 1 : selectedTopicIndex;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      newIndex = selectedTopicIndex > 0 ? selectedTopicIndex - 1 : 0;
+    }
+
+    if (newIndex !== selectedTopicIndex) {
+      setSelectedTopicIndex(newIndex);
+      // Опционально: Прокрутка до элемента, если он не полностью видим
+    }
+
+    if (e.key === 'Enter' && newIndex >= 0) {
+      const topicId = topicIds[newIndex];
+      onSelectChatOrUser(forumId!, topicId);
+    }
+  };
 
   const handleClick = useLastCallback((e: React.MouseEvent, chatId: string) => {
     const chat = chatsById?.[chatId];
@@ -210,7 +232,7 @@ const ChatOrUserPicker: FC<OwnProps> = ({
               <ListItem
                 key={`${forumId}_${topicId}`}
                 // eslint-disable-next-line max-len
-                className={`${selectedIndex === i ? 'selected' : ''} chat-item-clickable force-rounded-corners small-icon`}
+                className={`${selectedTopicIndex === i ? 'selected' : ''} chat-item-clickable force-rounded-corners small-icon`}
                 style={`top: ${i * CHAT_HEIGHT_PX}px;`}
                 onClick={handleTopicClick}
                 clickArg={topicId}
