@@ -53,7 +53,10 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
     // eslint-disable-next-line no-null/no-null
     if (value !== null) {
       try {
-        return JSON.parse(value);
+        const parsedValue = JSON.parse(value);
+        if (typeof parsedValue === typeof initValue) {
+          return parsedValue;
+        }
       } catch { /* */ }
     }
 
@@ -76,7 +79,10 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
         // eslint-disable-next-line no-null/no-null
         if (value !== null) {
           try {
-            return JSON.parse(value);
+            const parsedValue = JSON.parse(value);
+            if (typeof parsedValue === typeof initValue) {
+              return parsedValue;
+            }
           } catch { /* */ }
         }
 
@@ -90,8 +96,11 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
   // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
   }, []);
 
-  const setStateFiltered = (val: T) => {
-    setState(val === undefined ? initValue : val);
+  const setStateFiltered = (value: T) => {
+    const updValue = (value === undefined || typeof value !== typeof initValue)
+      ? initValue
+      : value;
+    setState(updValue);
   };
 
   return [state, setStateFiltered];
