@@ -357,6 +357,8 @@ export const DEFAULT_WORKSPACE: Workspace = {
   folders: [],
 };
 
+export const WORKSPACE_CHAT_TIME_SNAPSHOT_STALE_MINUTES = 30;
+
 export const LOCAL_STORAGE_KEYS = {
   WORKSPACES: 'workspaces',
   CURRENT_WORKSPACE_ID: 'current_workspace_id',

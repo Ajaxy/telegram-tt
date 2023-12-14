@@ -1,7 +1,8 @@
 import type { ChatTimeSnapshot, Workspace } from '../../types';
 
-import { DEFAULT_WORKSPACE, LOCAL_STORAGE_KEYS } from '../../config';
+import { DEFAULT_WORKSPACE, LOCAL_STORAGE_KEYS, WORKSPACE_CHAT_TIME_SNAPSHOT_STALE_MINUTES } from '../../config';
 import { LocalStorage } from '../../lib/localStorage';
+import { differenceInMinutes } from '../../util/time';
 import { actualizeChatTimeSnapshot, buildChatTimeSnapshot } from '../helpers';
 
 const lsWorkspaces = new LocalStorage<Workspace[]>();
@@ -45,16 +46,8 @@ function saveWorkspace(workspace: Workspace) {
 }
 
 export function isWorkspaceChatTimeSnapshotStale(chatTimeSnapshot: ChatTimeSnapshot) {
-  const currentTime = Date.now();
-
-  function isOlderThanXHours(timestamp: number, hours: number) {
-    const timeDifferenceInMilliseconds = currentTime - timestamp;
-    const timeDifferenceInHours = timeDifferenceInMilliseconds / (1000 * 60 * 60);
-
-    return timeDifferenceInHours > hours;
-  }
-
-  return isOlderThanXHours((chatTimeSnapshot.dateUpdated || chatTimeSnapshot.dateAdded), 12);
+  const diff = differenceInMinutes(chatTimeSnapshot.dateUpdated || chatTimeSnapshot.dateAdded);
+  return diff > WORKSPACE_CHAT_TIME_SNAPSHOT_STALE_MINUTES;
 }
 
 export function addChatToCurrentWorkspaceTemp(chatId: string) {
