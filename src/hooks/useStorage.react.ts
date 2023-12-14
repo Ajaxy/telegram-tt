@@ -27,6 +27,11 @@ export function useStorage() {
     setCurrentWorkspaceId,
   ] = useLocalStorage<string>('current_workspace_id', DEFAULT_WORKSPACE.id);
 
+  const [
+    isInitialMarkAsDone,
+    setIsInitialMarkAsDone,
+  ] = useLocalStorage<boolean>('was_initial_mark_as_done', false);
+
   return {
     isAutoDoneEnabled,
     setIsAutoDoneEnabled,
@@ -42,6 +47,8 @@ export function useStorage() {
     setSavedWorkspaces,
     currentWorkspaceId,
     setCurrentWorkspaceId,
+    isInitialMarkAsDone,
+    setIsInitialMarkAsDone,
   };
 }
 

@@ -1,5 +1,5 @@
 import type { FC } from '../../lib/teact/teact';
-import React, { memo } from '../../lib/teact/teact';
+import React, { memo, useEffect } from '../../lib/teact/teact';
 
 import type { GlobalState } from '../../global/types';
 import type { FolderEditDispatch } from '../../hooks/reducers/useFoldersReducer';
@@ -9,10 +9,12 @@ import { ANIMATION_END_DELAY, IS_STORIES_ENABLED } from '../../config';
 import buildClassName from '../../util/buildClassName';
 import { ANIMATION_DURATION } from '../story/helpers/ribbonAnimation';
 
+import useDone from '../../hooks/useDone';
 import useForumPanelRender from '../../hooks/useForumPanelRender';
 import useHistoryBack from '../../hooks/useHistoryBack';
 import useLang from '../../hooks/useLang';
 import useShowTransition from '../../hooks/useShowTransition';
+import { useStorage } from '../../hooks/useStorage';
 import useLeftHeaderButtonRtlForumTransition from './main/hooks/useLeftHeaderButtonRtlForumTransition';
 
 import StoryRibbon from '../story/StoryRibbon';
@@ -47,6 +49,15 @@ const UluInboxChats: FC<OwnProps> = ({
   foldersDispatch,
 }) => {
   const lang = useLang();
+
+  const { doneAllReadChats } = useDone();
+  const { isInitialMarkAsDone, setIsInitialMarkAsDone } = useStorage();
+  useEffect(() => {
+    if (!isInitialMarkAsDone) {
+      setIsInitialMarkAsDone(true);
+      doneAllReadChats();
+    }
+  }, [isInitialMarkAsDone, setIsInitialMarkAsDone, doneAllReadChats]);
 
   useHistoryBack({
     isActive,
