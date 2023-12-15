@@ -352,7 +352,7 @@ export const ULU_APP = {
 
 export const DEFAULT_WORKSPACE: Workspace = {
   id: 'personal',
-  name: 'Personal Workspace',
+  name: 'Personal',
   logoUrl: undefined,
   folders: [],
 };

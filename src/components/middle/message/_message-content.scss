@@ -272,7 +272,7 @@
     font-size: calc(var(--message-text-size, 1rem) - 0.125rem);
     font-weight: 500;
     line-height: 1.25rem;
-    /* color: var(--accent-color); */
+    color: var(--accent-color);
     unicode-bidi: plaintext;
     display: flex;
 
@@ -822,7 +822,6 @@
   .Message.own & {
     --hover-color: var(--color-reply-own-hover);
     --active-color: var(--color-reply-own-active);
-    color: var(--color-background);
 
     .with-subheader {
       flex-direction: row;
