@@ -10,6 +10,10 @@
 
   .left-header-shadow {
     box-shadow: 0 2px 2px var(--color-light-shadow);
+    @media (min-width: 600px) {
+      box-shadow: none;
+      border-bottom: 1px solid var(--color-borders-middle);
+    }
   }
 
   .DropdownMenuFiller {
@@ -51,5 +55,13 @@
     &.with-story-ribbon {
       --extra-height: var(--header-height);
     }
+  }
+
+  @media (min-width: 600px) {
+    height: -webkit-fill-available;
+    background: var(--color-background-secondary);
+    border: 1px solid var(--color-borders-middle);
+    border-radius: var(--border-radius-default);
+    margin-bottom: 1rem;
   }
 }

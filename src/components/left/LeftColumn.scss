@@ -9,7 +9,6 @@
   align-items: center;
   flex-shrink: 0;
   background-color: var(--color-background);
-
   h3 {
     margin-bottom: 0;
     font-size: 1.25rem;
@@ -68,8 +67,9 @@
   }
 
   @media (min-width: 600px) {
-    background-color: none !important;
+    background-color: transparent !important;
   }
+
 }
 
 body.is-macos.is-electron #LeftColumn {
@@ -79,6 +79,10 @@ body.is-macos.is-electron #LeftColumn {
 
 body.is-macos.is-electron .LeftBackground {
   background: var(--color-background);
+
+  @media (min-width: 600px) {
+    background: transparent;
+  }
 }
 
 .extra-spacing {

@@ -42,6 +42,10 @@
   > :global(.Button) {
     flex-shrink: 0;
   }
+
+  @media (min-width: 600px) {
+    border-radius: var(--border-radius-default);
+   }
 }
 
 .root:global(.full-width) {

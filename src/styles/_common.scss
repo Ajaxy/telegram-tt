@@ -123,6 +123,7 @@
   }
 
   @media (min-width: 600px) {
+    background: none !important;
     &.forum-panel-open .selected-forum .Avatar {
       transform: none;
     }

@@ -55,6 +55,12 @@
 
     &:not(.danger) {
       color: var(--color-composer-button);
+
+      @media (min-width: 600px) {
+        border: 1px solid var(--color-borders-middle);
+        background-color: var(--color-background-secondary);
+        box-shadow: none;
+      }
     }
 
     @media (max-width: 600px) {
@@ -324,10 +330,21 @@
     .corner {
       fill: var(--color-background);
     }
+
+    @media (min-width: 600px) {
+      display: none;
+    }
   }
 
   @media (max-width: 600px) {
     max-width: calc(100% - 3.375rem);
+  }
+
+  @media (min-width: 600px) {
+    background: var(--color-background-secondary);
+    border-radius: var(--border-radius-default);
+    border: 1px solid var( --color-borders-middle);
+    border-bottom-right-radius: var(--border-radius-default);
   }
 }
 
@@ -787,8 +804,14 @@
 
 html.theme-light div.composer-wrapper  {
   box-shadow: var(--button-shadow-light);
+  @media (min-width: 600px) {
+    box-shadow: none;
+  }
 }
 
 html.theme-dark div.composer-wrapper  {
   box-shadow: var(--button-shadow-dark);
+  @media (min-width: 600px) {
+    box-shadow: none;
+  }
 }

@@ -397,6 +397,13 @@
       }
     }
   }
+
+  @media (min-width: 600px) {
+    background: none !important;
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: 0; 
+    box-shadow: none;
+  }
 }
 
 @keyframes fade-in {

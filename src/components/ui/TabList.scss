@@ -28,5 +28,13 @@
     background-color: rgba(0, 0, 0, 0);
     // `box-shadow` prevents repaint on macOS when hovering out of scrollable container
     box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
+
+    @media (min-width: 600px) {
+      background-color: transparent !important;
+    }
+  }
+
+  @media (min-width: 600px) {
+    background-color: transparent;
   }
 }

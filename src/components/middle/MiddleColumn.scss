@@ -72,6 +72,10 @@
       body.no-message-composer-animations & {
         transition: none !important;
       }
+
+      @media (min-width: 600px) {
+        box-shadow: none;
+      }
     }
 
     &.hover-disabled,
@@ -218,6 +222,7 @@
           rgba(255, 255, 255, 0.4) 98%,
           rgba(255, 255, 255, 0) 100%
       );
+      margin: 0 1rem;
       opacity: 0;
       transition: opacity 350ms ease;
 
@@ -239,7 +244,16 @@
           rgba(127, 127, 127, 0.4) 98%,
           rgba(127, 127, 127, 0) 100%
       );
+      margin: 0 1rem;
     }
+    @media (min-width: 600px) {
+      padding: 0;
+    }
+
+  }
+
+  @media (min-width: 600px) {
+    padding: 0 1rem 0;
   }
 }
 
@@ -247,11 +261,12 @@
 .Composer,
 .MessageSelectToolbar,
 .messaging-disabled {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 
   @media (max-width: 600px) {
     margin-bottom: 0.5rem;
   }
+  
 }
 
 .Composer,

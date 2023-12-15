@@ -18,6 +18,11 @@
     grid-template-columns: auto 1fr;
     grid-template-rows: 100%;
   }
+
+  @media (min-width: 600px) {
+    background: none;
+    
+  }
 }
 
 .has-call-header {
@@ -138,6 +143,10 @@
       z-index: 1;
     }
   }
+
+  @media (min-width: 600px) {
+    background-color: transparent !important;
+  }
 }
 
 #RightColumn {
@@ -205,4 +214,9 @@
       transition: none;
     }
   }
+  @media (min-width: 600px) {
+    border-left: 0rem  !important;
+    border: 0rem !important;
+  }
+
 }
