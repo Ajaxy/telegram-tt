@@ -1,5 +1,13 @@
 @use "message-content";
 
+html.theme-dark {
+  --color: var(--color-background)
+}
+
+html.theme-light {
+  --color: var(--color-text)
+}
+
 // General styles
 .Message {
   display: flex;
@@ -184,6 +192,7 @@
 
   &.own {
     flex-direction: row-reverse;
+    color: var(--color);
     --background-color: var(--color-background-own);
     --hover-color: var(--color-reply-own-hover);
     --color-reaction: var(--color-message-reaction-own);
