@@ -136,6 +136,7 @@ const LeftSideMenuItems = ({
       }
       return newHistory;
     });
+    showNotification({ message: 'Workspace is changing...' });
     track?.('Switch workspace', { source: 'Left Side Menu' });
   }, [track, setCurrentWorkspaceId]); // Убедитесь в правильности зависимостей
 
@@ -148,6 +149,7 @@ const LeftSideMenuItems = ({
         const lastWorkspaceId = workspaceHistory[workspaceHistory.length - 2];
         if (lastWorkspaceId) {
           handleSelectWorkspace(lastWorkspaceId);
+          showNotification({ message: 'Workspace is changing...' });
         } else {
           //
         }
