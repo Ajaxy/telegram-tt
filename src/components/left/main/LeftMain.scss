@@ -92,4 +92,8 @@
     animation: buttonShine 3s linear infinite;
     white-space: nowrap;
   }
+
+  @media (min-width: 600px) {
+    background-color: none !important;
+  }
 }

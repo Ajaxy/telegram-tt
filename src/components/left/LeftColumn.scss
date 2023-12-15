@@ -66,6 +66,10 @@
       --offset-x: -4.125rem;
     }
   }
+
+  @media (min-width: 600px) {
+    background-color: none !important;
+  }
 }
 
 body.is-macos.is-electron #LeftColumn {
