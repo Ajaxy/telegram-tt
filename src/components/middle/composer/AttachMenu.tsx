@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useEffect,
@@ -240,8 +241,8 @@ const AttachMenu: FC<OwnProps> = ({
         {canAttachPolls && (
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
         )}
-
-        {canAttachMedia && !isScheduled && bots?.map((bot) => (
+        {/* не разкомменчивать, у нас wallet не работает */}
+        {/* {canAttachMedia && !isScheduled && bots?.map((bot) => (
           <AttachBotItem
             bot={bot}
             chatId={chatId}
@@ -250,7 +251,7 @@ const AttachMenu: FC<OwnProps> = ({
             onMenuOpened={markAttachmentBotMenuOpen}
             onMenuClosed={unmarkAttachmentBotMenuOpen}
           />
-        ))}
+        ))} */}
       </Menu>
     </div>
   );
