@@ -122,7 +122,7 @@ const HomePage: React.FC<HomePageProps> = ({
         close={close}
       />
       <Command.Group heading="Settings">
-        <Command.Item onSelect={openChangeThemePage}>
+        <Command.Item onSelect={openChangeThemePage} value="'Change interface theme', 'Dark', 'Light'">
           <i className="icon icon-darkmode" /><span>Change interface theme</span>
         </Command.Item>
         <Command.Item onSelect={commandDoneAll}>

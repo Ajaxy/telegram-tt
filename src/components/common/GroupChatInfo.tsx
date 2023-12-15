@@ -40,7 +40,7 @@ type OwnProps = {
   threadId?: number;
   className?: string;
   typingStatus?: ApiTypingStatus;
-  avatarSize?: 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
+  avatarSize?: 'nano' | 'tiny' | 'small' | 'medium' | 'large' | 'jumbo';
   status?: string;
   withDots?: boolean;
   withMediaViewer?: boolean;
