@@ -13,6 +13,7 @@ import { uluGetTranslatedString } from '../../../util/fallbackLangPackInitial';
 
 import useCommands from '../../../hooks/useCommands';
 import { useFolderManagerForOrderedIds, useFolderManagerForUnreadCounters } from '../../../hooks/useFolderManager';
+import { useJune } from '../../../hooks/useJune';
 import { useStorage } from '../../../hooks/useStorage';
 
 import UluChatFolder from './UluChatFolder';
@@ -39,7 +40,7 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
   const titleInbox = uluGetTranslatedString('Sidebar.SystemFolders.Inbox', language);
   const titleSavedMessages = uluGetTranslatedString('Sidebar.SystemFolders.SavedMessages', language);
   const titleArchivedChats = uluGetTranslatedString('Sidebar.SystemFolders.ArchivedChats', language);
-
+  const { track } = useJune();
   const { focusLastMessage, openChat } = getActions();
 
   const handleOpenSavedMessages = useCallback(() => {
@@ -53,7 +54,8 @@ const UluSystemFolders: FC<OwnProps & StateProps> = ({
 
   const handleOpenInbox = useCallback(() => {
     onLeftColumnContentChange(LeftColumnContent.UluInbox);
-  }, [onLeftColumnContentChange]);
+    track?.('Open Inbox');
+  }, [onLeftColumnContentChange, track]);
 
   const { useCommand } = useCommands();
   useCommand('OPEN_INBOX', handleOpenInbox);
