@@ -24,7 +24,7 @@ import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManag
 
 import { useFolderManagerForUnreadCounters } from '../../../../hooks/useFolderManager.react';
 import useLang from '../../../../hooks/useLang.react';
-import { useWorkspaces } from '../../../../hooks/useWorkspaces';
+import { useWorkspaces } from '../../../../hooks/useWorkspaces.react';
 
 import InfiniteScroll from '../../../ui/InfiniteScroll.react';
 import TreeRenders from './TreeRenderers';
