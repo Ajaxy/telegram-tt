@@ -371,10 +371,12 @@ const CommandMenu: FC<CommandMenuProps> = ({
   const handleDoneChat = useCallback(() => {
     if (currentChatId) {
       doneChat({ id: currentChatId });
-      close();
-      track?.('Mark as Done', { source: 'Сommand Menu' });
+      if (!isCurrentChatDone) {
+        close();
+        track?.('Mark as Done', { source: 'Command Menu' });
+      }
     }
-  }, [currentChatId, doneChat, close, track]);
+  }, [currentChatId, doneChat, close, track, isCurrentChatDone]);
 
   // Функция для отметки чата как непрочитанного/прочитанного
   const handleToggleChatUnread = useCallback(() => {

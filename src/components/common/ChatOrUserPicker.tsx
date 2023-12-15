@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 import type { FC } from '../../lib/teact/teact';
 import React, {
   memo, useMemo, useRef, useState,
@@ -6,7 +7,7 @@ import { getActions } from '../../global';
 
 import type { ApiChat, ApiTopic } from '../../api/types';
 
-import { CHAT_HEIGHT_PX } from '../../config';
+/* import { CHAT_HEIGHT_PX } from '../../config'; */
 import { getCanPostInChat, isUserId } from '../../global/helpers';
 import buildClassName from '../../util/buildClassName';
 import { REM } from './helpers/mediaDimensions';
@@ -14,7 +15,6 @@ import renderText from './helpers/renderText';
 
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import useInputFocusOnOpen from '../../hooks/useInputFocusOnOpen';
-import useKeyboardListNavigation from '../../hooks/useKeyboardListNavigation';
 import useLang from '../../hooks/useLang';
 import useLastCallback from '../../hooks/useLastCallback';
 
@@ -124,9 +124,30 @@ const ChatOrUserPicker: FC<OwnProps> = ({
     setTopicSearch(e.currentTarget.value);
   });
 
-  const handleKeyDown = useKeyboardListNavigation(containerRef, isOpen, (index) => {
-    if (viewportIds && viewportIds.length > 0) {
-      const chatId = viewportIds[index === -1 ? 0 : index];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const handleKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!viewportIds || viewportIds.length === 0) {
+      return;
+    }
+
+    let newIndex = selectedIndex;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      newIndex = selectedIndex < viewportIds.length - 1 ? selectedIndex + 1 : viewportIds.length - 1;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      newIndex = selectedIndex > 0 ? selectedIndex - 1 : 0;
+    }
+
+    if (newIndex !== selectedIndex) {
+      setSelectedIndex(newIndex);
+    // Дополнительно: Прокрутите до элемента, если он не полностью видим
+    }
+
+    if (e.key === 'Enter' && selectedIndex >= 0) {
+      const chatId = viewportIds[selectedIndex];
       const chat = chatsById?.[chatId];
       if (chat?.isForum) {
         if (!chat.topics) loadTopics({ chatId });
@@ -135,13 +156,36 @@ const ChatOrUserPicker: FC<OwnProps> = ({
         onSelectChatOrUser(chatId);
       }
     }
-  }, '.ListItem-button', true);
-
-  const handleTopicKeyDown = useKeyboardListNavigation(topicContainerRef, isOpen, (index) => {
-    if (topicIds?.length) {
-      onSelectChatOrUser(forumId!, topicIds[index === -1 ? 0 : index]);
+  };
+  const [selectedTopicIndex, setSelectedTopicIndex] = useState(0);
+  const handleTopicKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (e.key === 'Backspace' && topicSearch === '') {
+      handleHeaderBackClick();
     }
-  }, '.ListItem-button', true);
+    if (!topicIds || topicIds.length === 0) {
+      return;
+    }
+
+    let newIndex = selectedTopicIndex;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      newIndex = selectedTopicIndex < topicIds.length - 1 ? selectedTopicIndex + 1 : selectedTopicIndex;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      newIndex = selectedTopicIndex > 0 ? selectedTopicIndex - 1 : 0;
+    }
+
+    if (newIndex !== selectedTopicIndex) {
+      setSelectedTopicIndex(newIndex);
+      // Опционально: Прокрутка до элемента, если он не полностью видим
+    }
+
+    if (e.key === 'Enter' && newIndex >= 0) {
+      const topicId = topicIds[newIndex];
+      onSelectChatOrUser(forumId!, topicId);
+    }
+  };
 
   const handleClick = useLastCallback((e: React.MouseEvent, chatId: string) => {
     const chat = chatsById?.[chatId];
@@ -157,6 +201,8 @@ const ChatOrUserPicker: FC<OwnProps> = ({
   const handleTopicClick = useLastCallback((e: React.MouseEvent, topicId: number) => {
     onSelectChatOrUser(forumId!, topicId);
   });
+
+  const CHAT_HEIGHT_PX = window.innerWidth > 680 ? 48 : 72;
 
   function renderTopicList() {
     return (
@@ -185,7 +231,8 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             ? topicIds.map((topicId, i) => (
               <ListItem
                 key={`${forumId}_${topicId}`}
-                className="chat-item-clickable force-rounded-corners small-icon topic-item"
+                // eslint-disable-next-line max-len
+                className={`${selectedTopicIndex === i ? 'selected' : ''} chat-item-clickable force-rounded-corners small-icon`}
                 style={`top: ${i * CHAT_HEIGHT_PX}px;`}
                 onClick={handleTopicClick}
                 clickArg={topicId}
@@ -240,7 +287,8 @@ const ChatOrUserPicker: FC<OwnProps> = ({
             {viewportIds.map((id, i) => (
               <ListItem
                 key={id}
-                className="chat-item-clickable force-rounded-corners small-icon"
+                // eslint-disable-next-line max-len
+                className={`${selectedIndex === i ? 'selected' : ''} chat-item-clickable force-rounded-corners small-icon`}
                 style={`height: ${CHAT_HEIGHT_PX}px; top: ${(viewportOffset + i) * CHAT_HEIGHT_PX}px;`}
                 onClick={handleClick}
                 clickArg={id}
@@ -249,9 +297,10 @@ const ChatOrUserPicker: FC<OwnProps> = ({
                   <PrivateChatInfo
                     status={id === currentUserId ? lang('SavedMessagesInfo') : undefined}
                     userId={id}
+                    avatarSize={window.innerWidth > 680 ? 'nano' : 'medium'}
                   />
                 ) : (
-                  <GroupChatInfo chatId={id} />
+                  <GroupChatInfo chatId={id} avatarSize={window.innerWidth > 680 ? 'nano' : 'medium'} />
                 )}
               </ListItem>
             ))}

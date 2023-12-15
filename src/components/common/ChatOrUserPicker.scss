@@ -1,11 +1,18 @@
 .ChatOrUserPicker {
   .modal-dialog {
     height: 70%;
-    max-width: 25rem;
+    max-height: 440px;
+    max-width: 640px;
+    width: 90%;
 
     @media (max-width: 600px) {
       height: 90%;
     }
+
+    @media (min-width: 600px) {
+      margin-top: -20rem;
+    }
+
   }
 
   &_slide {
@@ -114,14 +121,53 @@
   .ListItem {
     position: absolute;
     width: 100%;
+    
+    .custom-emoji {
+      display: none;
+    }
 
     body.is-ios &:not(:last-of-type)::after,
     body.is-android &:not(:last-of-type)::after {
       right: -0.5rem;
     }
+    .ListItem-button {
+      height: 72px;
+      gap: 8px;
+
+      @media (min-width: 600px) {
+        height: 48px;
+      }
+    }
   }
 
   .ListItem.chat-item-clickable {
+
+    @media (min-width: 600px) {
+
+      .h3, .status {
+        font-size: 14px;
+      }
+      
+
+      .ChatInfo {
+
+        .info {
+      flex-direction: row;
+      justify-content: left;
+      gap: 16px;
+      }
+
+      .Avatar {
+        width: 20px;
+        height: 20px;
+      }
+
+      .status {
+        line-height: inherit;
+      }
+    }
+  }
+
     &:not(.force-rounded-corners) {
       @media (max-width: 600px) {
         margin: 0;
@@ -137,13 +183,23 @@
     --custom-emoji-size: 2.75rem;
 
     margin-inline-end: 0.25rem !important;
-    width: 2.75rem;
-    height: 2.75rem;
-    font-size: 2.75rem !important;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem !important;
+
+    @media (max-width: 600px) {
+      width: 2.75rem;
+      height: 2.75rem;
+      font-size: 2.75rem !important;
+    }
   }
 
   .topic-icon-letter {
-    font-size: 1.5rem;
+    font-size: 14px;
+    
+    @media (max-width: 600px) {
+      font-size: 1.5rem;
+    }
   }
 
   .topic-item {
@@ -154,6 +210,10 @@
       font-size: 1rem;
       line-height: 1.6875rem;
       font-weight: 500;
+
+      @media (min-width: 600px) {
+        gap: 8px;
+      }
     }
 
     .fullName {
@@ -165,5 +225,10 @@
       width: 1rem;
       height: 1rem;
     }
+  }
+
+  .selected {
+    background-color: var(--color-interactive-element-hover);
+    border-radius: var(--border-radius-default);
   }
 }
