@@ -16,8 +16,13 @@
   .modal-header {
     display: flex;
     align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-bottom: 2px solid var(--color-borders);
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--color-borders);
+
+    @media (max-width: 600px) {
+      padding: 0.25rem 0.5rem;
+      border-bottom: 2px solid var(--color-borders);
+    }
 
     .Button {
       margin-right: 0.5rem;
@@ -25,6 +30,9 @@
 
     .close-button {
       display: none;
+      @media (max-width: 600px) {
+        display: block;
+      }
     }
 
     .input-group {
@@ -41,6 +49,22 @@
       font-size: 1.25rem;
       line-height: 1.75rem;
       unicode-bidi: plaintext;
+
+      @media (min-width: 600px) {
+        font-family: var(--font-sans);
+        border: none;
+        width: 100%;
+        padding: 0rem 0.5rem;
+        font-size: 17px;
+        outline: none;
+        color: var(--color-text);
+        border-radius: 0;
+      }
+    }
+    .form-control::placeholder {
+      @media (min-width: 600px) {
+      color: var(--color-text-secondary);
+      }
     }
   }
 
