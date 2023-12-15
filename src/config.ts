@@ -314,8 +314,8 @@ export const FRESH_AUTH_PERIOD = 86400; // 1 day
 
 export const LIGHT_THEME_BG_COLOR = '#fefffe';
 export const DARK_THEME_BG_COLOR = '#0E0F0F';
-export const DEFAULT_PATTERN_COLOR = '#475aa0';
-export const DARK_THEME_PATTERN_COLOR = '#E9666F';
+export const DEFAULT_PATTERN_COLOR = '#475aa030';
+export const DARK_THEME_PATTERN_COLOR = '#E9666F30';
 export const PEER_COLOR_BG_OPACITY = '1a';
 export const PEER_COLOR_BG_ACTIVE_OPACITY = '2b';
 export const PEER_COLOR_GRADIENT_STEP = 5; // px
