@@ -13,17 +13,29 @@ const BOTTOM_FOCUS_OFFSET = 500;
 const RELOCATED_FOCUS_OFFSET = 750;
 const FOCUS_MARGIN = 20;
 
-export default function useFocusMessage(
-  elementRef: { current: HTMLDivElement | null },
-  chatId: string,
-  isFocused?: boolean,
-  focusDirection?: FocusDirection,
-  noFocusHighlight?: boolean,
-  isResizingContainer?: boolean,
-  isJustAdded?: boolean,
-  isQuote?: boolean,
+interface OwnProps {
+  elementRef: { current: HTMLDivElement | null };
+  chatId: string;
+  isFocused?: boolean;
+  focusDirection?: FocusDirection;
+  noFocusHighlight?: boolean;
+  isResizingContainer?: boolean;
+  isJustAdded?: boolean;
+  isQuote?: boolean;
+  focusMargin?: number;
+}
+
+export default function useFocusMessage({
+  elementRef,
+  chatId,
+  isFocused,
+  focusDirection,
+  noFocusHighlight,
+  isResizingContainer,
+  isJustAdded,
+  isQuote,
   focusMargin = FOCUS_MARGIN,
-) {
+}: OwnProps) {
   const isRelocatedRef = useRef(!isJustAdded);
 
   useLayoutEffect(() => {

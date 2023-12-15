@@ -12,7 +12,6 @@ import type {
   ApiMessageOutgoingStatus,
   ApiPeer,
   ApiReaction,
-  ApiSponsoredMessage,
   ApiThreadInfo,
   ApiTopic,
   ApiTypeStory,
@@ -275,7 +274,7 @@ type StateProps = {
   isConnected: boolean;
   isLoadingComments?: boolean;
   shouldWarnAboutSvg?: boolean;
-  sponsoredMessage?: ApiSponsoredMessage;
+  hasSponsoredMessage?: boolean;
 };
 
 type MetaPosition =
@@ -390,7 +389,7 @@ const Message: FC<OwnProps & StateProps> = ({
   getIsMessageListReady,
   shouldWarnAboutSvg,
   onPinnedIntersectionChange,
-  sponsoredMessage,
+  hasSponsoredMessage,
 }) => {
   const {
     toggleMessageSelection,
@@ -736,21 +735,28 @@ const Message: FC<OwnProps & StateProps> = ({
   );
 
   const WITH_BOTTOM_ELEMENT_GAP = 5.625 * REM;
-  const SPONSORED_MESSAGE_GAP = 10 * REM;
-  const SELECT_MODE_WITH_SPONSORED_GAP = WITH_BOTTOM_ELEMENT_GAP + 10 * REM;
+  const SPONSORED_MESSAGE_GAP = 11 * REM;
+  const SELECT_MODE_WITH_SPONSORED_GAP = WITH_BOTTOM_ELEMENT_GAP + SPONSORED_MESSAGE_GAP;
 
-  const getFocusMagring = () => {
-    if (messageListType === 'pinned' || (isInSelectMode && !sponsoredMessage)) return WITH_BOTTOM_ELEMENT_GAP;
-    if (!isInSelectMode && sponsoredMessage) return SPONSORED_MESSAGE_GAP;
-    if (isInSelectMode && sponsoredMessage) return SELECT_MODE_WITH_SPONSORED_GAP;
+  const getFocusMargin = () => {
+    if (messageListType === 'pinned' || (isInSelectMode && !hasSponsoredMessage)) return WITH_BOTTOM_ELEMENT_GAP;
+    if (!isInSelectMode && hasSponsoredMessage) return SPONSORED_MESSAGE_GAP;
+    if (isInSelectMode && hasSponsoredMessage) return SELECT_MODE_WITH_SPONSORED_GAP;
 
     return undefined;
   };
 
-  useFocusMessage(
-    // eslint-disable-next-line max-len
-    ref, chatId, isFocused, focusDirection, noFocusHighlight, isResizingContainer, isJustAdded, Boolean(focusedQuote), getFocusMagring(),
-  );
+  useFocusMessage({
+    elementRef: ref,
+    chatId,
+    isFocused,
+    focusDirection,
+    noFocusHighlight,
+    isResizingContainer,
+    isJustAdded,
+    isQuote: Boolean(focusedQuote),
+    focusMargin: getFocusMargin(),
+  });
 
   const signature = (isChannel && message.postAuthorTitle)
     || (!asForwarded && forwardInfo?.postAuthorTitle)
@@ -1569,7 +1575,7 @@ export default memo(withGlobal<OwnProps>(
     const hasActiveReactions = Boolean(reactionMessage && activeReactions[getMessageKey(reactionMessage)]?.length);
 
     return {
-      sponsoredMessage: selectSponsoredMessage(global, chatId),
+      hasSponsoredMessage: Boolean(selectSponsoredMessage(global, chatId)),
       theme: selectTheme(global),
       forceSenderName,
       sender,
