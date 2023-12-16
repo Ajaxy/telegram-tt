@@ -1,36 +1,51 @@
+import z from 'zod';
 import { useEffect, useState } from '../lib/teact/teact';
 
 import type { Workspace } from '../types';
+import { WorkspaceSchema } from '../types';
 
 import { DEFAULT_WORKSPACE } from '../config';
 
 export function useStorage() {
-  const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>('ulu_is_autodone_enabled', false);
+  const [isAutoDoneEnabled, setIsAutoDoneEnabled] = useLocalStorage<boolean>({
+    key: 'ulu_is_autodone_enabled',
+    initValue: false,
+    schema: z.boolean(),
+  });
   const [
     isAutoArchiverEnabled,
     setIsAutoArchiverEnabled,
-  ] = useLocalStorage<boolean>('ulu_is_autoarchiver_enabled', false);
+  ] = useLocalStorage<boolean>({ key: 'ulu_is_autoarchiver_enabled', initValue: false, schema: z.boolean() });
   const [
     isArchiveWhenDoneEnabled,
     setIsArchiveWhenDoneEnabled,
-  ] = useLocalStorage<boolean>('ulu_is_archive_when_done_enabled', false);
-  const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>(
-    'ulu_is_folders_tree_enabled',
-    false,
-  );
+  ] = useLocalStorage<boolean>({ key: 'ulu_is_archive_when_done_enabled', initValue: false, schema: z.boolean() });
+  const [isFoldersTreeEnabled, setIsFoldersTreeEnabled] = useLocalStorage<boolean>({
+    key: 'ulu_is_folders_tree_enabled',
+    initValue: false,
+    schema: z.boolean(),
+  });
 
-  const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>('ulu_done_chat_ids', []);
+  const [doneChatIds, setDoneChatIds] = useLocalStorage<string[]>({
+    key: 'ulu_done_chat_ids',
+    initValue: [],
+    schema: z.array(z.string()),
+  });
 
-  const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>('workspaces', []);
+  const [savedWorkspaces, setSavedWorkspaces] = useLocalStorage<Workspace[]>({
+    key: 'workspaces',
+    initValue: [],
+    schema: z.array(WorkspaceSchema),
+  });
   const [
     currentWorkspaceId,
     setCurrentWorkspaceId,
-  ] = useLocalStorage<string>('current_workspace_id', DEFAULT_WORKSPACE.id);
+  ] = useLocalStorage<string>({ key: 'current_workspace_id', initValue: DEFAULT_WORKSPACE.id, schema: z.string() });
 
   const [
     isInitialMarkAsDone,
     setIsInitialMarkAsDone,
-  ] = useLocalStorage<boolean>('ulu_is_initial_mark_as_done', false);
+  ] = useLocalStorage<boolean>({ key: 'ulu_is_initial_mark_as_done', initValue: false, schema: z.boolean() });
 
   return {
     isAutoDoneEnabled,
@@ -52,7 +67,14 @@ export function useStorage() {
   };
 }
 
-function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (val: T) => void] {
+type UseLocalStorageProps<T> = {
+  key: string;
+  initValue: T;
+  schema: z.ZodTypeAny;
+};
+
+function useLocalStorage<T>({ key, initValue, schema }: UseLocalStorageProps<T>):
+[value: T, setValue: (val: T) => void] {
   const eventName = `update_storage_${key}`;
 
   const [state, setState] = useState<T>((() => {
@@ -61,9 +83,12 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
     if (value !== null) {
       try {
         const parsedValue = JSON.parse(value);
-        if (typeof parsedValue === typeof initValue) {
-          return parsedValue;
+        const isValid = schema.safeParse(parsedValue).success;
+        if (!isValid) {
+          throw new Error('Invalid value');
         }
+
+        return parsedValue;
       } catch { /* */ }
     }
 
@@ -87,9 +112,12 @@ function useLocalStorage<T>(key: string, initValue: T): [value: T, setValue: (va
         if (value !== null) {
           try {
             const parsedValue = JSON.parse(value);
-            if (typeof parsedValue === typeof initValue) {
-              return parsedValue;
+            const isValid = schema.safeParse(parsedValue).success;
+            if (!isValid) {
+              throw new Error('Invalid value');
             }
+
+            return parsedValue;
           } catch { /* */ }
         }
 

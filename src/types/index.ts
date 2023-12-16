@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import type { TeactNode } from '../lib/teact/teact';
 
 import type {
@@ -433,9 +434,10 @@ export type InlineBotSettings = {
   cacheTime: number;
 };
 
-export type Workspace = {
-  id: string;
-  name: string;
-  logoUrl?: string;
-  folders?: number[];
-};
+export const WorkspaceSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  logoUrl: z.string().optional(),
+  folders: z.array(z.number()).optional(),
+});
+export type Workspace = z.infer<typeof WorkspaceSchema>;
