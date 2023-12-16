@@ -7,6 +7,7 @@
   border-radius: var(--border-radius-default);
   margin-bottom: 1rem;
   margin-left: 1rem;
+  margin-top: 1rem;
   width: auto;
 
   > .Transition_slide {
@@ -30,6 +31,10 @@
     margin-bottom: 0;
     margin-left: 0;
   }
+}
+
+body.is-electron.is-macos #Settings {
+  margin-top: 0rem;
 }
 
 .settings-main-header {

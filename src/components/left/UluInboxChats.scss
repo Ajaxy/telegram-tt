@@ -8,6 +8,7 @@
   margin-bottom: 1rem;
   margin-left: 1rem;
   width: auto;
+  margin-top: 1rem;
 
   .left-header {
     position: relative;
@@ -70,4 +71,8 @@
     border-radius: none;
     border: none;
   }
+}
+
+body.is-electron.is-macos .UluInboxChats {
+  margin-top: 0rem;
 }

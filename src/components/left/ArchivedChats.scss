@@ -7,6 +7,7 @@
   border-radius: var(--border-radius-default);
   margin-bottom: 1rem;
   margin-left: 1rem;
+  margin-top: 1rem;
   width: auto;
 
   .left-header {
@@ -72,4 +73,8 @@
     border-radius: none;
     border: none;
   }
+}
+
+body.is-electron.is-macos .ArchivedChats {
+  margin-top: 0rem;
 }

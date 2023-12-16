@@ -33,6 +33,10 @@
     }
   }
 
+  @media (min-width: 600px) {
+    margin-left: 0rem;
+  }
+
   @media (max-width: 600px) {
     padding: 0.5rem;
   }
