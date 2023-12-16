@@ -7,6 +7,7 @@
   cursor: var(--custom-cursor, default);
   flex-direction: row-reverse;
   background: var(--color-background);
+  border-radius: var(--border-radius-default);
 
   :global {
     .Button {
@@ -43,8 +44,8 @@
     flex-shrink: 0;
   }
 
-  @media (min-width: 600px) {
-    border-radius: var(--border-radius-default);
+  @media (max-width: 600px) {
+    border-radius: 0;
    }
 }
 

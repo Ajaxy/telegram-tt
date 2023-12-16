@@ -5,7 +5,7 @@
   flex-direction: column;
   // gap: 1.25rem;
   overflow: hidden;
-  background: var(--color-background);
+  background-color: transparent !important;
 
   > .Transition {
     flex: 1;
@@ -93,7 +93,7 @@
     white-space: nowrap;
   }
 
-  @media (min-width: 600px) {
-    background-color: transparent !important;
+  @media (max-width: 600px) {
+    background: var(--color-background);
   }
 }

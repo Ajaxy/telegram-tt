@@ -1,7 +1,13 @@
 .UluInboxChats {
-  height: 100%;
   overflow: hidden;
-  background: var(--color-background);
+
+  height: -webkit-fill-available;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-borders-middle);
+  border-radius: var(--border-radius-default);
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  width: auto;
 
   .left-header {
     position: relative;
@@ -9,10 +15,9 @@
   }
 
   .left-header-shadow {
-    box-shadow: 0 2px 2px var(--color-light-shadow);
-    @media (min-width: 600px) {
-      box-shadow: none;
-      border-bottom: 1px solid var(--color-borders-middle);
+    border-bottom: 1px solid var(--color-borders-middle);
+    @media (max-width: 600px) {
+      box-shadow: 0 2px 2px var(--color-light-shadow);
     }
   }
 
@@ -57,13 +62,12 @@
     }
   }
 
-  @media (min-width: 600px) {
-    height: -webkit-fill-available;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-borders-middle);
-    border-radius: var(--border-radius-default);
-    margin-bottom: 1rem;
-    margin-left: 1rem;
-    width: auto;
+  @media (max-width: 600px) {
+    height: 100%;
+    background: var(--color-background);
+    margin-bottom: 0;
+    margin-left: 0;
+    border-radius: none;
+    border: none;
   }
 }

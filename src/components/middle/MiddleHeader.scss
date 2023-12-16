@@ -27,19 +27,22 @@
   display: flex;
   align-items: center;
   width: 100%;
-  box-shadow: 0 2px 2px var(--color-light-shadow);
-  background: var(--color-background);
   position: relative;
   z-index: var(--z-middle-header);
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
-  padding-left: max(1.4375rem, env(safe-area-inset-left));
-  padding-right: max(0.8125rem, env(safe-area-inset-right));
   flex-shrink: 0;
   height: 3.5rem;
+  background: transparent;
+  padding-left: max(0.5rem, env(safe-area-inset-left));
+  padding-right: 0; 
+  box-shadow: none;
 
   @media (max-width: 600px) {
     position: relative;
+
+    background: var(--color-background);
+    box-shadow: 0 2px 2px var(--color-light-shadow);
 
     padding-left: max(0.5rem, env(safe-area-inset-left));
     padding-right: max(0.5rem, env(safe-area-inset-right));

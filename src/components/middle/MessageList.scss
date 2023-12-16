@@ -3,6 +3,12 @@
   width: 100%;
   margin-bottom: 0.5rem;
 
+  border: 1px solid var(--color-borders-middle);
+  background-color: var(--color-background-secondary);
+  border-radius: var(--border-radius-default);
+  margin-right: 0;
+  margin-left: 0;
+
   overflow-y: scroll;
   overflow-x: hidden;
 
@@ -94,6 +100,10 @@
   }
 
   @media (max-width: 600px) {
+    border: none;
+    background-color: inherit;
+    border-radius: 0;
+
     &.with-bottom-shift {
       margin-bottom: 0;
 

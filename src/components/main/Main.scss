@@ -2,7 +2,7 @@
   height: 100%;
   text-align: left;
   overflow: hidden;
-  background: var(--color-background);
+  background: transparent;
 
   @media (min-width: 1276px) {
     position: relative;
@@ -10,6 +10,7 @@
 
   @media (max-width: 600px) {
     height: calc(var(--vh, 1vh) * 100);
+    background: var(--color-background); 
     
   }
 
@@ -17,11 +18,6 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-rows: 100%;
-  }
-
-  @media (min-width: 600px) {
-    background: none;
-    
   }
 }
 
@@ -45,7 +41,7 @@
   overflow: hidden;
   position: relative;
 
-  background-color: var(--color-background);
+  background-color: transparent;
 
   @media (min-width: 926px) {
     --left-column-max-width: 40vw;
@@ -124,6 +120,7 @@
     transform: translate3d(-20vw, 0, 0);
     left: env(safe-area-inset-left) !important;
     width: calc(100vw - env(safe-area-inset-left)) !important;
+    background-color: var(--color-background);
 
     // Target: Old Firefox (Waterfox Classic)
     @supports not (left: env(safe-area-inset-left)) {
@@ -142,10 +139,6 @@
       background: var(--color-background);
       z-index: 1;
     }
-  }
-
-  @media (min-width: 600px) {
-    background-color: transparent !important;
   }
 }
 
@@ -168,7 +161,7 @@
 }
 
 #MiddleColumn {
-  border-left: 1px solid var(--color-borders);
+  border: 0rem;
 
   @media (max-width: 925px) {
     max-width: none;
@@ -196,7 +189,6 @@
   }
 
   @media (max-width: 600px) {
-    border-left: none;
 
     #Main.left-column-open & {
       transform: translate3d(100vw, 0, 0);
@@ -214,6 +206,7 @@
       transition: none;
     }
   }
+
   @media (min-width: 600px) {
     border-left: 0rem  !important;
     border: 0rem !important;
