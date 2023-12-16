@@ -1,6 +1,6 @@
 {
   "name": "ulu",
-  "version": "10.0.24-25",
+  "version": "10.0.24-27",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -155,7 +155,8 @@
     "path-browserify": "^1.0.1",
     "qr-code-styling": "github:zubiden/qr-code-styling#dbbfed0",
     "react-complex-tree": "^2.2.3",
-    "v8-compile-cache": "^2.4.0"
+    "v8-compile-cache": "^2.4.0",
+    "zod": "^3.22.4"
   },
   "optionalDependencies": {
     "dmg-license": "^1.0.11",
