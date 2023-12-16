@@ -1,3 +1,12 @@
+.isElectronIsMacos {
+  --margin-top: 0rem;
+}
+
+.notIsElectronIsMacos {
+  --margin-top: 1rem;
+}
+
+
 .root {
   position: absolute;
   top: 0;
@@ -14,6 +23,7 @@
   border-radius: var(--border-radius-default);
   margin-bottom: 1rem;
   margin-left: 1rem;
+  margin-top: var(--margin-top);
   width: auto;
 
   &.rtl {
@@ -53,6 +63,18 @@
     border: none;
     width: 100%;
   }
+}
+
+body.is-electron.is-macos .ForumPanel-module__root {
+  margin-top: 0rem;
+}
+
+body.is-electron.is-macos .ForumPanel {
+  margin-top: 0rem;
+}
+
+body.is-electron.is-macos .root {
+  margin-top: 0rem;
 }
 
 .group-call {
