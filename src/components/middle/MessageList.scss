@@ -409,6 +409,7 @@
     width: 100%;
     transform: translate3d(0, 0, 0);
     transition: transform var(--layer-transition);
+    margin-right: 0.5rem;
 
     .messages-container {
       width: 100%;
@@ -423,7 +424,8 @@
     }
 
     #Main.narrow-message-list & {
-      width: calc(100% - var(--right-column-width));
+      width: calc(100% - var(--right-column-width) - 0.5rem);
+      margin-right: 0.5rem !important;
 
       .messages-container {
         width: 100%;

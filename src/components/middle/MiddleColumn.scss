@@ -5,7 +5,7 @@
   position: relative;
   z-index: 1;
   min-width: 0;
-  padding: 0 1rem 0;
+  padding: 0 1rem 0 0.5rem;
 
   @media (max-width: 600px) {
     overflow: hidden;
@@ -182,8 +182,8 @@
       width: 100%;
 
       #Main.right-column-open & {
-        width: calc(100% - var(--right-column-width));
-        margin-right: var(--right-column-width);
+        width: calc(100% - var(--right-column-width) - 0.5rem);
+        margin-right: calc(0.5rem + var(--right-column-width));
       }
     }
 
@@ -354,16 +354,16 @@
 .resize-handle {
   position: absolute;
   top: 3.5rem;
-  left: 5px;
+  left: 2px;
   bottom: 1rem;
-  width: 6px;
+  width: 4px;
   z-index: var(--z-resize-handle);
   cursor: ew-resize;
   transition: background-color 400ms ease-in-out; 
   border-radius: 10px; 
 
   &:hover {
-    background-color: var(--color-chat-active);
+    background-color: var(--color-text-secondary);
 }
 }
 
