@@ -1,5 +1,5 @@
 .divider {
 	$padding: var(--ulu-sidebar-component-padding);
-	/* border-top: 1px solid var(--color-borders); */
+	border-top: 1px solid var(--color-borders-middle);
 	width: calc(100% - 2 * #{$padding})
 }

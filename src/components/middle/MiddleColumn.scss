@@ -359,10 +359,17 @@
 
 .resize-handle {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  top: 3.5rem;
+  left: 5px;
+  bottom: 1rem;
   width: 0.25rem;
   z-index: var(--z-resize-handle);
   cursor: ew-resize;
+  transition: background-color 400ms ease-in-out; 
+  border-radius: 10px; 
+
+  &:hover {
+    background-color: var(--color-chat-active);
 }
+}
+
