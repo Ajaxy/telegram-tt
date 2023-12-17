@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { FC } from '../../../lib/teact/teact';
 import React, {
   memo, useCallback, useEffect, useState,
 } from '../../../lib/teact/teact';
 import { getActions, withGlobal } from '../../../global';
 
-import type { ISettings, TimeFormat } from '../../../types';
+import type { ISettings, SettingsScreens, TimeFormat } from '../../../types';
 import type { IRadioOption } from '../../ui/RadioGroup';
-import { SettingsScreens } from '../../../types';
 
 import { pick } from '../../../util/iteratees';
 import { setTimeFormat } from '../../../util/langProvider';
@@ -144,13 +144,13 @@ const SettingsGeneral: FC<OwnProps & StateProps> = ({
           onChange={handleMessageTextSizeChange}
         />
 
-        <ListItem
+        {/* <ListItem
           icon="photo"
           // eslint-disable-next-line react/jsx-no-bind
           onClick={() => onScreenSelect(SettingsScreens.GeneralChatBackground)}
         >
           {lang('ChatBackground')}
-        </ListItem>
+        </ListItem> */}
 
         {IS_ELECTRON && IS_WINDOWS && (
           <Checkbox
