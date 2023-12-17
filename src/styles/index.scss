@@ -40,6 +40,10 @@ body {
   background-color: var(--color-background);
 }
 
+.body:not(.is-macos.is-electron) {
+  background-color: var(--color-background-electron);
+}
+
 noscript {
   width: 100%;
   height: 100%;
@@ -221,6 +225,18 @@ body:not(.is-ios) {
 .div-button {
   outline: none !important;
   cursor: var(--custom-cursor, pointer);
+}
+
+#header-dragger-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-app-region: drag;
+
 }
 
 .opacity-transition {
