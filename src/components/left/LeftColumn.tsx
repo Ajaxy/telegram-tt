@@ -1,5 +1,7 @@
 import type { RefObject } from 'react';
-import React, { memo, useEffect, useState } from '../../lib/teact/teact';
+import React, {
+  memo, useEffect, useRef, useState,
+} from '../../lib/teact/teact';
 import { getActions, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
@@ -15,6 +17,7 @@ import {
 } from '../../util/windowEnvironment';
 
 import useFoldersReducer from '../../hooks/reducers/useFoldersReducer';
+import useElectronDrag from '../../hooks/useElectronDrag';
 import { useHotkeys } from '../../hooks/useHotkeys';
 import useLastCallback from '../../hooks/useLastCallback';
 import usePrevious2 from '../../hooks/usePrevious2';
@@ -555,8 +558,12 @@ function LeftColumn({
     }
   }
 
+  // eslint-disable-next-line no-null/no-null
+  const LeftBackground = useRef<HTMLDivElement>(null);
+  useElectronDrag(LeftBackground);
+
   return (
-    <div className="LeftBackground">
+    <div className="LeftBackground" ref={LeftBackground}>
       <Transition
         ref={ref}
         name={shouldSkipHistoryAnimations ? 'none' : LAYERS_ANIMATION_NAME}

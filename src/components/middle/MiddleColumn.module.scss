@@ -20,10 +20,10 @@
     background-size: cover;
   }
 
-  :global(html.theme-light) &:not(.customBgImage)::before {
-    // background-image: url('../../assets/chat-bg-br.png');
+  /* :global(html.theme-light) &:not(.customBgImage)::before {
+    background-image: url('../../assets/chat-bg-br.png');
     background-color: #ECEEF2;
-  }
+  } */
 
   &:not(.customBgImage).customBgColor::before {
     display: none;
@@ -81,15 +81,16 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-image: url('../../assets/chat-bg-pattern-light.png');
+    /* background-image: url('../../assets/chat-bg-pattern-light.png'); */
     background-position: top right;
     background-size: 510px auto;
     background-repeat: repeat;
     mix-blend-mode: overlay;
 
-    :global(html.theme-dark) & {
+    /* :global(html.theme-dark) & {
       background-image: url('../../assets/chat-bg-pattern-dark.png');
-      /* mix-blend-mode: unset; */
-    }
+      mix-blend-mode: unset;
+    } */
+    
   }
 }

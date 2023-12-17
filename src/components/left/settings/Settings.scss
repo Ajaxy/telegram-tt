@@ -1,7 +1,14 @@
 @use "../../../styles/mixins";
 
 #Settings {
-  height: 100%;
+  height: -webkit-fill-available;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-borders-middle);
+  border-radius: var(--border-radius-default);
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  margin-top: 1rem;
+  width: auto;
 
   > .Transition_slide {
     display: flex;
@@ -10,8 +17,24 @@
   }
 
   .left-header {
-    padding-right: 0.8125rem;
+    padding-right: 0.5rem;
+    @media (max-width: 600px) {
+      padding-right: 0.8125rem;
+    }
   }
+
+  @media (max-width: 600px) {
+    height: 100%;
+    background: inherit;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+  }
+}
+
+body.is-electron.is-macos #Settings {
+  margin-top: 0rem;
 }
 
 .settings-main-header {
@@ -33,7 +56,7 @@
 }
 
 .settings-content {
-  border-top: 1px solid var(--color-borders);
+  border-top: 1px solid var(--color-borders-middle);
   height: calc(100% - var(--header-height));
 
   overflow-y: scroll;
@@ -111,6 +134,10 @@
   padding: 0.5rem;
   @include mixins.side-panel-section;
 
+  @media (min-width: 600px) {
+    background-color: transparent;
+  }
+
   > .ChatExtra {
     padding: 0 0.5rem 0.3125rem;
     margin: 0 -0.5rem 0.625rem;
@@ -118,6 +145,9 @@
 
     .ListItem.narrow {
       margin-bottom: 0.25rem;
+    }
+    @media (min-width: 600px) {
+      background-color: transparent;
     }
   }
 }

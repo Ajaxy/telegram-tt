@@ -5,9 +5,15 @@
   position: relative;
   z-index: 1;
   min-width: 0;
+  padding: 0 1rem 0 0.5rem;
 
   @media (max-width: 600px) {
     overflow: hidden;
+    padding: 0;
+  }
+
+  @media (max-width: 58rem) {
+    background-color: var(--color-background);
   }
 
   .messages-layout {
@@ -67,10 +73,14 @@
       transform: scale(1);
       transition: opacity var(--select-transition), transform var(--select-transition), background-color 0.15s,
       color 0.15s;
-      box-shadow: var(--button-shadow);
+      box-shadow: none;
 
       body.no-message-composer-animations & {
         transition: none !important;
+      }
+
+      @media (max-width: 600px) {
+        box-shadow: var(--button-shadow);
       }
     }
 
@@ -153,7 +163,7 @@
   .middle-column-footer {
     width: 100%;
     max-width: var(--messages-container-width);
-    padding: 0 1rem;
+    padding: 0;
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -176,8 +186,8 @@
       width: 100%;
 
       #Main.right-column-open & {
-        width: calc(100% - var(--right-column-width));
-        margin-right: var(--right-column-width);
+        width: calc(100% - var(--right-column-width) - 0.5rem);
+        margin-right: calc(0.5rem + var(--right-column-width));
       }
     }
 
@@ -218,6 +228,7 @@
           rgba(255, 255, 255, 0.4) 98%,
           rgba(255, 255, 255, 0) 100%
       );
+      margin: 0 1rem;
       opacity: 0;
       transition: opacity 350ms ease;
 
@@ -239,6 +250,7 @@
           rgba(127, 127, 127, 0.4) 98%,
           rgba(127, 127, 127, 0) 100%
       );
+      margin: 0 1rem;
     }
   }
 }
@@ -247,11 +259,12 @@
 .Composer,
 .MessageSelectToolbar,
 .messaging-disabled {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 
   @media (max-width: 600px) {
     margin-bottom: 0.5rem;
   }
+  
 }
 
 .Composer,
@@ -344,10 +357,18 @@
 
 .resize-handle {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 0.25rem;
+  top: 3.625rem;
+  left: 2px;
+  bottom: 1.125rem;
+  width: 4px;
   z-index: var(--z-resize-handle);
   cursor: ew-resize;
+  transition: background-color 400ms ease-in-out; 
+  border-radius: 10px; 
+  -webkit-app-region: no-drag;
+
+  &:hover {
+    background-color: var(--color-text-secondary);
 }
+}
+

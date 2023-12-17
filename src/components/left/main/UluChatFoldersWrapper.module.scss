@@ -3,4 +3,9 @@
 	display: flex;
 	flex-direction: column;
 	padding: 0 #{$padding} #{$padding} #{$padding};
+	margin-left: 0.5rem;
+
+	@media (max-width: 600px) {
+		margin-left: 0;
+	  }
 }

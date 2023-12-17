@@ -5,7 +5,7 @@
   flex-direction: column;
   // gap: 1.25rem;
   overflow: hidden;
-  background: var(--color-background);
+  background-color: transparent !important;
 
   > .Transition {
     flex: 1;
@@ -91,5 +91,9 @@
     transition: background-color 0.3s ease-in-out, background-position 0.3s ease-in-out;
     animation: buttonShine 3s linear infinite;
     white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    background: var(--color-background);
   }
 }

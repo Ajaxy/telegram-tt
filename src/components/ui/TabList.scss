@@ -8,7 +8,7 @@
   font-size: 0.875rem;
   flex-wrap: nowrap;
   box-shadow: 0 2px 2px var(--color-light-shadow);
-  background-color: var(--color-background);
+  background-color: transparent;
   overflow-x: auto;
   overflow-y: hidden;
 
@@ -25,8 +25,16 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0);
+    background-color: transparent !important;
     // `box-shadow` prevents repaint on macOS when hovering out of scrollable container
     box-shadow: 0 0 1px rgba(255, 255, 255, 0.01);
+
+    @media (max-width: 600px) {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
+
+  @media (max-width: 600px) {
+    background-color: var(--color-background);
   }
 }

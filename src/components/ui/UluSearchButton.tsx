@@ -11,7 +11,7 @@ type OwnProps = {
 
 const UluSearchButton: FC<OwnProps> = ({ onClick }) => {
   return (
-    <Button color="gray" ariaLabel="Search '⌘ + /'" className={styles.wrapper} onClick={onClick}>
+    <Button isText color="secondary" ariaLabel="Search '⌘ + /'" className={styles.wrapper} onClick={onClick}>
       <i className="icon icon-search search-icon" />
     </Button>
   );

@@ -81,6 +81,7 @@ import LeftColumn from '../left/LeftColumn';
 import UluChatFolders from '../left/main/UluChatFolders';
 import MediaViewer from '../mediaViewer/MediaViewer.async';
 import AudioPlayer from '../middle/AudioPlayer';
+import Header from '../middle/Header';
 import ReactionPicker from '../middle/message/ReactionPicker.async';
 import MessageListHistoryHandler from '../middle/MessageListHistoryHandler';
 import MiddleColumn from '../middle/MiddleColumn';
@@ -595,6 +596,7 @@ const Main: FC<OwnProps & StateProps> = ({
 
   return (
     <div ref={containerRef} id="Main" className={className}>
+      <Header />
       <LeftColumn ref={leftColumnRef} chatFoldersPortalRef={chatFoldersPortalRef} />
       <MiddleColumn leftColumnRef={leftColumnRef} isMobile={isMobile} />
       <RightColumn isMobile={isMobile} />

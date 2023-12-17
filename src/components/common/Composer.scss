@@ -50,11 +50,16 @@
   > .Button {
     flex-shrink: 0;
     margin-left: 0.5rem;
-    width: var(--base-height);
-    height: var(--base-height);
+    height: 58px;
 
     &:not(.danger) {
       color: var(--color-composer-button);
+
+      @media (min-width: 600px) {
+        border: 1px solid var(--color-borders-middle);
+        background-color: var(--color-background-secondary);
+        box-shadow: none;
+      }
     }
 
     @media (max-width: 600px) {
@@ -300,11 +305,11 @@
 .composer-wrapper {
   flex-grow: 1;
   max-width: calc(100% - 4rem);
-  background: var(--color-background);
   position: relative;
   z-index: 1;
-  border-radius: var(--border-radius-messages);
-  border-bottom-right-radius: 0;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-default);
+  border: 1px solid var( --color-borders-middle);
 
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);
@@ -320,14 +325,23 @@
     height: 1.25rem;
     transition: opacity 200ms;
     font-size: 1rem !important;
+    display: none;
 
     .corner {
       fill: var(--color-background);
+    }
+
+    @media (max-width: 600px) {
+      display: block;
     }
   }
 
   @media (max-width: 600px) {
     max-width: calc(100% - 3.375rem);
+    border-radius: var(--border-radius-messages);
+    border-bottom-right-radius: 0;
+    background: var(--color-background);
+    border: none;
   }
 }
 
@@ -786,9 +800,15 @@
 }
 
 html.theme-light div.composer-wrapper  {
-  box-shadow: var(--button-shadow-light);
+  box-shadow: none;
+  @media (max-width: 600px) {
+    box-shadow: var(--button-shadow-light);
+  }
 }
 
 html.theme-dark div.composer-wrapper  {
-  box-shadow: var(--button-shadow-dark);
+  box-shadow: none;
+  @media (max-width: 600px) {
+    box-shadow: var(--button-shadow-dark);
+  }
 }

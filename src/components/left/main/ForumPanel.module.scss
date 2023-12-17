@@ -1,18 +1,31 @@
+.isElectronIsMacos {
+  --margin-top: 0rem;
+}
+
+.notIsElectronIsMacos {
+  --margin-top: 1rem;
+}
+
+
 .root {
   position: absolute;
   top: 0;
   right: 0;
   left: 0rem;
   z-index: var(--z-forum-panel);
-  height: 100%;
-  background-color: var(--color-background);
   border-left: 1px solid var(--color-borders);
   display: flex;
   flex-direction: column;
+  
 
-  @media (max-width: 600px) {
-    left: 4.3125rem;
-  }
+  height: -webkit-fill-available;
+  background-color: var(--color-background-secondary);
+  border: 1px solid var(--color-borders-middle);
+  border-radius: var(--border-radius-default);
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  margin-top: var(--margin-top);
+  width: auto;
 
   &.rtl {
     left: 0;
@@ -41,6 +54,28 @@
     align-items: center;
     justify-content: flex-end;
   }
+
+  @media (max-width: 600px) {
+    height: 100%;
+    background-color: var(--color-background);
+    margin-bottom: 0;
+    margin-left: 0;
+    border-radius: none;
+    border: none;
+    width: 100%;
+  }
+}
+
+body.is-electron.is-macos .ForumPanel-module__root {
+  margin-top: 0rem;
+}
+
+body.is-electron.is-macos .ForumPanel {
+  margin-top: 0rem;
+}
+
+body.is-electron.is-macos .root {
+  margin-top: 0rem;
 }
 
 .group-call {

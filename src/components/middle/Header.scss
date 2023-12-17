@@ -1,0 +1,11 @@
+#header-dragger-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rem;
+  z-index: 1;
+  pointer-events: none;
+  -webkit-app-region: drag;
+
+}

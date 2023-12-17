@@ -99,7 +99,7 @@
 
 // Used by ChatList and ContactList components
 .chat-list {
-  background: var(--color-background);
+  background: transparent;
   height: 100%;
   padding: 0.5rem 0.4375rem 0.5rem 0.4375rem;
   @include mixins.adapt-padding-to-scrollbar(0.4375rem);
@@ -123,6 +123,7 @@
   }
 
   @media (min-width: 600px) {
+    background: none !important;
     &.forum-panel-open .selected-forum .Avatar {
       transform: none;
     }
@@ -153,6 +154,7 @@
   }
 
   @media (max-width: 600px) {
+    background: var(--color-background);
     padding-left: 0;
     padding-right: 0;
   }

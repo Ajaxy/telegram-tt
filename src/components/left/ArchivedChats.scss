@@ -1,7 +1,14 @@
 .ArchivedChats {
-  height: 100%;
   overflow: hidden;
-  background: var(--color-background);
+
+  height: -webkit-fill-available;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-borders-middle);
+  border-radius: var(--border-radius-default);
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  margin-top: 1rem;
+  width: auto;
 
   .left-header {
     position: relative;
@@ -9,7 +16,12 @@
   }
 
   .left-header-shadow {
-    box-shadow: 0 2px 2px var(--color-light-shadow);
+    box-shadow: none;
+    border-bottom: 1px solid var(--color-borders-middle);
+    @media (max-width: 600px) {
+      box-shadow: 0 2px 2px var(--color-light-shadow);
+      border-bottom: none;
+    }
   }
 
   .DropdownMenuFiller {
@@ -52,4 +64,17 @@
       --extra-height: var(--header-height);
     }
   }
+
+  @media (max-width: 600px) {
+    background: var(--color-background);
+    height: 100%;
+    margin-bottom: 0;
+    margin-left: 0;
+    border-radius: none;
+    border: none;
+  }
+}
+
+body.is-electron.is-macos .ArchivedChats {
+  margin-top: 0rem;
 }
