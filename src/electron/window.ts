@@ -20,6 +20,14 @@ import windowStateKeeper from './windowState';
 
 const ALLOWED_DEVICE_ORIGINS = ['http://localhost:1234', 'file://'];
 
+function updateWindowTransparency(isTransparent: boolean) {
+  const currentWindow = BrowserWindow.getFocusedWindow();
+  if (currentWindow) {
+    // eslint-disable-next-line no-null/no-null
+    currentWindow.setVibrancy(isTransparent ? 'sidebar' : null);
+  }
+}
+
 export function createWindow(url?: string) {
   const windowState = windowStateKeeper({
     defaultWidth: 1088,
@@ -61,7 +69,6 @@ export function createWindow(url?: string) {
     height,
     title: getAppTitle(),
     transparent: true,
-    backgroundColor: '#00000000',
     vibrancy: 'sidebar',
     visualEffectState: 'followWindow', // ...this is needed to make it work on macOS
     webPreferences: {
@@ -70,15 +77,20 @@ export function createWindow(url?: string) {
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
+      frame: false,
       trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
     }),
   });
 
   windowState.manage(window);
 
-  if (process.platform === 'darwin') {
-    window.setVibrancy('sidebar');
-  }
+  window.on('enter-full-screen', () => {
+    updateWindowTransparency(false); // Сделать фон непрозрачным в полноэкранном режиме
+  });
+
+  window.on('leave-full-screen', () => {
+    updateWindowTransparency(true); // Вернуть прозрачность при выходе из полноэкранного режима
+  });
 
   window.webContents.setWindowOpenHandler((details: HandlerDetails) => {
     shell.openExternal(details.url);

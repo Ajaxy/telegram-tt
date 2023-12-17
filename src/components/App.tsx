@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { FC } from '../lib/teact/teact';
 import React, { useEffect, useLayoutEffect } from '../lib/teact/teact';
 import { getActions, withGlobal } from '../global';
@@ -200,12 +201,12 @@ const App: FC<StateProps> = ({
     document.body.classList.add(styles.bg);
   }, []);
 
-  useLayoutEffect(() => {
+  /*  useLayoutEffect(() => {
     document.body.style.setProperty(
       '--theme-background-color',
       theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
     );
-  }, [theme]);
+  }, [theme]); */
 
   return (
     <UiLoader page={page} isMobile={isMobile}>
