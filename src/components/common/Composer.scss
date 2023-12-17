@@ -50,8 +50,7 @@
   > .Button {
     flex-shrink: 0;
     margin-left: 0.5rem;
-    width: var(--base-height);
-    height: var(--base-height);
+    height: 58px;
 
     &:not(.danger) {
       color: var(--color-composer-button);
@@ -311,10 +310,6 @@
   background: var(--color-background-secondary);
   border-radius: var(--border-radius-default);
   border: 1px solid var( --color-borders-middle);
-
-  @media (min-width: 600px) {
-    height: var(--base-height);
-  }
 
   &.with-story-tweaks {
     border-radius: var(--border-radius-default-small);

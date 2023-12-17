@@ -26,6 +26,7 @@
 .MiddleHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
   position: relative;
   z-index: var(--z-middle-header);
@@ -108,6 +109,14 @@
   .chat-info-wrapper {
     flex-grow: 1;
     overflow: hidden;
+    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+    border-radius: var(--border-radius-default);
+    width: fit-content;
+    max-width: 20rem;
+
+    &:hover {
+      background: var(--color-interactive-element-hover);
+    }
   }
 
   .header-tools {
@@ -210,7 +219,7 @@
 
     @media (min-width: 1275px) {
       #Main.right-column-open & {
-        max-width: calc(100% - var(--right-column-width));
+        max-width: 20rem;
       }
     }
   }
@@ -253,7 +262,7 @@
 
       @media (min-width: 1275px) {
         #Main.right-column-open & {
-          max-width: calc(100% - var(--right-column-width));
+          max-width: 20rem;
         }
       }
     }
@@ -265,7 +274,7 @@
 
       @media (min-width: 1275px) {
         #Main.right-column-open & {
-          max-width: calc(100% - var(--right-column-width));
+          max-width: 20rem;
         }
       }
     }
@@ -403,7 +412,7 @@
 
   @media (min-width: 600px) {
     background: none !important;
-    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-left: 0;
     padding-right: 0; 
     box-shadow: none;
   }

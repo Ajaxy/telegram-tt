@@ -79,13 +79,6 @@
     @media (max-width: 600px) {
       border-radius: 0 ;
     }
-
-    @media (min-width: 600px) {
-
-      &:not(:hover) {
-        background-color: transparent;
-      }
-    }
   
 
     > .icon {

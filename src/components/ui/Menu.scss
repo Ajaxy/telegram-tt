@@ -143,11 +143,11 @@
   }
 
   .theme-light &.compact .bubble {
-    backdrop-filter: blur(25px) saturate(190%) contrast(50%) brightness(130%);
+    backdrop-filter: blur(10px) saturate(190%) contrast(50%) brightness(130%);
   }
   
   .theme-dark &.compact .bubble {
-    backdrop-filter: blur(23px) saturate(190%) contrast(70%) brightness(80%);
+    backdrop-filter: blur(4px) saturate(190%) contrast(70%) brightness(80%);
   }
 
   .menu-loading-row {
