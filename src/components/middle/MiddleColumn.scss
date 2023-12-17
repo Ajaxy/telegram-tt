@@ -361,6 +361,7 @@
   cursor: ew-resize;
   transition: background-color 400ms ease-in-out; 
   border-radius: 10px; 
+  -webkit-app-region: no-drag;
 
   &:hover {
     background-color: var(--color-text-secondary);
