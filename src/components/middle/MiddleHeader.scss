@@ -74,13 +74,8 @@
   }
 
   .back-button {
-    margin-left: -0.5rem;
     margin-right: 0.5rem;
     position: relative;
-
-    @media (max-width: 600px) {
-      margin-left: 0;
-    }
 
     .unread-count {
       min-width: 1.25rem;
