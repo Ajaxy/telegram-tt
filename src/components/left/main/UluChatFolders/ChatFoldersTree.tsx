@@ -19,6 +19,7 @@ import type { TreeItemChat, TreeItemFolder } from './types';
 import { ALL_FOLDER_ID, DEFAULT_WORKSPACE } from '../../../../config';
 import { selectCanShareFolder, selectCurrentChat } from '../../../../global/selectors';
 import { selectCurrentLimit } from '../../../../global/selectors/limits';
+import { isWorkspaceChatTimeSnapshotStale } from '../../../../global/ulu/workspaces';
 import buildClassName from '../../../../util/buildClassName';
 import { getOrderedIds as getOrderedChatIds } from '../../../../util/folderManager';
 
@@ -38,7 +39,7 @@ type StateProps = {
   folderInvitesById: Record<number, ApiChatlistExportedInvite[]>;
   chatFoldersById: Record<number, ApiChatFolder>;
   orderedPinnedChatIds: string[] | undefined;
-  chatsById: Record<number, ApiChat>;
+  chatsById: Record<string, ApiChat>;
   maxFolderInvites: number;
   maxChatLists: number;
   maxFolders: number;
@@ -70,12 +71,21 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
     openLimitReachedModal,
   } = getActions();
 
-  const { currentWorkspace, savedWorkspaces } = useWorkspaces();
+  const { currentWorkspaceId, currentWorkspace, savedWorkspaces } = useWorkspaces();
+  const { chatSnapshotsTemp = [] } = currentWorkspace;
   const allFolderIdsInWorkspaces = savedWorkspaces
     .filter((ws) => ws.id !== currentWorkspace.id)
     .reduce((acc, ws) => {
       return [...acc, ...(ws.folders || [])];
     }, [] as number[]); // Указываем явно тип начального значения как number[]
+
+  const workspaceTempChatIds = useMemo(() => {
+    if (chatSnapshotsTemp.length === 0) { return []; }
+    return chatSnapshotsTemp
+      .filter((chatSnapshot) => !isWorkspaceChatTimeSnapshotStale(chatSnapshot))
+      .map((chat) => chat.id);
+  // eslint-disable-next-line react-hooks-static-deps/exhaustive-deps
+  }, [currentWorkspaceId, chatSnapshotsTemp]);
 
   const displayedFolders = (() => {
     return orderedFolderIds
@@ -184,6 +194,9 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
 
   const foldersToDisplay = useMemo(() => {
     const chatsLength = folders.reduce((length, folder) => length + folder.chatIds.length, 0);
+    const tempChatsToDisplay = [...workspaceTempChatIds];
+    let lastAdjustedIndex = 0;
+
     const items = folders.reduce((record, folder, index) => {
       const adjustedIndex = index + 1; // "inbox" (all chats) is not here
 
@@ -196,6 +209,11 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           return;
         }
 
+        const tempIndex = tempChatsToDisplay.findIndex((c) => c === chat.id);
+        if (tempIndex !== -1) {
+          tempChatsToDisplay.splice(tempIndex, 1);
+        }
+
         const chatAdjustedIndex = (folders.length + 1) * (adjustedIndex + 1) + chatsLength * (i + 1) + i + 1;
         record[chatAdjustedIndex] = {
           index: chatAdjustedIndex,
@@ -204,6 +222,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           id: chat.id,
           chat,
           isPinned: chat.isPinned,
+          isFirst: i === 0,
           folderId: chat.folderId,
           isFolder: false,
           canChangeFolder: folders.length > 1,
@@ -216,6 +235,7 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           ref: createRef<HTMLDivElement>(),
         };
         chatIndexes.push(chatAdjustedIndex);
+        lastAdjustedIndex = chatAdjustedIndex;
       });
 
       record[adjustedIndex] = {
@@ -234,6 +254,34 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
       return record;
     }, {} as Record<TreeItemIndex, TreeItemChat<any>>);
 
+    tempChatsToDisplay.forEach((id, i) => {
+      const chat = chatsById[id];
+      if (!chat) {
+        return;
+      }
+      const tempChatAdjustedIndex = lastAdjustedIndex * tempChatsToDisplay.length + i + 1;
+
+      items[tempChatAdjustedIndex] = {
+        index: tempChatAdjustedIndex,
+        type: 'chat',
+        contextActions: [],
+        id: chat.id,
+        chat,
+        isPinned: false,
+        isFirst: i === 0,
+        folderId: chat.folderId,
+        isFolder: false,
+        canChangeFolder: folders.length > 1,
+        isCurrentChat: currentChat && chat.id === currentChat.id,
+        isTempChat: true,
+        canRename: false,
+        children: undefined, // TODO threads for supergroups
+        data: chat.title,
+        unreadCount: chat.unreadCount,
+        ref: createRef<HTMLDivElement>(),
+      };
+    });
+
     return {
       items: {
         ...items,
@@ -242,14 +290,14 @@ const ChatFoldersTree: FC<OwnProps & StateProps> = ({
           canMove: true,
           isFolder: true,
           children: Object.values(items)
-            .filter((item) => item.type === 'folder')
+            .filter((item) => item.type === 'folder' || item.isTempChat)
             .map((item) => item.index),
           data: 'root',
           canRename: true,
         } as TreeItemChat<any>,
       } as Record<TreeItemIndex, TreeItemChat<any>>,
     };
-  }, [folders, currentChat]);
+  }, [folders, workspaceTempChatIds, currentChat, chatsById]);
 
   const classNameInfiniteScroll = buildClassName(
     'custom-scroll',

@@ -30,6 +30,7 @@ import MenuSeparator from '../../../../../../ui/MenuSeparator.react';
 import ChatFolderModal from '../../../../../ChatFolderModal.react';
 import MuteChatModal from '../../../../../MuteChatModal.react';
 import ChatAvatar from './ChatAvatar';
+// import Cross from './Cross';
 import SvgPin from './SvgPin';
 
 import stylesUluChatFolder from '../../../../UluChatFolder/UluChatFolder.module.scss';
@@ -54,8 +55,14 @@ const Chat: FC<{
 
   const classNameWrapper = buildClassName(
     stylesUluChatFolder.wrapper,
+    styles.wrapper,
     isCurrentChat && stylesUluChatFolder.active,
     !!messagesUnreadCount && shouldStressUnreadMessages && stylesUluChatFolder['has-unread-messages'],
+  );
+
+  const dividerClassName = buildClassName(
+    item.isFirst && styles.first,
+    item.isTempChat && styles.temp,
   );
 
   // const { isMobile } = useAppLayout(); TODO use this
@@ -180,13 +187,22 @@ const Chat: FC<{
     getLayout,
   );
 
+  const shouldRenderDivider = item.isFirst && item.isTempChat;
+
   const shouldRenderPin = item.isPinned;
   const shouldRenderMute = item.chat?.isMuted;
   const shouldRenderControl = shouldRenderPin || shouldRenderMute;
+  const classNameControl = buildClassName(styles['mini-items'], styles.control);
+
+  // const shouldRenderCross = item.isTempChat || true; // TODO
+  const shouldRenderUnreadCounter = !!messagesUnreadCount;
+  const shouldRenderRightItems = shouldRenderUnreadCounter;
+  const classNameRight = buildClassName(styles['mini-items'], styles.right);
 
   // TODO use <ListItem/> with <Ripple/>
   return (
     <>
+      {shouldRenderDivider && <div className={dividerClassName} />}
       <div
         className={classNameWrapper}
         ref={ref}
@@ -206,7 +222,7 @@ const Chat: FC<{
             {title}
           </div>
           { shouldRenderControl && (
-            <div className={styles.control}>
+            <div className={classNameControl}>
               { shouldRenderMute && <i className="icon icon-muted" /> }
               { shouldRenderPin && (
                 <SvgPin className={styles.pin} width={13} height={13} fill="var(--color-text-secondary)" />
@@ -214,7 +230,12 @@ const Chat: FC<{
             </div>
           ) }
         </div>
-        { !!messagesUnreadCount && (<div className={stylesUluChatFolder.unread}>{ messagesUnreadCount }</div>) }
+        { shouldRenderRightItems && (
+          <div className={classNameRight}>
+            { shouldRenderUnreadCounter && (<div className={stylesUluChatFolder.unread}>{ messagesUnreadCount }</div>) }
+            {/* { shouldRenderCross && <Cross className={styles.cross} /> } */}
+          </div>
+        ) }
         {contextActions && contextMenuPosition !== undefined && (
           <Menu
             isOpen={isContextMenuOpen}

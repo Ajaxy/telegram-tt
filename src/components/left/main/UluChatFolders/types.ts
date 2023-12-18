@@ -19,6 +19,8 @@ export type TreeItemChat<T extends any> = TreeItem<T> & {
   canChangeFolder?: boolean;
   isPinned?: boolean;
   isCurrentChat?: boolean;
+  isTempChat?: boolean;
+  isFirst?: boolean;
   folderId?: number;
 };
 
