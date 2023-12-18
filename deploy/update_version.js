@@ -25,7 +25,7 @@ const newUluVersion = uluVersion + 1;
 const newVersion = [major, minor, newPatch].join('.') + '-' + newUluVersion;
 
 const newPackageJsonContent = packageJsonContent.replace(`"version": "${currentVersion}"`, `"version": "${newVersion}"`);
-const newPackageLockJsonContent = packageLockJsonContent.replace(`"version": "${currentVersion}"`, `"version": "${newVersion}"`);
+const newPackageLockJsonContent = packageLockJsonContent.replaceAll(`"version": "${currentVersion}"`, `"version": "${newVersion}"`);
 
 console.log(`[update_version] ${currentVersion} -> ${newVersion}\n`);
 
