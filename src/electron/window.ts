@@ -68,6 +68,7 @@ export function createWindow(url?: string) {
     transparent: true,
     vibrancy: 'sidebar',
     titleBarStyle: 'hidden',
+    frame: false,
   });
 
   splash.loadFile(path.join(__dirname, 'components', 'splash.html'));

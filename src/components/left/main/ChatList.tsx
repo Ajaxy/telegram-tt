@@ -121,11 +121,11 @@ const ChatList: FC<OwnProps> = ({
 
   // Support <Alt>+<Up/Down> to navigate between chats
   useHotkeys(isActive && orderedIds?.length ? {
-    'Alt+ArrowUp': (e: KeyboardEvent) => {
+    'Alt+J': (e: KeyboardEvent) => {
       e.preventDefault();
       openNextChat({ targetIndexDelta: -1, orderedIds });
     },
-    'Alt+ArrowDown': (e: KeyboardEvent) => {
+    'Alt+K': (e: KeyboardEvent) => {
       e.preventDefault();
       openNextChat({ targetIndexDelta: 1, orderedIds });
     },
