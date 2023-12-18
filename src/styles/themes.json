@@ -7,7 +7,7 @@
   "--color-background": ["#ECEEF2", "#0E0F0F"],
   "--color-background-electron": ["#FFFFFF40", "#0E0F0F4D"],
   "--color-background-compact-menu": ["#fefffe7f", "#212121DD"],
-  "--color-background-compact-menu-no-blur": ["#FEFFFEF5", "#212121F5"],
+  "--color-background-compact-menu-no-blur": ["#FEFFFE", "#212121"],
   "--color-background-compact-menu-reactions": ["#fefffe7f", "#212121DD"],
   "--color-background-compact-menu-hover": ["#5c5e6314", "#FFFFFF0D"],
   "--color-background-secondary": ["#e0e2e5", "#161618"],

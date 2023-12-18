@@ -60,6 +60,18 @@ export function createWindow(url?: string) {
     height = windowState.height;
   }
 
+  const splash = new BrowserWindow({
+    width,
+    height,
+    x,
+    y,
+    transparent: true,
+    vibrancy: 'sidebar',
+    titleBarStyle: 'hidden',
+  });
+
+  splash.loadFile(path.join(__dirname, 'components', 'splash.html'));
+
   const window = new BrowserWindow({
     show: false,
     x,
@@ -70,14 +82,12 @@ export function createWindow(url?: string) {
     title: getAppTitle(),
     transparent: true,
     vibrancy: 'sidebar',
-    visualEffectState: 'followWindow', // ...this is needed to make it work on macOS
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       devTools: process.env.APP_ENV !== 'production',
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
-      frame: false,
       trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
     }),
   });
@@ -157,8 +167,13 @@ export function createWindow(url?: string) {
       await captureLocalStorage();
       reloadWindows();
     }
+  });
 
-    window.show();
+  window.once('ready-to-show', () => {
+    setTimeout(() => {
+      splash.close(); // Закрыть сплеш-скрин
+      window.show(); // Показать основное окно
+    }, 3000); // Задержка для гарантии видимости сплеш-скрина
   });
 
   windows.add(window);
@@ -170,7 +185,6 @@ function loadWindowUrl(window: BrowserWindow, url?: string, hash?: string): void
     window.loadURL(url);
   } else if (!app.isPackaged) {
     window.loadURL(`http://localhost:1234${hash}`);
-    window.webContents.openDevTools();
   } else if (getIsAutoUpdateEnabled()) {
     window.loadURL(`${process.env.BASE_URL}${hash}`);
   } else if (getIsAutoUpdateEnabled() === undefined && IS_FIRST_RUN) {

@@ -38,6 +38,7 @@
 }
 
 .Notification-container {
+  background-color: var(--color-cmdk);
   position: fixed;
   width: auto !important;
   max-width: 100vw;
@@ -67,10 +68,14 @@
       margin-top: 0.25rem;
     }
   }
+
+  #Main:not(.is-fullscreen) & {
+    background: var(--color-background-compact-menu-no-blur);
+  }
 }
 
 .Notification {
-  background: var(--color-cmdk)
+  background:  transparent
   url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15ZM8 6C8.55228 6 9 5.55228 9 5C9 4.44772 8.55228 4 8 4C7.44772 4 7 4.44772 7 5C7 5.55228 7.44772 6 8 6ZM6 8C6 7.58579 6.33579 7.25 6.75 7.25H7.5C8.19036 7.25 8.75 7.80964 8.75 8.5V11.25C8.75 11.6642 8.41421 12 8 12C7.58579 12 7.25 11.6642 7.25 11.25V8.75H6.75C6.33579 8.75 6 8.41421 6 8Z" fill="%23e3e3e3"/></svg>')
   no-repeat 0.9375rem center;
   background-size: 1.5rem;
@@ -86,6 +91,8 @@
   display: flex;
   align-items: center;
   position: relative;
+
+  
 
 
   .text-entity-link,

@@ -1,6 +1,7 @@
 import 'webpack-dev-server';
 
 import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 import dotenv from 'dotenv';
 import { GitRevisionPlugin } from 'git-revision-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
@@ -170,6 +171,11 @@ export default function createConfig(
     },
 
     plugins: [
+      new CopyPlugin({
+        patterns: [
+          { from: 'src/components/splash.html', to: 'components/splash.html' },
+        ],
+      }),
       // Clearing of the unused files for code highlight for smaller chunk count
       new ContextReplacementPlugin(
         /highlight\.js[\\/]lib[\\/]languages/,
