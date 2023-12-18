@@ -170,10 +170,8 @@ export function createWindow(url?: string) {
   });
 
   window.once('ready-to-show', () => {
-    setTimeout(() => {
-      splash.close(); // Закрыть сплеш-скрин
-      window.show(); // Показать основное окно
-    }, 3000); // Задержка для гарантии видимости сплеш-скрина
+    splash.close(); // Закрыть сплеш-скрин
+    window.show(); // Показать основное окно
   });
 
   windows.add(window);
