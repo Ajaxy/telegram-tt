@@ -6,6 +6,7 @@ import React from 'react';
 import { Command } from 'cmdk';
 import type { FC } from '../../../../lib/teact/teact';
 import { useCallback, useEffect } from '../../../../lib/teact/teact';
+import { getActions } from '../../../../lib/teact/teactn';
 
 import { cmdKey } from '../../../../config';
 import { IS_ARC_BROWSER } from '../../../../util/windowEnvironment';
@@ -25,6 +26,9 @@ const CreateNewGroup: FC<CreateNewGroupProps> = ({
   close, handleOpenWorkspaceSettings,
 }) => {
   const { runCommand } = useCommands();
+  const {
+    openUrl,
+  } = getActions();
 
   const handleSelectNewChannel = useCallback(() => {
     runCommand('NEW_CHANNEL');
@@ -63,12 +67,25 @@ const CreateNewGroup: FC<CreateNewGroupProps> = ({
     runCommand('OPEN_AUTOMATION_SETTINGS');
   };
 
+  const handleNewMeetLink = () => {
+    close();
+    openUrl({
+      url: 'https://meet.new',
+      shouldSkipModal: true,
+    });
+  };
+
   const menuItems = [
     {
       onSelect: handleSelectNewGroup,
       icon: 'group',
       label: 'Create new group',
       shortcut: IS_ARC_BROWSER ? [cmdKey, 'G'] : [cmdKey, '⇧', 'C'],
+    },
+    {
+      onSelect: handleNewMeetLink,
+      icon: 'video-outlined',
+      label: 'Create new Google Meet',
     },
     {
       onSelect: handleSelectNewChannel,
