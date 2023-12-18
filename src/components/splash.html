@@ -12,6 +12,13 @@
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Roboto", "Apple Color Emoji", "Helvetica Neue", sans-serif;
         }
 
+        .splash-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            flex-direction: column;
+        }
+
         .loading-container {
             display: flex;
             align-items: center;
@@ -20,6 +27,10 @@
             font-style: normal;
             font-weight: 400;
             line-height: 1.5rem;
+        }
+
+        .loading-icon {
+            margin-bottom: 10px;
         }
 
         .dots {
@@ -31,8 +42,45 @@
     </style>
 </head>
 <body>
-    <div class="loading-container">
-        <span>ulu is loading</span><span class="dots"></span>
+    <div class="splash-container">
+        <div class="loading-icon">
+            <svg width="32" height="27" viewBox="0 0 32 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M29.2859 0.233535C25.0645 1.98197 6.96313 9.47974 1.96175 11.5233C-0.307108 12.4086 -0.142771 13.2567 0.201156 13.7128C0.404998 13.9832 0.732702 14.115 1.05359 14.2233C1.9723 14.5333 4.04576 15.2245 5.88893 15.7773C8.34306 16.5137 9.65201 15.6957 9.65201 15.6957L21.187 7.92379C25.2775 5.14228 24.2959 7.4328 23.3139 8.41478C21.187 10.542 17.6692 13.8958 14.724 16.5957C13.4152 17.741 14.0694 18.7225 14.6424 19.2135C16.7693 21.0135 22.578 24.6949 22.905 24.9402C24.6332 26.1637 28.0326 27.9248 28.5497 24.2039L30.5949 11.36C31.2495 7.02415 31.9038 3.01537 31.9854 1.87011C32.2311 -0.911724 29.2859 0.233535 29.2859 0.233535Z" fill="url(#paint0_linear_2334_22126)"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M30.9706 1.27003C31.0916 1.29056 31.1731 1.40525 31.1525 1.52628L27.1524 25.0829C27.1318 25.2039 27.0171 25.2854 26.896 25.2648C26.775 25.2443 26.6936 25.1295 26.7141 25.0085L30.7143 1.45189C30.7349 1.33087 30.8496 1.24943 30.9706 1.27003Z" fill="url(#paint1_linear_2334_22126)" fill-opacity="0.4"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M22.1539 6.30512C22.1942 6.36677 22.177 6.44942 22.1155 6.48974L9.22598 14.9346C9.16433 14.9749 9.08168 14.9577 9.04136 14.8962C9.00097 14.8345 9.01825 14.7518 9.07981 14.7115L21.9693 6.26667C22.0309 6.22636 22.1135 6.24355 22.1539 6.30512Z" fill="url(#paint2_linear_2334_22126)" fill-opacity="0.4"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.937246 12.9877C0.96888 12.8691 1.09063 12.7986 1.20931 12.8302L7.87621 14.6081C7.9948 14.6397 8.06529 14.7615 8.03366 14.88C8.0021 14.9986 7.88027 15.0691 7.76168 15.0375L1.09477 13.2597C0.976181 13.2281 0.905611 13.1063 0.937246 12.9877Z" fill="url(#paint3_linear_2334_22126)" fill-opacity="0.4"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.6337 17.8122C15.7008 17.7094 15.8385 17.6804 15.9413 17.7475L26.164 24.4144C26.2668 24.4815 26.2958 24.6192 26.2287 24.722C26.1617 24.8248 26.024 24.8537 25.9212 24.7867L15.6985 18.1197C15.5957 18.0527 15.5667 17.915 15.6337 17.8122Z" fill="url(#paint4_linear_2334_22126)" fill-opacity="0.4"/>
+                <defs>
+                <linearGradient id="paint0_linear_2334_22126" x1="21.5496" y1="5.92042" x2="25.5498" y2="25.9213" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#AEB1B9" stop-opacity="0.7"/>
+                <stop offset="1" stop-color="#E4E8F3" stop-opacity="0.7"/>
+                </linearGradient>
+                <linearGradient id="paint1_linear_2334_22126" x1="26.0443" y1="24.1567" x2="31.3779" y2="0.600187" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E4E8F3"/>
+                <stop offset="1" stop-color="#AEB1B9" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="paint2_linear_2334_22126" x1="9.1529" y1="15.2675" x2="22.4868" y2="6.3782" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E4E8F3" stop-opacity="0"/>
+                <stop offset="0.0001" stop-color="#FFEDED" stop-opacity="0"/>
+                <stop offset="0.364583" stop-color="#AEB1B9"/>
+                <stop offset="1" stop-color="#E4E8F3" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="paint3_linear_2334_22126" x1="0.862133" y1="13.0449" x2="3.76175" y2="17.4771" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E4E8F3" stop-opacity="0"/>
+                <stop offset="0.390891" stop-color="#AEB1B9"/>
+                <stop offset="1" stop-color="#E4E8F3" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="paint4_linear_2334_22126" x1="15.3755" y1="17.9336" x2="26.0426" y2="24.6006" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#E4E8F3" stop-opacity="0"/>
+                <stop offset="0.390891" stop-color="#AEB1B9"/>
+                <stop offset="1" stop-color="#E4E8F3" stop-opacity="0"/>
+                </linearGradient>
+                </defs>
+            </svg>                
+        </div>
+        <div class="loading-container">
+            <span>ulu is loading</span><span class="dots"></span>
+        </div>
     </div>
 
     <script>

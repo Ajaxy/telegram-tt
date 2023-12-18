@@ -68,7 +68,6 @@ export function createWindow(url?: string) {
     transparent: true,
     vibrancy: 'sidebar',
     titleBarStyle: 'hidden',
-    frame: false,
   });
 
   splash.loadFile(path.join(__dirname, 'components', 'splash.html'));
@@ -81,8 +80,6 @@ export function createWindow(url?: string) {
     width,
     height,
     title: getAppTitle(),
-    transparent: true,
-    vibrancy: 'sidebar',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       devTools: process.env.APP_ENV !== 'production',
@@ -90,6 +87,8 @@ export function createWindow(url?: string) {
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
       trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
+      transparent: true,
+      vibrancy: 'sidebar',
     }),
   });
 
