@@ -40,8 +40,10 @@ body {
   background-color: var(--color-background);
 }
 
-.body:not(.is-macos.is-electron) {
-  background-color: var(--color-background-electron);
+body:not(.is-macos) {
+  &:not(.is-electron) {
+  background-color: var(--color-background);
+  }
 }
 
 noscript {
