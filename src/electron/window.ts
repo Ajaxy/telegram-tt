@@ -70,14 +70,12 @@ export function createWindow(url?: string) {
     title: getAppTitle(),
     transparent: true,
     vibrancy: 'sidebar',
-    visualEffectState: 'followWindow', // ...this is needed to make it work on macOS
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       devTools: process.env.APP_ENV !== 'production',
     },
     ...(IS_MAC_OS && {
       titleBarStyle: 'hidden',
-      frame: false,
       trafficLightPosition: TRAFFIC_LIGHT_POSITION.standard,
     }),
   });
